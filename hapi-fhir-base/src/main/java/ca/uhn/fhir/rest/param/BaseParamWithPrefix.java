@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
+
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -115,5 +117,18 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 	public T setPrefix(ParamPrefixEnum thePrefix) {
 		myPrefix = thePrefix;
 		return (T) this;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (!(theO instanceof BaseParamWithPrefix<?> that)) {
+			return false;
+		}
+		return super.equals(theO) && this.myPrefix == that.myPrefix;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.myPrefix, super.hashCode());
 	}
 }

@@ -839,7 +839,8 @@ public class FhirTerserDstu2Test {
 	
 	@Test
 	public void testVisitWithModelVisitor2() {
-		IModelVisitor2 visitor = mock(IModelVisitor2.class);
+	   // Setup
+	   IModelVisitor2 visitor = mock(IModelVisitor2.class);
 
 		ArgumentCaptor<IBase> element = ArgumentCaptor.forClass(IBase.class);
 		ArgumentCaptor<List<IBase>> containingElementPath = ArgumentCaptor.forClass(getListClass(IBase.class));
@@ -848,19 +849,23 @@ public class FhirTerserDstu2Test {
 		when(visitor.acceptElement(element.capture(), containingElementPath.capture(), childDefinitionPath.capture(), elementDefinitionPath.capture())).thenReturn(true);
 
 		Patient p = new Patient();
-		p.addLink().getTypeElement().setValue("CODE");
+		p.getLinkFirstRep().getTypeElement().setValue("CODE");
+		p.getLinkFirstRep().getTypeElement().addUndeclaredExtension(false, "http://foo").addUndeclaredExtension(false, "http://bar", new StringDt("baz"));
+
+		// Test
 		ourCtx.newTerser().visit(p, visitor);
 
-		assertThat(element.getAllValues()).hasSize(3);
+		assertThat(element.getAllValues()).hasSize(8);
 		assertThat(element.getAllValues().get(0)).isSameAs(p);
 		assertThat(element.getAllValues().get(1)).isSameAs(p.getLinkFirstRep());
 		assertThat(element.getAllValues().get(2)).isSameAs(p.getLinkFirstRep().getTypeElement());
+		assertThat(element.getAllValues().get(3)).isSameAs(p.getLinkFirstRep().getTypeElement().getUndeclaredExtensions().get(0));
+		assertThat(element.getAllValues().get(4)).isSameAs(p.getLinkFirstRep().getTypeElement().getUndeclaredExtensions().get(0).getUndeclaredExtensions().get(0));
+		assertThat(element.getAllValues().get(5)).isSameAs(p.getLinkFirstRep().getTypeElement().getUndeclaredExtensions().get(0).getUndeclaredExtensions().get(0).getUrlElement());
+		assertThat(element.getAllValues().get(6)).isSameAs(p.getLinkFirstRep().getTypeElement().getUndeclaredExtensions().get(0).getUndeclaredExtensions().get(0).getValue());
+		assertThat(element.getAllValues().get(7)).isSameAs(p.getLinkFirstRep().getTypeElement().getUndeclaredExtensions().get(0).getUrlElement());
 
-		assertThat(containingElementPath.getAllValues()).hasSize(3);
-		// assertEquals(0, containingElementPath.getAllValues().get(0).size());
-		// assertEquals(1, containingElementPath.getAllValues().get(1).size());
-		// assertEquals(2, containingElementPath.getAllValues().get(2).size());
-
+		assertThat(containingElementPath.getAllValues()).hasSize(8);
 	}
 
 	@AfterAll

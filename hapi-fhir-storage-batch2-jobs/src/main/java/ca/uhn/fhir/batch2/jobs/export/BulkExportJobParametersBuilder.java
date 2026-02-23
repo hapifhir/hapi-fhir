@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,11 @@ public class BulkExportJobParametersBuilder {
 	private BulkExportJobParameters.ExportStyle myExportStyle;
 	private List<String> myPatientIds = new ArrayList<>();
 	private String myGroupId;
-	private boolean myExpandMdm;
+	private Boolean myExpandMdm;
 	private RequestPartitionId myPartitionId;
 	private String myExportIdentifier;
 	private Set<String> myPostFetchFilterUrls;
+	private boolean myIncludeHistory;
 
 	public BulkExportJobParametersBuilder resourceTypes(IPrimitiveType<String> theResourceTypes) {
 		myResourceTypes = theResourceTypes == null
@@ -112,8 +113,7 @@ public class BulkExportJobParametersBuilder {
 	}
 
 	public BulkExportJobParametersBuilder expandMdm(IPrimitiveType<Boolean> theExpandMdm) {
-		final Boolean booleanValue = DatatypeUtil.toBooleanValue(theExpandMdm);
-		myExpandMdm = booleanValue != null && booleanValue;
+		myExpandMdm = DatatypeUtil.toBooleanValue(theExpandMdm);
 		return this;
 	}
 
@@ -132,6 +132,12 @@ public class BulkExportJobParametersBuilder {
 		return this;
 	}
 
+	public BulkExportJobParametersBuilder includeHistory(IPrimitiveType<Boolean> theIncludeHistory) {
+		final Boolean booleanValue = DatatypeUtil.toBooleanValue(theIncludeHistory);
+		myIncludeHistory = booleanValue != null && booleanValue;
+		return this;
+	}
+
 	public BulkExportJobParameters build() {
 		BulkExportJobParameters result = new BulkExportJobParameters();
 		result.setExpandMdm(myExpandMdm);
@@ -140,12 +146,13 @@ public class BulkExportJobParametersBuilder {
 		result.setFilters(myFilters);
 		result.setGroupId(myGroupId);
 		result.setOutputFormat(myOutputFormat);
-		result.setPartitionId(myPartitionId);
+		result.setPartitionIdForSecurity(myPartitionId);
 		result.setPatientIds(myPatientIds);
 		result.setResourceTypes(myResourceTypes);
 		result.setSince(mySince);
 		result.setUntil(myUntil);
 		result.setPostFetchFilterUrls(myPostFetchFilterUrls);
+		result.setIncludeHistory(myIncludeHistory);
 		return result;
 	}
 

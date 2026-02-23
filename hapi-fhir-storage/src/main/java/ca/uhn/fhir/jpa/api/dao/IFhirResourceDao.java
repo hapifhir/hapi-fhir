@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
@@ -255,7 +256,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 			String thePatchBody,
 			IBaseParameters theFhirPatchBody,
 			RequestDetails theRequestDetails,
-			TransactionDetails theTransactionDetails);
+			TransactionDetails theTransactionDetails,
+			RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * Read a resource - Note that this variant of the method does not take in a {@link RequestDetails} and

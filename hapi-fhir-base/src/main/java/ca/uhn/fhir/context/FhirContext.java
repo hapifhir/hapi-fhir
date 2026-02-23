@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -330,7 +330,7 @@ public class FhirContext {
 	 * avoiding the need to manually add profile declarations for these custom types.
 	 * </p>
 	 * <p>
-	 * See <a href="http://jamesagnew.gihhub.io/hapi-fhir/doc_extensions.html">Profiling and Extensions</a>
+	 * See <a href="https://hapifhir.io/hapi-fhir/docs/model/profiles_and_extensions.html">Profiles and Extensions</a>
 	 * for more information on using custom types.
 	 * </p>
 	 * <p>

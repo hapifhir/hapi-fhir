@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 7401
+jira: SMILE-11256
+backport: 8.4.2
+title: "Previously, `smileutil upload-terminology` failed to load and save multiple concept properties that 
+used the same property code for a single `CodeSystem.concept`. This is now fixed."
+
+

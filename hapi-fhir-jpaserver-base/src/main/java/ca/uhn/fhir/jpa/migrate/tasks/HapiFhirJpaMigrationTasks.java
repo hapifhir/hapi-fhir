@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,6 +131,69 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init820();
 		init840();
 		init860();
+		init880();
+	}
+
+	protected void init880() {
+		Builder version = forVersion(VersionEnum.V8_8_0);
+
+		// Addressing collation issue for MSSQL
+		{
+			final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+
+			// Changes 20251208.10-50 repeat migration 20240724.10-50,
+			// but with .runEvenDuringSchemaInitialization() turned on so it applies to new installations.
+			//
+			// This query checks if the FHIR_ID column has a case-sensitive collation.
+			@Language(("SQL"))
+			final String onlyIfSql = "SELECT CASE CHARINDEX('_CI_', COLLATION_NAME) WHEN 0 THEN 0 ELSE 1 END "
+					+ "FROM INFORMATION_SCHEMA.COLUMNS "
+					+ "WHERE TABLE_SCHEMA = SCHEMA_NAME() "
+					+ "AND TABLE_NAME = 'HFJ_RESOURCE' "
+					+ "AND COLUMN_NAME = 'FHIR_ID' ";
+			final String onlyfIReason =
+					"Skipping change to HFJ_RESOURCE.FHIR_ID collation to SQL_Latin1_General_CP1_CS_AS because it is already using it";
+
+			hfjResource
+					.dropIndex("20251208.10", "IDX_RES_FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.runEvenDuringSchemaInitialization()
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			hfjResource
+					.dropIndex("20251208.20", "IDX_RES_TYPE_FHIR_ID")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.runEvenDuringSchemaInitialization()
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			version.executeRawSql(
+							"20251208.30",
+							"ALTER TABLE HFJ_RESOURCE ALTER COLUMN FHIR_ID varchar(64) COLLATE SQL_Latin1_General_CP1_CS_AS")
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+					.runEvenDuringSchemaInitialization()
+					.onlyIf(onlyIfSql, onlyfIReason);
+
+			hfjResource
+					.addIndex("20251208.40", "IDX_RES_FHIR_ID")
+					.unique(false)
+					.online(true)
+					.withColumns("FHIR_ID")
+					.runEvenDuringSchemaInitialization()
+					// note that we do not apply the onlyIf() here since we have now fixed the column.
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+
+			hfjResource
+					.addIndex("20251208.50", "IDX_RES_TYPE_FHIR_ID")
+					.unique(true)
+					.online(true)
+					// include res_id and our deleted flag so we can satisfy Observation?_sort=_id from the index on
+					// platforms that support it.
+					.includeColumns("RES_ID, RES_DELETED_AT")
+					.withColumns("RES_TYPE", "FHIR_ID")
+					.runEvenDuringSchemaInitialization()
+					// note that we do not apply the onlyIf() here since we have now fixed the column.
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+		}
 	}
 
 	protected void init860() {
@@ -143,6 +206,28 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.withColumns("SRC_PATH, TARGET_RESOURCE_URL, PARTITION_ID, SRC_RESOURCE_ID")
 					.heavyweightSkipByDefault();
 		}
+
+		// Add HFJ_RES_SYSTEM and HFJ_RES_IDENTIFIER_PT_UNIQ
+		{
+			Builder.BuilderAddTableByColumns resIdentifierPatient = version.addTableByColumns(
+					"20250927.04", "HFJ_RES_IDENTIFIER_PT_UNIQ", "IDENT_SYSTEM_PID", "IDENT_VALUE");
+			resIdentifierPatient.addColumn("IDENT_SYSTEM_PID").nonNullable().type(ColumnTypeEnum.LONG);
+			resIdentifierPatient.addColumn("IDENT_VALUE").nonNullable().type(ColumnTypeEnum.STRING, 500);
+			resIdentifierPatient.addColumn("FHIR_ID").nonNullable().type(ColumnTypeEnum.STRING, 64);
+
+			Builder.BuilderAddTableByColumns resSystem =
+					version.addTableByColumns("20251011.02", "HFJ_RES_SYSTEM", "PID");
+			resSystem.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+			resSystem.addColumn("SYSTEM_URL").nonNullable().type(ColumnTypeEnum.STRING, 500);
+			resSystem.addIndex("20251011.03", "IDX_RESIDENT_SYS").unique(true).withColumns("SYSTEM_URL");
+		}
+
+		// Make the HFJ_IDX_CMB_TOK_NU (non-unique combo param) string version nullable
+		// in anticipation of dropping it
+		version.onTable("HFJ_IDX_CMB_TOK_NU")
+				.modifyColumn("20251015.01", "IDX_STRING")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 500);
 	}
 
 	protected void init840() {

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,15 +93,26 @@ public class TransactionUtil {
 			 * bundle entry, and those entries will always be in the same order. This
 			 * is a FHIR rule, and HAPI makes sure to always honour it.
 			 */
-			IBase requestEntry = requestEntries.get(i);
+			IBase requestEntry = requestEntries.size() > i ? requestEntries.get(i) : null;
 			IBase responseEntry = responseEntries.get(i);
 
-			String requestVerb = terser.getSinglePrimitiveValueOrNull(requestEntry, "request.method");
-			if ("GET".equals(requestVerb)) {
-				continue;
+			IBaseResource requestResource = null;
+			IIdType requestFullUrl = null;
+			if (requestEntry != null) {
+				String requestVerb = terser.getSinglePrimitiveValueOrNull(requestEntry, "request.method");
+				if ("GET".equals(requestVerb)) {
+					continue;
+				}
+
+				requestResource = terser.getSingleValueOrNull(requestEntry, "resource", IBaseResource.class);
+
+				String requestFullUrlString = terser.getSinglePrimitiveValueOrNull(requestEntry, "fullUrl");
+				if (requestFullUrlString != null) {
+					requestFullUrl = theContext.getVersion().newIdType(requestFullUrlString);
+					requestFullUrl = toUnqualified(requestFullUrl);
+				}
 			}
 
-			IBaseResource requestResource = terser.getSingleValueOrNull(requestEntry, "resource", IBaseResource.class);
 			String requestMetaSource = null;
 			if (requestResource != null
 					&& theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
@@ -109,13 +120,6 @@ public class TransactionUtil {
 			}
 			if (isBlank(requestMetaSource)) {
 				requestMetaSource = bundleMetaSource;
-			}
-
-			String requestFullUrlString = terser.getSinglePrimitiveValueOrNull(requestEntry, "fullUrl");
-			IIdType requestFullUrl = null;
-			if (requestFullUrlString != null) {
-				requestFullUrl = theContext.getVersion().newIdType(requestFullUrlString);
-				requestFullUrl = toUnqualified(requestFullUrl);
 			}
 
 			IBase responseResponse = terser.getSingleValueOrNull(responseEntry, "response", IBase.class);

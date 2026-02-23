@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,16 +68,12 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 			HttpServletResponse theServletResponse) {
 		updateSearchParamsForLastn(theSearchParameterMap, theRequestDetails);
 
-		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequestDetails, getResourceName(), theSearchParameterMap);
 		return mySearchCoordinatorSvc.registerSearch(
 				this,
 				theSearchParameterMap,
 				getResourceName(),
 				new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)),
-				theRequestDetails,
-				requestPartitionId);
+				theRequestDetails);
 	}
 
 	private String getEffectiveParamName() {

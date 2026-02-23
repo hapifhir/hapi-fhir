@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractorSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -95,7 +95,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 	protected IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	@Autowired
-	private SearchParamExtractorService mySearchParamExtractorService;
+	private ISearchParamExtractorSvc mySearchParamExtractorService;
 
 	@Autowired
 	private BaseRequestPartitionHelperSvc myPartitionHelperSvc;

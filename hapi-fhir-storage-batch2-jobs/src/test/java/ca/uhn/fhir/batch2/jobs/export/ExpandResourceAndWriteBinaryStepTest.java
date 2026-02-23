@@ -2,12 +2,14 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.export.v3.ExpandResourceAndWriteBinaryStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
@@ -21,6 +23,7 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -43,8 +46,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -71,6 +72,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -115,15 +117,24 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	@Mock
 	IIdHelperService<JpaPid> myIdHelperService;
 
+	@Mock
+	IJobStepExecutionServices myJobStepExecutionServices;
+
+	@SuppressWarnings("unused")
 	@Spy
 	private InterceptorService myInterceptorService = new InterceptorService();
 
+	@Spy
+	private PartitionSettings myPartitionSettings = new PartitionSettings();
+
+	@SuppressWarnings("unused")
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@Spy
 	private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
+	@SuppressWarnings("unused")
 	@Spy
 	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 
@@ -141,15 +152,12 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		ourLog.detachAppender(myAppender);
 	}
 
-	private BulkExportJobParameters createParameters(boolean thePartitioned) {
+	private BulkExportJobParameters createParameters() {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		parameters.setOutputFormat("json");
 		parameters.setSince(new Date());
-		if (thePartitioned) {
-			parameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
-		}
 		return parameters;
 	}
 
@@ -160,7 +168,8 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			theParameters,
 			theData,
 			theInstance,
-			new WorkChunk().setId("1")
+			new WorkChunk().setId("1"),
+			myJobStepExecutionServices
 		);
 	}
 
@@ -202,7 +211,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
 			idList,
-			createParameters(false),
+			createParameters(),
 			instance
 		);
 
@@ -220,6 +229,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			return JpaPid.fromId(Long.parseLong(fhirId));
 		});
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -237,6 +247,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 				methodOutcome.setId(binaryId);
 				return methodOutcome;
 			});
+		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 
 		// test
 		RunOutcome outcome = myFinalStep.run(input, sink);
@@ -268,7 +279,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
 			idList,
-			createParameters(false),
+			createParameters(),
 			instance
 		);
 
@@ -286,6 +297,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			return JpaPid.fromId(Long.parseLong(fhirId));
 		});
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -303,6 +315,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 				methodOutcome.setId(binaryId);
 				return methodOutcome;
 			});
+		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 
 		// test
 		RunOutcome outcome = myFinalStep.run(input, sink);
@@ -334,9 +347,8 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	}
 
 
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void run_validInputNoErrors_succeeds(boolean thePartitioned) {
+	@Test
+	public void run_validInputNoErrors_succeeds() {
 		// setup
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
@@ -347,7 +359,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
 			idList,
-			createParameters(thePartitioned),
+			createParameters(),
 			instance
 		);
 
@@ -359,6 +371,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
 		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -370,6 +383,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			.thenReturn(binaryDao);
 		when(binaryDao.update(any(IBaseBinary.class), any(RequestDetails.class)))
 			.thenReturn(methodOutcome);
+		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 
 		// test
 		RunOutcome outcome = myFinalStep.run(input, sink);
@@ -381,9 +395,6 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			.update(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
 		String outputString = new String(binaryCaptor.getValue().getContent());
 		assertEquals(resources.size(), StringUtils.countOccurrencesOf(outputString, "\n"));
-		if (thePartitioned) {
-			assertEquals(getPartitionId(thePartitioned), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
-		}
 
 		ArgumentCaptor<BulkExportBinaryFileId> fileIdArgumentCaptor = ArgumentCaptor.forClass(BulkExportBinaryFileId.class);
 		verify(sink)
@@ -429,7 +440,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
 			idList,
-			createParameters(false),
+			createParameters(),
 			instance
 		);
 		ourLog.setLevel(Level.ERROR);
@@ -438,6 +449,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
 		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -472,4 +484,5 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		verify(sink, never())
 			.accept(any(BulkExportBinaryFileId.class));
 	}
+
 }

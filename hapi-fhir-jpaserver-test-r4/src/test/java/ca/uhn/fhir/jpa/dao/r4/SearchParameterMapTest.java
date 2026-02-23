@@ -12,7 +12,9 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.test.BaseTest;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
@@ -25,11 +27,19 @@ public class SearchParameterMapTest extends BaseTest {
 	private final FhirContext myContext = FhirContext.forR4Cached();
 
 	@Test
-	public void toNormalizedQueryStringTest() {
+	public void testToNormalizedQueryString() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("_has", new HasParam("Observation", "subject", "identifier", "urn:system|FOO"));
 		String criteria = params.toNormalizedQueryString(myContext);
 		assertEquals(criteria, "?_has:Observation:subject:identifier=urn%3Asystem%7CFOO");
+	}
+
+	@Test
+	public void testToNormalizedQueryString_IdParam() {
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(IAnyResource.SP_RES_ID, new TokenParam("Patient/123"));
+		String actual = params.toNormalizedQueryString(myContext);
+		assertEquals("?_id=Patient/123", actual);
 	}
 
 	@Test

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,7 @@ public class ResourceIdListStep<PT extends PartitionedUrlJobParameters>
 				data.getUrl(),
 				data.getPartitionId());
 
+		// Guard against invalid values
 		int chunkSize = Math.max(1, Math.min(getIfNull(batchSize, MAX_BATCH_OF_IDS), MAX_BATCH_OF_IDS));
 
 		final IResourcePidStream searchResult =

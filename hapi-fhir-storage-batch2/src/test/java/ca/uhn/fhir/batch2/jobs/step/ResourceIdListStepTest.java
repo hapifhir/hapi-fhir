@@ -5,17 +5,18 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -27,9 +28,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,8 +46,6 @@ class ResourceIdListStepTest {
 	private IJobDataSink<ResourceIdListWorkChunkJson> myDataSink;
 	@Mock
 	private ChunkRangeJson myData;
-	@Mock
-	private PartitionedUrlJobParameters myParameters;
 
 	@Captor
 	private ArgumentCaptor<ResourceIdListWorkChunkJson> myDataCaptor;
@@ -60,15 +60,17 @@ class ResourceIdListStepTest {
 	@ParameterizedTest
 	@ValueSource(ints = {0, 1, 100, 500, 501, 2345, 10500})
 	void testResourceIdListBatchSizeLimit(int theListSize) {
-		List<IResourcePersistentId<JpaPid>> idList = generateIdList(theListSize);
+		List<JpaPid> idList = generateIdList(theListSize);
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(1);
 
+		PartitionedUrlJobParameters parameters = new PartitionedUrlJobParameters();
+
 		when(myStepExecutionDetails.getData()).thenReturn(myData);
-		when(myParameters.getBatchSize()).thenReturn(500);
-		when(myParameters.getLimitResourceCount()).thenReturn(null);
-		when(myStepExecutionDetails.getParameters()).thenReturn(myParameters);
-		IResourcePidStream resourcePidStream = new ListWrappingPidStream(
-			new HomogeneousResourcePidList("Patient", idList, null, partitionId));
+		parameters.setBatchSize(500);
+
+		when(myStepExecutionDetails.getParameters()).thenReturn(parameters);
+		IResourcePidStream resourcePidStream = new ListWrappingPidStream<>(
+			new HomogeneousResourcePidList<>("Patient", idList, null, partitionId));
 		if (theListSize > 0) {
 			// Ensure none of the work chunks exceed MAX_BATCH_OF_IDS in size:
 			doAnswer(i -> {
@@ -104,12 +106,64 @@ class ResourceIdListStepTest {
 		}
 	}
 
-	private List<IResourcePersistentId<JpaPid>> generateIdList(int theListSize) {
-		List<IResourcePersistentId<JpaPid>> idList = new ArrayList<>();
+	@ParameterizedTest
+	@CsvSource(textBlock =
+		//  limitResourceCount, availableIds, batchSize
+		"""
+			100,                222,          500
+			100,                222,          50
+			100,                20,           500
+			100,                20,           0
+			999,                999,          999
+			""")
+	void testLimitResourceCount(int theLimitResourceCount, int theAvailableIds, int theBatchSize) {
+		// Setup
+		List<JpaPid> idList = generateIdList(theAvailableIds);
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(1);
+
+		when(myStepExecutionDetails.getData()).thenReturn(myData);
+
+		PartitionedUrlJobParameters parameters = new PartitionedUrlJobParameters();
+		parameters.setBatchSize(theBatchSize);
+		parameters.setLimitResourceCount(theLimitResourceCount);
+		when(myStepExecutionDetails.getParameters()).thenReturn(parameters);
+		IResourcePidStream resourcePidStream = new ListWrappingPidStream<>(
+			new HomogeneousResourcePidList<>("Patient", idList, null, partitionId));
+
+		when(myIdChunkProducer.fetchResourceIdStream(any())).thenReturn(resourcePidStream);
+
+		// Test
+		final RunOutcome run = myResourceIdListStep.run(myStepExecutionDetails, myDataSink);
+		assertNotNull(run);
+
+		// Verify
+		verify(myDataSink, atLeast(1)).accept(myDataCaptor.capture());
+		List<TypedPidJson> expectedPids = idList
+			.subList(0, Math.min(theLimitResourceCount, theAvailableIds))
+			.stream()
+			.map(t -> new TypedPidJson("Patient", 1, t.getId().toString()))
+			.toList();
+		List<ResourceIdListWorkChunkJson> allChunks = myDataCaptor.getAllValues();
+		int expectedBatchSize = theBatchSize;
+		if (expectedBatchSize < 1) {
+			expectedBatchSize = 1;
+		}
+		for (var chunk : allChunks) {
+			assertThat(chunk.getTypedPids()).asList().hasSizeBetween(0, expectedBatchSize);
+		}
+		List<TypedPidJson> actualPids = allChunks
+			.stream()
+			.flatMap(t -> t.getTypedPids().stream())
+			.toList();
+		assertThat(actualPids).containsExactlyElementsOf(expectedPids);
+
+	}
+
+	private List<JpaPid> generateIdList(int theListSize) {
+		List<JpaPid> idList = new ArrayList<>();
 		for (long id = 0; id < theListSize; id++) {
-			IResourcePersistentId<JpaPid> theId = mock(IResourcePersistentId.class);
-			when(theId.getId()).thenReturn(JpaPid.fromId((id + 1)));
-			idList.add(theId);
+			JpaPid pid = JpaPid.fromId(id + 1, 1);
+			idList.add(pid);
 		}
 		return idList;
 	}

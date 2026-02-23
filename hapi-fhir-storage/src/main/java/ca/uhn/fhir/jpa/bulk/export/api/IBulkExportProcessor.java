@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
-public interface IBulkExportProcessor<T extends IResourcePersistentId> {
+public interface IBulkExportProcessor<T extends IResourcePersistentId<?>> {
 
 	/**
 	 * For fetching PIDs of resources
-	 * @param theParams
-	 * @return
 	 */
 	Iterator<T> getResourcePidIterator(ExportPIDIteratorParameters theParams);
 
@@ -40,4 +39,8 @@ public interface IBulkExportProcessor<T extends IResourcePersistentId> {
 	 * @param theResources - the list of resources to expand
 	 */
 	void expandMdmResources(List<IBaseResource> theResources);
+
+	Set<String> getPatientSetForGroupExport(ExportPIDIteratorParameters theParameters);
+
+	Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParameters);
 }

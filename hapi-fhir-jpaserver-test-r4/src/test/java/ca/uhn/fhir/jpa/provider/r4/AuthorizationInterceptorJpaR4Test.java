@@ -1,11 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
@@ -18,7 +12,6 @@ import ca.uhn.fhir.jpa.term.TermTestUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IOperation;
@@ -27,7 +20,6 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRuleBuilder;
@@ -88,14 +80,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
@@ -398,6 +391,70 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@ParameterizedTest
+	@MethodSource(value = "getReadStandaloneBundleArguments")
+	public void testReadCollectionBundleById(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
+		Bundle bundle = createCollectionBundle(createPatient("John", "Smith"));
+		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
+
+		assertReadByIdAllowed(bundle.getIdElement(), theShouldAllow);
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "getReadStandaloneBundleInTransactionArguments")
+	public void testReadCollectionBundleInTransaction(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
+		Bundle collectionBundle = createCollectionBundle(createPatient("John", "Smith"));
+		createCollectionBundle(createPatient("Jane", "Doe"));
+		IIdType collectionBundleId = collectionBundle.getIdElement();
+
+		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
+
+		SimpleRequestHeaderInterceptor interceptor = new SimpleRequestHeaderInterceptor("Authorization", "Bearer AAA");
+		try {
+			myClient.registerInterceptor(interceptor);
+
+			Bundle bundle;
+
+			// Read Bundle
+			bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(collectionBundleId.toUnqualifiedVersionless().getValue());
+			assertTransactionAllowed(bundle, theShouldAllow);
+
+			// Search
+			bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Bundle?type=collection");
+			assertTransactionAllowed(bundle, theShouldAllow);
+
+			// Simple Search
+			Bundle responseBundle = assertSearchAllowed("/Bundle?type=collection", theShouldAllow);
+
+			// Get next page
+			if (responseBundle != null) {
+				Bundle.BundleLinkComponent next = responseBundle.getLink("next");
+				assertNotNull(next);
+
+				bundle = new Bundle();
+				bundle.setType(Bundle.BundleType.TRANSACTION);
+				bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("/Bundle?" + Constants.PARAM_PAGINGACTION + next.getUrl());
+				assertTransactionAllowed(bundle, theShouldAllow);
+			}
+		} finally {
+			myClient.unregisterInterceptor(interceptor);
+		}
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "getReadStandaloneBundleArguments")
+	public void testGetNextPage_forCollectionBundles(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
+		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
+		Bundle bundle = createCollectionBundle(createPatient("John", "Smith"));
+		Bundle firstBundle = new Bundle();
+		firstBundle.addLink().setRelation("next").setUrl(myClient.getServerBase() + "/"+ bundle.getIdElement().toUnqualifiedVersionless());
+		assertGetNextPageAllowed(firstBundle, theShouldAllow);
+	}
+
+	@ParameterizedTest
 	@MethodSource(value = "getReadStandaloneBundleInTransactionArguments")
 	public void testReadBundleInTransaction(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
 		Bundle documentBundle1 = createDocumentBundle(createPatient("John", "Smith"));
@@ -520,7 +577,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testReadCodeIn_AllowedInCompartment() throws IOException {
-		myValueSetDao.update(loadResourceFromClasspath(ValueSet.class, "r4/adi-vs2.json"));
+		myValueSetDao.update(loadResourceFromClasspath(ValueSet.class, "r4/adi-vs2.json"), mySrd);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		logAllValueSetConcepts();
 
@@ -1490,11 +1547,11 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	public void testReadCompartmentTwoPatientIds() {
 		Patient patient1 = new Patient();
 		patient1.setActive(true);
-		IIdType p1id = myPatientDao.create(patient1).getId().toUnqualifiedVersionless();
+		IIdType p1id = myPatientDao.create(patient1, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient patient2 = new Patient();
 		patient2.setActive(true);
-		IIdType p2id = myPatientDao.create(patient2).getId().toUnqualifiedVersionless();
+		IIdType p2id = myPatientDao.create(patient2, mySrd).getId().toUnqualifiedVersionless();
 
 		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -1537,27 +1594,27 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	public void testReadCompartmentTwoPatientIdsTwoEOBs() {
 		Patient patient1 = new Patient();
 		patient1.setActive(true);
-		IIdType p1id = myPatientDao.create(patient1).getId().toUnqualifiedVersionless();
+		IIdType p1id = myPatientDao.create(patient1, mySrd).getId().toUnqualifiedVersionless();
 
 		ExplanationOfBenefit eob1 = new ExplanationOfBenefit();
 		eob1.setPatient(new Reference(p1id));
-		myExplanationOfBenefitDao.create(eob1);
+		myExplanationOfBenefitDao.create(eob1, mySrd);
 
 		Patient patient2 = new Patient();
 		patient2.setActive(true);
-		IIdType p2id = myPatientDao.create(patient2).getId().toUnqualifiedVersionless();
+		IIdType p2id = myPatientDao.create(patient2, mySrd).getId().toUnqualifiedVersionless();
 
 		ExplanationOfBenefit eob2 = new ExplanationOfBenefit();
 		eob2.setPatient(new Reference(p2id));
-		myExplanationOfBenefitDao.create(eob2);
+		myExplanationOfBenefitDao.create(eob2, mySrd);
 
 		Patient patient3 = new Patient();
 		patient3.setActive(true);
-		IIdType p3id = myPatientDao.create(patient3).getId().toUnqualifiedVersionless();
+		IIdType p3id = myPatientDao.create(patient3, mySrd).getId().toUnqualifiedVersionless();
 
 		ExplanationOfBenefit eob3 = new ExplanationOfBenefit();
 		eob3.setPatient(new Reference(p3id));
-		myExplanationOfBenefitDao.create(eob3);
+		myExplanationOfBenefitDao.create(eob3, mySrd);
 
 		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -1841,6 +1898,55 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertSearchAllowed("/Bundle", theShouldAllow);
 	}
 
+	@ParameterizedTest
+	@MethodSource(value = "getReadStandaloneBundleArguments")
+	public void testSearchBundles_forCollectionBundles(AuthorizationInterceptor theAuthorizationInterceptor, boolean theShouldAllow) {
+		myServer.getRestfulServer().registerInterceptor(theAuthorizationInterceptor);
+		createCollectionBundle(createPatient("John", "Smith"));
+		assertSearchAllowed("/Bundle", theShouldAllow);
+	}
+
+	@Test
+	public void testSearchBundles_forCollectionBundles_withTagBasedAuthorization() {
+		// Create COLLECTION bundle with TEST-TAG-1
+		Patient patient1 = createPatient("John", "Smith");
+		Bundle collectionBundle1 = createCollectionBundle(patient1);
+		collectionBundle1.getMeta().addTag("http//myserver.ca/provider-1", "TEST-TAG-1", null);
+		myBundleDao.update(collectionBundle1, mySrd);
+
+		// Create COLLECTION bundle with TEST-TAG-2
+		Patient patient2 = createPatient("Jane", "Doe");
+		Bundle collectionBundle2 = createCollectionBundle(patient2);
+		collectionBundle2.getMeta().addTag("http//myserver.ca/provider-1", "TEST-TAG-2", null);
+		myBundleDao.update(collectionBundle2, mySrd);
+
+		// Set up authorization interceptor that only allows reading bundles with TEST-TAG-1
+		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().resourcesOfType("Bundle").withAnyId()
+					.withFilterTester("_tag=http//myserver.ca/provider-1|TEST-TAG-1")
+					.andThen()
+					.build();
+			}
+		};
+		interceptor.setAuthorizationSearchParamMatcher(new AuthorizationSearchParamMatcher(mySearchParamMatcher));
+		myServer.getRestfulServer().registerInterceptor(interceptor);
+
+		// Search for bundles with TEST-TAG-1 should return TEST-TAG-1 COLLECTION
+		Bundle searchResults = assertSearchAllowed("/Bundle?_tag=http//myserver.ca/provider-1|TEST-TAG-1", true);
+
+		assertThat(searchResults).isNotNull();
+		assertThat(searchResults.getEntry()).as("Should find COLLECTION tagged TEST-TAG-1").hasSize(1);
+
+		// Search for bundles with TEST-TAG-2 should fail (no authorization)
+		assertSearchFailsWith403Forbidden("/Bundle?_tag=http//myserver.ca/provider-1|TEST-TAG-2");
+
+		// Search for bundles with no tag should fail (no authorization)
+		assertSearchFailsWith403Forbidden("/Bundle");
+	}
+
 	@Test
 	public void testSearchBundles_withPermissionToViewOneBundle_onlyAllowsViewingOneBundle() {
 		Bundle bundle1 = createMessageHeaderBundle(createPatient("John", "Smith"));
@@ -2023,6 +2129,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		messageHeader.setEvent(event);
 		messageHeader.getFocusFirstRep().setReference(thePatient.getIdElement().getValue());
 		bundle.addEntry().setResource(messageHeader);
+		bundle.addEntry().setResource(thePatient);
+
+		return (Bundle) myBundleDao.create(bundle, mySrd).getResource();
+	}
+
+	private Bundle createCollectionBundle(Patient thePatient) {
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.COLLECTION);
 		bundle.addEntry().setResource(thePatient);
 
 		return (Bundle) myBundleDao.create(bundle, mySrd).getResource();

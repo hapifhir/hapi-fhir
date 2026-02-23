@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.tuple.Pair;
@@ -818,7 +819,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		myStorageSettings.setSchedulingDisabled(true);
 		myStorageSettings.setReindexThreadCount(1);
 
-		List<RuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation", null);
+		List<RuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 		assertThat(uniqueSearchParams).isEmpty();
 
 		Patient pt1 = new Patient();
@@ -847,7 +848,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 		createUniqueObservationSubjectDateCode();
 
-		uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation", null);
+		uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 		assertThat(uniqueSearchParams).hasSize(1);
 		assertThat(uniqueSearchParams.get(0).getComponents()).hasSize(3);
 
@@ -864,7 +865,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 			myResourceIndexedComboStringUniqueDao.deleteAll();
 		});
 
-		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Observation", null)).hasSize(1);
+		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX)).hasSize(1);
 
 		executeReindex();
 
@@ -1704,16 +1705,16 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	@Test
 	public void testDetectUniqueSearchParams() {
 		createBirthdateAndGenderSps(true);
-		List<RuntimeSearchParam> params = mySearchParamRegistry.getActiveComboSearchParams("Patient", null);
+		List<RuntimeSearchParam> params = mySearchParamRegistry.getActiveComboSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 
 		assertThat(params).hasSize(1);
 		assertEquals(ComboSearchParamType.UNIQUE, params.get(0).getComboSearchParamType());
 		assertThat(params.get(0).getComponents()).hasSize(2);
 
-		// Should be alphabetical order
-		List<RuntimeSearchParam> compositeParams = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, params.get(0));
-		assertEquals("birthdate", compositeParams.get(0).getName());
-		assertEquals("gender", compositeParams.get(1).getName());
+		// Should come out in the order that they appear in the combo SearchParameter definitiom
+		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeParams = JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, params.get(0));
+		assertEquals("gender", compositeParams.get(0).getComponentParameter().getName());
+		assertEquals("birthdate", compositeParams.get(1).getComponentParameter().getName());
 	}
 
 	@Test

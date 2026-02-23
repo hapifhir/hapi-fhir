@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.api.IBaseInterceptorService;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ReflectionUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -605,8 +606,16 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 				return invokeMethod(args);
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
+
+				ourLog.atError()
+						.setMessage("Exception thrown by interceptor for pointcut {}: {}")
+						.addArgument(getPointcut())
+						.addArgument(targetException.toString())
+						// Don't include a stack trace if the exception is a HAPI FHIR exception
+						.setCause(targetException instanceof BaseServerResponseException ? null : targetException)
+						.log();
+
 				if (myPointcut.isShouldLogAndSwallowException(targetException)) {
-					ourLog.error("Exception thrown by interceptor: " + targetException.toString(), targetException);
 					return null;
 				}
 

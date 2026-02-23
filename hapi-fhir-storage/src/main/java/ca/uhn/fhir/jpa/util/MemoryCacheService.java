@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
@@ -33,8 +34,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -79,6 +78,10 @@ public class MemoryCacheService {
 				case HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY:
 					nextCache = CacheFactory.buildEternal(5_000, 50_000);
 					break;
+				case RESOURCE_IDENTIFIER_SYSTEM_TO_PID:
+					nextCache = CacheFactory.buildEternal(250, 1_000);
+					break;
+				case PATIENT_IDENTIFIER_TO_FHIR_ID:
 				case NAME_TO_PARTITION:
 				case ID_TO_PARTITION:
 				case PID_TO_FORCED_ID:
@@ -129,6 +132,27 @@ public class MemoryCacheService {
 		return retVal;
 	}
 
+	/**
+	 * Fetch an item from the cache if it exists and use the loading function to
+	 * obtain it otherwise. If the loading function returns null, the item will not
+	 * be placed in the cache and <code>null</code> will be returned.
+	 * <p>
+	 * This method will put the value into the cache using {@link #putAfterCommit(CacheEnum, Object, Object)}.
+	 *
+	 * @since 8.6.0
+	 */
+	public <K, T> T getThenPutAfterCommitIfNotNull(CacheEnum theCache, K theKey, Function<K, T> theSupplier) {
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
+		T retVal = getIfPresent(theCache, theKey);
+		if (retVal == null) {
+			retVal = theSupplier.apply(theKey);
+			if (retVal != null) {
+				putAfterCommit(theCache, theKey, retVal);
+			}
+		}
+		return retVal;
+	}
+
 	public <K, V> V getIfPresent(CacheEnum theCache, K theKey) {
 		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
 		return doGetIfPresent(theCache, theKey);
@@ -164,16 +188,9 @@ public class MemoryCacheService {
 		assert theCache.getKeyType().isAssignableFrom(theKey.getClass())
 				: "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache "
 						+ theCache;
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					put(theCache, theKey, theValue);
-				}
-			});
-		} else {
-			put(theCache, theKey, theValue);
-		}
+
+		HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(
+				() -> put(theCache, theKey, theValue));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -223,7 +240,9 @@ public class MemoryCacheService {
 		NAME_TO_PARTITION(String.class),
 		ID_TO_PARTITION(Integer.class),
 		HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY(Long.class),
-		RES_TYPE_TO_RES_TYPE_ID(String.class);
+		RES_TYPE_TO_RES_TYPE_ID(String.class),
+		RESOURCE_IDENTIFIER_SYSTEM_TO_PID(String.class),
+		PATIENT_IDENTIFIER_TO_FHIR_ID(IdentifierKey.class);
 
 		private final Class<?> myKeyType;
 
@@ -235,6 +254,8 @@ public class MemoryCacheService {
 			return myKeyType;
 		}
 	}
+
+	public record IdentifierKey(String system, String value) {}
 
 	public static class TagDefinitionCacheKey {
 

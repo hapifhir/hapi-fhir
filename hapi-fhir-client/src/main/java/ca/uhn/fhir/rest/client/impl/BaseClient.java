@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -431,17 +431,17 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 			try (InputStream inputStream = response.readEntity()) {
-				InputStream inputStreamToReturn = inputStream;
+				InputStream inputStreamToReturn;
 
-				if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
-					if (inputStream != null) {
+				if (inputStream != null) {
+					if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
 						String responseString = IOUtils.toString(inputStream, Charsets.UTF_8);
 						keepResponseAndLogIt(theLogRequestAndResponse, response, responseString);
 						inputStreamToReturn = new ByteArrayInputStream(responseString.getBytes(Charsets.UTF_8));
+					} else {
+						inputStreamToReturn = new ByteArrayInputStream(inputStream.readAllBytes());
 					}
-				}
-
-				if (inputStreamToReturn == null) {
+				} else {
 					inputStreamToReturn = new ByteArrayInputStream(new byte[] {});
 				}
 

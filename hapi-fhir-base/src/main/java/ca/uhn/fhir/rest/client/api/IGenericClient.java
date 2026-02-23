@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.gclient.IHistory;
 import ca.uhn.fhir.rest.gclient.IMeta;
 import ca.uhn.fhir.rest.gclient.IOperation;
 import ca.uhn.fhir.rest.gclient.IPatch;
+import ca.uhn.fhir.rest.gclient.IRawHttp;
 import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
@@ -107,6 +108,16 @@ public interface IGenericClient extends IRestfulClient {
 	 * Fluent method for "read" and "vread" methods.
 	 */
 	IRead read();
+
+	/**
+	 * Provides access to raw HTTP operations that bypass FHIR resource parsing.
+	 * This is useful for making non-FHIR HTTP requests through the same client
+	 * infrastructure, including interceptors and authentication.
+	 *
+	 * @return A builder for constructing raw HTTP requests
+	 * @since 8.6.0
+	 */
+	IRawHttp rawHttpRequest();
 
 	/**
 	 * Implementation of the "instance read" method.

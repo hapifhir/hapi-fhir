@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,14 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.config.SearchConfig;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.NonPersistedSearch;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.builder.StorageInterceptorHooksFacade;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchContinuationTask;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
@@ -56,6 +58,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -76,6 +79,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.io.Serial;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -114,6 +118,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private final SearchStrategyFactory mySearchStrategyFactory;
 	private final ExceptionService myExceptionSvc;
 	private final BeanFactory myBeanFactory;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 
 	private final Consumer<String> myOnRemoveSearchTask = myIdToSearchTask::remove;
@@ -141,7 +146,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			ISearchParamRegistry theSearchParamRegistry,
 			SearchStrategyFactory theSearchStrategyFactory,
 			ExceptionService theExceptionSvc,
-			BeanFactory theBeanFactory) {
+			BeanFactory theBeanFactory,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		super();
 		myContext = theContext;
 		myStorageSettings = theStorageSettings;
@@ -157,6 +163,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		mySearchStrategyFactory = theSearchStrategyFactory;
 		myExceptionSvc = theExceptionSvc;
 		myBeanFactory = theBeanFactory;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 
 		myStorageInterceptorHooks = new StorageInterceptorHooksFacade(myInterceptorBroadcaster);
 	}
@@ -238,7 +245,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		StopWatch sw = new StopWatch();
 		while (true) {
 
-			if (myNeverUseLocalSearchForUnitTests == false) {
+			if (!myNeverUseLocalSearchForUnitTests) {
 				if (searchTask != null) {
 					ourLog.trace("Local search found");
 					List<JpaPid> resourcePids = searchTask.getResourcePids(theFrom, theTo);
@@ -378,19 +385,38 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			final SearchParameterMap theParams,
 			String theResourceType,
 			CacheControlDirective theCacheControlDirective,
-			RequestDetails theRequestDetails,
-			RequestPartitionId theRequestPartitionId) {
+			@Nullable RequestDetails theRequestDetails) {
 		final String searchUuid = UUID.randomUUID().toString();
 
-		final String queryString = theParams.toNormalizedQueryString(myContext);
+		final String queryString = theParams.toNormalizedQueryString();
 		ourLog.debug("Registering new search {}", searchUuid);
+
+		// Invoke any STORAGE_PRESEARCH_PARTITION_SELECTED interceptor hooks
+		NonPersistedSearch nonPersistedSearch = new NonPersistedSearch(theResourceType);
+		nonPersistedSearch.setUuid(searchUuid);
+		myStorageInterceptorHooks.callStoragePresearchPartitionSelected(
+				theRequestDetails, theParams, nonPersistedSearch);
+
+		RequestPartitionId requestPartitionId = null;
+		if (theRequestDetails instanceof SystemRequestDetails srd) {
+			requestPartitionId = srd.getRequestPartitionId();
+		}
+
+		// If an explicit request partition wasn't provided, calculate the request
+		// partition after invoking STORAGE_PRESEARCH_REGISTERED just in case any interceptors
+		// made changes which could affect the calculated partition
+		if (requestPartitionId == null) {
+			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+					theRequestDetails, theResourceType, theParams);
+		}
 
 		Search search = new Search();
 		QueryParameterUtils.populateSearchEntity(
-				theParams, theResourceType, searchUuid, queryString, search, theRequestPartitionId);
+				theParams, theResourceType, searchUuid, queryString, search, requestPartitionId);
 
+		// Invoke any STORAGE_PRESEARCH_REGISTERED interceptor hooks
 		myStorageInterceptorHooks.callStoragePresearchRegistered(
-				theRequestDetails, theParams, search, theRequestPartitionId);
+				theRequestDetails, theParams, search, requestPartitionId);
 
 		validateSearch(theParams);
 
@@ -431,7 +457,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 			return mySynchronousSearchSvc.executeQuery(
-					theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, theRequestPartitionId);
+					theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, requestPartitionId);
 		}
 
 		/*
@@ -447,7 +473,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			if (theParams.getEverythingMode() == null) {
 				if (myStorageSettings.getReuseCachedSearchResultsForMillis() != null) {
 					PersistedJpaBundleProvider foundSearchProvider = findCachedQuery(
-							theParams, theResourceType, theRequestDetails, queryString, theRequestPartitionId);
+							theParams, theResourceType, theRequestDetails, queryString, requestPartitionId);
 					if (foundSearchProvider != null) {
 						foundSearchProvider.setCacheStatus(SearchCacheStatusEnum.HIT);
 						return foundSearchProvider;
@@ -457,7 +483,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		}
 
 		PersistedJpaSearchFirstPageBundleProvider retVal = submitSearch(
-				theCallingDao, theParams, theResourceType, theRequestDetails, sb, theRequestPartitionId, search);
+				theCallingDao, theParams, theResourceType, theRequestDetails, sb, requestPartitionId, search);
 		retVal.setCacheStatus(cacheStatus);
 		return retVal;
 	}
@@ -492,8 +518,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	}
 
 	private void validateSearch(SearchParameterMap theParams) {
+		/*
+		 * Having duplicate identical params in the search (e.g. Patient?gender=male&gender=male) is not
+		 * technically wrong, but it's inefficient and can slow query execution down. Checking for it also
+		 * adds CPU load itself though, so we only check this in an assert to hopefully catch errors in tests.
+		 */
 		assert checkNoDuplicateParameters(theParams)
-				: "Duplicate parameters found in query: " + theParams.toNormalizedQueryString(myContext);
+				: "Duplicate parameters found in query: " + theParams.toNormalizedQueryString();
 
 		validateIncludes(theParams.getIncludes(), Constants.PARAM_INCLUDE);
 		validateIncludes(theParams.getRevIncludes(), Constants.PARAM_REVINCLUDE);
@@ -763,6 +794,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		int pageIndex = theFromIndex / pageSize;
 
 		return new PageRequest(pageIndex, pageSize, Sort.unsorted()) {
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

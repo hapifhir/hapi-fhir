@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class ResetSequencesTestHelper implements AfterEachCallback {
 
 		txTemplate.executeWithoutResult(t -> {
 			entityManager.createNativeQuery("drop sequence if exists SEQ_RESOURCE_ID").executeUpdate();
-			entityManager.createNativeQuery("create sequence SEQ_RESOURCE_ID minvalue 1 start with 1 increment by 50").executeUpdate();
+			entityManager.createNativeQuery("create sequence SEQ_RESOURCE_ID minvalue 1 start with 100 increment by 50").executeUpdate();
 		});
 
 		/*

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7297
+title: "A new method has been added to BundleBuilder which allows the addition
+   of a transaction/batch Bundle entry containing a conditional delete."

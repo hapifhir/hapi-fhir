@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,12 +56,15 @@ public interface IBatch2JobInstanceRepository
 	@Query("UPDATE Batch2JobInstanceEntity e SET e.myWorkChunksPurged = true WHERE e.myId = :id")
 	int updateWorkChunksPurgedTrue(@Param("id") String theInstanceId);
 
-	@Query(
-			"SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId AND (b.myParamsJson = :params OR b.myParamsJsonVc = :params) AND b.myStatus IN( :stats )")
+	@Query("SELECT b from Batch2JobInstanceEntity b "
+			+ "WHERE b.myDefinitionId = :defId AND (b.myParamsJson = :params OR b.myParamsJsonVc = :params) "
+			+ "AND b.myStatus IN (:stats) "
+			+ "AND (:cancelled IS NULL OR b.myCancelled = :cancelled)")
 	List<Batch2JobInstanceEntity> findInstancesByJobIdParamsAndStatus(
 			@Param("defId") String theDefinitionId,
 			@Param("params") String theParams,
 			@Param("stats") Set<StatusEnum> theStatus,
+			@Param("cancelled") Boolean theIsCancelledBoolean,
 			Pageable thePageable);
 
 	@Query(

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkMetadataView;
 import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.Logs;
 import com.fasterxml.jackson.core.JsonParser;
@@ -186,10 +185,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public String storeNewInstance(JobInstance theInstance) {
+	public String storeNewInstance(RequestDetails theRequestDetails, JobInstance theInstance) {
 		Validate.isTrue(isBlank(theInstance.getInstanceId()));
 
-		invokePreStorageBatchHooks(theInstance);
+		invokePreStorageBatchHooks(theRequestDetails, theInstance);
 
 		Batch2JobInstanceEntity entity = new Batch2JobInstanceEntity();
 		entity.setId(UUID.randomUUID().toString());
@@ -207,6 +206,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setUserDataJson(theInstance.getUserDataAsString());
 
 		entity = myJobInstanceRepository.save(entity);
+		JobInstance savedJobInstance = new JobInstance(theInstance);
+		savedJobInstance.setInstanceId(entity.getId());
+		invokePostStorageBatchHooks(savedJobInstance);
+
 		return entity.getId();
 	}
 
@@ -294,13 +297,18 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		List<Batch2JobInstanceEntity> instanceEntities;
 
 		if (statuses != null && !statuses.isEmpty()) {
+			// if we're not looking for cancelled jobs, we don't want jobs that
+			// are in the process of being cancelled
+			// (cancelling isn't instantaneous, but uses this flag)
+			boolean isCancelled = statuses.contains(StatusEnum.CANCELLED);
+
 			if (Batch2JobDefinitionConstants.BULK_EXPORT.equals(definitionId)) {
 				if (originalRequestUrlTruncation(params) != null) {
 					params = originalRequestUrlTruncation(params);
 				}
 			}
 			instanceEntities = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
-					definitionId, params, statuses, pageable);
+					definitionId, params, statuses, isCancelled, pageable);
 		} else {
 			instanceEntities = myJobInstanceRepository.findInstancesByJobIdAndParams(definitionId, params, pageable);
 		}
@@ -623,13 +631,21 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		}
 	}
 
-	private void invokePreStorageBatchHooks(JobInstance theJobInstance) {
+	private void invokePreStorageBatchHooks(RequestDetails theRequestDetails, JobInstance theJobInstance) {
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE)) {
 			HookParams params = new HookParams()
 					.add(JobInstance.class, theJobInstance)
-					.add(RequestDetails.class, new SystemRequestDetails());
+					.add(RequestDetails.class, theRequestDetails);
 
 			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, params);
+		}
+	}
+
+	private void invokePostStorageBatchHooks(JobInstance theJobInstance) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_POSTSTORAGE_BATCH_JOB_CREATE)) {
+			HookParams params = new HookParams().add(JobInstance.class, theJobInstance);
+
+			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_POSTSTORAGE_BATCH_JOB_CREATE, params);
 		}
 	}
 

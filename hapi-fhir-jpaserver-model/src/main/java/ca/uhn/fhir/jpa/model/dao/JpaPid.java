@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dao;
 
+import ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
@@ -51,7 +52,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 @Embeddable
 public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable<JpaPid> {
 
-	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
+	@GenericGenerator(name = "SEQ_RESOURCE_ID", type = HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID", nullable = false)
 	@GenericField(projectable = Projectable.YES)

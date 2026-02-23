@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,9 +233,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 			}
 		}
 
-		ResponseDetails responseDetails = new ResponseDetails();
-		responseDetails.setResponseResource(outcome);
-		responseDetails.setResponseCode(operationStatus);
+		ResponseDetails responseDetails = new ResponseDetails(operationStatus, outcome);
 
 		if (!BaseResourceReturningMethodBinding.callOutgoingResponseHook(theRequest, responseDetails)) {
 			return null;

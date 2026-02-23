@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class AddIdGeneratorTask extends BaseTask {
 				break;
 			case COCKROACHDB_21_1:
 			case POSTGRES_9_4:
-				sql = "create sequence " + myGeneratorName + " start 1 increment " + myIncrement;
+				sql = "create sequence " + myGeneratorName + " start 1000 increment " + myIncrement;
 				break;
 			default:
 				throw new IllegalStateException(Msg.code(63));

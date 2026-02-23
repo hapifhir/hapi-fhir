@@ -1,0 +1,8 @@
+---
+type: add
+issue: 7394
+backport: 8.4.2
+title: "A new setting JpaStorageSettings.setAllowDatabaseValidationOverride(boolean) has been added.
+  When enabled, database-stored CodeSystem and ValueSet resources take precedence over built-in
+  default profile validation resources. This allows user-defined terminology resources to override
+  built-in HL7 definitions when performing validation operations."

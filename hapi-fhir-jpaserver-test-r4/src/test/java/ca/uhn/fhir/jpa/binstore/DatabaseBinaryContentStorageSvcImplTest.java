@@ -307,9 +307,10 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 		when(mockedLobHelper.createBlob(any())).thenReturn(mock(Blob.class));
 
 		// given
-		DatabaseBinaryContentStorageSvcImpl svc = new DatabaseBinaryContentStorageSvcImpl()
-			.setSupportLegacyLobServer(true)
-			.setEntityManagerForTesting(mockedEntityManager);
+		DatabaseBinaryContentStorageSvcImpl svc = new DatabaseBinaryContentStorageSvcImpl();
+		svc.setSupportLegacyLobServer(true);
+		svc.setEntityManagerForTesting(mockedEntityManager);
+		svc.setInterceptorBroadcasterForTests(myInterceptorRegistry);
 
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
 		String contentType = "image/png";

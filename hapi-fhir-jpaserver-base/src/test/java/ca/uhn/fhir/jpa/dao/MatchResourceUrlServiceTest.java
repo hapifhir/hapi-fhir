@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -53,6 +54,9 @@ class MatchResourceUrlServiceTest {
 
 	@Mock
 	private IFhirResourceDao<Patient> myFhirResourceDao;
+
+	@Mock
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Mock
 	private MatchUrlService myMatchUrlSvc;

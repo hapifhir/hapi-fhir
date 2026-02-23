@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,17 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
+import ca.uhn.fhir.jpa.dao.IResourceMetadataExtractorSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.BatchResourceLoader;
 import ca.uhn.fhir.jpa.search.ExceptionService;
 import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
@@ -49,6 +53,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.IMetaTagSorter;
 import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.BeanFactory;
@@ -133,7 +138,7 @@ public class SearchConfig {
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 
 	@Autowired
-	private IJpaStorageResourceParser myJpaStorageResourceParser;
+	private BatchResourceLoader myBatchResourceLoader;
 
 	@Bean
 	public ISearchCoordinatorSvc searchCoordinatorSvc() {
@@ -151,12 +156,30 @@ public class SearchConfig {
 				mySearchParamRegistry,
 				mySearchStrategyFactory,
 				exceptionService(),
-				myBeanFactory);
+				myBeanFactory,
+				myRequestPartitionHelperService);
 	}
 
 	@Bean
 	public ExceptionService exceptionService() {
 		return new ExceptionService(myContext);
+	}
+
+	@Bean
+	public BatchResourceLoader batchResourceLoader(
+			IResourceMetadataExtractorSvc theResourceMetadataExtractorSvc,
+			IJpaStorageResourceParser theJpaStorageResourceParser,
+			ExternallyStoredResourceServiceRegistry theExternallyStoredResourceServiceRegistry,
+			IMetaTagSorter theMetaTagSorter,
+			IPartitionLookupSvc thePartitionLookupSvc) {
+		return new BatchResourceLoader(
+				myContext,
+				theResourceMetadataExtractorSvc,
+				theJpaStorageResourceParser,
+				theExternallyStoredResourceServiceRegistry,
+				theMetaTagSorter,
+				myPartitionSettings,
+				thePartitionLookupSvc);
 	}
 
 	@Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
@@ -176,7 +199,7 @@ public class SearchConfig {
 				myContext,
 				myIdHelperService,
 				myResourceHistoryTableDao,
-				myJpaStorageResourceParser,
+				myBatchResourceLoader,
 				theResourceType);
 	}
 

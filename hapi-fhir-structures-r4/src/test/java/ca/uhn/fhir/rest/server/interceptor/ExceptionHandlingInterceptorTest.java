@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.opentest4j.AssertionFailedError;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.util.List;
@@ -103,6 +105,47 @@ public class ExceptionHandlingInterceptorTest {
 	}
 
 	@Test
+	public void ExceptionHandlingInterceptor_ReturnsHttpResponseCode_WhenExceptionThrown() throws IOException {
+
+		//Given: We have an interceptor which throws an Exception
+		ProblemGeneratingInterceptor problemInterceptor = new ProblemGeneratingInterceptor();
+		ourServer.registerInterceptor(problemInterceptor);
+
+		AlterHttpResponseCodeInterceptorToValid404Value alterHttpResponseCodeInterceptorToValid404Value =
+			 new AlterHttpResponseCodeInterceptorToValid404Value();
+		//When: We make a request to the server, triggering this exception to be thrown on an otherwise successful request
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?succeed=true");
+		httpGet.setHeader("Accept-encoding", "gzip");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(500, status.getStatusLine().getStatusCode());
+		OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
+		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
+
+		//When: We add an Interceptor which will return an alternate Http Response Code, it gets returned to the caller
+		ourServer.registerInterceptor(alterHttpResponseCodeInterceptorToValid404Value);
+		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?succeed=true");
+		httpGet.setHeader("Accept-encoding", "gzip");
+		status = ourClient.execute(httpGet);
+		ourServer.unregisterInterceptor(alterHttpResponseCodeInterceptorToValid404Value);
+
+		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
+		responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(HttpStatus.NOT_FOUND.value(), status.getStatusLine().getStatusCode());
+		oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
+		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
+
+	}
+
+	@Test
 	public void testInternalErrorFormatted() throws Exception {
 		{
 			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?throwInternalError=aaa&_format=true");
@@ -132,7 +175,13 @@ public class ExceptionHandlingInterceptorTest {
 				throw new IOException("Simulated IOException");
 			}
 		}
+	}
 
+	public static class AlterHttpResponseCodeInterceptorToValid404Value {
+		@Hook(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME)
+		public void intercept(RequestDetails theRequestDetails, ResponseDetails theOutgoingFailureResponse) {
+			theOutgoingFailureResponse.setResponseCode(HttpStatus.NOT_FOUND.value());
+		}
 	}
 
 	/**

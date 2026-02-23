@@ -62,7 +62,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
-public class MdmOperationPointcutsIT extends BaseProviderR4Test {
+public class MdmOperationPointcutsIT extends BaseMdmProviderR4Test {
 
 	/**
 	 * mdm link history can submit by

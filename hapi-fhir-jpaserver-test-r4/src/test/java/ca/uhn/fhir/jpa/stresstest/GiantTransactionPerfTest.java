@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
@@ -124,7 +125,7 @@ public class GiantTransactionPerfTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(GiantTransactionPerfTest.class);
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	private FhirSystemDaoR4 mySystemDao;
-	private IInterceptorBroadcaster myInterceptorSvc;
+	private IInterceptorService myInterceptorSvc;
 	private TransactionProcessor myTransactionProcessor;
 	private PlatformTransactionManager myTransactionManager;
 	private MockEntityManager myEntityManager;
@@ -208,10 +209,12 @@ public class GiantTransactionPerfTest {
 		myTransactionProcessor.setIdHelperServiceForUnitTest(myIdHelperService);
 		myTransactionProcessor.setFhirContextForUnitTest(ourFhirContext);
 		myTransactionProcessor.setApplicationContextForUnitTest(myAppCtx);
+		myTransactionProcessor.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
 
 		mySystemDao = new FhirSystemDaoR4();
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
 		mySystemDao.setStorageSettingsForUnitTest(myStorageSettings);
+		mySystemDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
 		when(myAppCtx.getBean(eq(IFhirSystemDao.class))).thenReturn(mySystemDao);
@@ -223,17 +226,17 @@ public class GiantTransactionPerfTest {
 		myResourceChangeListenerCacheRefresher = new ResourceChangeListenerCacheRefresherImpl();
 		myResourceChangeListenerCacheRefresher.setResourceVersionSvc(myResourceVersionSvc);
 
-		when(myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(any(), any(), any(), anyLong())).thenAnswer(t -> {
+		when(myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(any(), any(), any(), any(), anyLong())).thenAnswer(t -> {
 			String resourceName = t.getArgument(0, String.class);
-			SearchParameterMap searchParameterMap = t.getArgument(1, SearchParameterMap.class);
-			IResourceChangeListener changeListener = t.getArgument(2, IResourceChangeListener.class);
-			long refreshInterval = t.getArgument(3, Long.class);
-			ResourceChangeListenerCache retVal = new ResourceChangeListenerCache(resourceName, changeListener, searchParameterMap, refreshInterval);
+			SearchParameterMap searchParameterMap = t.getArgument(2, SearchParameterMap.class);
+			IResourceChangeListener changeListener = t.getArgument(3, IResourceChangeListener.class);
+			long refreshInterval = t.getArgument(4, Long.class);
+			ResourceChangeListenerCache retVal = new ResourceChangeListenerCache(resourceName, changeListener, RequestPartitionId.allPartitions(), searchParameterMap, refreshInterval);
 			retVal.setResourceChangeListenerCacheRefresher(myResourceChangeListenerCacheRefresher);
 			return retVal;
 		});
 
-		myResourceChangeListenerRegistry = new ResourceChangeListenerRegistryImpl(ourFhirContext, myResourceChangeListenerCacheFactory, myInMemoryResourceMatcher);
+		myResourceChangeListenerRegistry = new ResourceChangeListenerRegistryImpl(ourFhirContext, new PartitionSettings(), myResourceChangeListenerCacheFactory, myInMemoryResourceMatcher);
 		myResourceChangeListenerCacheRefresher.setResourceChangeListenerRegistry(myResourceChangeListenerRegistry);
 
 		mySearchParamRegistry = new SearchParamRegistryImpl();
@@ -242,6 +245,8 @@ public class GiantTransactionPerfTest {
 		mySearchParamRegistry.setSearchParameterCanonicalizerForUnitTest(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamRegistry.setFhirContext(ourFhirContext);
 		mySearchParamRegistry.setStorageSettings(myStorageSettings);
+		mySearchParamRegistry.setInterceptorServiceForUnitTest(myInterceptorSvc);
+		mySearchParamRegistry.setPartitionSettingsForUnitTest(myPartitionSettings);
 		mySearchParamRegistry.registerListener();
 		mySearchParamRegistry.start();
 
@@ -287,11 +292,14 @@ public class GiantTransactionPerfTest {
 		myEobDao.setMyMetaTagSorter(myMetaTagSorter);
 		myEobDao.setResourceHistoryCalculator(myResourceHistoryCalculator);
 		myEobDao.setResourceTypeCacheSvc(myResourceTypeCacheSvc);
+		myEobDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));
 
 		when(myResourceTypeCacheSvc.getResourceTypeId(anyString())).thenReturn((short)100);
+
+		when(myIdHelperService.translatePidsToForcedIds(any())).thenReturn(new PersistentIdToForcedIdMap<>(Map.of()));
 	}
 
 	@Test
@@ -425,7 +433,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(List<JpaPidFk> theVersionlessPids) {
+		public List<ResourceHistoryTable> findCurrentVersionsByResourcePidsAndFetchResourceTable(List<JpaPid> theVersionlessPids) {
 			throw new UnsupportedOperationException();
 		}
 

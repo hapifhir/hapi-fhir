@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7290
+title: "The in-memory search matcher (used for Subscription processing among other things) was previously
+   only able to handle `_id` parameters containing an untyped ID (e.g. `_id=123`) but not a qualified ID
+   such as `_id=Patient/123`. This has been fixed."

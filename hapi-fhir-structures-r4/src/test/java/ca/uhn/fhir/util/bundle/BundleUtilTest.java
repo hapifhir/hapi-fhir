@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
@@ -757,6 +758,33 @@ public class BundleUtilTest {
 		assertEquals("Patient/A123", ((Observation)output.getEntry().get(1).getResource()).getSubject().getReference());
 		assertEquals(Observation.ObservationStatus.AMENDED, ((Observation)output.getEntry().get(1).getResource()).getStatus());
 	}
+
+
+	@Test
+	void testToListOfEntriesModifiable_ConvertConditionalCreateToConditionalUpdate() {
+		Bundle underlyingBundle = new Bundle();
+		Bundle.BundleEntryComponent underlyingEntry = underlyingBundle.addEntry();
+		underlyingEntry.getRequest().setMethod(Bundle.HTTPVerb.POST);
+		underlyingEntry.getRequest().setUrl("Patient");
+		underlyingEntry.getRequest().setIfNoneExist("Patient?foo=bar");
+
+		List<ModifiableBundleEntryParts> modifiableEntries = BundleUtil.toListOfEntriesModifiable(ourCtx, underlyingBundle);
+		assertEquals(1, modifiableEntries.size());
+		ModifiableBundleEntryParts modifiableEntry = modifiableEntries.get(0);
+		assertEquals("Patient", modifiableEntry.getUrl());
+		assertEquals(RequestTypeEnum.POST, modifiableEntry.getMethod());
+
+		// Test
+		modifiableEntry.setConditionalUrl(null);
+		modifiableEntry.setMethod(RequestTypeEnum.PUT);
+		modifiableEntry.setConditionalUrl("Patient?foo123=bar123");
+
+		// Verify
+		assertEquals(Bundle.HTTPVerb.PUT, underlyingEntry.getRequest().getMethod());
+		assertEquals("Patient?foo123=bar123", underlyingEntry.getRequest().getUrl());
+		assertNull(underlyingEntry.getRequest().getIfNoneExist());
+	}
+
 
 	private static @Nonnull Bundle createBundleWithPatientAndObservation() {
 		Bundle input = new Bundle();
