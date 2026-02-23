@@ -803,7 +803,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Throw exception if the TermCodeSystemVersion is being duplicated.
 		if (codeSystemVersionEntity != null) {
 			if (!ObjectUtil.equals(codeSystemVersionEntity.getResource().getId(), theCodeSystemResourceTable.getId())) {
-				throw new UnprocessableEntityException(Msg.code(848) + msg);
+				if (myConceptDao.countByCodeSystemVersion(codeSystemVersionEntity.getPid()) == 0) {
+					// The existing version is a 0-concept placeholder (e.g. from a NOTPRESENT
+					// pre-seed). Re-point it to the new resource instead of rejecting.
+					codeSystemVersionEntity.setResource(theCodeSystemResourceTable);
+					myCodeSystemVersionDao.save(codeSystemVersionEntity);
+				} else {
+					throw new UnprocessableEntityException(Msg.code(848) + msg);
+				}
 			}
 		}
 	}
