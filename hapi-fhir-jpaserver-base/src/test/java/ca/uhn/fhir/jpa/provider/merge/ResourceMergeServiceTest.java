@@ -15,7 +15,9 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.partition.move.CrossPartitionResourceMoverSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
@@ -150,7 +152,9 @@ public class ResourceMergeServiceTest {
 			myJobCoordinatorMock,
 			myBatch2TaskHelperMock,
 			myMergeValidationServiceMock,
-			myMergeResourceHelper);
+			myMergeResourceHelper,
+			mock(CrossPartitionResourceMoverSvc.class),
+			new PartitionSettings());
 	}
 
 	@Nested

@@ -32,11 +32,14 @@ import ca.uhn.fhir.jpa.api.svc.IMergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR4;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.partition.move.CrossPartitionResourceMoverSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.provider.merge.MergeOperationProviderSvc;
@@ -157,6 +160,19 @@ public class JpaR4Config {
 		return new MergeResourceHelper(theDaoRegistry, theMergeProvenanceSvc, theResourceLinkServiceFactory);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Bean
+	public CrossPartitionResourceMoverSvc crossPartitionResourceMoverSvc(
+			DaoRegistry theDaoRegistry,
+			IResourceLinkDao theResourceLinkDao,
+			HapiTransactionService theHapiTransactionService,
+			ISearchParamExtractor theSearchParamExtractor,
+			IFhirSystemDao<Bundle, Meta> theSystemDao) {
+		return new CrossPartitionResourceMoverSvc(
+				theDaoRegistry, theResourceLinkDao, theHapiTransactionService, theSearchParamExtractor, (IFhirSystemDao)
+						theSystemDao);
+	}
+
 	@Bean
 	public ResourceMergeService resourceMergeService(
 			DaoRegistry theDaoRegistry,
@@ -167,7 +183,9 @@ public class JpaR4Config {
 			Batch2TaskHelper theBatch2TaskHelper,
 			JpaStorageSettings theStorageSettings,
 			MergeValidationService theMergeValidationService,
-			MergeResourceHelper theMergeResourceHelper) {
+			MergeResourceHelper theMergeResourceHelper,
+			CrossPartitionResourceMoverSvc theCrossPartitionResourceMoverSvc,
+			PartitionSettings thePartitionSettings) {
 
 		return new ResourceMergeService(
 				theStorageSettings,
@@ -178,7 +196,9 @@ public class JpaR4Config {
 				theJobCoordinator,
 				theBatch2TaskHelper,
 				theMergeValidationService,
-				theMergeResourceHelper);
+				theMergeResourceHelper,
+				theCrossPartitionResourceMoverSvc,
+				thePartitionSettings);
 	}
 
 	@Bean
