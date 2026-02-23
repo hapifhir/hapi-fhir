@@ -135,16 +135,16 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 		// This should succeed — the existing TermCodeSystemVersion is a 0-concept placeholder
 		// from the first pre-seed. It should be updated to point to the new resource.
-		// BUG: Currently throws UnprocessableEntityException with Msg.code(848) because
-		// checkForCodeSystemVersionDuplicate() doesn't allow a different resource even
-		// when the existing version has zero concepts (i.e. is just a placeholder).
-		myCodeSystemDao.create(cs2, mySrd);
+		// Previously threw UnprocessableEntityException (Msg.code(848)) — fixed by SMILE-7421.
+		JpaPid secondResourcePid = ((ResourceTable) myCodeSystemDao.create(cs2, mySrd).getEntity()).getId();
 
-		// Verify: TermCodeSystem still exists and points to the new resource
+		// Verify: TermCodeSystem and TermCodeSystemVersion both point to the second resource
 		runInTransaction(() -> {
 			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct");
 			assertThat(tcs).isNotNull();
+			assertThat(tcs.getResource().getId()).isEqualTo(secondResourcePid);
 			assertThat(tcs.getCurrentVersion()).isNotNull();
+			assertThat(tcs.getCurrentVersion().getResource().getId()).isEqualTo(secondResourcePid);
 		});
 	}
 
@@ -182,14 +182,16 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		cs2.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		cs2.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		// BUG: Currently throws Msg.code(848) — same bug as unversioned case
-		myCodeSystemDao.create(cs2, mySrd);
+		// Previously threw Msg.code(848) — fixed by SMILE-7421.
+		JpaPid secondResourcePid = ((ResourceTable) myCodeSystemDao.create(cs2, mySrd).getEntity()).getId();
 
-		// Verify: TermCodeSystem still exists and points to the new resource
+		// Verify: TermCodeSystem and TermCodeSystemVersion both point to the second resource
 		runInTransaction(() -> {
 			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct");
 			assertThat(tcs).isNotNull();
+			assertThat(tcs.getResource().getId()).isEqualTo(secondResourcePid);
 			assertThat(tcs.getCurrentVersion()).isNotNull();
+			assertThat(tcs.getCurrentVersion().getResource().getId()).isEqualTo(secondResourcePid);
 		});
 	}
 
