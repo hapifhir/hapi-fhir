@@ -142,7 +142,7 @@ public class CrossPartitionResourceMoverSvc {
 				IBaseBundle createBundle =
 						buildCreateBundle(moveList, sourcePatientId, targetPatientId, oldIdToPlaceholder);
 				IBaseBundle createResponse = mySystemDao.transactionNested(new SystemRequestDetails(), createBundle);
-				oldToNewIdMap = extractOldToNewIdMap(oldIdToPlaceholder, createResponse);
+				oldToNewIdMap = extractOldToNewIdMap(new ArrayList<>(oldIdToPlaceholder.keySet()), createResponse);
 			}
 
 			// Step 4: Execute UPDATE bundle — UPDATE resources were loaded from DB so
@@ -154,17 +154,14 @@ public class CrossPartitionResourceMoverSvc {
 				mySystemDao.transactionNested(new SystemRequestDetails(), updateBundle);
 			}
 
-			// Step 5: Delete source copies of moved resources
-			// Sort so leaf resources (those that reference other moved resources) are deleted first,
-			// to avoid referential integrity violations
-			List<String> sortedOldIds = sortForDeletion(oldIdToPlaceholder.keySet(), moveList);
-			SystemRequestDetails sourceRequest = SystemRequestDetails.forRequestPartitionId(sourcePartitionId);
-			for (String oldId : sortedOldIds) {
-				IIdType oldIdType = new IdDt(oldId);
-				String resourceType = oldIdType.getResourceType();
-				@SuppressWarnings("unchecked")
-				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
-				dao.delete(oldIdType, sourceRequest);
+			// Step 5: Delete source copies of moved resources via a single transaction bundle
+			if (!oldIdToPlaceholder.isEmpty()) {
+				BundleBuilder deleteBuilder = new BundleBuilder(myFhirContext);
+				for (String oldId : oldIdToPlaceholder.keySet()) {
+					deleteBuilder.addTransactionDeleteEntry(new IdDt(oldId));
+				}
+				mySystemDao.transactionNested(
+						SystemRequestDetails.forRequestPartitionId(sourcePartitionId), deleteBuilder.getBundle());
 			}
 
 			ourLog.info(
@@ -300,15 +297,19 @@ public class CrossPartitionResourceMoverSvc {
 	 * whose key order matches the bundle entry order).
 	 */
 	@SuppressWarnings("unchecked")
-	private Map<String, String> extractOldToNewIdMap(
-			Map<String, String> theOldIdToPlaceholder, IBaseBundle theCreateResponse) {
+	private Map<String, String> extractOldToNewIdMap(List<String> theOldIds, IBaseBundle theCreateResponse) {
 
 		FhirTerser terser = myFhirContext.newTerser();
-		List<String> orderedOldIds = new ArrayList<>(theOldIdToPlaceholder.keySet());
 		List<IBase> entries = terser.getValues(theCreateResponse, "Bundle.entry", IBase.class);
 
+		if (entries.size() != theOldIds.size()) {
+			// TODO Emre: add Msg.Code
+			throw new IllegalStateException("CREATE transaction response entry count (" + entries.size()
+					+ ") does not match expected resource count (" + theOldIds.size() + ")");
+		}
+
 		Map<String, String> result = new HashMap<>();
-		for (int i = 0; i < Math.min(entries.size(), orderedOldIds.size()); i++) {
+		for (int i = 0; i < entries.size(); i++) {
 			List<IBase> locationValues = terser.getValues(entries.get(i), "response.location", IBase.class);
 			if (!locationValues.isEmpty() && locationValues.get(0) instanceof IPrimitiveType) {
 				String location = ((IPrimitiveType<String>) locationValues.get(0)).getValueAsString();
@@ -316,9 +317,16 @@ public class CrossPartitionResourceMoverSvc {
 						.toVersionless()
 						.toUnqualifiedVersionless()
 						.getValue();
-				result.put(orderedOldIds.get(i), newId);
+				result.put(theOldIds.get(i), newId);
 			}
 		}
+
+		if (result.size() != theOldIds.size()) {
+			// TODO Emre: add Msg.Code
+			throw new IllegalStateException("Could not extract new IDs for all moved resources: expected "
+					+ theOldIds.size() + " but got " + result.size());
+		}
+
 		return result;
 	}
 
@@ -355,47 +363,5 @@ public class CrossPartitionResourceMoverSvc {
 			bundleBuilder.addTransactionUpdateEntry(resource);
 		}
 		return bundleBuilder.getBundle();
-	}
-
-	/**
-	 * Sort resource IDs for deletion so that resources which reference other moved resources
-	 * are deleted first (leaf-first ordering) to avoid referential integrity violations.
-	 */
-	private List<String> sortForDeletion(java.util.Collection<String> theOldIds, List<IBaseResource> theMoveList) {
-		Map<String, Integer> referencedByCount = new HashMap<>();
-		for (String id : theOldIds) {
-			referencedByCount.put(id, 0);
-		}
-
-		// Since moveList resources already have urn:uuid refs (not oldId refs), we can't use them.
-		// Instead, use the ResourceLink table: count how many of the moved resources reference each other.
-		// For a quick approach: just look at which resource types are typically referenced by others.
-		// Encounters are referenced by Observations, so delete Observations first.
-		// A simple heuristic: sort by resource type, putting "leaf" types first.
-		List<String> sorted = new ArrayList<>(theOldIds);
-		sorted.sort((a, b) -> {
-			String typeA = new IdDt(a).getResourceType();
-			String typeB = new IdDt(b).getResourceType();
-			// Encounter is typically referenced by Observation, so delete Observation first
-			int priorityA = getDeletePriority(typeA);
-			int priorityB = getDeletePriority(typeB);
-			return Integer.compare(priorityA, priorityB);
-		});
-		return sorted;
-	}
-
-	private static int getDeletePriority(String theResourceType) {
-		// Lower number = delete first. Leaf resources that reference others should be deleted first.
-		// Resources that are commonly referenced by others should be deleted last.
-		switch (theResourceType) {
-			case "Encounter":
-			case "Patient":
-			case "Practitioner":
-			case "Organization":
-			case "Location":
-				return 10; // referenced by many — delete last
-			default:
-				return 0; // leaf resources — delete first
-		}
 	}
 }
