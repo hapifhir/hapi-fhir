@@ -252,14 +252,24 @@ public class Batch2JobHelper {
 		return job.getCombinedRecordsProcessed();
 	}
 
+	/**
+	 * Awaits completion of all active (non-terminal) jobs for the given job definition ID.
+	 * Jobs that have already reached a terminal state (COMPLETED, FAILED, or CANCELLED) are
+	 * ignored, since stale FAILED/CANCELLED jobs from previous tests should not cause the
+	 * current test to fail.
+	 */
 	public void awaitAllJobsOfJobDefinitionIdToComplete(String theJobDefinitionId) {
 		// fetch all jobs of any status type
 		List<JobInstance> instances = myJobCoordinator.getJobInstancesByJobDefinitionId(
 			theJobDefinitionId,
 			BATCH_SIZE,
 			0);
-		// then await completion status
-		awaitJobCompletions(instances);
+		// Only wait for jobs that haven't reached a terminal state yet.
+		// Stale FAILED/CANCELLED jobs from previous tests should not cause the current test to fail.
+		List<JobInstance> activeInstances = instances.stream()
+			.filter(i -> !i.getStatus().isEnded())
+			.toList();
+		awaitJobCompletions(activeInstances);
 	}
 
 	protected void awaitJobCompletions(Collection<JobInstance> theJobInstances) {
@@ -301,7 +311,7 @@ public class Batch2JobHelper {
 		}
 
 		for (JobInstance job : jobs) {
-			if (job.getStatus().isIncomplete()) {
+			if (!job.getStatus().isEnded()) {
 				map.put(job.getInstanceId(), job.getJobDefinitionId() + " : " + job.getStatus().name());
 			}
 		}
@@ -328,7 +338,7 @@ public class Batch2JobHelper {
 				}
 
 				for (JobInstance job : jobs) {
-					if (job.getStatus() != StatusEnum.COMPLETED) {
+					if (!job.getStatus().isEnded()) {
 						map.put(job.getInstanceId(), job.getStatus().name());
 					} else {
 						map.remove(job.getInstanceId());
@@ -338,8 +348,10 @@ public class Batch2JobHelper {
 			});
 
 
-		String msg = map.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(", \n "));
-		ourLog.info("The following jobs did not complete as expected: {}", msg);
+		if (!map.isEmpty()) {
+			String msg = map.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(", \n "));
+			ourLog.info("The following jobs did not complete as expected: {}", msg);
+		}
 	}
 
 	public void runMaintenancePass() {
