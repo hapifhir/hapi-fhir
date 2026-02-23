@@ -38,12 +38,14 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * This class is a partitioning interceptor for unit tests that can be programmatically
+ * configured to return specific partition IDs for read and create operations.
+ */
 @Interceptor
 public class MockPartitioningInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(MockPartitioningInterceptor.class);
 
-	// FIXME: needed?
-	//	private final Map<String, RequestPartitionId> myPartitionIdByResourceName = new HashMap<>();
 	private final List<RequestPartitionId> myReadRequestPartitionIds = new ArrayList<>();
 	private final List<RequestPartitionId> myCreateRequestPartitionIds = new ArrayList<>();
 	private RequestPartitionId myAlwaysReturnPartition;
@@ -100,22 +102,36 @@ public class MockPartitioningInterceptor {
 				.isEmpty();
 	}
 
-	public void addNextIterceptorReadResult(RequestPartitionId theRequestPartitionId) {
-		myReadRequestPartitionIds.add(theRequestPartitionId);
-		ourLog.info(
-				"Adding partition {} for read (not have {})", theRequestPartitionId, myReadRequestPartitionIds.size());
-	}
-
+	/**
+	 * CLears any partitions specified by {@link #addNextInterceptorCreateResult(RequestPartitionId)} or {@link #addNextIterceptorReadResult(RequestPartitionId)}
+	 * or {@link #setAlwaysReturnPartition(RequestPartitionId)}.
+	 */
 	public void clearPartitions() {
 		myCreateRequestPartitionIds.clear();
 		myReadRequestPartitionIds.clear();
 		myAlwaysReturnPartition = null;
 	}
 
+	/**
+	 * The next call to this interceptor for a READ operation will return the given partition ID.
+	 */
+	public void addNextIterceptorReadResult(RequestPartitionId theRequestPartitionId) {
+		myReadRequestPartitionIds.add(theRequestPartitionId);
+		ourLog.info(
+				"Adding partition {} for read (not have {})", theRequestPartitionId, myReadRequestPartitionIds.size());
+	}
+
+	/**
+	 * The next call to this interceptor for a CREATE operation will return the given partition ID.
+	 */
 	public void addNextInterceptorCreateResult(RequestPartitionId theRequestPartitionId) {
 		myCreateRequestPartitionIds.add(theRequestPartitionId);
 	}
 
+	/**
+	 * All future calls to this interceptor will return the given partition ID,
+	 * until {@link #clearPartitions()} is called.
+	 */
 	public void setAlwaysReturnPartition(RequestPartitionId theAlwaysReturnPartition) {
 		myAlwaysReturnPartition = theAlwaysReturnPartition;
 	}

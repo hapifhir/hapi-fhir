@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7583
+title: "It is now possible to programmatically specify the partition to use
+   for individual entries within a FHIR Transaction Bundle submitted to the
+   JPA server."

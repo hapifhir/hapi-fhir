@@ -58,9 +58,6 @@ public class ReplaceReferenceUpdateStep<PT extends ReplaceReferencesJobParameter
 		ReplaceReferencesRequest replaceReferencesRequest = params.asReplaceReferencesRequest(myFhirContext);
 		List<FhirIdJson> fhirIds = theStepExecutionDetails.getData().getFhirIds();
 
-		// FIXME: clean
-		//		SystemRequestDetails requestDetails =
-		// SystemRequestDetails.forRequestPartitionId(params.getSourcePartitionId());
 		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(

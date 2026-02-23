@@ -53,13 +53,10 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 	 *
 	 * @param theTargetResourceType the resource type part of the id
 	 * @param theTargetResourceFhirId the value part of the id
-	 * @return
 	 */
 	@Query(
-			"SELECT DISTINCT new ca.uhn.fhir.jpa.api.pid.FhirIdJson(t.myPartitionIdValue, t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
+			"SELECT DISTINCT new ca.uhn.fhir.jpa.api.pid.FhirIdJson(t.myPartitionIdValue, t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResource.myResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
 	Stream<ca.uhn.fhir.jpa.api.pid.FhirIdJson> streamSourceIdsForTargetFhirId(
-			// FIXME: add partition? t.myTargetResourcePartitionId = :partitionId AND
-			//			@Param("partitionId") String theTargetPartitionId,
 			@Param("resourceType") String theTargetResourceType,
 			@Param("resourceFhirId") String theTargetResourceFhirId);
 

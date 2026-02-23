@@ -33,14 +33,23 @@ public class SqlParsingUtil {
 	/**
 	 * Non instantiable
 	 */
-	private SqlParsingUtil() {}
+	private SqlParsingUtil() {
+	}
 
 
+	/**
+	 * Given an <code>INSERT INTO abc ....</code> SQL statement, returns the table name
+	 * specified in the statement.
+	 */
 	public static String parseInsertStatementTableName(String theInsertSql) throws JSQLParserException {
 		Insert parsedStatement = (Insert) CCJSqlParserUtil.parse(theInsertSql);
 		return parsedStatement.getTable().getName();
 	}
 
+	/**
+	 * Given an <code>INSERT INTO abc ....</code> SQL statement, returns a map of column names to values
+	 * within the statement.
+	 */
 	public static Map<String, String> parseInsertStatementParams(String theInsertSql) throws JSQLParserException {
 		Insert parsedStatement = (Insert) CCJSqlParserUtil.parse(theInsertSql);
 
@@ -49,7 +58,7 @@ public class SqlParsingUtil {
 		for (int i = 0; i < parsedStatement.getColumns().size(); i++) {
 			String columnName = parsedStatement.getColumns().get(i).getColumnName();
 			String columnValue = parsedStatement.getValues().getExpressions().get(i).toString();
-			assertFalse(retVal.containsKey(columnName), ()->"Duplicate column in insert statement: " + columnName);
+			assertFalse(retVal.containsKey(columnName), () -> "Duplicate column in insert statement: " + columnName);
 			retVal.put(columnName, columnValue);
 		}
 
