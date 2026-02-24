@@ -183,12 +183,9 @@ public class FhirAutoConfiguration {
 		})
 		static class FhirJpaStorageSettingsConfiguration {
 
-			@Autowired
-			private EntityManagerFactory emf;
-
 			@Bean
 			@Primary
-			public PlatformTransactionManager transactionManager() {
+			public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
 				return new JpaTransactionManager(emf);
 			}
 
