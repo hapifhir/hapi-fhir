@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingListener;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -32,9 +34,11 @@ import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +51,8 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	private SubscriptionRegistry mySubscriptionRegistry;
 
 	@Autowired
-	private SubscriptionActivatingListener mySubscriptionActivatingInterceptor;
+	@Qualifier("subscriptionActivatingListener")
+	private IMessageListener<ResourceModifiedMessage> mySubscriptionActivatingListener;
 
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
@@ -86,13 +91,13 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	}
 
 	@Override
-	protected void handleInit(List<IBaseResource> resourceList) {
-		updateSubscriptionRegistry(resourceList);
+	protected void handleInit(@NotNull List<IBaseResource> theResourceList) {
+		updateSubscriptionRegistry(theResourceList);
 	}
 
 	@Override
-	protected int syncResourcesIntoCache(List<IBaseResource> resourceList) {
-		return updateSubscriptionRegistry(resourceList);
+	protected int syncResourcesIntoCache(@NotNull List<IBaseResource> theResourceList) {
+		return updateSubscriptionRegistry(theResourceList);
 	}
 
 	private int updateSubscriptionRegistry(List<IBaseResource> theResourceList) {
@@ -130,11 +135,14 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
 		boolean successfullyActivated = false;
 
+		SubscriptionActivatingListener activatingListener =
+				(SubscriptionActivatingListener) mySubscriptionActivatingListener;
+
 		if (SubscriptionConstants.REQUESTED_STATUS.equals(
 				mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription))) {
-			if (mySubscriptionActivatingInterceptor.isChannelTypeSupported(theSubscription)) {
+			if (activatingListener.isChannelTypeSupported(theSubscription)) {
 				// internally, subscriptions that cannot activate will be set to error
-				if (mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription)) {
+				if (activatingListener.activateSubscriptionIfRequired(theSubscription)) {
 					successfullyActivated = true;
 				} else {
 					logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
@@ -150,11 +158,6 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 		return successfullyActivated;
 	}
 
-	/**
-	 * Logs
-	 *
-	 * @param theSubscription
-	 */
 	private void logSubscriptionNotActivatedPlusErrorIfPossible(IBaseResource theSubscription) {
 		String error;
 		if (theSubscription instanceof Subscription) {

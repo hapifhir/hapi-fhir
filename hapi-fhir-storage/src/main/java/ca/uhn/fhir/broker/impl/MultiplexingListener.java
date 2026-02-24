@@ -29,7 +29,6 @@ import ca.uhn.fhir.rest.server.messaging.IMessageDeliveryContext;
 import ca.uhn.fhir.util.IoUtils;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +54,7 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 
 	@Override
 	public void handleMessage(
-			@Nullable IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage) {
+			@Nonnull IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage) {
 		checkState();
 
 		Class<?> messageClass = theMessage.getPayload().getClass();
@@ -75,6 +74,10 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 	@Override
 	public Class<T> getPayloadType() {
 		return myPayloadType;
+	}
+
+	public List<IMessageListener<T>> getSubListeners() {
+		return mySubListeners;
 	}
 
 	public boolean addListener(IMessageListener<T> theListener) {
@@ -115,6 +118,7 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 	public <L extends IMessageListener<T>> L getListenerOfTypeOrNull(Class<L> theMessageListenerClass) {
 		for (IMessageListener<T> next : mySubListeners) {
 			if (theMessageListenerClass.isAssignableFrom(next.getClass())) {
+				// noinspection unchecked
 				return (L) next;
 			}
 		}

@@ -22,17 +22,18 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.topic.SubscriptionTopicMatchingListener;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegisteringListener;
 import ca.uhn.fhir.util.IoUtils;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -43,22 +44,27 @@ public class MatchingQueueSubscriberLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(MatchingQueueSubscriberLoader.class);
 
 	@Autowired
-	private SubscriptionMatchingListener mySubscriptionMatchingListener;
+	@Qualifier("subscriptionMatchingListener")
+	private IMessageListener<ResourceModifiedMessage> mySubscriptionMatchingListener;
 
 	@Autowired
-	private SubscriptionActivatingListener mySubscriptionActivatingListener;
+	@Qualifier("subscriptionActivatingListener")
+	private IMessageListener<ResourceModifiedMessage> mySubscriptionActivatingListener;
 
 	@Autowired(required = false)
-	private SubscriptionTopicMatchingListener mySubscriptionTopicMatchingListener;
+	@Qualifier("subscriptionTopicMatchingListener")
+	private IMessageListener<ResourceModifiedMessage> mySubscriptionTopicMatchingListener;
 
 	@Autowired
-	private SubscriptionRegisteringListener mySubscriptionRegisteringListener;
+	@Qualifier("subscriptionRegisteringListener")
+	private IMessageListener<ResourceModifiedMessage> mySubscriptionRegisteringListener;
 
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 
 	@Autowired(required = false)
-	private SubscriptionTopicRegisteringListener mySubscriptionTopicRegisteringListener;
+	@Qualifier("subscriptionTopicRegisteringListener")
+	private IMessageListener<ResourceModifiedMessage> mySubscriptionTopicRegisteringListener;
 
 	@Autowired
 	private SubscriptionSettings mySubscriptionSettings;
@@ -70,7 +76,7 @@ public class MatchingQueueSubscriberLoader {
 	@Order(IHapiBootOrder.SUBSCRIPTION_MATCHING_CHANNEL_HANDLER)
 	public void subscribeToMatchingChannel() {
 		if (myMatchingConsumer == null) {
-			myMultiplexingListener = newDeliveryListener();
+			myMultiplexingListener = new MultiplexingListener<>(ResourceModifiedMessage.class);
 
 			myMatchingConsumer = mySubscriptionChannelFactory.newMatchingConsumer(
 					SUBSCRIPTION_MATCHING_CHANNEL_NAME, myMultiplexingListener, getChannelConsumerSettings());
@@ -91,10 +97,6 @@ public class MatchingQueueSubscriberLoader {
 						SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			}
 		}
-	}
-
-	protected MultiplexingListener<ResourceModifiedMessage> newDeliveryListener() {
-		return new MultiplexingListener<>(ResourceModifiedMessage.class);
 	}
 
 	private ChannelConsumerSettings getChannelConsumerSettings() {

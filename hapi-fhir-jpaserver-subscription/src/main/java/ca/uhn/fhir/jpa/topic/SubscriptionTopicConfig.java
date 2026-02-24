@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.config.SubscriptionConfig;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -36,16 +38,12 @@ import org.springframework.context.annotation.Lazy;
 @Import(SubscriptionConfig.class)
 public class SubscriptionTopicConfig {
 	@Bean
-	public SubscriptionTopicMatchingListener subscriptionTopicMatchingSubscriber(
+	public IMessageListener<ResourceModifiedMessage> subscriptionTopicMatchingListener(
 			FhirContext theFhirContext, MemoryCacheService memoryCacheService) {
-		switch (theFhirContext.getVersion().getVersion()) {
-			case R4:
-			case R5:
-			case R4B:
-				return new SubscriptionTopicMatchingListener(theFhirContext, memoryCacheService);
-			default:
-				return null;
-		}
+		return switch (theFhirContext.getVersion().getVersion()) {
+			case R4, R5, R4B -> new SubscriptionTopicMatchingListener(theFhirContext, memoryCacheService);
+			default -> null;
+		};
 	}
 
 	@Bean
@@ -67,39 +65,29 @@ public class SubscriptionTopicConfig {
 			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
 			ISearchParamRegistry theSearchParamRegistry) {
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theFhirContext);
-		switch (theFhirContext.getVersion().getVersion()) {
-			case R4:
-				return new R4SubscriptionTopicLoader(
-						versionCanonicalizer, theSubscriptionTopicRegistry, theSearchParamRegistry);
-			case R5:
-			case R4B:
-				return new SubscriptionTopicLoader(
-						versionCanonicalizer, theSubscriptionTopicRegistry, theSearchParamRegistry);
-			default:
-				return null;
-		}
+		return switch (theFhirContext.getVersion().getVersion()) {
+			case R4 -> new R4SubscriptionTopicLoader(
+					versionCanonicalizer, theSubscriptionTopicRegistry, theSearchParamRegistry);
+			case R5, R4B -> new SubscriptionTopicLoader(
+					versionCanonicalizer, theSubscriptionTopicRegistry, theSearchParamRegistry);
+			default -> null;
+		};
 	}
 
 	@Bean
-	public SubscriptionTopicRegisteringListener subscriptionTopicRegisteringSubscriber(FhirContext theFhirContext) {
-		switch (theFhirContext.getVersion().getVersion()) {
-			case R5:
-			case R4B:
-				return new SubscriptionTopicRegisteringListener();
-			default:
-				return null;
-		}
+	public IMessageListener<ResourceModifiedMessage> subscriptionTopicRegisteringListener(FhirContext theFhirContext) {
+		return switch (theFhirContext.getVersion().getVersion()) {
+			case R5, R4B -> new SubscriptionTopicRegisteringListener();
+			default -> null;
+		};
 	}
 
 	@Bean
 	public SubscriptionTopicValidatingInterceptor subscriptionTopicValidatingInterceptor(
 			FhirContext theFhirContext, SubscriptionQueryValidator theSubscriptionQueryValidator) {
-		switch (theFhirContext.getVersion().getVersion()) {
-			case R5:
-			case R4B:
-				return new SubscriptionTopicValidatingInterceptor(theFhirContext, theSubscriptionQueryValidator);
-			default:
-				return null;
-		}
+		return switch (theFhirContext.getVersion().getVersion()) {
+			case R5, R4B -> new SubscriptionTopicValidatingInterceptor(theFhirContext, theSubscriptionQueryValidator);
+			default -> null;
+		};
 	}
 }
