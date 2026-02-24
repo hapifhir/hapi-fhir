@@ -109,7 +109,9 @@ public class RestHookChannelValidatorTest {
 			Arguments.of("http://localhost:8000/fhir/", true),
 			Arguments.of("acme.corp", false),
 			Arguments.of("https://acme.corp/badstuff-%%$^&& iuyi", false),
-			Arguments.of("ftp://acme.corp", false));
+			Arguments.of("ftp://acme.corp", false),
+			Arguments.of("htt://example.com:8080/fhir", false),
+			Arguments.of("httpx://example.com", false));
 	}
 
 	static Stream<Arguments> urlAndExpectedEvaluationResultProviderForNoUrlValidation() {
