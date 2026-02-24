@@ -114,7 +114,8 @@ public class PrefetchTemplateUtil {
 		try {
 			return List.of(theContext.getString(key));
 		} catch (ClassCastException e) {
-			throw new PreconditionFailedException(Msg.code(2857) +  "Request context value for key <" + key + "> is not a string.");
+			throw new PreconditionFailedException(
+					Msg.code(2857) + "Request context value for key <" + key + "> is not a string.");
 		}
 	}
 
@@ -145,9 +146,9 @@ public class PrefetchTemplateUtil {
 					+ theFhirContext.getVersion().getVersion() + " Bundle resource for FHIRPath template key <"
 					+ thePrefetchKey + ">");
 		} catch (FhirPathExecutionException e) {
-			throw new PreconditionFailedException(
-				Msg.code(2859) +"Unable to evaluate FHIRPath for prefetch template key <" + thePrefetchKey + "> for FHIR version "
-							+ theFhirContext.getVersion().getVersion());
+			throw new PreconditionFailedException(Msg.code(2859)
+					+ "Unable to evaluate FHIRPath for prefetch template key <" + thePrefetchKey + "> for FHIR version "
+					+ theFhirContext.getVersion().getVersion());
 		}
 	}
 
@@ -166,7 +167,8 @@ public class PrefetchTemplateUtil {
 					if (result instanceof IPrimitiveType) {
 						return ((IPrimitiveType<?>) result).getValueAsString();
 					} else {
-						throw new PreconditionFailedException(Msg.code(2860) +"FHIR path expression returned a non-primitive result: "
+						throw new PreconditionFailedException(Msg.code(2860)
+								+ "FHIR path expression returned a non-primitive result: "
 								+ result.getClass().getSimpleName() + " for Prefetch Key : <" + thePrefetchKey + ">");
 					}
 				})
