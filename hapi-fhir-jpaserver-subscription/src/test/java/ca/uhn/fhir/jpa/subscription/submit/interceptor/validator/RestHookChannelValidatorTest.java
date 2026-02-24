@@ -107,6 +107,14 @@ public class RestHookChannelValidatorTest {
 			Arguments.of("http://localhost:8000/", true),
 			Arguments.of("http://localhost:8000/fhir", true),
 			Arguments.of("http://localhost:8000/fhir/", true),
+			// Fragment identifiers
+			Arguments.of("https://example.com/path#section", true),
+			Arguments.of("https://example.com/fhir#fragment", true),
+			// IPv6 host addresses
+			Arguments.of("https://[::1]:8080/callback", true),
+			Arguments.of("http://[2001:db8::1]/fhir", true),
+			// Port numbers (colon already supported, but explicit test)
+			Arguments.of("https://internal-service:8080/webhook", true),
 			Arguments.of("acme.corp", false),
 			Arguments.of("https://acme.corp/badstuff-%%$^&& iuyi", false),
 			Arguments.of("ftp://acme.corp", false),
