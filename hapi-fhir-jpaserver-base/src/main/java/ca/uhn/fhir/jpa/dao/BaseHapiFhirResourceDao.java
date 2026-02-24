@@ -2566,7 +2566,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.execute(updateCallback);
 	}
 
-	private IIdType addResourceTypeIdNecessary(IIdType resourceId) {
+	private IIdType addResourceTypeIdNecessary(IIdType theResourceId) {
+		IIdType resourceId = theResourceId;
 		if (!resourceId.hasResourceType()) {
 			resourceId = resourceId.withResourceType(getResourceName());
 		}

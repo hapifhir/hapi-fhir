@@ -218,6 +218,10 @@ public class TransactionDetails {
 	 */
 	public RequestPartitionId getResolvedPartition(IIdType theId) {
 		Validate.notNull(theId, "theId must not be null");
+		if (theId.isUuid()) {
+			return getResolvedPartition(theId.getValue());
+		}
+
 		Validate.isTrue(theId.hasResourceType(), "theId must have a resource type");
 		Validate.isTrue(theId.hasIdPart(), "theId must have an ID part");
 		return getResolvedPartition(theId.getResourceType() + "/" + theId.getIdPart());
