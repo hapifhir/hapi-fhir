@@ -408,7 +408,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		for (int count = 0; ; count++) {
 			try {
 				ourLog.info("Calling Expunge count {}", count);
-				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), new SystemRequestDetails());
+				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions()));
 				break;
 			} catch (Exception e) {
 				if (count >= 3) {

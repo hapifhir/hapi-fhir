@@ -282,9 +282,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	 * We need lots of calls: pre-fetch, main tx boundary, redundant boundary for dao.update(), and finally the assign call
 	 */
 	private void addNextTargetPartitionForUpdateInTxBundle(RequestPartitionId requestPartitionId) {
-		addNextInterceptorReadResult(requestPartitionId);
 		addNextInterceptorCreateResult(requestPartitionId);
-		addNextTargetPartitionForCreateWithId(requestPartitionId);
 	}
 
 	protected void addNextTargetPartitionForUpdateInTxBundle(int thePartitionId) {

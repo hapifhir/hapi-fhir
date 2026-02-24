@@ -1,25 +1,20 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.util.BundleBuilder;
-
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-
 import org.hl7.fhir.r4.model.StringType;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
-import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.SqlQuery;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningSearchCacheR4Test.class);
@@ -171,6 +167,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		addNextTargetPartitionForUpdateInTxBundle(1);
 		Bundle responseBundle1 = mySystemDao.transaction(mySrd, conditionalUpdatePatientWithConditionalUrlOnPartition());
 		assertResourceCreated(responseBundle1);
+		assertNoRemainingPartitionIds();
 
 		addNextTargetPartitionForUpdateInTxBundle(2);
 		Bundle responseBundle2 = mySystemDao.transaction(mySrd, conditionalUpdatePatientWithConditionalUrlOnPartition());
