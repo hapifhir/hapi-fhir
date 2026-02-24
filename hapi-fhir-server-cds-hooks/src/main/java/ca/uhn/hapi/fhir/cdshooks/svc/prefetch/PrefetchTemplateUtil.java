@@ -74,7 +74,7 @@ public class PrefetchTemplateUtil {
 			results.addAll(handleFhirPathAndReferencedPrefetchPart(part, theContext, theFhirContext));
 		}
 		if (results.isEmpty()) {
-			throw new PreconditionFailedException(Msg.code(2377) + "Unable to resolve prefetch template : "
+			throw new PreconditionFailedException(Msg.code(2856) + "Unable to resolve prefetch template : "
 					+ theRawExpression + ". No result was found for the prefetch query.");
 		}
 		return String.join(",", results);
@@ -114,7 +114,7 @@ public class PrefetchTemplateUtil {
 		try {
 			return List.of(theContext.getString(key));
 		} catch (ClassCastException e) {
-			throw new PreconditionFailedException("Request context value for key <" + key + "> is not a string.");
+			throw new PreconditionFailedException(Msg.code(2857) +  "Request context value for key <" + key + "> is not a string.");
 		}
 	}
 
@@ -141,19 +141,19 @@ public class PrefetchTemplateUtil {
 			final String fullExpression = resource.fhirType() + "." + theFhirPathExpression;
 			return fhirPath.evaluate(resource, fullExpression, IBase.class);
 		} catch (ClassCastException e) {
-			throw new PreconditionFailedException(Msg.code(2378) + "Request context did not provide valid "
+			throw new PreconditionFailedException(Msg.code(2858) + "Request context did not provide valid "
 					+ theFhirContext.getVersion().getVersion() + " Bundle resource for FHIRPath template key <"
 					+ thePrefetchKey + ">");
 		} catch (FhirPathExecutionException e) {
 			throw new PreconditionFailedException(
-					"Unable to evaluate FHIRPath for prefetch template key <" + thePrefetchKey + "> for FHIR version "
+				Msg.code(2859) +"Unable to evaluate FHIRPath for prefetch template key <" + thePrefetchKey + "> for FHIR version "
 							+ theFhirContext.getVersion().getVersion());
 		}
 	}
 
 	private static void validateContextKeyExists(String theKey, @Nonnull CdsServiceRequestContextJson theContext) {
 		if (!theContext.containsKey(theKey)) {
-			throw new PreconditionFailedException(Msg.code(2379) + "Request context did not provide a value for key <"
+			throw new PreconditionFailedException(Msg.code(2372) + "Request context did not provide a value for key <"
 					+ theKey + ">.  Available keys in context are: " + theContext.getKeys());
 		}
 	}
@@ -166,7 +166,7 @@ public class PrefetchTemplateUtil {
 					if (result instanceof IPrimitiveType) {
 						return ((IPrimitiveType<?>) result).getValueAsString();
 					} else {
-						throw new PreconditionFailedException("FHIR path expression returned a non-primitive result: "
+						throw new PreconditionFailedException(Msg.code(2860) +"FHIR path expression returned a non-primitive result: "
 								+ result.getClass().getSimpleName() + " for Prefetch Key : <" + thePrefetchKey + ">");
 					}
 				})

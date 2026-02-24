@@ -38,11 +38,11 @@ class PrefetchTemplateUtilCommonTest {
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
 				.isInstanceOf(PreconditionFailedException.class)
 				.hasMessage(
-						"HAPI-2379: Request context did not provide a value for key <userId>.  Available keys in context are: [patientId]");
+						"HAPI-2372: Request context did not provide a value for key <userId>.  Available keys in context are: [patientId]");
 	}
 
 	@Test
-	void substituteTemplateShouldThrow400ForMissingContext() {
+	void substituteTemplateShouldThrow412ForMissingContext() {
 		String template = "{{context.userId}} a {{context.patientId}}";
 		// Leave the context empty for the test.
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
@@ -50,7 +50,7 @@ class PrefetchTemplateUtilCommonTest {
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
 				.isInstanceOf(PreconditionFailedException.class)
 				.hasMessage(
-						"HAPI-2379: Request context did not provide a value for key <userId>.  Available keys in context are: []");
+						"HAPI-2372: Request context did not provide a value for key <userId>.  Available keys in context are: []");
 	}
 
 	@Test
@@ -61,7 +61,7 @@ class PrefetchTemplateUtilCommonTest {
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
 				.isInstanceOf(PreconditionFailedException.class)
 				.hasMessage(
-						"HAPI-2379: Request context did not provide a value for key <draftOrders>.  Available keys in context are: [patientId]");
+						"HAPI-2372: Request context did not provide a value for key <draftOrders>.  Available keys in context are: [patientId]");
 	}
 
 	@Test
