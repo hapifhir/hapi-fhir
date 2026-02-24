@@ -111,7 +111,7 @@ public class PrefetchTemplateUtil {
 		if (!m.matches()) return List.of();
 		final String key = m.group(1);
 		validateContextKeyExists(key, theContext);
-		try {//
+		try {
 			return List.of(theContext.getString(key));
 		} catch (ClassCastException e) {
 			throw new PreconditionFailedException(
