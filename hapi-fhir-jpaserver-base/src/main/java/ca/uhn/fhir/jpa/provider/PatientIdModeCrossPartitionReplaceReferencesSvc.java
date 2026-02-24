@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.partition.move;
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -56,15 +56,14 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Quick/dirty implementation of cross-partition resource mover for patient merge.
  * Discovers compartment resources for a source patient, moves them to the target patient's
  * partition via a transaction bundle (CREATEs + PUTs), and deletes the originals.
  * <p>
  * All operations are performed within a single DB transaction for atomicity.
  */
 // Created by claude-opus-4-6
-public class CrossPartitionResourceMoverSvc {
-	private static final Logger ourLog = LoggerFactory.getLogger(CrossPartitionResourceMoverSvc.class);
+public class PatientIdModeCrossPartitionReplaceReferencesSvc {
+	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdModeCrossPartitionReplaceReferencesSvc.class);
 
 	private final DaoRegistry myDaoRegistry;
 	private final IResourceLinkDao myResourceLinkDao;
@@ -73,7 +72,7 @@ public class CrossPartitionResourceMoverSvc {
 	private final IFhirSystemDao<IBaseBundle, ?> mySystemDao;
 	private final FhirContext myFhirContext;
 
-	public CrossPartitionResourceMoverSvc(
+	public PatientIdModeCrossPartitionReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			IResourceLinkDao theResourceLinkDao,
 			IHapiTransactionService theHapiTransactionService,

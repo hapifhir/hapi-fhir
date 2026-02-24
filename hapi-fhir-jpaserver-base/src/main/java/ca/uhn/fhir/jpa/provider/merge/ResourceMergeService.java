@@ -32,8 +32,8 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.partition.move.CrossPartitionResourceMoverSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
+import ca.uhn.fhir.jpa.provider.PatientIdModeCrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -76,7 +76,7 @@ public class ResourceMergeService {
 	private final MergeResourceHelper myMergeResourceHelper;
 	private final Batch2TaskHelper myBatch2TaskHelper;
 	private final MergeValidationService myMergeValidationService;
-	private final CrossPartitionResourceMoverSvc myCrossPartitionResourceMoverSvc;
+	private final PatientIdModeCrossPartitionReplaceReferencesSvc myCrossPartitionResourceMoverSvc;
 	private final PartitionSettings myPartitionSettings;
 
 	public ResourceMergeService(
@@ -89,7 +89,7 @@ public class ResourceMergeService {
 			Batch2TaskHelper theBatch2TaskHelper,
 			MergeValidationService theMergeValidationService,
 			MergeResourceHelper theMergeResourceHelper,
-			CrossPartitionResourceMoverSvc theCrossPartitionResourceMoverSvc,
+			PatientIdModeCrossPartitionReplaceReferencesSvc theCrossPartitionResourceMoverSvc,
 			PartitionSettings thePartitionSettings) {
 		myStorageSettings = theStorageSettings;
 		myDaoRegistry = theDaoRegistry;
