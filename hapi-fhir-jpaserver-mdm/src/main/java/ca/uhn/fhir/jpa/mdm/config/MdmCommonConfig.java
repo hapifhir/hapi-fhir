@@ -75,10 +75,8 @@ public class MdmCommonConfig {
 	}
 
 	@Bean
-	@Lazy
-	public IMatcherFactory matcherFactory(
-			FhirContext theFhirContext, IMdmSettings theSettings, INicknameSvc theNicknameSvc) {
-		return new MdmMatcherFactory(theFhirContext, theSettings, theNicknameSvc);
+	public IMatcherFactory matcherFactory(FhirContext theFhirContext, INicknameSvc theNicknameSvc) {
+		return new MdmMatcherFactory(theFhirContext, theNicknameSvc);
 	}
 
 	@Bean

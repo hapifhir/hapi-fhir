@@ -2,7 +2,6 @@ package ca.uhn.fhir.mdm;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
@@ -32,16 +31,9 @@ public abstract class BaseR4Test {
 	protected IMatcherFactory myIMatcherFactory;
 	protected ISimilarityFactory mySimilarityFactory;
 
-	protected IMdmSettings myMdmSettings;
-
 	@BeforeEach
 	public void before() {
-		myMdmSettings = mock(IMdmSettings.class);
-		myIMatcherFactory = new MdmMatcherFactory(
-			ourFhirContext,
-			myMdmSettings,
-			new NicknameSvc()
-		);
+		myIMatcherFactory = new MdmMatcherFactory(ourFhirContext, new NicknameSvc());
 		mySimilarityFactory = new MdmSimilarityFactory();
 	}
 
@@ -71,7 +63,7 @@ public abstract class BaseR4Test {
 		assertEquals(theExpectedMatchEnum, theMatchResult.getMatchResultEnum());
 	}
 
-	protected void assertMatchResult(MdmMatchResultEnum theExpectedMatchEnum, long theExpectedVector, double theExpectedScore, boolean theExpectedNewGoldenResource, boolean theExpectedEidMatch, MdmMatchOutcome theMatchResult) {
+	protected void assertMatchResult(MdmMatchResultEnum theExpectedMatchEnum, long theExpectedVector, double theExpectedScore, @SuppressWarnings("SameParameterValue") boolean theExpectedNewGoldenResource, @SuppressWarnings("SameParameterValue")boolean theExpectedEidMatch, MdmMatchOutcome theMatchResult) {
 		assertThat(theMatchResult.getScore()).isCloseTo(theExpectedScore, within(0.001));
 		assertEquals(theExpectedVector, theMatchResult.getVector());
 		assertEquals(theExpectedEidMatch, theMatchResult.isEidMatch());

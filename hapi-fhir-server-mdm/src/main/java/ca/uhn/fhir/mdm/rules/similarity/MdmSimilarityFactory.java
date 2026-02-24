@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.mdm.rules.similarity;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.log.Logs;
 import org.slf4j.Logger;
 
@@ -55,7 +56,8 @@ public class MdmSimilarityFactory implements ISimilarityFactory {
 	@Override
 	public void register(String theName, IMdmFieldSimilarity theSimilarity) {
 		if (mySimilarities.containsKey(theName)) {
-			throw new IllegalArgumentException("A similarity is already registered under the name: " + theName);
+			throw new IllegalArgumentException(
+					Msg.code(2851) + "A similarity is already registered under the name: " + theName);
 		}
 		mySimilarities.put(theName, theSimilarity);
 	}

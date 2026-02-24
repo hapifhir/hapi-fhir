@@ -2,7 +2,6 @@ package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 
 // Created by claude-opus-4-6
 class MdmMatcherFactoryTest {
@@ -19,8 +17,7 @@ class MdmMatcherFactoryTest {
 
 	@BeforeEach
 	void setUp() {
-		myFactory = new MdmMatcherFactory(
-			FhirContext.forR4(), mock(IMdmSettings.class), new NicknameSvc());
+		myFactory = new MdmMatcherFactory(FhirContext.forR4(), new NicknameSvc());
 	}
 
 	@Test
@@ -34,19 +31,6 @@ class MdmMatcherFactoryTest {
 	@Test
 	void getFieldMatcherForName_unknownName_returnsNull() {
 		assertThat(myFactory.getFieldMatcherForName("UNKNOWN_ALGORITHM")).isNull();
-	}
-
-	@Test
-	void getFieldMatcherForMatchType_delegatesToNameLookup() {
-		for (MatchTypeEnum matchType : MatchTypeEnum.values()) {
-			IMdmFieldMatcher matcher = myFactory.getFieldMatcherForMatchType(matchType);
-			assertThat(matcher).as("Matcher for " + matchType.name()).isNotNull();
-		}
-	}
-
-	@Test
-	void getFieldMatcherForMatchType_null_returnsNull() {
-		assertThat(myFactory.getFieldMatcherForMatchType(null)).isNull();
 	}
 
 	@Test

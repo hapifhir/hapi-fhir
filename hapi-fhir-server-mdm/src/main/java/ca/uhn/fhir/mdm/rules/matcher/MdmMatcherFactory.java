@@ -21,8 +21,8 @@ package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.nickname.INicknameSvc;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.EmptyFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.ExtensionMatcher;
@@ -48,7 +48,7 @@ public class MdmMatcherFactory implements IMatcherFactory {
 
 	private final Map<String, IMdmFieldMatcher> myMatchers = new LinkedHashMap<>();
 
-	public MdmMatcherFactory(FhirContext theFhirContext, IMdmSettings theSettings, INicknameSvc theNicknameSvc) {
+	public MdmMatcherFactory(FhirContext theFhirContext, INicknameSvc theNicknameSvc) {
 		myMatchers.put(MatchTypeEnum.CAVERPHONE1.name(), new PhoneticEncoderMatcher(PhoneticEncoderEnum.CAVERPHONE1));
 		myMatchers.put(MatchTypeEnum.CAVERPHONE2.name(), new PhoneticEncoderMatcher(PhoneticEncoderEnum.CAVERPHONE2));
 		myMatchers.put(MatchTypeEnum.COLOGNE.name(), new PhoneticEncoderMatcher(PhoneticEncoderEnum.COLOGNE));
@@ -78,15 +78,6 @@ public class MdmMatcherFactory implements IMatcherFactory {
 		myMatchers.put(MatchTypeEnum.EMPTY_FIELD.name(), new EmptyFieldMatcher());
 	}
 
-	@Deprecated
-	@Override
-	public IMdmFieldMatcher getFieldMatcherForMatchType(MatchTypeEnum theMdmMatcherEnum) {
-		if (theMdmMatcherEnum == null) {
-			return null;
-		}
-		return getFieldMatcherForName(theMdmMatcherEnum.name());
-	}
-
 	@Override
 	public IMdmFieldMatcher getFieldMatcherForName(String theName) {
 		IMdmFieldMatcher matcher = myMatchers.get(theName);
@@ -99,13 +90,14 @@ public class MdmMatcherFactory implements IMatcherFactory {
 	@Override
 	public void register(String theName, IMdmFieldMatcher theMatcher) {
 		if (myMatchers.containsKey(theName)) {
-			throw new IllegalArgumentException("A matcher is already registered under the name: " + theName);
+			throw new IllegalArgumentException(
+					Msg.code(2850) + "A matcher is already registered under the name: " + theName);
 		}
 		myMatchers.put(theName, theMatcher);
 	}
 
 	@Override
 	public Set<String> getRegisteredNames() {
-		return myMatchers.keySet();
+		return Set.copyOf(myMatchers.keySet());
 	}
 }
