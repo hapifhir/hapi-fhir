@@ -27,6 +27,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition;
@@ -512,7 +514,7 @@ class ParserState<T> {
 					IPrimitiveType<?> newChildInstance = newPrimitiveInstance(myDefinition, primitiveTarget);
 					myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
 					PrimitiveState newState = new PrimitiveState(
-							getPreResourceState(), newChildInstance, theLocalPart, primitiveTarget.getName());
+							getPreResourceState(), newChildInstance, theLocalPart, primitiveTarget.getName(), myDefinition);
 					push(newState);
 					return;
 				}
@@ -693,7 +695,7 @@ class ParserState<T> {
 					newChildInstance = getPrimitiveInstance(child, primitiveTarget);
 					child.getMutator().addValue(myInstance, newChildInstance);
 					PrimitiveState newState = new PrimitiveState(
-							getPreResourceState(), newChildInstance, theChildName, primitiveTarget.getName());
+							getPreResourceState(), newChildInstance, theChildName, primitiveTarget.getName(), child);
 					push(newState);
 					return;
 				}
@@ -852,8 +854,8 @@ class ParserState<T> {
 				}
 			}
 
-			BaseRuntimeElementDefinition<?> target =
-					myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildByName(theLocalPart);
+			RuntimeChildUndeclaredExtensionDefinition child = myContext.getRuntimeChildUndeclaredExtensionDefinition();
+			BaseRuntimeElementDefinition<?> target = child.getChildByName(theLocalPart);
 
 			if (target != null) {
 				switch (target.getChildType()) {
@@ -875,7 +877,7 @@ class ParserState<T> {
 						IPrimitiveType<?> newChildInstance = newInstance(primitiveTarget);
 						myExtension.setValue(newChildInstance);
 						PrimitiveState newState = new PrimitiveState(
-								getPreResourceState(), newChildInstance, theLocalPart, primitiveTarget.getName());
+								getPreResourceState(), newChildInstance, theLocalPart, primitiveTarget.getName(), child);
 						push(newState);
 						return;
 					}
@@ -945,7 +947,7 @@ class ParserState<T> {
 					break;
 				case "lastUpdated":
 					InstantDt updated = new InstantDt();
-					push(new PrimitiveState(getPreResourceState(), updated, theLocalPart, "instant"));
+					push(new PrimitiveState(getPreResourceState(), updated, theLocalPart, "instant", null));
 					myMap.put(ResourceMetadataKeyEnum.UPDATED, updated);
 					break;
 				case "security":
@@ -972,7 +974,7 @@ class ParserState<T> {
 						newProfiles = new ArrayList<>(1);
 					}
 					IdDt profile = new IdDt();
-					push(new PrimitiveState(getPreResourceState(), profile, theLocalPart, "id"));
+					push(new PrimitiveState(getPreResourceState(), profile, theLocalPart, "id", null));
 					newProfiles.add(profile);
 					myMap.put(ResourceMetadataKeyEnum.PROFILES, Collections.unmodifiableList(newProfiles));
 					break;
@@ -1421,13 +1423,17 @@ class ParserState<T> {
 		private final String myChildName;
 		private final String myTypeName;
 		private final IPrimitiveType<?> myInstance;
+		@Nullable
+		private final BaseRuntimeChildDefinition myChildDefinition;
 
 		PrimitiveState(
-				BasePreResourceState thePreResourceState,
-				IPrimitiveType<?> theInstance,
-				String theChildName,
-				String theTypeName) {
+			BasePreResourceState thePreResourceState,
+			IPrimitiveType<?> theInstance,
+			String theChildName,
+			String theTypeName,
+			@Nullable BaseRuntimeChildDefinition theChildDefinition) {
 			super(thePreResourceState);
+			myChildDefinition = theChildDefinition;
 			myInstance = theInstance;
 			myChildName = theChildName;
 			myTypeName = theTypeName;
@@ -1469,59 +1475,86 @@ class ParserState<T> {
 					} catch (DataFormatException | IllegalArgumentException e) {
 						ParseLocation location = ParseLocation.fromElementName(myChildName);
 
+//						// If this primitive is an enumeration, attempt a case-insensitive match against the enum
+//						// factory. If a match is found, emit an invalidValue
+//						// to the parser error handler (so callers can decide fatal vs recoverable) and set the
+//						// corrected enum value on the datatype.
+//						if (myInstance instanceof org.hl7.fhir.instance.model.api.IBaseEnumeration) {
+//							org.hl7.fhir.instance.model.api.IBaseEnumFactory<?> factory =
+//								((org.hl7.fhir.instance.model.api.IBaseEnumeration<?>) myInstance).getEnumFactory();
+//
+//							boolean corrected = false;
+//							if (factory != null && value != null) {
+//								// Use raw factory to avoid generic signature issues when calling toCode/fromCode
+//								@SuppressWarnings("rawtypes")
+//								org.hl7.fhir.instance.model.api.IBaseEnumFactory rawFactory =
+//									(org.hl7.fhir.instance.model.api.IBaseEnumFactory) factory;
+//
+//								// Try a reasonable case-normalization: enum codes are all lowercase
+//								String attempt = value.toLowerCase();
+//								try {
+//									Object enumValue = rawFactory.fromCode(attempt);
+//									if (enumValue != null) {
+//										// Call toCode via reflection to avoid generic type mismatch at compile time
+//										String correctedCode;
+//										try {
+//											java.lang.reflect.Method toCodeMethod =
+//												rawFactory.getClass().getMethod("toCode", java.lang.Enum.class);
+//											correctedCode =
+//												(String) toCodeMethod.invoke(rawFactory, (Enum<?>) enumValue);
+//										} catch (Exception reflectEx) {
+//											// Fall back to calling toCode on the original factory reference with an
+//											// unchecked cast
+//											@SuppressWarnings({"unchecked", "rawtypes"})
+//											String tmp = ((org.hl7.fhir.instance.model.api.IBaseEnumFactory) rawFactory)
+//												.toCode((Enum) enumValue);
+//											correctedCode = tmp;
+//										}
+//
+//										// Notify the error handler first so Strict handlers can abort parsing
+//										myErrorHandler.invalidValue(
+//											location,
+//											value,
+//											"Invalid enumeration value (corrected to '" + correctedCode + "')");
+//
+//										// Set the corrected enum value onto the primitive instance using raw types
+//										@SuppressWarnings({"rawtypes", "unchecked"})
+//										org.hl7.fhir.instance.model.api.IPrimitiveType enumPrimitive =
+//											(org.hl7.fhir.instance.model.api.IPrimitiveType) myInstance;
+//										enumPrimitive.setValue(enumValue);
+//
+//										corrected = true;
+//									}
+//								} catch (IllegalArgumentException ex) {
+//									// no-op - we'll fall through and emit invalidValue below
+//								}
+//							}
+//
+//							if (!corrected) {
+//								myErrorHandler.invalidValue(location, value, e.getMessage());
+//							}
+//						} else {
+//							myErrorHandler.invalidValue(location, value, e.getMessage());
+//						}
+
 						// If this primitive is an enumeration, attempt a case-insensitive match against the enum
 						// factory. If a match is found, emit an invalidValue
 						// to the parser error handler (so callers can decide fatal vs recoverable) and set the
 						// corrected enum value on the datatype.
-						if (myInstance instanceof org.hl7.fhir.instance.model.api.IBaseEnumeration) {
-							org.hl7.fhir.instance.model.api.IBaseEnumFactory<?> factory =
-									((org.hl7.fhir.instance.model.api.IBaseEnumeration<?>) myInstance).getEnumFactory();
-
+						if (myChildDefinition instanceof RuntimeChildPrimitiveEnumerationDatatypeDefinition enumChildDefinition) {
 							boolean corrected = false;
-							if (factory != null && value != null) {
-								// Use raw factory to avoid generic signature issues when calling toCode/fromCode
-								@SuppressWarnings("rawtypes")
-								org.hl7.fhir.instance.model.api.IBaseEnumFactory rawFactory =
-										(org.hl7.fhir.instance.model.api.IBaseEnumFactory) factory;
 
-								// Try a reasonable case-normalization: enum codes are all lowercase
-								String attempt = value.toLowerCase();
-								try {
-									Object enumValue = rawFactory.fromCode(attempt);
-									if (enumValue != null) {
-										// Call toCode via reflection to avoid generic type mismatch at compile time
-										String correctedCode;
-										try {
-											java.lang.reflect.Method toCodeMethod =
-													rawFactory.getClass().getMethod("toCode", java.lang.Enum.class);
-											correctedCode =
-													(String) toCodeMethod.invoke(rawFactory, (Enum<?>) enumValue);
-										} catch (Exception reflectEx) {
-											// Fall back to calling toCode on the original factory reference with an
-											// unchecked cast
-											@SuppressWarnings({"unchecked", "rawtypes"})
-											String tmp = ((org.hl7.fhir.instance.model.api.IBaseEnumFactory) rawFactory)
-													.toCode((Enum) enumValue);
-											correctedCode = tmp;
-										}
+							String correctedCode = enumChildDefinition.getCodeCaseInsensitive(value);
+							if (correctedCode != null && !value.equals(correctedCode)) {
 
-										// Notify the error handler first so Strict handlers can abort parsing
-										myErrorHandler.invalidValue(
-												location,
-												value,
-												"Invalid enumeration value (corrected to '" + correctedCode + "')");
+								// Notify the error handler first so Strict handlers can abort parsing
+								myErrorHandler.invalidValue(
+									location,
+									value,
+									"Case discrepancy detected in code value '" + value + "' (should be '" + correctedCode + "')");
 
-										// Set the corrected enum value onto the primitive instance using raw types
-										@SuppressWarnings({"rawtypes", "unchecked"})
-										org.hl7.fhir.instance.model.api.IPrimitiveType enumPrimitive =
-												(org.hl7.fhir.instance.model.api.IPrimitiveType) myInstance;
-										enumPrimitive.setValue(enumValue);
-
-										corrected = true;
-									}
-								} catch (IllegalArgumentException ex) {
-									// no-op - we'll fall through and emit invalidValue below
-								}
+								myInstance.setValueAsString(correctedCode);
+								corrected = true;
 							}
 
 							if (!corrected) {
@@ -1580,7 +1613,7 @@ class ParserState<T> {
 		@Override
 		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
 			if ("id".equals(theChildName)) {
-				push(new PrimitiveState(getPreResourceState(), myInstance.getId(), theChildName, "id"));
+				push(new PrimitiveState(getPreResourceState(), myInstance.getId(), theChildName, "id", null));
 			} else if ("meta".equals(theChildName)) {
 				push(new MetaElementState(getPreResourceState(), myInstance.getResourceMetadata()));
 			} else {

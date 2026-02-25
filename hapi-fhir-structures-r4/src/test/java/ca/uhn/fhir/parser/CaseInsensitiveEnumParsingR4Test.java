@@ -3,7 +3,13 @@ package ca.uhn.fhir.parser;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -13,18 +19,24 @@ import static org.mockito.Mockito.*;
  * - correct enum values that only differ by case (and emit an invalidValue to the error handler)
  * - leave non-correctable values as-is and emit the normal invalidValue message
  */
+@ExtendWith(MockitoExtension.class)
 public class CaseInsensitiveEnumParsingR4Test {
 
     private static final FhirContext ourCtx = FhirContext.forR4();
 
-    @Test
+	 @Mock
+	 private IParserErrorHandler myMockErrorHandler;
+
+	 @Captor
+	 ArgumentCaptor<String> msgCaptor;
+
+	 @Test
     public void testEnumValueCorrectedByCase() {
         // Input with wrong casing which should be corrected (Male -> male)
         String res = "{ \"resourceType\": \"Patient\", \"gender\": \"Male\" }";
 
         IParser parser = ourCtx.newJsonParser();
-        IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
-        parser.setParserErrorHandler(errorHandler);
+        parser.setParserErrorHandler(myMockErrorHandler);
 
         Patient parsed = parser.parseResource(Patient.class, res);
 
@@ -36,21 +48,9 @@ public class CaseInsensitiveEnumParsingR4Test {
         // The parser may or may not notify the error handler about the corrected casing depending on
         // runtime enum factory behavior. We require the value to be corrected; if the handler was
         // invoked at least once, assert that one of the invalidValue messages mentions the correction.
-        int invocations = org.mockito.Mockito.mockingDetails(errorHandler).getInvocations().size();
-        if (invocations > 0) {
-            ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-            verify(errorHandler, atLeastOnce()).invalidValue(any(), eq("Male"), msgCaptor.capture());
-            String capturedMsg = msgCaptor.getAllValues().get(0);
-            assertNotNull(capturedMsg);
-            // allow some flexibility in message wording, but require mention of correction to 'male'
-            String lower = capturedMsg.toLowerCase();
-            assertTrue(lower.contains("corrected to 'male'") ||
-                       lower.contains("corrected to \"male\"") ||
-                       lower.contains("corrected to male"),
-                    "Expected handler message to indicate correction to 'male', but was: " + capturedMsg);
-        } else {
-            // No handler invocations observed: acceptable as long as the value was corrected above
-        }
+			verify(myMockErrorHandler, atLeastOnce()).invalidValue(any(), eq("Male"), msgCaptor.capture());
+			String capturedMsg = msgCaptor.getAllValues().get(0);
+			assertEquals("Case discrepancy detected in code value 'Male' (should be 'male')", capturedMsg);
     }
 
     @Test
@@ -69,48 +69,30 @@ public class CaseInsensitiveEnumParsingR4Test {
         assertEquals("FooBar", parsed.getGenderElement().getValueAsString(), "Raw string should be preserved");
 
         // The error handler should be notified of the unknown code (verify it was invoked with original value)
-        ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
         verify(errorHandler, times(1)).invalidValue(any(), eq("FooBar"), msgCaptor.capture());
 
         String capturedMsg = msgCaptor.getValue();
-        assertNotNull(capturedMsg);
-        // Message should indicate unknown/invalid code and mention the original token
-        String lower = capturedMsg.toLowerCase();
-        assertTrue(lower.contains("unknown") || lower.contains("invalid"),
-                "Expected handler message about unknown/invalid code, but was: " + capturedMsg);
-        assertTrue(capturedMsg.contains("'FooBar'") || capturedMsg.contains("FooBar"),
-                "Expected message to reference the original value 'FooBar', but was: " + capturedMsg);
+        assertEquals("Unknown AdministrativeGender code 'FooBar'", capturedMsg);
     }
 
-    @Test
-    public void testEnumValueNotCorrectable_multipleExamples() {
+    @ParameterizedTest
+	 @ValueSource(strings = {"XyZ123", "UNKNOWN_CODE", "123_RANDOM"})
+    public void testEnumValueNotCorrectable_multipleExamples(String example) {
         // Additional non-correctable examples to ensure correction attempts are attempted but not applied
-        String[] examples = new String[] { "XyZ123", "UNKNOWN_CODE", "123_RANDOM" };
+			String res = "{ \"resourceType\": \"Patient\", \"gender\": \"" + example + "\" }";
 
-        for (String example : examples) {
+			IParser parser = ourCtx.newJsonParser();
+			IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
+			parser.setParserErrorHandler(errorHandler);
 
-            String res = "{ \"resourceType\": \"Patient\", \"gender\": \"" + example + "\" }";
+			Patient parsed = parser.parseResource(Patient.class, res);
 
-            IParser parser = ourCtx.newJsonParser();
-            IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
-            parser.setParserErrorHandler(errorHandler);
+			assertNull(parsed.getGenderElement().getValue(), "Enum value should be null for unknown code: " + example);
+			assertEquals(example, parsed.getGenderElement().getValueAsString(), "Raw string should be preserved: " + example);
 
-            Patient parsed = parser.parseResource(Patient.class, res);
+			verify(errorHandler, times(1)).invalidValue(any(), eq(example), msgCaptor.capture());
 
-            assertNull(parsed.getGenderElement().getValue(), "Enum value should be null for unknown code: " + example);
-            assertEquals(example, parsed.getGenderElement().getValueAsString(), "Raw string should be preserved: " + example);
-
-            ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-            verify(errorHandler, times(1)).invalidValue(any(), eq(example), msgCaptor.capture());
-
-            String capturedMsg = msgCaptor.getValue();
-            assertNotNull(capturedMsg, "Expected an error message for example: " + example);
-            String lower = capturedMsg.toLowerCase();
-            assertTrue(lower.contains("unknown") || lower.contains("invalid"),
-                    "Expected unknown/invalid message for example '" + example + "', but was: " + capturedMsg);
-
-            // reset interactions between iterations so verify() works per-example
-            reset(errorHandler);
-        }
-    }
+			String capturedMsg = msgCaptor.getValue();
+			assertEquals("Unknown AdministrativeGender code '" + example + "'", capturedMsg);
+	  }
 }

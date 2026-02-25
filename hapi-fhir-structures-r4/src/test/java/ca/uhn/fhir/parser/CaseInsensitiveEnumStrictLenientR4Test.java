@@ -1,18 +1,23 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests Strict vs Lenient error handler behavior for case-insensitive enum correction.
  */
 public class CaseInsensitiveEnumStrictLenientR4Test {
-
-    private static final FhirContext ourCtx = FhirContext.forR4();
+    private static final Logger ourLog = LoggerFactory.getLogger(CaseInsensitiveEnumStrictLenientR4Test.class);
+    private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
     @Test
     public void testStrictHandlerThrowsOnCorrectableEnum() {
@@ -26,12 +31,12 @@ public class CaseInsensitiveEnumStrictLenientR4Test {
 			  java.lang.reflect.Field f = parser.getClass().getDeclaredField("myErrorHandler");
 			  f.setAccessible(true);
 			  Object handler = f.get(parser);
-			  System.out.println("Parser class: " + parser.getClass().getName() + " loader=" + parser.getClass().getClassLoader());
-			  System.out.println("Handler class: " + handler.getClass().getName() + " loader=" + handler.getClass().getClassLoader());
+			  ourLog.info("Parser class: " + parser.getClass().getName() + " loader=" + parser.getClass().getClassLoader());
+			  ourLog.info("Handler class: " + handler.getClass().getName() + " loader=" + handler.getClass().getClassLoader());
 			  assertTrue(handler instanceof StrictErrorHandler, "Handler is not StrictErrorHandler; was: " + handler.getClass().getName());
 		  } catch (NoSuchFieldException | IllegalAccessException nsfe) {
 			  // some parser implementations may store the handler differently; print what we can
-			  System.out.println("No myErrorHandler field on parser impl: " + parser.getClass().getName());
+			  ourLog.info("No myErrorHandler field on parser impl: " + parser.getClass().getName());
  		  }
 
         // Strict handler should throw because invalidValue is treated as fatal
