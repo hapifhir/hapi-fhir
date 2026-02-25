@@ -48,7 +48,7 @@ public class PrefetchTemplateUtil {
 	private static final Pattern DEFAULT_PART = Pattern.compile("^context\\.(\\w+)$");
 	private static final Pattern FHIR_PATH_PART = Pattern.compile("^context\\.(\\w+)\\.(.+)$");
 	private static final Pattern REFERENCED_PREFETCH_PART = Pattern.compile("^%(\\w+)\\.(.+)$");
-	private static final String UNION_OPERATOR = "\\|";
+	private static final String UNION_OPERATOR_REGEX = "\\|";
 
 	private PrefetchTemplateUtil() {}
 
@@ -64,7 +64,7 @@ public class PrefetchTemplateUtil {
 			String theRawExpression,
 			@Nonnull CdsServiceRequestContextJson theContext,
 			@Nonnull FhirContext theFhirContext) {
-		final List<String> parts = Stream.of(theRawExpression.split(UNION_OPERATOR))
+		final List<String> parts = Stream.of(theRawExpression.split(UNION_OPERATOR_REGEX))
 				.map(String::trim)
 				.toList();
 		final List<String> results = new ArrayList<>();
@@ -85,6 +85,7 @@ public class PrefetchTemplateUtil {
 	 * <a href="http://hl7.org/fhir/us/davinci-crd/hooks.html#additional-prefetch-capabilities">here</a> version 1.0.0 - STU 1
 	 * This is subject to change as the IG can be updated by the working committee.
 	 */
+	@Nonnull
 	private static List<String> handleDaVinciPart(
 			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
 		final Matcher m = DA_VINCI_PART.matcher(thePart);

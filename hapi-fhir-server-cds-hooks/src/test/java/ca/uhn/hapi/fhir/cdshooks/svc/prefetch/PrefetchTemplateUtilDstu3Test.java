@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * DSTU3-specific tests for PrefetchTemplateUtil.
@@ -38,7 +37,7 @@ class PrefetchTemplateUtilDstu3Test {
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		String result = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
-		assertEquals(OBSERVATION_ID + " a " + TEST_PATIENT_ID, result);
+		assertThat(result).isEqualTo(OBSERVATION_ID + " a " + TEST_PATIENT_ID);
 	}
 
 	@Test

@@ -3,5 +3,5 @@ type: add
 issue: 7562
 title: "CDS Hooks prefetch templates now support FHIRPath expressions,
   enabling dynamic resolution of resource fields and references (e.g. context.draftOrders.entry.resource.ofType(ServiceRequest).id).
-  Support has also been added for the `union operator (|)` to combine multiple expressions within a single
+  Support has also been added for the union operator (`|`) to combine multiple expressions within a single
   placeholder, and for referencing previously resolved prefetch keys using the `%key` syntax."

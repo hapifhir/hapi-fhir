@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Common tests for PrefetchTemplateUtil that are FHIR version-agnostic.
@@ -27,7 +26,7 @@ class PrefetchTemplateUtilCommonTest {
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		context.put("userId", TEST_USER_ID);
 		String result = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
-		assertEquals(TEST_USER_ID + " a " + TEST_PATIENT_ID + " b " + TEST_PATIENT_ID, result);
+		assertThat(result).isEqualTo(TEST_USER_ID + " a " + TEST_PATIENT_ID + " b " + TEST_PATIENT_ID);
 	}
 
 	@Test

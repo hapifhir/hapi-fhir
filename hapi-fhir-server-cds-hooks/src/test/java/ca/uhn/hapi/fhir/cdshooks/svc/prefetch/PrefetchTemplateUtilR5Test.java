@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * R5-specific tests for PrefetchTemplateUtil.
@@ -133,6 +132,6 @@ class PrefetchTemplateUtilR5Test {
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		String result = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
-		assertEquals(SERVICE_ID1 + "," + SERVICE_ID2 + " a " + OBSERVATION_ID + " a " + TEST_PATIENT_ID, result);
+		assertThat(result).isEqualTo(SERVICE_ID1 + "," + SERVICE_ID2 + " a " + OBSERVATION_ID + " a " + TEST_PATIENT_ID);
 	}
 }
