@@ -127,7 +127,7 @@ public class PrefetchTemplateUtil {
 			final String value = theContext.getString(key);
 			if (value == null) {
 				throw new InvalidRequestException(
-						Msg.code(2857) + "Request context value for key <" + key + "> is null or not a string.");
+						Msg.code(2375) + "Request context value for key <" + key + "> is null or not a string.");
 			}
 			return List.of(value);
 		} catch (ClassCastException e) {

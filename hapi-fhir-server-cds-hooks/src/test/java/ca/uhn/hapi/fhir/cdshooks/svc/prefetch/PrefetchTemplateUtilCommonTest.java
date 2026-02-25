@@ -85,7 +85,7 @@ class PrefetchTemplateUtilCommonTest {
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
-				.hasMessage("HAPI-2857: Request context value for key <patientId> is null or not a string.");
+				.hasMessage("HAPI-2375: Request context value for key <patientId> is null or not a string.");
 	}
 
 	@Test
