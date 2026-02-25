@@ -40,7 +40,8 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class RuntimeChildPrimitiveEnumerationDatatypeDefinition extends RuntimeChildPrimitiveDatatypeDefinition {
-	private static final Logger ourLog = LoggerFactory.getLogger(RuntimeChildPrimitiveEnumerationDatatypeDefinition.class);
+	private static final Logger ourLog =
+			LoggerFactory.getLogger(RuntimeChildPrimitiveEnumerationDatatypeDefinition.class);
 	private final Map<String, String> myLowerCaseCodeToCode;
 	private Object myBinder;
 	private final Class<? extends Enum<?>> myEnumType;
