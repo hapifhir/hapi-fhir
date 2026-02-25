@@ -1,21 +1,30 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.BulkExportJobHelper;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
+import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
@@ -28,7 +37,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.transaction.annotation.Propagation;
 
+import java.util.Set;
+
 import static ca.uhn.fhir.jpa.dao.tx.HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS;
+import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -54,6 +66,7 @@ public class RequestHeaderPartitionTest extends BaseJpaR4Test {
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionInterceptor = new RequestHeaderPartitionInterceptor(myPartitionSettings);
 		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
+		registerInterceptor(myPartitionInterceptor);
 
 		myPatientIdInPartition1 = createPatientInPartition(new Patient(), "1").getIdElement().toVersionless();
 	}
@@ -68,6 +81,50 @@ public class RequestHeaderPartitionTest extends BaseJpaR4Test {
 		mySrdInterceptorService.unregisterInterceptor(myPartitionInterceptor);
 		myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
+
+
+	@Test
+	public void testBulkExport() {
+		// setup
+
+		// Should match
+		myPatientDao.update((Patient) buildPatient(withId("A")), createRequestDetailsWithPartitionHeader("1"));
+		myObservationDao.update((Observation) buildObservation(withId("AO"), withSubject("Patient/A")), createRequestDetailsWithPartitionHeader("1"));
+		myPatientDao.update((Patient) buildPatient(withId("B")), createRequestDetailsWithPartitionHeader("2"));
+		myObservationDao.update((Observation) buildObservation(withId("BO"), withSubject("Patient/B")), createRequestDetailsWithPartitionHeader("2"));
+
+		// Should not match
+		myPatientDao.update((Patient) buildPatient(withId("C")), createRequestDetailsWithPartitionHeader("3"));
+		myObservationDao.update((Observation) buildObservation(withId("CO"), withSubject("Patient/C")), createRequestDetailsWithPartitionHeader("3"));
+
+		logAllResources();
+
+		BulkExportJobParameters jobParameters = new BulkExportJobParameters();
+		jobParameters.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+		jobParameters.setOutputFormat(CT_FHIR_NDJSON);
+		jobParameters.setResourceTypes(Set.of("Patient", "Observation"));
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setParameters(jobParameters);
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+
+		RequestDetails requestDetails = createRequestDetailsWithPartitionHeader("1,2");
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(requestDetails, startRequest);
+
+		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 60);
+		BulkExportJobResults result =  JsonUtil.deserialize(jobInstance.getReport(), BulkExportJobResults.class);
+
+		logAllResources();
+
+		BulkExportJobHelper helper = new BulkExportJobHelper(myDaoRegistry);
+		helper.setRequestDetailsSupplier(()->createRequestDetailsWithPartitionHeader("1"));
+
+		BulkExportJobHelper.BulkExportContents fetchedResults = helper.fetchJobResults(result);
+		assertThat(fetchedResults.getResourceIdPartsForType("Patient")).containsExactlyInAnyOrder("A", "B", myPatientIdInPartition1.getIdPart());
+		assertThat(fetchedResults.getResourceIdPartsForType("Observation")).containsExactlyInAnyOrder("AO", "BO");
+
+	}
+
 
 	@ParameterizedTest
 	@ValueSource(strings = {

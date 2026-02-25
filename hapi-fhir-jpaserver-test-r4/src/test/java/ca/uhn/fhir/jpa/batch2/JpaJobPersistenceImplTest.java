@@ -130,7 +130,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Setup
 
 		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 		for (int i = 0; i < 10; i++) {
 			storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, i, JsonUtil.serialize(new NdJsonFileJson().setNdJsonText("{}")), false);
 		}
@@ -160,7 +160,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	public void testStoreAndFetchInstance() {
 		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 		runInTransaction(() -> {
 			Batch2JobInstanceEntity instanceEntity = findInstanceByIdOrThrow(instanceId);
@@ -264,7 +264,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Setup
 		JobInstance instance = createInstance();
 		myMaintenanceService.enableMaintenancePass(false);
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 		storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, false);
 		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(JOB_DEFINITION_ID, JOB_DEF_VER, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, false);
@@ -287,7 +287,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	public void testCancelInstance() {
 		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 		JobOperationResultJson result = mySvc.cancelInstance(instanceId);
 
@@ -307,7 +307,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	void testFetchInstancesByJobDefinitionId() {
 		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 		List<JobInstance> foundInstances = mySvc.fetchInstancesByJobDefinitionId(JOB_DEFINITION_ID, 10, 0);
 		assertThat(foundInstances).hasSize(1);
@@ -317,7 +317,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	void testFetchInstancesByJobDefinitionIdAndStatus() {
 		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 		Set<StatusEnum> statuses = new HashSet<>();
 		statuses.add(StatusEnum.QUEUED);
@@ -517,8 +517,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		instance2.setStatus(StatusEnum.COMPLETED);
 		instance2.setJobDefinitionId(JOB_DEFINITION_ID + "-2");
 
-		mySvc.storeNewInstance(instance);
-		mySvc.storeNewInstance(instance2);
+		mySvc.storeNewInstance(newSrd(), instance);
+		mySvc.storeNewInstance(newSrd(), instance2);
 	}
 
 	/**
@@ -549,7 +549,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Setup
 		boolean isGatedExecution = false;
 		JobInstance instance = createInstance(true, isGatedExecution);
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 		Date updateTime = runInTransaction(() -> new Date(findInstanceByIdOrThrow(instanceId).getUpdateTime().getTime()));
 
@@ -568,7 +568,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// setup
 		boolean isGatedExecution = true;
 		JobInstance instance = createInstance(true, isGatedExecution);
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 		String chunkIdSecondStep1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
 		String chunkIdSecondStep2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
 
@@ -593,7 +593,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// setup
 		boolean isGatedExecution = true;
 		JobInstance instance = createInstance(true, isGatedExecution);
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 		String chunkIdSecondStep1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
 		String chunkIdSecondStep2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
 
@@ -635,7 +635,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		}).when(myBatchSender).sendWorkChannelMessage(any(JobWorkNotification.class));
 		latch.setExpectedCount(1);
 		myMaintenanceService.enableMaintenancePass(false);
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 		// execute & verify
 		String firstChunkId = storeFirstWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, null);
@@ -664,7 +664,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String expectedSecondChunkData = "IAmChunk2";
 		JobInstance instance = createInstance(true, isGatedExecution);
 		myMaintenanceService.enableMaintenancePass(false);
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 		PointcutLatch latch = new PointcutLatch("senderlatch");
 		doAnswer(a -> {
 			latch.call(1);
@@ -721,7 +721,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	    // given
 		boolean isGatedExecution = false;
 		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 		String queuedId = storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, "some data", isGatedExecution);
 		String erroredId = storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 1, "some more data", isGatedExecution);
@@ -791,7 +791,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// setup
 		JobInstance instance = createInstance(true, theGatedExecution);
 		myMaintenanceService.enableMaintenancePass(false);
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 		PointcutLatch latch = new PointcutLatch("senderlatch");
 		doAnswer(a -> {
 			latch.call(1);
@@ -828,7 +828,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		boolean isGatedExecution = false;
 		myMaintenanceService.enableMaintenancePass(false);
 		JobInstance instance = createInstance(true, isGatedExecution);
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, CHUNK_DATA, isGatedExecution);
 		assertNotNull(chunkId);
 		PointcutLatch latch = new PointcutLatch("senderlatch");
@@ -883,7 +883,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		myMaintenanceService.enableMaintenancePass(false);
 
 		JobInstance instance = createInstance(true, isGatedExecution);
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 		String chunkId = storeWorkChunk(JOB_DEFINITION_ID, TestJobDefinitionUtils.FIRST_STEP_ID, instanceId, SEQUENCE_NUMBER, null, isGatedExecution);
 		assertNotNull(chunkId);
 
@@ -940,7 +940,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		boolean isGatedExecution = false;
 		myMaintenanceService.enableMaintenancePass(false);
 		JobInstance instance = createInstance(true, isGatedExecution);
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null, isGatedExecution);
 		assertNotNull(chunkId);
 		PointcutLatch latch = new PointcutLatch("senderlatch");
@@ -980,7 +980,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	public void markWorkChunksWithStatusAndWipeData_marksMultipleChunksWithStatus_asExpected() {
 		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 		ArrayList<String> chunkIds = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
 			WorkChunkCreateEvent chunk = new WorkChunkCreateEvent(
@@ -1019,13 +1019,36 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		try{
 			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, prestorageBatchJobCreateInterceptor);
 			JobInstance instance = createInstance();
-			String instanceId = mySvc.storeNewInstance(instance);
+			String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 			JobInstance foundInstance = mySvc.fetchInstance(instanceId).orElseThrow(IllegalStateException::new);
 
 			assertEquals(expectedTriggeringUserName, foundInstance.getTriggeringUsername());
 
 		} finally {
+			myInterceptorRegistry.unregisterInterceptor(prestorageBatchJobCreateInterceptor);
+		}
+
+	}
+
+	@Test
+	public void testPostStorageInterceptor_hasJobInstanceId_preStorageHasNot() {
+		IAnonymousInterceptor poststorageBatchJobCreateInterceptor = (pointcut, params) -> {
+			JobInstance jobInstance = params.get(JobInstance.class);
+			assertNotNull(jobInstance.getInstanceId());
+		};
+		IAnonymousInterceptor prestorageBatchJobCreateInterceptor = (pointcut, params) -> {
+			JobInstance jobInstance = params.get(JobInstance.class);
+			assertNull(jobInstance.getInstanceId());
+		};
+
+		try{
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_POSTSTORAGE_BATCH_JOB_CREATE, poststorageBatchJobCreateInterceptor);
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, prestorageBatchJobCreateInterceptor);
+			JobInstance instance = createInstance();
+			mySvc.storeNewInstance(newSrd(), instance);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(poststorageBatchJobCreateInterceptor);
 			myInterceptorRegistry.unregisterInterceptor(prestorageBatchJobCreateInterceptor);
 		}
 
@@ -1042,7 +1065,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		List<String> chunkIds = new ArrayList<>();
 		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 		for (int i = 0; i < 5; i++) {
 			chunkIds.add(storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, i, JsonUtil.serialize(new NdJsonFileJson().setNdJsonText("{}")), false));
 		}
@@ -1139,7 +1162,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		jobInstance.setParameters(CHUNK_DATA);
 		jobInstance.setReport("TEST");
 
-		final String id = mySvc.storeNewInstance(jobInstance);
+		final String id = mySvc.storeNewInstance(newSrd(), jobInstance);
 
 		mySvc.updateInstance(id, instance->{
 			instance.setEndTime(Date.from(Instant.now().minus(minutes, ChronoUnit.MINUTES)));

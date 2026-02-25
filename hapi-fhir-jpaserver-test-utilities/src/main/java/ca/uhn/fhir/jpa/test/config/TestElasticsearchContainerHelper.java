@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class TestElasticsearchContainerHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestElasticsearchContainerHelper.class);
 
 
-	public static final String ELASTICSEARCH_VERSION = "7.17.3";
+	public static final String ELASTICSEARCH_VERSION = "7.17.25";
 	public static final String ELASTICSEARCH_IMAGE = "docker.elastic.co/elasticsearch/elasticsearch:" + ELASTICSEARCH_VERSION;
 
 	public static ElasticsearchContainer getEmbeddedElasticSearch() {

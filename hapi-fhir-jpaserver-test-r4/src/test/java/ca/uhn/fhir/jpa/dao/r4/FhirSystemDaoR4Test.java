@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -132,6 +133,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -143,6 +146,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Mock
 	private Appender<ILoggingEvent> myAppender;
+	@Mock
+	private IAnonymousInterceptor myAnonymousInterceptor;
 
 	@AfterEach
 	public void after() {
@@ -951,6 +956,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionWithConditionalCreates_IdenticalMatchUrlsDifferentTypes_Unqualified() {
+		// Setup
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("foo").setValue("bar");
@@ -959,14 +965,24 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		obs.addIdentifier().setSystem("foo").setValue("bar");
 		bb.addTransactionCreateEntry(obs).conditional("identifier=foo|bar");
 
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESEARCH_REGISTERED, myAnonymousInterceptor);
+
+		// Test
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
+
+		// Verify
+		verify(myAnonymousInterceptor, times(2)).invoke(eq(Pointcut.STORAGE_PRESEARCH_REGISTERED), any());
+
 		assertEquals("201 Created", outcome.getEntry().get(0).getResponse().getStatus());
 		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).matches(".*Patient/[0-9]+/_history/1");
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).matches(".*Observation/[0-9]+/_history/1");
 
-		// Take 2
+		/*
+		 * Repeat a second time, should reuse existing resources
+		 */
 
+		// Setup
 		bb = new BundleBuilder(myFhirContext);
 		pt = new Patient();
 		pt.addIdentifier().setSystem("foo").setValue("bar");
@@ -975,7 +991,10 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		obs.addIdentifier().setSystem("foo").setValue("bar");
 		bb.addTransactionCreateEntry(obs).conditional("identifier=foo|bar");
 
+		// Test
 		outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
+
+		// Verify
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
 		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).matches(".*Patient/[0-9]+/_history/1");
 		assertEquals("200 OK", outcome.getEntry().get(1).getResponse().getStatus());

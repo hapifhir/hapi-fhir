@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.Logs;
@@ -50,7 +51,7 @@ public abstract class BaseSubscriptionTopicLoader extends BaseResourceCacheSynch
 			String theResourceName,
 			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
 			ISearchParamRegistry theSearchParamRegistry) {
-		super(theResourceName);
+		super(theResourceName, RequestPartitionId.allPartitions());
 		myVersionCanonicalizer = theVersionCanonicalizer;
 		mySubscriptionTopicRegistry = theSubscriptionTopicRegistry;
 		mySearchParamRegistry = theSearchParamRegistry;

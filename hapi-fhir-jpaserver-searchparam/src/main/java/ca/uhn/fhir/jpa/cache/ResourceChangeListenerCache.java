@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -63,6 +64,8 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 	 */
 	private final Semaphore myCacheSemaphore = new Semaphore(1);
 
+	private final RequestPartitionId myRequestPartitionId;
+
 	@Autowired
 	IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
 
@@ -81,12 +84,14 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 	public ResourceChangeListenerCache(
 			String theResourceName,
 			IResourceChangeListener theResourceChangeListener,
+			RequestPartitionId theRequestPartitionId,
 			SearchParameterMap theSearchParameterMap,
 			long theRemoteRefreshIntervalMs) {
 		myResourceName = theResourceName;
 		myResourceChangeListener = theResourceChangeListener;
 		mySearchParameterMap = SerializationUtils.clone(theSearchParameterMap);
 		myRemoteRefreshIntervalMs = theRemoteRefreshIntervalMs;
+		myRequestPartitionId = theRequestPartitionId;
 	}
 
 	/**
@@ -217,6 +222,10 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 	@Override
 	public String getResourceName() {
 		return myResourceName;
+	}
+
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
 	}
 
 	public ResourceVersionCache getResourceVersionCache() {

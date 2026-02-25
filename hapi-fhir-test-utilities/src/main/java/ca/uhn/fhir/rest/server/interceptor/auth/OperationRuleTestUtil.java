@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -71,5 +72,10 @@ public final class OperationRuleTestUtil {
 
 	public static BulkExportJobParameters.ExportStyle getWantExportStyle(IAuthRule theRule) {
 		return ((RuleBulkExportImpl) theRule).getWantExportStyle();
+	}
+
+	@Nullable
+	public static String getInstanceFilter(IAuthRule theRule) {
+		return ((OperationRule) theRule).getInstanceFilter();
 	}
 }

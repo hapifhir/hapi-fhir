@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -2788,6 +2788,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					} else if (next.getType() == TermConceptPropertyTypeEnum.STRING) {
 						IValidationSupport.StringConceptProperty property =
 								new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue());
+						result.getProperties().add(property);
+					} else if (next.getType() == TermConceptPropertyTypeEnum.BOOLEAN) {
+						IValidationSupport.BooleanConceptProperty property =
+								new IValidationSupport.BooleanConceptProperty(
+										next.getKey(), Boolean.parseBoolean(next.getValue()));
 						result.getProperties().add(property);
 					} else {
 						throw new InternalErrorException(Msg.code(905) + "Unknown type: " + next.getType());

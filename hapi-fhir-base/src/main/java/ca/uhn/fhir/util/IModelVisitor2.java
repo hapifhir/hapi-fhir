@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,11 @@ public interface IModelVisitor2 {
 			List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath);
 
 	/**
-	 *
+	 * @deprecated This method is called inconsistently by {@link FhirTerser} and should not be used. Any
+	 * 			   extensions present on the element being visited (including cases where an extension element
+	 * 			   is being visited directly) will result in call(s) to {@link #acceptElement(IBase, List, List, List)}.
 	 */
+	@Deprecated(forRemoval = true, since = "8.8.0")
 	default boolean acceptUndeclaredExtension(
 			IBaseExtension<?, ?> theNextExt,
 			List<IBase> theContainingElementPath,

@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patch;
 
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyOrRewriteGenerateReportStep;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
@@ -35,8 +36,12 @@ public class BulkPatchJobAppCtx extends BaseBulkPatchJobAppCtx {
 	/**
 	 * Constructor
 	 */
-	public BulkPatchJobAppCtx(IBatch2DaoSvc theBatch2DaoSvc, FhirContext theFhirContext, IDaoRegistry theDaoRegistry) {
-		super(theBatch2DaoSvc, theFhirContext, theDaoRegistry);
+	public BulkPatchJobAppCtx(
+			IBatch2DaoSvc theBatch2DaoSvc,
+			FhirContext theFhirContext,
+			IDaoRegistry theDaoRegistry,
+			IJobPartitionProvider theJobPartitionProvider) {
+		super(theBatch2DaoSvc, theFhirContext, theDaoRegistry, theJobPartitionProvider);
 	}
 
 	@Bean("bulkModifyJsonPatchJobDefinition")
@@ -53,7 +58,7 @@ public class BulkPatchJobAppCtx extends BaseBulkPatchJobAppCtx {
 	@Bean("bulkModifyPatchGenerateRangesStep")
 	@Override
 	public GenerateRangeChunksStep<BulkPatchJobParameters> generateRangesStep() {
-		return new GenerateRangeChunksStep<>();
+		return new GenerateRangeChunksStep<>(myJobPartitionProvider);
 	}
 
 	@Bean("bulkModifyPatchGenerateReportStep")

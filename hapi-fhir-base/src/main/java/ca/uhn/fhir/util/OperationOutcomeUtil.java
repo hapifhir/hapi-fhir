@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,10 @@ public class OperationOutcomeUtil {
 	public static final String OO_SEVERITY_INFO = "information";
 	public static final String OO_SEVERITY_WARN = "warning";
 	public static final String OO_ISSUE_CODE_INFORMATIONAL = "informational";
+	/**
+	 * OperationOutcome.issue.code value: A required element is missing.
+	 */
+	public static final String OO_ISSUE_CODE_REQUIRED = "required";
 
 	/**
 	 * Note: This code was added in FHIR R5, so the {@link #addIssue(FhirContext, IBaseOperationOutcome, String, String, String, String) addIssue}

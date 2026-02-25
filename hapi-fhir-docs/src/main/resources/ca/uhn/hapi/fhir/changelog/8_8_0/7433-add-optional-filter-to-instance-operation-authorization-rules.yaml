@@ -1,0 +1,7 @@
+---
+type: add
+issue: 7433
+title: "The `RuleBuilder` now supports adding optional FHIR query filters to instance-level operation authorization rules. 
+New methods `onAnyInstanceMatchingOptionalFilter()` and `onInstancesOfTypeMatchingOptionalFilter()` allow restricting which 
+resource instances are permitted for a given operation based on search parameter criteria. For example, this enables 
+rules like allowing `$meta` operations only on Observations matching `category=vital-signs`."

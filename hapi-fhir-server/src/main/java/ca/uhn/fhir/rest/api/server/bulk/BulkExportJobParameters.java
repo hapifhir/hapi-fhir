@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class BulkExportJobParameters extends BaseBatchJobParameters {
 
@@ -106,17 +107,14 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	private String myGroupId;
 
 	/**
-	 * For group export;
+	 * For group and patient instance exports;
 	 * whether or not to expand mdm
 	 */
 	@JsonProperty("expandMdm")
-	private boolean myExpandMdm;
+	private Boolean myExpandMdm;
 
-	/**
-	 * The partition for the request if applicable.
-	 */
 	@JsonProperty("partitionId")
-	private RequestPartitionId myPartitionId;
+	private RequestPartitionId myPartitionIdForSecurity;
 
 	@JsonProperty("binarySecurityContextIdentifierSystem")
 	private String myBinarySecurityContextIdentifierSystem;
@@ -232,10 +230,19 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	}
 
 	public boolean isExpandMdm() {
-		return myExpandMdm;
+		return Boolean.TRUE.equals(myExpandMdm);
 	}
 
-	public void setExpandMdm(boolean theExpandMdm) {
+	/**
+	 * Checks if the _mdm parameter was explicitly omitted from the request Parameters
+	 * @return an {@link Optional} containing the status if present,
+	 *         otherwise an empty {@link Optional}
+	 */
+	public Optional<Boolean> getExpandMdm() {
+		return Optional.ofNullable(myExpandMdm);
+	}
+
+	public void setExpandMdm(Boolean theExpandMdm) {
 		myExpandMdm = theExpandMdm;
 	}
 
@@ -247,16 +254,30 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 		this.myOriginalRequestUrl = theOriginalRequestUrl;
 	}
 
-	public RequestPartitionId getPartitionId() {
-		return myPartitionId;
+	/**
+	 * The partition ID associated with the initial job initiation. This partition ID is only used for
+	 * security checks to ensure that the calling user has appropriate permissions to access the data. As of
+	 * version 3 of the Bulk Export Batch2 job, we no longer use this element at runtime while actually
+	 * running the export and building the results - the job
+	 * calculates the partition(s) used for those activities whenever it needs to.
+	 */
+	public RequestPartitionId getPartitionIdForSecurity() {
+		return myPartitionIdForSecurity;
+	}
+
+	/**
+	 * The partition ID associated with the initial job initiation. This partition ID is only used for
+	 * security checks to ensure that the calling user has appropriate permissions to access the data. As of
+	 * version 3 of the Bulk Export Batch2 job, we no longer use this element at runtime while actually
+	 * running the export and building the results - the job
+	 * calculates the partition(s) used for those activities whenever it needs to.
+	 */
+	public void setPartitionIdForSecurity(RequestPartitionId thePartitionIdForSecurity) {
+		myPartitionIdForSecurity = thePartitionIdForSecurity;
 	}
 
 	public boolean isIncludeHistory() {
 		return myIncludeHistory;
-	}
-
-	public void setPartitionId(RequestPartitionId thePartitionId) {
-		this.myPartitionId = thePartitionId;
 	}
 
 	/**

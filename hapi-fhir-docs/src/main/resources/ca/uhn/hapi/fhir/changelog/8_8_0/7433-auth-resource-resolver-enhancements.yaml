@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7433
+title: "The `AuthResourceResolver` now includes per-request caching to avoid redundant database reads when 
+the same resource is resolved multiple times during authorization checks. Resource resolution is also now 
+partition-aware, using the request's partition context when reading resources."

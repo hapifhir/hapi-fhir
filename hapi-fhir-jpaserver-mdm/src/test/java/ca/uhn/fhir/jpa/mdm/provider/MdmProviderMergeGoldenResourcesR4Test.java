@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
+public class MdmProviderMergeGoldenResourcesR4Test extends BaseMdmProviderR4Test {
 
 	private Patient myFromGoldenPatient;
 	private StringType myFromGoldenPatientId;

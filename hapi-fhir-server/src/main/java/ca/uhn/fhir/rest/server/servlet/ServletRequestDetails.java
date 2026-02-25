@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,8 @@ public class ServletRequestDetails extends RequestDetails implements IHasServlet
 		myServer = theRequestDetails.getServer();
 		myServletRequest = theRequestDetails.getServletRequest();
 		myServletResponse = theRequestDetails.getServletResponse();
-		if (myHeaders != null) {
+		if (myHeaders != null || theRequestDetails.myHeaders != null) {
+			initHeaders();
 			myHeaders.putAll(theRequestDetails.myHeaders);
 		}
 	}

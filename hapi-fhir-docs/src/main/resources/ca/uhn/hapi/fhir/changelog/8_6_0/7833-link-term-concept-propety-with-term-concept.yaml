@@ -1,4 +1,5 @@
 type: fix
 issue: 7833
+backport: 8.4.2
 title: "When creating external code systems, some element relationships weren't kept in the database. 
 This has been fixed."

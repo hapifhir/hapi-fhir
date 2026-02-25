@@ -68,7 +68,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -133,7 +132,7 @@ public class SearchParamRegistryImplTest {
 	@BeforeEach
 	public void before() {
 		myAnswerCount = 0;
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenReturn(ourResourceVersionMap);
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 
 		// Our first refresh adds our test searchparams to the registry
@@ -255,15 +254,15 @@ public class SearchParamRegistryImplTest {
 	}
 
 	private void assertDbCalled() {
-		verify(myResourceVersionSvc, times(1)).getVersionMap(anyString(), any());
+		verify(myResourceVersionSvc, times(1)).getVersionMap(any(), any(), any());
 		reset(myResourceVersionSvc);
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenReturn(ourResourceVersionMap);
 	}
 
 	private void assertDbNotCalled() {
-		verify(myResourceVersionSvc, never()).getVersionMap(anyString(), any());
+		verify(myResourceVersionSvc, never()).getVersionMap(any(), any(), any());
 		reset(myResourceVersionSvc);
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenReturn(ourResourceVersionMap);
 	}
 
 	@Test
@@ -312,7 +311,7 @@ public class SearchParamRegistryImplTest {
 	@Test
 	public void testGetActiveSearchParamsRetries() {
 		AtomicBoolean retried = new AtomicBoolean(false);
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenAnswer(t -> {
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenAnswer(t -> {
 			if (myAnswerCount == 0) {
 				myAnswerCount++;
 				retried.set(true);
@@ -367,7 +366,7 @@ public class SearchParamRegistryImplTest {
 		ArrayList<ResourceTable> newEntities = new ArrayList<>(ourEntities);
 		newEntities.add(createEntity(99, 1));
 		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(newEntities);
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(newResourceVersionMap);
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenReturn(newResourceVersionMap);
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(sp));
 
 		mySearchParamRegistry.forceRefresh();
@@ -492,7 +491,7 @@ public class SearchParamRegistryImplTest {
 
 	private void resetMock(Enumerations.PublicationStatus theStatus, List<ResourceTable> theNewEntities) {
 		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceTableEntities(theNewEntities);
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(resourceVersionMap);
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenReturn(resourceVersionMap);
 
 		// When we ask for the new entity, return our foo search parameter
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(buildSearchParameter(theStatus)));
@@ -543,7 +542,7 @@ public class SearchParamRegistryImplTest {
 
 		@Bean
 		IResourceChangeListenerRegistry resourceChangeListenerRegistry(FhirContext theFhirContext, ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory, InMemoryResourceMatcher theInMemoryResourceMatcher) {
-			return new ResourceChangeListenerRegistryImpl(theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
+			return new ResourceChangeListenerRegistryImpl(theFhirContext, new PartitionSettings(), theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
 		}
 
 		@Bean

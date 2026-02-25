@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -220,6 +221,9 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 					myInterceptorBroadcaster, theRequestDetails);
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)) {
 				requestPartitionId = callAnyPointcut(compositeBroadcaster, theRequestDetails);
+			} else if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)) {
+				ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forGeneric(theRequestDetails);
+				requestPartitionId = callReadPointcut(compositeBroadcaster, theRequestDetails, readDetails);
 			}
 		}
 
@@ -298,6 +302,16 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		if (theRequest == null) {
 			requestDetails = new SystemRequestDetails();
 			logSubstitutingDefaultSystemRequestDetails();
+		}
+
+		// If we previously fetched a resource from the DB, it already knows what
+		// partition it is from, so we don't need to figure out its partition again
+		// when writing to it
+		RequestPartitionId existingPartitionId =
+				(RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (existingPartitionId != null) {
+			existingPartitionId = validateAndNormalizePartition(existingPartitionId, theRequest, theResourceType);
+			return existingPartitionId;
 		}
 
 		RequestPartitionId requestPartitionId = null;

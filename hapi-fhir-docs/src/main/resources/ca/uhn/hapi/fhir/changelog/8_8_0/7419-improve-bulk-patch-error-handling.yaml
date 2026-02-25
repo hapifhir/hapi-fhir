@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7419
+backport: 8.6.1
+title: "When a bulk patch operation fails, in some cases the failure is logged but otherwise ignored and the job reports successful completion. This has been corrected."

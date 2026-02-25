@@ -1,4 +1,5 @@
 ---
 type: fix
 issue: 7386
+backport: 8.4.2
 title: "A bug was fixed in Icd10CmLoader where applicable 7th character extensions were not being appended to all child codes."

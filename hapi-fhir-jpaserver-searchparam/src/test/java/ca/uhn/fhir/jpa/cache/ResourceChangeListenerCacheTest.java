@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -44,7 +45,7 @@ class ResourceChangeListenerCacheTest {
 
 	@Test
 	public void doNotRefreshIfNotMatches() {
-		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(TEST_RESOURCE_NAME, ourMap, mock(IResourceChangeListener.class), TEST_REFRESH_INTERVAL);
+		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(TEST_RESOURCE_NAME, RequestPartitionId.allPartitions(), ourMap, mock(IResourceChangeListener.class), TEST_REFRESH_INTERVAL);
 		cache.forceRefresh();
 		assertThat(cache.getNextRefreshTimeForUnitTest()).isNotEqualTo(Instant.MIN);
 
@@ -65,7 +66,7 @@ class ResourceChangeListenerCacheTest {
 
 	@Test
 	public void testSchedule() {
-		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(TEST_RESOURCE_NAME, ourMap, ourListener, TEST_REFRESH_INTERVAL);
+		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(TEST_RESOURCE_NAME, RequestPartitionId.allPartitions(), ourMap, ourListener, TEST_REFRESH_INTERVAL);
 		ResourceChangeListenerCache.setNowForUnitTests("08:00:00");
 		cache.refreshCacheIfNecessary();
 		verify(myResourceChangeListenerCacheRefresher, times(1)).refreshCacheAndNotifyListener(any());

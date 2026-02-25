@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -357,6 +357,10 @@ public abstract class BaseTask {
 
 	public boolean isHeavyweightSkippableTask() {
 		return myFlags.contains(TaskFlagEnum.HEAVYWEIGHT_SKIP_BY_DEFAULT);
+	}
+
+	public boolean isRunDuringSchemaInitialization() {
+		return myFlags.contains(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION);
 	}
 
 	public boolean hasFlag(TaskFlagEnum theFlag) {

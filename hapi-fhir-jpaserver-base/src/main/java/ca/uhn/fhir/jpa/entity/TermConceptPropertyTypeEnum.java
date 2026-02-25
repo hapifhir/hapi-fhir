@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@
  * #L%
  */
 package ca.uhn.fhir.jpa.entity;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /**
  * @see TermConceptProperty#getType()
@@ -51,5 +53,15 @@ public enum TermConceptPropertyTypeEnum {
 	/**
 	 * Date and time values.
 	 */
-	DATETIME
+	DATETIME;
+
+	public static TermConceptPropertyTypeEnum fromString(String theString) {
+		TermConceptPropertyTypeEnum retVal;
+		try {
+			retVal = TermConceptPropertyTypeEnum.valueOf(defaultString(theString));
+		} catch (Exception e) {
+			retVal = TermConceptPropertyTypeEnum.STRING;
+		}
+		return retVal;
+	}
 }

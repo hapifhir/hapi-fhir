@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,11 +43,9 @@ import java.util.List;
 public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 
 	private static final String ACTIVITY_CODE_MERGE = "merge";
-	private final MergeOperationInputParameterNames myInputParamNames;
 
 	public MergeProvenanceSvc(DaoRegistry theDaoRegistry) {
 		super(theDaoRegistry);
-		myInputParamNames = new MergeOperationInputParameterNames();
 	}
 
 	@Override
@@ -82,26 +80,44 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 
 	/**
 	 * Finds a Provenance with the activity code "merge" that has the given target id and source identifiers.
+	 * For Patient resources, tries both patient-specific and generic parameter names for backward compatibility.
+	 *
+	 * @param theTargetId the target resource id
+	 * @param theSourceIdentifiers the source identifiers to match
+	 * @param theRequestDetails the request details
 	 * @return the Provenance resource if matching one is found, or null if not found.
 	 */
 	@Nullable
 	public Provenance findProvenanceByTargetIdAndSourceIdentifiers(
 			IIdType theTargetId, List<CanonicalIdentifier> theSourceIdentifiers, RequestDetails theRequestDetails) {
-		String sourceIdentifierParameterName = myInputParamNames.getSourceIdentifiersParameterName();
+
+		String resourceType = theTargetId.getResourceType();
+		// Returns a list because Patient resources can be merged via two endpoints (Patient/$merge or
+		// Patient/$hapi.fhir.merge), each storing different parameter names in the Provenance.
+		// All other resource types only use the generic endpoint and parameter names.
+		List<AbstractMergeOperationInputParameterNames> parameterNamesList =
+				AbstractMergeOperationInputParameterNames.getParameterNamesForResourceType(resourceType);
+
 		List<Provenance> provenances =
 				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId), theRequestDetails);
-		// the input parameters must be the first contained resource in Provenance's contained resources,
-		// find the one that matches the source identifiers
+
+		// The input parameters must be the first contained resource in Provenance's contained resources.
+		// Try each set of parameter names (e.g., patient-specific and generic for Patient resources).
 		for (Provenance provenance : provenances) {
-			if (provenance.hasContained()
-					&& provenance.getContained().get(0) instanceof Parameters parameters
-					&& parameters.hasParameter(sourceIdentifierParameterName)) {
-				List<Type> originalInputSrcIdentifiers = parameters.getParameterValues(sourceIdentifierParameterName);
-				if (hasIdentifiers(originalInputSrcIdentifiers, theSourceIdentifiers)) {
-					return provenance;
+			if (provenance.hasContained() && provenance.getContained().get(0) instanceof Parameters parameters) {
+				for (AbstractMergeOperationInputParameterNames paramNames : parameterNamesList) {
+					String sourceIdentifierParamName = paramNames.getSourceIdentifiersParameterName();
+					if (parameters.hasParameter(sourceIdentifierParamName)) {
+						List<Type> originalInputSrcIdentifiers =
+								parameters.getParameterValues(sourceIdentifierParamName);
+						if (hasIdentifiers(originalInputSrcIdentifiers, theSourceIdentifiers)) {
+							return provenance;
+						}
+					}
 				}
 			}
 		}
+
 		return null;
 	}
 

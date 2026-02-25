@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r5.dbpartitionmode;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
@@ -40,7 +41,6 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
-import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -49,8 +49,10 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -73,6 +75,7 @@ import org.hl7.fhir.r5.model.ConceptMap;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.Group;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.r5.model.Observation;
@@ -107,6 +110,7 @@ import static ca.uhn.fhir.jpa.dao.r5.dbpartitionmode.DbpmDisabledPartitioningEna
 import static ca.uhn.fhir.jpa.dao.r5.dbpartitionmode.DbpmDisabledPartitioningEnabledTest.PARTITION_2;
 import static ca.uhn.fhir.jpa.test.BaseJpaTest.newSrd;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -128,7 +132,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 	private final TestPartitionSelectorInterceptor myPartitionSelectorInterceptor;
 	private final boolean myIncludePartitionIdsInSql;
-	private final BaseDbpmJpaR5Test myParentTest;
+	private final BaseDbpmResourceProviderR5Test myParentTest;
 	private final boolean myIncludePartitionIdsInPks;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
@@ -182,13 +186,15 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private DeleteExpungeStep myDeleteExpungeStep;
+	@Autowired
+	private IJobStepExecutionServices myJobStepExecutionServices;
 
 	@Mock
 	private IJobDataSink<VoidModel> myVoidSink;
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 
-	public TestDefinitions(@Nonnull BaseDbpmJpaR5Test theParentTest, @Nonnull TestPartitionSelectorInterceptor thePartitionSelectorInterceptor, boolean theIncludePartitionIdsInSql, boolean theIncludePartitionIdsInPks) {
+	public TestDefinitions(@Nonnull BaseDbpmResourceProviderR5Test theParentTest, @Nonnull TestPartitionSelectorInterceptor thePartitionSelectorInterceptor, boolean theIncludePartitionIdsInSql, boolean theIncludePartitionIdsInPks) {
 		myParentTest = theParentTest;
 		myPartitionSelectorInterceptor = thePartitionSelectorInterceptor;
 		myIncludePartitionIdsInSql = theIncludePartitionIdsInSql;
@@ -211,6 +217,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		myParentTest.myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
 
+
 	@Test
 	public void testBatch_DeleteExpungeStep() {
 		// Setup
@@ -228,7 +235,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		);
 		ResourceIdListWorkChunkJson workChunk = new ResourceIdListWorkChunkJson(typedPids, RequestPartitionId.fromPartitionId(PARTITION_1));
 		JobInstance jobInstance = new JobInstance();
-		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> executionDetails = new StepExecutionDetails<>(params, workChunk, jobInstance, new WorkChunk().setId("123"));
+		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> executionDetails = new StepExecutionDetails<>(params, workChunk, jobInstance, new WorkChunk().setId("123"), myJobStepExecutionServices);
 		myDeleteExpungeStep.run(executionDetails, myVoidSink);
 
 		// Verify
@@ -634,7 +641,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		List<String> actualIds = toUnqualifiedVersionlessIdValues(outcome);
 		assertThat(actualIds).asList().containsExactlyInAnyOrder(ids.allIdValues().toArray(new String[0]));
 
+		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+
 		assertThat(getSelectSql(0)).doesNotContainIgnoringCase("union");
 		if (myIncludePartitionIdsInSql) {
 			assertThat(getSelectSql(0)).endsWith(" where rt1_0.PARTITION_ID='1' and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='" + ids.patientPid + "')");
@@ -922,6 +931,53 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(values).asList().containsExactly(patientId.getValue());
 	}
 
+	@Test
+	public void testSearch_Has_CrossingPartitions() {
+		// Setup
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
+		createPatient(withId("P0"), withActiveTrue());
+		createPatient(withId("P1"), withActiveTrue());
+		final List<String> patientIds = List.of("Patient/P0", "Patient/P1");
+
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_2);
+		Group group = new Group();
+		group.setId("G0");
+		group.addMember().setEntity(new Reference("Patient/P0"));
+		group.addMember().setEntity(new Reference("Patient/P1"));
+		doUpdateResource(group);
+		myParentTest.logAllResources();
+		myParentTest.logAllResourceLinks();
+
+		// Test
+
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1, PARTITION_2);
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(PARAM_HAS, makeGroupMemberHasOrListParam("Group/G0"));
+		map.add(PARAM_ID, makeReferenceOrListParam(patientIds));
+		myCaptureQueriesListener.clear();
+		IBundleProvider actual = myPatientDao.search(map, newSrd());
+		List<String> actualIds = toUnqualifiedVersionlessIdValues(actual);
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		assertThat(actualIds).asList().containsExactlyInAnyOrderElementsOf(patientIds);
+	}
+
+	@Nonnull
+	private ReferenceOrListParam makeReferenceOrListParam(@Nonnull List<String> thePatientIds) {
+		final ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
+		thePatientIds.forEach(patientId -> referenceOrListParam.addOr(new ReferenceParam(patientId)));
+		return referenceOrListParam;
+	}
+
+	@Nonnull
+	private HasOrListParam makeGroupMemberHasOrListParam(@Nonnull String theGroupId) {
+		final HasParam hasParam = new HasParam("Group", "member", "_id", theGroupId);
+		return new HasOrListParam().addOr(hasParam);
+	}
+
 	@ParameterizedTest
 	@ValueSource(booleans = {false}) // TODO: True will be added in the next PR
 	public void testSearch_IdParam(boolean theIncludeOtherParameter) {
@@ -964,13 +1020,18 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	@Test
 	public void testSearch_ListParam() {
 		// Setup
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
 		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1);
 		IIdType patId0 = createPatient(withActiveTrue()).toUnqualifiedVersionless();
 		IIdType patId1 = createPatient(withActiveTrue()).toUnqualifiedVersionless();
+
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_2);
 		IIdType listId = createList(withListItem(patId0), withListItem(patId1)).toUnqualifiedVersionless();
 		Long listIdLong = listId.getIdPartAsLong();
 
 		// Test
+		myPartitionSelectorInterceptor.setNextPartitionId(PARTITION_1, PARTITION_2);
 		myCaptureQueriesListener.clear();
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -980,20 +1041,25 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(getSelectSql(0)).contains(" FROM HFJ_RESOURCE t1 ");
+		myMemoryCache.invalidateAllCaches();
+
+		// If partitioning is enabled, the first query is to look up "Patient/A" in Partition[1 | 2]
+		int searchQueryIndex = myPartitionSettings.isPartitioningEnabled() ? 1 : 0;
+
+		assertThat(getSelectSql(searchQueryIndex)).contains(" FROM HFJ_RESOURCE t1 ");
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_LINK t0 ON ((t1.PARTITION_ID = t0.PARTITION_ID) AND (t1.RES_ID = t0.TARGET_RESOURCE_ID)) ");
-			assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND ((t0.PARTITION_ID,t0.SRC_RESOURCE_ID) IN (('1','" + listIdLong + "')) )) fetch first '10000' rows only");
+			assertThat(getSelectSql(searchQueryIndex)).contains(" INNER JOIN HFJ_RES_LINK t0 ON ((t1.PARTITION_ID = t0.TARGET_RES_PARTITION_ID) AND (t1.RES_ID = t0.TARGET_RESOURCE_ID)) ");
+			assertThat(getSelectSql(searchQueryIndex)).endsWith(" WHERE ((t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND ((t0.PARTITION_ID,t0.SRC_RESOURCE_ID) IN (('2','" + listIdLong + "')) )) fetch first '10000' rows only");
 		} else {
-			assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_LINK t0 ON (t1.RES_ID = t0.TARGET_RESOURCE_ID) ");
+			assertThat(getSelectSql(searchQueryIndex)).contains(" INNER JOIN HFJ_RES_LINK t0 ON (t1.RES_ID = t0.TARGET_RESOURCE_ID) ");
 			if (myIncludePartitionIdsInSql) {
-				assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.PARTITION_ID = '1') AND (t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND (t0.SRC_RESOURCE_ID = '" + listIdLong + "')) fetch first '10000' rows only");
+				assertThat(getSelectSql(searchQueryIndex)).endsWith(" WHERE ((t0.TARGET_RES_PARTITION_ID IN ('1','2') ) AND (t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND (t0.SRC_RESOURCE_ID = '" + listIdLong + "')) fetch first '10000' rows only");
 			} else {
-				assertThat(getSelectSql(0)).endsWith(" WHERE ((t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND (t0.SRC_RESOURCE_ID = '" + listIdLong + "')) fetch first '10000' rows only");
+				assertThat(getSelectSql(searchQueryIndex)).endsWith(" WHERE ((t0.SRC_PATH = 'List.entry.item') AND (t0.TARGET_RESOURCE_TYPE = 'Patient') AND (t0.SRC_RESOURCE_ID = '" + listIdLong + "')) fetch first '10000' rows only");
 			}
 		}
 
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(searchQueryIndex + 2, myCaptureQueriesListener.countSelectQueries());
 	}
 
 	/**
@@ -1019,13 +1085,13 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		myCaptureQueriesListener.logSelectQueries();
 		if (myIncludePartitionIdsInPks) {
 			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') )) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first '10000' rows only", getSelectSql(0));
-			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in (('" + id0.getIdPartAsLong() + "','1'),('" + id1.getIdPartAsLong() + "','2'),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL)) and mrt1_0.RES_VER=rht1_0.RES_VER");
+			assertThat(getSelectSql(1)).contains(" where (mrt1_0.RES_ID,mrt1_0.PARTITION_ID) in (('" + id0.getIdPartAsLong() + "','1'),('" + id1.getIdPartAsLong() + "','2'),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL)) and mrt1_0.RES_VER=rht1_0.RES_VER");
 		} else if (myIncludePartitionIdsInSql) {
 			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') )) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first '10000' rows only", getSelectSql(0));
-			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID) in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
+			assertThat(getSelectSql(1)).contains(" where (mrt1_0.RES_ID) in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
 		} else {
 			assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE ((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first '10000' rows only", getSelectSql(0));
-			assertThat(getSelectSql(1)).contains(" where (rht1_0.RES_ID) in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
+			assertThat(getSelectSql(1)).contains(" where (mrt1_0.RES_ID) in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");
 		}
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
@@ -1213,9 +1279,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(0)).endsWith(" WHERE (t0.HASH_VALUE = '7943378963388545453') fetch first '10000' rows only");
 		}
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(1)).endsWith(" where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in (('" + id + "','1')) and mrt1_0.RES_VER=rht1_0.RES_VER");
+			assertThat(getSelectSql(1)).endsWith(" where (mrt1_0.RES_ID,mrt1_0.PARTITION_ID) in (('" + id + "','1')) and mrt1_0.RES_VER=rht1_0.RES_VER");
 		} else {
-			assertThat(getSelectSql(1)).endsWith(" where (rht1_0.RES_ID) in ('" + id + "') and mrt1_0.RES_VER=rht1_0.RES_VER");
+			assertThat(getSelectSql(1)).endsWith(" where (mrt1_0.RES_ID) in ('" + id + "') and mrt1_0.RES_VER=rht1_0.RES_VER");
 		}
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 	}
@@ -1303,10 +1369,10 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(sql).contains("from HFJ_RES_VER rht1_0");
 		if (myIncludePartitionIdsInPks) {
 			assertThat(sql).contains("join HFJ_RESOURCE mrt1_0 on mrt1_0.RES_ID=rht1_0.RES_ID and mrt1_0.PARTITION_ID=rht1_0.PARTITION_ID where");
-			assertThat(sql).contains("where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in");
+			assertThat(sql).contains("where (mrt1_0.RES_ID,mrt1_0.PARTITION_ID) in");
 		} else {
 			assertThat(sql).contains("join HFJ_RESOURCE mrt1_0 on mrt1_0.RES_ID=rht1_0.RES_ID where");
-			assertThat(sql).contains("where (rht1_0.RES_ID) in");
+			assertThat(sql).contains("where (mrt1_0.RES_ID) in");
 		}
 
 		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
@@ -1413,10 +1479,10 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(sql).contains("from HFJ_RES_VER rht1_0");
 		if (myIncludePartitionIdsInPks) {
 			assertThat(sql).contains("join HFJ_RESOURCE mrt1_0 on mrt1_0.RES_ID=rht1_0.RES_ID and mrt1_0.PARTITION_ID=rht1_0.PARTITION_ID where");
-			assertThat(sql).contains("where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in");
+			assertThat(sql).contains("where (mrt1_0.RES_ID,mrt1_0.PARTITION_ID) in");
 		} else {
 			assertThat(sql).contains("join HFJ_RESOURCE mrt1_0 on mrt1_0.RES_ID=rht1_0.RES_ID where");
-			assertThat(sql).contains("where (rht1_0.RES_ID) in");
+			assertThat(sql).contains("where (mrt1_0.RES_ID) in");
 		}
 
 		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
@@ -1571,10 +1637,10 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(sql).contains("from HFJ_RES_VER rht1_0");
 		if (myIncludePartitionIdsInPks) {
 			assertThat(sql).contains("join HFJ_RESOURCE mrt1_0 on mrt1_0.RES_ID=rht1_0.RES_ID and mrt1_0.PARTITION_ID=rht1_0.PARTITION_ID where");
-			assertThat(sql).contains("where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in");
+			assertThat(sql).contains("where (mrt1_0.RES_ID,mrt1_0.PARTITION_ID) in");
 		} else {
 			assertThat(sql).contains("join HFJ_RESOURCE mrt1_0 on mrt1_0.RES_ID=rht1_0.RES_ID where");
-			assertThat(sql).contains("where (rht1_0.RES_ID) in");
+			assertThat(sql).contains("where (mrt1_0.RES_ID) in");
 		}
 	}
 
@@ -1637,10 +1703,10 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(sql).contains("from HFJ_RES_VER rht1_0");
 		if (myIncludePartitionIdsInPks) {
 			assertThat(sql).contains("join HFJ_RESOURCE mrt1_0 on mrt1_0.RES_ID=rht1_0.RES_ID and mrt1_0.PARTITION_ID=rht1_0.PARTITION_ID where");
-			assertThat(sql).contains("where (rht1_0.RES_ID,rht1_0.PARTITION_ID) in");
+			assertThat(sql).contains("where (mrt1_0.RES_ID,mrt1_0.PARTITION_ID) in");
 		} else {
 			assertThat(sql).contains("join HFJ_RESOURCE mrt1_0 on mrt1_0.RES_ID=rht1_0.RES_ID where");
-			assertThat(sql).contains("where (rht1_0.RES_ID) in");
+			assertThat(sql).contains("where (mrt1_0.RES_ID) in");
 		}
 
 		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
@@ -1716,6 +1782,183 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	}
 
 
+	@Test
+	public void testLargeCodeSystemExpansion() {
+		String thePayload = "{\n" +
+			"  \"resourceType\": \"CodeSystem\",\n" +
+			"  \"id\": \"d9ece1b5-2ad7-498d-ba8e-d6fdd078b5fb\",\n" +
+			"  \"meta\": {\n" +
+			"    \"versionId\": \"1\",\n" +
+			"    \"lastUpdated\": \"2024-06-19T04:15:14.144+00:00\",\n" +
+			"    \"source\": \"#42cb18b4b3b718e4\"\n" +
+			"  },\n" +
+			"  \"url\": \"https://example.com/config/obs-tier-settings\",\n" +
+			"  \"version\": \"1\",\n" +
+			"  \"name\": \"obs_tier_settings\",\n" +
+			"  \"title\": \"Obs Tier Settings\",\n" +
+			"  \"status\": \"active\",\n" +
+			"  \"description\": \"Configuration for Obs Tier\",\n" +
+			"  \"compositional\": false,\n" +
+			"  \"content\": \"complete\",\n" +
+			"  \"property\": [\n" +
+			"    {\n" +
+			"      \"code\": \"name\",\n" +
+			"      \"description\": \"Name of this tier\",\n" +
+			"      \"type\": \"string\"\n" +
+			"    },\n" +
+			"    {\n" +
+			"      \"code\": \"chart\",\n" +
+			"      \"description\": \"The name of the chart to which this setting is linked\",\n" +
+			"      \"type\": \"string\"\n" +
+			"    }\n" +
+			"  ],\n" +
+			"  \"concept\": [\n" +
+			"    {\n" +
+			"      \"code\": \"red-tier\",\n" +
+			"      \"display\": \"Red Tier\",\n" +
+			"      \"designation\": [\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"message\"\n" +
+			"          },\n" +
+			"          \"value\": \"CALL FOR A RAPID RESPONSE (Refer to local escalation protocol) AND 1. You MUST INITIATE APPROPRIATE CLINICAL CARE 2. Remain with the patient 3. Inform the Nurse in Charge 4. Repeat observations every 5 minutes until team arrives 5. Repeat observations as indicated by the patient's condition (at least every 4 hours for a minimum of 24 hours)\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"zone-details\"\n" +
+			"          },\n" +
+			"          \"value\": \"<div class=\\\" msg-zone red-zone-msg\\\" ><p><b>IF PATIENT- REPORTED VITAL SIGN OBSERVATIONS ARE IN THE RED ZONE OF THE OBSERVATIONS CHART IN THE TELSTRA HEALTH VIRTUAL HEALTH PLATFORM (VHP), YOU MUST: </b></p><p>Review previous information in VHP and NSW Health patient health care record. If repeated vital sign observations are still in the Red Zone, contact the patient to obtain further information and validate self-measurements.</p><p><b>REFER TO YOUR LOCAL CLINICAL EMERGENCY RESPONSE SYSTEM (CERS) PROTOCOL FOR INSTRUCTIONS ON HOW TO MAKE A CALL TO ESCALATE CARE FOR YOUR PATIENT</b></p><p><b>CHECK THE HEALTH CARE RECORD FOR AN END OF LIFE CARE PLAN WHICH MAY ALTER THE MANAGEMENT OF YOUR PATIENT</b></p><p><strong>CONSIDER IF YOUR PATIENT’S DETERIORATION COULD BE DUE TO SEPSIS, A NEW ARRHYTHMIA, HYPOVOLAEMIA/HAEMORRHAGE, PULMONARY EMBOLUS/DVT, PNEUMONIA/ATELECTASIS, AN AMI, STROKE, OR AN OVERDOSE/OVER SEDATION</strong></p><p></p><p><strong>IF YOUR PATIENT HAS ANY RED ZONE OBSERVATIONS OR ADDITIONAL CRITERIA YOU MUST CALL FOR A RAPID RESPONSE (as per local CERS) <u>AND</u></strong></p><ol><li>Initiate appropriate clinical care</li><li>Inform the <strong>NURSE IN CHARGE</strong>that you have called for a <strong>RAPID RESPONSE</strong></li><li>Repeat and increase the frequency of observations, as indicated by your patient’s condition</li><li>Document an A-G assessment, reason for escalation, treatment and outcome in your patient’s health care record</li><li>Inform the Attending Medical Officer that a call was made as soon as it is practicable</li></ol><table border=\\\" 1\\\"  cellpadding=\\\" 0\\\"  cellspacing=\\\" 0\\\" ><tbody><tr><td colspan=\\\" 2\\\"  style=\\\" background-color: rgb(251, 213, 205);\\\"  valign=\\\" top\\\"  width=\\\" 283\\\" ><p><b>  *Additional RED ZONE Criteria</b></p></td></tr><tr><td style=\\\" background-color: rgb(253, 152, 131);\\\"  valign=\\\" top\\\"  width=\\\" 283\\\" ><ul><li>Cardiac or respiratory arrest</li><li>Airway obstruction or stridor</li><li>Patient unresponsive</li></ul></td><td rowspan=\\\" 2\\\"  style=\\\" background-color: rgb(251, 213, 205);\\\"  valign=\\\" top\\\"  width=\\\" 318\\\" ><ul><li>Sudden decrease in Level of Consciousness (a drop of 2 or more points on the GCS)</li><li>Seizures</li><li>Low urine output persistent for 8 hours (< 200mLs over 8 hours or < 0.5mL/kg/hr via an IDC)</li><li>Blood Glucose Level < 4mmol/L or > 20mmol/L with a decreased Level of Consciousness</li><li>Lactate ≥ 4mmol/L</li><li><strong>Serious concern by any patient or family member </strong></li><li><strong>Serious concern by you or any staff member</strong></li></ul></td></tr><tr><td style=\\\" background-color: rgb(251, 213, 205);\\\"  valign=\\\" top\\\"  width=\\\" 283\\\" ><ul><li>Deterioration not reversed within 1 hour of Clinical Review</li><li>Increasing oxygen requirements to maintain oxygen saturation > 90%</li><li>Arterial Blood Gas: PaO2 < 60 or PaCO2 > 60 or pH < 7.2 or BE < -5</li><li>Venous Blood Gas: PvCO2 > 65 or pH < 7.2</li><li>Only responds to Pain (P) on the AVPU scale</li></ul></td></tr></tbody></table></div>\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"display-name\"\n" +
+			"          },\n" +
+			"          \"value\": \"Red Zone\"\n" +
+			"        }\n" +
+			"      ],\n" +
+			"      \"property\": [\n" +
+			"        {\n" +
+			"          \"code\": \"name\",\n" +
+			"          \"valueString\": \"red-tier\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"code\": \"chart\",\n" +
+			"          \"valueString\": \"Vitals Signs\"\n" +
+			"        }\n" +
+			"      ]\n" +
+			"    },\n" +
+			"    {\n" +
+			"      \"code\": \"yellow-tier\",\n" +
+			"      \"display\": \"Yellow Tier\",\n" +
+			"      \"designation\": [\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"message\"\n" +
+			"          },\n" +
+			"          \"value\": \"INITIATE CLINICAL REVIEW CONSULT PROMPTLY WITH THE NURSE IN CHARGE. ASSESS IF A CLINCIAL REVIEW IS NEEDED AND REFER TO YOUR LOCAL ESCALATION PROTOCOL 1.  Initiate clinical care 2.  Repeat and record observations within at least 30 minutes 3.  Activate your local rapid response if clinical review has not been completed within 30 minutes\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"zone-details\"\n" +
+			"          },\n" +
+			"          \"value\": \"<div class=\\\"msg-zone yellow-zone-msg\\\"><h1>Clinical Review Criteria</h1><h4>Response Criteria:</h4><div><br/><ul><li>Any observation in the yellow zone</li><li>Stridor or respiratory difficulty</li><li>Excess or increasing blood loss</li><li>New, increasing or uncontrolled pain (including chest pain)</li><li>Protracted nausea</li><li>Decrease level of consciousness</li><li>Inadequate urine output < 30 ml/hr</li></ul></div><h4>Action Required:</h4><ul><li>Notify anaesthetist / surgeon</li><li>If you called for a Clinical Review and it has not been attended within 30 minutes, you <strong>MUST</strong> ACTIVATE YOUR LOCAL RAPID RESPONSE</li><li>If the patient's observations enter the RED Zone while you are waiting for a Clinical Review, you <strong>MUST</strong> ACTIVATE YOUR LOCAL RAPID RESPONSE (see below)</li><li>You may call for a Clinical Review at any time if worried about a patient</li></ul></div>\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"display-name\"\n" +
+			"          },\n" +
+			"          \"value\": \"Yellow Zone\"\n" +
+			"        }\n" +
+			"      ],\n" +
+			"      \"property\": [\n" +
+			"        {\n" +
+			"          \"code\": \"name\",\n" +
+			"          \"valueString\": \"yellow-tier\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"code\": \"chart\",\n" +
+			"          \"valueString\": \"Vitals Signs\"\n" +
+			"        }\n" +
+			"      ]\n" +
+			"    },\n" +
+			"    {\n" +
+			"      \"code\": \"blue-tier\",\n" +
+			"      \"display\": \"Blue Tier\",\n" +
+			"      \"designation\": [\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"message\"\n" +
+			"          },\n" +
+			"          \"value\": \"INCREASE OBSERVATIONS FREQUENCY YOU MUST INCREASE THE FREQUENCY OF OBSERVATIONS AS CLINICALLY APPROPRIATE, AND 1. You MUST initiate appropriate clinical care 2. Manage anxiety, pain and review oxygenation in consultation with the nurse in charge 3. You may call for a Clinical Review or Rapid Response at any time if worried about a patient or are unsure whether to call\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"zone-details\"\n" +
+			"          },\n" +
+			"          \"value\": \"<div class=\\\"msg-zone blue-zone-msg\\\"><h1>BLUE ZONE RESPONSE</h1><ul><li>Initiate appropriate clinical care</li><li>Repeat and increase the frequency of observations as indicated by your patient's conditions</li><li>Consider whether there is an adverse trend in other observation</li></ul></div>\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"display-name\"\n" +
+			"          },\n" +
+			"          \"value\": \"Blue Zone\"\n" +
+			"        }\n" +
+			"      ],\n" +
+			"      \"property\": [\n" +
+			"        {\n" +
+			"          \"code\": \"name\",\n" +
+			"          \"valueString\": \"blue-tier\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"code\": \"chart\",\n" +
+			"          \"valueString\": \"Vitals Signs\"\n" +
+			"        }\n" +
+			"      ]\n" +
+			"    },\n" +
+			"    {\n" +
+			"      \"code\": \"normal-tier\",\n" +
+			"      \"display\": \"Normal Tier\",\n" +
+			"      \"designation\": [\n" +
+			"        {\n" +
+			"          \"language\": \"dev\",\n" +
+			"          \"use\": {\n" +
+			"            \"code\": \"display-name\"\n" +
+			"          },\n" +
+			"          \"value\": \"Normal Zone\"\n" +
+			"        }\n" +
+			"      ],\n" +
+			"      \"property\": [\n" +
+			"        {\n" +
+			"          \"code\": \"name\",\n" +
+			"          \"valueString\": \"normal-tier\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"          \"code\": \"chart\",\n" +
+			"          \"valueString\": \"Vitals Signs\"\n" +
+			"        }\n" +
+			"      ]\n" +
+			"    }\n" +
+			"  ]\n" +
+			"}";
+		CodeSystem codeSystem = myFhirCtx.newJsonParser().parseResource(CodeSystem.class, thePayload);
+
+		//When:
+		myCodeSystemDao.create(codeSystem, new SystemRequestDetails());
+
+		//Then: that this does not throw any exceptions
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+
+	}
 	@Test
 	public void testValuesetExpansion_IncludePreExpandedVsWithFilter() {
 		// Setup
