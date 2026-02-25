@@ -56,7 +56,8 @@ public class PrefetchTemplateUtil {
 			String theTemplate, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
 		return SURROUNDING_CURLY_BRACES_PART
 				.matcher(theTemplate)
-				.replaceAll(match -> Matcher.quoteReplacement(resolveExpression(match.group(1), theContext, theFhirContext)));
+				.replaceAll(match ->
+						Matcher.quoteReplacement(resolveExpression(match.group(1), theContext, theFhirContext)));
 	}
 
 	private static String resolveExpression(
