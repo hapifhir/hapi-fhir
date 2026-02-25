@@ -2,7 +2,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -61,8 +61,9 @@ class PrefetchTemplateUtilR4Test {
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
-				.hasMessageContaining("Unable to resolve prefetch template");
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage("HAPI-2373: Request context did not provide for resource(s) matching template."
+						+ " ResourceType missing is: ServiceRequest");
 	}
 
 	@Test
@@ -73,7 +74,7 @@ class PrefetchTemplateUtilR4Test {
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, new Observation().setId(OBSERVATION_ID));
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
 						"Request context did not provide valid "
 								+ ourFhirContext.getVersion().getVersion()
@@ -161,7 +162,7 @@ class PrefetchTemplateUtilR4Test {
 		context.put(deviceRequestKey, deviceRequest1);
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
 						"Unable to resolve prefetch template : context.deviceRequest.code.resolve().as(Device).id. No result was found for the prefetch query.");
 	}
@@ -179,7 +180,7 @@ class PrefetchTemplateUtilR4Test {
 		context.put(deviceRequestKey, deviceRequest1);
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-			.isInstanceOf(PreconditionFailedException.class)
+			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining(
 				"Unable to resolve prefetch template : context.deviceRequest.code.resolve().as(Device).id. No result was found for the prefetch query.");
 	}
@@ -200,7 +201,7 @@ class PrefetchTemplateUtilR4Test {
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
 						"Unable to resolve prefetch template : context.draftOrders.entry.resource.ofType(DeviceRequest).code.resolve().as(Device).id. No result was found for the prefetch query.");
 	}
@@ -221,7 +222,7 @@ class PrefetchTemplateUtilR4Test {
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
 						"Unable to evaluate FHIRPath for prefetch template key <draftOrders> for FHIR version R4");
 	}
@@ -315,7 +316,7 @@ class PrefetchTemplateUtilR4Test {
 		context.put("some-key", "some-value");
 		// execute
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-			.isInstanceOf(PreconditionFailedException.class)
+			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("Request context did not provide a value for key <practitionerRoles>.  Available keys in context are: [some-key]");
 	}
 
@@ -393,7 +394,7 @@ class PrefetchTemplateUtilR4Test {
 		final String template = "Patient?name={{context.patient.name}}";
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("FHIR path expression returned a non-primitive result: HumanName for Prefetch Key : <patient>");
 	}
 
@@ -408,7 +409,7 @@ class PrefetchTemplateUtilR4Test {
 		final String template = "ServiceRequest?_id={{context.draftOrders.entry.resource}}";
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("FHIR path expression returned a non-primitive result: ServiceRequest for Prefetch Key : <draftOrders>");
 	}
 }

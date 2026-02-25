@@ -2,7 +2,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.dstu3.model.Device;
 import org.hl7.fhir.dstu3.model.DeviceRequest;
@@ -56,7 +56,7 @@ class PrefetchTemplateUtilDstu3Test {
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
 						"Unable to evaluate FHIRPath for prefetch template key <draftOrders> for FHIR version DSTU3");
 	}
@@ -95,7 +95,7 @@ class PrefetchTemplateUtilDstu3Test {
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
 						"Unable to resolve prefetch template : context.draftOrders.entry.resource.where(id = 'Device/2').id. No result was found for the prefetch query.");
 	}
@@ -125,7 +125,7 @@ class PrefetchTemplateUtilDstu3Test {
 		context.put("encounter", new Encounter());
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("Unable to resolve prefetch template : context.encounter.id. No result was found for the prefetch query.");
 	}
 }

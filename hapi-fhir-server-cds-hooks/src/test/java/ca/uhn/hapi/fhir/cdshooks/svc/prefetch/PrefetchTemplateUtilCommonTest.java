@@ -2,7 +2,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Encounter;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +35,7 @@ class PrefetchTemplateUtilCommonTest {
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessage(
 						"HAPI-2372: Request context did not provide a value for key <userId>.  Available keys in context are: [patientId]");
 	}
@@ -47,7 +47,7 @@ class PrefetchTemplateUtilCommonTest {
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessage(
 						"HAPI-2372: Request context did not provide a value for key <userId>.  Available keys in context are: []");
 	}
@@ -58,7 +58,7 @@ class PrefetchTemplateUtilCommonTest {
 		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
 		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessage(
 						"HAPI-2372: Request context did not provide a value for key <draftOrders>.  Available keys in context are: [patientId]");
 	}
@@ -77,6 +77,18 @@ class PrefetchTemplateUtilCommonTest {
 	}
 
 	@Test
+	void substituteTemplateShouldThrowWhenDefaultPartKeyHoldsNullValue() {
+		// setup
+		final String template = "Condition?patient={{context.patientId}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put(PATIENT_ID_CONTEXT_KEY, null);
+		// execute & validate
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage("HAPI-2857: Request context value for key <patientId> is null or not a string.");
+	}
+
+	@Test
 	void substituteTemplateShouldThrowWhenDefaultPartKeyHoldsResourceInsteadOfString() {
 		// setup
 		final String template = "Condition?encounter={{context.encounter}}";
@@ -84,7 +96,7 @@ class PrefetchTemplateUtilCommonTest {
 		context.put("encounter", new Encounter().setId("enc1"));
         // setup & execute
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("encounter");
 	}
 

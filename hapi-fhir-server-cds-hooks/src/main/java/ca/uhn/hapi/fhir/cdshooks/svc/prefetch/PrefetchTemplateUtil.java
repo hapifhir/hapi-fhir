@@ -25,7 +25,7 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -56,8 +56,7 @@ public class PrefetchTemplateUtil {
 			String theTemplate, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
 		return SURROUNDING_CURLY_BRACES_PART
 				.matcher(theTemplate)
-				.replaceAll(match ->
-						Matcher.quoteReplacement(resolveExpression(match.group(1), theContext, theFhirContext)));
+				.replaceAll(match -> Matcher.quoteReplacement(resolveExpression(match.group(1), theContext, theFhirContext)));
 	}
 
 	private static String resolveExpression(
@@ -69,12 +68,17 @@ public class PrefetchTemplateUtil {
 				.toList();
 		final List<String> results = new ArrayList<>();
 		for (String part : parts) {
-			results.addAll(handleDaVinciPart(part, theContext, theFhirContext));
-			results.addAll(handleDefaultPart(part, theContext));
-			results.addAll(handleFhirPathAndReferencedPrefetchPart(part, theContext, theFhirContext));
+			List<String> partResults = handleDaVinciPart(part, theContext, theFhirContext);
+			if (partResults.isEmpty()) {
+				partResults = handleDefaultPart(part, theContext);
+			}
+			if (partResults.isEmpty()) {
+				partResults = handleFhirPathAndReferencedPrefetchPart(part, theContext, theFhirContext);
+			}
+			results.addAll(partResults);
 		}
 		if (results.isEmpty()) {
-			throw new PreconditionFailedException(Msg.code(2856) + "Unable to resolve prefetch template : "
+			throw new InvalidRequestException(Msg.code(2856) + "Unable to resolve prefetch template : "
 					+ theRawExpression + ". No result was found for the prefetch query.");
 		}
 		return String.join(",", results);
@@ -95,13 +99,19 @@ public class PrefetchTemplateUtil {
 		validateContextKeyExists(key, theContext);
 		try {
 			final IBaseBundle bundle = (IBaseBundle) theContext.getResource(key);
-			return BundleUtil.toListOfResources(theFhirContext, bundle).stream()
+			final List<String> ids = BundleUtil.toListOfResources(theFhirContext, bundle).stream()
 					.filter(x -> x.fhirType().equals(resourceType))
 					.map(x -> x.getIdElement().getIdPart())
 					.filter(StringUtils::isNotBlank)
 					.toList();
+			if (ids.isEmpty()) {
+				throw new InvalidRequestException(Msg.code(2373)
+						+ "Request context did not provide for resource(s) matching template. ResourceType missing is: "
+						+ resourceType);
+			}
+			return ids;
 		} catch (ClassCastException e) {
-			throw new PreconditionFailedException(Msg.code(2374) + "Request context did not provide valid "
+			throw new InvalidRequestException(Msg.code(2374) + "Request context did not provide valid "
 					+ theFhirContext.getVersion().getVersion() + " Bundle resource for template key <" + key + ">");
 		}
 	}
@@ -113,10 +123,15 @@ public class PrefetchTemplateUtil {
 		final String key = m.group(1);
 		validateContextKeyExists(key, theContext);
 		try {
-			return List.of(theContext.getString(key));
+			final String value = theContext.getString(key);
+			if (value == null) {
+				throw new InvalidRequestException(
+						Msg.code(2857) + "Request context value for key <" + key + "> is null or not a string.");
+			}
+			return List.of(value);
 		} catch (ClassCastException e) {
-			throw new PreconditionFailedException(
-					Msg.code(2857) + "Request context value for key <" + key + "> is not a string.");
+			throw new InvalidRequestException(
+					Msg.code(2857) + "Request context value for key <" + key + "> is null or not a string.");
 		}
 	}
 
@@ -143,11 +158,11 @@ public class PrefetchTemplateUtil {
 			final String fullExpression = resource.fhirType() + "." + theFhirPathExpression;
 			return fhirPath.evaluate(resource, fullExpression, IBase.class);
 		} catch (ClassCastException e) {
-			throw new PreconditionFailedException(Msg.code(2858) + "Request context did not provide valid "
+			throw new InvalidRequestException(Msg.code(2858) + "Request context did not provide valid "
 					+ theFhirContext.getVersion().getVersion() + " Bundle resource for FHIRPath template key <"
 					+ thePrefetchKey + ">");
 		} catch (FhirPathExecutionException e) {
-			throw new PreconditionFailedException(Msg.code(2859)
+			throw new InvalidRequestException(Msg.code(2859)
 					+ "Unable to evaluate FHIRPath for prefetch template key <" + thePrefetchKey + "> for FHIR version "
 					+ theFhirContext.getVersion().getVersion());
 		}
@@ -155,7 +170,7 @@ public class PrefetchTemplateUtil {
 
 	private static void validateContextKeyExists(String theKey, @Nonnull CdsServiceRequestContextJson theContext) {
 		if (!theContext.containsKey(theKey)) {
-			throw new PreconditionFailedException(Msg.code(2372) + "Request context did not provide a value for key <"
+			throw new InvalidRequestException(Msg.code(2372) + "Request context did not provide a value for key <"
 					+ theKey + ">.  Available keys in context are: " + theContext.getKeys());
 		}
 	}
@@ -168,7 +183,7 @@ public class PrefetchTemplateUtil {
 					if (result instanceof IPrimitiveType) {
 						return ((IPrimitiveType<?>) result).getValueAsString();
 					} else {
-						throw new PreconditionFailedException(Msg.code(2860)
+						throw new InvalidRequestException(Msg.code(2860)
 								+ "FHIR path expression returned a non-primitive result: "
 								+ result.getClass().getSimpleName() + " for Prefetch Key : <" + thePrefetchKey + ">");
 					}

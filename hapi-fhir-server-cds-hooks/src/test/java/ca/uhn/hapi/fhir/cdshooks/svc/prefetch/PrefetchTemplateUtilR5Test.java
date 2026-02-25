@@ -2,7 +2,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.r5.model.CodeableReference;
 import org.hl7.fhir.r5.model.Device;
@@ -114,7 +114,7 @@ class PrefetchTemplateUtilR5Test {
 		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
-				.isInstanceOf(PreconditionFailedException.class)
+				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
 						"Unable to resolve prefetch template : context.draftOrders.entry.resource.ofType(DeviceRequest).code.reference.resolve().as(Device).id. No result was found for the prefetch query.");
 	}
