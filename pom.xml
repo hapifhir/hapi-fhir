@@ -984,6 +984,10 @@
 			<id>esecules</id>
 			<name>Eric Secules</name>
 		</developer>
+		<developer>
+			<id>dnaworks</id>
+			<name>Donald Wheeler</name>
+		</developer>
 	</developers>
 
 	<licenses>
