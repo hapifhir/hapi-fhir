@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7585
+title: "Custom MDM matching and similarity algorithms can now be registered at runtime. 
+  See [MDM Customizations](/hapi-fhir/docs/server_jpa_mdm/mdm_customizations.html) for details."
