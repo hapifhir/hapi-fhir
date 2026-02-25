@@ -58,6 +58,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -68,6 +69,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -2525,6 +2527,252 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		obs.setValue(new Quantity().setUnit("cm").setValue(51));
 		OperationOutcome oo = validateAndReturnOutcome(obs);
+		assertHasNoErrors(oo);
+	}
+
+	/**
+	 * Reproduces SMILE-11707: When validating a batch bundle containing cross-referencing
+	 * resources with a custom IG loaded, bundle-internal references should consult the
+	 * policy advisor rather than hardcoding CHECK_VALID. The desired behavior is that
+	 * validation passes without "Unable to find a profile match" errors for bundle-internal
+	 * references.
+	 */
+	@Test
+	void testValidateBundleWithCrossReferences_WhenCustomIgProfileConstrainsReferenceTarget_ShouldNotFailProfileMatching() {
+		// Given: Create a custom HealthcareService profile
+		String customHealthcareServiceProfileUrl = "http://example.com/fhir/StructureDefinition/custom-healthcareservice";
+		StructureDefinition healthcareServiceProfile = new StructureDefinition();
+		healthcareServiceProfile.setId("custom-healthcareservice");
+		healthcareServiceProfile.setUrl(customHealthcareServiceProfileUrl);
+		healthcareServiceProfile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		healthcareServiceProfile.setType("HealthcareService");
+		healthcareServiceProfile.setAbstract(false);
+		healthcareServiceProfile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		healthcareServiceProfile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/HealthcareService");
+		// Require the name field to be present (so our HealthcareService without name won't conform)
+		ElementDefinition hsNameElement = healthcareServiceProfile.getDifferential().addElement();
+		hsNameElement.setPath("HealthcareService.name");
+		hsNameElement.setId("HealthcareService.name");
+		hsNameElement.setMin(1);
+		myStructureDefinitionDao.update(healthcareServiceProfile, mySrd);
+
+		// Given: Create a custom OrganizationAffiliation profile that constrains
+		// the healthcareService reference to target the custom HealthcareService profile
+		String customOrgAffProfileUrl = "http://example.com/fhir/StructureDefinition/custom-organizationaffiliation";
+		StructureDefinition orgAffProfile = new StructureDefinition();
+		orgAffProfile.setId("custom-organizationaffiliation");
+		orgAffProfile.setUrl(customOrgAffProfileUrl);
+		orgAffProfile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		orgAffProfile.setType("OrganizationAffiliation");
+		orgAffProfile.setAbstract(false);
+		orgAffProfile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		orgAffProfile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/OrganizationAffiliation");
+		ElementDefinition oaRefElement = orgAffProfile.getDifferential().addElement();
+		oaRefElement.setPath("OrganizationAffiliation.healthcareService");
+		oaRefElement.setId("OrganizationAffiliation.healthcareService");
+		oaRefElement.addType().setCode("Reference").addTargetProfile(customHealthcareServiceProfileUrl);
+		myStructureDefinitionDao.update(orgAffProfile, mySrd);
+
+		// Given: Build a batch bundle with an OrganizationAffiliation referencing a HealthcareService
+		// The HealthcareService conforms to the BASE profile but NOT the custom profile (no name set)
+		HealthcareService healthcareService = new HealthcareService();
+		healthcareService.setId("HS-123");
+		healthcareService.setActive(true);
+		healthcareService.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>A healthcare service</div>");
+
+		OrganizationAffiliation orgAff = new OrganizationAffiliation();
+		orgAff.setId("OA-456");
+		orgAff.getMeta().addProfile(customOrgAffProfileUrl);
+		orgAff.setActive(true);
+		orgAff.addHealthcareService(new Reference("HealthcareService/HS-123"));
+		orgAff.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>An org affiliation</div>");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.BATCH);
+		bundle.addEntry()
+			.setFullUrl("http://example.com/fhir/HealthcareService/HS-123")
+			.setResource(healthcareService)
+			.getRequest()
+			.setUrl("HealthcareService/HS-123")
+			.setMethod(Bundle.HTTPVerb.PUT);
+		bundle.addEntry()
+			.setFullUrl("http://example.com/fhir/OrganizationAffiliation/OA-456")
+			.setResource(orgAff)
+			.getRequest()
+			.setUrl("OrganizationAffiliation/OA-456")
+			.setMethod(Bundle.HTTPVerb.PUT);
+
+		// When: Validate the bundle
+		OperationOutcome oo = validateAndReturnOutcome(bundle);
+		String encoded = encode(oo);
+		ourLog.info("Validation outcome: {}", encoded);
+
+		// Then: The desired behavior is NO errors about profile matching for bundle-internal references.
+		// The bug causes "Unable to find a profile match" because bundle-internal references
+		// are hardcoded to CHECK_VALID, bypassing the policy advisor.
+		assertThat(encoded).as("Bundle validation should not fail with profile match error for bundle-internal references")
+			.doesNotContain("Unable to find a profile match");
+		assertHasNoErrors(oo);
+	}
+
+	/**
+	 * Adjacent test for SMILE-11707: Validates that the same resources validated individually
+	 * (not in a bundle) do NOT trigger the "Unable to find a profile match" error.
+	 * This demonstrates the inconsistency - individual validation works, but bundle validation fails.
+	 */
+	@Test
+	void testValidateIndividualResource_WhenCustomIgProfileConstrainsReferenceTarget_ShouldNotFailProfileMatching() {
+		// Given: Same custom profiles as the primary test
+		String customHealthcareServiceProfileUrl = "http://example.com/fhir/StructureDefinition/custom-healthcareservice";
+		StructureDefinition healthcareServiceProfile = new StructureDefinition();
+		healthcareServiceProfile.setId("custom-healthcareservice");
+		healthcareServiceProfile.setUrl(customHealthcareServiceProfileUrl);
+		healthcareServiceProfile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		healthcareServiceProfile.setType("HealthcareService");
+		healthcareServiceProfile.setAbstract(false);
+		healthcareServiceProfile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		healthcareServiceProfile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/HealthcareService");
+		ElementDefinition hsNameElement = healthcareServiceProfile.getDifferential().addElement();
+		hsNameElement.setPath("HealthcareService.name");
+		hsNameElement.setId("HealthcareService.name");
+		hsNameElement.setMin(1);
+		myStructureDefinitionDao.update(healthcareServiceProfile, mySrd);
+
+		String customOrgAffProfileUrl = "http://example.com/fhir/StructureDefinition/custom-organizationaffiliation";
+		StructureDefinition orgAffProfile = new StructureDefinition();
+		orgAffProfile.setId("custom-organizationaffiliation");
+		orgAffProfile.setUrl(customOrgAffProfileUrl);
+		orgAffProfile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		orgAffProfile.setType("OrganizationAffiliation");
+		orgAffProfile.setAbstract(false);
+		orgAffProfile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		orgAffProfile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/OrganizationAffiliation");
+		ElementDefinition oaRefElement = orgAffProfile.getDifferential().addElement();
+		oaRefElement.setPath("OrganizationAffiliation.healthcareService");
+		oaRefElement.setId("OrganizationAffiliation.healthcareService");
+		oaRefElement.addType().setCode("Reference").addTargetProfile(customHealthcareServiceProfileUrl);
+		myStructureDefinitionDao.update(orgAffProfile, mySrd);
+
+		// Given: An OrganizationAffiliation referencing a HealthcareService (validated individually, not in bundle)
+		OrganizationAffiliation orgAff = new OrganizationAffiliation();
+		orgAff.getMeta().addProfile(customOrgAffProfileUrl);
+		orgAff.setActive(true);
+		orgAff.addHealthcareService(new Reference("HealthcareService/HS-123"));
+		orgAff.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>An org affiliation</div>");
+
+		// When: Validate individually (not in a bundle - reference is not resolvable in bundle context)
+		OperationOutcome oo = validateAndReturnOutcome(orgAff);
+		String encoded = encode(oo);
+		ourLog.info("Individual validation outcome: {}", encoded);
+
+		// Then: Should pass - when validated individually, the policy advisor IS consulted
+		// and returns IGNORE for the unresolvable reference
+		assertThat(encoded).doesNotContain("Unable to find a profile match");
+	}
+
+	/**
+	 * Adjacent test for SMILE-11707: Validates that a bundle with cross-referencing resources
+	 * but WITHOUT a custom IG profile loaded does not produce profile matching errors.
+	 */
+	@Test
+	void testValidateBundleWithCrossReferences_WhenNoCustomIgProfile_ShouldPassValidation() {
+		// Given: Build a bundle with an OrganizationAffiliation referencing a HealthcareService
+		// NO custom profiles are loaded - using base FHIR profiles only
+		HealthcareService healthcareService = new HealthcareService();
+		healthcareService.setId("HS-123");
+		healthcareService.setActive(true);
+		healthcareService.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>A healthcare service</div>");
+
+		OrganizationAffiliation orgAff = new OrganizationAffiliation();
+		orgAff.setId("OA-456");
+		orgAff.setActive(true);
+		orgAff.addHealthcareService(new Reference("HealthcareService/HS-123"));
+		orgAff.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>An org affiliation</div>");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.BATCH);
+		bundle.addEntry()
+			.setFullUrl("http://example.com/fhir/HealthcareService/HS-123")
+			.setResource(healthcareService)
+			.getRequest()
+			.setUrl("HealthcareService/HS-123")
+			.setMethod(Bundle.HTTPVerb.PUT);
+		bundle.addEntry()
+			.setFullUrl("http://example.com/fhir/OrganizationAffiliation/OA-456")
+			.setResource(orgAff)
+			.getRequest()
+			.setUrl("OrganizationAffiliation/OA-456")
+			.setMethod(Bundle.HTTPVerb.PUT);
+
+		// When: Validate the bundle
+		OperationOutcome oo = validateAndReturnOutcome(bundle);
+		String encoded = encode(oo);
+		ourLog.info("No custom IG validation outcome: {}", encoded);
+
+		// Then: Should pass - no custom target profile constraints to check against
+		assertThat(encoded).doesNotContain("Unable to find a profile match");
+		assertHasNoErrors(oo);
+	}
+
+	/**
+	 * Adjacent test for SMILE-11707: Validates that a bundle with cross-referencing resources
+	 * and base profiles only (no custom IG profile on the reference target) passes.
+	 */
+	@Test
+	void testValidateBundleWithCrossReferences_WhenBaseProfileOnly_ShouldPassValidation() {
+		// Given: Create a custom OrganizationAffiliation profile that does NOT constrain
+		// the healthcareService reference target (uses base HealthcareService profile)
+		String customOrgAffProfileUrl = "http://example.com/fhir/StructureDefinition/custom-orgaff-base-refs";
+		StructureDefinition orgAffProfile = new StructureDefinition();
+		orgAffProfile.setId("custom-orgaff-base-refs");
+		orgAffProfile.setUrl(customOrgAffProfileUrl);
+		orgAffProfile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		orgAffProfile.setType("OrganizationAffiliation");
+		orgAffProfile.setAbstract(false);
+		orgAffProfile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		orgAffProfile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/OrganizationAffiliation");
+		// Only constrain active to be required, don't touch healthcareService reference targets
+		ElementDefinition activeElement = orgAffProfile.getDifferential().addElement();
+		activeElement.setPath("OrganizationAffiliation.active");
+		activeElement.setId("OrganizationAffiliation.active");
+		activeElement.setMin(1);
+		myStructureDefinitionDao.update(orgAffProfile, mySrd);
+
+		// Given: Build a bundle
+		HealthcareService healthcareService = new HealthcareService();
+		healthcareService.setId("HS-123");
+		healthcareService.setActive(true);
+		healthcareService.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>A healthcare service</div>");
+
+		OrganizationAffiliation orgAff = new OrganizationAffiliation();
+		orgAff.setId("OA-456");
+		orgAff.getMeta().addProfile(customOrgAffProfileUrl);
+		orgAff.setActive(true);
+		orgAff.addHealthcareService(new Reference("HealthcareService/HS-123"));
+		orgAff.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>An org affiliation</div>");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.BATCH);
+		bundle.addEntry()
+			.setFullUrl("http://example.com/fhir/HealthcareService/HS-123")
+			.setResource(healthcareService)
+			.getRequest()
+			.setUrl("HealthcareService/HS-123")
+			.setMethod(Bundle.HTTPVerb.PUT);
+		bundle.addEntry()
+			.setFullUrl("http://example.com/fhir/OrganizationAffiliation/OA-456")
+			.setResource(orgAff)
+			.getRequest()
+			.setUrl("OrganizationAffiliation/OA-456")
+			.setMethod(Bundle.HTTPVerb.PUT);
+
+		// When: Validate the bundle
+		OperationOutcome oo = validateAndReturnOutcome(bundle);
+		String encoded = encode(oo);
+		ourLog.info("Base profile only validation outcome: {}", encoded);
+
+		// Then: Should pass - base HealthcareService profile is permissive
+		assertThat(encoded).doesNotContain("Unable to find a profile match");
 		assertHasNoErrors(oo);
 	}
 
