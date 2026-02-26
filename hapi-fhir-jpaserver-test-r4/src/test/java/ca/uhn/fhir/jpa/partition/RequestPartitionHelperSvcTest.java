@@ -6,9 +6,11 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +26,7 @@ import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -65,6 +68,10 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 	@AfterEach
 	public void afterEach(){
 		myPartitionSettings.setDefaultPartitionId(null);
+		Set<String> additional = myPartitionSettings.getAdditionalNonPartitionableResourceNames();
+		if (!additional.isEmpty()) {
+			additional.clear();
+		}
 	}
 
 	@Test
@@ -250,6 +257,72 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 
 		assertThat(normalizedRequestPartitionId.isPartition(theDefaultPartitionId)).isTrue();
 
+	}
+
+	@Test
+	void testIsResourcePartitionable_MeasureIsPartitionableByDefault() {
+		assertThat(mySvc.isResourcePartitionable("Measure")).isTrue();
+	}
+
+	@Test
+	void testIsResourcePartitionable_resourceBecomesNonPartitionable_whenAddedToAdditionalNonPartitionableResourceNames() {
+		myPartitionSettings.addAdditionalNonPartitionableResourceName("Measure");
+		assertThat(mySvc.isResourcePartitionable("Measure")).isFalse();
+	}
+
+	@Test
+	void testDetermineReadPartitionForSearchType_whenMeasureIsConfiguredNonPartitionable_returnsDefaultPartition() {
+		createPartition1();
+		myPartitionSettings.addAdditionalNonPartitionableResourceName("Measure");
+
+		ServletRequestDetails srd = new ServletRequestDetails();
+		srd.setTenantId(PARTITION_NAME_1);
+
+		RequestPartitionId result = mySvc.determineReadPartitionForRequestForSearchType(srd, "Measure");
+
+		assertThat(result.hasDefaultPartitionId(DEFAULT_PARTITION_ID)).isTrue();
+	}
+
+	@Test
+	void testDetermineReadPartitionForRead_whenMeasureIsConfiguredNonPartitionable_returnsDefaultPartition() {
+		createPartition1();
+		myPartitionSettings.addAdditionalNonPartitionableResourceName("Measure");
+
+		SystemRequestDetails srd = new SystemRequestDetails();
+		srd.setRequestPartitionId(RequestPartitionId.fromPartitionId(PARTITION_ID_1));
+
+		Measure measure = new Measure();
+		measure.setId(new IdType("Measure", "123", "1"));
+
+		RequestPartitionId result = mySvc.determineReadPartitionForRequestForRead(srd, measure.fhirType(), measure.getIdElement());
+
+		assertThat(result.hasDefaultPartitionId(DEFAULT_PARTITION_ID)).isTrue();
+	}
+
+	@Test
+	void testDetermineCreatePartition_whenMeasureIsConfiguredNonPartitionable_returnsDefaultPartition() {
+		myPartitionSettings.addAdditionalNonPartitionableResourceName("Measure");
+
+		SystemRequestDetails srd = new SystemRequestDetails();
+
+		Measure measure = new Measure();
+		RequestPartitionId result = mySvc.determineCreatePartitionForRequest(srd, measure, measure.fhirType());
+
+		assertThat(result.hasDefaultPartitionId(DEFAULT_PARTITION_ID)).isTrue();
+	}
+
+	@Test
+	void testDetermineCreatePartition_whenMeasureIsConfiguredNonPartitionable_andNonDefaultPartitionSpecified_throwsException() {
+		createPartition1();
+		myPartitionSettings.addAdditionalNonPartitionableResourceName("Measure");
+
+		SystemRequestDetails srd = new SystemRequestDetails();
+		srd.setRequestPartitionId(RequestPartitionId.fromPartitionId(PARTITION_ID_1));
+
+		Measure measure = new Measure();
+		assertThatThrownBy(() -> mySvc.determineCreatePartitionForRequest(srd, measure, measure.fhirType()))
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("non-partitionable resource");
 	}
 
 	private static Stream<Integer> withPartitionIds(){
