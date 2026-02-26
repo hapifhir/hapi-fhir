@@ -95,6 +95,15 @@ public class FhirDefaultPolicyAdvisor implements IValidationPolicyAdvisor {
 
 	@Override
 	public boolean isSuppressMessageId(String path, String messageId) {
+		if (!getReferencePolicy().checkValid()) {
+			// The InstanceValidator hardcodes CHECK_VALID for bundle-internal (INTERNAL) and
+			// contained references, bypassing the policy advisor's policyForReference method.
+			// When our configured policy would not have validated reference targets (e.g. IGNORE),
+			// suppress the profile-match errors that arise from the hardcoded CHECK_VALID behavior.
+			if ("Reference_REF_CantMatchChoice".equals(messageId)) {
+				return true;
+			}
+		}
 		return false;
 	}
 
