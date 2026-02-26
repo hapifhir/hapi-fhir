@@ -36,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,25 +63,23 @@ public class PrefetchTemplateUtil {
 			String theRawExpression,
 			@Nonnull CdsServiceRequestContextJson theContext,
 			@Nonnull FhirContext theFhirContext) {
-		final List<String> parts = Stream.of(theRawExpression.split(UNION_OPERATOR_REGEX))
+		final List<String> results = Stream.of(theRawExpression.split(UNION_OPERATOR_REGEX))
 				.map(String::trim)
+				.flatMap(part -> resolvePartResults(part, theContext, theFhirContext).stream())
 				.toList();
-		final List<String> results = new ArrayList<>();
-		for (String part : parts) {
-			List<String> partResults = handleDaVinciPart(part, theContext, theFhirContext);
-			if (partResults.isEmpty()) {
-				partResults = handleDefaultPart(part, theContext);
-			}
-			if (partResults.isEmpty()) {
-				partResults = handleFhirPathAndReferencedPrefetchPart(part, theContext, theFhirContext);
-			}
-			results.addAll(partResults);
-		}
 		if (results.isEmpty()) {
 			throw new InvalidRequestException(Msg.code(2856) + "Unable to resolve prefetch template : "
 					+ theRawExpression + ". No result was found for the prefetch query.");
 		}
 		return String.join(",", results);
+	}
+
+	private static List<String> resolvePartResults(
+			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
+		List<String> result = handleDaVinciPart(thePart, theContext, theFhirContext);
+		if (result.isEmpty()) result = handleDefaultPart(thePart, theContext);
+		if (result.isEmpty()) result = handleFhirPathAndReferencedPrefetchPart(thePart, theContext, theFhirContext);
+		return result;
 	}
 
 	/**
