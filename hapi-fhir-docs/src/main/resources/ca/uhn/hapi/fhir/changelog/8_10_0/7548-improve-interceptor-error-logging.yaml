@@ -1,0 +1,6 @@
+---
+type: change
+issue: 7548
+title: "The InterceptorService will no longer include a stack trace when logging the fact that a hook method
+   threw any exception extending HAPI FHIR's BaseServerResponseException, since this often happens as a part
+   of routine error handling."

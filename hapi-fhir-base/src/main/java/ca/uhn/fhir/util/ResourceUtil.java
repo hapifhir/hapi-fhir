@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,6 +149,13 @@ public class ResourceUtil {
 
 	public static EncodingEnum getEncodingTypeFromUserData(@Nonnull IBaseResource theResource) {
 		return (EncodingEnum) theResource.getUserData(ENCODING);
+	}
+
+	public static void clearRawStringFromResource(@Nonnull IBaseResource theResource) {
+		EncodingEnum type = (EncodingEnum) theResource.getUserData(ENCODING);
+		if (type != null) {
+			theResource.setUserData(getRawUserDataKey(type), null);
+		}
 	}
 
 	public static String getRawStringFromResourceOrNull(@Nonnull IBaseResource theResource) {

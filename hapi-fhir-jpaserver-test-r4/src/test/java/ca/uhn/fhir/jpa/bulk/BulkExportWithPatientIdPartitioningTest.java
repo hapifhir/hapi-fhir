@@ -2,10 +2,10 @@ package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -32,8 +32,9 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
 
 	@BeforeEach
+	@Override
 	public void before() {
-		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
@@ -51,8 +52,8 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 	public void testSystemBulkExport_withResourceType_success() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient");
-		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
+		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient");
+		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?");
 
 		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)) {
 			ourLog.info("Response: {}", postResponse);
@@ -65,8 +66,8 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 	public void testSystemBulkExport_withResourceType_pollSuccessful() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient"); // ignored when computing partition
-		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
+		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient"); // ignored when computing partition
+		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?");
 
 		String locationUrl;
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionOperations;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -266,32 +267,36 @@ public class HapiTransactionService implements IHapiTransactionService {
 			previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
 			ourRequestPartitionThreadLocal.set(requestPartitionId);
 		}
-
-		ourLog.trace("Starting doExecute for RequestPartitionId {}", requestPartitionId);
-		if (isCompatiblePartition(previousRequestPartitionId, requestPartitionId)) {
-			if (ourExistingTransaction.get() == this && canReuseExistingTransaction(theExecutionBuilder)) {
-				/*
-				 * If we're already in an active transaction, and it's for the right partition,
-				 * and it's not a read-only transaction, we don't need to open a new transaction
-				 * so let's just add a method to the stack trace that makes this obvious.
-				 */
-				return executeInExistingTransaction(theCallback);
-			}
-		}
-
-		HapiTransactionService previousExistingTransaction = ourExistingTransaction.get();
 		try {
-			ourExistingTransaction.set(this);
 
-			if (isRequiresNewTransactionWhenChangingPartitions()) {
-				return executeInNewTransactionForPartitionChange(
-						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
-			} else {
-				return doExecuteInTransaction(
-						theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+			ourLog.trace("Starting doExecute for RequestPartitionId {}", requestPartitionId);
+			if (isCompatiblePartition(previousRequestPartitionId, requestPartitionId)) {
+				if (ourExistingTransaction.get() == this && canReuseExistingTransaction(theExecutionBuilder)) {
+					/*
+					 * If we're already in an active transaction, and it's for the right partition,
+					 * and it's not a read-only transaction, we don't need to open a new transaction
+					 * so let's just add a method to the stack trace that makes this obvious.
+					 */
+					return executeInExistingTransaction(theCallback);
+				}
+			}
+
+			HapiTransactionService previousExistingTransaction = ourExistingTransaction.get();
+			try {
+				ourExistingTransaction.set(this);
+
+				if (isRequiresNewTransactionWhenChangingPartitions()) {
+					return executeInNewTransactionForPartitionChange(
+							theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+				} else {
+					return doExecuteInTransaction(
+							theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+				}
+			} finally {
+				ourExistingTransaction.set(previousExistingTransaction);
 			}
 		} finally {
-			ourExistingTransaction.set(previousExistingTransaction);
+			ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
 		}
 	}
 
@@ -724,5 +729,23 @@ public class HapiTransactionService implements IHapiTransactionService {
 		Validate.isTrue(
 				TransactionSynchronizationManager.isActualTransactionActive(),
 				"Transaction required here but no active transaction found");
+	}
+
+	/**
+	 * Registers a {@link Runnable} to be executed after the current active transaction is successfully committed,
+	 * using the {@link TransactionSynchronization#afterCommit()} callback. If no transaction is active, the runnable
+	 * is executed immediately.
+	 */
+	public static void executeAfterCommitOrExecuteNowIfNoTransactionIsActive(Runnable theRunnable) {
+		if (TransactionSynchronizationManager.isActualTransactionActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					theRunnable.run();
+				}
+			});
+		} else {
+			theRunnable.run();
+		}
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,6 +122,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
@@ -140,8 +141,10 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -780,21 +783,27 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
-		return myTransactionService.execute(theRequestDetails, transactionDetails, tx -> {
-			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			if (isNotBlank(theId.getValue())) {
-				deleteConflicts.setResourceIdMarkedForDeletion(theId);
-			}
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
+				theRequestDetails, getResourceName(), theId);
 
-			StopWatch w = new StopWatch();
+		return myTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(tx -> {
+					DeleteConflictList deleteConflicts = new DeleteConflictList();
+					if (isNotBlank(theId.getValue())) {
+						deleteConflicts.setResourceIdMarkedForDeletion(theId);
+					}
 
-			DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails, transactionDetails);
+					StopWatch w = new StopWatch();
 
-			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+					DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails, transactionDetails);
 
-			ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
-			return retVal;
-		});
+					DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+
+					ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
+					return retVal;
+				});
 	}
 
 	@Override
@@ -823,9 +832,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
 		}
 
-		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
-			throw new ResourceVersionConflictException(
-					Msg.code(961) + "Trying to delete " + theId + " but this is not the current version");
+		if (theId.hasVersionIdPart()) {
+			boolean versionMatches =
+					theId.isVersionIdPartValidLong() && Long.parseLong(theId.getVersionIdPart()) == entity.getVersion();
+			if (!versionMatches) {
+				throw new ResourceVersionConflictException(
+						Msg.code(961) + "Trying to delete " + theId + " but this is not the current version");
+			}
 		}
 
 		JpaPid persistentId = entity.getId();
@@ -865,11 +878,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		preDelete(resourceToDelete, entity, theRequestDetails);
 
 		ResourceTable savedEntity = updateEntityForDelete(theRequestDetails, theTransactionDetails, entity);
+		IIdType idBeforeDelete = new IdDt(resourceToDelete.getIdElement());
 		resourceToDelete.setId(entity.getIdDt());
 
 		// Notify JPA interceptors
 		HookParams hookParams = new HookParams()
 				.add(IBaseResource.class, resourceToDelete)
+				.add(IIdType.class, idBeforeDelete)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 				.add(TransactionDetails.class, theTransactionDetails)
@@ -1053,6 +1068,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			preDelete(resourceToDelete, entity, theRequestDetails);
 
 			updateEntityForDelete(theRequestDetails, transactionDetails, entity);
+			IdType oldVersionId = new IdType(entity.getIdDt().getValue());
 			resourceToDelete.setId(entity.getIdDt());
 
 			// Notify JPA interceptors
@@ -1061,6 +1077,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				public void beforeCommit(boolean readOnly) {
 					HookParams hookParams = new HookParams()
 							.add(IBaseResource.class, resourceToDelete)
+							.add(IIdType.class, oldVersionId)
 							.add(RequestDetails.class, theRequestDetails)
 							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 							.add(TransactionDetails.class, transactionDetails)
@@ -2010,7 +2027,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 										theId.getVersionIdPart(),
 										theId.toUnqualifiedVersionless()));
 			}
-			if (entity.getVersion() != theId.getVersionIdPartAsLong()) {
+			if (entity != null && entity.getVersion() != theId.getVersionIdPartAsLong()) {
 				entity = null;
 			}
 		}
@@ -2899,6 +2916,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			result = validator.validateWithResult(theRawResource, options);
 		} else {
 			result = validator.validateWithResult(theResource, options);
+		}
+
+		if (isNotBlank(theProfile)) {
+			// The $validate operation SHALL return error if the server cannot validate against the nominated profile.
+			// See https://www.hl7.org/fhir/resource-operation-validate.html
+			// even if FhirInstanceValidator.setErrorForUnknownProfiles(false) has been set
+			result.getMessages().stream()
+					.filter(m -> I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN.equals(m.getMessageId())
+							&& m.getSeverity() != ResultSeverityEnum.ERROR
+							&& m.getSeverity() != ResultSeverityEnum.FATAL)
+					.forEach(m -> m.setSeverity(ResultSeverityEnum.ERROR));
 		}
 
 		MethodOutcome retVal = new MethodOutcome();

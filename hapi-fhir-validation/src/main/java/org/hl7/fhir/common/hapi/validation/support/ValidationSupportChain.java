@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -116,7 +117,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class ValidationSupportChain implements IValidationSupport {
 	public static final ValueSetExpansionOptions EMPTY_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
 	static Logger ourLog = Logs.getTerminologyTroubleshootingLog();
-	private final List<IValidationSupport> myChain = new ArrayList<>();
+	private final List<IValidationSupport> myChain = new CopyOnWriteArrayList<>();
 
 	@Nullable
 	private final Cache<BaseKey<?>, Object> myExpiringCache;
@@ -499,10 +500,23 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	/**
+	 * Checks if the validation support chain is empty.
+	 * This method is useful for subclasses that need to determine whether validators
+	 * have already been added to the chain, particularly in scenarios where the same
+	 * chain instance may be shared across multiple application contexts.
+	 *
+	 * @return true if the chain is empty, false otherwise
+	 */
+	protected boolean isChainEmpty() {
+		return myChain.isEmpty();
+	}
+
+	/**
 	 * Removes an item from the chain. Note that this method is mostly intended for testing. Removing items from the chain while validation is
 	 * actually occurring is not an expected use case for this class.
 	 */
 	public void removeValidationSupport(IValidationSupport theValidationSupport) {
+		invalidateCaches();
 		myChain.remove(theValidationSupport);
 	}
 

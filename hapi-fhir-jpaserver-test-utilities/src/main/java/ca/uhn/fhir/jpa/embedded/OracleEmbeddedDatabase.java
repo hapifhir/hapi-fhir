@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,6 @@ import java.util.Map;
  */
 public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 	private JdbcDatabaseContainer<?> myContainer;
-
-	public OracleEmbeddedDatabase() {
-		this(new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true));
-	}
 
 	public OracleEmbeddedDatabase(JdbcDatabaseContainer<?> theContainer) {
 		myContainer = theContainer;

@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,24 @@ package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationRequest;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationResponse;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
@@ -47,8 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
 
@@ -69,8 +68,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 
 	@Override
 	protected void processPidsInTransaction(
-			String theInstanceId,
-			String theChunkId,
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			PT theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
@@ -79,7 +77,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 		HapiTransactionService.requireTransaction();
 
 		// Fetch all the resources in the chunk
-		fetchResourcesInTransaction(theState, thePids);
+		fetchResourcesInTransaction(theStepExecutionDetails, theState, thePids);
 
 		// Perform the modification (handled by subclasses)
 		C modificationContext;
@@ -92,7 +90,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 
 		// Store the modified resources to the DB
 		if (!theJobParameters.isDryRun()) {
-			storeResourcesInTransaction(modificationContext, theState, thePids, theTransactionDetails);
+			storeResourcesInTransaction(
+					theStepExecutionDetails, modificationContext, theState, thePids, theTransactionDetails);
 		} else {
 			theState.moveUnsavedToSaved();
 		}
@@ -102,7 +101,10 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	 * Fetches the given resources by PID from the database, and stores the fetched
 	 * resources in the {@link State}.
 	 */
-	private void fetchResourcesInTransaction(State theState, List<TypedPidAndVersionJson> thePids) {
+	private void fetchResourcesInTransaction(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			State theState,
+			List<TypedPidAndVersionJson> thePids) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		Multimap<TypedPidJson, TypedPidAndVersionJson> pidsToVersions =
@@ -139,7 +141,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 					// individually here. This could be made more efficient with some kind
 					// of bulk versioned fetch in the future.
 					IIdType nextVersionedId = resource.getIdElement().withVersion(Long.toString(nextVersion));
-					IBaseResource resourceVersion = dao.read(nextVersionedId, new SystemRequestDetails(), true);
+					RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+					IBaseResource resourceVersion = dao.read(nextVersionedId, requestDetails, true);
 
 					// Don't try to modify resource versions that are already deleted
 					if (ResourceMetadataKeyEnum.DELETED_AT.get(resourceVersion) != null) {
@@ -169,7 +172,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 			String resourceId = resource.getIdElement().getIdPart();
 			String resourceVersion = resource.getIdElement().getVersionIdPart();
 
-			try (HashingWriter preModificationHash = hashResource(resource)) {
+			try (ca.uhn.fhir.util.HashingWriter preModificationHash = hashResource(resource)) {
 
 				ResourceModificationRequest modificationRequest = new ResourceModificationRequest(resource);
 				ResourceModificationResponse modificationResponse =
@@ -190,7 +193,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 					continue;
 				}
 
-				HashingWriter postModificationHash = hashResource(updatedResource);
+				ca.uhn.fhir.util.HashingWriter postModificationHash = hashResource(updatedResource);
 				if (preModificationHash.matches(postModificationHash)) {
 					theState.moveToState(pid, StateEnum.UNCHANGED);
 					continue;
@@ -219,14 +222,15 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	}
 
 	@Nonnull
-	private HashingWriter hashResource(IBaseResource resource) {
-		try (HashingWriter preModificationHash = new HashingWriter()) {
-			preModificationHash.append(resource);
+	private ca.uhn.fhir.util.HashingWriter hashResource(IBaseResource resource) {
+		try (ca.uhn.fhir.util.HashingWriter preModificationHash = new ca.uhn.fhir.util.HashingWriter()) {
+			preModificationHash.append(myFhirContext, resource);
 			return preModificationHash;
 		}
 	}
 
 	private void storeResourcesInTransaction(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			C theModificationContext,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
@@ -241,7 +245,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 				Validate.isTrue(resource != null, "Resource for PID[%s] is null", pid);
 				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resource);
 
-				SystemRequestDetails requestDetails = createRequestDetails(theModificationContext, resource);
+				SystemRequestDetails requestDetails =
+						createRequestDetails(theStepExecutionDetails, theModificationContext, resource);
 
 				DaoMethodOutcome outcome =
 						dao.update(resource, null, true, false, requestDetails, theTransactionDetails);
@@ -258,7 +263,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 				IBaseResource resource = theState.getResourceForPid(pid);
 				Validate.isTrue(resource != null, "Resource for PID[%s] is null", pid);
 
-				SystemRequestDetails requestDetails = createRequestDetails(theModificationContext, resource);
+				SystemRequestDetails requestDetails =
+						createRequestDetails(theStepExecutionDetails, theModificationContext, resource);
 				if (requestDetails.isRewriteHistory()) {
 					throw new JobExecutionFailedException(
 							Msg.code(2806) + "Can't store deleted resources as history rewrites");
@@ -277,8 +283,11 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	}
 
 	@Nonnull
-	private SystemRequestDetails createRequestDetails(C theModificationContext, IBaseResource theResource) {
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
+	private SystemRequestDetails createRequestDetails(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			C theModificationContext,
+			IBaseResource theResource) {
+		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		requestDetails.setRewriteHistory(isRewriteHistory(theModificationContext, theResource));
 		return requestDetails;
 	}
@@ -320,40 +329,4 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	 */
 	protected abstract ResourceModificationResponse modifyResource(
 			PT theJobParameters, C theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
-
-	@SuppressWarnings("UnstableApiUsage")
-	private class HashingWriter extends Writer {
-
-		private final Hasher myHasher = Hashing.goodFastHash(128).newHasher();
-
-		@Override
-		public void write(@Nonnull char[] cbuf, final int off, final int len) {
-			for (int i = off; i < off + len; i++) {
-				myHasher.putChar(cbuf[i]);
-			}
-		}
-
-		@Override
-		public void flush() {
-			// nothing
-		}
-
-		@Override
-		public void close() {
-			// nothing
-		}
-
-		public void append(IBaseResource theResource) {
-			try {
-				myFhirContext.newJsonParser().setPrettyPrint(false).encodeResourceToWriter(theResource, this);
-			} catch (IOException e) {
-				// This shouldn't happen since we don't do any IO in this writer
-				throw new JobExecutionFailedException(Msg.code(2785) + "Failed to calculate resource hash", e);
-			}
-		}
-
-		public boolean matches(HashingWriter thePostModificationHash) {
-			return myHasher.hash().equals(thePostModificationHash.myHasher.hash());
-		}
-	}
 }

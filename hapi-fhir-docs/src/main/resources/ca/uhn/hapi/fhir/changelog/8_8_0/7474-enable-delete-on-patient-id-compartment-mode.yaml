@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7474
+title: "FHIR deletes do not always work when the PatientIdPartitionInterceptor is in use. This has been corrected."

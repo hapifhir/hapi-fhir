@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -255,5 +256,26 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		assertNotEquals(originalId, daoMethodOutcome.getId().getIdPartAsLong());
 		assertTrue(daoMethodOutcome.getCreated().booleanValue());
 		assertThat(firstObservationId.getIdPart()).isNotEqualTo(daoMethodOutcome.getId());
+	}
+
+	/**
+	 * When deleting a resource with a non-numeric version ID (e.g. from a corrupted or
+	 * non-numeric ETag), the server should throw a ResourceVersionConflictException (409)
+	 * rather than a NumberFormatException (500).
+	 * See SMILE-8708.
+	 */
+	@Test
+	void testDeleteWithNonNumericVersionId_returnsConflict() {
+		// Create a patient
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		// Attempt to delete with a non-numeric version in the ID
+		IdType idWithNonNumericVersion = new IdType("Patient", id.getIdPart(), "A23");
+
+		assertThatThrownBy(() -> myPatientDao.delete(idWithNonNumericVersion, mySrd))
+			.isInstanceOf(ResourceVersionConflictException.class)
+			.hasMessageContaining("Trying to delete");
 	}
 }

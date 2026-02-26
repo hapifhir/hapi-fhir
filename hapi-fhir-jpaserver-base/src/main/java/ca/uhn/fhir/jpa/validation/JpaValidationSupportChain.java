@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,6 +94,13 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	@PostConstruct
 	public void postConstruct() {
 		myWorkerContextValidationSupportAdapter.setValidationSupport(this);
+
+		// When this chain is shared between application contexts, Spring may call @PostConstruct
+		// multiple times on the same instance as it's registered in different application contexts.
+		// Only add validators if the chain is empty.
+		if (!isChainEmpty()) {
+			return;
+		}
 
 		if (myJpaStorageSettings.isAllowDatabaseValidationOverride()) {
 			addValidationSupport(myJpaValidationSupport);

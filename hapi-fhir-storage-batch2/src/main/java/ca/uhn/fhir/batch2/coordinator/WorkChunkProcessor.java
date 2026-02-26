@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -57,15 +58,18 @@ public class WorkChunkProcessor {
 	private final BatchJobSender myBatchJobSender;
 	private final StepExecutor myStepExecutor;
 	private final IHapiTransactionService myHapiTransactionService;
+	private final IJobStepExecutionServices myJobStepExecutionServices;
 
 	public WorkChunkProcessor(
 			IJobPersistence theJobPersistence,
 			BatchJobSender theSender,
-			IHapiTransactionService theHapiTransactionService) {
+			IHapiTransactionService theHapiTransactionService,
+			IJobStepExecutionServices theJobStepExecutionServices) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theSender;
 		myStepExecutor = new StepExecutor(theJobPersistence);
 		myHapiTransactionService = theHapiTransactionService;
+		myJobStepExecutionServices = theJobStepExecutionServices;
 	}
 
 	/**
@@ -73,7 +77,7 @@ public class WorkChunkProcessor {
 	 *
 	 * @param theCursor    - work cursor
 	 * @param theInstance  - the job instance
-	 * @param theWorkChunk - the work chunk (if available); can be null (for reduction step only!)
+	 * @param theWorkChunk - the work chunk (if available); can be null (for the reduction step only!)
 	 * @param <PT>         - Job parameters Type
 	 * @param <IT>         - Step input parameters Type
 	 * @param <OT>         - Step output parameters Type
@@ -94,10 +98,10 @@ public class WorkChunkProcessor {
 		assert !step.isReductionStep();
 
 		// all other kinds of steps
-		Validate.notNull(theWorkChunk);
+		Validate.notNull(theWorkChunk, "theWorkChunk must not be null");
 		Optional<StepExecutionDetails<PT, IT>> stepExecutionDetailsOpt =
 				getExecutionDetailsForNonReductionStep(theWorkChunk, theInstance, inputType, parameters);
-		if (!stepExecutionDetailsOpt.isPresent()) {
+		if (stepExecutionDetailsOpt.isEmpty()) {
 			return new JobStepExecutorOutput<>(false, dataSink);
 		}
 
@@ -114,9 +118,8 @@ public class WorkChunkProcessor {
 	 * Get the correct datasink for the cursor/job provided.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-			BaseDataSink<PT, IT, OT> getDataSink(
-					JobWorkCursor<PT, IT, OT> theCursor, JobDefinition<PT> theJobDefinition, String theInstanceId) {
+	<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> BaseDataSink<PT, IT, OT> getDataSink(
+			JobWorkCursor<PT, IT, OT> theCursor, JobDefinition<PT> theJobDefinition, String theInstanceId) {
 		BaseDataSink<PT, IT, OT> dataSink;
 
 		assert !theCursor.isReductionStep();
@@ -155,6 +158,7 @@ public class WorkChunkProcessor {
 			inputData = theWorkChunk.getData(theInputType);
 		}
 
-		return Optional.of(new StepExecutionDetails<>(theParameters, inputData, theInstance, theWorkChunk));
+		return Optional.of(new StepExecutionDetails<>(
+				theParameters, inputData, theInstance, theWorkChunk, myJobStepExecutionServices));
 	}
 }

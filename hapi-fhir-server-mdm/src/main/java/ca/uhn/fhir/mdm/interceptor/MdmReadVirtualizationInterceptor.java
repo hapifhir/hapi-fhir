@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.MdmSearchExpansionResults;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.mdm.svc.MdmSearchExpansionResults;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -103,8 +103,8 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	private MdmSearchExpansionSvc myMdmSearchExpansionSvc;
 
 	@Hook(
-			value = Pointcut.STORAGE_PRESEARCH_REGISTERED,
-			order = MdmConstants.ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR)
+			value = Pointcut.STORAGE_PRESEARCH_PARTITION_SELECTED,
+			order = MdmConstants.STORAGE_PRESEARCH_PARTITION_SELECTED_MDM_READ_VIRTUALIZATION_INTERCEPTOR)
 	public void preSearchRegistered(
 			RequestDetails theRequestDetails,
 			SearchParameterMap theSearchParameterMap,
@@ -113,7 +113,7 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 				.atTrace()
 				.setMessage("MDM virtualization original search: {}{}")
 				.addArgument(theRequestDetails.getResourceName())
-				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
+				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString())
 				.log();
 
 		String resourceType = theSearchDetails.getResourceType();
@@ -132,13 +132,14 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 				.atDebug()
 				.setMessage("MDM virtualization remapped search: {}{}")
 				.addArgument(theRequestDetails.getResourceName())
-				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString(myFhirContext))
+				.addArgument(() -> theSearchParameterMap.toNormalizedQueryString())
 				.log();
 	}
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShowResources(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
-		MdmSearchExpansionResults expansionResults = MdmSearchExpansionSvc.getCachedExpansionResults(theRequestDetails);
+		MdmSearchExpansionResults expansionResults =
+				MdmSearchExpansionResults.getCachedExpansionResults(theRequestDetails);
 		if (expansionResults == null) {
 			// This means the PRESEARCH hook didn't save anything, which probably means
 			// no RequestDetails is available
@@ -176,33 +177,30 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 		}
 
 		FhirTerser terser = myFhirContext.newTerser();
-		for (int resourceIdx = 0; resourceIdx < theDetails.size(); resourceIdx++) {
-			IBaseResource resource = theDetails.getResource(resourceIdx);
-			if (resource != null) {
 
-				// Extract all the references in the resources we're returning
-				// in case we need to remap them to golden equivalents
-				List<ResourceReferenceInfo> referenceInfos = terser.getAllResourceReferences(resource);
-				for (ResourceReferenceInfo referenceInfo : referenceInfos) {
-					IIdType referenceId = referenceInfo
-							.getResourceReference()
-							.getReferenceElement()
-							.toUnqualifiedVersionless();
-					if (referenceId.hasResourceType()
-							&& referenceId.hasIdPart()
-							&& !referenceId.isLocal()
-							&& !referenceId.isUuid()) {
-						Optional<IIdType> nonExpandedId = expansionResults.getOriginalIdForExpandedId(referenceId);
-						if (nonExpandedId != null && nonExpandedId.isPresent()) {
-							ourMdmTroubleshootingLog.debug(
-									"MDM virtualization is replacing reference at {} value {} with {}",
-									referenceInfo.getName(),
-									referenceInfo.getResourceReference().getReferenceElement(),
-									nonExpandedId.get().getValue());
-							referenceInfo
-									.getResourceReference()
-									.setReference(nonExpandedId.get().getValue());
-						}
+		for (IBaseResource resource : theDetails.getAllResources()) {
+			// Extract all the references in the resources we're returning
+			// in case we need to remap them to golden equivalents
+			List<ResourceReferenceInfo> referenceInfos = terser.getAllResourceReferences(resource);
+			for (ResourceReferenceInfo referenceInfo : referenceInfos) {
+				IIdType referenceId = referenceInfo
+						.getResourceReference()
+						.getReferenceElement()
+						.toUnqualifiedVersionless();
+				if (referenceId.hasResourceType()
+						&& referenceId.hasIdPart()
+						&& !referenceId.isLocal()
+						&& !referenceId.isUuid()) {
+					Optional<IIdType> nonExpandedId = expansionResults.getOriginalIdForExpandedId(referenceId);
+					if (nonExpandedId.isPresent()) {
+						ourMdmTroubleshootingLog.debug(
+								"MDM virtualization is replacing reference at {} value {} with {}",
+								referenceInfo.getName(),
+								referenceInfo.getResourceReference().getReferenceElement(),
+								nonExpandedId.get().getValue());
+						referenceInfo
+								.getResourceReference()
+								.setReference(nonExpandedId.get().getValue());
 					}
 				}
 			}

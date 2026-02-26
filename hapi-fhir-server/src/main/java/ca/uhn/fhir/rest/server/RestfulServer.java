@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1081,7 +1081,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 							&& contentType.startsWith(Constants.CT_X_FORM_URLENCODED)) {
 						String requestBody = toUtf8String(requestDetails.loadRequestContents());
 						params = UrlUtil.parseQueryStrings(theRequest.getQueryString(), requestBody);
-					} else if (theRequestType == RequestTypeEnum.GET) {
+					} else if (theRequestType == RequestTypeEnum.GET || theRequestType == RequestTypeEnum.POST) {
 						params = UrlUtil.parseQueryString(theRequest.getQueryString());
 					}
 				}

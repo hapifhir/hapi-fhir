@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,7 +218,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 			try {
 				compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 
-				retVal = accessDetails.toList().stream()
+				retVal = accessDetails.getAllResources().stream()
 						.map(resourceToPidMap::get)
 						.filter(Objects::nonNull)
 						.collect(Collectors.toSet());
