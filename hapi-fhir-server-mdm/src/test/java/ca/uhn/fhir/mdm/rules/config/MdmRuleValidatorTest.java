@@ -174,6 +174,38 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	}
 
 	@Test
+	void testCustomRegisteredMatcherAlgorithm_passesValidation() throws IOException {
+		myIMatcherFactory.register("CUSTOM_PHONETIC", (theLeftBase, theRightBase, theParams) -> true);
+		setMdmRuleJsonWithFactories("good-rules-custom-matcher-algorithm.json");
+		// No exception = pass
+	}
+
+	@Test
+	void testCustomRegisteredSimilarityAlgorithm_passesValidation() throws IOException {
+		mySimilarityFactory.register("CUSTOM_DISTANCE", (theFhirContext, theLeftBase, theRightBase, theExact) -> 1.0);
+		setMdmRuleJsonWithFactories("good-rules-custom-similarity-algorithm.json");
+		// No exception = pass
+	}
+
+	@Test
+	void testBuiltInMatcherAlgorithm_withFactories_passesValidation() throws IOException {
+		setMdmRuleJsonWithFactories("rules-extension-search.json");
+		// No exception = pass
+	}
+
+	@Test
+	void testUnknownMatcherAlgorithm_withNullFactories_passesValidation() throws IOException {
+		setMdmRuleJson("bad-rules-unknown-matcher-algorithm.json");
+		// No exception = null factories skip validation
+	}
+
+	@Test
+	void testUnknownSimilarityAlgorithm_withNullFactories_passesValidation() throws IOException {
+		setMdmRuleJson("bad-rules-unknown-similarity-algorithm.json");
+		// No exception = null factories skip validation
+	}
+
+	@Test
 	void testUnknownMatcherAlgorithm() throws IOException {
 		assertThatThrownBy(() -> setMdmRuleJsonWithFactories("bad-rules-unknown-matcher-algorithm.json"))
 			.isInstanceOf(ConfigurationException.class)
