@@ -187,6 +187,71 @@ public class SearchParameterValidatingInterceptorTest {
 
 	}
 
+	@Test
+	void whenRetireBuiltInNonDisableableSearchParam_thenExceptionIsThrown() {
+		// Created by Claude Sonnet 4.6
+		// Retiring Basic:code (built-in non-disableable) via API must be blocked
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/Basic-code");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
+		sp.setCode("code");
+		sp.setName("code");
+		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Basic.code");
+		sp.addBase("Basic");
+
+		try {
+			mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage()).contains("2845");
+		}
+	}
+
+	@Test
+	void whenRetireCustomSpOnNonDisableableResourceType_thenIsAllowed() {
+		// Created by Claude Sonnet 4.6
+		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
+		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(List.of());
+
+		// Retiring a custom (non-built-in URL) SP on Subscription must NOT be blocked
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/custom-sub-foo");
+		sp.setUrl("http://example.com/fhir/SearchParameter/Subscription-foo");
+		sp.setCode("foo");
+		sp.setName("foo");
+		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Subscription.status");
+		sp.addBase("Subscription");
+
+		// Should not throw
+		mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails);
+	}
+
+	@Test
+	void whenUpdateBuiltInNonDisableableSearchParamKeepingActive_thenIsAllowed() {
+		// Created by Claude Sonnet 4.6
+		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
+		setPersistedSearchParameterIds(asList(myExistingSearchParameter));
+		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(myExistingSearchParameter.getId()));
+
+		// Updating a non-disableable SP with ACTIVE status is fine
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/Basic-code");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
+		sp.setCode("code");
+		sp.setName("code");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Basic.code");
+		sp.addBase("Basic");
+
+		// Should not throw
+		mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails);
+	}
+
 	private void setPersistedSearchParameterIds(List<SearchParameter> theSearchParams) {
 		final AtomicLong counter = new AtomicLong();
 		List<IResourcePersistentId> resourcePersistentIds = theSearchParams

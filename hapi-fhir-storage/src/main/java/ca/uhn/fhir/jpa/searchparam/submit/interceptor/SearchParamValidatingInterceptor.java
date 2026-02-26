@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -162,6 +163,23 @@ public class SearchParamValidatingInterceptor {
 		RuntimeSearchParam runtimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theResource);
 		if (runtimeSearchParam == null) {
 			return;
+		}
+
+		/*
+		 * Block API calls that attempt to retire/inactivate a built-in non-disableable
+		 * search parameter. CDR seeding skips this check via the SKIP_VALIDATION flag
+		 * checked above, so only direct user API calls are affected.
+		 */
+		if (runtimeSearchParam.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
+			for (String nextBase : runtimeSearchParam.getBase()) {
+				if (ReadOnlySearchParamCache.isNonDisableableBuiltInSearchParam(
+						runtimeSearchParam.getUri(), nextBase, runtimeSearchParam.getName())) {
+					throw new UnprocessableEntityException(
+							Msg.code(2845) + "Cannot change the status of built-in search parameter "
+									+ nextBase + ":" + runtimeSearchParam.getName()
+									+ " because it is required for system operation");
+				}
+			}
 		}
 
 		validateSearchParamOnCreateAndUpdate(runtimeSearchParam);

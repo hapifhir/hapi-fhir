@@ -253,7 +253,7 @@ public class SearchParamRegistryImpl
 		RuntimeSearchParamCache searchParams =
 				RuntimeSearchParamCache.fromReadOnlySearchParamCache(builtInSearchParams);
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
-		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
+		ourLog.info("Have overridden {} built-in search parameters", overriddenCount);
 
 		// Auto-register: _language
 		if (myStorageSettings.isLanguageSearchParameterEnabled()) {
@@ -421,6 +421,22 @@ public class SearchParamRegistryImpl
 		 */
 		if (runtimeSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT) {
 			return 0;
+		}
+
+		/*
+		 * If the SP from the database is not active and it is a built-in non-disableable
+		 * search parameter, do not override the built-in ACTIVE version in the cache with
+		 * the retired/inactive DB version. This protects critical system search parameters
+		 * (e.g. Basic:code needed by the R4 SubscriptionTopic registry) from being
+		 * effectively retired even when the DB record has been updated.
+		 */
+		if (runtimeSp.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
+			for (String nextBase : runtimeSp.getBase()) {
+				if (ReadOnlySearchParamCache.isNonDisableableBuiltInSearchParam(
+						runtimeSp.getUri(), nextBase, runtimeSp.getName())) {
+					return 0;
+				}
+			}
 		}
 
 		/*

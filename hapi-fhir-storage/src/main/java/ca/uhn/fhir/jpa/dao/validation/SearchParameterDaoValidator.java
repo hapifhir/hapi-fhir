@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -78,7 +79,9 @@ public class SearchParameterDaoValidator {
 						nextBase, searchParameter.getCode(), ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 				if (existingSearchParam != null) {
 					boolean isBuiltIn = existingSearchParam.getId() == null;
-					isBuiltIn |= existingSearchParam.getUri().startsWith("http://hl7.org/fhir/SearchParameter/");
+					isBuiltIn |= existingSearchParam
+							.getUri()
+							.startsWith(ReadOnlySearchParamCache.BUILT_IN_SEARCH_PARAM_URI_PREFIX);
 					if (isBuiltIn) {
 						throw new UnprocessableEntityException(
 								Msg.code(1111) + "Can not override built-in search parameter " + nextBase + ":"

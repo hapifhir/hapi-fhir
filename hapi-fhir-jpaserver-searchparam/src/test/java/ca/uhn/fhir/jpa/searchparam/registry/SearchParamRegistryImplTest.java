@@ -481,6 +481,74 @@ public class SearchParamRegistryImplTest {
 
 	}
 
+	@Test
+	void testNonDisableableBuiltInSearchParam_RetiredInDbStaysActiveInCache() {
+		// Created by Claude Sonnet 4.6
+		// Setup: put a RETIRED version of Basic:code (built-in non-disableable URL) in the DB
+		SearchParameter basicCodeSp = new SearchParameter();
+		basicCodeSp.setId("SearchParameter/Basic-code");
+		basicCodeSp.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
+		basicCodeSp.setCode("code");
+		basicCodeSp.setName("code");
+		basicCodeSp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		basicCodeSp.setType(Enumerations.SearchParamType.TOKEN);
+		basicCodeSp.setExpression("Basic.code");
+		basicCodeSp.addBase("Basic");
+
+		ArrayList<ResourceTable> newEntities = new ArrayList<>(ourEntities);
+		newEntities.add(createEntity(++ourLastId, 1));
+		ResourceVersionMap versionMap = ResourceVersionMap.fromResourceTableEntities(newEntities);
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenReturn(versionMap);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(basicCodeSp));
+
+		// Test
+		mySearchParamRegistry.forceRefresh();
+
+		// Verify: the built-in ACTIVE version should remain in the cache despite the RETIRED DB entry
+		RuntimeSearchParam basicCode = mySearchParamRegistry.getActiveSearchParam(
+				"Basic", "code", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertNotNull(basicCode);
+		assertEquals("code", basicCode.getName());
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, basicCode.getStatus());
+	}
+
+	@Test
+	void testCustomSpOnNonDisableableResourceType_RetiredInDbIsRemovedFromCache() {
+		// Created by Claude Sonnet 4.6
+		// Setup: add a custom (non-built-in URL) SP on Subscription
+		SearchParameter customSp = new SearchParameter();
+		customSp.setId("SearchParameter/custom-subscription-foo");
+		customSp.setUrl("http://example.com/fhir/SearchParameter/Subscription-foo");
+		customSp.setCode("foo");
+		customSp.setName("foo");
+		customSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		customSp.setType(Enumerations.SearchParamType.TOKEN);
+		customSp.setExpression("Subscription.status");
+		customSp.addBase("Subscription");
+
+		ArrayList<ResourceTable> newEntities = new ArrayList<>(ourEntities);
+		newEntities.add(createEntity(++ourLastId, 1));
+		ResourceVersionMap versionMap = ResourceVersionMap.fromResourceTableEntities(newEntities);
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenReturn(versionMap);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(customSp));
+		mySearchParamRegistry.forceRefresh();
+
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
+				"Subscription", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+
+		// Now retire the custom SP
+		customSp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		newEntities.get(newEntities.size() - 1).setVersionForUnitTest(2);
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any()))
+				.thenReturn(ResourceVersionMap.fromResourceTableEntities(newEntities));
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(customSp));
+		mySearchParamRegistry.forceRefresh();
+
+		// Verify: custom SP is removed from cache (non-disableable protection is URI-prefix-gated)
+		assertNull(mySearchParamRegistry.getActiveSearchParam(
+				"Subscription", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+	}
+
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
 		// Add a new search parameter entity
 		List<ResourceTable> newEntities = new ArrayList<>(ourEntities);
