@@ -3,6 +3,8 @@ package ca.uhn.fhir.mdm.rules.similarity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -67,5 +69,35 @@ class MdmSimilarityFactoryTest {
 				.map(MdmSimilarityEnum::name)
 				.toList()
 		);
+	}
+
+	@Test
+	void getRegisteredNames_returnsImmutableCopy() {
+		Set<String> names = myFactory.getRegisteredNames();
+
+		assertThatThrownBy(() -> names.add("SHOULD_FAIL"))
+			.isInstanceOf(UnsupportedOperationException.class);
+	}
+
+	@Test
+	void register_viaProvider_isRetrievableByName() {
+		IMdmFieldSimilarity similarityImpl =
+			(theFhirContext, theLeftBase, theRightBase, theExact) -> 0.75;
+		IMdmFieldSimilarityProvider provider = new IMdmFieldSimilarityProvider() {
+			@Override
+			public String getName() {
+				return "PROVIDER_SIMILARITY";
+			}
+
+			@Override
+			public IMdmFieldSimilarity getSimilarity() {
+				return similarityImpl;
+			}
+		};
+
+		myFactory.register(provider.getName(), provider.getSimilarity());
+
+		assertThat(myFactory.getSimilarityForName("PROVIDER_SIMILARITY")).isSameAs(similarityImpl);
+		assertThat(myFactory.getRegisteredNames()).contains("PROVIDER_SIMILARITY");
 	}
 }

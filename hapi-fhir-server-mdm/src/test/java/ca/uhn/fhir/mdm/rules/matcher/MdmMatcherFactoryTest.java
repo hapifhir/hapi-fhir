@@ -3,6 +3,7 @@ package ca.uhn.fhir.mdm.rules.matcher;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcherProvider;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,5 +69,26 @@ class MdmMatcherFactoryTest {
 				.map(MatchTypeEnum::name)
 				.toList()
 		);
+	}
+
+	@Test
+	void register_viaProvider_isRetrievableByName() {
+		IMdmFieldMatcher matcherImpl = (theLeftBase, theRightBase, theParams) -> true;
+		IMdmFieldMatcherProvider provider = new IMdmFieldMatcherProvider() {
+			@Override
+			public String getName() {
+				return "PROVIDER_MATCHER";
+			}
+
+			@Override
+			public IMdmFieldMatcher getMatcher() {
+				return matcherImpl;
+			}
+		};
+
+		myFactory.register(provider.getName(), provider.getMatcher());
+
+		assertThat(myFactory.getFieldMatcherForName("PROVIDER_MATCHER")).isSameAs(matcherImpl);
+		assertThat(myFactory.getRegisteredNames()).contains("PROVIDER_MATCHER");
 	}
 }

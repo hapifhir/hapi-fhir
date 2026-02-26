@@ -64,6 +64,6 @@ public class MdmSimilarityFactory implements ISimilarityFactory {
 
 	@Override
 	public Set<String> getRegisteredNames() {
-		return mySimilarities.keySet();
+		return Set.copyOf(mySimilarities.keySet());
 	}
 }
