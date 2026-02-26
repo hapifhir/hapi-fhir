@@ -100,4 +100,30 @@ class PrefetchTemplateUtilCommonTest {
 				.hasMessageContaining("encounter");
 	}
 
+	@Test
+	void substituteTemplateShouldThrowWhenExpressionMatchesNoKnownPattern() {
+		// setup
+		final String template = "Patient?id={{unknownPattern}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put("patientId", TEST_PATIENT_ID);
+		// execute & validate
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(
+						"Unable to resolve prefetch template : unknownPattern. No result was found for the prefetch query.");
+	}
+
+	@Test
+	void substituteTemplateShouldThrowWhenFhirPathContextKeyHoldsNonResourceValue() {
+		// setup
+		final String template = "Patient?id={{context.encounter.id}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put("encounter", "not-a-resource");
+		// execute & validate
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(
+						"Request context did not provide valid R4 Bundle resource for FHIRPath template key <encounter>");
+	}
+
 }
