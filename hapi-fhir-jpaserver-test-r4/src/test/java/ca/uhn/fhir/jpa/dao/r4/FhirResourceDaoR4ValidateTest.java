@@ -2541,20 +2541,19 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	class BundleInternalReferenceProfileMatchTest {
 
 		private static final String CUSTOM_HEALTHCARE_SERVICE_PROFILE_URL =
-			"http://bpd.bcbs.com/StructureDefinition/bpd-healthcareservice-plan-submission";
+			"http://example.com/fhir/StructureDefinition/custom-healthcareservice";
 		private static final String CUSTOM_ORG_AFFILIATION_PROFILE_URL =
-			"http://bpd.bcbs.com/StructureDefinition/bpd-organizationaffiliation";
+			"http://example.com/fhir/StructureDefinition/custom-organizationaffiliation";
 
 		/**
 		 * Creates a custom HealthcareService profile that requires name (min=1).
 		 * A HealthcareService without name will NOT conform to this profile.
-		 * This mirrors the customer's BPD IG HealthcareService profile.
 		 */
 		private void createCustomHealthcareServiceProfile() {
 			StructureDefinition sd = new StructureDefinition();
-			sd.setId("bpd-healthcareservice-plan-submission");
+			sd.setId("custom-healthcareservice");
 			sd.setUrl(CUSTOM_HEALTHCARE_SERVICE_PROFILE_URL);
-			sd.setName("BpdHealthcareServicePlanSubmission");
+			sd.setName("CustomHealthcareService");
 			sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
 			sd.setType("HealthcareService");
 			sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/HealthcareService");
@@ -2570,13 +2569,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		/**
 		 * Creates a custom OrganizationAffiliation profile that constrains healthcareService
 		 * reference to target only the custom HealthcareService profile.
-		 * This mirrors the customer's BPD IG OrganizationAffiliation profile.
 		 */
 		private void createCustomOrgAffiliationProfile() {
 			StructureDefinition sd = new StructureDefinition();
-			sd.setId("bpd-organizationaffiliation");
+			sd.setId("custom-organizationaffiliation");
 			sd.setUrl(CUSTOM_ORG_AFFILIATION_PROFILE_URL);
-			sd.setName("BpdOrganizationAffiliation");
+			sd.setName("CustomOrganizationAffiliation");
 			sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
 			sd.setType("OrganizationAffiliation");
 			sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/OrganizationAffiliation");
@@ -2610,7 +2608,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		 * referencing the given HealthcareService.
 		 *
 		 * @param theHealthcareServiceRef the reference to the HealthcareService (e.g., "HealthcareService/svc1")
-		 * @param theIncludeSpecialty if true, adds a specialty coding (triggers the bug per customer report)
+		 * @param theIncludeSpecialty if true, adds a specialty coding (triggers additional validation paths)
 		 */
 		private OrganizationAffiliation createOrgAffiliationReferencingService(
 				String theHealthcareServiceRef, boolean theIncludeSpecialty) {
@@ -2665,32 +2663,28 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 
 		/**
-		 * Primary reproduction test for SMILE-11707 matching the customer's exact scenario.
+		 * Primary reproduction test for SMILE-11707.
 		 * <p>
-		 * A custom IG (BPD) defines a HealthcareService profile with name required.
+		 * A custom IG defines a HealthcareService profile with name required.
 		 * An OrganizationAffiliation profile constrains healthcareService reference
 		 * to target that custom profile. A batch bundle contains a HealthcareService
 		 * (without name, so it does NOT conform to the custom profile) and an
 		 * OrganizationAffiliation that references it. The OrganizationAffiliation has
-		 * specialty set (the customer reports removing specialty makes the error go away).
+		 * specialty set.
 		 * <p>
-		 * The DESIRED behavior is that the validation policy advisor should be consulted
-		 * for bundle-internal references just as it is for external references. With
-		 * the default IGNORE policy, no profile-match error should be produced.
-		 * <p>
-		 * This test SHOULD PASS (no profile-match errors), but FAILS on current master
-		 * because CHECK_VALID is hardcoded for INTERNAL references.
+		 * With the default IGNORE policy, no profile-match error should be produced
+		 * for bundle-internal references.
 		 */
 		@Test
 		void testValidateBundleWithCrossReferences_CustomProfileConstrainedTargetRef_ShouldNotProduceProfileMatchError() {
-			// Setup: create custom IG profiles matching the BPD scenario
+			// Setup: create custom IG profiles
 			createCustomHealthcareServiceProfile();
 			createCustomOrgAffiliationProfile();
 
 			// Create a HealthcareService without name (does not conform to custom profile)
 			HealthcareService svc = createHealthcareServiceWithoutName();
 
-			// Create an OrganizationAffiliation WITH specialty (key trigger per customer report)
+			// Create an OrganizationAffiliation WITH specialty (triggers additional validation paths)
 			OrganizationAffiliation orgAff =
 				createOrgAffiliationReferencingService("HealthcareService/svc1", true);
 
@@ -2718,10 +2712,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		/**
 		 * Adjacent test: Same scenario but WITHOUT specialty on OrganizationAffiliation.
-		 * <p>
-		 * The customer reports: "If you try to upload the Bundle without
-		 * OrganizationAffiliation.specialty the error no longer appears."
-		 * This test verifies whether removing specialty changes the validation behavior.
+		 * Removing specialty has been observed to change validation behavior in some cases.
 		 */
 		@Test
 		void testValidateBundleWithCrossReferences_WithoutSpecialty_ShouldNotProduceProfileMatchError() {
