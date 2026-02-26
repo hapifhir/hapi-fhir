@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7578
+title: "Previously, JSON Patch add operations failed with HAPI-1272 when targeting an empty
+  repeating element (e.g., adding a member to a Group with no existing members). The serialized
+  JSON omitted the empty array, causing the patch path to be unresolvable. This has been fixed
+  by pre-populating missing parent arrays before applying the patch."

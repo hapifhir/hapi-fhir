@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 7150
+jira: SMILE-9739
+title: "Previously, the default REST-hook endpoint URL validation regex allowed malformed URLs
+  such as those beginning with htt:// because the p in http was treated as optional. The
+  regex has been corrected to properly require http:// or https:// as the URL scheme.
+  Additionally, fragment identifiers (#) and IPv6 bracket notation ([ ]) are now accepted
+  in the default regex."

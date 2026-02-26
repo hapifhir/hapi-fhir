@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7531
+jira: SMILE-11306
+title: "Before, validation could fail because of stale validators in the validation chain. This has been fixed."

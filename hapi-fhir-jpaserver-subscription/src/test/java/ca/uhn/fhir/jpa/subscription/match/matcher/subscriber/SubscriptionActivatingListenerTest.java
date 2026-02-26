@@ -122,6 +122,6 @@ public class SubscriptionActivatingListenerTest {
 			.doAppend(appenderCaptor.capture());
 		List<ILoggingEvent> events = appenderCaptor.getAllValues();
 		assertThat(events).hasSize(totalInfoLogs);
-		assertThat(events.get(0).getMessage()).contains(exceptionMsg);
+		assertThat(events.get(0).getFormattedMessage()).contains(exceptionMsg);
 	}
 }

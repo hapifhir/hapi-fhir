@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5779
+title: "JsonParser.encodeResourceToString() was dropping whitespace-only primitive values (e.g. a string containing only spaces) during serialization. This was caused by the use of isBlank() instead of isEmpty() to check for empty values, as well as the element-level isEmpty() filter skipping primitives with whitespace-only content. Both issues have been fixed."
