@@ -10,7 +10,7 @@ schedules:
     displayName: Nightly Release Branch SNAPSHOT Publish
     branches:
       include:
-        - rel_8_8               # <-- UPDATE THIS EACH CYCLE
+        - rel_8_10               # <-- UPDATE THIS EACH CYCLE
     always: false
 
 # This is manually run to deploy SNAPSHOT versions of HAPI to oss.sonaypte.org
