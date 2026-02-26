@@ -1,0 +1,9 @@
+---
+type: fix
+jira: SMILE-11707
+title: "Previously, validating a Bundle containing cross-referencing resources could incorrectly fail with
+  \"Unable to find a profile match\" errors when a custom Implementation Guide constrained reference target
+  profiles and the configured reference validation policy was not CHECK_VALID. This was caused by the
+  underlying validator hardcoding CHECK_VALID for bundle-internal references, bypassing the configured
+  policy. This has been fixed so that profile match errors for bundle-internal references are suppressed
+  when the configured reference policy would not have validated those references."

@@ -2776,6 +2776,84 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertHasNoErrors(oo);
 	}
 
+	/**
+	 * Negative test for SMILE-11707: When the reference validation policy IS CHECK_VALID,
+	 * profile match errors should NOT be suppressed — users who opt into full reference
+	 * validation should see these errors.
+	 */
+	@Test
+	void testValidateBundleWithCrossReferences_WhenCheckValidPolicy_ShouldFailProfileMatching() {
+		// Given: Set the policy to CHECK_VALID (explicit opt-in to full reference validation)
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_VALID);
+
+		// Given: Same custom profiles as the primary test
+		String customHealthcareServiceProfileUrl = "http://example.com/fhir/StructureDefinition/custom-healthcareservice";
+		StructureDefinition healthcareServiceProfile = new StructureDefinition();
+		healthcareServiceProfile.setId("custom-healthcareservice");
+		healthcareServiceProfile.setUrl(customHealthcareServiceProfileUrl);
+		healthcareServiceProfile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		healthcareServiceProfile.setType("HealthcareService");
+		healthcareServiceProfile.setAbstract(false);
+		healthcareServiceProfile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		healthcareServiceProfile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/HealthcareService");
+		ElementDefinition hsNameElement = healthcareServiceProfile.getDifferential().addElement();
+		hsNameElement.setPath("HealthcareService.name");
+		hsNameElement.setId("HealthcareService.name");
+		hsNameElement.setMin(1);
+		myStructureDefinitionDao.update(healthcareServiceProfile, mySrd);
+
+		String customOrgAffProfileUrl = "http://example.com/fhir/StructureDefinition/custom-organizationaffiliation";
+		StructureDefinition orgAffProfile = new StructureDefinition();
+		orgAffProfile.setId("custom-organizationaffiliation");
+		orgAffProfile.setUrl(customOrgAffProfileUrl);
+		orgAffProfile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		orgAffProfile.setType("OrganizationAffiliation");
+		orgAffProfile.setAbstract(false);
+		orgAffProfile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		orgAffProfile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/OrganizationAffiliation");
+		ElementDefinition oaRefElement = orgAffProfile.getDifferential().addElement();
+		oaRefElement.setPath("OrganizationAffiliation.healthcareService");
+		oaRefElement.setId("OrganizationAffiliation.healthcareService");
+		oaRefElement.addType().setCode("Reference").addTargetProfile(customHealthcareServiceProfileUrl);
+		myStructureDefinitionDao.update(orgAffProfile, mySrd);
+
+		// Given: Same bundle as the primary test
+		HealthcareService healthcareService = new HealthcareService();
+		healthcareService.setId("HS-123");
+		healthcareService.setActive(true);
+		healthcareService.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>A healthcare service</div>");
+
+		OrganizationAffiliation orgAff = new OrganizationAffiliation();
+		orgAff.setId("OA-456");
+		orgAff.getMeta().addProfile(customOrgAffProfileUrl);
+		orgAff.setActive(true);
+		orgAff.addHealthcareService(new Reference("HealthcareService/HS-123"));
+		orgAff.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>An org affiliation</div>");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.BATCH);
+		bundle.addEntry()
+			.setFullUrl("http://example.com/fhir/HealthcareService/HS-123")
+			.setResource(healthcareService)
+			.getRequest()
+			.setUrl("HealthcareService/HS-123")
+			.setMethod(Bundle.HTTPVerb.PUT);
+		bundle.addEntry()
+			.setFullUrl("http://example.com/fhir/OrganizationAffiliation/OA-456")
+			.setResource(orgAff)
+			.getRequest()
+			.setUrl("OrganizationAffiliation/OA-456")
+			.setMethod(Bundle.HTTPVerb.PUT);
+
+		// When: Validate the bundle
+		OperationOutcome oo = validateAndReturnOutcome(bundle);
+		String encoded = encode(oo);
+		ourLog.info("CHECK_VALID policy validation outcome: {}", encoded);
+
+		// Then: SHOULD produce profile match error because user explicitly opted into CHECK_VALID
+		assertThat(encoded).contains("Unable to find a profile match");
+	}
+
 	private void registerUnknownCodeSystemValidationMessageSeverityInterceptor(IValidationSupport.IssueSeverity theSeverity) {
 		unregisterInterceptor(myValidationMessageUnknownCodeSystemProcessingInterceptor);
 		myValidationMessageUnknownCodeSystemProcessingInterceptor = new ValidationMessageUnknownCodeSystemPostProcessingInterceptor(theSeverity);
