@@ -645,11 +645,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		});
 
 		// Now simulate a "late-arriving" chunk: a step 1 worker finishes AFTER advancement and produces
-		// another chunk for LAST_STEP_ID. Because the job is gated, onWorkChunkCreate sets GATE_WAITING.
+		// another chunk for LAST_STEP_ID. The fix in onWorkChunkCreate detects that the job has already
+		// advanced to this step and creates the chunk as READY instead of GATE_WAITING.
 		String lateChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 2, null, isGatedExecution);
 
-		// verify - the late chunk SHOULD be READY since the job has already advanced to LAST_STEP_ID.
-		// BUG: This will FAIL because the late chunk is stuck in GATE_WAITING with no code path to flip it.
+		// verify - the late chunk should be READY since the job has already advanced to LAST_STEP_ID
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
 				.as("Late-arriving chunk for the current gated step should be READY, not stuck in GATE_WAITING")
