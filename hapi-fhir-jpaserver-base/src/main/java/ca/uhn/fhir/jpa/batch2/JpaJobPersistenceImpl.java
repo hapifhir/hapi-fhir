@@ -130,6 +130,25 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setStartTime(new Date());
 		entity.setStatus(getOnCreateStatus(theBatchWorkChunk));
 
+		// If the chunk would be GATE_WAITING, check if the job has already advanced to this step.
+		// Late-arriving chunks (produced by slow workers after advanceJobStepAndUpdateChunkStatus has
+		// already flipped existing chunks to READY) would otherwise be stuck in GATE_WAITING forever.
+		if (entity.getStatus() == WorkChunkStatusEnum.GATE_WAITING) {
+			Optional<Batch2JobInstanceEntity> instanceOpt =
+					myJobInstanceRepository.findById(theBatchWorkChunk.instanceId);
+			if (instanceOpt.isPresent()) {
+				String currentGatedStepId = instanceOpt.get().getCurrentGatedStepId();
+				if (theBatchWorkChunk.targetStepId.equals(currentGatedStepId)) {
+					ourLog.debug(
+							"Chunk {}/{} target step {} matches current gated step; creating as READY instead of GATE_WAITING",
+							entity.getInstanceId(),
+							entity.getId(),
+							theBatchWorkChunk.targetStepId);
+					entity.setStatus(WorkChunkStatusEnum.READY);
+				}
+			}
+		}
+
 		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
 		ourLog.trace(
 				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
