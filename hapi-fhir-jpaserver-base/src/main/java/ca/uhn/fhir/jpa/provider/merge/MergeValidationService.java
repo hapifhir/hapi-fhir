@@ -316,12 +316,8 @@ public class MergeValidationService {
 			return false;
 		}
 
-		if (!validateSourceAndTargetBelongToSamePatientCompartmentIfApplicable(
-				theSourceResource, theTargetResource, outcome)) {
-			return false;
-		}
-
-		return true;
+		return validateSourceAndTargetBelongToSamePatientCompartmentIfApplicable(
+				theSourceResource, theTargetResource, outcome);
 	}
 
 	/**
