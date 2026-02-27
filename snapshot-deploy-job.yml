@@ -15,6 +15,7 @@ jobs:
     variables:
       - group: GPG_VARIABLE_GROUP
       - group: CENTRAL_VARIABLE_GROUP
+      - group: SLACK_VARIABLE_GROUP
 
     container:
       image: smilecdr/hapi-build:latest
@@ -92,3 +93,29 @@ jobs:
           goals: deploy
           options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST -DskipTests -DdeployToCentral --batch-mode --no-transfer-progress --threads 1C --fail-at-end -Dstyle.color=never '
           publishJUnitResults: false
+
+      # 6. Notify Slack if the deploy failed
+      - bash: |
+          PIPELINE_URL="$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+          curl -s -X POST "${SLACK_WEBHOOK_URL}" \
+            -H 'Content-type: application/json' \
+            --data "{
+              \"text\": \":red_circle: *HAPI FHIR Nightly SNAPSHOT Deploy Failed*\",
+              \"blocks\": [
+                {
+                  \"type\": \"section\",
+                  \"text\": {
+                    \"type\": \"mrkdwn\",
+                    \"text\": \":red_circle: *HAPI FHIR Nightly SNAPSHOT Deploy Failed*\n\n*Pipeline:* ${PIPELINE_NAME}\n*Branch:* \`${BRANCH_NAME}\`\n*Build:* <${PIPELINE_URL}|${BUILD_NUMBER}>\n*Reason:* ${BUILD_REASON}\"
+                  }
+                }
+              ]
+            }" || echo "Failed to send Slack notification"
+        displayName: 'Notify Slack on failure'
+        condition: failed()
+        env:
+          SLACK_WEBHOOK_URL: $(SLACK_WEBHOOK_URL)
+          PIPELINE_NAME: $(Build.DefinitionName)
+          BRANCH_NAME: $(Build.SourceBranchName)
+          BUILD_NUMBER: $(Build.BuildNumber)
+          BUILD_REASON: $(Build.Reason)
