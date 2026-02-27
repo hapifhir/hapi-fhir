@@ -2,8 +2,9 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.merge.ExtensionBasedLinkService;
 import ca.uhn.fhir.merge.PatientNativeLinkService;
@@ -16,27 +17,35 @@ import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.OngoingStubbing;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -65,10 +74,19 @@ class MergeValidationServiceTest {
 	DaoRegistry myDaoRegistryMock;
 
 	@Mock
-	IFhirResourceDaoPatient<Patient> myPatientDaoMock;
+	IFhirResourceDao<IBaseResource> myPatientDaoMock;
 
 	@Mock
 	RequestDetails myRequestDetailsMock;
+
+	@Mock
+	ISearchParamExtractor mySearchParamExtractorMock;
+
+	@Mock
+	IFhirResourceDao<IBaseResource> myOrganizationDaoMock;
+
+	@Mock
+	IFhirResourceDao<IBaseResource> myObservationDaoMock;
 
 	private MergeValidationService myMergeValidationService;
 
@@ -84,9 +102,8 @@ class MergeValidationServiceTest {
 		ResourceLinkServiceFactory resourceLinkServiceFactory =
 			new ResourceLinkServiceFactory(patientNativeLinkService, extensionBasedLinkService);
 
-		ISearchParamExtractor searchParamExtractor = mock(ISearchParamExtractor.class);
 		myMergeValidationService = new MergeValidationService(
-			myFhirContext, myDaoRegistryMock, resourceLinkServiceFactory, searchParamExtractor);
+			myFhirContext, myDaoRegistryMock, resourceLinkServiceFactory, mySearchParamExtractorMock);
 	}
 
 	@Nested
@@ -733,6 +750,104 @@ class MergeValidationServiceTest {
 		}
 	}
 
+	@Nested
+	class PatientCompartmentValidation {
+
+		@Test
+		void testValidate_PatientResources_CompartmentCheckSkipped_ReturnsValid() {
+			// Given
+			MergeOperationInputParameters params = new MergeOperationInputParameters();
+			params.setResourceLimit(PAGE_SIZE);
+			params.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+			params.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+			Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID);
+			Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID);
+			setupDaoMockForSuccessfulRead(sourcePatient);
+			setupDaoMockForSuccessfulRead(targetPatient);
+
+			// When
+			MergeOperationOutcome mergeOutcome = createMergeOutcome();
+			MergeValidationResult result = myMergeValidationService.validate(params, myRequestDetailsMock, mergeOutcome);
+
+			// Then
+			assertThat(result.isValid).isTrue();
+			verifyNoInteractions(mySearchParamExtractorMock);
+		}
+
+		@Test
+		void testValidate_NonCompartmentResourceType_CompartmentCheckSkipped_ReturnsValid() {
+			// Given
+			when(myRequestDetailsMock.getResourceName()).thenReturn("Organization");
+			when(myDaoRegistryMock.getResourceDao("Organization")).thenReturn(myOrganizationDaoMock);
+
+			MergeOperationInputParameters params = new MergeOperationInputParameters();
+			params.setResourceLimit(PAGE_SIZE);
+			params.setSourceResource(new Reference("Organization/ORG1"));
+			params.setTargetResource(new Reference("Organization/ORG2"));
+			IBaseResource sourceOrg = createOrganization("Organization/ORG1");
+			IBaseResource targetOrg = createOrganization("Organization/ORG2");
+			setupDaoMockForSuccessfulRead(myOrganizationDaoMock, sourceOrg);
+			setupDaoMockForSuccessfulRead(myOrganizationDaoMock, targetOrg);
+
+			// When
+			MergeOperationOutcome mergeOutcome = createMergeOutcome();
+			MergeValidationResult result = myMergeValidationService.validate(params, myRequestDetailsMock, mergeOutcome);
+
+			// Then
+			assertThat(result.isValid).isTrue();
+		}
+
+		static Stream<Arguments> compartmentCases() {
+			BaseSearchParamExtractor.IValueExtractor refP01 = () -> List.of(new Reference("Patient/P01"));
+			BaseSearchParamExtractor.IValueExtractor refP02 = () -> List.of(new Reference("Patient/P02"));
+			BaseSearchParamExtractor.IValueExtractor empty = Collections::emptyList;
+			return Stream.of(
+				Arguments.of("same patient compartment",      refP01, refP01, true),
+				Arguments.of("different patient compartments", refP01, refP02, false),
+				Arguments.of("source has no patient ref",     empty,  refP01, true),
+				Arguments.of("target has no patient ref",     refP01, empty,  true)
+			);
+		}
+
+		@ParameterizedTest(name = "{0}")
+		@MethodSource("compartmentCases")
+		void testValidate_ResourceInPatientCompartment(
+				String theCaseName,
+				BaseSearchParamExtractor.IValueExtractor theSourceExtractor,
+				BaseSearchParamExtractor.IValueExtractor theTargetExtractor,
+				boolean theExpectedValid) {
+			// Given
+			when(myRequestDetailsMock.getResourceName()).thenReturn("Observation");
+			when(myDaoRegistryMock.getResourceDao("Observation")).thenReturn(myObservationDaoMock);
+			IBaseResource sourceObs = createObservation("Observation/OBS1");
+			IBaseResource targetObs = createObservation("Observation/OBS2");
+			setupDaoMockForSuccessfulRead(myObservationDaoMock, sourceObs);
+			setupDaoMockForSuccessfulRead(myObservationDaoMock, targetObs);
+			MergeOperationInputParameters params = new MergeOperationInputParameters();
+			params.setResourceLimit(PAGE_SIZE);
+			params.setSourceResource(new Reference("Observation/OBS1"));
+			params.setTargetResource(new Reference("Observation/OBS2"));
+			when(mySearchParamExtractorMock.getPathValueExtractor(eq(sourceObs), anyString()))
+				.thenReturn(theSourceExtractor);
+			when(mySearchParamExtractorMock.getPathValueExtractor(eq(targetObs), anyString()))
+				.thenReturn(theTargetExtractor);
+
+			// When
+			MergeOperationOutcome mergeOutcome = createMergeOutcome();
+			MergeValidationResult result = myMergeValidationService.validate(params, myRequestDetailsMock, mergeOutcome);
+
+			// Then
+			assertThat(result.isValid).isEqualTo(theExpectedValid);
+			if (!theExpectedValid) {
+				assertThat(result.httpStatusCode).isEqualTo(422);
+				OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
+				OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+				assertThat(issue.getDiagnostics()).contains("Source and target resources belong to different patients");
+				assertThat(issue.getCode().toCode()).isEqualTo("invalid");
+			}
+		}
+	}
+
 	private MergeOperationOutcome createMergeOutcome() {
 		MergeOperationOutcome mergeOutcome = new MergeOperationOutcome();
 		mergeOutcome.setOperationOutcome(OperationOutcomeUtil.newInstance(myFhirContext));
@@ -740,8 +855,12 @@ class MergeValidationServiceTest {
 	}
 
 	private void setupDaoMockForSuccessfulRead(Patient theResource) {
+		setupDaoMockForSuccessfulRead(myPatientDaoMock, theResource);
+	}
+
+	private void setupDaoMockForSuccessfulRead(IFhirResourceDao<IBaseResource> theDao, IBaseResource theResource) {
 		assertThat(theResource.getIdElement()).isNotNull();
-		when(myPatientDaoMock.read(theResource.getIdElement().toVersionless(), myRequestDetailsMock))
+		when(theDao.read(theResource.getIdElement().toVersionless(), myRequestDetailsMock))
 			.thenReturn(theResource);
 	}
 
@@ -801,6 +920,18 @@ class MergeValidationServiceTest {
 		Patient patient = new Patient();
 		patient.setId(theId);
 		return patient;
+	}
+
+	private static Observation createObservation(String theId) {
+		Observation observation = new Observation();
+		observation.setId(theId);
+		return observation;
+	}
+
+	private static Organization createOrganization(String theId) {
+		Organization organization = new Organization();
+		organization.setId(theId);
+		return organization;
 	}
 
 	private static void addReplacesLink(Patient thePatient, String theReplacedResourceId) {
