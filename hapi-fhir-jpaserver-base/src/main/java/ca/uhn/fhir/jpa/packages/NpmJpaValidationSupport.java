@@ -60,57 +60,6 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 		return fetchResource("StructureDefinition", theUri);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
-		if (theClass != null) {
-			String resourceType = myFhirContext.getResourceType(theClass);
-			// we can cast safely because the resource type must match what we're passing in.
-			// we aren't loading different versions of FHIR after all (since what we
-			// load is dependent on the fhir context too)
-			return (T) fetchResource(resourceType, theUri);
-		}
-
-		// no class
-		return null;
-	}
-
-	public static int batchSize() {
-		return 100;
-	}
-
-	@Override
-	public <T extends IBaseResource> List<T> fetchResources(Class<T> theClazz, String theUrl) {
-		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
-		PagingIterator<T> pagingIterator = new PagingIterator<>(
-				batchSize(),
-				(pageSize, batchSize, theConsumer) ->
-						myHapiPackageCacheManager
-								.loadPackageAssetsByUrl(fhirVersion, theUrl, PageRequest.of(pageSize, batchSize))
-								.stream()
-								.filter(r -> {
-									if (theClazz != null) {
-										return r.getClass().isAssignableFrom(theClazz);
-									}
-									return true;
-								})
-								.forEach(r -> theConsumer.accept((T) r)));
-
-		List<T> retval = new ArrayList<>();
-		while (pagingIterator.hasNext()) {
-			retval.add(pagingIterator.next());
-		}
-		return retval;
-	}
-
-	@Override
-	public <T extends IBaseResource> List<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
-		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
-		return myHapiPackageCacheManager.loadPackageAssetsByType(fhirVersion, theClazz.getSimpleName()).stream()
-				.map(r -> (T) r)
-				.toList();
-	}
-
 	@Nullable
 	public IBaseResource fetchResource(String theResourceType, String theUri) {
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();

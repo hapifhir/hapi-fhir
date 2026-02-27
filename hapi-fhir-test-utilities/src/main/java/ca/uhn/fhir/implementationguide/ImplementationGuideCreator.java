@@ -22,6 +22,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -71,20 +73,19 @@ public class ImplementationGuideCreator {
 	private final FhirTerser myTerser;
 	private final IParser myParser;
 
-	private final String myPackageJson;
+	private String myPackageJson;
 
 	private final String myPackageName;
 	private final String myPackageVersion;
 
 	private final Map<String, IBaseResource> myResourcesToInclude = new HashMap<>();
 
-	public ImplementationGuideCreator(@Nonnull FhirContext theFhirContext) throws JsonProcessingException {
+	public ImplementationGuideCreator(@Nonnull FhirContext theFhirContext) {
 		this(theFhirContext, "test.fhir.ca.com", "1.2.3");
 	}
 
 	public ImplementationGuideCreator(
-			@Nonnull FhirContext theFhirContext, String thePackageName, String thePackageVersion)
-			throws JsonProcessingException {
+			@Nonnull FhirContext theFhirContext, String thePackageName, String thePackageVersion) {
 		this(
 				theFhirContext,
 				theFhirContext.getVersion().getVersion().getFhirVersionString(),
@@ -101,8 +102,7 @@ public class ImplementationGuideCreator {
 	 */
 	@SuppressWarnings("unchecked")
 	public ImplementationGuideCreator(
-			@Nonnull FhirContext theFhirContext, String theFhirVersion, String theName, String theVersion)
-			throws JsonProcessingException {
+			@Nonnull FhirContext theFhirContext, String theFhirVersion, String theName, String theVersion) {
 		myFhirContext = theFhirContext;
 		myTerser = myFhirContext.newTerser();
 		myParser = myFhirContext.newJsonParser();
@@ -112,7 +112,13 @@ public class ImplementationGuideCreator {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-		Map<String, Object> mapJson = mapper.readValue(PACKAGE_JSON_BASE, Map.class);
+		Map<String, Object> mapJson;
+		try {
+			mapJson = mapper.readValue(PACKAGE_JSON_BASE, Map.class);
+		} catch (Exception ex) {
+			sneakyThrow(ex);
+			mapJson = new HashMap<>();
+		}
 
 		// update provided values
 		List<String> versions = (List<String>) mapJson.get("fhirVersions");
@@ -121,9 +127,14 @@ public class ImplementationGuideCreator {
 		mapJson.replace("name", myPackageName);
 		mapJson.replace("version", myPackageVersion);
 
-		myPackageJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapJson);
+		try {
+			myPackageJson = mapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(mapJson);
 
-		ourLog.info(myPackageJson);
+			ourLog.info(myPackageJson);
+		} catch (Exception ex) {
+			sneakyThrow(ex);
+		}
 	}
 
 	/**
@@ -170,7 +181,7 @@ public class ImplementationGuideCreator {
 		// add the package.json
 		addFileToDir(myPackageJson, "package.json", sourceDir);
 
-		// add search parameters
+		// add resources
 		int index = 0;
 		for (Map.Entry<String, IBaseResource> nameAndResource : myResourcesToInclude.entrySet()) {
 			addFileToDir(
@@ -198,5 +209,10 @@ public class ImplementationGuideCreator {
 				}
 			}
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <THROWS extends Throwable> void sneakyThrow(Throwable theThrowable) throws THROWS {
+		throw (THROWS) theThrowable;
 	}
 }

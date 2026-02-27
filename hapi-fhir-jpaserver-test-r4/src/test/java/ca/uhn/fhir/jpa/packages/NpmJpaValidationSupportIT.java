@@ -5,7 +5,6 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.implementationguide.ImplementationGuideCreator;
 import ca.uhn.fhir.jpa.api.svc.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.test.util.LogbackTestExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -15,24 +14,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mockStatic;
 
 public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 	@Autowired
@@ -191,102 +183,6 @@ public class NpmJpaValidationSupportIT extends BaseJpaR4Test {
 
 		// validate
 		assertNull(sp);
-	}
-
-	@ParameterizedTest
-	@ValueSource(booleans = { true, false })
-	public void fetchResources_specifiedResourceType_works(boolean theRequestSpecificTypes, @TempDir Path theTempDirPath) throws IOException {
-
-		int versionCount = 5;
-		String spUrl = "http://localhost/ig-test-dir/url";
-		String qUrl = "http://localhost/ig-test-dir/qurl";
-		for (int i = 0; i < versionCount; i++) {
-			ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, "test.ig.com", "1." + i);
-			Path subpath = Path.of(theTempDirPath.toString(), igCreator.getPackageName() + "_" + igCreator.getPackageVersion());
-			Files.createDirectory(subpath);
-			igCreator.setDirectory(subpath);
-
-			SearchParameter sp = new SearchParameter();
-			sp.setUrl(spUrl);
-			sp.setCode("helloWorld" + i);
-			sp.setName(sp.getCode());
-			sp.setDescription("description");
-			sp.setType(Enumerations.SearchParamType.STRING);
-			sp.addBase("Patient");
-			sp.setExpression("Patient.name.given");
-			sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			igCreator.addResourceToIG(sp.getName(), sp);
-
-			Questionnaire questionnaire = new Questionnaire();
-			questionnaire.setUrl(qUrl);
-			questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			questionnaire.setName("questionnaire" + i);
-			igCreator.addResourceToIG(questionnaire.getName(), questionnaire);
-
-			PackageInstallationSpec installationSpec1 = createAndInstallPackageSpec(igCreator, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-		}
-
-		// test
-		try (MockedStatic<NpmJpaValidationSupport> staticMock = mockStatic(NpmJpaValidationSupport.class)) {
-			// we use a small number to ensure batching works
-			staticMock.when(NpmJpaValidationSupport::batchSize).thenReturn(2);
-
-			if (theRequestSpecificTypes) {
-				List<SearchParameter> spList = myValidationSupport.fetchResources(SearchParameter.class, spUrl);
-				assertEquals(versionCount, spList.size());
-				spList.forEach(sp -> {
-					assertEquals(spUrl, sp.getUrl());
-				});
-			} else {
-				List<IBaseResource> resources = myValidationSupport.fetchResources(null, qUrl);
-				assertEquals(versionCount, resources.size());
-				FhirTerser terser = myFhirContext.newTerser();
-				resources.forEach(r -> {
-					assertTrue(r instanceof Questionnaire);
-					Optional<String> urlOp = terser.getSinglePrimitiveValue(r, "url");
-					assertTrue(urlOp.isPresent());
-					assertEquals(qUrl, urlOp.get());
-				});
-			}
-		}
-	}
-
-	@Test
-	public void fetchAllResourcesOfType_works(@TempDir Path theTempDirPath) throws IOException {
-		// create an IG
-		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext);
-		igCreator.setDirectory(theTempDirPath);
-
-		int resourceCount = 50;
-		String spUrl = "http://localhost/ig-test-dir/sp";
-		String qUrl = "http://localhost/ig-test-dir/quest";
-		for (int i = 0; i < resourceCount; i++) {
-			SearchParameter sp = new SearchParameter();
-			sp.setUrl(spUrl);
-			sp.setCode("helloWorld" + i);
-			sp.setName(sp.getCode());
-			sp.setDescription("description");
-			sp.setType(Enumerations.SearchParamType.STRING);
-			sp.addBase("Patient");
-			sp.setExpression("Patient.name.given");
-			sp.setVersion("1." + i);
-			sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			igCreator.addResourceToIG(sp.getName(), sp);
-
-			Questionnaire questionnaire = new Questionnaire();
-			questionnaire.setUrl(qUrl + i);
-			questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			questionnaire.setName("questionnaire" + i);
-			igCreator.addResourceToIG(questionnaire.getName(), questionnaire);
-		}
-
-		PackageInstallationSpec installationSpec = createAndInstallPackageSpec(igCreator, PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
-
-		// test
-		List<Questionnaire> questionnaireList = myValidationSupport.fetchAllResourcesOfType(Questionnaire.class);
-
-		// verify
-		assertEquals(resourceCount, questionnaireList.size());
 	}
 
 	private PackageInstallationSpec createAndInstallPackageSpec(ImplementationGuideCreator theIgCreator,

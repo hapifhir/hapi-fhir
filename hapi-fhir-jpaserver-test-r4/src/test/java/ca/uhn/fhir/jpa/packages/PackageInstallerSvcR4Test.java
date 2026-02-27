@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.implementationguide.ImplementationGuideCreator;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -34,15 +36,19 @@ import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.AfterEach;
@@ -52,6 +58,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
@@ -62,6 +69,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -132,6 +140,147 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 	}
 
+	/**
+	 * Some things that I think would be useful that we could learn from a dry run of a package load would include:
+	 * * If fetchDependencies is enabled, what packages and versions will be loaded as dependencies?
+	 * * If installMode is STORE_AND_INSTALL, what existing resources would be overwritten during the install?
+	 * * Does the package being loaded already exist with a different version in the repository?
+	 * * What would be the "current" versions of the package and dependencies that would ultimately be used by the NPM validator?
+	 */
+	@Test
+	public void dryRunInstall_flagsDuplicates_andDoesntInstall(@TempDir Path theTempDir) throws IOException {
+		// setup
+		String codeSystemStr;
+		String valueSetStr;
+		String conceptMapStr;
+		String nameSystemStr;
+		{
+			codeSystemStr = """
+				{                                                                                                                                     \s
+				    "resourceType": "CodeSystem",
+				    "url": "http://example.org/CodeSystem/my-codes",
+				    "status": "active",
+				    "content": "complete",
+				    "concept": [
+				      { "code": "foo", "display": "Foo" }
+				    ]
+				}
+				""";
+			valueSetStr = """
+				{
+				    "resourceType": "ValueSet",
+				    "url": "http://example.org/ValueSet/my-valueset",
+				    "status": "active",
+				    "compose": {
+				      "include": [
+				        { "system": "http://example.org/CodeSystem/my-codes" }
+				      ]
+				    }
+				}
+				""";
+			conceptMapStr = """
+				{
+				    "resourceType": "ConceptMap",
+				    "url": "http://example.org/ConceptMap/my-map",
+				    "status": "active",
+				    "group": [
+				      {
+				        "source": "http://example.org/CodeSystem/source-codes",
+				        "target": "http://example.org/CodeSystem/target-codes",
+				        "element": [
+				          {
+				            "code": "foo",
+				            "target": [{ "code": "bar", "equivalence": "equivalent" }]
+				          }
+				        ]
+				      }
+				    ]
+				}
+				""";
+			nameSystemStr = """
+				{
+				    "resourceType": "NamingSystem",
+				    "name": "MyNamingSystem",
+				    "status": "active",
+				    "kind": "identifier",
+				    "date": "2024-01-01",
+				    "uniqueId": [
+				      { "type": "uri", "value": "http://example.org/my-system" }
+				    ]
+				}
+				""";
+		}
+
+		String igName = "my.package.id";
+
+		IParser parser = myFhirContext.newJsonParser();
+
+		Path igdir1 = Files.createDirectory(Path.of(theTempDir.toString(), "dir1" ));
+		Path igdir2 = Files.createDirectory(Path.of(theTempDir.toString(), "dir2"));
+
+		ImplementationGuideCreator igV1 = new ImplementationGuideCreator(myFhirContext, igName, "1.0.0");
+		igV1.setDirectory(igdir1);
+		ImplementationGuideCreator igV2 = new ImplementationGuideCreator(myFhirContext, igName, "1.0.1");
+		igV2.setDirectory(igdir2);
+
+		// how many installation specs
+		PackageInstallationSpec installedSpec = new PackageInstallationSpec();
+		installedSpec
+			.setName(igV1.getPackageName())
+			.setVersion(igV1.getPackageVersion())
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+
+		PackageInstallationSpec dryRunSpec = new PackageInstallationSpec();
+		dryRunSpec
+			.setName(igV2.getPackageName())
+			.setVersion(igV2.getPackageVersion())
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION)
+			.setDryRun(true)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+
+		// add some resources
+		for (int i = 0; i < 10; i++) {
+			for (var ig : new ImplementationGuideCreator[]{igV1, igV2}) {
+				// codesystem, valueset, conceptMap all use url + version to determine if
+				// it's a duplicate
+				CodeSystem codeSystem = parser.parseResource(CodeSystem.class, codeSystemStr);
+				ValueSet valueSet = parser.parseResource(ValueSet.class, valueSetStr);
+				ConceptMap conceptMap = parser.parseResource(ConceptMap.class, conceptMapStr);
+
+				// namesystem uses uniqueId
+				NamingSystem namingSystem = parser.parseResource(NamingSystem.class, nameSystemStr);
+
+				ig.addResourceToIG("codeSystem" + i, codeSystem);
+				ig.addResourceToIG("valueSet" + i, valueSet);
+				ig.addResourceToIG("conceptMap" + i, conceptMap);
+				ig.addResourceToIG("namingSystem" + i, namingSystem);
+			}
+		}
+
+		// install the first ig as 'base'
+		Path installedPath = igV1.createTestIG();
+		Path dryRunPath = igV2.createTestIG();
+
+		installedSpec
+			.setPackageContents(Files.readAllBytes(installedPath));
+
+		dryRunSpec
+			.setPackageContents(Files.readAllBytes(dryRunPath));
+
+		// install first one (as normal install)
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(installedSpec);
+
+		assertTrue(outcome.getMessage()
+			.stream()
+			.anyMatch(m -> m.contains("Successfully added package")));
+
+		// test
+		PackageInstallOutcomeJson dryRunOutcome = myPackageInstallerSvc.install(dryRunSpec);
+
+	}
 
 	@Disabled("This test is super slow so don't run by default")
 	@Test

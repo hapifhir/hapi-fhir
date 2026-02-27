@@ -105,6 +105,10 @@ public class PackageInstallationSpec {
 	@JsonProperty("versionPolicy")
 	private VersionPolicyEnum myVersionPolicy = VersionPolicyEnum.MULTI_VERSION;
 
+	@Schema(description = "Boolean value to signify dry-run status or not. False is default. But if true is specified, nothing will be persisted and a report will be generated outlining changes that would result if set false.")
+	@JsonProperty("dryRun")
+	private boolean myDryRun = false;
+
 	@JsonIgnore
 	private byte[] myPackageContents;
 
@@ -221,9 +225,19 @@ public class PackageInstallationSpec {
 		return this;
 	}
 
+	public PackageInstallationSpec setDryRun(boolean theDryRun) {
+		myDryRun = theDryRun;
+		return this;
+	}
+
+	public boolean isDryRun() {
+		return myDryRun;
+	}
+
 	public enum InstallModeEnum {
 		STORE_ONLY,
-		STORE_AND_INSTALL
+		STORE_AND_INSTALL,
+//		DRY_RUN_INSTALL
 	}
 
 	public enum ValidationModeEnum {

@@ -723,39 +723,6 @@ public class ValidationSupportChain implements IValidationSupport {
 		return fetchValue(key, invoker, theUrl);
 	}
 
-	@Override
-	public <T extends IBaseResource> List<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
-		FetchAllKey<T> key = new FetchAllKey<>(FetchAllKey.TypeEnum.ALL);
-		Supplier<List<T>> loader = () -> {
-			List<T> allCandidates = new ArrayList<>();
-			for (IValidationSupport vs : myChain) {
-				List<T> candidates = vs.fetchAllResourcesOfType(theClazz);
-				if (candidates != null) {
-					allCandidates.addAll(candidates);
-				}
-			}
-			return allCandidates;
-		};
-
-		return getFromCacheWithAsyncRefresh(key, loader);
-	}
-
-	@Override
-	public <T extends IBaseResource> List<T> fetchResources(Class<T> theClazz, String theUrl) {
-		FetchAllKey<T> key = new FetchAllKey<>(FetchAllKey.TypeEnum.ALL);
-		Supplier<List<T>> loader = () -> {
-			List<T> all = new ArrayList<>();
-			for (IValidationSupport vs : myChain) {
-				List<T> candidates = vs.fetchResources(theClazz, theUrl);
-				if (candidates != null) {
-					all.addAll(candidates);
-				}
-			}
-			return all;
-		};
-		return getFromCacheWithAsyncRefresh(key, loader);
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
