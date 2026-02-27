@@ -424,13 +424,15 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	void testSearchObservation_mixedCompartmentParam_findsAll() {
 	    // given
 		createPatientA();
-		IIdType patAObsId = createObservation(withSubject("Patient/A"), withStatus("final"));
+		IIdType patAObsId = createObservation(withSubject("Patient/A"), withStatus("final"), withIdentifier("http://example.com", "patObsIdentifier"));
 		IIdType g1 = createGroup(withId("G1"));
-		IIdType g1ObsId = createObservation(withSubject(g1), withStatus("final"));
+		IIdType g1ObsId = createObservation(withSubject(g1), withStatus("final"), withIdentifier("http://example.com", "groupObsIdentifier"));
 
 		myTestDaoSearch.assertSearchFinds("find both cross partition", "Observation?status=final", patAObsId, g1ObsId);
 		myTestDaoSearch.assertSearchFinds("find only patient Obs", "Observation?status=final&subject=Patient/A", patAObsId);
 		myTestDaoSearch.assertSearchFinds("find only group Obs", "Observation?status=final&subject=Group/G1", g1ObsId);
+		myTestDaoSearch.assertSearchFinds("find by identifier for patient observation", "Observation?identifier=patObsIdentifier", patAObsId);
+		myTestDaoSearch.assertSearchFinds("find by identifier for group observation", "Observation?identifier=groupObsIdentifier", g1ObsId);
 	}
 
 
