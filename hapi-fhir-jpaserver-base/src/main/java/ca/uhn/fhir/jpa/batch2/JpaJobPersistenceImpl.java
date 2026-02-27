@@ -133,7 +133,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		// If the chunk would be GATE_WAITING, check if the job has already advanced to this step.
 		// Late-arriving chunks (produced by slow workers after advanceJobStepAndUpdateChunkStatus has
 		// already flipped existing chunks to READY) would otherwise be stuck in GATE_WAITING forever.
-		// This should technically never happen, but we have seen it at customer sites so we add this guard to cover this case just in case the system somehow gets into this invalid state.
+		// This should technically never happen, but we have seen it at customer sites so we add this guard to cover
+		// this case just in case the system somehow gets into this invalid state.
 		if (entity.getStatus() == WorkChunkStatusEnum.GATE_WAITING) {
 			Optional<Batch2JobInstanceEntity> instanceOpt =
 					myJobInstanceRepository.findById(theBatchWorkChunk.instanceId);
