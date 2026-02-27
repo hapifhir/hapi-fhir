@@ -48,8 +48,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * Tests for edge cases in merge operations that don't fit the generic resource pattern.
  * These tests validate error handling for unusual scenarios like resource types without identifiers.
