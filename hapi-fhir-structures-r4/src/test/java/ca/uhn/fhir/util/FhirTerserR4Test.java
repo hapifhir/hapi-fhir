@@ -1675,27 +1675,29 @@ public class FhirTerserR4Test {
 	void testEncodeParameters_withReferenceValueContainingInlineResource_shouldSucceed() {
 		// Setup
 		Parameters params = new Parameters();
-		Patient theInlinePatient = new Patient();
-		theInlinePatient.setActive(true);
-		theInlinePatient.addName().setFamily("Smith");
+		Patient inlinePatient = new Patient();
+		inlinePatient.setActive(true);
+		inlinePatient.addName().setFamily("Smith");
 
-		Reference theReference = new Reference();
-		theReference.setResource(theInlinePatient);
+		Reference reference = new Reference();
+		reference.setResource(inlinePatient);
 
 		params.addParameter()
 			.setName("subject")
-			.setValue(theReference);
+			.setValue(reference);
 
 		// Test - this should encode without throwing UnsupportedOperationException
-		String theEncoded = myCtx.newJsonParser().encodeResourceToString(params);
+		String encoded = myCtx.newJsonParser().encodeResourceToString(params);
 
 		// Verify - Parameters encodes successfully. Since Parameters extends Resource
 		// (not DomainResource), it has no "contained" field, so inline resources on
-		// references cannot be contained or serialized. The key assertion is that
-		// encoding does not throw.
-		assertThat(theEncoded).contains("\"resourceType\":\"Parameters\"");
-		assertThat(theEncoded).contains("\"name\":\"subject\"");
-		assertThat(theEncoded).contains("valueReference");
+		// references cannot be contained or serialized.
+		assertThat(encoded).contains("\"resourceType\":\"Parameters\"");
+		assertThat(encoded).contains("\"name\":\"subject\"");
+		assertThat(encoded).contains("valueReference");
+		// Inline resource data is NOT serialized because Parameters has no "contained" field
+		assertThat(encoded).doesNotContain("Smith");
+		assertThat(encoded).doesNotContain("contained");
 	}
 
 	/**
@@ -1707,23 +1709,23 @@ public class FhirTerserR4Test {
 	void testEncodeParameters_withEmbeddedResource_shouldSucceed() {
 		// Setup
 		Parameters params = new Parameters();
-		Patient theEmbeddedPatient = new Patient();
-		theEmbeddedPatient.setActive(true);
-		theEmbeddedPatient.addName().setFamily("Jones");
+		Patient embeddedPatient = new Patient();
+		embeddedPatient.setActive(true);
+		embeddedPatient.addName().setFamily("Jones");
 
 		params.addParameter()
 			.setName("subject")
-			.setResource(theEmbeddedPatient);
+			.setResource(embeddedPatient);
 
 		// Test - this should encode without issue since embedded resources
 		// are serialized directly without containment
-		String theEncoded = myCtx.newJsonParser().encodeResourceToString(params);
+		String encoded = myCtx.newJsonParser().encodeResourceToString(params);
 
 		// Verify
-		assertThat(theEncoded).contains("\"resourceType\":\"Parameters\"");
-		assertThat(theEncoded).contains("\"name\":\"subject\"");
-		assertThat(theEncoded).contains("Jones");
-		assertThat(theEncoded).contains("\"resourceType\":\"Patient\"");
+		assertThat(encoded).contains("\"resourceType\":\"Parameters\"");
+		assertThat(encoded).contains("\"name\":\"subject\"");
+		assertThat(encoded).contains("Jones");
+		assertThat(encoded).contains("\"resourceType\":\"Patient\"");
 	}
 
 	/**
@@ -1734,20 +1736,22 @@ public class FhirTerserR4Test {
 	@Test
 	void testEncodePatient_withReferenceContainingInlineResource_shouldSucceed() {
 		// Setup
-		Patient thePatient = new Patient();
-		thePatient.setActive(true);
+		Patient patient = new Patient();
+		patient.setActive(true);
 
-		Organization theInlineOrg = new Organization();
-		theInlineOrg.setName("Test Org");
+		Organization inlineOrg = new Organization();
+		inlineOrg.setName("Test Org");
 
-		thePatient.getManagingOrganization().setResource(theInlineOrg);
+		patient.getManagingOrganization().setResource(inlineOrg);
 
 		// Test - DomainResource containment works correctly
-		String theEncoded = myCtx.newJsonParser().encodeResourceToString(thePatient);
+		String encoded = myCtx.newJsonParser().encodeResourceToString(patient);
 
-		// Verify
-		assertThat(theEncoded).contains("\"resourceType\":\"Patient\"");
-		assertThat(theEncoded).contains("Test Org");
+		// Verify - Patient is a DomainResource, so inline resources ARE properly contained
+		assertThat(encoded).contains("\"resourceType\":\"Patient\"");
+		assertThat(encoded).contains("Test Org");
+		assertThat(encoded).contains("\"contained\"");
+		assertThat(encoded).contains("\"reference\":\"#");
 	}
 
 	/**

@@ -1526,6 +1526,19 @@ public class FhirTerser {
 		// Resources like Parameters, Bundle, and Binary extend Resource directly (not DomainResource)
 		// and have no "contained" field, so containment would fail with UnsupportedOperationException.
 		boolean canContain = (theResource instanceof IResource || theResource instanceof IDomainResource);
+		if (!canContain) {
+			for (IBaseReference next : allReferences) {
+				if (next.getResource() != null) {
+					ourLog.warn(
+							"Resource type {} does not support containment. "
+									+ "Inline resource on reference will not be serialized. "
+									+ "Use Reference.setReference() instead of Reference.setResource() "
+									+ "for non-DomainResource types.",
+							theResource.fhirType());
+					break;
+				}
+			}
+		}
 		if (canContain) {
 			for (IBaseReference next : allReferences) {
 				IBaseResource resource = next.getResource();
