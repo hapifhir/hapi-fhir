@@ -2152,6 +2152,24 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	void testSearchDate_TimingValueUsingPeriod_EndOnly_WithAutoCreatedStart() {
+		// Symmetric case: end set, start auto-created with null value
+		ServiceRequest p1 = new ServiceRequest();
+		p1.setOccurrence(new Timing());
+		p1.getOccurrenceTiming().getRepeat().setBounds(new Period());
+		// Trigger auto-creation of the start element (creates DateTimeType with null value)
+		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getStartElement();
+		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getEndElement().setValueAsString("2019-12-31");
+		String id1 = myServiceRequestDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map = new SearchParameterMap()
+			.setLoadSynchronous(true)
+			.add(ServiceRequest.SP_OCCURRENCE, new DateParam("lt2020"));
+		IBundleProvider found = myServiceRequestDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactlyInAnyOrder(id1);
+	}
+
+	@Test
 	void testSearchDate_TimingValueUsingPeriod_StartOnly_CleanPeriod() {
 		// Create a ServiceRequest with occurrenceTiming having boundsPeriod with start only,
 		// without triggering auto-creation of the end element
@@ -2170,28 +2188,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testSearchDate_TimingValueUsingPeriod_BothStartAndEnd() {
-		// Create a ServiceRequest with occurrenceTiming having boundsPeriod with both start and end
-		ServiceRequest p1 = new ServiceRequest();
-		p1.setOccurrence(new Timing());
-		p1.getOccurrenceTiming().getRepeat().setBounds(new Period());
-		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getStartElement().setValueAsString("2018-01-01");
-		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getEndElement().setValueAsString("2018-02-01");
-		String id1 = myServiceRequestDao.create(p1).getId().toUnqualifiedVersionless().getValue();
-
-		SearchParameterMap map = new SearchParameterMap()
-			.setLoadSynchronous(true)
-			.add(ServiceRequest.SP_OCCURRENCE, new DateParam("lt2019"));
-		IBundleProvider found = myServiceRequestDao.search(map);
-		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactlyInAnyOrder(id1);
-	}
-
-	@Test
 	void testSearchDate_TimingValueUsingEventDatesOnly() {
 		// Create a ServiceRequest with occurrenceTiming having only event dates (no bounds)
 		ServiceRequest p1 = new ServiceRequest();
 		p1.setOccurrence(new Timing());
-		p1.getOccurrenceTiming().addEvent(new java.util.Date(1514764800000L)); // 2018-01-01
+		p1.getOccurrenceTiming().addEvent(new Date(1514764800000L)); // 2018-01-01
 		String id1 = myServiceRequestDao.create(p1).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap map = new SearchParameterMap()
@@ -2208,7 +2209,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p1.setOccurrence(new Timing());
 		p1.getOccurrenceTiming().getRepeat().setBounds(new Period());
 		// Neither start nor end set - both accessors return empty lists
-		myServiceRequestDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+		myServiceRequestDao.create(p1);
 
 		// With no indexable dates, the resource should not match a date search
 		SearchParameterMap map = new SearchParameterMap()
