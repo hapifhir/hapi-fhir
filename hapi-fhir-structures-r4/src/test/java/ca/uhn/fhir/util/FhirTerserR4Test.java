@@ -1661,6 +1661,89 @@ public class FhirTerserR4Test {
 	}
 
 	/**
+	 * Reproduces SMILE-11238: Encoding a Parameters resource containing a parameter
+	 * whose value is a Reference with an inline resource (via setResource()) throws
+	 * UnsupportedOperationException. This is because Parameters extends Resource
+	 * (not DomainResource), so getContainedResourceList() returns Collections.emptyList()
+	 * which is immutable. When the encoder tries to add contained resources, it fails.
+	 */
+	@Test
+	void testEncodeParameters_withReferenceValueContainingInlineResource_shouldSucceed() {
+		// Setup
+		Parameters params = new Parameters();
+		Patient theInlinePatient = new Patient();
+		theInlinePatient.setActive(true);
+		theInlinePatient.addName().setFamily("Smith");
+
+		Reference theReference = new Reference();
+		theReference.setResource(theInlinePatient);
+
+		params.addParameter()
+			.setName("subject")
+			.setValue(theReference);
+
+		// Test - this should encode without throwing UnsupportedOperationException
+		String theEncoded = myCtx.newJsonParser().encodeResourceToString(params);
+
+		// Verify
+		assertThat(theEncoded).contains("\"resourceType\":\"Parameters\"");
+		assertThat(theEncoded).contains("\"name\":\"subject\"");
+		assertThat(theEncoded).contains("Smith");
+	}
+
+	/**
+	 * Adjacent test for SMILE-11238: Encoding a Parameters resource with an embedded
+	 * resource set directly on parameter.resource (not via Reference.setResource())
+	 * should work because this path does not trigger containment logic.
+	 */
+	@Test
+	void testEncodeParameters_withEmbeddedResource_shouldSucceed() {
+		// Setup
+		Parameters params = new Parameters();
+		Patient theEmbeddedPatient = new Patient();
+		theEmbeddedPatient.setActive(true);
+		theEmbeddedPatient.addName().setFamily("Jones");
+
+		params.addParameter()
+			.setName("subject")
+			.setResource(theEmbeddedPatient);
+
+		// Test - this should encode without issue since embedded resources
+		// are serialized directly without containment
+		String theEncoded = myCtx.newJsonParser().encodeResourceToString(params);
+
+		// Verify
+		assertThat(theEncoded).contains("\"resourceType\":\"Parameters\"");
+		assertThat(theEncoded).contains("\"name\":\"subject\"");
+		assertThat(theEncoded).contains("Jones");
+		assertThat(theEncoded).contains("\"resourceType\":\"Patient\"");
+	}
+
+	/**
+	 * Adjacent test for SMILE-11238: Encoding a DomainResource (Patient) with
+	 * a Reference containing an inline resource should work because Patient
+	 * extends DomainResource, so getContainedResourceList() returns a mutable list.
+	 */
+	@Test
+	void testEncodePatient_withReferenceContainingInlineResource_shouldSucceed() {
+		// Setup
+		Patient thePatient = new Patient();
+		thePatient.setActive(true);
+
+		Organization theInlineOrg = new Organization();
+		theInlineOrg.setName("Test Org");
+
+		thePatient.getManagingOrganization().setResource(theInlineOrg);
+
+		// Test - DomainResource containment works correctly
+		String theEncoded = myCtx.newJsonParser().encodeResourceToString(thePatient);
+
+		// Verify
+		assertThat(theEncoded).contains("\"resourceType\":\"Patient\"");
+		assertThat(theEncoded).contains("Test Org");
+	}
+
+	/**
 	 * See http://stackoverflow.com/questions/182636/how-to-determine-the-class-of-a-generic-type
 	 */
 	private static abstract class ClassGetter<T> {
