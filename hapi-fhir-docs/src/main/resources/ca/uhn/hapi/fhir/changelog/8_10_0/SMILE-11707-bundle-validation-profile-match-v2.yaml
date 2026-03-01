@@ -1,5 +1,6 @@
 ---
 type: fix
+issue: 7602
 jira: SMILE-11707
 title: "Previously, validating a FHIR Bundle containing cross-referencing resources against a custom
   Implementation Guide that constrains reference target profiles would produce false-positive
