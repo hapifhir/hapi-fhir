@@ -30,6 +30,7 @@ import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,6 +122,15 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 
 	@Override
 	public boolean isSuppressMessageId(String path, String messageId) {
+		if (!myValidationSettings.getLocalReferenceValidationDefaultPolicy().checkValid()) {
+			// The InstanceValidator hardcodes CHECK_VALID for bundle-internal (INTERNAL) and
+			// contained references, bypassing the policy advisor's policyForReference method.
+			// When our configured policy would not have validated reference targets (e.g. IGNORE),
+			// suppress the profile-match errors that arise from the hardcoded CHECK_VALID behavior.
+			if (I18nConstants.REFERENCE_REF_CANTMATCHCHOICE.equals(messageId)) {
+				return true;
+			}
+		}
 		return false;
 	}
 
