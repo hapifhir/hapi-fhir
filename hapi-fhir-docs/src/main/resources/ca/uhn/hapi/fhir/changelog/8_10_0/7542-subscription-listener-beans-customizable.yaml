@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7542
+title: "Subscription listener Spring beans (subscription matching, activating, registering) are now declared
+  with the IMessageListener interface return type, allowing them to be overridden by custom implementations.
+  This is the long-term fix for consent interference with subscription system processing, replacing the
+  previously deprecated short-term workaround in ConsentInterceptor."
