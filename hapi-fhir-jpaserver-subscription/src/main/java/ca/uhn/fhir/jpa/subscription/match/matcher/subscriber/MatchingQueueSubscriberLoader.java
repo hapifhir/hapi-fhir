@@ -27,7 +27,6 @@ import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegisteringListener;
 import ca.uhn.fhir.util.IoUtils;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
