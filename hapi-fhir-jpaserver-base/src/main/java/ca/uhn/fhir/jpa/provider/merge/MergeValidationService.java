@@ -25,6 +25,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.IResourceLinkService;
 import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
@@ -47,6 +49,7 @@ import org.hl7.fhir.r4.model.Reference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -62,15 +65,18 @@ public class MergeValidationService {
 	private final DaoRegistry myDaoRegistry;
 	private final ResourceLinkServiceFactory myResourceLinkServiceFactory;
 	private final FhirTerser myFhirTerser;
+	private final ISearchParamExtractor mySearchParamExtractor;
 
 	public MergeValidationService(
 			FhirContext theFhirContext,
 			DaoRegistry theDaoRegistry,
-			ResourceLinkServiceFactory theResourceLinkServiceFactory) {
+			ResourceLinkServiceFactory theResourceLinkServiceFactory,
+			ISearchParamExtractor theSearchParamExtractor) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		myResourceLinkServiceFactory = theResourceLinkServiceFactory;
 		myFhirTerser = myFhirContext.newTerser();
+		mySearchParamExtractor = theSearchParamExtractor;
 	}
 
 	MergeValidationResult validate(
@@ -307,6 +313,47 @@ public class MergeValidationService {
 							+ "is not a suitable source for merging.",
 					ref);
 			addErrorToOperationOutcome(myFhirContext, outcome, msg, "invalid");
+			return false;
+		}
+
+		return validateSourceAndTargetBelongToSamePatientCompartmentIfApplicable(
+				theSourceResource, theTargetResource, outcome);
+	}
+
+	/**
+	 * Validates that source and target resources belong to the same patient compartment,
+	 * if applicable. For resource types not in the Patient compartment (e.g., Organization,
+	 * Practitioner), the merge is allowed.
+	 */
+	private boolean validateSourceAndTargetBelongToSamePatientCompartmentIfApplicable(
+			IBaseResource theSourceResource, IBaseResource theTargetResource, IBaseOperationOutcome theOutcome) {
+
+		// Source and target are already validated to be the same resource type
+		String resourceType = theSourceResource.fhirType();
+
+		// Merging different patients is expected — patient identity is the resource itself
+		if ("Patient".equalsIgnoreCase(resourceType)) {
+			return true;
+		}
+
+		Optional<String> sourcePatient = ResourceCompartmentUtil.getPatientCompartmentIdentity(
+				theSourceResource, myFhirContext, mySearchParamExtractor);
+		Optional<String> targetPatient = ResourceCompartmentUtil.getPatientCompartmentIdentity(
+				theTargetResource, myFhirContext, mySearchParamExtractor);
+
+		// If either has no patient compartment identity, allow the merge.
+		// This covers resource types not in the Patient compartment (e.g., Organization,
+		// Practitioner) — getPatientCompartmentIdentity returns empty for those.
+		if (sourcePatient.isEmpty() || targetPatient.isEmpty()) {
+			return true;
+		}
+
+		if (!sourcePatient.get().equals(targetPatient.get())) {
+			String msg = String.format(
+					"Source and target resources belong to different patients and cannot be merged. "
+							+ "Source belongs to Patient/%s, Target belongs to Patient/%s.",
+					sourcePatient.get(), targetPatient.get());
+			addErrorToOperationOutcome(myFhirContext, theOutcome, msg, "invalid");
 			return false;
 		}
 

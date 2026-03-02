@@ -1661,6 +1661,100 @@ public class FhirTerserR4Test {
 	}
 
 	/**
+	 * Reproduces SMILE-11238: Encoding a Parameters resource containing a parameter
+	 * whose value is a Reference with an inline resource (via setResource()) throws
+	 * UnsupportedOperationException. This is because Parameters extends Resource
+	 * (not DomainResource), so getContainedResourceList() returns Collections.emptyList()
+	 * which is immutable. When the encoder tries to add contained resources, it fails.
+	 *
+	 * The fix skips the containment loop for non-containable resources (Parameters, Bundle,
+	 * Binary). The inline resource data is not serialized because Parameters has no "contained"
+	 * field, but the encoding completes without error and the reference is preserved.
+	 */
+	@Test
+	void testEncodeParameters_withReferenceValueContainingInlineResource_shouldSucceed() {
+		// Setup
+		Parameters params = new Parameters();
+		Patient inlinePatient = new Patient();
+		inlinePatient.setActive(true);
+		inlinePatient.addName().setFamily("Smith");
+
+		Reference reference = new Reference();
+		reference.setResource(inlinePatient);
+
+		params.addParameter()
+			.setName("subject")
+			.setValue(reference);
+
+		// Test - this should encode without throwing UnsupportedOperationException
+		String encoded = myCtx.newJsonParser().encodeResourceToString(params);
+
+		// Verify - Parameters encodes successfully. Since Parameters extends Resource
+		// (not DomainResource), it has no "contained" field, so inline resources on
+		// references cannot be contained or serialized.
+		assertThat(encoded).contains("\"resourceType\":\"Parameters\"");
+		assertThat(encoded).contains("\"name\":\"subject\"");
+		assertThat(encoded).contains("valueReference");
+		// Inline resource data is NOT serialized because Parameters has no "contained" field
+		assertThat(encoded).doesNotContain("Smith");
+		assertThat(encoded).doesNotContain("contained");
+	}
+
+	/**
+	 * Adjacent test for SMILE-11238: Encoding a Parameters resource with an embedded
+	 * resource set directly on parameter.resource (not via Reference.setResource())
+	 * should work because this path does not trigger containment logic.
+	 */
+	@Test
+	void testEncodeParameters_withEmbeddedResource_shouldSucceed() {
+		// Setup
+		Parameters params = new Parameters();
+		Patient embeddedPatient = new Patient();
+		embeddedPatient.setActive(true);
+		embeddedPatient.addName().setFamily("Jones");
+
+		params.addParameter()
+			.setName("subject")
+			.setResource(embeddedPatient);
+
+		// Test - this should encode without issue since embedded resources
+		// are serialized directly without containment
+		String encoded = myCtx.newJsonParser().encodeResourceToString(params);
+
+		// Verify
+		assertThat(encoded).contains("\"resourceType\":\"Parameters\"");
+		assertThat(encoded).contains("\"name\":\"subject\"");
+		assertThat(encoded).contains("Jones");
+		assertThat(encoded).contains("\"resourceType\":\"Patient\"");
+	}
+
+	/**
+	 * Adjacent test for SMILE-11238: Encoding a DomainResource (Patient) with
+	 * a Reference containing an inline resource should work because Patient
+	 * extends DomainResource, so getContainedResourceList() returns a mutable list.
+	 */
+	@Test
+	void testEncodePatient_withReferenceContainingInlineResource_shouldSucceed() {
+		// Setup
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		Organization inlineOrg = new Organization();
+		inlineOrg.setName("Test Org");
+
+		patient.getManagingOrganization().setResource(inlineOrg);
+
+		// Test - DomainResource containment works correctly
+		String encoded = myCtx.newJsonParser().encodeResourceToString(patient);
+
+		// Verify - Patient is a DomainResource, so inline resources ARE properly contained
+		assertThat(encoded).contains("\"resourceType\":\"Patient\"");
+		assertThat(encoded).contains("Test Org");
+		assertThat(encoded).contains("\"contained\"");
+		assertThat(encoded).contains("\"reference\":\"#");
+	}
+
+	/**
 	 * See http://stackoverflow.com/questions/182636/how-to-determine-the-class-of-a-generic-type
 	 */
 	private static abstract class ClassGetter<T> {

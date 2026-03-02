@@ -1522,35 +1522,55 @@ public class FhirTerser {
 			}
 		}
 
-		for (IBaseReference next : allReferences) {
-			IBaseResource resource = next.getResource();
-			if (resource != null) {
-				if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
+		// Only attempt to contain resources if the parent resource supports containment.
+		// Resources like Parameters, Bundle, and Binary extend Resource directly (not DomainResource)
+		// and have no "contained" field, so containment would fail with UnsupportedOperationException.
+		boolean canContain = (theResource instanceof IResource || theResource instanceof IDomainResource);
+		if (!canContain) {
+			for (IBaseReference next : allReferences) {
+				if (next.getResource() != null) {
+					ourLog.warn(
+							"Resource type {} does not support containment. "
+									+ "Inline resource on reference will not be serialized. "
+									+ "Use Reference.setReference() instead of Reference.setResource() "
+									+ "for non-DomainResource types.",
+							theResource.fhirType());
+					break;
+				}
+			}
+		}
+		if (canContain) {
+			for (IBaseReference next : allReferences) {
+				IBaseResource resource = next.getResource();
+				if (resource != null) {
+					if (resource.getIdElement().isEmpty()
+							|| resource.getIdElement().isLocal()) {
 
-					IIdType id = theContained.addContained(resource);
-					if (id == null) {
-						continue;
-					}
-					getContainedResourceList(theResource).add(resource);
+						IIdType id = theContained.addContained(resource);
+						if (id == null) {
+							continue;
+						}
+						getContainedResourceList(theResource).add(resource);
 
-					String idString = id.getValue();
-					if (!idString.startsWith("#")) {
-						idString = "#" + idString;
-					}
+						String idString = id.getValue();
+						if (!idString.startsWith("#")) {
+							idString = "#" + idString;
+						}
 
-					next.setReference(idString);
-					next.setResource(null);
-					if (resource.getIdElement().isLocal() && theContained.hasExistingIdToContainedResource()) {
-						theContained
-								.getExistingIdToContainedResource()
-								.remove(resource.getIdElement().getValue());
-					}
-				} else {
-					IIdType previouslyContainedResourceId = theContained.getPreviouslyContainedResourceId(resource);
-					if (previouslyContainedResourceId != null) {
-						if (theContained.getResourceId(resource) == null) {
-							theContained.addContained(previouslyContainedResourceId, resource);
-							getContainedResourceList(theResource).add(resource);
+						next.setReference(idString);
+						next.setResource(null);
+						if (resource.getIdElement().isLocal() && theContained.hasExistingIdToContainedResource()) {
+							theContained
+									.getExistingIdToContainedResource()
+									.remove(resource.getIdElement().getValue());
+						}
+					} else {
+						IIdType previouslyContainedResourceId = theContained.getPreviouslyContainedResourceId(resource);
+						if (previouslyContainedResourceId != null) {
+							if (theContained.getResourceId(resource) == null) {
+								theContained.addContained(previouslyContainedResourceId, resource);
+								getContainedResourceList(theResource).add(resource);
+							}
 						}
 					}
 				}

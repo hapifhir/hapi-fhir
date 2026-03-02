@@ -329,11 +329,15 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 
 	protected DaoMethodOutcome doUpdateForUpdateOrPatch(UpdateParameters<T> theUpdateParameters) {
 
-		if (theUpdateParameters.getResourceIdToUpdate().hasVersionIdPart()
-				&& Long.parseLong(theUpdateParameters.getResourceIdToUpdate().getVersionIdPart())
-						!= theUpdateParameters.getEntity().getVersion()) {
-			throw new ResourceVersionConflictException(Msg.code(989) + "Trying to update "
-					+ theUpdateParameters.getResourceIdToUpdate() + " but this is not the current version");
+		if (theUpdateParameters.getResourceIdToUpdate().hasVersionIdPart()) {
+			boolean versionMatches = theUpdateParameters.getResourceIdToUpdate().isVersionIdPartValidLong()
+					&& Long.parseLong(
+									theUpdateParameters.getResourceIdToUpdate().getVersionIdPart())
+							== theUpdateParameters.getEntity().getVersion();
+			if (!versionMatches) {
+				throw new ResourceVersionConflictException(Msg.code(989) + "Trying to update "
+						+ theUpdateParameters.getResourceIdToUpdate() + " but this is not the current version");
+			}
 		}
 
 		if (theUpdateParameters.getResourceIdToUpdate().hasResourceType()
