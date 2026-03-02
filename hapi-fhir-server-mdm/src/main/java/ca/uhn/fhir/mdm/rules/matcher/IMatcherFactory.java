@@ -19,8 +19,11 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
+import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -30,10 +33,16 @@ public interface IMatcherFactory {
 
 	/**
 	 * Retrieves the field matcher registered under the given name.
+	 * <p>
+	 * The default implementation delegates to the deprecated
+	 * {@link #getFieldMatcherForMatchType(MatchTypeEnum)} for backward compatibility
+	 * with implementations that only override the enum-based method.
 	 *
 	 * @param theName the matcher name (e.g. "STRING", "DATE")
 	 */
-	IMdmFieldMatcher getFieldMatcherForName(String theName);
+	default IMdmFieldMatcher getFieldMatcherForName(String theName) {
+		return getFieldMatcherForMatchType(MatchTypeEnum.valueOf(theName));
+	}
 
 	/**
 	 * Registers a field matcher under the given name.
@@ -41,10 +50,24 @@ public interface IMatcherFactory {
 	 * @param theName the matcher name
 	 * @param theMatcher the matcher implementation
 	 */
-	void register(String theName, IMdmFieldMatcher theMatcher);
+	default void register(String theName, IMdmFieldMatcher theMatcher) {
+		throw new UnsupportedOperationException(Msg.code(2852) + "This IMatcherFactory does not support registration");
+	}
 
 	/**
 	 * @return the set of all registered matcher names
 	 */
-	Set<String> getRegisteredNames();
+	default Set<String> getRegisteredNames() {
+		return Collections.emptySet();
+	}
+
+	/**
+	 * Retrieves the field matcher for the given {@link MatchTypeEnum}.
+	 *
+	 * @deprecated Use {@link #getFieldMatcherForName(String)} instead.
+	 */
+	@Deprecated(since = "8.10", forRemoval = true)
+	default IMdmFieldMatcher getFieldMatcherForMatchType(MatchTypeEnum theMatchType) {
+		return getFieldMatcherForName(theMatchType.name());
+	}
 }
