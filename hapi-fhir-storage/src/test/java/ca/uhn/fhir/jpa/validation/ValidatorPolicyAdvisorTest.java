@@ -35,4 +35,19 @@ class ValidatorPolicyAdvisorTest {
 		// Then: should return true because IGNORE policy means we suppress reference match errors
 		assertThat(result).isTrue();
 	}
+
+	@Test
+	void testIsSuppressMessageId_withCheckValidPolicy_shouldNotSuppressCantMatchChoice() {
+		// Given: a ValidatorPolicyAdvisor with ValidationSettings configured to CHECK_VALID policy
+		ValidatorPolicyAdvisor advisor = new ValidatorPolicyAdvisor();
+		ValidationSettings settings = new ValidationSettings();
+		settings.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_VALID);
+		ReflectionTestUtils.setField(advisor, "myValidationSettings", settings);
+
+		// When: calling isSuppressMessageId with the REFERENCE_REF_CANTMATCHCHOICE message ID
+		boolean result = advisor.isSuppressMessageId("Patient", I18nConstants.REFERENCE_REF_CANTMATCHCHOICE);
+
+		// Then: should return false because CHECK_VALID policy means we DO validate references
+		assertThat(result).isFalse();
+	}
 }

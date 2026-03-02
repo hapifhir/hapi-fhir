@@ -144,9 +144,11 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 			String path,
 			String url,
 			ReferenceDestinationType destinationType) {
-		int slashIdx = url.indexOf("/");
-		if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
-			return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
+		if (myFhirContext != null && myValidationSettings != null) {
+			int slashIdx = url.indexOf("/");
+			if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
+				return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
+			}
 		}
 		return ReferenceValidationPolicy.IGNORE;
 	}
