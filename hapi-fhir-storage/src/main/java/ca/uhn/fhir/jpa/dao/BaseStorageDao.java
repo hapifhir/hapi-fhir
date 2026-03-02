@@ -51,7 +51,6 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -308,10 +307,11 @@ public abstract class BaseStorageDao {
 						// then the version will be 1 (the first version)
 						version = 1L;
 					} else {
-						// resource not found
-						// and no autocreateplaceholders set...
-						// we throw
-						throw new ResourceNotFoundException(Msg.code(523) + referenceElement);
+						// resource not found and no autocreateplaceholders set:
+						// skip auto-versioning for this reference and let the downstream
+						// referential integrity check (DaoResourceLinkResolver) handle it
+						// with a proper error message (SMILE-9706)
+						continue;
 					}
 					String newTargetReference =
 							referenceElement.withVersion(version.toString()).getValue();
