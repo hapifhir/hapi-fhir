@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.StructureDefinition;
@@ -50,6 +51,17 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 
 	@Autowired
 	private FhirContext myFhirContext;
+
+
+	@VisibleForTesting
+	public void setValidationSettingsForUnitTest(ValidationSettings theValidationSettings) {
+		myValidationSettings = theValidationSettings;
+	}
+
+	@VisibleForTesting
+	public void setFhirContextForUnitTest(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
 
 	@Override
 	public EnumSet<ResourceValidationAction> policyForResource(
