@@ -237,28 +237,10 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	void testRevIncludeDoesNotIncludeFromIncludedResources() {
-		// SR/A - initial search target, no replaces
-		ServiceRequest srA = new ServiceRequest();
-		srA.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-		srA.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		IIdType srAId = myClient.create().resource(srA).execute().getId().toUnqualifiedVersionless();
-		ourLog.info("Created ServiceRequest A: {}", srAId.getValue());
-
-		// SR/B - should NOT appear in results (no replaces, not referenced by SR/A)
-		ServiceRequest srB = new ServiceRequest();
-		srB.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-		srB.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		IIdType srBId = myClient.create().resource(srB).execute().getId().toUnqualifiedVersionless();
-		ourLog.info("Created ServiceRequest B: {}", srBId.getValue());
-
-		// SR/C - replaces both SR/A and SR/B; should appear via _revinclude (references SR/A)
-		ServiceRequest srC = new ServiceRequest();
-		srC.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-		srC.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		srC.addReplaces(new Reference(srAId));
-		srC.addReplaces(new Reference(srBId));
-		IIdType srCId = myClient.create().resource(srC).execute().getId().toUnqualifiedVersionless();
-		ourLog.info("Created ServiceRequest C: {}", srCId.getValue());
+		List<IIdType> srIds = createThreeServiceRequestsWithReplacesChain();
+		IIdType srAId = srIds.get(0);
+		IIdType srBId = srIds.get(1);
+		IIdType srCId = srIds.get(2);
 
 		// ServiceRequest?_id=A&_include=ServiceRequest:replaces&_revinclude=ServiceRequest:replaces
 		// Without _iterate, _include should only apply to the initial result set (SR/A),
@@ -271,22 +253,14 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
-		Set<String> foundIds = foundResources.stream()
-			.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
-			.collect(Collectors.toSet());
+		Set<String> foundIds = extractResourceIds(bundle);
 
-		ourLog.info("Found {} resources: {}", foundResources.size(), foundIds);
-
-		// SR/A should be present (initial search result)
-		assertThat(foundIds).contains(srAId.getValue());
-		// SR/C should be present (found via _revinclude: SR/C.replaces references SR/A)
-		assertThat(foundIds).contains(srCId.getValue());
-		// SR/B should NOT be present (it would only appear if _include was applied to SR/C,
-		// which should not happen without _iterate)
-		assertThat(foundIds).doesNotContain(srBId.getValue());
-		// Exactly 2 resources: SR/A + SR/C
-		assertThat(foundResources).hasSize(2);
+		// SR/A (initial result) and SR/C (revinclude) should be present;
+		// SR/B should NOT appear without _iterate
+		assertThat(foundIds)
+			.contains(srAId.getValue(), srCId.getValue())
+			.doesNotContain(srBId.getValue())
+			.hasSize(2);
 	}
 
 	/**
@@ -296,22 +270,10 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	void testRevIncludeAloneDoesNotProduceTransitiveResults() {
-		ServiceRequest srA = new ServiceRequest();
-		srA.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-		srA.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		IIdType srAId = myClient.create().resource(srA).execute().getId().toUnqualifiedVersionless();
-
-		ServiceRequest srB = new ServiceRequest();
-		srB.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-		srB.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		IIdType srBId = myClient.create().resource(srB).execute().getId().toUnqualifiedVersionless();
-
-		ServiceRequest srC = new ServiceRequest();
-		srC.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-		srC.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		srC.addReplaces(new Reference(srAId));
-		srC.addReplaces(new Reference(srBId));
-		IIdType srCId = myClient.create().resource(srC).execute().getId().toUnqualifiedVersionless();
+		List<IIdType> srIds = createThreeServiceRequestsWithReplacesChain();
+		IIdType srAId = srIds.get(0);
+		IIdType srBId = srIds.get(1);
+		IIdType srCId = srIds.get(2);
 
 		// ServiceRequest?_id=A&_revinclude=ServiceRequest:replaces (no _include)
 		Bundle bundle = myClient.search()
@@ -321,17 +283,12 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
-		Set<String> foundIds = foundResources.stream()
-			.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
-			.collect(Collectors.toSet());
+		Set<String> foundIds = extractResourceIds(bundle);
 
-		ourLog.info("RevInclude alone - Found {} resources: {}", foundResources.size(), foundIds);
-
-		assertThat(foundIds).contains(srAId.getValue());
-		assertThat(foundIds).contains(srCId.getValue());
-		assertThat(foundIds).doesNotContain(srBId.getValue());
-		assertThat(foundResources).hasSize(2);
+		assertThat(foundIds)
+			.contains(srAId.getValue(), srCId.getValue())
+			.doesNotContain(srBId.getValue())
+			.hasSize(2);
 	}
 
 	/**
@@ -340,22 +297,9 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	void testIncludeAloneDoesNotProduceTransitiveResults() {
-		ServiceRequest srA = new ServiceRequest();
-		srA.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-		srA.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		IIdType srAId = myClient.create().resource(srA).execute().getId().toUnqualifiedVersionless();
-
-		ServiceRequest srB = new ServiceRequest();
-		srB.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-		srB.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		IIdType srBId = myClient.create().resource(srB).execute().getId().toUnqualifiedVersionless();
-
-		ServiceRequest srC = new ServiceRequest();
-		srC.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-		srC.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		srC.addReplaces(new Reference(srAId));
-		srC.addReplaces(new Reference(srBId));
-		myClient.create().resource(srC).execute().getId().toUnqualifiedVersionless();
+		List<IIdType> srIds = createThreeServiceRequestsWithReplacesChain();
+		IIdType srAId = srIds.get(0);
+		IIdType srBId = srIds.get(1);
 
 		// ServiceRequest?_id=A&_include=ServiceRequest:replaces (no _revinclude)
 		Bundle bundle = myClient.search()
@@ -365,17 +309,13 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
-		Set<String> foundIds = foundResources.stream()
-			.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
-			.collect(Collectors.toSet());
-
-		ourLog.info("Include alone - Found {} resources: {}", foundResources.size(), foundIds);
+		Set<String> foundIds = extractResourceIds(bundle);
 
 		// SR/A has no replaces, so _include adds nothing
-		assertThat(foundIds).contains(srAId.getValue());
-		assertThat(foundIds).doesNotContain(srBId.getValue());
-		assertThat(foundResources).hasSize(1);
+		assertThat(foundIds)
+			.contains(srAId.getValue())
+			.doesNotContain(srBId.getValue())
+			.hasSize(1);
 	}
 
 	/**
@@ -384,22 +324,10 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	void testRevIncludeWithIncludeIterateProducesTransitiveResults() {
-		ServiceRequest srA = new ServiceRequest();
-		srA.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-		srA.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		IIdType srAId = myClient.create().resource(srA).execute().getId().toUnqualifiedVersionless();
-
-		ServiceRequest srB = new ServiceRequest();
-		srB.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-		srB.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		IIdType srBId = myClient.create().resource(srB).execute().getId().toUnqualifiedVersionless();
-
-		ServiceRequest srC = new ServiceRequest();
-		srC.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-		srC.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		srC.addReplaces(new Reference(srAId));
-		srC.addReplaces(new Reference(srBId));
-		IIdType srCId = myClient.create().resource(srC).execute().getId().toUnqualifiedVersionless();
+		List<IIdType> srIds = createThreeServiceRequestsWithReplacesChain();
+		IIdType srAId = srIds.get(0);
+		IIdType srBId = srIds.get(1);
+		IIdType srCId = srIds.get(2);
 
 		// ServiceRequest?_id=A&_include:iterate=ServiceRequest:replaces&_revinclude:iterate=ServiceRequest:replaces
 		// With _iterate, the transitive cascade IS correct
@@ -411,18 +339,54 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
+		Set<String> foundIds = extractResourceIds(bundle);
+
+		// With _iterate, SR/B SHOULD be included (SR/C.replaces -> SR/B is followed iteratively)
+		assertThat(foundIds)
+			.contains(srAId.getValue(), srBId.getValue(), srCId.getValue())
+			.hasSize(3);
+	}
+
+	/**
+	 * Creates three ServiceRequest resources for SMILE-9135 tests:
+	 * - SR/A: no replaces (initial search target)
+	 * - SR/B: no replaces (transitive reference target)
+	 * - SR/C: replaces = [SR/A, SR/B]
+	 *
+	 * @return list of [srAId, srBId, srCId]
+	 */
+	private List<IIdType> createThreeServiceRequestsWithReplacesChain() {
+		ServiceRequest srA = new ServiceRequest();
+		srA.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
+		srA.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+		IIdType srAId = myClient.create().resource(srA).execute().getId().toUnqualifiedVersionless();
+
+		ServiceRequest srB = new ServiceRequest();
+		srB.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
+		srB.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+		IIdType srBId = myClient.create().resource(srB).execute().getId().toUnqualifiedVersionless();
+
+		ServiceRequest srC = new ServiceRequest();
+		srC.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
+		srC.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+		srC.addReplaces(new Reference(srAId));
+		srC.addReplaces(new Reference(srBId));
+		IIdType srCId = myClient.create().resource(srC).execute().getId().toUnqualifiedVersionless();
+
+		ourLog.info("Created ServiceRequests: A={}, B={}, C={}", srAId.getValue(), srBId.getValue(), srCId.getValue());
+		return List.of(srAId, srBId, srCId);
+	}
+
+	/**
+	 * Extracts unqualified versionless resource IDs from a Bundle, logging the results.
+	 */
+	private Set<String> extractResourceIds(Bundle theBundle) {
+		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, theBundle);
 		Set<String> foundIds = foundResources.stream()
 			.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
 			.collect(Collectors.toSet());
-
-		ourLog.info("Iterate - Found {} resources: {}", foundResources.size(), foundIds);
-
-		// With _iterate, SR/B SHOULD be included (SR/C.replaces -> SR/B is followed iteratively)
-		assertThat(foundIds).contains(srAId.getValue());
-		assertThat(foundIds).contains(srBId.getValue());
-		assertThat(foundIds).contains(srCId.getValue());
-		assertThat(foundResources).hasSize(3);
+		ourLog.info("Found {} resources: {}", foundResources.size(), foundIds);
+		return foundIds;
 	}
 
 }

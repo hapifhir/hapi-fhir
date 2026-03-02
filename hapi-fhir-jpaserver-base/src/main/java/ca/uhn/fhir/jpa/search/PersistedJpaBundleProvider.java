@@ -475,6 +475,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
 			Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
 
+			// Save original PIDs before non-iterate expansion
+			List<JpaPid> originalPids = new ArrayList<>(thePids);
+
 			// Load non-iterate _revincludes
 			Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(
 					myContext,
@@ -492,11 +495,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			thePids.addAll(nonIterateRevIncludedPids);
 			includedPidList.addAll(nonIterateRevIncludedPids);
 
-			// Load non-iterate _includes
+			// Load non-iterate _includes (use originalPids so _include only applies to the
+			// initial search results, not to revincluded resources — per FHIR spec, without _iterate)
 			Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(
 					myContext,
 					myEntityManager,
-					thePids,
+					originalPids,
 					mySearchEntity.toIncludesList(false),
 					false,
 					mySearchEntity.getLastUpdated(),

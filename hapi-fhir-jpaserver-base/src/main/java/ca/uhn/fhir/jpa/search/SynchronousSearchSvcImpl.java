@@ -52,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -207,7 +208,10 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 					 * individually for pages as we return them to clients
 					 */
 
-					// _includes
+					// Save original PIDs before any include/revinclude expansion
+					Set<JpaPid> originalPids = new HashSet<>(pids);
+
+					// _revincludes
 					Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
 					final Set<JpaPid> includedPids = theSb.loadIncludes(
 							myContext,
@@ -225,12 +229,13 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 					pids.addAll(includedPids);
 					List<JpaPid> includedPidsList = new ArrayList<>(includedPids);
 
-					// _revincludes
+					// _includes (use originalPids so _include only applies to the initial search results,
+					// not to revincluded resources — per FHIR spec, without _iterate)
 					if (theParams.getEverythingMode() == null && (maxIncludes == null || maxIncludes > 0)) {
 						Set<JpaPid> revIncludedPids = theSb.loadIncludes(
 								myContext,
 								myEntityManager,
-								pids,
+								originalPids,
 								theParams.getIncludes(),
 								false,
 								theParams.getLastUpdated(),
