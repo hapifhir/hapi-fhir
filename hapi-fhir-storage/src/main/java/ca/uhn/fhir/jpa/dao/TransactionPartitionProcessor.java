@@ -67,6 +67,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 	private final String myActionName;
 	private final FhirContext myFhirContext;
 	private final BaseTransactionProcessor myTransactionProcessor;
+	private final TransactionDetails myTransactionDetails;
 
 	/**
 	 * Constructor
@@ -77,13 +78,15 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			RequestDetails theRequestDetails,
 			boolean theNestedMode,
 			IInterceptorBroadcaster theCompositeBroadcaster,
-			String theActionName) {
+			String theActionName,
+			TransactionDetails theTransactionDetails) {
 		myTransactionProcessor = theTransactionProcessor;
 		myFhirContext = theFhirContext;
 		myRequestDetails = theRequestDetails;
 		myNestedMode = theNestedMode;
 		myInterceptorBroadcaster = theCompositeBroadcaster;
 		myActionName = theActionName;
+		myTransactionDetails = theTransactionDetails;
 	}
 
 	/**
@@ -105,7 +108,8 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		HookParams hookParams = new HookParams()
 				.add(RequestDetails.class, myRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
-				.add(IBaseBundle.class, theRequest);
+				.add(IBaseBundle.class, theRequest)
+				.add(TransactionDetails.class, myTransactionDetails);
 		TransactionPrePartitionResponse partitionResponse =
 				(TransactionPrePartitionResponse) myInterceptorBroadcaster.callHooksAndReturnObject(
 						Pointcut.STORAGE_TRANSACTION_PRE_PARTITION, hookParams);
@@ -181,8 +185,11 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			 * reuse this across sub-transactions because we can leverage pre-resolved IDs
 			 * and that kind of thing, but there is other state in there that shouldn't be
 			 * preserved, such as tag definitions and rollback items
+			 *
+			 * DO, however, copy user data from the parent transaction details
 			 */
 			TransactionDetails transactionDetails = new TransactionDetails();
+			myTransactionDetails.getUserData().forEach(transactionDetails::putUserData);
 
 			// Apply any placeholder ID substitutions from previous partition executions
 			for (IBaseResource resource : terser.getAllEmbeddedResources(singlePartitionRequest, true)) {

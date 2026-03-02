@@ -45,6 +45,8 @@ class RequestDetailsCloner {
 	static DetailsBuilder startWith(RequestDetails theDetails) {
 		RequestDetails newDetails;
 		if (theDetails instanceof ServletRequestDetails servletDetails) {
+			// TODO: LD: Ideally, this should be a ServletSubRequestDetails, but we need to do more work to make this
+			// happen
 			newDetails = new ServletRequestDetails(servletDetails);
 		} else {
 			newDetails = new SystemRequestDetails(theDetails);

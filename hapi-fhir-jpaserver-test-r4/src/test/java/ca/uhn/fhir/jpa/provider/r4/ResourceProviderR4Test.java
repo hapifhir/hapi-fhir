@@ -6452,6 +6452,89 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	/**
+	 * When updating a resource with a non-numeric ETag (e.g. W/"A23"), the server should return
+	 * a 409 Conflict (version mismatch) rather than a 500 Internal Server Error from NumberFormatException.
+	 * See SMILE-8708.
+	 */
+	@Test
+	void testUpdateWithNonNumericETag_returnsConflict() throws Exception {
+		// Create a patient
+		Patient pt = new Patient();
+		pt.addName().setFamily("testUpdateWithNonNumericETag");
+		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		// Attempt to update with a non-numeric ETag
+		pt.addName().setFamily("FAM2");
+		pt.setId(id.toUnqualifiedVersionless());
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
+
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
+		put.addHeader(Constants.HEADER_IF_MATCH, "W/\"A23\"");
+		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		try (CloseableHttpResponse response = ourHttpClient.execute(put)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseString);
+			assertThat(response.getStatusLine().getStatusCode())
+				.as("Non-numeric ETag should produce a 409 Conflict, not a 500 error")
+				.isEqualTo(409);
+			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			assertThat(oo.getIssue().get(0).getDiagnostics())
+				.contains("Trying to update Patient/" + id.getIdPart());
+		}
+	}
+
+	/**
+	 * Verify that a numeric wrong ETag still returns 409 as before.
+	 * Adjacent test for SMILE-8708 — this should pass (existing behavior).
+	 */
+	@Test
+	void testUpdateWithWrongNumericETag_returnsConflict() throws Exception {
+		Patient pt = new Patient();
+		pt.addName().setFamily("testUpdateWithWrongNumericETag");
+		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		pt.addName().setFamily("FAM2");
+		pt.setId(id.toUnqualifiedVersionless());
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
+
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
+		put.addHeader(Constants.HEADER_IF_MATCH, "W/\"999\"");
+		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		try (CloseableHttpResponse response = ourHttpClient.execute(put)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseString);
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(409);
+			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			assertThat(oo.getIssue().get(0).getDiagnostics())
+				.contains("Trying to update Patient/" + id.getIdPart());
+		}
+	}
+
+	/**
+	 * Verify that update with the correct ETag succeeds.
+	 * Adjacent test for SMILE-8708 — this should pass (existing behavior).
+	 */
+	@Test
+	void testUpdateWithCorrectETag_succeeds() throws Exception {
+		Patient pt = new Patient();
+		pt.addName().setFamily("testUpdateWithCorrectETag");
+		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		pt.addName().setFamily("FAM2");
+		pt.setId(id.toUnqualifiedVersionless());
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
+
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
+		put.addHeader(Constants.HEADER_IF_MATCH, "W/\"1\"");
+		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		try (CloseableHttpResponse response = ourHttpClient.execute(put)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseString);
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+		}
+	}
+
 	@Test
 	public void testUpdateWrongIdInBody() throws Exception {
 		String methodName = "testUpdateWrongIdInBody";
