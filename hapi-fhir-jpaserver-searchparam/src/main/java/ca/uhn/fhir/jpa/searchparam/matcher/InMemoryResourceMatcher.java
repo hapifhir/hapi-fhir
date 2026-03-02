@@ -693,6 +693,9 @@ public class InMemoryResourceMatcher {
 		switch (theParamDef.getParamType()) {
 			case TOKEN:
 				TokenParam tokenParam = (TokenParam) theParam;
+				if (tokenParam.getModifier() == null) {
+					return false;
+				}
 				switch (tokenParam.getModifier()) {
 					case IN:
 					case NOT_IN:
