@@ -162,7 +162,7 @@ public class JpaR4Config {
 
 	@SuppressWarnings("unchecked")
 	@Bean
-	public PatientIdModeCrossPartitionReplaceReferencesSvc crossPartitionResourceMoverSvc(
+	public PatientIdModeCrossPartitionReplaceReferencesSvc crossPartitionReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			IResourceLinkDao theResourceLinkDao,
 			HapiTransactionService theHapiTransactionService,

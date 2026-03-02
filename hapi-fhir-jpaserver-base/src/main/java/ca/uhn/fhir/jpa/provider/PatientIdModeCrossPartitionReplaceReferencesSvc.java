@@ -20,8 +20,6 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -134,7 +132,14 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 
 			// Step 3: Execute CREATE bundle — new SystemRequestDetails() (no explicit partition)
 			// lets the PatientIdPartitionInterceptor fire and route each resource to the
-			// correct partition based on its patient reference.
+			// correct partition based on its patient reference. This also ensures the
+			// TransactionProcessor pre-fetch uses allPartitions for reference targets, so
+			// cross-partition references (e.g. Observation.performer → Organization in
+			// default partition) are found. If we used forRequestPartitionId(targetPartitionId)
+			// instead, the pre-fetch would use targetPartitionId for ALL IDs including
+			// cross-partition reference targets (e.g. Organization in partition -1), miss them,
+			// cache them as null in TransactionDetails, and later cause a false HAPI-1096
+			// "is deleted" error when DaoResourceLinkResolver hits that null cache entry.
 			LinkedHashMap<String, String> oldIdToPlaceholder = new LinkedHashMap<>();
 			Map<String, String> oldToNewIdMap = new HashMap<>();
 			if (!moveList.isEmpty()) {
@@ -209,12 +214,8 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 			RequestPartitionId resourcePartition =
 					RequestPartitionId.getPartitionIfAssigned(resource).orElse(null);
 
-			RuntimeResourceDefinition resDef = myFhirContext.getResourceDefinition(resource);
-			List<RuntimeSearchParam> compartmentSps = ResourceCompartmentUtil.getPatientCompartmentSearchParams(resDef);
-			Optional<String> compartmentPatient = compartmentSps.isEmpty()
-					? Optional.empty()
-					: ResourceCompartmentUtil.getResourceCompartment(
-							"Patient", resource, compartmentSps, mySearchParamExtractor);
+			Optional<String> compartmentPatient = ResourceCompartmentUtil.getPatientCompartmentIdentity(
+					resource, myFhirContext, mySearchParamExtractor);
 
 			boolean inSourceCompartment =
 					compartmentPatient.isPresent() && compartmentPatient.get().equals(theSourcePatientId);
