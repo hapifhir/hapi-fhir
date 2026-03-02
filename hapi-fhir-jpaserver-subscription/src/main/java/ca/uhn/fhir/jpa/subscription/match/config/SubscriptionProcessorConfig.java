@@ -78,7 +78,7 @@ public class SubscriptionProcessorConfig {
 	}
 
 	@Bean
-	public MatchingQueueSubscriberLoader subscriptionMatchingListenerLoader() {
+	public MatchingQueueSubscriberLoader matchingQueueSubscriberLoader() {
 		return new MatchingQueueSubscriberLoader();
 	}
 
@@ -114,7 +114,7 @@ public class SubscriptionProcessorConfig {
 	}
 
 	@Bean
-	public SubscriptionDeliveryListenerFactory subscriptionDeliveryListenerFactory(
+	public SubscriptionDeliveryListenerFactory SubscriptionDeliveryListenerFactory(
 			ApplicationContext theApplicationContext, IEmailSender theEmailSender) {
 		return new SubscriptionDeliveryListenerFactory(theApplicationContext, theEmailSender);
 	}
@@ -136,7 +136,7 @@ public class SubscriptionProcessorConfig {
 
 	@Bean
 	@Scope("prototype")
-	public SubscriptionDeliveringMessageListener subscriptionDeliveringMessageSubscriber(
+	public SubscriptionDeliveringMessageListener subscriptionDeliveringMessageListener(
 			IBrokerClient theBrokerClient, IDefaultPartitionSettings theDefaultPartitionSettings) {
 		return new SubscriptionDeliveringMessageListener(theBrokerClient, theDefaultPartitionSettings);
 	}
