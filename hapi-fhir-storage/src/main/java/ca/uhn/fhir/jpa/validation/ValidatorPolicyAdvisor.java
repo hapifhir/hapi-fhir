@@ -33,25 +33,19 @@ import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPo
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
 public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorPolicyAdvisor.class);
-
 	@Autowired
 	private ValidationSettings myValidationSettings;
 
 	@Autowired
 	private FhirContext myFhirContext;
-
 
 	@VisibleForTesting
 	public void setValidationSettingsForUnitTest(ValidationSettings theValidationSettings) {
@@ -129,7 +123,7 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 			boolean valid,
 			IMessagingServices msgServices,
 			List<ValidationMessage> messages) {
-		return Arrays.asList();
+		return List.of();
 	}
 
 	@Override
