@@ -46,6 +46,16 @@ public class SubscriptionTopicConfig {
 		};
 	}
 
+	@Deprecated
+	@Bean
+	public SubscriptionTopicMatchingListener subscriptionTopicMatchingSubscriber(
+			FhirContext theFhirContext, MemoryCacheService memoryCacheService) {
+		return switch (theFhirContext.getVersion().getVersion()) {
+			case R4, R5, R4B -> new SubscriptionTopicMatchingListener(theFhirContext, memoryCacheService);
+			default -> null;
+		};
+	}
+
 	@Bean
 	@Lazy
 	public SubscriptionTopicRegistry subscriptionTopicRegistry() {

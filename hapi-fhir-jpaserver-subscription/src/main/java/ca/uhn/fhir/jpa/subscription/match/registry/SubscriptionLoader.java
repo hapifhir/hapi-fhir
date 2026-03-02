@@ -34,7 +34,6 @@ import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,12 +90,12 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	}
 
 	@Override
-	protected void handleInit(@NotNull List<IBaseResource> theResourceList) {
+	protected void handleInit(@Nonnull List<IBaseResource> theResourceList) {
 		updateSubscriptionRegistry(theResourceList);
 	}
 
 	@Override
-	protected int syncResourcesIntoCache(@NotNull List<IBaseResource> theResourceList) {
+	protected int syncResourcesIntoCache(@Nonnull List<IBaseResource> theResourceList) {
 		return updateSubscriptionRegistry(theResourceList);
 	}
 

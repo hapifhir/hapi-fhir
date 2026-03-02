@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.util.IResourceRepositoryCache;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -94,8 +93,6 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		myDaoRegistry = theDaoRegistry;
 
 		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
-		// bypass consent checks for reading Subscription resources since this is a system action
-		ConsentInterceptor.skipAllConsentForRequest(mySystemRequestDetails);
 	}
 
 	/**
