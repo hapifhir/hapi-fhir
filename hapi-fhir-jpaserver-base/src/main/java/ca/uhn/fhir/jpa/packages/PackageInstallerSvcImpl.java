@@ -24,6 +24,8 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -41,6 +43,7 @@ import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -79,7 +82,10 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
 import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
@@ -287,6 +293,27 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				}
 			}
 		}
+
+		if (theInstallationSpec.isDryRun()) {
+			theOutcome.getMessage()
+				.add("Dry-run complete. No resources were stored.");
+
+			for (Map.Entry<String, List<String>> set : theOutcome.getAddedResourceTypeToUniqueIdentifier().entrySet()) {
+				String resourceType = set.getKey();
+				List<String> resourceIdentifiers = set.getValue();
+				theOutcome.getMessage()
+					.add(String.format("%s: %d new resource(s) would be created.", resourceType, resourceIdentifiers.size()));
+			}
+			for (Map.Entry<String, List<String>> set : theOutcome.getReplacedResourceToUniqueIdentifier().entrySet()) {
+				String resourceType = set.getKey();
+				List<String> resourceIdentifiers = set.getValue();
+				for (String identifier : resourceIdentifiers) {
+					theOutcome.getMessage()
+						.add(String.format("Resource of type %s with unique identifier %s would be overwritten.",
+							resourceType, identifier));
+				}
+			}
+		}
 		ourLog.info(String.format("Finished installation of package %s#%s:", name, version));
 
 		for (int i = 0; i < count.length; i++) {
@@ -323,17 +350,22 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 						continue;
 					}
 
-					// resolve in local cache or on packages.fhir.org
-					NpmPackage dependency = myPackageCacheManager.loadPackage(id, ver);
-					// recursive call to install dependencies of a package before
-					// installing the package
-					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
+					if (theInstallationSpec.isDryRun()) {
+						theOutcome.getMessage()
+							.add(String.format("Installation would install %s:%s", id, ver));
+					} else {
 
-					if (theInstallationSpec.getInstallMode()
+						// resolve in local cache or on packages.fhir.org
+						NpmPackage dependency = myPackageCacheManager.loadPackage(id, ver);
+						// recursive call to install dependencies of a package before
+						// installing the package
+						fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
+
+						if (theInstallationSpec.getInstallMode()
 							== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
-						install(dependency, theInstallationSpec, theOutcome);
+							install(dependency, theInstallationSpec, theOutcome);
+						}
 					}
-
 				} catch (IOException e) {
 					throw new ImplementationGuideInstallationException(
 							Msg.code(1287) + String.format("Cannot resolve dependency %s#%s", id, ver), e);
@@ -386,7 +418,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		SearchParameterMap map = createSearchParameterMapFor(theResource, theInstallationSpec);
 		IBundleProvider searchResult = searchResource(dao, map);
 
-		String resourceQuery = map.toNormalizedQueryString(myFhirContext);
+		String resourceQuery = map.toNormalizedQueryString();
 		if (!searchResult.isEmpty() && !theInstallationSpec.isReloadExisting()) {
 			ourLog.info("Skipping update of existing resource matching {}", resourceQuery);
 			return;
@@ -396,7 +428,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 		IBaseResource existingResource =
 				!searchResult.isEmpty() ? searchResult.getResources(0, 1).get(0) : null;
-		boolean isInstalled = createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec);
+		boolean isInstalled = createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec, map, theOutcome);
 		if (isInstalled) {
 			theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
 		}
@@ -422,20 +454,53 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			IFhirResourceDao theDao,
 			IBaseResource theResource,
 			IBaseResource theExistingResource,
-			@Nonnull PackageInstallationSpec thePackageInstallationSpec) {
+			@Nonnull PackageInstallationSpec thePackageInstallationSpec,
+			SearchParameterMap theSpMap,
+			PackageInstallOutcomeJson theOutcome) {
 
 		// If the resource to be installed has a client-provided, purely numeric id,
 		// then add a prefix to the id, since we don't allow purely numeric IDs by default
 		prefixNumericIdIfNeeded(theResource);
 		setPackageMetaSource(theResource, thePackageInstallationSpec);
 
-		if (theExistingResource == null) {
-			return createNewResource(theDao, theResource, thePackageInstallationSpec);
+		if (!thePackageInstallationSpec.isDryRun()) {
+			if (theExistingResource == null) {
+				return createNewResource(theDao, theResource, thePackageInstallationSpec);
+			} else {
+				return updateExistingResource(theDao, theResource, theExistingResource);
+			}
 		} else {
-			return updateExistingResource(theDao, theResource, theExistingResource);
+			FhirTerser terser = myFhirContext.newTerser();
+			String resourceType = theResource.fhirType();
+			RuntimeResourceDefinition rtDefinition = myFhirContext.getResourceDefinition(resourceType);
+			List<RuntimeSearchParam> sps = rtDefinition.getSearchParams();
+			StringBuilder uniqueIdentifierSpBuilder = new StringBuilder();
+			for (Map.Entry<String, List<List<IQueryParameterType>>> spSet : theSpMap.entrySet()) {
+				String key = spSet.getKey();
+
+				// TODO - will we ever see nothing? or a throw?
+				RuntimeSearchParam runtimeSearchParameter = sps.stream()
+					.filter(sp -> sp.getName().equals(key))
+					.findFirst()
+					.orElseThrow();
+
+				Optional<String> valueOp = terser.getSinglePrimitiveValue(theResource, runtimeSearchParameter.getPath());
+				uniqueIdentifierSpBuilder.append(valueOp.get());
+			}
+
+			// dry run
+			if (theExistingResource != null) {
+				theOutcome.addExistingResource(resourceType,
+					uniqueIdentifierSpBuilder.toString());
+			} else {
+				// a resource we'd add
+				theOutcome.addResourceTypeToBeAdded(resourceType, uniqueIdentifierSpBuilder.toString());
+			}
+			return false;
 		}
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private boolean createNewResource(
 			IFhirResourceDao theDao,
 			IBaseResource theResource,
@@ -846,5 +911,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@VisibleForTesting
 	void setFhirContextForUnitTest(FhirContext theCtx) {
 		myFhirContext = theCtx;
+	}
+
+	private interface IParamAdder {
+		void add(String theKey, IQueryParameterType theValue);
 	}
 }

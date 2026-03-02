@@ -61,6 +61,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,13 +74,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport.GENERATING_SNAPSHOT_LOG_MSG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -140,6 +146,161 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 	}
 
+	@ParameterizedTest
+	@EnumSource(value = PackageInstallationSpec.VersionPolicyEnum.class)
+	public void dryRunInstall_singleDependencyDifferentVersionsAreConsideredNew_doesntInstall(PackageInstallationSpec.VersionPolicyEnum theVersionPolicyEnum, @TempDir Path theTempDir) throws IOException {
+		// setup
+
+		// terminology resources
+		String codeSystemStr;
+		String valueSetStr;
+		String conceptMapStr;
+
+		{
+			codeSystemStr = """
+				{                                                                                                                                     \s
+				    "resourceType": "CodeSystem",
+				    "url": "http://example.org/CodeSystem/my-codes",
+				    "status": "active",
+				    "content": "complete",
+				    "concept": [
+				      { "code": "foo", "display": "Foo" }
+				    ]
+				}
+				""";
+			valueSetStr = """
+				{
+				    "resourceType": "ValueSet",
+				    "url": "http://example.org/ValueSet/my-valueset",
+				    "status": "active",
+				    "compose": {
+				      "include": [
+				        { "system": "http://example.org/CodeSystem/my-codes" }
+				      ]
+				    }
+				}
+				""";
+			conceptMapStr = """
+				{
+				    "resourceType": "ConceptMap",
+				    "url": "http://example.org/ConceptMap/my-map",
+				    "status": "active",
+				    "group": [
+				      {
+				        "source": "http://example.org/CodeSystem/source-codes",
+				        "target": "http://example.org/CodeSystem/target-codes",
+				        "element": [
+				          {
+				            "code": "foo",
+				            "target": [{ "code": "bar", "equivalence": "equivalent" }]
+				          }
+				        ]
+				      }
+				    ]
+				}
+				""";
+		}
+
+		String igName = "my.package.id";
+
+		IParser parser = myFhirContext.newJsonParser();
+
+		Path igdir1 = Files.createDirectory(Path.of(theTempDir.toString(), "dir1"));
+		Path igdir2 = Files.createDirectory(Path.of(theTempDir.toString(), "dir2"));
+
+		ImplementationGuideCreator igV1 = new ImplementationGuideCreator(myFhirContext, igName, "1.0.0");
+		igV1.setDirectory(igdir1);
+		ImplementationGuideCreator igV2 = new ImplementationGuideCreator(myFhirContext, igName, "1.0.1");
+		igV2.setDirectory(igdir2);
+
+		// how many installation specs
+		PackageInstallationSpec installedSpec = new PackageInstallationSpec();
+		installedSpec
+			.setName(igV1.getPackageName())
+			.setVersion(igV1.getPackageVersion())
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setVersionPolicy(theVersionPolicyEnum)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+
+		PackageInstallationSpec dryRunSpec = new PackageInstallationSpec();
+		dryRunSpec
+			.setName(igV2.getPackageName())
+			.setVersion(igV2.getPackageVersion())
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setVersionPolicy(theVersionPolicyEnum)
+			.setDryRun(true)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+
+		for (int i = 0; i < 2; i++) {
+			CodeSystem codeSystem = parser.parseResource(CodeSystem.class, codeSystemStr);
+			ValueSet valueSet = parser.parseResource(ValueSet.class, valueSetStr);
+			ConceptMap conceptMap = parser.parseResource(ConceptMap.class, conceptMapStr);
+
+			// ensure different versions
+			codeSystem.setVersion("1.0." + i);
+			valueSet.setVersion("1.0." + i);
+			conceptMap.setVersion("1.0." + i);
+
+			ImplementationGuideCreator igcreator = i == 0 ? igV1 : igV2;
+
+			igcreator.addResourceToIG("codesystem", codeSystem);
+			igcreator.addResourceToIG("valueset", valueSet);
+			igcreator.addResourceToIG("conceptmap", conceptMap);
+		}
+
+		// test
+		// install the first ig as 'base'
+		Path installedPath = igV1.createTestIG();
+		Path dryRunPath = igV2.createTestIG();
+
+		installedSpec
+			.setPackageContents(Files.readAllBytes(installedPath));
+
+		dryRunSpec
+			.setPackageContents(Files.readAllBytes(dryRunPath));
+
+		// install first one (as normal install)
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(installedSpec);
+
+		assertTrue(outcome.getMessage()
+			.stream()
+			.anyMatch(m -> m.contains("Successfully added package")));
+
+		verifyResourceCountInDB("CodeSystem", 1);
+		verifyResourceCountInDB("ValueSet", 1);
+		verifyResourceCountInDB("ConceptMap", 1);
+
+		// test
+		PackageInstallOutcomeJson dryRunOutcome = myPackageInstallerSvc.install(dryRunSpec);
+
+		// verify
+		ourLog.info(String.join(", ", dryRunOutcome.getMessage()));
+
+		assertTrue(dryRunOutcome.getMessage().stream()
+			.anyMatch(m -> m.contains("Dry-run complete")));
+
+		// no new resources created
+		verifyResourceCountInDB("CodeSystem", 1);
+		verifyResourceCountInDB("ValueSet", 1);
+		verifyResourceCountInDB("ConceptMap", 1);
+
+		for (String rt : new String[]{"ValueSet", "CodeSystem", "ConceptMap"}) {
+			if (theVersionPolicyEnum == PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION) {
+				// single version means same url but different version is the same resource
+				assertFalse(dryRunOutcome.getMessage()
+					.stream().anyMatch(m -> m.startsWith(String.format("%s: 1 new resource(s) would be created", rt))));
+				assertTrue(dryRunOutcome.getMessage()
+					.stream().anyMatch(m -> m.contains("would be overwritten") && m.contains(rt)));
+			} else {
+				// multiversion means same url but different version is different resources
+				assertTrue(dryRunOutcome.getMessage()
+					.stream().anyMatch(m -> m.startsWith(String.format("%s: 1 new resource(s) would be created", rt))));
+				assertFalse(dryRunOutcome.getMessage()
+					.stream().anyMatch(m -> m.contains("would be overwritten") && m.contains(rt)));
+			}
+		}
+	}
+
 	/**
 	 * Some things that I think would be useful that we could learn from a dry run of a package load would include:
 	 * * If fetchDependencies is enabled, what packages and versions will be loaded as dependencies?
@@ -147,13 +308,17 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	 * * Does the package being loaded already exist with a different version in the repository?
 	 * * What would be the "current" versions of the package and dependencies that would ultimately be used by the NPM validator?
 	 */
-	@Test
-	public void dryRunInstall_flagsDuplicates_andDoesntInstall(@TempDir Path theTempDir) throws IOException {
+	@ParameterizedTest
+	@EnumSource(value = PackageInstallationSpec.VersionPolicyEnum.class)
+	public void dryRunInstall_flagsDuplicates_andDoesntInstall(PackageInstallationSpec.VersionPolicyEnum theVersionPolicy, @TempDir Path theTempDir) throws IOException {
 		// setup
+
+		// terminology resources
 		String codeSystemStr;
 		String valueSetStr;
 		String conceptMapStr;
 		String nameSystemStr;
+
 		{
 			codeSystemStr = """
 				{                                                                                                                                     \s
@@ -229,7 +394,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setName(igV1.getPackageName())
 			.setVersion(igV1.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
-			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION)
+			.setVersionPolicy(theVersionPolicy)
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 
 		PackageInstallationSpec dryRunSpec = new PackageInstallationSpec();
@@ -237,22 +402,42 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setName(igV2.getPackageName())
 			.setVersion(igV2.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
-			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION)
+			.setVersionPolicy(theVersionPolicy)
 			.setDryRun(true)
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 
+		boolean multiVersion = theVersionPolicy == PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION;
+
 		// add some resources
-		for (int i = 0; i < 10; i++) {
+		int resourceCount = 10;
+		for (int i = 0; i < resourceCount; i++) {
+			// codesystem, valueset, conceptMap all use url + version to determine if
+			// it's a duplicate
+			CodeSystem codeSystem = parser.parseResource(CodeSystem.class, codeSystemStr);
+			ValueSet valueSet = parser.parseResource(ValueSet.class, valueSetStr);
+			ConceptMap conceptMap = parser.parseResource(ConceptMap.class, conceptMapStr);
+			if (multiVersion) {
+				// multiversion, we check url|version
+				codeSystem.setVersion("1.0." + i);
+				valueSet.setVersion("1.0." + i);
+				conceptMap.setVersion("1.0." + i);
+			} else {
+				// singleversion, we check only the url, so version doesn't matter
+				codeSystem.setUrl(codeSystem.getUrl() + i);
+				valueSet.setUrl(valueSet.getUrl() + i);
+				conceptMap.setUrl(conceptMap.getUrl() + i);
+			}
+
+			// namesystem uses uniqueId - not url || url|version
+			NamingSystem namingSystem = parser.parseResource(NamingSystem.class, nameSystemStr);
+			String curValue = namingSystem.getUniqueId()
+				.get(0)
+				.getValue();
+			namingSystem.getUniqueId()
+				.get(0)
+				.setValue(curValue + "/id" + i);
+
 			for (var ig : new ImplementationGuideCreator[]{igV1, igV2}) {
-				// codesystem, valueset, conceptMap all use url + version to determine if
-				// it's a duplicate
-				CodeSystem codeSystem = parser.parseResource(CodeSystem.class, codeSystemStr);
-				ValueSet valueSet = parser.parseResource(ValueSet.class, valueSetStr);
-				ConceptMap conceptMap = parser.parseResource(ConceptMap.class, conceptMapStr);
-
-				// namesystem uses uniqueId
-				NamingSystem namingSystem = parser.parseResource(NamingSystem.class, nameSystemStr);
-
 				ig.addResourceToIG("codeSystem" + i, codeSystem);
 				ig.addResourceToIG("valueSet" + i, valueSet);
 				ig.addResourceToIG("conceptMap" + i, conceptMap);
@@ -273,6 +458,11 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		// install first one (as normal install)
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(installedSpec);
 
+		verifyResourceCountInDB("NamingSystem", resourceCount);
+		verifyResourceCountInDB("CodeSystem", resourceCount);
+		verifyResourceCountInDB("ValueSet", resourceCount);
+		verifyResourceCountInDB("ConceptMap", resourceCount);
+
 		assertTrue(outcome.getMessage()
 			.stream()
 			.anyMatch(m -> m.contains("Successfully added package")));
@@ -280,6 +470,109 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		// test
 		PackageInstallOutcomeJson dryRunOutcome = myPackageInstallerSvc.install(dryRunSpec);
 
+		// verification
+		assertFalse(dryRunOutcome.getReplacedResourceToUniqueIdentifier().isEmpty());
+		assertTrue(dryRunOutcome.getMessage()
+			.stream().anyMatch(m -> m.contains("Dry-run complete")));
+
+		// check that no new resources would be added
+		assertFalse(dryRunOutcome.getMessage()
+			.stream().anyMatch(m -> m.contains("new resources would be created")));
+
+		// check overwritten
+		String[] resourceTypes = new String[] {
+			"NamingSystem",
+			"CodeSystem",
+			"ValueSet",
+			"ConceptMap"
+		};
+		Map<String, Integer> resourceTypeToCount = new HashMap<>();
+		for (String rt : resourceTypes) {
+			resourceTypeToCount.put(rt, 0);
+		}
+		dryRunOutcome.getMessage().forEach(m -> {
+			Optional<String> resourceTypeMatch = Arrays.stream(resourceTypes)
+				.filter(rt -> m.contains(rt) && m.contains("overwritten"))
+				.findFirst();
+
+			if (resourceTypeMatch.isPresent()) {
+				String resourceType = resourceTypeMatch.get();
+				int count = resourceTypeToCount.get(resourceType);
+				count++;
+				resourceTypeToCount.put(resourceType, count);
+			}
+		});
+
+		for (String resourceType : resourceTypes) {
+			assertEquals(resourceCount, resourceTypeToCount.get(resourceType),
+				String.format("Expected %d of %s", resourceCount, resourceType));
+		}
+		// make sure they weren't installed
+		verifyResourceCountInDB("NamingSystem", resourceCount);
+		verifyResourceCountInDB("CodeSystem", resourceCount);
+		verifyResourceCountInDB("ValueSet", resourceCount);
+		verifyResourceCountInDB("ConceptMap", resourceCount);
+	}
+
+	@SuppressWarnings("rawtypes")
+	private void verifyResourceCountInDB(String theResourceType, int theExpectedCount) {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResourceType);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.setCount(theExpectedCount + 1); // more so that we don't get a false positive
+		IBundleProvider result = dao.search(map, new SystemRequestDetails());
+		assertEquals(theExpectedCount, result.sizeOrThrowNpe());
+	}
+
+	@Test
+	public void dryRunInstall_withDependencies_wontInstallDependencies(@TempDir Path theTempDir) throws IOException {
+		// setup
+		IParser parser = myFhirContext.newJsonParser();
+		String nameSystemStr = """
+				{
+				    "resourceType": "NamingSystem",
+				    "name": "MyNamingSystem",
+				    "status": "active",
+				    "kind": "identifier",
+				    "date": "2024-01-01",
+				    "uniqueId": [
+				      { "type": "uri", "value": "http://example.org/my-system" }
+				    ]
+				}
+				""";
+		NamingSystem system = parser.parseResource(NamingSystem.class, nameSystemStr);
+
+		Path igdir1 = Files.createDirectory(Path.of(theTempDir.toString(), "dir1" ));
+
+		ImplementationGuideCreator igV1 = new ImplementationGuideCreator(myFhirContext, "example.ig.com", "1.0.0");
+		igV1.setDirectory(igdir1);
+		igV1.addDependency("hl7.fhir.r4", "4.0.1");
+
+		// how many installation specs
+		PackageInstallationSpec installedSpec = new PackageInstallationSpec();
+		installedSpec
+			.setName(igV1.getPackageName())
+			.setVersion(igV1.getPackageVersion())
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION)
+			.setFetchDependencies(true)
+			.setDryRun(true);
+
+		// one resource - we don't really need or care about it
+		igV1.addResourceToIG("NamingSystem", system);
+
+		installedSpec.setPackageContents(Files.readAllBytes(igV1.createTestIG()));
+
+		// test
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(installedSpec);
+
+		// verify
+		assertNotNull(outcome);
+		assertTrue(outcome.getMessage()
+			.stream().anyMatch(m -> m.contains("Dry-run complete")));
+		assertTrue(outcome.getMessage()
+			.stream().anyMatch(m -> m.contains("Installation would install") && m.contains("hl7.fhir.r4")));
 	}
 
 	@Disabled("This test is super slow so don't run by default")

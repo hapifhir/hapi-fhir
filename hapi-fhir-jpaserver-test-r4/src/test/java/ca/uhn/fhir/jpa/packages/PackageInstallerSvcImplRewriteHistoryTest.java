@@ -42,7 +42,8 @@ public class PackageInstallerSvcImplRewriteHistoryTest extends BaseJpaR4Test {
 
 		// execute
 		// red-green this threw a NPE before the fix
-		mySvc.createOrUpdateResource(myConceptMapDao, conceptMap, null, new PackageInstallationSpec());
+		mySvc.createOrUpdateResource(myConceptMapDao, conceptMap, null, new PackageInstallationSpec(),
+			new SearchParameterMap(), new PackageInstallOutcomeJson());
 
 		// verify
 		IBundleProvider readConceptMap = myConceptMapDao.search(new SearchParameterMap().add(ConceptMap.SP_URL, new UriParam("http://example.com/ConceptMap/testcm")));

@@ -3,7 +3,6 @@ package ca.uhn.fhir.implementationguide;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.FhirTerser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import jakarta.annotation.Nonnull;
@@ -22,8 +21,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -67,18 +64,23 @@ public class ImplementationGuideCreator {
 	}
 """;
 
+	private final ObjectMapper myMapper = new ObjectMapper();
+
 	private Path myDir;
 	private final FhirContext myFhirContext;
 
 	private final FhirTerser myTerser;
 	private final IParser myParser;
 
-	private String myPackageJson;
-
 	private final String myPackageName;
 	private final String myPackageVersion;
 
 	private final Map<String, IBaseResource> myResourcesToInclude = new HashMap<>();
+
+	// dependencies, url|version
+	private final Map<String, String> myDependencies = new HashMap<>();
+
+	private Map<String, Object> myPackageJson;
 
 	public ImplementationGuideCreator(@Nonnull FhirContext theFhirContext) {
 		this(theFhirContext, "test.fhir.ca.com", "1.2.3");
@@ -109,32 +111,22 @@ public class ImplementationGuideCreator {
 		myPackageName = theName;
 		myPackageVersion = theVersion;
 
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		myMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-		Map<String, Object> mapJson;
+
 		try {
-			mapJson = mapper.readValue(PACKAGE_JSON_BASE, Map.class);
+			myPackageJson = myMapper.readValue(PACKAGE_JSON_BASE, Map.class);
 		} catch (Exception ex) {
 			sneakyThrow(ex);
-			mapJson = new HashMap<>();
+			myPackageJson = new HashMap<>();
 		}
 
 		// update provided values
-		List<String> versions = (List<String>) mapJson.get("fhirVersions");
+		List<String> versions = (List<String>) myPackageJson.get("fhirVersions");
 		versions.clear();
 		versions.add(theFhirVersion);
-		mapJson.replace("name", myPackageName);
-		mapJson.replace("version", myPackageVersion);
-
-		try {
-			myPackageJson = mapper.writerWithDefaultPrettyPrinter()
-				.writeValueAsString(mapJson);
-
-			ourLog.info(myPackageJson);
-		} catch (Exception ex) {
-			sneakyThrow(ex);
-		}
+		myPackageJson.replace("name", myPackageName);
+		myPackageJson.replace("version", myPackageVersion);
 	}
 
 	/**
@@ -178,8 +170,14 @@ public class ImplementationGuideCreator {
 
 		Path sourceDir = Files.createDirectory(Path.of(myDir.toString(), "package"));
 
+		if (!myDependencies.isEmpty()) {
+			myPackageJson.put("dependencies", myDependencies);
+		}
+
+		String pkg = createPackageJsonFile();
+
 		// add the package.json
-		addFileToDir(myPackageJson, "package.json", sourceDir);
+		addFileToDir(pkg, "package.json", sourceDir);
 
 		// add resources
 		int index = 0;
@@ -190,12 +188,28 @@ public class ImplementationGuideCreator {
 					sourceDir);
 			index++;
 		}
-
-		// we can add other resources here (not req'd for now)
+		ourLog.debug("Added " + index + " resources to package.");
 
 		Path outputFileName = Files.createFile(Path.of(myDir.toString(), myPackageName + ".gz.tar"));
 		GZipCreatorUtil.createTarGz(sourceDir, outputFileName);
 		return outputFileName;
+	}
+
+	private String createPackageJsonFile() {
+		String pkg = null;
+		try {
+			pkg = myMapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(myPackageJson);
+
+			ourLog.info(pkg);
+		} catch (Exception ex) {
+			sneakyThrow(ex);
+		}
+		return pkg;
+	}
+
+	public void addDependency(String thePackageName, String thePackageVersion) {
+		myDependencies.put(thePackageName, thePackageVersion);
 	}
 
 	private void addFileToDir(String theContent, String theFileName, Path theOutputPath) throws IOException {
