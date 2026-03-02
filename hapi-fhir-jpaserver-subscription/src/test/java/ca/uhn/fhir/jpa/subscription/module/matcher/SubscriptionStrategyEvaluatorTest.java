@@ -17,6 +17,31 @@ public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
 	@Test
+	void testTokenParamMissingModifier() {
+		// Reproduces SMILE-10730: Subscription with criteria using :missing modifier on a token param
+		// causes NPE in InMemoryResourceMatcher.supportedQualifier() because TokenParam.getModifier()
+		// returns null for :missing (it's not a TokenParamModifier enum member).
+		// Expected behavior: :missing on token params is unsupported for in-memory matching,
+		// so the strategy should fall back to DATABASE.
+		assertDatabase("MessageHeader?event:missing=true");
+	}
+
+	@Test
+	void testTokenParamNotModifier() {
+		// Adjacent to SMILE-10730: :not IS a valid TokenParamModifier, so the switch in
+		// supportedQualifier() handles it correctly. Should be evaluable in-memory.
+		assertInMemory("Observation?code:not=FOO");
+	}
+
+	@Test
+	void testSourceMissingModifier() {
+		// Adjacent to SMILE-10730: _source:missing uses a URI param, which has a different
+		// code path in supportedQualifier() that handles :missing correctly and supports
+		// in-memory matching.
+		assertInMemory("Observation?_source:missing=true");
+	}
+
+	@Test
 	public void testInMemory() {
 		assertInMemory("Observation?");
 		assertInMemory("QuestionnaireResponse?questionnaire=HomeAbsenceHospitalizationRecord,ARIncenterAbsRecord");

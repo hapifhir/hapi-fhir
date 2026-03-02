@@ -450,6 +450,39 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 
+	// SMILE-10730: Tests for :missing modifier on token search parameters
+	@Test
+	void testTokenParam_MissingModifier_ShouldReturnUnsupported() {
+		// The :missing modifier is NOT in the TokenParamModifier enum.
+		// When canBeEvaluatedInMemory is called with a token param using :missing,
+		// the desired behavior is to return an unsupported result (so the subscription
+		// falls back to DATABASE matching strategy). The bug causes an NPE instead.
+		InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory("Observation?code:missing=true");
+		assertThat(result.supported()).as("Token param with :missing modifier should be unsupported for in-memory matching").isFalse();
+	}
+
+	@Test
+	void testTokenParam_NotModifier_ShouldBeSupported() {
+		// :not IS in the TokenParamModifier enum, so this should work
+		InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory("Observation?code:not=FOO");
+		assertThat(result.supported()).as(":not modifier should be supported for in-memory matching").isTrue();
+	}
+
+	@Test
+	void testTokenParam_InModifier_ShouldBeSupported() {
+		// :in IS in the TokenParamModifier enum and IValidationSupport is available (mocked)
+		InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory("Observation?code:in=http://hl7.org/some-vs");
+		assertThat(result.supported()).as(":in modifier should be supported for in-memory matching when IValidationSupport is available").isTrue();
+	}
+
+	@Test
+	void testSourceParam_MissingModifier_ShouldBeSupported() {
+		// _source:missing uses the URI param code path, which handles :missing properly.
+		// This verifies the adjacent code path is not affected by the token :missing bug.
+		InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory("Observation?_source:missing=true");
+		assertThat(result.supported()).as("_source:missing should be supported for in-memory matching").isTrue();
+	}
+
 	private ResourceIndexedSearchParams extractSearchParams(Observation theObservation) {
 		ResourceIndexedSearchParams retval = ResourceIndexedSearchParams.withSets();
 		retval.myDateParams.add(extractEffectiveDateParam(theObservation));
