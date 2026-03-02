@@ -122,7 +122,10 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 
 	@Override
 	public boolean isSuppressMessageId(String path, String messageId) {
-		if (!myValidationSettings.getLocalReferenceValidationDefaultPolicy().checkValid()) {
+		if (myValidationSettings != null
+				&& !myValidationSettings
+						.getLocalReferenceValidationDefaultPolicy()
+						.checkValid()) {
 			// The InstanceValidator hardcodes CHECK_VALID for bundle-internal (INTERNAL) and
 			// contained references, bypassing the policy advisor's policyForReference method.
 			// When our configured policy would not have validated reference targets (e.g. IGNORE),
