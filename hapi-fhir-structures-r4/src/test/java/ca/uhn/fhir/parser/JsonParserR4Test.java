@@ -2086,6 +2086,47 @@ public class JsonParserR4Test extends BaseTest {
 		assertThat(parsed.getNameFirstRep().getGiven().get(0).getValue()).isEqualTo(" ");
 	}
 
+	@Test
+	void testObservationValueQuantityTrailingDecimalPoint_Issue8446() {
+		// Create an Observation JSON string with value quantity "1."
+		String observationJson = """
+			{
+			  "resourceType": "Observation",
+			  "id": "test-trailing-decimal",
+			  "status": "final",
+			  "code": {
+			    "coding": [
+			      {
+			        "system": "http://loinc.org",
+			        "code": "29463-7",
+			        "display": "Body Weight"
+			      }
+			    ]
+			  },
+			  "subject": {
+			    "reference": "Patient/example"
+			  },
+			  "valueQuantity": {
+			    "value": "1.",
+			    "unit": "kg",
+			    "system": "http://unitsofmeasure.org",
+			    "code": "kg"
+			  }
+			}
+			""";
+
+		// Parse the JSON string into an Observation
+		IParser parser = ourCtx.newJsonParser();
+		Observation observation = parser.parseResource(Observation.class, observationJson);
+
+		// Verify the parsed value is corrected from "1." to "1"
+		assertThat(observation.getValue()).isInstanceOf(Quantity.class);
+		Quantity valueQuantity = (Quantity) observation.getValue();
+
+		// The expectation is that "1." should be normalized to "1"
+		assertEquals("1", valueQuantity.getValueElement().getValueAsString()); // This should be "1", not "1."
+	}
+
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
