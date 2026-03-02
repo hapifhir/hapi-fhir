@@ -243,8 +243,6 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		IIdType srCId = srIds.get(2);
 
 		// ServiceRequest?_id=A&_include=ServiceRequest:replaces&_revinclude=ServiceRequest:replaces
-		// Without _iterate, _include should only apply to the initial result set (SR/A),
-		// NOT to the revincluded SR/C
 		Bundle bundle = myClient.search()
 			.forResource(ServiceRequest.class)
 			.where(IAnyResource.RES_ID.exactly().codes(srAId.getIdPart()))
@@ -264,9 +262,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * Adjacent test for SMILE-9135: _revinclude alone should work correctly.
-	 * When only _revinclude is used (no _include), there is no opportunity for
-	 * the transitive bug to manifest.
+	 * SMILE-9135: _revinclude without _include should still return only direct results.
 	 */
 	@Test
 	void testRevIncludeAloneDoesNotProduceTransitiveResults() {
@@ -275,7 +271,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		IIdType srBId = srIds.get(1);
 		IIdType srCId = srIds.get(2);
 
-		// ServiceRequest?_id=A&_revinclude=ServiceRequest:replaces (no _include)
+		// ServiceRequest?_id=A&_revinclude=ServiceRequest:replaces
 		Bundle bundle = myClient.search()
 			.forResource(ServiceRequest.class)
 			.where(IAnyResource.RES_ID.exactly().codes(srAId.getIdPart()))
@@ -292,8 +288,8 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * Adjacent test for SMILE-9135: _include alone should work correctly.
-	 * Since SR/A has no replaces, _include should not add anything.
+	 * SMILE-9135: _include without _revinclude should only return direct results.
+	 * Since SR/A has no replaces references, _include adds nothing.
 	 */
 	@Test
 	void testIncludeAloneDoesNotProduceTransitiveResults() {
@@ -301,7 +297,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		IIdType srAId = srIds.get(0);
 		IIdType srBId = srIds.get(1);
 
-		// ServiceRequest?_id=A&_include=ServiceRequest:replaces (no _revinclude)
+		// ServiceRequest?_id=A&_include=ServiceRequest:replaces
 		Bundle bundle = myClient.search()
 			.forResource(ServiceRequest.class)
 			.where(IAnyResource.RES_ID.exactly().codes(srAId.getIdPart()))
@@ -319,8 +315,8 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * Adjacent test for SMILE-9135: With _iterate, _include SHOULD apply to revincluded resources.
-	 * This is the correct behavior when iterate is specified - SR/B should appear.
+	 * SMILE-9135: With _iterate, _include SHOULD cascade through revincluded resources.
+	 * This is the correct behavior when iterate is specified — SR/B should appear.
 	 */
 	@Test
 	void testRevIncludeWithIncludeIterateProducesTransitiveResults() {
@@ -330,7 +326,6 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		IIdType srCId = srIds.get(2);
 
 		// ServiceRequest?_id=A&_include:iterate=ServiceRequest:replaces&_revinclude:iterate=ServiceRequest:replaces
-		// With _iterate, the transitive cascade IS correct
 		Bundle bundle = myClient.search()
 			.forResource(ServiceRequest.class)
 			.where(IAnyResource.RES_ID.exactly().codes(srAId.getIdPart()))
