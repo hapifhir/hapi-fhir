@@ -42,7 +42,8 @@ import java.util.function.Supplier;
 	"validationMode",
 	"reloadExisting",
 	"additionalResourceFolders",
-	"versionPolicy"
+	"versionPolicy",
+	"dryRun"
 })
 @ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
 @JsonInclude(JsonInclude.Include.NON_NULL)
