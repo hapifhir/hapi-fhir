@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Edit",
+      "Search",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:hl7.org)",
+      "Write"
+    ]
+  },
+  "enabledPlugins": {
+    "jdtls@claude-code-lsps": true,
+    "cdr@smile-marketplace": true,
+    "hapi@smile-marketplace": true,
+    "smile-dev-tools@smile-marketplace": true
+  }
+}

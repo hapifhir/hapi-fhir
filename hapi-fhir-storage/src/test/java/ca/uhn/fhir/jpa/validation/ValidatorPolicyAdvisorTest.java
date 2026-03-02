@@ -13,26 +13,26 @@ class ValidatorPolicyAdvisorTest {
 	@Test
 	void testIsSuppressMessageId_withoutSpringContext_shouldNotThrowNpe() {
 		// Given: a ValidatorPolicyAdvisor created without Spring (myValidationSettings is null)
-		ValidatorPolicyAdvisor myAdvisor = new ValidatorPolicyAdvisor();
+		ValidatorPolicyAdvisor advisor = new ValidatorPolicyAdvisor();
 
 		// When/Then: calling isSuppressMessageId should return false, not throw NPE
-		boolean myResult = myAdvisor.isSuppressMessageId("Patient", "some_message_id");
+		boolean result = advisor.isSuppressMessageId("Patient", "some_message_id");
 
-		assertThat(myResult).isFalse();
+		assertThat(result).isFalse();
 	}
 
 	@Test
 	void testIsSuppressMessageId_withIgnorePolicy_shouldSuppressCantMatchChoice() {
 		// Given: a ValidatorPolicyAdvisor with ValidationSettings configured to IGNORE policy
-		ValidatorPolicyAdvisor myAdvisor = new ValidatorPolicyAdvisor();
-		ValidationSettings mySettings = new ValidationSettings();
-		mySettings.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.IGNORE);
-		ReflectionTestUtils.setField(myAdvisor, "myValidationSettings", mySettings);
+		ValidatorPolicyAdvisor advisor = new ValidatorPolicyAdvisor();
+		ValidationSettings settings = new ValidationSettings();
+		settings.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.IGNORE);
+		ReflectionTestUtils.setField(advisor, "myValidationSettings", settings);
 
 		// When: calling isSuppressMessageId with the REFERENCE_REF_CANTMATCHCHOICE message ID
-		boolean myResult = myAdvisor.isSuppressMessageId("Patient", I18nConstants.REFERENCE_REF_CANTMATCHCHOICE);
+		boolean result = advisor.isSuppressMessageId("Patient", I18nConstants.REFERENCE_REF_CANTMATCHCHOICE);
 
 		// Then: should return true because IGNORE policy means we suppress reference match errors
-		assertThat(myResult).isTrue();
+		assertThat(result).isTrue();
 	}
 }
