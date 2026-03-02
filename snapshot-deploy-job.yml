@@ -97,24 +97,44 @@ jobs:
       # 6. Notify Slack if the deploy failed
       - bash: |
           PIPELINE_URL="$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
-          curl -s -X POST "${SLACK_WEBHOOK_URL}" \
-            -H 'Content-type: application/json' \
+          curl -s -X POST 'https://slack-bots.azure.smilecdr.com/robogary/slack/slack-message' \
+            -H 'Content-Type: application/json' \
+            -H "X-Slack-Sender-Token: ${SLACK_SENDER_TOKEN}" \
             --data "{
-              \"text\": \":red_circle: *HAPI FHIR Nightly SNAPSHOT Deploy Failed*\",
+              \"channel\": \"ci-clintel-build-status\",
+              \"author\": \"robogary\",
+              \"text\": \"HAPI FHIR Nightly SNAPSHOT Deploy Failed\",
               \"blocks\": [
                 {
-                  \"type\": \"section\",
+                  \"type\": \"header\",
                   \"text\": {
-                    \"type\": \"mrkdwn\",
-                    \"text\": \":red_circle: *HAPI FHIR Nightly SNAPSHOT Deploy Failed*\n\n*Pipeline:* ${PIPELINE_NAME}\n*Branch:* \`${BRANCH_NAME}\`\n*Build:* <${PIPELINE_URL}|${BUILD_NUMBER}>\n*Reason:* ${BUILD_REASON}\"
+                    \"type\": \"plain_text\",
+                    \"text\": \":red_circle: HAPI FHIR Nightly SNAPSHOT Deploy Failed\",
+                    \"emoji\": true
                   }
+                },
+                {
+                  \"type\": \"section\",
+                  \"fields\": [
+                    { \"type\": \"mrkdwn\", \"text\": \"*Pipeline:*\n${PIPELINE_NAME}\" },
+                    { \"type\": \"mrkdwn\", \"text\": \"*Branch:*\n\`${BRANCH_NAME}\`\" },
+                    { \"type\": \"mrkdwn\", \"text\": \"*Build:*\n<${PIPELINE_URL}|${BUILD_NUMBER}>\" },
+                    { \"type\": \"mrkdwn\", \"text\": \"*Reason:*\n${BUILD_REASON}\" }
+                  ]
+                },
+                { \"type\": \"divider\" },
+                {
+                  \"type\": \"context\",
+                  \"elements\": [
+                    { \"type\": \"mrkdwn\", \"text\": \"Nightly SNAPSHOT build failure notification\" }
+                  ]
                 }
               ]
             }" || echo "Failed to send Slack notification"
         displayName: 'Notify Slack on failure'
         condition: failed()
         env:
-          SLACK_WEBHOOK_URL: $(SLACK_WEBHOOK_URL)
+          SLACK_SENDER_TOKEN: $(SLACK_SENDER_TOKEN)
           PIPELINE_NAME: $(Build.DefinitionName)
           BRANCH_NAME: $(Build.SourceBranchName)
           BUILD_NUMBER: $(Build.BuildNumber)
