@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -55,6 +56,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -625,6 +627,69 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			patient = myPatientDao.read(patientId, mySrd);
 			messageHeader = myMessageHeaderDao.read(messageHeaderId, mySrd);
 			assertEquals(patient.getIdElement().getValue(), messageHeader.getFocus().get(0).getReference());
+		}
+
+		/**
+		 * SMILE-9706 - When autoVersionReferenceAtPaths is configured and a resource references
+		 * a non-existent target, the server should return status 400 with a descriptive message
+		 * like "Resource Patient/X not found, specified in path: Observation.subject",
+		 * not status 404 with the cryptic message "HAPI-0523: Patient/X".
+		 */
+		@Test
+		void testAutoVersionReferenceToNonExistentResource_throwsInvalidRequestException() {
+
+			Observation observation = new Observation();
+			observation.getMeta().setExtension(observationAutoVersionExtension);
+			observation.getSubject().setReference("Patient/nonexistent-patient-12345");
+
+			// When/Then: should throw InvalidRequestException (400) with proper context message,
+			// not ResourceNotFoundException (404) with cryptic HAPI-0523 message
+			assertThatThrownBy(() -> myObservationDao.create(observation, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("not found, specified in path");
+		}
+
+		/**
+		 * SMILE-9706 adjacent test - Without autoVersionReferenceAtPaths, a reference to a
+		 * non-existent resource should throw the proper InvalidRequestException (400) with HAPI-1094.
+		 * This is the control case - the normal code path that works correctly.
+		 */
+		@Test
+		void testAutoVersionReferenceToNonExistentResource_withoutAutoVersionPaths_throwsInvalidRequestException() {
+			// Given: clear autoVersionReferenceAtPaths so we go through the normal path
+			myStorageSettings.setAutoVersionReferenceAtPaths();
+
+			Observation observation = new Observation();
+			// No auto-version extension needed since the setting is cleared
+			observation.getSubject().setReference("Patient/nonexistent-patient-12345");
+
+			// When/Then: should throw InvalidRequestException (400) with proper message
+			assertThatThrownBy(() -> myObservationDao.create(observation, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("not found, specified in path: Observation.subject");
+		}
+
+		/**
+		 * SMILE-9706 adjacent test - When autoVersionReferenceAtPaths is configured and the
+		 * referenced resource exists, the create should succeed and the reference should be versioned.
+		 */
+		@Test
+		void testAutoVersionReferenceToExistingResource_succeeds() {
+			// Given: create a Patient so the reference target exists
+			Patient patient = new Patient();
+			patient.setActive(true);
+			IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualified();
+
+			Observation observation = new Observation();
+			observation.getMeta().setExtension(observationAutoVersionExtension);
+			observation.getSubject().setReference(patientId.toVersionless().getValue());
+
+			// When: create the observation
+			IIdType observationId = myObservationDao.create(observation, mySrd).getId().toUnqualified();
+
+			// Then: the create succeeds and the reference is versioned
+			Observation readBack = myObservationDao.read(observationId, mySrd);
+			assertThat(readBack.getSubject().getReference()).isEqualTo(patientId.getValue());
 		}
 
 		private Bundle createAndValidateBundle(Bundle theBundle, List<String> theOutcomeStatuses,
