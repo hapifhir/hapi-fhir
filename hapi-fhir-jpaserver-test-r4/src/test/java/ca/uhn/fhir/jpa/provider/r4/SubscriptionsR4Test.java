@@ -175,55 +175,36 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 	}
 
 
+	// SMILE-10730: :missing on token param should not NPE during subscription creation
 	@Test
 	void testCreateSubscriptionWithMissingModifierOnTokenParam() {
-		// Setup - matches the exact customer scenario from SMILE-10730
-		Subscription subscription = new Subscription();
-		subscription.setStatus(SubscriptionStatus.REQUESTED);
-		subscription.setCriteria("MessageHeader?event:missing=true");
-		subscription.getChannel().setType(SubscriptionChannelType.RESTHOOK);
-		subscription.getChannel().setPayload("application/fhir+json");
-		subscription.getChannel().setEndpoint("http://example.com/subscription");
-
-		// Execute - this should NOT throw an NPE; the :missing modifier
-		// should cause a fallback to DATABASE matching strategy
-		MethodOutcome outcome = myClient.create().resource(subscription).execute();
-
-		// Verify - the subscription should be created successfully
+		MethodOutcome outcome = createSubscriptionWithCriteria("MessageHeader?event:missing=true");
 		assertThat(outcome.getId()).isNotNull();
 		assertThat(outcome.getId().getIdPart()).isNotBlank();
 	}
 
 	@Test
 	void testCreateSubscriptionWithNotModifierOnTokenParam() {
-		// Adjacent test - :not modifier IS in TokenParamModifier, so should work
-		Subscription subscription = new Subscription();
-		subscription.setStatus(SubscriptionStatus.REQUESTED);
-		subscription.setCriteria("Observation?code:not=FOO");
-		subscription.getChannel().setType(SubscriptionChannelType.RESTHOOK);
-		subscription.getChannel().setPayload("application/fhir+json");
-		subscription.getChannel().setEndpoint("http://example.com/subscription");
-
-		MethodOutcome outcome = myClient.create().resource(subscription).execute();
-
+		MethodOutcome outcome = createSubscriptionWithCriteria("Observation?code:not=FOO");
 		assertThat(outcome.getId()).isNotNull();
 		assertThat(outcome.getId().getIdPart()).isNotBlank();
 	}
 
 	@Test
 	void testCreateSubscriptionWithSourceMissingModifier() {
-		// Adjacent test - _source:missing uses URI param path, not token param path
+		MethodOutcome outcome = createSubscriptionWithCriteria("Observation?_source:missing=true");
+		assertThat(outcome.getId()).isNotNull();
+		assertThat(outcome.getId().getIdPart()).isNotBlank();
+	}
+
+	private MethodOutcome createSubscriptionWithCriteria(String theCriteria) {
 		Subscription subscription = new Subscription();
 		subscription.setStatus(SubscriptionStatus.REQUESTED);
-		subscription.setCriteria("Observation?_source:missing=true");
+		subscription.setCriteria(theCriteria);
 		subscription.getChannel().setType(SubscriptionChannelType.RESTHOOK);
 		subscription.getChannel().setPayload("application/fhir+json");
 		subscription.getChannel().setEndpoint("http://example.com/subscription");
-
-		MethodOutcome outcome = myClient.create().resource(subscription).execute();
-
-		assertThat(outcome.getId()).isNotNull();
-		assertThat(outcome.getId().getIdPart()).isNotBlank();
+		return myClient.create().resource(subscription).execute();
 	}
 
 	public class BaseSocket {

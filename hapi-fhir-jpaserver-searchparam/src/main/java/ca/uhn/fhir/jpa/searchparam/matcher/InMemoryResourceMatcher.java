@@ -693,10 +693,17 @@ public class InMemoryResourceMatcher {
 		switch (theParamDef.getParamType()) {
 			case TOKEN:
 				TokenParam tokenParam = (TokenParam) theParam;
-				if (tokenParam.getModifier() == null) {
+				// BaseParam intercepts :missing and sets getMissing() instead of flowing through
+				// to TokenParamModifier, so getModifier() returns null for :missing params.
+				// Resolve the effective modifier to MISSING in that case.
+				TokenParamModifier modifier = tokenParam.getModifier();
+				if (modifier == null && tokenParam.getMissing() != null) {
+					modifier = TokenParamModifier.MISSING;
+				}
+				if (modifier == null) {
 					return false;
 				}
-				switch (tokenParam.getModifier()) {
+				switch (modifier) {
 					case IN:
 					case NOT_IN:
 						// Support for these qualifiers is dependent on an implementation of IValidationSupport being
@@ -704,6 +711,7 @@ public class InMemoryResourceMatcher {
 						return getValidationSupportOrNull() != null;
 					case NOT:
 						return true;
+					case MISSING:
 					case TEXT:
 					case OF_TYPE:
 					case ABOVE:

@@ -61,7 +61,20 @@ public enum TokenParamModifier {
 	/**
 	 * :of-type
 	 */
-	OF_TYPE(Constants.PARAMQUALIFIER_TOKEN_OF_TYPE);
+	OF_TYPE(Constants.PARAMQUALIFIER_TOKEN_OF_TYPE),
+
+	/**
+	 * :missing
+	 *
+	 * <p>Note: The {@code :missing} modifier is typically intercepted by
+	 * {@link BaseParam#setValueAsQueryToken} which sets {@link BaseParam#getMissing()}
+	 * and passes a {@code null} qualifier to the subclass. As a result,
+	 * {@link TokenParam#getModifier()} may still return {@code null} for
+	 * {@code :missing} searches parsed through the standard query token flow.
+	 * This enum value is provided so that code handling token modifiers can
+	 * reference it explicitly rather than relying on null checks.</p>
+	 */
+	MISSING(Constants.PARAMQUALIFIER_MISSING);
 
 	private static final Map<String, TokenParamModifier> VALUE_TO_ENUM;
 
