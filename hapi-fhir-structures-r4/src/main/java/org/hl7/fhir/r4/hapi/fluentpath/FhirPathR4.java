@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.fhirpath.TypeDetails;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.fhirpath.FHIRPathConstantEvaluationMode;
 
@@ -155,7 +156,8 @@ public class FhirPathR4 implements IFhirPath {
 			}
 
 			@Override
-			public Base resolveReference(FHIRPathEngine engine, Object appContext, String url, Base refContext)
+			public Base resolveReference(
+					FHIRPathEngine engine, Object appContext, String url, Identifier identifier, Base refContext)
 					throws FHIRException {
 				return (Base) theEvaluationContext.resolveReference(new IdType(url), refContext);
 			}

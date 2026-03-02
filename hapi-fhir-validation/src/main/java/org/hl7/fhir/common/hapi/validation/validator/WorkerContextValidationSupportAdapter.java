@@ -486,7 +486,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		return null;
 	}
 
-	public CodeSystem fetchSupplementedCodeSystem(String system, String version, Resource sourceOfReference) {
+	@Override
+	public CodeSystem fetchSupplementedCodeSystem(
+			String system, String version, List<String> specifiedSupplements, Resource sourceOfReference) {
 		return null;
 	}
 
@@ -654,6 +656,19 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	@Override
 	public String getVersion() {
 		return myFhirContext.getVersion().getVersion().getFhirVersionString();
+	}
+
+	@Override
+	public int getDefinitionsVersion() {
+		return 0;
+	}
+
+	@Override
+	public void storeAnalysis(Class className, Object analysis) {}
+
+	@Override
+	public Object retrieveAnalysis(Class className) {
+		return null;
 	}
 
 	@Override
