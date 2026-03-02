@@ -7,8 +7,11 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -335,6 +338,39 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.execute();
 
 		Set<String> foundIds = extractResourceIds(bundle);
+
+		// With _iterate, SR/B SHOULD be included (SR/C.replaces -> SR/B is followed iteratively)
+		assertThat(foundIds)
+			.contains(srAId.getValue(), srBId.getValue(), srCId.getValue())
+			.hasSize(3);
+	}
+
+	/**
+	 * SMILE-9135: Verify that _revinclude + _include:iterate works correctly on the synchronous path.
+	 * <p>
+	 * The synchronous path (SearchParameterMap.newSynchronous()) is taken when isLoadSynchronous() = true.
+	 * With _include:iterate, _include SHOULD cascade through revincluded resources, so SR/B must appear.
+	 */
+	@Test
+	void testSynchronousPathRevIncludeWithIncludeIterateProducesTransitiveResults() {
+		List<IIdType> srIds = createThreeServiceRequestsWithReplacesChain();
+		IIdType srAId = srIds.get(0);
+		IIdType srBId = srIds.get(1);
+		IIdType srCId = srIds.get(2);
+
+		// Use the DAO directly with a synchronous SearchParameterMap to exercise SynchronousSearchSvcImpl
+		SearchParameterMap params = SearchParameterMap.newSynchronous(
+			IAnyResource.SP_RES_ID, new TokenParam(srAId.getIdPart()));
+		params.addInclude(new Include("ServiceRequest:replaces").setRecurse(true));
+		params.addRevInclude(new Include("ServiceRequest:replaces").setRecurse(true));
+
+		IBundleProvider results = myServiceRequestDao.search(params, newSrd());
+		List<IBaseResource> resources = results.getResources(0, Integer.MAX_VALUE);
+
+		Set<String> foundIds = resources.stream()
+			.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
+			.collect(Collectors.toSet());
+		ourLog.info("Synchronous path found {} resources: {}", resources.size(), foundIds);
 
 		// With _iterate, SR/B SHOULD be included (SR/C.replaces -> SR/B is followed iteratively)
 		assertThat(foundIds)
