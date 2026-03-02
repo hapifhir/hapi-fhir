@@ -207,9 +207,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 							"Package {}#{} is already installed",
 							theInstallationSpec.getName(),
 							theInstallationSpec.getVersion());
-					// TODO
-					// add a property to specify whether we keep going or not.
-					// use quartz to schedule a batch job on one instance to install the packages
 				}
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
@@ -914,9 +911,5 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@VisibleForTesting
 	void setFhirContextForUnitTest(FhirContext theCtx) {
 		myFhirContext = theCtx;
-	}
-
-	private interface IParamAdder {
-		void add(String theKey, IQueryParameterType theValue);
 	}
 }

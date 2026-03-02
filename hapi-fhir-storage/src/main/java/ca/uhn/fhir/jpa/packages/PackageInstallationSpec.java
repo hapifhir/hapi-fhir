@@ -239,8 +239,7 @@ public class PackageInstallationSpec {
 
 	public enum InstallModeEnum {
 		STORE_ONLY,
-		STORE_AND_INSTALL,
-		//		DRY_RUN_INSTALL
+		STORE_AND_INSTALL
 	}
 
 	public enum ValidationModeEnum {
