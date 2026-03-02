@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -18,14 +19,21 @@ import ca.uhn.test.junit.StringToIntegerListArgumentConverter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.converter.ConvertWith;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -48,7 +56,7 @@ class PatientIdPartitionInterceptorTest {
 		ISearchParamRegistry searchParamRegistry = new FhirContextSearchParamRegistry(myFhirContext);
 		StorageSettings storageSettings = new StorageSettings();
 		ISearchParamExtractor searchParamExtractor = new SearchParamExtractorR4(storageSettings, myPartitionSettings, myFhirContext, searchParamRegistry);
-		mySvc = new PatientIdPartitionInterceptor(myFhirContext, searchParamExtractor, myPartitionSettings);
+		mySvc = new PatientIdPartitionInterceptor(myFhirContext, searchParamExtractor, myPartitionSettings, myDaoRegistry);
 
 		myMatchUrlSvc = new MatchUrlService(myFhirContext, new FhirContextSearchParamRegistry(myFhirContext));
 	}
@@ -71,6 +79,19 @@ class PatientIdPartitionInterceptorTest {
 		// Verify
 		assertFalse(actual.isAllPartitions());
 		assertThat(actual.getPartitionIds()).containsExactly(theExpectedPartitionId);
+	}
+
+	@Test
+	void testCreate_MultipleCompartments() {
+		// Setup
+		Observation createDetails = new Observation();
+		createDetails.addPerformer(new Reference("Patient/1"));
+		createDetails.addPerformer(new Reference("Patient/2"));
+
+		// Test
+		assertThatThrownBy(() -> mySvc.identifyForCreate(createDetails, new ServletRequestDetails()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Policy does not allow resource of type \"Observation\" to be created in multiple Patient compartments: Patient/1, Patient/2");
 	}
 
 	@ParameterizedTest
@@ -162,7 +183,7 @@ class PatientIdPartitionInterceptorTest {
 	void testPolicyVerification(String theResourceType, String thePolicy, String theExpectedFailureIfAny) {
 		Map<String, ResourceCompartmentStoragePolicy> policies = Map.of(theResourceType, ResourceCompartmentStoragePolicy.parse(thePolicy));
 
-		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
+		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 		if (isNotBlank(theExpectedFailureIfAny)) {
 			assertThatThrownBy(() -> interceptor.setResourceTypePolicies(policies))
 				.isInstanceOf(ConfigurationException.class)

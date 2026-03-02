@@ -62,7 +62,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Constants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,7 +81,6 @@ import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.ALWAY
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.MANDATORY_SINGLE_COMPARTMENT;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.NON_UNIQUE_COMPARTMENT_IN_DEFAULT;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.OPTIONAL_SINGLE_COMPARTMENT;
-import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionIfAssigned;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -171,30 +169,36 @@ public class PatientIdPartitionInterceptor {
 			String resourceType = entry.getKey();
 			ResourceCompartmentStoragePolicy policy = entry.getValue();
 
-			// FIXME: add message codes
 			if ("Patient".equals(resourceType)) {
-				throw new ConfigurationException("Can not provide a resource type policy for resource type 'Patient'");
+				throw new ConfigurationException(Msg.code(2864) + "Can not provide a resource type policy for resource type 'Patient'");
 			}
 
 			if (BaseRequestPartitionHelperSvc.NON_PARTITIONABLE_RESOURCE_NAMES.contains(resourceType)) {
-				throw new ConfigurationException(String.format("Can not provide a resource type policy for non-partitionable resource type: %s", resourceType));
+				throw new ConfigurationException(String.format(
+						"Can not provide a resource type policy for non-partitionable resource type: %s",
+						resourceType));
 			}
 
 			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resourceType);
 			if (resourceDef == null) {
-				throw new ConfigurationException(String.format("Resource type '%s' is not a valid resource type, can not apply resource type policy", resourceType));
+				throw new ConfigurationException(String.format(
+						"Resource type '%s' is not a valid resource type, can not apply resource type policy",
+						resourceType));
 			}
 
 			ResourceCompartmentStoragePolicy strictnessMode = entry.getValue();
 			if (strictnessMode == null) {
-				throw new ConfigurationException(String.format("Empty resource type policy for resource type: %s", resourceType));
+				throw new ConfigurationException(
+						String.format("Empty resource type policy for resource type: %s", resourceType));
 			}
 
 			if (policy.isOnlyAppliesToCompartmentResourceTypes()) {
 				List<RuntimeSearchParam> compartmentSps =
-					ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
-				if ( compartmentSps.isEmpty()) {
-					throw new ConfigurationException(String.format("Resource type '%s' is not a Patient Compartment resource type, can not apply policy: %s", resourceType, policy.getName()));
+						ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+				if (compartmentSps.isEmpty()) {
+					throw new ConfigurationException(String.format(
+							"Resource type '%s' is not a Patient Compartment resource type, can not apply policy: %s",
+							resourceType, policy.getName()));
 				}
 			}
 		}
@@ -224,20 +228,20 @@ public class PatientIdPartitionInterceptor {
 			}
 			return provideSingleCompartmentPartition(theRequestDetails, idElement.getIdPart());
 		} else {
-            // FIXME: use resource
-            IBaseResource resource = theResource;
-            if (theResource.isDeleted()) {
-                // when a resource is deleted, the current version of the deleted resource is empty
-                // and will definitely not have references to a patient.  in order to determine the
-                // patient compartment of a deleted resource, we need to get its previous version.
-                resource = getPreviousVersion(theResource);
-            }
-            
-            List<RuntimeSearchParam> compartmentSps =
+			// FIXME: use resource
+			IBaseResource resource = theResource;
+			if (theResource.isDeleted()) {
+				// when a resource is deleted, the current version of the deleted resource is empty
+				// and will definitely not have references to a patient.  in order to determine the
+				// patient compartment of a deleted resource, we need to get its previous version.
+				resource = getPreviousVersion(theResource);
+			}
+
+			List<RuntimeSearchParam> compartmentSps =
 					ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 
 			Collection<String> oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartments(
-					"Patient", theResource, compartmentSps, mySearchParamExtractor);
+					"Patient", resource, compartmentSps, mySearchParamExtractor);
 			oCompartmentIdentity = deDuplicateCompartmentList(oCompartmentIdentity);
 
 			if (!oCompartmentIdentity.isEmpty()) {
@@ -253,19 +257,20 @@ public class PatientIdPartitionInterceptor {
 				}
 
 				// FIXME: add code
-				throw new InvalidRequestException("Policy does not allow resource of type \"" + resourceDef.getName()
+				throw new InvalidRequestException(Msg.code(1324) + "Policy does not allow resource of type \""
+						+ resourceDef.getName()
 						+ "\" to be created in multiple Patient compartments: "
 						+ oCompartmentIdentity.stream().map(t -> "Patient/" + t).collect(Collectors.joining(", ")));
 
 			} else {
 				Set<RequestPartitionId> compartments =
-						getPartitionViaPartiallyProcessedReference(theRequestDetails, policy, theResource);
+						getPartitionViaPartiallyProcessedReference(theRequestDetails, policy, resource);
 				if (compartments.size() == 1) {
 					return compartments.iterator().next();
 				}
 
 				if (compartments.isEmpty() && policy == OPTIONAL_SINGLE_COMPARTMENT) {
-					return provideNonCompartmentMemberTypeResponse(theRequestDetails, policy, theResource);
+					return provideNonCompartmentMemberTypeResponse(theRequestDetails, policy, resource);
 				}
 
 				// If we get here, we have either 0 or 2+ compartments
@@ -274,7 +279,7 @@ public class PatientIdPartitionInterceptor {
 					return myPartitionSettings.getDefaultRequestPartitionId();
 				}
 
-				return throwNonCompartmentMemberInstanceFailureResponse(theResource);
+				return throwNonCompartmentMemberInstanceFailureResponse(resource);
 			}
 		}
 	}
@@ -331,7 +336,7 @@ public class PatientIdPartitionInterceptor {
 	@SuppressWarnings("unchecked")
 	@Nonnull
 	private Set<RequestPartitionId> getPartitionViaPartiallyProcessedReference(
-		RequestDetails theRequestDetails, ResourceCompartmentStoragePolicy thePolicy, IBaseResource theResource) {
+			RequestDetails theRequestDetails, ResourceCompartmentStoragePolicy thePolicy, IBaseResource theResource) {
 		Map<String, IBaseResource> placeholderToReference = null;
 		if (theRequestDetails != null) {
 			placeholderToReference =
@@ -391,7 +396,7 @@ public class PatientIdPartitionInterceptor {
 				if (theReadDetails.getSearchParams() != null) {
 					SearchParameterMap params = theReadDetails.getSearchParams();
 					if (PATIENT_STR.equals(theReadDetails.getResourceType())) {
-						List<String> idParts = getResourceIdList(params, "_id", false);
+						List<String> idParts = getResourceIdsForSearchParam(params, "_id");
 						return provideMultipleCompartmentPartition(
 								theRequestDetails, MANDATORY_SINGLE_COMPARTMENT, idParts);
 					} else if (isNotBlank(theReadDetails.getResourceType())) {
@@ -404,20 +409,21 @@ public class PatientIdPartitionInterceptor {
 							List<String> idParts = getResourceIdsForSearchParam(params, paramName);
 							if (!idParts.isEmpty()) {
 
+								// FIXME: remove?
 								// In PatientID partitioning mode, the only way for a compartment reference SP
 								// (ex: Observation.subject, Observation.performer) to have multiple references is if
 								// we have previously performed MDM expansion across partitions
-								if (idParts.size() > 1) {
-									validateMultipleIdsAreAllowedOrThrow(idParts, theRequestDetails, paramName);
-									return RequestPartitionId.allPartitions();
-								}
-								return provideCompartmentMemberInstanceResponse(theRequestDetails, idParts.get(0));
+								//								if (idParts.size() > 1) {
+								//									validateMultipleIdsAreAllowedOrThrow(idParts, theRequestDetails, paramName);
+								//									return RequestPartitionId.allPartitions();
+								//								}
+								return provideMultipleCompartmentPartition(theRequestDetails, policy, idParts);
 							}
 						}
 					}
 				} else if (theReadDetails.getReadResourceId() != null) {
 					if (PATIENT_STR.equals(theReadDetails.getResourceType())) {
-						return provideCompartmentMemberInstanceResponse(
+						return provideSingleCompartmentPartition(
 								theRequestDetails,
 								theReadDetails.getReadResourceId().getIdPart());
 					}
@@ -476,9 +482,10 @@ public class PatientIdPartitionInterceptor {
 			errorMsg = "Values for parameters " + theParamName + " are inconsistent with expansion results";
 		}
 
-		if (throwWithMsg) {
-			throw new MethodNotAllowedException(Msg.code(1324) + errorMsg);
-		}
+		// FIXME: remove
+		//		if (throwWithMsg) {
+		//			throw new MethodNotAllowedException(Msg.code(1324) + errorMsg);
+		//		}
 	}
 
 	/**
@@ -588,7 +595,7 @@ public class PatientIdPartitionInterceptor {
 					}
 				}
 
-				String valueAsQueryToken = idParam.getValueAsQueryToken();
+				String valueAsQueryToken = aParam.getValueAsQueryToken();
 				if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")
 						|| Strings.CS.contains(valueAsQueryToken, "/Patient/")) {
 					IdType id = new IdType(valueAsQueryToken);
@@ -602,11 +609,6 @@ public class PatientIdPartitionInterceptor {
 					}
 				}
 			}
-		}
-
-		if (theExpectOnlyOneBool && idParts.size() > 1) {
-			throw new MethodNotAllowedException(Msg.code(1324) + "Multiple values for parameter " + theParamName
-					+ " is not supported in patient compartment mode");
 		}
 
 		return idParts;
@@ -685,7 +687,7 @@ public class PatientIdPartitionInterceptor {
 	@SuppressWarnings("unused")
 	@Nonnull
 	protected RequestPartitionId provideNonCompartmentMemberTypeResponse(
-		RequestDetails theRequestDetails, ResourceCompartmentStoragePolicy thePolicy, IBaseResource theResource) {
+			RequestDetails theRequestDetails, ResourceCompartmentStoragePolicy thePolicy, IBaseResource theResource) {
 		return myPartitionSettings.getDefaultRequestPartitionId();
 	}
 

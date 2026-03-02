@@ -46,7 +46,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,26 +58,25 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	static {
 		NON_PARTITIONABLE_RESOURCE_NAMES = Set.of(
 
-		// Infrastructure
-		"SearchParameter",
+				// Infrastructure
+				"SearchParameter",
 
-		// Validation and Conformance
-		"StructureDefinition",
-		"Questionnaire",
-		"CapabilityStatement",
-		"CompartmentDefinition",
-		"OperationDefinition",
+				// Validation and Conformance
+				"StructureDefinition",
+				"Questionnaire",
+				"CapabilityStatement",
+				"CompartmentDefinition",
+				"OperationDefinition",
 
-		// CI
-		"Library",
+				// CI
+				"Library",
 
-		// Terminology
-		"ConceptMap",
-		"CodeSystem",
-		"ValueSet",
-		"NamingSystem",
-		"StructureMap"
-		);
+				// Terminology
+				"ConceptMap",
+				"CodeSystem",
+				"ValueSet",
+				"NamingSystem",
+				"StructureMap");
 	}
 
 	@Autowired
@@ -89,8 +87,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 	PartitionSettings myPartitionSettings;
 
-	protected BaseRequestPartitionHelperSvc() {
-	}
+	protected BaseRequestPartitionHelperSvc() {}
 
 	@Autowired
 	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
