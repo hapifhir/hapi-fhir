@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7506
+title: "Previously, after registering built-in interceptor `PatientIdPartitionInterceptor`, the $expunge operation 
+would fail to resolve the correct partition ID from the resource being expunged. This has been fixed."

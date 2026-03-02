@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -23,10 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProviderR4Test {
 
@@ -34,7 +35,7 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 	@Autowired
-	private ISearchParamExtractor myRequestPartitionHelperSvc;
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
 	private PatientCompartmentEnforcingInterceptor mySvc;
 
@@ -43,7 +44,7 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 	public void before() throws Exception {
 		super.before();
 		ForceOffsetSearchModeInterceptor forceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		PatientIdPartitionInterceptor patientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		PatientIdPartitionInterceptor patientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 
 		registerInterceptor(patientIdPartitionInterceptor);
 		registerInterceptor(forceOffsetSearchModeInterceptor);
@@ -96,9 +97,11 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		myObservationDao.update(obs, new SystemRequestDetails()).getId().getIdPart();
 
 		// try updating observation's patient, which would cross partition boundaries
-		obs.getSubject().setReference("Patient/" + otherId);
+		Observation updatedObs = new Observation();
+		updatedObs.setId("O");
+		updatedObs.getSubject().setReference("Patient/" + otherId);
 
-		assertThatThrownBy(() -> myObservationDao.update(obs, new SystemRequestDetails()))
+		assertThatThrownBy(() -> myObservationDao.update(updatedObs, new SystemRequestDetails()))
 			.isInstanceOf(PreconditionFailedException.class)
 			.hasMessageContaining("HAPI-2476: Resource compartment for Observation/O changed. Was a referenced Patient changed?");
 	}
@@ -182,6 +185,66 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		// Verify
 		Encounter actual = myEncounterDao.read(new IdType("E"), mySrd);
 		assertEquals("Patient/A", actual.getSubject().getReference());
+	}
+
+	@Test
+	public void testDeleteAndRecreateResource_InPatientCompartmentSucceeds() {
+		// Setup
+		createPatient(withId("A"), withActiveTrue());
+		createObservation(withId("O"), withSubject("Patient/A"));
+
+		// Test - Delete the observation
+		myCaptureQueriesListener.clear();
+		DaoMethodOutcome deleteOutcome = myObservationDao.delete(new IdType("Observation/O"), newSrd());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertGone("Observation/O");
+		long deletedVersion = deleteOutcome.getId().getVersionIdPartAsLong();
+
+		// Test - Re-create the same observation
+		myCaptureQueriesListener.clear();
+		createObservation(withId("O"), withSubject("Patient/A"));
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+
+		// Verify - Assert the observation exists and version is incremented
+		Observation recreated = myObservationDao.read(new IdType("Observation/O"), mySrd);
+		assertThat(recreated).isNotNull();
+		assertThat(recreated.getSubject().getReference()).isEqualTo("Patient/A");
+
+		assertThat(recreated.getIdElement().getVersionIdPartAsLong()).isEqualTo(deletedVersion + 2);
+	}
+
+	@Test
+	public void testDeleteAndRecreateResource_InDifferentCompartmentFail() {
+		registerInterceptor(mySvc);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+		// Setup
+		createPatient(withId("A"), withActiveTrue());
+		createObservation(withId("O"), withSubject("Patient/A"));
+
+
+		myObservationDao.delete(new IdType("Observation/O"), newSrd());
+		assertGone("Observation/O");
+
+		// Create a second patient with second resource that lands in the same partition as Patient/A
+		int patientAPartition = Math.abs("A".hashCode() % 15000);
+		int count = 0;
+		String otherId;
+		do {
+			otherId = "A" + ++count;
+		} while (patientAPartition != Math.abs(otherId.hashCode() % 15000));
+
+		Patient patient = new Patient();
+		patient.setId("Patient/" + otherId);
+		patient.setActive(true);
+		doUpdateResource(patient);
+
+		try {
+			createObservation(withId("O"), withSubject("Patient/" + otherId));
+			fail();
+		} catch (Exception e) {
+			assertThat(e.getMessage()).contains("HAPI-2476: Resource compartment for Observation/O changed. Was a referenced Patient changed?");
+		}
 	}
 
 	@SuppressWarnings("removal")

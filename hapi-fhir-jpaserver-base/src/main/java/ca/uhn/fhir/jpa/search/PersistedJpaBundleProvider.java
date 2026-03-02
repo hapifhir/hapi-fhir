@@ -215,7 +215,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 					.add(RequestDetails.class, myRequest)
 					.addIfMatchesType(ServletRequestDetails.class, myRequest);
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-			retVal = showDetails.toList();
+			retVal = showDetails.getAllResources();
 		}
 
 		return retVal;

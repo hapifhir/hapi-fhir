@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r5.dbpartitionmode;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
+import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
 import ca.uhn.fhir.jpa.util.TestPartitionSelectorInterceptor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class BaseDbpmJpaR5Test extends BaseJpaR5Test {
+public class BaseDbpmResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 	public static final String PARTITION_NAME_1 = "Partition_1";
 	public static final String PARTITION_NAME_2 = "Partition_2";
@@ -23,6 +23,7 @@ public class BaseDbpmJpaR5Test extends BaseJpaR5Test {
 
 	@Autowired
 	private IPartitionLookupSvc myPartitionConfigSvc;
+
 	@Autowired
 	HapiTransactionService myHapiTransactionService;
 

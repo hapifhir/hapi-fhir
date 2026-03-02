@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class BulkExportJobParameters extends BaseBatchJobParameters {
 
@@ -110,7 +111,7 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	 * whether or not to expand mdm
 	 */
 	@JsonProperty("expandMdm")
-	private boolean myExpandMdm;
+	private Boolean myExpandMdm;
 
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionIdForSecurity;
@@ -229,10 +230,19 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	}
 
 	public boolean isExpandMdm() {
-		return myExpandMdm;
+		return Boolean.TRUE.equals(myExpandMdm);
 	}
 
-	public void setExpandMdm(boolean theExpandMdm) {
+	/**
+	 * Checks if the _mdm parameter was explicitly omitted from the request Parameters
+	 * @return an {@link Optional} containing the status if present,
+	 *         otherwise an empty {@link Optional}
+	 */
+	public Optional<Boolean> getExpandMdm() {
+		return Optional.ofNullable(myExpandMdm);
+	}
+
+	public void setExpandMdm(Boolean theExpandMdm) {
 		myExpandMdm = theExpandMdm;
 	}
 

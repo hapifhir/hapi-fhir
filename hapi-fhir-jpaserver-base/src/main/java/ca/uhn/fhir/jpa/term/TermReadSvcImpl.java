@@ -2789,6 +2789,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						IValidationSupport.StringConceptProperty property =
 								new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue());
 						result.getProperties().add(property);
+					} else if (next.getType() == TermConceptPropertyTypeEnum.BOOLEAN) {
+						IValidationSupport.BooleanConceptProperty property =
+								new IValidationSupport.BooleanConceptProperty(
+										next.getKey(), Boolean.parseBoolean(next.getValue()));
+						result.getProperties().add(property);
 					} else {
 						throw new InternalErrorException(Msg.code(905) + "Unknown type: " + next.getType());
 					}

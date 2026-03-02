@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.IoUtils;
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,9 @@ import org.springframework.messaging.MessagingException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -50,7 +53,7 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageListener.class);
 
 	private final IBrokerClient myBrokerClient;
-	private IChannelProducer<ResourceModifiedMessage> myChannelProducer;
+	private Map<String, IChannelProducer<ResourceModifiedMessage>> myChannelProducerMap;
 	private final IDefaultPartitionSettings myDefaultPartitionSettings;
 
 	/**
@@ -61,6 +64,7 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 		super();
 		myBrokerClient = theBrokerClient;
 		myDefaultPartitionSettings = theDefaultPartitionSettings;
+		myChannelProducerMap = new ConcurrentHashMap<>();
 	}
 
 	public Class<ResourceDeliveryMessage> getPayloadType() {
@@ -138,10 +142,9 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
 		channelSettings.setQualifyChannelName(false);
 
-		if (myChannelProducer == null) {
-			myChannelProducer =
-					myBrokerClient.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, channelSettings);
-		}
+		IChannelProducer<ResourceModifiedMessage> producer = myChannelProducerMap.computeIfAbsent(
+				queueName,
+				key -> myBrokerClient.getOrCreateProducer(key, ResourceModifiedJsonMessage.class, channelSettings));
 
 		// Grab the payload type (encoding mimetype) from the subscription
 		String payloadString = subscription.getPayloadString();
@@ -155,7 +158,7 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 					Msg.code(4) + "Only JSON payload type is currently supported for Message Subscriptions");
 		}
 
-		doDelivery(theMessage, subscription, myChannelProducer, messageWrapperToSend);
+		doDelivery(theMessage, subscription, producer, messageWrapperToSend);
 
 		// Interceptor call: SUBSCRIPTION_AFTER_MESSAGE_DELIVERY
 		params = new HookParams()
@@ -174,8 +177,16 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 
 	@Override
 	public void close() throws Exception {
-		if (myChannelProducer instanceof AutoCloseable) {
-			IoUtils.closeQuietly((AutoCloseable) myChannelProducer, ourLog);
+		try {
+			myChannelProducerMap.values().forEach(producer -> {
+				if (producer instanceof AutoCloseable closeable) {
+					Logs.getSubscriptionTroubleshootingLog()
+							.debug("Destroying channel producer {}", producer.getChannelName());
+					IoUtils.closeQuietly(closeable, ourLog);
+				}
+			});
+		} finally {
+			myChannelProducerMap.clear();
 		}
 	}
 }

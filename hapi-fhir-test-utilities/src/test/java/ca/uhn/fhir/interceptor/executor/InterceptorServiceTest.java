@@ -14,9 +14,17 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +44,42 @@ import static org.junit.jupiter.api.Assertions.fail;
 class InterceptorServiceTest {
 	final InterceptorService myInterceptorService = new InterceptorService();
 
+	@RegisterExtension
+	private LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
+
 	private final List<String> myInvocations = new ArrayList<>();
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		java.lang.NullPointerException                            , true
+		java.lang.Exception                                       , true
+		ca.uhn.fhir.rest.server.exceptions.InternalErrorException , false
+		ca.uhn.fhir.rest.server.exceptions.AuthenticationException, false
+		"""
+	)
+	void testExceptionResultsInStackTraceLogging(Class<? extends Exception> theExceptionClass, boolean theExpectStackTraceToBeLogged) {
+		class TestInterceptor {
+			@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
+			public void test(HookParams theParams) throws Exception {
+				Exception exception = ReflectionUtil.newInstance(theExceptionClass, String.class, "This is the error message");
+				throw exception;
+			}
+		}
+
+		myInterceptorService.registerInterceptor(new TestInterceptor());
+
+		HookParams params = new HookParams();
+		params.add(HttpServletRequest.class, null);
+		params.add(HttpServletResponse.class, null);
+
+		// Test
+		assertThatThrownBy(()->myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED, params));
+
+		// Verify
+		ILoggingEvent logEvent = myLogbackTestExtension.getLogEvents().get(myLogbackTestExtension.getLogEvents().size() - 1);
+		assertEquals("Exception thrown by interceptor for pointcut SERVER_INCOMING_REQUEST_PRE_PROCESSED: " + theExceptionClass.getName() + ": This is the error message", logEvent.getFormattedMessage());
+		assertEquals(logEvent.getThrowableProxy() != null, theExpectStackTraceToBeLogged);
+	}
 
 	@Test
 	void testInterceptorWithAnnotationDefinedOnInterface() {

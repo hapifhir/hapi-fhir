@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -2035,6 +2036,54 @@ public class JsonParserR4Test extends BaseTest {
 			 .setName("resource")
 			 .setResource(createBundleWithCrossReferenceFullUrlsAndNoIds());
 		return retVal;
+	}
+
+	@Test
+	void encodeResourceToString_withWhitespaceOnlyPrimitiveValue_shouldPreserveValueAfterRoundTrip() {
+		// setup - create a Patient with a given name that is a single space " " (no extension)
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		HumanName name = patient.addName();
+		name.setFamily("Smith");
+		name.addGiven(" ");
+
+		// test - encode to JSON and parse back
+		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
+		String encoded = jsonParser.encodeResourceToString(patient);
+		ourLog.info("Encoded JSON:\n{}", encoded);
+
+		Patient parsed = jsonParser.parseResource(Patient.class, encoded);
+
+		// verify - the given name value " " should survive the round-trip
+		assertThat(parsed.getNameFirstRep().getGiven()).hasSize(1);
+		assertThat(parsed.getNameFirstRep().getGiven().get(0).getValue()).isEqualTo(" ");
+	}
+
+	@Test
+	void encodeResourceToString_withWhitespaceOnlyPrimitiveValueWithExtension_shouldPreserveValueAfterRoundTrip() {
+		// setup - create a Patient with a given name that is a single space " " plus an extension
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		HumanName name = patient.addName();
+		name.setFamily("Smith");
+		StringType givenElement = name.addGivenElement();
+		givenElement.setValue(" ");
+		givenElement.addExtension(
+			new Extension("http://example.com/ext", new BooleanType(true))
+		);
+
+		// test - encode to JSON and parse back
+		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
+		String encoded = jsonParser.encodeResourceToString(patient);
+		ourLog.info("Encoded JSON:\n{}", encoded);
+
+		Patient parsed = jsonParser.parseResource(Patient.class, encoded);
+
+		// verify - the given name value " " should survive the round-trip
+		assertThat(parsed.getNameFirstRep().getGiven()).hasSize(1);
+		assertThat(parsed.getNameFirstRep().getGiven().get(0).getValue()).isEqualTo(" ");
 	}
 
 	@AfterAll

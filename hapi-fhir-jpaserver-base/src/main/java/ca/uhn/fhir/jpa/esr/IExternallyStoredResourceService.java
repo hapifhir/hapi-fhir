@@ -59,4 +59,16 @@ public interface IExternallyStoredResourceService {
 		}
 		return result;
 	}
+
+	/**
+	 * Deletes the resource at the given address from external storage.
+	 * Implementations should override this method to support externally stored resource
+	 * removal during the $expunge operation.
+	 *
+	 * @param theAddress The address string is a format that is entirely up to the individual provider. HAPI FHIR
+	 *                   doesn't try to understand it. This should be the same address format used in {@link #fetchResource(String)}.
+	 */
+	default void deleteResource(String theAddress) {
+		// no-op
+	}
 }

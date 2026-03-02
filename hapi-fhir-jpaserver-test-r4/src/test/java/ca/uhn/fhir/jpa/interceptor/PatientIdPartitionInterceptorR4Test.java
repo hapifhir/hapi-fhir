@@ -18,6 +18,8 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -70,6 +72,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
@@ -87,7 +92,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
+@Import(PatientIdPartitionInterceptorR4Test.TestConfig.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
@@ -105,7 +110,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	public void before() throws Exception {
 		super.before();
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
 		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);
@@ -181,7 +186,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		// Verify
 		assertGone("Organization/O");
 	}
-
 
 	@Test
 	void testCreateProvenance_InPatientCompartmentThroughSecondTargetReference() {
@@ -588,14 +592,15 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			assertEquals(Msg.code(1322) + "The parameter subject.identifier is not supported in patient compartment mode", e.getMessage());
 		}
 
+	}
 
-		// Missing
+	@Test
+	public void testSearchObservation_allowsMdmQualifier() {
 		try {
 			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("Patient/ABC").setMdmExpand(true)), mySrd);
 		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(1322) + "The parameter subject:mdm is not supported in patient compartment mode", e.getMessage());
+			fail("Searching with :mdm qualifier is allowed and should not trow an exception");
 		}
-
 	}
 
 	/**
@@ -894,7 +899,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Organization org = new Organization();
 		org.setId("C");
 		org.setName("Foo");
-		myOrganizationDao.update(org);
+		myOrganizationDao.update(org, mySrd);
 		return org;
 	}
 
@@ -902,14 +907,14 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Observation obs = new Observation();
 		obs.setId("B");
 		obs.getSubject().setReference("Patient/A");
-		myObservationDao.update(obs);
+		myObservationDao.update(obs, mySrd);
 	}
 
 	private Patient createPatientA() {
 		Patient patient = new Patient();
 		patient.setId("Patient/A");
 		patient.setActive(true);
-		DaoMethodOutcome update = myPatientDao.update(patient);
+		DaoMethodOutcome update = myPatientDao.update(patient, mySrd);
 		return (Patient) update.getResource();
 	}
 
@@ -1161,6 +1166,17 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			return new TransactionPrePartitionResponse().setSplitBundles(bundles);
 		}
 
+	}
+
+	@Configuration
+	public static class TestConfig{
+
+		@Bean
+		public IMdmSettings mdmSettings(){
+			MdmSettings settings = new MdmSettings(null);
+			settings.setSearchAllPartitionForMatch(true);
+			return settings;
+		}
 	}
 
 }

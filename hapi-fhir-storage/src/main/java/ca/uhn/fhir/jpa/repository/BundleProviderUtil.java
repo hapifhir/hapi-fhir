@@ -73,7 +73,7 @@ public class BundleProviderUtil {
 		}
 
 		private int limitOrZero() {
-			return defaultZeroIfNull(offset);
+			return defaultZeroIfNull(limit);
 		}
 
 		private int defaultZeroIfNull(Integer value) {

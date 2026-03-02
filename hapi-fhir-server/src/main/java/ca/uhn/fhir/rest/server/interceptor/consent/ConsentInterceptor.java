@@ -82,6 +82,9 @@ public class ConsentInterceptor {
 	private final String myRequestSeenResourcesKey =
 			ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_SEENRESOURCES";
 
+	private static final String USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS =
+			"request_details_user_data_should_skip_consent";
+
 	private volatile List<IConsentService> myConsentService = Collections.emptyList();
 	private IConsentContextServices myContextConsentServices = IConsentContextServices.NULL_IMPL;
 
@@ -324,7 +327,6 @@ public class ConsentInterceptor {
 				getAlreadySeenResourcesMap(theRequestDetails);
 
 		for (int i = 0; i < thePreResourceShowDetails.size(); i++) {
-
 			IBaseResource resource = thePreResourceShowDetails.getResource(i);
 			if (resource == null
 					|| alreadySeenResources.putIfAbsent(resource, ConsentOperationStatusEnum.PROCEED) != null) {
@@ -586,7 +588,11 @@ public class ConsentInterceptor {
 	}
 
 	private boolean isSkipServiceForRequest(RequestDetails theRequestDetails) {
-		return isMetadataPath(theRequestDetails) || isMetaOperation(theRequestDetails);
+		// TODO MM: we could potentially aggregate all checks to skip consent into a single method
+		// isRequestAuthorized, isAllowListed into isSkipServiceForRequest
+		return isMetadataPath(theRequestDetails)
+				|| isMetaOperation(theRequestDetails)
+				|| shouldSkipAllConsent(theRequestDetails);
 	}
 
 	private boolean isAllowListedRequest(RequestDetails theRequestDetails) {
@@ -599,6 +605,25 @@ public class ConsentInterceptor {
 
 	private boolean isMetadataPath(RequestDetails theRequestDetails) {
 		return theRequestDetails != null && URL_TOKEN_METADATA.equals(theRequestDetails.getRequestPath());
+	}
+
+	/**
+	 * Call this method to bypass consent checking for a particular request {@link RequestDetails}.
+	 * Skipping consent is needed for resources that are modified in async system processing
+	 * e.g. SearchParameter initialization with subscriptions and subscription (matching) messages enabled.
+	 * This is a short term solution and is to be replaced by a long term solution.
+	 * {@see https://github.com/hapifhir/hapi-fhir/issues/7542}
+	 * @param theRequestDetails the request
+	 */
+	public static void skipAllConsentForRequest(@Nonnull RequestDetails theRequestDetails) {
+		theRequestDetails.getUserData().put(USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, true);
+	}
+
+	private static boolean shouldSkipAllConsent(@Nullable RequestDetails theRequestDetails) {
+		return theRequestDetails != null
+				&& (Boolean) theRequestDetails
+						.getUserData()
+						.getOrDefault(USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, Boolean.FALSE);
 	}
 
 	private void validateParameter(Map<String, String[]> theParameterMap) {
@@ -627,6 +652,9 @@ public class ConsentInterceptor {
 	@SuppressWarnings("unchecked")
 	private IdentityHashMap<IBaseResource, ConsentOperationStatusEnum> getAlreadySeenResourcesMap(
 			RequestDetails theRequestDetails) {
+		if (theRequestDetails == null) {
+			return new IdentityHashMap<>();
+		}
 		IdentityHashMap<IBaseResource, ConsentOperationStatusEnum> alreadySeenResources =
 				(IdentityHashMap<IBaseResource, ConsentOperationStatusEnum>)
 						theRequestDetails.getUserData().get(myRequestSeenResourcesKey);

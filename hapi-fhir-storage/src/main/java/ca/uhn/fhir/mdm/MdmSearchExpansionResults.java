@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Master Data Management
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -17,8 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.svc;
+package ca.uhn.fhir.mdm;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.HashMap;
@@ -28,16 +31,18 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Result object for {@link MdmSearchExpansionSvc}
+ * Result object for MDM search expansion
  *
  * @since 8.0.0
  */
 public class MdmSearchExpansionResults {
 
+	private static final String EXPANSION_RESULTS = MdmSearchExpansionResults.class.getName() + "_EXPANSION_RESULTS";
+
 	private final Set<IIdType> myOriginalIdToExpandedId = new HashSet<>();
 	private final Map<IIdType, IIdType> myExpandedIdToOriginalId = new HashMap<>();
 
-	void addExpandedId(IIdType theOriginalId, IIdType theExpandedId) {
+	public void addExpandedId(IIdType theOriginalId, IIdType theExpandedId) {
 		assert isRemapCandidate(theOriginalId) : theOriginalId.getValue();
 		myOriginalIdToExpandedId.add(theOriginalId);
 		myExpandedIdToOriginalId.put(theExpandedId, theOriginalId);
@@ -57,6 +62,10 @@ public class MdmSearchExpansionResults {
 		return Optional.ofNullable(originalId);
 	}
 
+	public Set<IIdType> getExpandedIds() {
+		return Set.copyOf(myExpandedIdToOriginalId.keySet());
+	}
+
 	public static boolean isRemapCandidate(IIdType theId) {
 		return theId != null
 				&& !theId.isLocal()
@@ -64,5 +73,39 @@ public class MdmSearchExpansionResults {
 				&& theId.hasResourceType()
 				&& theId.hasIdPart()
 				&& theId.getValue().equals(theId.toUnqualifiedVersionless().getValue());
+	}
+
+	/**
+	 * Retrieves cached expansion results from the request details user data.
+	 *
+	 * @param theRequestDetails The request details containing cached results
+	 * @return The cached expansion results, or null if none exist
+	 * @since 8.0.0
+	 */
+	@Nullable
+	public static MdmSearchExpansionResults getCachedExpansionResults(@Nonnull RequestDetails theRequestDetails) {
+		return (MdmSearchExpansionResults) theRequestDetails.getUserData().get(EXPANSION_RESULTS);
+	}
+
+	/**
+	 * Stores expansion results in the request details user data.
+	 *
+	 * @param theRequestDetails The request details to store results in
+	 * @param theResults The expansion results to store
+	 * @since 8.0.0
+	 */
+	public static void cacheExpansionResults(
+			@Nonnull RequestDetails theRequestDetails, @Nonnull MdmSearchExpansionResults theResults) {
+		theRequestDetails.getUserData().put(EXPANSION_RESULTS, theResults);
+	}
+
+	/**
+	 * Clears cached expansion results from the request details user data.
+	 *
+	 * @param theRequestDetails The request details to clear results from
+	 * @since 8.0.0
+	 */
+	public static void clearCachedExpansionResults(@Nonnull RequestDetails theRequestDetails) {
+		theRequestDetails.getUserData().remove(EXPANSION_RESULTS);
 	}
 }

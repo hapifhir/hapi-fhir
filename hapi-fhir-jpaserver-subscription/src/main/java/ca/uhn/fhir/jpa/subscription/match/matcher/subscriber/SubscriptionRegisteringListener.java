@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -148,6 +149,9 @@ public class SubscriptionRegisteringListener implements IMessageListener<Resourc
 			// creates a corrupt default partition.  This resets it to a clean one.
 			payloadPartitionId = RequestPartitionId.defaultPartition();
 		}
-		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
+		SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
+		// skip consent checking when registering Subscription resources since it is a system action
+		ConsentInterceptor.skipAllConsentForRequest(requestDetails);
+		return requestDetails;
 	}
 }

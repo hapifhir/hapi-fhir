@@ -86,6 +86,7 @@ import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.ID_
 import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_DATATYPE;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -318,7 +319,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			case PRIMITIVE_DATATYPE: {
 				final IPrimitiveType<?> value = (IPrimitiveType<?>) theNextValue;
 				final String valueStr = value.getValueAsString();
-				if (isBlank(valueStr)) {
+				if (isEmpty(valueStr)) {
 					if (theForceEmpty) {
 						theEventWriter.writeNull();
 					}
@@ -571,7 +572,14 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			for (IBase nextValue : values) {
 
 				if (nextValue == null || nextValue.isEmpty()) {
-					if (nextValue instanceof BaseContainedDt) {
+					// PrimitiveType.isEmpty() uses isBlank() which treats whitespace-only
+					// values as empty. Per the FHIR spec, the string type regex is
+					// [ \r\n\t\S]+ which includes spaces as valid content
+					// (see http://hl7.org/fhir/R4/datatypes.html#string).
+					// Only skip primitives with truly empty (null/"") values.
+					if (nextValue instanceof IPrimitiveType<?> primitive && !isEmpty(primitive.getValueAsString())) {
+						// fall through - encode primitive with whitespace-only value
+					} else if (nextValue instanceof BaseContainedDt) {
 						if (theContainedResource
 								|| theEncodeContext.getContainedResources().isEmpty()) {
 							continue;

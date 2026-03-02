@@ -17,34 +17,3 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.api.svc;
-
-import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
-
-/**
- * Service for validating codes against ValueSets and CodeSystems.
- * <p>
- * This service provides a unified interface for code validation that handles both
- * remote terminology service delegation and local DAO layer validation.
- * </p>
- *
- * // Created by claude-opus-4-5-20251101
- */
-public interface ITerminologyValidationSvc {
-
-	/**
-	 * Validates a code against a ValueSet.
-	 *
-	 * @param theRequest The validation request containing all parameters
-	 * @return The validation result
-	 */
-	CodeValidationResult validateCodeAgainstValueSet(ValueSetValidationRequest theRequest);
-
-	/**
-	 * Validates a code against a CodeSystem.
-	 *
-	 * @param theRequest The validation request containing all parameters
-	 * @return The validation result
-	 */
-	CodeValidationResult validateCodeAgainstCodeSystem(CodeSystemValidationRequest theRequest);
-}
