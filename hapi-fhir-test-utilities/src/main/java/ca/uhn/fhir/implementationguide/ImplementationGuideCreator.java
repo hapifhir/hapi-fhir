@@ -113,7 +113,6 @@ public class ImplementationGuideCreator {
 
 		myMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-
 		try {
 			myPackageJson = myMapper.readValue(PACKAGE_JSON_BASE, Map.class);
 		} catch (Exception ex) {
@@ -198,8 +197,7 @@ public class ImplementationGuideCreator {
 	private String createPackageJsonFile() {
 		String pkg = null;
 		try {
-			pkg = myMapper.writerWithDefaultPrettyPrinter()
-				.writeValueAsString(myPackageJson);
+			pkg = myMapper.writerWithDefaultPrettyPrinter().writeValueAsString(myPackageJson);
 
 			ourLog.info(pkg);
 		} catch (Exception ex) {

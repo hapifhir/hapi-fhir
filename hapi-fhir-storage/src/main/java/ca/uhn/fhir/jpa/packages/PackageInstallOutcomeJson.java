@@ -47,11 +47,15 @@ public class PackageInstallOutcomeJson {
 	@JsonProperty("resourcesInstalled")
 	private Map<String, Integer> myResourcesInstalled;
 
-	@Schema(description = "This map is populated only in the case of a dry-run and contains a mapping of resource type to unique identifier (for most resources, this will be url or url + version (if MULTI_VERSION mode is specified)) for resources that would be overwritten or updated should a real run be done.")
+	@Schema(
+			description =
+					"This map is populated only in the case of a dry-run and contains a mapping of resource type to unique identifier (for most resources, this will be url or url + version (if MULTI_VERSION mode is specified)) for resources that would be overwritten or updated should a real run be done.")
 	@JsonProperty("replacedResourceTypeToUniqueIdentifier")
 	private Map<String, List<String>> myReplacedResourceToUniqueIdentifier;
 
-	@Schema(description = "This map is populated only in the case of a dry-run and contains a mapping of resource type to unique identifier for resources that would be created anew should a real run be done.")
+	@Schema(
+			description =
+					"This map is populated only in the case of a dry-run and contains a mapping of resource type to unique identifier for resources that would be created anew should a real run be done.")
 	@JsonProperty("addedResourceTypeToUniqueIdentifier")
 	private Map<String, List<String>> myAddedResourceTypeToUniqueIdentifier;
 
@@ -96,8 +100,7 @@ public class PackageInstallOutcomeJson {
 		if (!map.containsKey(theResourceType)) {
 			map.put(theResourceType, new ArrayList<>());
 		}
-		map.get(theResourceType)
-			.add(theUniqueId);
+		map.get(theResourceType).add(theUniqueId);
 	}
 
 	public void incrementResourcesInstalled(String theResourceType) {

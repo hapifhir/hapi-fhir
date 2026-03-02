@@ -22,14 +22,10 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.model.api.PagingIterator;
-import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class NpmJpaValidationSupport implements IValidationSupport {

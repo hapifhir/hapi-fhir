@@ -84,8 +84,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
 import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
@@ -295,22 +293,27 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		if (theInstallationSpec.isDryRun()) {
-			theOutcome.getMessage()
-				.add("Dry-run complete. No resources were stored.");
+			theOutcome.getMessage().add("Dry-run complete. No resources were stored.");
 
-			for (Map.Entry<String, List<String>> set : theOutcome.getAddedResourceTypeToUniqueIdentifier().entrySet()) {
+			for (Map.Entry<String, List<String>> set :
+					theOutcome.getAddedResourceTypeToUniqueIdentifier().entrySet()) {
 				String resourceType = set.getKey();
 				List<String> resourceIdentifiers = set.getValue();
-				theOutcome.getMessage()
-					.add(String.format("%s: %d new resource(s) would be created.", resourceType, resourceIdentifiers.size()));
+				theOutcome
+						.getMessage()
+						.add(String.format(
+								"%s: %d new resource(s) would be created.", resourceType, resourceIdentifiers.size()));
 			}
-			for (Map.Entry<String, List<String>> set : theOutcome.getReplacedResourceToUniqueIdentifier().entrySet()) {
+			for (Map.Entry<String, List<String>> set :
+					theOutcome.getReplacedResourceToUniqueIdentifier().entrySet()) {
 				String resourceType = set.getKey();
 				List<String> resourceIdentifiers = set.getValue();
 				for (String identifier : resourceIdentifiers) {
-					theOutcome.getMessage()
-						.add(String.format("Resource of type %s with unique identifier %s would be overwritten.",
-							resourceType, identifier));
+					theOutcome
+							.getMessage()
+							.add(String.format(
+									"Resource of type %s with unique identifier %s would be overwritten.",
+									resourceType, identifier));
 				}
 			}
 		}
@@ -351,8 +354,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					}
 
 					if (theInstallationSpec.isDryRun()) {
-						theOutcome.getMessage()
-							.add(String.format("Installation would install %s:%s", id, ver));
+						theOutcome.getMessage().add(String.format("Installation would install %s:%s", id, ver));
 					} else {
 
 						// resolve in local cache or on packages.fhir.org
@@ -362,7 +364,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 						fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
 
 						if (theInstallationSpec.getInstallMode()
-							== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
+								== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
 							install(dependency, theInstallationSpec, theOutcome);
 						}
 					}
@@ -428,7 +430,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 		IBaseResource existingResource =
 				!searchResult.isEmpty() ? searchResult.getResources(0, 1).get(0) : null;
-		boolean isInstalled = createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec, map, theOutcome);
+		boolean isInstalled =
+				createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec, map, theOutcome);
 		if (isInstalled) {
 			theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
 		}
@@ -480,18 +483,18 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 				// TODO - will we ever see nothing? or a throw?
 				RuntimeSearchParam runtimeSearchParameter = sps.stream()
-					.filter(sp -> sp.getName().equals(key))
-					.findFirst()
-					.orElseThrow();
+						.filter(sp -> sp.getName().equals(key))
+						.findFirst()
+						.orElseThrow();
 
-				Optional<String> valueOp = terser.getSinglePrimitiveValue(theResource, runtimeSearchParameter.getPath());
+				Optional<String> valueOp =
+						terser.getSinglePrimitiveValue(theResource, runtimeSearchParameter.getPath());
 				uniqueIdentifierSpBuilder.append(valueOp.get());
 			}
 
 			// dry run
 			if (theExistingResource != null) {
-				theOutcome.addExistingResource(resourceType,
-					uniqueIdentifierSpBuilder.toString());
+				theOutcome.addExistingResource(resourceType, uniqueIdentifierSpBuilder.toString());
 			} else {
 				// a resource we'd add
 				theOutcome.addResourceTypeToBeAdded(resourceType, uniqueIdentifierSpBuilder.toString());
