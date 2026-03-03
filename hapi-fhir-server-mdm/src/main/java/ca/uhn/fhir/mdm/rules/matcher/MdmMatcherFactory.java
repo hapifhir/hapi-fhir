@@ -37,6 +37,7 @@ import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.PhoneticEncoderMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.SubstringStringMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
 import java.util.Map;
@@ -91,6 +92,8 @@ public class MdmMatcherFactory implements IMatcherFactory {
 
 	@Override
 	public void register(String theName, IMdmFieldMatcher theMatcher) {
+		Validate.notBlank(theName, "theName must not be blank");
+		Validate.notNull(theMatcher, "theMatcher must not be null");
 		if (myMatchers.containsKey(theName)) {
 			throw new IllegalArgumentException(
 					Msg.code(2850) + "A matcher is already registered under the name: " + theName);

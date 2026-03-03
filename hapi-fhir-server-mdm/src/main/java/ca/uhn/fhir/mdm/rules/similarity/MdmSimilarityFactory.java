@@ -21,6 +21,7 @@ package ca.uhn.fhir.mdm.rules.similarity;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.log.Logs;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
 import java.util.Map;
@@ -57,6 +58,8 @@ public class MdmSimilarityFactory implements ISimilarityFactory {
 
 	@Override
 	public void register(String theName, IMdmFieldSimilarity theSimilarity) {
+		Validate.notBlank(theName, "theName must not be blank");
+		Validate.notNull(theSimilarity, "theSimilarity must not be null");
 		if (mySimilarities.containsKey(theName)) {
 			throw new IllegalArgumentException(
 					Msg.code(2851) + "A similarity is already registered under the name: " + theName);
