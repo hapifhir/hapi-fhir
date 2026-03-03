@@ -185,6 +185,17 @@ public interface IResourceTableDao
 			@Param("restype") String theResourceName, @Param("fhirId") String theFhirId);
 
 	/**
+	 * Do not delete this method, used by Smile
+	 */
+	@SuppressWarnings("unused")
+	@Query(
+			"SELECT t FROM ResourceTable t where t.myPartitionIdValue = :partId AND t.myResourceType = :restype and t.myFhirId = :fhirId")
+	Optional<ResourceTable> findByPartitionAndTypeAndFhirId(
+			@Param("partId") Integer thePartitionId,
+			@Param("restype") String theResourceName,
+			@Param("fhirId") String theFhirId);
+
+	/**
 	 * @deprecated Use {@link #findById(Object)}
 	 */
 	default Optional<ResourceTable> findById(Long theId) {

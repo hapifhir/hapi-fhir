@@ -43,12 +43,7 @@ public class ReplaceReferencesErrorHandler<PT extends ReplaceReferencesJobParame
 
 	@Override
 	public void jobComplete(JobCompletionDetails<PT> theDetails) {
-
-		PT jobParameters = theDetails.getParameters();
-
-		SystemRequestDetails requestDetails =
-				SystemRequestDetails.forRequestPartitionId(jobParameters.getPartitionId());
-
+		SystemRequestDetails requestDetails = theDetails.newSystemRequestDetails();
 		myBatch2TaskHelper.updateTaskStatusOnJobCompletion(myTaskDao, requestDetails, theDetails);
 	}
 }

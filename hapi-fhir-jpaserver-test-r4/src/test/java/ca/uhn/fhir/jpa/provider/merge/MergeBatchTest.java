@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -106,7 +106,7 @@ public class MergeBatchTest extends BaseJpaR4Test {
 
 		MergeJobParameters jobParams = new MergeJobParameters();
 		//use a source that does not exist to force the job to fail
-		jobParams.setSourceId(new FhirIdJson("Patient", "doesnotexist"));
+		jobParams.setSourceId(new FhirIdJson(null, "Patient", "doesnotexist"));
 		jobParams.setTargetId(new FhirIdJson(myTestData.getTargetPatientId()));
 		jobParams.setTaskId(taskId);
 

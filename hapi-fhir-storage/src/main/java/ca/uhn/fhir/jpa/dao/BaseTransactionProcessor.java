@@ -970,11 +970,13 @@ public abstract class BaseTransactionProcessor {
 	private RequestPartitionId getEntryRequestPartitionId(
 			RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IBase theEntry) {
 
-		RequestPartitionId nextWriteEntryRequestPartitionId = null;
+		RequestPartitionId nextWriteEntryRequestPartitionId =
+				(RequestPartitionId) theEntry.getUserData(Constants.RESOURCE_PARTITION_ID);
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, theEntry);
 		String url = extractTransactionUrlOrThrowException(theEntry, verb);
 		RequestDetails requestDetailsForEntry =
 				createRequestDetailsForWriteEntry(theRequestDetails, theEntry, url, verb);
+
 		if (isNotBlank(verb)) {
 			BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
 			switch (verbEnum) {
@@ -985,24 +987,39 @@ public abstract class BaseTransactionProcessor {
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
 					if (isNotBlank(requestUrl)) {
 						if (requestUrl.indexOf('?') != -1) {
-							MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
-									myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
-							SearchParameterMap params = typeAndParams.searchParameterMap();
-							String resourceType =
-									typeAndParams.resourceDefinition().getName();
-							ReadPartitionIdRequestDetails details =
-									ReadPartitionIdRequestDetails.forDelete(resourceType, params);
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineReadPartitionForRequest(
-											requestDetailsForEntry, details);
+							if (nextWriteEntryRequestPartitionId == null) {
+								MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
+										myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
+								SearchParameterMap params = typeAndParams.searchParameterMap();
+								String resourceType =
+										typeAndParams.resourceDefinition().getName();
+								ReadPartitionIdRequestDetails details =
+										ReadPartitionIdRequestDetails.forDelete(resourceType, params);
+								nextWriteEntryRequestPartitionId =
+										myRequestPartitionHelperService.determineReadPartitionForRequest(
+												requestDetailsForEntry, details);
+							} else {
+								/*
+								 * We don't currently support an explicit partition stored on the Bundle.entry userdata map for conditional
+								 * deletes. The reason is that there's no easy way to pass the selected partition into the DAO from here.
+								 * If any use cases come up which require this, we could consider finding a way to smuggle it in the
+								 * TransactionDetails, but for now we'll leave this use case unaddressed and just throw an error.
+								 */
+								throw new InternalErrorException(
+										Msg.code(2845) + "Can not specify explicit partition for conditional delete");
+							}
 						} else {
 							IdType id = new IdType(requestUrl);
-							String resourceType = id.getResourceType();
-							ReadPartitionIdRequestDetails details =
-									ReadPartitionIdRequestDetails.forDelete(resourceType, id);
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineReadPartitionForRequest(
-											requestDetailsForEntry, details);
+							if (nextWriteEntryRequestPartitionId == null) {
+								String resourceType = id.getResourceType();
+								ReadPartitionIdRequestDetails details =
+										ReadPartitionIdRequestDetails.forDelete(resourceType, id);
+								nextWriteEntryRequestPartitionId =
+										myRequestPartitionHelperService.determineReadPartitionForRequest(
+												requestDetailsForEntry, details);
+							}
+							theTransactionDetails.addResolvedPartition(
+									id.getResourceType() + "/" + id.getIdPart(), nextWriteEntryRequestPartitionId);
 						}
 					}
 					break;
@@ -1011,34 +1028,49 @@ public abstract class BaseTransactionProcessor {
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
 					if (isNotBlank(requestUrl)) {
 						if (requestUrl.indexOf('?') != -1) {
-							MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
-									myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
-							SearchParameterMap params = typeAndParams.searchParameterMap();
-							String resourceType =
-									typeAndParams.resourceDefinition().getName();
-							ReadPartitionIdRequestDetails details =
-									ReadPartitionIdRequestDetails.forPatch(resourceType, params);
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineReadPartitionForRequest(
-											requestDetailsForEntry, details);
+							if (nextWriteEntryRequestPartitionId == null) {
+								MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
+										myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
+								SearchParameterMap params = typeAndParams.searchParameterMap();
+								String resourceType =
+										typeAndParams.resourceDefinition().getName();
+								ReadPartitionIdRequestDetails details =
+										ReadPartitionIdRequestDetails.forPatch(resourceType, params);
+								nextWriteEntryRequestPartitionId =
+										myRequestPartitionHelperService.determineReadPartitionForRequest(
+												requestDetailsForEntry, details);
+							}
 						} else {
 							IdType id = new IdType(requestUrl);
 							String resourceType = id.getResourceType();
-							ReadPartitionIdRequestDetails details =
-									ReadPartitionIdRequestDetails.forPatch(resourceType, id);
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineReadPartitionForRequest(
-											requestDetailsForEntry, details);
+							if (nextWriteEntryRequestPartitionId == null) {
+								ReadPartitionIdRequestDetails details =
+										ReadPartitionIdRequestDetails.forPatch(resourceType, id);
+								nextWriteEntryRequestPartitionId =
+										myRequestPartitionHelperService.determineReadPartitionForRequest(
+												requestDetailsForEntry, details);
+							}
+							theTransactionDetails.addResolvedPartition(
+									resourceType + "/" + id.getIdPart(), nextWriteEntryRequestPartitionId);
 						}
+					}
+					IBaseResource resource = myVersionAdapter.getResource(theEntry);
+					if (resource != null) {
+						resource.setUserData(Constants.RESOURCE_PARTITION_ID, nextWriteEntryRequestPartitionId);
 					}
 					break;
 				}
 				case POST: {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
-					nextWriteEntryRequestPartitionId =
-							myRequestPartitionHelperService.determineCreatePartitionForRequest(
-									requestDetailsForEntry, resource, resourceType);
+					if (nextWriteEntryRequestPartitionId == null) {
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineCreatePartitionForRequest(
+										requestDetailsForEntry, resource, resourceType);
+					}
+					if (resource != null) {
+						resource.setUserData(Constants.RESOURCE_PARTITION_ID, nextWriteEntryRequestPartitionId);
+					}
 					break;
 				}
 				case PUT: {
@@ -1050,18 +1082,21 @@ public abstract class BaseTransactionProcessor {
 							resourceId =
 									resourceType + "/" + resource.getIdElement().getIdPart();
 						}
-						if (resourceId != null) {
-							nextWriteEntryRequestPartitionId = theTransactionDetails.getResolvedPartition(resourceId);
-						}
 						if (nextWriteEntryRequestPartitionId == null) {
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineCreatePartitionForRequest(
-											requestDetailsForEntry, resource, resourceType);
 							if (resourceId != null) {
-								theTransactionDetails.addResolvedPartition(
-										resourceId, nextWriteEntryRequestPartitionId);
+								nextWriteEntryRequestPartitionId =
+										theTransactionDetails.getResolvedPartition(resourceId);
+							}
+							if (nextWriteEntryRequestPartitionId == null) {
+								nextWriteEntryRequestPartitionId =
+										myRequestPartitionHelperService.determineCreatePartitionForRequest(
+												requestDetailsForEntry, resource, resourceType);
 							}
 						}
+						if (resourceId != null) {
+							theTransactionDetails.addResolvedPartition(resourceId, nextWriteEntryRequestPartitionId);
+						}
+						resource.setUserData(Constants.RESOURCE_PARTITION_ID, nextWriteEntryRequestPartitionId);
 					}
 					break;
 				}

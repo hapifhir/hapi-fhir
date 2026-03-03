@@ -597,6 +597,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						associatedResource = resource;
 					}
 					processConditionalUrlForPreFetching(
+							false,
 							theRequestPartitionId,
 							resourceType,
 							associatedResource,
@@ -608,6 +609,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							searchParameterMapsToResolve);
 				} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
 					processConditionalUrlForPreFetching(
+							false,
 							theRequestPartitionId,
 							resourceType,
 							resource,
@@ -629,6 +631,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						String refResourceType = determineResourceTypeInResourceUrl(myFhirContext, referenceUrl);
 						if (refResourceType != null) {
 							processConditionalUrlForPreFetching(
+									true,
 									theRequestPartitionId,
 									refResourceType,
 									null,
@@ -722,12 +725,16 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		for (MatchUrlToResolve next : theMatchUrls) {
 			RequestPartitionId partition = RequestPartitionId.allPartitions();
 			if (myPartitionSettings.isPartitioningEnabled()) {
-				partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-						theRequestDetails,
-						next.myResourceDefinition.getName(),
-						next.myMatchUrlSearchMap,
-						next.getAssociatedResource());
-				if (partition.isAllPartitions()) {
+				if (next.myIsOutboundReference) {
+					partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+							theRequestDetails,
+							next.myResourceDefinition.getName(),
+							next.myMatchUrlSearchMap,
+							next.getAssociatedResource());
+					if (partition.isAllPartitions()) {
+						partition = theOuterRequestPartitionId;
+					}
+				} else {
 					partition = theOuterRequestPartitionId;
 				}
 			}
@@ -1038,6 +1045,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * a reference in it for example) so it's not really possible to doing anything useful with this.
 	 * </p>
 	 *
+	 * @param theIsOutboundReference					    Is the conditional URL for a reference out of a resource found somewhere in <code>Bundle.entry.resource.***.reference</code> (if false, it's a conditional URL associated with the <code>Bundle.entry</code> itself)
 	 * @param thePartitionId                        The partition ID of the associated resource (can be null)
 	 * @param theResourceType                       The resource type associated with the match URL (ie what resource type should it resolve to)
 	 * @param theRequestUrl                         The actual match URL, which could be as simple as just parameters or could include the resource type too
@@ -1047,6 +1055,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * @param theOutputSearchParameterMapsToResolve This will be populated with any {@link SearchParameterMap} instances corresponding to match URLs we need to resolve
 	 */
 	private void processConditionalUrlForPreFetching(
+			boolean theIsOutboundReference,
 			RequestPartitionId thePartitionId,
 			String theResourceType,
 			@Nullable IBaseResource theAssociatedResource,
@@ -1070,6 +1079,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					myMatchUrlService.translateMatchUrl(theRequestUrl, resourceDefinition);
 			assert matchUrlSearchMap != null;
 			theOutputSearchParameterMapsToResolve.add(new MatchUrlToResolve(
+					theIsOutboundReference,
 					theRequestUrl,
 					theAssociatedResource,
 					matchUrlSearchMap,
@@ -1220,12 +1230,13 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		private final boolean myShouldPreFetchResourceBody;
 		private final boolean myShouldPreFetchResourceVersion;
 		private final IBaseResource myAssociatedResource;
-
+		private final boolean myIsOutboundReference;
 		public boolean myResolved;
 		private Long myHashValue;
 		private Long myHashSystemAndValue;
 
 		public MatchUrlToResolve(
+				boolean theIsOutboundReference,
 				@Nonnull String theRequestUrl,
 				@Nullable IBaseResource theAssociatedResource,
 				@Nonnull SearchParameterMap theMatchUrlSearchMap,
@@ -1235,6 +1246,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			Validate.notNull(theRequestUrl, "theRequestUrl must not be null");
 			Validate.notNull(theMatchUrlSearchMap, "theMatchUrlSearchMap must not be null");
 			Validate.notNull(theResourceDefinition, "theResourceDefinition must not be null");
+			myIsOutboundReference = theIsOutboundReference;
 			myAssociatedResource = theAssociatedResource;
 			myRequestUrl = theRequestUrl;
 			myMatchUrlSearchMap = theMatchUrlSearchMap;

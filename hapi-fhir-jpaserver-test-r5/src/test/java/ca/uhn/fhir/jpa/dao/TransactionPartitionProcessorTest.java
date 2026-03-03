@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
-import ca.uhn.fhir.jpa.dao.r5.FhirSystemDaoTransactionPartitionR5Test;
+import ca.uhn.fhir.jpa.dao.r5.FhirSystemDaoTransactionPrePartitionR5Test;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
@@ -37,7 +37,7 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 
 	private final FhirContext myFhirContext = FhirContext.forR5Cached();
 	private final InterceptorService myInterceptorBroadcaster = new InterceptorService();
-	private final FhirSystemDaoTransactionPartitionR5Test.MyTransactionPrePartitionInterceptor myInterceptor = new FhirSystemDaoTransactionPartitionR5Test.MyTransactionPrePartitionInterceptor();
+	private final FhirSystemDaoTransactionPrePartitionR5Test.MyTransactionPrePartitionInterceptor myInterceptor = new FhirSystemDaoTransactionPrePartitionR5Test.MyTransactionPrePartitionInterceptor();
 	@Mock
 	private TransactionProcessor myTransactionProcessor;
 	@Captor

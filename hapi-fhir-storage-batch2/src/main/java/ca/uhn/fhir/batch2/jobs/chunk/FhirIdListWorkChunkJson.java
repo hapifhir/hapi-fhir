@@ -35,7 +35,7 @@ public class FhirIdListWorkChunkJson implements IModelJson {
 	private RequestPartitionId myRequestPartitionId;
 
 	@JsonProperty("fhirIds")
-	private List<FhirIdJson> myFhirIds;
+	private List<ca.uhn.fhir.jpa.api.pid.FhirIdJson> myFhirIds;
 
 	/**
 	 * Constructor
@@ -47,7 +47,8 @@ public class FhirIdListWorkChunkJson implements IModelJson {
 	/**
 	 * Constructor
 	 */
-	public FhirIdListWorkChunkJson(Collection<FhirIdJson> theFhirIds, RequestPartitionId theRequestPartitionId) {
+	public FhirIdListWorkChunkJson(
+			Collection<ca.uhn.fhir.jpa.api.pid.FhirIdJson> theFhirIds, RequestPartitionId theRequestPartitionId) {
 		this();
 		getFhirIds().addAll(theFhirIds);
 		myRequestPartitionId = theRequestPartitionId;
@@ -62,7 +63,7 @@ public class FhirIdListWorkChunkJson implements IModelJson {
 		return myRequestPartitionId;
 	}
 
-	public List<FhirIdJson> getFhirIds() {
+	public List<ca.uhn.fhir.jpa.api.pid.FhirIdJson> getFhirIds() {
 		if (myFhirIds == null) {
 			myFhirIds = new ArrayList<>();
 		}
@@ -85,7 +86,7 @@ public class FhirIdListWorkChunkJson implements IModelJson {
 		return getFhirIds().isEmpty();
 	}
 
-	public void add(FhirIdJson theFhirId) {
+	public void add(ca.uhn.fhir.jpa.api.pid.FhirIdJson theFhirId) {
 		getFhirIds().add(theFhirId);
 	}
 

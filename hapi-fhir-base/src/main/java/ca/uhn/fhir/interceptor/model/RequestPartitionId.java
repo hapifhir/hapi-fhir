@@ -228,18 +228,22 @@ public class RequestPartitionId implements IModelJson {
 		b.append(myAllPartitions, that.myAllPartitions);
 		b.append(myPartitionDate, that.myPartitionDate);
 		b.append(myPartitionIds, that.myPartitionIds);
-		b.append(myPartitionNames, that.myPartitionNames);
+		if (myPartitionIds == null || myPartitionIds.isEmpty()) {
+			b.append(myPartitionNames, that.myPartitionNames);
+		}
 		return b.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-				.append(myPartitionDate)
-				.append(myAllPartitions)
-				.append(myPartitionIds)
-				.append(myPartitionNames)
-				.toHashCode();
+		HashCodeBuilder b = new HashCodeBuilder(17, 37);
+		b.append(myPartitionDate);
+		b.append(myAllPartitions);
+		if (myPartitionIds == null || myPartitionIds.isEmpty()) {
+			b.append(myPartitionIds);
+		}
+		b.append(myPartitionNames);
+		return b.toHashCode();
 	}
 
 	public String toJson() {

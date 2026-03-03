@@ -25,11 +25,14 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdListWorkChunkJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.StreamUtil;
 import jakarta.annotation.Nonnull;
 
@@ -42,11 +45,15 @@ public class ReplaceReferencesQueryIdsStep<PT extends ReplaceReferencesJobParame
 
 	private final HapiTransactionService myHapiTransactionService;
 	private final IBatch2DaoSvc myBatch2DaoSvc;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	public ReplaceReferencesQueryIdsStep(
-			HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
+			HapiTransactionService theHapiTransactionService,
+			IBatch2DaoSvc theBatch2DaoSvc,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myHapiTransactionService = theHapiTransactionService;
 		myBatch2DaoSvc = theBatch2DaoSvc;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
 	@Nonnull
@@ -57,23 +64,21 @@ public class ReplaceReferencesQueryIdsStep<PT extends ReplaceReferencesJobParame
 			throws JobExecutionFailedException {
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
 
+		IdDt sourceIdType = params.getSourceId().asIdDt();
+		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+		RequestPartitionId partitionId =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(requestDetails, sourceIdType);
+
 		// Warning: It is a little confusing that source/target are reversed in the resource link table from the meaning
-		// in
-		// the replace references request
+		// in the replace-references request
 
 		AtomicInteger totalCount = new AtomicInteger();
-		myHapiTransactionService
-				.withSystemRequestOnPartition(params.getPartitionId())
-				.execute(() -> {
-					Stream<FhirIdJson> stream = myBatch2DaoSvc
-							.streamSourceIdsThatReferenceTargetId(
-									params.getSourceId().asIdDt())
-							.map(FhirIdJson::new);
+		myHapiTransactionService.withSystemRequestOnPartition(partitionId).execute(() -> {
+			Stream<FhirIdJson> stream = myBatch2DaoSvc.streamSourceIdsThatReferenceTargetId(sourceIdType);
 
-					StreamUtil.partition(stream, params.getBatchSize())
-							.forEach(chunk ->
-									totalCount.addAndGet(processChunk(theDataSink, chunk, params.getPartitionId())));
-				});
+			StreamUtil.partition(stream, params.getBatchSize())
+					.forEach(chunk -> totalCount.addAndGet(processChunk(theDataSink, chunk, partitionId)));
+		});
 
 		return new RunOutcome(totalCount.get());
 	}

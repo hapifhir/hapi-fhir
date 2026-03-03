@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.interceptor.ex.MockPartitioningInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -30,7 +30,7 @@ public class PartitioningAllowedUnqualifiedR4Test extends BasePartitioningR4Test
 		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultPartitionSettings.getAllowReferencesAcrossPartitions());
 		myPartitionSettings.setDefaultPartitionId(defaultPartitionSettings.getDefaultPartitionId());
 
-		mySrdInterceptorService.unregisterInterceptorsIf(MyReadWriteInterceptor.class::isInstance);
+		mySrdInterceptorService.unregisterInterceptorsIf(MockPartitioningInterceptor.class::isInstance);
 
 	}
 

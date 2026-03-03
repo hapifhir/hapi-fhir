@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import org.hl7.fhir.r4.model.Task;
@@ -72,8 +73,11 @@ public class ReplaceReferencesAppCtx {
 
 	@Bean
 	public ReplaceReferencesQueryIdsStep<ReplaceReferencesJobParameters> replaceReferencesQueryIdsStep(
-			HapiTransactionService theHapiTransactionService, IBatch2DaoSvc theBatch2DaoSvc) {
-		return new ReplaceReferencesQueryIdsStep<>(theHapiTransactionService, theBatch2DaoSvc);
+			HapiTransactionService theHapiTransactionService,
+			IBatch2DaoSvc theBatch2DaoSvc,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new ReplaceReferencesQueryIdsStep<>(
+				theHapiTransactionService, theBatch2DaoSvc, theRequestPartitionHelperSvc);
 	}
 
 	@Bean

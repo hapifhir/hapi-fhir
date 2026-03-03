@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.batch2.jobs.replacereferences;
 
-import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 

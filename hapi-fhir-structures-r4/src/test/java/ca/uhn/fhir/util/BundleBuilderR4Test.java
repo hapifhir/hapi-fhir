@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 public class BundleBuilderR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BundleBuilderR4Test.class);
-	private FhirContext myFhirContext = FhirContext.forR4Cached();
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 	private Date myCheckDate;
 
 	@BeforeEach
@@ -72,7 +72,11 @@ public class BundleBuilderR4Test {
 		op.addPart().setName("value").setValue(new BooleanType(false));
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		builder.addTransactionFhirPatchEntry(patch).conditional("Patient?identifier=http://foo|123");
+		BundleBuilder.PatchBuilder entry = builder
+			 .addTransactionFhirPatchEntry(patch)
+			 .conditional("Patient?identifier=http://foo|123");
+
+		assertNotNull(entry.getEntry());
 
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));

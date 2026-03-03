@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7583
+title: "The `BundleBuilder` utility now has a new utility method that
+   can return the raw newly created `Bundle.entry` when adding transaction
+   methods to a transaction Bundle."

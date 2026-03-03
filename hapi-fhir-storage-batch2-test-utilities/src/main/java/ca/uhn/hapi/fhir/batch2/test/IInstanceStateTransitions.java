@@ -114,7 +114,8 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 				new JobChunkProgressAccumulator(),
 				null,
 				jobDefinitionRegistry,
-				interceptorService
+				interceptorService,
+				null
 			).process();
 		});
 

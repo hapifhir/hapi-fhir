@@ -352,7 +352,6 @@ public class TransactionProcessorTest {
 
 		// Verify
 		verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(any(), notNull(), eq("Patient"));
-		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequestForSearchType(any(), eq("Patient"), any(), notNull());
 		verify(myRequestPartitionHelperSvc, atLeastOnce()).isDefaultPartition(any());
 		verifyNoMoreInteractions(myRequestPartitionHelperSvc);
 
@@ -386,7 +385,6 @@ public class TransactionProcessorTest {
 
 		// Verify
 		verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(any(), notNull(), eq("Patient"));
-		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequestForSearchType(any(), eq("Patient"), any(), notNull());
 		verify(myRequestPartitionHelperSvc, atLeastOnce()).isDefaultPartition(any());
 		verifyNoMoreInteractions(myRequestPartitionHelperSvc);
 

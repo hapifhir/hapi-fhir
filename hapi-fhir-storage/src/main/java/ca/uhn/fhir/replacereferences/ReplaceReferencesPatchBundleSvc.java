@@ -20,14 +20,17 @@
 package ca.uhn.fhir.replacereferences;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -67,7 +70,7 @@ public class ReplaceReferencesPatchBundleSvc {
 	 */
 	public Bundle patchReferencingResources(
 			ReplaceReferencesRequest theReplaceReferencesRequest,
-			List<IdDt> theResourceIds,
+			List<FhirIdJson> theResourceIds,
 			RequestDetails theRequestDetails) {
 		Bundle patchBundle = buildPatchBundle(theReplaceReferencesRequest, theResourceIds, theRequestDetails);
 		IFhirSystemDao<Bundle, Meta> systemDao = myDaoRegistry.getSystemDao();
@@ -79,18 +82,26 @@ public class ReplaceReferencesPatchBundleSvc {
 
 	private Bundle buildPatchBundle(
 			ReplaceReferencesRequest theReplaceReferencesRequest,
-			List<IdDt> theResourceIds,
+			List<FhirIdJson> theResourceIds,
 			RequestDetails theRequestDetails) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 		theResourceIds.forEach(referencingResourceId -> {
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(referencingResourceId.getResourceType());
-			IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
+			IIdType resId = myFhirContext
+					.getVersion()
+					.newIdType(referencingResourceId.getResourceType(), referencingResourceId.getFhirId());
+			IBaseResource resource = dao.read(resId, theRequestDetails);
 			Parameters patchParams = buildPatchParams(theReplaceReferencesRequest, resource);
 			// the patchParams could be empty if the resource contains only versioned references to the source,
 			// no need to add patch entry in that case
 			if (patchParams.hasParameter()) {
 				IIdType resourceId = resource.getIdElement();
-				bundleBuilder.addTransactionFhirPatchEntry(resourceId, patchParams);
+				IBase entry = bundleBuilder
+						.addTransactionFhirPatchEntry(resourceId, patchParams)
+						.getEntry();
+				entry.setUserData(
+						Constants.RESOURCE_PARTITION_ID,
+						RequestPartitionId.fromPartitionId(referencingResourceId.getPartitionId()));
 			}
 		});
 		return bundleBuilder.getBundleTyped();

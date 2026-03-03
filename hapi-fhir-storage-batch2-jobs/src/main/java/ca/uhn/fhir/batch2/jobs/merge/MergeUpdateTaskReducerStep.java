@@ -24,16 +24,19 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencePatchOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceResultsJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferenceUpdateTaskReducerStep;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Parameters;
 
 import java.util.ArrayList;
@@ -43,23 +46,30 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 	private final IHapiTransactionService myHapiTransactionService;
 	private final MergeResourceHelper myMergeResourceHelper;
 	private final MergeProvenanceSvc myMergeProvenanceSvc;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	public MergeUpdateTaskReducerStep(
 			DaoRegistry theDaoRegistry,
 			IHapiTransactionService theHapiTransactionService,
 			MergeResourceHelper theMergeResourceHelper,
-			MergeProvenanceSvc theMergeProvenanceSvc) {
+			MergeProvenanceSvc theMergeProvenanceSvc,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		super(theDaoRegistry, theMergeProvenanceSvc);
 		this.myHapiTransactionService = theHapiTransactionService;
 		myMergeResourceHelper = theMergeResourceHelper;
 		myMergeProvenanceSvc = theMergeProvenanceSvc;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
 	@Override
 	public IReductionStepWorker<MergeJobParameters, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson>
 			newInstance() {
 		return new MergeUpdateTaskReducerStep(
-				myDaoRegistry, myHapiTransactionService, myMergeResourceHelper, myMergeProvenanceSvc);
+				myDaoRegistry,
+				myHapiTransactionService,
+				myMergeResourceHelper,
+				myMergeProvenanceSvc,
+				myRequestPartitionHelperSvc);
 	}
 
 	@Override
@@ -68,8 +78,9 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			RequestDetails theRequestDetails) {
 		MergeJobParameters mergeJobParameters = theStepExecutionDetails.getParameters();
 
-		// Get resource type from source ID (needed for dynamic DAO lookup and parsing)
-		String resourceType = mergeJobParameters.getSourceId().getResourceType();
+		// Get resource type from target ID (needed for dynamic DAO lookup and parsing)
+		String resourceType = mergeJobParameters.getTargetId().getResourceType();
+		String targetFhirId = mergeJobParameters.getTargetId().getFhirId();
 
 		// Initialize parameter names based on operation type
 		String operationName = mergeJobParameters.getOperationName();
@@ -111,35 +122,43 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 			deleteSource = mergeJobParameters.getDeleteSource();
 		}
 
-		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
-			// Get DAO dynamically based on resource type
-			IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
+		IIdType targetFhirIdType = myFhirContext.getVersion().newIdType(resourceType, targetFhirId);
+		RequestPartitionId partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
+				theRequestDetails, resourceType, targetFhirIdType);
 
-			IBaseResource sourceResource =
-					dao.read(mergeJobParameters.getSourceId().asIdDt(), theRequestDetails);
-			IBaseResource targetResource =
-					dao.read(mergeJobParameters.getTargetId().asIdDt(), theRequestDetails);
+		myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(partition)
+				.execute(() -> {
+					// Get DAO dynamically based on resource type
+					IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
 
-			DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
-					sourceResource, targetResource, resultResource, deleteSource, theRequestDetails);
-			IBaseResource updatedTargetResource = outcome.getResource();
+					IBaseResource sourceResource =
+							dao.read(mergeJobParameters.getSourceId().asIdDt(), theRequestDetails);
+					IBaseResource targetResource =
+							dao.read(mergeJobParameters.getTargetId().asIdDt(), theRequestDetails);
 
-			String sourceVersionForProvenance = sourceResource.getIdElement().getVersionIdPart();
-			if (deleteSource) {
-				sourceVersionForProvenance =
-						Long.toString(sourceResource.getIdElement().getVersionIdPartAsLong() + 1);
-			}
+					DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
+							sourceResource, targetResource, resultResource, deleteSource, theRequestDetails);
+					IBaseResource updatedTargetResource = outcome.getResource();
 
-			mergeJobParameters.setSourceVersionForProvenance(sourceVersionForProvenance);
-			mergeJobParameters.setTargetVersionForProvenance(
-					updatedTargetResource.getIdElement().getVersionIdPart());
-			containedResourcesForProvenance.add(outcome.getOperationOutcome());
-			createProvenance(theStepExecutionDetails, theRequestDetails, containedResourcesForProvenance);
+					String sourceVersionForProvenance =
+							sourceResource.getIdElement().getVersionIdPart();
+					if (deleteSource) {
+						sourceVersionForProvenance =
+								Long.toString(sourceResource.getIdElement().getVersionIdPartAsLong() + 1);
+					}
 
-			if (deleteSource) {
-				dao.delete(sourceResource.getIdElement(), theRequestDetails);
-			}
-		});
+					mergeJobParameters.setSourceVersionForProvenance(sourceVersionForProvenance);
+					mergeJobParameters.setTargetVersionForProvenance(
+							updatedTargetResource.getIdElement().getVersionIdPart());
+					containedResourcesForProvenance.add(outcome.getOperationOutcome());
+					createProvenance(theStepExecutionDetails, theRequestDetails, containedResourcesForProvenance);
+
+					if (deleteSource) {
+						dao.delete(sourceResource.getIdElement(), theRequestDetails);
+					}
+				});
 	}
 
 	private boolean isDeleteSource(

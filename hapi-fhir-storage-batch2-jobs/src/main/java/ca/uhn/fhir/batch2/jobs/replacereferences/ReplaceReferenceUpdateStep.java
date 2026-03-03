@@ -24,10 +24,9 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdListWorkChunkJson;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -35,7 +34,6 @@ import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Bundle;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ReplaceReferenceUpdateStep<PT extends ReplaceReferencesJobParameters>
 		implements IJobStepWorker<PT, FhirIdListWorkChunkJson, ReplaceReferencePatchOutcomeJson> {
@@ -58,11 +56,9 @@ public class ReplaceReferenceUpdateStep<PT extends ReplaceReferencesJobParameter
 
 		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
 		ReplaceReferencesRequest replaceReferencesRequest = params.asReplaceReferencesRequest(myFhirContext);
-		List<IdDt> fhirIds = theStepExecutionDetails.getData().getFhirIds().stream()
-				.map(FhirIdJson::asIdDt)
-				.collect(Collectors.toList());
+		List<FhirIdJson> fhirIds = theStepExecutionDetails.getData().getFhirIds();
 
-		SystemRequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(params.getPartitionId());
+		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
 				replaceReferencesRequest, fhirIds, requestDetails);

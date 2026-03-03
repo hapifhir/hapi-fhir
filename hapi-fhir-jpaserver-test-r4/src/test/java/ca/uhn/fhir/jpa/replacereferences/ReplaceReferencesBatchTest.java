@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.replacereferences;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.jpa.api.pid.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -17,8 +17,6 @@ import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesAppCtx.JOB_REPLACE_REFERENCES;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED;
@@ -90,7 +88,7 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 		ReplaceReferencesJobParameters jobParams = new ReplaceReferencesJobParameters();
 		jobParams.setSourceId(new FhirIdJson(myTestData.getSourcePatientId()));
 		//use a target that does not exist to force the job to fail
-		jobParams.setTargetId(new FhirIdJson("Patient", "doesnotexist"));
+		jobParams.setTargetId(new FhirIdJson(null, "Patient", "doesnotexist"));
 		jobParams.setTaskId(taskId);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_REPLACE_REFERENCES, jobParams);

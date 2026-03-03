@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -61,7 +62,8 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			IHapiTransactionService theHapiTransactionService,
 			IInterceptorBroadcaster theInterceptorBroadcaster,
-			@Nonnull IInterceptorService theInterceptorService) {
+			@Nonnull IInterceptorService theInterceptorService,
+			@Nonnull IJobStepExecutionServices theJobStepExecutionServices) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myHapiTransactionService = theHapiTransactionService;
@@ -72,7 +74,8 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				theExecutorSvc,
 				theJobMaintenanceService,
 				theJobDefinitionRegistry,
-				theInterceptorService);
+				theInterceptorService,
+				theJobStepExecutionServices);
 	}
 
 	public Class<JobWorkNotification> getPayloadType() {

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server - Batch2 Task Processor
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.chunk;
+package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -28,6 +28,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public class FhirIdJson implements IModelJson {
 
+	@JsonProperty("part")
+	private Integer myPartitionId;
+
 	@JsonProperty("type")
 	private String myResourceType;
 
@@ -35,9 +38,11 @@ public class FhirIdJson implements IModelJson {
 	private String myFhirId;
 
 	// Jackson needs an empty constructor
+
 	public FhirIdJson() {}
 
-	public FhirIdJson(String theResourceType, String theFhirId) {
+	public FhirIdJson(Integer thePartitionId, String theResourceType, String theFhirId) {
+		myPartitionId = thePartitionId;
 		myResourceType = theResourceType;
 		myFhirId = theFhirId;
 	}
@@ -50,6 +55,10 @@ public class FhirIdJson implements IModelJson {
 	@Override
 	public String toString() {
 		return myResourceType + "/" + myFhirId;
+	}
+
+	public Integer getPartitionId() {
+		return myPartitionId;
 	}
 
 	public String getResourceType() {

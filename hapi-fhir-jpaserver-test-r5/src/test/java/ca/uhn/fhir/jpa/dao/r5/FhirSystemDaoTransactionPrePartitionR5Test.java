@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class FhirSystemDaoTransactionPartitionR5Test extends BaseJpaR5Test {
+public class FhirSystemDaoTransactionPrePartitionR5Test extends BaseJpaR5Test {
 
 	private final MyTransactionPrePartitionInterceptor myInterceptor = new MyTransactionPrePartitionInterceptor();
 
