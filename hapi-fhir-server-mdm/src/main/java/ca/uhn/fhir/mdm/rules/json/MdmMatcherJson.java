@@ -49,7 +49,7 @@ public class MdmMatcherJson implements IModelJson {
 	 * Convenience overload for backward compatibility with code that passes a {@link MatchTypeEnum}.
 	 * @deprecated Use {@link #setAlgorithm(String)} instead.
 	 */
-	@Deprecated(since = "8.10", forRemoval = true)
+	@Deprecated(since = "8_10", forRemoval = true)
 	public MdmMatcherJson setAlgorithm(MatchTypeEnum theAlgorithm) {
 		myAlgorithm = theAlgorithm.name();
 		return this;
