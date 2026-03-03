@@ -25,6 +25,11 @@ import org.junit.jupiter.params.converter.TypedArgumentConverter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class allows Junit {@link org.junit.jupiter.params.ParameterizedTest @ParameterizedTest}
+ * parameters to contain a comma separated list of integers (e.g. "1,2,3"), so that the
+ * test method can have a parameter of type <code>List&t;Integer&gt;</code>.
+ */
 @SuppressWarnings("rawtypes")
 public class StringToIntegerListArgumentConverter
 	extends TypedArgumentConverter<String, List<Integer>> {

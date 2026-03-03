@@ -29,16 +29,31 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Value type for {@link PatientIdPartitionInterceptor#setResourceTypePolicies(Map)}
+ * Value type for {@link PatientIdPartitionInterceptor#setResourceTypePolicies(Map)}.
+ * When using {@link PatientIdPartitionInterceptor Patient ID Partition Mode}, this class holds a
+ * policy defining which partition to write to or search in when storing or searching for resources
+ * that are in the Patient compartment. It can be used to specify that certain resources should
+ * be stored in a global partition instead of a patient-specific one.
+ * <p>
+ * Use the factory methods to create instances of this class:
+ * <ul>
+ *     <li>{@link #alwaysUseDefaultPartition()} - Always use the default partition for this resource type.</li>
+ *     <li>{@link #mandatorySingleCompartment()} - Require that the resource has exactly one compartment.</li>
+ *     <li>{@link #optionalSingleCompartment()} - Allow zero or one compartments for this resource type. If the resource is not in any compartment, store it in the default partition.</li>
+ *     <li>{@link #nonUniqueCompartmentInDefault()} - Allow the resource to be in multiple compartments or no compartment, store in the default partition if there isn't one unique compartment.</li>
+ *     <li>{@link #alwaysUsePartitionId(int)} - Always store the resource in the partition with the given ID.</li>
+ * </ul>
+ * </p>
  *
  * @see PatientIdPartitionInterceptor#setResourceTypePolicies(Map)
+ * @since 8.10.0
  */
 public class ResourceCompartmentStoragePolicy {
 
-	private static final String NON_UNIQUE_COMPARTMENT_IN_DEFAULT_NAME = "NON_UNIQUE_COMPARTMENT_IN_DEFAULT";
-	private static final String ALWAYS_USE_DEFAULT_PARTITION_NAME = "ALWAYS_USE_DEFAULT_PARTITION";
-	private static final String MANDATORY_SINGLE_COMPARTMENT_NAME = "MANDATORY_SINGLE_COMPARTMENT";
-	private static final String OPTIONAL_SINGLE_COMPARTMENT_NAME = "OPTIONAL_SINGLE_COMPARTMENT";
+	private static final String NON_UNIQUE_COMPARTMENT_IN_DEFAULT = "NON_UNIQUE_COMPARTMENT_IN_DEFAULT";
+	private static final String ALWAYS_USE_DEFAULT_PARTITION = "ALWAYS_USE_DEFAULT_PARTITION";
+	private static final String MANDATORY_SINGLE_COMPARTMENT = "MANDATORY_SINGLE_COMPARTMENT";
+	private static final String OPTIONAL_SINGLE_COMPARTMENT = "OPTIONAL_SINGLE_COMPARTMENT";
 	private static final String ALWAYS_USE_PARTITION_ID_PREFIX = "ALWAYS_USE_PARTITION_ID/";
 
 	private final String myName;
@@ -132,7 +147,7 @@ public class ResourceCompartmentStoragePolicy {
 	 * {@link ca.uhn.fhir.jpa.model.config.PartitionSettings#setDefaultPartitionId(Integer) default partition}.
 	 */
 	public static ResourceCompartmentStoragePolicy alwaysUseDefaultPartition() {
-		return new ResourceCompartmentStoragePolicy(ALWAYS_USE_DEFAULT_PARTITION_NAME, false, true, null, false, false);
+		return new ResourceCompartmentStoragePolicy(ALWAYS_USE_DEFAULT_PARTITION, false, true, null, false, false);
 	}
 
 	/**
@@ -141,7 +156,7 @@ public class ResourceCompartmentStoragePolicy {
 	 * compartment, an error will be raised and the resource will not be stored.
 	 */
 	public static ResourceCompartmentStoragePolicy mandatorySingleCompartment() {
-		return new ResourceCompartmentStoragePolicy(MANDATORY_SINGLE_COMPARTMENT_NAME, true, false, null, false, false);
+		return new ResourceCompartmentStoragePolicy(MANDATORY_SINGLE_COMPARTMENT, true, false, null, false, false);
 	}
 
 	/**
@@ -152,7 +167,7 @@ public class ResourceCompartmentStoragePolicy {
 	 * raised and the resource will not be stored.
 	 */
 	public static ResourceCompartmentStoragePolicy optionalSingleCompartment() {
-		return new ResourceCompartmentStoragePolicy(OPTIONAL_SINGLE_COMPARTMENT_NAME, true, false, null, false, true);
+		return new ResourceCompartmentStoragePolicy(OPTIONAL_SINGLE_COMPARTMENT, true, false, null, false, true);
 	}
 
 	/**
@@ -161,16 +176,30 @@ public class ResourceCompartmentStoragePolicy {
 	 * in the {@link ca.uhn.fhir.jpa.model.config.PartitionSettings#setDefaultPartitionId(Integer) default partition}.
 	 */
 	public static ResourceCompartmentStoragePolicy nonUniqueCompartmentInDefault() {
-		return new ResourceCompartmentStoragePolicy(
-				NON_UNIQUE_COMPARTMENT_IN_DEFAULT_NAME, true, false, null, true, true);
+		return new ResourceCompartmentStoragePolicy(NON_UNIQUE_COMPARTMENT_IN_DEFAULT, true, false, null, true, true);
 	}
 
+	/**
+	 * Parses a string representation of a resource compartment storage policy.
+	 * Supported values:
+	 * <table>
+	 *     <tr><th>String</th><th>Description</th></tr>
+	 *     <tr><td>ALWAYS_USE_DEFAULT_PARTITION</td><td>Always use the default partition for this resource type.</td></tr>
+	 *     <tr><td>MANDATORY_SINGLE_COMPARTMENT</td><td>Require that the resource has exactly one compartment.</td></tr>
+	 *     <tr><td>OPTIONAL_SINGLE_COMPARTMENT</td><td>Allow zero or one compartments for this resource type. If the resource is not in any compartment, store it in the default partition.</td></tr>
+	 *     <tr><td>NON_UNIQUE_COMPARTMENT_IN_DEFAULT</td><td>Allow the resource to be in multiple compartments or no compartment, store in the default partition if there isn't one unique compartment.</td></tr>
+	 *     <tr><td>ALWAYS_USE_PARTITION_ID/[id]</td><td>Always store the resource in the partition with the given ID.</td></tr>
+	 * </table>
+	 *
+	 * @param theName The string representation of the policy.
+	 * @return The parsed ResourceCompartmentStoragePolicy object.
+	 */
 	public static ResourceCompartmentStoragePolicy parse(String theName) {
 		return switch (theName) {
-			case ALWAYS_USE_DEFAULT_PARTITION_NAME -> alwaysUseDefaultPartition();
-			case MANDATORY_SINGLE_COMPARTMENT_NAME -> mandatorySingleCompartment();
-			case OPTIONAL_SINGLE_COMPARTMENT_NAME -> optionalSingleCompartment();
-			case NON_UNIQUE_COMPARTMENT_IN_DEFAULT_NAME -> nonUniqueCompartmentInDefault();
+			case ALWAYS_USE_DEFAULT_PARTITION -> alwaysUseDefaultPartition();
+			case MANDATORY_SINGLE_COMPARTMENT -> mandatorySingleCompartment();
+			case OPTIONAL_SINGLE_COMPARTMENT -> optionalSingleCompartment();
+			case NON_UNIQUE_COMPARTMENT_IN_DEFAULT -> nonUniqueCompartmentInDefault();
 			default -> {
 				if (theName.startsWith(ALWAYS_USE_PARTITION_ID_PREFIX)) {
 					String partitionIdStr = theName.substring(ALWAYS_USE_PARTITION_ID_PREFIX.length());

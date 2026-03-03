@@ -360,6 +360,12 @@ public class MatchUrlService {
 
 	public record ResourceTypeAndSearchParameterMap(
 			RuntimeResourceDefinition resourceDefinition, SearchParameterMap searchParameterMap) {
+
+		/**
+		 * Returns the resource type (e.g. "Patient") associated with the search
+		 *
+		 * @since 8.10.0
+		 */
 		public String resourceType() {
 			return resourceDefinition().getName();
 		}

@@ -404,20 +404,26 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@SuppressWarnings("GrazieInspection")
 	@ParameterizedTest
 	@CsvSource(textBlock =
-		//  Policy                            , DocRefWithPatient , DocRefNoPatient , IncludePatientIdInSearch, ExpectedSearchPartition
+		//  Policy                            | Part 1: Create                       | Part 2: Search
+		//                                    | DocRefWithPatient | DocRefNoPatient  | IncludePatientIdInSearch | ExpectedSearchPartition
+		//                                    | Expected Part ID  | Expected Part ID |                          |
 		"""
-			ALWAYS_USE_DEFAULT_PARTITION      , -1                , -1              , false                   , -1
-			OPTIONAL_SINGLE_COMPARTMENT       , 65                , -1              , false                   , ALL
-			MANDATORY_SINGLE_COMPARTMENT      , 65                , FAIL            , false                   , ALL
-			ALWAYS_USE_PARTITION_ID/5         , 5                 , 5               , false                   , 5
-			ALWAYS_USE_DEFAULT_PARTITION      , -1                , -1              , true                    , -1
-			OPTIONAL_SINGLE_COMPARTMENT       , 65                , -1              , true                    , 65
-			MANDATORY_SINGLE_COMPARTMENT      , 65                , FAIL            , true                    , 65
-			ALWAYS_USE_PARTITION_ID/5         , 5                 , 5               , true                    , 5
-			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1              , false                   , ALL
-			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1              , true                    , 65
+			ALWAYS_USE_DEFAULT_PARTITION      , -1                , -1               , false                    , -1
+			OPTIONAL_SINGLE_COMPARTMENT       , 65                , -1               , false                    , ALL
+			MANDATORY_SINGLE_COMPARTMENT      , 65                , FAIL             , false                    , ALL
+			ALWAYS_USE_PARTITION_ID/5         , 5                 , 5                , false                    , 5
+			ALWAYS_USE_DEFAULT_PARTITION      , -1                , -1               , true                     , -1
+			OPTIONAL_SINGLE_COMPARTMENT       , 65                , -1               , true                     , 65
+			MANDATORY_SINGLE_COMPARTMENT      , 65                , FAIL             , true                     , 65
+			ALWAYS_USE_PARTITION_ID/5         , 5                 , 5                , true                     , 5
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1               , false                    , ALL
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1               , true                     , 65
 			""")
 	void testResourceTypePolicies_PatientCompartmentResource(String thePolicyString, int thePatientSpecificDocRefCompartmentId, String theDocRefNoPatientCompartmentString, boolean theIncludePatientIdInSearch, String theExpectedSearchPartitionString) {
+		/*
+		 * Part 1: Create DocumentReference resource
+		 */
+
 		// Setup
 		ResourceCompartmentStoragePolicy policy = ResourceCompartmentStoragePolicy.parse(thePolicyString);
 
@@ -450,7 +456,11 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		}
 		logAllResources();
 
-		// Search for DocRefs with no parameters
+		/*
+		 * Part 2: Perform a Search for DOcumentReference Resources
+		 */
+
+		// Test: Search for DocRefs with no parameters
 		SearchParameterMap paramMap = SearchParameterMap.newSynchronous();
 		if (theIncludePatientIdInSearch) {
 			paramMap.add(DocumentReference.SP_PATIENT, new ReferenceParam("Patient/A"));

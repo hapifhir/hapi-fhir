@@ -164,6 +164,11 @@ public interface IHapiTransactionService {
 		 */
 		<T> List<T> searchList(IExecutionCallable<List<T>> theCallback);
 
+		/**
+		 * Execute a partition-specific action with no return result
+		 *
+		 * @since 8.10.0
+		 */
 		void executeWithoutResult(IExecutionCallable<Void> theCallback);
 	}
 

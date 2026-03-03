@@ -85,7 +85,7 @@ public class ResourceCompartmentUtil {
 	/**
 	 * @deprecated Use {@link #getResourceCompartments(String, IBaseResource, List, ISearchParamExtractor)} instead. It's dangerous to assume there will only ever be 1 compartment.
 	 */
-	@Deprecated(since = "8.8.0", forRemoval = true)
+	@Deprecated(since = "8.10.0", forRemoval = true)
 	public static Optional<String> getResourceCompartment(
 			String theCompartmentName,
 			IBaseResource theResource,

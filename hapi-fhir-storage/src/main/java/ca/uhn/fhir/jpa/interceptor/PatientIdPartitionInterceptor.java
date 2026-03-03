@@ -107,7 +107,7 @@ public class PatientIdPartitionInterceptor {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	private Map<String, ResourceCompartmentStoragePolicy> myResourceTypeToCompartmentStrictness = Map.of();
+	private Map<String, ResourceCompartmentStoragePolicy> myResourceTypeToCompartmentPolicy = Map.of();
 
 	/**
 	 * Constructor
@@ -203,7 +203,7 @@ public class PatientIdPartitionInterceptor {
 			}
 		}
 
-		myResourceTypeToCompartmentStrictness = Map.copyOf(thePatientCompartmentOptionalResourceTypes);
+		myResourceTypeToCompartmentPolicy = Map.copyOf(thePatientCompartmentOptionalResourceTypes);
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
@@ -309,7 +309,7 @@ public class PatientIdPartitionInterceptor {
 	 */
 	@Nonnull
 	private ResourceCompartmentStoragePolicy getPolicyForResourceType(RuntimeResourceDefinition resourceDef) {
-		ResourceCompartmentStoragePolicy retVal = myResourceTypeToCompartmentStrictness.get(resourceDef.getName());
+		ResourceCompartmentStoragePolicy retVal = myResourceTypeToCompartmentPolicy.get(resourceDef.getName());
 		if (retVal == null) {
 			retVal = switch (resourceDef.getName()) {
 				case "Group", "List" -> alwaysUseDefaultPartition();
