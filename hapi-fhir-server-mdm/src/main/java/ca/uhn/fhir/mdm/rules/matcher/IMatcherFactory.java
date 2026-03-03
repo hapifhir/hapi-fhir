@@ -34,16 +34,27 @@ public interface IMatcherFactory {
 	/**
 	 * Retrieves the field matcher registered under the given name.
 	 * <p>
-	 * The default implementation delegates to the deprecated
+	 * The default implementation attempts to resolve the name as a built-in
+	 * {@link MatchTypeEnum} and delegates to the deprecated
 	 * {@link #getFieldMatcherForMatchType(MatchTypeEnum)} for backward compatibility
-	 * with implementations that only override the enum-based method.
+	 * with implementations that only override the enum-based method. For names that
+	 * do not correspond to a built-in enum constant, the default throws
+	 * {@link UnsupportedOperationException}.
+	 * <p>
+	 * Implementations that support custom (non-enum) algorithm names must override
+	 * this method.
 	 *
 	 * @param theName the matcher name (e.g. "STRING", "DATE")
 	 */
 	default IMdmFieldMatcher getFieldMatcherForName(String theName) {
-		throw new UnsupportedOperationException(
-				Msg.code(2848) + "IMatcherFactory does not implement getFieldMatcherForName(String). "
-						+ "Override this method to support string-based matcher lookup.");
+		try {
+			MatchTypeEnum matchType = MatchTypeEnum.valueOf(theName);
+			return getFieldMatcherForMatchType(matchType);
+		} catch (IllegalArgumentException e) {
+			throw new UnsupportedOperationException(
+					Msg.code(2848) + "IMatcherFactory does not implement getFieldMatcherForName(String). "
+							+ "Override this method to support string-based matcher lookup.");
+		}
 	}
 
 	/**
@@ -76,6 +87,17 @@ public interface IMatcherFactory {
 
 	/**
 	 * Retrieves the field matcher for the given {@link MatchTypeEnum}.
+	 * <p>
+	 * The default implementation delegates to {@link #getFieldMatcherForName(String)}.
+	 * Together with the default on {@code getFieldMatcherForName}, this forms a
+	 * two-way bridge: legacy implementations that override only this method are
+	 * reachable from {@code getFieldMatcherForName}, and modern implementations
+	 * that override only {@code getFieldMatcherForName} are reachable from this
+	 * method.
+	 * <p>
+	 * <b>Important:</b> Implementations must override at least one of
+	 * {@code getFieldMatcherForName} or {@code getFieldMatcherForMatchType} to
+	 * avoid infinite recursion between the two defaults.
 	 *
 	 * @deprecated Use {@link #getFieldMatcherForName(String)} instead.
 	 */

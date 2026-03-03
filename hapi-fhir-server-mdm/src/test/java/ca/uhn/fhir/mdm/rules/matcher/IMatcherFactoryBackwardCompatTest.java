@@ -30,10 +30,18 @@ class IMatcherFactoryBackwardCompatTest {
 	};
 
 	@Test
-	void legacyImpl_getFieldMatcherForName_throwsUnsupportedOperationException() {
-		// A legacy impl that only overrides the deprecated enum method does not
-		// support string-based lookup — the default throws UnsupportedOperationException.
-		assertThatThrownBy(() -> myLegacyFactory.getFieldMatcherForName("STRING"))
+	void legacyImpl_getFieldMatcherForName_delegatesToDeprecatedMethod() {
+		// A legacy impl that only overrides the deprecated enum method should still
+		// work via getFieldMatcherForName for built-in enum names.
+		IMdmFieldMatcher matcher = myLegacyFactory.getFieldMatcherForName("STRING");
+		assertThat(matcher).isSameAs(LEGACY_STRING_MATCHER);
+	}
+
+	@Test
+	void legacyImpl_getFieldMatcherForName_unknownName_throwsUnsupportedOperationException() {
+		// For names that don't correspond to a MatchTypeEnum constant,
+		// the default throws UnsupportedOperationException.
+		assertThatThrownBy(() -> myLegacyFactory.getFieldMatcherForName("CUSTOM_UNKNOWN"))
 			.isInstanceOf(UnsupportedOperationException.class);
 	}
 
