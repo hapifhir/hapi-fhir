@@ -47,6 +47,14 @@ public interface ISimilarityFactory {
 	void register(String theName, IMdmFieldSimilarity theSimilarity);
 
 	/**
+	 * Unregisters the similarity algorithm with the given name.
+	 * Built-in similarities cannot be unregistered.
+	 *
+	 * @param theName the algorithm name to unregister
+	 */
+	void unregister(String theName);
+
+	/**
 	 * @return the set of all registered algorithm names
 	 */
 	Set<String> getRegisteredNames();

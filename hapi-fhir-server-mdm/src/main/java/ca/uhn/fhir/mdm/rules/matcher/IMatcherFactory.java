@@ -55,6 +55,17 @@ public interface IMatcherFactory {
 	}
 
 	/**
+	 * Unregisters the field matcher with the given name.
+	 * Built-in matchers cannot be unregistered.
+	 *
+	 * @param theName the matcher name to unregister
+	 */
+	default void unregister(String theName) {
+		throw new UnsupportedOperationException(
+				Msg.code(2853) + "This IMatcherFactory does not support unregistration");
+	}
+
+	/**
 	 * @return the set of all registered matcher names
 	 */
 	default Set<String> getRegisteredNames() {

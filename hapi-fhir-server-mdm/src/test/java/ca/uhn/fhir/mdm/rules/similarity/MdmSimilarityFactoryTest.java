@@ -80,6 +80,45 @@ class MdmSimilarityFactoryTest {
 	}
 
 	@Test
+	void unregister_customSimilarity_removesFromFactory() {
+		IMdmFieldSimilarity custom =
+			(theFhirContext, theLeftBase, theRightBase, theExact) -> 0.5;
+		myFactory.register("CUSTOM_TO_REMOVE", custom);
+		assertThat(myFactory.getSimilarityForName("CUSTOM_TO_REMOVE")).isNotNull();
+
+		myFactory.unregister("CUSTOM_TO_REMOVE");
+
+		assertThat(myFactory.getSimilarityForName("CUSTOM_TO_REMOVE")).isNull();
+		assertThat(myFactory.getRegisteredNames()).doesNotContain("CUSTOM_TO_REMOVE");
+	}
+
+	@Test
+	void unregister_builtInSimilarity_throwsException() {
+		assertThatThrownBy(() -> myFactory.unregister("JARO_WINKLER"))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("Cannot unregister built-in similarity");
+	}
+
+	@Test
+	void unregister_unknownName_doesNotThrow() {
+		myFactory.unregister("DOES_NOT_EXIST");
+	}
+
+	@Test
+	void register_afterUnregister_succeeds() {
+		IMdmFieldSimilarity sim1 =
+			(theFhirContext, theLeftBase, theRightBase, theExact) -> 0.5;
+		IMdmFieldSimilarity sim2 =
+			(theFhirContext, theLeftBase, theRightBase, theExact) -> 0.9;
+		myFactory.register("REREGISTERABLE", sim1);
+
+		myFactory.unregister("REREGISTERABLE");
+		myFactory.register("REREGISTERABLE", sim2);
+
+		assertThat(myFactory.getSimilarityForName("REREGISTERABLE")).isSameAs(sim2);
+	}
+
+	@Test
 	void register_viaProvider_isRetrievableByName() {
 		IMdmFieldSimilarity similarityImpl =
 			(theFhirContext, theLeftBase, theRightBase, theExact) -> 0.75;

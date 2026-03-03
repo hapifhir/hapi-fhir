@@ -72,6 +72,42 @@ class MdmMatcherFactoryTest {
 	}
 
 	@Test
+	void unregister_customMatcher_removesFromFactory() {
+		IMdmFieldMatcher customMatcher = (theLeftBase, theRightBase, theParams) -> true;
+		myFactory.register("CUSTOM_TO_REMOVE", customMatcher);
+		assertThat(myFactory.getFieldMatcherForName("CUSTOM_TO_REMOVE")).isNotNull();
+
+		myFactory.unregister("CUSTOM_TO_REMOVE");
+
+		assertThat(myFactory.getFieldMatcherForName("CUSTOM_TO_REMOVE")).isNull();
+		assertThat(myFactory.getRegisteredNames()).doesNotContain("CUSTOM_TO_REMOVE");
+	}
+
+	@Test
+	void unregister_builtInMatcher_throwsException() {
+		assertThatThrownBy(() -> myFactory.unregister("STRING"))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("Cannot unregister built-in matcher");
+	}
+
+	@Test
+	void unregister_unknownName_doesNotThrow() {
+		myFactory.unregister("DOES_NOT_EXIST");
+	}
+
+	@Test
+	void register_afterUnregister_succeeds() {
+		IMdmFieldMatcher matcher1 = (theLeftBase, theRightBase, theParams) -> true;
+		IMdmFieldMatcher matcher2 = (theLeftBase, theRightBase, theParams) -> false;
+		myFactory.register("REREGISTERABLE", matcher1);
+
+		myFactory.unregister("REREGISTERABLE");
+		myFactory.register("REREGISTERABLE", matcher2);
+
+		assertThat(myFactory.getFieldMatcherForName("REREGISTERABLE")).isSameAs(matcher2);
+	}
+
+	@Test
 	void register_viaProvider_isRetrievableByName() {
 		IMdmFieldMatcher matcherImpl = (theLeftBase, theRightBase, theParams) -> true;
 		IMdmFieldMatcherProvider provider = new IMdmFieldMatcherProvider() {

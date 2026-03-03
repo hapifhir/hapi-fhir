@@ -47,6 +47,7 @@ public class MdmMatcherFactory implements IMatcherFactory {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	private final Map<String, IMdmFieldMatcher> myMatchers = new LinkedHashMap<>();
+	private final Set<String> myBuiltInNames;
 
 	public MdmMatcherFactory(FhirContext theFhirContext, INicknameSvc theNicknameSvc) {
 		myMatchers.put(MatchTypeEnum.CAVERPHONE1.name(), new PhoneticEncoderMatcher(PhoneticEncoderEnum.CAVERPHONE1));
@@ -76,6 +77,7 @@ public class MdmMatcherFactory implements IMatcherFactory {
 		myMatchers.put(MatchTypeEnum.EXTENSION_ANY_ORDER.name(), new ExtensionMatcher());
 		myMatchers.put(MatchTypeEnum.NUMERIC.name(), new NumericMatcher());
 		myMatchers.put(MatchTypeEnum.EMPTY_FIELD.name(), new EmptyFieldMatcher());
+		myBuiltInNames = Set.copyOf(myMatchers.keySet());
 	}
 
 	@Override
@@ -94,6 +96,14 @@ public class MdmMatcherFactory implements IMatcherFactory {
 					Msg.code(2850) + "A matcher is already registered under the name: " + theName);
 		}
 		myMatchers.put(theName, theMatcher);
+	}
+
+	@Override
+	public void unregister(String theName) {
+		if (myBuiltInNames.contains(theName)) {
+			throw new IllegalArgumentException(Msg.code(2855) + "Cannot unregister built-in matcher: " + theName);
+		}
+		myMatchers.remove(theName);
 	}
 
 	@Override

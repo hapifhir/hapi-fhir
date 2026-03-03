@@ -37,11 +37,13 @@ public class MdmSimilarityFactory implements ISimilarityFactory {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	private final Map<String, IMdmFieldSimilarity> mySimilarities = new LinkedHashMap<>();
+	private final Set<String> myBuiltInNames;
 
 	public MdmSimilarityFactory() {
 		for (MdmSimilarityEnum enumConstant : MdmSimilarityEnum.values()) {
 			mySimilarities.put(enumConstant.name(), enumConstant.getSimilarity());
 		}
+		myBuiltInNames = Set.copyOf(mySimilarities.keySet());
 	}
 
 	@Override
@@ -60,6 +62,14 @@ public class MdmSimilarityFactory implements ISimilarityFactory {
 					Msg.code(2851) + "A similarity is already registered under the name: " + theName);
 		}
 		mySimilarities.put(theName, theSimilarity);
+	}
+
+	@Override
+	public void unregister(String theName) {
+		if (myBuiltInNames.contains(theName)) {
+			throw new IllegalArgumentException(Msg.code(2854) + "Cannot unregister built-in similarity: " + theName);
+		}
+		mySimilarities.remove(theName);
 	}
 
 	@Override
