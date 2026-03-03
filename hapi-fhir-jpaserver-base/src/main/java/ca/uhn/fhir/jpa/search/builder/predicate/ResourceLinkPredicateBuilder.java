@@ -237,8 +237,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 				String resourceType = refParam.getResourceType();
 				String resourceId = refParam.getIdPart();
 				if (isBlank(resourceType) || isBlank(resourceId)) {
-					// FIXME: add code
-					throw new InvalidRequestException(Msg.code(1) + "Parameter \""
+					throw new InvalidRequestException(Msg.code(2870) + "Parameter \""
 							+ UrlUtil.sanitizeUrlPart(theParamName) + "\" must be in the format [resourceType]/[id]");
 				}
 

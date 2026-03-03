@@ -225,7 +225,6 @@ public class PatientIdPartitionInterceptor {
 			}
 			return provideSingleCompartmentPartition(theRequestDetails, idElement.getIdPart());
 		} else {
-			// FIXME: use resource
 			IBaseResource resource = theResource;
 			if (theResource.isDeleted()) {
 				// when a resource is deleted, the current version of the deleted resource is empty
