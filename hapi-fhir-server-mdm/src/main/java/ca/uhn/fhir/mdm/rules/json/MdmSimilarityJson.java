@@ -19,10 +19,13 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.similarity.MdmSimilarityEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBase;
 
 public class MdmSimilarityJson implements IModelJson {
 	@JsonProperty(value = "algorithm", required = true)
@@ -73,5 +76,16 @@ public class MdmSimilarityJson implements IModelJson {
 	public MdmSimilarityJson setExact(boolean theExact) {
 		myExact = theExact;
 		return this;
+	}
+
+	/**
+	 * @deprecated Matching is now performed by {@link ca.uhn.fhir.mdm.rules.svc.MdmResourceFieldMatcher}
+	 *   using the {@link ca.uhn.fhir.mdm.rules.similarity.ISimilarityFactory}. This method only works
+	 *   for built-in {@link MdmSimilarityEnum} algorithm names.
+	 */
+	@Deprecated(since = "8_10", forRemoval = true)
+	public MdmMatchEvaluation match(FhirContext theFhirContext, IBase theLeftValue, IBase theRightValue) {
+		MdmSimilarityEnum similarityEnum = MdmSimilarityEnum.valueOf(myAlgorithm);
+		return similarityEnum.match(theFhirContext, theLeftValue, theRightValue, myExact, myMatchThreshold);
 	}
 }
