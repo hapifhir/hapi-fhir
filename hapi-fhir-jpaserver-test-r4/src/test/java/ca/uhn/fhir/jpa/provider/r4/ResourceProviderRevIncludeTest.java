@@ -346,6 +346,53 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	}
 
 	/**
+	 * Reproduces SMILE-9135 on the synchronous path ({@code SynchronousSearchSvcImpl}):
+	 * When {@code _include} and {@code _revinclude} are used together WITHOUT {@code :iterate},
+	 * {@code _include} must only apply to the initial search result set and must NOT follow through
+	 * revincluded resources.
+	 * <p>
+	 * Setup (via {@link #createThreeServiceRequestsWithReplacesChain()}):
+	 * <ul>
+	 *   <li>SR/A: no replaces (initial search target)</li>
+	 *   <li>SR/B: no replaces (must NOT appear — only reachable via SR/C → SR/B)</li>
+	 *   <li>SR/C: replaces = [SR/A, SR/B] (found via {@code _revinclude} of SR/A)</li>
+	 * </ul>
+	 * <p>
+	 * Query (DAO direct, synchronous map):
+	 * {@code ServiceRequest?_id=A&_include=ServiceRequest:replaces&_revinclude=ServiceRequest:replaces}
+	 * <p>
+	 * Expected: SR/A + SR/C only (2 resources). SR/B must NOT be present.
+	 */
+	@Test
+	void testSynchronousPathRevIncludeDoesNotIncludeFromIncludedResources() {
+		List<IIdType> srIds = createThreeServiceRequestsWithReplacesChain();
+		IIdType srAId = srIds.get(0);
+		IIdType srBId = srIds.get(1);
+		IIdType srCId = srIds.get(2);
+
+		// Use the DAO directly with a synchronous SearchParameterMap to exercise SynchronousSearchSvcImpl
+		SearchParameterMap params = SearchParameterMap.newSynchronous(
+			IAnyResource.SP_RES_ID, new TokenParam(srAId.getIdPart()));
+		params.addInclude(new Include("ServiceRequest:replaces")); // NOT iterate
+		params.addRevInclude(new Include("ServiceRequest:replaces")); // NOT iterate
+
+		IBundleProvider results = myServiceRequestDao.search(params, newSrd());
+		List<IBaseResource> resources = results.getResources(0, Integer.MAX_VALUE);
+
+		Set<String> foundIds = resources.stream()
+			.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
+			.collect(Collectors.toSet());
+		ourLog.info("Synchronous path (non-iterate) found {} resources: {}", resources.size(), foundIds);
+
+		// SR/A (initial result) and SR/C (revinclude) should be present;
+		// SR/B should NOT appear without _iterate
+		assertThat(foundIds)
+			.contains(srAId.getValue(), srCId.getValue())
+			.doesNotContain(srBId.getValue())
+			.hasSize(2);
+	}
+
+	/**
 	 * SMILE-9135: Verify that _revinclude + _include:iterate works correctly on the synchronous path.
 	 * <p>
 	 * The synchronous path (SearchParameterMap.newSynchronous()) is taken when isLoadSynchronous() = true.
