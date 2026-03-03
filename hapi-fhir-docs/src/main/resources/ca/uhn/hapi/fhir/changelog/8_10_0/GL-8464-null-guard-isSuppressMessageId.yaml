@@ -1,0 +1,7 @@
+---
+type: fix
+jira: GL-8464
+title: "Previously, instantiating ValidatorPolicyAdvisor directly (e.g. new ValidatorPolicyAdvisor())
+  without a Spring context would result in a NullPointerException when isSuppressMessageId was
+  called, because the injected myValidationSettings field was null. A null guard has been added
+  so that the class can be safely used outside of a Spring-managed context."
