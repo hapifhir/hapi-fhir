@@ -1,0 +1,8 @@
+---
+type: add
+issue: 7428
+title: "Added means to retrieve multiple resources from
+      NPM packages (IGs) without having to install.
+      Also added means to retrieve resources by type
+      (without having to specify a url).
+"

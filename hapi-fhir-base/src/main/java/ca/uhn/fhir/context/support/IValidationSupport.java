@@ -193,6 +193,22 @@ public interface IValidationSupport {
 	}
 
 	/**
+	 * This works the same as fetchResource, but as url may not be unique (different versions of an IG, for example),
+	 * it can return multiple resources instead.
+	 */
+	default <T extends IBaseResource> List<T> fetchResources(Class<T> theClazz, String theUrl) {
+		return List.of();
+	}
+
+	/**
+	 * Fetches all resources of a given type.
+	 * No order is defined.
+	 */
+	default <T extends IBaseResource> List<T> fetchAllResourcesOfType(@Nonnull Class<T> theClazz) {
+		return List.of();
+	}
+
+	/**
 	 * Loads a resource needed by the validation (a StructureDefinition, or a
 	 * ValueSet)
 	 *
