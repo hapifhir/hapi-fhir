@@ -43,7 +43,7 @@ public class SubscriptionMatcherInterceptorConfig {
 		return new SubscriptionMatcherInterceptor();
 	}
 
-	private boolean isSchedulingDisabledForTests() {
+	protected boolean isSchedulingDisabledForTests() {
 		String schedulingDisabled = myEnvironment.getProperty(SCHEDULING_DISABLED);
 		return "true".equals(schedulingDisabled);
 	}
