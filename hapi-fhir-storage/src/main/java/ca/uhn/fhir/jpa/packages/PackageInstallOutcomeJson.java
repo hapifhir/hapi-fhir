@@ -55,7 +55,7 @@ public class PackageInstallOutcomeJson {
 
 	@Schema(
 			description =
-					"This map is populated only in the case of a dry-run and contains a mapping of resource type to unique identifier for resources that would be created anew should a real run be done.")
+					"This map is populated only in the case of a dry-run and contains a mapping of resource type to unique identifier for resources that would be created should a real run be done.")
 	@JsonProperty("addedResourceTypeToUniqueIdentifier")
 	private Map<String, List<String>> myAddedResourceTypeToUniqueIdentifier;
 
@@ -82,10 +82,8 @@ public class PackageInstallOutcomeJson {
 
 	public void addResourceTypeToBeAdded(String theResourceType, String theUniqeId) {
 		Map<String, List<String>> map = getAddedResourceTypeToUniqueIdentifier();
-		if (!map.containsKey(theResourceType)) {
-			map.put(theResourceType, new ArrayList<>());
-		}
-		map.get(theResourceType).add(theUniqeId);
+		List<String> value = map.computeIfAbsent(theResourceType, v -> new ArrayList<>());
+		value.add(theUniqeId);
 	}
 
 	public Map<String, List<String>> getReplacedResourceToUniqueIdentifier() {
@@ -97,10 +95,8 @@ public class PackageInstallOutcomeJson {
 
 	public void addExistingResource(String theResourceType, String theUniqueId) {
 		Map<String, List<String>> map = getReplacedResourceToUniqueIdentifier();
-		if (!map.containsKey(theResourceType)) {
-			map.put(theResourceType, new ArrayList<>());
-		}
-		map.get(theResourceType).add(theUniqueId);
+		List<String> value = map.computeIfAbsent(theResourceType, v -> new ArrayList<>());
+		value.add(theUniqueId);
 	}
 
 	public void incrementResourcesInstalled(String theResourceType) {

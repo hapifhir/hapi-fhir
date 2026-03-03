@@ -426,8 +426,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 		IBaseResource existingResource =
 				!searchResult.isEmpty() ? searchResult.getResources(0, 1).get(0) : null;
-		boolean isInstalled =
-				createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec, map, theOutcome);
+		boolean isInstalled = false;
+		if (theInstallationSpec.isDryRun()) {
+			constructDryRunReport(theResource, existingResource, map, theOutcome);
+		} else {
+			isInstalled = createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec);
+		}
 		if (isInstalled) {
 			theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
 		}
@@ -453,50 +457,59 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			IFhirResourceDao theDao,
 			IBaseResource theResource,
 			IBaseResource theExistingResource,
-			@Nonnull PackageInstallationSpec thePackageInstallationSpec,
-			SearchParameterMap theSpMap,
-			PackageInstallOutcomeJson theOutcome) {
+			@Nonnull PackageInstallationSpec thePackageInstallationSpec) {
 
 		// If the resource to be installed has a client-provided, purely numeric id,
 		// then add a prefix to the id, since we don't allow purely numeric IDs by default
 		prefixNumericIdIfNeeded(theResource);
 		setPackageMetaSource(theResource, thePackageInstallationSpec);
 
-		if (!thePackageInstallationSpec.isDryRun()) {
-			if (theExistingResource == null) {
-				return createNewResource(theDao, theResource, thePackageInstallationSpec);
-			} else {
-				return updateExistingResource(theDao, theResource, theExistingResource);
-			}
+		if (theExistingResource == null) {
+			return createNewResource(theDao, theResource, thePackageInstallationSpec);
 		} else {
-			FhirTerser terser = myFhirContext.newTerser();
-			String resourceType = theResource.fhirType();
-			RuntimeResourceDefinition rtDefinition = myFhirContext.getResourceDefinition(resourceType);
-			List<RuntimeSearchParam> sps = rtDefinition.getSearchParams();
-			StringBuilder uniqueIdentifierSpBuilder = new StringBuilder();
-			for (Map.Entry<String, List<List<IQueryParameterType>>> spSet : theSpMap.entrySet()) {
-				String key = spSet.getKey();
-
-				// TODO - will we ever see nothing? or a throw?
-				RuntimeSearchParam runtimeSearchParameter = sps.stream()
-						.filter(sp -> sp.getName().equals(key))
-						.findFirst()
-						.orElseThrow();
-
-				Optional<String> valueOp =
-						terser.getSinglePrimitiveValue(theResource, runtimeSearchParameter.getPath());
-				uniqueIdentifierSpBuilder.append(valueOp.get());
-			}
-
-			// dry run
-			if (theExistingResource != null) {
-				theOutcome.addExistingResource(resourceType, uniqueIdentifierSpBuilder.toString());
-			} else {
-				// a resource we'd add
-				theOutcome.addResourceTypeToBeAdded(resourceType, uniqueIdentifierSpBuilder.toString());
-			}
-			return false;
+			return updateExistingResource(theDao, theResource, theExistingResource);
 		}
+	}
+
+	private boolean constructDryRunReport(
+			IBaseResource theResource,
+			IBaseResource theExistingResource,
+			SearchParameterMap theSpMap,
+			PackageInstallOutcomeJson theOutcome) {
+		FhirTerser terser = myFhirContext.newTerser();
+		String resourceType = theResource.fhirType();
+		RuntimeResourceDefinition rtDefinition = myFhirContext.getResourceDefinition(resourceType);
+		List<RuntimeSearchParam> sps = rtDefinition.getSearchParams();
+		StringBuilder uniqueIdentifierSpBuilder = new StringBuilder();
+		for (Map.Entry<String, List<List<IQueryParameterType>>> spSet : theSpMap.entrySet()) {
+			String key = spSet.getKey();
+
+			// TODO - will we ever see nothing? or a throw?
+			RuntimeSearchParam runtimeSearchParameter = sps.stream()
+					.filter(sp -> sp.getName().equals(key))
+					.findFirst()
+					.orElseThrow();
+
+			Optional<String> valueOp = terser.getSinglePrimitiveValue(theResource, runtimeSearchParameter.getPath());
+			if (valueOp.isEmpty()) {
+				/*
+				 * we don't expect to see this because we constructed this search paramter map out of the
+				 * existing fields already and we're deconstructing it.
+				 */
+				throw new UnprocessableEntityException(
+						Msg.code(2872) + " No unique value found at " + runtimeSearchParameter.getPath());
+			}
+			uniqueIdentifierSpBuilder.append(valueOp.get());
+		}
+
+		// dry run
+		if (theExistingResource != null) {
+			theOutcome.addExistingResource(resourceType, uniqueIdentifierSpBuilder.toString());
+		} else {
+			// a resource we'd add
+			theOutcome.addResourceTypeToBeAdded(resourceType, uniqueIdentifierSpBuilder.toString());
+		}
+		return false;
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
