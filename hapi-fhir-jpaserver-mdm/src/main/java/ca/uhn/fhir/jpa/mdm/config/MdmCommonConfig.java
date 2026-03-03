@@ -80,7 +80,6 @@ public class MdmCommonConfig {
 	}
 
 	@Bean
-	@Lazy
 	public ISimilarityFactory similarityFactory() {
 		return new MdmSimilarityFactory();
 	}
