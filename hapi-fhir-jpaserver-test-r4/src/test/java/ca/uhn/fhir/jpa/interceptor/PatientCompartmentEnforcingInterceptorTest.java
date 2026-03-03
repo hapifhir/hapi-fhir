@@ -83,9 +83,11 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		int patientAPartition = Math.abs("A".hashCode() % 15000);
 		int count = 0;
 		String otherId;
+		int newPartition;
 		do {
 			otherId = "A" + ++count;
-		} while (patientAPartition != Math.abs(otherId.hashCode() % 15000));
+			newPartition = Math.abs(otherId.hashCode() % 15000);
+		} while (patientAPartition != newPartition);
 		Patient patient = new Patient();
 		patient.setId("Patient/" + otherId);
 		patient.setActive(true);

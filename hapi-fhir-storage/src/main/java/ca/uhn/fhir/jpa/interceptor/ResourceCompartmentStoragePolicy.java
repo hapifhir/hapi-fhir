@@ -211,7 +211,7 @@ public class ResourceCompartmentStoragePolicy {
 								+ ALWAYS_USE_PARTITION_ID_PREFIX + UrlUtil.sanitizeUrlPart(partitionIdStr));
 					}
 				}
-				throw new ConfigurationException("Unknown policy name: " + theName);
+				throw new ConfigurationException(Msg.code(2871) + "Unknown policy name: " + theName);
 			}
 		};
 	}
