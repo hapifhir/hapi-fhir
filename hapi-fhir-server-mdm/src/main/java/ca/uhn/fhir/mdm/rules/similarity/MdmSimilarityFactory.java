@@ -23,9 +23,9 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.log.Logs;
 import org.slf4j.Logger;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 // Created by claude-opus-4-6
 /**
@@ -36,7 +36,7 @@ import java.util.Set;
 public class MdmSimilarityFactory implements ISimilarityFactory {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	private final Map<String, IMdmFieldSimilarity> mySimilarities = new LinkedHashMap<>();
+	private final Map<String, IMdmFieldSimilarity> mySimilarities = new ConcurrentHashMap<>();
 	private final Set<String> myBuiltInNames;
 
 	public MdmSimilarityFactory() {

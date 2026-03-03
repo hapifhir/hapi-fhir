@@ -39,14 +39,14 @@ import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.slf4j.Logger;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MdmMatcherFactory implements IMatcherFactory {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	private final Map<String, IMdmFieldMatcher> myMatchers = new LinkedHashMap<>();
+	private final Map<String, IMdmFieldMatcher> myMatchers = new ConcurrentHashMap<>();
 	private final Set<String> myBuiltInNames;
 
 	public MdmMatcherFactory(FhirContext theFhirContext, INicknameSvc theNicknameSvc) {
