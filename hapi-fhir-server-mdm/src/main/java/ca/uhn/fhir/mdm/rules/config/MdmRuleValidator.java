@@ -111,17 +111,15 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateSystemsAreUris(MdmRulesJson theMdmRules) {
-		theMdmRules.getEnterpriseEIDSystems().entrySet().forEach(entry -> {
-			String resourceType = entry.getKey();
-			String uri = entry.getValue();
+		theMdmRules.getEnterpriseEIDSystems().forEach((resourceType, uri) -> {
 			if (!resourceType.equals("*")) {
 				try {
 					myFhirContext.getResourceType(resourceType);
 				} catch (DataFormatException e) {
 					throw new ConfigurationException(Msg.code(1508)
-							+ String.format(
-									"%s is not a valid resource type, but is set in the eidSystems field.",
-									resourceType));
+						+ String.format(
+						"%s is not a valid resource type, but is set in the eidSystems field.",
+						resourceType));
 				}
 			}
 			validateIsUri(uri);
@@ -166,12 +164,12 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		}
 	}
 
-	private void validateSearchParam(String theFieldName, String theTheResourceType, String theTheSearchParam) {
+	private void validateSearchParam(String theFieldName, String theTheResourceType, String theSearchParam) {
 		if (MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE.equals(theTheResourceType)) {
-			validateResourceSearchParam(theFieldName, "Patient", theTheSearchParam);
-			validateResourceSearchParam(theFieldName, "Practitioner", theTheSearchParam);
+			validateResourceSearchParam(theFieldName, "Patient", theSearchParam);
+			validateResourceSearchParam(theFieldName, "Practitioner", theSearchParam);
 		} else {
-			validateResourceSearchParam(theFieldName, theTheResourceType, theTheSearchParam);
+			validateResourceSearchParam(theFieldName, theTheResourceType, theSearchParam);
 		}
 	}
 
@@ -210,7 +208,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		MdmMatcherJson matcher = theFieldMatch.getMatcher();
 		if (matcher != null && myMatcherFactory != null) {
 			String algorithmName = matcher.getAlgorithm();
-			if (algorithmName != null && myMatcherFactory.getFieldMatcherForName(algorithmName) == null) {
+			if (algorithmName != null && !myMatcherFactory.getRegisteredNames().contains(algorithmName)) {
 				throw new ConfigurationException(Msg.code(2846) + "MatchField " + theFieldMatch.getName()
 						+ " uses unknown matcher algorithm '" + algorithmName + "'");
 			}
@@ -218,7 +216,8 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		MdmSimilarityJson similarity = theFieldMatch.getSimilarity();
 		if (similarity != null && mySimilarityFactory != null) {
 			String algorithmName = similarity.getAlgorithm();
-			if (algorithmName != null && mySimilarityFactory.getSimilarityForName(algorithmName) == null) {
+			if (algorithmName != null
+					&& !mySimilarityFactory.getRegisteredNames().contains(algorithmName)) {
 				throw new ConfigurationException(Msg.code(2847) + "MatchField " + theFieldMatch.getName()
 						+ " uses unknown similarity algorithm '" + algorithmName + "'");
 			}
