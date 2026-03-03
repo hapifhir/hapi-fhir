@@ -41,7 +41,9 @@ public interface IMatcherFactory {
 	 * @param theName the matcher name (e.g. "STRING", "DATE")
 	 */
 	default IMdmFieldMatcher getFieldMatcherForName(String theName) {
-		return getFieldMatcherForMatchType(MatchTypeEnum.valueOf(theName));
+		throw new UnsupportedOperationException(
+				Msg.code(2848) + "IMatcherFactory does not implement getFieldMatcherForName(String). "
+						+ "Override this method to support string-based matcher lookup.");
 	}
 
 	/**
@@ -77,7 +79,7 @@ public interface IMatcherFactory {
 	 *
 	 * @deprecated Use {@link #getFieldMatcherForName(String)} instead.
 	 */
-	@Deprecated(since = "8.10", forRemoval = true)
+	@Deprecated(since = "8_10", forRemoval = true)
 	default IMdmFieldMatcher getFieldMatcherForMatchType(MatchTypeEnum theMatchType) {
 		return getFieldMatcherForName(theMatchType.name());
 	}
