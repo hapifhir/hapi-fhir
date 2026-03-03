@@ -24,13 +24,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class SearchParameterMapTest extends BaseTest {
 	private static final Logger ourLog = getLogger(SearchParameterMapTest.class);
 
-	private final FhirContext myContext = FhirContext.forR4Cached();
-
 	@Test
 	public void testToNormalizedQueryString() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("_has", new HasParam("Observation", "subject", "identifier", "urn:system|FOO"));
-		String criteria = params.toNormalizedQueryString(myContext);
+		String criteria = params.toNormalizedQueryString();
 		assertEquals(criteria, "?_has:Observation:subject:identifier=urn%3Asystem%7CFOO");
 	}
 
@@ -38,7 +36,7 @@ public class SearchParameterMapTest extends BaseTest {
 	public void testToNormalizedQueryString_IdParam() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(IAnyResource.SP_RES_ID, new TokenParam("Patient/123"));
-		String actual = params.toNormalizedQueryString(myContext);
+		String actual = params.toNormalizedQueryString();
 		assertEquals("?_id=Patient/123", actual);
 	}
 
@@ -59,13 +57,26 @@ public class SearchParameterMapTest extends BaseTest {
 
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 
-		String originalQueryString = params.toNormalizedQueryString(myContext);
+		String originalQueryString = params.toNormalizedQueryString();
 		ourLog.info("Original query string: {}", originalQueryString);
 		SearchParameterMap params2 = params.clone();
 
-		String clonedQueryString = params2.toNormalizedQueryString(myContext);
+		String clonedQueryString = params2.toNormalizedQueryString();
 		ourLog.info("Cloned query string: {}", clonedQueryString);
 
 		assertEquals(originalQueryString, clonedQueryString);
 	}
+
+	@Test
+	void testClean() {
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("a", new StringOrListParam());
+		params.add("b", new StringOrListParam().addOr(new StringParam("value")));
+		params.clean();
+
+		assertEquals(1, params.size());
+		assertThat(params.toNormalizedQueryString()).isEqualTo("?b=value");
+	}
+
+
 }

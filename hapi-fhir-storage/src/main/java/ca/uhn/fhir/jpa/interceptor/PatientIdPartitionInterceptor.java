@@ -396,7 +396,7 @@ public class PatientIdPartitionInterceptor {
 						List<String> idParts = getResourceIdsForSearchParam(params, "_id");
 						return provideMultipleCompartmentPartition(
 								theRequestDetails,
-								ResourceCompartmentStoragePolicy.mandatorySingleCompartment(),
+								ResourceCompartmentStoragePolicy.optionalSingleCompartment(),
 								idParts);
 					} else if (isNotBlank(theReadDetails.getResourceType())) {
 						RuntimeResourceDefinition resourceDef =
@@ -585,7 +585,7 @@ public class PatientIdPartitionInterceptor {
 	protected RequestPartitionId provideSingleCompartmentPartition(
 			RequestDetails theRequestDetails, String thePatientIdPart) {
 		int partitionId = providePartitionIdForPatientId(theRequestDetails, thePatientIdPart);
-		return RequestPartitionId.fromPartitionId(partitionId);
+		return RequestPartitionId.fromPartitionIdAndName(partitionId, thePatientIdPart);
 	}
 
 	@SuppressWarnings("unused")
@@ -605,6 +605,11 @@ public class PatientIdPartitionInterceptor {
 				partitionId = compartmentPartition;
 			}
 		}
+
+		if (partitionId == null) {
+			partitionId = RequestPartitionId.allPartitions();
+		}
+
 		return partitionId;
 	}
 

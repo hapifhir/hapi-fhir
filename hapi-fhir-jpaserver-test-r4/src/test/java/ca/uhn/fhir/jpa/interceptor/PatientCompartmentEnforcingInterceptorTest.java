@@ -24,6 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,15 +40,16 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
 	private PatientCompartmentEnforcingInterceptor mySvc;
+	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
 
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		ForceOffsetSearchModeInterceptor forceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		PatientIdPartitionInterceptor patientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 
-		registerInterceptor(patientIdPartitionInterceptor);
+		registerInterceptor(myPatientIdPartitionInterceptor);
 		registerInterceptor(forceOffsetSearchModeInterceptor);
 
 		myPartitionSettings.setPartitioningEnabled(true);
@@ -75,6 +78,27 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		"false, true",
 		"false, false"})
 	public void testUpdateResource_whenCrossingPatientCompartment_throws(boolean theMassIngestionEnabled, boolean theUseNewInterceptor) {
+//		registerInterceptor(theUseNewInterceptor);
+//		myStorageSettings.setMassIngestionMode(theMassIngestionEnabled);
+//		createPatient(withId("A1"), withActiveTrue());
+//		createPatient(withId("A2"), withActiveTrue());
+//
+//		Observation obs = new Observation();
+//		obs.setId("O");
+//		obs.getSubject().setReference("Patient/A1");
+//		myObservationDao.update(obs, new SystemRequestDetails()).getId().getIdPart();
+//
+//		// try updating observation's patient, which would cross partition boundaries
+//		FhirPatchBuilder pb = new FhirPatchBuilder(myFhirContext);
+//		pb.replace()
+//			.path("Observation.subject")
+//			.value(new Reference("Patient/A2"));
+//		IBaseParameters patch = pb.build();
+//
+//		assertThatThrownBy(() -> myObservationDao.patch(new IdType("Observation/O"), null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, newSrd()))
+//			.isInstanceOf(PreconditionFailedException.class)
+//			.hasMessageContaining("HAPI-2476: Resource compartment for Observation/O changed. Was a referenced Patient changed?");
+
 		registerInterceptor(theUseNewInterceptor);
 		myStorageSettings.setMassIngestionMode(theMassIngestionEnabled);
 		createPatientA();
@@ -217,13 +241,15 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 
 	@Test
 	public void testDeleteAndRecreateResource_InDifferentCompartmentFail() {
+		// Setup
 		registerInterceptor(mySvc);
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		myPatientIdPartitionInterceptor.setResourceTypePolicies(Map.of(
+			"Observation", ResourceCompartmentStoragePolicy.nonUniqueCompartmentInDefault()
+		));
 
-		// Setup
 		createPatient(withId("A"), withActiveTrue());
 		createObservation(withId("O"), withSubject("Patient/A"));
-
 
 		myObservationDao.delete(new IdType("Observation/O"), newSrd());
 		assertGone("Observation/O");
@@ -247,6 +273,12 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		} catch (Exception e) {
 			assertThat(e.getMessage()).contains("HAPI-2476: Resource compartment for Observation/O changed. Was a referenced Patient changed?");
 		}
+//		Observation o = new Observation();
+//		o.setId("O");
+//		o.addPerformer(new Reference("Patient/A"));
+//		o.addPerformer(new Reference("Patient/" + otherId));
+//		assertThatThrownBy(() -> myObservationDao.update(o, newSrd()))
+//			.hasMessageContaining("HAPI-2476: Resource compartment for Observation/O changed. Was a referenced Patient changed?");
 	}
 
 	@SuppressWarnings("removal")

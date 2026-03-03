@@ -108,6 +108,15 @@ public interface IHapiTransactionService {
 		return true;
 	}
 
+	/**
+	 * Returns <code>true</code> if the partition contains multiple IDs which
+	 * are not compatible with each other, per {@link #isCompatiblePartition(RequestPartitionId, RequestPartitionId)}.
+	 */
+	@Beta
+	default boolean containsIncompatiblePartitions(RequestPartitionId theRequestPartitionId) {
+		return false;
+	}
+
 	interface IExecutionBuilder extends TransactionOperations {
 
 		IExecutionBuilder withIsolation(Isolation theIsolation);
