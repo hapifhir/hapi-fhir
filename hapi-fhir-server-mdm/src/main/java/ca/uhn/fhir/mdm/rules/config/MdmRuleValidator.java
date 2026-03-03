@@ -117,9 +117,9 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 					myFhirContext.getResourceType(resourceType);
 				} catch (DataFormatException e) {
 					throw new ConfigurationException(Msg.code(1508)
-						+ String.format(
-						"%s is not a valid resource type, but is set in the eidSystems field.",
-						resourceType));
+							+ String.format(
+									"%s is not a valid resource type, but is set in the eidSystems field.",
+									resourceType));
 				}
 			}
 			validateIsUri(uri);
