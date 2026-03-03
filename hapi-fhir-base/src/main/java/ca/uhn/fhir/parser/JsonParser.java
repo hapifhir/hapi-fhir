@@ -352,12 +352,14 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					}
 				} else if (value instanceof IBaseDecimalDatatype) {
 					BigDecimal decimalValue = ((IBaseDecimalDatatype) value).getValue();
-					decimalValue = new BigDecimal(decimalValue.toString()) {
+					// Normalize the decimal value
+					String normalizedValue = normalizeDecimal(decimalValue.toString());
+					decimalValue = new BigDecimal(normalizedValue) {
 						private static final long serialVersionUID = 1L;
 
 						@Override
 						public String toString() {
-							return value.getValueAsString();
+							return normalizedValue; // Use normalized form
 						}
 					};
 					if (theChildName != null) {
@@ -458,6 +460,15 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			default:
 				throw new IllegalStateException(Msg.code(1839) + "Should not have this state here: "
 						+ theChildDef.getChildType().name());
+		}
+	}
+
+	private String normalizeDecimal(String theValue) {
+		try {
+			BigDecimal numberValue = new BigDecimal(theValue);
+			return numberValue.toString();
+		} catch (NumberFormatException e) {
+			return theValue;
 		}
 	}
 

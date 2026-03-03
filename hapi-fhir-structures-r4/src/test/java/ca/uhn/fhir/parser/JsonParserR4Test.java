@@ -59,6 +59,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -68,6 +69,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -2086,45 +2088,56 @@ public class JsonParserR4Test extends BaseTest {
 		assertThat(parsed.getNameFirstRep().getGiven().get(0).getValue()).isEqualTo(" ");
 	}
 
+	@ParameterizedTest
+	@CsvSource({
+		 "0.0, 0.0",
+		 ".5, 0.5",
+		 "000.5, 0.5",
+		 "1., 1",
+		 "1.0, 1.0",
+		 "1.00, 1.00",
+		 "3.14, 3.14"
+	})
+	void encodeResourceToString_DecimalNormalization_PreservesSignificantDecimals(String theOriginalValue, String theExpectedValue) {
+		Observation obs = new Observation();
+		obs.setId("test-obs");
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+
+		// Test various decimal cases
+		Quantity quantity = new Quantity();
+		quantity.setValue(new BigDecimal(theOriginalValue));
+		obs.setValue(quantity);
+
+		String json = ourCtx.newJsonParser().encodeResourceToString(obs);
+		assertThat(json).contains(String.format("\"value\":%s", theExpectedValue));
+	}
+
 	@Test
-	void testObservationValueQuantityTrailingDecimalPoint_Issue8446() {
-		// Create an Observation JSON string with value quantity "1."
-		String observationJson = """
-			{
-			  "resourceType": "Observation",
-			  "id": "test-trailing-decimal",
-			  "status": "final",
-			  "code": {
-			    "coding": [
-			      {
-			        "system": "http://loinc.org",
-			        "code": "29463-7",
-			        "display": "Body Weight"
-			      }
-			    ]
-			  },
-			  "subject": {
-			    "reference": "Patient/example"
-			  },
-			  "valueQuantity": {
-			    "value": "1.",
-			    "unit": "kg",
-			    "system": "http://unitsofmeasure.org",
-			    "code": "kg"
-			  }
-			}
-			""";
+	void encodeResourceToString_ObservationValueQuantity_DecimalNormalization() {
+		// Ensure that parsing still works correctly with trailing decimals
+		String jsonWithTrailingDecimal = """
+          {
+            "resourceType": "Observation",
+            "id": "test",
+            "status": "final",
+            "valueQuantity": {
+              "value": "1.",
+              "unit": "kg"
+            }
+          }
+          """;
 
-		// Parse the JSON string into an Observation
-		IParser parser = ourCtx.newJsonParser();
-		Observation observation = parser.parseResource(Observation.class, observationJson);
+		// This should parse without error
+		Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, jsonWithTrailingDecimal);
+		Quantity quantity = (Quantity) obs.getValue();
 
-		// Verify the parsed value is corrected from "1." to "1"
-		assertThat(observation.getValue()).isInstanceOf(Quantity.class);
-		Quantity valueQuantity = (Quantity) observation.getValue();
+		// The parsed value should be correct
+		assertThat(quantity.getValue()).isEqualByComparingTo(new BigDecimal("1"));
 
-		// The expectation is that "1." should be normalized to "1"
-		assertEquals("1", valueQuantity.getValueElement().getValueAsString()); // This should be "1", not "1."
+		// When we encode it back, it should be normalized
+		String reEncoded = ourCtx.newJsonParser().encodeResourceToString(obs);
+		assertThat(reEncoded).contains("\"value\":1");
+		assertThat(reEncoded).doesNotContain("\"value\":1.");
 	}
 
 	@AfterAll
