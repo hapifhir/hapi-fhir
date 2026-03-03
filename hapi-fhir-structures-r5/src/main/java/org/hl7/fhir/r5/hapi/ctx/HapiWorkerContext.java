@@ -278,12 +278,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public void storeAnalysis(Class className, Object analysis) {
-		throw new UnsupportedOperationException(Msg.code(2862));
+		// Do nothing
 	}
 
 	@Override
 	public Object retrieveAnalysis(Class className) {
-		throw new UnsupportedOperationException(Msg.code(2863));
+		return null;
 	}
 
 	@Override
