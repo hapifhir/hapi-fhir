@@ -20,30 +20,66 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PrefetchTemplateUtil {
-	private static final Pattern ourPlaceholder = Pattern.compile("\\{\\{context\\.(\\w+)}}");
-	private static final Pattern daVinciPreFetch = Pattern.compile("\\{\\{context\\.(\\w+)\\.(\\w+)\\.(id)}}");
-
-	private static final int GROUP_WITH_KEY = 1;
-	private static final int DAVINCI_RESOURCETYPE_KEY = 2;
+	private static final Pattern SURROUNDING_CURLY_BRACES_PART = Pattern.compile("\\{\\{([^}]+)}}");
+	private static final Pattern DA_VINCI_PART = Pattern.compile("^context\\.(\\w+)\\.(\\w+)\\.id$");
+	private static final Pattern DEFAULT_PART = Pattern.compile("^context\\.(\\w+)$");
+	private static final Pattern FHIR_PATH_PART = Pattern.compile("^context\\.(\\w+)\\.(.+)$");
+	private static final Pattern REFERENCED_PREFETCH_PART = Pattern.compile("^%(\\w+)\\.(.+)$");
+	private static final String UNION_OPERATOR_REGEX = "\\|";
 
 	private PrefetchTemplateUtil() {}
 
 	public static String substituteTemplate(
-			String theTemplate, CdsServiceRequestContextJson theContext, FhirContext theFhirContext) {
-		String parsedDaVinciPrefetchTemplate = handleDaVinciPrefetchTemplate(theTemplate, theContext, theFhirContext);
-		return handleDefaultPrefetchTemplate(parsedDaVinciPrefetchTemplate, theContext);
+			String theTemplate, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
+		return SURROUNDING_CURLY_BRACES_PART
+				.matcher(theTemplate)
+				.replaceAll(match ->
+						Matcher.quoteReplacement(resolveExpression(match.group(1), theContext, theFhirContext)));
+	}
+
+	private static String resolveExpression(
+			String theRawExpression,
+			@Nonnull CdsServiceRequestContextJson theContext,
+			@Nonnull FhirContext theFhirContext) {
+		final List<String> results = Stream.of(theRawExpression.split(UNION_OPERATOR_REGEX))
+				.map(String::trim)
+				.flatMap(part -> resolvePartResults(part, theContext, theFhirContext).stream())
+				.toList();
+		if (results.isEmpty()) {
+			throw new InvalidRequestException(Msg.code(2856) + "Unable to resolve prefetch template : "
+					+ theRawExpression + ". No result was found for the prefetch query.");
+		}
+		return String.join(",", results);
+	}
+
+	private static List<String> resolvePartResults(
+			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
+		List<String> result = handleDaVinciPart(thePart, theContext, theFhirContext);
+		if (result.isEmpty()) result = handleDefaultPart(thePart, theContext);
+		if (result.isEmpty()) result = handleFhirPathAndReferencedPrefetchPart(thePart, theContext, theFhirContext);
+		return result;
 	}
 
 	/**
@@ -51,59 +87,118 @@ public class PrefetchTemplateUtil {
 	 * <a href="http://hl7.org/fhir/us/davinci-crd/hooks.html#additional-prefetch-capabilities">here</a> version 1.0.0 - STU 1
 	 * This is subject to change as the IG can be updated by the working committee.
 	 */
-	private static String handleDaVinciPrefetchTemplate(
-			String theTemplate, CdsServiceRequestContextJson theContext, FhirContext theFhirContext) {
-		Matcher matcher = daVinciPreFetch.matcher(theTemplate);
-		String returnValue = theTemplate;
-		while (matcher.find()) {
-			String key = matcher.group(GROUP_WITH_KEY);
-			if (!theContext.containsKey(key)) {
-				throw new InvalidRequestException(Msg.code(2372) + "Request context did not provide a value for key <"
-						+ key + ">" + ".  Available keys in context are: " + theContext.getKeys());
+	@Nonnull
+	private static List<String> handleDaVinciPart(
+			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
+		final Matcher m = DA_VINCI_PART.matcher(thePart);
+		if (!m.matches()) return List.of();
+		final String key = m.group(1);
+		final String resourceType = m.group(2);
+		validateContextKeyExists(key, theContext);
+		try {
+			final IBaseBundle bundle = (IBaseBundle) theContext.getResource(key);
+			final List<String> ids = BundleUtil.toListOfResources(theFhirContext, bundle).stream()
+					.filter(x -> x.fhirType().equals(resourceType))
+					.map(x -> x.getIdElement().getIdPart())
+					.filter(StringUtils::isNotBlank)
+					.toList();
+			if (ids.isEmpty()) {
+				throw new InvalidRequestException(Msg.code(2373)
+						+ "Request context did not provide for resource(s) matching template. ResourceType missing is: "
+						+ resourceType);
 			}
-			try {
-				IBaseBundle bundle = (IBaseBundle) theContext.getResource(key);
-				String resourceType = matcher.group(DAVINCI_RESOURCETYPE_KEY);
-				String resourceIds = BundleUtil.toListOfResources(theFhirContext, bundle).stream()
-						.filter(x -> x.fhirType().equals(resourceType))
-						.map(x -> x.getIdElement().getIdPart())
-						.collect(Collectors.joining(","));
-				if (StringUtils.isEmpty(resourceIds)) {
-					throw new InvalidRequestException(Msg.code(2373)
-							+ "Request context did not provide for resource(s) matching template. ResourceType missing is: "
-							+ resourceType);
-				}
-				String keyToReplace = key + "." + resourceType + "\\.(id)";
-				returnValue = substitute(returnValue, keyToReplace, resourceIds);
-			} catch (ClassCastException e) {
-				throw new InvalidRequestException(Msg.code(2374) + "Request context did not provide valid "
-						+ theFhirContext.getVersion().getVersion() + " Bundle resource for template key <" + key + ">");
-			}
+			return ids;
+		} catch (ClassCastException e) {
+			throw new InvalidRequestException(Msg.code(2374) + "Request context did not provide valid "
+					+ theFhirContext.getVersion().getVersion() + " Bundle resource for template key <" + key + ">");
 		}
-		return returnValue;
 	}
 
-	private static String handleDefaultPrefetchTemplate(String theTemplate, CdsServiceRequestContextJson theContext) {
-		Matcher matcher = ourPlaceholder.matcher(theTemplate);
-		String returnValue = theTemplate;
-		while (matcher.find()) {
-			String key = matcher.group(GROUP_WITH_KEY);
-			// Check to see if the context map is empty, or doesn't contain the key.
-			// Note we cannot return the keyset as for cases where the map is empty this will throw a
-			// NullPointerException.
-			if (theContext.getString(key) == null) {
+	@Nonnull
+	private static List<String> handleDefaultPart(String thePart, @Nonnull CdsServiceRequestContextJson theContext) {
+		final Matcher m = DEFAULT_PART.matcher(thePart);
+		if (!m.matches()) return List.of();
+		final String key = m.group(1);
+		validateContextKeyExists(key, theContext);
+		try {
+			final String value = theContext.getString(key);
+			if (value == null) {
 				throw new InvalidRequestException(
-						Msg.code(2375) + "Either request context was empty or it did not provide a value for key <"
-								+ key
-								+ ">.  Please make sure you are including a context with valid keys.");
+						Msg.code(2375) + "Request context value for key <" + key + "> is null or not a string.");
 			}
-			String value = theContext.getString(key);
-			returnValue = substitute(returnValue, key, value);
+			return List.of(value);
+		} catch (ClassCastException e) {
+			throw new InvalidRequestException(
+					Msg.code(2857) + "Request context value for key <" + key + "> is null or not a string.");
 		}
-		return returnValue;
 	}
 
-	private static String substitute(String theString, String theKey, String theValue) {
-		return theString.replaceAll("\\{\\{context\\." + theKey + "}}", theValue);
+	@Nonnull
+	private static List<String> handleFhirPathAndReferencedPrefetchPart(
+			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
+		Matcher m = FHIR_PATH_PART.matcher(thePart);
+		if (!m.matches()) m = REFERENCED_PREFETCH_PART.matcher(thePart);
+		if (!m.matches()) return List.of();
+		return convertPrimitiveResultsToString(
+				evaluateFhirPathOnContextKey(m.group(1), m.group(2), theContext, theFhirContext), m.group(1));
+	}
+
+	@Nonnull
+	private static List<IBase> evaluateFhirPathOnContextKey(
+			String thePrefetchKey,
+			String theFhirPathExpression,
+			@Nonnull CdsServiceRequestContextJson theContext,
+			@Nonnull FhirContext theFhirContext) {
+		validateContextKeyExists(thePrefetchKey, theContext);
+		try {
+			final IBaseResource resource = theContext.getResource(thePrefetchKey);
+			final IFhirPath fhirPath = createFhirPathWithReferenceLocalResolution(theFhirContext, resource);
+			final String fullExpression = resource.fhirType() + "." + theFhirPathExpression;
+			return fhirPath.evaluate(resource, fullExpression, IBase.class);
+		} catch (ClassCastException e) {
+			throw new InvalidRequestException(Msg.code(2858) + "Request context did not provide valid "
+					+ theFhirContext.getVersion().getVersion() + " Bundle resource for FHIRPath template key <"
+					+ thePrefetchKey + ">");
+		} catch (FhirPathExecutionException e) {
+			throw new InvalidRequestException(Msg.code(2859)
+					+ "Unable to evaluate FHIRPath for prefetch template key <" + thePrefetchKey + "> for FHIR version "
+					+ theFhirContext.getVersion().getVersion());
+		}
+	}
+
+	private static void validateContextKeyExists(String theKey, @Nonnull CdsServiceRequestContextJson theContext) {
+		if (!theContext.containsKey(theKey)) {
+			throw new InvalidRequestException(Msg.code(2372) + "Request context did not provide a value for key <"
+					+ theKey + ">.  Available keys in context are: " + theContext.getKeys());
+		}
+	}
+
+	@Nonnull
+	private static List<String> convertPrimitiveResultsToString(
+			@Nonnull List<IBase> theResults, String thePrefetchKey) {
+		return theResults.stream()
+				.map(result -> {
+					if (result instanceof IPrimitiveType) {
+						return ((IPrimitiveType<?>) result).getValueAsString();
+					} else {
+						throw new InvalidRequestException(Msg.code(2860)
+								+ "FHIR path expression returned a non-primitive result: "
+								+ result.getClass().getSimpleName() + " for Prefetch Key : <" + thePrefetchKey + ">");
+					}
+				})
+				.filter(StringUtils::isNotBlank)
+				.toList();
+	}
+
+	private static IFhirPath createFhirPathWithReferenceLocalResolution(
+			@Nonnull FhirContext theFhirContext, IBaseResource theResource) {
+		final IFhirPath fhirPath = theFhirContext.newFhirPath();
+		fhirPath.setEvaluationContext(new IFhirPathEvaluationContext() {
+			@Override
+			public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
+				return BundleUtil.getReferenceInBundle(theFhirContext, theReference.getValue(), theResource);
+			}
+		});
+		return fhirPath;
 	}
 }

@@ -1,0 +1,8 @@
+---
+type: fix
+jira: SMILE-11050
+title: "Previously, persisting a resource with a Timing search parameter whose boundsPeriod contained only
+  a start date (no end date) could result in a NullPointerException during search parameter extraction
+  if the end element had been auto-created as an empty DateTimeType by earlier processing (e.g. validation,
+  serialization, or interceptors). The boundsPeriod date extraction now correctly checks for null values
+  before constructing date wrappers, matching the existing null-value check used for Timing event dates."
