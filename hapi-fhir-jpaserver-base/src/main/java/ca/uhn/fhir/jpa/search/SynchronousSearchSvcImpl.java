@@ -216,13 +216,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 					Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
 					List<JpaPid> allIncludedPidsList = new ArrayList<>();
 
-					// Separate non-iterate and iterate includes/revincludes
-					Set<Include> nonIterateRevIncludes = theParams.getRevIncludes().stream()
-							.filter(i -> !i.isRecurse())
-							.collect(Collectors.toSet());
-					Set<Include> iterateRevIncludes = theParams.getRevIncludes().stream()
-							.filter(Include::isRecurse)
-							.collect(Collectors.toSet());
+					// Separate non-iterate and iterate includes
 					Set<Include> nonIterateIncludes = theParams.getIncludes().stream()
 							.filter(i -> !i.isRecurse())
 							.collect(Collectors.toSet());
@@ -230,13 +224,22 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 							.filter(Include::isRecurse)
 							.collect(Collectors.toSet());
 
-					// Phase 1: non-iterate _revincludes on original search result PIDs
-					if (!nonIterateRevIncludes.isEmpty()) {
+					/*
+					 * Phase 1: ALL _revinclude entries (iterate AND non-iterate) together on originalPids.
+					 *
+					 * loadIncludes() uses an internal do-while loop that already handles the
+					 * iterate/non-iterate distinction: non-iterate entries are removed after the first
+					 * round, while iterate entries continue cascading in subsequent rounds. Passing all
+					 * revinclude entries here ensures that iterate revinclude cascades only within the
+					 * revinclude chain (starting from originalPids), and NOT through forward-include
+					 * results added in Phase 2.
+					 */
+					if (!theParams.getRevIncludes().isEmpty()) {
 						Set<JpaPid> revIncludedPids = theSb.loadIncludes(
 								myContext,
 								myEntityManager,
 								originalPids,
-								nonIterateRevIncludes,
+								theParams.getRevIncludes(),
 								true,
 								theParams.getLastUpdated(),
 								"(synchronous)",
@@ -249,9 +252,12 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						allIncludedPidsList.addAll(revIncludedPids);
 					}
 
-					// Phase 2: non-iterate _includes on original search result PIDs
-					// (use originalPids so _include only applies to the initial search results,
-					// not to revincluded resources — per FHIR spec, without _iterate)
+					/*
+					 * Phase 2: non-iterate _includes on original search result PIDs only.
+					 *
+					 * Using originalPids ensures _include (without :iterate) only applies to the initial
+					 * search results, not to revincluded resources — per FHIR spec.
+					 */
 					if (theParams.getEverythingMode() == null
 							&& !nonIterateIncludes.isEmpty()
 							&& (maxIncludes == null || maxIncludes > 0)) {
@@ -272,26 +278,12 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						allIncludedPidsList.addAll(forwardIncludedPids);
 					}
 
-					// Phase 3: iterate _revincludes on expanded PIDs (including non-iterate revinclude results)
-					if (!iterateRevIncludes.isEmpty() && (maxIncludes == null || maxIncludes > 0)) {
-						Set<JpaPid> iterateRevIncludedPids = theSb.loadIncludes(
-								myContext,
-								myEntityManager,
-								pids,
-								iterateRevIncludes,
-								true,
-								theParams.getLastUpdated(),
-								"(synchronous)",
-								theRequestDetails,
-								maxIncludes);
-						if (maxIncludes != null) {
-							maxIncludes -= iterateRevIncludedPids.size();
-						}
-						pids.addAll(iterateRevIncludedPids);
-						allIncludedPidsList.addAll(iterateRevIncludedPids);
-					}
-
-					// Phase 4: iterate _includes on all expanded PIDs (including revinclude results)
+					/*
+					 * Phase 3: iterate _includes on all expanded PIDs (original + revinclude results + Phase 2 results).
+					 *
+					 * Iterate include runs on the fully-expanded pids set so it can cascade through
+					 * revincluded resources, which is the correct behaviour for :iterate.
+					 */
 					if (theParams.getEverythingMode() == null
 							&& !iterateIncludes.isEmpty()
 							&& (maxIncludes == null || maxIncludes > 0)) {
