@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -201,12 +202,9 @@ public class SearchParameterValidatingInterceptorTest {
 		sp.setExpression("Basic.code");
 		sp.addBase("Basic");
 
-		try {
-			mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).contains("2845");
-		}
+		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageContaining("2845");
 	}
 
 	@Test
