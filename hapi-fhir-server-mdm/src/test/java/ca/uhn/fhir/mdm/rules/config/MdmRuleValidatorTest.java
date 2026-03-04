@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.BaseR4Test;
+import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -206,19 +208,50 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	}
 
 	@Test
-	void testUnknownMatcherAlgorithm() {
-		assertThatThrownBy(() -> setMdmRuleJsonWithFactories("bad-rules-unknown-matcher-algorithm.json"))
+	void testUnknownMatcherAlgorithm_validate_doesNotThrow() throws IOException {
+		// validate() no longer checks algorithm names — that is deferred to validateAlgorithmRegistrations()
+		setMdmRuleJsonWithFactories("bad-rules-unknown-matcher-algorithm.json");
+	}
+
+	@Test
+	void testUnknownSimilarityAlgorithm_validate_doesNotThrow() throws IOException {
+		// validate() no longer checks algorithm names — that is deferred to validateAlgorithmRegistrations()
+		setMdmRuleJsonWithFactories("bad-rules-unknown-similarity-algorithm.json");
+	}
+
+	@Test
+	void testUnknownMatcherAlgorithm_validateAlgorithmRegistrations_throws() throws IOException {
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);
+		MdmRulesJson rules = loadRulesJson("bad-rules-unknown-matcher-algorithm.json");
+		mdmRuleValidator.validate(rules);
+
+		assertThatThrownBy(() -> mdmRuleValidator.validateAlgorithmRegistrations(rules))
 			.isInstanceOf(ConfigurationException.class)
 			.hasMessageContaining(Msg.code(2846))
 			.hasMessageContaining("DOES_NOT_EXIST");
 	}
 
 	@Test
-	void testUnknownSimilarityAlgorithm() {
-		assertThatThrownBy(() -> setMdmRuleJsonWithFactories("bad-rules-unknown-similarity-algorithm.json"))
+	void testUnknownSimilarityAlgorithm_validateAlgorithmRegistrations_throws() throws IOException {
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);
+		MdmRulesJson rules = loadRulesJson("bad-rules-unknown-similarity-algorithm.json");
+		mdmRuleValidator.validate(rules);
+
+		assertThatThrownBy(() -> mdmRuleValidator.validateAlgorithmRegistrations(rules))
 			.isInstanceOf(ConfigurationException.class)
 			.hasMessageContaining(Msg.code(2847))
 			.hasMessageContaining("DOES_NOT_EXIST");
+	}
+
+	@Test
+	void testCustomRegisteredAlgorithm_passesValidateAlgorithmRegistrations() throws IOException {
+		myIMatcherFactory.register("CUSTOM_PHONETIC", (theLeftBase, theRightBase, theParams) -> true);
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);
+		MdmRulesJson rules = loadRulesJson("good-rules-custom-matcher-algorithm.json");
+		mdmRuleValidator.validate(rules);
+
+		// Should not throw — custom algorithm is registered
+		mdmRuleValidator.validateAlgorithmRegistrations(rules);
 	}
 
 	private void setMdmRuleJson(String theS) throws IOException {
@@ -237,6 +270,13 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 		Resource resource = resourceLoader.getResource(theS);
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		mdmSettings.setScriptText(json);
+	}
+
+	private MdmRulesJson loadRulesJson(String theS) throws IOException {
+		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
+		Resource resource = resourceLoader.getResource(theS);
+		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
+		return JsonUtil.deserialize(json, MdmRulesJson.class);
 	}
 
 }

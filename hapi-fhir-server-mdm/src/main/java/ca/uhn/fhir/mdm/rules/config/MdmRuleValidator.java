@@ -204,8 +204,19 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 				throw new ConfigurationException(Msg.code(1513) + "MatchField " + fieldMatch.getName()
 						+ " has neither a similarity nor a matcher.  At least one must be present.");
 			}
-			validateAlgorithmNames(fieldMatch);
 			validatePath(theMdmRulesJson.getMdmTypes(), fieldMatch);
+		}
+	}
+
+	/**
+	 * Validates that all matcher and similarity algorithm names referenced in the MDM rules
+	 * are registered in the factories. This is intended to be called after all custom algorithms
+	 * have been registered (e.g., during {@code ContextRefreshedEvent}), rather than eagerly
+	 * during bean creation, so that {@code @PostConstruct}-registered algorithms are available.
+	 */
+	public void validateAlgorithmRegistrations(MdmRulesJson theMdmRules) {
+		for (MdmFieldMatchJson fieldMatch : theMdmRules.getMatchFields()) {
+			validateAlgorithmNames(fieldMatch);
 		}
 	}
 
