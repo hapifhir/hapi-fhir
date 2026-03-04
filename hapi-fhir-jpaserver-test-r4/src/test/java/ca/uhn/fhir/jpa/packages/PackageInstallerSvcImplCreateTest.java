@@ -43,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
@@ -305,9 +306,13 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		}
 
 		// test
-		mySvc.install(installedSpec);
+		PackageInstallOutcomeJson outcome = mySvc.install(installedSpec);
 
 		// verify
+		assertNotNull(outcome);
+		assertTrue(outcome.getMessage().stream()
+			.anyMatch(m -> m.contains("Resources have been successfully installed")));
+
 		// the questionnaire should now exist
 		provider = dao.search(spmap, new SystemRequestDetails());
 		assertFalse(provider.isEmpty());
