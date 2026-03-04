@@ -35,6 +35,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -104,7 +105,7 @@ public abstract class RequestDetails {
 	public RequestDetails(RequestDetails theRequestDetails) {
 		myInterceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
 		myRequestStopwatch = theRequestDetails.getRequestStopwatch();
-		myTenantId = theRequestDetails.getTenantId();
+		setTenantId(theRequestDetails.getTenantId());
 		myCompartmentName = theRequestDetails.getCompartmentName();
 		myCompleteUrl = theRequestDetails.getCompleteUrl();
 		myFhirServerBase = theRequestDetails.getFhirServerBase();
@@ -457,14 +458,18 @@ public abstract class RequestDetails {
 	}
 
 	/**
-	 * Sets the tenant ID associated with the request. Note that the tenant ID
-	 * and the partition ID are not the same thing - Depending on the specific
+	 * Sets the tenant ID associated with the request. Blank values are normalized to null.
+	 * <p>
+	 * Note that the tenant ID and the partition ID are not the same thing - Depending on the specific
 	 * partition interceptors in use, the tenant ID might be used internally
 	 * to derive the partition ID or it might not. Do not assume that it will
 	 * be used for this purpose.
 	 */
 	public void setTenantId(String theTenantId) {
-		myTenantId = theTenantId;
+		myTenantId = StringUtils.trimToNull(theTenantId);
+		if (myTenantId == null && theTenantId != null) {
+			ourLog.debug("Blank tenant ID has been normalized to null");
+		}
 	}
 
 	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {

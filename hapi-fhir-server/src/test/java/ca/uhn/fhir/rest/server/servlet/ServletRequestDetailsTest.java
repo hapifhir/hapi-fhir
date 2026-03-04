@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.iterators.IteratorEnumeration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -73,6 +75,34 @@ class ServletRequestDetailsTest {
 		assertThat(srd.getHeaders("foo")).contains("Bar", "Baz");
 	}
 
+	@Test
+	void setTenantId_withNonBlankValue_retainsValue() {
+		ServletRequestDetails srd = new ServletRequestDetails();
+		srd.setTenantId("TENANT_A");
+		assertThat(srd.getTenantId()).isEqualTo("TENANT_A");
+	}
 
+	@Test
+	void setTenantId_withNullValue_normalizesToNull() {
+		ServletRequestDetails srd = new ServletRequestDetails();
+		srd.setTenantId(null);
+		assertThat(srd.getTenantId()).isNull();
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"", " ", "  "})
+	void setTenantId_withBlankValue_normalizesToNull(String theTenantId) {
+		ServletRequestDetails srd = new ServletRequestDetails();
+		srd.setTenantId(theTenantId);
+		assertThat(srd.getTenantId()).isNull();
+	}
+
+	@Test
+	void setTenantId_withBlankValue_clearsExistingTenant() {
+		ServletRequestDetails srd = new ServletRequestDetails();
+		srd.setTenantId("TENANT_A");
+		srd.setTenantId("");
+		assertThat(srd.getTenantId()).isNull();
+	}
 }
 
