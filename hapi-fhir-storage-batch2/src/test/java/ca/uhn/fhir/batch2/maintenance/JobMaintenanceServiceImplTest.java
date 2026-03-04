@@ -293,6 +293,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		verify(myWorkChannelProducer, times(2)).send(myMessageCaptor.capture());
 		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
 		verify(myJobPersistence, times(1)).advanceJobStepAndUpdateChunkStatus(eq(INSTANCE_ID), eq(STEP_2), eq(false));
+		// Maintenance run also flips any remaining GATE_WAITING chunks for the current step
+		verify(myJobPersistence).enqueueGateWaitingChunksForCurrentStep(eq(INSTANCE_ID), eq(STEP_1), eq(false));
 		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(INSTANCE_ID));
 		verifyNoMoreInteractions(myJobPersistence);
 		JobWorkNotification payload0 = myMessageCaptor.getAllValues().get(0).getPayload();

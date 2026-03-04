@@ -130,27 +130,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setStartTime(new Date());
 		entity.setStatus(getOnCreateStatus(theBatchWorkChunk));
 
-		// If the chunk would be GATE_WAITING, check if the job has already advanced to this step.
-		// Late-arriving chunks (produced by slow workers after advanceJobStepAndUpdateChunkStatus has
-		// already flipped existing chunks to READY) would otherwise be stuck in GATE_WAITING forever.
-		// This should technically never happen, but we have seen it at customer sites so we add this guard to cover
-		// this case just in case the system somehow gets into this invalid state.
-		if (entity.getStatus() == WorkChunkStatusEnum.GATE_WAITING) {
-			Optional<Batch2JobInstanceEntity> instanceOpt =
-					myJobInstanceRepository.findById(theBatchWorkChunk.instanceId);
-			if (instanceOpt.isPresent()) {
-				String currentGatedStepId = instanceOpt.get().getCurrentGatedStepId();
-				if (theBatchWorkChunk.targetStepId.equals(currentGatedStepId)) {
-					ourLog.debug(
-							"Chunk {}/{} target step {} matches current gated step; creating as READY instead of GATE_WAITING",
-							entity.getInstanceId(),
-							entity.getId(),
-							theBatchWorkChunk.targetStepId);
-					entity.setStatus(WorkChunkStatusEnum.READY);
-				}
-			}
-		}
-
 		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
 		ourLog.trace(
 				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
@@ -685,29 +664,38 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		});
 
 		if (changed) {
-			ourLog.debug(
-					"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
-					theJobInstanceId,
-					theNextStepId);
-			WorkChunkStatusEnum nextStep =
-					theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
-			// when we reach here, the current step id is equal to theNextStepId
-			// Up to 7.1, gated jobs' work chunks are created in status QUEUED but not actually queued for the
-			// workers.
-			// In order to keep them compatible, turn QUEUED chunks into READY, too.
-			// TODO: 'QUEUED' from the IN clause will be removed after 7.6.0.
-			int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
-					theJobInstanceId,
-					theNextStepId,
-					List.of(WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED),
-					nextStep);
-			ourLog.debug(
-					"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
-					numChanged,
-					theJobInstanceId,
-					theNextStepId);
+			// Flip existing GATE_WAITING/QUEUED chunks for the new current step to READY (or REDUCTION_READY).
+			// Late-arriving chunks (produced by slow workers after this point) will be caught by
+			// enqueueGateWaitingChunksForCurrentStep() on the next maintenance run.
+			enqueueGateWaitingChunksForCurrentStep(theJobInstanceId, theNextStepId, theIsReductionStep);
 		}
 
 		return changed;
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public int enqueueGateWaitingChunksForCurrentStep(
+			String theJobInstanceId, String theStepId, boolean theIsReductionStep) {
+		WorkChunkStatusEnum nextStatus =
+				theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
+		// Up to 7.1, gated jobs' work chunks are created in status QUEUED but not actually queued for the
+		// workers.
+		// In order to keep them compatible, turn QUEUED chunks into READY, too.
+		// TODO: 'QUEUED' from the IN clause will be removed after 7.6.0.
+		int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
+				theJobInstanceId,
+				theStepId,
+				List.of(WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED),
+				nextStatus);
+		if (numChanged > 0) {
+			ourLog.debug(
+					"Updated {} chunks of gated instance {} for step {} from GATE_WAITING to {}.",
+					numChanged,
+					theJobInstanceId,
+					theStepId,
+					nextStatus);
+		}
+		return numChanged;
 	}
 }
