@@ -195,6 +195,7 @@ public class ReadOnlySearchParamCache {
 		return false;
 	}
 
+	// TODO JDJD review
 	/**
 	 * Returns {@code true} if the given search parameter is a built-in (HL7) search
 	 * parameter that must remain active regardless of enable/disable configuration.
@@ -211,18 +212,18 @@ public class ReadOnlySearchParamCache {
 	 * {@code Subscription}) remain fully manageable.
 	 *
 	 * @param theUri           the SearchParameter URL; may be {@code null}
-	 * @param theResourceType  the base resource type (e.g. {@code "Basic"})
+	 * @param theResourceBase  the base resource type (e.g. {@code "Basic"})
 	 * @param theParamName     the search parameter code/name (e.g. {@code "code"})
 	 * @return {@code true} if this SP is a built-in non-disableable parameter
 	 */
 	public static boolean isNonDisableableBuiltInSearchParam(
-			String theUri, String theResourceType, String theParamName) {
+			String theUri, String theResourceBase, String theParamName) {
 		// Created by Claude Sonnet 4.6
 		if (theUri == null || !theUri.startsWith(BUILT_IN_SEARCH_PARAM_URI_PREFIX)) {
 			return false;
 		}
 		return searchParamMatchesAtLeastOnePattern(
-				SearchParamRegistryImpl.NON_DISABLEABLE_SEARCH_PARAMS, theResourceType, theParamName);
+				SearchParamRegistryImpl.NON_DISABLEABLE_SEARCH_PARAMS, theResourceBase, theParamName);
 	}
 
 	public static ReadOnlySearchParamCache fromRuntimeSearchParamCache(

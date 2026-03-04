@@ -253,7 +253,7 @@ public class SearchParamRegistryImpl
 		RuntimeSearchParamCache searchParams =
 				RuntimeSearchParamCache.fromReadOnlySearchParamCache(builtInSearchParams);
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
-		ourLog.info("Have overridden {} built-in search parameters", overriddenCount);
+		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 
 		// Auto-register: _language
 		if (myStorageSettings.isLanguageSearchParameterEnabled()) {
@@ -407,8 +407,8 @@ public class SearchParamRegistryImpl
 			return 0;
 		}
 
-		RuntimeSearchParam runtimeSp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theSearchParameter);
-		if (runtimeSp == null) {
+		RuntimeSearchParam newRuntimeSp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theSearchParameter);
+		if (newRuntimeSp == null) {
 			return 0;
 		}
 
@@ -419,10 +419,11 @@ public class SearchParamRegistryImpl
 		 * were depending on this behaviour? I don't know.. Honestly this is probably being
 		 * overly cautious. -JA
 		 */
-		if (runtimeSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT) {
+		if (newRuntimeSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT) {
 			return 0;
 		}
 
+		// TODO JDJD review
 		/*
 		 * If the SP from the database is not active and it is a built-in non-disableable
 		 * search parameter, do not override the built-in ACTIVE version in the cache with
@@ -430,11 +431,13 @@ public class SearchParamRegistryImpl
 		 * (e.g. Basic:code needed by the R4 SubscriptionTopic registry) from being
 		 * effectively retired even when the DB record has been updated.
 		 */
-		if (runtimeSp.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
-			for (String nextBase : runtimeSp.getBase()) {
+		if (newRuntimeSp.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
+			for (String nextBase : newRuntimeSp.getBase()) {
 				if (ReadOnlySearchParamCache.isNonDisableableBuiltInSearchParam(
-						runtimeSp.getUri(), nextBase, runtimeSp.getName())) {
+						newRuntimeSp.getUri(), nextBase, newRuntimeSp.getName())) {
 					return 0;
+					// TODO jdjd wondering if return 0 updated is right here
+					// Should we instead, allow updates to the base, as long as it doesn't retire it and doesn't remove the non-disableable?
 				}
 			}
 		}
@@ -444,16 +447,16 @@ public class SearchParamRegistryImpl
 		 * the old SP from anywhere it is registered. This helps us override SPs like _content
 		 * and _text.
 		 */
-		String url = runtimeSp.getUri();
+		String url = newRuntimeSp.getUri();
 		RuntimeSearchParam existingParam = theSearchParams.getByUrl(url);
 		if (existingParam != null) {
-			if (isNotBlank(existingParam.getName()) && !existingParam.getName().equals(runtimeSp.getName())) {
+			if (isNotBlank(existingParam.getName()) && !existingParam.getName().equals(newRuntimeSp.getName())) {
 				ourLog.warn(
 						"Existing SearchParameter with URL[{}] and name[{}] doesn't match name[{}] found on SearchParameter: {}",
 						url,
 						existingParam.getName(),
-						runtimeSp.getName(),
-						runtimeSp.getId());
+						newRuntimeSp.getName(),
+						newRuntimeSp.getId());
 			} else {
 				Set<String> expandedBases = expandBaseList(existingParam.getBase());
 				for (String base : expandedBases) {
@@ -465,8 +468,8 @@ public class SearchParamRegistryImpl
 		long retval = 0;
 		for (String nextBaseName :
 				expandBaseList(SearchParameterUtil.getBaseAsStrings(myFhirContext, theSearchParameter))) {
-			String name = runtimeSp.getName();
-			theSearchParams.add(nextBaseName, name, runtimeSp);
+			String name = newRuntimeSp.getName();
+			theSearchParams.add(nextBaseName, name, newRuntimeSp);
 			ourLog.debug(
 					"Adding search parameter {}.{} to SearchParamRegistry",
 					nextBaseName,

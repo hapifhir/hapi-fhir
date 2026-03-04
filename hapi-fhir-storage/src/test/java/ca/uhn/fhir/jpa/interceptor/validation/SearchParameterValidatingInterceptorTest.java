@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -188,6 +190,7 @@ public class SearchParameterValidatingInterceptorTest {
 
 	}
 
+	// todo jdjd 3 tests review
 	@Test
 	void whenRetireBuiltInNonDisableableSearchParam_thenExceptionIsThrown() {
 		// Created by Claude Sonnet 4.6
@@ -210,10 +213,11 @@ public class SearchParameterValidatingInterceptorTest {
 	@Test
 	void whenRetireCustomSpOnNonDisableableResourceType_thenIsAllowed() {
 		// Created by Claude Sonnet 4.6
-		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
+		when(myDaoRegistry.getResourceDao(SearchParamValidatingInterceptor.SEARCH_PARAM)).thenReturn(myIFhirResourceDao);
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(List.of());
 
 		// Retiring a custom (non-built-in URL) SP on Subscription must NOT be blocked
+		// since custom SPs are not critical for internal system calls
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/custom-sub-foo");
 		sp.setUrl("http://example.com/fhir/SearchParameter/Subscription-foo");
@@ -225,15 +229,16 @@ public class SearchParameterValidatingInterceptorTest {
 		sp.addBase("Subscription");
 
 		// Should not throw
-		mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails);
+		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails)).doesNotThrowAnyException();
 	}
+
+	//todo jdjd is it possible the DB has a retired SP already and they try to update it? how can we recover if we do this check?
+	// should we shift to IF change is to retired then fail (ie current active, req to retired)
 
 	@Test
 	void whenUpdateBuiltInNonDisableableSearchParamKeepingActive_thenIsAllowed() {
 		// Created by Claude Sonnet 4.6
-		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
-		setPersistedSearchParameterIds(asList(myExistingSearchParameter));
-		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(myExistingSearchParameter.getId()));
+		when(myDaoRegistry.getResourceDao(SearchParamValidatingInterceptor.SEARCH_PARAM)).thenReturn(myIFhirResourceDao);
 
 		// Updating a non-disableable SP with ACTIVE status is fine
 		SearchParameter sp = new SearchParameter();
@@ -246,8 +251,13 @@ public class SearchParameterValidatingInterceptorTest {
 		sp.setExpression("Basic.code");
 		sp.addBase("Basic");
 
+		setPersistedSearchParameterIds(Collections.singletonList(sp));
+		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(sp.getId()));
+
+		sp.setDescription("foo");
+
 		// Should not throw
-		mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails);
+		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails)).doesNotThrowAnyException();
 	}
 
 	private void setPersistedSearchParameterIds(List<SearchParameter> theSearchParams) {

@@ -29,6 +29,7 @@ public class ReadOnlySearchParamCacheTest {
 		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> searchParamMatchesAtLeastOnePattern(newHashSet("Patient:"), "Patient", "name"));
 	}
 
+	// TODO JDJD review 3 test cases
 	@Test
 	void testIsNonDisableableBuiltInSearchParam_builtInNonDisableable() {
 		// Created by Claude Sonnet 4.6
@@ -48,6 +49,7 @@ public class ReadOnlySearchParamCacheTest {
 		// Custom URL on a non-disableable resource type must NOT be protected
 		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/Basic-custom", "Basic", "custom"));
 		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/Subscription-foo", "Subscription", "foo"));
+		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/CustomResource-url", "CustomResource", "url"));
 		// Null URI
 		assertFalse(isNonDisableableBuiltInSearchParam(null, "Basic", "code"));
 	}

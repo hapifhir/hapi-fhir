@@ -165,11 +165,13 @@ public class SearchParamValidatingInterceptor {
 			return;
 		}
 
+		// Todo jdjd review
 		/*
 		 * Block API calls that attempt to retire/inactivate a built-in non-disableable
 		 * search parameter. CDR seeding skips this check via the SKIP_VALIDATION flag
 		 * checked above, so only direct user API calls are affected.
 		 */
+		// todo jdjd anything but deactivate should be alloweed tho right?
 		if (runtimeSearchParam.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
 			for (String nextBase : runtimeSearchParam.getBase()) {
 				if (ReadOnlySearchParamCache.isNonDisableableBuiltInSearchParam(
