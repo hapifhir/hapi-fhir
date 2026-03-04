@@ -824,6 +824,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theCode);
 		if (isNotBlank(theCodeSystem)) {
 			ParametersUtil.addParameterToParametersUri(fhirContext, params, "system", theCodeSystem);
+		} else {
+			// system could not be determined locally — ask the remote server to infer it
+			ParametersUtil.addParameterToParametersBoolean(fhirContext, params, "inferSystem", true);
 		}
 		if (isNotBlank(theDisplay)) {
 			ParametersUtil.addParameterToParametersString(fhirContext, params, "display", theDisplay);
