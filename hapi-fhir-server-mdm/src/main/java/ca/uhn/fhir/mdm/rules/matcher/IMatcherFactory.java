@@ -88,21 +88,16 @@ public interface IMatcherFactory {
 	/**
 	 * Retrieves the field matcher for the given {@link MatchTypeEnum}.
 	 * <p>
-	 * The default implementation delegates to {@link #getFieldMatcherForName(String)}.
-	 * Together with the default on {@code getFieldMatcherForName}, this forms a
-	 * two-way bridge: legacy implementations that override only this method are
-	 * reachable from {@code getFieldMatcherForName}, and modern implementations
-	 * that override only {@code getFieldMatcherForName} are reachable from this
-	 * method.
-	 * <p>
-	 * <b>Important:</b> Implementations must override at least one of
-	 * {@code getFieldMatcherForName} or {@code getFieldMatcherForMatchType} to
-	 * avoid infinite recursion between the two defaults.
+	 * The default implementation throws {@link UnsupportedOperationException}.
+	 * Legacy implementations that override this method are still reachable from
+	 * the default {@link #getFieldMatcherForName(String)}, which delegates here
+	 * for built-in enum names.
 	 *
 	 * @deprecated Use {@link #getFieldMatcherForName(String)} instead.
 	 */
 	@Deprecated(since = "8_10", forRemoval = true)
 	default IMdmFieldMatcher getFieldMatcherForMatchType(MatchTypeEnum theMatchType) {
-		return getFieldMatcherForName(theMatchType.name());
+		throw new UnsupportedOperationException(
+				Msg.code(2849) + "getFieldMatcherForMatchType is deprecated. Use getFieldMatcherForName instead.");
 	}
 }

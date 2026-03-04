@@ -58,14 +58,10 @@ class IMatcherFactoryBackwardCompatTest {
 	}
 
 	@Test
-	void modernImpl_deprecatedGetFieldMatcherForMatchType_delegatesToGetFieldMatcherForName() {
-		// MdmMatcherFactory (a modern impl) overrides getFieldMatcherForName;
-		// the deprecated getFieldMatcherForMatchType default should delegate to it.
+	@SuppressWarnings("removal")
+	void modernImpl_deprecatedGetFieldMatcherForMatchType_throwsUnsupportedOperationException() {
 		MdmMatcherFactory modernFactory = new MdmMatcherFactory(FhirContext.forR4(), new NicknameSvc());
-		@SuppressWarnings("all")
-		IMdmFieldMatcher matcher = modernFactory.getFieldMatcherForMatchType(MatchTypeEnum.STRING);
-		assertThat(matcher)
-			.isNotNull()
-			.isSameAs(modernFactory.getFieldMatcherForName("STRING"));
+		assertThatThrownBy(() -> modernFactory.getFieldMatcherForMatchType(MatchTypeEnum.STRING))
+			.isInstanceOf(UnsupportedOperationException.class);
 	}
 }
