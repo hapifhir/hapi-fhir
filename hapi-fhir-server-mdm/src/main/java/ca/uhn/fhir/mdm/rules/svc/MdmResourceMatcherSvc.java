@@ -55,6 +55,7 @@ public class MdmResourceMatcherSvc {
 	private final List<MdmResourceFieldMatcher> myFieldMatchers = new ArrayList<>();
 
 	private MdmRulesJson myMdmRulesJson;
+	private volatile boolean myFieldMatchersInitialized = false;
 
 	public MdmResourceMatcherSvc(
 			FhirContext theFhirContext,
@@ -65,8 +66,17 @@ public class MdmResourceMatcherSvc {
 		myMatcherFactory = theIMatcherFactory;
 		mySimilarityFactory = theSimilarityFactory;
 		myMdmRulesJson = theMdmSettings.getMdmRules();
+	}
 
-		addFieldMatchers();
+	private void ensureFieldMatchersInitialized() {
+		if (!myFieldMatchersInitialized) {
+			synchronized (this) {
+				if (!myFieldMatchersInitialized) {
+					addFieldMatchers();
+					myFieldMatchersInitialized = true;
+				}
+			}
+		}
 	}
 
 	private void addFieldMatchers() {
@@ -94,6 +104,7 @@ public class MdmResourceMatcherSvc {
 	}
 
 	MdmMatchOutcome match(IBaseResource theLeftResource, IBaseResource theRightResource) {
+		ensureFieldMatchersInitialized();
 		MdmMatchOutcome matchResult = getMatchOutcome(theLeftResource, theRightResource);
 		MdmMatchResultEnum matchResultEnum = myMdmRulesJson.getMatchResult(matchResult.getVector());
 		matchResult.setMatchResultEnum(matchResultEnum);
@@ -178,8 +189,8 @@ public class MdmResourceMatcherSvc {
 	}
 
 	@VisibleForTesting
-	public void setMdmRulesJson(MdmRulesJson theMdmRulesJson) {
+	public synchronized void setMdmRulesJson(MdmRulesJson theMdmRulesJson) {
 		myMdmRulesJson = theMdmRulesJson;
-		addFieldMatchers();
+		myFieldMatchersInitialized = false;
 	}
 }
