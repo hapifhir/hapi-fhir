@@ -971,6 +971,34 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 
+	/**
+	 * Searching for Organization via DAO with a SystemRequestDetails that has
+	 * a blank tenant ID should work in PATIENT_ID partition mode (unnamed).
+	 * The blank tenant ID should not bypass the interceptor chain and cause
+	 * "Partition IDs have not been set".
+	 */
+	@Test
+	public void testSearchOrganization_withBlankTenantId_shouldReturnDefaultPartition() {
+		// Create an Organization in the default partition
+		Organization org = new Organization();
+		org.setId("Organization/ORG1");
+		org.setName("Test Org");
+		org.addIdentifier().setSystem("http://example.com").setValue("ORG1");
+		myOrganizationDao.update(org, mySrd);
+
+		// Search using a SystemRequestDetails with blank tenant ID
+		SystemRequestDetails blankTenantRequest = new SystemRequestDetails();
+		blankTenantRequest.setTenantId("");
+
+		SearchParameterMap searchMap = new SearchParameterMap()
+				.add(Organization.SP_IDENTIFIER, new TokenParam("http://example.com", "ORG1"))
+				.setLoadSynchronous(true);
+
+		// This should NOT throw "HAPI-2223: Partition IDs have not been set"
+		IBundleProvider result = myOrganizationDao.search(searchMap, blankTenantRequest);
+		assertThat(result.size()).isEqualTo(1);
+	}
+
 	@Interceptor
 	public class MyTransactionSplitInterceptor {
 
