@@ -111,9 +111,22 @@ public class RequestPartitionId implements IModelJson {
 		myAllPartitions = true;
 	}
 
+	/**
+	 * @deprecated Use {@link #getPartitionFromUserDataIfPresent(IBaseResource)}
+	 */
+	@Deprecated(since = "8.10.0", forRemoval = true)
+	public static Optional<RequestPartitionId> getPartitionIfAssigned(IBaseResource theFromResource) {
+		return Optional.ofNullable((RequestPartitionId) theFromResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+	}
+
+	/**
+	 * Fetches the {@link RequestPartitionId} from the given resource's user data using the
+	 * {@link Constants#RESOURCE_PARTITION_ID} key. This key is set by the JPA layer when
+	 * fetching resources from the database.
+	 */
 	@Nonnull
 	public static Optional<RequestPartitionId> getPartitionFromUserDataIfPresent(IBaseResource theFromResource) {
-		return Optional.ofNullable((RequestPartitionId) theFromResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		return getPartitionIfAssigned(theFromResource);
 	}
 
 	/**
