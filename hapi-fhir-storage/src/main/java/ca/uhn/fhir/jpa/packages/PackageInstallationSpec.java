@@ -252,7 +252,6 @@ public class PackageInstallationSpec {
 		 */
 		INSTALL_ONLY
 	}
-	}
 
 	public enum ValidationModeEnum {
 		NOT_AVAILABLE,

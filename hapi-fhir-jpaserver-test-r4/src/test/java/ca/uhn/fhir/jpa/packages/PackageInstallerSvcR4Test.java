@@ -218,7 +218,6 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		installedSpec
 			.setName(igV1.getPackageName())
 			.setVersion(igV1.getPackageVersion())
-			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setVersionPolicy(theVersionPolicyEnum)
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 
