@@ -44,6 +44,7 @@ import ca.uhn.fhir.jpa.provider.merge.MergeValidationService;
 import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
 import ca.uhn.fhir.jpa.provider.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.provider.merge.ResourceUndoMergeService;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -121,8 +122,10 @@ public class JpaR4Config {
 	public MergeValidationService mergeValidationService(
 			FhirContext theFhirContext,
 			DaoRegistry theDaoRegistry,
-			ResourceLinkServiceFactory theResourceLinkServiceFactory) {
-		return new MergeValidationService(theFhirContext, theDaoRegistry, theResourceLinkServiceFactory);
+			ResourceLinkServiceFactory theResourceLinkServiceFactory,
+			ISearchParamExtractor theSearchParamExtractor) {
+		return new MergeValidationService(
+				theFhirContext, theDaoRegistry, theResourceLinkServiceFactory, theSearchParamExtractor);
 	}
 
 	@Bean
