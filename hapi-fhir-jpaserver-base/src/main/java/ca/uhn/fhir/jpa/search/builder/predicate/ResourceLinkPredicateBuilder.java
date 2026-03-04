@@ -225,7 +225,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		 */
 		RequestPartitionId predicateTargetPartitionId = theRequestPartitionId;
 		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
-			predicateTargetPartitionId = null;
+
+			// In named partition mode we want to narrow down the partitions supplied
+			// by the client. In unnamed partition mode we just want to create a fresh
+			// list based on whatever the interceptor says
+			if (myPartitionSettings.isUnnamedPartitionMode()) {
+				predicateTargetPartitionId = null;
+			}
+
 			for (IQueryParameterType next : theReferenceOrParamList) {
 
 				Validate.isTrue(
