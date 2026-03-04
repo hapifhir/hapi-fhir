@@ -185,8 +185,11 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateMatchFields(MdmRulesJson theMdmRulesJson) {
-		ourLog.info("Validating match fields {}", theMdmRulesJson.getMatchFields().stream()
-			.map(MdmFieldMatchJson::getName).collect(Collectors.joining(", ")));
+		ourLog.info(
+				"Validating match fields {}",
+				theMdmRulesJson.getMatchFields().stream()
+						.map(MdmFieldMatchJson::getName)
+						.collect(Collectors.joining(", ")));
 
 		Set<String> names = new HashSet<>();
 		for (MdmFieldMatchJson fieldMatch : theMdmRulesJson.getMatchFields()) {
