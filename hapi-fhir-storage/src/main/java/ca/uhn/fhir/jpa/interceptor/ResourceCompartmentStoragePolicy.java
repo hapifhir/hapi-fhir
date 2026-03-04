@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.util.UrlUtil;
 
 import java.util.Map;
@@ -87,6 +86,10 @@ public class ResourceCompartmentStoragePolicy {
 		return myOnlyAppliesToCompartmentResourceTypes;
 	}
 
+	public RequestPartitionId getAlwaysUsePartition() {
+		return myAlwaysUsePartition;
+	}
+
 	public Optional<RequestPartitionId> getPartitionIdForNonUniqueCompartment(PartitionSettings thePartitionSettings) {
 		if (hasPartitionIdForNonUniqueCompartment()) {
 			return Optional.of(RequestPartitionId.defaultPartition(thePartitionSettings));
@@ -113,11 +116,10 @@ public class ResourceCompartmentStoragePolicy {
 
 	public Optional<RequestPartitionId> getUsePartitionId(PartitionSettings thePartitionSettings) {
 		if (myAlwaysUseDefaultPartition) {
-			return Optional.of(RequestPartitionId.fromPartitionIdAndName(
-					thePartitionSettings.getDefaultPartitionId(), JpaConstants.DEFAULT_PARTITION_NAME));
+			return Optional.of(RequestPartitionId.defaultPartition(thePartitionSettings));
 		}
-		if (myAlwaysUsePartition != null) {
-			return Optional.of(myAlwaysUsePartition);
+		if (getAlwaysUsePartition() != null) {
+			return Optional.of(getAlwaysUsePartition());
 		}
 		return Optional.empty();
 	}
