@@ -63,7 +63,7 @@ public abstract class BaseR4Test {
 		assertEquals(theExpectedMatchEnum, theMatchResult.getMatchResultEnum());
 	}
 
-	protected void assertMatchResult(MdmMatchResultEnum theExpectedMatchEnum, long theExpectedVector, double theExpectedScore, @SuppressWarnings("SameParameterValue") boolean theExpectedNewGoldenResource, @SuppressWarnings("SameParameterValue")boolean theExpectedEidMatch, MdmMatchOutcome theMatchResult) {
+	protected void assertMatchResult(MdmMatchResultEnum theExpectedMatchEnum, long theExpectedVector, double theExpectedScore, @SuppressWarnings("SameParameterValue") boolean theExpectedNewGoldenResource, @SuppressWarnings("SameParameterValue") boolean theExpectedEidMatch, MdmMatchOutcome theMatchResult) {
 		assertThat(theMatchResult.getScore()).isCloseTo(theExpectedScore, within(0.001));
 		assertEquals(theExpectedVector, theMatchResult.getVector());
 		assertEquals(theExpectedEidMatch, theMatchResult.isEidMatch());
