@@ -136,9 +136,9 @@ public class PreviousResourceVersionRestorer {
 				long currentVersion = deletedId.getVersionIdPartAsLong();
 				if (currentVersion != referenceVersion) {
 					String msg = String.format(
-							"The resource cannot be restored because the current version of resource %s (%s) does not match the expected version (%s)",
-							referenceStr, currentVersion, referenceVersion);
-					throw new ResourceVersionConflictException(Msg.code(2732) + msg);
+							"The resource '%s' cannot be restored because it was deleted. %s",
+							referenceStr, e.getMessage());
+					throw new ResourceGoneException(Msg.code(2751) + msg);
 				}
 				ourLog.info("[DIAG]   Tombstoned resource version matches ({}), will undelete", currentVersion);
 				// Version matches → resource is tombstoned at the expected version, proceed to undelete

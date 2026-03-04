@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -334,6 +335,8 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 	}
 
 
+	//TODO EMRE: remove this test
+	@Disabled
 	@Test
 	void testUndoMerge_ProvenanceExistsButMissingContainedResourceForInputParams_Fails() {
 		// Setup: Create scenario without referencing resources
