@@ -2091,6 +2091,7 @@ public class JsonParserR4Test extends BaseTest {
 	@ParameterizedTest
 	@CsvSource({
 		 "0.0, 0.0",
+		 "0.1000, 0.1",
 		 ".5, 0.5",
 		 "000.5, 0.5",
 		 "1., 1",
