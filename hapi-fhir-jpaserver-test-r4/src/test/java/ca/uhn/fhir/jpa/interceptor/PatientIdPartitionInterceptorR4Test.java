@@ -554,6 +554,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@Test
 	void testSearchObservation_mixedCompartmentParam_findsAll() {
 	    // given
+		mySvc.setResourceTypePolicies(Map.of(
+			"Observation",
+			ResourceCompartmentStoragePolicy.optionalSingleCompartment()
+		));
 		createPatientA();
 		IIdType patAObsId = createObservation(withSubject("Patient/A"), withStatus("final"), withIdentifier("http://example.com", "patObsIdentifier"));
 		IIdType g1 = createGroup(withId("G1"));
@@ -573,9 +577,9 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		createObservationB();
 
 		// Multiple ANDs
-		assertThatThrownBy(() -> myObservationDao.search(SearchParameterMap.newSynchronous()
-					.add("subject", new ReferenceParam("identifier", "http://patient|1"))
-				, mySrd))
+		assertThatThrownBy(() -> myObservationDao.search(SearchParameterMap
+				.newSynchronous()
+				.add("subject", new ReferenceParam("identifier", "http://patient|1")), mySrd))
 			.isInstanceOf(MethodNotAllowedException.class)
 			.hasMessageContaining(Msg.code(1322) + "The parameter subject.identifier is not supported in patient compartment mode");
 	}
