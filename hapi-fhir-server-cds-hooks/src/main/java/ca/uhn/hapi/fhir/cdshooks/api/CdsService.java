@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * Marks a method as a CDS Hooks service.  A method annotated with `@CdsService(value="example-service")` is accessed
  * at a path like `<a href="https://example.com/cds-services/example-service">Example Service</a>`
  *
- * @see <a href="https://cds-hooks.hl7.org/ballots/2020Sep/">Version 1.1 of the CDS Hooks Specification</a>
+ * @see <a href="https://cds-hooks.hl7.org/STU2">The STU 2 release of the CDS Hooks Specification</a>
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -69,6 +69,12 @@ public @interface CdsService {
 	 * prefetch elements itself.
 	 */
 	boolean allowAutoFhirClientPrefetch() default false;
+
+	/**
+	 * Human-friendly description of any preconditions for the use of this CDS Service.
+	 * Added in CDS Hooks version 2.0.
+	 */
+	String usageRequirements() default "";
 
 	/**
 	 * An arbitrary string which will be used to store stringify JSON
