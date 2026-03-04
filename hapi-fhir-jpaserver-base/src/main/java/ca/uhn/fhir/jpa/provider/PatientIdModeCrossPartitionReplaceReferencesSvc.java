@@ -42,6 +42,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,8 +88,13 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 	/**
 	 * Moves compartment resources from source patient's partition to target patient's partition,
 	 * and updates references in non-compartment resources. All within a single DB transaction.
+	 *
+	 * @return a Bundle whose entries have {@code response.location} set to the versioned ID of
+	 *         every resource affected by the move: new copies (v1), updated in-place resources
+	 *         (vN), and tombstoned old copies (vN+1). This bundle is stored in the Provenance
+	 *         resource and used by undo-merge to reverse the operation.
 	 */
-	public void moveCompartmentResourcesAndReplaceReferences(
+	public Bundle moveCompartmentResourcesAndReplaceReferences(
 			IBaseResource theSourcePatient, IBaseResource theTargetPatient, RequestDetails theRequestDetails) {
 
 		String sourcePatientId = theSourcePatient.getIdElement().getIdPart();
@@ -105,6 +111,8 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 				sourcePartitionId,
 				targetPatientId,
 				targetPartitionId);
+
+		Bundle[] resultBundle = {new Bundle()};
 
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
 			// Step 1: Discover all resources referencing the source patient
@@ -130,6 +138,15 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 				return;
 			}
 
+			// Capture the current version of each resource to be moved before buildCreateBundle
+			// clears their IDs. After the DELETE in Step 5, the tombstone version = currentVersion + 1.
+			Map<String, Long> moveListOldIdToCurrentVersion = new LinkedHashMap<>();
+			for (IBaseResource resource : moveList) {
+				String oldId =
+						resource.getIdElement().toUnqualifiedVersionless().getValue();
+				moveListOldIdToCurrentVersion.put(oldId, resource.getIdElement().getVersionIdPartAsLong());
+			}
+
 			// Step 3: Execute CREATE bundle — new SystemRequestDetails() (no explicit partition)
 			// lets the PatientIdPartitionInterceptor fire and route each resource to the
 			// correct partition based on its patient reference. This also ensures the
@@ -142,20 +159,24 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 			// "is deleted" error when DaoResourceLinkResolver hits that null cache entry.
 			LinkedHashMap<String, String> oldIdToPlaceholder = new LinkedHashMap<>();
 			Map<String, String> oldToNewIdMap = new HashMap<>();
+			List<String> newVersionedLocations = new ArrayList<>();
 			if (!moveList.isEmpty()) {
 				IBaseBundle createBundle =
 						buildCreateBundle(moveList, sourcePatientId, targetPatientId, oldIdToPlaceholder);
 				IBaseBundle createResponse = mySystemDao.transactionNested(new SystemRequestDetails(), createBundle);
 				oldToNewIdMap = extractOldToNewIdMap(new ArrayList<>(oldIdToPlaceholder.keySet()), createResponse);
+				newVersionedLocations = extractVersionedLocations(createResponse);
 			}
 
 			// Step 4: Execute UPDATE bundle — UPDATE resources were loaded from DB so
 			// RESOURCE_PARTITION_ID is already set on each; determineCreatePartitionForRequest()
 			// uses that directly, ignoring SystemRequestDetails.
+			List<String> updatedVersionedLocations = new ArrayList<>();
 			if (!updateList.isEmpty()) {
 				IBaseBundle updateBundle =
 						buildUpdateBundle(updateList, sourcePatientId, targetPatientId, oldToNewIdMap);
-				mySystemDao.transactionNested(new SystemRequestDetails(), updateBundle);
+				IBaseBundle updateResponse = mySystemDao.transactionNested(new SystemRequestDetails(), updateBundle);
+				updatedVersionedLocations = extractVersionedLocations(updateResponse);
 			}
 
 			// Step 5: Delete source copies of moved resources via a single transaction bundle
@@ -172,7 +193,46 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 					"Cross-partition merge complete: moved {} resources, updated {} references",
 					moveList.size(),
 					updateList.size());
+
+			// Build result bundle: versioned locations for all affected resources, used by undo-merge
+			Bundle bundle = new Bundle();
+			for (String location : newVersionedLocations) {
+				addEntryWithLocation(bundle, location);
+			}
+			for (String location : updatedVersionedLocations) {
+				addEntryWithLocation(bundle, location);
+			}
+			// Tombstoned old copies: their version after DELETE = currentVersion + 1
+			for (Map.Entry<String, Long> entry : moveListOldIdToCurrentVersion.entrySet()) {
+				String tombstonedLocation = entry.getKey() + "/_history/" + (entry.getValue() + 1);
+				addEntryWithLocation(bundle, tombstonedLocation);
+			}
+			resultBundle[0] = bundle;
 		});
+
+		return resultBundle[0];
+	}
+
+	private static void addEntryWithLocation(Bundle theBundle, String theVersionedLocation) {
+		Bundle.BundleEntryComponent entry = theBundle.addEntry();
+		entry.setResponse(new Bundle.BundleEntryResponseComponent().setLocation(theVersionedLocation));
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<String> extractVersionedLocations(IBaseBundle theResponse) {
+		FhirTerser terser = myFhirContext.newTerser();
+		List<IBase> entries = terser.getValues(theResponse, "Bundle.entry", IBase.class);
+		List<String> result = new ArrayList<>();
+		for (IBase entry : entries) {
+			List<IBase> locationValues = terser.getValues(entry, "response.location", IBase.class);
+			if (!locationValues.isEmpty() && locationValues.get(0) instanceof IPrimitiveType) {
+				String location = ((IPrimitiveType<String>) locationValues.get(0)).getValueAsString();
+				if (location != null && !location.isEmpty()) {
+					result.add(location);
+				}
+			}
+		}
+		return result;
 	}
 
 	private List<IBaseResource> discoverReferencingResources(String theSourcePatientId) {

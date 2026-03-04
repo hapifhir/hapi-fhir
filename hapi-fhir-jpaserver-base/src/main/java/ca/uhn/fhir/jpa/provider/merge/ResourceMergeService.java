@@ -240,9 +240,8 @@ public class ResourceMergeService {
 
 		Bundle patchResultBundle;
 		if (crossPartition) {
-			myCrossPartitionResourceMoverSvc.moveCompartmentResourcesAndReplaceReferences(
+			patchResultBundle = myCrossPartitionResourceMoverSvc.moveCompartmentResourcesAndReplaceReferences(
 					theSourceResource, theTargetResource, theRequestDetails);
-			patchResultBundle = new Bundle();
 		} else {
 			ReplaceReferencesRequest replaceReferencesRequest = new ReplaceReferencesRequest(
 					theSourceResource.getIdElement(),

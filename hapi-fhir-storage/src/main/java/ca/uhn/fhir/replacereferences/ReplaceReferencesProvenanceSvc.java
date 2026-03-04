@@ -205,7 +205,7 @@ public class ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId, IIdType theSourceId, RequestDetails theRequestDetails, String theOperationName) {
 
 		List<Provenance> provenances =
-				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId, theSourceId), theRequestDetails);
+				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId), theRequestDetails);
 
 		if (provenances.isEmpty()) {
 			return null;
