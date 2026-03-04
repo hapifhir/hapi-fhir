@@ -553,14 +553,11 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		createObservationB();
 
 		// Multiple ANDs
-		try {
-			myObservationDao.search(SearchParameterMap.newSynchronous()
+		assertThatThrownBy(() -> myObservationDao.search(SearchParameterMap.newSynchronous()
 					.add("subject", new ReferenceParam("identifier", "http://patient|1"))
-				, mySrd);
-		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(1322) + "The parameter subject.identifier is not supported in patient compartment mode", e.getMessage());
-		}
-
+				, mySrd))
+			.isInstanceOf(MethodNotAllowedException.class)
+			.hasMessageContaining(Msg.code(1322) + "The parameter subject.identifier is not supported in patient compartment mode");
 	}
 
 	@Test
