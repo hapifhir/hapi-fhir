@@ -218,6 +218,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		installedSpec
 			.setName(igV1.getPackageName())
 			.setVersion(igV1.getPackageVersion())
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setVersionPolicy(theVersionPolicyEnum)
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 
@@ -527,6 +528,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	@Test
 	public void dryRunInstall_withDependencies_wontInstallDependencies(@TempDir Path theTempDir) throws IOException {
 		// setup
+		String packageName = "my.fake.pkg.r4";
 		IParser parser = myFhirContext.newJsonParser();
 		String nameSystemStr = """
 				{
@@ -546,7 +548,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		ImplementationGuideCreator igV1 = new ImplementationGuideCreator(myFhirContext, "example.ig.com", "1.0.0");
 		igV1.setDirectory(igdir1);
-		igV1.addDependency("hl7.fhir.r4", "4.0.1");
+		igV1.addDependency(packageName, "4.0.1");
 
 		// how many installation specs
 		PackageInstallationSpec installedSpec = new PackageInstallationSpec();
@@ -556,7 +558,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION)
 			.setFetchDependencies(true)
-			.setDryRun(true);
+			.setDryRun(true)
+		;
 
 		// one resource - we don't really need or care about it
 		igV1.addResourceToIG("NamingSystem", system);
@@ -571,7 +574,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertTrue(outcome.getMessage()
 			.stream().anyMatch(m -> m.contains("Dry-run complete")));
 		assertTrue(outcome.getMessage()
-			.stream().anyMatch(m -> m.contains("Installation would install") && m.contains("hl7.fhir.r4")));
+			.stream().anyMatch(m -> m.contains("Installation would install") && m.contains(packageName)));
 	}
 
 	@Disabled("This test is super slow so don't run by default")

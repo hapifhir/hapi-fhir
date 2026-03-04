@@ -116,8 +116,7 @@ public class ImplementationGuideCreator {
 		try {
 			myPackageJson = myMapper.readValue(PACKAGE_JSON_BASE, Map.class);
 		} catch (Exception ex) {
-			sneakyThrow(ex);
-			myPackageJson = new HashMap<>();
+			throw new RuntimeException(ex);
 		}
 
 		// update provided values
@@ -201,7 +200,7 @@ public class ImplementationGuideCreator {
 
 			ourLog.info(pkg);
 		} catch (Exception ex) {
-			sneakyThrow(ex);
+			throw new RuntimeException(ex);
 		}
 		return pkg;
 	}
@@ -221,10 +220,5 @@ public class ImplementationGuideCreator {
 				}
 			}
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <THROWS extends Throwable> void sneakyThrow(Throwable theThrowable) throws THROWS {
-		throw (THROWS) theThrowable;
 	}
 }

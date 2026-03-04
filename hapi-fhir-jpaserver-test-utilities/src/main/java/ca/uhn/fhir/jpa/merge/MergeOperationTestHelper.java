@@ -28,9 +28,11 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Task;
 
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
@@ -150,6 +152,23 @@ public class MergeOperationTestHelper {
 		String jobId = getJobIdFromTask(task);
 
 		myBatch2JobHelper.awaitJobCompletion(jobId);
+	}
+
+	// Outcome validation helpers
+
+	/**
+	 * Validates the OperationOutcome from a synchronous merge operation contains
+	 * the expected success message.
+	 *
+	 * @param theOutParams the output parameters from merge operation
+	 */
+	public void validateSyncSuccessMessage(@Nonnull Parameters theOutParams) {
+		OperationOutcome outcome = (OperationOutcome)
+				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
+			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+			assertThat(issue.getDetails().getText()).isEqualTo("Merge operation completed successfully.");
+		});
 	}
 
 	// Error validation helpers

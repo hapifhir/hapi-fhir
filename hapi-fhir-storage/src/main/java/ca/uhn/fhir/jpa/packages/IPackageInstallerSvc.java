@@ -17,11 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.api.svc;
-
-import ca.uhn.fhir.jpa.packages.PackageDeleteOutcomeJson;
-import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
-import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
+package ca.uhn.fhir.jpa.packages;
 
 public interface IPackageInstallerSvc {
 

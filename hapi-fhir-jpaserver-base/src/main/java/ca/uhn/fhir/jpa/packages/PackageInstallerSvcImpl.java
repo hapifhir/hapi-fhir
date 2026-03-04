@@ -33,7 +33,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.api.svc.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
@@ -435,8 +434,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 		IBaseResource existingResource =
 				!searchResult.isEmpty() ? searchResult.getResources(0, 1).get(0) : null;
-		boolean isInstalled =
-				createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec, map, theOutcome);
+		boolean isInstalled = false;
+		if (theInstallationSpec.isDryRun()) {
+			constructDryRunReport(theResource, existingResource, map, theOutcome);
+		} else {
+			isInstalled = createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec);
+		}
 		if (isInstalled) {
 			theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
 		}
@@ -506,6 +509,47 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			}
 			return false;
 		}
+	}
+
+	private boolean constructDryRunReport(
+			IBaseResource theResource,
+			IBaseResource theExistingResource,
+			SearchParameterMap theSpMap,
+			PackageInstallOutcomeJson theOutcome) {
+		FhirTerser terser = myFhirContext.newTerser();
+		String resourceType = theResource.fhirType();
+		RuntimeResourceDefinition rtDefinition = myFhirContext.getResourceDefinition(resourceType);
+		List<RuntimeSearchParam> sps = rtDefinition.getSearchParams();
+		StringBuilder uniqueIdentifierSpBuilder = new StringBuilder();
+		for (Map.Entry<String, List<List<IQueryParameterType>>> spSet : theSpMap.entrySet()) {
+			String key = spSet.getKey();
+
+			// TODO - will we ever see nothing? or a throw?
+			RuntimeSearchParam runtimeSearchParameter = sps.stream()
+					.filter(sp -> sp.getName().equals(key))
+					.findFirst()
+					.orElseThrow();
+
+			Optional<String> valueOp = terser.getSinglePrimitiveValue(theResource, runtimeSearchParameter.getPath());
+			if (valueOp.isEmpty()) {
+				/*
+				 * we don't expect to see this because we constructed this search paramter map out of the
+				 * existing fields already and we're deconstructing it.
+				 */
+				throw new UnprocessableEntityException(
+						Msg.code(2872) + " No unique value found at " + runtimeSearchParameter.getPath());
+			}
+			uniqueIdentifierSpBuilder.append(valueOp.get());
+		}
+
+		// dry run
+		if (theExistingResource != null) {
+			theOutcome.addExistingResource(resourceType, uniqueIdentifierSpBuilder.toString());
+		} else {
+			// a resource we'd add
+			theOutcome.addResourceTypeToBeAdded(resourceType, uniqueIdentifierSpBuilder.toString());
+		}
+		return false;
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})

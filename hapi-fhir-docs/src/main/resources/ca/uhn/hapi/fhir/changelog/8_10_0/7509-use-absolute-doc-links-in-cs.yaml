@@ -1,0 +1,7 @@
+---
+type: add
+issue: 7509
+title: "The SearchParameter documentation links in automatically generated
+   server CapabilityStatements contained relative links that did not generally
+   resolve. These have been replaced with proper absolute links. Thanks to
+   Jens Kristian Villadsen for the contribution!"
