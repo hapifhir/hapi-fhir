@@ -272,7 +272,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		if (theRequest.getRequestPartitionId() != null) {
 			return theRequest.getRequestPartitionId();
 		}
-		if (theRequest.getTenantId() != null) {
+		if (StringUtils.isNotBlank(theRequest.getTenantId())) {
 			// TODO: JA2 we should not be inferring the partition name from the tenant name
 			return RequestPartitionId.fromPartitionName(theRequest.getTenantId());
 		} else {
@@ -353,7 +353,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	}
 
 	private boolean systemRequestHasExplicitPartition(@Nonnull SystemRequestDetails theRequest) {
-		return theRequest.getRequestPartitionId() != null || theRequest.getTenantId() != null;
+		return theRequest.getRequestPartitionId() != null || StringUtils.isNotBlank(theRequest.getTenantId());
 	}
 
 	@Nonnull
@@ -384,6 +384,12 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			} else if (retVal.hasPartitionIds()) {
 				retVal = validateAndNormalizePartitionIds(retVal);
 			}
+		}
+
+		// In unnamed partition mode, partition names can't be resolved to IDs.
+		// Fall back to default partition rather than passing an unresolvable partition.
+		if (myPartitionSettings.isUnnamedPartitionMode() && retVal.hasPartitionNames() && !retVal.hasPartitionIds()) {
+			retVal = myPartitionSettings.getDefaultRequestPartitionId();
 		}
 
 		// Note: It's still possible that the partition only has a date but no name/id
