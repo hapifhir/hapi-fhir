@@ -227,7 +227,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 					if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
 						retVal.getMessage()
-							.add("Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
+								.add(
+										"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
 					}
 
 					// If any SearchParameters were installed, let's load them right away
