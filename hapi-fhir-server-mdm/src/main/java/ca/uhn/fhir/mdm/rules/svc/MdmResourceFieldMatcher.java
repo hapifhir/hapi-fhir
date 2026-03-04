@@ -38,6 +38,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 
@@ -73,19 +74,23 @@ public class MdmResourceFieldMatcher {
 		myMdmRulesJson = theMdmRulesJson;
 		myIsFhirPathExpression = myFhirPath != null;
 
-		MdmMatcherJson matcherJson = theMdmFieldMatchJson.getMatcher();
-		if (matcherJson != null && matcherJson.getAlgorithm() != null) {
-			myMatcher = theIMatcherFactory.getFieldMatcherForName(matcherJson.getAlgorithm());
-		} else {
-			myMatcher = null;
-		}
+		myMatcher = resolveMatcher(theIMatcherFactory, theMdmFieldMatchJson.getMatcher());
+		mySimilarity = resolveSimilarity(theSimilarityFactory, theMdmFieldMatchJson.getSimilarity());
+	}
 
-		MdmSimilarityJson similarityJson = theMdmFieldMatchJson.getSimilarity();
-		if (similarityJson != null && similarityJson.getAlgorithm() != null) {
-			mySimilarity = theSimilarityFactory.getSimilarityForName(similarityJson.getAlgorithm());
-		} else {
-			mySimilarity = null;
-		}
+	private static IMdmFieldMatcher resolveMatcher(IMatcherFactory theFactory, MdmMatcherJson theMatcherJson) {
+		return Optional.ofNullable(theMatcherJson)
+				.map(MdmMatcherJson::getAlgorithm)
+				.map(theFactory::getFieldMatcherForName)
+				.orElse(null);
+	}
+
+	private static IMdmFieldSimilarity resolveSimilarity(
+			ISimilarityFactory theFactory, MdmSimilarityJson theSimilarityJson) {
+		return Optional.ofNullable(theSimilarityJson)
+				.map(MdmSimilarityJson::getAlgorithm)
+				.map(theFactory::getSimilarityForName)
+				.orElse(null);
 	}
 
 	/**
