@@ -111,9 +111,6 @@ public class JobInstanceProcessor {
 		// determine job progress; delete CANCELED/COMPLETE/FAILED jobs that are no longer needed
 		cleanupInstance(theInstance);
 		// move gated jobs to the next step, if needed
-		// moves GATE_WAITING / QUEUED (legacy) chunks to:
-		// READY (for regular gated jobs)
-		// REDUCTION_READY (if it's the final reduction step)
 		triggerGatedExecutions(theInstance, jobDefinition);
 
 		if (theInstance.hasGatedStep() && theInstance.isRunning()) {
@@ -125,6 +122,17 @@ public class JobInstanceProcessor {
 
 			JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
 					jobDefinition, updatedInstance.get().getCurrentGatedStepId());
+
+			// On every maintenance run, flip any GATE_WAITING chunks for the current gated step to READY.
+			// This catches late-arriving chunks that were produced by slow workers after the job step
+			// was advanced. In normal operation this is a no-op, but it handles the race condition
+			// where a chunk is created as GATE_WAITING after advanceJobStepAndUpdateChunkStatus has
+			// already run.
+			myJobPersistence.enqueueGateWaitingChunksForCurrentStep(
+					theInstance.getInstanceId(),
+					updatedInstance.get().getCurrentGatedStepId(),
+					jobWorkCursor.isReductionStep());
+
 			if (jobWorkCursor.isReductionStep()) {
 				// Reduction step work chunks should never be sent to the queue but to its specific service instead.
 				triggerReductionStep(theInstance, jobWorkCursor);
