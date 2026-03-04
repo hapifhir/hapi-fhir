@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class MdmRuleValidator implements IMdmRuleValidator {
@@ -184,7 +185,8 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateMatchFields(MdmRulesJson theMdmRulesJson) {
-		ourLog.info("Validating match fields {}", theMdmRulesJson.getMatchFields());
+		ourLog.info("Validating match fields {}", theMdmRulesJson.getMatchFields().stream()
+			.map(MdmFieldMatchJson::getName).collect(Collectors.joining(", ")));
 
 		Set<String> names = new HashSet<>();
 		for (MdmFieldMatchJson fieldMatch : theMdmRulesJson.getMatchFields()) {
