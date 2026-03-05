@@ -763,6 +763,41 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	void enqueueGateWaitingChunksForCurrentStep_forReductionStep_flipsToReductionReady() {
+		// setup - create a gated job instance and advance to LAST_STEP_ID
+		boolean isGatedExecution = true;
+		JobInstance instance = createInstance(true, isGatedExecution);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Store a chunk and advance so the instance is at LAST_STEP_ID
+		storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+		runInTransaction(() -> mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false));
+
+		// Simulate a late-arriving chunk that arrives AFTER step advancement
+		String lateChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
+
+		// verify precondition - late chunk starts as GATE_WAITING
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
+				.as("Late-arriving chunk should initially be GATE_WAITING")
+				.isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+		});
+
+		// execute - enqueue with theIsReductionStep = true
+		runInTransaction(() -> {
+			int flipped = mySvc.enqueueGateWaitingChunksForCurrentStep(instanceId, LAST_STEP_ID, true);
+			assertThat(flipped).as("Should flip the late-arriving chunk").isEqualTo(1);
+		});
+
+		// verify - the late chunk should be REDUCTION_READY (not READY) for a reduction step
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
+				.as("Reduction step should flip late-arriving chunks to REDUCTION_READY")
+				.isEqualTo(WorkChunkStatusEnum.REDUCTION_READY);
+		});
+	}
+
+	@Test
 	public void testFetchUnknownWork() {
 		assertFalse(myWorkChunkRepository.findById("FOO").isPresent());
 	}
