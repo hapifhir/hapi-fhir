@@ -273,7 +273,7 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		myPartitionSettings.setDefaultPartitionId(0);
 
 		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(
-				myFhirContext, mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+				myFhirContext, mySearchParamExtractor, myPartitionSettings);
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		try {
 			// Create a SystemRequestDetails with ONLY a blank tenant ID (no explicit partition)
@@ -303,7 +303,7 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		myPartitionSettings.setDefaultPartitionId(0);
 
 		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(
-				myFhirContext, mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+				myFhirContext, mySearchParamExtractor, myPartitionSettings);
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		try {
 			// Create a SystemRequestDetails with null tenant ID (the default)
