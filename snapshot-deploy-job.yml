@@ -101,7 +101,7 @@ jobs:
             -H 'Content-Type: application/json' \
             -H "X-Slack-Sender-Token: ${SLACK_SENDER_TOKEN}" \
             --data "{
-              \"channel\": \"ci-clintel-build-status\",
+              \"channel\": \"cdr-build-status\",
               \"author\": \"robogary\",
               \"text\": \"HAPI FHIR Nightly SNAPSHOT Deploy Failed\",
               \"blocks\": [
