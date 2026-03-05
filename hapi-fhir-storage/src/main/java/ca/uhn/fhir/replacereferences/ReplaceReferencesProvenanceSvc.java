@@ -51,8 +51,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE;
-
 /**
  * This service is used to create a Provenance resource for the $replace-references operation
  * and also used as a base class for {@link ca.uhn.fhir.merge.MergeProvenanceSvc} used in $merge operations.
@@ -138,7 +136,7 @@ public class ReplaceReferencesProvenanceSvc {
 	 *
 	 * @param theTargetId           the versioned id of the target resource of the operation.
 	 * @param theSourceId           the versioned id of the source resource of the operation.
-	 * @param thePatchResultBundles the list of patch result bundles that contain the updated resources.
+	 * @param theReferencesToChangedResources  the list of references to resources that were changed by the operation.
 	 * @param theStartTime          the start time of the operation.
 	 * @param theRequestDetails     the request details
 	 * @param theProvenanceAgents   the list of agents to be included in the Provenance resource.
@@ -146,7 +144,7 @@ public class ReplaceReferencesProvenanceSvc {
 	public void createProvenance(
 			IIdType theTargetId,
 			IIdType theSourceId,
-			List<Bundle> thePatchResultBundles,
+			List<Reference> theReferencesToChangedResources,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -154,7 +152,7 @@ public class ReplaceReferencesProvenanceSvc {
 		createProvenance(
 				theTargetId,
 				theSourceId,
-				thePatchResultBundles,
+				theReferencesToChangedResources,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
@@ -167,7 +165,7 @@ public class ReplaceReferencesProvenanceSvc {
 	protected void createProvenance(
 			IIdType theTargetId,
 			IIdType theSourceId,
-			List<Bundle> thePatchResultBundles,
+			List<Reference> theReferencesToChangedResources,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -176,12 +174,11 @@ public class ReplaceReferencesProvenanceSvc {
 		String resourceType = theTargetId.getResourceType();
 		Reference targetReference = new Reference(theTargetId);
 		Reference sourceReference = new Reference(theSourceId);
-		List<Reference> patchedReferences = extractUpdatedResourceReferences(thePatchResultBundles);
-		if (!patchedReferences.isEmpty() || theCreateEvenWhenNoReferencesWereUpdated) {
+		if (!theReferencesToChangedResources.isEmpty() || theCreateEvenWhenNoReferencesWereUpdated) {
 			Provenance provenance = createProvenanceObject(
 					targetReference,
 					sourceReference,
-					patchedReferences,
+					theReferencesToChangedResources,
 					theStartTime,
 					theProvenanceAgents,
 					theContainedResources,
@@ -205,7 +202,7 @@ public class ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId, IIdType theSourceId, RequestDetails theRequestDetails, String theOperationName) {
 
 		List<Provenance> provenances =
-				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId, theSourceId), theRequestDetails);
+				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId), theRequestDetails);
 
 		if (provenances.isEmpty()) {
 			return null;
@@ -306,28 +303,26 @@ public class ReplaceReferencesProvenanceSvc {
 						.getValue());
 	}
 
-	protected List<Reference> extractUpdatedResourceReferences(List<Bundle> thePatchBundles) {
-		List<Reference> patchedResourceReferences = new ArrayList<>();
-		thePatchBundles.forEach(outputBundle -> {
+	public static List<Reference> extractChangedResourceReferences(List<Bundle> theResponseBundles) {
+		List<Reference> changedResourceReferences = new ArrayList<>();
+		theResponseBundles.forEach(outputBundle -> {
 			outputBundle.getEntry().forEach(entry -> {
 				if (entry.getResponse() != null && entry.getResponse().hasLocation()) {
-					if (isNoopPatch(entry.getResponse())) {
-						// in the unlikely event that the patch resulted in a no-op change,
-						// don't add the reference to the Provenance since it wasn't really updated by the transaction.
+					if (isNoChangeResponse(entry.getResponse())) {
 						ourLog.warn(
-								"Not adding reference {} to Provenance, because the patch resulted in a no-op change",
+								"Not adding reference {} to Provenance, because the operation resulted in a no-op change",
 								entry.getResponse().getLocation());
 						return;
 					}
 					Reference reference = new Reference(entry.getResponse().getLocation());
-					patchedResourceReferences.add(reference);
+					changedResourceReferences.add(reference);
 				}
 			});
 		});
-		return patchedResourceReferences;
+		return changedResourceReferences;
 	}
 
-	private boolean isNoopPatch(Bundle.BundleEntryResponseComponent theResponse) {
+	private static boolean isNoChangeResponse(Bundle.BundleEntryResponseComponent theResponse) {
 		if (!theResponse.hasOutcome()) {
 			return false;
 		}
@@ -338,14 +333,18 @@ public class ReplaceReferencesProvenanceSvc {
 			return false;
 		}
 
-		List<OperationOutcome.OperationOutcomeIssueComponent> issues = outcome.getIssue();
-
-		return issues.stream()
+		return outcome.getIssue().stream()
 				.filter(issue -> issue.hasDetails() && issue.getDetails().hasCoding())
 				.map(issue -> issue.getDetails().getCoding())
 				.flatMap(List::stream)
-				.anyMatch(coding -> StorageResponseCodeEnum.SYSTEM.equals(coding.getSystem())
-						&& SUCCESSFUL_PATCH_NO_CHANGE.getCode().equals(coding.getCode()));
+				.filter(coding -> StorageResponseCodeEnum.SYSTEM.equals(coding.getSystem()))
+				.anyMatch(coding -> {
+					try {
+						return StorageResponseCodeEnum.valueOf(coding.getCode()).isNoChange();
+					} catch (IllegalArgumentException e) {
+						return false;
+					}
+				});
 	}
 
 	private Provenance.ProvenanceAgentComponent createR4ProvenanceAgent(IProvenanceAgent theProvenanceAgent) {

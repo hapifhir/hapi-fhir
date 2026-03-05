@@ -30,9 +30,12 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
+import ca.uhn.fhir.jpa.provider.PatientIdModeCrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.merge.MergeResourceHelper;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -42,12 +45,14 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
 import static ca.uhn.fhir.merge.MergeResourceHelper.addInfoToOperationOutcome;
@@ -73,6 +78,8 @@ public class ResourceMergeService {
 	private final MergeResourceHelper myMergeResourceHelper;
 	private final Batch2TaskHelper myBatch2TaskHelper;
 	private final MergeValidationService myMergeValidationService;
+	private final PatientIdModeCrossPartitionReplaceReferencesSvc myCrossPartitionResourceMoverSvc;
+	private final PartitionSettings myPartitionSettings;
 
 	public ResourceMergeService(
 			JpaStorageSettings theStorageSettings,
@@ -83,7 +90,9 @@ public class ResourceMergeService {
 			IJobCoordinator theJobCoordinator,
 			Batch2TaskHelper theBatch2TaskHelper,
 			MergeValidationService theMergeValidationService,
-			MergeResourceHelper theMergeResourceHelper) {
+			MergeResourceHelper theMergeResourceHelper,
+			PatientIdModeCrossPartitionReplaceReferencesSvc theCrossPartitionResourceMoverSvc,
+			PartitionSettings thePartitionSettings) {
 		myStorageSettings = theStorageSettings;
 		myDaoRegistry = theDaoRegistry;
 
@@ -96,6 +105,8 @@ public class ResourceMergeService {
 		myHapiTransactionService = theHapiTransactionService;
 		myMergeResourceHelper = theMergeResourceHelper;
 		myMergeValidationService = theMergeValidationService;
+		myCrossPartitionResourceMoverSvc = theCrossPartitionResourceMoverSvc;
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**
@@ -226,22 +237,31 @@ public class ResourceMergeService {
 			RequestPartitionId partitionId) {
 
 		Date startTime = new Date();
-		ReplaceReferencesRequest replaceReferencesRequest = new ReplaceReferencesRequest(
-				theSourceResource.getIdElement(),
-				theTargetResource.getIdElement(),
-				theMergeOperationParameters.getResourceLimit(),
-				partitionId,
-				// don't create provenance as part of replace-references,
-				// we create it after updating source and target for merge
-				false,
-				null);
 
-		IBaseParameters outParams =
-				myReplaceReferencesSvc.replaceReferences(replaceReferencesRequest, theRequestDetails);
+		boolean crossPartition = isCrossPartitionMerge(theSourceResource, theTargetResource);
 
-		Bundle patchResultBundle = (Bundle) ParametersUtil.getNamedParameterResource(
-						myFhirContext, outParams, OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME)
-				.orElseThrow();
+		Bundle patchResultBundle;
+		if (crossPartition) {
+			patchResultBundle = myCrossPartitionResourceMoverSvc.moveCompartmentResourcesAndReplaceReferences(
+					theSourceResource, theTargetResource, theRequestDetails);
+		} else {
+			ReplaceReferencesRequest replaceReferencesRequest = new ReplaceReferencesRequest(
+					theSourceResource.getIdElement(),
+					theTargetResource.getIdElement(),
+					theMergeOperationParameters.getResourceLimit(),
+					partitionId,
+					// don't create provenance as part of replace-references,
+					// we create it after updating source and target for merge
+					false,
+					null);
+
+			IBaseParameters outParams =
+					myReplaceReferencesSvc.replaceReferences(replaceReferencesRequest, theRequestDetails);
+
+			patchResultBundle = (Bundle) ParametersUtil.getNamedParameterResource(
+							myFhirContext, outParams, OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME)
+					.orElseThrow();
+		}
 
 		myHapiTransactionService
 				.withRequest(theRequestDetails)
@@ -264,10 +284,13 @@ public class ResourceMergeService {
 								theMergeOperationParameters.getOriginalInputParameters(),
 								outcome.getOperationOutcome());
 
+						List<Reference> referencesToChangedResources =
+								ReplaceReferencesProvenanceSvc.extractChangedResourceReferences(
+										List.of(patchResultBundle));
 						myMergeResourceHelper.createProvenance(
 								theSourceResource,
 								updatedTargetResource,
-								List.of(patchResultBundle),
+								referencesToChangedResources,
 								theMergeOperationParameters.getDeleteSource(),
 								theRequestDetails,
 								startTime,
@@ -312,5 +335,14 @@ public class ResourceMergeService {
 		String detailsText = "Merge request is accepted, and will be processed asynchronously. See"
 				+ " task resource returned in this response for details.";
 		addInfoToOperationOutcome(myFhirContext, theMergeOutcome.getOperationOutcome(), null, detailsText);
+	}
+
+	private boolean isCrossPartitionMerge(IBaseResource theSourceResource, IBaseResource theTargetResource) {
+		if (!myPartitionSettings.isPartitioningEnabled()) {
+			return false;
+		}
+		Optional<RequestPartitionId> srcPart = RequestPartitionId.getPartitionIfAssigned(theSourceResource);
+		Optional<RequestPartitionId> tgtPart = RequestPartitionId.getPartitionIfAssigned(theTargetResource);
+		return srcPart.isPresent() && tgtPart.isPresent() && !srcPart.get().equals(tgtPart.get());
 	}
 }
