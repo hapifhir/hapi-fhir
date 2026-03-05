@@ -67,6 +67,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -475,6 +476,10 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
 			Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
 
+			// Save original search result PIDs — non-iterate _include must apply only to initial results, not to
+			// revinclude results
+			Set<JpaPid> originalPids = new HashSet<>(thePids);
+
 			// Load non-iterate _revincludes
 			Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(
 					myContext,
@@ -492,11 +497,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			thePids.addAll(nonIterateRevIncludedPids);
 			includedPidList.addAll(nonIterateRevIncludedPids);
 
-			// Load non-iterate _includes
+			// Load non-iterate _includes (use originalPids so _include only applies to the
+			// initial search results, not to revincluded resources — per FHIR spec, without _iterate)
 			Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(
 					myContext,
 					myEntityManager,
-					thePids,
+					originalPids,
 					mySearchEntity.toIncludesList(false),
 					false,
 					mySearchEntity.getLastUpdated(),

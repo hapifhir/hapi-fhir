@@ -1,0 +1,8 @@
+---
+type: fix
+jira: SMILE-9135
+title: "Previously, when a search used both _revinclude and _include without _iterate, the
+  _include parameter was incorrectly applied to revincluded resources in addition to the
+  initial search results. This caused extra resources to be returned that the FHIR specification
+  only permits when _iterate is specified. The _include expansion is now correctly scoped to
+  the original search result set only, matching the expected non-iterative behaviour."
