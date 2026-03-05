@@ -43,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,11 +177,13 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 				theReplaceReferencesRequest, accumulator.getItemList(), theRequestDetails);
 
 		if (theReplaceReferencesRequest.createProvenance) {
+			List<Reference> referencesToChangedResources =
+					ReplaceReferencesProvenanceSvc.extractChangedResourceReferences(List.of(result));
 			myReplaceReferencesProvenanceSvc.createProvenance(
 					// we need to use versioned ids for the Provenance resource
 					theTargetResource.getIdElement().toUnqualified(),
 					theSourceResource.getIdElement().toUnqualified(),
-					List.of(result),
+					referencesToChangedResources,
 					startTime,
 					theRequestDetails,
 					theReplaceReferencesRequest.provenanceAgents,

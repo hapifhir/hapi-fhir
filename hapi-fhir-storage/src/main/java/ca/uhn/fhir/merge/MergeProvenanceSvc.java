@@ -27,11 +27,11 @@ import ca.uhn.fhir.util.CanonicalIdentifier;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Type;
 
 import java.util.Date;
@@ -59,7 +59,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	public void createProvenance(
 			IIdType theTargetId,
 			IIdType theSourceId,
-			List<Bundle> thePatchResultBundles,
+			List<Reference> theReferencesToChangedResources,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -68,7 +68,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 		super.createProvenance(
 				theTargetId,
 				theSourceId,
-				thePatchResultBundles,
+				theReferencesToChangedResources,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,

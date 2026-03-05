@@ -36,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.Date;
@@ -116,7 +115,7 @@ public class MergeResourceHelper {
 	public void createProvenance(
 			IBaseResource theSourceResource,
 			IBaseResource theTargetResource,
-			List<Bundle> thePatchResultBundles,
+			List<Reference> theReferencesToChangedResources,
 			boolean theIsDeleteSource,
 			RequestDetails theRequestDetails,
 			Date theStartTime,
@@ -136,7 +135,7 @@ public class MergeResourceHelper {
 		myProvenanceSvc.createProvenance(
 				theTargetResource.getIdElement(),
 				sourceIdForProvenance,
-				thePatchResultBundles,
+				theReferencesToChangedResources,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,

@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.PatientIdModeCrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.merge.MergeResourceHelper;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -44,6 +45,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -282,10 +284,13 @@ public class ResourceMergeService {
 								theMergeOperationParameters.getOriginalInputParameters(),
 								outcome.getOperationOutcome());
 
+						List<Reference> referencesToChangedResources =
+								ReplaceReferencesProvenanceSvc.extractChangedResourceReferences(
+										List.of(patchResultBundle));
 						myMergeResourceHelper.createProvenance(
 								theSourceResource,
 								updatedTargetResource,
-								List.of(patchResultBundle),
+								referencesToChangedResources,
 								theMergeOperationParameters.getDeleteSource(),
 								theRequestDetails,
 								startTime,

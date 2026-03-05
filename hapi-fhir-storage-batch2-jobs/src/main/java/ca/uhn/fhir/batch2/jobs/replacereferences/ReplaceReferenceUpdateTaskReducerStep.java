@@ -91,10 +91,12 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 
 			IdDt sourceIdVersioned = params.getSourceId().asIdDt().withVersion(params.getSourceVersionForProvenance());
 
+			List<Reference> referencesToChangedResources =
+					ReplaceReferencesProvenanceSvc.extractChangedResourceReferences(myPatchOutputBundles);
 			myProvenanceSvc.createProvenance(
 					targetIdVersioned,
 					sourceIdVersioned,
-					myPatchOutputBundles,
+					referencesToChangedResources,
 					theStepExecutionDetails.getInstance().getStartTime(),
 					theRequestDetails,
 					ProvenanceAgentJson.toIProvenanceAgents(params.getProvenanceAgents(), myFhirContext),
