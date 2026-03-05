@@ -502,7 +502,9 @@ public class SearchParamRegistryImplTest {
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(basicCodeSp));
 
 		// Test
-		mySearchParamRegistry.forceRefresh();
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
+		assertDbCalled();
 
 		// Verify: the built-in ACTIVE version should remain in the cache despite the RETIRED DB entry
 		RuntimeSearchParam basicCode = mySearchParamRegistry.getActiveSearchParam(
@@ -531,7 +533,9 @@ public class SearchParamRegistryImplTest {
 		ResourceVersionMap versionMap = ResourceVersionMap.fromResourceTableEntities(newEntities);
 		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenReturn(versionMap);
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(customSp));
-		mySearchParamRegistry.forceRefresh();
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
+		assertDbCalled();
 
 		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
 				"Subscription", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
@@ -542,7 +546,9 @@ public class SearchParamRegistryImplTest {
 		when(myResourceVersionSvc.getVersionMap(any(), any(), any()))
 				.thenReturn(ResourceVersionMap.fromResourceTableEntities(newEntities));
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(customSp));
-		mySearchParamRegistry.forceRefresh();
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 0, 1, 0);
+		assertDbCalled();
 
 		// Verify: custom SP is removed from cache (non-disableable protection is URI-prefix-gated)
 		assertNull(mySearchParamRegistry.getActiveSearchParam(
