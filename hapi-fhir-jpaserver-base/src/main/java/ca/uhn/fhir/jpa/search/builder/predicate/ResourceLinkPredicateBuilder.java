@@ -100,6 +100,7 @@ import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static ca.uhn.fhir.rest.api.Constants.VALID_MODIFIERS;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder implements ICanMakeMissingParamPredicate {
@@ -241,6 +242,12 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 						next.getClass(),
 						theParamName);
 				ReferenceParam refParam = (ReferenceParam) next;
+
+				if (isNotBlank(refParam.getChain())) {
+					predicateTargetPartitionId = theRequestPartitionId;
+					break;
+				}
+
 				String resourceType = refParam.getResourceType();
 				String resourceId = refParam.getIdPart();
 				if (isBlank(resourceType) || isBlank(resourceId)) {
