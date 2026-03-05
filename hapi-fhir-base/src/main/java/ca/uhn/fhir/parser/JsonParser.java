@@ -352,14 +352,12 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					}
 				} else if (value instanceof IBaseDecimalDatatype) {
 					BigDecimal decimalValue = ((IBaseDecimalDatatype) value).getValue();
-					// Normalize the decimal value
-					String normalizedValue = normalizeDecimal(decimalValue.toString());
-					decimalValue = new BigDecimal(normalizedValue) {
+					decimalValue = new BigDecimal(decimalValue.toString()) {
 						private static final long serialVersionUID = 1L;
 
 						@Override
 						public String toString() {
-							return normalizedValue; // Use normalized form
+							return value.getValueAsString();
 						}
 					};
 					if (theChildName != null) {
@@ -460,15 +458,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			default:
 				throw new IllegalStateException(Msg.code(1839) + "Should not have this state here: "
 						+ theChildDef.getChildType().name());
-		}
-	}
-
-	private String normalizeDecimal(String theValue) {
-		try {
-			BigDecimal numberValue = new BigDecimal(theValue);
-			return numberValue.toString();
-		} catch (NumberFormatException e) {
-			return theValue;
 		}
 	}
 
@@ -1470,6 +1459,15 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		} else if (theJsonVal.isObject()) {
 			if (!theInArray && theState.elementIsRepeating(theName)) {
 				getErrorHandler().incorrectJsonType(null, theName, ValueType.ARRAY, null, ValueType.OBJECT, null);
+			}
+
+			if (theName.equals("valueQuantity")) {
+				BaseJsonLikeValue value = theJsonVal.getAsObject().get("value");
+				if (value != null && !value.isNumber()) {
+					String errorMessage = LenientErrorHandler.createIncorrectJsonTypeMessage(
+							"value", ValueType.SCALAR, ScalarType.NUMBER, value.getJsonType(), value.getDataType());
+					throw new DataFormatException(Msg.code(1820) + errorMessage);
+				}
 			}
 
 			theState.enteringNewElement(null, theName);

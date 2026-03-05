@@ -2088,41 +2088,15 @@ public class JsonParserR4Test extends BaseTest {
 		assertThat(parsed.getNameFirstRep().getGiven().get(0).getValue()).isEqualTo(" ");
 	}
 
-	@ParameterizedTest
-	@CsvSource({
-		 "0.0, 0.0",
-		 "0.1000, 0.1",
-		 ".5, 0.5",
-		 "000.5, 0.5",
-		 "1., 1",
-		 "1.0, 1.0",
-		 "1.00, 1.00",
-		 "3.14, 3.14"
-	})
-	void encodeResourceToString_DecimalNormalization_PreservesSignificantDecimals(String theOriginalValue, String theExpectedValue) {
-		Observation obs = new Observation();
-		obs.setId("test-obs");
-		obs.setStatus(Observation.ObservationStatus.FINAL);
-
-		// Test various decimal cases
-		Quantity quantity = new Quantity();
-		quantity.setValue(new BigDecimal(theOriginalValue));
-		obs.setValue(quantity);
-
-		String json = ourCtx.newJsonParser().encodeResourceToString(obs);
-		assertThat(json).contains(String.format("\"value\":%s", theExpectedValue));
-	}
-
 	@Test
-	void encodeResourceToString_ObservationValueQuantity_DecimalNormalization() {
-		// Ensure that parsing still works correctly with trailing decimals
+	void parseChildren_ValueQuantity_ValidValue() {
 		String jsonWithTrailingDecimal = """
           {
             "resourceType": "Observation",
             "id": "test",
             "status": "final",
             "valueQuantity": {
-              "value": "1.",
+              "value": 1,
               "unit": "kg"
             }
           }
@@ -2134,11 +2108,26 @@ public class JsonParserR4Test extends BaseTest {
 
 		// The parsed value should be correct
 		assertThat(quantity.getValue()).isEqualByComparingTo(new BigDecimal("1"));
+	}
 
-		// When we encode it back, it should be normalized
-		String reEncoded = ourCtx.newJsonParser().encodeResourceToString(obs);
-		assertThat(reEncoded).contains("\"value\":1");
-		assertThat(reEncoded).doesNotContain("\"value\":1.");
+	@Test
+	void parseChildren_ObservationValueQuantity_invalidValue() {
+		String jsonObservation = """
+          {
+            "resourceType": "Observation",
+            "id": "test",
+            "status": "final",
+            "valueQuantity": {
+              "value": "1.0",
+              "unit": "kg"
+            }
+          }
+          """;
+
+		// This should throw an error
+		IParser parser = ourCtx.newJsonParser();
+		DataFormatException exception = assertThrows(DataFormatException.class, () -> parser.parseResource(Observation.class, jsonObservation));
+		assertThat(exception.getMessage()).isEqualTo("HAPI-1820: Found incorrect type for element value - Expected SCALAR (NUMBER) and found SCALAR (STRING)");
 	}
 
 	@AfterAll
