@@ -329,5 +329,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @return the number of chunks that were updated
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	int enqueueGateWaitingChunksForCurrentStep(String theJobInstanceId, String theStepId, boolean theIsReductionStep);
+	default int enqueueGateWaitingChunksForCurrentStep(
+			String theJobInstanceId, String theStepId, boolean theIsReductionStep) {
+		return 0;
+	}
 }
