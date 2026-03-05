@@ -50,6 +50,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -149,7 +150,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateSearchParams(MdmRulesJson theMdmRulesJson) {
-		ourLog.info("Validating search parameters {}", theMdmRulesJson.getCandidateSearchParams());
+		logSearchParameters(theMdmRulesJson);
 		if (theMdmRulesJson.getCandidateSearchParams().isEmpty()) {
 			ourLog.warn("No candidate search parameter was found. Defining candidate search parameter is strongly "
 					+ "recommended for better performance of MDM");
@@ -163,6 +164,20 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		for (MdmFilterSearchParamJson filter : theMdmRulesJson.getCandidateFilterSearchParams()) {
 			validateSearchParam("candidateFilterSearchParams", filter.getResourceType(), filter.getSearchParam());
 		}
+	}
+
+	private void logSearchParameters(MdmRulesJson theMdmRulesJson) {
+		ourLog.info(
+				"Validating search parameters: {}",
+				theMdmRulesJson.getCandidateSearchParams().stream()
+						.collect(Collectors.groupingBy(
+								MdmResourceSearchParamJson::getResourceType,
+								LinkedHashMap::new,
+								Collectors.flatMapping(sp -> sp.getSearchParams().stream(), Collectors.toList())))
+						.entrySet()
+						.stream()
+						.map(e -> e.getKey() + " " + e.getValue())
+						.collect(Collectors.joining(", ")));
 	}
 
 	private void validateSearchParam(String theFieldName, String theTheResourceType, String theSearchParam) {
