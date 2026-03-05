@@ -121,14 +121,16 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 
 	@Test
-	public void runMaintenancePass_SingleQueuedChunk_noChange() {
+	public void runMaintenancePass_SingleQueuedChunk_flipsToReady() throws InterruptedException {
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
 			"chunk1, FIRST, QUEUED",
-			""
+			"chunk1"
 		);
 
 		expectation.storeChunks();
+		myChannelInterceptor.setExpectedCount(1);
 		myJobMaintenanceService.runMaintenancePass();
+		myChannelInterceptor.awaitExpected();
 		expectation.assertNotifications();
 
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
