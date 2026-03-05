@@ -1,6 +1,7 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -266,6 +268,23 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		private List<ValueSet> myNextReturnValueSets;
 		private UriParam myLastUrlParam;
 		private SummaryEnum myLastSummaryParam;
+		private Parameters myValidateCodeResult;
+		private BooleanType myLastValidateCodeInferSystem;
+
+		// Created by claude-sonnet-4-6
+		@Operation(name = "validate-code", idempotent = true, returnParameters = {
+			@OperationParam(name = "result", type = BooleanType.class, min = 1),
+			@OperationParam(name = "message", type = StringType.class),
+			@OperationParam(name = "display", type = StringType.class)
+		})
+		public Parameters validateCode(
+			@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
+			@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+			@OperationParam(name = "inferSystem", min = 0, max = 1) BooleanType theInferSystem,
+			@OperationParam(name = "valueSet") ValueSet theValueSet) {
+			myLastValidateCodeInferSystem = theInferSystem;
+			return myValidateCodeResult;
+		}
 
 		@Search
 		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam, SummaryEnum theSummaryParam) {
@@ -323,5 +342,27 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		public Class<? extends IBaseResource> getResourceType() {
 			return ConceptMap.class;
 		}
+	}
+
+	/**
+	 * When the stub ValueSet passed in has no compose and the ValueSet is not locally available,
+	 * inferSystem=true should be sent in the remote $validate-code call so the terminology server
+	 * can determine the system from the ValueSet definition.
+	 */
+	// Created by claude-sonnet-4-6
+	@Test
+	void validateCodeInValueSet_stubValueSet_noLocalValueSet_sendsInferSystem() {
+		String testValueSetUrl = "http://example.org/valueset/test-vs";
+		String testCode = "test-code";
+
+		ValueSet stubValueSet = new ValueSet();
+		stubValueSet.setUrl(testValueSetUrl);
+
+		myValueSetProvider.myValidateCodeResult = new Parameters().addParameter("result", true);
+
+		mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), null, testCode, null, stubValueSet);
+
+		assertThat(myValueSetProvider.myLastValidateCodeInferSystem).isNotNull();
+		assertThat(myValueSetProvider.myLastValidateCodeInferSystem.booleanValue()).isTrue();
 	}
 }
