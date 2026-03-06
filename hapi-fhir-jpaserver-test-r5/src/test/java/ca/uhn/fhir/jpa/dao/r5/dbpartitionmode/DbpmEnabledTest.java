@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -37,9 +36,6 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
-
-	@Autowired
-	private IPackageInstallerSvc myIPackageInstallerSvc;
 
 	@Override
 	@BeforeEach
