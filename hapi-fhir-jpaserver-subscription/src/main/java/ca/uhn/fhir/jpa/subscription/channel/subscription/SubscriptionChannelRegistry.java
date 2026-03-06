@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.subscription.api.ISubscriptionDeliveryValidator;
 import ca.uhn.fhir.jpa.subscription.channel.models.ProducingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.channel.models.ReceivingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import com.google.common.annotations.VisibleForTesting;
@@ -44,7 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Optional;
 
 public class SubscriptionChannelRegistry {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegistry.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionChannelRegistry.class);
 
 	private final SubscriptionConsumerCache myDeliveryConsumerCache = new SubscriptionConsumerCache();
 	private final SubscriptionProducerCache myDeliveryProducerCache = new SubscriptionProducerCache();
@@ -62,8 +61,6 @@ public class SubscriptionChannelRegistry {
 
 	@Autowired
 	private ISubscriptionDeliveryValidator mySubscriptionDeliveryValidator;
-
-	public SubscriptionChannelRegistry() {}
 
 	public synchronized void add(ActiveSubscription theActiveSubscription) {
 		String channelName = theActiveSubscription.getChannelName();
@@ -120,18 +117,18 @@ public class SubscriptionChannelRegistry {
 			ActiveSubscription theActiveSubscription, ReceivingChannelParameters receivingParameters) {
 		MultiplexingListener<ResourceDeliveryMessage> multiplexingListener =
 				new MultiplexingListener<>(ResourceDeliveryMessage.class);
-		IChannelConsumer<ResourceDeliveryMessage> deliveryConsumer =
-				newDeliveryConsumer(multiplexingListener, receivingParameters);
+
 		Optional<IMessageListener<ResourceDeliveryMessage>> oDeliveryListener =
 				mySubscriptionDeliveryListenerFactory.createDeliveryListener(theActiveSubscription.getChannelType());
+		oDeliveryListener.ifPresent(multiplexingListener::addListener);
 
-		SubscriptionResourceDeliveryMessageConsumer subscriptionResourceDeliveryMessageConsumer =
-				new SubscriptionResourceDeliveryMessageConsumer(deliveryConsumer);
 		SubscriptionValidatingListener subscriptionValidatingListener =
 				new SubscriptionValidatingListener(mySubscriptionDeliveryValidator, theActiveSubscription.getIdDt());
-		subscriptionResourceDeliveryMessageConsumer.addListener(subscriptionValidatingListener);
-		oDeliveryListener.ifPresent(subscriptionResourceDeliveryMessageConsumer::addListener);
-		return subscriptionResourceDeliveryMessageConsumer;
+		multiplexingListener.addListener(subscriptionValidatingListener);
+
+		IChannelConsumer<ResourceDeliveryMessage> deliveryConsumer =
+				newDeliveryConsumer(multiplexingListener, receivingParameters);
+		return new SubscriptionResourceDeliveryMessageConsumer(deliveryConsumer);
 	}
 
 	protected IChannelConsumer<ResourceDeliveryMessage> newDeliveryConsumer(

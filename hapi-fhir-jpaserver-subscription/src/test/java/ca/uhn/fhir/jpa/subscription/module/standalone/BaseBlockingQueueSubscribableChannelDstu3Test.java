@@ -96,14 +96,14 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
-	@Qualifier("subscriptionActivatingSubscriber")
-	IMessageListener<ResourceModifiedMessage> mySubscriptionActivatingSubscriber;
+	@Qualifier("subscriptionActivatingListener")
+	IMessageListener<ResourceModifiedMessage> mySubscriptionActivatingListener;
 	@Autowired
-	@Qualifier("subscriptionRegisteringSubscriber")
-	IMessageListener<ResourceModifiedMessage> subscriptionRegisteringSubscriber;
+	@Qualifier("subscriptionRegisteringListener")
+	IMessageListener<ResourceModifiedMessage> mySubscriptionRegisteringListener;
 	@Autowired
-	@Qualifier("SubscriptionMatchingListener")
-	IMessageListener<ResourceModifiedMessage> SubscriptionMatchingListener;
+	@Qualifier("subscriptionMatchingListener")
+	IMessageListener<ResourceModifiedMessage> mySubscriptionMatchingListener;
 	@Autowired
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Autowired
@@ -123,9 +123,9 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		canonicalSubscription.setChannelType(CanonicalSubscriptionChannelType.RESTHOOK);
 		mySubscriptionRegistry.unregisterAllSubscriptions();
 		MultiplexingListener<ResourceModifiedMessage> multiplexingListener = new MultiplexingListener<>(ResourceModifiedMessage.class);
-		multiplexingListener.addListener(mySubscriptionActivatingSubscriber);
-		multiplexingListener.addListener(SubscriptionMatchingListener);
-		multiplexingListener.addListener(subscriptionRegisteringSubscriber);
+		multiplexingListener.addListener(mySubscriptionActivatingListener);
+		multiplexingListener.addListener(mySubscriptionMatchingListener);
+		multiplexingListener.addListener(mySubscriptionRegisteringListener);
 		ourMatchingConsumer = mySubscriptionChannelFactory.newMatchingConsumer(mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalSubscription), multiplexingListener, CONSUMER_OPTIONS);
 		ourMatchingProducer = mySubscriptionChannelFactory.newMatchingProducer(mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalSubscription), PRODUCER_OPTIONS);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionMatchingPost);

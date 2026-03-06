@@ -98,7 +98,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmMessageListener mdmMessageHandler() {
+	public MdmMessageListener mdmMessageHandler() {
 		return new MdmMessageListener();
 	}
 

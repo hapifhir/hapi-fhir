@@ -590,9 +590,7 @@ public class ConsentInterceptor {
 	private boolean isSkipServiceForRequest(RequestDetails theRequestDetails) {
 		// TODO MM: we could potentially aggregate all checks to skip consent into a single method
 		// isRequestAuthorized, isAllowListed into isSkipServiceForRequest
-		return isMetadataPath(theRequestDetails)
-				|| isMetaOperation(theRequestDetails)
-				|| shouldSkipAllConsent(theRequestDetails);
+		return isMetadataPath(theRequestDetails) || isMetaOperation(theRequestDetails);
 	}
 
 	private boolean isAllowListedRequest(RequestDetails theRequestDetails) {
@@ -608,22 +606,11 @@ public class ConsentInterceptor {
 	}
 
 	/**
-	 * Call this method to bypass consent checking for a particular request {@link RequestDetails}.
-	 * Skipping consent is needed for resources that are modified in async system processing
-	 * e.g. SearchParameter initialization with subscriptions and subscription (matching) messages enabled.
-	 * This is a short term solution and is to be replaced by a long term solution.
-	 * {@see https://github.com/hapifhir/hapi-fhir/issues/7542}
-	 * @param theRequestDetails the request
+	 * @deprecated about to replace this with a long term solution.
+	 * {@see https://gitlab.com/simpatico.ai/cdr/-/issues/8381}
 	 */
 	public static void skipAllConsentForRequest(@Nonnull RequestDetails theRequestDetails) {
 		theRequestDetails.getUserData().put(USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, true);
-	}
-
-	private static boolean shouldSkipAllConsent(@Nullable RequestDetails theRequestDetails) {
-		return theRequestDetails != null
-				&& (Boolean) theRequestDetails
-						.getUserData()
-						.getOrDefault(USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, Boolean.FALSE);
 	}
 
 	private void validateParameter(Map<String, String[]> theParameterMap) {
