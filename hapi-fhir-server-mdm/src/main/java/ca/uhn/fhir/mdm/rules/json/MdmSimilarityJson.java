@@ -29,7 +29,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 
 public class MdmSimilarityJson implements IModelJson {
 	@JsonProperty(value = "algorithm", required = true)
-	MdmSimilarityEnum myAlgorithm;
+	String myAlgorithm;
 
 	@JsonProperty(value = "matchThreshold", required = true)
 	Double myMatchThreshold;
@@ -40,12 +40,22 @@ public class MdmSimilarityJson implements IModelJson {
 	@JsonProperty(value = "exact")
 	boolean myExact;
 
-	public MdmSimilarityEnum getAlgorithm() {
+	public String getAlgorithm() {
 		return myAlgorithm;
 	}
 
-	public MdmSimilarityJson setAlgorithm(MdmSimilarityEnum theAlgorithm) {
+	public MdmSimilarityJson setAlgorithm(String theAlgorithm) {
 		myAlgorithm = theAlgorithm;
+		return this;
+	}
+
+	/**
+	 * Convenience overload for backward compatibility with code that passes a {@link MdmSimilarityEnum}.
+	 * @deprecated Use {@link #setAlgorithm(String)} instead.
+	 */
+	@Deprecated(since = "8.10.0", forRemoval = true)
+	public MdmSimilarityJson setAlgorithm(MdmSimilarityEnum theAlgorithm) {
+		myAlgorithm = theAlgorithm.name();
 		return this;
 	}
 
@@ -68,7 +78,14 @@ public class MdmSimilarityJson implements IModelJson {
 		return this;
 	}
 
+	/**
+	 * @deprecated Matching is now performed by {@link ca.uhn.fhir.mdm.rules.svc.MdmResourceFieldMatcher}
+	 *   using the {@link ca.uhn.fhir.mdm.rules.similarity.ISimilarityFactory}. This method only works
+	 *   for built-in {@link MdmSimilarityEnum} algorithm names.
+	 */
+	@Deprecated(since = "8.10.0", forRemoval = true)
 	public MdmMatchEvaluation match(FhirContext theFhirContext, IBase theLeftValue, IBase theRightValue) {
-		return myAlgorithm.match(theFhirContext, theLeftValue, theRightValue, myExact, myMatchThreshold);
+		MdmSimilarityEnum similarityEnum = MdmSimilarityEnum.valueOf(myAlgorithm);
+		return similarityEnum.match(theFhirContext, theLeftValue, theRightValue, myExact, myMatchThreshold);
 	}
 }

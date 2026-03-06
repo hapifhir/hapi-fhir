@@ -31,6 +31,7 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
+import ca.uhn.fhir.mdm.rules.similarity.ISimilarityFactory;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -50,17 +51,32 @@ public class MdmResourceMatcherSvc {
 
 	private final FhirContext myFhirContext;
 	private final IMatcherFactory myMatcherFactory;
+	private final ISimilarityFactory mySimilarityFactory;
 	private final List<MdmResourceFieldMatcher> myFieldMatchers = new ArrayList<>();
 
 	private MdmRulesJson myMdmRulesJson;
+	private volatile boolean myFieldMatchersInitialized = false;
 
 	public MdmResourceMatcherSvc(
-			FhirContext theFhirContext, IMatcherFactory theIMatcherFactory, IMdmSettings theMdmSettings) {
+			FhirContext theFhirContext,
+			IMatcherFactory theIMatcherFactory,
+			ISimilarityFactory theSimilarityFactory,
+			IMdmSettings theMdmSettings) {
 		myFhirContext = theFhirContext;
 		myMatcherFactory = theIMatcherFactory;
+		mySimilarityFactory = theSimilarityFactory;
 		myMdmRulesJson = theMdmSettings.getMdmRules();
+	}
 
-		addFieldMatchers();
+	private void ensureFieldMatchersInitialized() {
+		if (!myFieldMatchersInitialized) {
+			synchronized (this) {
+				if (!myFieldMatchersInitialized) {
+					addFieldMatchers();
+					myFieldMatchersInitialized = true;
+				}
+			}
+		}
 	}
 
 	private void addFieldMatchers() {
@@ -70,8 +86,8 @@ public class MdmResourceMatcherSvc {
 		}
 		myFieldMatchers.clear();
 		for (MdmFieldMatchJson matchFieldJson : myMdmRulesJson.getMatchFields()) {
-			myFieldMatchers.add(
-					new MdmResourceFieldMatcher(myFhirContext, myMatcherFactory, matchFieldJson, myMdmRulesJson));
+			myFieldMatchers.add(new MdmResourceFieldMatcher(
+					myFhirContext, myMatcherFactory, mySimilarityFactory, matchFieldJson, myMdmRulesJson));
 		}
 	}
 
@@ -88,6 +104,7 @@ public class MdmResourceMatcherSvc {
 	}
 
 	MdmMatchOutcome match(IBaseResource theLeftResource, IBaseResource theRightResource) {
+		ensureFieldMatchersInitialized();
 		MdmMatchOutcome matchResult = getMatchOutcome(theLeftResource, theRightResource);
 		MdmMatchResultEnum matchResultEnum = myMdmRulesJson.getMatchResult(matchResult.getVector());
 		matchResult.setMatchResultEnum(matchResultEnum);
@@ -172,8 +189,8 @@ public class MdmResourceMatcherSvc {
 	}
 
 	@VisibleForTesting
-	public void setMdmRulesJson(MdmRulesJson theMdmRulesJson) {
+	public synchronized void setMdmRulesJson(MdmRulesJson theMdmRulesJson) {
 		myMdmRulesJson = theMdmRulesJson;
-		addFieldMatchers();
+		myFieldMatchersInitialized = false;
 	}
 }

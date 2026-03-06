@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.BaseR4Test;
+import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +16,7 @@ import org.springframework.core.io.Resource;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -172,13 +175,132 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 		}
 	}
 
-	private void setMdmRuleJson(String theTheS) throws IOException {
-		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever);
+	@Test
+	void testCustomRegisteredMatcherAlgorithm_passesValidation() throws IOException {
+		myIMatcherFactory.register("CUSTOM_PHONETIC", (theLeftBase, theRightBase, theParams) -> true);
+		setMdmRuleJsonWithFactories("good-rules-custom-matcher-algorithm.json");
+		// No exception = pass
+	}
+
+	@Test
+	void testCustomRegisteredSimilarityAlgorithm_passesValidation() throws IOException {
+		mySimilarityFactory.register("CUSTOM_DISTANCE", (theFhirContext, theLeftBase, theRightBase, theExact) -> 1.0);
+		setMdmRuleJsonWithFactories("good-rules-custom-similarity-algorithm.json");
+		// No exception = pass
+	}
+
+	@Test
+	void testBuiltInMatcherAlgorithm_withFactories_passesValidation() throws IOException {
+		setMdmRuleJsonWithFactories("rules-extension-search.json");
+		// No exception = pass
+	}
+
+	@Test
+	void testUnknownMatcherAlgorithm_withNullFactories_passesValidation() throws IOException {
+		setMdmRuleJson("bad-rules-unknown-matcher-algorithm.json");
+		// No exception = null factories skip validation
+	}
+
+	@Test
+	void testUnknownSimilarityAlgorithm_withNullFactories_passesValidation() throws IOException {
+		setMdmRuleJson("bad-rules-unknown-similarity-algorithm.json");
+		// No exception = null factories skip validation
+	}
+
+	@Test
+	void testUnknownMatcherAlgorithm_validate_doesNotThrow() throws IOException {
+		// validate() no longer checks algorithm names — that is deferred to validateAlgorithmRegistrations()
+		setMdmRuleJsonWithFactories("bad-rules-unknown-matcher-algorithm.json");
+	}
+
+	@Test
+	void testUnknownSimilarityAlgorithm_validate_doesNotThrow() throws IOException {
+		// validate() no longer checks algorithm names — that is deferred to validateAlgorithmRegistrations()
+		setMdmRuleJsonWithFactories("bad-rules-unknown-similarity-algorithm.json");
+	}
+
+	@Test
+	void testUnknownMatcherAlgorithm_validateAlgorithmRegistrations_throws() throws IOException {
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);
+		MdmRulesJson rules = loadRulesJson("bad-rules-unknown-matcher-algorithm.json");
+		mdmRuleValidator.validate(rules);
+
+		assertThatThrownBy(() -> mdmRuleValidator.validateAlgorithmRegistrations(rules))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageContaining(Msg.code(2846))
+			.hasMessageContaining("DOES_NOT_EXIST");
+	}
+
+	@Test
+	void testUnknownSimilarityAlgorithm_validateAlgorithmRegistrations_throws() throws IOException {
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);
+		MdmRulesJson rules = loadRulesJson("bad-rules-unknown-similarity-algorithm.json");
+		mdmRuleValidator.validate(rules);
+
+		assertThatThrownBy(() -> mdmRuleValidator.validateAlgorithmRegistrations(rules))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageContaining(Msg.code(2847))
+			.hasMessageContaining("DOES_NOT_EXIST");
+	}
+
+	@Test
+	void testBlankMatcherAlgorithm_validateAlgorithmRegistrations_throws() throws IOException {
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);
+		MdmRulesJson rules = loadRulesJson("bad-rules-blank-matcher-algorithm.json");
+		mdmRuleValidator.validate(rules);
+
+		assertThatThrownBy(() -> mdmRuleValidator.validateAlgorithmRegistrations(rules))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageContaining(Msg.code(2873))
+			.hasMessageContaining("blank matcher algorithm");
+	}
+
+	@Test
+	void testBlankSimilarityAlgorithm_validateAlgorithmRegistrations_throws() throws IOException {
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);
+		MdmRulesJson rules = loadRulesJson("bad-rules-blank-similarity-algorithm.json");
+		mdmRuleValidator.validate(rules);
+
+		assertThatThrownBy(() -> mdmRuleValidator.validateAlgorithmRegistrations(rules))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageContaining(Msg.code(2874))
+			.hasMessageContaining("blank similarity algorithm");
+	}
+
+	@Test
+	void testCustomRegisteredAlgorithm_passesValidateAlgorithmRegistrations() throws IOException {
+		myIMatcherFactory.register("CUSTOM_PHONETIC", (theLeftBase, theRightBase, theParams) -> true);
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);
+		MdmRulesJson rules = loadRulesJson("good-rules-custom-matcher-algorithm.json");
+		mdmRuleValidator.validate(rules);
+
+		// Should not throw — custom algorithm is registered
+		mdmRuleValidator.validateAlgorithmRegistrations(rules);
+	}
+
+	private void setMdmRuleJson(String theS) throws IOException {
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, null, null);
 		MdmSettings mdmSettings = new MdmSettings(mdmRuleValidator);
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		Resource resource = resourceLoader.getResource(theTheS);
+		Resource resource = resourceLoader.getResource(theS);
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		mdmSettings.setScriptText(json);
+	}
+
+	private void setMdmRuleJsonWithFactories(String theS) throws IOException {
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);
+		MdmSettings mdmSettings = new MdmSettings(mdmRuleValidator);
+		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
+		Resource resource = resourceLoader.getResource(theS);
+		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
+		mdmSettings.setScriptText(json);
+	}
+
+	private MdmRulesJson loadRulesJson(String theS) throws IOException {
+		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
+		Resource resource = resourceLoader.getResource(theS);
+		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
+		return JsonUtil.deserialize(json, MdmRulesJson.class);
 	}
 
 }

@@ -677,6 +677,8 @@ The following algorithms are currently supported:
      </tbody>
 </table>
 
+In addition to the built-in algorithms listed above, you can register custom matcher and similarity algorithms at runtime via the `IMatcherFactory` and `ISimilarityFactory` interfaces. See [MDM Customizations](/hapi-fhir/docs/server_jpa_mdm/mdm_customizations.html) for details on how to implement and register custom algorithms.
+
 ### matchResultMap
 
 These entries convert combinations of successful matchFields into an MDM Match Result for overall matching of a given pair of resources. MATCH results are evaluated take precedence over POSSIBLE_MATCH results. If the incoming resource matches ALL of the named matchFields listed, then a new match link is created with the assigned matchResult (`MATCH` or `POSSIBLE_MATCH`).

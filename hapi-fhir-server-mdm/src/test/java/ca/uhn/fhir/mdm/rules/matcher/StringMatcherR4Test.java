@@ -1,7 +1,6 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import jakarta.annotation.Nonnull;
@@ -12,37 +11,24 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-
 public class StringMatcherR4Test extends BaseMatcherR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(StringMatcherR4Test.class);
 	public static final String LEFT_NAME = "namadega";
 	public static final String RIGHT_NAME = "namaedga";
 
 	private IMatcherFactory myIMatcherFactory;
 
-	private IMdmSettings myMdmSettings;
-
 	@BeforeEach
 	public void before() {
 		super.before();
 
-		myMdmSettings = mock(IMdmSettings.class);
-
-		myIMatcherFactory = new MdmMatcherFactory(
-			ourFhirContext,
-			myMdmSettings,
-			new NicknameSvc()
-		);
+		myIMatcherFactory = new MdmMatcherFactory(ourFhirContext, new NicknameSvc());
 	}
 
 	private @Nonnull IMdmFieldMatcher getFieldMatcher(MatchTypeEnum theMatchTypeEnum) {
-		return myIMatcherFactory.getFieldMatcherForMatchType(theMatchTypeEnum);
+		return myIMatcherFactory.getFieldMatcherForName(theMatchTypeEnum.name());
 	}
 
 	@Test
@@ -139,10 +125,10 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 
 	@Test
 	public void testExactGender() {
-		Enumeration<Enumerations.AdministrativeGender> male = new Enumeration<Enumerations.AdministrativeGender>(new Enumerations.AdministrativeGenderEnumFactory());
+		Enumeration<Enumerations.AdministrativeGender> male = new Enumeration<>(new Enumerations.AdministrativeGenderEnumFactory());
 		male.setValue(Enumerations.AdministrativeGender.MALE);
 
-		Enumeration<Enumerations.AdministrativeGender> female = new Enumeration<Enumerations.AdministrativeGender>(new Enumerations.AdministrativeGenderEnumFactory());
+		Enumeration<Enumerations.AdministrativeGender> female = new Enumeration<>(new Enumerations.AdministrativeGenderEnumFactory());
 		female.setValue(Enumerations.AdministrativeGender.FEMALE);
 
 		myMdmMatcherJson.setExact(true);

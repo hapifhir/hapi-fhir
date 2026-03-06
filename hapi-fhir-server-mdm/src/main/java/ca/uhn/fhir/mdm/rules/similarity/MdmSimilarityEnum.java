@@ -47,6 +47,13 @@ public enum MdmSimilarityEnum {
 		myMdmFieldSimilarity = theMdmFieldSimilarity;
 	}
 
+	/**
+	 * @return the underlying {@link IMdmFieldSimilarity} instance for this enum constant
+	 */
+	public IMdmFieldSimilarity getSimilarity() {
+		return myMdmFieldSimilarity;
+	}
+
 	public MdmMatchEvaluation match(
 			FhirContext theFhirContext,
 			IBase theLeftBase,

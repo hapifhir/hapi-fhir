@@ -29,7 +29,8 @@ import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
 import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
-import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
+import ca.uhn.fhir.mdm.rules.similarity.IMdmFieldSimilarity;
+import ca.uhn.fhir.mdm.rules.similarity.ISimilarityFactory;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
@@ -37,7 +38,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 
@@ -55,15 +56,15 @@ public class MdmResourceFieldMatcher {
 	private final String myName;
 	private final boolean myIsFhirPathExpression;
 
-	private final IMatcherFactory myIMatcherFactory;
+	private final IMdmFieldMatcher myMatcher;
+	private final IMdmFieldSimilarity mySimilarity;
 
 	public MdmResourceFieldMatcher(
 			FhirContext theFhirContext,
 			IMatcherFactory theIMatcherFactory,
+			ISimilarityFactory theSimilarityFactory,
 			MdmFieldMatchJson theMdmFieldMatchJson,
 			MdmRulesJson theMdmRulesJson) {
-		myIMatcherFactory = theIMatcherFactory;
-
 		myFhirContext = theFhirContext;
 		myMdmFieldMatchJson = theMdmFieldMatchJson;
 		myResourceType = theMdmFieldMatchJson.getResourceType();
@@ -72,6 +73,24 @@ public class MdmResourceFieldMatcher {
 		myName = theMdmFieldMatchJson.getName();
 		myMdmRulesJson = theMdmRulesJson;
 		myIsFhirPathExpression = myFhirPath != null;
+
+		myMatcher = resolveMatcher(theIMatcherFactory, theMdmFieldMatchJson.getMatcher());
+		mySimilarity = resolveSimilarity(theSimilarityFactory, theMdmFieldMatchJson.getSimilarity());
+	}
+
+	private static IMdmFieldMatcher resolveMatcher(IMatcherFactory theFactory, MdmMatcherJson theMatcherJson) {
+		return Optional.ofNullable(theMatcherJson)
+				.map(MdmMatcherJson::getAlgorithm)
+				.map(theFactory::getFieldMatcherForName)
+				.orElse(null);
+	}
+
+	private static IMdmFieldSimilarity resolveSimilarity(
+			ISimilarityFactory theFactory, MdmSimilarityJson theSimilarityJson) {
+		return Optional.ofNullable(theSimilarityJson)
+				.map(MdmSimilarityJson::getAlgorithm)
+				.map(theFactory::getSimilarityForName)
+				.orElse(null);
 	}
 
 	/**
@@ -108,9 +127,8 @@ public class MdmResourceFieldMatcher {
 		MdmMatchEvaluation retval = new MdmMatchEvaluation(false, 0.0);
 
 		boolean isMatchingEmptyFieldValues = (theLeftValues.isEmpty() && theRightValues.isEmpty());
-		IMdmFieldMatcher matcher = getFieldMatcher();
-		if (isMatchingEmptyFieldValues && (matcher != null && matcher.isMatchingEmptyFields())) {
-			return match((IBase) null, (IBase) null);
+		if (isMatchingEmptyFieldValues && (myMatcher != null && myMatcher.isMatchingEmptyFields())) {
+			return match(null, (IBase) null);
 		}
 
 		for (IBase leftValue : theLeftValues) {
@@ -124,15 +142,16 @@ public class MdmResourceFieldMatcher {
 	}
 
 	private MdmMatchEvaluation match(IBase theLeftValue, IBase theRightValue) {
-		IMdmFieldMatcher matcher = getFieldMatcher();
-		if (matcher != null) {
-			boolean isMatches = matcher.matches(theLeftValue, theRightValue, myMdmFieldMatchJson.getMatcher());
+		if (myMatcher != null) {
+			boolean isMatches = myMatcher.matches(theLeftValue, theRightValue, myMdmFieldMatchJson.getMatcher());
 			return new MdmMatchEvaluation(isMatches, isMatches ? 1.0 : 0.0);
 		}
 
-		MdmSimilarityJson similarity = myMdmFieldMatchJson.getSimilarity();
-		if (similarity != null) {
-			return similarity.match(myFhirContext, theLeftValue, theRightValue);
+		if (mySimilarity != null) {
+			MdmSimilarityJson similarity = myMdmFieldMatchJson.getSimilarity();
+			double score = mySimilarity.similarity(myFhirContext, theLeftValue, theRightValue, similarity.getExact());
+			boolean isMatch = score >= similarity.getMatchThreshold();
+			return new MdmMatchEvaluation(isMatch, score);
 		}
 
 		throw new InternalErrorException(
@@ -149,7 +168,7 @@ public class MdmResourceFieldMatcher {
 			Validate.isTrue(
 					isMdmType,
 					"Expecting resource type %s, got resource type %s",
-					myMdmRulesJson.getMdmTypes().stream().collect(Collectors.joining(",")),
+					String.join(",", myMdmRulesJson.getMdmTypes()),
 					resourceType);
 		} else {
 			Validate.isTrue(
@@ -170,18 +189,5 @@ public class MdmResourceFieldMatcher {
 
 	public String getName() {
 		return myName;
-	}
-
-	private IMdmFieldMatcher getFieldMatcher() {
-		MdmMatcherJson matcherJson = myMdmFieldMatchJson.getMatcher();
-		MatchTypeEnum matchTypeEnum = null;
-		if (matcherJson != null) {
-			matchTypeEnum = matcherJson.getAlgorithm();
-		}
-		if (matchTypeEnum == null) {
-			return null;
-		}
-
-		return myIMatcherFactory.getFieldMatcherForMatchType(matchTypeEnum);
 	}
 }
