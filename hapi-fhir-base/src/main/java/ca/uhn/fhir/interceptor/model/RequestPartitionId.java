@@ -136,9 +136,14 @@ public class RequestPartitionId implements IModelJson {
 	 * partition names and dates are ignored and not returned. This {@link RequestPartitionId}
 	 * and {@literal theOther} are not modified.
 	 *
+	 * @param theOther The {@link RequestPartitionId} to merge in. If {@literal null}, this method will simply return {@literal this}.
 	 * @since 7.4.0
 	 */
-	public RequestPartitionId mergeIds(RequestPartitionId theOther) {
+	public RequestPartitionId mergeIds(@Nullable RequestPartitionId theOther) {
+		if (theOther == null) {
+			return this;
+		}
+
 		if ((isAllPartitions() && !hasPartitionIds()) || (theOther.isAllPartitions() && !theOther.hasPartitionIds())) {
 			return RequestPartitionId.allPartitions();
 		}

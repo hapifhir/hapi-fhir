@@ -1084,6 +1084,7 @@ public class QueryStack {
 							new ArrayList<>(),
 							Collections.singletonList(referenceParam),
 							operation,
+							searchParam,
 							theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
 					return theQueryStack3.createPredicateQuantity(
@@ -1425,6 +1426,7 @@ public class QueryStack {
 			List<String> theQualifiers,
 			List<? extends IQueryParameterType> theList,
 			SearchFilterParser.CompareOperation theOperation,
+			RuntimeSearchParam theSearchParam,
 			RequestPartitionId theRequestPartitionId) {
 		return createPredicateReference(
 				theSourceJoinColumn,
@@ -1433,6 +1435,7 @@ public class QueryStack {
 				theQualifiers,
 				theList,
 				theOperation,
+				theSearchParam,
 				theRequestPartitionId,
 				mySqlBuilder);
 	}
@@ -1445,6 +1448,7 @@ public class QueryStack {
 			List<String> theQualifiers,
 			List<? extends IQueryParameterType> theList,
 			SearchFilterParser.CompareOperation theOperation,
+			RuntimeSearchParam theSearchParam,
 			RequestPartitionId theRequestPartitionId,
 			SearchQueryBuilder theSqlBuilder) {
 
@@ -1476,7 +1480,7 @@ public class QueryStack {
 			return predicateBuilder.createPredicate(
 					myRequestDetails,
 					theResourceName,
-					theParamName,
+					theSearchParam,
 					theQualifiers,
 					theList,
 					theOperation,
@@ -1876,6 +1880,7 @@ public class QueryStack {
 					theQualifiers,
 					theOrValues,
 					theOperation,
+					theParamDefinition,
 					theRequestPartitionId,
 					theSqlBuilder);
 			default -> throw new InvalidRequestException(
@@ -2545,6 +2550,7 @@ public class QueryStack {
 									new ArrayList<>(),
 									nextAnd,
 									null,
+									nextParamDef,
 									theRequestPartitionId));
 						} else {
 							andPredicates.add(createPredicateReferenceForEmbeddedChainedSearchResource(
