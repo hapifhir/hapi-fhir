@@ -53,7 +53,7 @@ public class MdmSimilarityJson implements IModelJson {
 	 * Convenience overload for backward compatibility with code that passes a {@link MdmSimilarityEnum}.
 	 * @deprecated Use {@link #setAlgorithm(String)} instead.
 	 */
-	@Deprecated(since = "8_10", forRemoval = true)
+	@Deprecated(since = "8_10_0", forRemoval = true)
 	public MdmSimilarityJson setAlgorithm(MdmSimilarityEnum theAlgorithm) {
 		myAlgorithm = theAlgorithm.name();
 		return this;
@@ -83,7 +83,7 @@ public class MdmSimilarityJson implements IModelJson {
 	 *   using the {@link ca.uhn.fhir.mdm.rules.similarity.ISimilarityFactory}. This method only works
 	 *   for built-in {@link MdmSimilarityEnum} algorithm names.
 	 */
-	@Deprecated(since = "8_10", forRemoval = true)
+	@Deprecated(since = "8_10_0", forRemoval = true)
 	public MdmMatchEvaluation match(FhirContext theFhirContext, IBase theLeftValue, IBase theRightValue) {
 		MdmSimilarityEnum similarityEnum = MdmSimilarityEnum.valueOf(myAlgorithm);
 		return similarityEnum.match(theFhirContext, theLeftValue, theRightValue, myExact, myMatchThreshold);
