@@ -1,0 +1,8 @@
+---
+type: fix
+jira: SMILE-7421
+title: "Previously, creating a CodeSystem resource with a URL that already had an existing NOTPRESENT
+  (zero-concept) placeholder TermCodeSystemVersion would fail with error HAPI-0848. This occurred
+  during package pre-seeding when a second create was attempted for the same CodeSystem URL. The
+  fix allows the placeholder version to be updated to reference the new resource when no concepts
+  have been stored yet."
