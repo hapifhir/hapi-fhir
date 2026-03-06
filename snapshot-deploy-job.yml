@@ -15,6 +15,7 @@ jobs:
     variables:
       - group: GPG_VARIABLE_GROUP
       - group: CENTRAL_VARIABLE_GROUP
+      - group: SLACK_VARIABLE_GROUP
 
     container:
       image: smilecdr/hapi-build:latest
@@ -92,3 +93,49 @@ jobs:
           goals: deploy
           options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST -DskipTests -DdeployToCentral --batch-mode --no-transfer-progress --threads 1C --fail-at-end -Dstyle.color=never '
           publishJUnitResults: false
+
+      # 6. Notify Slack if the deploy failed
+      - bash: |
+          PIPELINE_URL="$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+          curl -s -X POST 'https://slack-bots.azure.smilecdr.com/robogary/slack/slack-message' \
+            -H 'Content-Type: application/json' \
+            -H "X-Slack-Sender-Token: ${SLACK_SENDER_TOKEN}" \
+            --data "{
+              \"channel\": \"cdr-build-status\",
+              \"author\": \"robogary\",
+              \"text\": \"HAPI FHIR Nightly SNAPSHOT Deploy Failed\",
+              \"blocks\": [
+                {
+                  \"type\": \"header\",
+                  \"text\": {
+                    \"type\": \"plain_text\",
+                    \"text\": \":red_circle: HAPI FHIR Nightly SNAPSHOT Deploy Failed\",
+                    \"emoji\": true
+                  }
+                },
+                {
+                  \"type\": \"section\",
+                  \"fields\": [
+                    { \"type\": \"mrkdwn\", \"text\": \"*Pipeline:*\n${PIPELINE_NAME}\" },
+                    { \"type\": \"mrkdwn\", \"text\": \"*Branch:*\n\`${BRANCH_NAME}\`\" },
+                    { \"type\": \"mrkdwn\", \"text\": \"*Build:*\n<${PIPELINE_URL}|${BUILD_NUMBER}>\" },
+                    { \"type\": \"mrkdwn\", \"text\": \"*Reason:*\n${BUILD_REASON}\" }
+                  ]
+                },
+                { \"type\": \"divider\" },
+                {
+                  \"type\": \"context\",
+                  \"elements\": [
+                    { \"type\": \"mrkdwn\", \"text\": \"Nightly SNAPSHOT build failure notification\" }
+                  ]
+                }
+              ]
+            }" || echo "Failed to send Slack notification"
+        displayName: 'Notify Slack on failure'
+        condition: failed()
+        env:
+          SLACK_SENDER_TOKEN: $(SLACK_SENDER_TOKEN)
+          PIPELINE_NAME: $(Build.DefinitionName)
+          BRANCH_NAME: $(Build.SourceBranchName)
+          BUILD_NUMBER: $(Build.BuildNumber)
+          BUILD_REASON: $(Build.Reason)
