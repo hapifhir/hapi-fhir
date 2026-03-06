@@ -95,7 +95,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public CodeSystem fetchSupplementedCodeSystem(String system, String version, Resource sourceOfReference) {
+	public CodeSystem fetchSupplementedCodeSystem(
+			String system, String version, List<String> specifiedSupplements, Resource sourceOfReference) {
 		return null;
 	}
 
@@ -268,6 +269,21 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public String getVersion() {
 		return myCtx.getVersion().getVersion().getFhirVersionString();
+	}
+
+	@Override
+	public int getDefinitionsVersion() {
+		throw new UnsupportedOperationException(Msg.code(2861));
+	}
+
+	@Override
+	public void storeAnalysis(Class className, Object analysis) {
+		// Do nothing
+	}
+
+	@Override
+	public Object retrieveAnalysis(Class className) {
+		return null;
 	}
 
 	@Override

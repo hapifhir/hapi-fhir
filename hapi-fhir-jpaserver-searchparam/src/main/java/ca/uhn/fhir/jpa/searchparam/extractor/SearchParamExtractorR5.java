@@ -39,6 +39,7 @@ import org.hl7.fhir.r5.fhirpath.TypeDetails;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -150,7 +151,8 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		}
 
 		@Override
-		public Base resolveReference(FHIRPathEngine engine, Object appContext, String theUrl, Base refContext) {
+		public Base resolveReference(
+				FHIRPathEngine engine, Object appContext, String theUrl, Identifier identifier, Base refContext) {
 			Base retVal = (Base) BundleUtil.getReferenceInBundle(getContext(), theUrl, appContext);
 			if (retVal != null) {
 				return retVal;
