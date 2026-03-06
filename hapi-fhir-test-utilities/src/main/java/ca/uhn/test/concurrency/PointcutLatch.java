@@ -104,7 +104,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		myPointcutLatchSession.set(new PointcutLatchSession(getName(), theCount, theExactMatch));
 	}
 
-	private String getName() {
+	public String getName() {
 		return myName + " " + this.getClass().getSimpleName();
 	}
 
