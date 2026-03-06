@@ -139,9 +139,6 @@ public class TestJPAConfig {
 
 	@Bean
 	public IMdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
-		// this config is general-purpose JPA test infrastructure, and most tests using it aren't exercising MDM-specific
-		// algorithm validation. The MDM-specific tests (like MdmRuleValidatorTest) already test
-		// both paths: with null factories and with real/mock factories.
 		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever, null, null);
 	}
 }
