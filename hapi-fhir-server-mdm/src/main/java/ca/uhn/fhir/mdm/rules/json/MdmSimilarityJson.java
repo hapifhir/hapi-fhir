@@ -53,7 +53,7 @@ public class MdmSimilarityJson implements IModelJson {
 	 * Convenience overload for backward compatibility with code that passes a {@link MdmSimilarityEnum}.
 	 * @deprecated Use {@link #setAlgorithm(String)} instead.
 	 */
-	@Deprecated(since = "8_10", forRemoval = true)
+	@Deprecated(since = "8.10.0", forRemoval = true)
 	public MdmSimilarityJson setAlgorithm(MdmSimilarityEnum theAlgorithm) {
 		myAlgorithm = theAlgorithm.name();
 		return this;
