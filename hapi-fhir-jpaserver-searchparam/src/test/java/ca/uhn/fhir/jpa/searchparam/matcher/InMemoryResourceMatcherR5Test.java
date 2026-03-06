@@ -450,6 +450,26 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 
+	// SMILE-10730: :missing on token param is unsupported for in-memory matching and should fall back to DATABASE
+	@Test
+	void testTokenParam_MissingModifier_ShouldReturnUnsupported() {
+		InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory("Observation?code:missing=true");
+		assertThat(result.supported()).isFalse();
+	}
+
+	@Test
+	void testTokenParam_NotModifier_ShouldBeSupported() {
+		InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory("Observation?code:not=FOO");
+		assertThat(result.supported()).isTrue();
+	}
+
+	@Test
+	void testSourceParam_MissingModifier_ShouldBeSupported() {
+		// URI param code path handles :missing correctly (different from token path)
+		InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory("Observation?_source:missing=true");
+		assertThat(result.supported()).isTrue();
+	}
+
 	private ResourceIndexedSearchParams extractSearchParams(Observation theObservation) {
 		ResourceIndexedSearchParams retval = ResourceIndexedSearchParams.withSets();
 		retval.myDateParams.add(extractEffectiveDateParam(theObservation));
