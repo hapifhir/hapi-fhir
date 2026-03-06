@@ -154,13 +154,23 @@ public class CustomMdmMatcherConfig {
 Where `SpanishPhoneticMatcher` implements `IMdmFieldMatcher`:
 
 ```java
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 public class SpanishPhoneticMatcher implements IMdmFieldMatcher {
 
    @Override
    public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-      // Custom phonetic matching logic for Spanish names
-      String left = extractString(theLeftBase);
-      String right = extractString(theRightBase);
+      // IBase values from FHIRPath are typically IPrimitiveType for simple fields
+      // like name.given or name.family. Cast and call getValueAsString() to get
+      // the string representation.
+      if (!(theLeftBase instanceof IPrimitiveType) || !(theRightBase instanceof IPrimitiveType)) {
+         return false;
+      }
+      String left = ((IPrimitiveType<?>) theLeftBase).getValueAsString();
+      String right = ((IPrimitiveType<?>) theRightBase).getValueAsString();
       if (left == null || right == null) {
          return false;
       }
@@ -205,8 +215,11 @@ public class CustomMdmSimilarityConfig {
    public void registerCustomSimilarities() {
       mySimilarityFactory.register("WEIGHTED_EDIT_DISTANCE",
          (theFhirContext, theLeftBase, theRightBase, theExact) -> {
-            String left = extractString(theFhirContext, theLeftBase, theExact);
-            String right = extractString(theFhirContext, theRightBase, theExact);
+            if (!(theLeftBase instanceof IPrimitiveType) || !(theRightBase instanceof IPrimitiveType)) {
+               return 0.0;
+            }
+            String left = ((IPrimitiveType<?>) theLeftBase).getValueAsString();
+            String right = ((IPrimitiveType<?>) theRightBase).getValueAsString();
             if (left == null || right == null) {
                return 0.0;
             }
