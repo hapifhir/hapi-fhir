@@ -1,0 +1,8 @@
+---
+type: add
+issue: 7614
+title: "Added an additional install mode for NPM packages: \"INSTALL_ONLY\".
+      Using this mode will allow resources to be persisted to the database,
+      but will not keep the npm package (ie, it won't be saved in the database,
+      nor will it be reserved on disk).
+"

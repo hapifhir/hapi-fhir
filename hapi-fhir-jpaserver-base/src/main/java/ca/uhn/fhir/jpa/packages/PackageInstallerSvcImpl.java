@@ -219,8 +219,16 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal);
 				}
 
-				if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
+				if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL
+						|| theInstallationSpec.getInstallMode()
+								== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
 					install(npmPackage, theInstallationSpec, retVal);
+
+					if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
+						retVal.getMessage()
+								.add(
+										"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
+					}
 
 					// If any SearchParameters were installed, let's load them right away
 					mySearchParamRegistryController.refreshCacheIfNecessary();
@@ -430,7 +438,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (theInstallationSpec.isDryRun()) {
 			constructDryRunReport(theResource, existingResource, map, theOutcome);
 		} else {
-			isInstalled = createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec);
+			isInstalled =
+					createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec, map, theOutcome);
 		}
 		if (isInstalled) {
 			theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
@@ -457,17 +466,49 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			IFhirResourceDao theDao,
 			IBaseResource theResource,
 			IBaseResource theExistingResource,
-			@Nonnull PackageInstallationSpec thePackageInstallationSpec) {
+			@Nonnull PackageInstallationSpec thePackageInstallationSpec,
+			SearchParameterMap theSpMap,
+			PackageInstallOutcomeJson theOutcome) {
 
 		// If the resource to be installed has a client-provided, purely numeric id,
 		// then add a prefix to the id, since we don't allow purely numeric IDs by default
 		prefixNumericIdIfNeeded(theResource);
 		setPackageMetaSource(theResource, thePackageInstallationSpec);
 
-		if (theExistingResource == null) {
-			return createNewResource(theDao, theResource, thePackageInstallationSpec);
+		if (!thePackageInstallationSpec.isDryRun()) {
+			if (theExistingResource == null) {
+				return createNewResource(theDao, theResource, thePackageInstallationSpec);
+			} else {
+				return updateExistingResource(theDao, theResource, theExistingResource);
+			}
 		} else {
-			return updateExistingResource(theDao, theResource, theExistingResource);
+			FhirTerser terser = myFhirContext.newTerser();
+			String resourceType = theResource.fhirType();
+			RuntimeResourceDefinition rtDefinition = myFhirContext.getResourceDefinition(resourceType);
+			List<RuntimeSearchParam> sps = rtDefinition.getSearchParams();
+			StringBuilder uniqueIdentifierSpBuilder = new StringBuilder();
+			for (Map.Entry<String, List<List<IQueryParameterType>>> spSet : theSpMap.entrySet()) {
+				String key = spSet.getKey();
+
+				// TODO - will we ever see nothing? or a throw?
+				RuntimeSearchParam runtimeSearchParameter = sps.stream()
+						.filter(sp -> sp.getName().equals(key))
+						.findFirst()
+						.orElseThrow();
+
+				Optional<String> valueOp =
+						terser.getSinglePrimitiveValue(theResource, runtimeSearchParameter.getPath());
+				uniqueIdentifierSpBuilder.append(valueOp.get());
+			}
+
+			// dry run
+			if (theExistingResource != null) {
+				theOutcome.addExistingResource(resourceType, uniqueIdentifierSpBuilder.toString());
+			} else {
+				// a resource we'd add
+				theOutcome.addResourceTypeToBeAdded(resourceType, uniqueIdentifierSpBuilder.toString());
+			}
+			return false;
 		}
 	}
 
