@@ -18,11 +18,15 @@ import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r5.model.Device;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Patient;
@@ -59,6 +63,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 	public static final RequestPartitionId PARTITION_PATIENT = RequestPartitionId.fromPartitionId(1);
 	public static final RequestPartitionId PARTITION_OBSERVATION = RequestPartitionId.fromPartitionId(2);
+	public static final RequestPartitionId PARTITION_DEVICE = RequestPartitionId.fromPartitionId(3);
 	@Autowired
 	private JpaHapiTransactionService myTransactionSvc;
 	@Autowired
@@ -205,6 +210,8 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		assertEquals(patientId.getValue(), referenceDetails.getPathAndRef().getRef().getReferenceElement().getValue());
 	}
 
+
+
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testCrossPartitionReference_CreateWithConditionalUrl(boolean theMatchUrlCacheEnabled) {
@@ -314,15 +321,11 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 		@Nonnull
 		private static RequestPartitionId selectPartition(String resourceType) {
-			switch (resourceType) {
-				case "Patient":
-				case "RelatedPerson":
-					return PARTITION_PATIENT;
-				case "Observation":
-					return PARTITION_OBSERVATION;
-				default:
-					throw new InternalErrorException("Don't know how to handle resource type: " + resourceType);
-			}
+			return switch (resourceType) {
+				case "Patient", "RelatedPerson" -> PARTITION_PATIENT;
+				case "Observation" -> PARTITION_OBSERVATION;
+				default -> throw new InternalErrorException("Don't know how to handle resource type: " + resourceType);
+			};
 		}
 
 	}

@@ -46,7 +46,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,7 +53,31 @@ import java.util.stream.Collectors;
 public abstract class BaseRequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	public static final Logger ourLog = Logs.getPartitionTroubleshootingLog();
-	private final HashSet<Object> myNonPartitionableResourceNames;
+	public static final Set<String> NON_PARTITIONABLE_RESOURCE_NAMES;
+
+	static {
+		NON_PARTITIONABLE_RESOURCE_NAMES = Set.of(
+
+				// Infrastructure
+				"SearchParameter",
+
+				// Validation and Conformance
+				"StructureDefinition",
+				"Questionnaire",
+				"CapabilityStatement",
+				"CompartmentDefinition",
+				"OperationDefinition",
+
+				// CI
+				"Library",
+
+				// Terminology
+				"ConceptMap",
+				"CodeSystem",
+				"ValueSet",
+				"NamingSystem",
+				"StructureMap");
+	}
 
 	@Autowired
 	protected FhirContext myFhirContext;
@@ -64,28 +87,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 	PartitionSettings myPartitionSettings;
 
-	protected BaseRequestPartitionHelperSvc() {
-		myNonPartitionableResourceNames = new HashSet<>();
-
-		// Infrastructure
-		myNonPartitionableResourceNames.add("SearchParameter");
-
-		// Validation and Conformance
-		myNonPartitionableResourceNames.add("StructureDefinition");
-		myNonPartitionableResourceNames.add("Questionnaire");
-		myNonPartitionableResourceNames.add("CapabilityStatement");
-		myNonPartitionableResourceNames.add("CompartmentDefinition");
-		myNonPartitionableResourceNames.add("OperationDefinition");
-
-		myNonPartitionableResourceNames.add("Library");
-
-		// Terminology
-		myNonPartitionableResourceNames.add("ConceptMap");
-		myNonPartitionableResourceNames.add("CodeSystem");
-		myNonPartitionableResourceNames.add("ValueSet");
-		myNonPartitionableResourceNames.add("NamingSystem");
-		myNonPartitionableResourceNames.add("StructureMap");
-	}
+	protected BaseRequestPartitionHelperSvc() {}
 
 	@Autowired
 	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
@@ -431,7 +433,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 	@Override
 	public boolean isResourcePartitionable(String theResourceType) {
-		return theResourceType != null && !myNonPartitionableResourceNames.contains(theResourceType);
+		return theResourceType != null && !NON_PARTITIONABLE_RESOURCE_NAMES.contains(theResourceType);
 	}
 
 	@Override

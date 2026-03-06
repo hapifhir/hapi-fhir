@@ -10,6 +10,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -115,7 +116,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		msgHeader.setEvent(new Coding("http://foo", "bar", "blah"));
 		inputBundle.addEntry().setResource(msgHeader);
 
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Bundle", "message", null);
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Bundle", "message", ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		assertEquals("Bundle.entry[0].resource", sp.getPath());
 		assertThat(sp.getBase()).containsExactly("Bundle");
 		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, sp.getStatus());
@@ -622,7 +623,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization=" + orgId.getValueAsString();
 
 		// execute
+		myCaptureQueriesListener.clear();
 		List<String> oids = myTestDaoSearch.searchForIds(url);
+		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
 		assertThat(oids).hasSize(1);
