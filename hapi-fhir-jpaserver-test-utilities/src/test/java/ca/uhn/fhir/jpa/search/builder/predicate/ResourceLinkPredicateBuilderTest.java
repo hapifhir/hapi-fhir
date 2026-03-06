@@ -94,7 +94,6 @@ public class ResourceLinkPredicateBuilderTest {
 		assertEquals(BinaryCondition.class, condition.getClass());
 	}
 
-	// FIXME: test
 	@Test
 	void validateInvalidModifiers() {
 		when(mySearchQueryBuilder.getFhirContext()).thenReturn(FhirContext.forR4Cached());
@@ -109,7 +108,7 @@ public class ResourceLinkPredicateBuilderTest {
 		requestDetails.setParameters(params);
 
 		assertThatThrownBy(() ->
-			myResourceLinkPredicateBuilder.createPredicate(requestDetails, "Observation", null, Collections.emptyList(), referenceOrParamList, null, RequestPartitionId.allPartitions()))
+			myResourceLinkPredicateBuilder.createPredicate(requestDetails, "Observation", null, null, Collections.emptyList(), referenceOrParamList, null, RequestPartitionId.allPartitions()))
 			.isInstanceOf(Exception.class)
 			.hasMessage("HAPI-2498: Unsupported search modifier(s): \"[:identifier, :x, :y]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]");
 

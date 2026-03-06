@@ -1481,6 +1481,7 @@ public class QueryStack {
 					myRequestDetails,
 					theResourceName,
 					theSearchParam,
+					theParamName,
 					theQualifiers,
 					theList,
 					theOperation,

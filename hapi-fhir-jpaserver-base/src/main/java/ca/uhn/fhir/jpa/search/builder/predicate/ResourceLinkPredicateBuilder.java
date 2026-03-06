@@ -217,12 +217,12 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			RequestDetails theRequest,
 			String theResourceType,
 			RuntimeSearchParam theParam,
+			String theParamName,
 			List<String> theQualifiers,
 			List<? extends IQueryParameterType> theReferenceOrParamList,
 			SearchFilterParser.CompareOperation theOperation,
 			RequestPartitionId theRequestPartitionId) {
 
-		String paramName = theParam.getName();
 		List<IIdType> targetIds = new ArrayList<>();
 		List<String> targetQualifiedUrls = new ArrayList<>();
 
@@ -271,7 +271,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 					return addPredicateReferenceWithChain(
 							theResourceType,
-							paramName,
+							theParamName,
 							theQualifiers,
 							theReferenceOrParamList,
 							ref,
@@ -287,11 +287,11 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 		for (IIdType next : targetIds) {
 			if (!next.hasResourceType()) {
-				warnAboutPerformanceOnUnqualifiedResources(paramName, theRequest, null);
+				warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, null);
 			}
 		}
 
-		List<String> pathsToMatch = createResourceLinkPaths(theResourceType, paramName, theQualifiers);
+		List<String> pathsToMatch = createResourceLinkPaths(theResourceType, theParamName, theQualifiers);
 		boolean inverse = (theOperation != null) && (theOperation != SearchFilterParser.CompareOperation.eq);
 
 		List<JpaPid> pids = myIdHelperService.resolveResourcePids(
