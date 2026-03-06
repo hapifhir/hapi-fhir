@@ -244,6 +244,30 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	}
 
 	@Test
+	void testBlankMatcherAlgorithm_validateAlgorithmRegistrations_throws() throws IOException {
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);
+		MdmRulesJson rules = loadRulesJson("bad-rules-blank-matcher-algorithm.json");
+		mdmRuleValidator.validate(rules);
+
+		assertThatThrownBy(() -> mdmRuleValidator.validateAlgorithmRegistrations(rules))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageContaining(Msg.code(2873))
+			.hasMessageContaining("blank matcher algorithm");
+	}
+
+	@Test
+	void testBlankSimilarityAlgorithm_validateAlgorithmRegistrations_throws() throws IOException {
+		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);
+		MdmRulesJson rules = loadRulesJson("bad-rules-blank-similarity-algorithm.json");
+		mdmRuleValidator.validate(rules);
+
+		assertThatThrownBy(() -> mdmRuleValidator.validateAlgorithmRegistrations(rules))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageContaining(Msg.code(2874))
+			.hasMessageContaining("blank similarity algorithm");
+	}
+
+	@Test
 	void testCustomRegisteredAlgorithm_passesValidateAlgorithmRegistrations() throws IOException {
 		myIMatcherFactory.register("CUSTOM_PHONETIC", (theLeftBase, theRightBase, theParams) -> true);
 		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory);

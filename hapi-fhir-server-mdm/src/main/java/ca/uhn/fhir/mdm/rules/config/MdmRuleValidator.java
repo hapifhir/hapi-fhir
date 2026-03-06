@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 @Service
 public class MdmRuleValidator implements IMdmRuleValidator {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmRuleValidator.class);
@@ -239,7 +241,11 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		MdmMatcherJson matcher = theFieldMatch.getMatcher();
 		if (matcher != null && myMatcherFactory != null) {
 			String algorithmName = matcher.getAlgorithm();
-			if (algorithmName != null && !myMatcherFactory.getRegisteredNames().contains(algorithmName)) {
+			if (isBlank(algorithmName)) {
+				throw new ConfigurationException(
+						Msg.code(2873) + "MatchField " + theFieldMatch.getName() + " has blank matcher algorithm");
+			}
+			if (!myMatcherFactory.getRegisteredNames().contains(algorithmName)) {
 				throw new ConfigurationException(Msg.code(2846) + "MatchField " + theFieldMatch.getName()
 						+ " uses unknown matcher algorithm '" + algorithmName + "'");
 			}
@@ -247,8 +253,11 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		MdmSimilarityJson similarity = theFieldMatch.getSimilarity();
 		if (similarity != null && mySimilarityFactory != null) {
 			String algorithmName = similarity.getAlgorithm();
-			if (algorithmName != null
-					&& !mySimilarityFactory.getRegisteredNames().contains(algorithmName)) {
+			if (isBlank(algorithmName)) {
+				throw new ConfigurationException(
+						Msg.code(2874) + "MatchField " + theFieldMatch.getName() + " has blank similarity algorithm");
+			}
+			if (!mySimilarityFactory.getRegisteredNames().contains(algorithmName)) {
 				throw new ConfigurationException(Msg.code(2847) + "MatchField " + theFieldMatch.getName()
 						+ " uses unknown similarity algorithm '" + algorithmName + "'");
 			}
