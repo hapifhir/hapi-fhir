@@ -105,7 +105,53 @@ The steps would be:
 
     Your search operation SQL logs should be logged.
 
-Note: This example was set to allow you to observe the effect of the filters on the log output, however swapping steps 1 and 2 would work better by avoiding the initial vast logging output. 
+Note: This example was set to allow you to observe the effect of the filters on the log output, however swapping steps 1 and 2 would work better by avoiding the initial vast logging output.
 
+# Specialized Loggers
 
+HAPI FHIR provides several specialized loggers that allow you to capture detailed information about specific subsystems without enabling debug logging across the entire application. These loggers can be configured independently in your logging configuration.
+
+## Available Specialized Loggers
+
+| Logger Name | Description |
+|-------------|-------------|
+| `ca.uhn.fhir.log.database_migration` | Logs all database schema migration activity including migration task execution, schema changes, and migration lock acquisition. Useful for monitoring and troubleshooting database upgrades. |
+| `ca.uhn.fhir.log.batch_troubleshooting` | Logs detailed information about batch job processing, including job execution progress and errors. |
+| `ca.uhn.fhir.log.narrative_generation_troubleshooting` | Logs information about FHIR narrative generation. |
+| `ca.uhn.fhir.log.partition_troubleshooting` | Logs information about partition resolution and routing in multi-tenant configurations. |
+| `ca.uhn.fhir.log.subscription_topic_troubleshooting` | Logs information about SubscriptionTopic processing and evaluation. |
+| `ca.uhn.fhir.log.terminology_troubleshooting` | Logs detailed information about terminology operations including ValueSet expansion and code validation. |
+
+## Configuring Specialized Loggers
+
+To enable detailed logging for a specific subsystem, add the appropriate logger to your logging configuration. For example, to enable database migration logging with Logback:
+
+```xml
+<configuration>
+    <!-- Your existing configuration -->
+
+    <!-- Enable database migration logging -->
+    <logger name="ca.uhn.fhir.log.database_migration" level="DEBUG"/>
+
+    <!-- Enable batch job troubleshooting -->
+    <logger name="ca.uhn.fhir.log.batch_troubleshooting" level="DEBUG"/>
+</configuration>
+```
+
+You can also direct specialized log output to a separate file:
+
+```xml
+<configuration>
+    <appender name="MIGRATION_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>migration.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="ca.uhn.fhir.log.database_migration" level="DEBUG" additivity="false">
+        <appender-ref ref="MIGRATION_FILE"/>
+    </logger>
+</configuration>
+```
 

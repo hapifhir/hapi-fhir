@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Set;
@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class MigrationTaskSkipper {
-	private static final Logger ourLog = LoggerFactory.getLogger(MigrationTaskSkipper.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 
 	public static void setDoNothingOnSkippedTasks(Collection<BaseTask> theTasks, String theSkipVersions) {
 		if (isBlank(theSkipVersions) || theTasks.isEmpty()) {

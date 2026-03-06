@@ -21,13 +21,13 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 
 public class MigratePostgresTextClobToBinaryClobTask extends BaseTableColumnTask {
-	private static final Logger ourLog = LoggerFactory.getLogger(MigratePostgresTextClobToBinaryClobTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 
 	/**
 	 * Constructor

@@ -21,16 +21,16 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.Set;
 
 public class RenameTableTask extends BaseTableTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(RenameTableTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 
 	private final String myOldTableName;
 	private final String myNewTableName;
