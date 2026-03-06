@@ -95,7 +95,7 @@ public interface IMatcherFactory {
 	 *
 	 * @deprecated Use {@link #getFieldMatcherForName(String)} instead.
 	 */
-	@Deprecated(since = "8_10_0", forRemoval = true)
+	@Deprecated(since = "8.10.0", forRemoval = true)
 	default IMdmFieldMatcher getFieldMatcherForMatchType(MatchTypeEnum theMatchType) {
 		throw new UnsupportedOperationException(
 				Msg.code(2849) + "getFieldMatcherForMatchType is deprecated. Use getFieldMatcherForName instead.");

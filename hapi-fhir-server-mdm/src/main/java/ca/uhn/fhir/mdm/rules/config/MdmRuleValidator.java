@@ -170,7 +170,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 
 	private void logSearchParameters(MdmRulesJson theMdmRulesJson) {
 		ourLog.info(
-				"Validating search parameters: {}",
+				"Validating search parameters used by MDM rules definition: {}",
 				theMdmRulesJson.getCandidateSearchParams().stream()
 						.collect(Collectors.groupingBy(
 								MdmResourceSearchParamJson::getResourceType,
