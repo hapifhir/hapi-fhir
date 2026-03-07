@@ -614,6 +614,190 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	void advanceJobStepAndUpdateChunkStatus_whenChunkInsertedAfterAdvancement_maintenanceFlipsToReady() {
+		// setup - create a gated job instance with the job definition registered
+		boolean isGatedExecution = true;
+		JobInstance instance = createInstance(true, isGatedExecution);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Store two GATE_WAITING chunks for LAST_STEP_ID (these simulate chunks already produced by step 1 workers)
+		String chunkId1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+		String chunkId2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
+
+		// Verify preconditions: both chunks are GATE_WAITING, instance is at FIRST_STEP_ID
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(chunkId1).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+			assertThat(findChunkByIdOrThrow(chunkId2).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(FIRST_STEP_ID);
+		});
+
+		// execute - advance the job to LAST_STEP_ID (this flips existing GATE_WAITING chunks to READY)
+		runInTransaction(() -> {
+			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false);
+			assertThat(changed).isTrue();
+		});
+
+		// Verify the two pre-existing chunks are now READY
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(chunkId1).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findChunkByIdOrThrow(chunkId2).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(LAST_STEP_ID);
+		});
+
+		// Now simulate a "late-arriving" chunk: a step 1 worker finishes AFTER advancement and produces
+		// another chunk for LAST_STEP_ID. It will be created as GATE_WAITING since that is the default
+		// for gated jobs.
+		String lateChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 2, null, isGatedExecution);
+
+		// verify - the late chunk is GATE_WAITING initially
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
+				.as("Late-arriving chunk should initially be GATE_WAITING")
+				.isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+		});
+
+		// execute - simulate a maintenance run that flips GATE_WAITING chunks for the current step to READY
+		runInTransaction(() -> {
+			int flipped = mySvc.enqueueGateWaitingChunksForCurrentStep(instanceId, LAST_STEP_ID, false);
+			assertThat(flipped).as("Maintenance run should flip the late-arriving chunk").isEqualTo(1);
+		});
+
+		// verify - the late chunk should now be READY after the maintenance run
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
+				.as("Late-arriving chunk should be READY after maintenance run")
+				.isEqualTo(WorkChunkStatusEnum.READY);
+		});
+	}
+
+	@Test
+	void advanceJobStepAndUpdateChunkStatus_whenAllChunksInsertedBeforeAdvancement_allChunksAreReady() {
+		// setup - create a gated job instance
+		boolean isGatedExecution = true;
+		JobInstance instance = createInstance(true, isGatedExecution);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Store three GATE_WAITING chunks for LAST_STEP_ID - all inserted BEFORE advancement
+		String chunkId1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+		String chunkId2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
+		String chunkId3 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 2, null, isGatedExecution);
+
+		// execute - advance the job to LAST_STEP_ID
+		runInTransaction(() -> {
+			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false);
+			assertThat(changed).isTrue();
+		});
+
+		// verify - all three chunks should be READY since they were all present before advancement
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(chunkId1).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findChunkByIdOrThrow(chunkId2).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findChunkByIdOrThrow(chunkId3).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(LAST_STEP_ID);
+		});
+	}
+
+	@Test
+	void enqueueGateWaitingChunksForCurrentStep_whenNoGateWaitingChunks_returnsZero() {
+		// setup - create a gated job instance and advance to LAST_STEP_ID
+		boolean isGatedExecution = true;
+		JobInstance instance = createInstance(true, isGatedExecution);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Store chunks and advance so all are READY
+		storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+		runInTransaction(() -> mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false));
+
+		// execute - calling enqueueGateWaitingChunksForCurrentStep again should be a no-op
+		runInTransaction(() -> {
+			int flipped = mySvc.enqueueGateWaitingChunksForCurrentStep(instanceId, LAST_STEP_ID, false);
+			assertThat(flipped).as("No GATE_WAITING chunks should remain after advancement").isEqualTo(0);
+		});
+	}
+
+	@Test
+	void storeWorkChunk_forNonGatedJob_chunkIsReadyRegardlessOfTiming() {
+		// setup - create a NON-gated job instance
+		boolean isGatedExecution = false;
+		JobInstance instance = createInstance(true, isGatedExecution);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Store chunks for a non-gated job - they should always be created with READY status
+		String chunkId1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+		String chunkId2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
+
+		// verify - non-gated chunks are READY immediately upon creation, no race condition possible
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(chunkId1).getStatus())
+				.as("Non-gated job chunks should always start as READY")
+				.isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findChunkByIdOrThrow(chunkId2).getStatus())
+				.as("Non-gated job chunks should always start as READY")
+				.isEqualTo(WorkChunkStatusEnum.READY);
+		});
+	}
+
+	@Test
+	void advanceJobStepAndUpdateChunkStatus_whenSingleChunkPerStep_advancesCorrectly() {
+		// setup - create a gated job instance with a single chunk for the next step
+		boolean isGatedExecution = true;
+		JobInstance instance = createInstance(true, isGatedExecution);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Store exactly one GATE_WAITING chunk for LAST_STEP_ID
+		String singleChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+
+		// execute - advance to LAST_STEP_ID
+		runInTransaction(() -> {
+			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false);
+			assertThat(changed).isTrue();
+		});
+
+		// verify - the single chunk should be READY and step advanced correctly
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(singleChunkId).getStatus())
+				.as("Single chunk should be flipped to READY after advancement")
+				.isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(LAST_STEP_ID);
+		});
+	}
+
+	@Test
+	void enqueueGateWaitingChunksForCurrentStep_forReductionStep_flipsToReductionReady() {
+		// setup - create a gated job instance and advance to LAST_STEP_ID
+		boolean isGatedExecution = true;
+		JobInstance instance = createInstance(true, isGatedExecution);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Store a chunk and advance so the instance is at LAST_STEP_ID
+		storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+		runInTransaction(() -> mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false));
+
+		// Simulate a late-arriving chunk that arrives AFTER step advancement
+		String lateChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
+
+		// verify precondition - late chunk starts as GATE_WAITING
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
+				.as("Late-arriving chunk should initially be GATE_WAITING")
+				.isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+		});
+
+		// execute - enqueue with theIsReductionStep = true
+		runInTransaction(() -> {
+			int flipped = mySvc.enqueueGateWaitingChunksForCurrentStep(instanceId, LAST_STEP_ID, true);
+			assertThat(flipped).as("Should flip the late-arriving chunk").isEqualTo(1);
+		});
+
+		// verify - the late chunk should be REDUCTION_READY (not READY) for a reduction step
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
+				.as("Reduction step should flip late-arriving chunks to REDUCTION_READY")
+				.isEqualTo(WorkChunkStatusEnum.REDUCTION_READY);
+		});
+	}
+
+	@Test
 	public void testFetchUnknownWork() {
 		assertFalse(myWorkChunkRepository.findById("FOO").isPresent());
 	}

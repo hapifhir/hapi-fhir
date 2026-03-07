@@ -302,13 +302,35 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	WorkChunk createWorkChunk(WorkChunk theWorkChunk);
 
 	/**
-	 * Atomically advance the given job to the given step and change the status of all QUEUED and GATE_WAITING chunks
-	 * in the next step to READY
+	 * Advance the given job to the given step and flip any GATE_WAITING/QUEUED chunks for the new
+	 * step to READY (or REDUCTION_READY for reduction steps). Late-arriving chunks that are created
+	 * after this call will remain in GATE_WAITING until the next maintenance run calls
+	 * {@link #enqueueGateWaitingChunksForCurrentStep}.
+	 *
 	 * @param theJobInstanceId the id of the job instance to be updated
 	 * @param theNextStepId the id of the next job step
+	 * @param theIsReductionStepBoolean whether the next step is a reduction step
 	 * @return whether any changes were made
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean advanceJobStepAndUpdateChunkStatus(
 			String theJobInstanceId, String theNextStepId, boolean theIsReductionStepBoolean);
+
+	/**
+	 * Flip any GATE_WAITING (or legacy QUEUED) chunks for the given job instance and step to READY
+	 * (or REDUCTION_READY for reduction steps). This is called on every maintenance run to catch
+	 * late-arriving chunks that were created after the job step was advanced. In normal operation
+	 * this is a no-op after the first run, but it also handles the race condition where a slow
+	 * worker produces a chunk after advancement has already occurred.
+	 *
+	 * @param theJobInstanceId the id of the job instance
+	 * @param theStepId the current gated step id
+	 * @param theIsReductionStep whether this is a reduction step
+	 * @return the number of chunks that were updated
+	 */
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	default int enqueueGateWaitingChunksForCurrentStep(
+			String theJobInstanceId, String theStepId, boolean theIsReductionStep) {
+		return 0;
+	}
 }

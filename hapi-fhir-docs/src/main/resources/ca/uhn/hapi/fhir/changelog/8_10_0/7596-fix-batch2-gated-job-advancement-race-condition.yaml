@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7596
+jira: SMILE-11603
+title: "Fixed a race condition in the batch2 framework where work chunks produced by slow workers
+  after a gated job step had already advanced could be permanently stuck in GATE_WAITING status.
+  The maintenance run now flips GATE_WAITING chunks for the current gated step to READY on every
+  pass, catching any late-arriving chunks without adding a database round trip to each chunk write."
