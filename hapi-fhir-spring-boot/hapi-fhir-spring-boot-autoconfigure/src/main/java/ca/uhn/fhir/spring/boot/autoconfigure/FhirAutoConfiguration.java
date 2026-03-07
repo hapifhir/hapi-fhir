@@ -20,7 +20,6 @@
 package ca.uhn.fhir.spring.boot.autoconfigure;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.JpaDstu2Config;
@@ -103,7 +102,7 @@ public class FhirAutoConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnClass(AbstractJaxRsProvider.class)
+	@ConditionalOnClass(RestfulServer.class)
 	@EnableConfigurationProperties(FhirProperties.class)
 	@ConfigurationProperties("hapi.fhir.rest")
 	@SuppressWarnings("serial")
