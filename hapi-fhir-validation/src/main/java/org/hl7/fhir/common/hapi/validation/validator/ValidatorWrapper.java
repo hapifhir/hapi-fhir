@@ -17,6 +17,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
 import org.hl7.fhir.r5.fhirpath.IHostApplicationServices;
+import org.hl7.fhir.r5.model.Enumerations.BindingStrength;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
@@ -36,11 +37,13 @@ import org.w3c.dom.NodeList;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 class ValidatorWrapper {
@@ -59,6 +62,7 @@ class ValidatorWrapper {
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
 	private IHostApplicationServices hostApplicationServices;
 	private boolean myAllowExamples;
+	private boolean downgradeExampleAndPreferredBindingsError = false;
 
 	/**
 	 * Constructor
@@ -133,7 +137,6 @@ class ValidatorWrapper {
 
 	public List<ValidationMessage> validate(
 			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
-
 		InstanceValidator v = buildInstanceValidator(theWorkerContext);
 
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
@@ -142,6 +145,10 @@ class ValidatorWrapper {
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(myNoTerminologyChecks);
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
+		/*
+		 * Start strict: unknown CodeSystems become errors, then selectively down-grade preferred/example
+		 * bindings (e.g. DocumentReference.content.format) in post-processing.
+		 */
 		/* setUnknownCodeSystemsCauseErrors interacts with UnknownCodeSystemWarningValidationSupport. Until this interaction is resolved, the value here should remain fixed. */
 		v.setUnknownCodeSystemsCauseErrors(true);
 		v.getExtensionDomains().addAll(myExtensionDomains);
@@ -210,6 +217,9 @@ class ValidatorWrapper {
 		} else {
 			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
 		}
+
+		if (isDowngradeExampleAndPreferredBindingsError())
+			adjustUnknownCodeSystemIssueLevels(profiles, theWorkerContext, messages);
 
 		if (profiles.isEmpty() && !invalidProfileValidationMessages.isEmpty()) {
 			messages.addAll(invalidProfileValidationMessages);
@@ -301,5 +311,126 @@ class ValidatorWrapper {
 			}
 		}
 		return profileNames;
+	}
+
+	private void adjustUnknownCodeSystemIssueLevels(
+			List<StructureDefinition> theProfiles,
+			IWorkerContext theWorkerContext,
+			List<ValidationMessage> theMessages) {
+		for (ValidationMessage next : theMessages) {
+			if (!isUnknownCodeSystemIssue(next)) {
+				continue;
+			}
+
+			String path = cleanLocationPath(extractLocation(next));
+			Optional<BindingStrength> strengthOpt = determineBindingStrength(theProfiles, theWorkerContext, path);
+			if (strengthOpt.isPresent()) {
+				BindingStrength strength = strengthOpt.get();
+				switch (strength) {
+					case REQUIRED:
+					case EXTENSIBLE:
+						if (next.getLevel().ordinal() < ValidationMessage.IssueSeverity.ERROR.ordinal()) {
+							next.setLevel(ValidationMessage.IssueSeverity.ERROR);
+						}
+						break;
+					case PREFERRED:
+					case EXAMPLE:
+						if (next.getLevel() == ValidationMessage.IssueSeverity.ERROR) {
+							next.setLevel(ValidationMessage.IssueSeverity.WARNING);
+						}
+						break;
+					default:
+						// no-op
+				}
+			}
+		}
+	}
+
+	private boolean isUnknownCodeSystemIssue(ValidationMessage theMessage) {
+		String messageId = theMessage.getMessageId();
+		String msg = theMessage.getMessage() != null ? theMessage.getMessage() : "";
+		return "Terminology_PassThrough_TX_Message".equals(messageId)
+				|| msg.contains("CodeSystem is unknown")
+				|| msg.contains("Unknown code system")
+				|| msg.contains("Code system is unknown")
+				|| msg.contains("CodeSystem is unknown and can't be validated")
+				|| (msg.contains("Unable to validate code") && msg.contains("CodeSystem"));
+	}
+
+	private String cleanLocationPath(String theLocation) {
+		if (theLocation == null) {
+			return null;
+		}
+		return theLocation.replaceAll("\\[[0-9]+]", "");
+	}
+
+	private String extractLocation(ValidationMessage theMessage) {
+		try {
+			Method m = ValidationMessage.class.getMethod("getLocationString");
+			Object out = m.invoke(theMessage);
+			return out != null ? out.toString() : null;
+		} catch (Exception e) {
+			// ignore
+		}
+		try {
+			Method m2 = ValidationMessage.class.getMethod("getLocation");
+			Object out = m2.invoke(theMessage);
+			if (out instanceof Collection) {
+				return ((Collection<?>) out)
+						.stream().findFirst().map(Object::toString).orElse(null);
+			}
+			if (out instanceof String) {
+				return (String) out;
+			}
+		} catch (Exception e) {
+			// ignore
+		}
+		return null;
+	}
+
+	private Optional<BindingStrength> determineBindingStrength(
+			List<StructureDefinition> theProfiles, IWorkerContext theWorkerContext, String thePath) {
+		if (thePath == null || thePath.isEmpty()) {
+			return Optional.empty();
+		}
+
+		for (StructureDefinition nextProfile : theProfiles) {
+			Optional<BindingStrength> strength = bindingForPath(nextProfile, thePath);
+			if (strength.isPresent()) {
+				return strength;
+			}
+		}
+
+		String resourceName = thePath.split("\\.")[0];
+		StructureDefinition baseDef = theWorkerContext.fetchTypeDefinition(resourceName);
+		if (baseDef != null) {
+			Optional<BindingStrength> strength = bindingForPath(baseDef, thePath);
+			if (strength.isPresent()) {
+				return strength;
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	private Optional<BindingStrength> bindingForPath(StructureDefinition theSd, String thePath) {
+		if (theSd == null || !theSd.hasSnapshot()) {
+			return Optional.empty();
+		}
+		return theSd.getSnapshot().getElement().stream()
+				.filter(ed -> thePath.equals(ed.getPath()))
+				.filter(ed -> ed.hasBinding() && ed.getBinding().hasStrength())
+				.map(ed -> ed.getBinding().getStrength())
+				.findFirst();
+	}
+
+	public boolean isDowngradeExampleAndPreferredBindingsError() {
+		return downgradeExampleAndPreferredBindingsError;
+	}
+
+	public ValidatorWrapper setDowngradeExampleAndPreferredBindingsError(
+			boolean downgradeExampleAndPreferredBindingsError) {
+		this.downgradeExampleAndPreferredBindingsError = downgradeExampleAndPreferredBindingsError;
+		return this;
 	}
 }

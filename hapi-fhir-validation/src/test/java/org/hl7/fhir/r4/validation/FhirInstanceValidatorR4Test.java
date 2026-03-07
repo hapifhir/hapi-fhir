@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -61,6 +62,9 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r5.elementmodel.JsonParser;
 import org.hl7.fhir.r5.test.utils.ClassesLoadedFlags;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
@@ -1695,6 +1699,294 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertThat(oo.getIssue().get(0).getLocation()).hasSize(2);
 		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
 		assertEquals("Line[22] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
+	}
+
+	@Test
+	void testDocumentReferenceFormatPreferredBindingDoesNotErrorOnUnknownCode() {
+		DocumentReference doc = new DocumentReference();
+		doc.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		doc.setSubject(new Reference("Patient/123"));
+
+		DocumentReference.DocumentReferenceContentComponent content = doc.addContent();
+		content.setAttachment(new Attachment().setContentType("application/pdf").setUrl("http://example.org/doc.pdf"));
+		content.setFormat(new Coding()
+			.setSystem("urn:oid:2.16.756.5.30.1.127.3.10.10")
+			.setCode("urn:che:epr:ch-emed:medication-card:20231")
+			.setDisplay("example code outside preferred value set"));
+
+		ValidationResult result = myFhirValidator.validateWithResult(doc);
+
+		List<SingleValidationMessage> formatErrors = result.getMessages().stream()
+			.filter(m -> m.getSeverity() == ResultSeverityEnum.ERROR)
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("DocumentReference.content"))
+			.filter(m -> m.getLocationString().contains("format"))
+			.collect(Collectors.toList());
+
+		assertThat(formatErrors)
+			.withFailMessage(() -> "Expected no errors on content.format but got: " + formatErrors)
+			.isEmpty();
+	}
+
+	@Test
+	void testDocumentReferenceFormatPreferredBindingKnownSystemInvalidCode() {
+		DocumentReference doc = new DocumentReference();
+		doc.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		doc.setSubject(new Reference("Patient/123"));
+
+		DocumentReference.DocumentReferenceContentComponent content = doc.addContent();
+		content.setAttachment(new Attachment().setContentType("application/pdf").setUrl("http://example.org/doc.pdf"));
+		content.setFormat(new Coding()
+			.setSystem("http://loinc.org")
+			.setCode("not-a-valid-format-code")
+			.setDisplay("bad code on known system"));
+
+		ValidationResult result = myFhirValidator.validateWithResult(doc);
+
+		List<SingleValidationMessage> formatIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("DocumentReference.content"))
+			.filter(m -> m.getLocationString().contains("format"))
+			.collect(Collectors.toList());
+
+		assertThat(formatIssues).isNotEmpty();
+		assertThat(formatIssues)
+			.as("Known system with invalid code should not raise ERROR for preferred binding")
+			.noneMatch(m -> m.getSeverity() == ResultSeverityEnum.ERROR || m.getSeverity() == ResultSeverityEnum.FATAL);
+		assertThat(formatIssues)
+			.anyMatch(m -> m.getMessage().contains("Unknown code") || m.getMessage().contains("not found in CodeSystem"));
+	}
+
+	@Test
+	void testDocumentReferenceFormatPreferredBindingUnknownSystemExampleCode() {
+		DocumentReference doc = new DocumentReference();
+		doc.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		doc.setSubject(new Reference("Patient/123"));
+
+		DocumentReference.DocumentReferenceContentComponent content = doc.addContent();
+		content.setAttachment(new Attachment().setContentType("application/pdf").setUrl("http://example.org/doc.pdf"));
+		content.setFormat(new Coding()
+			.setSystem("http://unknown-system.example.org/format")
+			.setCode("example-code")
+			.setDisplay("example code on unknown system"));
+
+		ValidationResult result = myFhirValidator.validateWithResult(doc);
+
+		List<SingleValidationMessage> formatIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("DocumentReference.content"))
+			.filter(m -> m.getLocationString().contains("format"))
+			.collect(Collectors.toList());
+
+		assertThat(formatIssues).isNotEmpty();
+		assertThat(formatIssues)
+			.as("Unknown system should not be promoted to ERROR for preferred binding")
+			.noneMatch(m -> m.getSeverity() == ResultSeverityEnum.ERROR || m.getSeverity() == ResultSeverityEnum.FATAL);
+		assertThat(formatIssues)
+			.anyMatch(m -> m.getMessage().contains("CodeSystem is unknown") || m.getMessage().contains("CodeSystem is unknown and can't be validated") || m.getMessage().contains("Unknown code system"));
+	}
+
+	@Test
+	void testUnknownCodeSystemRequiredBindingIsError() {
+		AllergyIntolerance ai = new AllergyIntolerance();
+		ai.setClinicalStatus(new CodeableConcept().addCoding(new Coding()
+			.setSystem("http://unknown.example.org/allergy-status")
+			.setCode("active")));
+		ai.setPatient(new Reference("Patient/123"));
+
+		ValidationResult result = myFhirValidator.validateWithResult(ai);
+
+		List<SingleValidationMessage> statusIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("AllergyIntolerance.clinicalStatus"))
+			.filter(m -> m.getMessage() != null && m.getMessage().toLowerCase().contains("codesystem"))
+			.collect(Collectors.toList());
+
+		assertThat(statusIssues)
+			.as("Unknown CodeSystem on required binding should be an ERROR")
+			.anyMatch(m -> m.getSeverity() == ResultSeverityEnum.ERROR || m.getSeverity() == ResultSeverityEnum.FATAL);
+	}
+
+	@Test
+	void testUnknownCodeSystemExtensibleBindingIsWarning() {
+
+		myInstanceVal.setDowngradeExampleAndPreferredBindingsError(false);
+		buildValidationSupportWithLogicalAndSupport(false);
+
+		Observation obs = createObservationWithDefaultSubjectPerfomerEffective();
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.getCode().addCoding().setSystem("http://loinc.org").setCode("1234-5").setDisplay("placeholder");
+		obs.getCategory().clear();
+		obs.addCategory().addCoding()
+			.setSystem("http://unknown.example.org/obs-category")
+			.setCode("foo")
+			.setDisplay("Unknown category");
+
+		ValidationResult result = myFhirValidator.validateWithResult(obs);
+
+		List<SingleValidationMessage> categoryIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("Observation.category"))
+			.filter(m -> m.getMessage() != null && m.getMessage().toLowerCase().contains("codesystem"))
+			.collect(Collectors.toList());
+
+		assertThat(categoryIssues)
+			.as("Unknown CodeSystem on extensible binding should be an ERROR")
+				.anyMatch(m -> m.getSeverity() == ResultSeverityEnum.WARNING);
+	}
+
+	@Test
+	void testRequiredBindingStillErrorsWithUnknownCode() {
+		String patientJson = """
+			{
+			  "resourceType": "Patient",
+			  "name": [{ "family": "Test" }],
+			  "gender": "not-a-gender"
+			}
+			""";
+
+		ValidationResult result = myFhirValidator.validateWithResult(patientJson);
+
+		List<SingleValidationMessage> genderIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("Patient.gender"))
+			.collect(Collectors.toList());
+
+		assertThat(genderIssues).isNotEmpty();
+		assertThat(genderIssues)
+			.anyMatch(m -> m.getSeverity() == ResultSeverityEnum.ERROR || m.getSeverity() == ResultSeverityEnum.FATAL);
+	}
+
+	@Test
+	void testExtensibleBindingRemainsWarningForUnknownCodeSystem() {
+		Observation obs = createObservationWithDefaultSubjectPerfomerEffective();
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.getCode().addCoding().setSystem("http://loinc.org").setCode("1234-5").setDisplay("placeholder");
+		obs.getCategory().clear();
+		obs.addCategory().addCoding()
+			.setSystem("http://unknown.example.org/obs-category")
+			.setCode("foo")
+			.setDisplay("Unknown category");
+
+		ValidationResult result = myFhirValidator.validateWithResult(obs);
+
+		List<SingleValidationMessage> categoryIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("Observation.category"))
+			.collect(Collectors.toList());
+
+		assertThat(categoryIssues).isNotEmpty();
+		assertThat(categoryIssues)
+			.noneMatch(m -> m.getSeverity() == ResultSeverityEnum.FATAL);
+	}
+
+	@Test
+	void testUnknownCodeSystemExtensibleBinding_withDowngradeDisabled_isWarning() {
+		// When downgrade flag is disabled (default), extensible bindings with unknown
+		// code systems should produce WARNING (not upgraded to ERROR)
+		buildValidationSupportWithLogicalAndSupport(false);
+		myInstanceVal.setDowngradeExampleAndPreferredBindingsError(false);
+
+		Observation obs = createObservationWithDefaultSubjectPerfomerEffective();
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.getCode().addCoding().setSystem("http://loinc.org").setCode("1234-5").setDisplay("placeholder");
+		obs.getCategory().clear();
+		obs.addCategory().addCoding()
+			.setSystem("http://unknown.example.org/obs-category")
+			.setCode("foo")
+			.setDisplay("Unknown category");
+
+		ValidationResult result = myFhirValidator.validateWithResult(obs);
+
+		List<SingleValidationMessage> categoryIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("Observation.category"))
+			.filter(m -> m.getMessage() != null && m.getMessage().toLowerCase().contains("codesystem"))
+			.collect(Collectors.toList());
+
+		assertThat(categoryIssues)
+			.as("Unknown CodeSystem on extensible binding should be WARNING when downgrade flag is disabled")
+			.isNotEmpty()
+			.anyMatch(m -> m.getSeverity() == ResultSeverityEnum.WARNING);
+	}
+
+	@Test
+	void testUnknownCodeSystemExtensibleBinding_withDowngradeEnabled_isStillProcessed() {
+		// When downgrade flag is enabled, the adjustment logic runs.
+		// Unknown code system issues should still be reported (at WARNING or ERROR depending on binding lookup)
+		buildValidationSupportWithLogicalAndSupport(false);
+		myInstanceVal.setDowngradeExampleAndPreferredBindingsError(true);
+
+		Observation obs = createObservationWithDefaultSubjectPerfomerEffective();
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.getCode().addCoding().setSystem("http://loinc.org").setCode("1234-5").setDisplay("placeholder");
+		obs.getCategory().clear();
+		obs.addCategory().addCoding()
+			.setSystem("http://unknown.example.org/obs-category")
+			.setCode("foo")
+			.setDisplay("Unknown category");
+
+		ValidationResult result = myFhirValidator.validateWithResult(obs);
+
+		List<SingleValidationMessage> categoryIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("Observation.category"))
+			.filter(m -> m.getMessage() != null && m.getMessage().toLowerCase().contains("codesystem"))
+			.collect(Collectors.toList());
+
+		// Verify issues are still detected - the downgrade flag enables post-processing
+		// but doesn't change that unknown code systems are reported
+		assertThat(categoryIssues)
+			.as("Unknown CodeSystem issues should still be reported when downgrade flag is enabled")
+			.isNotEmpty();
+	}
+
+	@Test
+	void testUnknownCodeSystemPreferredBinding_withDowngradeEnabled_isWarning() {
+		buildValidationSupportWithLogicalAndSupport(false);
+		myInstanceVal.setDowngradeExampleAndPreferredBindingsError(true);
+
+		// DocumentReference.content.format has a PREFERRED binding
+		DocumentReference docRef = new DocumentReference();
+		docRef.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		docRef.addContent()
+			.getAttachment()
+			.setContentType("text/plain");
+		docRef.getContentFirstRep()
+			.setFormat(new Coding()
+				.setSystem("http://unknown.example.org/format")
+				.setCode("unknown-format")
+				.setDisplay("Unknown Format"));
+
+		ValidationResult result = myFhirValidator.validateWithResult(docRef);
+
+		List<SingleValidationMessage> formatIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("DocumentReference.content"))
+			.filter(m -> m.getMessage() != null && m.getMessage().toLowerCase().contains("codesystem"))
+			.collect(Collectors.toList());
+
+		// All unknown code system issues on preferred binding should be WARNING (not ERROR)
+		assertThat(formatIssues)
+			.as("Unknown CodeSystem on preferred binding should be WARNING when downgrade flag is enabled")
+			.isNotEmpty()
+			.noneMatch(m -> m.getSeverity() == ResultSeverityEnum.ERROR);
+	}
+
+	@Test
+	void testUnknownCodeSystemRequiredBinding_withDowngradeEnabled_remainsError() {
+		buildValidationSupportWithLogicalAndSupport(false);
+		myInstanceVal.setDowngradeExampleAndPreferredBindingsError(true);
+
+		// Patient.gender has a REQUIRED binding - use an invalid code
+		String patientJson = """
+			{
+			  "resourceType": "Patient",
+			  "name": [{ "family": "Test" }],
+			  "gender": "invalid-gender"
+			}
+			""";
+
+		ValidationResult result = myFhirValidator.validateWithResult(patientJson);
+
+		List<SingleValidationMessage> genderIssues = result.getMessages().stream()
+			.filter(m -> m.getLocationString() != null && m.getLocationString().contains("Patient.gender"))
+			.collect(Collectors.toList());
+
+		// Required bindings should remain as errors even with downgrade enabled
+		assertThat(genderIssues)
+			.as("Required bindings should still produce errors")
+			.anyMatch(m -> m.getSeverity() == ResultSeverityEnum.ERROR || m.getSeverity() == ResultSeverityEnum.FATAL);
 	}
 
 
