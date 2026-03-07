@@ -1002,6 +1002,9 @@ public class SearchQueryBuilder {
 		String columnName = "MHD" + (myNextNearnessColumnId++);
 		mySelect.addAliasedColumn(sum, columnName);
 		mySelect.addCustomOrderings(columnName + ordering);
+		if (mySelect.toString().contains("GROUP BY")) {
+			mySelect.addCustomGroupings(columnName);
+		}
 	}
 
 	public void addSortString(DbColumn theColumnValueNormalized, boolean theAscending) {
