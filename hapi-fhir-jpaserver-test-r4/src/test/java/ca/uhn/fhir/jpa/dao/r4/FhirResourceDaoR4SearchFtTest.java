@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -610,6 +611,84 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		map.add(SP_VALUE_QUANTITY, new QuantityParam("lt90"));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactly(toValues(id2));
 
+	}
+
+	/**
+	 * When Hibernate Search is enabled but HibernateSearchIndexFullText is false,
+	 * a _text search should still be permitted (returning empty results if nothing
+	 * was indexed). This is a regression from HAPI 8.0.0 where an overly strict
+	 * validation check was added that throws HAPI-2566.
+	 *
+	 * @see <a href="https://smile-cdr.atlassian.net/browse/SMILE-11363">SMILE-11363</a>
+	 */
+	@Test
+	void testTextSearch_withHibernateSearchEnabled_andFullTextIndexDisabled_shouldNotThrowError() {
+		// Setup: disable fulltext indexing but keep Hibernate Search enabled (bean is present)
+		myStorageSettings.setHibernateSearchIndexFullText(false);
+		mySearchParamRegistry.forceRefresh();
+
+		// Create a patient with narrative text (manually populated, not auto-indexed)
+		Patient patient = new Patient();
+		patient.getText().setDivAsString("<div>Some narrative text for searching</div>");
+		patient.addName().addGiven("TestPatient");
+		myPatientDao.create(patient, mySrd);
+
+		// Test: _text search should execute without error
+		// The desired behavior is that the search succeeds (empty or with results),
+		// NOT that it throws HAPI-2566
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Constants.PARAM_TEXT, new StringParam("narrative"));
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+
+		// Assert: we get a result bundle (possibly empty), not an exception
+		assertThat(results).isNotNull();
+		assertThat(results.getAllResources()).isNotNull();
+	}
+
+	/**
+	 * Adjacent test: _text search with HibernateSearchIndexFullText=true should work normally.
+	 * This verifies the standard (non-regression) path still functions.
+	 */
+	@Test
+	void testTextSearch_withHibernateSearchEnabled_andFullTextIndexEnabled_shouldWork() {
+		// Setup: both HS and fulltext indexing enabled (the @BeforeEach default)
+		// myStorageSettings.setHibernateSearchIndexFullText(true) is already set in @BeforeEach
+
+		Patient patient = new Patient();
+		patient.getText().setDivAsString("<div>DIVTEXT</div>");
+		patient.addName().addGiven("TestPatient");
+		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+		// Test: _text search should work and return the patient
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Constants.PARAM_TEXT, new StringParam("DIVTEXT"));
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+
+		assertThat(results).isNotNull();
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactly(toValues(patientId));
+	}
+
+	/**
+	 * Adjacent test: when HibernateSearchIndexFullText is false, the search parameter
+	 * registry should still register _text and _content as active search parameters
+	 * (since Hibernate Search is enabled). Currently, the registry gates these params
+	 * behind isHibernateSearchIndexFullText(), which is a secondary bug.
+	 */
+	@Test
+	void testSearchParamRegistry_withFullTextIndexDisabled_shouldStillRegisterTextParam() {
+		// Setup: disable fulltext indexing but keep Hibernate Search enabled
+		myStorageSettings.setHibernateSearchIndexFullText(false);
+		mySearchParamRegistry.forceRefresh();
+
+		// Assert: _text should still be registered as an active search parameter
+		boolean hasTextParam = mySearchParamRegistry.hasActiveSearchParam(
+			"Patient",
+			Constants.PARAM_TEXT,
+			ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+
+		assertThat(hasTextParam)
+			.as("_text search parameter should be active when Hibernate Search is enabled, regardless of fulltext indexing setting")
+			.isTrue();
 	}
 
 }
