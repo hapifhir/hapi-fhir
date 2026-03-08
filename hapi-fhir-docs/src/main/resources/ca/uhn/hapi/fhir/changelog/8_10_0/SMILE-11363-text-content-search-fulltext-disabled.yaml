@@ -1,0 +1,11 @@
+---
+type: fix
+jira: SMILE-11363
+title: "Previously, using the _text or _content search parameters when Hibernate Search was enabled
+  but the fulltext content index (HibernateSearchIndexFullText) was set to false would result in
+  an error (HAPI-2566: Fulltext searching is not enabled on this server). This was a regression
+  introduced in HAPI 8.0.0: a validation check was added that incorrectly blocked _text and _content
+  queries whenever fulltext content auto-indexing was disabled, even though Hibernate Search was
+  fully operational. The overly strict validation check has been removed and _text/_content search
+  parameter registration is now unconditional when Hibernate Search is enabled, restoring the
+  behaviour from HAPI 7.6.0 and earlier."

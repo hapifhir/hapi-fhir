@@ -5,8 +5,8 @@ import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.CompositeAndListParam;
@@ -671,8 +671,9 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 	/**
 	 * Adjacent test: when HibernateSearchIndexFullText is false, the search parameter
 	 * registry should still register _text and _content as active search parameters
-	 * (since Hibernate Search is enabled). Currently, the registry gates these params
-	 * behind isHibernateSearchIndexFullText(), which is a secondary bug.
+	 * (since Hibernate Search is enabled). Previously, the registry gated these params
+	 * behind isHibernateSearchIndexFullText(), which was a secondary bug fixed alongside
+	 * the HAPI-2566 regression.
 	 */
 	@Test
 	void testSearchParamRegistry_withFullTextIndexDisabled_shouldStillRegisterTextParam() {
@@ -680,14 +681,21 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		myStorageSettings.setHibernateSearchIndexFullText(false);
 		mySearchParamRegistry.forceRefresh();
 
-		// Assert: _text should still be registered as an active search parameter
+		// Assert: _text and _content should still be registered as active search parameters
 		boolean hasTextParam = mySearchParamRegistry.hasActiveSearchParam(
 			"Patient",
 			Constants.PARAM_TEXT,
 			ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+		boolean hasContentParam = mySearchParamRegistry.hasActiveSearchParam(
+			"Patient",
+			Constants.PARAM_CONTENT,
+			ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 		assertThat(hasTextParam)
 			.as("_text search parameter should be active when Hibernate Search is enabled, regardless of fulltext indexing setting")
+			.isTrue();
+		assertThat(hasContentParam)
+			.as("_content search parameter should be active when Hibernate Search is enabled, regardless of fulltext indexing setting")
 			.isTrue();
 	}
 
