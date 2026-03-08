@@ -2453,29 +2453,20 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		"/Patient/A/$everything?_content=HELLO"
 	})
 	public void testFullTextIndexingDisabled(String theUri) throws IOException {
-		// Setup
+		// Setup: disable fulltext auto-indexing but Hibernate Search is still enabled
 		myStorageSettings.setHibernateSearchIndexFullText(false);
+		mySearchParamRegistry.forceRefresh();
 		createPatient(withId("A"), withActiveTrue());
 
-		// Test
+		// Test: _text/_content searches should still be allowed when HS is enabled,
+		// even if fulltext auto-indexing is disabled. The search returns empty results
+		// since nothing was indexed, but no error is thrown.
 		HttpGet get = new HttpGet(myServerBase + theUri);
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 
-			// Verify
+			// Verify: expect HTTP 200 (success), not HTTP 400
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(400, response.getStatusLine().getStatusCode(), resp);
-			String expectedParams = null;
-			if (theUri.contains("_content")) {
-				expectedParams = "_content";
-			}
-			if (theUri.contains("_text")) {
-				if (expectedParams != null) {
-					expectedParams += ", _text";
-				} else {
-					expectedParams = "_text";
-				}
-			}
-			assertThat(resp).contains("Fulltext searching is not enabled on this server, can not support the parameter(s): " + expectedParams);
+			assertThat(response.getStatusLine().getStatusCode()).as(resp).isEqualTo(200);
 		}
 
 	}

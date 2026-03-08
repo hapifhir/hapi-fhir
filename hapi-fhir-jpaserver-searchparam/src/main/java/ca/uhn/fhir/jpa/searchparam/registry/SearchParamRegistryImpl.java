@@ -269,25 +269,25 @@ public class SearchParamRegistryImpl
 		}
 
 		// Auto-register: _content and _text
-		if (myStorageSettings.isHibernateSearchIndexFullText()) {
-			registerImplicitSearchParam(
-					searchParams,
-					Constants.PARAM_TEXT_URL,
-					Constants.PARAM_TEXT,
-					PARAM_TEXT_DESCRIPTION,
-					"Resource",
-					RestSearchParameterTypeEnum.STRING);
-			registerImplicitSearchParam(
-					searchParams,
-					Constants.PARAM_CONTENT_URL,
-					Constants.PARAM_CONTENT,
-					PARAM_CONTENT_DESCRIPTION,
-					"Resource",
-					RestSearchParameterTypeEnum.STRING);
-		} else {
-			unregisterImplicitSearchParam(searchParams, Constants.PARAM_CONTENT);
-			unregisterImplicitSearchParam(searchParams, Constants.PARAM_TEXT);
-		}
+		// These are always registered as implicit search parameters. If Hibernate Search
+		// is not enabled, the search will fail at execution time with an appropriate error
+		// (HAPI-1192). Previously, these were gated behind isHibernateSearchIndexFullText()
+		// but that setting only controls auto-indexing of fulltext data, not whether
+		// _text/_content searches should be allowed when HS is enabled.
+		registerImplicitSearchParam(
+				searchParams,
+				Constants.PARAM_TEXT_URL,
+				Constants.PARAM_TEXT,
+				PARAM_TEXT_DESCRIPTION,
+				"Resource",
+				RestSearchParameterTypeEnum.STRING);
+		registerImplicitSearchParam(
+				searchParams,
+				Constants.PARAM_CONTENT_URL,
+				Constants.PARAM_CONTENT,
+				PARAM_CONTENT_DESCRIPTION,
+				"Resource",
+				RestSearchParameterTypeEnum.STRING);
 
 		removeInactiveSearchParams(searchParams);
 

@@ -328,18 +328,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			return;
 		}
 
-		// Can't use _content or _text if FullText indexing is disabled
-		if (!myStorageSettings.isHibernateSearchIndexFullText()) {
-			String failingParams = theParams.keySet().stream()
-					.filter(t -> t.equals(Constants.PARAM_TEXT) || t.equals(Constants.PARAM_CONTENT))
-					.sorted()
-					.collect(Collectors.joining(", "));
-			String msg = myFhirContext
-					.getLocalizer()
-					.getMessage(FulltextSearchSvcImpl.class, "fullTextSearchingNotPossible", failingParams);
-			throw new InvalidRequestException(Msg.code(2566) + msg);
-		}
-
 		List<String> failingParams = null;
 
 		// theResourceType is null for $everything queries
