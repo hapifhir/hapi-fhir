@@ -1,6 +1,6 @@
 /*
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -47,6 +47,18 @@ public class PackageInstallOutcomeJson {
 	@JsonProperty("resourcesInstalled")
 	private Map<String, Integer> myResourcesInstalled;
 
+	@Schema(
+			description =
+					"This map is populated only in the case of a dry-run and contains a mapping of resource type to unique identifier (for most resources, this will be url or url + version (if MULTI_VERSION mode is specified)) for resources that would be overwritten or updated should a real run be done.")
+	@JsonProperty("replacedResourceTypeToUniqueIdentifier")
+	private Map<String, List<String>> myReplacedResourceToUniqueIdentifier;
+
+	@Schema(
+			description =
+					"This map is populated only in the case of a dry-run and contains a mapping of resource type to unique identifier for resources that would be created should a real run be done.")
+	@JsonProperty("addedResourceTypeToUniqueIdentifier")
+	private Map<String, List<String>> myAddedResourceTypeToUniqueIdentifier;
+
 	public List<String> getMessage() {
 		if (myMessage == null) {
 			myMessage = new ArrayList<>();
@@ -59,6 +71,32 @@ public class PackageInstallOutcomeJson {
 			myResourcesInstalled = new HashMap<>();
 		}
 		return myResourcesInstalled;
+	}
+
+	public Map<String, List<String>> getAddedResourceTypeToUniqueIdentifier() {
+		if (myAddedResourceTypeToUniqueIdentifier == null) {
+			myAddedResourceTypeToUniqueIdentifier = new HashMap<>();
+		}
+		return myAddedResourceTypeToUniqueIdentifier;
+	}
+
+	public void addResourceTypeToBeAdded(String theResourceType, String theUniqeId) {
+		Map<String, List<String>> map = getAddedResourceTypeToUniqueIdentifier();
+		List<String> value = map.computeIfAbsent(theResourceType, v -> new ArrayList<>());
+		value.add(theUniqeId);
+	}
+
+	public Map<String, List<String>> getReplacedResourceToUniqueIdentifier() {
+		if (myReplacedResourceToUniqueIdentifier == null) {
+			myReplacedResourceToUniqueIdentifier = new HashMap<>();
+		}
+		return myReplacedResourceToUniqueIdentifier;
+	}
+
+	public void addExistingResource(String theResourceType, String theUniqueId) {
+		Map<String, List<String>> map = getReplacedResourceToUniqueIdentifier();
+		List<String> value = map.computeIfAbsent(theResourceType, v -> new ArrayList<>());
+		value.add(theUniqueId);
 	}
 
 	public void incrementResourcesInstalled(String theResourceType) {

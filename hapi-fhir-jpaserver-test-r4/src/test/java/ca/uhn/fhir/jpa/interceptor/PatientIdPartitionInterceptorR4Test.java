@@ -8,6 +8,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -85,7 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-@Import(PatientIdPartitionInterceptorR4Test.TestConfig.class)
+@Import({PatientIdPartitionInterceptorR4Test.TestConfig.class, TestDaoSearch.Config.class})
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
@@ -94,6 +95,9 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	private HapiTransactionService myTransactionService;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
+	@Autowired
+	TestDaoSearch myTestDaoSearch;
+
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
 	private PatientIdPartitionInterceptor mySvc;
 
@@ -415,6 +419,22 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Observation') AND (t0.RES_DELETED_AT IS NULL)) fetch first '10000' rows only", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
 	}
+
+	@Test
+	void testSearchObservation_mixedCompartmentParam_findsAll() {
+	    // given
+		createPatientA();
+		IIdType patAObsId = createObservation(withSubject("Patient/A"), withStatus("final"), withIdentifier("http://example.com", "patObsIdentifier"));
+		IIdType g1 = createGroup(withId("G1"));
+		IIdType g1ObsId = createObservation(withSubject(g1), withStatus("final"), withIdentifier("http://example.com", "groupObsIdentifier"));
+
+		myTestDaoSearch.assertSearchFinds("find both cross partition", "Observation?status=final", patAObsId, g1ObsId);
+		myTestDaoSearch.assertSearchFinds("find only patient Obs", "Observation?status=final&subject=Patient/A", patAObsId);
+		myTestDaoSearch.assertSearchFinds("find only group Obs", "Observation?status=final&subject=Group/G1", g1ObsId);
+		myTestDaoSearch.assertSearchFinds("find by identifier for patient observation", "Observation?identifier=patObsIdentifier", patAObsId);
+		myTestDaoSearch.assertSearchFinds("find by identifier for group observation", "Observation?identifier=groupObsIdentifier", g1ObsId);
+	}
+
 
 	@Test
 	public void testSearchObservation_ChainedSubjectParameter() {
@@ -970,6 +990,34 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertEquals(1, search.getEntry().size(), "we find the Encounter linked to the organization and the patient");
 	}
 
+
+	/**
+	 * Searching for Organization via DAO with a SystemRequestDetails that has
+	 * a blank tenant ID should work in PATIENT_ID partition mode (unnamed).
+	 * The blank tenant ID should not bypass the interceptor chain and cause
+	 * "Partition IDs have not been set".
+	 */
+	@Test
+	public void testSearchOrganization_withBlankTenantId_shouldReturnDefaultPartition() {
+		// Create an Organization in the default partition
+		Organization org = new Organization();
+		org.setId("Organization/ORG1");
+		org.setName("Test Org");
+		org.addIdentifier().setSystem("http://example.com").setValue("ORG1");
+		myOrganizationDao.update(org, mySrd);
+
+		// Search using a SystemRequestDetails with blank tenant ID
+		SystemRequestDetails blankTenantRequest = new SystemRequestDetails();
+		blankTenantRequest.setTenantId("");
+
+		SearchParameterMap searchMap = new SearchParameterMap()
+				.add(Organization.SP_IDENTIFIER, new TokenParam("http://example.com", "ORG1"))
+				.setLoadSynchronous(true);
+
+		// This should NOT throw "HAPI-2223: Partition IDs have not been set"
+		IBundleProvider result = myOrganizationDao.search(searchMap, blankTenantRequest);
+		assertThat(result.size()).isEqualTo(1);
+	}
 
 	@Interceptor
 	public class MyTransactionSplitInterceptor {

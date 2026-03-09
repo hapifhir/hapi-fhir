@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -42,7 +42,8 @@ import java.util.function.Supplier;
 	"validationMode",
 	"reloadExisting",
 	"additionalResourceFolders",
-	"versionPolicy"
+	"versionPolicy",
+	"dryRun"
 })
 @ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -104,6 +105,12 @@ public class PackageInstallationSpec {
 					"Controls whether multiple versions of installed resources can coexist in the repository during STORE_AND_INSTALL installation")
 	@JsonProperty("versionPolicy")
 	private VersionPolicyEnum myVersionPolicy = VersionPolicyEnum.MULTI_VERSION;
+
+	@Schema(
+			description =
+					"Boolean value to signify dry-run status or not. False is default. But if true is specified, nothing will be persisted and a report will be generated outlining changes that would result if set false.")
+	@JsonProperty("dryRun")
+	private boolean myDryRun = false;
 
 	@JsonIgnore
 	private byte[] myPackageContents;
@@ -219,6 +226,15 @@ public class PackageInstallationSpec {
 	public PackageInstallationSpec setVersionPolicy(VersionPolicyEnum theVersionPolicy) {
 		myVersionPolicy = theVersionPolicy;
 		return this;
+	}
+
+	public PackageInstallationSpec setDryRun(boolean theDryRun) {
+		myDryRun = theDryRun;
+		return this;
+	}
+
+	public boolean isDryRun() {
+		return myDryRun;
 	}
 
 	public enum InstallModeEnum {
