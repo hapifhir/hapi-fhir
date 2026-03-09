@@ -13,7 +13,9 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -52,6 +54,18 @@ class PatientIdPartitionInterceptorTest {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("patient", new ReferenceParam(theValue));
 		ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forSearchType("Observation", params, null);
+
+		RequestPartitionId actual = mySvc.identifyForRead(readDetails, new ServletRequestDetails());
+
+		// Verify
+		assertFalse(actual.isAllPartitions());
+	}
+
+	@Test
+	void testHistoryInstance_Patient_ResolvesPartition() {
+		// Test
+		ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forHistory(
+			"Patient", new IdType("Patient/p1"));
 
 		RequestPartitionId actual = mySvc.identifyForRead(readDetails, new ServletRequestDetails());
 
