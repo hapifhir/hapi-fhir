@@ -273,6 +273,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public int getDefinitionsVersion() {
+		// This is not called in 6.8.2 of org.hl7.fhir.core
 		throw new UnsupportedOperationException(Msg.code(2861));
 	}
 

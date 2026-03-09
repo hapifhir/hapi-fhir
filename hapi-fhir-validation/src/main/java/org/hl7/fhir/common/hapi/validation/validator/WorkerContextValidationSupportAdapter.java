@@ -660,7 +660,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 	@Override
 	public int getDefinitionsVersion() {
-		return 0;
+		// This is not called in 6.8.2 of org.hl7.fhir.core
+		throw new UnsupportedOperationException(Msg.code(2862));
 	}
 
 	@Override
