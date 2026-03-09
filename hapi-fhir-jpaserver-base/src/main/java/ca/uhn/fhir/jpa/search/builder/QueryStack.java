@@ -1548,7 +1548,9 @@ public class QueryStack {
 
 		List<Condition> predicates = new ArrayList<>();
 		for (List<String> nextReferenceLink : referenceLinks.keySet()) {
-			for (LeafNodeDefinition leafNodeDefinition : referenceLinks.get(nextReferenceLink)) {
+			Collection<LeafNodeDefinition> mergedLeafNodes =
+					mergeLeafNodeDefinitionsByStructure(referenceLinks.get(nextReferenceLink));
+			for (LeafNodeDefinition leafNodeDefinition : mergedLeafNodes) {
 				SearchQueryBuilder builder;
 				if (wantChainedAndNormal) {
 					builder = mySqlBuilder.newChildSqlBuilder(mySqlBuilder.isIncludePartitionIdInJoins());
@@ -1617,6 +1619,31 @@ public class QueryStack {
 		// restore the state of this collection to turn caching back on before we exit
 		myReusePredicateBuilderTypes.addAll(cachedReusePredicateBuilderTypes);
 		return retVal;
+	}
+
+	/**
+	 * Multiple OR values on the same uplifted leaf are represented as multiple leaf instances.
+	 * Merge those values so that predicate builders can emit a single indexed OR (or IN) path
+	 * instead of creating repeated self-joins.
+	 */
+	private Collection<LeafNodeDefinition> mergeLeafNodeDefinitionsByStructure(
+			Set<LeafNodeDefinition> theLeafNodeDefinitions) {
+		Map<LeafNodeDefinitionKey, LeafNodeDefinition> mergedLeafNodes = new HashMap<>();
+
+		for (LeafNodeDefinition nextLeafNode : theLeafNodeDefinitions) {
+			LeafNodeDefinitionKey leafNodeDefinitionKey = new LeafNodeDefinitionKey(nextLeafNode);
+			LeafNodeDefinition existingLeafNode = mergedLeafNodes.get(leafNodeDefinitionKey);
+			if (existingLeafNode == null) {
+				mergedLeafNodes.put(leafNodeDefinitionKey, nextLeafNode);
+				continue;
+			}
+
+			ArrayList<IQueryParameterType> mergedOrValues = Lists.newArrayList(existingLeafNode.getOrValues());
+			mergedOrValues.addAll(nextLeafNode.getOrValues());
+			mergedLeafNodes.put(leafNodeDefinitionKey, existingLeafNode.withOrValues(mergedOrValues));
+		}
+
+		return mergedLeafNodes.values();
 	}
 
 	private void collateChainedSearchOptions(
@@ -3184,6 +3211,44 @@ public class QueryStack {
 		public LeafNodeDefinition withParam(RuntimeSearchParam theParamDefinition) {
 			return new LeafNodeDefinition(
 					theParamDefinition, myOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
+		}
+
+		public LeafNodeDefinition withOrValues(ArrayList<IQueryParameterType> theOrValues) {
+			return new LeafNodeDefinition(
+					myParamDefinition, theOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
+		}
+	}
+
+	private static final class LeafNodeDefinitionKey {
+		private final RuntimeSearchParam myParamDefinition;
+		private final String myLeafTarget;
+		private final String myLeafParamName;
+		private final String myLeafPathPrefix;
+		private final List<String> myQualifiers;
+
+		private LeafNodeDefinitionKey(LeafNodeDefinition theLeafNodeDefinition) {
+			myParamDefinition = theLeafNodeDefinition.getParamDefinition();
+			myLeafTarget = theLeafNodeDefinition.getLeafTarget();
+			myLeafParamName = theLeafNodeDefinition.getLeafParamName();
+			myLeafPathPrefix = theLeafNodeDefinition.getLeafPathPrefix();
+			myQualifiers = theLeafNodeDefinition.getQualifiers();
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			LeafNodeDefinitionKey that = (LeafNodeDefinitionKey) o;
+			return Objects.equals(myParamDefinition, that.myParamDefinition)
+					&& Objects.equals(myLeafTarget, that.myLeafTarget)
+					&& Objects.equals(myLeafParamName, that.myLeafParamName)
+					&& Objects.equals(myLeafPathPrefix, that.myLeafPathPrefix)
+					&& Objects.equals(myQualifiers, that.myQualifiers);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myParamDefinition, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
 		}
 	}
 
