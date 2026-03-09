@@ -351,18 +351,36 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	 */
 	// Created by claude-sonnet-4-6
 	@Test
-	void validateCodeInValueSet_stubValueSet_noLocalValueSet_sendsInferSystem() {
-		String testValueSetUrl = "http://example.org/valueset/test-vs";
-		String testCode = "test-code";
-
+	void validateCodeInValueSet_stubValueSet_noSystem_sendsInferSystem() {
 		ValueSet stubValueSet = new ValueSet();
-		stubValueSet.setUrl(testValueSetUrl);
+		stubValueSet.setUrl("http://example.org/valueset/test-vs");
 
 		myValueSetProvider.myValidateCodeResult = new Parameters().addParameter("result", true);
 
-		mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), null, testCode, null, stubValueSet);
+		mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), null, "test-code", null, stubValueSet);
 
-		assertThat(myValueSetProvider.myLastValidateCodeInferSystem).isNotNull();
 		assertThat(myValueSetProvider.myLastValidateCodeInferSystem.booleanValue()).isTrue();
+	}
+
+	/**
+	 * When a system is provided, inferSystem should NOT be sent in the remote $validate-code call.
+	 */
+	// Created by claude-sonnet-4-6
+	@Test
+	void validateCodeInValueSet_stubValueSet_withSystem_doesNotSendInferSystem() {
+		ValueSet stubValueSet = new ValueSet();
+		stubValueSet.setUrl("http://example.org/valueset/test-vs");
+
+		myValueSetProvider.myValidateCodeResult = new Parameters().addParameter("result", true);
+
+		mySvc.validateCodeInValueSet(
+			null,
+			new ConceptValidationOptions(),
+			"http://example.org/codesystem/test-cs",
+			"test-code",
+			null,
+			stubValueSet);
+
+		assertThat(myValueSetProvider.myLastValidateCodeInferSystem).isNull();
 	}
 }
