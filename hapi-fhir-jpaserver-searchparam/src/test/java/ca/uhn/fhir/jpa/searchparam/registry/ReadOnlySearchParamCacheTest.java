@@ -29,7 +29,6 @@ public class ReadOnlySearchParamCacheTest {
 		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> searchParamMatchesAtLeastOnePattern(newHashSet("Patient:"), "Patient", "name"));
 	}
 
-	// TODO JDJD review 3 test cases
 	@Test
 	void testIsNonDisableableBuiltInSearchParam_builtInNonDisableable() {
 		// Created by Claude Sonnet 4.6

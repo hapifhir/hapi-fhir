@@ -407,7 +407,8 @@ public class SearchParamRegistryImpl
 			return 0;
 		}
 
-		RuntimeSearchParam newRuntimeSp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theSearchParameter);
+		RuntimeSearchParam newRuntimeSp =
+				mySearchParameterCanonicalizer.canonicalizeSearchParameter(theSearchParameter);
 		if (newRuntimeSp == null) {
 			return 0;
 		}
@@ -423,7 +424,6 @@ public class SearchParamRegistryImpl
 			return 0;
 		}
 
-		// TODO JDJD review
 		/*
 		 * If the SP from the database is not active and it is a built-in non-disableable
 		 * search parameter, do not override the built-in ACTIVE version in the cache with
@@ -436,8 +436,6 @@ public class SearchParamRegistryImpl
 				if (ReadOnlySearchParamCache.isNonDisableableBuiltInSearchParam(
 						newRuntimeSp.getUri(), nextBase, newRuntimeSp.getName())) {
 					return 0;
-					// TODO jdjd wondering if return 0 updated is right here
-					// Should we instead, allow updates to the base, as long as it doesn't retire it and doesn't remove the non-disableable?
 				}
 			}
 		}

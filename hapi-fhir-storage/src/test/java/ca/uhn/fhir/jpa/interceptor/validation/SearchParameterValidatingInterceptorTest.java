@@ -190,7 +190,6 @@ public class SearchParameterValidatingInterceptorTest {
 
 	}
 
-	// todo jdjd 3 tests review
 	@Test
 	void whenRetireBuiltInNonDisableableSearchParam_thenExceptionIsThrown() {
 		// Created by Claude Sonnet 4.6

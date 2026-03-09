@@ -195,7 +195,6 @@ public class ReadOnlySearchParamCache {
 		return false;
 	}
 
-	// TODO JDJD review
 	/**
 	 * Returns {@code true} if the given search parameter is a built-in (HL7) search
 	 * parameter that must remain active regardless of enable/disable configuration.
