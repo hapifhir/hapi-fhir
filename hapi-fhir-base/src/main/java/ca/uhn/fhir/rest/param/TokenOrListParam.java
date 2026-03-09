@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -48,6 +49,15 @@ public class TokenOrListParam extends BaseOrListParam<TokenOrListParam, TokenPar
 	public TokenOrListParam(String theSystem, String... theValues) {
 		for (String next : theValues) {
 			add(theSystem, next);
+		}
+	}
+
+	/**
+	 * Create a new token "OR list" with the given tokens
+	 */
+	public TokenOrListParam(Collection<TokenParam> theTokenParams) {
+		for (TokenParam next : theTokenParams) {
+			add(next);
 		}
 	}
 
