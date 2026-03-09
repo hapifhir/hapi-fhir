@@ -123,11 +123,7 @@ public class JobInstanceProcessor {
 			JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
 					jobDefinition, updatedInstance.get().getCurrentGatedStepId());
 
-			// On every maintenance run, flip any GATE_WAITING chunks for the current gated step to READY.
-			// This catches late-arriving chunks that were produced by slow workers after the job step
-			// was advanced. In normal operation this is a no-op, but it handles the race condition
-			// where a chunk is created as GATE_WAITING after advanceJobStepAndUpdateChunkStatus has
-			// already run.
+			// Catch late-arriving GATE_WAITING chunks from slow workers that finished after step advancement
 			myJobPersistence.enqueueGateWaitingChunksForCurrentStep(
 					theInstance.getInstanceId(),
 					updatedInstance.get().getCurrentGatedStepId(),
