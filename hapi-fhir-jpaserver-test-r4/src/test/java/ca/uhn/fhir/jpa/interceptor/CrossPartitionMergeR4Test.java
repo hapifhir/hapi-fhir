@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.config.r4.FhirContextR4Config;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -61,6 +62,8 @@ public class CrossPartitionMergeR4Test extends BaseResourceProviderR4Test {
 		myPartitionSettings.setDefaultPartitionId(ALTERNATE_DEFAULT_ID);
 		myPartitionSettings.setAllowReferencesAcrossPartitions(
 			PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 	}
 
 	@Override
@@ -76,8 +79,11 @@ public class CrossPartitionMergeR4Test extends BaseResourceProviderR4Test {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(
 			defaultSettings.getAllowReferencesAcrossPartitions());
 
-		myTransactionService.setTransactionPropagationWhenChangingPartitions(
-			HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(
+			FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER);
+
+		//myTransactionService.setTransactionPropagationWhenChangingPartitions(
+		//	HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
 
 	@Test
