@@ -515,6 +515,41 @@ public class SearchParamRegistryImplTest {
 	}
 
 	@Test
+	void testNonDisableableBuiltInSearchParam_ActiveInDbUpdatesCache() {
+		// Created by Claude Sonnet 4.6
+		// A non-disableable built-in SP that is ACTIVE in the DB should update the cache normally.
+		// The guard in overrideSearchParam() only fires when status != ACTIVE, so an ACTIVE
+		// DB version should replace the built-in entry.
+		SearchParameter basicCodeSp = new SearchParameter();
+		basicCodeSp.setId("SearchParameter/Basic-code");
+		basicCodeSp.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
+		basicCodeSp.setCode("code");
+		basicCodeSp.setName("code");
+		basicCodeSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		basicCodeSp.setType(Enumerations.SearchParamType.TOKEN);
+		basicCodeSp.setExpression("Basic.code");
+		basicCodeSp.setDescription("customised description");
+		basicCodeSp.addBase("Basic");
+
+		ArrayList<ResourceTable> newEntities = new ArrayList<>(ourEntities);
+		newEntities.add(createEntity(++ourLastId, 1));
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any()))
+				.thenReturn(ResourceVersionMap.fromResourceTableEntities(newEntities));
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(basicCodeSp));
+
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
+		assertDbCalled();
+
+		// Verify: the DB version replaced the built-in — the customised description is present
+		RuntimeSearchParam basicCode = mySearchParamRegistry.getActiveSearchParam(
+				"Basic", "code", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertNotNull(basicCode);
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, basicCode.getStatus());
+		assertEquals("customised description", basicCode.getDescription());
+	}
+
+	@Test
 	void testCustomSpOnNonDisableableResourceType_RetiredInDbIsRemovedFromCache() {
 		// Created by Claude Sonnet 4.6
 		// Setup: add a custom (non-built-in URL) SP on Subscription
