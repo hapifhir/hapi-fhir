@@ -239,8 +239,8 @@ public class FhirResourceDaoR5SearchIncludeTest extends BaseJpaR5Test {
 			.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myEpisodeOfCareDao.search(map, mySrd);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		// Phase 2 (_include=*) finds ORG-0 from EOC-0.managingOrganization.
-		// Phase 3 (_revinclude=*:iterate) then cascades through ORG-0, finding EOC-1..9.
+		// Phase 2 (`_include=*`) finds ORG-0 from EOC-0.managingOrganization.
+		// Phase 3 (`_revinclude=*:iterate`) then cascades through ORG-0, finding EOC-1..9.
 		List<String> expected = IntStream.range(0, 10)
 			.mapToObj(t -> "EpisodeOfCare/EOC-" + t)
 			.collect(Collectors.toList());
@@ -283,8 +283,8 @@ public class FhirResourceDaoR5SearchIncludeTest extends BaseJpaR5Test {
 			.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myOrganizationDao.search(map, mySrd);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		// Phase 2 (_include=*) finds ORG-P from ORG-0.partOf (uses 1 of 5 include slots).
-		// Phase 3 (_revinclude=*:iterate) on {ORG-0, ORG-P} finds resources referencing either.
+		// Phase 2 (`_include=*`) finds ORG-P from ORG-0.partOf (uses 1 of 5 include slots).
+		// Phase 3 (`_revinclude=*:iterate`) on {ORG-0, ORG-P} finds resources referencing either.
 		// ORG-0 is itself a revinclude of ORG-P (via partOf), consuming 1 slot before being
 		// filtered as already-present, leaving 3 slots for EOCs. Total: ORG-0 + ORG-P + 3 EOCs.
 		assertThat(ids)

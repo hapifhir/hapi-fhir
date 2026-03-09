@@ -225,18 +225,18 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * Reproduces SMILE-9135: When _include and _revinclude are used together WITHOUT _iterate,
-	 * _include should only apply to the initial search result set, not to revincluded resources.
+	 * Reproduces SMILE-9135: When `_include` and `_revinclude` are used together WITHOUT `:iterate`,
+	 * `_include` should only apply to the initial search result set, not to revincluded resources.
 	 * <p>
 	 * Setup:
 	 * - SR/A: no replaces (initial search target)
-	 * - SR/B: no replaces (should NOT appear without _iterate)
-	 * - SR/C: replaces = [SR/A, SR/B] (found via _revinclude of SR/A)
+	 * - SR/B: no replaces (should NOT appear without `:iterate`)
+	 * - SR/C: replaces = [SR/A, SR/B] (found via `_revinclude` of SR/A)
 	 * <p>
 	 * Query: ServiceRequest?_id=A&_include=ServiceRequest:replaces&_revinclude=ServiceRequest:replaces
 	 * <p>
 	 * Expected: SR/A + SR/C only (2 resources)
-	 * Bug: SR/B is also returned because _include is applied to revincluded SR/C
+	 * Bug: SR/B is also returned because `_include` is applied to revincluded SR/C
 	 */
 	@Test
 	void testRevIncludeDoesNotIncludeFromIncludedResources() {
@@ -257,7 +257,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		Set<String> foundIds = extractResourceIds(bundle);
 
 		// SR/A (initial result) and SR/C (revinclude) should be present;
-		// SR/B should NOT appear without _iterate
+		// SR/B should NOT appear without `:iterate`
 		assertThat(foundIds)
 			.contains(srAId.getValue(), srCId.getValue())
 			.doesNotContain(srBId.getValue())
@@ -265,7 +265,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * SMILE-9135: _revinclude without _include should still return only direct results.
+	 * SMILE-9135: `_revinclude` without `_include` should still return only direct results.
 	 */
 	@Test
 	void testRevIncludeAloneDoesNotProduceTransitiveResults() {
@@ -291,8 +291,8 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * SMILE-9135: _include without _revinclude should only return direct results.
-	 * Since SR/A has no replaces references, _include adds nothing.
+	 * SMILE-9135: `_include` without `_revinclude` should only return direct results.
+	 * Since SR/A has no replaces references, `_include` adds nothing.
 	 */
 	@Test
 	void testIncludeAloneDoesNotProduceTransitiveResults() {
@@ -310,7 +310,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
 		Set<String> foundIds = extractResourceIds(bundle);
 
-		// SR/A has no replaces, so _include adds nothing
+		// SR/A has no replaces, so `_include` adds nothing
 		assertThat(foundIds)
 			.contains(srAId.getValue())
 			.doesNotContain(srBId.getValue())
@@ -318,8 +318,8 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * SMILE-9135: With _iterate, _include SHOULD cascade through revincluded resources.
-	 * This is the correct behavior when iterate is specified — SR/B should appear.
+	 * SMILE-9135: With `:iterate`, `_include` SHOULD cascade through revincluded resources.
+	 * This is the correct behavior when `:iterate` is specified — SR/B should appear.
 	 */
 	@Test
 	void testRevIncludeWithIncludeIterateProducesTransitiveResults() {
@@ -339,7 +339,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
 		Set<String> foundIds = extractResourceIds(bundle);
 
-		// With _iterate, SR/B SHOULD be included (SR/C.replaces -> SR/B is followed iteratively)
+		// With `:iterate`, SR/B SHOULD be included (SR/C.replaces -> SR/B is followed iteratively)
 		assertThat(foundIds)
 			.contains(srAId.getValue(), srBId.getValue(), srCId.getValue())
 			.hasSize(3);
@@ -385,7 +385,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		ourLog.info("Synchronous path (non-iterate) found {} resources: {}", resources.size(), foundIds);
 
 		// SR/A (initial result) and SR/C (revinclude) should be present;
-		// SR/B should NOT appear without _iterate
+		// SR/B should NOT appear without `:iterate`
 		assertThat(foundIds)
 			.contains(srAId.getValue(), srCId.getValue())
 			.doesNotContain(srBId.getValue())
@@ -393,10 +393,10 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * SMILE-9135: Verify that _revinclude + _include:iterate works correctly on the synchronous path.
+	 * SMILE-9135: Verify that `_revinclude` + `_include:iterate` works correctly on the synchronous path.
 	 * <p>
 	 * The synchronous path (SearchParameterMap.newSynchronous()) is taken when isLoadSynchronous() = true.
-	 * With _include:iterate, _include SHOULD cascade through revincluded resources, so SR/B must appear.
+	 * With `_include:iterate`, `_include` SHOULD cascade through revincluded resources, so SR/B must appear.
 	 */
 	@Test
 	void testSynchronousPathRevIncludeWithIncludeIterateProducesTransitiveResults() {
@@ -419,7 +419,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.collect(Collectors.toSet());
 		ourLog.info("Synchronous path found {} resources: {}", resources.size(), foundIds);
 
-		// With _iterate, SR/B SHOULD be included (SR/C.replaces -> SR/B is followed iteratively)
+		// With `:iterate`, SR/B SHOULD be included (SR/C.replaces -> SR/B is followed iteratively)
 		assertThat(foundIds)
 			.contains(srAId.getValue(), srBId.getValue(), srCId.getValue())
 			.hasSize(3);

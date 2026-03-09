@@ -230,7 +230,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 							.filter(Include::isRecurse)
 							.collect(Collectors.toSet());
 
-					// Phase 1: non-iterate _revincludes on original search result PIDs
+					// Phase 1: non-iterate `_revinclude` on original search result PIDs
 					if (!nonIterateRevIncludes.isEmpty()) {
 						Set<JpaPid> revIncludedPids = theSb.loadIncludes(
 								myContext,
@@ -249,9 +249,9 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						allIncludedPidsList.addAll(revIncludedPids);
 					}
 
-					// Phase 2: non-iterate _includes on original search result PIDs
-					// (use originalPids so _include only applies to the initial search results,
-					// not to revincluded resources — per FHIR spec, without _iterate)
+					// Phase 2: non-iterate `_include` on original search result PIDs
+					// (use originalPids so `_include` only applies to the initial search results,
+					// not to revincluded resources — per FHIR spec, without `:iterate`)
 					if (theParams.getEverythingMode() == null
 							&& !nonIterateIncludes.isEmpty()
 							&& (maxIncludes == null || maxIncludes > 0)) {
@@ -272,7 +272,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						allIncludedPidsList.addAll(forwardIncludedPids);
 					}
 
-					// Phase 3: iterate _revincludes on expanded PIDs (including non-iterate revinclude results)
+					// Phase 3: `_revinclude:iterate` on expanded PIDs (including non-iterate revinclude results)
 					if (!iterateRevIncludes.isEmpty() && (maxIncludes == null || maxIncludes > 0)) {
 						Set<JpaPid> iterateRevIncludedPids = theSb.loadIncludes(
 								myContext,
@@ -291,7 +291,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						allIncludedPidsList.addAll(iterateRevIncludedPids);
 					}
 
-					// Phase 4: iterate _includes on all expanded PIDs (including revinclude results)
+					// Phase 4: `_include:iterate` on all expanded PIDs (including revinclude results)
 					if (theParams.getEverythingMode() == null
 							&& !iterateIncludes.isEmpty()
 							&& (maxIncludes == null || maxIncludes > 0)) {
