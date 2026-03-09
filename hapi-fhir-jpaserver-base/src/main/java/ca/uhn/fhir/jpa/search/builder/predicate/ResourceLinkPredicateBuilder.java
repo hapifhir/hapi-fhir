@@ -105,7 +105,6 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static ca.uhn.fhir.rest.api.Constants.VALID_MODIFIERS;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder implements ICanMakeMissingParamPredicate {
@@ -311,21 +310,34 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 	/**
 	 * If cross-partition references are allowed, this method calculates a {@link RequestPartitionId} that
-	 * covers all possible partitions that could hold the target resource.
+	 * covers all possible partitions that could hold potential targets for the given reference
+	 * so that we can resolve it.
+	 *
+	 * @param theRequest The request details
+	 * @param theRequestPartitionId The outer request partition which was used to resolve the source
+	 *                              resource containing the reference
+	 * @param theParam The SearchParameter indexing the reference
+	 * @param theReferenceOrParamList The actual parameter values for the SearchParameter referenced by {@literal theParam}
+	 * @return The calculated request partition ID for potential cross-partition targets
 	 */
 	private RequestPartitionId calculatePotentialCrossPartitionsForPredicateTarget(
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId,
 			RuntimeSearchParam theParam,
 			List<? extends IQueryParameterType> theReferenceOrParamList) {
-		// This method should only be called when this is enabled
-		assert myPartitionSettings.isAllowUnqualifiedCrossPartitionReference();
+		Validate.isTrue(
+				myPartitionSettings.isAllowUnqualifiedCrossPartitionReference(),
+				"This method must only be called if AllowUnqualifiedCrossPartitionReference is enabled. This is a bug.");
 
+		/*
+		 * In named partition mode, we also include the outer request partition as a part
+		 * of the targets. Wo do this because named partition mode is used for scenarios
+		 * like multi-tenancy where the outer request partition is a likely place for
+		 * references to live too. In unnamed partition mode, the expectation is that
+		 * the interceptor will always return a very specific list of partitions that
+		 * could potentially hold any reference.
+		 */
 		RequestPartitionId predicateTargetPartitionId = null;
-
-		// In named partition mode we want to narrow down the partitions supplied
-		// by the client. In unnamed partition mode we just want to create a fresh
-		// list based on whatever the interceptor says
 		if (!myPartitionSettings.isUnnamedPartitionMode()) {
 			predicateTargetPartitionId = theRequestPartitionId;
 		}
@@ -338,7 +350,25 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					next instanceof ReferenceParam, "Unexpected type %s for param %s", next.getClass(), paramName);
 			ReferenceParam refParam = (ReferenceParam) next;
 
-			if (isNotBlank(refParam.getChain())) {
+			if (isBlank(refParam.getChain())) {
+
+				/*
+				 * This is a standard reference by resource ID (?subject=Patient/A)
+				 * so we can determine the partition for the specific resource being
+				 * referenced.
+				 */
+				String resourceType = refParam.getResourceType();
+				String resourceId = refParam.getIdPart();
+				if (isBlank(resourceType) || isBlank(resourceId)) {
+					throw new InvalidRequestException(Msg.code(2870) + "Parameter \""
+							+ UrlUtil.sanitizeUrlPart(paramName) + "\" must be in the format [resourceType]/[id]");
+				}
+
+				IIdType id = myFhirContext.getVersion().newIdType(resourceType, resourceId);
+				RequestPartitionId nextPartitionId =
+						myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, id);
+				predicateTargetPartitionId = nextPartitionId.mergeIds(predicateTargetPartitionId);
+			} else {
 
 				/*
 				 * If we're chaining into target resources in an environment where cross-partition
@@ -349,9 +379,10 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 				 * Most reference parameters declare a target resource type (or a small number of
 				 * resource types) so we can just ask the partition interceptor to tell us
 				 * which partition would handle the chained search for each potential target
-				 * type.
+				 * type. If the reference doesn't declare any target types, we'll just
+				 * assume it's a Reference(All) and target all partitions.
 				 */
-				if (!theParam.getTargets().isEmpty() && theParam.getTargets().size() < 20) {
+				if (!theParam.getTargets().isEmpty()) {
 					String chain = refParam.getChain();
 					chain = StringUtils.substringBefore(chain, '.');
 
@@ -381,18 +412,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					predicateTargetPartitionId = RequestPartitionId.allPartitions();
 					break;
 				}
-			} else {
-				String resourceType = refParam.getResourceType();
-				String resourceId = refParam.getIdPart();
-				if (isBlank(resourceType) || isBlank(resourceId)) {
-					throw new InvalidRequestException(Msg.code(2870) + "Parameter \""
-							+ UrlUtil.sanitizeUrlPart(paramName) + "\" must be in the format [resourceType]/[id]");
-				}
-
-				IIdType id = myFhirContext.getVersion().newIdType(resourceType, resourceId);
-				RequestPartitionId nextPartitionId =
-						myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, id);
-				predicateTargetPartitionId = nextPartitionId.mergeIds(predicateTargetPartitionId);
 			}
 		}
 
