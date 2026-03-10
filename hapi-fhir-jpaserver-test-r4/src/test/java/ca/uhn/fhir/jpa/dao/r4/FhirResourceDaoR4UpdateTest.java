@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -1342,6 +1343,42 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertTrue(p.getActive());
 		assertEquals("foo", p.getIdentifierFirstRep().getValue());
+	}
+
+	@Test
+	public void testUpdateWithNoChanges_PreservesMetaSource() {
+		// Enable NOP detection
+		myStorageSettings.setSuppressUpdatesWithNoChange(true);
+
+		// Create a practitioner with meta.source set
+		Practitioner practitioner = new Practitioner();
+		practitioner.addName().setFamily("TestPractitioner");
+		practitioner.setActive(true);
+		practitioner.getMeta().setSource("initial-request-123");
+
+		IIdType id = myPractitionerDao.create(practitioner, mySrd).getId().toUnqualifiedVersionless();
+
+		// Verify initial creation preserved the source correctly
+		Practitioner created = myPractitionerDao.read(id, mySrd);
+		assertThat(created.getMeta().getSource()).isEqualTo("initial-request-123");
+
+		// Now perform UPDATE with same content but different meta.source
+		// This should be detected as NOP but source should still be updated
+		Practitioner updatePractitioner = new Practitioner();
+		updatePractitioner.setId(id);
+		updatePractitioner.addName().setFamily("TestPractitioner");
+		updatePractitioner.setActive(true);
+		updatePractitioner.getMeta().setSource("updated-request-456");
+
+		IIdType updatedId = myPractitionerDao.update(updatePractitioner, mySrd).getId();
+
+		// Read the updated resource
+		Practitioner updated = myPractitionerDao.read(updatedId.toUnqualifiedVersionless(), mySrd);
+
+		// ASSERTION: meta.source should reflect the updated value from the request
+		// Currently this will fail because populateResourceMetadata() overwrites
+		// the updated value with stale data from old history entries during NOP updates
+		assertThat(updated.getMeta().getSource()).isEqualTo("updated-request-456");
 	}
 
 	/**
