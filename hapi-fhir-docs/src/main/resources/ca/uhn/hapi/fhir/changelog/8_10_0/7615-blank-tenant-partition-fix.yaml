@@ -1,0 +1,7 @@
+---
+type: fix
+jira: SMILE-11797
+backport: 8.6.6
+title: "Previously, setting a blank tenant ID on a RequestDetails would cause partition resolution to fail
+  with a 'HAPI-2223: Partition IDs have not been set' error in unnamed partition mode. RequestDetails.setTenantId()
+  now normalizes blank values to null."
