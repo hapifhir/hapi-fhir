@@ -311,4 +311,18 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean advanceJobStepAndUpdateChunkStatus(
 			String theJobInstanceId, String theNextStepId, boolean theIsReductionStepBoolean);
+
+	/**
+	 * Flips any GATE_WAITING or QUEUED chunks for the current gated step to READY
+	 * (or REDUCTION_READY for reduction steps). This is a safety net for late-arriving
+	 * chunks that were created after step advancement already happened.
+	 *
+	 * @param theJobInstanceId the id of the job instance
+	 * @param theCurrentStepId the current gated step id
+	 * @param theIsReductionStep whether the current step is a reduction step
+	 * @return the number of chunks that were updated
+	 */
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	int enqueueGateWaitingChunksForCurrentStep(
+			String theJobInstanceId, String theCurrentStepId, boolean theIsReductionStep);
 }

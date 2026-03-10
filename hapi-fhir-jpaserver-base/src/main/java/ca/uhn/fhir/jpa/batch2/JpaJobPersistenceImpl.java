@@ -664,29 +664,45 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		});
 
 		if (changed) {
-			ourLog.debug(
-					"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
-					theJobInstanceId,
-					theNextStepId);
-			WorkChunkStatusEnum nextStep =
-					theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
-			// when we reach here, the current step id is equal to theNextStepId
-			// Up to 7.1, gated jobs' work chunks are created in status QUEUED but not actually queued for the
-			// workers.
-			// In order to keep them compatible, turn QUEUED chunks into READY, too.
-			// TODO: 'QUEUED' from the IN clause will be removed after 7.6.0.
-			int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
-					theJobInstanceId,
-					theNextStepId,
-					List.of(WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED),
-					nextStep);
-			ourLog.debug(
-					"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
-					numChanged,
-					theJobInstanceId,
-					theNextStepId);
+			flipGateWaitingChunksForStep(theJobInstanceId, theNextStepId, theIsReductionStep);
 		}
 
 		return changed;
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public int enqueueGateWaitingChunksForCurrentStep(
+			String theJobInstanceId, String theCurrentStepId, boolean theIsReductionStep) {
+		return flipGateWaitingChunksForStep(theJobInstanceId, theCurrentStepId, theIsReductionStep);
+	}
+
+	/**
+	 * Flips GATE_WAITING and QUEUED chunks for the given step to READY (or REDUCTION_READY for reduction steps).
+	 * Used both during step advancement and as a maintenance safety net for late-arriving chunks.
+	 */
+	private int flipGateWaitingChunksForStep(String theJobInstanceId, String theStepId, boolean theIsReductionStep) {
+		ourLog.debug(
+				"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
+				theJobInstanceId,
+				theStepId);
+		WorkChunkStatusEnum targetStatus =
+				theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
+		// Up to 7.1, gated jobs' work chunks are created in status QUEUED but not actually queued for the
+		// workers.
+		// In order to keep them compatible, turn QUEUED chunks into READY, too.
+		// TODO: 'QUEUED' from the IN clause will be removed after 7.6.0.
+		int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
+				theJobInstanceId,
+				theStepId,
+				List.of(WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED),
+				targetStatus);
+		ourLog.debug(
+				"Updated {} chunks of gated instance {} for step {} from GATE_WAITING/QUEUED to {}.",
+				numChanged,
+				theJobInstanceId,
+				theStepId,
+				targetStatus);
+		return numChanged;
 	}
 }

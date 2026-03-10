@@ -1233,11 +1233,12 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// BUG: No mechanism exists to do this, so the chunk remains stuck in GATE_WAITING.
 		myBatch2JobHelper.runMaintenancePass();
 
-		// Assert the desired behavior: the late chunk should now be READY
+		// Assert the desired behavior: the late chunk should have been flipped from GATE_WAITING
+		// to READY by the safety net, and then enqueued to QUEUED by the maintenance pass
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
-				.as("Late-arriving chunk for current gated step should be flipped to READY by maintenance")
-				.isEqualTo(WorkChunkStatusEnum.READY);
+				.as("Late-arriving chunk for current gated step should be enqueued by maintenance")
+				.isEqualTo(WorkChunkStatusEnum.QUEUED);
 		});
 	}
 

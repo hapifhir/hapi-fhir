@@ -251,6 +251,44 @@ public class JobInstanceProcessor {
 					currentStepId,
 					stepId);
 		}
+
+		// Safety net: flip any late-arriving GATE_WAITING chunks for the current step.
+		// This handles the race condition where a slow worker creates chunks after step advancement.
+		enqueueGateWaitingChunksForCurrentStep(theInstance, theJobDefinition);
+	}
+
+	/**
+	 * Flips any remaining GATE_WAITING/QUEUED chunks for the current gated step to READY
+	 * (or REDUCTION_READY for reduction steps). Re-reads the instance to get the latest
+	 * currentGatedStepId in case advancement just occurred.
+	 */
+	private void enqueueGateWaitingChunksForCurrentStep(JobInstance theInstance, JobDefinition<?> theJobDefinition) {
+		Optional<JobInstance> freshInstance = myJobPersistence.fetchInstance(theInstance.getInstanceId());
+		if (freshInstance.isEmpty()) {
+			return;
+		}
+
+		String currentStepId = freshInstance.get().getCurrentGatedStepId();
+		if (currentStepId == null) {
+			return;
+		}
+
+		// Determine if this is a reduction step by checking the existing chunk statuses.
+		// If any chunks for this step are already in REDUCTION_READY, treat late chunks as reduction too.
+		Set<WorkChunkStatusEnum> existingStatuses =
+				myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(theInstance.getInstanceId(), currentStepId);
+		boolean isReductionStep = existingStatuses.contains(WorkChunkStatusEnum.REDUCTION_READY);
+
+		int updated = myJobPersistence.enqueueGateWaitingChunksForCurrentStep(
+				theInstance.getInstanceId(), currentStepId, isReductionStep);
+		if (updated > 0) {
+			ourLog.info(
+					"Safety net: flipped {} late-arriving GATE_WAITING chunks to {} for instance {} step {}",
+					updated,
+					isReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY,
+					theInstance.getInstanceId(),
+					currentStepId);
+		}
 	}
 
 	private boolean canAdvanceGatedJob(JobInstance theInstance) {
