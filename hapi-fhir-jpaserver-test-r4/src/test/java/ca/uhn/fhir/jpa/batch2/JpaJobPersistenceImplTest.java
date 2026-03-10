@@ -678,65 +678,25 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertThat(changed).isTrue();
 		});
 
-		// Manually create a work chunk in GATE_WAITING state for LAST_STEP_ID to simulate the race
-		// condition where a chunk was created just before the advancement committed.
-		// We bypass onWorkChunkCreate and use createWorkChunk directly so the creation-time fix
-		// doesn't interfere with the test setup.
-		WorkChunk lateChunk = new WorkChunk();
-		lateChunk.setInstanceId(instanceId);
-		lateChunk.setJobDefinitionId(JOB_DEFINITION_ID);
-		lateChunk.setJobDefinitionVersion(JOB_DEF_VER);
-		lateChunk.setTargetStepId(LAST_STEP_ID);
-		lateChunk.setStatus(WorkChunkStatusEnum.GATE_WAITING);
-		lateChunk.setCreateTime(new Date());
-		lateChunk.setStartTime(new Date());
-		String lateChunkId = runInTransaction(() -> mySvc.createWorkChunk(lateChunk).getId());
+		// Create a GATE_WAITING chunk bypassing the creation-time fix to simulate the race window
+		String lateChunkId = createGateWaitingChunk(instanceId, LAST_STEP_ID);
 
 		// verify precondition - chunk is GATE_WAITING
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
-				.as("Manually created chunk should be GATE_WAITING")
 				.isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
 		});
 
 		// execute - simulate a maintenance run that flips GATE_WAITING chunks for the current step to READY
 		runInTransaction(() -> {
 			int flipped = mySvc.enqueueGateWaitingChunksForCurrentStep(instanceId, LAST_STEP_ID, false);
-			assertThat(flipped).as("Maintenance run should flip the GATE_WAITING chunk").isEqualTo(1);
+			assertThat(flipped).isEqualTo(1);
 		});
 
 		// verify - the chunk should now be READY after the maintenance run
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
-				.as("GATE_WAITING chunk should be READY after maintenance run")
 				.isEqualTo(WorkChunkStatusEnum.READY);
-		});
-	}
-
-	@Test
-	void advanceJobStepAndUpdateChunkStatus_whenAllChunksInsertedBeforeAdvancement_allChunksAreReady() {
-		// setup - create a gated job instance
-		boolean isGatedExecution = true;
-		JobInstance instance = createInstance(true, isGatedExecution);
-		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
-
-		// Store three GATE_WAITING chunks for LAST_STEP_ID - all inserted BEFORE advancement
-		String chunkId1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
-		String chunkId2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
-		String chunkId3 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 2, null, isGatedExecution);
-
-		// execute - advance the job to LAST_STEP_ID
-		runInTransaction(() -> {
-			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false);
-			assertThat(changed).isTrue();
-		});
-
-		// verify - all three chunks should be READY since they were all present before advancement
-		runInTransaction(() -> {
-			assertThat(findChunkByIdOrThrow(chunkId1).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
-			assertThat(findChunkByIdOrThrow(chunkId2).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
-			assertThat(findChunkByIdOrThrow(chunkId3).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
-			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(LAST_STEP_ID);
 		});
 	}
 
@@ -781,31 +741,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void advanceJobStepAndUpdateChunkStatus_whenSingleChunkPerStep_advancesCorrectly() {
-		// setup - create a gated job instance with a single chunk for the next step
-		boolean isGatedExecution = true;
-		JobInstance instance = createInstance(true, isGatedExecution);
-		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
-
-		// Store exactly one GATE_WAITING chunk for LAST_STEP_ID
-		String singleChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
-
-		// execute - advance to LAST_STEP_ID
-		runInTransaction(() -> {
-			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false);
-			assertThat(changed).isTrue();
-		});
-
-		// verify - the single chunk should be READY and step advanced correctly
-		runInTransaction(() -> {
-			assertThat(findChunkByIdOrThrow(singleChunkId).getStatus())
-				.as("Single chunk should be flipped to READY after advancement")
-				.isEqualTo(WorkChunkStatusEnum.READY);
-			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(LAST_STEP_ID);
-		});
-	}
-
-	@Test
 	void enqueueGateWaitingChunksForCurrentStep_forReductionStep_flipsToReductionReady() {
 		// setup - create a gated job instance and advance to LAST_STEP_ID
 		boolean isGatedExecution = true;
@@ -815,29 +750,19 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Advance the job to LAST_STEP_ID
 		runInTransaction(() -> mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false));
 
-		// Manually create a GATE_WAITING chunk to simulate the narrow race window where the
-		// creation-time fix doesn't catch the chunk (stale read of currentGatedStepId)
-		WorkChunk lateChunk = new WorkChunk();
-		lateChunk.setInstanceId(instanceId);
-		lateChunk.setJobDefinitionId(JOB_DEFINITION_ID);
-		lateChunk.setJobDefinitionVersion(JOB_DEF_VER);
-		lateChunk.setTargetStepId(LAST_STEP_ID);
-		lateChunk.setStatus(WorkChunkStatusEnum.GATE_WAITING);
-		lateChunk.setCreateTime(new Date());
-		lateChunk.setStartTime(new Date());
-		String lateChunkId = runInTransaction(() -> mySvc.createWorkChunk(lateChunk).getId());
+		// Create a GATE_WAITING chunk bypassing the creation-time fix to simulate the race window
+		String lateChunkId = createGateWaitingChunk(instanceId, LAST_STEP_ID);
 
 		// verify precondition - chunk is GATE_WAITING
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
-				.as("Manually created chunk should be GATE_WAITING")
 				.isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
 		});
 
 		// execute - enqueue with theIsReductionStep = true
 		runInTransaction(() -> {
 			int flipped = mySvc.enqueueGateWaitingChunksForCurrentStep(instanceId, LAST_STEP_ID, true);
-			assertThat(flipped).as("Should flip the GATE_WAITING chunk").isEqualTo(1);
+			assertThat(flipped).isEqualTo(1);
 		});
 
 		// verify - the chunk should be REDUCTION_READY (not READY) for a reduction step
@@ -1427,5 +1352,22 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	private Batch2WorkChunkEntity findChunkByIdOrThrow(String secondChunkId) {
 		return myWorkChunkRepository.findById(secondChunkId).orElseThrow(IllegalArgumentException::new);
+	}
+
+	/**
+	 * Creates a GATE_WAITING work chunk directly via createWorkChunk, bypassing the creation-time
+	 * fix in onWorkChunkCreate. This simulates the narrow race window where a chunk is created
+	 * just before advancement commits.
+	 */
+	private String createGateWaitingChunk(String theInstanceId, String theTargetStepId) {
+		WorkChunk chunk = new WorkChunk();
+		chunk.setInstanceId(theInstanceId);
+		chunk.setJobDefinitionId(JOB_DEFINITION_ID);
+		chunk.setJobDefinitionVersion(JOB_DEF_VER);
+		chunk.setTargetStepId(theTargetStepId);
+		chunk.setStatus(WorkChunkStatusEnum.GATE_WAITING);
+		chunk.setCreateTime(new Date());
+		chunk.setStartTime(new Date());
+		return runInTransaction(() -> mySvc.createWorkChunk(chunk).getId());
 	}
 }

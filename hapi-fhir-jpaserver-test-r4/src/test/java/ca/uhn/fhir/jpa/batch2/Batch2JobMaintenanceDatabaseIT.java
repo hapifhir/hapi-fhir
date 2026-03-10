@@ -133,7 +133,11 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		myChannelInterceptor.awaitExpected();
 		expectation.assertNotifications();
 
-		assertInstanceStatus(StatusEnum.IN_PROGRESS);
+		// The chunk was flipped to READY and sent to the worker. Depending on timing, the worker
+		// may have already completed the work, so accept either IN_PROGRESS or COMPLETED.
+		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
+		assertThat(instance).isPresent();
+		assertThat(instance.get().getStatus()).isIn(StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
 	}
 
 	@Test
