@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -70,7 +71,8 @@ class PatientIdPartitionInterceptorTest {
 		RequestPartitionId actual = mySvc.identifyForRead(readDetails, new ServletRequestDetails());
 
 		// Verify
-		assertFalse(actual.isAllPartitions());
+		int expectedPartitionId = PatientIdPartitionInterceptor.defaultPartitionAlgorithm("p1");
+		assertThat(actual.getPartitionIds()).containsExactly(expectedPartitionId);
 	}
 
 	@ParameterizedTest
