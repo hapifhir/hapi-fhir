@@ -39,7 +39,6 @@ import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.provider.PatientIdModeCrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeOperationProviderSvc;
@@ -60,6 +59,7 @@ import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.merge.PatientNativeLinkService;
 import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
@@ -165,18 +165,17 @@ public class JpaR4Config {
 	public PatientIdModeCrossPartitionReplaceReferencesSvc crossPartitionReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			IResourceLinkDao theResourceLinkDao,
-			HapiTransactionService theHapiTransactionService,
 			ISearchParamExtractor theSearchParamExtractor,
 			IFhirSystemDao<Bundle, Meta> theSystemDao) {
 		return new PatientIdModeCrossPartitionReplaceReferencesSvc(
-				theDaoRegistry, theResourceLinkDao, theHapiTransactionService, theSearchParamExtractor, (IFhirSystemDao)
-						theSystemDao);
+				theDaoRegistry, theResourceLinkDao, theSearchParamExtractor, (IFhirSystemDao) theSystemDao);
 	}
 
 	@Bean
 	public ResourceMergeService resourceMergeService(
 			DaoRegistry theDaoRegistry,
-			IReplaceReferencesSvc theReplaceReferencesSvc,
+			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
+			IResourceLinkDao theResourceLinkDao,
 			HapiTransactionService theHapiTransactionService,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			IJobCoordinator theJobCoordinator,
@@ -190,7 +189,8 @@ public class JpaR4Config {
 		return new ResourceMergeService(
 				theStorageSettings,
 				theDaoRegistry,
-				theReplaceReferencesSvc,
+				theReplaceReferencesPatchBundleSvc,
+				theResourceLinkDao,
 				theHapiTransactionService,
 				theRequestPartitionHelperSvc,
 				theJobCoordinator,
