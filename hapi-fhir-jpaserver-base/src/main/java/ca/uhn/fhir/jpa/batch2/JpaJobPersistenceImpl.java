@@ -141,26 +141,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	/**
 	 * Gets the initial onCreate state for the given workchunk.
 	 * For non-gated jobs, chunks always start in READY.
-	 * For gated jobs, chunks targeting the current gated step start in READY (they are already
-	 * eligible for processing). Chunks targeting a future step start in GATE_WAITING and will be
-	 * transitioned to READY during maintenance pass when all chunks in the previous step are COMPLETED.
-	 * This handles the common late-arrival race condition where a slow worker produces a chunk for
-	 * the current step after advancement has already occurred.
+	 * For gated jobs, chunks always start in GATE_WAITING and will be transitioned to READY
+	 * when the job advances to their target step. Late-arriving chunks (produced by slow workers
+	 * after advancement) are caught by {@link #enqueueGateWaitingChunksForCurrentStep} on the
+	 * next maintenance pass.
 	 */
-	private WorkChunkStatusEnum getOnCreateStatus(WorkChunkCreateEvent theBatchWorkChunk) {
-		if (!theBatchWorkChunk.isGatedExecution) {
+	private static WorkChunkStatusEnum getOnCreateStatus(WorkChunkCreateEvent theBatchWorkChunk) {
+		if (theBatchWorkChunk.isGatedExecution) {
+			return WorkChunkStatusEnum.GATE_WAITING;
+		} else {
 			return WorkChunkStatusEnum.READY;
 		}
-
-		// Check if this chunk targets the step that the job has already advanced to.
-		// If so, the chunk is immediately eligible for processing — no need to wait.
-		Batch2JobInstanceEntity instance =
-				myEntityManager.find(Batch2JobInstanceEntity.class, theBatchWorkChunk.instanceId);
-		if (instance != null && theBatchWorkChunk.targetStepId.equals(instance.getCurrentGatedStepId())) {
-			return WorkChunkStatusEnum.READY;
-		}
-
-		return WorkChunkStatusEnum.GATE_WAITING;
 	}
 
 	@Override

@@ -305,9 +305,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * Atomically advance the given job to the given step and change the status of all QUEUED and GATE_WAITING chunks
 	 * in the next step to READY (or REDUCTION_READY for reduction steps).
 	 *
-	 * <p>Most late-arriving chunks (produced by slow workers after advancement) will be created as READY
-	 * directly by the creation-time fix in {@code onWorkChunkCreate}. However, in a narrow race window
-	 * a chunk may still be created as GATE_WAITING; these are caught by
+	 * <p>Late-arriving chunks (produced by slow workers after advancement) will be created as GATE_WAITING
+	 * since the creation path always uses GATE_WAITING for gated jobs. These are caught by
 	 * {@link #enqueueGateWaitingChunksForCurrentStep} on the next maintenance run.</p>
 	 *
 	 * @param theJobInstanceId the id of the job instance to be updated
@@ -321,9 +320,10 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Flip any GATE_WAITING (or legacy QUEUED) chunks for the given job instance and step to READY
-	 * (or REDUCTION_READY for reduction steps). This is a safety-net called on every maintenance run
-	 * to catch chunks that slipped through the creation-time fix in a narrow race window. In normal
-	 * operation this is a no-op since late-arriving chunks are created as READY directly.
+	 * (or REDUCTION_READY for reduction steps). Called on every maintenance run to catch late-arriving
+	 * chunks produced by slow workers that finished after step advancement. Gated job chunks are always
+	 * created as GATE_WAITING, so this method is the primary mechanism for making them processable
+	 * after advancement.
 	 *
 	 * @param theJobInstanceId the id of the job instance
 	 * @param theStepId the current gated step id

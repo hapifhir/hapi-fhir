@@ -59,8 +59,8 @@ stateDiagram-v2
     state FAILED
     state COMPLETED
    direction LR
-   [*]             --> READY            : on create - non-gated jobs, or gated jobs targeting the current step
-   [*]             --> GATE_WAITING     : on create - gated jobs targeting a future step
+   [*]             --> READY            : on create - non-gated jobs
+   [*]             --> GATE_WAITING     : on create - gated jobs (flipped to READY on step advancement or maintenance)
    GATE_WAITING    --> READY            : on gate release - gated
    GATE_WAITING    --> REDUCTION_READY  : on gate release for the final reduction step (all reduction jobs are gated)
    QUEUED          --> READY            : on gate release - gated (for compatibility with legacy QUEUED state up to Hapi-fhir version 7.1)
