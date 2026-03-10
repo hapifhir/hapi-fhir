@@ -2,7 +2,8 @@
 type: fix
 issue: 7629
 jira: SMILE-11357
-title: "Previously, built-in SearchParameters required for system operation (`Basic:*`,
-`Subscription:*`, `SearchParameter:*`, and `*:url`) could be inadvertently retired when
-broad disable patterns were configured or when enable patterns did not cover them. This
-could cause the Subscription module and terminology services to fail. This has been fixed."
+title: "Previously, if a built-in SearchParameter required for system operation (`Basic:*`,
+`Subscription:*`, `SearchParameter:*`, and `*:url`) was marked as retired in the database,
+the search parameter registry cache would reflect that retired status, potentially causing
+dependent services to fail. The registry now always preserves the active state of these
+SearchParameters regardless of their status in the database."
