@@ -302,10 +302,13 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	WorkChunk createWorkChunk(WorkChunk theWorkChunk);
 
 	/**
-	 * Advance the given job to the given step and flip any GATE_WAITING/QUEUED chunks for the new
-	 * step to READY (or REDUCTION_READY for reduction steps). Late-arriving chunks that are created
-	 * after this call will remain in GATE_WAITING until the next maintenance run calls
-	 * {@link #enqueueGateWaitingChunksForCurrentStep}.
+	 * Atomically advance the given job to the given step and change the status of all QUEUED and GATE_WAITING chunks
+	 * in the next step to READY (or REDUCTION_READY for reduction steps).
+	 *
+	 * <p>Most late-arriving chunks (produced by slow workers after advancement) will be created as READY
+	 * directly by the creation-time fix in {@code onWorkChunkCreate}. However, in a narrow race window
+	 * a chunk may still be created as GATE_WAITING; these are caught by
+	 * {@link #enqueueGateWaitingChunksForCurrentStep} on the next maintenance run.</p>
 	 *
 	 * @param theJobInstanceId the id of the job instance to be updated
 	 * @param theNextStepId the id of the next job step
@@ -318,10 +321,9 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Flip any GATE_WAITING (or legacy QUEUED) chunks for the given job instance and step to READY
-	 * (or REDUCTION_READY for reduction steps). This is called on every maintenance run to catch
-	 * late-arriving chunks that were created after the job step was advanced. In normal operation
-	 * this is a no-op after the first run, but it also handles the race condition where a slow
-	 * worker produces a chunk after advancement has already occurred.
+	 * (or REDUCTION_READY for reduction steps). This is a safety-net called on every maintenance run
+	 * to catch chunks that slipped through the creation-time fix in a narrow race window. In normal
+	 * operation this is a no-op since late-arriving chunks are created as READY directly.
 	 *
 	 * @param theJobInstanceId the id of the job instance
 	 * @param theStepId the current gated step id
