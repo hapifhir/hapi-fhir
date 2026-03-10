@@ -46,6 +46,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 /**
@@ -111,9 +112,22 @@ public class RequestPartitionId implements IModelJson {
 		myAllPartitions = true;
 	}
 
-	@Nonnull
+	/**
+	 * @deprecated Use {@link #getPartitionFromUserDataIfPresent(IBaseResource)}
+	 */
+	@Deprecated(since = "8.10.0", forRemoval = true)
 	public static Optional<RequestPartitionId> getPartitionIfAssigned(IBaseResource theFromResource) {
 		return Optional.ofNullable((RequestPartitionId) theFromResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+	}
+
+	/**
+	 * Fetches the {@link RequestPartitionId} from the given resource's user data using the
+	 * {@link Constants#RESOURCE_PARTITION_ID} key. This key is set by the JPA layer when
+	 * fetching resources from the database.
+	 */
+	@Nonnull
+	public static Optional<RequestPartitionId> getPartitionFromUserDataIfPresent(IBaseResource theFromResource) {
+		return getPartitionIfAssigned(theFromResource);
 	}
 
 	/**
@@ -123,14 +137,19 @@ public class RequestPartitionId implements IModelJson {
 	 * partition names and dates are ignored and not returned. This {@link RequestPartitionId}
 	 * and {@literal theOther} are not modified.
 	 *
+	 * @param theOther The {@link RequestPartitionId} to merge in. If {@literal null}, this method will simply return {@literal this}.
 	 * @since 7.4.0
 	 */
-	public RequestPartitionId mergeIds(RequestPartitionId theOther) {
+	public RequestPartitionId mergeIds(@Nullable RequestPartitionId theOther) {
+		if (theOther == null) {
+			return this;
+		}
+
 		if ((isAllPartitions() && !hasPartitionIds()) || (theOther.isAllPartitions() && !theOther.hasPartitionIds())) {
 			return RequestPartitionId.allPartitions();
 		}
 
-		// don't know why this is required - otherwise PartitionedStrictTransactionR4Test fails
+		// Short circuit if we're merging something identical in
 		if (this.equals(theOther)) {
 			return this;
 		}
@@ -146,6 +165,26 @@ public class RequestPartitionId implements IModelJson {
 		} else {
 			return RequestPartitionId.fromPartitionIds(newPartitionIds);
 		}
+	}
+
+	/**
+	 * Merges two nullable {@link RequestPartitionId} instances into one. If both are non-null,
+	 * they are combined via {@link #mergeIds(RequestPartitionId)}. If only one is non-null,
+	 * it is returned as-is. If both are null, an empty {@link Optional} is returned.
+	 *
+	 * @param theLeft the first partition ID, may be null
+	 * @param theRight the second partition ID, may be null
+	 * @return an {@link Optional} containing the merged partition ID, or empty if both inputs are null
+	 */
+	public static Optional<RequestPartitionId> mergeIds(@Nullable RequestPartitionId theLeft, @Nullable RequestPartitionId theRight){
+		RequestPartitionId retVal = null;
+		if(nonNull(theLeft)){
+			retVal = theLeft.mergeIds(theRight);
+		} else if (nonNull(theRight)) {
+			retVal = theRight.mergeIds(theLeft);
+		}
+
+		return Optional.ofNullable(retVal);
 	}
 
 	public static RequestPartitionId fromJson(String theJson) throws JsonProcessingException {
