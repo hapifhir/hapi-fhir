@@ -165,7 +165,7 @@ public class PatientIdPartitionInterceptor {
 			String resourceType = entry.getKey();
 			ResourceCompartmentStoragePolicy policy = entry.getValue();
 
-			if ("Patient".equals(resourceType)) {
+			if (PATIENT_STR.equals(resourceType)) {
 				throw new ConfigurationException(
 						Msg.code(2864) + "Can not provide a resource type policy for resource type 'Patient'");
 			}
@@ -401,15 +401,34 @@ public class PatientIdPartitionInterceptor {
 					} else if (isNotBlank(theReadDetails.getResourceType())) {
 						RuntimeResourceDefinition resourceDef =
 								myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
+
 						List<RuntimeSearchParam> compartmentSps =
 								ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef, true);
+
 						for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
+							RequestPartitionId nonCompartmentPartition = null;
+							RequestPartitionId multiCompartmentPartition = null;
+							ResourceCompartmentStoragePolicy policy = getPolicyForResourceType(theReadDetails);
 							String paramName = nextCompartmentSp.getName();
-							List<String> idParts = getResourceIdsForSearchParam(params, paramName);
-							if (!idParts.isEmpty()) {
-								ResourceCompartmentStoragePolicy policy = getPolicyForResourceType(theReadDetails);
-								return provideMultipleCompartmentPartition(theRequestDetails, policy, idParts);
+
+							boolean includeNonCompartmentRequestPartition = hasReferencesToNonPartitionableResources(params, paramName);
+
+							if (includeNonCompartmentRequestPartition){
+								nonCompartmentPartition = provideNonCompartmentMemberTypeResponse(theRequestDetails, policy, null);
 							}
+
+							List<String> idParts = getResourceIdsForSearchParam(params, paramName);
+
+							if (!idParts.isEmpty()) {
+								multiCompartmentPartition = provideMultipleCompartmentPartition(theRequestDetails, policy, idParts);
+							}
+
+							Optional<RequestPartitionId> mergedCompartmentOptional = RequestPartitionId.mergeIds(nonCompartmentPartition, multiCompartmentPartition);
+
+							if(mergedCompartmentOptional.isPresent()){
+								return mergedCompartmentOptional.get();
+							}
+
 						}
 					}
 				} else if (theReadDetails.getReadResourceId() != null) {
@@ -528,6 +547,47 @@ public class PatientIdPartitionInterceptor {
 		}
 	}
 
+	private void validateParameter(IQueryParameterType theParamType, String theParamName) {
+		String qualifier = theParamType.getQueryParameterQualifier();
+		if (isNotBlank(qualifier) && !Constants.PARAMQUALIFIER_MDM.equals(qualifier)) {
+			throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName + qualifier
+				+ " is not supported in patient compartment mode");
+		}
+		if (theParamType instanceof ReferenceParam) {
+			String chain = ((ReferenceParam) theParamType).getChain();
+			if (chain != null) {
+				throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
+					+ chain + " is not supported in patient compartment mode");
+			}
+		}
+	}
+
+	protected boolean hasReferencesToNonPartitionableResources(SearchParameterMap theParams, String theParamName) {
+		List<List<IQueryParameterType>> paramAndListForParamName = theParams.get(theParamName);
+		if (paramAndListForParamName == null) {
+			return false;
+		}
+
+		Set<String> nonPartitionableResourceNames = new HashSet<>(BaseRequestPartitionHelperSvc.NON_PARTITIONABLE_RESOURCE_NAMES);
+		nonPartitionableResourceNames.add("Group");
+		nonPartitionableResourceNames.add("List");
+
+		for (List<IQueryParameterType> iQueryParameterTypes : paramAndListForParamName) {
+			for (IQueryParameterType aParam : iQueryParameterTypes) {
+				if (aParam instanceof ReferenceParam){
+					String valueAsQueryToken = aParam.getValueAsQueryToken();
+					String resourceType = new IdType(valueAsQueryToken).getResourceType();
+					if (nonPartitionableResourceNames.contains(resourceType)) {
+						return true;
+					}
+
+				}
+			}
+		}
+
+		return false;
+	}
+
 	@SuppressWarnings("SameParameterValue")
 	private List<String> getResourceIdsForSearchParam(SearchParameterMap theParams, String theParamName) {
 		List<List<IQueryParameterType>> paramAndListForParamName = theParams.get(theParamName);
@@ -538,18 +598,7 @@ public class PatientIdPartitionInterceptor {
 		List<String> idParts = new ArrayList<>();
 		for (List<IQueryParameterType> iQueryParameterTypes : paramAndListForParamName) {
 			for (IQueryParameterType aParam : iQueryParameterTypes) {
-				String qualifier = aParam.getQueryParameterQualifier();
-				if (isNotBlank(qualifier) && !Constants.PARAMQUALIFIER_MDM.equals(qualifier)) {
-					throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName + qualifier
-							+ " is not supported in patient compartment mode");
-				}
-				if (aParam instanceof ReferenceParam) {
-					String chain = ((ReferenceParam) aParam).getChain();
-					if (chain != null) {
-						throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
-								+ chain + " is not supported in patient compartment mode");
-					}
-				}
+				validateParameter(aParam, theParamName);
 
 				String valueAsQueryToken = aParam.getValueAsQueryToken();
 				if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")
