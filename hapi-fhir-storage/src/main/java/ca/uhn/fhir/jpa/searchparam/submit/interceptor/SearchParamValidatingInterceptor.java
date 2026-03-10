@@ -175,7 +175,7 @@ public class SearchParamValidatingInterceptor {
 				if (ReadOnlySearchParamCache.isNonDisableableBuiltInSearchParam(
 						runtimeSearchParam.getUri(), nextBase, runtimeSearchParam.getName())) {
 					throw new UnprocessableEntityException(
-							Msg.code(2845) + "Cannot change the status of built-in search parameter "
+							Msg.code(2875) + "Cannot change the status of built-in search parameter "
 									+ nextBase + ":" + runtimeSearchParam.getName()
 									+ " because it is required for system operation");
 				}
