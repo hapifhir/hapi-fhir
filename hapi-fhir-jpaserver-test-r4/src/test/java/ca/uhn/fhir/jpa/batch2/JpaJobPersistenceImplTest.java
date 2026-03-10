@@ -1186,6 +1186,159 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		);
 	}
 
+	// ---- Tests for SMILE-11603: Late-arriving GATE_WAITING chunks after step advancement ----
+
+	@Test
+	void advanceJobStepAndUpdateChunkStatus_lateChunkCreatedAfterAdvancement_shouldBeFlippedToReadyByMaintenance() {
+		// setup - create a gated job and advance to step 2
+		boolean isGatedExecution = true;
+		JobInstance instance = createInstance(true, isGatedExecution);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Create a chunk for step 1 (first step) and mark it COMPLETED so we can advance
+		String firstStepChunkId = storeFirstWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA);
+		runInTransaction(() -> myWorkChunkRepository.updateChunkStatus(firstStepChunkId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.COMPLETED));
+
+		// Create an initial chunk for step 2 (last step) - this one will be present at advancement time
+		String earlyChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+
+		// Verify pre-conditions
+		runInTransaction(() -> {
+			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(FIRST_STEP_ID);
+			assertThat(findChunkByIdOrThrow(earlyChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+		});
+
+		// Advance job to step 2 — this flips existing GATE_WAITING chunks to READY
+		runInTransaction(() -> {
+			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false);
+			assertThat(changed).isTrue();
+		});
+
+		// Verify the early chunk was flipped to READY
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(earlyChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(LAST_STEP_ID);
+		});
+
+		// Now simulate a slow worker creating a "late" chunk for step 2 AFTER advancement
+		String lateChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
+
+		// The late chunk is created as GATE_WAITING (because isGatedExecution=true)
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+		});
+
+		// Run a maintenance pass - this SHOULD flip the late GATE_WAITING chunk to READY
+		// because the job has already advanced to this step.
+		// BUG: No mechanism exists to do this, so the chunk remains stuck in GATE_WAITING.
+		myBatch2JobHelper.runMaintenancePass();
+
+		// Assert the desired behavior: the late chunk should now be READY
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
+				.as("Late-arriving chunk for current gated step should be flipped to READY by maintenance")
+				.isEqualTo(WorkChunkStatusEnum.READY);
+		});
+	}
+
+	@Test
+	void advanceJobStepAndUpdateChunkStatus_allChunksPresentBeforeAdvancement_shouldAllBeFlippedToReady() {
+		// Adjacent test: normal gated job flow where all chunks exist before advancement
+		boolean isGatedExecution = true;
+		JobInstance instance = createInstance(true, isGatedExecution);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Create chunks for step 2 before advancement
+		String chunkId1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+		String chunkId2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
+		String chunkId3 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 2, null, isGatedExecution);
+
+		// All should start as GATE_WAITING
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(chunkId1).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+			assertThat(findChunkByIdOrThrow(chunkId2).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+			assertThat(findChunkByIdOrThrow(chunkId3).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+		});
+
+		// Advance - all chunks present, should all be flipped
+		runInTransaction(() -> {
+			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false);
+			assertThat(changed).isTrue();
+		});
+
+		// Verify all chunks are now READY
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(chunkId1).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findChunkByIdOrThrow(chunkId2).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findChunkByIdOrThrow(chunkId3).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
+		});
+	}
+
+	@Test
+	void nonGatedJobChunkCreation_chunksCreatedAsReady_notAffectedByGatingRace() {
+		// Adjacent test: non-gated jobs create chunks as READY, no gating involved
+		boolean isGatedExecution = false;
+		JobInstance instance = createInstance(true, isGatedExecution);
+		myMaintenanceService.enableMaintenancePass(false);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Create a chunk for a non-gated job
+		String chunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+
+		// Non-gated chunks should be created as READY
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(chunkId).getStatus())
+				.as("Non-gated job chunks should be created as READY")
+				.isEqualTo(WorkChunkStatusEnum.READY);
+		});
+	}
+
+	@Test
+	void advanceJobStepAndUpdateChunkStatus_lateChunkForReductionStep_shouldBeFlippedToReductionReadyByMaintenance() {
+		// Adjacent test: same race condition but for a reduction step
+		boolean isGatedExecution = true;
+		JobInstance instance = createInstance(true, isGatedExecution);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Create a chunk for step 1 and mark it COMPLETED
+		String firstStepChunkId = storeFirstWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA);
+		runInTransaction(() -> myWorkChunkRepository.updateChunkStatus(firstStepChunkId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.COMPLETED));
+
+		// Create an initial chunk for the reduction step (step 2)
+		String earlyChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+
+		// Advance to step 2 as a reduction step
+		runInTransaction(() -> {
+			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, true);
+			assertThat(changed).isTrue();
+		});
+
+		// Verify the early chunk was flipped to REDUCTION_READY
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(earlyChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.REDUCTION_READY);
+		});
+
+		// Now simulate a slow worker creating a "late" chunk for the reduction step
+		String lateChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
+
+		// The late chunk is GATE_WAITING
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+		});
+
+		// Run maintenance - should flip to REDUCTION_READY
+		myBatch2JobHelper.runMaintenancePass();
+
+		// Assert desired behavior: late chunk should be REDUCTION_READY
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
+				.as("Late-arriving chunk for current reduction step should be flipped to REDUCTION_READY by maintenance")
+				.isEqualTo(WorkChunkStatusEnum.REDUCTION_READY);
+		});
+	}
+
+	// ---- End of SMILE-11603 tests ----
+
 	private Batch2JobInstanceEntity findInstanceByIdOrThrow(String instanceId) {
 		return myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalStateException::new);
 	}
