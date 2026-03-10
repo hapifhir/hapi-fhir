@@ -139,9 +139,9 @@ public class FetchResourceIdsV3Step
 		ourLog.info(
 				"Running {} for InstanceID[{}] ChunkID[{}] with ResourceType[{}] Partition[{}]",
 				getClass().getSimpleName(),
-				theResourceType,
 				theStepExecutionDetails.getInstance().getInstanceId(),
 				theStepExecutionDetails.getChunkId(),
+				theResourceType,
 				data.getPartitionId());
 
 		@SuppressWarnings("unchecked")
@@ -205,6 +205,12 @@ public class FetchResourceIdsV3Step
 		idList.setIds(theBatchResourceIds);
 
 		theDataSink.accept(idList);
+
+		ourLog.info(
+			"submitted work chunk for {} of ResourceType[{}] on Partition[{}]",
+			theBatchResourceIds.size(),
+			theResourceType,
+			thePartitionId);
 	}
 
 	@VisibleForTesting

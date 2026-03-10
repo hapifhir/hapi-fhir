@@ -142,7 +142,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 						pids = getPidsForSystemStyleExport(theParams, jobId, chunkId, def);
 					}
 
-					ourLog.debug("Finished expanding resource pids to export, size is {}", pids.size());
+					ourLog.debug("Finished expanding [{}] resource pids to export, size is {}", resourceType, pids.size());
 					return pids.iterator();
 				});
 	}
