@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -17,11 +17,24 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.packages;
+package ca.uhn.fhir.mdm.rules.matcher.models;
 
-public interface IPackageInstallerSvc {
+// Created by claude-opus-4-6
+/**
+ * Provider interface for registering custom MDM field matchers.
+ * Implementations supply a named {@link IMdmFieldMatcher} that can be
+ * registered on an {@link ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory}
+ * and referenced by name in MDM rules JSON.
+ */
+public interface IMdmFieldMatcherProvider {
 
-	PackageInstallOutcomeJson install(PackageInstallationSpec theSpec);
+	/**
+	 * @return the unique name for this matcher algorithm, used in MDM rules JSON
+	 */
+	String getName();
 
-	PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theSpec);
+	/**
+	 * @return the matcher implementation
+	 */
+	IMdmFieldMatcher getMatcher();
 }

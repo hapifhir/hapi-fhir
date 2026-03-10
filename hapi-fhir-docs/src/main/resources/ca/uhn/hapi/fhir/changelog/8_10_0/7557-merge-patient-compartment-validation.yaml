@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7557
+title: "The $hapi.fhir.merge operation now validates that source and target resources belong to the same patient compartment for resource types in the Patient compartment (e.g., Observation, Encounter). Previously, resources belonging to different patients could be merged without error."

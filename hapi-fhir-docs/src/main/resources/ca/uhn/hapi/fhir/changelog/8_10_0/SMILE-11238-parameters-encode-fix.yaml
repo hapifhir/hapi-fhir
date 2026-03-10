@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 7319
+jira: SMILE-11238
+title: "Previously, encoding a Parameters resource containing inline Reference resources with
+  an embedded resource (e.g. a Reference with a resource object set rather than a URL) would
+  throw an UnsupportedOperationException. This was caused by FhirTerser.getContainedResourceList()
+  returning an immutable empty list for non-DomainResource types such as Parameters. The encoder
+  now correctly skips containment processing for resource types that do not support contained
+  resources (Parameters, Bundle, Binary), preventing the exception."

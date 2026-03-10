@@ -762,12 +762,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		validateInputParametersReturned(theOutParams);
 
 		// Assert outcome
-		OperationOutcome outcome = (OperationOutcome)
-				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
-		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
-			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-			assertThat(issue.getDetails().getText()).isEqualTo("Merge operation completed successfully.");
-		});
+		myHelper.validateSyncSuccessMessage(theOutParams);
 
 		// In sync mode, the result resource is returned in the output,
 		// assert what is returned is the same as the one in the db

@@ -52,7 +52,7 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 		assertEquals(MdmMatchResultEnum.MATCH, rulesDeser.getMatchResult(myBothNameFields));
 		MdmFieldMatchJson second = rulesDeser.get(1);
 		assertEquals("name.family", second.getResourcePath());
-		assertEquals(MdmSimilarityEnum.JARO_WINKLER, second.getSimilarity().getAlgorithm());
+		assertEquals(MdmSimilarityEnum.JARO_WINKLER.name(), second.getSimilarity().getAlgorithm());
 	}
 
 	@Test
