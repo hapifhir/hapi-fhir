@@ -231,9 +231,6 @@ public class SearchParameterValidatingInterceptorTest {
 		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails)).doesNotThrowAnyException();
 	}
 
-	//todo jdjd is it possible the DB has a retired SP already and they try to update it? how can we recover if we do this check?
-	// should we shift to IF change is to retired then fail (ie current active, req to retired)
-
 	@Test
 	void whenUpdateBuiltInNonDisableableSearchParamKeepingActive_thenIsAllowed() {
 		// Created by Claude Sonnet 4.6
