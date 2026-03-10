@@ -50,8 +50,8 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	private List<Object> myProviders = new ArrayList<>();
 	private FhirVersionEnum myFhirVersion;
 	private RestfulServer myServlet;
-	private List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
-	private Map<String, Object> myRunningServerUserData = new HashMap<>();
+	private final List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
+	private final Map<String, Object> myRunningServerUserData = new HashMap<>();
 	private ServerValidationModeEnum myServerValidationMode = ServerValidationModeEnum.NEVER;
 	private IPagingProvider myPagingProvider;
 
@@ -72,6 +72,19 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	public RestfulServerExtension(FhirVersionEnum theFhirVersionEnum) {
 		Validate.notNull(theFhirVersionEnum);
 		myFhirVersion = theFhirVersionEnum;
+	}
+
+	public void setFhirVersion(FhirVersionEnum theFhirVersion) {
+		myFhirVersion = theFhirVersion;
+	}
+
+	public void setFhirContext(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
+
+	@Override
+	protected boolean isRunning() {
+		return super.isRunning() || myServlet != null;
 	}
 
 	/**
@@ -116,6 +129,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 			return;
 		}
 		myRunningServerUserData.clear();
+		myProviders.clear();
 		myPagingProvider = null;
 		myServlet = null;
 	}

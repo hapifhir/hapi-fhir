@@ -70,9 +70,7 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 	@Override
 	public synchronized void clear() {
 		super.clear();
-		if (myUpdates != null) {
-			myUpdates.clear();
-		}
+		myUpdates.clear();
 	}
 
 	@Override
