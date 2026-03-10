@@ -177,7 +177,7 @@ public class SearchParamValidatingInterceptor {
 					throw new UnprocessableEntityException(
 							Msg.code(2875) + "Cannot change the status of built-in search parameter "
 									+ nextBase + ":" + runtimeSearchParam.getName()
-									+ " because it is required for system operation");
+									+ " because it is required for system operation.");
 				}
 			}
 		}

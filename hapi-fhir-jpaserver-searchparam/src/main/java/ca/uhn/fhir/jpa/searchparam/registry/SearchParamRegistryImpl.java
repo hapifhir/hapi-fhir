@@ -435,7 +435,7 @@ public class SearchParamRegistryImpl
 			for (String nextBase : newRuntimeSp.getBase()) {
 				if (ReadOnlySearchParamCache.isNonDisableableBuiltInSearchParam(
 						newRuntimeSp.getUri(), nextBase, newRuntimeSp.getName())) {
-					ourLog.warn(
+					ourLog.debug(
 							"Attempted to disable a non-disableable search parameter. {} will remain active in cache.",
 							newRuntimeSp.getPath());
 					return 0;
