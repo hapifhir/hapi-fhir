@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
+import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
@@ -46,6 +47,19 @@ public class ReadOnlySearchParamCache {
 	 * custom/user-defined SPs.
 	 */
 	public static final String BUILT_IN_SEARCH_PARAM_URI_PREFIX = "http://hl7.org/fhir/SearchParameter/";
+
+	/**
+	 * Search parameter patterns that must remain active regardless of enable/disable configuration,
+	 * because they are required for core system operation.
+	 * <ul>
+	 *   <li>{@code *:url} — used by the validator and terminology services</li>
+	 *   <li>{@code Subscription:*} — used by the Subscription module</li>
+	 *   <li>{@code SearchParameter:*} — used by the search parameter registry</li>
+	 *   <li>{@code Basic:*} — used by the R4 SubscriptionTopic registry</li>
+	 * </ul>
+	 */
+	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
+			Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*", "Basic:*"));
 
 	// resourceName -> searchParamName -> searchparam
 	protected final Map<String, ResourceSearchParams> myResourceNameToSpNameToSp;
@@ -203,7 +217,7 @@ public class ReadOnlySearchParamCache {
 	 * <ol>
 	 *   <li>Its URI starts with {@link #BUILT_IN_SEARCH_PARAM_URI_PREFIX}, AND</li>
 	 *   <li>It matches at least one pattern in
-	 *       {@link SearchParamRegistryImpl#NON_DISABLEABLE_SEARCH_PARAMS}.</li>
+	 *       {@link #NON_DISABLEABLE_SEARCH_PARAMS}.</li>
 	 * </ol>
 	 *
 	 * <p>This check is intentionally limited to built-in SPs (by URI prefix) so that
@@ -222,7 +236,7 @@ public class ReadOnlySearchParamCache {
 			return false;
 		}
 		return searchParamMatchesAtLeastOnePattern(
-				SearchParamRegistryImpl.NON_DISABLEABLE_SEARCH_PARAMS, theResourceBase, theParamName);
+				NON_DISABLEABLE_SEARCH_PARAMS, theResourceBase, theParamName);
 	}
 
 	public static ReadOnlySearchParamCache fromRuntimeSearchParamCache(

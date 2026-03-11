@@ -45,7 +45,6 @@ import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
@@ -76,10 +75,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamRegistryImpl
 		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
-
-	// Basic is needed by the R4 SubscriptionTopic registry
-	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
-			Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*", "Basic:*"));
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	public static final int MAX_MANAGED_PARAM_COUNT = 10000;
@@ -363,7 +358,7 @@ public class SearchParamRegistryImpl
 			} else {
 				// Only the built-in search params that can not be disabled will be supported automatically
 				myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(
-						myFhirContext, mySearchParameterCanonicalizer, NON_DISABLEABLE_SEARCH_PARAMS);
+						myFhirContext, mySearchParameterCanonicalizer, ReadOnlySearchParamCache.NON_DISABLEABLE_SEARCH_PARAMS);
 			}
 		}
 		return myBuiltInSearchParams;
