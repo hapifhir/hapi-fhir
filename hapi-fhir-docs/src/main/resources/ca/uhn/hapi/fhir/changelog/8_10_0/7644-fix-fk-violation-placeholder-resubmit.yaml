@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7644
+jira: SMILE-11562
+title: "Fixed an issue where resubmitting a transaction bundle that auto-creates placeholder resources
+could fail with a database constraint violation."
