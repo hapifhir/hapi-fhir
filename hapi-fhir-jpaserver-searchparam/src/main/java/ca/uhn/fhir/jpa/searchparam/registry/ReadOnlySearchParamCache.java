@@ -26,7 +26,6 @@ import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
-import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
@@ -59,7 +58,7 @@ public class ReadOnlySearchParamCache {
 	 * </ul>
 	 */
 	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
-			Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*", "Basic:*"));
+			Set.of("*:url", "Subscription:*", "SearchParameter:*", "Basic:*");
 
 	// resourceName -> searchParamName -> searchparam
 	protected final Map<String, ResourceSearchParams> myResourceNameToSpNameToSp;
