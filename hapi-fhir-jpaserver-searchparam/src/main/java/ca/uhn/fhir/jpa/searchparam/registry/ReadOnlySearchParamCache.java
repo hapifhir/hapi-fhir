@@ -234,8 +234,7 @@ public class ReadOnlySearchParamCache {
 		if (theUri == null || !theUri.startsWith(BUILT_IN_SEARCH_PARAM_URI_PREFIX)) {
 			return false;
 		}
-		return searchParamMatchesAtLeastOnePattern(
-				NON_DISABLEABLE_SEARCH_PARAMS, theResourceBase, theParamName);
+		return searchParamMatchesAtLeastOnePattern(NON_DISABLEABLE_SEARCH_PARAMS, theResourceBase, theParamName);
 	}
 
 	public static ReadOnlySearchParamCache fromRuntimeSearchParamCache(

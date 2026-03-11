@@ -358,7 +358,9 @@ public class SearchParamRegistryImpl
 			} else {
 				// Only the built-in search params that can not be disabled will be supported automatically
 				myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(
-						myFhirContext, mySearchParameterCanonicalizer, ReadOnlySearchParamCache.NON_DISABLEABLE_SEARCH_PARAMS);
+						myFhirContext,
+						mySearchParameterCanonicalizer,
+						ReadOnlySearchParamCache.NON_DISABLEABLE_SEARCH_PARAMS);
 			}
 		}
 		return myBuiltInSearchParams;
