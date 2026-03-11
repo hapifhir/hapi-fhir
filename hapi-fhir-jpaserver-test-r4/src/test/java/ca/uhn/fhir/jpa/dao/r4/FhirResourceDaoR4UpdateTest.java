@@ -1347,9 +1347,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testUpdateWithNoChanges_PreservesMetaSource() {
-		// Enable NOP detection
-		myStorageSettings.setSuppressUpdatesWithNoChange(true);
-
 		// Create a practitioner with meta.source set
 		Practitioner practitioner = new Practitioner();
 		practitioner.addName().setFamily("TestPractitioner");
