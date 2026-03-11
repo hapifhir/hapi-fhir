@@ -4,8 +4,11 @@ import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
@@ -30,6 +33,7 @@ import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
 import ca.uhn.fhir.testjob.TestJobDefinitionUtils;
 import ca.uhn.fhir.testjob.models.FirstStepOutput;
+import ca.uhn.fhir.testjob.models.TestJobParameters;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest;
 import ca.uhn.hapi.fhir.batch2.test.configs.SpyOverrideConfig;
@@ -91,6 +95,8 @@ import static org.mockito.Mockito.verify;
 public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	public static final String JOB_DEFINITION_ID = "definition-id";
+	private static final String GATING_RACE_JOB_DEF_ID = "gating-race-job-def-id";
+	private static final String REDUCTION_RACE_JOB_DEF_ID = "reduction-race-job-def-id";
 	public static final String FIRST_STEP_ID = TestJobDefinitionUtils.FIRST_STEP_ID;
 	public static final String LAST_STEP_ID = TestJobDefinitionUtils.LAST_STEP_ID;
 	public static final String DEF_CHUNK_ID = "definition-chunkId";
@@ -121,6 +127,18 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
+		// Delete any instances created by SMILE-11603 race condition tests BEFORE
+		// re-enabling maintenance, to prevent the background scheduler from processing
+		// orphaned READY chunks and interfering with other tests' mock verifications.
+		// Note: We keep the race job definitions registered to avoid HAPI-2043 errors
+		// from in-flight async work channel messages that reference these job definitions.
+		for (String raceJobDefId : List.of(GATING_RACE_JOB_DEF_ID, REDUCTION_RACE_JOB_DEF_ID)) {
+			List<JobInstance> raceInstances = mySvc.fetchInstancesByJobDefinitionId(raceJobDefId, 100, 0);
+			for (JobInstance raceInstance : raceInstances) {
+				mySvc.deleteInstanceAndChunks(raceInstance.getInstanceId());
+			}
+		}
+		clearInvocations(myBatchSender);
 		myJobDefinitionRegistry.removeJobDefinition(JOB_DEFINITION_ID, JOB_DEF_VER);
 		myMaintenanceService.enableMaintenancePass(true);
 	}
@@ -1102,6 +1120,88 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		return createInstance(false, false);
 	}
 
+	/**
+	 * Creates a gated job instance with a unique job definition ID for SMILE-11603 race condition tests.
+	 * Uses a separate ID to avoid test pollution with other tests that register the same JOB_DEFINITION_ID.
+	 */
+	@Nonnull
+	private JobInstance createGatedInstanceForRaceTest() {
+		JobInstance instance = new JobInstance();
+		instance.setJobDefinitionId(GATING_RACE_JOB_DEF_ID);
+		instance.setStatus(StatusEnum.QUEUED);
+		instance.setJobDefinitionVersion(JOB_DEF_VER);
+		instance.setParameters(CHUNK_DATA);
+		instance.setReport("TEST");
+
+		JobDefinition<?> jobDef = TestJobDefinitionUtils.buildGatedJobDefinition(
+			GATING_RACE_JOB_DEF_ID,
+			(step, sink) -> {
+				sink.accept(new FirstStepOutput());
+				return RunOutcome.SUCCESS;
+			},
+			(step, sink) -> RunOutcome.SUCCESS,
+			theDetails -> {}
+		);
+		instance.setCurrentGatedStepId(jobDef.getFirstStepId());
+
+		if (myJobDefinitionRegistry.getJobDefinition(jobDef.getJobDefinitionId(), jobDef.getJobDefinitionVersion()).isEmpty()) {
+			myJobDefinitionRegistry.addJobDefinition(jobDef);
+		}
+
+		return instance;
+	}
+
+	/**
+	 * Creates a gated job instance with a reduction step for SMILE-11603 race condition tests.
+	 */
+	@Nonnull
+	private JobInstance createReductionInstanceForRaceTest() {
+		JobInstance instance = new JobInstance();
+		instance.setJobDefinitionId(REDUCTION_RACE_JOB_DEF_ID);
+		instance.setStatus(StatusEnum.QUEUED);
+		instance.setJobDefinitionVersion(JOB_DEF_VER);
+		instance.setParameters(CHUNK_DATA);
+		instance.setReport("TEST");
+
+		IReductionStepWorker<TestJobParameters, FirstStepOutput, VoidModel> reductionWorker =
+			new IReductionStepWorker<>() {
+				@Nonnull
+				@Override
+				public ChunkOutcome consume(ca.uhn.fhir.batch2.api.ChunkExecutionDetails<TestJobParameters, FirstStepOutput> theChunkDetails) {
+					return ChunkOutcome.SUCCESS();
+				}
+
+				@Nonnull
+				@Override
+				public RunOutcome run(@Nonnull ca.uhn.fhir.batch2.api.StepExecutionDetails<TestJobParameters, FirstStepOutput> theStepExecutionDetails,
+						@Nonnull ca.uhn.fhir.batch2.api.IJobDataSink<VoidModel> theDataSink) {
+					return RunOutcome.SUCCESS;
+				}
+
+				@Override
+				public IReductionStepWorker<TestJobParameters, FirstStepOutput, VoidModel> newInstance() {
+					return this;
+				}
+			};
+
+		JobDefinition<?> jobDef = TestJobDefinitionUtils.buildGatedJobDefinitionWithReductionStep(
+			REDUCTION_RACE_JOB_DEF_ID,
+			(step, sink) -> {
+				sink.accept(new FirstStepOutput());
+				return RunOutcome.SUCCESS;
+			},
+			reductionWorker,
+			theDetails -> {}
+		);
+		instance.setCurrentGatedStepId(jobDef.getFirstStepId());
+
+		if (myJobDefinitionRegistry.getJobDefinition(jobDef.getJobDefinitionId(), jobDef.getJobDefinitionVersion()).isEmpty()) {
+			myJobDefinitionRegistry.addJobDefinition(jobDef);
+		}
+
+		return instance;
+	}
+
 	@Nonnull
 	private JobInstance createInstance(boolean theCreateJobDefBool, boolean theCreateGatedJob) {
 		JobInstance instance = new JobInstance();
@@ -1187,20 +1287,26 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	// ---- Tests for SMILE-11603: Late-arriving GATE_WAITING chunks after step advancement ----
+	// These tests disable background maintenance to prevent interference with other tests'
+	// mock verifications. The @AfterEach re-enables maintenance.
 
 	@Test
 	void advanceJobStepAndUpdateChunkStatus_lateChunkCreatedAfterAdvancement_shouldBeFlippedToReadyByMaintenance() {
+		// Disable background maintenance to prevent interference with other tests
+		myMaintenanceService.enableMaintenancePass(false);
+		clearInvocations(myBatchSender);
+
 		// setup - create a gated job and advance to step 2
 		boolean isGatedExecution = true;
-		JobInstance instance = createInstance(true, isGatedExecution);
+		JobInstance instance = createGatedInstanceForRaceTest();
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 		// Create a chunk for step 1 (first step) and mark it COMPLETED so we can advance
-		String firstStepChunkId = storeFirstWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA);
+		String firstStepChunkId = storeFirstWorkChunk(GATING_RACE_JOB_DEF_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA);
 		runInTransaction(() -> myWorkChunkRepository.updateChunkStatus(firstStepChunkId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.COMPLETED));
 
 		// Create an initial chunk for step 2 (last step) - this one will be present at advancement time
-		String earlyChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+		String earlyChunkId = storeWorkChunk(GATING_RACE_JOB_DEF_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
 
 		// Verify pre-conditions
 		runInTransaction(() -> {
@@ -1221,38 +1327,42 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		});
 
 		// Now simulate a slow worker creating a "late" chunk for step 2 AFTER advancement
-		String lateChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
+		String lateChunkId = storeWorkChunk(GATING_RACE_JOB_DEF_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
 
 		// The late chunk is created as GATE_WAITING (because isGatedExecution=true)
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
 		});
 
-		// Run a maintenance pass - this SHOULD flip the late GATE_WAITING chunk to READY
-		// because the job has already advanced to this step.
-		// BUG: No mechanism exists to do this, so the chunk remains stuck in GATE_WAITING.
+		// Run maintenance pass - the safety net runs AFTER enqueueReadyChunks, so it flips
+		// the late GATE_WAITING chunk to READY but does not dispatch it in this pass.
 		myBatch2JobHelper.runMaintenancePass();
 
-		// Assert the desired behavior: the late chunk should have been flipped from GATE_WAITING
-		// to READY by the safety net, and then enqueued to QUEUED by the maintenance pass
+		// After first pass: late chunk should be READY (flipped by safety net, awaiting next dispatch)
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
-				.as("Late-arriving chunk for current gated step should be enqueued by maintenance")
-				.isEqualTo(WorkChunkStatusEnum.QUEUED);
+				.as("Late-arriving chunk should be flipped to READY by safety net")
+				.isEqualTo(WorkChunkStatusEnum.READY);
 		});
+
+		clearInvocations(myBatchSender);
 	}
 
 	@Test
 	void advanceJobStepAndUpdateChunkStatus_allChunksPresentBeforeAdvancement_shouldAllBeFlippedToReady() {
+		// Disable background maintenance to prevent interference with other tests
+		myMaintenanceService.enableMaintenancePass(false);
+		clearInvocations(myBatchSender);
+
 		// Adjacent test: normal gated job flow where all chunks exist before advancement
 		boolean isGatedExecution = true;
-		JobInstance instance = createInstance(true, isGatedExecution);
+		JobInstance instance = createGatedInstanceForRaceTest();
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 		// Create chunks for step 2 before advancement
-		String chunkId1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
-		String chunkId2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
-		String chunkId3 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 2, null, isGatedExecution);
+		String chunkId1 = storeWorkChunk(GATING_RACE_JOB_DEF_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+		String chunkId2 = storeWorkChunk(GATING_RACE_JOB_DEF_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
+		String chunkId3 = storeWorkChunk(GATING_RACE_JOB_DEF_ID, LAST_STEP_ID, instanceId, 2, null, isGatedExecution);
 
 		// All should start as GATE_WAITING
 		runInTransaction(() -> {
@@ -1273,6 +1383,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertThat(findChunkByIdOrThrow(chunkId2).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
 			assertThat(findChunkByIdOrThrow(chunkId3).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
 		});
+
+		clearInvocations(myBatchSender);
 	}
 
 	@Test
@@ -1281,9 +1393,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		boolean isGatedExecution = false;
 		JobInstance instance = createInstance(true, isGatedExecution);
 		myMaintenanceService.enableMaintenancePass(false);
+		clearInvocations(myBatchSender);
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
-		// Create a chunk for a non-gated job
+		// Create a chunk for a non-gated job (uses JOB_DEFINITION_ID since non-gated is fine)
 		String chunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
 
 		// Non-gated chunks should be created as READY
@@ -1292,21 +1405,27 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 				.as("Non-gated job chunks should be created as READY")
 				.isEqualTo(WorkChunkStatusEnum.READY);
 		});
+
+		clearInvocations(myBatchSender);
 	}
 
 	@Test
 	void advanceJobStepAndUpdateChunkStatus_lateChunkForReductionStep_shouldBeFlippedToReductionReadyByMaintenance() {
+		// Disable background maintenance to prevent interference with other tests
+		myMaintenanceService.enableMaintenancePass(false);
+		clearInvocations(myBatchSender);
+
 		// Adjacent test: same race condition but for a reduction step
 		boolean isGatedExecution = true;
-		JobInstance instance = createInstance(true, isGatedExecution);
+		JobInstance instance = createReductionInstanceForRaceTest();
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 		// Create a chunk for step 1 and mark it COMPLETED
-		String firstStepChunkId = storeFirstWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA);
+		String firstStepChunkId = storeFirstWorkChunk(REDUCTION_RACE_JOB_DEF_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA);
 		runInTransaction(() -> myWorkChunkRepository.updateChunkStatus(firstStepChunkId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.COMPLETED));
 
 		// Create an initial chunk for the reduction step (step 2)
-		String earlyChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+		String earlyChunkId = storeWorkChunk(REDUCTION_RACE_JOB_DEF_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
 
 		// Advance to step 2 as a reduction step
 		runInTransaction(() -> {
@@ -1320,14 +1439,14 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		});
 
 		// Now simulate a slow worker creating a "late" chunk for the reduction step
-		String lateChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
+		String lateChunkId = storeWorkChunk(REDUCTION_RACE_JOB_DEF_ID, LAST_STEP_ID, instanceId, 1, null, isGatedExecution);
 
 		// The late chunk is GATE_WAITING
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
 		});
 
-		// Run maintenance - should flip to REDUCTION_READY
+		// Run maintenance - the safety net runs after enqueueReadyChunks and flips to REDUCTION_READY
 		myBatch2JobHelper.runMaintenancePass();
 
 		// Assert desired behavior: late chunk should be REDUCTION_READY
@@ -1336,6 +1455,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 				.as("Late-arriving chunk for current reduction step should be flipped to REDUCTION_READY by maintenance")
 				.isEqualTo(WorkChunkStatusEnum.REDUCTION_READY);
 		});
+
+		clearInvocations(myBatchSender);
 	}
 
 	// ---- End of SMILE-11603 tests ----

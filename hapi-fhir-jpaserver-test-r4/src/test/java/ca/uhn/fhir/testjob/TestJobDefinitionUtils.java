@@ -2,6 +2,7 @@ package ca.uhn.fhir.testjob;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -38,6 +39,36 @@ public class TestJobDefinitionUtils {
 		IJobCompletionHandler<TestJobParameters> theCompletionHandler) {
 		return getJobBuilder(theJobId, theFirstStep, theLastStep, theCompletionHandler)
 			.gatedExecution().build();
+	}
+
+	/**
+	 * Creates a gated test job definition with a reduction step as the last step.
+	 */
+	public static JobDefinition<? extends IModelJson> buildGatedJobDefinitionWithReductionStep(
+		String theJobId,
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep,
+		IReductionStepWorker<TestJobParameters, FirstStepOutput, VoidModel> theReductionStep,
+		IJobCompletionHandler<TestJobParameters> theCompletionHandler) {
+		return JobDefinition.newBuilder()
+			.setJobDefinitionId(theJobId)
+			.setJobDescription("test job with reduction step")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"Test first step",
+				FirstStepOutput.class,
+				theFirstStep
+			)
+			.gatedExecution()
+			.addFinalReducerStep(
+				LAST_STEP_ID,
+				"Test reduction step",
+				VoidModel.class,
+				theReductionStep
+			)
+			.completionHandler(theCompletionHandler)
+			.build();
 	}
 
 	private static JobDefinition.Builder getJobBuilder(
