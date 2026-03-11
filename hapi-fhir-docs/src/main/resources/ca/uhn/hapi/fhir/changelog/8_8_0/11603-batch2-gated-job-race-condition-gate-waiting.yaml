@@ -1,0 +1,8 @@
+---
+type: fix
+jira: SMILE-11603
+title: "Fixed a race condition in the Batch2 gated job framework where work chunks arriving
+  after step advancement could remain permanently stuck in GATE_WAITING status. A maintenance
+  safety net now runs on every maintenance pass to flip any late-arriving GATE_WAITING chunks
+  for already-advanced steps to READY (or REDUCTION_READY for reduction steps), ensuring
+  stuck chunks are recovered automatically."
