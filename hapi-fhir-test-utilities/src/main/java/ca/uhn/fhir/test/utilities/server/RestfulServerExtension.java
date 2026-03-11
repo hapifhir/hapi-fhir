@@ -129,7 +129,6 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 			return;
 		}
 		myRunningServerUserData.clear();
-		myProviders.clear();
 		myPagingProvider = null;
 		myServlet = null;
 	}
@@ -167,9 +166,8 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 		Validate.notNull(theProvider);
 		if (isStarted()) {
 			myServlet.registerProvider(theProvider);
-		} else {
-			myProviders.add(theProvider);
 		}
+		myProviders.add(theProvider);
 		return this;
 	}
 
@@ -214,6 +212,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 
 	public void unregisterProvider(Object theProvider) {
 		withServer(t -> t.unregisterProvider(theProvider));
+		myProviders.remove(theProvider);
 	}
 
 	public Integer getDefaultPageSize() {

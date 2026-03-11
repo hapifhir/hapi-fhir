@@ -93,17 +93,18 @@ public interface ITestSubscriptionBuilder extends ITestDataBuilder {
 	}
 
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
 	default ICreationArgument withChannelExtension(String theUrl, String theValue) {
 		return t -> {
-			if (t instanceof IBaseHasExtensions) {
-				IBaseExtension ext = ((IBaseHasExtensions) t).addExtension();
-				ext.setUrl(theUrl);
-				IPrimitiveType<String> val = (IPrimitiveType<String>)
-						Objects.requireNonNull(getFhirContext().getElementDefinition("string")).newInstance();
-				val.setValueAsString(theValue);
-				ext.setValue(val);
+			if (! (t instanceof IBaseHasExtensions)) {
+				throw new IllegalArgumentException("Resource does not support extensions");
 			}
+			IBaseExtension<?, ?> ext = ((IBaseHasExtensions) t).addExtension();
+			ext.setUrl(theUrl);
+			//noinspection unchecked
+			IPrimitiveType<String> val = (IPrimitiveType<String>)
+					Objects.requireNonNull(getFhirContext().getElementDefinition("string")).newInstance();
+			val.setValueAsString(theValue);
+			ext.setValue(val);
 		};
 	}
 }
