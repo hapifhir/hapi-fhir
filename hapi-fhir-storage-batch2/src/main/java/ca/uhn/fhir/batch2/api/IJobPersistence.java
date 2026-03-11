@@ -313,7 +313,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 			String theJobInstanceId, String theNextStepId, boolean theIsReductionStepBoolean);
 
 	/**
-	 * Flips any GATE_WAITING or QUEUED chunks for the current gated step to READY
+	 * Flips any GATE_WAITING chunks for the current gated step to READY
 	 * (or REDUCTION_READY for reduction steps). This is a safety net for late-arriving
 	 * chunks that were created after step advancement already happened.
 	 *
