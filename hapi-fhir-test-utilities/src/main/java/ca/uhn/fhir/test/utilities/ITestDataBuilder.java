@@ -30,7 +30,6 @@ import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -552,8 +551,6 @@ public interface ITestDataBuilder {
 		IIdType doCreateResource(IBaseResource theResource);
 
 		IIdType doUpdateResource(IBaseResource theResource);
-
-		void doDeleteResource(IIdType theIIdType);
 	}
 
 	interface WithSupport extends ITestDataBuilder {
@@ -608,11 +605,6 @@ public interface ITestDataBuilder {
 		@Override
 		public IIdType doUpdateResource(IBaseResource theResource) {
 			throw new UnsupportedOperationException("Update not supported");
-		}
-
-		@Override
-		public void doDeleteResource(IIdType theIIdType) {
-			throw new UnsupportedOperationException("Delete not supported");
 		}
 	}
 
