@@ -123,6 +123,7 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	 *
 	 * @since 5.0.0
 	 */
+	@Override
 	public boolean isPartitioningEnabled() {
 		return myPartitioningEnabled;
 	}

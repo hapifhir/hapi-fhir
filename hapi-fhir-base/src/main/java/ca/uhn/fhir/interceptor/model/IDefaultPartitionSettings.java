@@ -66,4 +66,11 @@ public interface IDefaultPartitionSettings {
 	default RequestPartitionId getDefaultRequestPartitionId() {
 		return RequestPartitionId.fromPartitionId(getDefaultPartitionId());
 	}
+
+	/**
+	 * If enabled (default is <code>false</code>) the server will support data partitioning
+	 *
+	 * @since 8.2.0
+	 */
+	boolean isPartitioningEnabled();
 }
