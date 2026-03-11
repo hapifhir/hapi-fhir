@@ -25,10 +25,12 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -129,6 +131,20 @@ public class DaoSearchParamSynchronizer {
 			next.setResourceId(theEntity.getId().getId());
 			next.setPartitionId(theEntity.getPartitionId());
 			next.calculateHashes();
+			// Populate @ManyToOne entity references so that Hibernate's InsertActionSorter can detect
+			// FK dependencies and order INSERT statements correctly when JDBC batch mode is active.
+			// Without these references, search param and link rows may be inserted before their parent
+			// HFJ_RESOURCE row, causing FK constraint violations.
+			if (next instanceof BaseResourceIndexedSearchParam searchParam) {
+				searchParam.setResource(theEntity);
+			}
+			// For resource links, populate the target @ManyToOne reference using a Hibernate proxy
+			// (no DB hit). InsertActionSorter uses this to ensure the target HFJ_RESOURCE row is
+			// inserted before this HFJ_RES_LINK row when both are new in the same batch.
+			if (next instanceof ResourceLink link && link.getTargetResourcePid() != null) {
+				JpaPid targetId = JpaPid.fromId(link.getTargetResourcePid(), link.getTargetResourcePartitionId());
+				link.setTargetResourceTable(myEntityManager.getReference(ResourceTable.class, targetId));
+			}
 		}
 
 		/*
