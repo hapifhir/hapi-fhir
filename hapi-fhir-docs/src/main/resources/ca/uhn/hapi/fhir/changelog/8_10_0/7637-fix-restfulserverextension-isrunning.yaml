@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7637
+title: "Previously, RestfulServerExtension.isRunning() only checked the Jetty server state,
+  causing it to return false prematurely during shutdown and skipping stopServer() cleanup.
+  It now also checks whether the RestfulServer servlet instance is non-null."
