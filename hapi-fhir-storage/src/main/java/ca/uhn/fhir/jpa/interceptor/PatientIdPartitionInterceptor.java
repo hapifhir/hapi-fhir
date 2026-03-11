@@ -227,6 +227,7 @@ public class PatientIdPartitionInterceptor {
 			case PATCH:
 			case READ:
 			case VREAD:
+			case HISTORY_INSTANCE:
 			case SEARCH_TYPE:
 				if (theReadDetails.getSearchParams() != null) {
 					SearchParameterMap params = theReadDetails.getSearchParams();

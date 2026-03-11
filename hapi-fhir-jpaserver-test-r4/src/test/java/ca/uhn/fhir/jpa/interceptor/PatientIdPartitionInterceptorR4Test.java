@@ -86,6 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 @Import({PatientIdPartitionInterceptorR4Test.TestConfig.class, TestDaoSearch.Config.class})
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4Test {
