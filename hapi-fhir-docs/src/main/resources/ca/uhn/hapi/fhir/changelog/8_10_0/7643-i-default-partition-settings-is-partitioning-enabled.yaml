@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7643
+title: "isPartitioningEnabled() is not defined in IDefaultPartitionSettings, only implementing class PartitionSettings.
+        This has been fixed."
