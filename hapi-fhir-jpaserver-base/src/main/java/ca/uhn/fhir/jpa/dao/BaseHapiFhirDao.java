@@ -513,9 +513,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 					theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
-					if (hasResourceSourceChanged(meta, theRequest, theEntity)) {
-						changed = true;
-					}
+					changed = hasResourceSourceChanged(meta, theRequest, theEntity);
 
 					// TODO:  LD: Once 2024-02 it out the door we should consider further refactoring here to move
 					// more of this logic within the calculator and eliminate more local variables
@@ -609,6 +607,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 */
 	private boolean hasResourceSourceChanged(
 			IBaseMetaType theMeta, RequestDetails theRequest, ResourceTable theEntity) {
+		if (theEntity.getFhirVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+			return false;
+		}
+
 		String metaSource = MetaUtil.getSource(myFhirContext, theMeta);
 		ResourceHistoryTable currentEntity = theEntity.getCurrentVersionEntity();
 
@@ -1059,10 +1061,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					entity.getIdDt().toUnqualified().getValue());
 			if (theResource != null) {
 				myJpaStorageResourceParser.updateResourceMetadata(entity, theResource);
-				String sourceId =
-						((ResourceTable) theEntity).getCurrentVersionEntity().getSourceUri();
-				String requestId =
-						((ResourceTable) theEntity).getCurrentVersionEntity().getRequestId();
+				String sourceId = entity.getCurrentVersionEntity().getSourceUri();
+				String requestId = entity.getCurrentVersionEntity().getRequestId();
 				MetaUtil.populateResourceSource(myFhirContext, sourceId, requestId, theResource);
 			}
 			entity.setUnchangedInCurrentOperation(true);

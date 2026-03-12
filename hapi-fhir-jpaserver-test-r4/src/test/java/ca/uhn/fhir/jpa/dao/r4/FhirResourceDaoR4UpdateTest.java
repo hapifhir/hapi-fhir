@@ -1373,8 +1373,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		Practitioner updated = myPractitionerDao.read(updatedId.toUnqualifiedVersionless(), mySrd);
 
 		// ASSERTION: meta.source should reflect the updated value from the request
-		// Currently this will fail because populateResourceMetadata() overwrites
-		// the updated value with stale data from old history entries during NOP updates
 		assertThat(updated.getMeta().getSource()).isEqualTo("updated-request-456");
 	}
 
