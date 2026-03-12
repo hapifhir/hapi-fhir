@@ -25,13 +25,11 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -52,7 +50,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -62,23 +60,23 @@ import java.util.stream.Stream;
  * All operations are performed within a single DB transaction for atomicity.
  */
 // Created by claude-opus-4-6
-public class PatientIdModeCrossPartitionReplaceReferencesSvc {
-	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdModeCrossPartitionReplaceReferencesSvc.class);
+public class CrossPartitionReplaceReferencesSvc {
+	private static final Logger ourLog = LoggerFactory.getLogger(CrossPartitionReplaceReferencesSvc.class);
 
 	private final DaoRegistry myDaoRegistry;
 	private final IResourceLinkDao myResourceLinkDao;
-	private final ISearchParamExtractor mySearchParamExtractor;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private final IFhirSystemDao<IBaseBundle, ?> mySystemDao;
 	private final FhirContext myFhirContext;
 
-	public PatientIdModeCrossPartitionReplaceReferencesSvc(
+	public CrossPartitionReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			IResourceLinkDao theResourceLinkDao,
-			ISearchParamExtractor theSearchParamExtractor,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			IFhirSystemDao<IBaseBundle, ?> theSystemDao) {
 		myDaoRegistry = theDaoRegistry;
 		myResourceLinkDao = theResourceLinkDao;
-		mySearchParamExtractor = theSearchParamExtractor;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		mySystemDao = theSystemDao;
 		myFhirContext = theDaoRegistry.getFhirContext();
 	}
@@ -113,7 +111,7 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 				targetPartitionId);
 
 		// Step 1: Discover all resources referencing the source patient
-		List<IBaseResource> allReferencingResources = discoverReferencingResources(sourcePatientId);
+		List<IBaseResource> allReferencingResources = discoverReferencingResources(sourcePatientId, theRequestDetails);
 
 		if (allReferencingResources.isEmpty()) {
 			ourLog.info("No referencing resources found for Patient/{}", sourcePatientId);
@@ -123,7 +121,8 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 		// Step 2: Classify into MOVE (in source compartment + source partition) vs UPDATE
 		List<IBaseResource> moveList = new ArrayList<>();
 		List<IBaseResource> updateList = new ArrayList<>();
-		classifyResources(allReferencingResources, sourcePatientId, sourcePartitionId, moveList, updateList);
+		classifyResourcesAndReplaceSourceReferences(
+				allReferencingResources, sourcePatientId, targetPatientId, theRequestDetails, moveList, updateList);
 
 		ourLog.info(
 				"Classified {} resources: {} to move, {} to update references",
@@ -144,33 +143,29 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 		List<Reference> referencesToCreatedResources = List.of();
 		List<Reference> referencesToUpdatedResources = List.of();
 
-		// Step 3: Execute CREATE bundle — new SystemRequestDetails() (no explicit partition)
-		// lets the PatientIdPartitionInterceptor fire and route each resource to the
-		// correct partition based on its patient reference. This also ensures the
-		// TransactionProcessor pre-fetch uses allPartitions for reference targets, so
-		// cross-partition references (e.g. Observation.performer → Organization in
-		// default partition) are found. If we used forRequestPartitionId(targetPartitionId)
-		// instead, the pre-fetch would use targetPartitionId for ALL IDs including
-		// cross-partition reference targets (e.g. Organization in partition -1), miss them,
-		// cache them as null in TransactionDetails, and later cause a false HAPI-1096
-		// "is deleted" error when DaoResourceLinkResolver hits that null cache entry.
+		// Step 3: Execute CREATE bundle — pass through the incoming RequestDetails so the
+		// partition interceptor can determine the correct partition for each resource
+		// (e.g. from tenant ID, headers, or patient reference depending on mode).
+		// Note: buildCreateBundle clears RESOURCE_PARTITION_ID on each resource so the
+		// interceptor determines the partition fresh rather than short-circuiting with
+		// the source partition.
 		LinkedHashMap<String, String> oldIdToPlaceholder = new LinkedHashMap<>();
-		Map<String, String> oldToNewIdMap = new HashMap<>();
+		Map<String, String> movedResourceOldToNewIdMap = new HashMap<>();
 		if (!moveList.isEmpty()) {
-			IBaseBundle createBundle =
-					buildCreateBundle(moveList, sourcePatientId, targetPatientId, oldIdToPlaceholder);
-			IBaseBundle createResponse = mySystemDao.transactionNested(new SystemRequestDetails(), createBundle);
-			oldToNewIdMap = extractOldToNewIdMap(new ArrayList<>(oldIdToPlaceholder.keySet()), createResponse);
+			IBaseBundle createBundle = buildCreateBundle(moveList, oldIdToPlaceholder);
+			IBaseBundle createResponse = mySystemDao.transactionNested(theRequestDetails, createBundle);
+			movedResourceOldToNewIdMap =
+					extractOldToNewIdMap(new ArrayList<>(oldIdToPlaceholder.keySet()), createResponse);
 			referencesToCreatedResources =
 					ReplaceReferencesProvenanceSvc.extractChangedResourceReferences(List.of((Bundle) createResponse));
 		}
 
 		// Step 4: Execute UPDATE bundle — UPDATE resources were loaded from DB so
 		// RESOURCE_PARTITION_ID is already set on each; determineCreatePartitionForRequest()
-		// uses that directly, ignoring SystemRequestDetails.
+		// uses that directly.
 		if (!updateList.isEmpty()) {
-			IBaseBundle updateBundle = buildUpdateBundle(updateList, sourcePatientId, targetPatientId, oldToNewIdMap);
-			IBaseBundle updateResponse = mySystemDao.transactionNested(new SystemRequestDetails(), updateBundle);
+			IBaseBundle updateBundle = buildUpdateBundle(updateList, movedResourceOldToNewIdMap);
+			IBaseBundle updateResponse = mySystemDao.transactionNested(theRequestDetails, updateBundle);
 			referencesToUpdatedResources =
 					ReplaceReferencesProvenanceSvc.extractChangedResourceReferences(List.of((Bundle) updateResponse));
 		}
@@ -184,85 +179,87 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 				referencesToCreatedResources, referencesToUpdatedResources, movedResourceOriginals);
 	}
 
-	private List<IBaseResource> discoverReferencingResources(String theSourcePatientId) {
+	private List<IBaseResource> discoverReferencingResources(
+			String theSourcePatientId, RequestDetails theRequestDetails) {
 		List<IBaseResource> result = new ArrayList<>();
 
 		Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetFhirId("Patient", theSourcePatientId);
-		List<IdDt> ids = idStream.distinct().collect(java.util.stream.Collectors.toList());
-
-		SystemRequestDetails readRequest =
-				SystemRequestDetails.forRequestPartitionId(RequestPartitionId.allPartitions());
+		List<IdDt> ids = idStream.distinct().toList();
 
 		for (IdDt id : ids) {
-			// Skip Patient — the merge flow handles patients separately
-			if ("Patient".equals(id.getResourceType())) {
-				continue;
-			}
-
 			try {
 				@SuppressWarnings("unchecked")
 				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(id.getResourceType());
-				IBaseResource resource = dao.read(id.toVersionless(), readRequest);
+				IBaseResource resource = dao.read(id.toVersionless(), theRequestDetails);
 				result.add(resource);
 			} catch (ResourceGoneException | ResourceNotFoundException e) {
-				ourLog.debug("Skipping deleted/not-found resource: {}", id.getValue());
+				ourLog.warn("Skipping deleted/not-found resource: {}", id.getValue());
 			}
 		}
 
 		return result;
 	}
 
-	private void classifyResources(
+	private void classifyResourcesAndReplaceSourceReferences(
 			List<IBaseResource> theResources,
 			String theSourcePatientId,
-			RequestPartitionId theSourcePartitionId,
+			String theTargetPatientId,
+			RequestDetails theRequestDetails,
 			List<IBaseResource> theMoveList,
 			List<IBaseResource> theUpdateList) {
 
+		String sourcePatientRef = "Patient/" + theSourcePatientId;
+		String targetPatientRef = "Patient/" + theTargetPatientId;
+
 		for (IBaseResource resource : theResources) {
-			RequestPartitionId resourcePartition =
-					RequestPartitionId.getPartitionIfAssigned(resource).orElse(null);
+			Integer currentPartitionId = RequestPartitionId.getPartitionIfAssigned(resource)
+					.map(RequestPartitionId::getFirstPartitionIdOrNull)
+					.orElse(null);
 
-			Optional<String> compartmentPatient = ResourceCompartmentUtil.getPatientCompartmentIdentity(
-					resource, myFhirContext, mySearchParamExtractor);
+			// Rewrite source→target patient references so determineCreatePartitionForRequest
+			// routes based on the post-merge state.
+			replaceVersionlessReferences(resource, Map.of(sourcePatientRef, targetPatientRef));
 
-			boolean inSourceCompartment =
-					compartmentPatient.isPresent() && compartmentPatient.get().equals(theSourcePatientId);
-			// Compare by numeric partition ID only — the source patient's RequestPartitionId may include
-			// a partition name (e.g. {id:65, name:"A"}) while the resource loaded from the DB may have
-			// only the numeric id (e.g. {id:65}). RequestPartitionId.equals() compares names too, so we
-			// compare just the first partition ID to avoid false negatives.
-			Integer sourcePartId =
-					theSourcePartitionId != null ? theSourcePartitionId.getFirstPartitionIdOrNull() : null;
-			Integer resourcePartId = resourcePartition != null ? resourcePartition.getFirstPartitionIdOrNull() : null;
-			boolean inSourcePartition = sourcePartId != null && sourcePartId.equals(resourcePartId);
+			Integer newPartitionId = determinePartition(resource, theRequestDetails);
 
-			if (inSourceCompartment && inSourcePartition) {
-				theMoveList.add(resource);
-			} else {
+			if (Objects.equals(currentPartitionId, newPartitionId)) {
 				theUpdateList.add(resource);
+			} else {
+				theMoveList.add(resource);
 			}
 		}
 	}
 
 	/**
+	 * Determines the partition for a resource by temporarily clearing its existing
+	 * RESOURCE_PARTITION_ID and asking the partition helper to compute a fresh partition
+	 * based on the resource's current references. The original partition is restored afterward.
+	 */
+	private Integer determinePartition(IBaseResource theResource, RequestDetails theRequestDetails) {
+		Object savedPartitionUserData = theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		theResource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
+		try {
+			String resourceType = myFhirContext.getResourceType(theResource);
+			RequestPartitionId targetPartition = myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
+					theRequestDetails, theResource, resourceType);
+			return targetPartition.getFirstPartitionIdOrNull();
+		} finally {
+			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, savedPartitionUserData);
+		}
+	}
+
+	/**
 	 * Builds a transaction bundle containing POST (CREATE) entries for all compartment resources
-	 * to be moved to the target partition. References to the source patient and to other moved
-	 * resources are updated before building the bundle.
+	 * to be moved to the target partition. References between moved resources are replaced with
+	 * urn:uuid placeholders. Patient references are already rewritten by
+	 * {@link #classifyResourcesAndReplaceSourceReferences}.
 	 * <p>
 	 * {@code theOldIdToPlaceholder} is populated as a {@link LinkedHashMap} whose key insertion
 	 * order matches the order of entries added to the returned bundle, so that
 	 * {@link #extractOldToNewIdMap} can correlate response entries by index.
 	 */
 	private IBaseBundle buildCreateBundle(
-			List<IBaseResource> theMoveList,
-			String theSourcePatientId,
-			String theTargetPatientId,
-			LinkedHashMap<String, String> theOldIdToPlaceholder) {
-
-		FhirTerser terser = myFhirContext.newTerser();
-		String sourcePatientRef = "Patient/" + theSourcePatientId;
-		String targetPatientRef = "Patient/" + theTargetPatientId;
+			List<IBaseResource> theMoveList, LinkedHashMap<String, String> theOldIdToPlaceholder) {
 
 		// Build placeholder map; insertion order is preserved so keys
 		// can be correlated by index with CREATE response entries in extractOldToNewIdMap.
@@ -271,21 +268,9 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 			theOldIdToPlaceholder.put(oldId, IdDt.newRandomUuid().getValue());
 		}
 
-		// Replace Patient/A→Patient/B and inter-move refs with urn:uuid placeholders
-		for (IBaseResource resource : theMoveList) {
-			for (ResourceReferenceInfo refInfo : terser.getAllResourceReferences(resource)) {
-				String refValue = refInfo.getResourceReference()
-						.getReferenceElement()
-						.toUnqualifiedVersionless()
-						.getValue();
-				// TODO Emre: is this the right way to compare?
-				if (sourcePatientRef.equals(refValue)) {
-					refInfo.getResourceReference().setReference(targetPatientRef);
-				} else if (theOldIdToPlaceholder.containsKey(refValue)) {
-					refInfo.getResourceReference().setReference(theOldIdToPlaceholder.get(refValue));
-				}
-			}
-		}
+		// Replace inter-move references with urn:uuid placeholders.
+		// Patient references were already rewritten by classifyResourcesAndReplaceSourceReferences.
+		replaceVersionlessReferences(theMoveList, theOldIdToPlaceholder);
 
 		// Clear partition + ID and build CREATE entries
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
@@ -341,36 +326,47 @@ public class PatientIdModeCrossPartitionReplaceReferencesSvc {
 
 	/**
 	 * Builds a transaction bundle containing PUT (UPDATE) entries for non-compartment resources
-	 * whose references to the source patient (or moved resources) need updating.
+	 * whose references to moved resources need updating. Patient references were already rewritten
+	 * by {@link #classifyResourcesAndReplaceSourceReferences}.
 	 */
 	private IBaseBundle buildUpdateBundle(
-			List<IBaseResource> theUpdateList,
-			String theSourcePatientId,
-			String theTargetPatientId,
-			Map<String, String> theOldToNewIdMap) {
+			List<IBaseResource> theUpdateList, Map<String, String> theMovedResourceOldToNewIdMap) {
 
-		FhirTerser terser = myFhirContext.newTerser();
-		String sourcePatientRef = "Patient/" + theSourcePatientId;
-		String targetPatientRef = "Patient/" + theTargetPatientId;
-
-		for (IBaseResource resource : theUpdateList) {
-			for (ResourceReferenceInfo refInfo : terser.getAllResourceReferences(resource)) {
-				String refValue = refInfo.getResourceReference()
-						.getReferenceElement()
-						.toUnqualifiedVersionless()
-						.getValue();
-				if (sourcePatientRef.equals(refValue)) {
-					refInfo.getResourceReference().setReference(targetPatientRef);
-				} else if (theOldToNewIdMap.containsKey(refValue)) {
-					refInfo.getResourceReference().setReference(theOldToNewIdMap.get(refValue));
-				}
-			}
-		}
+		replaceVersionlessReferences(theUpdateList, theMovedResourceOldToNewIdMap);
 
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 		for (IBaseResource resource : theUpdateList) {
 			bundleBuilder.addTransactionUpdateEntry(resource);
 		}
 		return bundleBuilder.getBundle();
+	}
+
+	/**
+	 * Rewrites versionless references in all resources in the list using the given map.
+	 * Versioned references are left unchanged.
+	 */
+	private void replaceVersionlessReferences(List<IBaseResource> theResources, Map<String, String> theReferenceMap) {
+		for (IBaseResource resource : theResources) {
+			replaceVersionlessReferences(resource, theReferenceMap);
+		}
+	}
+
+	/**
+	 * Rewrites versionless references in a single resource using the given map.
+	 * Versioned references are left unchanged.
+	 */
+	private void replaceVersionlessReferences(IBaseResource theResource, Map<String, String> theReferenceMap) {
+		FhirTerser terser = myFhirContext.newTerser();
+		for (ResourceReferenceInfo refInfo : terser.getAllResourceReferences(theResource)) {
+			IIdType refElement = refInfo.getResourceReference().getReferenceElement();
+			if (refElement.hasVersionIdPart()) {
+				continue;
+			}
+			String refValue = refElement.toUnqualifiedVersionless().getValue();
+			String replacement = theReferenceMap.get(refValue);
+			if (replacement != null) {
+				refInfo.getResourceReference().setReference(replacement);
+			}
+		}
 	}
 }

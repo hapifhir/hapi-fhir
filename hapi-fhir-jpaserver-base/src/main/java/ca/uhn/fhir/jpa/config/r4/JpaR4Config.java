@@ -39,8 +39,8 @@ import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
-import ca.uhn.fhir.jpa.provider.PatientIdModeCrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeValidationService;
 import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
@@ -162,13 +162,13 @@ public class JpaR4Config {
 
 	@SuppressWarnings("unchecked")
 	@Bean
-	public PatientIdModeCrossPartitionReplaceReferencesSvc crossPartitionReplaceReferencesSvc(
+	public CrossPartitionReplaceReferencesSvc crossPartitionReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			IResourceLinkDao theResourceLinkDao,
-			ISearchParamExtractor theSearchParamExtractor,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			IFhirSystemDao<Bundle, Meta> theSystemDao) {
-		return new PatientIdModeCrossPartitionReplaceReferencesSvc(
-				theDaoRegistry, theResourceLinkDao, theSearchParamExtractor, (IFhirSystemDao) theSystemDao);
+		return new CrossPartitionReplaceReferencesSvc(
+				theDaoRegistry, theResourceLinkDao, theRequestPartitionHelperSvc, (IFhirSystemDao) theSystemDao);
 	}
 
 	@Bean
@@ -183,7 +183,7 @@ public class JpaR4Config {
 			JpaStorageSettings theStorageSettings,
 			MergeValidationService theMergeValidationService,
 			MergeResourceHelper theMergeResourceHelper,
-			PatientIdModeCrossPartitionReplaceReferencesSvc theCrossPartitionResourceMoverSvc,
+			CrossPartitionReplaceReferencesSvc theCrossPartitionResourceMoverSvc,
 			PartitionSettings thePartitionSettings) {
 
 		return new ResourceMergeService(

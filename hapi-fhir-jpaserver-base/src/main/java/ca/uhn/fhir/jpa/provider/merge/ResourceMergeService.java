@@ -35,7 +35,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.CrossPartitionMoveResult;
-import ca.uhn.fhir.jpa.provider.PatientIdModeCrossPartitionReplaceReferencesSvc;
+import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
@@ -62,7 +62,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
 import static ca.uhn.fhir.merge.MergeResourceHelper.addInfoToOperationOutcome;
@@ -88,7 +87,7 @@ public class ResourceMergeService {
 	private final MergeResourceHelper myMergeResourceHelper;
 	private final Batch2TaskHelper myBatch2TaskHelper;
 	private final MergeValidationService myMergeValidationService;
-	private final PatientIdModeCrossPartitionReplaceReferencesSvc myCrossPartitionResourceMoverSvc;
+	private final CrossPartitionReplaceReferencesSvc myCrossPartitionResourceMoverSvc;
 	private final PartitionSettings myPartitionSettings;
 
 	public ResourceMergeService(
@@ -102,7 +101,7 @@ public class ResourceMergeService {
 			Batch2TaskHelper theBatch2TaskHelper,
 			MergeValidationService theMergeValidationService,
 			MergeResourceHelper theMergeResourceHelper,
-			PatientIdModeCrossPartitionReplaceReferencesSvc theCrossPartitionResourceMoverSvc,
+			CrossPartitionReplaceReferencesSvc theCrossPartitionResourceMoverSvc,
 			PartitionSettings thePartitionSettings) {
 		myStorageSettings = theStorageSettings;
 		myDaoRegistry = theDaoRegistry;
@@ -263,7 +262,7 @@ public class ResourceMergeService {
 					+ " exceeds the resource-limit "
 					+ theMergeOperationParameters.getResourceLimit();
 			if (!crossPartition) {
-				message += ". Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.";
+				message += ". Submit the request asynchronously by adding the HTTP Header 'Prefer: respond-async'.";
 			}
 			throw new PreconditionFailedException(message);
 		}
@@ -403,7 +402,7 @@ public class ResourceMergeService {
 				.streamSourceIdsForTargetFhirId(
 						replaceReferencesRequest.sourceId.getResourceType(),
 						replaceReferencesRequest.sourceId.getIdPart())
-				.collect(Collectors.toList());
+				.toList();
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResourcesInNestedTransaction(
 				replaceReferencesRequest, resourceIds, theRequestDetails);
 		return List.of(result);
