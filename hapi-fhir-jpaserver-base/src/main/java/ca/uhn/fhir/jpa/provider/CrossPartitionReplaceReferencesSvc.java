@@ -47,11 +47,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.Set;
 
 /**
  * Discovers compartment resources for a source patient, moves them to the target patient's
@@ -160,6 +161,10 @@ public class CrossPartitionReplaceReferencesSvc {
 					ReplaceReferencesProvenanceSvc.extractChangedResourceReferences(List.of((Bundle) createResponse));
 		}
 
+		// Step 3b: Discover resources outside the source compartment that reference moved resources
+		// (Cases D and E — e.g., another patient's DiagnosticReport referencing a moved Observation)
+		discoverAndAddAdditionalResourcesToUpdate(movedResourceOldToNewIdMap, updateList, theRequestDetails);
+
 		// Step 4: Execute UPDATE bundle — UPDATE resources were loaded from DB so
 		// RESOURCE_PARTITION_ID is already set on each; determineCreatePartitionForRequest()
 		// uses that directly.
@@ -181,22 +186,69 @@ public class CrossPartitionReplaceReferencesSvc {
 
 	private List<IBaseResource> discoverReferencingResources(
 			String theSourcePatientId, RequestDetails theRequestDetails) {
+		List<IdDt> ids = myResourceLinkDao
+				.streamSourceIdsForTargetFhirId("Patient", theSourcePatientId)
+				.toList();
+		return loadResources(ids, theRequestDetails);
+	}
+
+	/**
+	 * Discovers resources that reference moved resources (by their old IDs) and appends
+	 * them to {@code theUpdateList}. Resources already in the move/update lists are excluded
+	 * to avoid duplicate entries in the transaction bundle.
+	 * <p>
+	 * This handles cases where resources outside the source compartment reference non-patient
+	 * resources that were moved and got new IDs (e.g., another patient's Observation referencing
+	 * a moved Encounter, or a non-compartmental List referencing a moved Encounter).
+	 */
+	private void discoverAndAddAdditionalResourcesToUpdate(
+			Map<String, String> theMovedResourceOldToNewIdMap,
+			List<IBaseResource> theUpdateList,
+			RequestDetails theRequestDetails) {
+		if (theMovedResourceOldToNewIdMap.isEmpty()) {
+			return;
+		}
+
+		Set<String> alreadyDiscoveredIds = new HashSet<>();
+		alreadyDiscoveredIds.addAll(theMovedResourceOldToNewIdMap.keySet());
+		alreadyDiscoveredIds.addAll(theMovedResourceOldToNewIdMap.values());
+		alreadyDiscoveredIds.addAll(theUpdateList.stream()
+				.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
+				.toList());
+
+		List<IdDt> additionalIds = new ArrayList<>();
+		for (String oldId : theMovedResourceOldToNewIdMap.keySet()) {
+			IdDt oldIdDt = new IdDt(oldId);
+			myResourceLinkDao
+					.streamSourceIdsForTargetFhirId(oldIdDt.getResourceType(), oldIdDt.getIdPart())
+					.forEach(id -> {
+						if (alreadyDiscoveredIds.add(
+								id.toUnqualifiedVersionless().getValue())) {
+							additionalIds.add(id);
+						}
+					});
+		}
+
+		if (!additionalIds.isEmpty()) {
+			List<IBaseResource> additionalResources = loadResources(additionalIds, theRequestDetails);
+			ourLog.info(
+					"Discovered {} additional resources referencing resources to be moved across partitions",
+					additionalResources.size());
+			theUpdateList.addAll(additionalResources);
+		}
+	}
+
+	private List<IBaseResource> loadResources(List<IdDt> theIds, RequestDetails theRequestDetails) {
 		List<IBaseResource> result = new ArrayList<>();
-
-		Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetFhirId("Patient", theSourcePatientId);
-		List<IdDt> ids = idStream.distinct().toList();
-
-		for (IdDt id : ids) {
+		for (IdDt id : theIds) {
 			try {
 				@SuppressWarnings("unchecked")
 				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(id.getResourceType());
-				IBaseResource resource = dao.read(id.toVersionless(), theRequestDetails);
-				result.add(resource);
+				result.add(dao.read(id.toVersionless(), theRequestDetails));
 			} catch (ResourceGoneException | ResourceNotFoundException e) {
 				ourLog.warn("Skipping deleted/not-found resource: {}", id.getValue());
 			}
 		}
-
 		return result;
 	}
 
