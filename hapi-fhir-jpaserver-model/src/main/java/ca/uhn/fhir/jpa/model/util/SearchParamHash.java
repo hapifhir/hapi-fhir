@@ -20,8 +20,8 @@
 package ca.uhn.fhir.jpa.model.util;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -53,10 +53,10 @@ public class SearchParamHash {
 	 * Applies a fast and consistent hashing algorithm to a set of strings
 	 */
 	public static long hashSearchParam(
-			@Nonnull PartitionSettings thePartitionSettings,
+			@Nonnull IDefaultPartitionSettings theDefaultPartitionSettings,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			@Nonnull String... theValues) {
-		return doHashSearchParam(thePartitionSettings, theRequestPartitionId, theValues);
+		return doHashSearchParam(theDefaultPartitionSettings, theRequestPartitionId, theValues);
 	}
 
 	/**
@@ -67,15 +67,15 @@ public class SearchParamHash {
 	}
 
 	private static long doHashSearchParam(
-			@Nullable PartitionSettings thePartitionSettings,
+			@Nullable IDefaultPartitionSettings theDefaultPartitionSettings,
 			@Nullable RequestPartitionId theRequestPartitionId,
 			@Nonnull String[] theValues) {
 		Hasher hasher = HASH_FUNCTION.newHasher();
 
-		if (thePartitionSettings != null
+		if (theDefaultPartitionSettings != null
 				&& theRequestPartitionId != null
-				&& thePartitionSettings.isPartitioningEnabled()
-				&& thePartitionSettings.isIncludePartitionInSearchHashes()) {
+				&& theDefaultPartitionSettings.isPartitioningEnabled()
+				&& theDefaultPartitionSettings.isIncludePartitionInSearchHashes()) {
 			if (theRequestPartitionId.getPartitionIds().size() > 1) {
 				throw new InternalErrorException(Msg.code(1527)
 						+ "Can not search multiple partitions when partitions are included in search hashes");

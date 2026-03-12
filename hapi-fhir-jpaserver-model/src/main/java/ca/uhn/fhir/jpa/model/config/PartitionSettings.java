@@ -97,6 +97,7 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	 * If {@link StorageSettings#isIndexStorageOptimized()} is enabled this setting should be set to <code>false</code>.
 	 * </p>
 	 */
+	@Override
 	public boolean isIncludePartitionInSearchHashes() {
 		return myIncludePartitionInSearchHashes;
 	}

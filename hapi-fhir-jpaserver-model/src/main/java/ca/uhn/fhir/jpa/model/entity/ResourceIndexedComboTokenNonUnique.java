@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -98,7 +98,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 	private String myIndexString;
 
 	@Transient
-	private transient PartitionSettings myPartitionSettings;
+	private transient IDefaultPartitionSettings myDefaultPartitionSettings;
 
 	/**
 	 * Constructor
@@ -108,8 +108,8 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 	}
 
 	public ResourceIndexedComboTokenNonUnique(
-			PartitionSettings thePartitionSettings, ResourceTable theEntity, String theQueryString) {
-		myPartitionSettings = thePartitionSettings;
+			IDefaultPartitionSettings theDefaultPartitionSettings, ResourceTable theEntity, String theQueryString) {
+		myDefaultPartitionSettings = theDefaultPartitionSettings;
 		myResource = theEntity;
 		myIndexString = theQueryString;
 		calculateHashes();
@@ -146,7 +146,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
 		ResourceIndexedComboTokenNonUnique source = (ResourceIndexedComboTokenNonUnique) theSource;
-		myPartitionSettings = source.myPartitionSettings;
+		myDefaultPartitionSettings = source.myDefaultPartitionSettings;
 		myHashComplete = source.myHashComplete;
 		myIndexString = source.myIndexString;
 	}
@@ -177,7 +177,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 			return;
 		}
 
-		PartitionSettings partitionSettings = getPartitionSettings();
+		IDefaultPartitionSettings partitionSettings = getPartitionSettings();
 		PartitionablePartitionId partitionId = getPartitionId();
 		String queryString = myIndexString;
 		setHashComplete(calculateHashComplete(partitionSettings, partitionId, queryString));
@@ -192,12 +192,12 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		return builder.toHashCode();
 	}
 
-	public PartitionSettings getPartitionSettings() {
-		return myPartitionSettings;
+	public IDefaultPartitionSettings getPartitionSettings() {
+		return myDefaultPartitionSettings;
 	}
 
-	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
-		myPartitionSettings = thePartitionSettings;
+	public void setPartitionSettings(IDefaultPartitionSettings theDefaultPartitionSettings) {
+		myDefaultPartitionSettings = theDefaultPartitionSettings;
 	}
 
 	@Override
@@ -236,7 +236,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 	}
 
 	public static long calculateHashComplete(
-			PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
+			IDefaultPartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
 		return SearchParamHash.hashSearchParam(partitionSettings, requestPartitionId, queryString);
 	}

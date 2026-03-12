@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import jakarta.annotation.Nullable;
@@ -101,12 +101,12 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public ResourceIndexedSearchParamCoords() {}
 
 	public ResourceIndexedSearchParamCoords(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			String theResourceType,
 			String theParamName,
 			double theLatitude,
 			double theLongitude) {
-		setPartitionSettings(thePartitionSettings);
+		setPartitionSettings(theDefaultPartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setLatitude(theLatitude);

@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -99,7 +99,7 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 	private Long myHashPresence;
 
 	@Transient
-	private transient PartitionSettings myPartitionSettings;
+	private transient IDefaultPartitionSettings myDefaultPartitionSettings;
 
 	/**
 	 * Constructor
@@ -194,12 +194,12 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 		return b.build();
 	}
 
-	public PartitionSettings getPartitionSettings() {
-		return myPartitionSettings;
+	public IDefaultPartitionSettings getPartitionSettings() {
+		return myDefaultPartitionSettings;
 	}
 
-	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
-		myPartitionSettings = thePartitionSettings;
+	public void setPartitionSettings(IDefaultPartitionSettings theDefaultPartitionSettings) {
+		myDefaultPartitionSettings = theDefaultPartitionSettings;
 	}
 
 	/**
@@ -215,23 +215,24 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 	}
 
 	public static long calculateHashPresence(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			PartitionablePartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			Boolean thePresent) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
 		return calculateHashPresence(
-				thePartitionSettings, requestPartitionId, theResourceType, theParamName, thePresent);
+				theDefaultPartitionSettings, requestPartitionId, theResourceType, theParamName, thePresent);
 	}
 
 	public static long calculateHashPresence(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			Boolean thePresent) {
 		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
-		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);
+		return hashSearchParam(
+				theDefaultPartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);
 	}
 }

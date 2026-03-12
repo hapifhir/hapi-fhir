@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -148,13 +148,13 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	 * Constructor
 	 */
 	public ResourceIndexedSearchParamToken(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			String theResourceType,
 			String theParamName,
 			String theSystem,
 			String theValue) {
 		super();
-		setPartitionSettings(thePartitionSettings);
+		setPartitionSettings(theDefaultPartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setSystem(theSystem);
@@ -166,9 +166,12 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	 * Constructor
 	 */
 	public ResourceIndexedSearchParamToken(
-			PartitionSettings thePartitionSettings, String theResourceType, String theParamName, boolean theMissing) {
+			IDefaultPartitionSettings theDefaultPartitionSettings,
+			String theResourceType,
+			String theParamName,
+			boolean theMissing) {
 		super();
-		setPartitionSettings(thePartitionSettings);
+		setPartitionSettings(theDefaultPartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setMissing(theMissing);
@@ -366,27 +369,28 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	public static long calculateHashSystem(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			PartitionablePartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			String theSystem) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashSystem(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem);
+		return calculateHashSystem(
+				theDefaultPartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem);
 	}
 
 	public static long calculateHashSystem(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			String theSystem) {
 		return hashSearchParam(
-				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, trim(theSystem));
+				theDefaultPartitionSettings, theRequestPartitionId, theResourceType, theParamName, trim(theSystem));
 	}
 
 	public static long calculateHashSystemAndValue(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			PartitionablePartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
@@ -394,18 +398,18 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			String theValue) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
 		return calculateHashSystemAndValue(
-				thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem, theValue);
+				theDefaultPartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem, theValue);
 	}
 
 	public static long calculateHashSystemAndValue(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			String theSystem,
 			String theValue) {
 		return hashSearchParam(
-				thePartitionSettings,
+				theDefaultPartitionSettings,
 				theRequestPartitionId,
 				theResourceType,
 				theParamName,
@@ -414,23 +418,25 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	public static long calculateHashValue(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			PartitionablePartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			String theValue) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashValue(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theValue);
+		return calculateHashValue(
+				theDefaultPartitionSettings, requestPartitionId, theResourceType, theParamName, theValue);
 	}
 
 	public static long calculateHashValue(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			String theValue) {
 		String value = trim(theValue);
-		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
+		return hashSearchParam(
+				theDefaultPartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 	@Override

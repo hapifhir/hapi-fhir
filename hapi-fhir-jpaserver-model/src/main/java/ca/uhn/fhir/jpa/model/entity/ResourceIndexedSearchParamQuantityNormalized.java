@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -125,14 +125,14 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 	}
 
 	public ResourceIndexedSearchParamQuantityNormalized(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			String theResourceType,
 			String theParamName,
 			double theValue,
 			String theSystem,
 			String theUnits) {
 		this();
-		setPartitionSettings(thePartitionSettings);
+		setPartitionSettings(theDefaultPartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setSystem(theSystem);

@@ -187,6 +187,11 @@ public class RequestPartitionIdTest {
 			public boolean isPartitioningEnabled() {
 				return false;
 			}
+
+			@Override
+			public boolean isIncludePartitionInSearchHashes() {
+				return false;
+			}
 		};
 		return new ContainsTestCase[]{
 			new ContainsTestCase("all vs all", allPartitions(), allPartitions(), EQUAL),

@@ -115,6 +115,11 @@ public final class RequestPartitionHeaderUtil {
 			public boolean isPartitioningEnabled() {
 				return false;
 			}
+
+			@Override
+			public boolean isIncludePartitionInSearchHashes() {
+				return false;
+			}
 		});
 	}
 

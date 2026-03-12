@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -149,7 +149,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	 * Constructor
 	 */
 	public ResourceIndexedSearchParamDate(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			String theResourceType,
 			String theParamName,
 			Date theLow,
@@ -157,7 +157,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 			Date theHigh,
 			String theHighString,
 			String theOriginalValue) {
-		setPartitionSettings(thePartitionSettings);
+		setPartitionSettings(theDefaultPartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValueLow(theLow);

@@ -73,4 +73,12 @@ public interface IDefaultPartitionSettings {
 	 * @since 8.2.0
 	 */
 	boolean isPartitioningEnabled();
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the <code>PARTITION_ID</code> value will be factored
+	 * into the hash values used in the <code>HFJ_SPIDX_xxx</code> tables.
+	 *
+	 * @since 8.2.0
+	 */
+	boolean isIncludePartitionInSearchHashes();
 }

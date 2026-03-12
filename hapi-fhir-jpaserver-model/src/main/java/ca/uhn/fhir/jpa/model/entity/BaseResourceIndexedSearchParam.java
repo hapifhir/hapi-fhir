@@ -20,8 +20,8 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -83,7 +83,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	private Date myUpdated;
 
 	@Transient
-	private transient PartitionSettings myPartitionSettings;
+	private transient IDefaultPartitionSettings myDefaultPartitionSettings;
 
 	@Transient
 	private transient StorageSettings myStorageSettings;
@@ -145,7 +145,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		myResourceType = source.myResourceType;
 		myUpdated = source.myUpdated;
 		myStorageSettings = source.myStorageSettings;
-		myPartitionSettings = source.myPartitionSettings;
+		myDefaultPartitionSettings = source.myDefaultPartitionSettings;
 		setPartitionId(source.getPartitionId());
 	}
 
@@ -192,12 +192,12 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		throw new UnsupportedOperationException(Msg.code(1526) + "No parameter matcher for " + theParam);
 	}
 
-	public PartitionSettings getPartitionSettings() {
-		return myPartitionSettings;
+	public IDefaultPartitionSettings getPartitionSettings() {
+		return myDefaultPartitionSettings;
 	}
 
-	public BaseResourceIndexedSearchParam setPartitionSettings(PartitionSettings thePartitionSettings) {
-		myPartitionSettings = thePartitionSettings;
+	public BaseResourceIndexedSearchParam setPartitionSettings(IDefaultPartitionSettings theDefaultPartitionSettings) {
+		myDefaultPartitionSettings = theDefaultPartitionSettings;
 		return this;
 	}
 
@@ -211,25 +211,25 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	public static long calculateHashIdentity(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			PartitionablePartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashIdentity(thePartitionSettings, requestPartitionId, theResourceType, theParamName);
+		return calculateHashIdentity(theDefaultPartitionSettings, requestPartitionId, theResourceType, theParamName);
 	}
 
 	public static long calculateHashIdentity(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName) {
 		return SearchParamHash.hashSearchParam(
-				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
+				theDefaultPartitionSettings, theRequestPartitionId, theResourceType, theParamName);
 	}
 
 	public static long calculateHashIdentity(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
@@ -241,6 +241,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 			values[i + 2] = theAdditionalValues.get(i);
 		}
 
-		return SearchParamHash.hashSearchParam(thePartitionSettings, theRequestPartitionId, values);
+		return SearchParamHash.hashSearchParam(theDefaultPartitionSettings, theRequestPartitionId, values);
 	}
 }

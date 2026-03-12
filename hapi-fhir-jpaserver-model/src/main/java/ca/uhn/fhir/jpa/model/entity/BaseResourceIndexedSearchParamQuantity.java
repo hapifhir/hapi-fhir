@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -127,7 +127,7 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 	}
 
 	public static long calculateHashSystemAndUnits(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			PartitionablePartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
@@ -135,36 +135,38 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 			String theUnits) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
 		return calculateHashSystemAndUnits(
-				thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem, theUnits);
+				theDefaultPartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem, theUnits);
 	}
 
 	public static long calculateHashSystemAndUnits(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			String theSystem,
 			String theUnits) {
 		return hashSearchParam(
-				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theSystem, theUnits);
+				theDefaultPartitionSettings, theRequestPartitionId, theResourceType, theParamName, theSystem, theUnits);
 	}
 
 	public static long calculateHashUnits(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			PartitionablePartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			String theUnits) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashUnits(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUnits);
+		return calculateHashUnits(
+				theDefaultPartitionSettings, requestPartitionId, theResourceType, theParamName, theUnits);
 	}
 
 	public static long calculateHashUnits(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			String theUnits) {
-		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUnits);
+		return hashSearchParam(
+				theDefaultPartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUnits);
 	}
 }

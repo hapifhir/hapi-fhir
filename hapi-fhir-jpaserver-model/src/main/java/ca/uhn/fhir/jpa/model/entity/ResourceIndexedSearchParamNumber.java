@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -102,8 +102,11 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	public ResourceIndexedSearchParamNumber() {}
 
 	public ResourceIndexedSearchParamNumber(
-			PartitionSettings thePartitionSettings, String theResourceType, String theParamName, BigDecimal theValue) {
-		setPartitionSettings(thePartitionSettings);
+			IDefaultPartitionSettings theDefaultPartitionSettings,
+			String theResourceType,
+			String theParamName,
+			BigDecimal theValue) {
+		setPartitionSettings(theDefaultPartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValue(theValue);
