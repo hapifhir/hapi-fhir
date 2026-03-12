@@ -25,30 +25,22 @@ import java.util.List;
 
 /**
  * Result of moving compartment resources across partitions during a cross-partition merge.
- * Contains references extracted from the CREATE and UPDATE response bundles, plus
+ * Contains references extracted from the combined CREATE+UPDATE response bundle, plus
  * versioned references to the original source copies (for tombstone computation and deferred deletion).
  */
 // Created by claude-opus-4-6
 public class CrossPartitionMoveResult {
-	private final List<Reference> myReferencesToCreatedResources;
-	private final List<Reference> myReferencesToUpdatedResources;
+	private final List<Reference> myReferencesToChangedResources;
 	private final List<Reference> myReferencesToMovedResourceOriginals;
 
 	public CrossPartitionMoveResult(
-			List<Reference> theReferencesToCreatedResources,
-			List<Reference> theReferencesToUpdatedResources,
-			List<Reference> theReferencesToMovedResourceOriginals) {
-		myReferencesToCreatedResources = theReferencesToCreatedResources;
-		myReferencesToUpdatedResources = theReferencesToUpdatedResources;
+			List<Reference> theReferencesToChangedResources, List<Reference> theReferencesToMovedResourceOriginals) {
+		myReferencesToChangedResources = theReferencesToChangedResources;
 		myReferencesToMovedResourceOriginals = theReferencesToMovedResourceOriginals;
 	}
 
-	public List<Reference> getReferencesToCreatedResources() {
-		return myReferencesToCreatedResources;
-	}
-
-	public List<Reference> getReferencesToUpdatedResources() {
-		return myReferencesToUpdatedResources;
+	public List<Reference> getReferencesToChangedResources() {
+		return myReferencesToChangedResources;
 	}
 
 	public List<Reference> getReferencesToMovedResourceOriginals() {

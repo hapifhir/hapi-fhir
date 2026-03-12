@@ -35,11 +35,9 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
@@ -48,11 +46,12 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Discovers compartment resources for a source patient, moves them to the target patient's
@@ -116,7 +115,7 @@ public class CrossPartitionReplaceReferencesSvc {
 
 		if (allReferencingResources.isEmpty()) {
 			ourLog.info("No referencing resources found for Patient/{}", sourcePatientId);
-			return new CrossPartitionMoveResult(List.of(), List.of(), List.of());
+			return new CrossPartitionMoveResult(List.of(), List.of());
 		}
 
 		// Step 2: Classify into MOVE (in source compartment + source partition) vs UPDATE
@@ -132,56 +131,39 @@ public class CrossPartitionReplaceReferencesSvc {
 				updateList.size());
 
 		if (moveList.isEmpty() && updateList.isEmpty()) {
-			return new CrossPartitionMoveResult(List.of(), List.of(), List.of());
+			return new CrossPartitionMoveResult(List.of(), List.of());
 		}
 
-		// Capture versioned IDs from moveList before buildCreateBundle clears them
+		// Capture versioned IDs from moveList before buildCombinedBundle clears them
 		List<Reference> movedResourceOriginals = new ArrayList<>();
 		for (IBaseResource resource : moveList) {
 			movedResourceOriginals.add(new Reference(resource.getIdElement().getValue()));
 		}
 
-		List<Reference> referencesToCreatedResources = List.of();
-		List<Reference> referencesToUpdatedResources = List.of();
+		// Step 3: Discover additional resources to update BEFORE bundle execution.
+		// This only needs the old IDs of moved resources, not the new IDs.
+		Set<String> movedResourceOldIds = moveList.stream()
+				.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+		discoverAndAddAdditionalResourcesToUpdate(movedResourceOldIds, updateList, theRequestDetails);
 
-		// Step 3: Execute CREATE bundle — pass through the incoming RequestDetails so the
-		// partition interceptor can determine the correct partition for each resource
-		// (e.g. from tenant ID, headers, or patient reference depending on mode).
-		// Note: buildCreateBundle clears RESOURCE_PARTITION_ID on each resource so the
-		// interceptor determines the partition fresh rather than short-circuiting with
-		// the source partition.
-		LinkedHashMap<String, String> oldIdToPlaceholder = new LinkedHashMap<>();
-		Map<String, String> movedResourceOldToNewIdMap = new HashMap<>();
-		if (!moveList.isEmpty()) {
-			IBaseBundle createBundle = buildCreateBundle(moveList, oldIdToPlaceholder);
-			IBaseBundle createResponse = mySystemDao.transactionNested(theRequestDetails, createBundle);
-			movedResourceOldToNewIdMap =
-					extractOldToNewIdMap(new ArrayList<>(oldIdToPlaceholder.keySet()), createResponse);
-			referencesToCreatedResources =
-					ReplaceReferencesProvenanceSvc.extractChangedResourceReferences(List.of((Bundle) createResponse));
-		}
-
-		// Step 3b: Discover resources outside the source compartment that reference moved resources
-		// (Cases D and E — e.g., another patient's DiagnosticReport referencing a moved Observation)
-		discoverAndAddAdditionalResourcesToUpdate(movedResourceOldToNewIdMap, updateList, theRequestDetails);
-
-		// Step 4: Execute UPDATE bundle — UPDATE resources were loaded from DB so
-		// RESOURCE_PARTITION_ID is already set on each; determineCreatePartitionForRequest()
-		// uses that directly.
-		if (!updateList.isEmpty()) {
-			IBaseBundle updateBundle = buildUpdateBundle(updateList, movedResourceOldToNewIdMap);
-			IBaseBundle updateResponse = mySystemDao.transactionNested(theRequestDetails, updateBundle);
-			referencesToUpdatedResources =
-					ReplaceReferencesProvenanceSvc.extractChangedResourceReferences(List.of((Bundle) updateResponse));
-		}
+		// Step 4: Build and execute a single combined transaction bundle.
+		// TransactionSorter processes POST entries before PUT entries, and
+		// IdSubstitutionMap resolves urn:uuid placeholders from POST fullUrl
+		// values in PUT entry references — so PUT entries can reference
+		// moved resources via the same urn:uuid placeholders used by POST entries.
+		Map<String, String> oldIdToPlaceholder = new HashMap<>();
+		IBaseBundle combinedBundle = buildCombinedBundle(moveList, updateList, oldIdToPlaceholder);
+		IBaseBundle combinedResponse = mySystemDao.transactionNested(theRequestDetails, combinedBundle);
+		List<Reference> referencesToChangedResources =
+				ReplaceReferencesProvenanceSvc.extractChangedResourceReferences(List.of((Bundle) combinedResponse));
 
 		ourLog.info(
 				"Cross-partition merge complete: moved {} resources, updated {} references",
 				moveList.size(),
 				updateList.size());
 
-		return new CrossPartitionMoveResult(
-				referencesToCreatedResources, referencesToUpdatedResources, movedResourceOriginals);
+		return new CrossPartitionMoveResult(referencesToChangedResources, movedResourceOriginals);
 	}
 
 	private List<IBaseResource> discoverReferencingResources(
@@ -202,22 +184,19 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * a moved Encounter, or a non-compartmental List referencing a moved Encounter).
 	 */
 	private void discoverAndAddAdditionalResourcesToUpdate(
-			Map<String, String> theMovedResourceOldToNewIdMap,
-			List<IBaseResource> theUpdateList,
-			RequestDetails theRequestDetails) {
-		if (theMovedResourceOldToNewIdMap.isEmpty()) {
+			Set<String> theMovedResourceOldIds, List<IBaseResource> theUpdateList, RequestDetails theRequestDetails) {
+		if (theMovedResourceOldIds.isEmpty()) {
 			return;
 		}
 
 		Set<String> alreadyDiscoveredIds = new HashSet<>();
-		alreadyDiscoveredIds.addAll(theMovedResourceOldToNewIdMap.keySet());
-		alreadyDiscoveredIds.addAll(theMovedResourceOldToNewIdMap.values());
+		alreadyDiscoveredIds.addAll(theMovedResourceOldIds);
 		alreadyDiscoveredIds.addAll(theUpdateList.stream()
 				.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
 				.toList());
 
 		List<IdDt> additionalIds = new ArrayList<>();
-		for (String oldId : theMovedResourceOldToNewIdMap.keySet()) {
+		for (String oldId : theMovedResourceOldIds) {
 			IdDt oldIdDt = new IdDt(oldId);
 			myResourceLinkDao
 					.streamSourceIdsForTargetFhirId(oldIdDt.getResourceType(), oldIdDt.getIdPart())
@@ -301,31 +280,34 @@ public class CrossPartitionReplaceReferencesSvc {
 	}
 
 	/**
-	 * Builds a transaction bundle containing POST (CREATE) entries for all compartment resources
-	 * to be moved to the target partition. References between moved resources are replaced with
-	 * urn:uuid placeholders. Patient references are already rewritten by
-	 * {@link #classifyResourcesAndReplaceSourceReferences}.
+	 * Builds a single combined transaction bundle containing POST (CREATE) entries for moved
+	 * resources and PUT (UPDATE) entries for reference-only changes. References to moved resources
+	 * are replaced with {@code urn:uuid} placeholders in both lists — the transaction processor's
+	 * {@code IdSubstitutionMap} resolves these after the POST entries create the new resources.
 	 * <p>
-	 * {@code theOldIdToPlaceholder} is populated as a {@link LinkedHashMap} whose key insertion
-	 * order matches the order of entries added to the returned bundle, so that
-	 * {@link #extractOldToNewIdMap} can correlate response entries by index.
+	 * Patient references are already rewritten by {@link #classifyResourcesAndReplaceSourceReferences}.
+	 *
+	 * @param theOldIdToPlaceholder populated by this method with old ID → urn:uuid mappings
 	 */
-	private IBaseBundle buildCreateBundle(
-			List<IBaseResource> theMoveList, LinkedHashMap<String, String> theOldIdToPlaceholder) {
+	private IBaseBundle buildCombinedBundle(
+			List<IBaseResource> theMoveList,
+			List<IBaseResource> theUpdateList,
+			Map<String, String> theOldIdToPlaceholder) {
 
-		// Build placeholder map; insertion order is preserved so keys
-		// can be correlated by index with CREATE response entries in extractOldToNewIdMap.
+		// Build old ID → urn:uuid placeholder map from the move list
 		for (IBaseResource resource : theMoveList) {
 			String oldId = resource.getIdElement().toUnqualifiedVersionless().getValue();
 			theOldIdToPlaceholder.put(oldId, IdDt.newRandomUuid().getValue());
 		}
 
-		// Replace inter-move references with urn:uuid placeholders.
+		// Replace inter-resource references with urn:uuid placeholders in BOTH lists.
 		// Patient references were already rewritten by classifyResourcesAndReplaceSourceReferences.
 		replaceVersionlessReferences(theMoveList, theOldIdToPlaceholder);
+		replaceVersionlessReferences(theUpdateList, theOldIdToPlaceholder);
 
-		// Clear partition + ID and build CREATE entries
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+
+		// POST entries: clear partition + ID on moved resources, add as CREATE with placeholder fullUrl
 		for (IBaseResource resource : theMoveList) {
 			String oldId = resource.getIdElement().toUnqualifiedVersionless().getValue();
 			String placeholder = theOldIdToPlaceholder.get(oldId);
@@ -334,62 +316,11 @@ public class CrossPartitionReplaceReferencesSvc {
 			bundleBuilder.addTransactionCreateEntry(resource, placeholder);
 		}
 
-		return bundleBuilder.getBundle();
-	}
-
-	/**
-	 * Builds a map from each old resource ID to its new ID by correlating the CREATE response
-	 * entries (in order) with the keys of {@code theOldIdToPlaceholder} (a {@link LinkedHashMap}
-	 * whose key order matches the bundle entry order).
-	 */
-	@SuppressWarnings("unchecked")
-	private Map<String, String> extractOldToNewIdMap(List<String> theOldIds, IBaseBundle theCreateResponse) {
-
-		FhirTerser terser = myFhirContext.newTerser();
-		List<IBase> entries = terser.getValues(theCreateResponse, "Bundle.entry", IBase.class);
-
-		if (entries.size() != theOldIds.size()) {
-			// TODO Emre: add Msg.Code
-			throw new IllegalStateException("CREATE transaction response entry count (" + entries.size()
-					+ ") does not match expected resource count (" + theOldIds.size() + ")");
-		}
-
-		Map<String, String> result = new HashMap<>();
-		for (int i = 0; i < entries.size(); i++) {
-			List<IBase> locationValues = terser.getValues(entries.get(i), "response.location", IBase.class);
-			if (!locationValues.isEmpty() && locationValues.get(0) instanceof IPrimitiveType) {
-				String location = ((IPrimitiveType<String>) locationValues.get(0)).getValueAsString();
-				String newId = new IdDt(location)
-						.toVersionless()
-						.toUnqualifiedVersionless()
-						.getValue();
-				result.put(theOldIds.get(i), newId);
-			}
-		}
-
-		if (result.size() != theOldIds.size()) {
-			// TODO Emre: add Msg.Code
-			throw new IllegalStateException("Could not extract new IDs for all moved resources: expected "
-					+ theOldIds.size() + " but got " + result.size());
-		}
-
-		return result;
-	}
-
-	/**
-	 * Builds a transaction bundle containing PUT (UPDATE) entries for non-compartment resources
-	 * whose references to moved resources need updating. Patient references were already rewritten
-	 * by {@link #classifyResourcesAndReplaceSourceReferences}.
-	 */
-	private IBaseBundle buildUpdateBundle(
-			List<IBaseResource> theUpdateList, Map<String, String> theMovedResourceOldToNewIdMap) {
-
-		replaceVersionlessReferences(theUpdateList, theMovedResourceOldToNewIdMap);
-
-		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+		// PUT entries: update list resources keep their partition ID intact
 		for (IBaseResource resource : theUpdateList) {
 			bundleBuilder.addTransactionUpdateEntry(resource);
 		}
+
 		return bundleBuilder.getBundle();
 	}
 

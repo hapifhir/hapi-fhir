@@ -280,9 +280,7 @@ public class ResourceMergeService {
 						CrossPartitionMoveResult moveResult =
 								myCrossPartitionResourceMoverSvc.moveCompartmentResourcesAndReplaceReferences(
 										theSourceResource, theTargetResource, theRequestDetails);
-						referencesToChangedResources = new ArrayList<>();
-						referencesToChangedResources.addAll(moveResult.getReferencesToCreatedResources());
-						referencesToChangedResources.addAll(moveResult.getReferencesToUpdatedResources());
+						referencesToChangedResources = new ArrayList<>(moveResult.getReferencesToChangedResources());
 						movedResourceOriginals = moveResult.getReferencesToMovedResourceOriginals();
 						resourcesToDelete.addAll(movedResourceOriginals);
 					} else {
