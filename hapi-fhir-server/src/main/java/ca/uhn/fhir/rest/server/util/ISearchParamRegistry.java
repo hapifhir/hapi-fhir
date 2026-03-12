@@ -140,6 +140,7 @@ public interface ISearchParamRegistry extends IResourceRepositoryCache {
 		}
 		retval.add(IAnyResource.SP_RES_ID);
 		retval.add(Constants.PARAM_LASTUPDATED);
+		retval.add(Constants.PARAM_COMPARTMENT_CHANGE);
 		return retval;
 	}
 

@@ -82,6 +82,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 	private EverythingModeEnum myEverythingMode = null;
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
+	private DateRangeParam myCompartmentChange;
 	private boolean myLoadSynchronous;
 	private Integer myLoadSynchronousUpTo;
 	private Set<Include> myRevIncludes;
@@ -128,6 +129,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 		map.setLastN(isLastN());
 		map.setLastNMax(getLastNMax());
 		map.setLastUpdated(getLastUpdated());
+		map.setCompartmentChange(getCompartmentChange());
 		map.setLoadSynchronous(isLoadSynchronous());
 		map.setNearDistanceParam(getNearDistanceParam());
 		map.setLoadSynchronousUpTo(getLoadSynchronousUpTo());
@@ -257,6 +259,17 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 		}
 	}
 
+	private void addCompartmentChangeParam(
+			StringBuilder theBuilder, ParamPrefixEnum thePrefix, DateParam theDateParam) {
+		if (theDateParam != null && isNotBlank(theDateParam.getValueAsString())) {
+			addUrlParamSeparator(theBuilder);
+			theBuilder.append(Constants.PARAM_COMPARTMENT_CHANGE);
+			theBuilder.append('=');
+			theBuilder.append(thePrefix.getValue());
+			theBuilder.append(theDateParam.getValueAsString());
+		}
+	}
+
 	public SearchParameterMap addRevInclude(Include theInclude) {
 		getRevIncludes().add(theInclude);
 		return this;
@@ -345,6 +358,20 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 
 	public void setLastUpdated(DateRangeParam theLastUpdated) {
 		myLastUpdated = theLastUpdated;
+	}
+
+	/**
+	 * Returns null if there is no compartment change value
+	 */
+	public DateRangeParam getCompartmentChange() {
+		if (myCompartmentChange != null && myCompartmentChange.isEmpty()) {
+			myCompartmentChange = null;
+		}
+		return myCompartmentChange;
+	}
+
+	public void setCompartmentChange(DateRangeParam theCompartmentChange) {
+		myCompartmentChange = theCompartmentChange;
 	}
 
 	/**
@@ -552,6 +579,18 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 			} else {
 				addLastUpdateParam(b, GREATERTHAN_OR_EQUALS, lb);
 				addLastUpdateParam(b, LESSTHAN_OR_EQUALS, ub);
+			}
+		}
+
+		if (getCompartmentChange() != null) {
+			DateParam ccLb = getCompartmentChange().getLowerBound();
+			DateParam ccUb = getCompartmentChange().getUpperBound();
+
+			if (isNotEqualsComparator(ccLb, ccUb)) {
+				addCompartmentChangeParam(b, NOT_EQUAL, getCompartmentChange().getLowerBound());
+			} else {
+				addCompartmentChangeParam(b, GREATERTHAN_OR_EQUALS, ccLb);
+				addCompartmentChangeParam(b, LESSTHAN_OR_EQUALS, ccUb);
 			}
 		}
 
@@ -963,6 +1002,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 				&& myEverythingMode == that.myEverythingMode
 				&& Objects.equals(myIncludes, that.myIncludes)
 				&& Objects.equals(myLastUpdated, that.myLastUpdated)
+				&& Objects.equals(myCompartmentChange, that.myCompartmentChange)
 				&& Objects.equals(myLoadSynchronousUpTo, that.myLoadSynchronousUpTo)
 				&& Objects.equals(myRevIncludes, that.myRevIncludes)
 				&& Objects.equals(mySort, that.mySort)
@@ -983,6 +1023,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 				myEverythingMode,
 				myIncludes,
 				myLastUpdated,
+				myCompartmentChange,
 				myLoadSynchronous,
 				myLoadSynchronousUpTo,
 				myRevIncludes,
