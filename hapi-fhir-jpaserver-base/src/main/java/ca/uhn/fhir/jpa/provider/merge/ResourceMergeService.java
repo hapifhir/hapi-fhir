@@ -42,7 +42,6 @@ import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -340,10 +339,7 @@ public class ResourceMergeService {
 
 					// 5. Unified delete (AFTER provenance)
 					if (!resourcesToDelete.isEmpty()) {
-						RequestPartitionId sourcePartitionId = RequestPartitionId.getPartitionIfAssigned(
-										theSourceResource)
-								.orElse(null);
-						deleteResources(resourcesToDelete, sourcePartitionId);
+						deleteResources(resourcesToDelete, theRequestDetails);
 					}
 				});
 
@@ -406,15 +402,12 @@ public class ResourceMergeService {
 		return List.of(result);
 	}
 
-	private void deleteResources(List<Reference> theResourcesToDelete, RequestPartitionId thePartitionId) {
+	private void deleteResources(List<Reference> theResourcesToDelete, RequestDetails theRequestDetails) {
 		BundleBuilder deleteBuilder = new BundleBuilder(myFhirContext);
 		for (Reference ref : theResourcesToDelete) {
 			deleteBuilder.addTransactionDeleteEntry(new IdType(ref.getReference()).toVersionless());
 		}
-		myDaoRegistry
-				.getSystemDao()
-				.transactionNested(
-						SystemRequestDetails.forRequestPartitionId(thePartitionId), deleteBuilder.getBundle());
+		myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, deleteBuilder.getBundle());
 	}
 
 	private void validateCrossPartitionAsyncNotSupported(
