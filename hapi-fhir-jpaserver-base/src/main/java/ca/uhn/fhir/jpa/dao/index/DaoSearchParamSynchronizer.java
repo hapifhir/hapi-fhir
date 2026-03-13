@@ -131,16 +131,11 @@ public class DaoSearchParamSynchronizer {
 			next.setResourceId(theEntity.getId().getId());
 			next.setPartitionId(theEntity.getPartitionId());
 			next.calculateHashes();
-			// Populate @ManyToOne entity references so that Hibernate's InsertActionSorter can detect
-			// FK dependencies and order INSERT statements correctly when JDBC batch mode is active.
-			// Without these references, search param and link rows may be inserted before their parent
-			// HFJ_RESOURCE row, causing FK constraint violations.
+			// set the resource table for some search parameters because otherwise there's a risk the search
+			// parameter could be inserted into the DB before the resource it depends on.
 			if (next instanceof BaseResourceIndexedSearchParam searchParam) {
 				searchParam.setResource(theEntity);
 			}
-			// For resource links, populate the target @ManyToOne reference using a Hibernate proxy
-			// (no DB hit). InsertActionSorter uses this to ensure the target HFJ_RESOURCE row is
-			// inserted before this HFJ_RES_LINK row when both are new in the same batch.
 			if (next instanceof ResourceLink link && link.getTargetResourcePid() != null) {
 				JpaPid targetId = JpaPid.fromId(link.getTargetResourcePid(), link.getTargetResourcePartitionId());
 				link.setTargetResourceTable(myEntityManager.getReference(ResourceTable.class, targetId));
