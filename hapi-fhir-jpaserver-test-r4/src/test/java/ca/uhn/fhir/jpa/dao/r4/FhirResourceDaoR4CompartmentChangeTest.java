@@ -38,11 +38,12 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testCompartmentChange_onlyChangedPatientsReturnedAfterSecondDate() {
+	void testCompartmentChange_onlyChangedPatientsReturnedAfterSecondDate() throws InterruptedException {
 		createPatientWithObservation();
 		String patient2Id = createPatientWithObservation();
 
 		// Record time after initial creation
+		Thread.sleep(2);
 		Date afterInitialCreation = new Date();
 
 		// Create new observation only for patient2
@@ -60,7 +61,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testCompartmentChange_patientDirectlyUpdatedIsReturned() {
+	void testCompartmentChange_patientDirectlyUpdatedIsReturned() throws InterruptedException {
 		Patient patient1 = new Patient();
 		patient1.setActive(true);
 		String patient1Id = myPatientDao.create(patient1, mySrd).getId().toUnqualifiedVersionless().getValue();
@@ -69,6 +70,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		patient2.setActive(true);
 		myPatientDao.create(patient2, mySrd);
 
+		Thread.sleep(2);
 		Date afterInitialCreation = new Date();
 
 		// Directly update patient1
@@ -96,14 +98,17 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testCompartmentChange_dateRangeWithUpperBound() {
+	void testCompartmentChange_dateRangeWithUpperBound() throws InterruptedException {
 		createPatientWithObservation();
 
+		Thread.sleep(2);
 		Date rangeStart = new Date();
 
 		String patientDuringId = createPatientWithObservation();
 
+		Thread.sleep(2);
 		Date rangeEnd = new Date();
+		Thread.sleep(2);
 
 		createPatientWithObservation();
 
@@ -120,11 +125,12 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testCompartmentChange_patientWithNoChangesAfterDateNotReturned() {
+	void testCompartmentChange_patientWithNoChangesAfterDateNotReturned() throws InterruptedException {
 		Patient patient1 = new Patient();
 		patient1.setActive(true);
 		myPatientDao.create(patient1, mySrd);
 
+		Thread.sleep(2);
 		Date afterCreation = new Date();
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
