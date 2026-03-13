@@ -439,7 +439,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			constructDryRunReport(theResource, existingResource, map, theOutcome);
 		} else {
 			isInstalled =
-					createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec, map, theOutcome);
+					createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec);
 		}
 		if (isInstalled) {
 			theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
@@ -466,9 +466,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			IFhirResourceDao theDao,
 			IBaseResource theResource,
 			IBaseResource theExistingResource,
-			@Nonnull PackageInstallationSpec thePackageInstallationSpec,
-			SearchParameterMap theSpMap,
-			PackageInstallOutcomeJson theOutcome) {
+			@Nonnull PackageInstallationSpec thePackageInstallationSpec) {
 
 		// If the resource to be installed has a client-provided, purely numeric id,
 		// then add a prefix to the id, since we don't allow purely numeric IDs by default
