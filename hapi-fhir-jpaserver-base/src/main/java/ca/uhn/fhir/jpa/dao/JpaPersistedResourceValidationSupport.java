@@ -300,7 +300,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		params.setLoadSynchronousUpTo(1);
 		// The HL7 FHIR core validator percent-encodes '|' as '%7C' before calling back into HAPI.
 		// Normalize before splitting so "http://foo%7C1.0" is treated as "http://foo|1.0".
-		String uri = UrlUtil.unescape(theUri);
+		String uri = theUri.contains("%7C") ? UrlUtil.unescape(theUri) : theUri;
 		int versionSeparator = uri.lastIndexOf('|');
 		if (versionSeparator != -1) {
 			params.add(StructureDefinition.SP_VERSION, new TokenParam(uri.substring(versionSeparator + 1)));
