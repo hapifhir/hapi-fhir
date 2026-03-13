@@ -276,6 +276,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 
 	}
 
+	// Created by Claude Sonnet 4.6
 	/**
 	 * Verify that searching QuestionnaireResponse by a versioned canonical questionnaire URL works
 	 * when the server base URL is in TreatBaseUrlsAsLocal.

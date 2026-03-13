@@ -2243,6 +2243,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 
+	// Created by Claude Sonnet 4.6
 	@Test
 	void testValidateQuestionnaireResponseWithVersionedCanonicalReference() {
 		Questionnaire q = new Questionnaire();
@@ -2264,8 +2265,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String encoded = encode(oo);
 		ourLog.info(encoded);
 
-		// Validator must have resolved the questionnaire and validated against it,
-		// reporting a structural error (missing required 'link0'), NOT a "could not be resolved" warning
+		// Validator will have resolved the questionnaire and validated against it. I will, however
+		// report a structural error (missing required 'link0'), but NOT a "could not be resolved" warning.
 		assertHasErrors(oo);
 		assertThat(encoded).doesNotContain("could not be resolved");
 		assertEquals("No response answer found for required item 'link0'", oo.getIssueFirstRep().getDiagnostics());

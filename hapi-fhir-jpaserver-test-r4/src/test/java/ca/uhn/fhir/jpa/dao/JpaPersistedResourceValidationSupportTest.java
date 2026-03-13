@@ -123,6 +123,7 @@ class JpaPersistedResourceValidationSupportTest {
 			assertThat(versionParam).isEqualTo("1.1.0");
 		}
 
+		// Created by Claude Sonnet 4.6
 		@Test
 		@DisplayName("fetch resource by percent-encoded versioned URL (%7C should be treated as |)")
 		void fetchResourceForPercentEncodedVersionedUrl() {
