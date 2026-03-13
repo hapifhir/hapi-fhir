@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.broker.api;
 
+/**
+ * Interface to a message listener that delegates messages to a list of sub-listeners. It supports message handling
+ * within a retry-aware context.
+ *
+ * @param <T> the type of payload this message listener is expecting to receive
+ */
 public interface IMultiplexingListener<T> extends IRetryAwareMessageListener<T>, AutoCloseable {
 	boolean addListener(IMessageListener<T> theListener);
 

@@ -606,8 +606,9 @@ public class ConsentInterceptor {
 	}
 
 	/**
-	 * @deprecated about to replace this with a long term solution.
-	 * {@see https://gitlab.com/simpatico.ai/cdr/-/issues/8381}
+	 * @deprecated about to be removed. Internal processes can skip consent by populating a different context
+	 * which can then consumed by the IConsentService implementation.
+	 * See issue <a href="https://github.com/hapifhir/hapi-fhir/issues/7542">7542</a>
 	 */
 	public static void skipAllConsentForRequest(@Nonnull RequestDetails theRequestDetails) {
 		theRequestDetails.getUserData().put(USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, true);
