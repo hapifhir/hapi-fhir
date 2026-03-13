@@ -95,9 +95,8 @@ public class CrossPartitionReplaceReferencesSvc {
 	public CrossPartitionMoveResult moveCompartmentResourcesAndReplaceReferences(
 			IBaseResource theSourceResource, IBaseResource theTargetResource, RequestDetails theRequestDetails) {
 
-		String sourceResourceType = myFhirContext.getResourceType(theSourceResource);
-		String sourceId = theSourceResource.getIdElement().getIdPart();
-		String targetId = theTargetResource.getIdElement().getIdPart();
+		IIdType sourceId = theSourceResource.getIdElement().toUnqualifiedVersionless();
+		IIdType targetId = theTargetResource.getIdElement().toUnqualifiedVersionless();
 
 		RequestPartitionId sourcePartitionId =
 				RequestPartitionId.getPartitionIfAssigned(theSourceResource).orElse(null);
@@ -105,30 +104,30 @@ public class CrossPartitionReplaceReferencesSvc {
 				RequestPartitionId.getPartitionIfAssigned(theTargetResource).orElse(null);
 
 		ourLog.info(
-				"Cross-partition merge: moving referencing resources from {}/{} (partition {}) to {}/{} (partition {})",
-				sourceResourceType,
-				sourceId,
+				"Cross-partition merge: moving referencing resources from {} (partition {}) to {} (partition {})",
+				sourceId.getValue(),
 				sourcePartitionId,
-				sourceResourceType,
-				targetId,
+				targetId.getValue(),
 				targetPartitionId);
 
 		// Step 1: Discover all resources referencing the source resource
-		List<IBaseResource> allReferencingResources =
-				discoverReferencingResources(sourceResourceType, sourceId, theRequestDetails);
+		List<IBaseResource> allReferencingResources = discoverReferencingResources(sourceId, theRequestDetails);
 
 		if (allReferencingResources.isEmpty()) {
-			ourLog.info("No referencing resources found for {}/{}", sourceResourceType, sourceId);
+			ourLog.info("No referencing resources found for {}", sourceId.getValue());
 			return new CrossPartitionMoveResult(List.of(), List.of());
 		}
 
 		// Step 2: Classify into MOVE (partition changes after rewrite) vs UPDATE (same partition)
-		String sourceRef = sourceResourceType + "/" + sourceId;
-		String targetRef = sourceResourceType + "/" + targetId;
 		List<IBaseResource> moveList = new ArrayList<>();
 		List<IBaseResource> updateList = new ArrayList<>();
 		classifyResourcesAndReplaceSourceReferences(
-				allReferencingResources, sourceRef, targetRef, theRequestDetails, moveList, updateList);
+				allReferencingResources,
+				sourceId.getValue(),
+				targetId.getValue(),
+				theRequestDetails,
+				moveList,
+				updateList);
 
 		ourLog.info(
 				"Classified {} resources: {} to move, {} to update references",
@@ -148,8 +147,8 @@ public class CrossPartitionReplaceReferencesSvc {
 
 		// Step 3: Discover additional resources to update BEFORE bundle execution.
 		// This only needs the old IDs of moved resources, not the new IDs.
-		Set<String> movedResourceOldIds = moveList.stream()
-				.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
+		Set<IIdType> movedResourceOldIds = moveList.stream()
+				.map(r -> r.getIdElement().toUnqualifiedVersionless())
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 		discoverAndAddAdditionalResourcesToUpdate(movedResourceOldIds, updateList, theRequestDetails);
 
@@ -172,10 +171,9 @@ public class CrossPartitionReplaceReferencesSvc {
 		return new CrossPartitionMoveResult(referencesToChangedResources, movedResourceOriginals);
 	}
 
-	private List<IBaseResource> discoverReferencingResources(
-			String theSourceResourceType, String theSourceId, RequestDetails theRequestDetails) {
+	private List<IBaseResource> discoverReferencingResources(IIdType theSourceId, RequestDetails theRequestDetails) {
 		List<IdDt> ids = myResourceLinkDao
-				.streamSourceIdsForTargetFhirId(theSourceResourceType, theSourceId)
+				.streamSourceIdsForTargetFhirId(theSourceId.getResourceType(), theSourceId.getIdPart())
 				.toList();
 		return loadResources(ids, theRequestDetails);
 	}
@@ -189,22 +187,22 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * a moved resource that got a new ID (e.g., a List referencing a moved Encounter).
 	 */
 	private void discoverAndAddAdditionalResourcesToUpdate(
-			Set<String> theMovedResourceOldIds, List<IBaseResource> theUpdateList, RequestDetails theRequestDetails) {
+			Set<IIdType> theMovedResourceOldIds, List<IBaseResource> theUpdateList, RequestDetails theRequestDetails) {
 		if (theMovedResourceOldIds.isEmpty()) {
 			return;
 		}
 
 		Set<String> alreadyDiscoveredIds = new HashSet<>();
-		alreadyDiscoveredIds.addAll(theMovedResourceOldIds);
+		alreadyDiscoveredIds.addAll(
+				theMovedResourceOldIds.stream().map(IIdType::getValue).toList());
 		alreadyDiscoveredIds.addAll(theUpdateList.stream()
 				.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
 				.toList());
 
 		List<IdDt> additionalIds = new ArrayList<>();
-		for (String oldId : theMovedResourceOldIds) {
-			IdDt oldIdDt = new IdDt(oldId);
+		for (IIdType oldId : theMovedResourceOldIds) {
 			myResourceLinkDao
-					.streamSourceIdsForTargetFhirId(oldIdDt.getResourceType(), oldIdDt.getIdPart())
+					.streamSourceIdsForTargetFhirId(oldId.getResourceType(), oldId.getIdPart())
 					.forEach(id -> {
 						if (alreadyDiscoveredIds.add(
 								id.toUnqualifiedVersionless().getValue())) {
