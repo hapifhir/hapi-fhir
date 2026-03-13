@@ -4,15 +4,21 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -216,6 +222,73 @@ class RestfulServerExtensionTest {
 	}
 
 	@Nested
+	@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+	class AsJUnitExtension_StopsBetweenTests {
+
+		@RegisterExtension
+		static RestfulServerExtension mySharedExtension = new RestfulServerExtension(FhirContext.forR4Cached(), new PatientProvider())
+			.registerProvider(new ObservationProvider())
+			.withPagingProvider(new FifoMemoryPagingProvider(10))
+			.withServer(s -> s.setDefaultPrettyPrint(false));
+
+		private static RestfulServer ourFirstServlet;
+
+		@Test
+		@Order(1)
+		void test1_captureState() {
+			ourFirstServlet = mySharedExtension.getRestfulServer();
+			mySharedExtension.getRunningServerUserData().put("test-key", "value");
+			assertThat(mySharedExtension.isRunning()).isTrue();
+			assertThat(mySharedExtension.getRestfulServer().getResourceProviders()).hasSize(2);
+			assertThat(mySharedExtension.getRestfulServer().getPagingProvider()).isNotNull();
+		}
+
+		@Test
+		@Order(2)
+		void test2_serverRestartedBetweenTests_newServletAndUserDataCleared() {
+			assertThat(mySharedExtension.isRunning()).isTrue();
+			assertThat(mySharedExtension.getRestfulServer()).isNotSameAs(ourFirstServlet);
+			assertThat(mySharedExtension.getRunningServerUserData()).isEmpty();
+			assertThat(mySharedExtension.getRestfulServer().getResourceProviders()).hasSize(2);
+			assertThat(mySharedExtension.getRestfulServer().getPagingProvider()).isNotNull();
+		}
+	}
+
+	@Nested
+	@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+	class AsJUnitExtension_KeepsStateBetweenTests {
+
+		@RegisterExtension
+		static RestfulServerExtension mySharedExtension = new RestfulServerExtension(FhirContext.forR4Cached(), new PatientProvider())
+			.keepAliveBetweenTests()
+			.registerProvider(new ObservationProvider())
+			.withPagingProvider(new FifoMemoryPagingProvider(10))
+			.withServer(s -> s.setDefaultPrettyPrint(false));
+
+		private static RestfulServer ourFirstServlet;
+
+		@Test
+		@Order(1)
+		void test1_captureState() {
+			ourFirstServlet = mySharedExtension.getRestfulServer();
+			mySharedExtension.getRunningServerUserData().put("test-key", "value");
+			assertThat(mySharedExtension.isRunning()).isTrue();
+			assertThat(mySharedExtension.getRestfulServer().getResourceProviders()).hasSize(2);
+			assertThat(mySharedExtension.getRestfulServer().getPagingProvider()).isNotNull();
+		}
+
+		@Test
+		@Order(2)
+		void test2_serverRemainsRunning_statePreservedAcrossTests() {
+			assertThat(mySharedExtension.isRunning()).isTrue();
+			assertThat(mySharedExtension.getRestfulServer()).isSameAs(ourFirstServlet);
+			assertThat(mySharedExtension.getRunningServerUserData()).containsEntry("test-key", "value");
+			assertThat(mySharedExtension.getRestfulServer().getResourceProviders()).hasSize(2);
+			assertThat(mySharedExtension.getRestfulServer().getPagingProvider()).isNotNull();
+		}
+	}
+
+	@Nested
 	class KeepAliveBetweenTests {
 
 		@Test
@@ -282,6 +355,30 @@ class RestfulServerExtensionTest {
 			assertThat(myExtension.getRunningServerUserData())
 				.as("user data persists across tests when server is kept alive")
 				.containsEntry("shared-key", "value");
+		}
+	}
+
+	private static class PatientProvider implements IResourceProvider {
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Read
+		public Patient read(@IdParam IdType theId) {
+			throw new ResourceNotFoundException(theId);
+		}
+	}
+
+	private static class ObservationProvider implements IResourceProvider {
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Observation.class;
+		}
+
+		@Read
+		public Observation read(@IdParam IdType theId) {
+			throw new ResourceNotFoundException(theId);
 		}
 	}
 }

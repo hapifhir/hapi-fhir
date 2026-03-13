@@ -1,7 +1,0 @@
----
-type: fix
-issue: 7637
-title: "RestfulServerExtension now correctly tracks providers in its internal list when
-  registerProvider() is called on a running server, and removes them from the list on
-  unregisterProvider(). Previously, providers registered after server start were not
-  re-registered on server restart."
