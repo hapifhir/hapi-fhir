@@ -438,8 +438,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (theInstallationSpec.isDryRun()) {
 			constructDryRunReport(theResource, existingResource, map, theOutcome);
 		} else {
-			isInstalled =
-					createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec);
+			isInstalled = createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec);
 		}
 		if (isInstalled) {
 			theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
