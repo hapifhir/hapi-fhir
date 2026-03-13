@@ -33,7 +33,6 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
@@ -293,24 +292,39 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	/**
 	 * Creates a {@link SearchParameterMap} for a canonical URL, which can be either
 	 * unversioned (<code>http://foo</code>) or versioned (<code>http://foo|1.2.3</code>).
+	 * The version separator may appear as a literal <code>|</code> or percent-encoded as <code>%7C</code>.
 	 */
 	@Nonnull
 	private static SearchParameterMap createSearchParameterMapForCanonicalUrl(String theUri) {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(1);
-		// The HL7 FHIR core validator percent-encodes '|' as '%7C' before calling back into HAPI.
-		// Normalize before splitting so "http://foo%7C1.0" is treated as "http://foo|1.0".
-		String uri = theUri.contains("%7C") ? UrlUtil.unescape(theUri) : theUri;
-		int versionSeparator = uri.lastIndexOf('|');
+		int versionSeparator = findVersionSeparator(theUri);
 		if (versionSeparator != -1) {
-			params.add(StructureDefinition.SP_VERSION, new TokenParam(uri.substring(versionSeparator + 1)));
-			params.add(StructureDefinition.SP_URL, new UriParam(uri.substring(0, versionSeparator)));
+			params.add(StructureDefinition.SP_VERSION, new TokenParam(versionOf(theUri, versionSeparator)));
+			params.add(StructureDefinition.SP_URL, new UriParam(urlOf(theUri, versionSeparator)));
 		} else {
-			params.add(StructureDefinition.SP_URL, new UriParam(uri));
+			params.add(StructureDefinition.SP_URL, new UriParam(theUri));
 			// When no version is specified, we will take the most recently updated resource as the current
 			// version
 			params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 		}
 		return params;
+	}
+
+	private static int findVersionSeparator(String theUri) {
+		int idx = theUri.lastIndexOf('|');
+		if (idx != -1) {
+			return idx;
+		}
+		return theUri.lastIndexOf("%7C");
+	}
+
+	private static String urlOf(String theUri, int theSeparatorIdx) {
+		return theUri.substring(0, theSeparatorIdx);
+	}
+
+	private static String versionOf(String theUri, int theSeparatorIdx) {
+		String separator = theUri.charAt(theSeparatorIdx) == '|' ? "|" : "%7C";
+		return theUri.substring(theSeparatorIdx + separator.length());
 	}
 }
