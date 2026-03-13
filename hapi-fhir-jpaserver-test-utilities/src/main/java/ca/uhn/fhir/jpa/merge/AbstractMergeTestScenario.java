@@ -30,12 +30,9 @@ import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -55,7 +52,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -65,7 +61,6 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_RESULT;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -86,7 +81,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   <li>{@link #createResource(List)}</li>
  *   <li>{@link #createReferencingResource(String, IIdType)}</li>
  *   <li>{@link #createReferencingResource()}</li>
- *   <li>{@link #assertActiveFieldIfSupported(IBaseResource, boolean)}</li>
  *   <li>{@link #withOneReferencingResource()}</li>
  *   <li>{@link #withMultipleReferencingResources()}</li>
  *   <li>{@link #withMultipleReferencingResources(int)}</li>
@@ -232,23 +226,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 * @return this scenario for chaining
 	 */
 	public abstract AbstractMergeTestScenario<T> withMultipleReferencingResources(int theCount);
-
-	/**
-	 * Template method for subclasses to implement active field assertions.
-	 *
-	 * <p>Subclasses must implement this method to either:
-	 * <ul>
-	 *   <li>Perform active field validation if the resource supports it (e.g., Practitioner)</li>
-	 *   <li>Provide an explicit no-op if the resource doesn't support it (e.g., Observation)</li>
-	 * </ul>
-	 *
-	 * <p>This forces implementers to consciously decide and document whether
-	 * their resource type supports the active field.
-	 *
-	 * @param theResource the resource to check
-	 * @param theExpectedValue the expected value of the active field (true for target, false for source)
-	 */
-	protected abstract void assertActiveFieldIfSupported(@Nonnull T theResource, boolean theExpectedValue);
 
 	// ================================================
 	// BUILDER METHODS
@@ -639,52 +616,15 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	public void assertSourceResourceState() {
-		IIdType versionlessTargetId = getVersionlessTargetId();
-
-		if (myDeleteSource) {
-			// Resource should not exist
-			assertThatThrownBy(this::readSourceResource)
-					.as("Source resource should be deleted")
-					.isInstanceOf(ResourceGoneException.class);
-		} else {
-			// Read the resource internally
-			T source = readSourceResource();
-
-			// Resource should have replaced-by link
-			IResourceLinkService linkService = myLinkServiceFactory.getServiceForResourceType(getResourceTypeName());
-			List<IBaseReference> replacedByLinksRefs = linkService.getReplacedByLinks(source);
-
-			assertThat(replacedByLinksRefs)
-					.as("Source should have replaced-by link")
-					.hasSize(1)
-					.element(0)
-					.satisfies(link -> assertThat(link.getReferenceElement()).isEqualTo(versionlessTargetId));
-
-			// active field on the source should be set to false, if the resourceType has an active field
-			assertActiveFieldIfSupported(source, false);
-		}
+		myHelper.assertSourceResourceState(getVersionlessSourceId(), getVersionlessTargetId(), myDeleteSource);
 	}
 
 	public void assertTargetResourceState() {
-		// Read target resource
-		T target = readTargetResource();
-
-		// Should have replaces link only if source was not deleted
-		// (when source is deleted, we don't want a dangling reference)
-		if (!myDeleteSource) {
-			IResourceLinkService linkService = myLinkServiceFactory.getServiceForResourceType(getResourceTypeName());
-			List<IBaseReference> replacesLinksRefs = linkService.getReplacesLinks(target);
-
-			assertThat(replacesLinksRefs)
-					.as("Target should have replaces link when source not deleted")
-					.hasSize(1)
-					.element(0)
-					.satisfies(link -> assertThat(link.getReferenceElement()).isEqualTo(getVersionlessSourceId()));
-		}
-
-		// Should have expected identifiers
-		List<Identifier> actualIdentifiers = getIdentifiersFromResource(target);
-		assertIdentifiers(actualIdentifiers, getExpectedIdentifiersOnTargetAfterMerge());
+		myHelper.assertTargetResourceState(
+				getVersionlessSourceId(),
+				getVersionlessTargetId(),
+				myDeleteSource,
+				getExpectedIdentifiersOnTargetAfterMerge());
 	}
 
 	/**
@@ -888,29 +828,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	// REFERENCE VALIDATION
 	// ================================================
 
-	/**
-	 * Extract all reference strings from a resource.
-	 *
-	 * @param theRefId Resource ID to read and extract references from
-	 * @return List of reference strings (resourceType/id format)
-	 */
-	private List<String> readResourceAndExtractReferences(IIdType theRefId) {
-		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(theRefId.getResourceType());
-		IBaseResource resource = dao.read(theRefId, myRequestDetails);
-
-		FhirTerser terser = myFhirContext.newTerser();
-		List<IBaseReference> allRefs = terser.getAllPopulatedChildElementsOfType(resource, IBaseReference.class);
-
-		List<String> refStrings = allRefs.stream()
-				.map(ref -> ref.getReferenceElement().getValue())
-				.filter(Objects::nonNull)
-				.toList();
-
-		ourLog.info("Resource {} contains references: {}", theRefId, refStrings);
-
-		return refStrings;
-	}
-
 	public void assertReferencesUpdated() {
 		for (String resourceType : getReferencingResourceTypes()) {
 			List<IIdType> referencingResourceIds = getReferencingResourceIds(resourceType);
@@ -919,22 +836,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	public void assertReferencesUpdated(@Nonnull List<IIdType> theReferencingResourceIds) {
-		for (IIdType refId : theReferencingResourceIds) {
-			List<String> refStrings = readResourceAndExtractReferences(refId);
-
-			// Verify references contain target and not source
-			assertThat(refStrings)
-					.as(
-							"Resource %s should contain reference to target %s",
-							refId, getVersionlessTargetId().getValue())
-					.contains(getVersionlessTargetId().getValue());
-
-			assertThat(refStrings)
-					.as(
-							"Resource %s should not contain reference to source %s",
-							refId, getVersionlessSourceId().getValue())
-					.doesNotContain(getVersionlessSourceId().getValue());
-		}
+		myHelper.assertReferencesUpdated(theReferencingResourceIds, getVersionlessSourceId(), getVersionlessTargetId());
 	}
 
 	public void assertReferencesNotUpdated() {
@@ -945,22 +847,8 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	public void assertReferencesNotUpdated(@Nonnull List<IIdType> theReferencingResourceIds) {
-		for (IIdType refId : theReferencingResourceIds) {
-			List<String> refStrings = readResourceAndExtractReferences(refId);
-
-			// Verify references still contain source and not target
-			assertThat(refStrings)
-					.as(
-							"Resource %s should still reference source %s in preview mode",
-							refId, getVersionlessSourceId().getValue())
-					.contains(getVersionlessSourceId().getValue());
-
-			assertThat(refStrings)
-					.as(
-							"Resource %s should not reference target %s in preview mode",
-							refId, getVersionlessTargetId().getValue())
-					.doesNotContain(getVersionlessTargetId().getValue());
-		}
+		myHelper.assertReferencesNotUpdated(
+				theReferencingResourceIds, getVersionlessSourceId(), getVersionlessTargetId());
 	}
 
 	// ================================================
@@ -982,9 +870,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				.map(id -> id.withVersion("2").toString())
 				.collect(Collectors.toSet());
 
-		// Delegate to ReplaceReferencesTestHelper for provenance validation
-		ReplaceReferencesTestHelper helper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
-		helper.assertMergeProvenance(
+		myHelper.assertMergeProvenance(
 				myInputParameters,
 				expectedSourceId,
 				expectedTargetId,

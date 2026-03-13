@@ -170,7 +170,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 					+ theReplaceReferencesRequest.sourceId
 					+ " exceeds the resource-limit "
 					+ theReplaceReferencesRequest.resourceLimit
-					+ ". Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
+					+ ". Submit the request asynchronously by adding the HTTP Header 'Prefer: respond-async'.");
 		}
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(

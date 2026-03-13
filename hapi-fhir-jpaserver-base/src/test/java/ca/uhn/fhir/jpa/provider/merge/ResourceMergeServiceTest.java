@@ -606,7 +606,7 @@ public class ResourceMergeServiceTest {
 		assertThat(operationOutcome.getIssue()).hasSize(1);
 		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics())
 			.contains("Number of resources with references to Patient/123 exceeds the resource-limit 5")
-			.contains("Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
+			.contains("Submit the request asynchronously by adding the HTTP Header 'Prefer: respond-async'.");
 		verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock, mySystemDaoMock);
 	}
 

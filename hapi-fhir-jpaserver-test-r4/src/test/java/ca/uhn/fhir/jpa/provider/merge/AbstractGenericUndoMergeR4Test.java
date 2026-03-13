@@ -17,14 +17,12 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -107,7 +105,7 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 		// verify that Provenance resources were saved with versioned target references
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
-		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext);
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry);
 	}
 
 
@@ -435,30 +433,7 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 	}
 
 	protected void assertResourcesAreEqualIgnoringVersionAndLastUpdated(IBaseResource theBefore, IBaseResource theAfter) {
-		// the resources should have the same versionless id
-		assertThat(theBefore.getIdElement().toVersionless()).isEqualTo(theAfter.getIdElement().toVersionless());
-
-		FhirTerser terser = myFhirContext.newTerser();
-
-		// Create a copy of the before resource since we will modify some of its meta data to match the after resource
-		IBaseResource copyOfTheBefore = terser.clone(theBefore);
-
-		copyOfTheBefore.getMeta().setLastUpdated(theAfter.getMeta().getLastUpdated());
-		copyOfTheBefore.getMeta().setVersionId(theAfter.getMeta().getVersionId());
-		copyOfTheBefore.setId(theAfter.getIdElement());
-
-		// Copy meta.source from after to before using terser
-		List<IBase> sourceValues = terser.getValues(theAfter, "meta.source");
-		if (!sourceValues.isEmpty()) {
-			String sourceValue = terser.getSinglePrimitiveValueOrNull(theAfter, "meta.source");
-			if (sourceValue != null) {
-				terser.addElement(copyOfTheBefore, "meta.source", sourceValue);
-			}
-		}
-
-		String before = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(copyOfTheBefore);
-		String after = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theAfter);
-		assertThat(after).isEqualTo(before);
+		myHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(theBefore, theAfter);
 	}
 
 	@Test
