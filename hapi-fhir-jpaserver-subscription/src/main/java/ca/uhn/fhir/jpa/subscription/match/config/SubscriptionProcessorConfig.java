@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.subscription.match.config;
 
 import ca.uhn.fhir.broker.api.IBrokerClient;
-import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
@@ -47,7 +46,6 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionRegiste
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicPayloadBuilder;
@@ -68,22 +66,22 @@ import org.springframework.context.annotation.Scope;
 public class SubscriptionProcessorConfig {
 
 	@Bean
-	public IMessageListener<ResourceModifiedMessage> subscriptionMatchingListener() {
+	public SubscriptionMatchingListener SubscriptionMatchingListener() {
 		return new SubscriptionMatchingListener();
 	}
 
 	@Bean
-	public IMessageListener<ResourceModifiedMessage> subscriptionActivatingListener() {
+	public SubscriptionActivatingListener subscriptionActivatingSubscriber() {
 		return new SubscriptionActivatingListener();
 	}
 
 	@Bean
-	public MatchingQueueSubscriberLoader matchingQueueSubscriberLoader() {
+	public MatchingQueueSubscriberLoader SubscriptionMatchingListenerLoader() {
 		return new MatchingQueueSubscriberLoader();
 	}
 
 	@Bean
-	public IMessageListener<ResourceModifiedMessage> subscriptionRegisteringListener() {
+	public SubscriptionRegisteringListener subscriptionRegisteringSubscriber() {
 		return new SubscriptionRegisteringListener();
 	}
 
@@ -130,20 +128,20 @@ public class SubscriptionProcessorConfig {
 
 	@Bean
 	@Scope("prototype")
-	public SubscriptionDeliveringRestHookListener subscriptionDeliveringRestHookListener() {
+	public SubscriptionDeliveringRestHookListener SubscriptionDeliveringRestHookListener() {
 		return new SubscriptionDeliveringRestHookListener();
 	}
 
 	@Bean
 	@Scope("prototype")
-	public SubscriptionDeliveringMessageListener subscriptionDeliveringMessageListener(
+	public SubscriptionDeliveringMessageListener subscriptionDeliveringMessageSubscriber(
 			IBrokerClient theBrokerClient, IDefaultPartitionSettings theDefaultPartitionSettings) {
 		return new SubscriptionDeliveringMessageListener(theBrokerClient, theDefaultPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public SubscriptionDeliveringEmailListener subscriptionDeliveringEmailListener(IEmailSender theEmailSender) {
+	public SubscriptionDeliveringEmailListener SubscriptionDeliveringEmailListener(IEmailSender theEmailSender) {
 		return new SubscriptionDeliveringEmailListener(theEmailSender);
 	}
 
@@ -172,11 +170,15 @@ public class SubscriptionProcessorConfig {
 			DaoRegistry theDaoRegistry,
 			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
 			MatchUrlService theMatchUrlService) {
-		return switch (theFhirContext.getVersion().getVersion()) {
-			case R4, R4B, R5 -> new SubscriptionTopicPayloadBuilder(
-					theFhirContext, theDaoRegistry, theSubscriptionTopicRegistry, theMatchUrlService);
-			default -> null;
-		};
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R4:
+			case R4B:
+			case R5:
+				return new SubscriptionTopicPayloadBuilder(
+						theFhirContext, theDaoRegistry, theSubscriptionTopicRegistry, theMatchUrlService);
+			default:
+				return null;
+		}
 	}
 
 	@Lazy

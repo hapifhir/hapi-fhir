@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
-import ca.uhn.fhir.broker.impl.MultiplexingListener;
+import ca.uhn.fhir.broker.api.IMultiplexingListener;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.util.IoUtils;
 import com.google.common.annotations.VisibleForTesting;
@@ -36,11 +36,12 @@ public class SubscriptionResourceDeliveryMessageConsumer implements AutoCloseabl
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionResourceDeliveryMessageConsumer.class);
 
 	private final IChannelConsumer<ResourceDeliveryMessage> myConsumer;
-	private final MultiplexingListener<ResourceDeliveryMessage> myMultiplexingListener;
+	private final IMultiplexingListener<ResourceDeliveryMessage> myMultiplexingListener;
 
 	public SubscriptionResourceDeliveryMessageConsumer(IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
 		myConsumer = theConsumer;
-		myMultiplexingListener = (MultiplexingListener<ResourceDeliveryMessage>) theConsumer.getMessageListener();
+		// see if we can refactor to get rid of this cast
+		myMultiplexingListener = (IMultiplexingListener<ResourceDeliveryMessage>) theConsumer.getMessageListener();
 	}
 
 	public boolean addListener(IMessageListener<ResourceDeliveryMessage> theListener) {
@@ -48,8 +49,8 @@ public class SubscriptionResourceDeliveryMessageConsumer implements AutoCloseabl
 	}
 
 	public boolean removeListener(IMessageListener<ResourceDeliveryMessage> theListener) {
-		if (theListener instanceof AutoCloseable) {
-			IoUtils.closeQuietly((AutoCloseable) theListener, ourLog);
+		if (theListener instanceof AutoCloseable theAutoCloseable) {
+			IoUtils.closeQuietly(theAutoCloseable, ourLog);
 		}
 		return myMultiplexingListener.removeListener(theListener);
 	}

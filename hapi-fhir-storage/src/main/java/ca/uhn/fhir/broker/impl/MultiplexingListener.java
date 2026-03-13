@@ -21,6 +21,7 @@ package ca.uhn.fhir.broker.impl;
 
 import ca.uhn.fhir.broker.api.BrokerListenerClosedException;
 import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.broker.api.IMultiplexingListener;
 import ca.uhn.fhir.broker.api.IRetryAwareMessageListener;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
@@ -41,7 +42,7 @@ import java.util.List;
  *
  * @param <T> the type of payload this message listener is expecting to receive
  */
-public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, AutoCloseable {
+public class MultiplexingListener<T> implements IMultiplexingListener<T> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MultiplexingListener.class);
 	private final List<IMessageListener<T>> mySubListeners = new LinkedList<>();
 
@@ -102,8 +103,8 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 	}
 
 	private void closeQuietly(IMessageListener<T> theMessageListener) {
-		if (theMessageListener instanceof AutoCloseable) {
-			IoUtils.closeQuietly((AutoCloseable) theMessageListener, ourLog);
+		if (theMessageListener instanceof AutoCloseable theAutoCloseable) {
+			IoUtils.closeQuietly(theAutoCloseable, ourLog);
 		}
 	}
 
