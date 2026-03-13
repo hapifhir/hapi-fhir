@@ -154,6 +154,9 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR5Config.class, TestDaoSearch.Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
+
+	public static final String VALID_PATIENT_SEARCH_PARAMS = "[_compartmentChange, _id, _lastUpdated, _profile, _security, _source, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, part-agree, phone, phonetic, telecom]";
+
 	@Autowired
 	protected IJobStepExecutionServices myJobStepExecutionServices;
 	@Autowired
