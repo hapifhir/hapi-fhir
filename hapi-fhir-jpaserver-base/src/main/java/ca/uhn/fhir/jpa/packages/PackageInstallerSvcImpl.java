@@ -475,40 +475,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		prefixNumericIdIfNeeded(theResource);
 		setPackageMetaSource(theResource, thePackageInstallationSpec);
 
-		if (!thePackageInstallationSpec.isDryRun()) {
-			if (theExistingResource == null) {
-				return createNewResource(theDao, theResource, thePackageInstallationSpec);
-			} else {
-				return updateExistingResource(theDao, theResource, theExistingResource);
-			}
+		if (theExistingResource == null) {
+			return createNewResource(theDao, theResource, thePackageInstallationSpec);
 		} else {
-			FhirTerser terser = myFhirContext.newTerser();
-			String resourceType = theResource.fhirType();
-			RuntimeResourceDefinition rtDefinition = myFhirContext.getResourceDefinition(resourceType);
-			List<RuntimeSearchParam> sps = rtDefinition.getSearchParams();
-			StringBuilder uniqueIdentifierSpBuilder = new StringBuilder();
-			for (Map.Entry<String, List<List<IQueryParameterType>>> spSet : theSpMap.entrySet()) {
-				String key = spSet.getKey();
-
-				// TODO - will we ever see nothing? or a throw?
-				RuntimeSearchParam runtimeSearchParameter = sps.stream()
-						.filter(sp -> sp.getName().equals(key))
-						.findFirst()
-						.orElseThrow();
-
-				Optional<String> valueOp =
-						terser.getSinglePrimitiveValue(theResource, runtimeSearchParameter.getPath());
-				uniqueIdentifierSpBuilder.append(valueOp.get());
-			}
-
-			// dry run
-			if (theExistingResource != null) {
-				theOutcome.addExistingResource(resourceType, uniqueIdentifierSpBuilder.toString());
-			} else {
-				// a resource we'd add
-				theOutcome.addResourceTypeToBeAdded(resourceType, uniqueIdentifierSpBuilder.toString());
-			}
-			return false;
+			return updateExistingResource(theDao, theResource, theExistingResource);
 		}
 	}
 
