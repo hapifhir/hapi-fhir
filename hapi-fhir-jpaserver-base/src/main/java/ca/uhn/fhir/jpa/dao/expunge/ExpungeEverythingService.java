@@ -180,8 +180,6 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		counter.addAndGet(expungeBatch2Entities(theRequest, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
 				theRequest, ResourceIdentifierPatientUniqueEntity.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, Batch2JobInstanceEntity.class, requestPartitionId));//todo jdjd u might have to remove this
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
 				theRequest, NpmPackageVersionResourceEntity.class, requestPartitionId));
 		counter.addAndGet(
