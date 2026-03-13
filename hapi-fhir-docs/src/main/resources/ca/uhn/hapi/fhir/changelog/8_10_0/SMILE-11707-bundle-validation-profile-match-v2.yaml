@@ -2,6 +2,7 @@
 type: fix
 issue: 7602
 jira: SMILE-11707
+backport: 8.8.1
 title: "Previously, validating a FHIR Bundle containing cross-referencing resources against a custom
   Implementation Guide that constrains reference target profiles would produce false-positive
   \"Unable to find a profile match\" errors. This occurred because the underlying InstanceValidator
