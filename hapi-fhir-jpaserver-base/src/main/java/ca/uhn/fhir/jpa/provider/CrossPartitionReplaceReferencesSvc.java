@@ -54,7 +54,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Discovers compartment resources for a source patient, moves them to the target patient's
+ * Discovers resources referencing a source resource, moves them to the target resource's
  * partition via a transaction bundle (CREATEs + PUTs), and deletes the originals.
  * <p>
  * All operations are performed within a single DB transaction for atomicity.
@@ -82,8 +82,8 @@ public class CrossPartitionReplaceReferencesSvc {
 	}
 
 	/**
-	 * Moves compartment resources from source patient's partition to target patient's partition,
-	 * and updates references in non-compartment resources. Assumes the caller provides the outer
+	 * Moves referencing resources from the source resource's partition to the target resource's partition,
+	 * and updates references in resources that don't change partition. Assumes the caller provides the outer
 	 * transaction — all internal operations use {@code transactionNested()}.
 	 * <p>
 	 * Does NOT delete the source copies — the caller is responsible for deleting them after
@@ -93,36 +93,42 @@ public class CrossPartitionReplaceReferencesSvc {
 	 *         and versioned references to the original source copies for deferred deletion.
 	 */
 	public CrossPartitionMoveResult moveCompartmentResourcesAndReplaceReferences(
-			IBaseResource theSourcePatient, IBaseResource theTargetPatient, RequestDetails theRequestDetails) {
+			IBaseResource theSourceResource, IBaseResource theTargetResource, RequestDetails theRequestDetails) {
 
-		String sourcePatientId = theSourcePatient.getIdElement().getIdPart();
-		String targetPatientId = theTargetPatient.getIdElement().getIdPart();
+		String sourceResourceType = myFhirContext.getResourceType(theSourceResource);
+		String sourceId = theSourceResource.getIdElement().getIdPart();
+		String targetId = theTargetResource.getIdElement().getIdPart();
 
 		RequestPartitionId sourcePartitionId =
-				RequestPartitionId.getPartitionIfAssigned(theSourcePatient).orElse(null);
+				RequestPartitionId.getPartitionIfAssigned(theSourceResource).orElse(null);
 		RequestPartitionId targetPartitionId =
-				RequestPartitionId.getPartitionIfAssigned(theTargetPatient).orElse(null);
+				RequestPartitionId.getPartitionIfAssigned(theTargetResource).orElse(null);
 
 		ourLog.info(
-				"Cross-partition merge: moving compartment resources from Patient/{} (partition {}) to Patient/{} (partition {})",
-				sourcePatientId,
+				"Cross-partition merge: moving referencing resources from {}/{} (partition {}) to {}/{} (partition {})",
+				sourceResourceType,
+				sourceId,
 				sourcePartitionId,
-				targetPatientId,
+				sourceResourceType,
+				targetId,
 				targetPartitionId);
 
-		// Step 1: Discover all resources referencing the source patient
-		List<IBaseResource> allReferencingResources = discoverReferencingResources(sourcePatientId, theRequestDetails);
+		// Step 1: Discover all resources referencing the source resource
+		List<IBaseResource> allReferencingResources =
+				discoverReferencingResources(sourceResourceType, sourceId, theRequestDetails);
 
 		if (allReferencingResources.isEmpty()) {
-			ourLog.info("No referencing resources found for Patient/{}", sourcePatientId);
+			ourLog.info("No referencing resources found for {}/{}", sourceResourceType, sourceId);
 			return new CrossPartitionMoveResult(List.of(), List.of());
 		}
 
-		// Step 2: Classify into MOVE (in source compartment + source partition) vs UPDATE
+		// Step 2: Classify into MOVE (partition changes after rewrite) vs UPDATE (same partition)
+		String sourceRef = sourceResourceType + "/" + sourceId;
+		String targetRef = sourceResourceType + "/" + targetId;
 		List<IBaseResource> moveList = new ArrayList<>();
 		List<IBaseResource> updateList = new ArrayList<>();
 		classifyResourcesAndReplaceSourceReferences(
-				allReferencingResources, sourcePatientId, targetPatientId, theRequestDetails, moveList, updateList);
+				allReferencingResources, sourceRef, targetRef, theRequestDetails, moveList, updateList);
 
 		ourLog.info(
 				"Classified {} resources: {} to move, {} to update references",
@@ -167,9 +173,9 @@ public class CrossPartitionReplaceReferencesSvc {
 	}
 
 	private List<IBaseResource> discoverReferencingResources(
-			String theSourcePatientId, RequestDetails theRequestDetails) {
+			String theSourceResourceType, String theSourceId, RequestDetails theRequestDetails) {
 		List<IdDt> ids = myResourceLinkDao
-				.streamSourceIdsForTargetFhirId("Patient", theSourcePatientId)
+				.streamSourceIdsForTargetFhirId(theSourceResourceType, theSourceId)
 				.toList();
 		return loadResources(ids, theRequestDetails);
 	}
@@ -179,9 +185,8 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * them to {@code theUpdateList}. Resources already in the move/update lists are excluded
 	 * to avoid duplicate entries in the transaction bundle.
 	 * <p>
-	 * This handles cases where resources outside the source compartment reference non-patient
-	 * resources that were moved and got new IDs (e.g., another patient's Observation referencing
-	 * a moved Encounter, or a non-compartmental List referencing a moved Encounter).
+	 * This handles cases where resources that do not reference the source resource but do reference
+	 * a moved resource that got a new ID (e.g., a List referencing a moved Encounter).
 	 */
 	private void discoverAndAddAdditionalResourcesToUpdate(
 			Set<String> theMovedResourceOldIds, List<IBaseResource> theUpdateList, RequestDetails theRequestDetails) {
@@ -233,23 +238,20 @@ public class CrossPartitionReplaceReferencesSvc {
 
 	private void classifyResourcesAndReplaceSourceReferences(
 			List<IBaseResource> theResources,
-			String theSourcePatientId,
-			String theTargetPatientId,
+			String theSourceRef,
+			String theTargetRef,
 			RequestDetails theRequestDetails,
 			List<IBaseResource> theMoveList,
 			List<IBaseResource> theUpdateList) {
-
-		String sourcePatientRef = "Patient/" + theSourcePatientId;
-		String targetPatientRef = "Patient/" + theTargetPatientId;
 
 		for (IBaseResource resource : theResources) {
 			Integer currentPartitionId = RequestPartitionId.getPartitionIfAssigned(resource)
 					.map(RequestPartitionId::getFirstPartitionIdOrNull)
 					.orElse(null);
 
-			// Rewrite source→target patient references so determineCreatePartitionForRequest
+			// Rewrite source→target references so determineCreatePartitionForRequest
 			// routes based on the post-merge state.
-			replaceVersionlessReferences(resource, Map.of(sourcePatientRef, targetPatientRef));
+			replaceVersionlessReferences(resource, Map.of(theSourceRef, theTargetRef));
 
 			Integer newPartitionId = determinePartition(resource, theRequestDetails);
 
@@ -285,7 +287,7 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * are replaced with {@code urn:uuid} placeholders in both lists — the transaction processor's
 	 * {@code IdSubstitutionMap} resolves these after the POST entries create the new resources.
 	 * <p>
-	 * Patient references are already rewritten by {@link #classifyResourcesAndReplaceSourceReferences}.
+	 * Source→target references are already rewritten by {@link #classifyResourcesAndReplaceSourceReferences}.
 	 *
 	 * @param theOldIdToPlaceholder populated by this method with old ID → urn:uuid mappings
 	 */
@@ -301,7 +303,7 @@ public class CrossPartitionReplaceReferencesSvc {
 		}
 
 		// Replace inter-resource references with urn:uuid placeholders in BOTH lists.
-		// Patient references were already rewritten by classifyResourcesAndReplaceSourceReferences.
+		// Source→target references were already rewritten by classifyResourcesAndReplaceSourceReferences.
 		replaceVersionlessReferences(theMoveList, theOldIdToPlaceholder);
 		replaceVersionlessReferences(theUpdateList, theOldIdToPlaceholder);
 
