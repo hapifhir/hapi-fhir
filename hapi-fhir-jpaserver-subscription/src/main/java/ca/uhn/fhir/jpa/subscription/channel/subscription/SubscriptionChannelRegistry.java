@@ -159,7 +159,6 @@ public class SubscriptionChannelRegistry {
 
 		// This was the last one.  Close and remove the channel
 		if (!myActiveSubscriptionByChannelName.containsKey(channelName)) {
-			ourLog.info("Removing {}", channelName);
 			myDeliveryConsumerCache.closeAndRemove(channelName);
 			myDeliveryProducerCache.closeAndRemove(channelName);
 		}

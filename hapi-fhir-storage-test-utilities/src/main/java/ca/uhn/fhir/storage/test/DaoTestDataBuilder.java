@@ -108,13 +108,8 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 	}
 
 	@Override
-	public ITestDataBuilder.Support getTestDataBuilderSupport() {
+	public Support getTestDataBuilderSupport() {
 		return this;
-	}
-
-	@Override
-	public void doDeleteResource(IIdType theIIdType) {
-		throw new UnsupportedOperationException("Not implemented");
 	}
 
 	@Override

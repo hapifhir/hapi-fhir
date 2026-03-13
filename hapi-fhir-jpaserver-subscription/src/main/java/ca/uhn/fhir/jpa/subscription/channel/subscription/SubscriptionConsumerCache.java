@@ -60,7 +60,8 @@ class SubscriptionConsumerCache {
 
 	@VisibleForTesting
 	void logForUnitTest() {
-		ourLog.info(
-				"SubscriptionConsumerCache: [{}]", myCache.isEmpty() ? "empty" : String.join(",", myCache.keySet()));
+		for (String key : myCache.keySet()) {
+			ourLog.info("SubscriptionConsumerCache: {}", key);
+		}
 	}
 }
