@@ -71,7 +71,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class, TestDaoSearch.Config.class})
-public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder {
+public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabaseVerificationIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
 	public static final String INIT_SCHEMA = "init_schema";
@@ -80,10 +80,10 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	IFhirResourceDaoPatient<Patient> myPatientDao;
 
 	@Autowired
-	private FhirContext myFhirContext;
+	protected FhirContext myFhirContext;
 
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected DaoRegistry myDaoRegistry;
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -110,6 +110,14 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			s.setDefaultPrettyPrint(false);
 			s.setPagingProvider(myPagingProvider);
 		});
+
+	@Override
+	public TuplePredicateSearchTest.Context getTuplePredicateSearchTestContext() {
+		return new TuplePredicateSearchTest.Context(
+			myStorageSettings,
+			myServer
+		);
+	}
 
 
 	@ParameterizedTest
