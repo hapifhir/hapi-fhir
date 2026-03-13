@@ -268,7 +268,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					IIdType dt = new IdDt(ref.getBaseUrl(), ref.getResourceType(), ref.getIdPart(), null);
 
 					if (dt.hasBaseUrl()) {
-						if (myStorageSettings.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
+						if (myStorageSettings.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())
+								&& !dt.getIdPart().contains("|")) {
 							dt = dt.toUnqualified();
 							targetIds.add(dt);
 						} else {

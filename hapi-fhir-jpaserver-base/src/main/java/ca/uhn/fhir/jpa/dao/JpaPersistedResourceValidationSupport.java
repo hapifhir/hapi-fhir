@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
@@ -297,12 +298,15 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	private static SearchParameterMap createSearchParameterMapForCanonicalUrl(String theUri) {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(1);
-		int versionSeparator = theUri.lastIndexOf('|');
+		// The HL7 FHIR core validator percent-encodes '|' as '%7C' before calling back into HAPI.
+		// Normalize before splitting so "http://foo%7C1.0" is treated as "http://foo|1.0".
+		String uri = UrlUtil.unescape(theUri);
+		int versionSeparator = uri.lastIndexOf('|');
 		if (versionSeparator != -1) {
-			params.add(StructureDefinition.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
-			params.add(StructureDefinition.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
+			params.add(StructureDefinition.SP_VERSION, new TokenParam(uri.substring(versionSeparator + 1)));
+			params.add(StructureDefinition.SP_URL, new UriParam(uri.substring(0, versionSeparator)));
 		} else {
-			params.add(StructureDefinition.SP_URL, new UriParam(theUri));
+			params.add(StructureDefinition.SP_URL, new UriParam(uri));
 			// When no version is specified, we will take the most recently updated resource as the current
 			// version
 			params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
