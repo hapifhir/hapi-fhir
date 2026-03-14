@@ -31,11 +31,13 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
+import jakarta.ws.rs.Path;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@Path("/Patient")
 public class PatientResourceProvider extends AbstractJaxRsResourceProvider<Patient> {
 
 	private static Long counter = 1L;
