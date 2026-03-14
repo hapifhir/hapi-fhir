@@ -1,0 +1,4 @@
+---
+type: change
+issue: 7443
+title: "Bumped Spring Boot version from 3.4.11 to 3.5.11 to address the Spring Boot 3.4.x End-of-Life."
