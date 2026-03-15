@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
+import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.TuplePredicateRewriter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -847,8 +848,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
 				condition = TuplePredicateRewriter.toExpandedTupleInPredicate(
 						getSearchQueryBuilder(),
-						getColumnTargetPartitionId(),
-						myColumnTargetResourceId,
+						PartitionableJoinColumns.newPartitioned(getColumnTargetPartitionId(), myColumnTargetResourceId),
 						List.of(theTargetPids),
 						false);
 			} else {

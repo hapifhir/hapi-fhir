@@ -28,7 +28,7 @@ import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
-import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import org.apache.commons.lang3.Validate;
 
 import java.util.Collection;
 
@@ -59,18 +59,18 @@ public final class TuplePredicateRewriter {
 	 * @param theSubQueryBuilder the child SQL builder
 	 * @param theSubQueryPredicateBuilder the predicate builder for the subquery's root table
 	 * @param theOuterJoinColumns the outer query's join columns
-	 *        ({@code [PARTITION_ID, RES_ID]} in partition mode, {@code [RES_ID]} otherwise)
 	 */
 	public static Condition toNotInSubquery(
 			SearchQueryBuilder theSubQueryBuilder,
 			BaseJoiningPredicateBuilder theSubQueryPredicateBuilder,
-			DbColumn[] theOuterJoinColumns) {
-		if (theOuterJoinColumns.length > 1) {
+			PartitionableJoinColumns theOuterJoinColumns) {
+		if (theOuterJoinColumns.isPartitioned()) {
 			addCorrelationPredicates(theSubQueryBuilder, theSubQueryPredicateBuilder, theOuterJoinColumns);
 			return new NotCondition(UnaryCondition.exists(new Subquery(theSubQueryBuilder.getSelect())));
 		}
 		return new InCondition(
-						new ColumnTupleObject(theOuterJoinColumns[0]), new Subquery(theSubQueryBuilder.getSelect()))
+						new ColumnTupleObject(theOuterJoinColumns.getResourceIdColumn()),
+						new Subquery(theSubQueryBuilder.getSelect()))
 				.setNegate(true);
 	}
 
@@ -84,12 +84,15 @@ public final class TuplePredicateRewriter {
 	 *
 	 * @param theSubQueryBuilder the child SQL builder (must use "s" alias prefix)
 	 * @param theSubQueryPredicateBuilder the predicate builder for the subquery's root table
-	 * @param theOuterJoinColumns the outer query's join columns
+	 * @param theOuterJoinColumns the outer query's join columns (must be partitioned)
 	 */
 	public static Condition toExistsSubquery(
 			SearchQueryBuilder theSubQueryBuilder,
 			BaseJoiningPredicateBuilder theSubQueryPredicateBuilder,
-			DbColumn[] theOuterJoinColumns) {
+			PartitionableJoinColumns theOuterJoinColumns) {
+		Validate.isTrue(
+				theOuterJoinColumns.isPartitioned(),
+				"toExistsSubquery requires partitioned join columns with both PARTITION_ID and RES_ID");
 		addCorrelationPredicates(theSubQueryBuilder, theSubQueryPredicateBuilder, theOuterJoinColumns);
 		return UnaryCondition.exists(new Subquery(theSubQueryBuilder.getSelect()));
 	}
@@ -97,12 +100,11 @@ public final class TuplePredicateRewriter {
 	private static void addCorrelationPredicates(
 			SearchQueryBuilder theSubQueryBuilder,
 			BaseJoiningPredicateBuilder theSubQueryPredicateBuilder,
-			DbColumn[] theOuterJoinColumns) {
-		theSubQueryBuilder.addPredicate(
-				BinaryCondition.equalTo(theSubQueryPredicateBuilder.getPartitionIdColumn(), theOuterJoinColumns[0]));
+			PartitionableJoinColumns theOuterJoinColumns) {
 		theSubQueryBuilder.addPredicate(BinaryCondition.equalTo(
-				theSubQueryPredicateBuilder.getResourceIdColumn(),
-				theOuterJoinColumns[theOuterJoinColumns.length - 1]));
+				theSubQueryPredicateBuilder.getPartitionIdColumn(), theOuterJoinColumns.getPartitionIdColumn()));
+		theSubQueryBuilder.addPredicate(BinaryCondition.equalTo(
+				theSubQueryPredicateBuilder.getResourceIdColumn(), theOuterJoinColumns.getResourceIdColumn()));
 	}
 
 	/**
@@ -114,24 +116,27 @@ public final class TuplePredicateRewriter {
 	 * To: {@code (col1=v1a AND col2=v2a) OR (col1=v1b AND col2=v2b)}
 	 *
 	 * @param theSearchQueryBuilder the SQL builder for generating bind variable placeholders
-	 * @param thePartitionIdColumn the PARTITION_ID column
-	 * @param theResourceIdColumn the RES_ID column
+	 * @param theJoinColumns the partitioned join columns (must be partitioned)
 	 * @param thePids the resource PIDs containing partition and resource IDs
 	 * @param theNegate if true, wraps the result in a NOT condition
 	 */
 	public static Condition toExpandedTupleInPredicate(
 			SearchQueryBuilder theSearchQueryBuilder,
-			DbColumn thePartitionIdColumn,
-			DbColumn theResourceIdColumn,
+			PartitionableJoinColumns theJoinColumns,
 			Collection<JpaPid> thePids,
 			boolean theNegate) {
+		Validate.isTrue(
+				theJoinColumns.isPartitioned(),
+				"toExpandedTupleInPredicate requires partitioned join columns with both PARTITION_ID and RES_ID");
 		ComboCondition orCondition = ComboCondition.or();
 		for (JpaPid pid : thePids) {
 			Condition rowMatch = ComboCondition.and(
 					BinaryCondition.equalTo(
-							thePartitionIdColumn, theSearchQueryBuilder.generatePlaceholder(pid.getPartitionId())),
+							theJoinColumns.getPartitionIdColumn(),
+							theSearchQueryBuilder.generatePlaceholder(pid.getPartitionId())),
 					BinaryCondition.equalTo(
-							theResourceIdColumn, theSearchQueryBuilder.generatePlaceholder(pid.getId())));
+							theJoinColumns.getResourceIdColumn(),
+							theSearchQueryBuilder.generatePlaceholder(pid.getId())));
 			orCondition.addCondition(rowMatch);
 		}
 

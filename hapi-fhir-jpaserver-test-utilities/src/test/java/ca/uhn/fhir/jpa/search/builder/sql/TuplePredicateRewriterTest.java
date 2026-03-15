@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +62,7 @@ class TuplePredicateRewriterTest {
 	void toNotInSubquery_singleColumn_producesNotIn(Dialect theDialect) {
 		SearchQueryBuilder outerBuilder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder outerRoot = outerBuilder.getOrCreateFirstPredicateBuilder();
-		DbColumn[] singleColumn = new DbColumn[]{outerRoot.getResourceIdColumn()};
+		PartitionableJoinColumns singleColumn = PartitionableJoinColumns.newNonPartitioned(outerRoot.getResourceIdColumn());
 
 		SearchQueryBuilder childBuilder = outerBuilder.newChildSqlBuilder(false);
 		BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
@@ -79,7 +78,7 @@ class TuplePredicateRewriterTest {
 	void toNotInSubquery_multiColumn_producesNotExistsWithCorrelation(Dialect theDialect) {
 		SearchQueryBuilder outerBuilder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder outerRoot = outerBuilder.getOrCreateFirstPredicateBuilder();
-		DbColumn[] multiColumn = outerRoot.getJoinColumns();
+		PartitionableJoinColumns multiColumn = PartitionableJoinColumns.from(outerRoot.getJoinColumns());
 
 		SearchQueryBuilder childBuilder = outerBuilder.newChildSqlBuilder(true);
 		BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
@@ -95,7 +94,7 @@ class TuplePredicateRewriterTest {
 	void toExistsSubquery_producesExistsWithCorrelation(Dialect theDialect) {
 		SearchQueryBuilder outerBuilder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder outerRoot = outerBuilder.getOrCreateFirstPredicateBuilder();
-		DbColumn[] multiColumn = outerRoot.getJoinColumns();
+		PartitionableJoinColumns multiColumn = PartitionableJoinColumns.from(outerRoot.getJoinColumns());
 
 		SearchQueryBuilder childBuilder = outerBuilder.newChildSqlBuilder(true);
 		BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
@@ -113,7 +112,7 @@ class TuplePredicateRewriterTest {
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
 
 		Condition result = TuplePredicateRewriter.toExpandedTupleInPredicate(
-			builder, root.getPartitionIdColumn(), root.getResourceIdColumn(),
+			builder, PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
 			List.of(JpaPid.fromId(100L, 1)), false);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
@@ -127,7 +126,7 @@ class TuplePredicateRewriterTest {
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
 
 		Condition result = TuplePredicateRewriter.toExpandedTupleInPredicate(
-			builder, root.getPartitionIdColumn(), root.getResourceIdColumn(),
+			builder, PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
 			List.of(JpaPid.fromId(100L, 1), JpaPid.fromId(200L, 1)), false);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
@@ -141,7 +140,7 @@ class TuplePredicateRewriterTest {
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
 
 		Condition result = TuplePredicateRewriter.toExpandedTupleInPredicate(
-			builder, root.getPartitionIdColumn(), root.getResourceIdColumn(),
+			builder, PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
 			List.of(JpaPid.fromId(100L, 1)), true);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
@@ -155,7 +154,7 @@ class TuplePredicateRewriterTest {
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
 
 		Condition result = TuplePredicateRewriter.toExpandedTupleInPredicate(
-			builder, root.getPartitionIdColumn(), root.getResourceIdColumn(),
+			builder, PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
 			List.of(JpaPid.fromId(100L, 1), JpaPid.fromId(200L, 2)), false);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(

@@ -56,6 +56,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.PredicateBuilderFactory;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.TuplePredicateRewriter;
@@ -1600,7 +1601,8 @@ public class QueryStack {
 
 			if (usePartitionIdInJoins) {
 				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false, null);
-				DbColumn[] outerColumns = theSourceJoinColumn != null ? theSourceJoinColumn : root.getJoinColumns();
+				PartitionableJoinColumns outerColumns = PartitionableJoinColumns.from(
+						theSourceJoinColumn != null ? theSourceJoinColumn : root.getJoinColumns());
 				ComboCondition orExists = ComboCondition.or();
 				for (SearchQueryBuilder childBuilder : childBuilders) {
 					BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
@@ -1610,8 +1612,8 @@ public class QueryStack {
 				retVal = orExists;
 			} else if (theSourceJoinColumn == null) {
 				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false, null);
-				DbColumn[] joinColumns = root.getJoinColumns();
-				retVal = new InCondition(joinColumns[0], union);
+				PartitionableJoinColumns joinColumns = PartitionableJoinColumns.from(root.getJoinColumns());
+				retVal = new InCondition(joinColumns.getResourceIdColumn(), union);
 			} else {
 				// -- for the resource link, need join with target_resource_id
 				retVal = new InCondition(theSourceJoinColumn, union);
@@ -2068,7 +2070,8 @@ public class QueryStack {
 						tagSelector.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId));
 
 				join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-				tagPredicate = TuplePredicateRewriter.toNotInSubquery(sqlBuilder, tagSelector, join.getJoinColumns());
+				tagPredicate = TuplePredicateRewriter.toNotInSubquery(
+						sqlBuilder, tagSelector, PartitionableJoinColumns.from(join.getJoinColumns()));
 
 			} else {
 				// Tag table can't be a query root because it will include deleted resources, and can't select by
@@ -2244,7 +2247,8 @@ public class QueryStack {
 					tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
 
 			join = theSqlBuilder.getOrCreateFirstPredicateBuilder();
-			DbColumn[] outerColumns = theSourceJoinColumn != null ? theSourceJoinColumn : join.getJoinColumns();
+			PartitionableJoinColumns outerColumns = PartitionableJoinColumns.from(
+					theSourceJoinColumn != null ? theSourceJoinColumn : join.getJoinColumns());
 			predicate = TuplePredicateRewriter.toNotInSubquery(sqlBuilder, tokenSelector, outerColumns);
 
 		} else {
