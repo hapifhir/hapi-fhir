@@ -71,7 +71,7 @@ class TuplePredicateRewriterTest {
 		Condition result = TuplePredicateRewriter.toNotInSubquery(childBuilder, childRoot, singleColumn);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
-			"(t0.RES_ID NOT IN (SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL))) )");
+			"((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL))) )");
 	}
 
 	@ParameterizedTest

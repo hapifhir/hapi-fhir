@@ -205,14 +205,15 @@ interface TuplePredicateSearchTest extends ITestDataBuilder {
 	@Test
 	default void testChainedTokenSearch() {
 		Context ctx = getTuplePredicateSearchTestContext();
+		String code = "chain-token-test";
 		IIdType malePatientId = createPatient(withActiveTrue(), withGender("male"));
 		IIdType femalePatientId = createPatient(withActiveTrue(), withGender("female"));
-		IIdType maleObsId = createObservation(withSubject(malePatientId));
-		createObservation(withSubject(femalePatientId));
+		IIdType maleObsId = createObservation(withSubject(malePatientId), withObservationCode("http://test", code));
+		createObservation(withSubject(femalePatientId), withObservationCode("http://test", code));
 
 		Bundle results = ctx.server().getFhirClient()
 			.search()
-			.byUrl("Observation?subject.gender=male")
+			.byUrl("Observation?subject.gender=male&code=http://test|" + code)
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -223,14 +224,15 @@ interface TuplePredicateSearchTest extends ITestDataBuilder {
 	@Test
 	default void testChainedTokenNotSearch() {
 		Context ctx = getTuplePredicateSearchTestContext();
+		String code = "chain-token-not-test";
 		IIdType malePatientId = createPatient(withActiveTrue(), withGender("male"));
 		IIdType femalePatientId = createPatient(withActiveTrue(), withGender("female"));
-		createObservation(withSubject(malePatientId));
-		IIdType femaleObsId = createObservation(withSubject(femalePatientId));
+		createObservation(withSubject(malePatientId), withObservationCode("http://test", code));
+		IIdType femaleObsId = createObservation(withSubject(femalePatientId), withObservationCode("http://test", code));
 
 		Bundle results = ctx.server().getFhirClient()
 			.search()
-			.byUrl("Observation?subject.gender:not=male")
+			.byUrl("Observation?subject.gender:not=male&code=http://test|" + code)
 			.returnBundle(Bundle.class)
 			.execute();
 

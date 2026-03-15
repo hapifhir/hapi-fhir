@@ -69,7 +69,9 @@ public final class TuplePredicateRewriter {
 			addCorrelationPredicates(theSubQueryBuilder, theSubQueryPredicateBuilder, theOuterJoinColumns);
 			return new NotCondition(UnaryCondition.exists(new Subquery(theSubQueryBuilder.getSelect())));
 		}
-		return new InCondition(theOuterJoinColumns[0], new Subquery(theSubQueryBuilder.getSelect())).setNegate(true);
+		return new InCondition(
+						new ColumnTupleObject(theOuterJoinColumns[0]), new Subquery(theSubQueryBuilder.getSelect()))
+				.setNegate(true);
 	}
 
 	/**
