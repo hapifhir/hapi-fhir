@@ -45,9 +45,8 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
-import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
-import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.TuplePredicateRewriter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -70,7 +69,6 @@ import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
@@ -847,9 +845,12 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			// if resource ids are provided, we'll create the predicate
 			// with ids in or equal to this value
 			if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
-				Object left = ColumnTupleObject.from(getJoinColumnsForTarget());
-				JpaPidValueTuples right = JpaPidValueTuples.from(getSearchQueryBuilder(), theTargetPids);
-				condition = new InCondition(left, right);
+				condition = TuplePredicateRewriter.toExpandedTupleInPredicate(
+						getSearchQueryBuilder(),
+						getColumnTargetPartitionId(),
+						myColumnTargetResourceId,
+						List.of(theTargetPids),
+						false);
 			} else {
 				condition = QueryParameterUtils.toEqualToOrInPredicate(
 						myColumnTargetResourceId, generatePlaceholders(JpaPid.toLongList(theTargetPids)));

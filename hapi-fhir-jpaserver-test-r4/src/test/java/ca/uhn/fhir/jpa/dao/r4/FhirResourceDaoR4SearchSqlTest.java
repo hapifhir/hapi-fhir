@@ -78,16 +78,16 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 				"SELECT t1.PARTITION_ID,t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON ((t1.PARTITION_ID = t0.PARTITION_ID) AND (t1.RES_ID = t0.RES_ID)) INNER JOIN HFJ_SPIDX_TOKEN t2 ON ((t1.PARTITION_ID = t2.PARTITION_ID) AND (t1.RES_ID = t2.RES_ID)) WHERE (((t0.PARTITION_ID = ?) AND ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))) AND ((t2.PARTITION_ID = ?) AND (t2.HASH_VALUE = ?))) fetch first ? rows only"
 			)
 			, new SqlGenerationTestCase(
-				"token not as a NOT IN subselect",
+				"token not as a NOT EXISTS subselect",
 				"Encounter?class:not=not-there",
 				"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )) fetch first ? rows only",
-				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID = ?) AND ((t0.PARTITION_ID,t0.RES_ID) NOT IN (SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))) fetch first ? rows only"
+				"SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t0.PARTITION_ID = ?) AND (NOT (EXISTS (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_SPIDX_TOKEN s0 WHERE ((s0.HASH_VALUE = ?) AND (s0.PARTITION_ID = t0.PARTITION_ID) AND (s0.RES_ID = t0.RES_ID))))))) fetch first ? rows only"
 			)
 			, new SqlGenerationTestCase(
-				"token not on chain join - NOT IN from hfj_res_link target columns",
+				"token not on chain join - NOT EXISTS from hfj_res_link target columns",
 				"Observation?encounter.class:not=not-there",
 				"SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) )) fetch first ? rows only",
-				"SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.PARTITION_ID = ?) AND ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) NOT IN (SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_VALUE = ?)) ))) fetch first ? rows only"
+				"SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND ((t0.PARTITION_ID = ?) AND (NOT (EXISTS (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_SPIDX_TOKEN s0 WHERE ((s0.HASH_VALUE = ?) AND (s0.PARTITION_ID = t0.TARGET_RES_PARTITION_ID) AND (s0.RES_ID = t0.TARGET_RESOURCE_ID))))))) fetch first ? rows only"
 			)
 			, new SqlGenerationTestCase(
 				"bare sort",

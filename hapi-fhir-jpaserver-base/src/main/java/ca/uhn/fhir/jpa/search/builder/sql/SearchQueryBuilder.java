@@ -144,8 +144,12 @@ public class SearchQueryBuilder {
 				theCountQuery,
 				new ArrayList<>(),
 				thePartitionSettings.isPartitioningEnabled(),
-				theSelectResourceType);
+				theSelectResourceType,
+				DEFAULT_ALIAS_PREFIX);
 	}
+
+	private static final String DEFAULT_ALIAS_PREFIX = DbSpec.DEFAULT_ALIAS_PREFIX;
+	private static final String CHILD_ALIAS_PREFIX = "s";
 
 	/**
 	 * Constructor for child SQL Builders
@@ -162,7 +166,8 @@ public class SearchQueryBuilder {
 			boolean theCountQuery,
 			ArrayList<Object> theBindVariableValues,
 			boolean theSelectPartitionId,
-			boolean theSelectResourceType) {
+			boolean theSelectResourceType,
+			String theAliasPrefix) {
 		myFhirContext = theFhirContext;
 		myStorageSettings = theStorageSettings;
 		myPartitionSettings = thePartitionSettings;
@@ -178,7 +183,7 @@ public class SearchQueryBuilder {
 			dialectIsMsSql = true;
 		}
 
-		mySpec = new DbSpec();
+		mySpec = new DbSpec(theAliasPrefix);
 		mySchema = mySpec.addDefaultSchema();
 		mySelect = new SelectQuery();
 
@@ -963,7 +968,8 @@ public class SearchQueryBuilder {
 				false,
 				myBindVariableValues,
 				theSelectPartitionId,
-				false);
+				false,
+				theSelectPartitionId ? CHILD_ALIAS_PREFIX : DEFAULT_ALIAS_PREFIX);
 	}
 
 	public SelectQuery getSelect() {
