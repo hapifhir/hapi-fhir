@@ -1,5 +1,6 @@
 ---
 type: fix
+issue: 7584
 jira: SMILE-8708
 title: "Previously, supplying a non-numeric version in an If-Match header (e.g. If-Match: W/\"abc\") on an
   update or delete request would result in a 500 Internal Server Error due to a failed integer parse.
