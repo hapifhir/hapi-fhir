@@ -1,0 +1,10 @@
+---
+type: fix
+jira: SMILE-11858
+title: "Previously, performing a no-op PUT (update with unchanged content) on a resource that existed
+  before the V8_4_0 database migration (which introduced the RES_TYPE_ID column) would incorrectly
+  increment the resource version number without creating a corresponding history entry. This was caused
+  by Hibernate treating the lazy population of the RES_TYPE_ID field (from null to a resolved value)
+  as a dirty change, triggering an unintended version bump at transaction commit. The ResourceTable
+  entity field has been annotated to exclude it from optimistic locking, so no-op PUTs on pre-upgrade
+  resources no longer cause spurious version increments."

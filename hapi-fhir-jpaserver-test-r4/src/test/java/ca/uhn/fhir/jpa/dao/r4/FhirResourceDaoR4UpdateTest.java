@@ -1343,4 +1343,157 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		assertTrue(p.getActive());
 		assertEquals("foo", p.getIdentifierFirstRep().getValue());
 	}
+
+	/**
+	 * Reproduces SMILE-11858: A no-op PUT on a resource whose RES_TYPE_ID is null
+	 * (simulating a pre-upgrade resource created before migration V8_4_0 added the column)
+	 * should NOT increment the version. The bug is that ResourceTable.myResourceTypeId
+	 * is missing @OptimisticLock(excluded = true), so Hibernate treats the null->value
+	 * transition as a version-triggering dirty change.
+	 */
+	@Test
+	void testNoOpPutWithNullResourceTypeId_VersionShouldNotBeIncremented() {
+		// Create a Patient resource
+		Patient patient = new Patient();
+		patient.addName().setFamily("Simpson");
+		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualified();
+		assertThat(id.getVersionIdPart()).isEqualTo("1");
+
+		Long pid = id.getIdPartAsLong();
+
+		// Simulate a pre-upgrade state: null out RES_TYPE_ID using native SQL
+		// to avoid Hibernate dirty checking on the null-out itself
+		runInTransaction(() -> {
+			myEntityManager.createNativeQuery(
+				"UPDATE HFJ_RESOURCE SET RES_TYPE_ID = NULL WHERE RES_ID = " + pid
+			).executeUpdate();
+		});
+
+		// Verify RES_TYPE_ID is actually null now
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findById(pid).orElseThrow();
+			assertThat(resourceTable.getResourceTypeId()).isNull();
+			assertThat(resourceTable.getVersion()).isEqualTo(1L);
+		});
+
+		// Perform a no-op PUT (same content, nothing changed)
+		Patient toUpdate = new Patient();
+		toUpdate.setId(id.toUnqualifiedVersionless());
+		toUpdate.addName().setFamily("Simpson");
+		IIdType updatedId = myPatientDao.update(toUpdate, mySrd).getId().toUnqualified();
+
+		// The version should NOT have been incremented since the content did not change
+		assertThat(updatedId.getVersionIdPart()).isEqualTo("1");
+
+		// Also verify at the database level that RES_VER was not incremented
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findById(pid).orElseThrow();
+			assertThat(resourceTable.getVersion()).isEqualTo(1L);
+		});
+
+		// Verify no orphan history row was created (the core SMILE-11858 symptom:
+		// res_ver incremented without a corresponding hfj_res_ver entry)
+		runInTransaction(() -> {
+			List<ResourceHistoryTable> allHistory = myResourceHistoryTableDao.findAll();
+			assertThat(allHistory).hasSize(1);
+			assertThat(allHistory.get(0).getVersion()).isEqualTo(1L);
+		});
+	}
+
+	/**
+	 * Adjacent test for SMILE-11858: A no-op PUT on a resource that already has
+	 * a populated myResourceTypeId should NOT increment the version. This path
+	 * is not affected by the bug since the field value doesn't change.
+	 */
+	@Test
+	void testNoOpPutWithPopulatedResourceTypeId_VersionShouldNotBeIncremented() {
+		// Create a Patient resource (myResourceTypeId gets populated on create)
+		Patient patient = new Patient();
+		patient.addName().setFamily("Flanders");
+		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualified();
+		assertThat(id.getVersionIdPart()).isEqualTo("1");
+
+		Long pid = id.getIdPartAsLong();
+
+		// Verify RES_TYPE_ID is populated
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findById(pid).orElseThrow();
+			assertThat(resourceTable.getResourceTypeId()).isNotNull();
+		});
+
+		// Perform a no-op PUT (same content)
+		Patient toUpdate = new Patient();
+		toUpdate.setId(id.toUnqualifiedVersionless());
+		toUpdate.addName().setFamily("Flanders");
+		IIdType updatedId = myPatientDao.update(toUpdate, mySrd).getId().toUnqualified();
+
+		// Version should NOT be incremented
+		assertThat(updatedId.getVersionIdPart()).isEqualTo("1");
+
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findById(pid).orElseThrow();
+			assertThat(resourceTable.getVersion()).isEqualTo(1L);
+		});
+	}
+
+	/**
+	 * Adjacent test for SMILE-11858: An actual content-change PUT on a resource
+	 * with null myResourceTypeId should correctly increment the version.
+	 * This tests that real updates still work properly.
+	 */
+	@Test
+	void testContentChangePutWithNullResourceTypeId_VersionShouldBeIncremented() {
+		// Create a Patient resource
+		Patient patient = new Patient();
+		patient.addName().setFamily("Burns");
+		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualified();
+		assertThat(id.getVersionIdPart()).isEqualTo("1");
+
+		Long pid = id.getIdPartAsLong();
+
+		// Simulate pre-upgrade state: null out RES_TYPE_ID
+		runInTransaction(() -> {
+			myEntityManager.createNativeQuery(
+				"UPDATE HFJ_RESOURCE SET RES_TYPE_ID = NULL WHERE RES_ID = " + pid
+			).executeUpdate();
+		});
+
+		// Perform a PUT with actual content change
+		Patient toUpdate = new Patient();
+		toUpdate.setId(id.toUnqualifiedVersionless());
+		toUpdate.addName().setFamily("Smithers");
+		IIdType updatedId = myPatientDao.update(toUpdate, mySrd).getId().toUnqualified();
+
+		// Version SHOULD be incremented because content actually changed
+		assertThat(updatedId.getVersionIdPart()).isEqualTo("2");
+
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findById(pid).orElseThrow();
+			assertThat(resourceTable.getVersion()).isEqualTo(2L);
+		});
+	}
+
+	/**
+	 * Adjacent test for SMILE-11858: Creating a new resource then performing a
+	 * no-op PUT should not increment the version. On create, myResourceTypeId
+	 * is populated immediately, so there is no null->value transition on the
+	 * subsequent PUT.
+	 */
+	@Test
+	void testCreateThenNoOpPut_VersionShouldNotBeIncremented() {
+		// Create a Patient resource (fresh create - myResourceTypeId is populated)
+		Patient patient = new Patient();
+		patient.addName().setFamily("Bouvier");
+		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualified();
+		assertThat(id.getVersionIdPart()).isEqualTo("1");
+
+		// Perform a no-op PUT (identical content)
+		Patient toUpdate = new Patient();
+		toUpdate.setId(id.toUnqualifiedVersionless());
+		toUpdate.addName().setFamily("Bouvier");
+		IIdType updatedId = myPatientDao.update(toUpdate, mySrd).getId().toUnqualified();
+
+		// Version should NOT be incremented
+		assertThat(updatedId.getVersionIdPart()).isEqualTo("1");
+	}
 }
