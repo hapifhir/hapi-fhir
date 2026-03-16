@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER;
@@ -399,11 +400,11 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			targetPatient.getIdElement(),
 			theDeleteSource);
 
+		IIdType versionedSourceId = sourcePatient.getIdElement().withVersion("2");
 		myTestHelper.assertMergeProvenance(inParams.asParametersResource(),
-			sourcePatient.getIdElement().withVersion("2"),
+			versionedSourceId,
 			theExpectedTargetIdWithVersion,
-			0,
-			Collections.EMPTY_SET,
+			Set.of(versionedSourceId.toString(), theExpectedTargetIdWithVersion.toString()),
 			null);
 	}
 

@@ -616,13 +616,15 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	}
 
 	public void assertSourceResourceState() {
-		myHelper.assertSourceResourceState(getVersionlessSourceId(), getVersionlessTargetId(), myDeleteSource);
+		myHelper.assertSourceResourceState(
+				getVersionlessSourceId().withVersion("2"), getVersionlessTargetId(), myDeleteSource);
 	}
 
-	public void assertTargetResourceState() {
+	public void assertTargetResourceState(boolean theExpectTargetToBeUpdated) {
+		String expectedVersion = theExpectTargetToBeUpdated ? "2" : "1";
 		myHelper.assertTargetResourceState(
 				getVersionlessSourceId(),
-				getVersionlessTargetId(),
+				getVersionlessTargetId().withVersion(expectedVersion),
 				myDeleteSource,
 				getExpectedIdentifiersOnTargetAfterMerge());
 	}
@@ -673,7 +675,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 		assertSourceResourceState();
 
 		// Validate target resource state
-		assertTargetResourceState();
+		assertTargetResourceState(theExpectTargetToBeUpdated);
 
 		// Validate references to source in referencing resources now point to target (i.e. replace-refences worked)
 		assertReferencesUpdated();
@@ -870,13 +872,12 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 				.map(id -> id.withVersion("2").toString())
 				.collect(Collectors.toSet());
 
+		Set<String> allExpectedTargets = new java.util.HashSet<>(expectedReferencingResourceIds);
+		allExpectedTargets.add(expectedSourceId.toString());
+		allExpectedTargets.add(expectedTargetId.toString());
+
 		myHelper.assertMergeProvenance(
-				myInputParameters,
-				expectedSourceId,
-				expectedTargetId,
-				getTotalReferenceCount(),
-				expectedReferencingResourceIds,
-				myExpectedProvenanceAgents);
+				myInputParameters, expectedSourceId, expectedTargetId, allExpectedTargets, myExpectedProvenanceAgents);
 	}
 
 	// ================================================

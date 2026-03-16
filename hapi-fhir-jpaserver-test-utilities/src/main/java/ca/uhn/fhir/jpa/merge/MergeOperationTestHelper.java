@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -235,13 +236,18 @@ public class MergeOperationTestHelper {
 	 * Validates the source resource state after a merge operation.
 	 * <p>
 	 * If deleteSource is true, verifies the source returns 410 Gone.
-	 * Otherwise, verifies the source has a replaced-by link to the target
+	 * Otherwise, reads the source by its versionless ID, verifies its version matches
+	 * the expected versioned ID, that it has a replaced-by link to the target,
 	 * and that the active field (if present) is set to false.
+	 *
+	 * @param theExpectedVersionedSourceId the expected versioned source ID (e.g., Patient/A/_history/2)
+	 * @param theTargetId                  the target resource ID
+	 * @param theDeleteSource              whether deleteSource was set in the merge
 	 */
 	public void assertSourceResourceState(
-			@Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, boolean theDeleteSource) {
+			@Nonnull IIdType theExpectedVersionedSourceId, @Nonnull IIdType theTargetId, boolean theDeleteSource) {
 
-		IIdType versionlessSourceId = theSourceId.toUnqualifiedVersionless();
+		IIdType versionlessSourceId = theExpectedVersionedSourceId.toUnqualifiedVersionless();
 		IIdType versionlessTargetId = theTargetId.toUnqualifiedVersionless();
 		String resourceType = versionlessSourceId.getResourceType();
 
@@ -251,6 +257,9 @@ public class MergeOperationTestHelper {
 					.isInstanceOf(ResourceGoneException.class);
 		} else {
 			IBaseResource source = readResource(versionlessSourceId);
+
+			assertThat(source.getIdElement().getVersionIdPart())
+					.isEqualTo(theExpectedVersionedSourceId.getVersionIdPart());
 
 			IResourceLinkService linkService = myLinkServiceFactory.getServiceForResourceType(resourceType);
 			List<IBaseReference> replacedByLinks = linkService.getReplacedByLinks(source);
@@ -268,19 +277,29 @@ public class MergeOperationTestHelper {
 	/**
 	 * Validates the target resource state after a merge operation.
 	 * <p>
-	 * Checks that the target has a replaces link to the source (when source not deleted),
-	 * and that identifiers match expectations.
+	 * Reads the target by its versionless ID, verifies its version matches the expected
+	 * versioned ID, checks that the target has a replaces link to the source (when source
+	 * not deleted), and that identifiers match expectations.
+	 *
+	 * @param theSourceId                  the source resource ID
+	 * @param theExpectedVersionedTargetId the expected versioned target ID (e.g., Patient/B/_history/2)
+	 * @param theDeleteSource              whether deleteSource was set in the merge
+	 * @param theExpectedIdentifiers       expected identifiers on the target after merge
 	 */
 	public void assertTargetResourceState(
 			@Nonnull IIdType theSourceId,
-			@Nonnull IIdType theTargetId,
+			@Nonnull IIdType theExpectedVersionedTargetId,
 			boolean theDeleteSource,
 			@Nonnull List<Identifier> theExpectedIdentifiers) {
 
 		IIdType versionlessSourceId = theSourceId.toUnqualifiedVersionless();
-		IIdType versionlessTargetId = theTargetId.toUnqualifiedVersionless();
+		IIdType versionlessTargetId = theExpectedVersionedTargetId.toUnqualifiedVersionless();
 		String resourceType = versionlessTargetId.getResourceType();
 		IBaseResource target = readResource(versionlessTargetId);
+
+		assertThat(target.getIdElement().getVersionIdPart())
+				.as("Target resource version")
+				.isEqualTo(theExpectedVersionedTargetId.getVersionIdPart());
 
 		if (!theDeleteSource) {
 			IResourceLinkService linkService = myLinkServiceFactory.getServiceForResourceType(resourceType);
@@ -353,8 +372,7 @@ public class MergeOperationTestHelper {
 			@Nonnull Parameters theInputParams,
 			@Nonnull IIdType theExpectedSourceId,
 			@Nonnull IIdType theExpectedTargetId,
-			int theExpectedReferenceCount,
-			@Nonnull Set<String> theExpectedReferencingResourceIds,
+			@Nonnull Set<String> theExpectedProvenanceTargets,
 			@Nullable List<IProvenanceAgent> theExpectedAgents) {
 
 		ReplaceReferencesTestHelper helper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
@@ -362,8 +380,7 @@ public class MergeOperationTestHelper {
 				theInputParams,
 				theExpectedSourceId,
 				theExpectedTargetId,
-				theExpectedReferenceCount,
-				theExpectedReferencingResourceIds,
+				theExpectedProvenanceTargets,
 				theExpectedAgents);
 	}
 
@@ -385,18 +402,51 @@ public class MergeOperationTestHelper {
 		copyOfTheBefore.getMeta().setVersionId(theAfter.getMeta().getVersionId());
 		copyOfTheBefore.setId(theAfter.getIdElement());
 
-		// Copy meta.source from after to before using terser
-		List<IBase> sourceValues = terser.getValues(theAfter, "meta.source");
-		if (!sourceValues.isEmpty()) {
-			String sourceValue = terser.getSinglePrimitiveValueOrNull(theAfter, "meta.source");
-			if (sourceValue != null) {
-				terser.addElement(copyOfTheBefore, "meta.source", sourceValue);
-			}
-		}
+		// Copy meta.source from after to before
+		MetaUtil.setSource(
+				myFhirContext, copyOfTheBefore, terser.getSinglePrimitiveValueOrNull(theAfter, "meta.source"));
 
 		String before = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(copyOfTheBefore);
 		String after = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theAfter);
 		assertThat(after).isEqualTo(before);
+	}
+
+	/**
+	 * Validates all standard post-merge state: source resource, target resource,
+	 * references updated, and merge provenance.
+	 *
+	 * @param theMergeParams                the merge parameters used to invoke the operation
+	 * @param theExpectedVersionedSourceId  the expected versioned source ID after merge
+	 * @param theExpectedVersionedTargetId  the expected versioned target ID after merge
+	 * @param theReferencingResourceIds     IDs of resources that should now reference the target
+	 *                                      instead of source
+	 * @param theExpectedProvenanceTargets  versioned ID strings for all expected provenance targets
+	 *                                      including source and target patients
+	 */
+	public void validateResourcesAfterMerge(
+			@Nonnull MergeTestParameters theMergeParams,
+			@Nonnull IIdType theExpectedVersionedSourceId,
+			@Nonnull IIdType theExpectedVersionedTargetId,
+			@Nonnull List<IIdType> theReferencingResourceIds,
+			@Nonnull Set<String> theExpectedProvenanceTargets) {
+
+		IIdType sourceId = theExpectedVersionedSourceId.toUnqualifiedVersionless();
+		IIdType targetId = theExpectedVersionedTargetId.toUnqualifiedVersionless();
+		boolean deleteSource = Boolean.TRUE.equals(theMergeParams.getDeleteSource());
+
+		assertSourceResourceState(theExpectedVersionedSourceId, targetId, deleteSource);
+		assertTargetResourceState(sourceId, theExpectedVersionedTargetId, deleteSource, List.of());
+
+		if (!theReferencingResourceIds.isEmpty()) {
+			assertReferencesUpdated(theReferencingResourceIds, sourceId, targetId);
+		}
+
+		assertMergeProvenance(
+				theMergeParams.asParametersResource(),
+				theExpectedVersionedSourceId,
+				theExpectedVersionedTargetId,
+				theExpectedProvenanceTargets,
+				null);
 	}
 
 	// ================================================
