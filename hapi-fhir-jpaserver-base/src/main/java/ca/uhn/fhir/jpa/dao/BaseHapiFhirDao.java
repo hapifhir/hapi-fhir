@@ -1039,9 +1039,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					entity.getIdDt().toUnqualified().getValue());
 			if (theResource != null) {
 				myJpaStorageResourceParser.updateResourceMetadata(entity, theResource);
-				String sourceId = entity.getCurrentVersionEntity().getSourceUri();
-				String requestId = entity.getCurrentVersionEntity().getRequestId();
-				MetaUtil.populateResourceSource(myFhirContext, sourceId, requestId, theResource);
+
+				if (entity.getCurrentVersionEntity() != null) {
+					String sourceId = entity.getCurrentVersionEntity().getSourceUri();
+					String requestId = entity.getCurrentVersionEntity().getRequestId();
+					MetaUtil.populateResourceSource(myFhirContext, sourceId, requestId, theResource);
+				}
 			}
 			entity.setUnchangedInCurrentOperation(true);
 			return entity;
