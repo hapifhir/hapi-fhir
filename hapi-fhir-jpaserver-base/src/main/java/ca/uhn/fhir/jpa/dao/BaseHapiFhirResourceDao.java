@@ -1896,7 +1896,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} catch (Exception e) {
 			ourLog.warn("Failure during fulltext reindex: {}", e.toString());
 			theReindexOutcome.addWarning(
-				"Failed to reindex fulltext index for resource " + theEntity.getIdDt() + ": " + e);
+					"Failed to reindex fulltext index for resource " + theEntity.getIdDt() + ": " + e);
 			myResourceTableDao.updateIndexStatus(theEntity.getId(), EntityIndexStatusEnum.INDEXING_FAILED);
 		}
 	}
