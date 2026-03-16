@@ -20,8 +20,8 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -132,13 +132,13 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	public ResourceIndexedSearchParamString(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			StorageSettings theStorageSettings,
 			String theResourceType,
 			String theParamName,
 			String theValueNormalized,
 			String theValueExact) {
-		setPartitionSettings(thePartitionSettings);
+		setPartitionSettings(theDefaultPartitionSettings);
 		setStorageSettings(theStorageSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
@@ -304,28 +304,28 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	public static long calculateHashExact(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			PartitionablePartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			String theValueExact) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
 		return calculateHashExact(
-				thePartitionSettings, requestPartitionId, theResourceType, theParamName, theValueExact);
+				theDefaultPartitionSettings, requestPartitionId, theResourceType, theParamName, theValueExact);
 	}
 
 	public static long calculateHashExact(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			String theValueExact) {
 		return hashSearchParam(
-				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
+				theDefaultPartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
 	}
 
 	public static long calculateHashNormalized(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			PartitionablePartitionId theRequestPartitionId,
 			StorageSettings theStorageSettings,
 			String theResourceType,
@@ -333,7 +333,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			String theValueNormalized) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
 		return calculateHashNormalized(
-				thePartitionSettings,
+				theDefaultPartitionSettings,
 				requestPartitionId,
 				theStorageSettings,
 				theResourceType,
@@ -342,7 +342,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	public static long calculateHashNormalized(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			StorageSettings theStorageSettings,
 			String theResourceType,
@@ -360,7 +360,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		}
 
 		String value = StringUtil.left(theValueNormalized, hashPrefixLength);
-		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
+		return hashSearchParam(
+				theDefaultPartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 	@Override

@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -124,8 +124,11 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	 * Constructor
 	 */
 	public ResourceIndexedSearchParamUri(
-			PartitionSettings thePartitionSettings, String theResourceType, String theParamName, String theUri) {
-		setPartitionSettings(thePartitionSettings);
+			IDefaultPartitionSettings theDefaultPartitionSettings,
+			String theResourceType,
+			String theParamName,
+			String theUri) {
+		setPartitionSettings(theDefaultPartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setUri(theUri);
@@ -249,22 +252,23 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	}
 
 	public static long calculateHashUri(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			PartitionablePartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			String theUri) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashUri(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUri);
+		return calculateHashUri(theDefaultPartitionSettings, requestPartitionId, theResourceType, theParamName, theUri);
 	}
 
 	public static long calculateHashUri(
-			PartitionSettings thePartitionSettings,
+			IDefaultPartitionSettings theDefaultPartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName,
 			String theUri) {
-		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
+		return hashSearchParam(
+				theDefaultPartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
 	}
 
 	@Override

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7643
+title: "isPartitioningEnabled() and isIncludePartitionInSearchHashes() are not defined in IDefaultPartitionSettings, 
+        only in the implementing class PartitionSettings.
+        This has been fixed."

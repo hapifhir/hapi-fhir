@@ -110,7 +110,17 @@ public final class RequestPartitionHeaderUtil {
 	 */
 	public static void validateHeader(String theSourceName, String thePartitionHeaderValue) {
 		// We're only validating syntax, so it doesn't matter what the default partition id is
-		fromHeader(theSourceName, thePartitionHeaderValue, new IDefaultPartitionSettings() {});
+		fromHeader(theSourceName, thePartitionHeaderValue, new IDefaultPartitionSettings() {
+			@Override
+			public boolean isPartitioningEnabled() {
+				return false;
+			}
+
+			@Override
+			public boolean isIncludePartitionInSearchHashes() {
+				return false;
+			}
+		});
 	}
 
 	public static void validateHeader(String thePartitionHeaderValue) {

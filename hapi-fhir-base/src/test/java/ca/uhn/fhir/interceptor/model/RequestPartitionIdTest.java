@@ -182,7 +182,17 @@ public class RequestPartitionIdTest {
 	}
 
 	static ContainsTestCase[] getContainsTestCases() {
-		IDefaultPartitionSettings nullDefaultPartition = new IDefaultPartitionSettings() {};
+		IDefaultPartitionSettings nullDefaultPartition = new IDefaultPartitionSettings() {
+			@Override
+			public boolean isPartitioningEnabled() {
+				return false;
+			}
+
+			@Override
+			public boolean isIncludePartitionInSearchHashes() {
+				return false;
+			}
+		};
 		return new ContainsTestCase[]{
 			new ContainsTestCase("all vs all", allPartitions(), allPartitions(), EQUAL),
 			new ContainsTestCase("all vs normal", allPartitions(), fromPartitionIds(1, 2, 3), LEFT_CONTAINS_RIGHT),

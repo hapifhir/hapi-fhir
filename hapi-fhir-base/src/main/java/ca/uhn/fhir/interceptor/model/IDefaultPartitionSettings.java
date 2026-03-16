@@ -66,4 +66,19 @@ public interface IDefaultPartitionSettings {
 	default RequestPartitionId getDefaultRequestPartitionId() {
 		return RequestPartitionId.fromPartitionId(getDefaultPartitionId());
 	}
+
+	/**
+	 * If enabled (default is <code>false</code>) the server will support data partitioning
+	 *
+	 * @since 8.2.0
+	 */
+	boolean isPartitioningEnabled();
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the <code>PARTITION_ID</code> value will be factored
+	 * into the hash values used in the <code>HFJ_SPIDX_xxx</code> tables.
+	 *
+	 * @since 8.2.0
+	 */
+	boolean isIncludePartitionInSearchHashes();
 }
