@@ -15,8 +15,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import org.hl7.fhir.r4.model.IdType;
 import ca.uhn.test.junit.StringToIntegerListArgumentConverter;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +28,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Map;
 
@@ -43,9 +42,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PatientIdPartitionInterceptorTest {
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
+	private final PartitionSettings myPartitionSettings = new PartitionSettings();
 	private PatientIdPartitionInterceptor mySvc;
 	private MatchUrlService myMatchUrlSvc;
-	private PartitionSettings myPartitionSettings = new PartitionSettings();
 
 	@Mock
 	private ISearchParamExtractor mySearchParamExtractor;
