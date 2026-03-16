@@ -1874,6 +1874,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		try {
 			T resource = (T) myJpaStorageResourceParser.toResource(entity, false);
 			reindexSearchParameters(resource, entity, theTransactionDetails);
+			if (mySearchDao != null) {
+				mySearchDao.reindex(entity);
+			}
 		} catch (Exception e) {
 			ourLog.warn("Failure during reindex: {}", e.toString());
 			theReindexOutcome.addWarning("Failed to reindex resource " + entity.getIdDt() + ": " + e);

@@ -12,13 +12,13 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -46,6 +46,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -57,17 +58,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
@@ -87,6 +83,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -157,6 +154,9 @@ class BaseHapiFhirResourceDaoTest {
 
 	@Mock
 	private CacheTagDefinitionDao myCacheTagDefinitionDao;
+
+	@Mock
+	private IFulltextSearchSvc myFulltextSearchDao;
 
 	@Captor
 	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
@@ -460,6 +460,32 @@ class BaseHapiFhirResourceDaoTest {
 		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
 
 		assertThat(actualParameters.getPartitionedUrls()).isEmpty();
+	}
+
+	@Test
+	public void reindex_withSearchParameterReindex_republishesToFullTextIndex() {
+		// given
+		JpaPid pid = JpaPid.fromId(123L);
+		ResourceTable entity = new ResourceTable();
+		entity.setIdForUnitTest(pid.getId());
+		entity.setResourceType("Patient");
+		entity.setFhirId("123");
+
+		Patient resource = new Patient();
+		when(myEntityManager.find(ResourceTable.class, pid, LockModeType.OPTIMISTIC)).thenReturn(entity);
+		when(myJpaStorageResourceParser.toResource(entity, false)).thenReturn(resource);
+		doReturn(entity)
+			.when(mySpiedSvc)
+			.updateEntity(any(), any(), any(), any(), anyBoolean(), anyBoolean(), any(), anyBoolean(), anyBoolean());
+
+		ReindexParameters params =
+			new ReindexParameters().setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.ALL);
+
+		// when
+		mySpiedSvc.reindex(pid, params, new SystemRequestDetails(), new TransactionDetails());
+
+		// then
+		verify(myFulltextSearchDao).reindex(entity);
 	}
 
 	@ParameterizedTest
