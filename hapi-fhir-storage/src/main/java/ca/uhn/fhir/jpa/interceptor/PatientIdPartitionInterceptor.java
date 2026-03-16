@@ -244,7 +244,7 @@ public class PatientIdPartitionInterceptor {
 
 				// One compartment
 				if (oCompartmentIdentity.size() == 1) {
-					return provideMultipleCompartmentPartition(theRequestDetails, policy, oCompartmentIdentity);
+					return provideMultipleCompartmentPartition(theRequestDetails, oCompartmentIdentity);
 				}
 
 				// Multiple compartments
@@ -394,10 +394,7 @@ public class PatientIdPartitionInterceptor {
 					SearchParameterMap params = theReadDetails.getSearchParams();
 					if (PATIENT_STR.equals(theReadDetails.getResourceType())) {
 						List<String> idParts = getResourceIdsForSearchParam(params, "_id");
-						return provideMultipleCompartmentPartition(
-								theRequestDetails,
-								ResourceCompartmentStoragePolicy.optionalSingleCompartment(),
-								idParts);
+						return provideMultipleCompartmentPartition(theRequestDetails, idParts);
 					} else if (isNotBlank(theReadDetails.getResourceType())) {
 						RuntimeResourceDefinition resourceDef =
 								myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
@@ -408,7 +405,7 @@ public class PatientIdPartitionInterceptor {
 							List<String> idParts = getResourceIdsForSearchParam(params, paramName);
 							if (!idParts.isEmpty()) {
 								ResourceCompartmentStoragePolicy policy = getPolicyForResourceType(theReadDetails);
-								return provideMultipleCompartmentPartition(theRequestDetails, policy, idParts);
+								return provideMultipleCompartmentPartition(theRequestDetails, idParts);
 							}
 						}
 					}
@@ -432,7 +429,7 @@ public class PatientIdPartitionInterceptor {
 		}
 
 		if (isBlank(theReadDetails.getResourceType())) {
-			return provideNonCompartmentMemberTypeResponse(theRequestDetails, null, null);
+			return provideNonCompartmentMemberTypeResponse(theRequestDetails);
 		}
 
 		// If we couldn't identify a patient ID by the URL, let's try using the
@@ -591,9 +588,7 @@ public class PatientIdPartitionInterceptor {
 	@SuppressWarnings("unused")
 	@Nullable
 	protected RequestPartitionId provideMultipleCompartmentPartition(
-			RequestDetails theRequestDetails,
-			ResourceCompartmentStoragePolicy thePolicy,
-			Collection<String> thePatientIdParts) {
+			RequestDetails theRequestDetails, Collection<String> thePatientIdParts) {
 		thePatientIdParts = deDuplicateCompartmentList(thePatientIdParts);
 		RequestPartitionId partitionId = null;
 		for (String compartmentId : thePatientIdParts) {
@@ -647,8 +642,7 @@ public class PatientIdPartitionInterceptor {
 	 */
 	@SuppressWarnings("unused")
 	@Nonnull
-	protected RequestPartitionId provideNonCompartmentMemberTypeResponse(
-			RequestDetails theRequestDetails, ResourceCompartmentStoragePolicy thePolicy, IBaseResource theResource) {
+	protected RequestPartitionId provideNonCompartmentMemberTypeResponse(RequestDetails theRequestDetails) {
 		return myPartitionSettings.getDefaultRequestPartitionId();
 	}
 

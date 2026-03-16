@@ -331,7 +331,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 		/*
 		 * In named partition mode, we also include the outer request partition as a part
-		 * of the targets. Wo do this because named partition mode is used for scenarios
+		 * of the targets. We do this because named partition mode is used for scenarios
 		 * like multi-tenancy where the outer request partition is a likely place for
 		 * references to live too. In unnamed partition mode, the expectation is that
 		 * the interceptor will always return a very specific list of partitions that
