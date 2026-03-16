@@ -1,0 +1,5 @@
+---
+type: fix
+jira: SMILE-7559
+title: "Previously, X-Request-ID was disappearing from meta.source when updating a resource with no changes.
+  Fix ensures that the resource has the meta.source populated whenever the resource hasn't been changed."
