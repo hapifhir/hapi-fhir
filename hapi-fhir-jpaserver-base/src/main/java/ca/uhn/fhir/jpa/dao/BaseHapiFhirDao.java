@@ -513,8 +513,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 					theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
-					changed = hasResourceSourceChanged(meta, theRequest, theEntity);
-
 					// TODO:  LD: Once 2024-02 it out the door we should consider further refactoring here to move
 					// more of this logic within the calculator and eliminate more local variables
 					final ResourceHistoryState calculate = myResourceHistoryCalculator.calculateResourceHistoryState(
@@ -599,26 +597,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		retVal.setChanged(changed);
 
 		return retVal;
-	}
-
-	/**
-	 * Determines if the resource source has changed by comparing meta.source and request ID
-	 * between the incoming request and the current entity version.
-	 */
-	private boolean hasResourceSourceChanged(
-			IBaseMetaType theMeta, RequestDetails theRequest, ResourceTable theEntity) {
-		if (theEntity.getFhirVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
-			return false;
-		}
-
-		String metaSource = MetaUtil.getSource(myFhirContext, theMeta);
-		ResourceHistoryTable currentEntity = theEntity.getCurrentVersionEntity();
-
-		String entitySource = currentEntity != null ? currentEntity.getSourceUri() : null;
-		String entityRequestId = currentEntity != null ? currentEntity.getRequestId() : null;
-		String requestId = theRequest != null ? theRequest.getRequestId() : null;
-
-		return !Objects.equals(entitySource, metaSource) || !Objects.equals(entityRequestId, requestId);
 	}
 
 	/**

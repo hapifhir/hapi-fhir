@@ -1346,18 +1346,19 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testUpdateWithNoChanges_PreservesMetaSource() {
+	public void testUpdateWithNoChanges_PreservesMetaSource_RequestID() {
 		// Create a practitioner with meta.source set
 		Practitioner practitioner = new Practitioner();
 		practitioner.addName().setFamily("TestPractitioner");
 		practitioner.setActive(true);
-		practitioner.getMeta().setSource("initial-request-123");
 
-		IIdType id = myPractitionerDao.create(practitioner, mySrd).getId().toUnqualifiedVersionless();
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestId("initial-request");
+		IIdType id = myPractitionerDao.create(practitioner, systemRequestDetails).getId().toUnqualifiedVersionless();
 
 		// Verify initial creation preserved the source correctly
-		Practitioner created = myPractitionerDao.read(id, mySrd);
-		assertThat(created.getMeta().getSource()).isEqualTo("initial-request-123");
+		Practitioner created = myPractitionerDao.read(id, systemRequestDetails);
+		assertThat(created.getMeta().getSource()).isEqualTo("#initial-request");
 
 		// Now perform UPDATE with same content but different meta.source
 		// This should be detected as NOP but source should still be updated
@@ -1365,15 +1366,12 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		updatePractitioner.setId(id);
 		updatePractitioner.addName().setFamily("TestPractitioner");
 		updatePractitioner.setActive(true);
-		updatePractitioner.getMeta().setSource("updated-request-456");
-
-		IIdType updatedId = myPractitionerDao.update(updatePractitioner, mySrd).getId();
 
 		// Read the updated resource
-		Practitioner updated = myPractitionerDao.read(updatedId.toUnqualifiedVersionless(), mySrd);
+		Practitioner updated = (Practitioner) myPractitionerDao.update(updatePractitioner, systemRequestDetails).getResource();
 
 		// ASSERTION: meta.source should reflect the updated value from the request
-		assertThat(updated.getMeta().getSource()).isEqualTo("updated-request-456");
+		assertThat(updated.getMeta().getSource()).isEqualTo("#initial-request");
 	}
 
 	/**
