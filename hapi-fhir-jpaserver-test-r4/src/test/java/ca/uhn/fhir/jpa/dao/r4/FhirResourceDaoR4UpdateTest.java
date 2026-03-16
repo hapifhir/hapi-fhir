@@ -1390,6 +1390,14 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			ResourceTable resourceTable = myResourceTableDao.findById(pid).orElseThrow();
 			assertThat(resourceTable.getVersion()).isEqualTo(1L);
 		});
+
+		// Verify no orphan history row was created (the core SMILE-11858 symptom:
+		// res_ver incremented without a corresponding hfj_res_ver entry)
+		runInTransaction(() -> {
+			List<ResourceHistoryTable> allHistory = myResourceHistoryTableDao.findAll();
+			assertThat(allHistory).hasSize(1);
+			assertThat(allHistory.get(0).getVersion()).isEqualTo(1L);
+		});
 	}
 
 	/**
