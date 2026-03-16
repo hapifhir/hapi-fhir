@@ -22,6 +22,10 @@ package ca.uhn.fhir.jpa.model.config;
 import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @since 5.0.0
  */
@@ -35,6 +39,7 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
 	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
 	private boolean myDatabasePartitionMode = false;
+	private Set<String> myAdditionalNonPartitionableResourceNames = Collections.emptySet();
 
 	public PartitionSettings() {
 		super();
@@ -239,6 +244,29 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 			boolean theConditionalCreateDuplicateIdentifiersEnabled) {
 		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;
 		return this;
+	}
+
+	/**
+	 * Returns the set of additional resource type names that should be treated as non-partitionable.
+	 * These are checked in addition to the hardcoded set in {@code BaseRequestPartitionHelperSvc}.
+	 *
+	 * @since 8.4.0
+	 */
+	public Set<String> getAdditionalNonPartitionableResourceNames() {
+		return myAdditionalNonPartitionableResourceNames;
+	}
+
+	/**
+	 * Adds a resource type name that should be treated as non-partitionable.
+	 * Resources added here will always be stored in the default partition.
+	 *
+	 * @since 8.4.0
+	 */
+	public void addAdditionalNonPartitionableResourceName(String theResourceName) {
+		if (myAdditionalNonPartitionableResourceNames.isEmpty()) {
+			myAdditionalNonPartitionableResourceNames = new HashSet<>();
+		}
+		myAdditionalNonPartitionableResourceNames.add(theResourceName);
 	}
 
 	public enum CrossPartitionReferenceMode {
