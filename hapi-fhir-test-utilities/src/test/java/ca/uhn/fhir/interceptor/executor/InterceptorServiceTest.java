@@ -293,6 +293,20 @@ class InterceptorServiceTest {
 	}
 
 	@Test
+	public void testInvokeInterceptor_withExtremeOrderValues() {
+		// Setup - register interceptors with order value differences that overflow int range (e.g., Integer.MIN_VALUE - 100)
+		InterceptorService svc = new InterceptorService();
+		svc.registerInterceptor(new MyTestInterceptorMinValue());
+		svc.registerInterceptor(new MyTestInterceptorOne());
+
+		// Test
+		List<Object> globalInterceptors = svc.getGlobalInterceptorsForUnitTest();
+		assertThat(globalInterceptors).hasSize(2);
+		assertInstanceOf(MyTestInterceptorMinValue.class, globalInterceptors.get(0), globalInterceptors.get(0).getClass().toString());
+		assertInstanceOf(MyTestInterceptorOne.class, globalInterceptors.get(1), globalInterceptors.get(1).getClass().toString());
+	}
+
+	@Test
 	void testInvokeGlobalInterceptorMethods() {
 		InterceptorService svc = new InterceptorService();
 
@@ -790,6 +804,24 @@ class InterceptorServiceTest {
 		@Hook(Pointcut.INTERCEPTOR_REGISTERED)
 		void registered();
 
+	}
+
+	@Interceptor(order = Integer.MIN_VALUE)
+	public class MyTestInterceptorMinValue {
+
+		private String myLastString0;
+		private boolean myNextReturn = true;
+
+		public MyTestInterceptorMinValue() {
+			super();
+		}
+
+		@Hook(Pointcut.TEST_RB)
+		public boolean testRb(String theString0) {
+			myLastString0 = theString0;
+			myInvocations.add("MyTestInterceptorMinValue.testRb");
+			return myNextReturn;
+		}
 	}
 
 	@Interceptor(order = 100)
