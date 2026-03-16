@@ -2,12 +2,13 @@ package ca.uhn.fhir.interceptor.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
-import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.hl7.fhir.r4.model.Patient;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -98,6 +99,13 @@ public class RequestPartitionIdTest {
 		RequestPartitionId expected = allPartitions();
 		assertEquals(expected, actual);
 
+	}
+
+	@Test
+	public void testGetPartitionFromUserDataIfPresent_None() {
+
+		Patient resource = new Patient();
+		assertThat(RequestPartitionId.getPartitionFromUserDataIfPresent(resource)).isNull();
 	}
 
 	@Test

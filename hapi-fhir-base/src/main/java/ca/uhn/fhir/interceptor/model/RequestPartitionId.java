@@ -116,7 +116,7 @@ public class RequestPartitionId implements IModelJson {
 	 */
 	@Deprecated(since = "8.10.0", forRemoval = true)
 	public static Optional<RequestPartitionId> getPartitionIfAssigned(IBaseResource theFromResource) {
-		return Optional.ofNullable((RequestPartitionId) theFromResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		return getPartitionFromUserDataIfPresent(theFromResource);
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class RequestPartitionId implements IModelJson {
 	 */
 	@Nonnull
 	public static Optional<RequestPartitionId> getPartitionFromUserDataIfPresent(IBaseResource theFromResource) {
-		return getPartitionIfAssigned(theFromResource);
+		return Optional.ofNullable((RequestPartitionId) theFromResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 	}
 
 	/**
