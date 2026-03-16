@@ -259,6 +259,41 @@ class CompositeInterceptorBroadcasterTest {
 		);
 	}
 
+	@Test
+	public void testCompositeBroadcasterBroadcastsInOrder_withExtremeOrderValues() {
+		// Setup - register interceptors with order value differences that overflow int range (e.g., Integer.MIN_VALUE - 100)
+		InterceptorService svc0 = new InterceptorService();
+		svc0.registerInterceptor(new Interceptor0());
+		InterceptorService svc1 = new InterceptorService();
+		svc1.registerInterceptor(new Interceptor1());
+		svc1.registerInterceptor(new InterceptorMinValue());
+		InterceptorService svc2 = new InterceptorService();
+		svc2.registerInterceptor(new Interceptor2());
+		InterceptorService[] services = new InterceptorService[]{svc0, svc1, svc2};
+
+		IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster
+			.newCompositeBroadcaster(services);
+
+		// Test
+		HookParams hookParams = new HookParams()
+			.add(String.class, "PARAM_A")
+			.add(String.class, "PARAM_B");
+		compositeBroadcaster.callHooksAndReturnObject(Pointcut.TEST_RO, hookParams);
+
+		// Verify
+		assertThat(myOrders).asList().containsExactly(
+			Integer.MIN_VALUE, -2, -1, 0, 1, 2, 3
+		);
+	}
+
+	@Interceptor
+	private class InterceptorMinValue {
+		@Hook(value = Pointcut.TEST_RO, order = Integer.MIN_VALUE)
+		public BaseServerResponseException hook() {
+			myOrders.add(Integer.MIN_VALUE);
+			return null;
+		}
+	}
 
 	@Interceptor
 	private class Interceptor0 {

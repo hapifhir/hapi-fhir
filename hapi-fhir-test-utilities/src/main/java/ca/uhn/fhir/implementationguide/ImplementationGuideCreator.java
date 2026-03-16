@@ -240,9 +240,4 @@ public class ImplementationGuideCreator {
 			}
 		}
 	}
-	//
-	//	@SuppressWarnings("unchecked")
-	//	public static <THROWS extends Throwable> void sneakyThrow(Throwable theThrowable) throws THROWS {
-	//		throw (THROWS) theThrowable;
-	//	}
 }

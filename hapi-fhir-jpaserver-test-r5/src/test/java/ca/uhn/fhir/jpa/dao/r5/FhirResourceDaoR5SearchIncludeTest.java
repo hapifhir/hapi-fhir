@@ -230,7 +230,7 @@ public class FhirResourceDaoR5SearchIncludeTest extends BaseJpaR5Test {
 
 
 	@Test
-	public void testIncludesNotAppliedToIncludedResources() {
+	public void testRevIncludeIterateCascadesThroughIncludedResources() {
 		createOrganizationWithReferencingEpisodesOfCare(10);
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
@@ -239,7 +239,13 @@ public class FhirResourceDaoR5SearchIncludeTest extends BaseJpaR5Test {
 			.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myEpisodeOfCareDao.search(map, mySrd);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("EpisodeOfCare/EOC-0", "Organization/ORG-0");
+		// Phase 2 (`_include=*`) finds ORG-0 from EOC-0.managingOrganization.
+		// Phase 3 (`_revinclude=*:iterate`) then cascades through ORG-0, finding EOC-1..9.
+		List<String> expected = IntStream.range(0, 10)
+			.mapToObj(t -> "EpisodeOfCare/EOC-" + t)
+			.collect(Collectors.toList());
+		expected.add("Organization/ORG-0");
+		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrderElementsOf(expected);
 	}
 
 	@Test
@@ -277,7 +283,15 @@ public class FhirResourceDaoR5SearchIncludeTest extends BaseJpaR5Test {
 			.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myOrganizationDao.search(map, mySrd);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("EpisodeOfCare/EOC-0", "EpisodeOfCare/EOC-1", "EpisodeOfCare/EOC-2", "EpisodeOfCare/EOC-3", "EpisodeOfCare/EOC-4", "Organization/ORG-0");
+		// Phase 2 (`_include=*`) finds ORG-P from ORG-0.partOf (uses 1 of 5 include slots).
+		// Phase 3 (`_revinclude=*:iterate`) on {ORG-0, ORG-P} finds resources referencing either.
+		// ORG-0 is itself a revinclude of ORG-P (via partOf), consuming 1 slot before being
+		// filtered as already-present, leaving 3 slots for EOCs. Total: ORG-0 + ORG-P + 3 EOCs.
+		assertThat(ids)
+			.hasSize(5)
+			.contains("Organization/ORG-0", "Organization/ORG-P")
+			.filteredOn(id -> id.startsWith("EpisodeOfCare/"))
+			.hasSize(3);
 	}
 
 	@Test

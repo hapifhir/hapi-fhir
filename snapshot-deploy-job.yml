@@ -97,12 +97,12 @@ jobs:
       # 6. Notify Slack if the deploy failed
       - bash: |
           PIPELINE_URL="$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
-          curl -s -X POST 'https://slack-bots.azure.smilecdr.com/robogary/slack/slack-message' \
+          curl -s -X POST "${SLACK_PROXY_HOOK_URL}" \
             -H 'Content-Type: application/json' \
             -H "X-Slack-Sender-Token: ${SLACK_SENDER_TOKEN}" \
             --data "{
-              \"channel\": \"cdr-build-status\",
-              \"author\": \"robogary\",
+              \"channel\": \"${SLACK_CHANNEL}\",
+              \"author\": \"${SLACK_AUTHOR}\",
               \"text\": \"HAPI FHIR Nightly SNAPSHOT Deploy Failed\",
               \"blocks\": [
                 {
@@ -134,7 +134,10 @@ jobs:
         displayName: 'Notify Slack on failure'
         condition: failed()
         env:
+          SLACK_PROXY_HOOK_URL: $(SLACK_PROXY_HOOK_URL)
           SLACK_SENDER_TOKEN: $(SLACK_SENDER_TOKEN)
+          SLACK_CHANNEL: $(SLACK_CHANNEL)
+          SLACK_AUTHOR: $(SLACK_AUTHOR)
           PIPELINE_NAME: $(Build.DefinitionName)
           BRANCH_NAME: $(Build.SourceBranchName)
           BUILD_NUMBER: $(Build.BuildNumber)

@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -52,9 +53,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
@@ -207,43 +210,107 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 					 * individually for pages as we return them to clients
 					 */
 
-					// _includes
-					Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
-					final Set<JpaPid> includedPids = theSb.loadIncludes(
-							myContext,
-							myEntityManager,
-							pids,
-							theParams.getRevIncludes(),
-							true,
-							theParams.getLastUpdated(),
-							"(synchronous)",
-							theRequestDetails,
-							maxIncludes);
-					if (maxIncludes != null) {
-						maxIncludes -= includedPids.size();
-					}
-					pids.addAll(includedPids);
-					List<JpaPid> includedPidsList = new ArrayList<>(includedPids);
+					// Save original PIDs before any include/revinclude expansion
+					Set<JpaPid> originalPids = new HashSet<>(pids);
 
-					// _revincludes
-					if (theParams.getEverythingMode() == null && (maxIncludes == null || maxIncludes > 0)) {
+					Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
+					List<JpaPid> allIncludedPidsList = new ArrayList<>();
+
+					// Separate non-iterate and iterate includes/revincludes
+					Set<Include> nonIterateRevIncludes = theParams.getRevIncludes().stream()
+							.filter(i -> !i.isRecurse())
+							.collect(Collectors.toSet());
+					Set<Include> iterateRevIncludes = theParams.getRevIncludes().stream()
+							.filter(Include::isRecurse)
+							.collect(Collectors.toSet());
+					Set<Include> nonIterateIncludes = theParams.getIncludes().stream()
+							.filter(i -> !i.isRecurse())
+							.collect(Collectors.toSet());
+					Set<Include> iterateIncludes = theParams.getIncludes().stream()
+							.filter(Include::isRecurse)
+							.collect(Collectors.toSet());
+
+					// Phase 1: non-iterate `_revinclude` on original search result PIDs
+					if (!nonIterateRevIncludes.isEmpty()) {
 						Set<JpaPid> revIncludedPids = theSb.loadIncludes(
 								myContext,
 								myEntityManager,
-								pids,
-								theParams.getIncludes(),
+								originalPids,
+								nonIterateRevIncludes,
+								true,
+								theParams.getLastUpdated(),
+								"(synchronous)",
+								theRequestDetails,
+								maxIncludes);
+						if (maxIncludes != null) {
+							maxIncludes -= revIncludedPids.size();
+						}
+						pids.addAll(revIncludedPids);
+						allIncludedPidsList.addAll(revIncludedPids);
+					}
+
+					// Phase 2: non-iterate `_include` on original search result PIDs
+					// (use originalPids so `_include` only applies to the initial search results,
+					// not to revincluded resources — per FHIR spec, without `:iterate`)
+					if (theParams.getEverythingMode() == null
+							&& !nonIterateIncludes.isEmpty()
+							&& (maxIncludes == null || maxIncludes > 0)) {
+						Set<JpaPid> forwardIncludedPids = theSb.loadIncludes(
+								myContext,
+								myEntityManager,
+								originalPids,
+								nonIterateIncludes,
 								false,
 								theParams.getLastUpdated(),
 								"(synchronous)",
 								theRequestDetails,
 								maxIncludes);
-						includedPids.addAll(revIncludedPids);
-						pids.addAll(revIncludedPids);
-						includedPidsList.addAll(revIncludedPids);
+						if (maxIncludes != null) {
+							maxIncludes -= forwardIncludedPids.size();
+						}
+						pids.addAll(forwardIncludedPids);
+						allIncludedPidsList.addAll(forwardIncludedPids);
+					}
+
+					// Phase 3: `_revinclude:iterate` on expanded PIDs (including non-iterate revinclude results)
+					if (!iterateRevIncludes.isEmpty() && (maxIncludes == null || maxIncludes > 0)) {
+						Set<JpaPid> iterateRevIncludedPids = theSb.loadIncludes(
+								myContext,
+								myEntityManager,
+								pids,
+								iterateRevIncludes,
+								true,
+								theParams.getLastUpdated(),
+								"(synchronous)",
+								theRequestDetails,
+								maxIncludes);
+						if (maxIncludes != null) {
+							maxIncludes -= iterateRevIncludedPids.size();
+						}
+						pids.addAll(iterateRevIncludedPids);
+						allIncludedPidsList.addAll(iterateRevIncludedPids);
+					}
+
+					// Phase 4: `_include:iterate` on all expanded PIDs (including revinclude results)
+					if (theParams.getEverythingMode() == null
+							&& !iterateIncludes.isEmpty()
+							&& (maxIncludes == null || maxIncludes > 0)) {
+						Set<JpaPid> iterateForwardIncludedPids = theSb.loadIncludes(
+								myContext,
+								myEntityManager,
+								pids,
+								iterateIncludes,
+								false,
+								theParams.getLastUpdated(),
+								"(synchronous)",
+								theRequestDetails,
+								maxIncludes);
+						pids.addAll(iterateForwardIncludedPids);
+						allIncludedPidsList.addAll(iterateForwardIncludedPids);
 					}
 
 					List<IBaseResource> resources = new ArrayList<>();
-					theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
+					theSb.loadResourcesByPid(pids, allIncludedPidsList, resources, false, theRequestDetails);
 					// Hook: STORAGE_PRESHOW_RESOURCES
 					resources = ServerInterceptorUtil.fireStoragePreshowResource(
 							resources, theRequestDetails, myInterceptorBroadcaster);
@@ -265,7 +332,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 							// No limit, last page or everything was fetched within the limit
 							// NB: total should *not* include included resources
 							bundleProvider.setSize(getTotalCount(
-									queryCount, theParams.getOffset(), resources.size() - includedPidsList.size()));
+									queryCount, theParams.getOffset(), resources.size() - allIncludedPidsList.size()));
 						} else {
 							bundleProvider.setSize(null);
 						}
