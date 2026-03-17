@@ -1,5 +1,7 @@
 package ca.uhn.test.concurrency;
 
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -153,6 +155,90 @@ class PointcutLatchTest {
 			assertThat(e.getMessage()).startsWith("HAPI-2344: " + TEST_LATCH_NAME + " PointcutLatch had 1 exceptions.  Throwing first one.");
 		}
 		// @AfterEach clear() handles cleanup
+	}
+
+	// --- constructor, convenience methods, and utility coverage ---
+
+	@Test
+	void testConstructorWithIPointcut() {
+		PointcutLatch latch = new PointcutLatch(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED);
+		assertThat(latch.toString()).contains(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED.name());
+	}
+
+	@Test
+	void testRunWithExpectedCount() throws InterruptedException {
+		myPointcutLatch.runWithExpectedCount(1, this::invoke);
+		// no exception means set, invoke, and await all succeeded
+		assertThat(myPointcutLatch.isSet()).isFalse();
+	}
+
+	@Test
+	void testSetDefaultTimeoutSeconds_AffectsAwaitExpected() throws InterruptedException {
+		myPointcutLatch.setDefaultTimeoutSeconds(1);
+		myPointcutLatch.setExpectedCount(1);
+		// invoke never called — should timeout using the 1s default
+		try {
+			myPointcutLatch.awaitExpected();
+			fail();
+		} catch (LatchTimedOutError e) {
+			assertThat(e.getMessage()).contains("timed out waiting 1 seconds");
+		}
+	}
+
+	@Test
+	void testSetExpectAtLeast_AllowsMoreInvocationsThanExpected() throws InterruptedException {
+		myPointcutLatch.setExpectAtLeast(1);
+		invoke();
+		invoke(); // second invoke should not cause failure
+		myPointcutLatch.awaitExpected();
+	}
+
+	@Test
+	void testSetStrictFalse_SuppressesUnexpectedInvocationError() throws InterruptedException {
+		myPointcutLatch.setStrict(false);
+		invoke(); // unexpected — but strict=false so checkExceptions() is a no-op
+
+		// setExpectedCount must succeed despite pending unexpected invocation
+		myPointcutLatch.setExpectedCount(1);
+		invoke();
+		myPointcutLatch.awaitExpected();
+	}
+
+	@Test
+	void testToString_ContainsName() {
+		assertThat(myPointcutLatch.toString()).contains(TEST_LATCH_NAME);
+	}
+
+	@Test
+	void testGetLatchInvocationParameter_ReturnsSingleArg() throws InterruptedException {
+		myPointcutLatch.setExpectedCount(1);
+		String payload = "test-payload";
+		myPointcutLatch.call(payload);
+		List<HookParams> hookParams = myPointcutLatch.awaitExpected();
+
+		assertThat(PointcutLatch.getLatchInvocationParameter(hookParams)).isEqualTo(payload);
+	}
+
+	@Test
+	void testGetLatchInvocationParameter_ByIndex() throws InterruptedException {
+		myPointcutLatch.setExpectedCount(2);
+		myPointcutLatch.call("first");
+		myPointcutLatch.call("second");
+		List<HookParams> hookParams = myPointcutLatch.awaitExpected();
+
+		assertThat(PointcutLatch.getLatchInvocationParameter(hookParams, 0)).isEqualTo("first");
+		assertThat(PointcutLatch.getLatchInvocationParameter(hookParams, 1)).isEqualTo("second");
+	}
+
+	@Test
+	void testGetInvocationParameterOfType_ReturnsTypedArg() throws InterruptedException {
+		myPointcutLatch.setExpectedCount(1);
+		String payload = "typed-payload";
+		myPointcutLatch.call(payload);
+		List<HookParams> hookParams = myPointcutLatch.awaitExpected();
+
+		String result = PointcutLatch.getInvocationParameterOfType(hookParams, String.class);
+		assertThat(result).isEqualTo(payload);
 	}
 
 	@Test
