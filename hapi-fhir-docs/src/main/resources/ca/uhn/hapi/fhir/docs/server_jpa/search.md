@@ -57,6 +57,7 @@ GET /Patient?_compartmentChange=ge2024-01-01&_compartmentChange=le2024-01-31
 #### Limitations
 
 * This parameter is only supported for Patient searches. Using it on other resource types will result in an error.
+* In MegaScale configurations, this parameter is only supported in REQUEST_TENANT partition mode. It is not supported in PATIENT_ID or BUCKETED_PATIENT_ID partition modes because these modes require cross-partition search which is not available in MegaScale.
 
 <a id="uplifted-refchains"></a>
 
