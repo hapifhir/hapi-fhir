@@ -302,7 +302,7 @@ public interface ITestDataBuilder {
 		return buildResource("Practitioner", theModifiers);
 	}
 
-	default void deleteResource(IIdType theIIdType){
+	default void deleteResource(IIdType theIIdType) {
 		doDeleteResource(theIIdType);
 	}
 

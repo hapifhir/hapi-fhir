@@ -147,7 +147,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 			return;
 		}
 
-		if (myUnexpectedInvocations.size() > 0) {
+		if (!myUnexpectedInvocations.isEmpty()) {
 			PointcutLatchException firstException = myUnexpectedInvocations.get(0);
 			int size = myUnexpectedInvocations.size();
 			if (firstException != null) {
@@ -160,16 +160,14 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	public void invoke(IPointcut thePointcut, HookParams theArgs) {
 		myLastInvoke.set(System.currentTimeMillis());
 
-		try {
-			PointcutLatchSession session = myPointcutLatchSession.get();
-			if (session == null) {
-				throw new PointcutLatchException(Msg.code(1485) + "invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke().", myName, theArgs);
-			}
-			session.invoke(theArgs);
-		} catch (PointcutLatchException e) {
+		PointcutLatchSession session = myPointcutLatchSession.get();
+		if (session == null) {
+			PointcutLatchException e =  new PointcutLatchException(Msg.code(1485) + "invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke().", myName, theArgs);
+			ourLog.error(e.getMessage(), e);
 			myUnexpectedInvocations.add(e);
-			throw e;
+			return;
 		}
+		session.invoke(theArgs);
 	}
 
 	public void call(Object arg) {
