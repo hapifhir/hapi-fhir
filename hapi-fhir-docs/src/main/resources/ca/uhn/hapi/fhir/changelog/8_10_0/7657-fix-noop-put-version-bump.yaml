@@ -1,6 +1,7 @@
 ---
 type: fix
 jira: SMILE-11858
+backport: 8.6.7
 title: "Previously, performing a no-op PUT (update with unchanged content) on a resource that existed
   before the V8_4_0 database migration (which introduced the RES_TYPE_ID column) would incorrectly
   increment the resource version number without creating a corresponding history entry. This was caused
