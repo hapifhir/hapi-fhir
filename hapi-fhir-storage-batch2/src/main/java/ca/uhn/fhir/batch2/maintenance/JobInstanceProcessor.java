@@ -135,16 +135,13 @@ public class JobInstanceProcessor {
 			}
 		}
 
-		// enqueue all READY chunks
-		enqueueReadyChunks(theInstance, jobDefinition);
-
 		// Safety net: flip any late-arriving GATE_WAITING chunks for the current step.
-		// This runs AFTER enqueueReadyChunks so that newly-flipped chunks are dispatched
-		// on the NEXT maintenance pass, not this one. This avoids extra sendWorkChannelMessage
-		// calls in the current pass.
 		if (theInstance.hasGatedStep()) {
 			enqueueGateWaitingChunksForCurrentStep(theInstance, jobDefinition);
 		}
+
+		// enqueue all READY chunks
+		enqueueReadyChunks(theInstance, jobDefinition);
 
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
 	}
@@ -289,8 +286,8 @@ public class JobInstanceProcessor {
 		// hasn't flipped them yet, so there's nothing for the safety net to do.
 		Set<WorkChunkStatusEnum> existingStatuses =
 				myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(theInstance.getInstanceId(), currentStepId);
-		if (existingStatuses.isEmpty() || existingStatuses.equals(Set.of(WorkChunkStatusEnum.GATE_WAITING))) {
-			// No chunks or only GATE_WAITING chunks — step hasn't been advanced yet
+		if (existingStatuses.isEmpty()) {
+			// No chunks — step hasn't been advanced yet
 			return;
 		}
 
@@ -298,7 +295,7 @@ public class JobInstanceProcessor {
 				JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, currentStepId);
 		boolean isReductionStep = cursor.isReductionStep();
 
-		int updated = myJobPersistence.enqueueGateWaitingChunksForCurrentStep(
+		int updated = myJobPersistence.releaseGateWaitingChunksForCurrentStep(
 				theInstance.getInstanceId(), currentStepId, isReductionStep);
 		if (updated > 0) {
 			ourLog.info(

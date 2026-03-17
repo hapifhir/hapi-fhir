@@ -297,7 +297,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// Safety net calls fetchInstance + getDistinctWorkChunkStatesForJobAndStep again;
 		// the latter returns COMPLETED (already advanced), so it proceeds to call
 		// enqueueGateWaitingChunksForCurrentStep (which flips any remaining GATE_WAITING chunks)
-		verify(myJobPersistence).enqueueGateWaitingChunksForCurrentStep(eq(INSTANCE_ID), eq(STEP_1), eq(false));
+		verify(myJobPersistence).releaseGateWaitingChunksForCurrentStep(eq(INSTANCE_ID), eq(STEP_1), eq(false));
 		verifyNoMoreInteractions(myJobPersistence);
 		JobWorkNotification payload0 = myMessageCaptor.getAllValues().get(0).getPayload();
 		assertEquals(STEP_2, payload0.getTargetStepId());

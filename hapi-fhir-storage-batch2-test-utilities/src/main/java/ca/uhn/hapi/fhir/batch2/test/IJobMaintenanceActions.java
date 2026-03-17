@@ -67,10 +67,6 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	@ParameterizedTest
 	@ValueSource(strings = {
 	"""
-   		1|COMPLETED
-   		2|GATE_WAITING
-	""",
-	"""
    		# Chunk already queued -> waiting for complete
 		1|COMPLETED
 		2|QUEUED

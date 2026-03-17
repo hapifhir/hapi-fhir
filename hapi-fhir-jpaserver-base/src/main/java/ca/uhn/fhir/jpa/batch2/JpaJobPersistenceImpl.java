@@ -672,7 +672,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public int enqueueGateWaitingChunksForCurrentStep(
+	public int releaseGateWaitingChunksForCurrentStep(
 			String theJobInstanceId, String theCurrentStepId, boolean theIsReductionStep) {
 		ourLog.debug(
 				"Safety net: checking for late-arriving GATE_WAITING chunks for instance {} step {}.",

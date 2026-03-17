@@ -1341,8 +1341,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// After first pass: late chunk should be READY (flipped by safety net, awaiting next dispatch)
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
-				.as("Late-arriving chunk should be flipped to READY by safety net")
-				.isEqualTo(WorkChunkStatusEnum.READY);
+				.as("Late-arriving chunk should be QUEUED by safety net")
+				.isEqualTo(WorkChunkStatusEnum.QUEUED);
 		});
 
 		clearInvocations(myBatchSender);
