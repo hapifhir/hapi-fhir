@@ -163,8 +163,8 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		PointcutLatchSession session = myPointcutLatchSession.get();
 		if (session == null) {
 			PointcutLatchException e =  new PointcutLatchException(Msg.code(1485) + "invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke().", myName, theArgs);
-			ourLog.error(e.getMessage(), e);
 			myUnexpectedInvocations.add(e);
+			ourLog.error(e.getMessage(), e);
 			return;
 		}
 		session.invoke(theArgs);
