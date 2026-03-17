@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: 7602
+issue: 7612
 jira: SMILE-11707
 backport: 8.8.1
 title: "Previously, instantiating ValidatorPolicyAdvisor directly (e.g. new ValidatorPolicyAdvisor())
