@@ -587,8 +587,13 @@ public class ConsentInterceptor {
 		return retVal;
 	}
 
-	private boolean isSkipServiceForRequest(RequestDetails theRequestDetails) {
-		// TODO MM: we could potentially aggregate all checks to skip consent into a single method
+	/**
+	 * Determine if consent should be bypassed for the given request.
+	 * @param theRequestDetails the request
+	 * @return true if the consent checks should be skipped for the request, false otherwise
+	 */
+	protected boolean isSkipServiceForRequest(RequestDetails theRequestDetails) {
+		// we could potentially aggregate all checks to skip consent into a single method
 		// isRequestAuthorized, isAllowListed into isSkipServiceForRequest
 		return isMetadataPath(theRequestDetails) || isMetaOperation(theRequestDetails);
 	}
