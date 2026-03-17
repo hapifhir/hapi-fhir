@@ -30,8 +30,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -46,7 +46,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private boolean myStrict = true;
 	private final AtomicLong myLastInvoke = new AtomicLong();
 	private int myDefaultTimeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
-	private final List<PointcutLatchException> myUnexpectedInvocations = new ArrayList<>();
+	private final List<PointcutLatchException> myUnexpectedInvocations = new CopyOnWriteArrayList<>();
 	private final AtomicReference<PointcutLatchSession> myPointcutLatchSession = new AtomicReference<>();
 
 	public PointcutLatch(IPointcut thePointcut) {
@@ -80,6 +80,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	}
 
 	public void setExpectedCount(int theCount, boolean theExactMatch) {
+		checkExceptions();
 		if (myPointcutLatchSession.get() != null) {
 			String previousStack = myPointcutLatchSession.get().getStackTrace();
 			throw new PointcutLatchException(Msg.code(1480) + "setExpectedCount() called before previous awaitExpected() completed. Previous set stack:\n" + previousStack, myName);
@@ -133,13 +134,8 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	@Override
 	public void clear() {
 		ourLog.debug("Clearing latch {}", getName());
-		try {
-			// this method can throw exception so clear in a finally block
-			checkExceptions();
-		} finally {
-			myPointcutLatchSession.set(null);
-			myUnexpectedInvocations.clear();
-		}
+		myPointcutLatchSession.set(null);
+		myUnexpectedInvocations.clear();
 	}
 
 	private void checkExceptions() {

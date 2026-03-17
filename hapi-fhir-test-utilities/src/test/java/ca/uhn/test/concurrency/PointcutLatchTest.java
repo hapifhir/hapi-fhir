@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,9 +24,7 @@ class PointcutLatchTest {
 
 	@AfterEach
 	void after() {
-		myPointcutLatch.setStrict(false);
 		myPointcutLatch.clear();
-		myPointcutLatch.setStrict(true);
 	}
 
 	@Test
@@ -106,37 +106,34 @@ class PointcutLatchTest {
 
 	@Test
 	void testInvokeCalledBeforeExpect_DoesNotThrowImmediately() {
-		// invoke() outside a session must NOT throw — the error is deferred to clear()
+		// invoke() outside a session must NOT throw — the error is deferred to setExpectedCount()
 		invoke();
 
 		assertThat(myPointcutLatch.getLastInvoke()).isPositive();
-
-		// myUnexpectedInvocations has one entry; suppress AssertionError in @AfterEach clear()
-		myPointcutLatch.setStrict(false);
+		// @AfterEach clear() is safe since clear() no longer throws
 	}
 
 	@Test
-	void testInvokeCalledBeforeExpect_ClearThrowsAssertionError() {
+	void testInvokeCalledBeforeExpect_ClearDoesNotThrow() {
 		invoke();
 
+		// clear() must NOT throw — error is deferred to the next setExpectedCount()
+		myPointcutLatch.clear();
+
+		assertThat(myPointcutLatch.isSet()).isFalse();
+	}
+
+	@Test
+	void testInvokeCalledBeforeExpect_ErrorSurfacedAtNextSetExpectedCount() {
+		invoke(); // unexpected invocation stored; clear() NOT called so it survives to setExpectedCount()
+
 		try {
-			myPointcutLatch.clear();
+			myPointcutLatch.setExpectedCount(1);
 			fail();
 		} catch (AssertionError e) {
 			assertThat(e.getMessage()).startsWith("HAPI-2344: " + TEST_LATCH_NAME + " PointcutLatch had 1 exceptions.  Throwing first one.");
 		}
-		// myUnexpectedInvocations was already cleared above, @AfterEach is clean
-	}
-
-	@Test
-	void testInvokeCalledBeforeExpect_WithStrictFalse_NeverThrows() {
-		myPointcutLatch.setStrict(false);
-
-		// Neither invoke nor clear should throw
-		invoke();
-		myPointcutLatch.clear();
-
-		assertThat(myPointcutLatch.isSet()).isFalse();
+		// @AfterEach clear() handles cleanup
 	}
 
 	@Test
@@ -148,14 +145,37 @@ class PointcutLatchTest {
 		Thread asyncThread = future.get();
 		assertThat(asyncThread).isNotEqualTo(Thread.currentThread());
 
-		// clear() surfaces the unexpected invocation as an AssertionError on the test thread
+		// error surfaces at next setExpectedCount() — clear() NOT called so invocation survives
 		try {
-			myPointcutLatch.clear();
+			myPointcutLatch.setExpectedCount(1);
 			fail();
 		} catch (AssertionError e) {
 			assertThat(e.getMessage()).startsWith("HAPI-2344: " + TEST_LATCH_NAME + " PointcutLatch had 1 exceptions.  Throwing first one.");
 		}
-		// myUnexpectedInvocations was already cleared above, @AfterEach is clean
+		// @AfterEach clear() handles cleanup
+	}
+
+	@Test
+	void testConcurrentUnexpectedInvocations_AllRecorded()
+			throws ExecutionException, InterruptedException {
+		// Invoke from multiple threads concurrently outside a session.
+		// CopyOnWriteArrayList must not lose or corrupt any entries.
+		ExecutorService pool = Executors.newFixedThreadPool(4);
+		List<Future<Thread>> futures = new ArrayList<>();
+		for (int i = 0; i < 4; i++) {
+			futures.add(pool.submit(this::invoke));
+		}
+		for (Future<Thread> f : futures) {
+			f.get(); // must not throw ExecutionException
+		}
+		pool.shutdown();
+
+		try {
+			myPointcutLatch.setExpectedCount(1);
+			fail();
+		} catch (AssertionError e) {
+			assertThat(e.getMessage()).contains("had 4 exceptions");
+		}
 	}
 
 }
