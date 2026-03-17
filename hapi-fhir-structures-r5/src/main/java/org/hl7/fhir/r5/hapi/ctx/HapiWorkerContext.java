@@ -274,8 +274,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public int getDefinitionsVersion() {
 		/* 	This is not called in 6.8.2 of org.hl7.fhir.core except within implementations of
-			storeAnalysis/retrieveAnalysis, which we do not implement in HAPI -dotasek
-		 */
+		storeAnalysis/retrieveAnalysis, which we do not implement in HAPI -dotasek
+		*/
 		throw new UnsupportedOperationException(Msg.code(2861));
 	}
 
@@ -287,9 +287,9 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public Object retrieveAnalysis(Class className) {
 		/*  org.hl7.fhir.core will produce the necessary analysis on-demand if this returns null, at a performance cost.
-        	If performance in validation or FHIRPath execution becomes an issue, this will have to be implemented in a
-        	thread-safe manner. -dotasek
-        */
+			If performance in validation or FHIRPath execution becomes an issue, this will have to be implemented in a
+			thread-safe manner. -dotasek
+		*/
 		return null;
 	}
 

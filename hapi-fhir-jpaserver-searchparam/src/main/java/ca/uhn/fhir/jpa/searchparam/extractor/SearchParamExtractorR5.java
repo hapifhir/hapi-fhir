@@ -152,9 +152,9 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 
 		@Override
 		/* 	The identifier parameter introduced in org.hl7.fhir.core 6.8.2 is unused by tests in that project, and
-            omitted in most of its internal implementations. If tests are introduced in subsequent releases that rely on
-            it, its use may need to be included here. -dotasek
-        */
+			omitted in most of its internal implementations. If tests are introduced in subsequent releases that rely on
+			it, its use may need to be included here. -dotasek
+		*/
 		public Base resolveReference(
 				FHIRPathEngine engine, Object appContext, String theUrl, Identifier identifier, Base refContext) {
 			Base retVal = (Base) BundleUtil.getReferenceInBundle(getContext(), theUrl, appContext);
