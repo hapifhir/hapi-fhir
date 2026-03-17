@@ -61,7 +61,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -220,7 +219,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setVersion(igV1.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setVersionPolicy(theVersionPolicyEnum)
-			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		;
 
 		PackageInstallationSpec dryRunSpec = new PackageInstallationSpec();
 		dryRunSpec
@@ -229,7 +228,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setVersionPolicy(theVersionPolicyEnum)
 			.setDryRun(true)
-			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		;
 
 		for (int i = 0; i < 2; i++) {
 			CodeSystem codeSystem = parser.parseResource(CodeSystem.class, codeSystemStr);
@@ -299,6 +298,111 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 					.stream().anyMatch(m -> m.contains("would be overwritten") && m.contains(rt)));
 			}
 		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = PackageInstallationSpec.InstallModeEnum.class, mode = EnumSource.Mode.EXCLUDE, names = "STORE_ONLY")
+	public void dryRunInstall_installMode_shouldntEffectDryRun(PackageInstallationSpec.InstallModeEnum theModeEnum, @TempDir Path theTempDir) throws IOException {
+		// setup
+		// terminology resources
+		String codeSystemStr;
+		String valueSetStr;
+		String conceptMapStr;
+
+		{
+			codeSystemStr = """
+				{                                                                                                                                     \s
+				    "resourceType": "CodeSystem",
+				    "url": "http://example.org/CodeSystem/my-codes",
+				    "status": "active",
+				    "content": "complete",
+				    "concept": [
+				      { "code": "foo", "display": "Foo" }
+				    ]
+				}
+				""";
+			valueSetStr = """
+				{
+				    "resourceType": "ValueSet",
+				    "url": "http://example.org/ValueSet/my-valueset",
+				    "status": "active",
+				    "compose": {
+				      "include": [
+				        { "system": "http://example.org/CodeSystem/my-codes" }
+				      ]
+				    }
+				}
+				""";
+			conceptMapStr = """
+				{
+				    "resourceType": "ConceptMap",
+				    "url": "http://example.org/ConceptMap/my-map",
+				    "status": "active",
+				    "group": [
+				      {
+				        "source": "http://example.org/CodeSystem/source-codes",
+				        "target": "http://example.org/CodeSystem/target-codes",
+				        "element": [
+				          {
+				            "code": "foo",
+				            "target": [{ "code": "bar", "equivalence": "equivalent" }]
+				          }
+				        ]
+				      }
+				    ]
+				}
+				""";
+		}
+
+		String igName = "my.package.id";
+
+		IParser parser = myFhirContext.newJsonParser();
+
+		Path igdir1 = Files.createDirectory(Path.of(theTempDir.toString(), "dir1"));
+
+		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, igName, "1.0.0");
+		igCreator.setDirectory(igdir1);
+
+		// how many installation specs
+		PackageInstallationSpec installedSpec = new PackageInstallationSpec();
+		installedSpec
+			.setName(igCreator.getPackageName())
+			.setVersion(igCreator.getPackageVersion())
+			.setInstallMode(theModeEnum)
+			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION)
+			.setDryRun(true)
+		;
+
+		for (int i = 0; i < 2; i++) {
+			CodeSystem codeSystem = parser.parseResource(CodeSystem.class, codeSystemStr);
+			ValueSet valueSet = parser.parseResource(ValueSet.class, valueSetStr);
+			ConceptMap conceptMap = parser.parseResource(ConceptMap.class, conceptMapStr);
+
+			// ensure different versions
+			codeSystem.setVersion("1.0." + i);
+			valueSet.setVersion("1.0." + i);
+			conceptMap.setVersion("1.0." + i);
+
+			igCreator.addResourceToIG("codesystem", codeSystem);
+			igCreator.addResourceToIG("valueset", valueSet);
+			igCreator.addResourceToIG("conceptmap", conceptMap);
+		}
+
+		Path dryRunPath = igCreator.createTestIG();
+		installedSpec
+			.setPackageContents(Files.readAllBytes(dryRunPath));
+
+		// test
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(installedSpec);
+
+		// verify
+		assertTrue(outcome.getMessage().stream()
+			.anyMatch(m -> m.contains("Dry-run complete")));
+
+		verifyResourceCountInDB("NamingSystem", 0);
+		verifyResourceCountInDB("CodeSystem", 0);
+		verifyResourceCountInDB("ValueSet", 0);
+		verifyResourceCountInDB("ConceptMap", 0);
 	}
 
 	/**

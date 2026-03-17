@@ -1,5 +1,6 @@
 ---
 type: fix
+issue: 7601
 jira: SMILE-11050
 title: "Previously, persisting a resource with a Timing search parameter whose boundsPeriod contained only
   a start date (no end date) could result in a NullPointerException during search parameter extraction

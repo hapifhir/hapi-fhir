@@ -274,6 +274,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 
 	@Override
 	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
 		setResourceType(theResource.getResourceType());
 		return this;
 	}

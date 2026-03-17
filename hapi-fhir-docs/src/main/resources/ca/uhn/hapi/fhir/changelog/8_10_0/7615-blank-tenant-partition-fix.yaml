@@ -1,5 +1,6 @@
 ---
 type: fix
+issue: 7615
 jira: SMILE-11797
 backport: 8.6.6
 title: "Previously, setting a blank tenant ID on a RequestDetails would cause partition resolution to fail

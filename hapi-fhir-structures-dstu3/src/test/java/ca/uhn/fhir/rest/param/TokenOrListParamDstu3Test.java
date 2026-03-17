@@ -7,19 +7,32 @@ import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TokenOrListParamDstu3Test {
 
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private final FhirContext myCtx = FhirContext.forDstu3Cached();
+
+	@Test
+	public void testListConstructor() {
+		List<TokenParam> params = List.of(
+			 new TokenParam("system0", "code0"),
+			 new TokenParam("system1", "code1")
+		);
+
+		TokenOrListParam orParams = new TokenOrListParam(params);
+		assertEquals(2, orParams.size());
+	}
 
 	/**
 	 * See #192
 	 */
 	@Test
-	public void testParseExcaped() {
+	public void testParseEscaped() {
 		TokenOrListParam params = new TokenOrListParam();
-		params.setValuesAsQueryTokens(ourCtx, null, QualifiedParamList.singleton("system|code-include-but-not-end-with-comma\\,suffix"));
+		params.setValuesAsQueryTokens(myCtx, null, QualifiedParamList.singleton("system|code-include-but-not-end-with-comma\\,suffix"));
 
 		assertThat(params.getListAsCodings()).hasSize(1);
 		assertEquals("system", params.getListAsCodings().get(0).getSystemElement().getValue());

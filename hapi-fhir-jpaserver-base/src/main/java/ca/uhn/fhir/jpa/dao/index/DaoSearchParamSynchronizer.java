@@ -25,10 +25,12 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -129,6 +131,15 @@ public class DaoSearchParamSynchronizer {
 			next.setResourceId(theEntity.getId().getId());
 			next.setPartitionId(theEntity.getPartitionId());
 			next.calculateHashes();
+			// set the resource table for some search parameters because otherwise there's a risk the search
+			// parameter could be inserted into the DB before the resource it depends on.
+			if (next instanceof BaseResourceIndexedSearchParam searchParam) {
+				searchParam.setResource(theEntity);
+			}
+			if (next instanceof ResourceLink link && link.getTargetResourcePid() != null) {
+				JpaPid targetId = JpaPid.fromId(link.getTargetResourcePid(), link.getTargetResourcePartitionId());
+				link.setTargetResourceTable(myEntityManager.getReference(ResourceTable.class, targetId));
+			}
 		}
 
 		/*
