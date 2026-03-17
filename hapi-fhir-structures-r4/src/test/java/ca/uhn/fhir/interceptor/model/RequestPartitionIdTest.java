@@ -1,16 +1,20 @@
 package ca.uhn.fhir.interceptor.model;
 
+import ca.uhn.fhir.rest.api.Constants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.allPartitions;
@@ -23,31 +27,48 @@ import static ca.uhn.fhir.interceptor.model.RequestPartitionIdTest.ContainsTestC
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
+@SuppressWarnings("deprecation")
 public class RequestPartitionIdTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(RequestPartitionIdTest.class);
 
 	private static final Integer ourDefaultPartitionId = 0;
-	
+
+	@Mock
+	private IDefaultPartitionSettings myPartitionSettings;
+
 	@Test
 	public void testHashCode() {
 		assertEquals(31860737, allPartitions().hashCode());
 	}
 
+	@SuppressWarnings("AssertBetweenInconvertibleTypes")
 	@Test
 	public void testEquals() {
 		assertEquals(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)), RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
 		assertNotNull(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
-		assertThat("123").isNotEqualTo(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
+
+		assertNotEquals(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)), "123");
+		assertNotEquals(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)), null);
 	}
 
 	@Test
 	public void testPartition() {
+		when(myPartitionSettings.getDefaultPartitionId()).thenReturn(null);
+
 		assertFalse(allPartitions().isDefaultPartition());
+		assertFalse(allPartitions().isPartition(null));
 		assertFalse(defaultPartition().isAllPartitions());
 		assertTrue(defaultPartition().isDefaultPartition());
+		assertTrue(defaultPartition().isPartition(myPartitionSettings.getDefaultPartitionId()));
+		assertFalse(defaultPartition(myPartitionSettings).isAllPartitions());
+		assertTrue(defaultPartition(myPartitionSettings).isDefaultPartition());
+		assertTrue(defaultPartition(myPartitionSettings).isPartition(myPartitionSettings.getDefaultPartitionId()));
 		assertTrue(allPartitions().isAllPartitions());
 		assertFalse(RequestPartitionId.forPartitionIdsAndNames(Lists.newArrayList("Name1", "Name2"), null, null).isAllPartitions());
 		assertFalse(RequestPartitionId.forPartitionIdsAndNames(Lists.newArrayList("Name1", "Name2"), null, null).isDefaultPartition());
@@ -57,7 +78,6 @@ public class RequestPartitionIdTest {
 
 	@Test
 	public void testIsDefaultPartition_withPartitionAsParameter() {
-
 		assertThat(defaultPartition().isPartition(null)).isTrue();
 		assertThat(fromPartitionIds(ourDefaultPartitionId).isPartition(ourDefaultPartitionId)).isTrue();
 
@@ -100,6 +120,25 @@ public class RequestPartitionIdTest {
 
 	}
 
+	@SuppressWarnings("removal")
+	@Test
+	public void testGetPartitionFromUserDataIfPresent_None() {
+
+		Patient resource = new Patient();
+		assertThat(RequestPartitionId.getPartitionFromUserDataIfPresent(resource)).isNotPresent();
+		assertThat(RequestPartitionId.getPartitionIfAssigned(resource)).isNotPresent();
+	}
+
+	@SuppressWarnings("removal")
+	@Test
+	public void testGetPartitionFromUserDataIfPresent_Present() {
+
+		Patient resource = new Patient();
+		resource.setUserData(Constants.RESOURCE_PARTITION_ID, RequestPartitionId.fromPartitionIds(1, 2, 3));
+		assertEquals(RequestPartitionId.fromPartitionIds(1, 2, 3), RequestPartitionId.getPartitionFromUserDataIfPresent(resource).orElseThrow());
+		assertEquals(RequestPartitionId.fromPartitionIds(1, 2, 3), RequestPartitionId.getPartitionIfAssigned(resource).orElseThrow());
+	}
+
 	@Test
 	public void testMergeIds_OtherAllPartitions() {
 		RequestPartitionId input0 = fromPartitionIds(1, 2, 3);
@@ -131,13 +170,13 @@ public class RequestPartitionIdTest {
 
 
 	static Stream<Object[]> testStringifyForKeyTestCases() {
-		return List.of(
+		return Stream.of(
 			new Object[]{RequestPartitionId.allPartitions(), "(all)"},
 			new Object[]{RequestPartitionId.defaultPartition(), "null"},
 			new Object[]{RequestPartitionId.fromPartitionIds(1, 2, 3), "1 2 3"},
 			new Object[]{RequestPartitionId.fromPartitionIds(null, 2, 3), "null 2 3"},
 			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(1, 2, 3), "(all) 1 2 3"}
-		).stream();
+		);
 	}
 
 	record ContainsTestCase(String description, RequestPartitionId left, RequestPartitionId right, Comparison comparison) {
@@ -160,6 +199,7 @@ public class RequestPartitionIdTest {
 			}
 		}
 
+		@Nonnull
 		@Override
 		public String toString() {
 			return "%s: %s %s".formatted(description, left, right);

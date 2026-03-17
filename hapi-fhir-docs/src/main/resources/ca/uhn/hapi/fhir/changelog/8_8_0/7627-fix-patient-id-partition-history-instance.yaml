@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7627
+title: "Previously, when using Patient ID partitioning mode, instance history requests
+  (e.g. GET /Patient/123/_history) returned a 404 error because the PatientIdPartitionInterceptor
+  did not resolve the correct partition for HISTORY_INSTANCE operations. This has been fixed."
