@@ -110,6 +110,7 @@ public class JobInstanceProcessor {
 		processPollingChunks(theInstance.getInstanceId());
 		// determine job progress; delete CANCELED/COMPLETE/FAILED jobs that are no longer needed
 		cleanupInstance(theInstance);
+
 		// move gated jobs to the next step, if needed
 		// moves GATE_WAITING / QUEUED (legacy) chunks to:
 		// READY (for regular gated jobs)

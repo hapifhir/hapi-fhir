@@ -1,16 +1,16 @@
 package ca.uhn.fhir.jpa.batch2;
 
-import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
-import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
+import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
+import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
+import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
@@ -94,9 +94,11 @@ import static org.mockito.Mockito.verify;
 public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	public static final String JOB_DEFINITION_ID = "definition-id";
+	private static final String THREE_STEP_JOB_DEF_ID = "three-step-gated-job";
 	private static final String GATING_RACE_JOB_DEF_ID = "gating-race-job-def-id";
 	private static final String REDUCTION_RACE_JOB_DEF_ID = "reduction-race-job-def-id";
 	public static final String FIRST_STEP_ID = TestJobDefinitionUtils.FIRST_STEP_ID;
+	private static final String SECOND_STEP_ID = "second-step";
 	public static final String LAST_STEP_ID = TestJobDefinitionUtils.LAST_STEP_ID;
 	public static final String DEF_CHUNK_ID = "definition-chunkId";
 	public static final String STEP_CHUNK_ID = TestJobDefinitionUtils.FIRST_STEP_ID;
@@ -139,6 +141,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		}
 		clearInvocations(myBatchSender);
 		myJobDefinitionRegistry.removeJobDefinition(JOB_DEFINITION_ID, JOB_DEF_VER);
+		myJobDefinitionRegistry.removeJobDefinition(THREE_STEP_JOB_DEF_ID, JOB_DEF_VER);
 		myMaintenanceService.enableMaintenancePass(true);
 	}
 
@@ -1289,58 +1292,256 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	/**
 	 * Simulates the multi-server race condition where a WorkChunk in GATE_WAITING status
-	 * is created AFTER advanceJobStepAndUpdateChunkStatus has already bulk-updated all
-	 * existing GATE_WAITING chunks for that step to READY.
+	 * is created AFTER a maintenance pass has already advanced the gate and bulk-updated
+	 * all existing GATE_WAITING chunks for that step to READY.
 	 *
 	 * The race scenario:
-	 * 1. Multiple servers process step N chunks concurrently
-	 * 2. All step N chunks complete → maintenance advances gate to step N+1
-	 * 3. advanceJobStepAndUpdateChunkStatus bulk-updates existing GATE_WAITING → READY
-	 * 4. A slow worker on another server creates a NEW output chunk for step N+1
+	 * 1. A gated job's step 1 chunk is processed to completion (dequeue, execute, complete)
+	 * 2. A maintenance pass sees step 1 fully COMPLETED, advances the gate to step 2,
+	 *    and enqueues the existing step 2 chunks (GATE_WAITING → READY → QUEUED)
+	 * 3. A slow worker on another server creates a NEW output chunk for step 2
 	 *    with GATE_WAITING status (because isGatedExecution=true)
-	 * 5. This "late" chunk was not present during the bulk UPDATE and should still
-	 *    be transitioned to READY — but currently it is not.
+	 * 4. A subsequent maintenance pass should transition this late chunk to QUEUED —
+	 *    but currently it does not, leaving the chunk stuck in GATE_WAITING.
 	 */
 	@Test
-	void advanceJobStepAndUpdateChunkStatus_lateChunkCreatedAfterAdvancement_shouldBeReady() {
-		// setup - create a gated job instance at step 1
+	void gatedJob_lateChunkCreatedAfterMaintenanceAdvancesGate_shouldBeQueuedBySubsequentMaintenance() throws InterruptedException {
+		// setup
 		boolean isGatedExecution = true;
-		JobInstance instance = createInstance(true, true);
+		JobInstance instance = createInstance(true, isGatedExecution);
 		myMaintenanceService.enableMaintenancePass(false);
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+		PointcutLatch latch = new PointcutLatch("senderlatch");
+		doAnswer(a -> {
+			latch.call(1);
+			return Void.class;
+		}).when(myBatchSender).sendWorkChannelMessage(any(JobWorkNotification.class));
+		latch.setExpectedCount(1);
 
-		// Create and complete a step 1 chunk so we can advance the gate
+		// Create the first step chunk (non-gated first chunk) and
+		// an "early" output chunk for step 2 (gated, so GATE_WAITING)
 		String step1ChunkId = storeFirstWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA);
-		runInTransaction(() -> myWorkChunkRepository.updateChunkStatus(
-			step1ChunkId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.COMPLETED));
+		String earlyStep2ChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, CHUNK_DATA, isGatedExecution);
 
-		// Create an "early" chunk for step 2 — this one exists before advancement
-		String earlyChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, CHUNK_DATA, isGatedExecution);
-
-		// ---- Simulate Server A: maintenance advances the gate ----
-		boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false);
-		assertThat(changed).as("Gate should advance successfully").isTrue();
-
-		// Verify the early chunk was flipped to READY by the bulk UPDATE
+		// Verify initial states
 		runInTransaction(() -> {
-			assertThat(findChunkByIdOrThrow(earlyChunkId).getStatus())
-				.as("Early chunk should be READY after advancement")
-				.isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findChunkByIdOrThrow(step1ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findChunkByIdOrThrow(earlyStep2ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
 		});
 
-		// ---- Simulate Server B: slow worker creates a "late" chunk AFTER advancement ----
-		// In production, this happens when a step N worker on another server is still running
-		// and calls dataSink.accept() which inserts a new GATE_WAITING chunk for step N+1.
-		// The chunk is created with isGatedExecution=true, so it gets GATE_WAITING status.
-		String lateChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, CHUNK_DATA, isGatedExecution);
+		// First maintenance pass: enqueues step 1 chunk (READY → QUEUED), step 2 stays GATE_WAITING
+		myBatch2JobHelper.runMaintenancePass();
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(step1ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
+			assertThat(findChunkByIdOrThrow(earlyStep2ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+		});
+		latch.awaitExpected();
 
-		// The late chunk should be READY since the gate for this step has already been opened.
+		// Simulate worker processing step 1: dequeue → in progress → completed
+		WorkChunk chunk = mySvc.onWorkChunkDequeue(step1ChunkId).orElseThrow(IllegalArgumentException::new);
+		assertThat(chunk.getStatus()).isEqualTo(WorkChunkStatusEnum.IN_PROGRESS);
+		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(step1ChunkId, 50, 0));
+
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(step1ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.COMPLETED);
+			// step 2 chunk still waiting for the gate to open
+			assertThat(findChunkByIdOrThrow(earlyStep2ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+		});
+
+		// Second maintenance pass: sees step 1 all COMPLETED, advances gate to step 2,
+		// flips early step 2 chunk GATE_WAITING → READY → QUEUED
+		latch.setExpectedCount(1);
+		myBatch2JobHelper.runMaintenancePass();
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(earlyStep2ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
+			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(LAST_STEP_ID);
+		});
+		latch.awaitExpected();
+		clearInvocations(myBatchSender);
+
+		// ---- Simulate Server B: slow worker creates a "late" chunk AFTER gate advancement ----
+		// In production, this happens when a step 1 worker on another server was still running
+		// and calls dataSink.accept(), which inserts a new GATE_WAITING chunk for step 2.
+		String lateStep2ChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 1, CHUNK_DATA, isGatedExecution);
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(lateStep2ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+		});
+
+		// Third maintenance pass: should detect and transition the late chunk.
+		myBatch2JobHelper.runMaintenancePass();
+
+		// The late chunk should now be QUEUED (GATE_WAITING → READY → QUEUED).
 		// This assertion currently FAILS — demonstrating the race condition bug.
 		runInTransaction(() -> {
-			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
-				.as("Late-arriving chunk for an already-advanced step should be READY")
-				.isEqualTo(WorkChunkStatusEnum.READY);
+			assertThat(findChunkByIdOrThrow(lateStep2ChunkId).getStatus())
+				.as("Late-arriving chunk for an already-advanced step should be QUEUED after maintenance")
+				.isEqualTo(WorkChunkStatusEnum.QUEUED);
 		});
+	}
+
+	/**
+	 * Simulates the more realistic multi-server race condition: a 3-step gated job
+	 * where step 2 has multiple chunks processed in parallel across servers.
+	 * A slow worker on one server creates a late output chunk for step 3 AFTER
+	 * maintenance has already advanced the gate from step 2 → step 3.
+	 *
+	 * The race scenario:
+	 * 1. Step 1 completes, gate advances to step 2
+	 * 2. Step 2 has 3 chunks processed across servers, each producing output for step 3
+	 * 3. All 3 step 2 chunks complete, maintenance advances gate to step 3,
+	 *    flipping existing step 3 GATE_WAITING chunks → READY → QUEUED
+	 * 4. A slow worker on another server creates one more output chunk for step 3
+	 *    with GATE_WAITING status — this chunk is stuck.
+	 */
+	@Test
+	void gatedJob_multiChunkStep_lateChunkCreatedAfterAdvancement_shouldBeQueuedBySubsequentMaintenance() throws InterruptedException {
+		// setup - register a 3-step gated job definition
+		JobDefinition<?> threeStepJobDef = buildThreeStepGatedJobDefinition();
+		myMaintenanceService.enableMaintenancePass(false);
+
+		JobInstance instance = new JobInstance();
+		instance.setJobDefinitionId(THREE_STEP_JOB_DEF_ID);
+		instance.setStatus(StatusEnum.QUEUED);
+		instance.setJobDefinitionVersion(JOB_DEF_VER);
+		instance.setParameters(CHUNK_DATA);
+		instance.setCurrentGatedStepId(FIRST_STEP_ID);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		PointcutLatch latch = new PointcutLatch("senderlatch");
+		doAnswer(a -> {
+			latch.call(1);
+			return Void.class;
+		}).when(myBatchSender).sendWorkChannelMessage(any(JobWorkNotification.class));
+
+		// === STEP 1: single chunk, process to completion ===
+		String step1ChunkId = storeFirstWorkChunk(THREE_STEP_JOB_DEF_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA);
+
+		// Maintenance enqueues step 1 chunk
+		latch.setExpectedCount(1);
+		myBatch2JobHelper.runMaintenancePass();
+		runInTransaction(() ->
+			assertThat(findChunkByIdOrThrow(step1ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED));
+		latch.awaitExpected();
+
+		// Worker processes step 1: dequeue → complete
+		mySvc.onWorkChunkDequeue(step1ChunkId);
+		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(step1ChunkId, 1, 0));
+		runInTransaction(() ->
+			assertThat(findChunkByIdOrThrow(step1ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.COMPLETED));
+
+		// Step 1 worker produced 3 output chunks for step 2 (all GATE_WAITING)
+		String step2Chunk1 = storeWorkChunk(THREE_STEP_JOB_DEF_ID, SECOND_STEP_ID, instanceId, 0, CHUNK_DATA, true);
+		String step2Chunk2 = storeWorkChunk(THREE_STEP_JOB_DEF_ID, SECOND_STEP_ID, instanceId, 1, CHUNK_DATA, true);
+		String step2Chunk3 = storeWorkChunk(THREE_STEP_JOB_DEF_ID, SECOND_STEP_ID, instanceId, 2, CHUNK_DATA, true);
+
+		// === GATE ADVANCE: step 1 → step 2 ===
+		// Maintenance sees step 1 COMPLETED, advances gate, enqueues step 2 chunks
+		latch.setExpectedCount(3);
+		myBatch2JobHelper.runMaintenancePass();
+		runInTransaction(() -> {
+			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(SECOND_STEP_ID);
+			assertThat(findChunkByIdOrThrow(step2Chunk1).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
+			assertThat(findChunkByIdOrThrow(step2Chunk2).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
+			assertThat(findChunkByIdOrThrow(step2Chunk3).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
+		});
+		latch.awaitExpected();
+
+		// === STEP 2: 3 chunks processed across multiple servers ===
+		// Each worker dequeues, produces output for step 3, and completes
+
+		// Server A processes chunk 1 → creates output for step 3
+		mySvc.onWorkChunkDequeue(step2Chunk1);
+		String step3ChunkA = storeWorkChunk(THREE_STEP_JOB_DEF_ID, LAST_STEP_ID, instanceId, 0, CHUNK_DATA, true);
+		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(step2Chunk1, 10, 0));
+
+		// Server B processes chunk 2 → creates output for step 3
+		mySvc.onWorkChunkDequeue(step2Chunk2);
+		String step3ChunkB = storeWorkChunk(THREE_STEP_JOB_DEF_ID, LAST_STEP_ID, instanceId, 1, CHUNK_DATA, true);
+		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(step2Chunk2, 10, 0));
+
+		// Server C processes chunk 3 → completes but hasn't created output yet (slow dataSink.accept)
+		mySvc.onWorkChunkDequeue(step2Chunk3);
+		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(step2Chunk3, 10, 0));
+
+		// Verify all step 2 chunks are COMPLETED, step 3 chunks are GATE_WAITING
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(step2Chunk1).getStatus()).isEqualTo(WorkChunkStatusEnum.COMPLETED);
+			assertThat(findChunkByIdOrThrow(step2Chunk2).getStatus()).isEqualTo(WorkChunkStatusEnum.COMPLETED);
+			assertThat(findChunkByIdOrThrow(step2Chunk3).getStatus()).isEqualTo(WorkChunkStatusEnum.COMPLETED);
+			assertThat(findChunkByIdOrThrow(step3ChunkA).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+			assertThat(findChunkByIdOrThrow(step3ChunkB).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
+		});
+
+		// === GATE ADVANCE: step 2 → step 3 ===
+		// Maintenance sees all step 2 COMPLETED, advances gate, flips existing step 3 chunks
+		latch.setExpectedCount(2);
+		clearInvocations(myBatchSender);
+		myBatch2JobHelper.runMaintenancePass();
+		runInTransaction(() -> {
+			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(LAST_STEP_ID);
+			assertThat(findChunkByIdOrThrow(step3ChunkA).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
+			assertThat(findChunkByIdOrThrow(step3ChunkB).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
+		});
+		latch.awaitExpected();
+		clearInvocations(myBatchSender);
+
+		// === THE RACE: Server C's slow worker finally creates its step 3 output ===
+		// In production, Server C's dataSink.accept() commits in a REQUIRES_NEW transaction
+		// that happens to land just after the gate advancement bulk UPDATE.
+		String lateStep3Chunk = storeWorkChunk(THREE_STEP_JOB_DEF_ID, LAST_STEP_ID, instanceId, 2, CHUNK_DATA, true);
+		runInTransaction(() ->
+			assertThat(findChunkByIdOrThrow(lateStep3Chunk).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING));
+
+		// Subsequent maintenance pass: should detect and transition the late chunk
+		myBatch2JobHelper.runMaintenancePass();
+
+		// The late chunk should now be QUEUED.
+		// This assertion currently FAILS — demonstrating the race condition bug.
+		runInTransaction(() -> {
+			assertThat(findChunkByIdOrThrow(lateStep3Chunk).getStatus())
+				.as("Late-arriving step 3 chunk should be QUEUED after maintenance, but is stuck in GATE_WAITING")
+				.isEqualTo(WorkChunkStatusEnum.QUEUED);
+		});
+	}
+
+	@Nonnull
+	private JobDefinition<?> buildThreeStepGatedJobDefinition() {
+		JobDefinition<TestJobParameters> jobDef = JobDefinition.newBuilder()
+			.setJobDefinitionId(THREE_STEP_JOB_DEF_ID)
+			.setJobDescription("three step gated test job")
+			.setJobDefinitionVersion(JOB_DEF_VER)
+			.setParametersType(TestJobParameters.class)
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"Test first step",
+				FirstStepOutput.class,
+				(step, sink) -> {
+					sink.accept(new FirstStepOutput());
+					return RunOutcome.SUCCESS;
+				}
+			)
+			.addIntermediateStep(
+				SECOND_STEP_ID,
+				"Test second step",
+				FirstStepOutput.class,
+				(step, sink) -> {
+					sink.accept(new FirstStepOutput());
+					return RunOutcome.SUCCESS;
+				}
+			)
+			.addLastStep(
+				LAST_STEP_ID,
+				"Test last step",
+				(step, sink) -> RunOutcome.SUCCESS
+			)
+			.completionHandler(theDetails -> {})
+			.gatedExecution()
+			.build();
+
+		if (myJobDefinitionRegistry.getJobDefinition(jobDef.getJobDefinitionId(), jobDef.getJobDefinitionVersion()).isEmpty()) {
+			myJobDefinitionRegistry.addJobDefinition(jobDef);
+		}
+		return jobDef;
 	}
 
 	// ---- End of SMILE-11603 tests ----
