@@ -176,9 +176,10 @@ public class RequestPartitionId implements IModelJson {
 	 * @param theRight the second partition ID, may be null
 	 * @return an {@link Optional} containing the merged partition ID, or empty if both inputs are null
 	 */
-	public static Optional<RequestPartitionId> mergeIds(@Nullable RequestPartitionId theLeft, @Nullable RequestPartitionId theRight){
+	public static Optional<RequestPartitionId> mergeIds(
+			@Nullable RequestPartitionId theLeft, @Nullable RequestPartitionId theRight) {
 		RequestPartitionId retVal = null;
-		if(nonNull(theLeft)){
+		if (nonNull(theLeft)) {
 			retVal = theLeft.mergeIds(theRight);
 		} else if (nonNull(theRight)) {
 			retVal = theRight.mergeIds(theLeft);

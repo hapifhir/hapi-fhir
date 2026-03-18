@@ -409,21 +409,24 @@ public class PatientIdPartitionInterceptor {
 							String paramName = nextCompartmentSp.getName();
 							ResourceCompartmentStoragePolicy policy = getPolicyForResourceType(theReadDetails);
 
-							boolean includeNonCompartmentRequestPartition = hasReferencesToNonPartitionableResources(params, paramName);
+							boolean includeNonCompartmentRequestPartition =
+									hasReferencesToNonPartitionableResources(params, paramName);
 
-							if (includeNonCompartmentRequestPartition){
+							if (includeNonCompartmentRequestPartition) {
 								nonCompartmentPartition = provideNonCompartmentMemberTypeResponse(theRequestDetails);
 							}
 
 							List<String> idParts = getResourceIdsForSearchParam(params, paramName);
 
 							if (!idParts.isEmpty()) {
-								multiCompartmentPartition = provideMultipleCompartmentPartition(theRequestDetails, idParts);
+								multiCompartmentPartition =
+										provideMultipleCompartmentPartition(theRequestDetails, idParts);
 							}
 
-							Optional<RequestPartitionId> mergedCompartmentOptional = RequestPartitionId.mergeIds(nonCompartmentPartition, multiCompartmentPartition);
+							Optional<RequestPartitionId> mergedCompartmentOptional =
+									RequestPartitionId.mergeIds(nonCompartmentPartition, multiCompartmentPartition);
 
-							if(mergedCompartmentOptional.isPresent()){
+							if (mergedCompartmentOptional.isPresent()) {
 								return mergedCompartmentOptional.get();
 							}
 						}
@@ -550,19 +553,19 @@ public class PatientIdPartitionInterceptor {
 			return false;
 		}
 
-		Set<String> nonPartitionableResourceNames = new HashSet<>(BaseRequestPartitionHelperSvc.NON_PARTITIONABLE_RESOURCE_NAMES);
+		Set<String> nonPartitionableResourceNames =
+				new HashSet<>(BaseRequestPartitionHelperSvc.NON_PARTITIONABLE_RESOURCE_NAMES);
 		nonPartitionableResourceNames.add("Group");
 		nonPartitionableResourceNames.add("List");
 
 		for (List<IQueryParameterType> iQueryParameterTypes : paramAndListForParamName) {
 			for (IQueryParameterType aParam : iQueryParameterTypes) {
-				if (aParam instanceof ReferenceParam){
+				if (aParam instanceof ReferenceParam) {
 					String valueAsQueryToken = aParam.getValueAsQueryToken();
 					String resourceType = new IdType(valueAsQueryToken).getResourceType();
 					if (nonPartitionableResourceNames.contains(resourceType)) {
 						return true;
 					}
-
 				}
 			}
 		}
