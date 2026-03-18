@@ -156,7 +156,7 @@ public abstract class BaseDatabasePartitionModeIT extends BaseJpaTest implements
 	public static class TestConfig extends TestR5Config {
 
 		@Autowired
-		private BaseDatabaseVerificationIT.JpaDatabaseContextConfigParamObject myJpaDatabaseContextConfigParamObject;
+		private JpaDatabaseContextConfigParamObject myJpaDatabaseContextConfigParamObject;
 
 		@Override
 		@Bean
@@ -188,7 +188,7 @@ public abstract class BaseDatabasePartitionModeIT extends BaseJpaTest implements
 
 		@Bean
 		public JpaEmbeddedDatabase jpaEmbeddedDatabase(
-				BaseDatabaseVerificationIT.JpaDatabaseContextConfigParamObject theJpaDatabaseContextConfigParamObject) {
+				JpaDatabaseContextConfigParamObject theJpaDatabaseContextConfigParamObject) {
 			return theJpaDatabaseContextConfigParamObject.getJpaEmbeddedDatabase();
 		}
 

@@ -274,24 +274,6 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 	}
 
-	public static class JpaDatabaseContextConfigParamObject {
-		final JpaEmbeddedDatabase myJpaEmbeddedDatabase;
-		final String myDialect;
-
-		public JpaDatabaseContextConfigParamObject(JpaEmbeddedDatabase theJpaEmbeddedDatabase, String theDialect) {
-			myJpaEmbeddedDatabase = theJpaEmbeddedDatabase;
-			myDialect = theDialect;
-		}
-
-		public JpaEmbeddedDatabase getJpaEmbeddedDatabase() {
-			return myJpaEmbeddedDatabase;
-		}
-
-		public String getDialect() {
-			return myDialect;
-		}
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
