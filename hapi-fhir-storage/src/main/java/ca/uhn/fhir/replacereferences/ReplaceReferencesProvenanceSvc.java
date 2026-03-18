@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nullable;
@@ -231,13 +232,17 @@ public class ReplaceReferencesProvenanceSvc {
 			List<IIdType> theTargetIds, RequestDetails theRequestDetails) {
 		SearchParameterMap map = new SearchParameterMap();
 
-		theTargetIds.forEach(tId -> map.add("target", new ReferenceParam(tId)));
+		theTargetIds.forEach(tId -> map.add("target", new ReferenceParam(tId.toUnqualifiedVersionless())));
 
 		// Add sort by recorded field, in case there are multiple Provenance resources for the same source and target,
 		// we want the most recent one.
 		map.setSort(new SortSpec("recorded", SortOrderEnum.DESC));
 
-		IBundleProvider searchBundle = myProvenanceDao.search(map, theRequestDetails);
+		// Use all-partitions request because in patient-id partitioning mode with NON_UNIQUE_COMPARTMENT_IN_DEFAULT
+		// policy, merge/replace-references Provenance resources that reference multiple patients are stored in
+		// the default partition. A patient-scoped search (routed by PatientIdPartitionInterceptor based on the
+		// "target" search param) would only search the patient's partition and miss the Provenance.
+		IBundleProvider searchBundle = myProvenanceDao.search(map, SystemRequestDetails.forAllPartitions());
 		// 'activity' is not available as a search parameter in r4, was added in r5,
 		// so we need to filter the results manually.
 		return filterByActivity(searchBundle.getAllResources());

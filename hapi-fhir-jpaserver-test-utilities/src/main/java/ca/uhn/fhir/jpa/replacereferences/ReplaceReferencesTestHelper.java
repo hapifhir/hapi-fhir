@@ -143,10 +143,13 @@ public class ReplaceReferencesTestHelper {
 		return provenanceAgent;
 	}
 
-	public List<IBaseResource> searchProvenance(String theTargetId) {
+	public List<IBaseResource> searchProvenance(IIdType theTargetId) {
 		SearchParameterMap map = new SearchParameterMap();
-		map.add("target", new ReferenceParam(theTargetId));
-		IBundleProvider searchBundle = myProvenanceDao.search(map, mySrd);
+		map.add("target", new ReferenceParam(theTargetId.toUnqualifiedVersionless()));
+		// Use all-partitions request to find Provenance regardless of which partition it's stored in.
+		// In patient-id partitioning mode with NON_UNIQUE_COMPARTMENT_IN_DEFAULT policy, merge Provenance
+		// referencing multiple patients is stored in the default partition, not a patient-specific partition.
+		IBundleProvider searchBundle = myProvenanceDao.search(map, SystemRequestDetails.forAllPartitions());
 		return searchBundle.getAllResources();
 	}
 
@@ -170,7 +173,7 @@ public class ReplaceReferencesTestHelper {
 			Set<String> theExpectedPatchedResourceTargetReferences,
 			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
 
-		List<IBaseResource> provenances = searchProvenance(theTargetResourceIdWithExpectedVersion.getIdPart());
+		List<IBaseResource> provenances = searchProvenance(theTargetResourceIdWithExpectedVersion);
 		assertThat(provenances).hasSize(1);
 		Provenance provenance = (Provenance) provenances.get(0);
 
@@ -241,7 +244,7 @@ public class ReplaceReferencesTestHelper {
 			Set<String> theExpectedProvenanceTargets,
 			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
 
-		List<IBaseResource> provenances = searchProvenance(theTargetPatientIdWithExpectedVersion.getIdPart());
+		List<IBaseResource> provenances = searchProvenance(theTargetPatientIdWithExpectedVersion);
 		assertThat(provenances).hasSize(1);
 		Provenance provenance = (Provenance) provenances.get(0);
 

@@ -447,7 +447,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			awaitJobCompletion(task);
 		}
 
-		List<IBaseResource> provenances = myTestHelper.searchProvenance(targetPatientId.toString());
+		List<IBaseResource> provenances = myTestHelper.searchProvenance(targetPatientId);
 		assertThat(provenances).isEmpty();
 	}
 
