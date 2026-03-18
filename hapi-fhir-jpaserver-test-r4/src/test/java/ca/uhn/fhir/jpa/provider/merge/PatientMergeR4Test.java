@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER;
@@ -350,7 +351,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		// exec
 		assertThatThrownBy(() -> callMergeOperation(inParameters, false))
 			.isInstanceOf(PreconditionFailedException.class)
-			.satisfies(ex -> assertThat(myTestHelper.extractFailureMessageFromOutcomeParameter((BaseServerResponseException) ex)).isEqualTo("HAPI-2597: Number of resources with references to "+ myLargeTestData.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
+			.satisfies(ex -> assertThat(myTestHelper.extractFailureMessageFromOutcomeParameter((BaseServerResponseException) ex)).isEqualTo("HAPI-2880: Number of resources with references to "+ myLargeTestData.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronously by adding the HTTP Header 'Prefer: respond-async'."));
 	}
 
 	@ParameterizedTest(name = "{index}: deleteSource={0}, async={1}")
@@ -399,11 +400,11 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			targetPatient.getIdElement(),
 			theDeleteSource);
 
+		IIdType theExpectedSourceIdWithVersion = sourcePatient.getIdElement().withVersion("2");
 		myTestHelper.assertMergeProvenance(inParams.asParametersResource(),
-			sourcePatient.getIdElement().withVersion("2"),
+			theExpectedSourceIdWithVersion,
 			theExpectedTargetIdWithVersion,
-			0,
-			Collections.EMPTY_SET,
+			Set.of(theExpectedSourceIdWithVersion.toString(), theExpectedTargetIdWithVersion.toString()),
 			null);
 	}
 

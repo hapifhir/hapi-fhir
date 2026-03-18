@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
@@ -57,11 +58,14 @@ public class MergeEdgeCaseR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	protected Batch2JobHelper myBatch2JobHelper;
 
+	@Autowired
+	protected ResourceLinkServiceFactory myLinkServiceFactory;
+
 	protected MergeOperationTestHelper myHelper;
 
 	@BeforeEach
 	public void beforeMergeEdgeCase() {
-		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext);
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry);
 	}
 
 	@Test

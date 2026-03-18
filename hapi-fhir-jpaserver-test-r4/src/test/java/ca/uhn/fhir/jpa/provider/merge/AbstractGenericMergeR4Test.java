@@ -108,7 +108,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// with versioned target references, and delete-source on merge works correctly.
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
-		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext);
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry);
 		myReplaceReferencesTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 	}
 
@@ -639,7 +639,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				getResourceTypeName(),
 				params,
 				PreconditionFailedException.class,
-				"HAPI-2597: Number of resources with references to " + sourceId + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
+				"HAPI-2880: Number of resources with references to " + sourceId + " exceeds the resource-limit 5. Submit the request asynchronously by adding the HTTP Header 'Prefer: respond-async'.");
 	}
 
 	/**

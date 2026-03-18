@@ -72,6 +72,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -220,12 +221,16 @@ public class ReplaceReferencesTestHelper {
 			Parameters theInputParameters,
 			ReplaceReferencesLargeTestData theTestData,
 			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgent) {
+		IIdType versionedSourceId = theTestData.getSourcePatientId().withVersion("2");
+		IIdType versionedTargetId = theTestData.getTargetPatientId().withVersion("2");
+		Set<String> allExpectedTargets = new HashSet<>(theTestData.getExpectedProvenanceTargetsForPatchedResources());
+		allExpectedTargets.add(versionedSourceId.toString());
+		allExpectedTargets.add(versionedTargetId.toString());
 		assertMergeProvenance(
 				theInputParameters,
-				theTestData.getSourcePatientId().withVersion("2"),
-				theTestData.getTargetPatientId().withVersion("2"),
-				ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES,
-				theTestData.getExpectedProvenanceTargetsForPatchedResources(),
+				versionedSourceId,
+				versionedTargetId,
+				allExpectedTargets,
 				theExpectedProvenanceAgent);
 	}
 
@@ -233,8 +238,7 @@ public class ReplaceReferencesTestHelper {
 			Parameters theInputParameters,
 			IIdType theSourcePatientIdWithExpectedVersion,
 			IIdType theTargetPatientIdWithExpectedVersion,
-			int theExpectedPatches,
-			Set<String> theExpectedProvenanceTargetsForPatchedResources,
+			Set<String> theExpectedProvenanceTargets,
 			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
 
 		List<IBaseResource> provenances = searchProvenance(theTargetPatientIdWithExpectedVersion.getIdPart());
@@ -242,10 +246,7 @@ public class ReplaceReferencesTestHelper {
 		Provenance provenance = (Provenance) provenances.get(0);
 
 		// assert targets
-		int expectedNumberOfProvenanceTargets = theExpectedPatches;
-		// target patient and source patient
-		expectedNumberOfProvenanceTargets += 2;
-		assertThat(provenance.getTarget()).hasSize(expectedNumberOfProvenanceTargets);
+		assertThat(provenance.getTarget()).hasSize(theExpectedProvenanceTargets.size());
 		// the first target reference should be the target patient
 		String targetPatientReferenceInProvenance =
 				provenance.getTarget().get(0).getReference();
@@ -255,7 +256,7 @@ public class ReplaceReferencesTestHelper {
 		assertThat(sourcePatientReference).isEqualTo(theSourcePatientIdWithExpectedVersion.toString());
 
 		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
-		assertThat(allActualTargets).containsAll(theExpectedProvenanceTargetsForPatchedResources);
+		assertThat(allActualTargets).containsExactlyInAnyOrderElementsOf(theExpectedProvenanceTargets);
 
 		validateAgents(theExpectedProvenanceAgents, provenance);
 

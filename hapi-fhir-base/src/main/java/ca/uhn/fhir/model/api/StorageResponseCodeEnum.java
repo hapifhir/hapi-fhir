@@ -26,40 +26,53 @@ package ca.uhn.fhir.model.api;
  * This is used in CRUD response OperationOutcome resources.
  */
 public enum StorageResponseCodeEnum implements ICodingEnum {
-	SUCCESSFUL_CREATE("Create succeeded."),
+	SUCCESSFUL_CREATE("Create succeeded.", false),
 	SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH(
-			"Conditional create succeeded: no existing resource matched the conditional URL."),
+			"Conditional create succeeded: no existing resource matched the conditional URL.", false),
 	SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH(
-			"Conditional create succeeded: an existing resource matched the conditional URL so no action was taken."),
-	SUCCESSFUL_UPDATE("Update succeeded."),
-	SUCCESSFUL_UPDATE_AS_CREATE("Update as create succeeded."),
-	SUCCESSFUL_UPDATE_NO_CHANGE("Update succeeded: No changes were detected so no action was taken."),
+			"Conditional create succeeded: an existing resource matched the conditional URL so no action was taken.",
+			true),
+	SUCCESSFUL_UPDATE("Update succeeded.", false),
+	SUCCESSFUL_UPDATE_AS_CREATE("Update as create succeeded.", false),
+	SUCCESSFUL_UPDATE_NO_CHANGE("Update succeeded: No changes were detected so no action was taken.", true),
 	SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH(
-			"Conditional update succeeded: no existing resource matched the conditional URL so a new resource was created."),
+			"Conditional update succeeded: no existing resource matched the conditional URL so a new resource was created.",
+			false),
 	SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH(
-			"Conditional update succeeded: an existing resource matched the conditional URL and was updated."),
+			"Conditional update succeeded: an existing resource matched the conditional URL and was updated.", false),
 	SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE(
-			"Conditional update succeeded: an existing resource matched the conditional URL and was updated, but no changes were detected so no action was taken."),
-	SUCCESSFUL_DELETE("Delete succeeded."),
-	SUCCESSFUL_DELETE_ALREADY_DELETED("Delete succeeded: Resource was already deleted so no action was taken."),
-	SUCCESSFUL_DELETE_NOT_FOUND("Delete succeeded: No existing resource was found so no action was taken."),
+			"Conditional update succeeded: an existing resource matched the conditional URL and was updated, but no changes were detected so no action was taken.",
+			true),
+	SUCCESSFUL_DELETE("Delete succeeded.", false),
+	SUCCESSFUL_DELETE_ALREADY_DELETED("Delete succeeded: Resource was already deleted so no action was taken.", true),
+	SUCCESSFUL_DELETE_NOT_FOUND("Delete succeeded: No existing resource was found so no action was taken.", true),
 
-	SUCCESSFUL_PATCH("Patch succeeded."),
+	SUCCESSFUL_PATCH("Patch succeeded.", false),
 
-	SUCCESSFUL_PATCH_NO_CHANGE("Patch succeeded: No changes were detected so no action was taken."),
-	SUCCESSFUL_CONDITIONAL_PATCH("Conditional patch succeeded."),
+	SUCCESSFUL_PATCH_NO_CHANGE("Patch succeeded: No changes were detected so no action was taken.", true),
+	SUCCESSFUL_CONDITIONAL_PATCH("Conditional patch succeeded.", false),
 	SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE(
-			"Conditional patch succeeded: No changes were detected so no action was taken."),
-	AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE("Automatically created placeholder resource."),
-	FAILURE("Failed to process resource."),
+			"Conditional patch succeeded: No changes were detected so no action was taken.", true),
+	AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE("Automatically created placeholder resource.", false),
+	FAILURE("Failed to process resource.", false),
 	;
 
 	public static final String SYSTEM = "https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code";
 
 	private final String myDisplay;
+	private final boolean myNoChange;
 
-	StorageResponseCodeEnum(String theDisplay) {
+	StorageResponseCodeEnum(String theDisplay, boolean theNoChange) {
 		myDisplay = theDisplay;
+		myNoChange = theNoChange;
+	}
+
+	/**
+	 * Returns {@code true} if this outcome code represents a no-change operation,
+	 * meaning no data was actually modified in storage.
+	 */
+	public boolean isNoChange() {
+		return myNoChange;
 	}
 
 	@Override

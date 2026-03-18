@@ -169,18 +169,20 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 					+ theReplaceReferencesRequest.sourceId
 					+ " exceeds the resource-limit "
 					+ theReplaceReferencesRequest.resourceLimit
-					+ ". Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
+					+ ". Submit the request asynchronously by adding the HTTP Header 'Prefer: respond-async'.");
 		}
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
 				theReplaceReferencesRequest, accumulator.getItemList(), theRequestDetails);
 
 		if (theReplaceReferencesRequest.createProvenance) {
+			List<IIdType> changedResourceIds =
+					ReplaceReferencesProvenanceSvc.extractChangedResourceIds(List.of(result));
 			myReplaceReferencesProvenanceSvc.createProvenance(
 					// we need to use versioned ids for the Provenance resource
 					theTargetResource.getIdElement().toUnqualified(),
 					theSourceResource.getIdElement().toUnqualified(),
-					List.of(result),
+					changedResourceIds,
 					startTime,
 					theRequestDetails,
 					theReplaceReferencesRequest.provenanceAgents,
