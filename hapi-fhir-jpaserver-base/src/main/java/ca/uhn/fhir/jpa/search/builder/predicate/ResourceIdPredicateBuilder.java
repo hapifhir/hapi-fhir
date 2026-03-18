@@ -28,8 +28,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.search.builder.sql.TuplePredicateRewriter;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -149,20 +147,12 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 				predicate = queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 				return predicate;
 			} else {
-				if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
-					return TuplePredicateRewriter.toExpandedTupleInPredicate(
-							getSearchQueryBuilder(),
-							PartitionableJoinColumns.from(theSourceJoinColumn),
-							allOrPids,
-							operation == SearchFilterParser.CompareOperation.ne);
-				} else {
-					DbColumn resIdColumn = getResourceIdColumn(theSourceJoinColumn);
-					List<Long> resourceIds = JpaPid.toLongList(allOrPids);
-					return QueryParameterUtils.toEqualToOrInPredicate(
-							resIdColumn,
-							generatePlaceholders(resourceIds),
-							operation == SearchFilterParser.CompareOperation.ne);
-				}
+				return getSearchQueryBuilder()
+						.getTuplePredicateRewriter()
+						.toInPredicate(
+								PartitionableJoinColumns.from(theSourceJoinColumn),
+								allOrPids,
+								operation == SearchFilterParser.CompareOperation.ne);
 			}
 		}
 

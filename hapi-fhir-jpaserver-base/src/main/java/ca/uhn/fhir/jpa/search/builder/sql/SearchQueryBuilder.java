@@ -118,6 +118,7 @@ public class SearchQueryBuilder {
 	private int myNextNearnessColumnId = 0;
 	private DbColumn mySelectedResourceIdColumn;
 	private DbColumn mySelectedPartitionIdColumn;
+	private final TuplePredicateRewriter myTuplePredicateRewriter;
 
 	/**
 	 * Constructor
@@ -191,6 +192,11 @@ public class SearchQueryBuilder {
 		myBindVariableValues = theBindVariableValues;
 		mySelectPartitionId = theSelectPartitionId;
 		mySelectResourceType = theSelectResourceType;
+		myTuplePredicateRewriter = new TuplePredicateRewriter(this);
+	}
+
+	public TuplePredicateRewriter getTuplePredicateRewriter() {
+		return myTuplePredicateRewriter;
 	}
 
 	public FhirContext getFhirContext() {

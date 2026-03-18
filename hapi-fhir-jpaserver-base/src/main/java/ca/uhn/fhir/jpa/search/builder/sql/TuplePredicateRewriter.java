@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -31,6 +32,7 @@ import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Utility for building IN/NOT IN predicates that are compatible across all database
@@ -47,10 +49,14 @@ import java.util.Collection;
  */
 public final class TuplePredicateRewriter {
 
-	private TuplePredicateRewriter() {}
+	private final SearchQueryBuilder mySearchQueryBuilder;
+
+	TuplePredicateRewriter(SearchQueryBuilder theSearchQueryBuilder) {
+		mySearchQueryBuilder = theSearchQueryBuilder;
+	}
 
 	/**
-	 * Creates a NOT IN condition using the optimal strategy for the column layout.
+	 * Creates a NOT IN condition using the optimal strategy for database partition mode.
 	 * <p>
 	 * For single-column (non-partition mode): {@code col NOT IN (SELECT ...)}
 	 * <br>
@@ -60,11 +66,11 @@ public final class TuplePredicateRewriter {
 	 * @param theSubQueryPredicateBuilder the predicate builder for the subquery's root table
 	 * @param theOuterJoinColumns the outer query's join columns
 	 */
-	public static Condition toNotInSubquery(
+	public Condition toNotInSubquery(
 			SearchQueryBuilder theSubQueryBuilder,
 			BaseJoiningPredicateBuilder theSubQueryPredicateBuilder,
 			PartitionableJoinColumns theOuterJoinColumns) {
-		if (theOuterJoinColumns.isPartitioned()) {
+		if (mySearchQueryBuilder.isIncludePartitionIdInJoins()) {
 			addCorrelationPredicates(theSubQueryBuilder, theSubQueryPredicateBuilder, theOuterJoinColumns);
 			return new NotCondition(UnaryCondition.exists(new Subquery(theSubQueryBuilder.getSelect())));
 		}
@@ -75,26 +81,26 @@ public final class TuplePredicateRewriter {
 	}
 
 	/**
-	 * Creates an EXISTS condition with a correlated subquery, replacing the tuple IN
-	 * pattern that is not supported by MSSQL.
+	 * Creates an OR'd EXISTS condition from multiple child subqueries with correlated predicates
+	 * on PARTITION_ID and RES_ID.
 	 * <p>
-	 * Converts: {@code (t0.PARTITION_ID, t0.RES_ID) IN (SELECT t0.PARTITION_ID, t0.RES_ID FROM ...)}
-	 * <br>
-	 * To: {@code EXISTS (SELECT 1 FROM ... WHERE s0.PARTITION_ID = t0.PARTITION_ID AND s0.RES_ID = t0.RES_ID)}
+	 * Produces: {@code EXISTS (SELECT ... WHERE correlated) OR EXISTS (...)}
 	 *
-	 * @param theSubQueryBuilder the child SQL builder (must use "s" alias prefix)
-	 * @param theSubQueryPredicateBuilder the predicate builder for the subquery's root table
+	 * @param theChildBuilders the child SQL builders (one per subquery, must use "s" alias prefix)
 	 * @param theOuterJoinColumns the outer query's join columns (must be partitioned)
 	 */
-	public static Condition toExistsSubquery(
-			SearchQueryBuilder theSubQueryBuilder,
-			BaseJoiningPredicateBuilder theSubQueryPredicateBuilder,
-			PartitionableJoinColumns theOuterJoinColumns) {
+	public Condition toInSubquery(
+			List<SearchQueryBuilder> theChildBuilders, PartitionableJoinColumns theOuterJoinColumns) {
 		Validate.isTrue(
 				theOuterJoinColumns.isPartitioned(),
-				"toExistsSubquery requires partitioned join columns with both PARTITION_ID and RES_ID");
-		addCorrelationPredicates(theSubQueryBuilder, theSubQueryPredicateBuilder, theOuterJoinColumns);
-		return UnaryCondition.exists(new Subquery(theSubQueryBuilder.getSelect()));
+				"toInSubquery requires partitioned join columns with both PARTITION_ID and RES_ID");
+		ComboCondition orExists = ComboCondition.or();
+		for (SearchQueryBuilder childBuilder : theChildBuilders) {
+			BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
+			addCorrelationPredicates(childBuilder, childRoot, theOuterJoinColumns);
+			orExists.addCondition(UnaryCondition.exists(new Subquery(childBuilder.getSelect())));
+		}
+		return orExists;
 	}
 
 	private static void addCorrelationPredicates(
@@ -108,35 +114,40 @@ public final class TuplePredicateRewriter {
 	}
 
 	/**
-	 * Creates an expanded AND/OR condition replacing a tuple IN/NOT IN predicate with
-	 * inline values, which is not supported by MSSQL.
+	 * Creates an IN/NOT IN condition for a collection of PIDs, choosing the optimal strategy
+	 * based on database partition mode.
 	 * <p>
-	 * Converts: {@code (col1, col2) IN ((v1a,v2a), (v1b,v2b))}
-	 * <br>
-	 * To: {@code (col1=v1a AND col2=v2a) OR (col1=v1b AND col2=v2b)}
+	 * For multi-column (partition mode):
+	 * <br>Converts: {@code (col1, col2) IN ((v1a,v2a), (v1b,v2b))}
+	 * <br>To: {@code (col1=v1a AND col2=v2a) OR (col1=v1b AND col2=v2b)}
+	 * <p>
+	 * For single-column (non-partition mode): {@code col IN (v1, v2, ...)}
 	 *
-	 * @param theSearchQueryBuilder the SQL builder for generating bind variable placeholders
-	 * @param theJoinColumns the partitioned join columns (must be partitioned)
+	 * @param theJoinColumns the join columns
 	 * @param thePids the resource PIDs containing partition and resource IDs
 	 * @param theNegate if true, wraps the result in a NOT condition
 	 */
-	public static Condition toExpandedTupleInPredicate(
-			SearchQueryBuilder theSearchQueryBuilder,
-			PartitionableJoinColumns theJoinColumns,
-			Collection<JpaPid> thePids,
-			boolean theNegate) {
-		Validate.isTrue(
-				theJoinColumns.isPartitioned(),
-				"toExpandedTupleInPredicate requires partitioned join columns with both PARTITION_ID and RES_ID");
+	public Condition toInPredicate(
+			PartitionableJoinColumns theJoinColumns, Collection<JpaPid> thePids, boolean theNegate) {
+		if (mySearchQueryBuilder.isIncludePartitionIdInJoins()) {
+			return toExpandedTupleInPredicate(theJoinColumns, thePids, theNegate);
+		}
+		List<String> placeholders = mySearchQueryBuilder.generatePlaceholders(JpaPid.toLongList(thePids));
+		return QueryParameterUtils.toEqualToOrInPredicate(
+				theJoinColumns.getResourceIdColumn(), placeholders, theNegate);
+	}
+
+	private Condition toExpandedTupleInPredicate(
+			PartitionableJoinColumns theJoinColumns, Collection<JpaPid> thePids, boolean theNegate) {
 		ComboCondition orCondition = ComboCondition.or();
 		for (JpaPid pid : thePids) {
 			Condition rowMatch = ComboCondition.and(
 					BinaryCondition.equalTo(
 							theJoinColumns.getPartitionIdColumn(),
-							theSearchQueryBuilder.generatePlaceholder(pid.getPartitionId())),
+							mySearchQueryBuilder.generatePlaceholder(pid.getPartitionId())),
 					BinaryCondition.equalTo(
 							theJoinColumns.getResourceIdColumn(),
-							theSearchQueryBuilder.generatePlaceholder(pid.getId())));
+							mySearchQueryBuilder.generatePlaceholder(pid.getId())));
 			orCondition.addCondition(rowMatch);
 		}
 

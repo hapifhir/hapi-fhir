@@ -60,14 +60,14 @@ class TuplePredicateRewriterTest {
 	@ParameterizedTest
 	@MethodSource("allDialects")
 	void toNotInSubquery_singleColumn_producesNotIn(Dialect theDialect) {
-		SearchQueryBuilder outerBuilder = createBuilder(theDialect);
+		SearchQueryBuilder outerBuilder = createNonPartitionBuilder(theDialect);
 		BaseJoiningPredicateBuilder outerRoot = outerBuilder.getOrCreateFirstPredicateBuilder();
 		PartitionableJoinColumns singleColumn = PartitionableJoinColumns.newNonPartitioned(outerRoot.getResourceIdColumn());
 
 		SearchQueryBuilder childBuilder = outerBuilder.newChildSqlBuilder(false);
 		BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = TuplePredicateRewriter.toNotInSubquery(childBuilder, childRoot, singleColumn);
+		Condition result = outerBuilder.getTuplePredicateRewriter().toNotInSubquery(childBuilder, childRoot, singleColumn);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
 			"((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL))) )");
@@ -83,7 +83,7 @@ class TuplePredicateRewriterTest {
 		SearchQueryBuilder childBuilder = outerBuilder.newChildSqlBuilder(true);
 		BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = TuplePredicateRewriter.toNotInSubquery(childBuilder, childRoot, multiColumn);
+		Condition result = outerBuilder.getTuplePredicateRewriter().toNotInSubquery(childBuilder, childRoot, multiColumn);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
 			"(NOT (EXISTS (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0 WHERE (((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL)) AND (s0.PARTITION_ID = t0.PARTITION_ID) AND (s0.RES_ID = t0.RES_ID)))))");
@@ -91,15 +91,14 @@ class TuplePredicateRewriterTest {
 
 	@ParameterizedTest
 	@MethodSource("allDialects")
-	void toExistsSubquery_producesExistsWithCorrelation(Dialect theDialect) {
+	void toInSubquery_multiColumn_producesExistsWithCorrelation(Dialect theDialect) {
 		SearchQueryBuilder outerBuilder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder outerRoot = outerBuilder.getOrCreateFirstPredicateBuilder();
 		PartitionableJoinColumns multiColumn = PartitionableJoinColumns.from(outerRoot.getJoinColumns());
 
 		SearchQueryBuilder childBuilder = outerBuilder.newChildSqlBuilder(true);
-		BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = TuplePredicateRewriter.toExistsSubquery(childBuilder, childRoot, multiColumn);
+		Condition result = outerBuilder.getTuplePredicateRewriter().toInSubquery(List.of(childBuilder), multiColumn);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
 			"(EXISTS (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0 WHERE (((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL)) AND (s0.PARTITION_ID = t0.PARTITION_ID) AND (s0.RES_ID = t0.RES_ID))))");
@@ -111,8 +110,8 @@ class TuplePredicateRewriterTest {
 		SearchQueryBuilder builder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = TuplePredicateRewriter.toExpandedTupleInPredicate(
-			builder, PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
+		Condition result = builder.getTuplePredicateRewriter().toInPredicate(
+			PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
 			List.of(JpaPid.fromId(100L, 1)), false);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
@@ -125,8 +124,8 @@ class TuplePredicateRewriterTest {
 		SearchQueryBuilder builder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = TuplePredicateRewriter.toExpandedTupleInPredicate(
-			builder, PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
+		Condition result = builder.getTuplePredicateRewriter().toInPredicate(
+			PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
 			List.of(JpaPid.fromId(100L, 1), JpaPid.fromId(200L, 1)), false);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
@@ -139,8 +138,8 @@ class TuplePredicateRewriterTest {
 		SearchQueryBuilder builder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = TuplePredicateRewriter.toExpandedTupleInPredicate(
-			builder, PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
+		Condition result = builder.getTuplePredicateRewriter().toInPredicate(
+			PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
 			List.of(JpaPid.fromId(100L, 1)), true);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
@@ -153,8 +152,8 @@ class TuplePredicateRewriterTest {
 		SearchQueryBuilder builder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = TuplePredicateRewriter.toExpandedTupleInPredicate(
-			builder, PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
+		Condition result = builder.getTuplePredicateRewriter().toInPredicate(
+			PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
 			List.of(JpaPid.fromId(100L, 1), JpaPid.fromId(200L, 2)), false);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
@@ -166,6 +165,16 @@ class TuplePredicateRewriterTest {
 		dialectProvider.setDialectForUnitTest(theDialect);
 		return new SearchQueryBuilder(myFhirContext, myStorageSettings, myPartitionSettings,
 			RequestPartitionId.fromPartitionId(1), "Patient", mySqlBuilderFactory, dialectProvider, false, false);
+	}
+
+	private SearchQueryBuilder createNonPartitionBuilder(Dialect theDialect) {
+		PartitionSettings nonPartitionSettings = new PartitionSettings();
+		nonPartitionSettings.setPartitioningEnabled(false);
+		nonPartitionSettings.setDatabasePartitionMode(false);
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
+		dialectProvider.setDialectForUnitTest(theDialect);
+		return new SearchQueryBuilder(myFhirContext, myStorageSettings, nonPartitionSettings,
+			RequestPartitionId.defaultPartition(), "Patient", mySqlBuilderFactory, dialectProvider, false, false);
 	}
 
 	/**

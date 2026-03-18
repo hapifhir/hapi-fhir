@@ -47,7 +47,6 @@ import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.search.builder.sql.TuplePredicateRewriter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -845,16 +844,12 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		if (theTargetPids != null && theTargetPids.length >= 1) {
 			// if resource ids are provided, we'll create the predicate
 			// with ids in or equal to this value
-			if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
-				condition = TuplePredicateRewriter.toExpandedTupleInPredicate(
-						getSearchQueryBuilder(),
-						PartitionableJoinColumns.newPartitioned(getColumnTargetPartitionId(), myColumnTargetResourceId),
-						List.of(theTargetPids),
-						false);
-			} else {
-				condition = QueryParameterUtils.toEqualToOrInPredicate(
-						myColumnTargetResourceId, generatePlaceholders(JpaPid.toLongList(theTargetPids)));
-			}
+			PartitionableJoinColumns joinColumns = getSearchQueryBuilder().isIncludePartitionIdInJoins()
+					? PartitionableJoinColumns.newPartitioned(getColumnTargetPartitionId(), myColumnTargetResourceId)
+					: PartitionableJoinColumns.newNonPartitioned(myColumnTargetResourceId);
+			condition = getSearchQueryBuilder()
+					.getTuplePredicateRewriter()
+					.toInPredicate(joinColumns, List.of(theTargetPids), false);
 		} else {
 			// ... otherwise we look for resource types
 			condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
