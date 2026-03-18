@@ -148,7 +148,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 				return predicate;
 			} else {
 				return getSearchQueryBuilder()
-						.getTuplePredicateRewriter()
+						.getTuplePredicateBuilder()
 						.toInPredicate(
 								PartitionableJoinColumns.from(theSourceJoinColumn),
 								allOrPids,

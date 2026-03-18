@@ -51,7 +51,7 @@ public final class TuplePredicateBuilder {
 
 	private final SearchQueryBuilder mySearchQueryBuilder;
 
-	TuplePredicateBuilder(SearchQueryBuilder theSearchQueryBuilder) {
+	public TuplePredicateBuilder(SearchQueryBuilder theSearchQueryBuilder) {
 		mySearchQueryBuilder = theSearchQueryBuilder;
 	}
 

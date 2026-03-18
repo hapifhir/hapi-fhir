@@ -195,7 +195,7 @@ public class SearchQueryBuilder {
 		myTuplePredicateBuilder = new TuplePredicateBuilder(this);
 	}
 
-	public TuplePredicateBuilder getTuplePredicateRewriter() {
+	public TuplePredicateBuilder getTuplePredicateBuilder() {
 		return myTuplePredicateBuilder;
 	}
 

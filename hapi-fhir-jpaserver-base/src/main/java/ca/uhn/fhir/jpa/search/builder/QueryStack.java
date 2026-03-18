@@ -1609,7 +1609,7 @@ public class QueryStack {
 				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false, null);
 				PartitionableJoinColumns outerColumns = PartitionableJoinColumns.from(
 						theSourceJoinColumn != null ? theSourceJoinColumn : root.getJoinColumns());
-				retVal = mySqlBuilder.getTuplePredicateRewriter().toInSubquery(childBuilders, outerColumns);
+				retVal = mySqlBuilder.getTuplePredicateBuilder().toInSubquery(childBuilders, outerColumns);
 			} else if (theSourceJoinColumn == null) {
 				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false, null);
 				PartitionableJoinColumns joinColumns = PartitionableJoinColumns.from(root.getJoinColumns());
@@ -2097,7 +2097,7 @@ public class QueryStack {
 
 				join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 				tagPredicate = mySqlBuilder
-						.getTuplePredicateRewriter()
+						.getTuplePredicateBuilder()
 						.toNotInSubquery(sqlBuilder, tagSelector, PartitionableJoinColumns.from(join.getJoinColumns()));
 
 			} else {
@@ -2277,7 +2277,7 @@ public class QueryStack {
 			PartitionableJoinColumns outerColumns = PartitionableJoinColumns.from(
 					theSourceJoinColumn != null ? theSourceJoinColumn : join.getJoinColumns());
 			predicate =
-					theSqlBuilder.getTuplePredicateRewriter().toNotInSubquery(sqlBuilder, tokenSelector, outerColumns);
+					theSqlBuilder.getTuplePredicateBuilder().toNotInSubquery(sqlBuilder, tokenSelector, outerColumns);
 
 		} else {
 			Boolean isMissing = theList.get(0).getMissing();

@@ -944,7 +944,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					? PartitionableJoinColumns.newPartitioned(getColumnTargetPartitionId(), myColumnTargetResourceId)
 					: PartitionableJoinColumns.newNonPartitioned(myColumnTargetResourceId);
 			condition = getSearchQueryBuilder()
-					.getTuplePredicateRewriter()
+					.getTuplePredicateBuilder()
 					.toInPredicate(joinColumns, List.of(theTargetPids), false);
 		} else {
 			// ... otherwise we look for resource types

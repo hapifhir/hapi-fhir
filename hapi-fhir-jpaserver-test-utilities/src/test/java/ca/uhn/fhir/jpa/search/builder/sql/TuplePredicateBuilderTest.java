@@ -67,7 +67,7 @@ class TuplePredicateBuilderTest {
 		SearchQueryBuilder childBuilder = outerBuilder.newChildSqlBuilder(false);
 		BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = outerBuilder.getTuplePredicateRewriter().toNotInSubquery(childBuilder, childRoot, singleColumn);
+		Condition result = outerBuilder.getTuplePredicateBuilder().toNotInSubquery(childBuilder, childRoot, singleColumn);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
 			"((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL))) )");
@@ -83,7 +83,7 @@ class TuplePredicateBuilderTest {
 		SearchQueryBuilder childBuilder = outerBuilder.newChildSqlBuilder(true);
 		BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = outerBuilder.getTuplePredicateRewriter().toNotInSubquery(childBuilder, childRoot, multiColumn);
+		Condition result = outerBuilder.getTuplePredicateBuilder().toNotInSubquery(childBuilder, childRoot, multiColumn);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
 			"(NOT (EXISTS (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0 WHERE (((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL)) AND (s0.PARTITION_ID = t0.PARTITION_ID) AND (s0.RES_ID = t0.RES_ID)))))");
@@ -98,7 +98,7 @@ class TuplePredicateBuilderTest {
 
 		SearchQueryBuilder childBuilder = outerBuilder.newChildSqlBuilder(true);
 
-		Condition result = outerBuilder.getTuplePredicateRewriter().toInSubquery(List.of(childBuilder), multiColumn);
+		Condition result = outerBuilder.getTuplePredicateBuilder().toInSubquery(List.of(childBuilder), multiColumn);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
 			"(EXISTS (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0 WHERE (((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL)) AND (s0.PARTITION_ID = t0.PARTITION_ID) AND (s0.RES_ID = t0.RES_ID))))");
@@ -110,7 +110,7 @@ class TuplePredicateBuilderTest {
 		SearchQueryBuilder builder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = builder.getTuplePredicateRewriter().toInPredicate(
+		Condition result = builder.getTuplePredicateBuilder().toInPredicate(
 			PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
 			List.of(JpaPid.fromId(100L, 1)), false);
 
@@ -124,7 +124,7 @@ class TuplePredicateBuilderTest {
 		SearchQueryBuilder builder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = builder.getTuplePredicateRewriter().toInPredicate(
+		Condition result = builder.getTuplePredicateBuilder().toInPredicate(
 			PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
 			List.of(JpaPid.fromId(100L, 1), JpaPid.fromId(200L, 1)), false);
 
@@ -138,7 +138,7 @@ class TuplePredicateBuilderTest {
 		SearchQueryBuilder builder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = builder.getTuplePredicateRewriter().toInPredicate(
+		Condition result = builder.getTuplePredicateBuilder().toInPredicate(
 			PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
 			List.of(JpaPid.fromId(100L, 1)), true);
 
@@ -152,7 +152,7 @@ class TuplePredicateBuilderTest {
 		SearchQueryBuilder builder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
 
-		Condition result = builder.getTuplePredicateRewriter().toInPredicate(
+		Condition result = builder.getTuplePredicateBuilder().toInPredicate(
 			PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
 			List.of(JpaPid.fromId(100L, 1), JpaPid.fromId(200L, 2)), false);
 
