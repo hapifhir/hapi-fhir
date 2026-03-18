@@ -165,7 +165,7 @@ public class MatchUrlService {
 					} else {
 						DateRangeParam p1 = new DateRangeParam();
 						p1.setValuesAsQueryTokens(myFhirContext, nextParamName, paramList);
-						paramMap.setCompartmentChange(p1);
+						paramMap.setCompartmentLastUpdated(p1);
 					}
 				}
 			} else if (Constants.PARAM_HAS.equals(nextParamName)) {

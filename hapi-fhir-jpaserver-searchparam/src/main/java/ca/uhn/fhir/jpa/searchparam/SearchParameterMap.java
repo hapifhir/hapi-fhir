@@ -83,7 +83,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 	private EverythingModeEnum myEverythingMode = null;
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
-	private DateRangeParam myCompartmentChange;
+	private DateRangeParam myCompartmentLastUpdated;
 	private boolean myLoadSynchronous;
 	private Integer myLoadSynchronousUpTo;
 	private Set<Include> myRevIncludes;
@@ -130,7 +130,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 		map.setLastN(isLastN());
 		map.setLastNMax(getLastNMax());
 		map.setLastUpdated(getLastUpdated());
-		map.setCompartmentChange(getCompartmentLastUpdated());
+		map.setCompartmentLastUpdated(getCompartmentLastUpdated());
 		map.setLoadSynchronous(isLoadSynchronous());
 		map.setNearDistanceParam(getNearDistanceParam());
 		map.setLoadSynchronousUpTo(getLoadSynchronousUpTo());
@@ -260,7 +260,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 		}
 	}
 
-	private void addCompartmentChangeParam(
+	private void addCompartmentLastUpdatedParam(
 			StringBuilder theBuilder, ParamPrefixEnum thePrefix, DateParam theDateParam) {
 		if (theDateParam != null && isNotBlank(theDateParam.getValueAsString())) {
 			addUrlParamSeparator(theBuilder);
@@ -362,17 +362,17 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 	}
 
 	/**
-	 * Returns null if there is no compartment change value
+	 * Returns null if there is no compartment last updated value
 	 */
 	public DateRangeParam getCompartmentLastUpdated() {
-		if (myCompartmentChange != null && myCompartmentChange.isEmpty()) {
-			myCompartmentChange = null;
+		if (myCompartmentLastUpdated != null && myCompartmentLastUpdated.isEmpty()) {
+			myCompartmentLastUpdated = null;
 		}
-		return myCompartmentChange;
+		return myCompartmentLastUpdated;
 	}
 
-	public void setCompartmentChange(DateRangeParam theCompartmentChange) {
-		myCompartmentChange = theCompartmentChange;
+	public void setCompartmentLastUpdated(DateRangeParam theCompartmentLastUpdated) {
+		myCompartmentLastUpdated = theCompartmentLastUpdated;
 	}
 
 	/**
@@ -588,11 +588,11 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 			DateParam ccUb = getCompartmentLastUpdated().getUpperBound();
 
 			if (isNotEqualsComparator(ccLb, ccUb)) {
-				addCompartmentChangeParam(
+				addCompartmentLastUpdatedParam(
 						b, NOT_EQUAL, getCompartmentLastUpdated().getLowerBound());
 			} else {
-				addCompartmentChangeParam(b, GREATERTHAN_OR_EQUALS, ccLb);
-				addCompartmentChangeParam(b, LESSTHAN_OR_EQUALS, ccUb);
+				addCompartmentLastUpdatedParam(b, GREATERTHAN_OR_EQUALS, ccLb);
+				addCompartmentLastUpdatedParam(b, LESSTHAN_OR_EQUALS, ccUb);
 			}
 		}
 
@@ -1011,7 +1011,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 				&& myEverythingMode == that.myEverythingMode
 				&& Objects.equals(myIncludes, that.myIncludes)
 				&& Objects.equals(myLastUpdated, that.myLastUpdated)
-				&& Objects.equals(myCompartmentChange, that.myCompartmentChange)
+				&& Objects.equals(myCompartmentLastUpdated, that.myCompartmentLastUpdated)
 				&& Objects.equals(myLoadSynchronousUpTo, that.myLoadSynchronousUpTo)
 				&& Objects.equals(myRevIncludes, that.myRevIncludes)
 				&& Objects.equals(mySort, that.mySort)
@@ -1032,7 +1032,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 				myEverythingMode,
 				myIncludes,
 				myLastUpdated,
-				myCompartmentChange,
+				myCompartmentLastUpdated,
 				myLoadSynchronous,
 				myLoadSynchronousUpTo,
 				myRevIncludes,

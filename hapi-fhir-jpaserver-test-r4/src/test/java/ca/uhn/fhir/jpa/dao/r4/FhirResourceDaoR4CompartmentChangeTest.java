@@ -30,7 +30,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		String patient2Id = createPatientWithObservation();
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.setCompartmentChange(compartmentChangeGt(beforeCreation));
+		map.setCompartmentLastUpdated(compartmentChangeGt(beforeCreation));
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
@@ -53,7 +53,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		myObservationDao.create(obs2, mySrd);
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.setCompartmentChange(compartmentChangeGt(afterInitialCreation));
+		map.setCompartmentLastUpdated(compartmentChangeGt(afterInitialCreation));
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
@@ -79,7 +79,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		myPatientDao.update(patient1, mySrd);
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.setCompartmentChange(compartmentChangeGt(afterInitialCreation));
+		map.setCompartmentLastUpdated(compartmentChangeGt(afterInitialCreation));
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
@@ -89,7 +89,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 	@Test
 	void testCompartmentChange_nonPatientResourceTypeThrowsException() {
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.setCompartmentChange(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN, "2024-01-01")));
+		map.setCompartmentLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN, "2024-01-01")));
 
 		assertThatThrownBy(() -> myObservationDao.search(map, mySrd))
 				.isInstanceOf(InvalidRequestException.class)
@@ -117,7 +117,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		range.setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, rangeEnd));
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.setCompartmentChange(range);
+		map.setCompartmentLastUpdated(range);
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
@@ -134,7 +134,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		Date afterCreation = new Date();
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.setCompartmentChange(compartmentChangeGt(afterCreation));
+		map.setCompartmentLastUpdated(compartmentChangeGt(afterCreation));
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);

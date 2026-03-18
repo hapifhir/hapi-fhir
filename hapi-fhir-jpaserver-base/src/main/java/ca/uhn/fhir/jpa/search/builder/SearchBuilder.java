@@ -337,7 +337,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						dateRange.setRangeFromDatesInclusive(dateParam, dateParam);
 					}
 				}
-				theParams.setCompartmentChange(dateRange);
+				theParams.setCompartmentLastUpdated(dateRange);
 			}
 		}
 
