@@ -1338,7 +1338,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// the late GATE_WAITING chunk to READY but does not dispatch it in this pass.
 		myBatch2JobHelper.runMaintenancePass();
 
-		// After first pass: late chunk should be READY (flipped by safety net, awaiting next dispatch)
+		// After first pass: late chunk should be QUEUED (flipped by safety net to ready and queued immediately)
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(lateChunkId).getStatus())
 				.as("Late-arriving chunk should be QUEUED by safety net")

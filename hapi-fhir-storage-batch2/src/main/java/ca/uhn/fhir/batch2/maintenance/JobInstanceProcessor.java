@@ -116,6 +116,11 @@ public class JobInstanceProcessor {
 		// REDUCTION_READY (if it's the final reduction step)
 		triggerGatedExecutions(theInstance, jobDefinition);
 
+		// Safety net: flip any late-arriving GATE_WAITING chunks for the current step.
+		if (theInstance.hasGatedStep()) {
+			enqueueGateWaitingChunksForCurrentStep(theInstance, jobDefinition);
+		}
+
 		if (theInstance.hasGatedStep() && theInstance.isRunning()) {
 			Optional<JobInstance> updatedInstance = myJobPersistence.fetchInstance(theInstance.getInstanceId());
 
@@ -126,18 +131,10 @@ public class JobInstanceProcessor {
 			JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
 					jobDefinition, updatedInstance.get().getCurrentGatedStepId());
 			if (jobWorkCursor.isReductionStep()) {
-				// Safety net: flip late-arriving GATE_WAITING chunks to REDUCTION_READY
-				// before triggerReductionStep checks for reduction readiness
-				enqueueGateWaitingChunksForCurrentStep(theInstance, jobDefinition);
 				// Reduction step work chunks should never be sent to the queue but to its specific service instead.
 				triggerReductionStep(theInstance, jobWorkCursor);
 				return;
 			}
-		}
-
-		// Safety net: flip any late-arriving GATE_WAITING chunks for the current step.
-		if (theInstance.hasGatedStep()) {
-			enqueueGateWaitingChunksForCurrentStep(theInstance, jobDefinition);
 		}
 
 		// enqueue all READY chunks

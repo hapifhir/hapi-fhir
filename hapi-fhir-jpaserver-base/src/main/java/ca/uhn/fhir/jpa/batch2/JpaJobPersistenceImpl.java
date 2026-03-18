@@ -698,7 +698,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	 * Flips GATE_WAITING and QUEUED chunks for the given step to READY (or REDUCTION_READY for reduction steps).
 	 * Used both during step advancement and as a maintenance safety net for late-arriving chunks.
 	 */
-	private int flipGateWaitingChunksForStep(String theJobInstanceId, String theStepId, boolean theIsReductionStep) {
+	private void flipGateWaitingChunksForStep(String theJobInstanceId, String theStepId, boolean theIsReductionStep) {
 		ourLog.debug(
 				"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
 				theJobInstanceId,
@@ -720,6 +720,5 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				theJobInstanceId,
 				theStepId,
 				targetStatus);
-		return numChanged;
 	}
 }
