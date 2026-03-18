@@ -16,6 +16,8 @@ jobs:
       - group: GPG_VARIABLE_GROUP
       - group: CENTRAL_VARIABLE_GROUP
       - group: SLACK_VARIABLE_GROUP
+      - name: MAVEN_OPTS
+        value: ''
 
     container:
       image: smilecdr/hapi-build:latest
@@ -86,23 +88,22 @@ jobs:
       # 5. Deploy SNAPSHOT build to sonatype
       - task: Maven@4
         displayName: 'Deploy to Maven Central staging'
-        env:
-          MAVEN_OPTS: "-Xmx2048m -XX:+UseG1GC"
         inputs:
           mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
           goals: deploy
           options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST -DskipTests -DdeployToCentral --batch-mode --no-transfer-progress --threads 1C --fail-at-end -Dstyle.color=never '
+          mavenOptions: '-Xmx2048m -XX:+UseG1GC $(MAVEN_OPTS)'
           publishJUnitResults: false
 
       # 6. Notify Slack if the deploy failed
       - bash: |
           PIPELINE_URL="$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
-          curl -s -X POST 'https://slack-bots.azure.smilecdr.com/robogary/slack/slack-message' \
+          curl -s -X POST "${SLACK_PROXY_HOOK_URL}" \
             -H 'Content-Type: application/json' \
             -H "X-Slack-Sender-Token: ${SLACK_SENDER_TOKEN}" \
             --data "{
-              \"channel\": \"cdr-build-status\",
-              \"author\": \"robogary\",
+              \"channel\": \"${SLACK_CHANNEL}\",
+              \"author\": \"${SLACK_AUTHOR}\",
               \"text\": \"HAPI FHIR Nightly SNAPSHOT Deploy Failed\",
               \"blocks\": [
                 {
@@ -134,7 +135,10 @@ jobs:
         displayName: 'Notify Slack on failure'
         condition: failed()
         env:
+          SLACK_PROXY_HOOK_URL: $(SLACK_PROXY_HOOK_URL)
           SLACK_SENDER_TOKEN: $(SLACK_SENDER_TOKEN)
+          SLACK_CHANNEL: $(SLACK_CHANNEL)
+          SLACK_AUTHOR: $(SLACK_AUTHOR)
           PIPELINE_NAME: $(Build.DefinitionName)
           BRANCH_NAME: $(Build.SourceBranchName)
           BUILD_NUMBER: $(Build.BuildNumber)

@@ -424,7 +424,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 																		ReadPartitionIdRequestDetails theDetails) {
 
 			if (theDetails.getResourceType() != null) {
-				RequestPartitionId partitionIdForType = myTypeToPartitionId.get(theDetails.getResourceType());
+				String resourceType = theDetails.getResourceType();
+				RequestPartitionId partitionIdForType = getRequestPartitionIdForResourceType(resourceType);
 				if (partitionIdForType != null) {
 					return partitionIdForType;
 				}
@@ -435,7 +436,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			// for a partition ID
 			String stack = getCallerStackLine();
 
-			assertThat(myReadRequestPartitionIds).describedAs("read partition ids").isNotEmpty();
+			assertThat(myReadRequestPartitionIds).describedAs("read partition ids for type[" + theDetails.getResourceType() + "]").isNotEmpty();
 			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);
 			ourLog.info("Returning partition {} for read at: {}", retVal, stack);
 			return retVal;
@@ -488,7 +489,8 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			assertNotNull(theResource);
 			String stack = getCallerStackLine();
 
-			RequestPartitionId partitionIdForType = myTypeToPartitionId.get(FhirContext.forR4Cached().getResourceType(theResource));
+			String resourceType = FhirContext.forR4Cached().getResourceType(theResource);
+			RequestPartitionId partitionIdForType = getRequestPartitionIdForResourceType(resourceType);
 			if (partitionIdForType != null) {
 				return partitionIdForType;
 			}
@@ -497,6 +499,14 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
 			ourLog.info("Returning partition [{}] for create of resource {} with date {}: {}", retVal, theResource, retVal.getPartitionDate(), stack);
 			return retVal;
+		}
+
+		protected RequestPartitionId getRequestPartitionIdForResourceType(String resourceType) {
+			RequestPartitionId partitionIdForType = myTypeToPartitionId.get(resourceType);
+			if (partitionIdForType == null) {
+				partitionIdForType = myTypeToPartitionId.get("*");
+			}
+			return partitionIdForType;
 		}
 
 		public void assertNoRemainingIds() {

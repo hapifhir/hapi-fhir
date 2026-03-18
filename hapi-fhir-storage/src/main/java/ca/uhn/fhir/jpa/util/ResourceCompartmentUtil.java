@@ -97,7 +97,7 @@ public class ResourceCompartmentUtil {
 	}
 
 	/**
-	 * Extracts and returns an optional compartment of the received resource
+	 * Extracts and returns a list of compartment identities (if any) for the given resource
 	 * @param theCompartmentName     the name of the compartment
 	 * @param theResource            source resource which compartment is extracted
 	 * @param theCompartmentSps      the RuntimeSearchParam list involving the searched compartment

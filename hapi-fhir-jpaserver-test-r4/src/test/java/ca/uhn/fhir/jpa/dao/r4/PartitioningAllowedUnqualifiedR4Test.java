@@ -172,6 +172,7 @@ public class PartitioningAllowedUnqualifiedR4Test extends BasePartitioningR4Test
 		myPartitionInterceptor.addTypeToPartitionId("Patient", RequestPartitionId.fromPartitionId(1));
 		myPartitionInterceptor.addTypeToPartitionId("Observation", RequestPartitionId.fromPartitionId(2));
 		myPartitionInterceptor.addTypeToPartitionId("Device", RequestPartitionId.fromPartitionId(3));
+		myPartitionInterceptor.addTypeToPartitionId("*", RequestPartitionId.fromPartitionId(4));
 
 		createDevice(withId("D"), withIdentifier("http://foo", "1234-5"));
 		createPatient(withId("A"), withActiveTrue());

@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.test.junit.StringToIntegerListArgumentConverter;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,9 +42,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PatientIdPartitionInterceptorTest {
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
+	private final PartitionSettings myPartitionSettings = new PartitionSettings();
 	private PatientIdPartitionInterceptor mySvc;
 	private MatchUrlService myMatchUrlSvc;
-	private PartitionSettings myPartitionSettings = new PartitionSettings();
 
 	@Mock
 	private ISearchParamExtractor mySearchParamExtractor;
@@ -130,6 +131,19 @@ class PatientIdPartitionInterceptorTest {
 		// Verify
 		assertFalse(actual.isAllPartitions());
 		assertThat(actual.getPartitionIds()).containsExactly(theExpectedPartitionId.toArray(Integer[]::new));
+	}
+
+	@Test
+	void testHistoryInstance_Patient_ResolvesPartition() {
+		// Test
+		ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forHistory(
+			"Patient", new IdType("Patient/p1"));
+
+		RequestPartitionId actual = mySvc.identifyForRead(readDetails, new ServletRequestDetails());
+
+		// Verify
+		int expectedPartitionId = PatientIdPartitionInterceptor.defaultPartitionAlgorithm("p1");
+		assertThat(actual.getPartitionIds()).containsExactly(expectedPartitionId);
 	}
 
 	@ParameterizedTest
