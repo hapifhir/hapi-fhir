@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patch;
 
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationRequest;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationResponse;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyResourcesIndividuallyStep;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import jakarta.annotation.Nonnull;
@@ -43,7 +45,10 @@ public class BulkPatchModifyResourcesStep<PT extends BulkPatchJobParameters>
 	@Nullable
 	@Override
 	protected BulkPatchModificationContext preModifyResources(
-			PT theJobParameters, List<TypedPidAndVersionJson> thePids, List<IBaseResource> theResources) {
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			PT theJobParameters,
+			List<TypedPidAndVersionJson> thePids,
+			List<IBaseResource> theResources) {
 		IBaseResource patch = theJobParameters.getFhirPatch(myFhirContext);
 		return new BulkPatchModificationContext(patch);
 	}
@@ -51,6 +56,7 @@ public class BulkPatchModifyResourcesStep<PT extends BulkPatchJobParameters>
 	@Nonnull
 	@Override
 	protected ResourceModificationResponse modifyResource(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			PT theJobParameters,
 			BulkPatchModificationContext theModificationContext,
 			@Nonnull ResourceModificationRequest theModificationRequest) {
