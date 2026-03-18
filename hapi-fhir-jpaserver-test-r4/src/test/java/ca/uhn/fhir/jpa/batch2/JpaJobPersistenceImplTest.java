@@ -4,13 +4,11 @@ import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.api.RunOutcome;
-import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
 import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
-import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
@@ -70,9 +68,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -1153,57 +1155,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		return instance;
 	}
 
-	/**
-	 * Creates a gated job instance with a reduction step for SMILE-11603 race condition tests.
-	 */
-	@Nonnull
-	private JobInstance createReductionInstanceForRaceTest() {
-		JobInstance instance = new JobInstance();
-		instance.setJobDefinitionId(REDUCTION_RACE_JOB_DEF_ID);
-		instance.setStatus(StatusEnum.QUEUED);
-		instance.setJobDefinitionVersion(JOB_DEF_VER);
-		instance.setParameters(CHUNK_DATA);
-		instance.setReport("TEST");
-
-		IReductionStepWorker<TestJobParameters, FirstStepOutput, VoidModel> reductionWorker =
-			new IReductionStepWorker<>() {
-				@Nonnull
-				@Override
-				public ChunkOutcome consume(ca.uhn.fhir.batch2.api.ChunkExecutionDetails<TestJobParameters, FirstStepOutput> theChunkDetails) {
-					return ChunkOutcome.SUCCESS();
-				}
-
-				@Nonnull
-				@Override
-				public RunOutcome run(@Nonnull ca.uhn.fhir.batch2.api.StepExecutionDetails<TestJobParameters, FirstStepOutput> theStepExecutionDetails,
-						@Nonnull ca.uhn.fhir.batch2.api.IJobDataSink<VoidModel> theDataSink) {
-					return RunOutcome.SUCCESS;
-				}
-
-				@Override
-				public IReductionStepWorker<TestJobParameters, FirstStepOutput, VoidModel> newInstance() {
-					return this;
-				}
-			};
-
-		JobDefinition<?> jobDef = TestJobDefinitionUtils.buildGatedJobDefinitionWithReductionStep(
-			REDUCTION_RACE_JOB_DEF_ID,
-			(step, sink) -> {
-				sink.accept(new FirstStepOutput());
-				return RunOutcome.SUCCESS;
-			},
-			reductionWorker,
-			theDetails -> {}
-		);
-		instance.setCurrentGatedStepId(jobDef.getFirstStepId());
-
-		if (myJobDefinitionRegistry.getJobDefinition(jobDef.getJobDefinitionId(), jobDef.getJobDefinitionVersion()).isEmpty()) {
-			myJobDefinitionRegistry.addJobDefinition(jobDef);
-		}
-
-		return instance;
-	}
-
 	@Nonnull
 	private JobInstance createInstance(boolean theCreateJobDefBool, boolean theCreateGatedJob) {
 		JobInstance instance = new JobInstance();
@@ -1311,12 +1262,13 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance(true, isGatedExecution);
 		myMaintenanceService.enableMaintenancePass(false);
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
-		PointcutLatch latch = new PointcutLatch("senderlatch");
+
+		// flag so we know when a workchunk is sent to the queue
+		AtomicBoolean flag = new AtomicBoolean();
 		doAnswer(a -> {
-			latch.call(1);
+			flag.set(true);
 			return Void.class;
 		}).when(myBatchSender).sendWorkChannelMessage(any(JobWorkNotification.class));
-		latch.setExpectedCount(1);
 
 		// Create the first step chunk (non-gated first chunk) and
 		// an "early" output chunk for step 2 (gated, so GATE_WAITING)
@@ -1330,12 +1282,15 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		});
 
 		// First maintenance pass: enqueues step 1 chunk (READY → QUEUED), step 2 stays GATE_WAITING
+		flag.set(false);
 		myBatch2JobHelper.runMaintenancePass();
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(step1ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
 			assertThat(findChunkByIdOrThrow(earlyStep2ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING);
 		});
-		latch.awaitExpected();
+		await().atMost(10, TimeUnit.SECONDS).until(() -> {
+			return flag.get();
+		});
 
 		// Simulate worker processing step 1: dequeue → in progress → completed
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(step1ChunkId).orElseThrow(IllegalArgumentException::new);
@@ -1350,13 +1305,15 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// Second maintenance pass: sees step 1 all COMPLETED, advances gate to step 2,
 		// flips early step 2 chunk GATE_WAITING → READY → QUEUED
-		latch.setExpectedCount(1);
+		flag.set(false);
 		myBatch2JobHelper.runMaintenancePass();
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(earlyStep2ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
 			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(LAST_STEP_ID);
 		});
-		latch.awaitExpected();
+		await().atMost(10, TimeUnit.SECONDS).until(() -> {
+			return flag.get();
+		});
 		clearInvocations(myBatchSender);
 
 		// ---- Simulate Server B: slow worker creates a "late" chunk AFTER gate advancement ----
@@ -1369,9 +1326,21 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// Third maintenance pass: should detect and transition the late chunk.
 		myBatch2JobHelper.runMaintenancePass();
+		// verify late arriving chunk is now READY
+		assertThat(findChunkByIdOrThrow(lateStep2ChunkId).getStatus())
+			.as("Late-arriving chunk for an already-advanced step should be QUEUED after maintenance")
+			.isEqualTo(WorkChunkStatusEnum.READY);
 
-		// The late chunk should now be QUEUED (GATE_WAITING → READY → QUEUED).
-		// This assertion currently FAILS — demonstrating the race condition bug.
+		// simulate multiple maintenance run passes... eventually the
+		// workchunk should be sent to the queue
+		flag.set(false);
+		await().atMost(10, TimeUnit.SECONDS).until(() -> {
+			myBatch2JobHelper.runMaintenancePass();
+			return flag.get();
+		});
+
+		// now we can verify that
+		// the late chunk should now be QUEUED (GATE_WAITING → READY → QUEUED).
 		runInTransaction(() -> {
 			assertThat(findChunkByIdOrThrow(lateStep2ChunkId).getStatus())
 				.as("Late-arriving chunk for an already-advanced step should be QUEUED after maintenance")
@@ -1407,9 +1376,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		instance.setCurrentGatedStepId(FIRST_STEP_ID);
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
-		PointcutLatch latch = new PointcutLatch("senderlatch");
+		AtomicInteger count = new AtomicInteger();
 		doAnswer(a -> {
-			latch.call(1);
+			count.getAndIncrement();
 			return Void.class;
 		}).when(myBatchSender).sendWorkChannelMessage(any(JobWorkNotification.class));
 
@@ -1417,11 +1386,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String step1ChunkId = storeFirstWorkChunk(THREE_STEP_JOB_DEF_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA);
 
 		// Maintenance enqueues step 1 chunk
-		latch.setExpectedCount(1);
+		count.set(0);
 		myBatch2JobHelper.runMaintenancePass();
 		runInTransaction(() ->
 			assertThat(findChunkByIdOrThrow(step1ChunkId).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED));
-		latch.awaitExpected();
+		await().atMost(1, TimeUnit.SECONDS).until(() -> count.get() == 1);
 
 		// Worker processes step 1: dequeue → complete
 		mySvc.onWorkChunkDequeue(step1ChunkId);
@@ -1436,7 +1405,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// === GATE ADVANCE: step 1 → step 2 ===
 		// Maintenance sees step 1 COMPLETED, advances gate, enqueues step 2 chunks
-		latch.setExpectedCount(3);
+		count.set(0);
 		myBatch2JobHelper.runMaintenancePass();
 		runInTransaction(() -> {
 			assertThat(findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()).isEqualTo(SECOND_STEP_ID);
@@ -1444,7 +1413,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertThat(findChunkByIdOrThrow(step2Chunk2).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
 			assertThat(findChunkByIdOrThrow(step2Chunk3).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
 		});
-		latch.awaitExpected();
+		await().atMost(1, TimeUnit.SECONDS).until(() -> count.get() == 3);
 
 		// === STEP 2: 3 chunks processed across multiple servers ===
 		// Each worker dequeues, produces output for step 3, and completes
@@ -1474,7 +1443,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// === GATE ADVANCE: step 2 → step 3 ===
 		// Maintenance sees all step 2 COMPLETED, advances gate, flips existing step 3 chunks
-		latch.setExpectedCount(2);
+		count.set(0);
 		clearInvocations(myBatchSender);
 		myBatch2JobHelper.runMaintenancePass();
 		runInTransaction(() -> {
@@ -1482,7 +1451,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertThat(findChunkByIdOrThrow(step3ChunkA).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
 			assertThat(findChunkByIdOrThrow(step3ChunkB).getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
 		});
-		latch.awaitExpected();
+		await().atMost(1, TimeUnit.SECONDS).until(() -> count.get() == 2);
 		clearInvocations(myBatchSender);
 
 		// === THE RACE: Server C's slow worker finally creates its step 3 output ===
@@ -1493,7 +1462,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertThat(findChunkByIdOrThrow(lateStep3Chunk).getStatus()).isEqualTo(WorkChunkStatusEnum.GATE_WAITING));
 
 		// Subsequent maintenance pass: should detect and transition the late chunk
-		myBatch2JobHelper.runMaintenancePass();
+		count.set(0);
+		await().atMost(1, TimeUnit.SECONDS).until(() -> {
+			myBatch2JobHelper.runMaintenancePass();
+			return count.get() == 1;
+		});
 
 		// The late chunk should now be QUEUED.
 		// This assertion currently FAILS — demonstrating the race condition bug.

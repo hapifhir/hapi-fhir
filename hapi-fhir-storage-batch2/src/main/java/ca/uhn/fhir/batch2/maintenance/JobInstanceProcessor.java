@@ -106,6 +106,20 @@ public class JobInstanceProcessor {
 		JobDefinition<? extends IModelJson> jobDefinition =
 				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
 
+		// Safety net: flip any late-arriving GATE_WAITING chunks for the current step.
+		if (theInstance.hasGatedStep()) {
+			int flippedChunks = enqueueGateWaitingChunksForCurrentStep(theInstance, jobDefinition);
+			if (flippedChunks > 0) {
+				/*
+				 * some chunks are still coming in.
+				 * We'll wait a cycle to process.
+				 * This will give us a bit more chance for other slow workers
+				 * to process
+				 */
+				return;
+			}
+		}
+
 		// move POLL_WAITING -> READY
 		processPollingChunks(theInstance.getInstanceId());
 		// determine job progress; delete CANCELED/COMPLETE/FAILED jobs that are no longer needed
@@ -116,11 +130,6 @@ public class JobInstanceProcessor {
 		// READY (for regular gated jobs)
 		// REDUCTION_READY (if it's the final reduction step)
 		triggerGatedExecutions(theInstance, jobDefinition);
-
-		// Safety net: flip any late-arriving GATE_WAITING chunks for the current step.
-		if (theInstance.hasGatedStep()) {
-			enqueueGateWaitingChunksForCurrentStep(theInstance, jobDefinition);
-		}
 
 		if (theInstance.hasGatedStep() && theInstance.isRunning()) {
 			Optional<JobInstance> updatedInstance = myJobPersistence.fetchInstance(theInstance.getInstanceId());
@@ -268,15 +277,15 @@ public class JobInstanceProcessor {
 	 * chunks for the current step), to avoid flipping chunks that haven't been through
 	 * the normal step advancement process yet.
 	 */
-	private void enqueueGateWaitingChunksForCurrentStep(JobInstance theInstance, JobDefinition<?> theJobDefinition) {
+	private int enqueueGateWaitingChunksForCurrentStep(JobInstance theInstance, JobDefinition<?> theJobDefinition) {
 		Optional<JobInstance> freshInstance = myJobPersistence.fetchInstance(theInstance.getInstanceId());
 		if (freshInstance.isEmpty()) {
-			return;
+			return 0;
 		}
 
 		String currentStepId = freshInstance.get().getCurrentGatedStepId();
 		if (currentStepId == null) {
-			return;
+			return 0;
 		}
 
 		// Check if the step has already been advanced by looking for non-GATE_WAITING chunks.
@@ -286,7 +295,7 @@ public class JobInstanceProcessor {
 				myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(theInstance.getInstanceId(), currentStepId);
 		if (existingStatuses.isEmpty()) {
 			// No chunks — step hasn't been advanced yet
-			return;
+			return 0;
 		}
 
 		JobWorkCursor<?, ?, ?> cursor =
@@ -303,6 +312,7 @@ public class JobInstanceProcessor {
 					theInstance.getInstanceId(),
 					currentStepId);
 		}
+		return updated;
 	}
 
 	private boolean canAdvanceGatedJob(JobInstance theInstance) {
