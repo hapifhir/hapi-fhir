@@ -43,7 +43,7 @@ public class BulkPatchModifyResourcesStep<PT extends BulkPatchJobParameters>
 	@Nullable
 	@Override
 	protected BulkPatchModificationContext preModifyResources(
-			PT theJobParameters, List<TypedPidAndVersionJson> thePids) {
+			PT theJobParameters, List<TypedPidAndVersionJson> thePids, List<IBaseResource> theResources) {
 		IBaseResource patch = theJobParameters.getFhirPatch(myFhirContext);
 		return new BulkPatchModificationContext(patch);
 	}

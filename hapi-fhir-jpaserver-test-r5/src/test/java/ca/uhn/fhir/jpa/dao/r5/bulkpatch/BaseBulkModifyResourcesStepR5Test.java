@@ -150,7 +150,7 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 
 		@Nullable
 		@Override
-		protected Object preModifyResources(BulkPatchJobParameters theJobParameters, List<TypedPidAndVersionJson> thePids) {
+		protected Object preModifyResources(BulkPatchJobParameters theJobParameters, List<TypedPidAndVersionJson> thePids, List<IBaseResource> theResources) {
 			return myMockStep.preModifyResources(theJobParameters, thePids);
 		}
 

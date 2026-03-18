@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.util.HashingWriter;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import jakarta.annotation.Nonnull;
@@ -48,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -158,21 +160,27 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	private C modifyResourcesInTransaction(State theState, PT theJobParameters, List<TypedPidAndVersionJson> thePids) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
-		C modificationContext = preModifyResources(theJobParameters, thePids);
-
+		List<IBaseResource> resources = new ArrayList<>(thePids.size());
 		for (TypedPidAndVersionJson pid : thePids) {
+			resources.add(theState.getResourceForPid(pid));
+		}
+
+		C modificationContext = preModifyResources(theJobParameters, thePids, resources);
+
+		for (int i = 0; i < thePids.size(); i++) {
+			TypedPidAndVersionJson pid = thePids.get(i);
 			if (!theState.isPidInState(pid, StateEnum.INITIAL)) {
 				// If we found that a resource version was deleted, we move it
 				// straight to UNCHANGED status
 				continue;
 			}
 
-			IBaseResource resource = theState.getResourceForPid(pid);
+			IBaseResource resource = resources.get(i);
 			String resourceType = myFhirContext.getResourceType(resource);
 			String resourceId = resource.getIdElement().getIdPart();
 			String resourceVersion = resource.getIdElement().getVersionIdPart();
 
-			try (ca.uhn.fhir.util.HashingWriter preModificationHash = hashResource(resource)) {
+			try (HashingWriter preModificationHash = hashResource(resource)) {
 
 				ResourceModificationRequest modificationRequest = new ResourceModificationRequest(resource);
 				ResourceModificationResponse modificationResponse =
@@ -193,7 +201,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 					continue;
 				}
 
-				ca.uhn.fhir.util.HashingWriter postModificationHash = hashResource(updatedResource);
+				HashingWriter postModificationHash = hashResource(updatedResource);
 				if (preModificationHash.matches(postModificationHash)) {
 					theState.moveToState(pid, StateEnum.UNCHANGED);
 					continue;
@@ -293,28 +301,21 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	}
 
 	/**
-	 * Subclasses may override this method to indicate that this resource should be stored
-	 * as a history rewrite
-	 */
-	@SuppressWarnings("unused")
-	protected boolean isRewriteHistory(C theState, IBaseResource theResource) {
-		return false;
-	}
-
-	/**
 	 * Subclasses may override this method, which will be called immediately before beginning processing
 	 * of a resource batch. It can be used to perform any shared processing that would otherwise need
-	 * to be repeated, such as looking up context resources, parsing a patch object in the job parameters
+	 * to be repeated, such as looking up context resources, parsing a patch object in the job parameters,
 	 * or other expensive operations.
 	 *
 	 * @param theJobParameters The parameters for the current instance of the job
 	 * @param thePids          The PIDs of the resources to be modified. The PIDs will be in the same order as the resources in the chunk.
+	 * @param theResources     The resources to be modified. The resources will be in the same order as the PIDs in the chunk.
 	 * @return A context object which will be passed to {@link #modifyResource(PT, Object, ResourceModificationRequest)}
 	 * 	during each invocation. The format of the context object is up to the subclass, the framework
 	 * 	won't look at it and doesn't care if it is {@literal null}.
 	 */
 	@Nullable
-	protected C preModifyResources(PT theJobParameters, List<TypedPidAndVersionJson> thePids) {
+	protected C preModifyResources(
+			PT theJobParameters, List<TypedPidAndVersionJson> thePids, List<IBaseResource> theResources) {
 		return null;
 	}
 
