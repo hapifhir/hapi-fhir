@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SearchQueryBuilderTest.MyConfig.class})
-class TuplePredicateRewriterTest {
+class TuplePredicateBuilderTest {
 
 	private static final String PLACEHOLDER = "'[^']*'";
 

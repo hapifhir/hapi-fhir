@@ -47,11 +47,11 @@ import java.util.List;
  * @see <a href="https://github.com/hibernate/hibernate-orm/blob/main/hibernate-core/src/main/java/org/hibernate/sql/ast/spi/AbstractSqlAstTranslator.java">
  *     Hibernate AbstractSqlAstTranslator (emulateTupleComparison)</a>
  */
-public final class TuplePredicateRewriter {
+public final class TuplePredicateBuilder {
 
 	private final SearchQueryBuilder mySearchQueryBuilder;
 
-	TuplePredicateRewriter(SearchQueryBuilder theSearchQueryBuilder) {
+	TuplePredicateBuilder(SearchQueryBuilder theSearchQueryBuilder) {
 		mySearchQueryBuilder = theSearchQueryBuilder;
 	}
 
