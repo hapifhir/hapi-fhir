@@ -106,6 +106,48 @@ class TuplePredicateBuilderTest {
 
 	@ParameterizedTest
 	@MethodSource("allDialects")
+	void toInPredicate_nonPartitionMode_producesSimpleIn(Dialect theDialect) {
+		SearchQueryBuilder builder = createNonPartitionBuilder(theDialect);
+		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
+
+		Condition result = builder.getTuplePredicateBuilder().toInPredicate(
+			PartitionableJoinColumns.newNonPartitioned(root.getResourceIdColumn()),
+			List.of(JpaPid.fromId(100L), JpaPid.fromId(200L)), false);
+
+		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
+			"(t0.RES_ID IN (?,?) )");
+	}
+
+	@ParameterizedTest
+	@MethodSource("allDialects")
+	void toInPredicate_nonPartitionMode_negated_singlePid_producesNotEqual(Dialect theDialect) {
+		SearchQueryBuilder builder = createNonPartitionBuilder(theDialect);
+		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
+
+		Condition result = builder.getTuplePredicateBuilder().toInPredicate(
+			PartitionableJoinColumns.newNonPartitioned(root.getResourceIdColumn()),
+			List.of(JpaPid.fromId(100L)), true);
+
+		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
+			"(t0.RES_ID <> ?)");
+	}
+
+	@ParameterizedTest
+	@MethodSource("allDialects")
+	void toInPredicate_nonPartitionMode_negated_multiplePids_producesNotIn(Dialect theDialect) {
+		SearchQueryBuilder builder = createNonPartitionBuilder(theDialect);
+		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
+
+		Condition result = builder.getTuplePredicateBuilder().toInPredicate(
+			PartitionableJoinColumns.newNonPartitioned(root.getResourceIdColumn()),
+			List.of(JpaPid.fromId(100L), JpaPid.fromId(200L)), true);
+
+		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
+			"(t0.RES_ID NOT IN (?,?) )");
+	}
+
+	@ParameterizedTest
+	@MethodSource("allDialects")
 	void toExpandedTupleInPredicate_singlePid(Dialect theDialect) {
 		SearchQueryBuilder builder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
@@ -144,6 +186,20 @@ class TuplePredicateBuilderTest {
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
 			"(NOT ((t0.PARTITION_ID = ?) AND (t0.RES_ID = ?)))");
+	}
+
+	@ParameterizedTest
+	@MethodSource("allDialects")
+	void toExpandedTupleInPredicate_negated_multiplePids(Dialect theDialect) {
+		SearchQueryBuilder builder = createBuilder(theDialect);
+		BaseJoiningPredicateBuilder root = builder.getOrCreateFirstPredicateBuilder();
+
+		Condition result = builder.getTuplePredicateBuilder().toInPredicate(
+			PartitionableJoinColumns.newPartitioned(root.getPartitionIdColumn(), root.getResourceIdColumn()),
+			List.of(JpaPid.fromId(100L, 1), JpaPid.fromId(200L, 2)), true);
+
+		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
+			"(NOT (((t0.PARTITION_ID = ?) AND (t0.RES_ID = ?)) OR ((t0.PARTITION_ID = ?) AND (t0.RES_ID = ?))))");
 	}
 
 	@ParameterizedTest
