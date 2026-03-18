@@ -564,11 +564,11 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		IIdType g1 = createGroup(withId("G1"));
 		IIdType g1ObsId = createObservation(withSubject(g1), withStatus("final"), withIdentifier("http://example.com", "groupObsIdentifier"));
 
-//		myTestDaoSearch.assertSearchFinds("find both cross partition", "Observation?status=final", patAObsId, g1ObsId);
-//		myTestDaoSearch.assertSearchFinds("find only patient Obs", "Observation?status=final&subject=Patient/A", patAObsId);
-//		myTestDaoSearch.assertSearchFinds("find only group Obs", "Observation?status=final&subject=Group/G1", g1ObsId);
-//		myTestDaoSearch.assertSearchFinds("find by identifier for patient observation", "Observation?identifier=patObsIdentifier", patAObsId);
-//		myTestDaoSearch.assertSearchFinds("find by identifier for group observation", "Observation?identifier=groupObsIdentifier", g1ObsId);
+		myTestDaoSearch.assertSearchFinds("find both cross partition", "Observation?status=final", patAObsId, g1ObsId);
+		myTestDaoSearch.assertSearchFinds("find only patient Obs", "Observation?status=final&subject=Patient/A", patAObsId);
+		myTestDaoSearch.assertSearchFinds("find only group Obs", "Observation?status=final&subject=Group/G1", g1ObsId);
+		myTestDaoSearch.assertSearchFinds("find by identifier for patient observation", "Observation?identifier=patObsIdentifier", patAObsId);
+		myTestDaoSearch.assertSearchFinds("find by identifier for group observation", "Observation?identifier=groupObsIdentifier", g1ObsId);
 		myTestDaoSearch.assertSearchFinds("find both by subject id", "Observation?status=final&subject=Group/G1,Patient/A", patAObsId, g1ObsId);
 	}
 
