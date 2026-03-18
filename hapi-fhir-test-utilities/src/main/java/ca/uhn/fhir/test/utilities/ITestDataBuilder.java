@@ -279,8 +279,16 @@ public interface ITestDataBuilder {
 		return buildResource("Provenance", theModifiers);
 	}
 
+	default IIdType createDevice(ICreationArgument... theModifiers) {
+		return createResource("Device", theModifiers);
+	}
+
 	default IIdType createList(ICreationArgument... theModifiers) {
 		return createResource("List", theModifiers);
+	}
+
+	default IIdType createLocation(ICreationArgument... theModifiers) {
+		return createResource("Location", theModifiers);
 	}
 
 	default IIdType createPatient(ICreationArgument... theModifiers) {

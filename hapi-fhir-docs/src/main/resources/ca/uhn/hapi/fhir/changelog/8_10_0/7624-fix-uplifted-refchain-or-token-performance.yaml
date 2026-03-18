@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7624
+title: "Previously, OR searches on uplifted chained token parameters (comma-separated values)
+  could generate multiple self-joins on `HFJ_SPIDX_TOKEN`, leading to severe performance degradation
+  and timeouts as the number of OR values increased. This has been fixed by consolidating equivalent
+  uplifted leaf predicates so OR values are evaluated through a single token-index path.
+  Fix submitted by Patrick Werner."

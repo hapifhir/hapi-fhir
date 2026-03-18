@@ -9,7 +9,12 @@ import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import jakarta.persistence.EntityManager;
@@ -22,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -52,6 +58,7 @@ public class DaoSearchParamSynchronizerTest {
 	@Mock
 	private ISearchParamIdentityCacheSvc searchParamIdentityCacheSvc;
 
+
 	private ResourceIndexedSearchParams existingParams;
 
 	@BeforeEach
@@ -79,6 +86,7 @@ public class DaoSearchParamSynchronizerTest {
 
 	@Test
 	void synchronizeSearchParamsNumberOnlyValuesDifferent() {
+		when(theEntity.getResourceType()).thenReturn("Patient");
 		final AddRemoveCount addRemoveCount = subject.synchronizeSearchParamsToDatabase(theParams, theEntity, existingParams);
 
 		assertEquals(0, addRemoveCount.getRemoveCount());
@@ -90,5 +98,87 @@ public class DaoSearchParamSynchronizerTest {
 			.calculateHashIdentity(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Patient", GRITTSCORE);
 		verify(searchParamIdentityCacheSvc, times(1))
 			.findOrCreateSearchParamIdentity(expectedSpIdentity, "Patient", GRITTSCORE);
+	}
+
+	/**
+	 * Verifies that {@code synchronize()} populates the {@code @ManyToOne} entity reference on a new
+	 * token search param so that Hibernate's {@code InsertActionSorter} can detect the FK dependency
+	 * to {@code HFJ_RESOURCE} when JDBC batch inserts are active (SMILE-11562).
+	 *
+	 * <p>Created by claude-sonnet-4-6.</p>
+	 */
+	@Test
+	void synchronize_setsEntityReferenceOnNewTokenSearchParam() {
+		when(theEntity.getResourceType()).thenReturn("Patient");
+		ResourceIndexedSearchParamToken tokenParam = new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active");
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myTokenParams.add(tokenParam);
+
+		subject.synchronizeSearchParamsToDatabase(newParams, theEntity, ResourceIndexedSearchParams.empty());
+
+		assertThat(tokenParam.getResource()).isSameAs(theEntity);
+	}
+
+	/**
+	 * Verifies that {@code synchronize()} populates the {@code @ManyToOne} entity reference on a new
+	 * string search param so that Hibernate's {@code InsertActionSorter} can detect the FK dependency
+	 * to {@code HFJ_RESOURCE} when JDBC batch inserts are active (SMILE-11562).
+	 *
+	 * <p>Created by claude-sonnet-4-6.</p>
+	 */
+	@Test
+	void synchronize_setsEntityReferenceOnNewStringSearchParam() {
+		when(theEntity.getResourceType()).thenReturn("Patient");
+		ResourceIndexedSearchParamString stringParam = new ResourceIndexedSearchParamString(
+			new PartitionSettings(), new StorageSettings(), "Patient", "name", "smith", "SMITH");
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myStringParams.add(stringParam);
+
+		subject.synchronizeSearchParamsToDatabase(newParams, theEntity, ResourceIndexedSearchParams.empty());
+
+		assertThat(stringParam.getResource()).isSameAs(theEntity);
+	}
+
+	/**
+	 * Verifies that {@code synchronize()} populates the {@code @ManyToOne} entity reference on a new
+	 * URI search param so that Hibernate's {@code InsertActionSorter} can detect the FK dependency
+	 * to {@code HFJ_RESOURCE} when JDBC batch inserts are active (SMILE-11562).
+	 *
+	 * <p>Created by claude-sonnet-4-6.</p>
+	 */
+	@Test
+	void synchronize_setsEntityReferenceOnNewUriSearchParam() {
+		when(theEntity.getResourceType()).thenReturn("Patient");
+		ResourceIndexedSearchParamUri uriParam = new ResourceIndexedSearchParamUri(
+			new PartitionSettings(), "Patient", "url", "http://example.org");
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myUriParams.add(uriParam);
+
+		subject.synchronizeSearchParamsToDatabase(newParams, theEntity, ResourceIndexedSearchParams.empty());
+
+		assertThat(uriParam.getResource()).isSameAs(theEntity);
+	}
+
+	/**
+	 * Verifies that {@code synchronize()} populates the target {@code @ManyToOne} entity reference on
+	 * a new resource link so that Hibernate's {@code InsertActionSorter} can detect the FK dependency
+	 * to the target {@code HFJ_RESOURCE} row when JDBC batch inserts are active (SMILE-11562).
+	 *
+	 * <p>Created by claude-sonnet-4-6.</p>
+	 */
+	@Test
+	void synchronize_setsTargetEntityReferenceOnNewResourceLink() {
+		ResourceLink link = new ResourceLink();
+		link.setTargetResource("Composition", 42L, "42");
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myLinks.add(link);
+
+		subject.synchronizeSearchParamsToDatabase(newParams, theEntity, ResourceIndexedSearchParams.empty());
+
+		// Verify getReference() was called with the correct target PID — this is how we confirm
+		// that setTargetResourceTable() was invoked, since myTargetResource has no public getter
+		// (it is the @ManyToOne field inspected internally by Hibernate's InsertActionSorter).
+		verify(entityManager).getReference(ResourceTable.class, JpaPid.fromId(42L, (Integer) null));
 	}
 }
