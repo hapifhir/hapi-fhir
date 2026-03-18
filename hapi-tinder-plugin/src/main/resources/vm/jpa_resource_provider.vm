@@ -132,11 +132,11 @@ public class ${className}ResourceProvider extends
 			DateRangeParam the_lastUpdated,
 	#end
 
-	## _compartmentChange is a non-standard search parameter only applicable to Patient
+	## _compartmentLastUpdated is a non-standard search parameter only applicable to Patient
 	#if ( ${className} == 'Patient' )
 			@Description(shortDefinition="Find patients whose compartment data has changed within a given date range")
-			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_COMPARTMENT_CHANGE)
-			DateRangeParam theCompartmentChange,
+			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_COMPARTMENT_LAST_UPDATED)
+			DateRangeParam theCompartmentLastUpdated,
 	#end
 
 			@IncludeParam
@@ -200,7 +200,7 @@ paramMap.setRevIncludes(theRevIncludes);
 			paramMap.setSearchContainedMode(theSearchContainedMode);
 
 	#if ( ${className} == 'Patient' )
-			paramMap.setCompartmentChange(theCompartmentChange);
+			paramMap.setCompartmentLastUpdated(theCompartmentLastUpdated);
 	#end
 
 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);

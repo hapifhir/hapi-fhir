@@ -93,7 +93,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 
 		assertThatThrownBy(() -> myObservationDao.search(map, mySrd))
 				.isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining(Constants.PARAM_COMPARTMENT_CHANGE)
+				.hasMessageContaining(Constants.PARAM_COMPARTMENT_LAST_UPDATED)
 				.hasMessageContaining("only supported for Patient");
 	}
 

@@ -34,7 +34,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ServerCapabilityStatementProviderJpaR4Test.class);
 	private static final Set<String> MUST_CHECK_NULL_URL_PARAMS =
-			Set.of("_has", "_list", "_language", Constants.PARAM_COMPARTMENT_CHANGE);
+			Set.of("_has", "_list", "_language", Constants.PARAM_COMPARTMENT_LAST_UPDATED);
 	private ResponseHighlighterInterceptor myResponseHighlightingInterceptor = new ResponseHighlighterInterceptor();
 
 	@AfterEach

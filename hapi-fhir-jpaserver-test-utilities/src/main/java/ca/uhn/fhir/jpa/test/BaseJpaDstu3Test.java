@@ -134,7 +134,7 @@ import java.util.Map;
 @ContextConfiguration(classes = {TestDstu3Config.class})
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
-	public static final String VALID_PATIENT_SEARCH_PARAMS = "[_compartmentChange, _id, _lastUpdated, _profile, _security, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]";
+	public static final String VALID_PATIENT_SEARCH_PARAMS = "[_compartmentLastUpdated, _id, _lastUpdated, _profile, _security, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]";
 
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;

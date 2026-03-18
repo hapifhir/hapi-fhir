@@ -31,9 +31,9 @@ Note that this is an internal feature that may change or be removed in the futur
 
 <a id="compartment-change"></a>
 
-### _compartmentChange
+### _compartmentLastUpdated
 
-The JPA server implements a non-standard search parameter called `_compartmentChange` that can be used on **Patient** searches to find patients whose compartment data has changed within a given date range.
+The JPA server implements a non-standard search parameter called `_compartmentLastUpdated` that can be used on **Patient** searches to find patients whose compartment data has changed within a given date range.
 
 This parameter accepts a date range and returns Patient resources where either:
 
@@ -45,13 +45,13 @@ This parameter accepts a date range and returns Patient resources where either:
 Find all patients with compartment changes after a specific date:
 
 ```url
-GET /Patient?_compartmentChange=ge2024-01-15
+GET /Patient?_compartmentLastUpdated=ge2024-01-15
 ```
 
 Find all patients with compartment changes within a date range:
 
 ```url
-GET /Patient?_compartmentChange=ge2024-01-01&_compartmentChange=le2024-01-31
+GET /Patient?_compartmentLastUpdated=ge2024-01-01&_compartmentLastUpdated=le2024-01-31
 ```
 
 #### Limitations

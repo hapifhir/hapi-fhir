@@ -130,7 +130,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 		map.setLastN(isLastN());
 		map.setLastNMax(getLastNMax());
 		map.setLastUpdated(getLastUpdated());
-		map.setCompartmentChange(getCompartmentChange());
+		map.setCompartmentChange(getCompartmentLastUpdated());
 		map.setLoadSynchronous(isLoadSynchronous());
 		map.setNearDistanceParam(getNearDistanceParam());
 		map.setLoadSynchronousUpTo(getLoadSynchronousUpTo());
@@ -264,7 +264,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 			StringBuilder theBuilder, ParamPrefixEnum thePrefix, DateParam theDateParam) {
 		if (theDateParam != null && isNotBlank(theDateParam.getValueAsString())) {
 			addUrlParamSeparator(theBuilder);
-			theBuilder.append(Constants.PARAM_COMPARTMENT_CHANGE);
+			theBuilder.append(Constants.PARAM_COMPARTMENT_LAST_UPDATED);
 			theBuilder.append('=');
 			theBuilder.append(thePrefix.getValue());
 			theBuilder.append(theDateParam.getValueAsString());
@@ -364,7 +364,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 	/**
 	 * Returns null if there is no compartment change value
 	 */
-	public DateRangeParam getCompartmentChange() {
+	public DateRangeParam getCompartmentLastUpdated() {
 		if (myCompartmentChange != null && myCompartmentChange.isEmpty()) {
 			myCompartmentChange = null;
 		}
@@ -583,12 +583,13 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 			}
 		}
 
-		if (getCompartmentChange() != null) {
-			DateParam ccLb = getCompartmentChange().getLowerBound();
-			DateParam ccUb = getCompartmentChange().getUpperBound();
+		if (getCompartmentLastUpdated() != null) {
+			DateParam ccLb = getCompartmentLastUpdated().getLowerBound();
+			DateParam ccUb = getCompartmentLastUpdated().getUpperBound();
 
 			if (isNotEqualsComparator(ccLb, ccUb)) {
-				addCompartmentChangeParam(b, NOT_EQUAL, getCompartmentChange().getLowerBound());
+				addCompartmentChangeParam(
+						b, NOT_EQUAL, getCompartmentLastUpdated().getLowerBound());
 			} else {
 				addCompartmentChangeParam(b, GREATERTHAN_OR_EQUALS, ccLb);
 				addCompartmentChangeParam(b, LESSTHAN_OR_EQUALS, ccUb);

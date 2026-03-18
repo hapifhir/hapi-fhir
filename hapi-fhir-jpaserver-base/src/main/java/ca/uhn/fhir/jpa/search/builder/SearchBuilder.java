@@ -325,11 +325,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Remove any empty parameters
 		theParams.clean();
 
-		// Extract _compartmentChange from the regular param map if present (it arrives as a raw parameter)
-		if (theParams.containsKey(Constants.PARAM_COMPARTMENT_CHANGE)) {
+		// Extract _compartmentLastUpdated from the regular param map if present (it arrives as a raw parameter)
+		if (theParams.containsKey(Constants.PARAM_COMPARTMENT_LAST_UPDATED)) {
 			List<List<IQueryParameterType>> compartmentChangeValues =
-					theParams.remove(Constants.PARAM_COMPARTMENT_CHANGE);
-			if (theParams.getCompartmentChange() == null && compartmentChangeValues != null) {
+					theParams.remove(Constants.PARAM_COMPARTMENT_LAST_UPDATED);
+			if (theParams.getCompartmentLastUpdated() == null && compartmentChangeValues != null) {
 				DateRangeParam dateRange = new DateRangeParam();
 				for (List<IQueryParameterType> nextAnd : compartmentChangeValues) {
 					for (IQueryParameterType nextOr : nextAnd) {
@@ -540,7 +540,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									&&
 									// todo MB don't we support _lastUpdated and _offset now?
 									theParams.getLastUpdated() == null
-									&& theParams.getCompartmentChange() == null
+									&& theParams.getCompartmentLastUpdated() == null
 									&& theParams.getEverythingMode() == null
 									&& theParams.getOffset() == null);
 
@@ -721,7 +721,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			RequestDetails theRequest,
 			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
-		if (myParams.getCompartmentChange() != null) {
+		if (myParams.getCompartmentLastUpdated() != null) {
 			createChunkedQueryForCompartmentChangeSearch(theSearchProperties, theSearchQueryExecutors);
 		} else if (myParams.getEverythingMode() != null) {
 			createChunkedQueryForEverythingSearch(
@@ -883,11 +883,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			SearchQueryProperties theSearchQueryProperties, List<ISearchQueryExecutor> theSearchQueryExecutors) {
 
 		if (!"Patient".equals(myResourceName)) {
-			throw new InvalidRequestException(
-					Msg.code(2876) + Constants.PARAM_COMPARTMENT_CHANGE + " is only supported for Patient searches");
+			throw new InvalidRequestException(Msg.code(2876) + Constants.PARAM_COMPARTMENT_LAST_UPDATED
+					+ " is only supported for Patient searches");
 		}
 
-		DateRangeParam compartmentChange = myParams.getCompartmentChange();
+		DateRangeParam compartmentLastUpdated = myParams.getCompartmentLastUpdated();
 
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
 				myContext,
@@ -905,7 +905,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				sqlBuilder.getOrCreateResourceTablePredicateBuilder(true, null);
 
 		// Condition 1: Patient directly updated within the date range
-		Condition patientDirectlyUpdated = sqlBuilder.addPredicateLastUpdated(compartmentChange, resourceTableRoot);
+		Condition patientDirectlyUpdated =
+				sqlBuilder.addPredicateLastUpdated(compartmentLastUpdated, resourceTableRoot);
 
 		// Condition 2: EXISTS subquery — compartment resources updated within the date range
 		DbTable resLinkTable = sqlBuilder.addTable("HFJ_RES_LINK");
@@ -930,7 +931,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		subquery.addCondition(BinaryCondition.equalTo(rlTargetResId, outerResourceId));
 
 		// Add date conditions on the source resource's RES_UPDATED
-		addDateConditionsToSubquery(subquery, srcResUpdated, compartmentChange, sqlBuilder);
+		addDateConditionsToSubquery(subquery, srcResUpdated, compartmentLastUpdated, sqlBuilder);
 
 		// Add partition predicate to the subquery if partitioning is enabled
 		if (myPartitionSettings.isPartitioningEnabled()
