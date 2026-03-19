@@ -311,7 +311,8 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 			@Nullable IBaseResource theResource) {
 		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		if (theResource != null) {
-			requestDetails.setRewriteHistory(isRewriteHistory(theModificationContext, theResource));
+			requestDetails.setRewriteHistory(
+					isRewriteHistory(theStepExecutionDetails, theModificationContext, theResource));
 		}
 		return requestDetails;
 	}

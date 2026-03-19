@@ -67,7 +67,10 @@ public class BulkPatchModifyResourcesStep<PT extends BulkPatchJobParameters>
 	}
 
 	@Override
-	protected boolean isRewriteHistory(BulkPatchModificationContext theState, IBaseResource theResource) {
+	protected boolean isRewriteHistory(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			BulkPatchModificationContext theState,
+			IBaseResource theResource) {
 		return myRewriteHistory;
 	}
 

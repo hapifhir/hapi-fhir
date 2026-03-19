@@ -139,7 +139,7 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 		private IMockStep myMockStep;
 
 		@Override
-		public boolean isRewriteHistory(Object theState, IBaseResource theResource) {
+		public boolean isRewriteHistory(StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, Object theState, IBaseResource theResource) {
 			return myMockStep.isRewriteHistory(theState, theResource);
 		}
 

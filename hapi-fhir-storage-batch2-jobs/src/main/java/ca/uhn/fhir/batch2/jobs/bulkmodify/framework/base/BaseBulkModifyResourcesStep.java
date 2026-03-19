@@ -277,7 +277,10 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * as a history rewrite
 	 */
 	@SuppressWarnings("unused")
-	protected boolean isRewriteHistory(C theState, IBaseResource theResource) {
+	protected boolean isRewriteHistory(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			C theState,
+			IBaseResource theResource) {
 		return false;
 	}
 
