@@ -327,11 +327,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// Extract _compartmentLastUpdated from the regular param map if present (it arrives as a raw parameter)
 		if (theParams.containsKey(Constants.PARAM_COMPARTMENT_LAST_UPDATED)) {
-			List<List<IQueryParameterType>> compartmentChangeValues =
+			List<List<IQueryParameterType>> compartmentLastUpdatedValues =
 					theParams.remove(Constants.PARAM_COMPARTMENT_LAST_UPDATED);
-			if (theParams.getCompartmentLastUpdated() == null && compartmentChangeValues != null) {
+			if (theParams.getCompartmentLastUpdated() == null && compartmentLastUpdatedValues != null) {
 				DateRangeParam dateRange = new DateRangeParam();
-				for (List<IQueryParameterType> nextAnd : compartmentChangeValues) {
+				for (List<IQueryParameterType> nextAnd : compartmentLastUpdatedValues) {
 					for (IQueryParameterType nextOr : nextAnd) {
 						DateParam dateParam = new DateParam(nextOr.getValueAsQueryToken());
 						dateRange.setRangeFromDatesInclusive(dateParam, dateParam);
