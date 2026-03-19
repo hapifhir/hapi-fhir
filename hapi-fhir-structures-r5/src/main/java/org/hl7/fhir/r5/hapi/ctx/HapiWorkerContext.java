@@ -21,7 +21,6 @@ import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent;
-import org.hl7.fhir.r5.model.NamingSystem;
 import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Parameters;
@@ -45,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -72,7 +70,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(String theSystem) {
+	public CodeSystem fetchCodeSystem(String theSystem, IWorkerContext.VersionResolutionRules rules) {
 		if (myValidationSupport == null) {
 			return null;
 		} else {
@@ -81,7 +79,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(String theSystem, String version, Resource sourceOfReference) {
+	public CodeSystem fetchCodeSystem(
+			String theSystem, IWorkerContext.VersionResolutionRules rules, String version, Resource sourceOfReference) {
 		if (myValidationSupport == null) {
 			return null;
 		} else {
@@ -90,13 +89,17 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public CodeSystem fetchSupplementedCodeSystem(String theS) {
+	public CodeSystem fetchSupplementedCodeSystem(String theS, IWorkerContext.VersionResolutionRules rules) {
 		return null;
 	}
 
 	@Override
 	public CodeSystem fetchSupplementedCodeSystem(
-			String system, String version, List<String> specifiedSupplements, Resource sourceOfReference) {
+			String system,
+			IWorkerContext.VersionResolutionRules rules,
+			String version,
+			List<String> specifiedSupplements,
+			Resource sourceOfReference) {
 		return null;
 	}
 
@@ -113,11 +116,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public IResourceValidator newValidator() {
 		throw new UnsupportedOperationException(Msg.code(206));
-	}
-
-	@Override
-	public Map<String, NamingSystem> getNSUrlMap() {
-		throw new UnsupportedOperationException(Msg.code(2241));
 	}
 
 	@Override
@@ -272,7 +270,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public int getDefinitionsVersion() {
+	public long getDefinitionsVersion() {
 		/* 	This is not called in 6.8.2 of org.hl7.fhir.core except within implementations of
 		storeAnalysis/retrieveAnalysis, which we do not implement in HAPI -dotasek
 		*/
@@ -339,12 +337,14 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public <T extends Resource> T fetchResourceRaw(Class<T> class_, String uri) {
-		return fetchResource(class_, uri);
+	public <T extends Resource> T fetchResourceRaw(
+			Class<T> class_, String uri, IWorkerContext.VersionResolutionRules rules) {
+		return fetchResource(class_, uri, rules);
 	}
 
 	@Override
-	public <T extends org.hl7.fhir.r5.model.Resource> T fetchResource(Class<T> theClass, String theUri) {
+	public <T extends org.hl7.fhir.r5.model.Resource> T fetchResource(
+			Class<T> theClass, String theUri, IWorkerContext.VersionResolutionRules rules) {
 		if (myValidationSupport == null || theUri == null) {
 			return null;
 		} else {
@@ -359,9 +359,9 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public <T extends org.hl7.fhir.r5.model.Resource> T fetchResourceWithException(Class<T> theClass, String theUri)
-			throws FHIRException {
-		T retVal = fetchResource(theClass, theUri);
+	public <T extends org.hl7.fhir.r5.model.Resource> T fetchResourceWithException(
+			Class<T> theClass, String theUri, IWorkerContext.VersionResolutionRules rules) throws FHIRException {
+		T retVal = fetchResource(theClass, theUri, rules);
 		if (retVal == null) {
 			throw new FHIRException(Msg.code(224) + "Could not find resource: " + theUri);
 		}
@@ -370,17 +370,26 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public <T extends Resource> T fetchResourceWithException(
-			Class<T> theClass, String uri, String version, Resource sourceOfReference) throws FHIRException {
+			Class<T> theClass,
+			String uri,
+			IWorkerContext.VersionResolutionRules rules,
+			String version,
+			Resource sourceOfReference)
+			throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(2213));
 	}
 
 	@Override
 	public <T extends Resource> T fetchResource(
-			Class<T> theClass, String theUri, String theVersion, Resource sourceOfReference) {
+			Class<T> theClass,
+			String theUri,
+			IWorkerContext.VersionResolutionRules rules,
+			String theVersion,
+			Resource sourceOfReference) {
 		if (theVersion == null) {
-			return fetchResource(theClass, theUri);
+			return fetchResource(theClass, theUri, rules);
 		}
-		return fetchResource(theClass, theUri + "|" + theVersion);
+		return fetchResource(theClass, theUri + "|" + theVersion, rules);
 	}
 
 	@Override
@@ -516,12 +525,17 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public <T extends Resource> T findTxResource(
-			Class<T> class_, String canonical, String version, Resource sourceOfReference) {
+			Class<T> class_,
+			String canonical,
+			IWorkerContext.VersionResolutionRules rules,
+			String version,
+			Resource sourceOfReference) {
 		throw new UnsupportedOperationException(Msg.code(2829));
 	}
 
 	@Override
-	public <T extends Resource> T findTxResource(Class<T> class_, String canonical) {
+	public <T extends Resource> T findTxResource(
+			Class<T> class_, String canonical, IWorkerContext.VersionResolutionRules rules) {
 		throw new UnsupportedOperationException(Msg.code(2492));
 	}
 
