@@ -92,6 +92,9 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class SearchQueryBuilder {
 
+	private static final String DEFAULT_ALIAS_PREFIX = DbSpec.DEFAULT_ALIAS_PREFIX;
+	private static final String CHILD_ALIAS_PREFIX = "s";
+
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryBuilder.class);
 	private final String myBindVariableSubstitutionBase;
 	private final ArrayList<Object> myBindVariableValues;
@@ -148,9 +151,6 @@ public class SearchQueryBuilder {
 				theSelectResourceType,
 				DEFAULT_ALIAS_PREFIX);
 	}
-
-	private static final String DEFAULT_ALIAS_PREFIX = DbSpec.DEFAULT_ALIAS_PREFIX;
-	private static final String CHILD_ALIAS_PREFIX = "s";
 
 	/**
 	 * Constructor for child SQL Builders

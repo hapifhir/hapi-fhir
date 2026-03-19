@@ -12,6 +12,10 @@ import org.springframework.context.annotation.Configuration;
 
 public class EmbeddedDatabaseConfigurations {
 
+	private EmbeddedDatabaseConfigurations(){
+
+	}
+
 	@Configuration
 	public static class MsSql {
 		@Bean
