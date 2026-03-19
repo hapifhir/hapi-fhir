@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -1342,6 +1343,35 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertTrue(p.getActive());
 		assertEquals("foo", p.getIdentifierFirstRep().getValue());
+	}
+
+	@Test
+	public void testUpdateWithNoChanges_PreservesMetaSource_RequestID() {
+		// Create a practitioner with meta.source set
+		Practitioner practitioner = new Practitioner();
+		practitioner.addName().setFamily("TestPractitioner");
+		practitioner.setActive(true);
+
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestId("initial-request");
+		IIdType id = myPractitionerDao.create(practitioner, systemRequestDetails).getId().toUnqualifiedVersionless();
+
+		// Verify initial creation preserved the source correctly
+		Practitioner created = myPractitionerDao.read(id, systemRequestDetails);
+		assertThat(created.getMeta().getSource()).isEqualTo("#initial-request");
+
+		// Now perform UPDATE with same content but different meta.source
+		// This should be detected as NOP but source should still be updated
+		Practitioner updatePractitioner = new Practitioner();
+		updatePractitioner.setId(id);
+		updatePractitioner.addName().setFamily("TestPractitioner");
+		updatePractitioner.setActive(true);
+
+		// Read the updated resource
+		Practitioner updated = (Practitioner) myPractitionerDao.update(updatePractitioner, systemRequestDetails).getResource();
+
+		// ASSERTION: meta.source should reflect the updated value from the request
+		assertThat(updated.getMeta().getSource()).isEqualTo("#initial-request");
 	}
 
 	/**
