@@ -341,6 +341,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		}
 
+		if (theParams.getCompartmentLastUpdated() != null && !"Patient".equals(myResourceName)) {
+			throw new InvalidRequestException(Msg.code(2876) + Constants.PARAM_COMPARTMENT_LAST_UPDATED
+					+ " is only supported for Patient searches");
+		}
+
 		// For DSTU3, pull out near-distance first so when it comes time to evaluate near, we already know the distance
 		if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
 			Dstu3DistanceHelper.setNearDistance(myResourceType, theParams);
@@ -721,9 +726,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			RequestDetails theRequest,
 			List<JpaPid> thePidList,
 			List<ISearchQueryExecutor> theSearchQueryExecutors) {
-		if (myParams.getCompartmentLastUpdated() != null) {
-			createChunkedQueryForCompartmentChangeSearch(theSearchProperties, theSearchQueryExecutors);
-		} else if (myParams.getEverythingMode() != null) {
+		if (myParams.getEverythingMode() != null) {
 			createChunkedQueryForEverythingSearch(
 					theRequest, theParams, theSearchProperties, thePidList, theSearchQueryExecutors);
 		} else {
@@ -815,6 +818,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Last updated
 		addLastUpdatePredicate(sqlBuilder);
 
+		// Compartment last updated
+		addCompartmentLastUpdatedPredicate(sqlBuilder);
+
 		/*
 		 * Exclude the pids already in the previous iterator. This is an optimization, as opposed
 		 * to something needed to guarantee correct results.
@@ -877,78 +883,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, theProperties.getMaxResultsRequested());
 			theSearchQueryExecutors.add(executor);
 		}
-	}
-
-	private void createChunkedQueryForCompartmentChangeSearch(
-			SearchQueryProperties theSearchQueryProperties, List<ISearchQueryExecutor> theSearchQueryExecutors) {
-
-		if (!"Patient".equals(myResourceName)) {
-			throw new InvalidRequestException(Msg.code(2876) + Constants.PARAM_COMPARTMENT_LAST_UPDATED
-					+ " is only supported for Patient searches");
-		}
-
-		DateRangeParam compartmentLastUpdated = myParams.getCompartmentLastUpdated();
-
-		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(
-				myContext,
-				myStorageSettings,
-				myPartitionSettings,
-				myRequestPartitionId,
-				myResourceName,
-				mySqlBuilderFactory,
-				myDialectProvider,
-				theSearchQueryProperties.isDoCountOnlyFlag(),
-				false);
-
-		// Ensure the resource type (Patient) and non-deleted predicates are applied
-		ResourceTablePredicateBuilder resourceTableRoot =
-				sqlBuilder.getOrCreateResourceTablePredicateBuilder(true, null);
-
-		// Condition 1: Patient directly updated within the date range
-		Condition patientDirectlyUpdated =
-				sqlBuilder.addPredicateLastUpdated(compartmentLastUpdated, resourceTableRoot);
-
-		// Condition 2: EXISTS subquery — compartment resources updated within the date range
-		DbTable resLinkTable = sqlBuilder.addTable("HFJ_RES_LINK");
-		DbColumn rlTargetResId = resLinkTable.addColumn("TARGET_RESOURCE_ID");
-		DbColumn rlSrcResId = resLinkTable.addColumn("SRC_RESOURCE_ID");
-
-		DbTable srcResourceTable = sqlBuilder.addTable("HFJ_RESOURCE");
-		DbColumn srcResId = srcResourceTable.addColumn("RES_ID");
-		DbColumn srcResUpdated = srcResourceTable.addColumn("RES_UPDATED");
-
-		SelectQuery subquery = new SelectQuery();
-		subquery.addCustomColumns(1);
-		subquery.addFromTable(resLinkTable);
-		subquery.addJoin(
-				SelectQuery.JoinType.INNER,
-				resLinkTable,
-				srcResourceTable,
-				BinaryCondition.equalTo(rlSrcResId, srcResId));
-
-		// Link the subquery to the outer query's Patient resource ID
-		DbColumn outerResourceId = resourceTableRoot.getResourceIdColumn();
-		subquery.addCondition(BinaryCondition.equalTo(rlTargetResId, outerResourceId));
-
-		// Add date conditions on the source resource's RES_UPDATED
-		addDateConditionsToSubquery(subquery, srcResUpdated, compartmentLastUpdated, sqlBuilder);
-
-		// Add partition predicate to the subquery if partitioning is enabled
-		if (myPartitionSettings.isPartitioningEnabled()
-				&& myRequestPartitionId != null
-				&& !myRequestPartitionId.isAllPartitions()) {
-			DbColumn rlPartitionId = resLinkTable.addColumn("PARTITION_ID");
-			subquery.addCondition(BinaryCondition.equalTo(
-					rlPartitionId, sqlBuilder.generatePlaceholder(myRequestPartitionId.getFirstPartitionIdOrNull())));
-		}
-
-		Condition existsSubquery = UnaryCondition.exists(subquery);
-
-		// Combine: (patient directly updated) OR (compartment resource updated)
-		Condition combinedCondition = ComboCondition.or(patientDirectlyUpdated, existsSubquery);
-		sqlBuilder.addPredicate(combinedCondition);
-
-		executeSearch(theSearchQueryProperties, theSearchQueryExecutors, sqlBuilder);
 	}
 
 	private void addDateConditionsToSubquery(
@@ -1089,6 +1023,62 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Condition lastUpdatedPredicates = theSqlBuilder.addPredicateLastUpdated(lu);
 			theSqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
+	}
+
+	private void addCompartmentLastUpdatedPredicate(SearchQueryBuilder theSqlBuilder) {
+		DateRangeParam compartmentLastUpdated = myParams.getCompartmentLastUpdated();
+		if (compartmentLastUpdated == null || compartmentLastUpdated.isEmpty()) {
+			return;
+		}
+
+		// Ensure the resource table root is available for the outer query
+		ResourceTablePredicateBuilder resourceTableRoot =
+				theSqlBuilder.getOrCreateResourceTablePredicateBuilder(true, null);
+
+		// Condition 1: Patient directly updated within the date range
+		Condition patientDirectlyUpdated =
+				theSqlBuilder.addPredicateLastUpdated(compartmentLastUpdated, resourceTableRoot);
+
+		// Condition 2: EXISTS subquery — compartment resources updated within the date range
+		DbTable resLinkTable = theSqlBuilder.addTable("HFJ_RES_LINK");
+		DbColumn rlTargetResId = resLinkTable.addColumn("TARGET_RESOURCE_ID");
+		DbColumn rlSrcResId = resLinkTable.addColumn("SRC_RESOURCE_ID");
+
+		DbTable srcResourceTable = theSqlBuilder.addTable("HFJ_RESOURCE");
+		DbColumn srcResId = srcResourceTable.addColumn("RES_ID");
+		DbColumn srcResUpdated = srcResourceTable.addColumn("RES_UPDATED");
+
+		SelectQuery subquery = new SelectQuery();
+		subquery.addCustomColumns(1);
+		subquery.addFromTable(resLinkTable);
+		subquery.addJoin(
+				SelectQuery.JoinType.INNER,
+				resLinkTable,
+				srcResourceTable,
+				BinaryCondition.equalTo(rlSrcResId, srcResId));
+
+		// Link the subquery to the outer query's Patient resource ID
+		DbColumn outerResourceId = resourceTableRoot.getResourceIdColumn();
+		subquery.addCondition(BinaryCondition.equalTo(rlTargetResId, outerResourceId));
+
+		// Add date conditions on the source resource's RES_UPDATED
+		addDateConditionsToSubquery(subquery, srcResUpdated, compartmentLastUpdated, theSqlBuilder);
+
+		// Add partition predicate to the subquery if partitioning is enabled
+		if (myPartitionSettings.isPartitioningEnabled()
+				&& myRequestPartitionId != null
+				&& !myRequestPartitionId.isAllPartitions()) {
+			DbColumn rlPartitionId = resLinkTable.addColumn("PARTITION_ID");
+			subquery.addCondition(BinaryCondition.equalTo(
+					rlPartitionId,
+					theSqlBuilder.generatePlaceholder(myRequestPartitionId.getFirstPartitionIdOrNull())));
+		}
+
+		Condition existsSubquery = UnaryCondition.exists(subquery);
+
+		// Combine: (patient directly updated) OR (compartment resource updated)
+		Condition combinedCondition = ComboCondition.or(patientDirectlyUpdated, existsSubquery);
+		theSqlBuilder.addPredicate(combinedCondition);
 	}
 
 	private JdbcTemplate initializeJdbcTemplate(Integer theMaximumResults) {

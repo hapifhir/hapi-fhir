@@ -3,11 +3,15 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -152,6 +156,78 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		myObservationDao.create(obs, mySrd);
 
 		return patientId;
+	}
+
+	@Test
+	void testCompartmentLastUpdated_combinedWithMultipleParameters() {
+		Date beforeCreation = new Date();
+
+		// Create male patient born 1990 with observation
+		Patient malePatient1990 = new Patient();
+		malePatient1990.setGender(Enumerations.AdministrativeGender.MALE);
+		malePatient1990.setBirthDateElement(new org.hl7.fhir.r4.model.DateType("1990-01-01"));
+		String malePatient1990Id = myPatientDao.create(malePatient1990, mySrd).getId().toUnqualifiedVersionless().getValue();
+		Observation obs1 = new Observation();
+		obs1.setSubject(new Reference(malePatient1990Id));
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		myObservationDao.create(obs1, mySrd);
+
+		// Create male patient born 2000 with observation
+		Patient malePatient2000 = new Patient();
+		malePatient2000.setGender(Enumerations.AdministrativeGender.MALE);
+		malePatient2000.setBirthDateElement(new org.hl7.fhir.r4.model.DateType("2000-01-01"));
+		String malePatient2000Id = myPatientDao.create(malePatient2000, mySrd).getId().toUnqualifiedVersionless().getValue();
+		Observation obs2 = new Observation();
+		obs2.setSubject(new Reference(malePatient2000Id));
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		myObservationDao.create(obs2, mySrd);
+
+		// Create female patient born 1990 with observation
+		Patient femalePatient = new Patient();
+		femalePatient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		femalePatient.setBirthDateElement(new org.hl7.fhir.r4.model.DateType("1990-01-01"));
+		myPatientDao.create(femalePatient, mySrd);
+
+		// Search: _compartmentLastUpdated + gender=male + birthdate=1990
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.setCompartmentLastUpdated(compartmentChangeGt(beforeCreation));
+		map.add(Patient.SP_GENDER, new TokenParam("male"));
+		map.add(Patient.SP_BIRTHDATE, new DateParam(ParamPrefixEnum.EQUAL, "1990-01-01"));
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids).containsExactlyInAnyOrder(malePatient1990Id);
+	}
+
+	@Test
+	void testCompartmentLastUpdated_combinedWithSort() {
+		Date beforeCreation = new Date();
+
+		// Create patients with different family names
+		Patient patientA = new Patient();
+		patientA.addName().setFamily("Adams");
+		String patientAId = myPatientDao.create(patientA, mySrd).getId().toUnqualifiedVersionless().getValue();
+		Observation obsA = new Observation();
+		obsA.setSubject(new Reference(patientAId));
+		obsA.setStatus(Observation.ObservationStatus.FINAL);
+		myObservationDao.create(obsA, mySrd);
+
+		Patient patientZ = new Patient();
+		patientZ.addName().setFamily("Zimmerman");
+		String patientZId = myPatientDao.create(patientZ, mySrd).getId().toUnqualifiedVersionless().getValue();
+		Observation obsZ = new Observation();
+		obsZ.setSubject(new Reference(patientZId));
+		obsZ.setStatus(Observation.ObservationStatus.FINAL);
+		myObservationDao.create(obsZ, mySrd);
+
+		// Search with _compartmentLastUpdated + _sort=family (ascending)
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.setCompartmentLastUpdated(compartmentChangeGt(beforeCreation));
+		map.setSort(new SortSpec(Patient.SP_FAMILY, SortOrderEnum.ASC));
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids).containsExactly(patientAId, patientZId);
 	}
 
 	private DateRangeParam compartmentChangeGt(Date theDate) {
