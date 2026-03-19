@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8475
+jira: SMILE-11635
+title: "Previously, the `$validate` operation would fail to separate the id and version from a canonical URL such as `http://example.com/fhir/StructureDefinition/exampleProfile|1.1.0`. This has been fixed."

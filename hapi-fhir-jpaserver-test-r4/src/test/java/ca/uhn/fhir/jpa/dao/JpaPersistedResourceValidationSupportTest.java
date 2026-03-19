@@ -122,6 +122,37 @@ class JpaPersistedResourceValidationSupportTest {
 				.orElse(null);
 			assertThat(versionParam).isEqualTo("1.1.0");
 		}
+
+		// Created by Claude Sonnet 4.6
+		@Test
+		@DisplayName("fetch resource by percent-encoded versioned URL (%7C should be treated as |)")
+		void fetchResourceForPercentEncodedVersionedUrl() {
+			final String encodedUrl = "http://example.com/fhir/StructureDefinition/exampleProfile%7C1.1.0";
+			when(mockDao.search(any(), any())).thenReturn(mock(IBundleProvider.class));
+			when(myDaoRegistry.getResourceDao(anyString())).thenReturn(mockDao);
+
+			myTestClass.fetchResource(StructureDefinition.class, encodedUrl);
+
+			verify(mockDao).search(searchParameterMapCaptor.capture(), any());
+			SearchParameterMap searchParams = searchParameterMapCaptor.getValue();
+			String uriParam = searchParams.get(StructureDefinition.SP_URL)
+				.get(0)
+				.stream()
+				.map(UriParam.class::cast)
+				.map(UriParam::getValue)
+				.findFirst()
+				.orElse(null);
+			String versionParam = searchParams.get(StructureDefinition.SP_VERSION)
+				.get(0)
+				.stream()
+				.map(TokenParam.class::cast)
+				.map(TokenParam::getValue)
+				.findFirst()
+				.orElse(null);
+
+			assertThat(uriParam).isEqualTo("http://example.com/fhir/StructureDefinition/exampleProfile");
+			assertThat(versionParam).isEqualTo("1.1.0");
+		}
 	}
 
 	@Nested
