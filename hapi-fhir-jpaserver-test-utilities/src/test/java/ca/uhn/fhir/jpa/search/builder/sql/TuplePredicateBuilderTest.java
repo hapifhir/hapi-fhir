@@ -70,7 +70,10 @@ class TuplePredicateBuilderTest {
 		Condition result = outerBuilder.getTuplePredicateBuilder().toNotInSubquery(childBuilder, childRoot, singleColumn);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
-			"((t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL))) )");
+			"((t0.RES_ID) NOT IN ("
+				+ "SELECT t0.RES_ID FROM HFJ_RESOURCE t0"
+				+ " WHERE ((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL))"
+				+ ") )");
 	}
 
 	@ParameterizedTest
@@ -86,12 +89,17 @@ class TuplePredicateBuilderTest {
 		Condition result = outerBuilder.getTuplePredicateBuilder().toNotInSubquery(childBuilder, childRoot, multiColumn);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
-			"(NOT (EXISTS (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0 WHERE (((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL)) AND (s0.PARTITION_ID = t0.PARTITION_ID) AND (s0.RES_ID = t0.RES_ID)))))");
+			"(NOT (EXISTS ("
+				+ "SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0"
+				+ " WHERE (((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL))"
+				+ " AND (s0.PARTITION_ID = t0.PARTITION_ID)"
+				+ " AND (s0.RES_ID = t0.RES_ID))"
+				+ ")))");
 	}
 
 	@ParameterizedTest
 	@MethodSource("allDialects")
-	void toInSubquery_multiColumn_producesExistsWithCorrelation(Dialect theDialect) {
+	void toInSubquery_singleChildBuilder_producesExistsWithCorrelation(Dialect theDialect) {
 		SearchQueryBuilder outerBuilder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder outerRoot = outerBuilder.getOrCreateFirstPredicateBuilder();
 		PartitionableJoinColumns multiColumn = PartitionableJoinColumns.from(outerRoot.getJoinColumns());
@@ -101,7 +109,38 @@ class TuplePredicateBuilderTest {
 		Condition result = outerBuilder.getTuplePredicateBuilder().toInSubquery(List.of(childBuilder), multiColumn);
 
 		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
-			"(EXISTS (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0 WHERE (((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL)) AND (s0.PARTITION_ID = t0.PARTITION_ID) AND (s0.RES_ID = t0.RES_ID))))");
+			"(EXISTS ("
+				+ "SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0"
+				+ " WHERE (((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL))"
+				+ " AND (s0.PARTITION_ID = t0.PARTITION_ID)"
+				+ " AND (s0.RES_ID = t0.RES_ID))"
+				+ "))");
+	}
+
+	@ParameterizedTest
+	@MethodSource("allDialects")
+	void toInSubquery_multipleChildBuilders_producesOrExistsWithCorrelation(Dialect theDialect) {
+		SearchQueryBuilder outerBuilder = createBuilder(theDialect);
+		BaseJoiningPredicateBuilder outerRoot = outerBuilder.getOrCreateFirstPredicateBuilder();
+		PartitionableJoinColumns multiColumn = PartitionableJoinColumns.from(outerRoot.getJoinColumns());
+
+		SearchQueryBuilder childBuilder1 = outerBuilder.newChildSqlBuilder(true);
+		SearchQueryBuilder childBuilder2 = outerBuilder.newChildSqlBuilder(true);
+
+		Condition result = outerBuilder.getTuplePredicateBuilder().toInSubquery(List.of(childBuilder1, childBuilder2), multiColumn);
+
+		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
+			"((EXISTS ("
+				+ "SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0"
+				+ " WHERE (((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL))"
+				+ " AND (s0.PARTITION_ID = t0.PARTITION_ID)"
+				+ " AND (s0.RES_ID = t0.RES_ID))"
+				+ ")) OR (EXISTS ("
+				+ "SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0"
+				+ " WHERE (((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL))"
+				+ " AND (s0.PARTITION_ID = t0.PARTITION_ID)"
+				+ " AND (s0.RES_ID = t0.RES_ID))"
+				+ ")))");
 	}
 
 	@ParameterizedTest
