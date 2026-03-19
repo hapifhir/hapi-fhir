@@ -39,7 +39,11 @@ public class JerseyConformanceProvider extends AbstractJaxRsConformanceProvider 
 	private final PatientResourceProvider patientResourceProvider;
 
 	public JerseyConformanceProvider(PatientResourceProvider patientResourceProvider) {
-		super(FhirContext.forDstu3Cached(), "Spring Boot Jersey Sample", "hapi-fhir-spring-boot-sample-server-jersey", "1.0.0");
+		super(
+				FhirContext.forDstu3Cached(),
+				"Spring Boot Jersey Sample",
+				"hapi-fhir-spring-boot-sample-server-jersey",
+				"1.0.0");
 		this.patientResourceProvider = patientResourceProvider;
 	}
 
