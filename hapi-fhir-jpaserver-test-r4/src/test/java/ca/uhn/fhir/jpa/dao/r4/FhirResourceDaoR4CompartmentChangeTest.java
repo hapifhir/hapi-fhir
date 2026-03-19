@@ -1,17 +1,22 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -28,6 +33,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.Date;
 import java.util.List;
 
@@ -36,6 +43,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 // Created by claude-opus-4-6
 class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
+
+	@Autowired
+	private ISearchParamExtractor mySearchParamExtractor;
 
 	@Test
 	void testCompartmentChange_allPatientsReturnedWhenCompartmentResourcesCreatedAfterDate() {
@@ -325,6 +335,182 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			public RequestPartitionId identifyRead(ServletRequestDetails theRequestDetails) {
 				return myReadPartition;
 			}
+		}
+	}
+
+	@Nested
+	// Created by claude-opus-4-6
+	class PatientIdModeCompartmentLastUpdatedTest {
+
+		private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
+
+		@BeforeEach
+		void setUp() {
+			myPartitionSettings.setPartitioningEnabled(true);
+			myPartitionSettings.setUnnamedPartitionMode(true);
+			myPartitionSettings.setDefaultPartitionId(-1);
+			// PATIENT_ID mode: partition derived from patient ID via default algorithm
+			myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(
+					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+			myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
+		}
+
+		@AfterEach
+		void tearDown() {
+			myPartitionSettings.setPartitioningEnabled(false);
+			myPartitionSettings.setUnnamedPartitionMode(false);
+			myPartitionSettings.setDefaultPartitionId(null);
+			myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
+		}
+
+		@Test
+		void testCompartmentLastUpdated_withPatientIdMode() {
+			Date beforeCreation = new Date();
+
+			String patient1Id = createPatientWithClientAssignedId("PT-ALPHA");
+			String patient2Id = createPatientWithClientAssignedId("PT-BETA");
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.setCompartmentLastUpdated(compartmentChangeGt(beforeCreation));
+			IBundleProvider results = myPatientDao.search(map, mySrd);
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids).containsExactlyInAnyOrder(patient1Id, patient2Id);
+		}
+
+		@Test
+		void testCompartmentLastUpdated_withPatientIdMode_onlyChangedPatientsReturned() throws InterruptedException {
+			createPatientWithClientAssignedId("PT-ALPHA");
+			String patient2Id = createPatientWithClientAssignedId("PT-BETA");
+
+			Thread.sleep(2);
+			Date afterInitialCreation = new Date();
+
+			// Create new observation only for patient2
+			Observation obs = new Observation();
+			obs.setSubject(new Reference(patient2Id));
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			myObservationDao.create(obs, mySrd);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.setCompartmentLastUpdated(compartmentChangeGt(afterInitialCreation));
+			IBundleProvider results = myPatientDao.search(map, mySrd);
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids).containsExactlyInAnyOrder(patient2Id);
+		}
+
+		private String createPatientWithClientAssignedId(String thePatientId) {
+			Patient patient = new Patient();
+			patient.setId(thePatientId);
+			patient.setActive(true);
+			String patientId = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+			Observation obs = new Observation();
+			obs.setSubject(new Reference(patientId));
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			myObservationDao.create(obs, mySrd);
+
+			return patientId;
+		}
+	}
+
+	@Nested
+	// Created by claude-opus-4-6
+	class BucketedPatientIdModeCompartmentLastUpdatedTest {
+
+		private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
+
+		@BeforeEach
+		void setUp() {
+			myPartitionSettings.setPartitioningEnabled(true);
+			myPartitionSettings.setUnnamedPartitionMode(true);
+			myPartitionSettings.setDefaultPartitionId(-1);
+			// BUCKETED_PATIENT_ID mode: patients hashed into a small number of buckets
+			myPatientIdPartitionInterceptor = new SmallBucketPatientIdPartitionInterceptor(
+					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+			myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
+		}
+
+		@AfterEach
+		void tearDown() {
+			myPartitionSettings.setPartitioningEnabled(false);
+			myPartitionSettings.setUnnamedPartitionMode(false);
+			myPartitionSettings.setDefaultPartitionId(null);
+			myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
+		}
+
+		@Test
+		void testCompartmentLastUpdated_withBucketedPatientIdMode() {
+			Date beforeCreation = new Date();
+
+			String patient1Id = createPatientWithClientAssignedId("PT-ALPHA");
+			String patient2Id = createPatientWithClientAssignedId("PT-BETA");
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.setCompartmentLastUpdated(compartmentChangeGt(beforeCreation));
+			IBundleProvider results = myPatientDao.search(map, mySrd);
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids).containsExactlyInAnyOrder(patient1Id, patient2Id);
+		}
+
+		@Test
+		void testCompartmentLastUpdated_withBucketedPatientIdMode_onlyChangedPatientsReturned() throws InterruptedException {
+			createPatientWithClientAssignedId("PT-ALPHA");
+			String patient2Id = createPatientWithClientAssignedId("PT-BETA");
+
+			Thread.sleep(2);
+			Date afterInitialCreation = new Date();
+
+			// Create new observation only for patient2
+			Observation obs = new Observation();
+			obs.setSubject(new Reference(patient2Id));
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			myObservationDao.create(obs, mySrd);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.setCompartmentLastUpdated(compartmentChangeGt(afterInitialCreation));
+			IBundleProvider results = myPatientDao.search(map, mySrd);
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids).containsExactlyInAnyOrder(patient2Id);
+		}
+
+		private String createPatientWithClientAssignedId(String thePatientId) {
+			Patient patient = new Patient();
+			patient.setId(thePatientId);
+			patient.setActive(true);
+			String patientId = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+			Observation obs = new Observation();
+			obs.setSubject(new Reference(patientId));
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			myObservationDao.create(obs, mySrd);
+
+			return patientId;
+		}
+	}
+
+	/**
+	 * BUCKETED_PATIENT_ID mode interceptor: hashes patient IDs into a small number of
+	 * buckets so multiple patients share partitions.
+	 */
+	// Created by claude-opus-4-6
+	static class SmallBucketPatientIdPartitionInterceptor extends PatientIdPartitionInterceptor {
+		private static final int BUCKET_COUNT = 3;
+
+		SmallBucketPatientIdPartitionInterceptor(
+				FhirContext theFhirContext,
+				ISearchParamExtractor theSearchParamExtractor,
+				PartitionSettings thePartitionSettings,
+				DaoRegistry theDaoRegistry) {
+			super(theFhirContext, theSearchParamExtractor, thePartitionSettings, theDaoRegistry);
+		}
+
+		@Override
+		protected int providePartitionIdForPatientId(RequestDetails theRequestDetails, String thePatientIdPart) {
+			return Math.abs(thePatientIdPart.hashCode() % BUCKET_COUNT);
 		}
 	}
 }
