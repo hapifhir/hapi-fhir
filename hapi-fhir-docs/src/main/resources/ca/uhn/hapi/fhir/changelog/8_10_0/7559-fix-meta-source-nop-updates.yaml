@@ -1,0 +1,4 @@
+---
+type: fix
+jira: SMILE-7559
+title: "Previously, the value provided in header X-Request-ID was disappearing from the meta.source when performing a NOP resource update. This issue is Fixed."

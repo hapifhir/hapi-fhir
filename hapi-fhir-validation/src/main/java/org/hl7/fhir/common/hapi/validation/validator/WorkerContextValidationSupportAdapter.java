@@ -486,7 +486,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		return null;
 	}
 
-	public CodeSystem fetchSupplementedCodeSystem(String system, String version, Resource sourceOfReference) {
+	@Override
+	public CodeSystem fetchSupplementedCodeSystem(
+			String system, String version, List<String> specifiedSupplements, Resource sourceOfReference) {
 		return null;
 	}
 
@@ -654,6 +656,28 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	@Override
 	public String getVersion() {
 		return myFhirContext.getVersion().getVersion().getFhirVersionString();
+	}
+
+	@Override
+	public int getDefinitionsVersion() {
+		/* 	This is not called in 6.8.2 of org.hl7.fhir.core except within implementations of
+			storeAnalysis/retrieveAnalysis, which we do not implement in HAPI -dotasek
+		*/
+		throw new UnsupportedOperationException(Msg.code(2862));
+	}
+
+	@Override
+	public void storeAnalysis(Class className, Object analysis) {
+		// Unimplemented: see retrieveAnalysis for details.
+	}
+
+	@Override
+	public Object retrieveAnalysis(Class className) {
+		/* 	org.hl7.fhir.core will produce the necessary analysis on-demand if this returns null, at a performance cost.
+			If performance in validation or FHIRPath execution becomes an issue, this will have to be implemented in a
+			thread-safe manner. -dotasek
+		*/
+		return null;
 	}
 
 	@Override
