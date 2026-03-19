@@ -68,15 +68,16 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 		myExtendedOperationName = theExtendedOperationName;
 	}
 
+
 	public static ReadPartitionIdRequestDetails forGeneric(RequestDetails theRequestDetails) {
+		RestOperationTypeEnum operationType = theRequestDetails.getRestOperationType();
+		if (operationType == null) {
+			// System/internal requests (e.g. SystemRequestDetails) have no REST operation type.
+			// Treat them as server-level operations so partition interceptors can route them correctly.
+			operationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+		}
 		return new ReadPartitionIdRequestDetails(
-				theRequestDetails.getResourceName(),
-				theRequestDetails.getRestOperationType(),
-				theRequestDetails.getId(),
-				null,
-				null,
-				null,
-				null);
+				theRequestDetails.getResourceName(), operationType, theRequestDetails.getId(), null, null, null, null);
 	}
 
 	@Nullable
