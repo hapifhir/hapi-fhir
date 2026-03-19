@@ -20,14 +20,12 @@
 package ca.uhn.fhir.replacereferences;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -72,21 +70,17 @@ public class PreviousResourceVersionRestorer {
 	 * so it will actually cause a new version to be created (i.e. it does not rewrite the history).
 	 * @param theReferences a list of versioned resource references to restore
 	 * @param theRequestDetails the request details for the operation
-	 * @param thePartitionId the partition ID for the operation
 	 *
 	 * @throws IllegalArgumentException if a given reference is versionless
 	 * @throws ResourceVersionConflictException if the current version of the resource does not match the version specified in the reference.
 	 */
-	public void restoreToPreviousVersionsInTrx(
-			List<Reference> theReferences, RequestDetails theRequestDetails, RequestPartitionId thePartitionId) {
+	public void restoreToPreviousVersionsInTrx(List<Reference> theReferences, RequestDetails theRequestDetails) {
 		myHapiTransactionService
 				.withRequest(theRequestDetails)
-				.withRequestPartitionId(thePartitionId)
-				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails, thePartitionId));
+				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails));
 	}
 
-	private void restoreToPreviousVersions(
-			List<Reference> theReferences, RequestDetails theRequestDetails, RequestPartitionId thePartitionId) {
+	private void restoreToPreviousVersions(List<Reference> theReferences, RequestDetails theRequestDetails) {
 		List<IIdType> idsToDelete = new ArrayList<>();
 		for (Reference reference : theReferences) {
 			String referenceStr = reference.getReference();
@@ -152,8 +146,7 @@ public class PreviousResourceVersionRestorer {
 			for (IIdType id : idsToDelete) {
 				deleteBuilder.addTransactionDeleteEntry(id);
 			}
-			systemDao.transactionNested(
-					SystemRequestDetails.forRequestPartitionId(thePartitionId), deleteBuilder.getBundle());
+			systemDao.transactionNested(theRequestDetails, deleteBuilder.getBundle());
 		}
 	}
 }

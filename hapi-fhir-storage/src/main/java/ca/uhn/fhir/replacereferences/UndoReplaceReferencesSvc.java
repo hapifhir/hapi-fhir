@@ -108,8 +108,7 @@ public class UndoReplaceReferencesSvc {
 			throw new InvalidRequestException(Msg.code(2729) + msg);
 		}
 
-		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(
-				toRestore, theRequestDetails, theUndoReplaceReferencesRequest.partitionId);
+		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(toRestore, theRequestDetails);
 
 		IBaseOperationOutcome opOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
 		String msg = String.format(

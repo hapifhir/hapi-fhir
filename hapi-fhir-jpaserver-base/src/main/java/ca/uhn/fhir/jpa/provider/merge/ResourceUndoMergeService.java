@@ -21,10 +21,7 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
@@ -78,19 +75,16 @@ public class ResourceUndoMergeService {
 	private final PreviousResourceVersionRestorer myResourceVersionRestorer;
 	private final MergeValidationService myMergeValidationService;
 	private final FhirContext myFhirContext;
-	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	public ResourceUndoMergeService(
 			DaoRegistry theDaoRegistry,
 			MergeProvenanceSvc theMergeProvenanceSvc,
 			PreviousResourceVersionRestorer theResourceVersionRestorer,
-			MergeValidationService theMergeValidationService,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+			MergeValidationService theMergeValidationService) {
 		myMergeProvenanceSvc = theMergeProvenanceSvc;
 		myResourceVersionRestorer = theResourceVersionRestorer;
 		myFhirContext = theDaoRegistry.getFhirContext();
 		myMergeValidationService = theMergeValidationService;
-		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
 	public OperationOutcomeWithStatusCode undoMerge(
@@ -165,9 +159,6 @@ public class ResourceUndoMergeService {
 			throw new InvalidRequestException(Msg.code(2748) + msg);
 		}
 
-		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
-				theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetId));
-
 		List<Reference> referencesToRestore = references;
 		if (wasTargetUpdateANoop(provenance)) {
 			// skip restoring the target resource if it was not updated by the merge operation.
@@ -178,7 +169,7 @@ public class ResourceUndoMergeService {
 			referencesToRestore = references.subList(1, references.size());
 		}
 
-		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(referencesToRestore, theRequestDetails, partitionId);
+		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(referencesToRestore, theRequestDetails);
 
 		String msg = format(
 				"Successfully restored %d resources to their previous versions based on the Provenance resource: %s",
