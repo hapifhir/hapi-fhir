@@ -32,15 +32,12 @@ interface TuplePredicateSearchTest extends ITestDataBuilder {
 	@Test
 	default void testSecuritySearch() {
 		Context ctx = getTuplePredicateSearchTestContext();
-		String identifier = "sec-test";
-		IIdType taggedId = createPatient(withActiveTrue(), withIdentifier("http://test", identifier + "-tagged"),
-			withSecurity("http://sys", "code"));
-		createPatient(withActiveTrue(),
-			withIdentifier("http://test", identifier + "-untagged"));
+		IIdType taggedId = createPatient(withActiveTrue(), withSecurity("http://sys", "code"));
+		createPatient(withActiveTrue());
 
 		Bundle results = ctx.server().getFhirClient()
 			.search()
-			.byUrl("Patient?_security=http://sys|code&identifier=http://test|" + identifier + "-tagged")
+			.byUrl("Patient?_security=http://sys|code")
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -51,15 +48,12 @@ interface TuplePredicateSearchTest extends ITestDataBuilder {
 	@Test
 	default void testSecurityNotSearch() {
 		Context ctx = getTuplePredicateSearchTestContext();
-		String identifier = "sec-not-test";
-		createPatient(withActiveTrue(), withIdentifier("http://test", identifier + "-tagged"),
-			withSecurity("http://sys", "code"));
-		IIdType untaggedId = createPatient(withActiveTrue(),
-			withIdentifier("http://test", identifier + "-untagged"));
+		createPatient(withActiveTrue(), withSecurity("http://sys", "code"));
+		IIdType untaggedId = createPatient(withActiveTrue());
 
 		Bundle results = ctx.server().getFhirClient()
 			.search()
-			.byUrl("Patient?_security:not=http://sys|code&identifier=http://test|" + identifier + "-untagged")
+			.byUrl("Patient?_security:not=http://sys|code")
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -70,15 +64,12 @@ interface TuplePredicateSearchTest extends ITestDataBuilder {
 	@Test
 	default void testTagSearch() {
 		Context ctx = getTuplePredicateSearchTestContext();
-		String identifier = "tag-test";
-		IIdType taggedId = createPatient(withActiveTrue(), withIdentifier("http://test", identifier + "-tagged"),
-			withTag("http://sys", "tag1"));
-		createPatient(withActiveTrue(),
-			withIdentifier("http://test", identifier + "-untagged"));
+		IIdType taggedId = createPatient(withActiveTrue(), withTag("http://sys", "tag1"));
+		createPatient(withActiveTrue());
 
 		Bundle results = ctx.server().getFhirClient()
 			.search()
-			.byUrl("Patient?_tag=http://sys|tag1&identifier=http://test|" + identifier + "-tagged")
+			.byUrl("Patient?_tag=http://sys|tag1")
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -89,15 +80,12 @@ interface TuplePredicateSearchTest extends ITestDataBuilder {
 	@Test
 	default void testTagNotSearch() {
 		Context ctx = getTuplePredicateSearchTestContext();
-		String identifier = "tag-not-test";
-		createPatient(withActiveTrue(), withIdentifier("http://test", identifier + "-tagged"),
-			withTag("http://sys", "tag1"));
-		IIdType untaggedId = createPatient(withActiveTrue(),
-			withIdentifier("http://test", identifier + "-untagged"));
+		createPatient(withActiveTrue(), withTag("http://sys", "tag1"));
+		IIdType untaggedId = createPatient(withActiveTrue());
 
 		Bundle results = ctx.server().getFhirClient()
 			.search()
-			.byUrl("Patient?_tag:not=http://sys|tag1&identifier=http://test|" + identifier + "-untagged")
+			.byUrl("Patient?_tag:not=http://sys|tag1")
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -108,16 +96,12 @@ interface TuplePredicateSearchTest extends ITestDataBuilder {
 	@Test
 	default void testTokenSearch() {
 		Context ctx = getTuplePredicateSearchTestContext();
-		String identifier = "token-test";
-		IIdType maleId = createPatient(withActiveTrue(), withIdentifier("http://test", identifier + "-male"),
-			withGender("male"));
-		createPatient(withActiveTrue(),
-			withIdentifier("http://test", identifier + "-female"),
-			withGender("female"));
+		IIdType maleId = createPatient(withActiveTrue(), withGender("male"));
+		createPatient(withActiveTrue(), withGender("female"));
 
 		Bundle results = ctx.server().getFhirClient()
 			.search()
-			.byUrl("Patient?gender=male&identifier=http://test|" + identifier + "-male")
+			.byUrl("Patient?gender=male")
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -128,16 +112,12 @@ interface TuplePredicateSearchTest extends ITestDataBuilder {
 	@Test
 	default void testTokenNotSearch() {
 		Context ctx = getTuplePredicateSearchTestContext();
-		String identifier = "token-not-test";
-		createPatient(withActiveTrue(), withIdentifier("http://test", identifier + "-male"),
-			withGender("male"));
-		IIdType femaleId = createPatient(withActiveTrue(),
-			withIdentifier("http://test", identifier + "-female"),
-			withGender("female"));
+		createPatient(withActiveTrue(), withGender("male"));
+		IIdType femaleId = createPatient(withActiveTrue(), withGender("female"));
 
 		Bundle results = ctx.server().getFhirClient()
 			.search()
-			.byUrl("Patient?gender:not=male&identifier=http://test|" + identifier + "-female")
+			.byUrl("Patient?gender:not=male")
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -205,15 +185,14 @@ interface TuplePredicateSearchTest extends ITestDataBuilder {
 	@Test
 	default void testChainedTokenSearch() {
 		Context ctx = getTuplePredicateSearchTestContext();
-		String code = "chain-token-test";
 		IIdType malePatientId = createPatient(withActiveTrue(), withGender("male"));
 		IIdType femalePatientId = createPatient(withActiveTrue(), withGender("female"));
-		IIdType maleObsId = createObservation(withSubject(malePatientId), withObservationCode("http://test", code));
-		createObservation(withSubject(femalePatientId), withObservationCode("http://test", code));
+		IIdType maleObsId = createObservation(withSubject(malePatientId));
+		createObservation(withSubject(femalePatientId));
 
 		Bundle results = ctx.server().getFhirClient()
 			.search()
-			.byUrl("Observation?subject.gender=male&code=http://test|" + code)
+			.byUrl("Observation?subject.gender=male")
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -222,17 +201,36 @@ interface TuplePredicateSearchTest extends ITestDataBuilder {
 	}
 
 	@Test
-	default void testChainedTokenNotSearch() {
+	default void testCombinedTagNotAndSecurityNotSearch() {
 		Context ctx = getTuplePredicateSearchTestContext();
-		String code = "chain-token-not-test";
-		IIdType malePatientId = createPatient(withActiveTrue(), withGender("male"));
-		IIdType femalePatientId = createPatient(withActiveTrue(), withGender("female"));
-		createObservation(withSubject(malePatientId), withObservationCode("http://test", code));
-		IIdType femaleObsId = createObservation(withSubject(femalePatientId), withObservationCode("http://test", code));
+		// Patient with excluded tag — should be filtered out by _tag:not
+		createPatient(withActiveTrue(), withTag("http://sys", "exclude-tag"));
+		// Patient with excluded security label — should be filtered out by _security:not
+		createPatient(withActiveTrue(), withSecurity("http://sys", "exclude-sec"));
+		// Patient with neither — should be the only result
+		IIdType cleanId = createPatient(withActiveTrue());
 
 		Bundle results = ctx.server().getFhirClient()
 			.search()
-			.byUrl("Observation?subject.gender:not=male&code=http://test|" + code)
+			.byUrl("Patient?_tag:not=http://sys|exclude-tag&_security:not=http://sys|exclude-sec")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		List<String> ids = SearchTestUtil.toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids).containsExactly(cleanId.toUnqualifiedVersionless().getValue());
+	}
+
+	@Test
+	default void testChainedTokenNotSearch() {
+		Context ctx = getTuplePredicateSearchTestContext();
+		IIdType malePatientId = createPatient(withActiveTrue(), withGender("male"));
+		IIdType femalePatientId = createPatient(withActiveTrue(), withGender("female"));
+		createObservation(withSubject(malePatientId));
+		IIdType femaleObsId = createObservation(withSubject(femalePatientId));
+
+		Bundle results = ctx.server().getFhirClient()
+			.search()
+			.byUrl("Observation?subject.gender:not=male")
 			.returnBundle(Bundle.class)
 			.execute();
 

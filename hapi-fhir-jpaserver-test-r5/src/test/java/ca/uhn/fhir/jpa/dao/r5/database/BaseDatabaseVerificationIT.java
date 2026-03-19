@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
@@ -35,6 +36,7 @@ import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.PractitionerRole;
 import org.hl7.fhir.r5.model.Reference;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -97,6 +99,9 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
 
+	@Autowired
+	private ExpungeEverythingService myExpungeEverythingService;
+
 	SystemRequestDetails myRequestDetails = new SystemRequestDetails();
 
 	@RegisterExtension
@@ -110,6 +115,11 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			s.setDefaultPrettyPrint(false);
 			s.setPagingProvider(myPagingProvider);
 		});
+
+	@BeforeEach
+	void beforeEach() {
+		myExpungeEverythingService.expungeEverything(new SystemRequestDetails());
+	}
 
 	@Override
 	public TuplePredicateSearchTest.Context getTuplePredicateSearchTestContext() {

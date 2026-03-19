@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
@@ -93,10 +94,14 @@ public abstract class BaseDatabasePartitionModeIT extends BaseJpaTest implements
 	@Autowired
 	private IPartitionLookupSvc myPartitionLookupSvc;
 
+	@Autowired
+	private ExpungeEverythingService myExpungeEverythingService;
+
 	private final TestPartitionSelectorInterceptor myPartitionInterceptor = new TestPartitionSelectorInterceptor();
 
 	@BeforeEach
 	void beforeEach() {
+		myExpungeEverythingService.expungeEverything(new SystemRequestDetails());
 		myPartitionSettings.setDatabasePartitionMode(true);
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(0);
