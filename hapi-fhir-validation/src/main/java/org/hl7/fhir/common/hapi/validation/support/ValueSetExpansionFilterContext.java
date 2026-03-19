@@ -3,6 +3,8 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.ValueSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -19,14 +21,20 @@ import java.util.regex.PatternSyntaxException;
 
 /**
  * Class to apply ValueSet filters during in-memory expansion.
- * Will only work on 'code', 'concept' and 'display' property types.
+ * Will only work on 'code', 'concept', 'display', and the standard FHIR concept properties
+ * ('child', 'parent', 'inactive', 'notSelectable').
  *
  * Supports: equal | is-a | descendent-of | is-not-a | regex | in | not-in | generalizes | child-of | descendent-leaf | exists
  */
 public class ValueSetExpansionFilterContext {
+	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionFilterContext.class);
+
 	private final Map<String, Map<String, String>> propertyIndex = new HashMap<>();
 
 	private final Map<String, Set<String>> conceptCodeTree = new HashMap<>();
+	private final Set<String> conceptsWithParent = new HashSet<>();
+	private final Set<String> inactiveCodes = new HashSet<>();
+	private final Set<String> notSelectableCodes = new HashSet<>();
 	private final Set<String> allCodes = new HashSet<>();
 	private final Set<String> allCodesLower = new HashSet<>();
 	private final Map<String, Set<String>> inSetsMap = new HashMap<>();
@@ -66,18 +74,47 @@ public class ValueSetExpansionFilterContext {
 					filter.hasProperty() ? filter.getProperty().toLowerCase(Locale.ROOT) : "concept";
 			boolean onCode = theFilterProperty.equals("concept") || theFilterProperty.equals("code");
 			boolean onDisplay = theFilterProperty.equals("display");
+			boolean onChild = theFilterProperty.equals("child");
+			boolean onParent = theFilterProperty.equals("parent");
+			boolean onInactive = theFilterProperty.equals("inactive");
+			boolean onNotSelectable = theFilterProperty.equals("notselectable");
 
-			/**
-			 * Only code/display supported in the in-memory validation support, so reject any custom concept properties,
-			 * even though that should technically be supported by the FHIR spec.
-			 *
-			 * @see <a href="https://build.fhir.org/codesystem.html#properties">
-			 *      FHIR CodeSystem Concept Properties (4.8.11)</a>
-			 * @see <a href="https://build.fhir.org/codesystem.html#defined-props">
-			 *      FHIR CodeSystem Defined Concept Properties (4.8.12)</a>
-			 */
+			// Handle standard FHIR concept properties (child, parent, inactive, notSelectable).
+			// These are structural/boolean in nature, so only EXISTS is meaningful in-memory.
+			// For any other operator, pass through rather than silently filtering everything out.
+			if (onChild || onParent || onInactive || onNotSelectable) {
+				if (filter.getOp() != org.hl7.fhir.r5.model.Enumerations.FilterOperator.EXISTS) {
+					ourLog.warn(
+							"In-memory ValueSet expansion does not support operator '{}' for property '{}'; filter will be ignored.",
+							filter.getOp().toCode(),
+							filter.getProperty());
+					return true;
+				}
+				boolean wantExists = Boolean.parseBoolean(filter.getValue());
+				String theConceptCode = concept.getCode();
+				if (onChild) {
+					return wantExists
+							== !conceptCodeTree
+									.getOrDefault(theConceptCode, Collections.emptySet())
+									.isEmpty();
+				}
+				if (onParent) {
+					return wantExists == conceptsWithParent.contains(theConceptCode);
+				}
+				if (onInactive) {
+					return wantExists == inactiveCodes.contains(theConceptCode);
+				}
+				// onNotSelectable
+				return wantExists == notSelectableCodes.contains(theConceptCode);
+			}
+
+			// For unrecognized properties, pass through with a warning rather than silently producing
+			// an empty ValueSet expansion when an unsupported-but-valid filter is encountered.
 			if (!onCode && !onDisplay) {
-				return false;
+				ourLog.warn(
+						"In-memory ValueSet expansion does not support property '{}'; filter will be ignored.",
+						filter.getProperty());
+				return true;
 			}
 
 			String theFilterValue = filter.getValue();
@@ -316,6 +353,7 @@ public class ValueSetExpansionFilterContext {
 			// 2) Index immediate children
 			for (var child : def.getConcept()) {
 				conceptCodeTree.computeIfAbsent(code, k -> new HashSet<>()).add(child.getCode());
+				conceptsWithParent.add(child.getCode());
 			}
 
 			// 3) Index the "code" property
@@ -324,7 +362,17 @@ public class ValueSetExpansionFilterContext {
 			// 4) Index the "display" property
 			propertyIndex.computeIfAbsent("display", k -> new HashMap<>()).put(code, display);
 
-			// 5) Recurse
+			// 5) Index standard boolean concept properties
+			for (var prop : def.getProperty()) {
+				String propCode = prop.getCode();
+				if ("inactive".equals(propCode) && prop.hasValueBooleanType()) {
+					inactiveCodes.add(code);
+				} else if ("notSelectable".equals(propCode) && prop.hasValueBooleanType()) {
+					notSelectableCodes.add(code);
+				}
+			}
+
+			// 6) Recurse
 			buildIndexes(def.getConcept());
 		}
 	}
