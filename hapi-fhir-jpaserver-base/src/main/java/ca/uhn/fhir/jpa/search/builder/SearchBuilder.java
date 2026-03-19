@@ -1064,16 +1064,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Add date conditions on the source resource's RES_UPDATED
 		addDateConditionsToSubquery(subquery, srcResUpdated, compartmentLastUpdated, theSqlBuilder);
 
-		// Add partition predicate to the subquery if partitioning is enabled
-		if (myPartitionSettings.isPartitioningEnabled()
-				&& myRequestPartitionId != null
-				&& !myRequestPartitionId.isAllPartitions()) {
-			DbColumn rlPartitionId = resLinkTable.addColumn("PARTITION_ID");
-			subquery.addCondition(BinaryCondition.equalTo(
-					rlPartitionId,
-					theSqlBuilder.generatePlaceholder(myRequestPartitionId.getFirstPartitionIdOrNull())));
-		}
-
 		Condition existsSubquery = UnaryCondition.exists(subquery);
 
 		// Combine: (patient directly updated) OR (compartment resource updated)

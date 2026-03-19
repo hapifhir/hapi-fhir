@@ -1,5 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -11,10 +17,15 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -232,5 +243,88 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 
 	private DateRangeParam compartmentChangeGt(Date theDate) {
 		return new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, theDate));
+	}
+
+	@Nested
+	// Created by claude-opus-4-6
+	class PartitionedCompartmentLastUpdatedTest {
+
+		private PartitionInterceptor myPartitionInterceptor;
+
+		@BeforeEach
+		void setUp() {
+			myPartitionSettings.setPartitioningEnabled(true);
+			myPartitionInterceptor = new PartitionInterceptor();
+			mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
+		}
+
+		@AfterEach
+		void tearDown() {
+			myPartitionSettings.setPartitioningEnabled(false);
+			myPartitionSettings.setUnnamedPartitionMode(false);
+			myPartitionSettings.setDefaultPartitionId(null);
+			myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+			mySrdInterceptorService.unregisterInterceptor(myPartitionInterceptor);
+		}
+
+		@Test
+		void testCompartmentLastUpdated_withNamedPartitions() {
+			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"), null);
+			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"), null);
+
+			verifyCompartmentLastUpdatedReturnsPatientsFromBothPartitions();
+		}
+
+		@Test
+		void testCompartmentLastUpdated_withUnnamedPartitionMode() {
+			myPartitionSettings.setUnnamedPartitionMode(true);
+
+			verifyCompartmentLastUpdatedReturnsPatientsFromBothPartitions();
+		}
+
+		private void verifyCompartmentLastUpdatedReturnsPatientsFromBothPartitions() {
+			Date beforeCreation = new Date();
+
+			// Create Patient+Observation in partition 1
+			myPartitionInterceptor.setCreatePartition(RequestPartitionId.fromPartitionId(1));
+			String patient1Id = createPatientWithObservation();
+
+			// Create Patient+Observation in partition 2
+			myPartitionInterceptor.setCreatePartition(RequestPartitionId.fromPartitionId(2));
+			String patient2Id = createPatientWithObservation();
+
+			// Search with allPartitions read
+			myPartitionInterceptor.setReadPartition(RequestPartitionId.allPartitions());
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.setCompartmentLastUpdated(compartmentChangeGt(beforeCreation));
+			IBundleProvider results = myPatientDao.search(map, mySrd);
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids).containsExactlyInAnyOrder(patient1Id, patient2Id);
+		}
+
+		@Interceptor
+		static class PartitionInterceptor {
+			private RequestPartitionId myCreatePartition = RequestPartitionId.fromPartitionId(null);
+			private RequestPartitionId myReadPartition = RequestPartitionId.allPartitions();
+
+			void setCreatePartition(RequestPartitionId thePartitionId) {
+				myCreatePartition = thePartitionId;
+			}
+
+			void setReadPartition(RequestPartitionId thePartitionId) {
+				myReadPartition = thePartitionId;
+			}
+
+			@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
+			public RequestPartitionId identifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+				return myCreatePartition;
+			}
+
+			@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+			public RequestPartitionId identifyRead(ServletRequestDetails theRequestDetails) {
+				return myReadPartition;
+			}
+		}
 	}
 }
