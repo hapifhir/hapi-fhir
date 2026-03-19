@@ -5,5 +5,5 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = {
 	EmbeddedDatabaseConfigurations.MsSql.class
 })
-public class DatabaseVerificationWithMsSqlIT extends BaseDatabaseVerificationIT {
+public class DatabasePartitionModeWithMsSqlIT extends BaseDatabasePartitionModeIT {
 }

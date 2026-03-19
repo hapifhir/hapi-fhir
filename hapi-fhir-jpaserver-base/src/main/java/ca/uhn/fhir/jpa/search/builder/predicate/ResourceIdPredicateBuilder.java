@@ -26,10 +26,8 @@ import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
-import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
-import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
+import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -149,19 +147,12 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 				predicate = queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 				return predicate;
 			} else {
-				if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
-					ColumnTupleObject left = new ColumnTupleObject(theSourceJoinColumn);
-					JpaPidValueTuples right = JpaPidValueTuples.from(getSearchQueryBuilder(), allOrPids);
-					return QueryParameterUtils.toInPredicate(
-							left, right, operation == SearchFilterParser.CompareOperation.ne);
-				} else {
-					DbColumn resIdColumn = getResourceIdColumn(theSourceJoinColumn);
-					List<Long> resourceIds = JpaPid.toLongList(allOrPids);
-					return QueryParameterUtils.toEqualToOrInPredicate(
-							resIdColumn,
-							generatePlaceholders(resourceIds),
-							operation == SearchFilterParser.CompareOperation.ne);
-				}
+				return getSearchQueryBuilder()
+						.getTuplePredicateBuilder()
+						.toInPredicate(
+								PartitionableJoinColumns.from(theSourceJoinColumn),
+								allOrPids,
+								operation == SearchFilterParser.CompareOperation.ne);
 			}
 		}
 
