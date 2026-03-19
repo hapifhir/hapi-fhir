@@ -334,7 +334,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				for (List<IQueryParameterType> nextAnd : compartmentLastUpdatedValues) {
 					for (IQueryParameterType nextOr : nextAnd) {
 						DateParam dateParam = new DateParam(nextOr.getValueAsQueryToken());
-						dateRange.setRangeFromDatesInclusive(dateParam, dateParam);
+						DateRangeParam parsed = new DateRangeParam(dateParam);
+						if (parsed.getLowerBound() != null) {
+							dateRange.setLowerBound(parsed.getLowerBound());
+						}
+						if (parsed.getUpperBound() != null) {
+							dateRange.setUpperBound(parsed.getUpperBound());
+						}
 					}
 				}
 				theParams.setCompartmentLastUpdated(dateRange);

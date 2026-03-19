@@ -251,6 +251,80 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		assertThat(ids).containsExactly(patientAId, patientZId);
 	}
 
+	@Test
+	void testCompartmentLastUpdated_rawParamWithGePrefix_returnsOnlyLaterPatients() throws InterruptedException {
+		// Create patient before the cutoff date
+		createPatientWithObservation();
+
+		Thread.sleep(2);
+		Date cutoff = new Date();
+
+		// Create patient after the cutoff date
+		String patient2Id = createPatientWithObservation();
+
+		// Add _compartmentLastUpdated as a raw parameter (via map.add) rather than setCompartmentLastUpdated.
+		// This exercises the raw parameter extraction path in SearchBuilder.searchForIdsWithAndOr.
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_COMPARTMENT_LAST_UPDATED,
+				new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, cutoff));
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids).containsExactlyInAnyOrder(patient2Id);
+	}
+
+	@Test
+	void testCompartmentLastUpdated_rawParamWithGePlusLeRange_returnsPatientsInRange() throws InterruptedException {
+		// Create patient before the range
+		createPatientWithObservation();
+
+		Thread.sleep(2);
+		Date rangeStart = new Date();
+
+		// Create patient inside the range
+		String patientInRangeId = createPatientWithObservation();
+
+		Thread.sleep(2);
+		Date rangeEnd = new Date();
+		Thread.sleep(2);
+
+		// Create patient after the range
+		createPatientWithObservation();
+
+		// Add both ge and le as raw parameters — two separate map.add calls produce two AND groups.
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_COMPARTMENT_LAST_UPDATED,
+				new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, rangeStart));
+		map.add(Constants.PARAM_COMPARTMENT_LAST_UPDATED,
+				new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, rangeEnd));
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids).containsExactlyInAnyOrder(patientInRangeId);
+	}
+
+	@Test
+	void testCompartmentLastUpdated_rawParamWithLePrefix_returnsOnlyEarlierPatients() throws InterruptedException {
+		// Create patient before the cutoff date
+		String patient1Id = createPatientWithObservation();
+
+		Thread.sleep(2);
+		Date cutoff = new Date();
+		Thread.sleep(2);
+
+		// Create patient after the cutoff date
+		createPatientWithObservation();
+
+		// Add _compartmentLastUpdated=le[cutoff] as a raw parameter
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_COMPARTMENT_LAST_UPDATED,
+				new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, cutoff));
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids).containsExactlyInAnyOrder(patient1Id);
+	}
+
 	private DateRangeParam compartmentChangeGt(Date theDate) {
 		return new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, theDate));
 	}
