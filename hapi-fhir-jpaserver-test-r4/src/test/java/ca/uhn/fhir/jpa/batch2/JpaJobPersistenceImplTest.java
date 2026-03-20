@@ -1082,7 +1082,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public void simulatedSlowWorkerResultingInDuplicateNotificationsAndWorkChunkProcessing() {
 		// setup
 		// we'll be manually running steps
-		myMaintenanceService.enableMaintenancePass(false);
+//		myMaintenanceService.enableMaintenancePass(false);
 		String jobId = new Exception()
 			.getStackTrace()[0].getMethodName();
 
@@ -1122,9 +1122,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 							return secondGate.get();
 						});
 
-					FirstStepOutput output = new FirstStepOutput();
-					theDataSink.accept(output);
-
 					// 1st worker skips this gate
 					int v = thirdGate.getAndIncrement();
 					ourLog.debug("\nTHIRD GATE -------" + v + " : " + theStepExecutionDetails.getChunkId());
@@ -1138,6 +1135,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 								return fifthGate.get();
 							});
 					}
+
+					FirstStepOutput output = new FirstStepOutput();
+					theDataSink.accept(output);
+
 					return RunOutcome.SUCCESS;
 				}
 			},
@@ -1167,8 +1168,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// and use it to make a second notification delivery
 		doAnswer(invocation -> {
 			JobWorkNotification notification = (JobWorkNotification) invocation.getArguments()[0];
-//			ourLog.info("NOTIFICATION RECEIVED : \n"
-//				+ notification.toString());
+			ourLog.info("NOTIFICATION RECEIVED : \n"
+				+ notification.toString());
 
 			if (notificationRef.get() == null) {
 				notificationRef.set(notification);
