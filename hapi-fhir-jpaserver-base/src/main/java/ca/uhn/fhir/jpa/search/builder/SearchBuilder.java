@@ -1035,9 +1035,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		ResourceTablePredicateBuilder srcResourceTable =
 				new ResourceTablePredicateBuilder(theSqlBuilder, SearchIncludeDeletedEnum.NEVER);
 
-		DbTable resLinkTable = theSqlBuilder.addTable("HFJ_RES_LINK");
-		DbColumn rlTargetResId = resLinkTable.addColumn("TARGET_RESOURCE_ID");
-		DbColumn rlSrcResId = resLinkTable.addColumn("SRC_RESOURCE_ID");
+		DbTable resLinkTable = theSqlBuilder.addTable(ResourceLink.TABLE_NAME);
+		DbColumn rlTargetResId = resLinkTable.addColumn(ResourceLink.TARGET_RESOURCE_ID);
+		DbColumn rlSrcResId = resLinkTable.addColumn(ResourceLink.SRC_RESOURCE_ID);
 
 		SelectQuery subquery = new SelectQuery();
 		subquery.addCustomColumns(1);
