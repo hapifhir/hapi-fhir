@@ -365,8 +365,8 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 	 * Returns null if there is no compartment last updated value
 	 */
 	public DateRangeParam getCompartmentLastUpdated() {
-		if (myCompartmentLastUpdated != null && myCompartmentLastUpdated.isEmpty()) {
-			myCompartmentLastUpdated = null;
+		if (myCompartmentLastUpdated == null || myCompartmentLastUpdated.isEmpty()) {
+			return null;
 		}
 		return myCompartmentLastUpdated;
 	}
