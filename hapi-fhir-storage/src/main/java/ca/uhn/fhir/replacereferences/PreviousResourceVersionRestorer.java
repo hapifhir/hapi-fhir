@@ -92,6 +92,7 @@ public class PreviousResourceVersionRestorer {
 			}
 			long referenceVersion = referenceId.getVersionIdPartAsLong();
 
+			// Read the current resource
 			IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(referenceId.getResourceType());
 			IBaseResource currentResource = null;
 			try {
@@ -102,15 +103,19 @@ public class PreviousResourceVersionRestorer {
 					throw e;
 				}
 				long currentVersion = deletedId.getVersionIdPartAsLong();
+				// Resource was deleted after the operation modified it — cannot safely undo.
 				if (currentVersion != referenceVersion) {
 					String msg = String.format(
-							"The resource '%s' cannot be restored because it was deleted. %s",
-							referenceStr, e.getMessage());
+							"The resource '%s' cannot be restored because it was deleted after the operation"
+									+ " modified it (current version: %s, expected version: %s).",
+							referenceStr, currentVersion, referenceVersion);
 					throw new ResourceGoneException(Msg.code(2751) + msg);
 				}
 				// Version matches → resource is tombstoned at the expected version, proceed to undelete
 			}
 
+			// If resource exists, check its current version matches the expected version.
+			// If not, the resource was updated since the reference was created, so the operation should fail.
 			if (currentResource != null) {
 				long currentVersion = currentResource.getIdElement().getVersionIdPartAsLong();
 				if (currentVersion != referenceVersion) {
@@ -122,11 +127,12 @@ public class PreviousResourceVersionRestorer {
 
 				if (referenceVersion == 1) {
 					// Resource was created new by the operation (v1) — collect for bundle delete
-					idsToDelete.add(referenceId.toUnqualifiedVersionless());
+					idsToDelete.add(referenceId);
 					continue;
 				}
 			}
 
+			// Restore previous version (version - 1)
 			long previousVersion = referenceVersion - 1;
 			if (previousVersion < 1) {
 				throw new IllegalArgumentException(Msg.code(2731)
@@ -136,17 +142,22 @@ public class PreviousResourceVersionRestorer {
 			IIdType previousId = referenceId.withVersion(Long.toString(previousVersion));
 			IBaseResource previousResource = dao.read(previousId, theRequestDetails);
 			previousResource.setId(previousResource.getIdElement().toUnqualifiedVersionless());
+			// Update the resource to the previous version's content
 			dao.update(previousResource, theRequestDetails);
 		}
 
 		if (!idsToDelete.isEmpty()) {
-			@SuppressWarnings("unchecked")
-			IFhirSystemDao<Object, Object> systemDao = (IFhirSystemDao<Object, Object>) myDaoRegistry.getSystemDao();
-			BundleBuilder deleteBuilder = new BundleBuilder(systemDao.getContext());
-			for (IIdType id : idsToDelete) {
-				deleteBuilder.addTransactionDeleteEntry(id);
-			}
-			systemDao.transactionNested(theRequestDetails, deleteBuilder.getBundle());
+			deleteResourcesInNestedTransaction(idsToDelete, theRequestDetails);
 		}
+	}
+
+	private void deleteResourcesInNestedTransaction(List<IIdType> theIds, RequestDetails theRequestDetails) {
+		@SuppressWarnings("unchecked")
+		IFhirSystemDao<Object, Object> systemDao = (IFhirSystemDao<Object, Object>) myDaoRegistry.getSystemDao();
+		BundleBuilder deleteBuilder = new BundleBuilder(systemDao.getContext());
+		for (IIdType id : theIds) {
+			deleteBuilder.addTransactionDeleteEntry(id);
+		}
+		systemDao.transactionNested(theRequestDetails, deleteBuilder.getBundle());
 	}
 }

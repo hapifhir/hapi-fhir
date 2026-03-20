@@ -238,10 +238,9 @@ public class ReplaceReferencesProvenanceSvc {
 		// we want the most recent one.
 		map.setSort(new SortSpec("recorded", SortOrderEnum.DESC));
 
-		// Use all-partitions request because in patient-id partitioning mode with NON_UNIQUE_COMPARTMENT_IN_DEFAULT
-		// policy, merge/replace-references Provenance resources that reference multiple patients are stored in
-		// the default partition. A patient-scoped search (routed by PatientIdPartitionInterceptor based on the
-		// "target" search param) would only search the patient's partition and miss the Provenance.
+		// TODO: PatientIdPartitionInterceptor should be returning the default partition as a part of
+		// the response when Provenance has policy `NON_UNIQUE_COMPARTMENT_IN_DEFAULT`. It doesn't
+		// currently. We shouldn't hardcode allPartitions once we fix that.
 		IBundleProvider searchBundle = myProvenanceDao.search(map, SystemRequestDetails.forAllPartitions());
 		// 'activity' is not available as a search parameter in r4, was added in r5,
 		// so we need to filter the results manually.

@@ -97,9 +97,9 @@ public class ReplaceReferencesPatchBundleSvc {
 			List<IdDt> theResourceIds,
 			RequestDetails theRequestDetails) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
-		theResourceIds.forEach(theReferencingResourceId -> {
-			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theReferencingResourceId.getResourceType());
-			IBaseResource resource = dao.read(theReferencingResourceId, theRequestDetails);
+		theResourceIds.forEach(referencingResourceId -> {
+			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(referencingResourceId.getResourceType());
+			IBaseResource resource = dao.read(referencingResourceId, theRequestDetails);
 			Parameters patchParams = buildPatchParams(theReplaceReferencesRequest, resource);
 			// the patchParams could be empty if the resource contains only versioned references to the source,
 			// no need to add patch entry in that case
