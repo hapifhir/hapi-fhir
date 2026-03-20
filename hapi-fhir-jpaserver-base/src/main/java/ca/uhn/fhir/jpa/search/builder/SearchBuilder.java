@@ -81,6 +81,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
@@ -331,19 +332,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<List<IQueryParameterType>> compartmentLastUpdatedValues =
 					theParams.remove(Constants.PARAM_COMPARTMENT_LAST_UPDATED);
 			if (theParams.getCompartmentLastUpdated() == null && compartmentLastUpdatedValues != null) {
-				DateRangeParam dateRange = new DateRangeParam();
+				List<QualifiedParamList> qualifiedParams = new ArrayList<>();
 				for (List<IQueryParameterType> nextAnd : compartmentLastUpdatedValues) {
 					for (IQueryParameterType nextOr : nextAnd) {
-						DateParam dateParam = new DateParam(nextOr.getValueAsQueryToken());
-						DateRangeParam parsed = new DateRangeParam(dateParam);
-						if (parsed.getLowerBound() != null) {
-							dateRange.setLowerBound(parsed.getLowerBound());
-						}
-						if (parsed.getUpperBound() != null) {
-							dateRange.setUpperBound(parsed.getUpperBound());
-						}
+						QualifiedParamList qpl = new QualifiedParamList();
+						qpl.add(nextOr.getValueAsQueryToken());
+						qualifiedParams.add(qpl);
 					}
 				}
+				DateRangeParam dateRange = new DateRangeParam();
+				dateRange.setValuesAsQueryTokens(myContext, Constants.PARAM_COMPARTMENT_LAST_UPDATED, qualifiedParams);
 				theParams.setCompartmentLastUpdated(dateRange);
 			}
 		}
