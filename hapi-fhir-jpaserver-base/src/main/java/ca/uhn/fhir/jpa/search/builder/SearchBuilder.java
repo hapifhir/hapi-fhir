@@ -1038,22 +1038,50 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		DbTable resLinkTable = theSqlBuilder.addTable(ResourceLink.TABLE_NAME);
 		DbColumn rlTargetResId = resLinkTable.addColumn(ResourceLink.TARGET_RESOURCE_ID);
 		DbColumn rlSrcResId = resLinkTable.addColumn(ResourceLink.SRC_RESOURCE_ID);
-
+		DbColumn rlPartitionId = resLinkTable.addColumn("PARTITION_ID");
 		SelectQuery subquery = new SelectQuery();
 		subquery.addCustomColumns(1);
 		subquery.addFromTable(resLinkTable);
-		subquery.addJoin(
-				SelectQuery.JoinType.INNER,
-				resLinkTable,
-				srcResourceTable.getTable(),
-				BinaryCondition.equalTo(rlSrcResId, srcResourceTable.getResourceIdColumn()));
+
+		// Join HFJ_RES_LINK to HFJ_RESOURCE (source resource).
+		// In database-partition mode, partition IDs are part of primary keys so joins must
+		// include partition columns; in non-database-partition mode only resource ID is needed.
+		Condition resLinkJoinCondition;
+		if (theSqlBuilder.isIncludePartitionIdInJoins()) {
+			DbColumn srcResPartitionId = srcResourceTable.getPartitionIdColumn();
+			resLinkJoinCondition = ComboCondition.and(
+					BinaryCondition.equalTo(rlPartitionId, srcResPartitionId),
+					BinaryCondition.equalTo(rlSrcResId, srcResourceTable.getResourceIdColumn()));
+		} else {
+			resLinkJoinCondition = BinaryCondition.equalTo(rlSrcResId, srcResourceTable.getResourceIdColumn());
+		}
+		subquery.addJoin(SelectQuery.JoinType.INNER, resLinkTable, srcResourceTable.getTable(), resLinkJoinCondition);
 
 		// Link the subquery to the outer query's Patient resource ID
 		DbColumn outerResourceId = resourceTableRoot.getResourceIdColumn();
 		subquery.addCondition(BinaryCondition.equalTo(rlTargetResId, outerResourceId));
 
-		// Add date conditions on the source resource's RES_UPDATED
-		// Reuse addPredicateLastUpdated to avoid duplicating prefix handling logic
+		// In database-partition mode, correlate the subquery's target partition with the
+		// outer query's Patient partition to prevent cross-partition matches
+		if (theSqlBuilder.isIncludePartitionIdInJoins()) {
+			DbColumn rlTargetPartitionId = resLinkTable.addColumn(ResourceLink.TARGET_RES_PARTITION_ID);
+			DbColumn outerPartitionId = resourceTableRoot.getPartitionIdColumn();
+			subquery.addCondition(BinaryCondition.equalTo(rlTargetPartitionId, outerPartitionId));
+		}
+
+		// Partition predicate on the inner HFJ_RESOURCE table (source resource).
+		// In non-database-partition mode this restricts the subquery to the requested partition(s).
+		// In database-partition mode createPartitionIdPredicate typically returns null since
+		// partition filtering is handled by the join conditions above.
+		Condition srcPartitionPredicate = srcResourceTable.createPartitionIdPredicate(myRequestPartitionId);
+		if (srcPartitionPredicate != null) {
+			subquery.addCondition(srcPartitionPredicate);
+		}
+
+		// Add date conditions on the source resource's RES_UPDATED.
+		// addPredicateLastUpdated builds a ComboCondition and registers its bind variables
+		// in the outer query builder — this is correct because the subquery is embedded in
+		// the outer query and shares its parameter list.
 		ComboCondition dateCondition = theSqlBuilder.addPredicateLastUpdated(compartmentLastUpdated, srcResourceTable);
 		subquery.addCondition(dateCondition);
 

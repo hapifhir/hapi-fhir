@@ -503,6 +503,33 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			assertThat(ids).containsExactlyInAnyOrder(patient1Id, patient2Id);
 		}
 
+		@Test
+		void testCompartmentLastUpdated_singlePartitionRead_doesNotReturnCrossPartitionData() {
+			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"), null);
+			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"), null);
+			myPartitionSettings.setAllowReferencesAcrossPartitions(
+					PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+			Date beforeCreation = new Date();
+
+			// Create Patient+Observation in partition 1
+			myPartitionInterceptor.setCreatePartition(RequestPartitionId.fromPartitionId(1));
+			String patient1Id = createPatientWithObservation();
+
+			// Create Patient+Observation in partition 2
+			myPartitionInterceptor.setCreatePartition(RequestPartitionId.fromPartitionId(2));
+			createPatientWithObservation();
+
+			// Read ONLY partition 1 — must NOT see partition 2 data
+			myPartitionInterceptor.setReadPartition(RequestPartitionId.fromPartitionId(1));
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.setCompartmentLastUpdated(compartmentChangeGt(beforeCreation));
+			IBundleProvider results = myPatientDao.search(map, mySrd);
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids).containsExactlyInAnyOrder(patient1Id);
+		}
+
 		@Interceptor
 		static class PartitionInterceptor {
 			private RequestPartitionId myCreatePartition = RequestPartitionId.fromPartitionId(null);
