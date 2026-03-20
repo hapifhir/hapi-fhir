@@ -47,7 +47,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
@@ -60,6 +59,7 @@ import ca.uhn.fhir.jpa.search.BatchResourceLoader.ResourceLoadResult;
 import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.models.SearchQueryProperties;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -117,7 +117,6 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -1031,29 +1030,25 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		ResourceTablePredicateBuilder srcResourceTable =
 				new ResourceTablePredicateBuilder(theSqlBuilder, SearchIncludeDeletedEnum.NEVER);
 
-		DbTable resLinkTable = theSqlBuilder.addTable(ResourceLink.TABLE_NAME);
-		DbColumn rlTargetResId = resLinkTable.addColumn(ResourceLink.TARGET_RESOURCE_ID);
-		DbColumn rlSrcResId = resLinkTable.addColumn(ResourceLink.SRC_RESOURCE_ID);
-		DbColumn rlPartitionId = resLinkTable.addColumn(PartitionablePartitionId.PARTITION_ID);
+		ResourceLinkPredicateBuilder resLink = new ResourceLinkPredicateBuilder(null, theSqlBuilder);
 		SelectQuery subquery = new SelectQuery();
 		subquery.addCustomColumns(1);
-		subquery.addFromTable(resLinkTable);
+		subquery.addFromTable(resLink.getTable());
 
 		// Join HFJ_RES_LINK to HFJ_RESOURCE (source resource)
-		DbColumn[] rlSrcColumns = theSqlBuilder.toJoinColumns(rlPartitionId, rlSrcResId);
 		DbColumn[] srcResColumns = theSqlBuilder.toJoinColumns(
 				srcResourceTable.getPartitionIdColumn(), srcResourceTable.getResourceIdColumn());
-		Condition resLinkJoinCondition = SearchQueryBuilder.toJoinCondition(rlSrcColumns, srcResColumns);
-		subquery.addJoin(SelectQuery.JoinType.INNER, resLinkTable, srcResourceTable.getTable(), resLinkJoinCondition);
+		Condition resLinkJoinCondition =
+				SearchQueryBuilder.toJoinCondition(resLink.getJoinColumnsForSource(), srcResColumns);
+		subquery.addJoin(
+				SelectQuery.JoinType.INNER, resLink.getTable(), srcResourceTable.getTable(), resLinkJoinCondition);
 
 		// Correlate the subquery to the outer query's Patient resource
-		DbColumn rlTargetPartitionId = resLinkTable.addColumn(ResourceLink.TARGET_RES_PARTITION_ID);
-		DbColumn[] rlTargetColumns = theSqlBuilder.toJoinColumns(rlTargetPartitionId, rlTargetResId);
 		DbColumn[] outerColumns = theSqlBuilder.toJoinColumns(
 				resourceTableRoot.getPartitionIdColumn(), resourceTableRoot.getResourceIdColumn());
-		subquery.addCondition(SearchQueryBuilder.toJoinCondition(rlTargetColumns, outerColumns));
+		subquery.addCondition(SearchQueryBuilder.toJoinCondition(resLink.getJoinColumnsForTarget(), outerColumns));
 
-		// Restrict subquery to requested partition(s) (only applies in non-database-partition mode)
+		// Restrict subquery to requested partition(s)
 		Condition srcPartitionPredicate = srcResourceTable.createPartitionIdPredicate(myRequestPartitionId);
 		if (srcPartitionPredicate != null) {
 			subquery.addCondition(srcPartitionPredicate);
