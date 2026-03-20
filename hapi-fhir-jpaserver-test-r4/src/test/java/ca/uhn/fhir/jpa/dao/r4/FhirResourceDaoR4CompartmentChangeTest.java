@@ -166,6 +166,34 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		assertThat(ids).isEmpty();
 	}
 
+	@Test
+	void testCompartmentChange_deletedCompartmentResourceIsNotDetected() throws InterruptedException {
+		// Deleting a compartment resource (e.g. Observation) removes its HFJ_RES_LINK rows,
+		// so the link-based subquery can no longer associate it with the Patient.
+		Patient patient1 = new Patient();
+		patient1.setActive(true);
+		String patient1Id = myPatientDao.create(patient1, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Observation obs1 = new Observation();
+		obs1.setSubject(new Reference(patient1Id));
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		var obs1Id = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+		Thread.sleep(2);
+		Date afterCreation = new Date();
+
+		// Delete the observation — this removes the HFJ_RES_LINK row
+		myObservationDao.delete(obs1Id, mySrd);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.setCompartmentLastUpdated(compartmentChangeGt(afterCreation));
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+
+		// The deletion is NOT detected because link rows are cleaned up on delete
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids).doesNotContain(patient1Id);
+	}
+
 	private String createPatientWithObservation() {
 		Patient patient = new Patient();
 		patient.setActive(true);

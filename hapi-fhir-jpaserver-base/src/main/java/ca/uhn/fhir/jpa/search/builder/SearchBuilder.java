@@ -83,6 +83,7 @@ import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -891,21 +892,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private void addDateConditionsToSubquery(
-			SelectQuery theSubquery,
-			DbColumn theUpdatedColumn,
-			DateRangeParam theDateRange,
-			SearchQueryBuilder theSqlBuilder) {
-		if (theDateRange.getLowerBoundAsInstant() != null) {
-			theSubquery.addCondition(BinaryCondition.greaterThanOrEq(
-					theUpdatedColumn, theSqlBuilder.generatePlaceholder(theDateRange.getLowerBoundAsInstant())));
-		}
-		if (theDateRange.getUpperBoundAsInstant() != null) {
-			theSubquery.addCondition(BinaryCondition.lessThanOrEq(
-					theUpdatedColumn, theSqlBuilder.generatePlaceholder(theDateRange.getUpperBoundAsInstant())));
-		}
-	}
-
 	private void createChunkedQueryForEverythingSearch(
 			RequestDetails theRequest,
 			SearchParameterMap theParams,
@@ -1046,13 +1032,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				theSqlBuilder.addPredicateLastUpdated(compartmentLastUpdated, resourceTableRoot);
 
 		// Condition 2: EXISTS subquery — compartment resources updated within the date range
+		// Use ResourceTablePredicateBuilder for column accessors, deleted-resource filtering,
+		// and to reuse addPredicateLastUpdated for date conditions
+		ResourceTablePredicateBuilder srcResourceTable =
+				new ResourceTablePredicateBuilder(theSqlBuilder, SearchIncludeDeletedEnum.NEVER);
+
 		DbTable resLinkTable = theSqlBuilder.addTable("HFJ_RES_LINK");
 		DbColumn rlTargetResId = resLinkTable.addColumn("TARGET_RESOURCE_ID");
 		DbColumn rlSrcResId = resLinkTable.addColumn("SRC_RESOURCE_ID");
-
-		DbTable srcResourceTable = theSqlBuilder.addTable("HFJ_RESOURCE");
-		DbColumn srcResId = srcResourceTable.addColumn("RES_ID");
-		DbColumn srcResUpdated = srcResourceTable.addColumn("RES_UPDATED");
 
 		SelectQuery subquery = new SelectQuery();
 		subquery.addCustomColumns(1);
@@ -1060,15 +1047,30 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		subquery.addJoin(
 				SelectQuery.JoinType.INNER,
 				resLinkTable,
-				srcResourceTable,
-				BinaryCondition.equalTo(rlSrcResId, srcResId));
+				srcResourceTable.getTable(),
+				BinaryCondition.equalTo(rlSrcResId, srcResourceTable.getResourceIdColumn()));
 
 		// Link the subquery to the outer query's Patient resource ID
 		DbColumn outerResourceId = resourceTableRoot.getResourceIdColumn();
 		subquery.addCondition(BinaryCondition.equalTo(rlTargetResId, outerResourceId));
 
+		// Exclude deleted compartment resources. Note: HFJ_RES_LINK rows are removed
+		// on delete, so this filter is belt-and-suspenders — deleted resources won't
+		// match the link join anyway.
+		DbColumn srcResDeletedAt = srcResourceTable.getTable().addColumn("RES_DELETED_AT");
+		subquery.addCondition(UnaryCondition.isNull(srcResDeletedAt));
+
 		// Add date conditions on the source resource's RES_UPDATED
-		addDateConditionsToSubquery(subquery, srcResUpdated, compartmentLastUpdated, theSqlBuilder);
+		if (compartmentLastUpdated.getLowerBoundAsInstant() != null) {
+			subquery.addCondition(BinaryCondition.greaterThanOrEq(
+					srcResourceTable.getLastUpdatedColumn(),
+					theSqlBuilder.generatePlaceholder(compartmentLastUpdated.getLowerBoundAsInstant())));
+		}
+		if (compartmentLastUpdated.getUpperBoundAsInstant() != null) {
+			subquery.addCondition(BinaryCondition.lessThanOrEq(
+					srcResourceTable.getLastUpdatedColumn(),
+					theSqlBuilder.generatePlaceholder(compartmentLastUpdated.getUpperBoundAsInstant())));
+		}
 
 		Condition existsSubquery = UnaryCondition.exists(subquery);
 
