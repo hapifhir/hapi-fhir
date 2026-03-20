@@ -1266,7 +1266,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(map);
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1206) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: " + VALID_PATIENT_SEARCH_PARAMS, e.getMessage());
+			assertEquals(Msg.code(1206) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: " + getValidPatientSearchParams(), e.getMessage());
 		}
 	}
 

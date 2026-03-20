@@ -142,7 +142,7 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 				String expectedErrorMessage = "HAPI-" + theParameters.myExpectedErrorCode + ": Search parameter \"" + sp.getCode() + "\" for resource type \"Patient\" is not active for searching";
 				assertThat(e.getMessage()).contains(expectedErrorMessage);
 
-				String expectedValidParams = "Valid search parameters for this search are: " + VALID_PATIENT_SEARCH_PARAMS;
+				String expectedValidParams = "Valid search parameters for this search are: " + getValidPatientSearchParams();
 				if (theParameters.mySearchParameter.getCode().equals("family")) {
 					expectedValidParams = expectedErrorMessage.replace(", family", "");
 				}

@@ -244,7 +244,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_CODE_SYSTEM_2 = "http://example.com/my_code_system_2";
-	public static final String VALID_PATIENT_SEARCH_PARAMS = "[_compartmentLastUpdated, _id, _lastUpdated, _profile, _security, _source, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]";
 
 	@Autowired
 	protected IJobStepExecutionServices myJobStepExecutionServices;
