@@ -109,7 +109,8 @@ public class SubscriptionRegisteringListener implements IMessageListener<Resourc
 		} catch (ResourceNotFoundException e) {
 			// This shouldn't happen unless something is really wrong - e.g. someone manually
 			// deleted a resource from the DB.
-			ourLog.warn("Received notification about Subscription {} not found in repository. Will unregister.", payloadId);
+			ourLog.warn(
+					"Received notification about Subscription {} not found in repository. Will unregister.", payloadId);
 			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
 			return;
 		}
