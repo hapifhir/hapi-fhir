@@ -26,6 +26,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.GenericMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.IResourceLinkService;
 import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
@@ -62,7 +64,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchException;
 
 /**
- * Test helper for invoking generic merge operations and validating merge results.
+ * Test helper for invoking merge operations and validating merge results.
  * <p>
  * This helper provides methods for:
  * - Invoking merge operations (sync and async)
@@ -80,6 +82,8 @@ public class MergeOperationTestHelper {
 	private final FhirContext myFhirContext;
 	private final ResourceLinkServiceFactory myLinkServiceFactory;
 	private final DaoRegistry myDaoRegistry;
+	private final String myOperationName;
+	private final AbstractMergeOperationInputParameterNames myParameterNames;
 
 	public MergeOperationTestHelper(
 			@Nonnull IGenericClient theClient,
@@ -87,12 +91,37 @@ public class MergeOperationTestHelper {
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull ResourceLinkServiceFactory theLinkServiceFactory,
 			@Nonnull DaoRegistry theDaoRegistry) {
+		this(
+				theClient,
+				theBatch2JobHelper,
+				theFhirContext,
+				theLinkServiceFactory,
+				theDaoRegistry,
+				"$hapi.fhir.merge",
+				new GenericMergeOperationInputParameterNames());
+	}
+
+	public MergeOperationTestHelper(
+			@Nonnull IGenericClient theClient,
+			@Nonnull Batch2JobHelper theBatch2JobHelper,
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull ResourceLinkServiceFactory theLinkServiceFactory,
+			@Nonnull DaoRegistry theDaoRegistry,
+			@Nonnull String theOperationName,
+			@Nonnull AbstractMergeOperationInputParameterNames theParameterNames) {
 
 		myClient = theClient;
 		myBatch2JobHelper = theBatch2JobHelper;
 		myFhirContext = theFhirContext;
 		myLinkServiceFactory = theLinkServiceFactory;
 		myDaoRegistry = theDaoRegistry;
+		myOperationName = theOperationName;
+		myParameterNames = theParameterNames;
+	}
+
+	@Nonnull
+	public AbstractMergeOperationInputParameterNames getParameterNames() {
+		return myParameterNames;
 	}
 
 	// ================================================
@@ -111,13 +140,13 @@ public class MergeOperationTestHelper {
 	public Parameters callMergeOperation(
 			@Nonnull String theResourceType, @Nonnull MergeTestParameters theParams, boolean theAsync) {
 
-		Parameters inputParams = theParams.asParametersResource();
+		Parameters inputParams = theParams.asParametersResource(myParameterNames);
 
-		ourLog.info("Calling $hapi.fhir.merge on {} with async={}", theResourceType, theAsync);
+		ourLog.info("Calling {} on {} with async={}", myOperationName, theResourceType, theAsync);
 
 		var operation = myClient.operation()
 				.onType(theResourceType)
-				.named("$hapi.fhir.merge")
+				.named(myOperationName)
 				.withParameters(inputParams);
 
 		if (theAsync) {
@@ -478,7 +507,7 @@ public class MergeOperationTestHelper {
 		}
 
 		assertMergeProvenance(
-				theMergeParams.asParametersResource(),
+				theMergeParams.asParametersResource(myParameterNames),
 				theExpectedVersionedSourceId,
 				theExpectedVersionedTargetId,
 				theExpectedProvenanceTargets,

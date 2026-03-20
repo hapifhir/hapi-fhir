@@ -1,4 +1,4 @@
-// Created by claude-sonnet-4-5
+// Created by claude-opus-4-6
 package ca.uhn.fhir.jpa.provider.merge;
 
 /*-
@@ -23,21 +23,24 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
 import ca.uhn.fhir.jpa.merge.PatientMergeTestScenario;
+import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.PatientMergeOperationInputParameterNames;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Patient;
 
 /**
- * Integration tests for the Patient/$hapi.fhir.merge operation.
+ * Integration tests for the FHIR-standard Patient/$merge operation.
  *
- * <p>This test class validates the HAPI FHIR generic merge endpoint that works with any
- * resource type, using generic parameter names (e.g., "source-resource", "target-resource").
+ * <p>This test class validates the Patient-specific merge endpoint using Patient-specific
+ * parameter names (e.g., "source-patient", "target-patient").
  *
  * <p>All common test methods are inherited from {@link AbstractGenericMergeR4Test}.
- * This class only configures the Patient-specific scenario and resource type name.
+ * This class only configures the Patient-specific scenario, operation name, and parameter names.
  *
- * <p>For tests of the standard FHIR Patient/$merge endpoint, see {@link PatientMergeStandardEndpointR4Test}.
+ * <p>For tests of the generic merge endpoint (Patient/$hapi.fhir.merge), see
+ * {@link PatientMergeGenericEndpointR4Test}.
  */
-public class PatientMergeGenericEndpointR4Test extends AbstractGenericMergeR4Test<Patient> {
+public class PatientMergeStandardEndpointR4Test extends AbstractGenericMergeR4Test<Patient> {
 
 	@Nonnull
 	@Override
@@ -49,5 +52,17 @@ public class PatientMergeGenericEndpointR4Test extends AbstractGenericMergeR4Tes
 	@Override
 	protected String getResourceTypeName() {
 		return "Patient";
+	}
+
+	@Nonnull
+	@Override
+	protected String getOperationName() {
+		return "$merge";
+	}
+
+	@Nonnull
+	@Override
+	protected AbstractMergeOperationInputParameterNames getParameterNames() {
+		return new PatientMergeOperationInputParameterNames();
 	}
 }

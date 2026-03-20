@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
+import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.IResourceLinkService;
 import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
@@ -466,7 +467,7 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 
 		addResultResourceIfNeeded(params);
 		myMergeTestParameters = params;
-		myInputParameters = params.asParametersResource();
+		myInputParameters = params.asParametersResource(myHelper.getParameterNames());
 		return params;
 	}
 
@@ -507,21 +508,38 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	 */
 	@Nonnull
 	public Parameters buildUndoMergeParameters(boolean theSourceById, boolean theTargetById) {
+		return buildUndoMergeParameters(theSourceById, theTargetById, myHelper.getParameterNames());
+	}
+
+	@Nonnull
+	public Parameters buildUndoMergeParameters(
+			boolean theSourceById,
+			boolean theTargetById,
+			@Nonnull AbstractMergeOperationInputParameterNames theParameterNames) {
+
 		Parameters params = new Parameters();
 
 		if (theSourceById) {
-			params.addParameter().setName("source-resource").setValue(new Reference(getVersionlessSourceId()));
+			params.addParameter()
+					.setName(theParameterNames.getSourceResourceParameterName())
+					.setValue(new Reference(getVersionlessSourceId()));
 		} else {
 			for (Identifier identifier : getSourceIdentifiers()) {
-				params.addParameter().setName("source-resource-identifier").setValue(identifier);
+				params.addParameter()
+						.setName(theParameterNames.getSourceIdentifiersParameterName())
+						.setValue(identifier);
 			}
 		}
 
 		if (theTargetById) {
-			params.addParameter().setName("target-resource").setValue(new Reference(getVersionlessTargetId()));
+			params.addParameter()
+					.setName(theParameterNames.getTargetResourceParameterName())
+					.setValue(new Reference(getVersionlessTargetId()));
 		} else {
 			for (Identifier identifier : getTargetIdentifiers()) {
-				params.addParameter().setName("target-resource-identifier").setValue(identifier);
+				params.addParameter()
+						.setName(theParameterNames.getTargetIdentifiersParameterName())
+						.setValue(identifier);
 			}
 		}
 
@@ -660,7 +678,6 @@ public abstract class AbstractMergeTestScenario<T extends IBaseResource> {
 	/**
 	 * Validates the completed async task output after job finishes.
 	 * Should be called AFTER waitForAsyncTaskCompletion().
-	 * Copied from PatientMergeR4Test.validateTaskOutput().
 	 *
 	 * @param theOutParams the original output parameters from merge operation
 	 */
