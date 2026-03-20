@@ -91,14 +91,12 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 		super.after();
 
 		myStorageSettings.setDefaultTransactionEntriesForWrite(new JpaStorageSettings().getDefaultTransactionEntriesForWrite());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 	}
 
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setAllowMultipleDelete(true);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 		// we need to keep the version on Provenance.target fields to

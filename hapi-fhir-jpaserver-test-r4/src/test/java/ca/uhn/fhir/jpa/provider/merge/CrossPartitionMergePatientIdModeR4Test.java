@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy;
 import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
@@ -94,10 +93,6 @@ public class CrossPartitionMergePatientIdModeR4Test extends BaseResourceProvider
 		myPartitionSettings.setAllowReferencesAcrossPartitions(
 			PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
-		// Disable search cache: merge mutates data mid-test and subsequent searches
-		// would return stale cached results
-		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
-
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
@@ -123,8 +118,6 @@ public class CrossPartitionMergePatientIdModeR4Test extends BaseResourceProvider
 		myPartitionSettings.setAllowReferencesAcrossPartitions(
 			defaultPartitionSettings.getAllowReferencesAcrossPartitions());
 
-		myStorageSettings.setReuseCachedSearchResultsForMillis(
-			new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(
 			DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER);
 	}

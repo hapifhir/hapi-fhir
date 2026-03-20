@@ -97,7 +97,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		super.after();
 
 		myStorageSettings.setDefaultTransactionEntriesForWrite(new JpaStorageSettings().getDefaultTransactionEntriesForWrite());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 		// For some reason, if this value is not restored to its default at the end, it interferes with other suites,
 		// so restore the default value
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER);
@@ -107,7 +106,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setAllowMultipleDelete(true);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 		// we need to keep the version on Provenance.target fields to verify that Provenance resources were saved
