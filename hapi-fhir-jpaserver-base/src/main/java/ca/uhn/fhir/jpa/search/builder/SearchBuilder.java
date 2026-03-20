@@ -1061,16 +1061,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		subquery.addCondition(UnaryCondition.isNull(srcResDeletedAt));
 
 		// Add date conditions on the source resource's RES_UPDATED
-		if (compartmentLastUpdated.getLowerBoundAsInstant() != null) {
-			subquery.addCondition(BinaryCondition.greaterThanOrEq(
-					srcResourceTable.getLastUpdatedColumn(),
-					theSqlBuilder.generatePlaceholder(compartmentLastUpdated.getLowerBoundAsInstant())));
-		}
-		if (compartmentLastUpdated.getUpperBoundAsInstant() != null) {
-			subquery.addCondition(BinaryCondition.lessThanOrEq(
-					srcResourceTable.getLastUpdatedColumn(),
-					theSqlBuilder.generatePlaceholder(compartmentLastUpdated.getUpperBoundAsInstant())));
-		}
+		// Reuse addPredicateLastUpdated to avoid duplicating prefix handling logic
+		ComboCondition dateCondition = theSqlBuilder.addPredicateLastUpdated(compartmentLastUpdated, srcResourceTable);
+		subquery.addCondition(dateCondition);
 
 		Condition existsSubquery = UnaryCondition.exists(subquery);
 

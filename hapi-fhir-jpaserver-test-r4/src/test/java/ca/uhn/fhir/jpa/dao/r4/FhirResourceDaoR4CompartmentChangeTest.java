@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -147,6 +148,41 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids).containsExactlyInAnyOrder(patientDuringId);
+	}
+
+	@Test
+	void testCompartmentChange_notEqualsPrefix_excludesCompartmentResourceUpdatedAtExactDate() throws InterruptedException {
+		// Create patient1 with observation at time T1
+		String patient1Id = createPatientWithObservation();
+
+		Thread.sleep(2);
+
+		// Create patient2 (no observation) — its sole RES_UPDATED becomes the excluded date.
+		// Without compartment resources, the EXISTS subquery returns no rows, so exclusion
+		// depends only on the outer ne condition matching patient2's exact RES_UPDATED.
+		Patient patient2 = new Patient();
+		patient2.setActive(true);
+		String patient2Id = myPatientDao.create(patient2, mySrd).getId().toUnqualifiedVersionless().getValue();
+		Date excludedDate = myPatientDao.read(new IdType(patient2Id), mySrd).getMeta().getLastUpdated();
+
+		Thread.sleep(2);
+
+		// Create patient3 with observation at time T3
+		String patient3Id = createPatientWithObservation();
+
+		// Search: ne (not-equals) excludedDate — should return patient1 and patient3 but NOT patient2
+		// ne produces: (RES_UPDATED < excludedDate OR RES_UPDATED > excludedDate)
+		DateRangeParam neRange = new DateRangeParam();
+		neRange.setLowerBound(new DateParam(ParamPrefixEnum.NOT_EQUAL, excludedDate));
+		neRange.setUpperBound(new DateParam(ParamPrefixEnum.NOT_EQUAL, excludedDate));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.setCompartmentLastUpdated(neRange);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		// Patient1 (before) and patient3 (after) match via ne; patient2 excluded at exact timestamp
+		assertThat(ids).containsExactlyInAnyOrder(patient1Id, patient3Id);
 	}
 
 	@Test
@@ -351,6 +387,58 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids).containsExactlyInAnyOrder(patient1Id);
+	}
+
+	@Test
+	void testCompartmentLastUpdated_gtPrefix_excludesBoundaryDate() throws InterruptedException {
+		// Create patient with observation and capture the observation's exact timestamp
+		Patient patient = new Patient();
+		patient.setActive(true);
+		String patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Observation obs = new Observation();
+		obs.setSubject(new Reference(patientId));
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		var obsOutcome = myObservationDao.create(obs, mySrd);
+		Date obsTimestamp = obsOutcome.getResource().getMeta().getLastUpdated();
+
+		// Search with gt (strict greater-than) at the exact observation timestamp
+		// The observation was created AT obsTimestamp, so gt should exclude it
+		DateRangeParam range = new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN, obsTimestamp));
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.setCompartmentLastUpdated(range);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids).doesNotContain(patientId);
+	}
+
+	@Test
+	void testCompartmentLastUpdated_ltPrefix_excludesBoundaryDate() {
+		// Create patient and capture its exact timestamp
+		Patient patient = new Patient();
+		patient.setActive(true);
+		var patientOutcome = myPatientDao.create(patient, mySrd);
+		String patientId = patientOutcome.getId().toUnqualifiedVersionless().getValue();
+		Date patientTimestamp = patientOutcome.getResource().getMeta().getLastUpdated();
+
+		// Add a compartment resource (observation) — created at or after patientTimestamp
+		Observation obs = new Observation();
+		obs.setSubject(new Reference(patientId));
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		myObservationDao.create(obs, mySrd);
+
+		// Search with lt (strict less-than) at the patient's exact timestamp.
+		// Patient was created AT patientTimestamp, so lt should exclude it.
+		// Observation was created at or after patientTimestamp, so lt also excludes
+		// it from the EXISTS subquery.
+		DateRangeParam range = new DateRangeParam(new DateParam(ParamPrefixEnum.LESSTHAN, patientTimestamp));
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.setCompartmentLastUpdated(range);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids).doesNotContain(patientId);
 	}
 
 	private DateRangeParam compartmentChangeGt(Date theDate) {
