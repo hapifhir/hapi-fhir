@@ -57,6 +57,7 @@ GET /Patient?_compartmentLastUpdated=ge2024-01-01&_compartmentLastUpdated=le2024
 #### Limitations
 
 * This parameter is only supported for Patient searches. Using it on other resource types will result in an error.
+* Deleted compartment resources are not detected.
 
 <a id="uplifted-refchains"></a>
 
