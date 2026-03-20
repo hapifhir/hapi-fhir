@@ -1054,12 +1054,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		DbColumn outerResourceId = resourceTableRoot.getResourceIdColumn();
 		subquery.addCondition(BinaryCondition.equalTo(rlTargetResId, outerResourceId));
 
-		// Exclude deleted compartment resources. Note: HFJ_RES_LINK rows are removed
-		// on delete, so this filter is belt-and-suspenders — deleted resources won't
-		// match the link join anyway.
-		DbColumn srcResDeletedAt = srcResourceTable.getTable().addColumn("RES_DELETED_AT");
-		subquery.addCondition(UnaryCondition.isNull(srcResDeletedAt));
-
 		// Add date conditions on the source resource's RES_UPDATED
 		// Reuse addPredicateLastUpdated to avoid duplicating prefix handling logic
 		ComboCondition dateCondition = theSqlBuilder.addPredicateLastUpdated(compartmentLastUpdated, srcResourceTable);
