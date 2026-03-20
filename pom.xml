@@ -988,6 +988,10 @@
 			<id>dnaworks</id>
 			<name>Donald Wheeler</name>
 		</developer>
+		<developer>
+			<id>kathbigra</id>
+			<name>Faisal Dilawar</name>
+		</developer>
 	</developers>
 
 	<licenses>
