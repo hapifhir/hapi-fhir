@@ -47,6 +47,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class JobInstanceProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -269,6 +270,11 @@ public class JobInstanceProcessor {
 			// trivial to advance to next step
 			ourLog.info("No workchunks for {} in step id {}", theInstance.getInstanceId(), currentGatedStepId);
 			return true;
+		}
+
+		if (workChunkStatuses.size() > 1) {
+			ourLog.error("Found unexpected workchunks:\n"
+				+ String.join(", ", workChunkStatuses.stream().map(m -> m.name()).collect(Collectors.toSet())));
 		}
 
 		// all workchunks for the current step are in COMPLETED -> proceed.
