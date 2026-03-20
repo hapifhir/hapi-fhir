@@ -57,7 +57,9 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 	}
 
 	public void setWarningProcessor(IWarningProcessor theWarningProcessor) {
-		myWarningProcessor = theWarningProcessor;
+		if (myWarningProcessor == null) {
+			myWarningProcessor = theWarningProcessor;
+		}
 	}
 
 	public int getRecoveredErrorCount() {
