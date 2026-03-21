@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.merge;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.GenericMergeOperationInputParameterNames;
 import jakarta.annotation.Nonnull;
@@ -225,6 +228,23 @@ public class MergeTestParameters {
 		}
 
 		return params;
+	}
+
+	/**
+	 * Convert this test parameters object to a {@link MergeJobParameters} instance.
+	 *
+	 * @param theFhirContext the FHIR context for JSON serialization
+	 * @param theParameterNames the parameter names to use when serializing input parameters
+	 * @return a MergeJobParameters with source/target IDs and serialized original input parameters
+	 */
+	public MergeJobParameters asMergeJobParameters(
+			@Nonnull FhirContext theFhirContext, @Nonnull AbstractMergeOperationInputParameterNames theParameterNames) {
+		MergeJobParameters jobParams = new MergeJobParameters();
+		jobParams.setSourceId(new FhirIdJson(mySourceResource.getReferenceElement()));
+		jobParams.setTargetId(new FhirIdJson(myTargetResource.getReferenceElement()));
+		jobParams.setOriginalInputParameters(
+				theFhirContext.newJsonParser().encodeResourceToString(asParametersResource(theParameterNames)));
+		return jobParams;
 	}
 
 	// Getters for test validation

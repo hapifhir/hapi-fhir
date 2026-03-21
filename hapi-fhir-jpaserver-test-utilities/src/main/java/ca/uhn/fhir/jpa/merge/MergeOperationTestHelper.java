@@ -85,6 +85,10 @@ public class MergeOperationTestHelper {
 	private final String myOperationName;
 	private final AbstractMergeOperationInputParameterNames myParameterNames;
 
+	/**
+	 * Creates a helper configured for the generic $hapi.fhir.merge endpoint
+	 * with generic parameter names (source-resource, target-resource, etc.).
+	 */
 	public MergeOperationTestHelper(
 			@Nonnull IGenericClient theClient,
 			@Nonnull Batch2JobHelper theBatch2JobHelper,
@@ -101,6 +105,11 @@ public class MergeOperationTestHelper {
 				new GenericMergeOperationInputParameterNames());
 	}
 
+	/**
+	 * Creates a helper configured for a specific merge endpoint and parameter names.
+	 * Use this for testing the FHIR-standard Patient/$merge endpoint with patient-specific
+	 * parameter names (source-patient, target-patient, etc.).
+	 */
 	public MergeOperationTestHelper(
 			@Nonnull IGenericClient theClient,
 			@Nonnull Batch2JobHelper theBatch2JobHelper,
