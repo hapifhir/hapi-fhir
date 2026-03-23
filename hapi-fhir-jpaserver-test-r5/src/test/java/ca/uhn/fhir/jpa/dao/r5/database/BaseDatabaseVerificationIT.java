@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
@@ -35,6 +36,7 @@ import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.PractitionerRole;
 import org.hl7.fhir.r5.model.Reference;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -71,7 +73,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class, TestDaoSearch.Config.class})
-public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder {
+public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabaseVerificationIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
 	public static final String INIT_SCHEMA = "init_schema";
@@ -80,10 +82,10 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	IFhirResourceDaoPatient<Patient> myPatientDao;
 
 	@Autowired
-	private FhirContext myFhirContext;
+	protected FhirContext myFhirContext;
 
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected DaoRegistry myDaoRegistry;
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -96,6 +98,9 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
+
+	@Autowired
+	private ExpungeEverythingService myExpungeEverythingService;
 
 	SystemRequestDetails myRequestDetails = new SystemRequestDetails();
 
@@ -110,6 +115,19 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			s.setDefaultPrettyPrint(false);
 			s.setPagingProvider(myPagingProvider);
 		});
+
+	@BeforeEach
+	void beforeEach() {
+		myExpungeEverythingService.expungeEverything(new SystemRequestDetails());
+	}
+
+	@Override
+	public TuplePredicateSearchTest.Context getTuplePredicateSearchTestContext() {
+		return new TuplePredicateSearchTest.Context(
+			myStorageSettings,
+			myServer
+		);
+	}
 
 
 	@ParameterizedTest
@@ -264,24 +282,6 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			return retVal;
 		}
 
-	}
-
-	public static class JpaDatabaseContextConfigParamObject {
-		final JpaEmbeddedDatabase myJpaEmbeddedDatabase;
-		final String myDialect;
-
-		public JpaDatabaseContextConfigParamObject(JpaEmbeddedDatabase theJpaEmbeddedDatabase, String theDialect) {
-			myJpaEmbeddedDatabase = theJpaEmbeddedDatabase;
-			myDialect = theDialect;
-		}
-
-		public JpaEmbeddedDatabase getJpaEmbeddedDatabase() {
-			return myJpaEmbeddedDatabase;
-		}
-
-		public String getDialect() {
-			return myDialect;
-		}
 	}
 
 	@SuppressWarnings("unchecked")

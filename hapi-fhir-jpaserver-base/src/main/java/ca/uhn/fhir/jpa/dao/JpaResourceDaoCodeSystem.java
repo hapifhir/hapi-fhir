@@ -251,6 +251,18 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 				myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(
 						cs, (ResourceTable) theEntity, theRequest);
+
+				String codeSystemUrl = cs != null ? cs.getUrl() : null;
+				if (isNotBlank(codeSystemUrl)) {
+					int invalidated = myTerminologySvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(
+							codeSystemUrl);
+					if (invalidated > 0) {
+						ourLog.info(
+								"Invalidated {} pre-calculated ValueSet expansion(s) due to update of CodeSystem: {}",
+								invalidated,
+								codeSystemUrl);
+					}
+				}
 			}
 
 			/*

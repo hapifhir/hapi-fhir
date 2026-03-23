@@ -38,8 +38,6 @@ import org.hl7.fhir.r4.model.Reference;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * Merge test scenario implementation for Practitioner resources.
  *
@@ -78,7 +76,6 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 	@Nonnull
 	public Practitioner createResource(@Nonnull List<Identifier> theIdentifiers) {
 		Practitioner p = new Practitioner();
-		p.setActive(true);
 		p.addName().setFamily("TestPractitioner");
 		p.setIdentifier(theIdentifiers);
 		return p;
@@ -144,12 +141,5 @@ public class PractitionerMergeTestScenario extends AbstractMergeTestScenario<Pra
 		} else {
 			return withReferences(List.of(ReferencingTestResourceType.of("PractitionerRole", theCount)));
 		}
-	}
-
-	@Override
-	protected void assertActiveFieldIfSupported(@Nonnull Practitioner theResource, boolean theExpectedValue) {
-		assertThat(theResource.getActive())
-				.as("Practitioner active field should be " + theExpectedValue)
-				.isEqualTo(theExpectedValue);
 	}
 }

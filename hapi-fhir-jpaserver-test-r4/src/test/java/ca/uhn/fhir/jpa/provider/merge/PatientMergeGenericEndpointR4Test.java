@@ -35,7 +35,7 @@ import org.hl7.fhir.r4.model.Patient;
  * <p>All common test methods are inherited from {@link AbstractGenericMergeR4Test}.
  * This class only configures the Patient-specific scenario and resource type name.
  *
- * <p>For tests of the standard FHIR Patient/$merge endpoint, see {@link PatientMergeR4Test}.
+ * <p>For tests of the standard FHIR Patient/$merge endpoint, see {@link PatientMergeStandardEndpointR4Test}.
  */
 public class PatientMergeGenericEndpointR4Test extends AbstractGenericMergeR4Test<Patient> {
 
