@@ -569,6 +569,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		myTestDaoSearch.assertSearchFinds("find only group Obs", "Observation?status=final&subject=Group/G1", g1ObsId);
 		myTestDaoSearch.assertSearchFinds("find by identifier for patient observation", "Observation?identifier=patObsIdentifier", patAObsId);
 		myTestDaoSearch.assertSearchFinds("find by identifier for group observation", "Observation?identifier=groupObsIdentifier", g1ObsId);
+		myTestDaoSearch.assertSearchFinds("find both by subject id", "Observation?status=final&subject=Group/G1,Patient/A", patAObsId, g1ObsId);
 	}
 
 

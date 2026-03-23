@@ -165,7 +165,7 @@ public class PatientIdPartitionInterceptor {
 			String resourceType = entry.getKey();
 			ResourceCompartmentStoragePolicy policy = entry.getValue();
 
-			if ("Patient".equals(resourceType)) {
+			if (PATIENT_STR.equals(resourceType)) {
 				throw new ConfigurationException(
 						Msg.code(2864) + "Can not provide a resource type policy for resource type 'Patient'");
 			}
@@ -237,7 +237,7 @@ public class PatientIdPartitionInterceptor {
 					ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 
 			Collection<String> oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartments(
-					"Patient", resource, compartmentSps, mySearchParamExtractor);
+					PATIENT_STR, resource, compartmentSps, mySearchParamExtractor);
 			oCompartmentIdentity = deDuplicateCompartmentList(oCompartmentIdentity);
 
 			if (!oCompartmentIdentity.isEmpty()) {
@@ -399,14 +399,35 @@ public class PatientIdPartitionInterceptor {
 					} else if (isNotBlank(theReadDetails.getResourceType())) {
 						RuntimeResourceDefinition resourceDef =
 								myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
+
 						List<RuntimeSearchParam> compartmentSps =
 								ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef, true);
+
 						for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
+							RequestPartitionId nonCompartmentPartition = null;
+							RequestPartitionId multiCompartmentPartition = null;
 							String paramName = nextCompartmentSp.getName();
+							ResourceCompartmentStoragePolicy policy = getPolicyForResourceType(theReadDetails);
+
+							boolean includeNonCompartmentRequestPartition =
+									hasReferencesToNonPartitionableResources(params, paramName);
+
+							if (includeNonCompartmentRequestPartition) {
+								nonCompartmentPartition = provideNonCompartmentMemberTypeResponse(theRequestDetails);
+							}
+
 							List<String> idParts = getResourceIdsForSearchParam(params, paramName);
+
 							if (!idParts.isEmpty()) {
-								ResourceCompartmentStoragePolicy policy = getPolicyForResourceType(theReadDetails);
-								return provideMultipleCompartmentPartition(theRequestDetails, idParts);
+								multiCompartmentPartition =
+										provideMultipleCompartmentPartition(theRequestDetails, idParts);
+							}
+
+							Optional<RequestPartitionId> mergedCompartmentOptional =
+									RequestPartitionId.mergeIds(nonCompartmentPartition, multiCompartmentPartition);
+
+							if (mergedCompartmentOptional.isPresent()) {
+								return mergedCompartmentOptional.get();
 							}
 						}
 					}
@@ -524,6 +545,32 @@ public class PatientIdPartitionInterceptor {
 		if (theRequestDetails != null) {
 			theRequestDetails.getUserData().put(PLACEHOLDER_TO_REFERENCE_KEY, placeholderToResource);
 		}
+	}
+
+	protected boolean hasReferencesToNonPartitionableResources(SearchParameterMap theParams, String theParamName) {
+		List<List<IQueryParameterType>> paramAndListForParamName = theParams.get(theParamName);
+		if (paramAndListForParamName == null) {
+			return false;
+		}
+
+		Set<String> nonPartitionableResourceNames =
+				new HashSet<>(BaseRequestPartitionHelperSvc.NON_PARTITIONABLE_RESOURCE_NAMES);
+		nonPartitionableResourceNames.add("Group");
+		nonPartitionableResourceNames.add("List");
+
+		for (List<IQueryParameterType> iQueryParameterTypes : paramAndListForParamName) {
+			for (IQueryParameterType aParam : iQueryParameterTypes) {
+				if (aParam instanceof ReferenceParam) {
+					String valueAsQueryToken = aParam.getValueAsQueryToken();
+					String resourceType = new IdType(valueAsQueryToken).getResourceType();
+					if (nonPartitionableResourceNames.contains(resourceType)) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	@SuppressWarnings("SameParameterValue")

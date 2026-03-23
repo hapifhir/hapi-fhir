@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7631
+title: "When operating in PatientId partitioning mode, searching with a subject parameter containing
+  a mix of Patient and non-Patient references (e.g. Observation?subject=Patient/A,Group/G1) now
+  correctly returns results from both the patient partition and the default partition."
