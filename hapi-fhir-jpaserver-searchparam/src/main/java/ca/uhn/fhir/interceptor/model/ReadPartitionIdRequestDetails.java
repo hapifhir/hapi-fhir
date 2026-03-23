@@ -68,7 +68,6 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 		myExtendedOperationName = theExtendedOperationName;
 	}
 
-
 	public static ReadPartitionIdRequestDetails forGeneric(RequestDetails theRequestDetails) {
 		RestOperationTypeEnum operationType = theRequestDetails.getRestOperationType();
 		if (operationType == null) {
