@@ -72,8 +72,9 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 	public static ReadPartitionIdRequestDetails forGeneric(RequestDetails theRequestDetails) {
 		RestOperationTypeEnum operationType = theRequestDetails.getRestOperationType();
 		if (operationType == null) {
-			// System/internal requests (e.g. SystemRequestDetails) have no REST operation type.
-			// Treat them as server-level operations so partition interceptors can route them correctly.
+			// Programmatic/internal requests (e.g. SystemRequestDetails, CamelExchangeRequestDetails)
+			// have no HTTP context and therefore no REST operation type. Default to a server-level
+			// operation so partition interceptors can route them correctly without NPEs.
 			operationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
 		}
 		return new ReadPartitionIdRequestDetails(
