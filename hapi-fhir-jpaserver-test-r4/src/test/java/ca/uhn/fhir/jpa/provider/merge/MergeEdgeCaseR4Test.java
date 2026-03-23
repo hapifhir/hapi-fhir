@@ -25,10 +25,17 @@ import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
@@ -45,8 +52,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for edge cases in merge operations that don't fit the generic resource pattern.
@@ -57,11 +68,14 @@ public class MergeEdgeCaseR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	protected Batch2JobHelper myBatch2JobHelper;
 
+	@Autowired
+	protected ResourceLinkServiceFactory myLinkServiceFactory;
+
 	protected MergeOperationTestHelper myHelper;
 
 	@BeforeEach
 	public void beforeMergeEdgeCase() {
-		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext);
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry);
 	}
 
 	@Test
@@ -207,6 +221,24 @@ public class MergeEdgeCaseR4Test extends BaseResourceProviderR4Test {
 			}
 			obs.addIdentifier(new Identifier().setSystem("http://test.org").setValue(theIdentifierValue));
 			return myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"$merge", "$hapi.fhir.merge"})
+	void testMerge_NonParameterRequestBody_Returns400BadRequest(String theOperationName) throws IOException {
+		HttpClientExtension clientExtension = new HttpClientExtension();
+		clientExtension.initialize();
+		try (CloseableHttpClient client = clientExtension.getClient()) {
+			HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + theOperationName);
+			post.addHeader("Content-Type", "application/fhir+json");
+			post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(new Patient()), StandardCharsets.UTF_8));
+			try (CloseableHttpResponse response = client.execute(post)) {
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+				String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+				assertThat(responseContent).contains("There are no source resource parameters provided");
+				assertThat(responseContent).contains("There are no target resource parameters provided");
+			}
 		}
 	}
 }

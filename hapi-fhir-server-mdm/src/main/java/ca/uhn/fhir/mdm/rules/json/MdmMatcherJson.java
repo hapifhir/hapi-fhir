@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MdmMatcherJson implements IModelJson {
 	@JsonProperty(value = "algorithm", required = true)
-	MatchTypeEnum myAlgorithm;
+	String myAlgorithm;
 
 	@JsonProperty(value = "identifierSystem", required = false)
 	String myIdentifierSystem;
@@ -36,12 +36,22 @@ public class MdmMatcherJson implements IModelJson {
 	@JsonProperty(value = "exact")
 	boolean myExact;
 
-	public MatchTypeEnum getAlgorithm() {
+	public String getAlgorithm() {
 		return myAlgorithm;
 	}
 
-	public MdmMatcherJson setAlgorithm(MatchTypeEnum theAlgorithm) {
+	public MdmMatcherJson setAlgorithm(String theAlgorithm) {
 		myAlgorithm = theAlgorithm;
+		return this;
+	}
+
+	/**
+	 * Convenience overload for backward compatibility with code that passes a {@link MatchTypeEnum}.
+	 * @deprecated Use {@link #setAlgorithm(String)} instead.
+	 */
+	@Deprecated(since = "8.10.0", forRemoval = true)
+	public MdmMatcherJson setAlgorithm(MatchTypeEnum theAlgorithm) {
+		myAlgorithm = theAlgorithm.name();
 		return this;
 	}
 

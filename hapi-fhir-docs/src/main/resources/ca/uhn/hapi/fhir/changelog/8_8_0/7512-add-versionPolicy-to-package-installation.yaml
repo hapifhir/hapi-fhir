@@ -1,6 +1,7 @@
 ---
 type: add
 issue: 7512
+backport: 6.8.5
 title: "Added a new `versionPolicy` parameter to PackageInstallationSpec that 
 controls how resource versions are handled during package installation in STORE_AND_INSTALL mode. 
 The `MULTI_VERSION` policy (default) assigns server-generated IDs and matches existing resources by both canonical URL 

@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.api.server;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,5 +28,35 @@ class SystemRequestDetailsTest {
 		assertThat(copy.getHeaders("header1")).containsExactly("value1", "value2");
 		assertThat(copy.getHeaders("header2")).containsExactly("value3");
 		assertThat(copy.getHeader("headerNew")).isNull();
+	}
+
+	@Test
+	void setTenantId_withNonBlankValue_retainsValue() {
+		SystemRequestDetails srd = new SystemRequestDetails();
+		srd.setTenantId("TENANT_A");
+		assertThat(srd.getTenantId()).isEqualTo("TENANT_A");
+	}
+
+	@Test
+	void setTenantId_withNullValue_normalizesToNull() {
+		SystemRequestDetails srd = new SystemRequestDetails();
+		srd.setTenantId(null);
+		assertThat(srd.getTenantId()).isNull();
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"", " ", "  "})
+	void setTenantId_withBlankValue_normalizesToNull(String theTenantId) {
+		SystemRequestDetails srd = new SystemRequestDetails();
+		srd.setTenantId(theTenantId);
+		assertThat(srd.getTenantId()).isNull();
+	}
+
+	@Test
+	void setTenantId_withBlankValue_clearsExistingTenant() {
+		SystemRequestDetails srd = new SystemRequestDetails();
+		srd.setTenantId("TENANT_A");
+		srd.setTenantId("");
+		assertThat(srd.getTenantId()).isNull();
 	}
 }

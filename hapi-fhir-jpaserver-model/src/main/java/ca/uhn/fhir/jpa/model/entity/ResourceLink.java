@@ -459,6 +459,21 @@ public class ResourceLink extends BaseResourceIndex {
 	}
 
 	/**
+	 * Sets the target resource entity reference. This allows Hibernate's {@code InsertActionSorter}
+	 * to detect the FK dependency between the target {@code HFJ_RESOURCE} INSERT and this
+	 * {@code HFJ_RES_LINK} INSERT when JDBC batch mode is active, ensuring correct ordering.
+	 *
+	 * <p>Created by claude-sonnet-4-6.</p>
+	 *
+	 * @param theTargetResource the target resource entity (may be a Hibernate proxy from
+	 *                          {@code EntityManager.getReference()})
+	 * @see ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer
+	 */
+	public void setTargetResourceTable(ResourceTable theTargetResource) {
+		myTargetResource = theTargetResource;
+	}
+
+	/**
 	 * Creates a clone of this resourcelink which doesn't contain the internal PID
 	 * of the target resource.
 	 */

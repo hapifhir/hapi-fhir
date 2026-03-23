@@ -1,0 +1,10 @@
+---
+type: add
+issue: 7668
+title: "The Patient $merge operation now supports cross-partition merging when using
+  the PatientIdPartitionInterceptor. When the source and target patients reside in different
+  partitions, the merge operation will automatically copy resources in the source
+  patient's compartment from the source partition to the target partition, update
+  all references accordingly, and delete the originals from the source partition. A Provenance resource is created
+  to track all the changes done by the merge operation, enabling undo.
+  Cross-partition merge currently supports synchronous execution only."

@@ -292,15 +292,16 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	/**
 	 * Creates a {@link SearchParameterMap} for a canonical URL, which can be either
 	 * unversioned (<code>http://foo</code>) or versioned (<code>http://foo|1.2.3</code>).
+	 * The version separator may appear as a literal <code>|</code> or percent-encoded as <code>%7C</code>.
 	 */
 	@Nonnull
 	private static SearchParameterMap createSearchParameterMapForCanonicalUrl(String theUri) {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(1);
-		int versionSeparator = theUri.lastIndexOf('|');
+		int versionSeparator = findVersionSeparator(theUri);
 		if (versionSeparator != -1) {
-			params.add(StructureDefinition.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
-			params.add(StructureDefinition.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
+			params.add(StructureDefinition.SP_VERSION, new TokenParam(versionOf(theUri, versionSeparator)));
+			params.add(StructureDefinition.SP_URL, new UriParam(urlOf(theUri, versionSeparator)));
 		} else {
 			params.add(StructureDefinition.SP_URL, new UriParam(theUri));
 			// When no version is specified, we will take the most recently updated resource as the current
@@ -308,5 +309,22 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 			params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 		}
 		return params;
+	}
+
+	private static int findVersionSeparator(String theUri) {
+		int idx = theUri.lastIndexOf('|');
+		if (idx != -1) {
+			return idx;
+		}
+		return theUri.lastIndexOf("%7C");
+	}
+
+	private static String urlOf(String theUri, int theSeparatorIdx) {
+		return theUri.substring(0, theSeparatorIdx);
+	}
+
+	private static String versionOf(String theUri, int theSeparatorIdx) {
+		String separator = theUri.charAt(theSeparatorIdx) == '|' ? "|" : "%7C";
+		return theUri.substring(theSeparatorIdx + separator.length());
 	}
 }
