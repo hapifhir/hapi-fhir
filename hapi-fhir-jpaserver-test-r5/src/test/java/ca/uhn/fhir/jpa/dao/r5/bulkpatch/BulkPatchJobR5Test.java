@@ -109,7 +109,7 @@ public class BulkPatchJobR5Test extends BaseBulkPatchR5Test {
 
 		JobInstance instance = myJobCoordinator.getInstance(jobId);
 		assertEquals(StatusEnum.FAILED, instance.getStatus());
-		assertEquals("HAPI-2790: Bulk Patch had 1 failure(s). See report for details.", instance.getErrorMessage());
+		assertEquals("HAPI-2790: Bulk Patch had 1 failure(s). See report for details.", instance.getErrorMessage(), instance::toString);
 		BulkModifyResourcesResultsJson report = JsonUtil.deserialize(instance.getReport(), BulkModifyResourcesResultsJson.class);
 		ourLog.info("Report: {}", report.getReport());
 
