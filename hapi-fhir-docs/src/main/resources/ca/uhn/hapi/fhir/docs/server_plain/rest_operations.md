@@ -2,7 +2,7 @@
 
 This page shows the operations which can be implemented on HAPI [Plain Server](/docs/server_plain/introduction.html), as well as on the [Annotation Client](/docs/client/annotation_client.html). Most of the examples shown here show how to implement a server method, but to perform an equivalent call on an annotation client you simply put a method with the same signature in your client interface.
 
-<a name="instance_read" />
+<a id="instance_read"></a>
 
 # Instance Level - Read
 
@@ -24,7 +24,7 @@ The following snippet shows how to define a client interface to handle a read me
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|clientReadInterface}}
 ``` 
 
-<a name="instance_vread" />
+<a id="instance_vread"></a>
 
 # Instance Level - VRead
 
@@ -40,7 +40,7 @@ Example URL to invoke this method:
 http://fhir.example.com/Patient/111/_history/2
 ```
 
-<a name="instance_update" />
+<a id="instance_update"></a>
 
 # Instance Level - Update
 
@@ -84,7 +84,7 @@ Example URL to invoke this method (this would be invoked using an HTTP PUT,	with
 http://fhir.example.com/Patient?identifier=system%7C00001
 ```
 
-<a name="raw_update_access"/>
+<a id="raw_update_access"></a>
 
 ## Accessing The Raw Resource Payload
 
@@ -96,7 +96,7 @@ The following example shows how to use these additional data elements.
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|updateRaw}}
 ``` 
 
-<a name="prefer"/>
+<a id="prefer"></a>
 
 ## Prefer Header / Returning the resource body
 
@@ -161,7 +161,7 @@ X-Rewrite-History: true
 }
 ```
 
-<a name="instance_delete" />
+<a id="instance_delete"></a>
 
 # Instance Level - Delete
 
@@ -248,7 +248,7 @@ X-Rewrite-History: true
 ```
 
 
-<a name="type_create" />
+<a id="type_create"></a>
 
 # Type Level - Create
 
@@ -305,7 +305,7 @@ If you wish to allow your server to honour the `Prefer` header, the same mechani
 
 The create operation also supports access to the raw payload, using the same semantics as raw payload access [for the update operation](#raw_update_access).
 
-<a name="type_search" />
+<a id="type_search"></a>
 
 # Type Level - Search
 
@@ -314,7 +314,7 @@ The [search](http://hl7.org/implement/standards/fhir/http.html#search) operation
 Searching is a very powerful and potentially very complicated operation to implement, with many possible parameters and combinations of parameters. See [REST Operations: Search](./rest_operations_search.html) for details on how to create search methods.
 
 
-<a name="type_validate" />
+<a id="type_validate"></a>
 
 # Type Level - Validate
 
@@ -349,7 +349,7 @@ Example URL to invoke this method (this would be invoked using an HTTP POST, wit
 http://fhir.example.com/Patient/$validate
 ```
 
-<a name="system_capabilities" />
+<a id="system_capabilities"></a>
 
 # System Level - Capabilities
 
@@ -377,7 +377,7 @@ You can then use the standard [Annotation Client](/docs/client/annotation_client
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|metadataClientUsage}}
 ``` 
 
-<a name="system_transaction" />
+<a id="system_transaction"></a>
 
 # System Level - Transaction
 
@@ -408,13 +408,13 @@ Content-Type: application/fhir+json
 }
 ```
 
-<a name="system_search" />
+<a id="system_search"></a>
 
 # System Level - Search
 
 Not yet implemented - Get in touch if you would like to help!
 
-<a name="history" />
+<a id="history"></a>
 
 # History (Instance, Type, Server)
 
@@ -452,7 +452,7 @@ When implementing a server operation, there are a number of failure conditions s
 See [REST Exception Handling](./resource_providers.html#exceptions) for information on available exceptions.
 
 
-<a name="tags" />
+<a id="tags"></a>
 
 # Tags
 
@@ -503,7 +503,7 @@ However, if you wish to add parameters to manually handle these fields, the foll
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|summaryAndElements}}
 ``` 
 
-<a name="compartments" />
+<a id="compartments"></a>
 
 # Compartments
 

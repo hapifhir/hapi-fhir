@@ -29,7 +29,7 @@ This sort is useful for imposing tie-breaking sort order in an efficient way.
 
 Note that this is an internal feature that may change or be removed in the future. Use with caution.
 
-<a name="uplifted-refchains"/>
+<a id="uplifted-refchains"></a>
 
 # Uplifted Refchains and Chaining Performance
 
@@ -197,7 +197,7 @@ For example, to modify the _composition_ SearchParameter in order to support the
 ```
 
 
-<a name="chained-sorting"/>
+<a id="chained-sorting"></a>
 
 # Chained Sorting
 

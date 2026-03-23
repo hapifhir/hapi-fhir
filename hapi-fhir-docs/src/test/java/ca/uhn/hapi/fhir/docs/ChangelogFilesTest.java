@@ -14,8 +14,13 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -23,6 +28,31 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ChangelogFilesTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ChangelogFilesTest.class);
+
+	@Test
+	void testDocAnchors_noDeprecatedNameAttribute() throws Exception {
+		Path docsDir = Paths.get("src/main/resources/ca/uhn/hapi/fhir/docs");
+		List<String> violations = new ArrayList<>();
+
+		try (Stream<Path> paths = Files.walk(docsDir)) {
+			paths.filter(p -> p.toString().endsWith(".md")).forEach(p -> {
+				try {
+					List<String> lines = Files.readAllLines(p);
+					for (int i = 0; i < lines.size(); i++) {
+						if (lines.get(i).contains("<a name=")) {
+							violations.add(p + ":" + (i + 1) + " - " + lines.get(i).trim());
+						}
+					}
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+		}
+
+		assertThat(violations)
+			.as("Found deprecated <a name=\"...\"> anchors — use <a id=\"...\"></a> instead")
+			.isEmpty();
+	}
 
 	@Test
 	public void testChangelogFiles() {
