@@ -38,13 +38,12 @@ import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_UNDO_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 
 /**
- * This service is implements the $hapi.fhir.replace-references operation.
+ * This service implements the $hapi.fhir.undo-replace-references operation.
  * It reverts the changes made by $hapi.fhir.replace-references operation based on the Provenance resource
  * that was created as part of the $hapi.fhir.replace-references operation.
  *
@@ -109,8 +108,7 @@ public class UndoReplaceReferencesSvc {
 			throw new InvalidRequestException(Msg.code(2729) + msg);
 		}
 
-		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(
-				toRestore, Collections.emptySet(), theRequestDetails, theUndoReplaceReferencesRequest.partitionId);
+		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(toRestore, theRequestDetails);
 
 		IBaseOperationOutcome opOutcome = OperationOutcomeUtil.newInstance(myFhirContext);
 		String msg = String.format(

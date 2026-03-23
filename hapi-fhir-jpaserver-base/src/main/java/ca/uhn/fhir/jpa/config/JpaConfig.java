@@ -1102,6 +1102,7 @@ public class JpaConfig {
 			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle,
 			Batch2TaskHelper theBatch2TaskHelper,
 			JpaStorageSettings theStorageSettings,
+			PartitionSettings thePartitionSettings,
 			ReplaceReferencesProvenanceSvc theProvenanceSvc) {
 		return new ReplaceReferencesSvcImpl(
 				theDaoRegistry,
@@ -1111,6 +1112,7 @@ public class JpaConfig {
 				theReplaceReferencesPatchBundle,
 				theBatch2TaskHelper,
 				theStorageSettings,
+				thePartitionSettings,
 				theProvenanceSvc);
 	}
 
