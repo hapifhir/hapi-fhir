@@ -9,7 +9,6 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationResp
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyResourcesIndividuallyStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParameters;
-import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -150,8 +149,8 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 
 		@Nullable
 		@Override
-		protected Object preModifyResources(StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, BulkPatchJobParameters theJobParameters, List<TypedPidAndVersionJson> thePids, List<IBaseResource> theResources) {
-			return myMockStep.preModifyResources(theJobParameters, thePids);
+		protected Object preModifyResources(StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, List<IBaseResource> theResources) {
+			return myMockStep.preModifyResources(theStepExecutionDetails, theResources);
 		}
 
 		@Override
@@ -168,7 +167,7 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 
 	interface IMockStep {
 
-		Object preModifyResources(BulkPatchJobParameters theJobParameters, List<TypedPidAndVersionJson> thePids);
+		Object preModifyResources(StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> theJobParameters, List<IBaseResource> thePids);
 
 		ResourceModificationResponse modifyResource(BulkPatchJobParameters theJobParameters, Object theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
 

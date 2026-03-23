@@ -179,7 +179,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 			resourceVersions.add(resource.getIdElement().getVersionIdPart());
 		}
 
-		C modificationContext = preModifyResources(theStepExecutionDetails, theJobParameters, thePids, resources);
+		C modificationContext = preModifyResources(theStepExecutionDetails, resources);
 
 		for (int i = 0; i < thePids.size(); i++) {
 			TypedPidAndVersionJson pid = thePids.get(i);
@@ -330,8 +330,6 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	 * </p>
 	 *
 	 * @param theStepExecutionDetails The details of the current step execution. This can be used to obtain {@link RequestDetails} objects for DAO calls.
-	 * @param theJobParameters        The parameters for the current instance of the job
-	 * @param thePids                 The PIDs of the resources to be modified. The PIDs will be in the same order as the resources in the chunk.
 	 * @param theResources            The resources to be modified. The resources will be in the same order as the PIDs in the chunk.
 	 * @return A context object which will be passed to {@link #modifyResource(StepExecutionDetails, BaseBulkModifyJobParameters, Object, ResourceModificationRequest)}
 	 * 	during each invocation. The format of the context object is up to the subclass, the framework
@@ -340,8 +338,6 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	@Nullable
 	protected C preModifyResources(
 			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
-			PT theJobParameters,
-			List<TypedPidAndVersionJson> thePids,
 			List<IBaseResource> theResources) {
 		return null;
 	}
