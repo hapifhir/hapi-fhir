@@ -455,7 +455,11 @@ public abstract class BaseTransactionProcessor {
 				if (i < totalAttempts && transactionSemantics.isTryBatchAsTransactionFirst()) {
 					BundleUtil.setBundleType(myContext, theRequest, "transaction");
 					response = processTransaction(
-							theRequestDetails, new TransactionDetails(theRequest), theRequest, "Transaction", theNestedMode);
+							theRequestDetails,
+							new TransactionDetails(theRequest),
+							theRequest,
+							"Transaction",
+							theNestedMode);
 				} else {
 					BundleUtil.setBundleType(myContext, theRequest, "batch");
 					response = processBatch(theRequestDetails, theRequest, theNestedMode);
