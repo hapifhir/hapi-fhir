@@ -1724,9 +1724,9 @@ public class XmlUtil {
 			 * https://www.owasp.org/index.php/XML_External_Entity_%28XXE%29_Processing
 			 */
 			inputFactory.setProperty(
-				XMLInputFactory.SUPPORT_DTD, false); // This disables DTDs entirely for that factory
+					XMLInputFactory.SUPPORT_DTD, false); // This disables DTDs entirely for that factory
 			inputFactory.setProperty(
-				XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false); // disable external entities
+					XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false); // disable external entities
 
 			throwUnitTestExceptionIfConfiguredToDoSo();
 		} catch (Throwable e) {
