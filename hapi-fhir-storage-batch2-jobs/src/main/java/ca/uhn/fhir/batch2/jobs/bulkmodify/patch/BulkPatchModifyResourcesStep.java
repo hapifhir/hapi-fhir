@@ -54,7 +54,6 @@ public class BulkPatchModifyResourcesStep<PT extends BulkPatchJobParameters>
 	@Override
 	protected ResourceModificationResponse modifyResource(
 			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
-			PT theJobParameters,
 			BulkPatchModificationContext theModificationContext,
 			@Nonnull ResourceModificationRequest theModificationRequest) {
 		IBaseResource resourceToPatch = theModificationRequest.getResource();

@@ -166,7 +166,7 @@ class BaseBulkModifyResourcesIndividuallyStepTest {
 
 	private class MySvc extends BaseBulkModifyResourcesIndividuallyStep<MyParameters, Integer> {
 		@Override
-		protected ResourceModificationResponse modifyResource(StepExecutionDetails<MyParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, MyParameters theJobParameters, Integer theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest) {
+		protected ResourceModificationResponse modifyResource(StepExecutionDetails<MyParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, Integer theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest) {
 			return myFunction.apply(theModificationRequest);
 		}
 

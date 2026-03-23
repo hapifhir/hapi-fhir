@@ -75,7 +75,7 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 		WorkChunk chunk = new WorkChunk().setId("my-chunk-id");
 		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(jobParameters, data, new JobInstance(), chunk, myJobStepExecutionServices);
 
-		when(myMockStep.modifyResource(any(), any(), any())).thenAnswer(t->{
+		when(myMockStep.modifyResource(any(), any())).thenAnswer(t->{
 			ResourceModificationRequest request = t.getArgument(2, ResourceModificationRequest.class);
 			Patient patient = (Patient) request.getResource();
 			// Delete Patient/P2, leave Patient/P1 alone
@@ -113,7 +113,7 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(new BulkPatchJobParameters(), data, new JobInstance(), chunk, myJobStepExecutionServices);
 
 		when(myMockStep.isRewriteHistory(any(), any())).thenReturn(true);
-		when(myMockStep.modifyResource(any(), any(), any())).thenReturn(ResourceModificationResponse.delete());
+		when(myMockStep.modifyResource(any(), any())).thenReturn(ResourceModificationResponse.delete());
 
 		// Test & Verify
 		assertThatThrownBy(()->myStep.run(stepExecutionDetails, mySink))
@@ -154,8 +154,8 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 		}
 
 		@Override
-		protected ResourceModificationResponse modifyResource(StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, BulkPatchJobParameters theJobParameters, Object theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest) {
-			return myMockStep.modifyResource(theJobParameters, theModificationContext, theModificationRequest);
+		protected ResourceModificationResponse modifyResource(StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, Object theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest) {
+			return myMockStep.modifyResource(theModificationContext, theModificationRequest);
 		}
 
 		void setMockStep(IMockStep theMockStep) {
@@ -169,7 +169,7 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 
 		Object preModifyResources(StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> theJobParameters, List<IBaseResource> thePids);
 
-		ResourceModificationResponse modifyResource(BulkPatchJobParameters theJobParameters, Object theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
+		ResourceModificationResponse modifyResource(Object theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
 
 		boolean isRewriteHistory(Object theState, IBaseResource theResource);
 	}
