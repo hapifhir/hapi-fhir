@@ -16,6 +16,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.Reference;
@@ -154,7 +155,7 @@ class HostApplicationServicesTest {
 
 		@Override
 		public org.hl7.fhir.r5.model.Base resolveReference(
-			FHIRPathEngine engine, Object appContext, String url, org.hl7.fhir.r5.model.Base refContext)
+			FHIRPathEngine engine, Object appContext, String url, Identifier identifier, org.hl7.fhir.r5.model.Base refContext)
 			throws FHIRException {
 			myResolveCalled.set(true);
 			return new Practitioner().setId(url);

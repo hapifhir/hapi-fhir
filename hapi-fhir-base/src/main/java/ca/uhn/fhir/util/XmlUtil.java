@@ -1658,18 +1658,6 @@ public class XmlUtil {
 			}
 
 			/*
-			 * These two properties disable external entity processing, which can
-			 * be a security vulnerability.
-			 *
-			 * See https://github.com/hapifhir/hapi-fhir/issues/339
-			 * https://www.owasp.org/index.php/XML_External_Entity_%28XXE%29_Processing
-			 */
-			inputFactory.setProperty(
-					XMLInputFactory.SUPPORT_DTD, false); // This disables DTDs entirely for that factory
-			inputFactory.setProperty(
-					"javax.xml.stream.isSupportingExternalEntities", false); // disable external entities
-
-			/*
 			 * In the following few lines, you can uncomment the first and comment the second to disable automatic
 			 * parsing of extended entities, e.g. &sect;
 			 *
@@ -1727,6 +1715,19 @@ public class XmlUtil {
 			if (inputFactory.isPropertySupported(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES)) {
 				inputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, true);
 			}
+
+			/*
+			 * These two properties disable external entity processing, which can
+			 * be a security vulnerability.
+			 *
+			 * See https://github.com/hapifhir/hapi-fhir/issues/339
+			 * https://www.owasp.org/index.php/XML_External_Entity_%28XXE%29_Processing
+			 */
+			inputFactory.setProperty(
+					XMLInputFactory.SUPPORT_DTD, false); // This disables DTDs entirely for that factory
+			inputFactory.setProperty(
+					XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false); // disable external entities
+
 			throwUnitTestExceptionIfConfiguredToDoSo();
 		} catch (Throwable e) {
 			throw new ConfigurationException(

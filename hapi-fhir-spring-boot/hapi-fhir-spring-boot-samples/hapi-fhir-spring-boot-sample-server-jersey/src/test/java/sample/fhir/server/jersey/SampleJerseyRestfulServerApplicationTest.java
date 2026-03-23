@@ -1,6 +1,5 @@
 package sample.fhir.server.jersey;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Disabled("This test stopped working when we upgraded to Boot 3 - Fixes welcome")
 public class SampleJerseyRestfulServerApplicationTest {
 
 	@Autowired

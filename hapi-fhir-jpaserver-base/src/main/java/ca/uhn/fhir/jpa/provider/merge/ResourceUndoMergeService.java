@@ -21,10 +21,7 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
@@ -39,16 +36,13 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static ca.uhn.fhir.merge.MergeResourceHelper.addErrorToOperationOutcome;
 import static ca.uhn.fhir.merge.MergeResourceHelper.addInfoToOperationOutcome;
@@ -81,19 +75,16 @@ public class ResourceUndoMergeService {
 	private final PreviousResourceVersionRestorer myResourceVersionRestorer;
 	private final MergeValidationService myMergeValidationService;
 	private final FhirContext myFhirContext;
-	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	public ResourceUndoMergeService(
 			DaoRegistry theDaoRegistry,
 			MergeProvenanceSvc theMergeProvenanceSvc,
 			PreviousResourceVersionRestorer theResourceVersionRestorer,
-			MergeValidationService theMergeValidationService,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+			MergeValidationService theMergeValidationService) {
 		myMergeProvenanceSvc = theMergeProvenanceSvc;
 		myResourceVersionRestorer = theResourceVersionRestorer;
 		myFhirContext = theDaoRegistry.getFhirContext();
 		myMergeValidationService = theMergeValidationService;
-		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
 	public OperationOutcomeWithStatusCode undoMerge(
@@ -168,17 +159,6 @@ public class ResourceUndoMergeService {
 			throw new InvalidRequestException(Msg.code(2748) + msg);
 		}
 
-		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
-				theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetId));
-
-		Set<Reference> allowedToUndelete = new HashSet<>();
-		if (wasSourceResourceDeletedByMergeOperation(provenance, theInputParamNames)) {
-			// If the source resource was deleted by the merge operation,
-			// let the version restorer know it can be undeleted.
-			Reference sourceReference = provenance.getTarget().get(1);
-			allowedToUndelete.add(sourceReference);
-		}
-
 		List<Reference> referencesToRestore = references;
 		if (wasTargetUpdateANoop(provenance)) {
 			// skip restoring the target resource if it was not updated by the merge operation.
@@ -189,8 +169,7 @@ public class ResourceUndoMergeService {
 			referencesToRestore = references.subList(1, references.size());
 		}
 
-		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(
-				referencesToRestore, allowedToUndelete, theRequestDetails, partitionId);
+		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(referencesToRestore, theRequestDetails);
 
 		String msg = format(
 				"Successfully restored %d resources to their previous versions based on the Provenance resource: %s",
@@ -199,25 +178,6 @@ public class ResourceUndoMergeService {
 		undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_200_OK);
 
 		return undoMergeOutcome;
-	}
-
-	private boolean wasSourceResourceDeletedByMergeOperation(
-			Provenance provenance, AbstractMergeOperationInputParameterNames theInputParamNames) {
-		if (provenance.hasContained()) {
-			List<Resource> containedResources = provenance.getContained();
-			if (!containedResources.isEmpty() && containedResources.get(0) instanceof Parameters parameters) {
-				if (parameters.hasParameter(theInputParamNames.getDeleteSourceParameterName())) {
-					return parameters.getParameterBool(theInputParamNames.getDeleteSourceParameterName());
-				}
-				// by default the source resource is not deleted by the merge operation
-				return false;
-			}
-		}
-
-		throw new InternalErrorException(Msg.code(2749)
-				+ format(
-						"The provenance resource '%s' does not contain the expected contained resource for the input parameters of the merge operation.",
-						provenance.getIdElement().asStringValue()));
 	}
 
 	private boolean wasTargetUpdateANoop(Provenance provenance) {
