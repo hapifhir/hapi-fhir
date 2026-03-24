@@ -164,7 +164,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		} else {
 			 methodOutcome =  myClient.update().resource(theSubscription).execute();
 		}
-		theSubscription.setId(methodOutcome.getId());
+		// remove the version since there is async updates happening (e.g. subscription activation)
+		theSubscription.setId(methodOutcome.getId().toUnqualifiedVersionless());
 		mySubscriptionIds.add(methodOutcome.getId());
 		return (Subscription) theSubscription;
 	}
