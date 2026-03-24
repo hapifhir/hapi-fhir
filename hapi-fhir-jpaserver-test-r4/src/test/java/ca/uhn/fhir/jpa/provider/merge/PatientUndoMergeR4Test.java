@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
+import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
+import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.merge.PatientMergeTestScenario;
-import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
+import ca.uhn.fhir.merge.PatientMergeOperationInputParameterNames;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,6 +20,15 @@ import org.junit.jupiter.params.provider.CsvSource;
  * <p>All common test methods are inherited from {@link AbstractGenericUndoMergeR4Test}.
  */
 public class PatientUndoMergeR4Test extends AbstractGenericUndoMergeR4Test<Patient> {
+
+	private MergeOperationTestHelper myHelperUsingPatientMergeEndpoint;
+
+	@BeforeEach
+	void beforePatientUndoMerge() {
+		myHelperUsingPatientMergeEndpoint = new MergeOperationTestHelper(
+				myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry,
+				"$merge", new PatientMergeOperationInputParameterNames());
+	}
 
 	@Nonnull
 	@Override
@@ -105,20 +115,16 @@ public class PatientUndoMergeR4Test extends AbstractGenericUndoMergeR4Test<Patie
 			Patient targetBeforeMerge = scenario.readTargetResource();
 
 			// Execute merge
-			if (theUsePatientMergeEndpoint) {
-				callPatientSpecificMerge(scenario, theUseIdForSource, theUseIdForTarget);
-			} else {
-				scenario.callMergeOperation(theUseIdForSource, theUseIdForTarget);
-			}
+			MergeOperationTestHelper mergeHelper = theUsePatientMergeEndpoint
+					? myHelperUsingPatientMergeEndpoint : myHelper;
+			MergeTestParameters mergeParams = scenario.buildMergeOperationParameters(theUseIdForSource, theUseIdForTarget);
+			mergeHelper.callMergeOperation("Patient", mergeParams, false);
 
 			// Execute undo-merge
-			Parameters undoMergeOutParams;
-			if (theUsePatientSpecificUndoParams) {
-				Parameters undoParams = buildPatientSpecificParams(scenario, theUseIdForSource, theUseIdForTarget);
-				undoMergeOutParams = myHelper.callUndoMergeOperation("Patient", undoParams);
-			} else {
-				undoMergeOutParams = scenario.callUndoMergeOperation(theUseIdForSource, theUseIdForTarget);
-			}
+			Parameters undoParams = theUsePatientSpecificUndoParams
+					? scenario.buildUndoMergeParameters(theUseIdForSource, theUseIdForTarget, myHelperUsingPatientMergeEndpoint.getParameterNames())
+					: scenario.buildUndoMergeParameters(theUseIdForSource, theUseIdForTarget, myHelper.getParameterNames());
+			Parameters undoMergeOutParams = myHelper.callUndoMergeOperation("Patient", undoParams);
 
 			// Validate
 			int expectedResourceCount = scenario.getTotalReferenceCount() + 2;
@@ -131,60 +137,5 @@ public class PatientUndoMergeR4Test extends AbstractGenericUndoMergeR4Test<Patie
 
 			scenario.assertReferencesNotUpdated();
 		}
-	}
-
-	/**
-	 * Calls the Patient/$merge operation.
-	 */
-	private void callPatientSpecificMerge(
-			AbstractMergeTestScenario<Patient> theScenario,
-			boolean theUseIdForSource,
-			boolean theUseIdForTarget) {
-
-		Parameters parameters = buildPatientSpecificParams(theScenario, theUseIdForSource, theUseIdForTarget);
-		// Call Patient/$merge endpoint
-		myClient.operation()
-			.onType("Patient")
-			.named("$merge")
-			.withParameters(parameters)
-			.returnResourceType(Parameters.class)
-			.execute();
-	}
-
-	/**
-	 * Builds undo-merge parameters using patient-specific parameter names.
-	 */
-	private Parameters buildPatientSpecificParams(
-			AbstractMergeTestScenario<Patient> theScenario,
-			boolean theUseIdForSource,
-			boolean theUseIdForTarget) {
-
-		Parameters undoParams = new Parameters();
-
-		if (theUseIdForSource) {
-			undoParams.addParameter()
-				.setName("source-patient")
-				.setValue(new Reference(theScenario.getVersionlessSourceId()));
-		} else {
-			for (Identifier identifier : theScenario.getSourceIdentifiers()) {
-				undoParams.addParameter()
-					.setName("source-patient-identifier")
-					.setValue(identifier);
-			}
-		}
-
-		if (theUseIdForTarget) {
-			undoParams.addParameter()
-				.setName("target-patient")
-				.setValue(new Reference(theScenario.getVersionlessTargetId()));
-		} else {
-			for (Identifier identifier : theScenario.getTargetIdentifiers()) {
-				undoParams.addParameter()
-					.setName("target-patient-identifier")
-					.setValue(identifier);
-			}
-		}
-
-		return undoParams;
 	}
 }

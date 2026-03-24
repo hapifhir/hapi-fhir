@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7669
+title: "Fixed a bug where the Patient/$merge and $hapi.fhir.merge operations did not
+  set active=false on the source resource when the active field was not previously set.
+  This affected resource types that have an active field."

@@ -1,6 +1,7 @@
 ---
 type: add
 issue: 7421
+backport: 8.6.6
 title: "Patient instance bulk export operation now supports MDM expansion. When the `_mdm` parameter is enabled on
 a Patient instance bulk export request (POST /Patient/123/$export?_mdm=true), the exported set of resources will include:
 <ul>

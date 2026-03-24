@@ -238,8 +238,19 @@ public class PackageInstallationSpec {
 	}
 
 	public enum InstallModeEnum {
+		/**
+		 * Downloads the package from NPM, but doesn't persist any of the resources into the database.
+		 */
 		STORE_ONLY,
-		STORE_AND_INSTALL
+		/**
+		 * Downloads the package from NPM, stores it locally, and persists the resources into the database.
+		 */
+		STORE_AND_INSTALL,
+		/**
+		 * Downloads the package from NPM and persists the resources into the database, but doesn't store the
+		 * package locally.
+		 */
+		INSTALL_ONLY
 	}
 
 	public enum ValidationModeEnum {

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -30,9 +31,11 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -94,16 +97,27 @@ public class SubscriptionRegisteringListener implements IMessageListener<Resourc
 
 		// We read the resource back from the DB instead of using the supplied copy for
 		// two reasons:
-		// - in order to store partition id in the userdata of the resource for partitioned subscriptions
+		// - to store partition id in the userdata of the resource for partitioned subscriptions
 		// - in case we're processing out of order and a create-then-delete has been processed backwards (or vice versa)
 
 		IIdType payloadId = payload.getPayloadId(myFhirContext).toUnqualifiedVersionless();
 		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
 		RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
-		IBaseResource payloadResource = subscriptionDao.read(payloadId, systemRequestDetails, true);
+		IBaseResource payloadResource;
+		try {
+			payloadResource = subscriptionDao.read(payloadId, systemRequestDetails, true);
+		} catch (ResourceNotFoundException e) {
+			// This shouldn't happen unless something is really wrong - e.g. someone manually
+			// deleted a resource from the DB.
+			ourLog.warn(
+					"Received notification about Subscription {} not found in repository. Will unregister.", payloadId);
+			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
+			return;
+		}
 		if (payloadResource == null) {
 			// Only for unit test
 			payloadResource = payload.getResource(myFhirContext);
+			Validate.notNull(payloadResource, "Resource should not be null (this is a bug)");
 		}
 		if (payloadResource.isDeleted()) {
 			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
@@ -123,11 +137,11 @@ public class SubscriptionRegisteringListener implements IMessageListener<Resourc
 			return myPartitionSettings.getDefaultPartitionId();
 		}
 		/*
-		 * We log a warning because in most cases you will want a partitionsettings
+		 * We log a warning because in most cases you will want a PartitionSettings
 		 * object.
 		 * However, PartitionSettings beans are not provided in the same
 		 * config as the one that provides this bean; as such, it is the responsibility
-		 * of whomever includes the config for this bean to also provide a PartitionSettings
+		 * of whoever includes the config for this bean to also provide a PartitionSettings
 		 * bean (or import a config that does)
 		 */
 		ourLog.warn("No PartitionSettings available.");
@@ -135,19 +149,19 @@ public class SubscriptionRegisteringListener implements IMessageListener<Resourc
 	}
 
 	/**
-	 * There were some situations where the RequestDetails attempted to use the default partition
+	 * There were some situations where the RequestDetails attempted to use the default partition,
 	 * and the partition name was a list containing null values (i.e. using the package installer to STORE_AND_INSTALL
 	 * Subscriptions while partitioning was enabled). If any partition matches these criteria,
-	 * {@link RequestPartitionId#defaultPartition()} is used to obtain the default partition.
+	 * {@link RequestPartitionId#defaultPartition(IDefaultPartitionSettings)} is used to get the default partition.
 	 */
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
 		Integer defaultPartitionId = getDefaultPartitionId();
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
 		if (payloadPartitionId == null || payloadPartitionId.isPartition(defaultPartitionId)) {
-			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is
+			// This may look redundant, but the package installer STORE_AND_INSTALL Subscriptions when partitioning is
 			// enabled
 			// creates a corrupt default partition.  This resets it to a clean one.
-			payloadPartitionId = RequestPartitionId.defaultPartition();
+			payloadPartitionId = RequestPartitionId.defaultPartition(myPartitionSettings);
 		}
 		SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
 		// skip consent checking when registering Subscription resources since it is a system action

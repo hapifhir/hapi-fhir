@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.fhirpath.TypeDetails;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -153,7 +154,12 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		}
 
 		@Override
-		public Base resolveReference(FHIRPathEngine engine, Object theAppContext, String theUrl, Base refContext) {
+		/* 	The identifier parameter introduced in org.hl7.fhir.core 6.8.2 is unused by tests in that project, and
+			omitted in most of its internal implementations. If tests are introduced in subsequent releases that rely on
+			it, its use may need to be included here. -dotasek
+		*/
+		public Base resolveReference(
+				FHIRPathEngine engine, Object theAppContext, String theUrl, Identifier identifier, Base refContext) {
 			Base retVal = (Base) BundleUtil.getReferenceInBundle(getContext(), theUrl, theAppContext);
 			if (retVal != null) {
 				return retVal;

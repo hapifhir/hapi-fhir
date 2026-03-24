@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -654,10 +655,17 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 	}
 
 	public void clean() {
-		for (Map.Entry<String, List<List<IQueryParameterType>>> nextParamEntry : this.entrySet()) {
+		for (Iterator<Map.Entry<String, List<List<IQueryParameterType>>>> iterator =
+						this.entrySet().iterator();
+				iterator.hasNext(); ) {
+			Map.Entry<String, List<List<IQueryParameterType>>> nextParamEntry = iterator.next();
 			String nextParamName = nextParamEntry.getKey();
 			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
 			cleanParameter(nextParamName, andOrParams);
+
+			if (andOrParams.isEmpty()) {
+				iterator.remove();
+			}
 		}
 	}
 

@@ -219,8 +219,16 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal);
 				}
 
-				if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
+				if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL
+						|| theInstallationSpec.getInstallMode()
+								== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
 					install(npmPackage, theInstallationSpec, retVal);
+
+					if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
+						retVal.getMessage()
+								.add(
+										"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
+					}
 
 					// If any SearchParameters were installed, let's load them right away
 					mySearchParamRegistryController.refreshCacheIfNecessary();

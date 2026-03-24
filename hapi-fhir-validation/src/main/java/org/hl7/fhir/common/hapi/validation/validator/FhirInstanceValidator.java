@@ -16,6 +16,7 @@ import org.hl7.fhir.r5.fhirpath.FHIRPathUtilityClasses.FunctionDetails;
 import org.hl7.fhir.r5.fhirpath.IHostApplicationServices;
 import org.hl7.fhir.r5.fhirpath.TypeDetails;
 import org.hl7.fhir.r5.model.Base;
+import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
@@ -381,7 +382,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public Base resolveReference(FHIRPathEngine engine, Object appContext, String url, Base refContext)
+		public Base resolveReference(
+				FHIRPathEngine engine, Object appContext, String url, Identifier identifier, Base refContext)
 				throws FHIRException {
 			return null;
 		}
