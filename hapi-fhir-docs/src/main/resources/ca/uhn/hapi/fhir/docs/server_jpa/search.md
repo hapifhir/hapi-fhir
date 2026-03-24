@@ -29,7 +29,7 @@ This sort is useful for imposing tie-breaking sort order in an efficient way.
 
 Note that this is an internal feature that may change or be removed in the future. Use with caution.
 
-<a id="compartment-change"></a>
+<a id="compartment-last-updated"></a>
 
 ### _compartmentLastUpdated
 
