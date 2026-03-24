@@ -296,7 +296,7 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		subscription.getCriteriaElement().addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL, new StringType(theFilter));
 
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(2);
-		Subscription retval = postOrPutSubscription(subscription);
+		Subscription retval = createOrUpdateSubscription(subscription);
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
 
 		return retval;

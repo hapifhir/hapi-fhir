@@ -24,7 +24,6 @@ import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
-import ca.uhn.fhir.broker.api.IMultiplexingListener;
 import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.jpa.subscription.api.ISubscriptionDeliveryValidator;
 import ca.uhn.fhir.jpa.subscription.channel.models.ProducingChannelParameters;
@@ -121,7 +120,7 @@ public class SubscriptionChannelRegistry {
 		return new SubscriptionResourceDeliveryMessageConsumer(deliveryConsumer);
 	}
 
-	protected IMultiplexingListener<ResourceDeliveryMessage> buildDeliveryConsumerListener(
+	protected MultiplexingListener<ResourceDeliveryMessage> buildDeliveryConsumerListener(
 			ActiveSubscription theSubscription) {
 		MultiplexingListener<ResourceDeliveryMessage> multiplexingListener =
 				new MultiplexingListener<>(ResourceDeliveryMessage.class);

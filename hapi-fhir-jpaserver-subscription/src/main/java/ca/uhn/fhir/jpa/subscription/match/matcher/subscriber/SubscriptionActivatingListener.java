@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
@@ -148,6 +149,7 @@ public class SubscriptionActivatingListener implements IMessageListener<Resource
 			// if this happens, we will treat this as a failure to activate
 
 			SystemRequestDetails srdForRead = SystemRequestDetails.forAllPartitions();
+			ConsentInterceptor.skipAllConsentForRequest(srdForRead);
 			subscription = subscriptionDao.read(theSubscription.getIdElement(), srdForRead);
 			subscription.setId(subscription.getIdElement().toVersionless());
 
@@ -161,6 +163,7 @@ public class SubscriptionActivatingListener implements IMessageListener<Resource
 			RequestPartitionId partitionId =
 					(RequestPartitionId) subscription.getUserData(Constants.RESOURCE_PARTITION_ID);
 			SystemRequestDetails srdForUpdate = new SystemRequestDetails().setRequestPartitionId(partitionId);
+			ConsentInterceptor.skipAllConsentForRequest(srdForUpdate);
 			subscriptionDao.update(subscription, srdForUpdate);
 			return true;
 		} catch (final UnprocessableEntityException | ResourceGoneException e) {
@@ -171,6 +174,7 @@ public class SubscriptionActivatingListener implements IMessageListener<Resource
 			SubscriptionUtil.setReason(myFhirContext, subscription, e.getMessage());
 
 			SystemRequestDetails srd = SystemRequestDetails.forAllPartitions();
+			ConsentInterceptor.skipAllConsentForRequest(srd);
 			subscriptionDao.update(subscription, srd);
 			return false;
 		}

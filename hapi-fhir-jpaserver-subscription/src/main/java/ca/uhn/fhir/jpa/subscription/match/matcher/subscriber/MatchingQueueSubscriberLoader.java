@@ -23,7 +23,6 @@ import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
-import ca.uhn.fhir.broker.api.IMultiplexingListener;
 import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -84,7 +83,7 @@ public class MatchingQueueSubscriberLoader {
 		}
 	}
 
-	protected IMultiplexingListener<ResourceModifiedMessage> buildMatchingConsumerListener() {
+	protected MultiplexingListener<ResourceModifiedMessage> buildMatchingConsumerListener() {
 		MultiplexingListener<ResourceModifiedMessage> multiplexingListener =
 				new MultiplexingListener<>(ResourceModifiedMessage.class);
 		multiplexingListener.addListener(mySubscriptionMatchingListener);

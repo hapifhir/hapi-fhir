@@ -595,7 +595,9 @@ public class ConsentInterceptor {
 	protected boolean isSkipServiceForRequest(RequestDetails theRequestDetails) {
 		// we could potentially aggregate all checks to skip consent into a single method
 		// isRequestAuthorized, isAllowListed into isSkipServiceForRequest
-		return isMetadataPath(theRequestDetails) || isMetaOperation(theRequestDetails);
+		return isMetadataPath(theRequestDetails)
+				|| isMetaOperation(theRequestDetails)
+				|| shouldSkipAllConsent(theRequestDetails);
 	}
 
 	private boolean isAllowListedRequest(RequestDetails theRequestDetails) {
@@ -611,12 +613,20 @@ public class ConsentInterceptor {
 	}
 
 	/**
-	 * @deprecated about to be removed. Internal processes can skip consent by populating a different context
-	 * which can then consumed by the IConsentService implementation.
-	 * See issue <a href="https://github.com/hapifhir/hapi-fhir/issues/7542">7542</a>
+	 * Call this method to bypass consent checking for a particular request {@link RequestDetails}.
+	 * Skipping consent is needed for resources that are modified in async system processing
+	 * e.g. SearchParameter initialization with subscriptions and subscription (matching) messages enabled.
+	 * @param theRequestDetails the request
 	 */
 	public static void skipAllConsentForRequest(@Nonnull RequestDetails theRequestDetails) {
 		theRequestDetails.getUserData().put(USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, true);
+	}
+
+	private static boolean shouldSkipAllConsent(@Nullable RequestDetails theRequestDetails) {
+		return theRequestDetails != null
+				&& (Boolean) theRequestDetails
+						.getUserData()
+						.getOrDefault(USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS, Boolean.FALSE);
 	}
 
 	private void validateParameter(Map<String, String[]> theParameterMap) {

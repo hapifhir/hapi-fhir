@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
-import ca.uhn.fhir.broker.api.IMultiplexingListener;
+import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.util.IoUtils;
 import com.google.common.annotations.VisibleForTesting;
@@ -36,12 +36,12 @@ public class SubscriptionResourceDeliveryMessageConsumer implements AutoCloseabl
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionResourceDeliveryMessageConsumer.class);
 
 	private final IChannelConsumer<ResourceDeliveryMessage> myConsumer;
-	private final IMultiplexingListener<ResourceDeliveryMessage> myMultiplexingListener;
+	private final MultiplexingListener<ResourceDeliveryMessage> myMultiplexingListener;
 
 	public SubscriptionResourceDeliveryMessageConsumer(IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
 		myConsumer = theConsumer;
 		// see if we can refactor to get rid of this cast
-		myMultiplexingListener = (IMultiplexingListener<ResourceDeliveryMessage>) theConsumer.getMessageListener();
+		myMultiplexingListener = (MultiplexingListener<ResourceDeliveryMessage>) theConsumer.getMessageListener();
 	}
 
 	public boolean addListener(IMessageListener<ResourceDeliveryMessage> theListener) {
