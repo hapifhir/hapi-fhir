@@ -1131,7 +1131,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	@Override
-	protected void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
+	protected void flushSession(@Nonnull TransactionDetails theTransactionDetails, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
 		try {
 			int insertionCount;
 			int updateCount;
@@ -1142,6 +1142,16 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			} else {
 				insertionCount = -1;
 				updateCount = -1;
+			}
+
+			List<Runnable> preCommitActions = theTransactionDetails.getPreCommitActions();
+			if (!preCommitActions.isEmpty()) {
+				StopWatch sw = new StopWatch();
+				for (Runnable action : preCommitActions) {
+					action.run();
+				}
+				theTransactionDetails.clearPreCommitActions();
+				ourLog.debug("Pre-commit actions took {}ms", sw.getMillis());
 			}
 
 			StopWatch sw = new StopWatch();

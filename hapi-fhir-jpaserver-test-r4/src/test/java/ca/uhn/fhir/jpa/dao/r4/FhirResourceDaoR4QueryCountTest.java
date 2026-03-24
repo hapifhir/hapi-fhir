@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
+import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -199,6 +200,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	private IJobStepExecutionServices myJobStepExecutionServices;
 	private AuthorizationInterceptor myAuthInterceptor;
 	private ConsentInterceptor myConsentInterceptor;
+	private ComboSearchParameterTestHelper myComboSearchParameterTestHelper;
 
 	@AfterEach
 	public void afterResetDao() {
@@ -247,6 +249,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myReindexTestHelper = new ReindexTestHelper(myFhirContext, myDaoRegistry, mySearchParamRegistry);
 		initResourceTypeCacheFromConfig();
+
+		myComboSearchParameterTestHelper = new ComboSearchParameterTestHelper(mySearchParameterDao, mySearchParamRegistry);
 	}
 
 	@ParameterizedTest
@@ -1000,6 +1004,73 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
 	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void testCreateAndUpdateUniqueSp(boolean theUniqueIndexesCheckedBeforeSave) {
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(theUniqueIndexesCheckedBeforeSave);
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
+
+		/*
+		 * Create a patient
+		 */
+		myCaptureQueriesListener.clear();
+		IIdType id = createPatient(
+			withIdentifier("http://foo", "id1"),
+			withIdentifier("http://foo", "id2"),
+			withIdentifier("http://foo", "id3")
+		);
+		myCaptureQueriesListener.logSelectQueries();
+		if (theUniqueIndexesCheckedBeforeSave) {
+			assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(1);
+		} else {
+			assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(0);
+		}
+		assertThat(myCaptureQueriesListener.getInsertQueries()).hasSize(4);
+		assertThat(myCaptureQueriesListener.getUpdateQueries()).hasSize(0);
+		assertThat(myCaptureQueriesListener.getDeleteQueries()).hasSize(0);
+
+		/*
+		 * Update the patient - No change to unique indexes
+		 */
+		myCaptureQueriesListener.clear();
+		createPatient(
+			withId(id.getIdPart()),
+			withIdentifier("http://foo", "id1"),
+			withIdentifier("http://foo", "id2"),
+			withIdentifier("http://foo", "id3"),
+			withActiveTrue()
+		);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(4);
+		assertThat(myCaptureQueriesListener.getInsertQueries()).hasSize(2);
+		assertThat(myCaptureQueriesListener.getUpdateQueries()).hasSize(1);
+		assertThat(myCaptureQueriesListener.getDeleteQueries()).hasSize(0);
+
+		/*
+		 * Update the patient - With change to unique indexes
+		 */
+		myCaptureQueriesListener.clear();
+		createPatient(
+			withId(id.getIdPart()),
+			withIdentifier("http://foo", "id1"),
+			withIdentifier("http://foo", "id4"),
+			withIdentifier("http://foo", "id5"),
+			withActiveTrue()
+		);
+		myCaptureQueriesListener.logSelectQueries();
+		if (theUniqueIndexesCheckedBeforeSave) {
+			assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(5);
+		} else {
+			assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(4);
+		}
+		assertThat(myCaptureQueriesListener.getInsertQueries()).hasSize(1);
+		assertThat(myCaptureQueriesListener.getUpdateQueries()).hasSize(3);
+		assertThat(myCaptureQueriesListener.getDeleteQueries()).hasSize(0);
+
+	}
+
+
 
 	@Test
 	public void testDeleteMultiple() {
@@ -2911,6 +2982,48 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 	}
+
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	void testTransactionWithMultipleUniqueIndexes(boolean theUniqueIndexesCheckedBeforeSave) {
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(theUniqueIndexesCheckedBeforeSave);
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id1"),
+				withIdentifier("http://foo", "id2"),
+				withIdentifier("http://foo", "id3")
+			));
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id4"),
+				withIdentifier("http://foo", "id5"),
+				withIdentifier("http://foo", "id6")
+			));
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id7"),
+				withIdentifier("http://foo", "id8"),
+				withIdentifier("http://foo", "id9")
+			));
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+		myCaptureQueriesListener.logSelectQueries();
+		if (theUniqueIndexesCheckedBeforeSave) {
+			assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(3);
+		} else {
+			assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(0);
+		}
+		assertThat(myCaptureQueriesListener.getInsertQueries()).hasSize(4);
+		assertThat(myCaptureQueriesListener.getUpdateQueries()).hasSize(0);
+		assertThat(myCaptureQueriesListener.getDeleteQueries()).hasSize(0);
+
+	}
+
 
 
 	/**

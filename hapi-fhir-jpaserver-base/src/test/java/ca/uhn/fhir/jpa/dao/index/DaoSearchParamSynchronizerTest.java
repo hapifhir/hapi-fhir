@@ -87,15 +87,16 @@ public class DaoSearchParamSynchronizerTest {
 	@Test
 	void synchronizeSearchParamsNumberOnlyValuesDifferent() {
 		when(theEntity.getResourceType()).thenReturn("Patient");
-		final AddRemoveCount addRemoveCount = subject.synchronizeSearchParamsToDatabase(theParams, theEntity, existingParams);
+		final AddRemoveCount addRemoveCount = subject.synchronizeSearchParamsToDatabase(null, null, theParams, theEntity, existingParams);
 
 		assertEquals(0, addRemoveCount.getRemoveCount());
 		assertEquals(1, addRemoveCount.getAddCount());
 
 		verify(entityManager, never()).remove(any(BaseResourceIndex.class));
 		verify(entityManager, times(1)).persist(THE_SEARCH_PARAM_NUMBER);
+		PartitionSettings partitionSettings = new PartitionSettings();
 		long expectedSpIdentity = BaseResourceIndexedSearchParam
-			.calculateHashIdentity(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Patient", GRITTSCORE);
+			.calculateHashIdentity(partitionSettings, RequestPartitionId.defaultPartition(partitionSettings), "Patient", GRITTSCORE);
 		verify(searchParamIdentityCacheSvc, times(1))
 			.findOrCreateSearchParamIdentity(expectedSpIdentity, "Patient", GRITTSCORE);
 	}
@@ -115,7 +116,7 @@ public class DaoSearchParamSynchronizerTest {
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myTokenParams.add(tokenParam);
 
-		subject.synchronizeSearchParamsToDatabase(newParams, theEntity, ResourceIndexedSearchParams.empty());
+		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, ResourceIndexedSearchParams.empty());
 
 		assertThat(tokenParam.getResource()).isSameAs(theEntity);
 	}
@@ -135,7 +136,7 @@ public class DaoSearchParamSynchronizerTest {
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myStringParams.add(stringParam);
 
-		subject.synchronizeSearchParamsToDatabase(newParams, theEntity, ResourceIndexedSearchParams.empty());
+		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, ResourceIndexedSearchParams.empty());
 
 		assertThat(stringParam.getResource()).isSameAs(theEntity);
 	}
@@ -155,7 +156,7 @@ public class DaoSearchParamSynchronizerTest {
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myUriParams.add(uriParam);
 
-		subject.synchronizeSearchParamsToDatabase(newParams, theEntity, ResourceIndexedSearchParams.empty());
+		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, ResourceIndexedSearchParams.empty());
 
 		assertThat(uriParam.getResource()).isSameAs(theEntity);
 	}
@@ -174,7 +175,7 @@ public class DaoSearchParamSynchronizerTest {
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myLinks.add(link);
 
-		subject.synchronizeSearchParamsToDatabase(newParams, theEntity, ResourceIndexedSearchParams.empty());
+		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, ResourceIndexedSearchParams.empty());
 
 		// Verify getReference() was called with the correct target PID — this is how we confirm
 		// that setTargetResourceTable() was invoked, since myTargetResource has no public getter
