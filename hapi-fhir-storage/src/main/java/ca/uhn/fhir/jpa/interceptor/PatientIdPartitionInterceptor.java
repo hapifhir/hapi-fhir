@@ -383,6 +383,10 @@ public class PatientIdPartitionInterceptor {
 			}
 		}
 
+		Validate.notNull(
+				theReadDetails.getRestOperationType(),
+				"REST operation type must be set on RequestDetails before invoking partition identification.");
+
 		//noinspection EnumSwitchStatementWhichMissesCases
 		switch (theReadDetails.getRestOperationType()) {
 			case DELETE:
