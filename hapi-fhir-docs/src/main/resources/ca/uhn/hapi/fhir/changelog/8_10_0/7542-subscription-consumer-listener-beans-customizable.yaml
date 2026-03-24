@@ -1,6 +1,4 @@
 ---
-type: fix
+type: add
 issue: 7542
-title: "Subscription matching and delivery consumer and MDM listeners can now be extended to enable them 
-to bypass consent when interacting with DAOs. This is the long-term fix that is replacing the deprecated 
-short-term workaround in `ConsentInterceptor` which uses `RequestDetails#userData`."
+title: "Subscription beans that perform DAO reads can now be extended."
