@@ -1,4 +1,4 @@
 ---
 type: add
 issue: 7542
-title: "Subscription beans that perform DAO reads can now be extended."
+title: "Subscription beans that perform DAO reads can now be extended. Custom consent interceptors can now skip consent. "
