@@ -1,7 +1,0 @@
----
-type: fix
-issue: 7637
-title: "Previously, RestfulServerExtension.isRunning() only checked the Jetty server state,
-causing the internal RestfulServer to remain running between tests. In addition to that the 
-configuration for the server (including providers) was not preserved after restart.
-This was causing instability and flakiness when running tests locally and it has been fixed."

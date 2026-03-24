@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import jakarta.servlet.http.HttpServlet;
-import jakarta.validation.constraints.NotNull;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
@@ -50,15 +50,16 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	private List<Object> myProviders = new ArrayList<>();
 	private FhirVersionEnum myFhirVersion;
 	private RestfulServer myServlet;
-	private final List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
-	private final Map<String, Object> myRunningServerUserData = new HashMap<>();
+	private List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
+	private Map<String, Object> myRunningServerUserData = new HashMap<>();
 	private ServerValidationModeEnum myServerValidationMode = ServerValidationModeEnum.NEVER;
 	private IPagingProvider myPagingProvider;
 
 	/**
 	 * Constructor
 	 */
-	public RestfulServerExtension(@NotNull FhirContext theFhirContext, Object... theProviders) {
+	public RestfulServerExtension(FhirContext theFhirContext, Object... theProviders) {
+		Validate.notNull(theFhirContext);
 		myFhirContext = theFhirContext;
 		if (theProviders != null) {
 			myProviders = new ArrayList<>(Arrays.asList(theProviders));
@@ -68,31 +69,9 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	/**
 	 * Constructor: If this is used, it will create and tear down a FhirContext which is good for memory
 	 */
-	public RestfulServerExtension(@NotNull FhirVersionEnum theFhirVersionEnum) {
+	public RestfulServerExtension(FhirVersionEnum theFhirVersionEnum) {
+		Validate.notNull(theFhirVersionEnum);
 		myFhirVersion = theFhirVersionEnum;
-	}
-
-	@Override
-	public void afterAll(ExtensionContext context) throws Exception {
-		super.afterAll(context);
-		myProviders.clear();
-		myConsumers.clear();
-		myRunningServerUserData.clear();
-		myPagingProvider = null;
-		myServlet = null;
-	}
-
-	public void setFhirVersion(@NotNull FhirVersionEnum theFhirVersion) {
-		myFhirVersion = theFhirVersion;
-	}
-
-	public void setFhirContext(@NotNull FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-	}
-
-	@Override
-	protected boolean isRunning() {
-		return super.isRunning() || myServlet != null;
 	}
 
 	/**
@@ -137,6 +116,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 			return;
 		}
 		myRunningServerUserData.clear();
+		myPagingProvider = null;
 		myServlet = null;
 	}
 
@@ -169,18 +149,21 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 		super.beforeEach(theContext);
 	}
 
-	public RestfulServerExtension registerProvider(@NotNull Object theProvider) {
-		myProviders.add(theProvider);
+	public RestfulServerExtension registerProvider(Object theProvider) {
+		Validate.notNull(theProvider);
 		if (isStarted()) {
 			myServlet.registerProvider(theProvider);
+		} else {
+			myProviders.add(theProvider);
 		}
 		return this;
 	}
 
 	public RestfulServerExtension withServer(Consumer<RestfulServer> theConsumer) {
-		myConsumers.add(theConsumer);
 		if (isStarted()) {
 			theConsumer.accept(myServlet);
+		} else {
+			myConsumers.add(theConsumer);
 		}
 		return this;
 	}
@@ -203,9 +186,10 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	}
 
 	public RestfulServerExtension withPagingProvider(IPagingProvider thePagingProvider) {
-		myPagingProvider = thePagingProvider;
 		if (isStarted()) {
 			myServlet.setPagingProvider(thePagingProvider);
+		} else {
+			myPagingProvider = thePagingProvider;
 		}
 		return this;
 	}
@@ -216,7 +200,6 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 
 	public void unregisterProvider(Object theProvider) {
 		withServer(t -> t.unregisterProvider(theProvider));
-		myProviders.remove(theProvider);
 	}
 
 	public Integer getDefaultPageSize() {

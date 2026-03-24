@@ -101,8 +101,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 public class HashMapResourceProvider<T extends IBaseResource> implements IResourceProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(HashMapResourceProvider.class);
-	private Class<T> myResourceType;
-	private FhirContext myFhirContext;
+	private final Class<T> myResourceType;
+	private final FhirContext myFhirContext;
+	private final String myResourceName;
 	private final AtomicLong myDeleteCount = new AtomicLong(0);
 	private final AtomicLong myUpdateCount = new AtomicLong(0);
 	private final AtomicLong myCreateCount = new AtomicLong(0);
@@ -111,7 +112,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	protected Map<String, LinkedList<T>> myIdToHistory = new LinkedHashMap<>();
 	protected LinkedList<T> myTypeHistory = new LinkedList<>();
 	protected AtomicLong mySearchCount = new AtomicLong(0);
-	private long myNextId = 1;
+	private long myNextId;
 
 	/**
 	 * Constructor
@@ -122,15 +123,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	public HashMapResourceProvider(FhirContext theFhirContext, Class<T> theResourceType) {
 		myFhirContext = theFhirContext;
 		myResourceType = theResourceType;
-	}
-
-	public void setFhirContext(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-	}
-
-	@SuppressWarnings("unchecked")
-	public void setResourceType(Class<? extends IBaseResource> theResourceType) {
-		myResourceType = (Class<T>) theResourceType;
+		myResourceName = myFhirContext.getResourceType(theResourceType);
+		clear();
 	}
 
 	/**
@@ -375,8 +369,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			boolean theDeleted) {
 		IIdType id = myFhirContext.getVersion().newIdType();
 		String versionIdPart = Long.toString(theVersionIdPart);
-		String resourceName = myFhirContext.getResourceType(myResourceType);
-		id.setParts(null, resourceName, theIdPart, versionIdPart);
+		id.setParts(null, myResourceName, theIdPart, versionIdPart);
 		theResource.setId(id);
 
 		if (theDeleted) {
