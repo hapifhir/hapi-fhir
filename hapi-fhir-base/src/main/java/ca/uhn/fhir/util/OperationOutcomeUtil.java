@@ -70,6 +70,20 @@ public class OperationOutcomeUtil {
 	public static final String OO_ISSUE_CODE_PROCESSING = "processing";
 
 	/**
+	 * Note: This code was added in FHIR R5, so the {@link #addIssue(FhirContext, IBaseOperationOutcome, String, String, String, String) addIssue}
+	 * methods here will automatically convert it to {@link #OO_ISSUE_CODE_INFORMATIONAL} for
+	 * previous versions of FHIR.
+	 *
+	 * @since 8.6.0
+	 */
+	public static final String OO_ISSUE_CODE_SUCCESS = "success";
+
+	/**
+	 * @since 8.6.0
+	 */
+	public static final String OO_ISSUE_CODE_PROCESSING = "processing";
+
+	/**
 	 * Add an issue to an OperationOutcome
 	 *
 	 * @param theCtx              The fhir context
