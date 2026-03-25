@@ -137,10 +137,13 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 		}
 
 		@Override
-		public void onRollback(@Nonnull Exception cause) {
+		public RuntimeException onRollback(@Nonnull RuntimeException theCause) {
+			RuntimeException cause = theCause;
 			if (isCausedByUniqueComboConstraintFailure(cause)) {
-				validateNoExistingUniqueIndexesMatchAny(myRequestDetails, myIndexesToRemove, myIndexesToAdd);
+				cause = validateNoExistingUniqueIndexesMatchAny(
+						myRequestDetails, myIndexesToRemove, myIndexesToAdd, cause);
 			}
+			return cause;
 		}
 
 		private boolean isCausedByUniqueComboConstraintFailure(Exception theException) {
@@ -157,10 +160,11 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 			return false;
 		}
 
-		private void validateNoExistingUniqueIndexesMatchAny(
+		private RuntimeException validateNoExistingUniqueIndexesMatchAny(
 				RequestDetails theRequestDetails,
 				Collection<ResourceIndexedComboStringUnique> theParamsToRemove,
-				Collection<ResourceIndexedComboStringUnique> theParamsToAdd) {
+				Collection<ResourceIndexedComboStringUnique> theParamsToAdd,
+				RuntimeException theCause) {
 			Map<String, ResourceIndexedComboStringUnique> existingStringToParam =
 					fetchExistingMatchingParams(theRequestDetails, theParamsToAdd);
 			for (ResourceIndexedComboStringUnique theIndex : theParamsToAdd) {
@@ -198,9 +202,11 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 
 					// Use ResourceVersionConflictException here because the HapiTransactionService
 					// catches this and can retry it if needed
-					throw new ResourceVersionConflictException(Msg.code(1093) + msg);
+					return new ResourceVersionConflictException(Msg.code(1093) + msg, theCause);
 				}
 			}
+
+			return theCause;
 		}
 
 		private Map<String, ResourceIndexedComboStringUnique> fetchExistingMatchingParams(

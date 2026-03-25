@@ -10,11 +10,14 @@ import jakarta.annotation.Nonnull;
 public interface IExceptionAwareRollbackAction extends Runnable {
 
 	/**
-	 * Called when the transaction is rolled back
+	 * Called when the transaction is rolled back, and may modify the exception being
+	 * thrown.
 	 *
-	 * @param theCause The exception that caused the rollback (note that this isn't necessarily the root cause
+	 * @param theCause The exception that caused the rollback
+	 * @return The exception that should be thrown or the same exception if no different exception should be thrown.
 	 */
-	void onRollback(@Nonnull Exception theCause);
+	@Nonnull
+	RuntimeException onRollback(@Nonnull RuntimeException theCause);
 
 	// nothing by default since it's assumed the user will
 	@Override
