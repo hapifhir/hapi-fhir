@@ -39,8 +39,8 @@ public class ComboUniqueSearchParameterDateOffsetR4Test extends BaseResourceProv
 
 	@Test
 	void testSearch_withDottedSpCodeAndDateOffset_returnsResource() {
-		Bundle document = createMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
-		 myClient.create().resource(document).execute().getId().toUnqualifiedVersionless().getValue();
+		Bundle document = makeMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
+		 myClient.create().resource(document).execute();
 
 		// Search with date offset -04:00 — should return the resource
 		Bundle offsetResult = myClient.search()
@@ -69,11 +69,11 @@ public class ComboUniqueSearchParameterDateOffsetR4Test extends BaseResourceProv
 
 	@Test
 	void testConditionalUpdate_withDottedSpCodeAndDateOffset_updatesExistingResource() {
-		Bundle document = createMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
+		Bundle document = makeMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
 		String bundleId = myClient.create().resource(document).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// Conditional update with date offset — should find and update, not 409
-		Bundle updatedDocument = createMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
+		Bundle updatedDocument = makeMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
 		((Composition) updatedDocument.getEntry().get(0).getResource()).setTitle("Updated medication dispensed");
 		String conditionalUrl = "Bundle?composition.medicationdispense.currentrx.identifier="
 			+ UrlUtil.escapeUrlParam(IDENTIFIER_SYSTEM + "|" + IDENTIFIER_VALUE)
@@ -92,13 +92,20 @@ public class ComboUniqueSearchParameterDateOffsetR4Test extends BaseResourceProv
 	 */
 	@Test
 	void testCreate_duplicateWithSameComboValues_isRejected() {
-		Bundle document = createMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
+		Bundle document = makeMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
 		myClient.create().resource(document).execute();
 
 		// Second create with identical values should be rejected by the unique constraint
-		Bundle duplicate = createMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
+		Bundle duplicate = makeMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
 		assertThatThrownBy(() -> myClient.create().resource(duplicate).execute())
 			.isInstanceOf(ResourceVersionConflictException.class);
+
+		// Verify only the original resource exists
+		Bundle searchResult = myClient.search()
+			.forResource(Bundle.class)
+			.returnBundle(Bundle.class)
+			.execute();
+		assertThat(searchResult.getEntry()).hasSize(1);
 	}
 
 	/**
@@ -108,13 +115,20 @@ public class ComboUniqueSearchParameterDateOffsetR4Test extends BaseResourceProv
 	 */
 	@Test
 	void testCreate_duplicateWithEquivalentUtcDate_isRejected() {
-		Bundle document = createMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
+		Bundle document = makeMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
 		myClient.create().resource(document).execute();
 
 		// Second create with equivalent UTC time should also be rejected
-		Bundle duplicate = createMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_UTC);
+		Bundle duplicate = makeMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_UTC);
 		assertThatThrownBy(() -> myClient.create().resource(duplicate).execute())
 			.isInstanceOf(ResourceVersionConflictException.class);
+
+		// Verify only the original resource exists
+		Bundle searchResult = myClient.search()
+			.forResource(Bundle.class)
+			.returnBundle(Bundle.class)
+			.execute();
+		assertThat(searchResult.getEntry()).hasSize(1);
 	}
 
 	/**
@@ -123,8 +137,8 @@ public class ComboUniqueSearchParameterDateOffsetR4Test extends BaseResourceProv
 	 */
 	@Test
 	void testSearch_withDottedDateSpCodeOnly_returnsResource() {
-		Bundle document = createMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
-		myClient.create().resource(document).execute().getId().toUnqualifiedVersionless().getValue();
+		Bundle document = makeMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
+		myClient.create().resource(document).execute();
 
 		// Search with only the dotted date SP and timezone offset
 		Bundle offsetResult = myClient.search()
@@ -185,7 +199,6 @@ public class ComboUniqueSearchParameterDateOffsetR4Test extends BaseResourceProv
 		compositeUniqueSp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
-		// TODO - verify
 		compositeUniqueSp.addComponent()
 			.setExpression("Bundle.entry.resource.ofType(MedicationDispense).identifier")
 			.setDefinition("SearchParameter/bundle-composition-medicationdispense-currentrx-identifier");
@@ -195,8 +208,8 @@ public class ComboUniqueSearchParameterDateOffsetR4Test extends BaseResourceProv
 		myClient.update().resource(compositeUniqueSp).execute();
 	}
 
-	private static Bundle createMedicationDispenseBundle(String theIdentifierSystem,
-														 String theIdentifierValue, String theWhenPrepared) {
+	private static Bundle makeMedicationDispenseBundle(String theIdentifierSystem,
+													   String theIdentifierValue, String theWhenPrepared) {
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.DOCUMENT);
 
