@@ -2694,8 +2694,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 		String combinedName = theComponent.getCombinedParamName();
 		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam(
-			myResourceName, combinedName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
-		return sp != null && RestSearchParameterTypeEnum.DATE.equals(sp.getParamType() );
+				myResourceName, combinedName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+		return sp != null && RestSearchParameterTypeEnum.DATE.equals(sp.getParamType());
 	}
 
 	@Override
