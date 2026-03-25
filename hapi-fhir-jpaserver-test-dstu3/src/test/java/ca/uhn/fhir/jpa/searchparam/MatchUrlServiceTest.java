@@ -158,7 +158,9 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 		assertThat(map.getLastUpdated().getLowerBound().getValueAsString()).isEqualTo("2020-01-01");
 		assertThat(map.containsKey("_id")).isTrue();
 		assertThat(map.get("_id").get(0).get(0)).isEqualTo(new StringParam("123"));
-	}@Test
+	}
+
+	@Test
 	void testCompartmentLastUpdated_parsedFromMatchUrl() {
 		var map = myMatchUrlService.translateMatchUrl(
 				"Patient?_compartmentLastUpdated=ge2024-01-15", ourCtx.getResourceDefinition("Patient"));

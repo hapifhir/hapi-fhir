@@ -140,6 +140,7 @@ import org.hibernate.ScrollableResults;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -327,28 +328,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		theParams.clean();
 
 		// Extract _compartmentLastUpdated from the regular param map if present (it arrives as a raw parameter)
-		if (theParams.containsKey(Constants.PARAM_COMPARTMENT_LAST_UPDATED)) {
-			List<List<IQueryParameterType>> compartmentLastUpdatedValues =
-					theParams.remove(Constants.PARAM_COMPARTMENT_LAST_UPDATED);
-			if (theParams.getCompartmentLastUpdated() == null && compartmentLastUpdatedValues != null) {
-				List<QualifiedParamList> qualifiedParams = new ArrayList<>();
-				for (List<IQueryParameterType> nextAnd : compartmentLastUpdatedValues) {
-					for (IQueryParameterType nextOr : nextAnd) {
-						QualifiedParamList qpl = new QualifiedParamList();
-						qpl.add(nextOr.getValueAsQueryToken());
-						qualifiedParams.add(qpl);
-					}
-				}
-				DateRangeParam dateRange = new DateRangeParam();
-				dateRange.setValuesAsQueryTokens(myContext, Constants.PARAM_COMPARTMENT_LAST_UPDATED, qualifiedParams);
-				theParams.setCompartmentLastUpdated(dateRange);
-			}
-		}
-
-		if (theParams.getCompartmentLastUpdated() != null && !"Patient".equals(myResourceName)) {
-			throw new InvalidRequestException(Msg.code(2876) + Constants.PARAM_COMPARTMENT_LAST_UPDATED
-					+ " is only supported for Patient searches");
-		}
+		normalizeCompartmentLastUpdated(theParams);
 
 		// For DSTU3, pull out near-distance first so when it comes time to evaluate near, we already know the distance
 		if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
@@ -389,6 +369,31 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
+		}
+	}
+
+	private void normalizeCompartmentLastUpdated(@NotNull SearchParameterMap theParams) {
+		if (theParams.containsKey(Constants.PARAM_COMPARTMENT_LAST_UPDATED)) {
+			List<List<IQueryParameterType>> compartmentLastUpdatedValues =
+					theParams.remove(Constants.PARAM_COMPARTMENT_LAST_UPDATED);
+			if (theParams.getCompartmentLastUpdated() == null && compartmentLastUpdatedValues != null) {
+				List<QualifiedParamList> qualifiedParams = new ArrayList<>();
+				for (List<IQueryParameterType> nextAnd : compartmentLastUpdatedValues) {
+					for (IQueryParameterType nextOr : nextAnd) {
+						QualifiedParamList qpl = new QualifiedParamList();
+						qpl.add(nextOr.getValueAsQueryToken());
+						qualifiedParams.add(qpl);
+					}
+				}
+				DateRangeParam dateRange = new DateRangeParam();
+				dateRange.setValuesAsQueryTokens(myContext, Constants.PARAM_COMPARTMENT_LAST_UPDATED, qualifiedParams);
+				theParams.setCompartmentLastUpdated(dateRange);
+			}
+		}
+
+		if (theParams.getCompartmentLastUpdated() != null && !"Patient".equals(myResourceName)) {
+			throw new InvalidRequestException(Msg.code(2876) + Constants.PARAM_COMPARTMENT_LAST_UPDATED
+					+ " is only supported for Patient searches");
 		}
 	}
 

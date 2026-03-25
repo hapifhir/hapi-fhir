@@ -28,12 +28,12 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -49,8 +49,9 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 	private ISearchParamExtractor mySearchParamExtractor;
 
 	@Test
-	void testCompartmentChange_allPatientsReturnedWhenCompartmentResourcesCreatedAfterDate() {
+	void testCompartmentChange_allPatientsReturnedWhenCompartmentResourcesCreatedAfterDate() throws InterruptedException {
 		Date beforeCreation = new Date();
+		Thread.sleep(2);
 
 		String patient1Id = createPatientWithObservation();
 		String patient2Id = createPatientWithObservation();
@@ -203,6 +204,8 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	// This test is verifying an unfortunate limitation. If you fix this limitation,
+	// make sure to update the documentation.
 	void testCompartmentChange_deletedCompartmentResourceIsNotDetected() throws InterruptedException {
 		// Deleting a compartment resource (e.g. Observation) removes its HFJ_RES_LINK rows,
 		// so the link-based subquery can no longer associate it with the Patient.
@@ -244,8 +247,9 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testCompartmentLastUpdated_combinedWithMultipleParameters() {
+	void testCompartmentLastUpdated_combinedWithMultipleParameters() throws InterruptedException {
 		Date beforeCreation = new Date();
+		Thread.sleep(2);
 
 		// Create male patient born 1990 with observation
 		Patient malePatient1990 = new Patient();
@@ -285,8 +289,9 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testCompartmentLastUpdated_combinedWithSort() {
+	void testCompartmentLastUpdated_combinedWithSort() throws InterruptedException {
 		Date beforeCreation = new Date();
+		Thread.sleep(2);
 
 		// Create patients with different family names
 		Patient patientA = new Patient();
@@ -390,7 +395,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testCompartmentLastUpdated_gtPrefix_excludesBoundaryDate() throws InterruptedException {
+	void testCompartmentLastUpdated_gtPrefix_excludesBoundaryDate() {
 		// Create patient with observation and capture the observation's exact timestamp
 		Patient patient = new Patient();
 		patient.setActive(true);
@@ -468,7 +473,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		}
 
 		@Test
-		void testCompartmentLastUpdated_withNamedPartitions() {
+		void testCompartmentLastUpdated_withNamedPartitions() throws InterruptedException {
 			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"), null);
 			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"), null);
 
@@ -476,14 +481,15 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		}
 
 		@Test
-		void testCompartmentLastUpdated_withUnnamedPartitionMode() {
+		void testCompartmentLastUpdated_withUnnamedPartitionMode() throws InterruptedException {
 			myPartitionSettings.setUnnamedPartitionMode(true);
 
 			verifyCompartmentLastUpdatedReturnsPatientsFromBothPartitions();
 		}
 
-		private void verifyCompartmentLastUpdatedReturnsPatientsFromBothPartitions() {
+		private void verifyCompartmentLastUpdatedReturnsPatientsFromBothPartitions() throws InterruptedException {
 			Date beforeCreation = new Date();
+			Thread.sleep(2);
 
 			// Create Patient+Observation in partition 1
 			myPartitionInterceptor.setCreatePartition(RequestPartitionId.fromPartitionId(1));
@@ -504,13 +510,14 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		}
 
 		@Test
-		void testCompartmentLastUpdated_singlePartitionRead_doesNotReturnCrossPartitionData() {
+		void testCompartmentLastUpdated_singlePartitionRead_doesNotReturnCrossPartitionData() throws InterruptedException {
 			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"), null);
 			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"), null);
 			myPartitionSettings.setAllowReferencesAcrossPartitions(
 					PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
 			Date beforeCreation = new Date();
+			Thread.sleep(2);
 
 			// Create Patient+Observation in partition 1
 			myPartitionInterceptor.setCreatePartition(RequestPartitionId.fromPartitionId(1));
@@ -530,7 +537,111 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			assertThat(ids).containsExactlyInAnyOrder(patient1Id);
 		}
 
+		@Test
+		void testCompartmentLastUpdated_compartmentResourceOnDifferentPartition_notVisibleFromPatientPartition() throws InterruptedException {
+			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"), null);
+			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"), null);
+			myPartitionSettings.setAllowReferencesAcrossPartitions(
+					PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+			// Create Patient in partition 1 BEFORE the cutoff so the direct-update
+			// condition does not match — only the EXISTS subquery can surface it.
+			myPartitionInterceptor.setCreatePartition(RequestPartitionId.fromPartitionId(1));
+			Patient patient = new Patient();
+			patient.setActive(true);
+			String patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+			Thread.sleep(2);
+			Date afterPatientCreation = new Date();
+
+			// Create Observation referencing that Patient, but stored in partition 2
+			myPartitionInterceptor.setCreatePartition(RequestPartitionId.fromPartitionId(2));
+			Observation obs = new Observation();
+			obs.setSubject(new Reference(patientId));
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			myObservationDao.create(obs, mySrd);
+
+			// Read partition 1 only — the subquery restricts HFJ_RESOURCE to partition 1,
+			// so the Observation in partition 2 is not found by the EXISTS subquery.
+			// The Patient was created before the cutoff, so the direct-update condition
+			// also excludes it. Net result: Patient is NOT returned.
+			myPartitionInterceptor.setReadPartition(RequestPartitionId.fromPartitionId(1));
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.setCompartmentLastUpdated(compartmentChangeGt(afterPatientCreation));
+			IBundleProvider results = myPatientDao.search(map, mySrd);
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids).doesNotContain(patientId);
+		}
+
+		@Test
+		void testCompartmentLastUpdated_compartmentResourceOnDifferentPartition_visibleWithAllPartitionsRead() throws InterruptedException {
+			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"), null);
+			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"), null);
+			myPartitionSettings.setAllowReferencesAcrossPartitions(
+					PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+			// Create Patient in partition 1
+			myPartitionInterceptor.setCreatePartition(RequestPartitionId.fromPartitionId(1));
+			Patient patient = new Patient();
+			patient.setActive(true);
+			String patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+			Thread.sleep(2);
+			Date afterPatientCreation = new Date();
+
+			// Create Observation referencing that Patient, but stored in partition 2
+			myPartitionInterceptor.setCreatePartition(RequestPartitionId.fromPartitionId(2));
+			Observation obs = new Observation();
+			obs.setSubject(new Reference(patientId));
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			myObservationDao.create(obs, mySrd);
+
+			// Read all partitions — the subquery has no partition restriction,
+			// so the cross-partition Observation IS found and the Patient is returned.
+			myPartitionInterceptor.setReadPartition(RequestPartitionId.allPartitions());
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.setCompartmentLastUpdated(compartmentChangeGt(afterPatientCreation));
+			IBundleProvider results = myPatientDao.search(map, mySrd);
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids).containsExactlyInAnyOrder(patientId);
+		}
+
+		@Test
+		void testCompartmentLastUpdated_nonCompartmentResourceOnDifferentPartition_doesNotAffectResults() throws InterruptedException {
+			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"), null);
+			myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"), null);
+			myPartitionSettings.setAllowReferencesAcrossPartitions(
+					PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+			Date beforeCreation = new Date();
+			Thread.sleep(2);
+
+			// Create Patient + Observation in partition 1
+			myPartitionInterceptor.setCreatePartition(RequestPartitionId.fromPartitionId(1));
+			String patientId = createPatientWithObservation();
+
+			// Create Practitioner in partition 2 — a non-compartment resource on a different partition.
+			// The compartment last updated query should be entirely unaffected by non-compartment resources
+			// regardless of their partition.
+			myPartitionInterceptor.setCreatePartition(RequestPartitionId.fromPartitionId(2));
+			Practitioner practitioner = new Practitioner();
+			practitioner.addName().setFamily("Smith");
+			myPractitionerDao.create(practitioner, mySrd);
+
+			// Read partition 1 — Practitioner on partition 2 is irrelevant to compartment change
+			myPartitionInterceptor.setReadPartition(RequestPartitionId.fromPartitionId(1));
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.setCompartmentLastUpdated(compartmentChangeGt(beforeCreation));
+			IBundleProvider results = myPatientDao.search(map, mySrd);
+
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids).containsExactlyInAnyOrder(patientId);
+		}
+
 		@Interceptor
+		@SuppressWarnings("unused")
 		static class PartitionInterceptor {
 			private RequestPartitionId myCreatePartition = RequestPartitionId.fromPartitionId(null);
 			private RequestPartitionId myReadPartition = RequestPartitionId.allPartitions();
@@ -581,8 +692,9 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		}
 
 		@Test
-		void testCompartmentLastUpdated_withPatientIdMode() {
+		void testCompartmentLastUpdated_withPatientIdMode() throws InterruptedException {
 			Date beforeCreation = new Date();
+			Thread.sleep(2);
 
 			String patient1Id = createPatientWithClientAssignedId("PT-ALPHA");
 			String patient2Id = createPatientWithClientAssignedId("PT-BETA");
@@ -658,8 +770,9 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 		}
 
 		@Test
-		void testCompartmentLastUpdated_withBucketedPatientIdMode() {
+		void testCompartmentLastUpdated_withBucketedPatientIdMode() throws InterruptedException {
 			Date beforeCreation = new Date();
+			Thread.sleep(2);
 
 			String patient1Id = createPatientWithClientAssignedId("PT-ALPHA");
 			String patient2Id = createPatientWithClientAssignedId("PT-BETA");
