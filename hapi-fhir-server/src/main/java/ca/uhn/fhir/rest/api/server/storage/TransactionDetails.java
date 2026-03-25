@@ -66,7 +66,6 @@ public class TransactionDetails {
 
 	private final Date myTransactionDate;
 	private List<Runnable> myRollbackUndoActions = Collections.emptyList();
-	private List<Runnable> myPreCommitActions = Collections.emptyList();
 	private Map<String, RequestPartitionId> myResolvedPartitions = Collections.emptyMap();
 	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	/** The reverse of myResolvedResourceIds. Safe since id:pid is 1:1. */
@@ -103,6 +102,7 @@ public class TransactionDetails {
 	 */
 	public List<Runnable> getRollbackUndoActions() {
 		if (myRollbackUndoActions.isEmpty()) {
+			// Empty collection is immutable already
 			return myRollbackUndoActions;
 		}
 		return Collections.unmodifiableList(myRollbackUndoActions);
@@ -110,9 +110,12 @@ public class TransactionDetails {
 
 	/**
 	 * Add an action that should be executed if the transaction is rolled back. If a rollback is triggered, the
-	 * actions will be executed in reverse order in order to leave .
+	 * actions will be executed in reverse order in order to undo any state changes or perform other cleanup.
+	 *
+	 * @param theRunnable The action to execute (can optionally be an instance of {@link IExceptionAwareRollbackAction})
 	 *
 	 * @since 5.5.0
+	 * @see IExceptionAwareRollbackAction
 	 */
 	public void addRollbackUndoAction(@Nonnull Runnable theRunnable) {
 		assert theRunnable != null;
@@ -130,48 +133,6 @@ public class TransactionDetails {
 	public void clearRollbackUndoActions() {
 		if (!myRollbackUndoActions.isEmpty()) {
 			myRollbackUndoActions.clear();
-		}
-	}
-	
-	/**
-	 * Fetches a list of actions that should be executed prior to the transaction commit.
-	 * This may only be used when {@link #isFhirTransaction()} returns {@code true}.
-	 *
-	 * @since 8.10.0
-	 */
-	public List<Runnable> getPreCommitActions() {
-		Validate.isTrue(isFhirTransaction(), "This method may only be called when isFhirTransaction() returns true");
-		if (myPreCommitActions.isEmpty()) {
-			return myPreCommitActions;
-		}
-		return Collections.unmodifiableList(myPreCommitActions);
-	}
-
-	/**
-	 * Adds an action that should be executed prior to the transaction commit.
-	 * This may only be used when {@link #isFhirTransaction()} returns {@code true}.
-	 *
-	 * @since 8.10.0
-	 */
-	public void addPreCommitAction(@Nonnull Runnable theRunnable) {
-		assert theRunnable != null;
-		Validate.isTrue(isFhirTransaction(), "This method may only be called when isFhirTransaction() returns true");
-		if (myPreCommitActions.isEmpty()) {
-			myPreCommitActions = new ArrayList<>();
-		}
-		myPreCommitActions.add(theRunnable);
-	}
-
-	/**
-	 * Clears the list of actions that should be executed prior to the transaction commit.
-	 * This may only be used when {@link #isFhirTransaction()} returns {@code true}.
-	 *
-	 * @since 8.10.0
-	 */
-	public void clearPreCommitActions() {
-		Validate.isTrue(isFhirTransaction(), "This method may only be called when isFhirTransaction() returns true");
-		if (!myPreCommitActions.isEmpty()) {
-			myPreCommitActions.clear();
 		}
 	}
 

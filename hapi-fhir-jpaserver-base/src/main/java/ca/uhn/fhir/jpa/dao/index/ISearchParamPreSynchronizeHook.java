@@ -13,6 +13,9 @@ import java.util.Collection;
  */
 interface ISearchParamPreSynchronizeHook<T extends BaseResourceIndex> {
 
-	void preSave(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, Collection<T> theParamsToRemove, Collection<T> theParamsToAdd);
-
+	void preSave(
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
+			Collection<T> theParamsToRemove,
+			Collection<T> theParamsToAdd);
 }

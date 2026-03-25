@@ -358,6 +358,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 					return doExecuteCallback(theExecutionBuilder, theCallback);
 
 				} catch (Exception e) {
+
 					int retriesRemaining = 0;
 					int maxRetries = 0;
 					boolean exceptionIsRetriable = isRetriable(e);
@@ -367,7 +368,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 					}
 
 					// we roll back on all exceptions.
-					theExecutionBuilder.rollbackTransactionProcessingChanges(retriesRemaining > 0);
+					theExecutionBuilder.rollbackTransactionProcessingChanges(e, retriesRemaining > 0);
 
 					if (!exceptionIsRetriable) {
 						ourLog.debug("Unexpected transaction exception. Will not be retried.", e);
@@ -628,7 +629,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		 * @param theWillRetry Should be <code>true</code> if the transaction is about to be automatically retried
 		 *                     by the transaction service.
 		 */
-		void rollbackTransactionProcessingChanges(boolean theWillRetry) {
+		void rollbackTransactionProcessingChanges(Exception theCause, boolean theWillRetry) {
 			if (myOnRollback != null) {
 				myOnRollback.run();
 			}
@@ -644,6 +645,13 @@ public class HapiTransactionService implements IHapiTransactionService {
 				for (int i = rollbackUndoActions.size() - 1; i >= 0; i--) {
 					Runnable rollbackUndoAction = rollbackUndoActions.get(i);
 					rollbackUndoAction.run();
+
+					if (rollbackUndoAction
+							instanceof
+							ca.uhn.fhir.rest.api.server.storage.IExceptionAwareRollbackAction
+							exceptionConvertingRollbackAction) {
+						exceptionConvertingRollbackAction.onRollback(theCause);
+					}
 				}
 
 				/*

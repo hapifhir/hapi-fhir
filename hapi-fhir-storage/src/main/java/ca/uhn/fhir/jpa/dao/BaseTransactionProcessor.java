@@ -2355,7 +2355,8 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
-	protected abstract void flushSession(@Nonnull TransactionDetails theTransactionDetails, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome);
+	protected abstract void flushSession(
+			@Nonnull TransactionDetails theTransactionDetails, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome);
 
 	private void validateResourcePresent(IBaseResource theResource, Integer theOrder, String theVerb) {
 		if (theResource == null) {

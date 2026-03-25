@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
@@ -70,11 +71,15 @@ public class DaoSearchParamSynchronizer {
 	@Autowired
 	private FhirContext myFhirContext;
 
+	@Autowired
+	private IHapiTransactionService myTransactionService;
+
 	private UniqueIndexPreExistenceChecker myUniqueIndexPreExistenceChecker;
 
 	@PostConstruct
 	void start() {
-		myUniqueIndexPreExistenceChecker = new UniqueIndexPreExistenceChecker(myStorageSettings, myFhirContext, myResourceIndexedCompositeStringUniqueDao);
+		myUniqueIndexPreExistenceChecker = new UniqueIndexPreExistenceChecker(
+				myStorageSettings, myFhirContext, myResourceIndexedCompositeStringUniqueDao, myTransactionService);
 	}
 
 	public AddRemoveCount synchronizeSearchParamsToDatabase(
@@ -85,29 +90,94 @@ public class DaoSearchParamSynchronizer {
 			ResourceIndexedSearchParams existingParams) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
-		synchronize(theRequestDetails, theTransactionDetails, theEntity, retVal, theParams.myStringParams, existingParams.myStringParams, null);
-		synchronize(theRequestDetails, theTransactionDetails, theEntity, retVal, theParams.myTokenParams, existingParams.myTokenParams, null);
-		synchronize(theRequestDetails, theTransactionDetails, theEntity, retVal, theParams.myNumberParams, existingParams.myNumberParams, null);
-		synchronize(theRequestDetails, theTransactionDetails, theEntity, retVal, theParams.myQuantityParams, existingParams.myQuantityParams, null);
 		synchronize(
-			theRequestDetails, theTransactionDetails,
-			theEntity,
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myStringParams,
+				existingParams.myStringParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myTokenParams,
+				existingParams.myTokenParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myNumberParams,
+				existingParams.myNumberParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myQuantityParams,
+				existingParams.myQuantityParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
 				retVal,
 				theParams.myQuantityNormalizedParams,
 				existingParams.myQuantityNormalizedParams,
 				null);
-		synchronize(theRequestDetails, theTransactionDetails, theEntity, retVal, theParams.myDateParams, existingParams.myDateParams, null);
-		synchronize(theRequestDetails, theTransactionDetails, theEntity, retVal, theParams.myUriParams, existingParams.myUriParams, null);
-		synchronize(theRequestDetails, theTransactionDetails, theEntity, retVal, theParams.myCoordsParams, existingParams.myCoordsParams, null);
-		synchronize(theRequestDetails, theTransactionDetails, theEntity, retVal, theParams.myLinks, existingParams.myLinks, null);
-		synchronize(theRequestDetails, theTransactionDetails, theEntity, retVal, theParams.myComboTokenNonUnique, existingParams.myComboTokenNonUnique, null);
 		synchronize(
-			theRequestDetails, theTransactionDetails,
-			theEntity,
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myDateParams,
+				existingParams.myDateParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myUriParams,
+				existingParams.myUriParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myCoordsParams,
+				existingParams.myCoordsParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myLinks,
+				existingParams.myLinks,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myComboTokenNonUnique,
+				existingParams.myComboTokenNonUnique,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
 				retVal,
 				theParams.myComboStringUniques,
 				existingParams.myComboStringUniques,
-			myUniqueIndexPreExistenceChecker);
+				myUniqueIndexPreExistenceChecker);
 
 		// make sure links are indexed
 		theEntity.setResourceLinks(theParams.myLinks);
@@ -345,5 +415,4 @@ public class DaoSearchParamSynchronizer {
 		}
 		return retVal;
 	}
-
 }
