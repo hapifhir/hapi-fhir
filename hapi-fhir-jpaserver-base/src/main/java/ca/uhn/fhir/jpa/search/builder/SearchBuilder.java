@@ -2649,7 +2649,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			// Date params are not eligible for using composite unique index
 			// as index could contain date with different precision (e.g. DAY, SECOND)
 			if (theComboParam.getComboSearchParamType() == ComboSearchParamType.UNIQUE) {
-				if (nextOrValue instanceof DateParam) {
+				if (isDateComboComponent(nextOrValue, theComboComponent)) {
 					ourLog.debug(
 							"Search with params {} is not a candidate for combo searching - "
 									+ "Unique combo search parameter '{}' has DATE type",
@@ -2678,6 +2678,24 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Determines if a combo search parameter component represents a date.
+	 * Returns true when the value is a DateParam, or when the component's registered
+	 * SP is a DATE type. The latter handles dotted SP codes (e.g.
+	 * "composition.medicationdispense.whenprepared") where the URL parser produces
+	 * a ReferenceParam instead of a DateParam.
+	 */
+	private boolean isDateComboComponent(
+			IQueryParameterType theParam, JpaParamUtil.ComponentAndCorrespondingParam theComponent) {
+		if (theParam instanceof DateParam) {
+			return true;
+		}
+		String combinedName = theComponent.getCombinedParamName();
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam(
+			myResourceName, combinedName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+		return sp != null && RestSearchParameterTypeEnum.DATE.equals(sp.getParamType() );
 	}
 
 	@Override
