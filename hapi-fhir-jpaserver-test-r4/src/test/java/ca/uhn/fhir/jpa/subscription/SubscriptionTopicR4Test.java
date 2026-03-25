@@ -283,7 +283,7 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 
 		// Check subscription reference
 		Reference subscriptionRef = (Reference) parameters.getParameter("subscription").getValue();
-		assertEquals(subscription.getId(), subscriptionRef.getReferenceElement().getIdPart());
+		assertEquals(subscription.getId(), subscriptionRef.getReferenceElement().getValue());
 		
 		// Check topic URL
 		CanonicalType topic = (CanonicalType) parameters.getParameter("topic").getValue();
@@ -296,7 +296,7 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		subscription.getCriteriaElement().addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL, new StringType(theFilter));
 
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(2);
-		Subscription retval = postOrPutSubscription(subscription);
+		Subscription retval = createOrUpdateSubscription(subscription);
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
 
 		return retval;
