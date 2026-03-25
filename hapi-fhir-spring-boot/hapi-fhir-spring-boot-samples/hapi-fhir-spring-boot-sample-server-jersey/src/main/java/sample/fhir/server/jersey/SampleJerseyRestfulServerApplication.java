@@ -20,11 +20,12 @@
 package sample.fhir.server.jersey;
 
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.spring.boot.autoconfigure.FhirAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {FhirAutoConfiguration.class})
 public class SampleJerseyRestfulServerApplication {
 
 	public static void main(String[] args) {

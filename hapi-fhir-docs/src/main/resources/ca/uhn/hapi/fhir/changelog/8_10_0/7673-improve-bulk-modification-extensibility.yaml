@@ -1,0 +1,7 @@
+---
+type: change
+issue: 7673
+title: "The bulk modification framework has been tweaked to be more extensible:
+   * Modified BaseBulkModifyResourcesIndividuallyStep so that various methods include a StepExecutionDetails in their parameters
+   * Modified BaseBulkModifyResourcesIndividuallyStep so that the preModifyResources method can be used to modify multiple resources in a batch
+"

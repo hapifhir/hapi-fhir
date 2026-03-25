@@ -56,7 +56,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
+import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.PredicateBuilderFactory;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -96,11 +96,9 @@ import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.Expression;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.SetOperationQuery;
-import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.UnionQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
@@ -1546,19 +1544,21 @@ public class QueryStack {
 			collateChainedSearchOptions(referenceLinks, nextChain, leafNodes, theEmbeddedChainedSearchModeEnum);
 		}
 
+		boolean usePartitionIdInJoins = mySqlBuilder.isIncludePartitionIdInJoins();
 		UnionQuery union = null;
-		if (wantChainedAndNormal) {
+		if (wantChainedAndNormal && !usePartitionIdInJoins) {
 			union = new UnionQuery(SetOperationQuery.Type.UNION_ALL);
 		}
 
 		List<Condition> predicates = new ArrayList<>();
+		List<SearchQueryBuilder> childBuilders = new ArrayList<>();
 		for (List<String> nextReferenceLink : referenceLinks.keySet()) {
 			Collection<LeafNodeDefinition> mergedLeafNodes =
 					mergeLeafNodeDefinitionsByStructure(referenceLinks.get(nextReferenceLink));
 			for (LeafNodeDefinition leafNodeDefinition : mergedLeafNodes) {
 				SearchQueryBuilder builder;
 				if (wantChainedAndNormal) {
-					builder = mySqlBuilder.newChildSqlBuilder(mySqlBuilder.isIncludePartitionIdInJoins());
+					builder = mySqlBuilder.newChildSqlBuilder(usePartitionIdInJoins);
 				} else {
 					builder = mySqlBuilder;
 				}
@@ -1591,7 +1591,11 @@ public class QueryStack {
 
 				if (wantChainedAndNormal) {
 					builder.addPredicate(containedCondition);
-					union.addQueries(builder.getSelect());
+					if (usePartitionIdInJoins) {
+						childBuilders.add(builder);
+					} else {
+						union.addQueries(builder.getSelect());
+					}
 				} else {
 					predicates.add(containedCondition);
 				}
@@ -1601,16 +1605,15 @@ public class QueryStack {
 		Condition retVal;
 		if (wantChainedAndNormal) {
 
-			if (theSourceJoinColumn == null) {
+			if (usePartitionIdInJoins) {
 				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false, null);
-				DbColumn[] joinColumns = root.getJoinColumns();
-				Object joinColumnObject;
-				if (joinColumns.length == 1) {
-					joinColumnObject = joinColumns[0];
-				} else {
-					joinColumnObject = ColumnTupleObject.from(joinColumns);
-				}
-				retVal = new InCondition(joinColumnObject, union);
+				PartitionableJoinColumns outerColumns = PartitionableJoinColumns.from(
+						theSourceJoinColumn != null ? theSourceJoinColumn : root.getJoinColumns());
+				retVal = mySqlBuilder.getTuplePredicateBuilder().toInSubquery(childBuilders, outerColumns);
+			} else if (theSourceJoinColumn == null) {
+				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false, null);
+				PartitionableJoinColumns joinColumns = PartitionableJoinColumns.from(root.getJoinColumns());
+				retVal = new InCondition(joinColumns.getResourceIdColumn(), union);
 			} else {
 				// -- for the resource link, need join with target_resource_id
 				retVal = new InCondition(theSourceJoinColumn, union);
@@ -2091,18 +2094,11 @@ public class QueryStack {
 				TagPredicateBuilder tagSelector = sqlBuilder.addTagPredicateBuilder(null);
 				sqlBuilder.addPredicate(
 						tagSelector.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId));
-				SelectQuery sql = sqlBuilder.getSelect();
 
 				join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-				Expression subSelect = new Subquery(sql);
-
-				Object left;
-				if (selectPartitionId) {
-					left = new ColumnTupleObject(join.getJoinColumns());
-				} else {
-					left = join.getResourceIdColumn();
-				}
-				tagPredicate = new InCondition(left, subSelect).setNegate(true);
+				tagPredicate = mySqlBuilder
+						.getTuplePredicateBuilder()
+						.toNotInSubquery(sqlBuilder, tagSelector, PartitionableJoinColumns.from(join.getJoinColumns()));
 
 			} else {
 				// Tag table can't be a query root because it will include deleted resources, and can't select by
@@ -2276,20 +2272,12 @@ public class QueryStack {
 			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(
 					tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
-			SelectQuery sql = sqlBuilder.getSelect();
-			Expression subSelect = new Subquery(sql);
 
 			join = theSqlBuilder.getOrCreateFirstPredicateBuilder();
-
-			DbColumn[] leftColumns;
-			if (theSourceJoinColumn == null) {
-				leftColumns = join.getJoinColumns();
-			} else {
-				leftColumns = theSourceJoinColumn;
-			}
-
-			Object left = new ColumnTupleObject(leftColumns);
-			predicate = new InCondition(left, subSelect).setNegate(true);
+			PartitionableJoinColumns outerColumns = PartitionableJoinColumns.from(
+					theSourceJoinColumn != null ? theSourceJoinColumn : join.getJoinColumns());
+			predicate =
+					theSqlBuilder.getTuplePredicateBuilder().toNotInSubquery(sqlBuilder, tokenSelector, outerColumns);
 
 		} else {
 			Boolean isMissing = theList.get(0).getMissing();

@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 7656
+jira: SMILE-11857
+title: "Previously, when running in Database Partition Mode, searches using `_security`, `_tag`,
+  `token :not` modifiers, and chained reference searches could fail on MS SQL because the
+  generated SQL used row-value constructor syntax (e.g. `(PARTITION_ID, RES_ID) NOT IN ...`)
+  which is not supported by MS SQL. These queries have been rewritten to use
+  cross-database compatible alternatives (`NOT EXISTS` with correlated subqueries and
+  expanded equality predicates)."

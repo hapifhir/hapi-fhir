@@ -27,7 +27,6 @@ import ca.uhn.fhir.util.CanonicalIdentifier;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
@@ -59,7 +58,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	public void createProvenance(
 			IIdType theTargetId,
 			IIdType theSourceId,
-			List<Bundle> thePatchResultBundles,
+			List<IIdType> theChangedResourceIds,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -68,7 +67,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 		super.createProvenance(
 				theTargetId,
 				theSourceId,
-				thePatchResultBundles,
+				theChangedResourceIds,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
@@ -125,9 +124,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 		for (CanonicalIdentifier identifier : theIdentifiersToLookFor) {
 			boolean identifierFound = theIdentifiers.stream()
 					.map(i -> (Identifier) i)
-					.anyMatch(i -> i.getSystem()
-									.equals(identifier.getSystemElement().getValueAsString())
-							&& i.getValue().equals(identifier.getValueElement().getValueAsString()));
+					.anyMatch(i -> CanonicalIdentifier.fromIdentifier(i).equals(identifier));
 
 			if (!identifierFound) {
 				return false;

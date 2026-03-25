@@ -88,7 +88,6 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 	@Override
 	protected void processPidsInTransaction(
 			StepExecutionDetails<ReindexJobParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
-			ReindexJobParameters theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
 			TransactionDetails theTransactionDetails,
@@ -109,8 +108,9 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 		ReindexResults reindexResults = new ReindexResults();
 
 		// Prefetch Resources from DB
+		ReindexJobParameters jobParameters = theStepExecutionDetails.getParameters();
 		boolean reindexSearchParameters =
-				theJobParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
+				jobParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
 		mySystemDao.preFetchResources(persistentIds, reindexSearchParameters);
 		ourLog.info(
 				"Prefetched {} resources in {} - Instance[{}] Chunk[{}]",
@@ -120,10 +120,10 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 				theStepExecutionDetails.getChunkId());
 
 		ReindexParameters parameters = new ReindexParameters()
-				.setReindexSearchParameters(theJobParameters.getReindexSearchParameters())
-				.setOptimizeStorage(theJobParameters.getOptimizeStorage())
-				.setOptimisticLock(theJobParameters.getOptimisticLock())
-				.setCorrectCurrentVersion(theJobParameters.getCorrectCurrentVersion());
+				.setReindexSearchParameters(jobParameters.getReindexSearchParameters())
+				.setOptimizeStorage(jobParameters.getOptimizeStorage())
+				.setOptimisticLock(jobParameters.getOptimisticLock())
+				.setCorrectCurrentVersion(jobParameters.getCorrectCurrentVersion());
 
 		// Reindex
 
