@@ -1,4 +1,6 @@
 ---
 type: fix
 issue: 7692
-title: "The R4 subscription topic notification status builder was using `DateType` instead of `InstantType` for the notification event timestamp. This has been fixed to conform to the backport subscription specification."
+title: "The R4 subscription topic notification status builder was using `DateType` instead of `InstantType` for 
+    the notification event timestamp. This has been fixed to conform to the backport subscription specification.
+    Thanks to Michael Jensen Garde for the contribution!"
