@@ -30,6 +30,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.StringType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -146,5 +149,49 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 
 	}
 
+	@Test
+	void testExpandByPropertyEqualFilter_whenHibernateSearchDisabled() {
+		// Set up - CodeSystem with 4 concepts, each with a TTY property
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId("v3-rxNorm");
+		codeSystem.setUrl("http://www.nlm.nih.gov/research/umls/rxnorm");
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.addConcept().setCode("748856").setDisplay("Yaz 28 Day Pack")
+			.addProperty().setCode("TTY").setValue(new StringType("BPCK"));
+		codeSystem.addConcept().setCode("748832").setDisplay("Levonorgestrel Pack")
+			.addProperty().setCode("TTY").setValue(new StringType("GPCK"));
+		codeSystem.addConcept().setCode("95267").setDisplay("glucose 500 MG/ML Oral Solution")
+			.addProperty().setCode("TTY").setValue(new StringType("SCD"));
+		codeSystem.addConcept().setCode("91668").setDisplay("tetracycline Ophthalmic Ointment")
+			.addProperty().setCode("TTY").setValue(new StringType("SBD"));
+		persistCodeSystem(codeSystem);
 
+		// ValueSet filtering on TTY=SBD and TTY=SCD
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId("NonPackSemanticDrugVS");
+		valueSet.setUrl("http://hl7.org/fhir/us/davinci-drug-formulary/ValueSet/NonPackSemanticDrugVS");
+		valueSet.getCompose().addInclude()
+			.setSystem("http://www.nlm.nih.gov/research/umls/rxnorm")
+			.addFilter().setProperty("TTY").setOp(ValueSet.FilterOperator.EQUAL).setValue("SBD");
+		valueSet.getCompose().addInclude()
+			.setSystem("http://www.nlm.nih.gov/research/umls/rxnorm")
+			.addFilter().setProperty("TTY").setOp(ValueSet.FilterOperator.EQUAL).setValue("SCD");
+		persistValueSet(valueSet);
+
+		// Execute
+		Parameters responseParam = myServer.getFhirClient()
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
+		ValueSet expanded = (ValueSet) responseParam.getParameter().get(0).getResource();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+
+		// Verify
+		List<String> codes = expanded.getExpansion().getContains().stream()
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.toList();
+		assertThat(codes).containsExactlyInAnyOrder("91668", "95267");
+	}
 }
