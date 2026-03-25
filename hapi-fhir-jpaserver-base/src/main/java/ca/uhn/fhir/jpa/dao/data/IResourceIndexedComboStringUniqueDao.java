@@ -31,12 +31,12 @@ import java.util.List;
 public interface IResourceIndexedComboStringUniqueDao extends JpaRepository<ResourceIndexedComboStringUnique, Long> {
 
 	@Query(
-			"SELECT r FROM ResourceIndexedComboStringUnique r WHERE r.myPartitionIdValue IS NULL AND r.myIndexString IN (:str)")
-	List<ResourceIndexedComboStringUnique> findByQueryStringNullPartition(@Param("str") List<String> theQueryStrings);
+			"SELECT r FROM ResourceIndexedComboStringUnique r JOIN FETCH r.myResource WHERE r.myPartitionIdValue IS NULL AND r.myIndexString IN (:str)")
+	List<ResourceIndexedComboStringUnique> findByQueryStringNullPartitionAndFetchResource(@Param("str") List<String> theQueryStrings);
 
 	@Query(
-			"SELECT r FROM ResourceIndexedComboStringUnique r WHERE r.myPartitionIdValue = :pid AND r.myIndexString IN (:str)")
-	List<ResourceIndexedComboStringUnique> findByQueryString(
+			"SELECT r FROM ResourceIndexedComboStringUnique r JOIN FETCH r.myResource WHERE r.myPartitionIdValue = :pid AND r.myIndexString IN (:str)")
+	List<ResourceIndexedComboStringUnique> findByQueryStringAndFetchResource(
 			@Param("pid") Integer thePartitionId, @Param("str") List<String> theQueryStrings);
 
 	@Query("SELECT r FROM ResourceIndexedComboStringUnique r WHERE r.myResource.myPid = :resId")

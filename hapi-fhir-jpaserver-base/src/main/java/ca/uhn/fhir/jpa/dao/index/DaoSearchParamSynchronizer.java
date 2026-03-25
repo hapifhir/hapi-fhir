@@ -79,7 +79,7 @@ public class DaoSearchParamSynchronizer {
 	@PostConstruct
 	void start() {
 		myUniqueIndexPreExistenceChecker = new UniqueIndexPreExistenceChecker(
-				myStorageSettings, myFhirContext, myResourceIndexedCompositeStringUniqueDao, myTransactionService);
+			myFhirContext, myResourceIndexedCompositeStringUniqueDao, myTransactionService);
 	}
 
 	public AddRemoveCount synchronizeSearchParamsToDatabase(
