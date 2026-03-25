@@ -84,8 +84,8 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public BatchJobSender batchJobSender() {
-		return new BatchJobSender(batch2ProcessingChannelProducer(myBrokerClient));
+	public BatchJobSender batchJobSender(IChannelProducer<JobWorkNotification> theChannelProducer) {
+		return new BatchJobSender(theChannelProducer);
 	}
 
 	@Bean

@@ -28,12 +28,8 @@ import jakarta.annotation.Nonnull;
  * @param <T> the type of payload this message listener is expecting to receive
  */
 public interface IMessageListener<T> {
-	/**
-	 * This method is called whenever a new message is received.
-	 *
-	 * @param theMessage the message that was received
-	 */
-	void handleMessage(@Nonnull IMessage<T> theMessage);
+
+	void handleMessage(IMessage<T> theMessage, IChannelConsumer<T> theConsumer);
 
 	/**
 	 * @return the type of payload this message listener is expecting to receive

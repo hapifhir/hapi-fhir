@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.api.ISendResult;
 import ca.uhn.fhir.context.FhirContext;
@@ -81,13 +82,14 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 	}
 
 	@Override
-	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage) {
+	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage, IChannelConsumer<ResourceModifiedMessage> theConsumer) {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
 		ResourceModifiedMessage msg = theMessage.getPayload();
 		matchActiveSubscriptionsAndDeliver(msg);
 	}
 
+	// TODO - update
 	public void matchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		switch (theMsg.getOperationType()) {
 			case CREATE:
@@ -125,6 +127,7 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 		}
 	}
 
+	// TODO - update
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		IIdType resourceId = theMsg.getPayloadId(myFhirContext);
 

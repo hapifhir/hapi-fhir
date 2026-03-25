@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -75,13 +76,13 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				theInterceptorService);
 	}
 
-	public Class<JobWorkNotification> getPayloadType() {
-		return JobWorkNotification.class;
+	@Override
+	public void handleMessage(IMessage<JobWorkNotification> theMessage, IChannelConsumer<JobWorkNotification> theConsumer) {
+		handleWorkChannelMessage(theMessage.getPayload(), theConsumer);
 	}
 
-	@Override
-	public void handleMessage(@Nonnull IMessage<JobWorkNotification> theMessage) {
-		handleWorkChannelMessage(theMessage.getPayload());
+	public Class<JobWorkNotification> getPayloadType() {
+		return JobWorkNotification.class;
 	}
 
 	/**
@@ -229,11 +230,12 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 		}
 	}
 
-	private void handleWorkChannelMessage(JobWorkNotification theWorkNotification) {
+	private void handleWorkChannelMessage(JobWorkNotification theWorkNotification, IChannelConsumer<JobWorkNotification> theConsumer) {
 		try {
 			// Load the job instance and work chunk IDs into the logging MDC context
 			BatchJobTracingContext.setBatchJobIds(
 					theWorkNotification.getInstanceId(), theWorkNotification.getChunkId());
+			// this is duplicated
 			ourLog.info("Received work notification for {}", theWorkNotification);
 
 			// There are three paths through this code:

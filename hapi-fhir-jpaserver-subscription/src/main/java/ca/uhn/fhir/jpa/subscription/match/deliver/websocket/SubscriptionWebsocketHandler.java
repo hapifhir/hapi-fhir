@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
 
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
@@ -156,7 +157,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		}
 
 		@Override
-		public void handleMessage(@Nonnull IMessage<ResourceDeliveryMessage> theMessage) {
+		public void handleMessage(@Nonnull IMessage<ResourceDeliveryMessage> theMessage, IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
 			try {
 				ResourceDeliveryMessage msg = theMessage.getPayload();
 				handleSubscriptionPayload(msg);

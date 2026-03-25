@@ -20,6 +20,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
@@ -27,6 +28,12 @@ import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.broker.api.IBrokerClient;
+import ca.uhn.fhir.broker.api.IChannelNamer;
+import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.api.IChannelSettings;
+import ca.uhn.fhir.broker.api.ISendResult;
+import ca.uhn.fhir.broker.impl.LinkedBlockingBrokerClient;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -61,7 +68,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -99,15 +109,37 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @ContextConfiguration(classes = {
-	Batch2FastSchedulerConfig.class
+	Batch2FastSchedulerConfig.class,
+	JpaJobPersistenceImplTest.TestConfig.class
 })
 @Import(SpyOverrideConfig.class)
 public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
+
+	@Configuration
+	static class TestConfig {
+
+		@Primary
+		@Bean
+		IChannelProducer<JobWorkNotification> producer(IChannelProducer<JobWorkNotification> myProducer) {
+			return spy(myProducer);
+		}
+
+		@Bean
+		IBrokerClient brokerClient() {
+			return new LinkedBlockingBrokerClient(new IChannelNamer() {
+				@Override
+				public String getChannelName(String theNameComponent, IChannelSettings theChannelSettings) {
+					return theNameComponent + "-test";
+				}
+			});
+		}
+	}
 
 	public static final String JOB_DEFINITION_ID = "definition-id";
 	public static final String FIRST_STEP_ID = TestJobDefinitionUtils.FIRST_STEP_ID;
@@ -131,6 +163,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	// this is our spy
 	@Autowired
 	private BatchJobSender myBatchSender;
+
+	@Autowired
+	IChannelProducer<JobWorkNotification> myProducer;
 
 	@Autowired
 	private IJobMaintenanceService myMaintenanceService;
@@ -1166,13 +1201,15 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// we will spy this service to capture the notification
 		// and use it to make a second notification delivery
+
 		doAnswer(invocation -> {
-			JobWorkNotification notification = (JobWorkNotification) invocation.getArguments()[0];
+			JobWorkNotificationJsonMessage msg = (JobWorkNotificationJsonMessage) invocation.getArguments()[0];
 			ourLog.info("NOTIFICATION RECEIVED : \n"
-				+ notification.toString());
+				+ msg.getPayload().toString());
 
 			if (notificationRef.get() == null) {
-				notificationRef.set(notification);
+				notificationRef.set(msg.getPayload());
+				return ISendResult.FAILURE;
 			}
 
 			ourLog.info("\nFIFTH GATE SET " + fifthGate.get());
@@ -1185,8 +1222,29 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			}
 
 			invocation.callRealMethod();
-			return null;
-		}).when(myBatchSender).sendWorkChannelMessage(any());
+			return ((ISendResult) () -> true);
+		}).when(myProducer).send(any());
+//		doAnswer(invocation -> {
+//			JobWorkNotification notification = (JobWorkNotification) invocation.getArguments()[0];
+//			ourLog.info("NOTIFICATION RECEIVED : \n"
+//				+ notification.toString());
+//
+//			if (notificationRef.get() == null) {
+//				notificationRef.set(notification);
+//			}
+//
+//			ourLog.info("\nFIFTH GATE SET " + fifthGate.get());
+//			// if 2nd worker has been released from step 1...
+//			if (fifthGate.get()) {
+//				// we'll alert when the new notification arrives
+//				// for workchunk creation
+//				ourLog.info("\nSIXTH GATE -------");
+//				sixthGate.set(true);
+//			}
+//
+//			invocation.callRealMethod();
+//			return null;
+//		}).when(myBatchSender).sendWorkChannelMessage(any());
 
 		// test
 		RequestDetails rds = new SystemRequestDetails();

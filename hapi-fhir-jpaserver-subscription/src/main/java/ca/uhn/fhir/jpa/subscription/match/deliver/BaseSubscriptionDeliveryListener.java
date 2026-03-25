@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.deliver;
 
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -77,7 +78,7 @@ public abstract class BaseSubscriptionDeliveryListener implements IMessageListen
 	private MatchUrlService myMatchUrlService;
 
 	@Override
-	public void handleMessage(@Nonnull IMessage<ResourceDeliveryMessage> theMessage) {
+	public void handleMessage(@Nonnull IMessage<ResourceDeliveryMessage> theMessage, IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
 		ResourceDeliveryMessage msg = theMessage.getPayload();
 		String subscriptionId = msg.getSubscriptionId(myFhirContext);
 		if (subscriptionId == null) {

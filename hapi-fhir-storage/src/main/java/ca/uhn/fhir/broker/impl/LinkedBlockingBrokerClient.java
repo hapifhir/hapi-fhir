@@ -53,6 +53,7 @@ public class LinkedBlockingBrokerClient implements IBrokerClient {
 				myLinkedBlockingChannelFactory.getOrCreateReceiver(theChannelName, theChannelConsumerSettings);
 		SpringMessagingReceiverAdapter<T> retval = new SpringMessagingReceiverAdapter<>(
 				theMessageType, springMessagingChannelReceiver, theMessageListener);
+		// TODO - should we pass in the channelReceiver?
 		MessageHandler handler = new SpringMessagingMessageHandlerAdapter<>(theMessageType, theMessageListener);
 		retval.subscribe(handler);
 		return retval;

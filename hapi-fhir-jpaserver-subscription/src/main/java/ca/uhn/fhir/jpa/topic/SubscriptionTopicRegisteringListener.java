@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -73,7 +74,7 @@ public class SubscriptionTopicRegisteringListener implements IMessageListener<Re
 	}
 
 	@Override
-	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage) {
+	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage, IChannelConsumer<ResourceModifiedMessage> theConsumer) {
 		ResourceModifiedMessage payload = theMessage.getPayload();
 
 		if (!payload.hasResourceType(myFhirContext, "SubscriptionTopic")) {

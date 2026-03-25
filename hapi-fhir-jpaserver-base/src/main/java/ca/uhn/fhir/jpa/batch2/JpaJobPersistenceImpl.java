@@ -664,29 +664,57 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		});
 
 		if (changed) {
-			ourLog.debug(
-					"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
-					theJobInstanceId,
-					theNextStepId);
-			WorkChunkStatusEnum nextStep =
-					theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
-			// when we reach here, the current step id is equal to theNextStepId
-			// Up to 7.1, gated jobs' work chunks are created in status QUEUED but not actually queued for the
-			// workers.
-			// In order to keep them compatible, turn QUEUED chunks into READY, too.
-			// TODO: 'QUEUED' from the IN clause will be removed after 7.6.0.
-			int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
-					theJobInstanceId,
-					theNextStepId,
-					List.of(WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED),
-					nextStep);
-			ourLog.debug(
-					"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
-					numChanged,
-					theJobInstanceId,
-					theNextStepId);
+			flipGateWaitingChunksForStep(theJobInstanceId, theNextStepId, theIsReductionStep);
 		}
 
 		return changed;
+	}
+
+	private void flipGateWaitingChunksForStep(String theJobInstanceId, String theNextStepId, boolean theIsReductionStep) {
+		ourLog.debug(
+				"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
+			theJobInstanceId,
+			theNextStepId);
+		WorkChunkStatusEnum nextStep =
+				theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
+		// when we reach here, the current step id is equal to theNextStepId
+		// Up to 7.1, gated jobs' work chunks are created in status QUEUED but not actually queued for the
+		// workers.
+		// In order to keep them compatible, turn QUEUED chunks into READY, too.
+		// TODO: 'QUEUED' from the IN clause will be removed after 7.6.0.
+		int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
+			theJobInstanceId,
+			theNextStepId,
+				List.of(WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED),
+				nextStep);
+		ourLog.debug(
+				"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
+				numChanged,
+			theJobInstanceId,
+			theNextStepId);
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public int releaseGateWaitingChunksForCurrentStep(
+		String theJobInstanceId, String theCurrentStepId, boolean theIsReductionStep) {
+		ourLog.debug(
+			"Safety net: checking for late-arriving GATE_WAITING chunks for instance {} step {}.",
+			theJobInstanceId,
+			theCurrentStepId);
+		WorkChunkStatusEnum targetStatus =
+			theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
+		// Only target GATE_WAITING chunks here (not QUEUED). QUEUED chunks have already been dispatched
+		// to workers and should not be re-flipped. The QUEUED legacy handling is only needed during
+		// step advancement (in flipGateWaitingChunksForStep), not during the safety net maintenance pass.
+		int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
+			theJobInstanceId, theCurrentStepId, List.of(WorkChunkStatusEnum.GATE_WAITING), targetStatus);
+		ourLog.debug(
+			"Safety net: updated {} late-arriving GATE_WAITING chunks to {} for instance {} step {}.",
+			numChanged,
+			targetStatus,
+			theJobInstanceId,
+			theCurrentStepId);
+		return numChanged;
 	}
 }
