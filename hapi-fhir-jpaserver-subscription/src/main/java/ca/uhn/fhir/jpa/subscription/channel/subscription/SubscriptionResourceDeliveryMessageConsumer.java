@@ -49,8 +49,8 @@ public class SubscriptionResourceDeliveryMessageConsumer implements AutoCloseabl
 	}
 
 	public boolean removeListener(IMessageListener<ResourceDeliveryMessage> theListener) {
-		if (theListener instanceof AutoCloseable theAutoCloseable) {
-			IoUtils.closeQuietly(theAutoCloseable, ourLog);
+		if (theListener instanceof AutoCloseable autoCloseable) {
+			IoUtils.closeQuietly(autoCloseable, ourLog);
 		}
 		return myMultiplexingListener.removeListener(theListener);
 	}
