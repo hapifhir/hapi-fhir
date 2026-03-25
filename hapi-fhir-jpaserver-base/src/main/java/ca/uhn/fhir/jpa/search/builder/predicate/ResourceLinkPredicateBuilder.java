@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -147,13 +148,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	 * Constructor
 	 */
 	public ResourceLinkPredicateBuilder(QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
-		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable(ResourceLink.TABLE_NAME));
+		myColumnSrcResourceId = getTable().addColumn(ResourceLink.SRC_RESOURCE_ID);
 		myColumnSrcPartitionId = getTable().addColumn("PARTITION_ID");
 		myColumnSrcType = getTable().addColumn("SOURCE_RESOURCE_TYPE");
 		myColumnSrcPath = getTable().addColumn("SRC_PATH");
-		myColumnTargetResourceId = getTable().addColumn("TARGET_RESOURCE_ID");
-		myColumnTargetPartitionId = getTable().addColumn("TARGET_RES_PARTITION_ID");
+		myColumnTargetResourceId = getTable().addColumn(ResourceLink.TARGET_RESOURCE_ID);
+		myColumnTargetPartitionId = getTable().addColumn(ResourceLink.TARGET_RES_PARTITION_ID);
 		myColumnTargetResourceUrl = getTable().addColumn("TARGET_RESOURCE_URL");
 		myColumnTargetResourceType = getTable().addColumn("TARGET_RESOURCE_TYPE");
 

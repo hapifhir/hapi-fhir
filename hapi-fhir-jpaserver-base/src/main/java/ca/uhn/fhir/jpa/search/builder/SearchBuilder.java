@@ -59,6 +59,8 @@ import ca.uhn.fhir.jpa.search.BatchResourceLoader.ResourceLoadResult;
 import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.models.SearchQueryProperties;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
@@ -80,8 +82,10 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -108,7 +112,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MultimapBuilder;
+import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.SelectQuery;
+import com.healthmarketscience.sqlbuilder.UnaryCondition;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -318,6 +326,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Remove any empty parameters
 		theParams.clean();
 
+		// Extract _compartmentLastUpdated from the regular param map if present (it arrives as a raw parameter)
+		normalizeCompartmentLastUpdated(theParams);
+
 		// For DSTU3, pull out near-distance first so when it comes time to evaluate near, we already know the distance
 		if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
 			Dstu3DistanceHelper.setNearDistance(myResourceType, theParams);
@@ -357,6 +368,31 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
+		}
+	}
+
+	private void normalizeCompartmentLastUpdated(@Nonnull SearchParameterMap theParams) {
+		if (theParams.containsKey(Constants.PARAM_COMPARTMENT_LAST_UPDATED)) {
+			List<List<IQueryParameterType>> compartmentLastUpdatedValues =
+					theParams.remove(Constants.PARAM_COMPARTMENT_LAST_UPDATED);
+			if (theParams.getCompartmentLastUpdated() == null && compartmentLastUpdatedValues != null) {
+				List<QualifiedParamList> qualifiedParams = new ArrayList<>();
+				for (List<IQueryParameterType> nextAnd : compartmentLastUpdatedValues) {
+					for (IQueryParameterType nextOr : nextAnd) {
+						QualifiedParamList qpl = new QualifiedParamList();
+						qpl.add(nextOr.getValueAsQueryToken());
+						qualifiedParams.add(qpl);
+					}
+				}
+				DateRangeParam dateRange = new DateRangeParam();
+				dateRange.setValuesAsQueryTokens(myContext, Constants.PARAM_COMPARTMENT_LAST_UPDATED, qualifiedParams);
+				theParams.setCompartmentLastUpdated(dateRange);
+			}
+		}
+
+		if (theParams.getCompartmentLastUpdated() != null && !"Patient".equals(myResourceName)) {
+			throw new InvalidRequestException(Msg.code(2876) + Constants.PARAM_COMPARTMENT_LAST_UPDATED
+					+ " is only supported for Patient searches");
 		}
 	}
 
@@ -517,6 +553,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									&&
 									// todo MB don't we support _lastUpdated and _offset now?
 									theParams.getLastUpdated() == null
+									&& theParams.getCompartmentLastUpdated() == null
 									&& theParams.getEverythingMode() == null
 									&& theParams.getOffset() == null);
 
@@ -789,6 +826,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Last updated
 		addLastUpdatePredicate(sqlBuilder);
 
+		addCompartmentLastUpdatedPredicate(sqlBuilder);
+
 		/*
 		 * Exclude the pids already in the previous iterator. This is an optimization, as opposed
 		 * to something needed to guarantee correct results.
@@ -976,6 +1015,57 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Condition lastUpdatedPredicates = theSqlBuilder.addPredicateLastUpdated(lu);
 			theSqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
+	}
+
+	private void addCompartmentLastUpdatedPredicate(SearchQueryBuilder theSqlBuilder) {
+		DateRangeParam compartmentLastUpdated = myParams.getCompartmentLastUpdated();
+		if (compartmentLastUpdated == null || compartmentLastUpdated.isEmpty()) {
+			return;
+		}
+
+		ResourceTablePredicateBuilder resourceTableRoot =
+				theSqlBuilder.getOrCreateResourceTablePredicateBuilder(true, null);
+
+		// Condition 1: Patient directly updated within the date range
+		Condition patientDirectlyUpdated =
+				theSqlBuilder.addPredicateLastUpdated(compartmentLastUpdated, resourceTableRoot);
+
+		// Condition 2: EXISTS subquery — compartment resources updated within the date range
+		ResourceTablePredicateBuilder srcResourceTable =
+				new ResourceTablePredicateBuilder(theSqlBuilder, SearchIncludeDeletedEnum.NEVER);
+
+		ResourceLinkPredicateBuilder resLink = new ResourceLinkPredicateBuilder(null, theSqlBuilder);
+		SelectQuery subquery = new SelectQuery();
+		subquery.addCustomColumns(1);
+		subquery.addFromTable(resLink.getTable());
+
+		// Join HFJ_RES_LINK to HFJ_RESOURCE (source resource)
+		DbColumn[] srcResColumns = theSqlBuilder.toJoinColumns(
+				srcResourceTable.getPartitionIdColumn(), srcResourceTable.getResourceIdColumn());
+		Condition resLinkJoinCondition =
+				SearchQueryBuilder.toJoinCondition(resLink.getJoinColumnsForSource(), srcResColumns);
+		subquery.addJoin(
+				SelectQuery.JoinType.INNER, resLink.getTable(), srcResourceTable.getTable(), resLinkJoinCondition);
+
+		// Correlate the subquery to the outer query's Patient resource
+		DbColumn[] outerColumns = theSqlBuilder.toJoinColumns(
+				resourceTableRoot.getPartitionIdColumn(), resourceTableRoot.getResourceIdColumn());
+		subquery.addCondition(SearchQueryBuilder.toJoinCondition(resLink.getJoinColumnsForTarget(), outerColumns));
+
+		// Restrict subquery to requested partition(s)
+		Condition srcPartitionPredicate = srcResourceTable.createPartitionIdPredicate(myRequestPartitionId);
+		if (srcPartitionPredicate != null) {
+			subquery.addCondition(srcPartitionPredicate);
+		}
+
+		// Date conditions on the source resource's RES_UPDATED
+		ComboCondition dateCondition = theSqlBuilder.addPredicateLastUpdated(compartmentLastUpdated, srcResourceTable);
+		subquery.addCondition(dateCondition);
+
+		Condition existsSubquery = UnaryCondition.exists(subquery);
+
+		Condition combinedCondition = ComboCondition.or(patientDirectlyUpdated, existsSubquery);
+		theSqlBuilder.addPredicate(combinedCondition);
 	}
 
 	private JdbcTemplate initializeJdbcTemplate(Integer theMaximumResults) {
