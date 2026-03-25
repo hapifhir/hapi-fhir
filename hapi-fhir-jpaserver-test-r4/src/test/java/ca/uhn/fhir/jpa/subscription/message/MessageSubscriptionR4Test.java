@@ -136,7 +136,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		channel.setEndpoint(theQueueName);
 
 		subscription.setChannel(channel);
-		postOrPutSubscription(subscription);
+		createOrUpdateSubscription(subscription);
 		return subscription;
 	}
 
