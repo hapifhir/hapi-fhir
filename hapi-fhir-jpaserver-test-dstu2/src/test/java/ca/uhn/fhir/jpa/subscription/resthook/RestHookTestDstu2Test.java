@@ -362,7 +362,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	public static class ObservationListener implements IResourceProvider {
 
 		@Create
-		public MethodOutcome create(@ResourceParam Observation theObservation) {
+		public synchronized MethodOutcome create(@ResourceParam Observation theObservation) {
 			ourLog.info("Received Listener Create");
 			ourCreatedObservations.add(theObservation.getIdElement().toUnqualified().getValue());
 			return new MethodOutcome(new IdDt("Observation/1"), true);
@@ -374,7 +374,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 
 		@Update
-		public MethodOutcome update(@ResourceParam Observation theObservation) {
+		public synchronized MethodOutcome update(@ResourceParam Observation theObservation) {
 			ourLog.info("Received Listener Update");
 			ourUpdatedObservations.add(theObservation.getIdElement().toUnqualified().getValue());
 			return new MethodOutcome(new IdDt("Observation/1"), false);
