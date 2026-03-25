@@ -84,7 +84,7 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 			transactionIndexes.indexesToRemove().addAll(theParamsToRemove);
 			for (ResourceIndexedComboStringUnique param : theParamsToAdd) {
 				boolean added = transactionIndexes.indexesToAdd().add(param);
-				if (!added) {
+				if (theTransactionDetails.isFhirTransaction() && !added) {
 					String msg = myFhirContext
 							.getLocalizer()
 							.getMessage(
