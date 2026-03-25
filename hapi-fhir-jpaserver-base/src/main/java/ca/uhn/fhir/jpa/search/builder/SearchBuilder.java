@@ -140,7 +140,6 @@ import org.hibernate.ScrollableResults;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -372,7 +371,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private void normalizeCompartmentLastUpdated(@NotNull SearchParameterMap theParams) {
+	private void normalizeCompartmentLastUpdated(@Nonnull SearchParameterMap theParams) {
 		if (theParams.containsKey(Constants.PARAM_COMPARTMENT_LAST_UPDATED)) {
 			List<List<IQueryParameterType>> compartmentLastUpdatedValues =
 					theParams.remove(Constants.PARAM_COMPARTMENT_LAST_UPDATED);
