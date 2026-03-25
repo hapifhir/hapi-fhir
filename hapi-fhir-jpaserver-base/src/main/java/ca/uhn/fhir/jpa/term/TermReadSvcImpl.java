@@ -57,7 +57,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
@@ -116,6 +115,7 @@ import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
@@ -129,6 +129,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -2810,22 +2811,26 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					if (ObjectUtils.isNotEmpty(propertyNames) && !propertyNames.contains(next.getKey())) {
 						continue;
 					}
-					if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
-						IValidationSupport.CodingConceptProperty property =
-								new IValidationSupport.CodingConceptProperty(
-										next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay());
-						result.getProperties().add(property);
-					} else if (next.getType() == TermConceptPropertyTypeEnum.STRING) {
-						IValidationSupport.StringConceptProperty property =
-								new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue());
-						result.getProperties().add(property);
-					} else if (next.getType() == TermConceptPropertyTypeEnum.BOOLEAN) {
-						IValidationSupport.BooleanConceptProperty property =
-								new IValidationSupport.BooleanConceptProperty(
-										next.getKey(), Boolean.parseBoolean(next.getValue()));
-						result.getProperties().add(property);
-					} else {
-						throw new InternalErrorException(Msg.code(905) + "Unknown type: " + next.getType());
+					switch (next.getType()) {
+						case CODING -> {
+							CodingConceptProperty property = new CodingConceptProperty(
+									next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay());
+							result.getProperties().add(property);
+						}
+						case STRING -> {
+							StringConceptProperty property = new StringConceptProperty(next.getKey(), next.getValue());
+							result.getProperties().add(property);
+						}
+						case BOOLEAN -> {
+							BooleanConceptProperty property =
+									new BooleanConceptProperty(next.getKey(), Boolean.parseBoolean(next.getValue()));
+							result.getProperties().add(property);
+						}
+						case CODE -> {
+							CodeConceptProperty property = new CodeConceptProperty(next.getKey(), next.getValue());
+							result.getProperties().add(property);
+						}
+						default -> throw new InternalErrorException(Msg.code(905) + "Unknown type: " + next.getType());
 					}
 				}
 
@@ -3499,6 +3504,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			if (next.getValue() instanceof StringType) {
 				property.setType(TermConceptPropertyTypeEnum.STRING);
 				property.setValue(next.getValueStringType().getValue());
+			} else if (next.getValue() instanceof CodeType) {
+				property.setType(TermConceptPropertyTypeEnum.CODE);
+				property.setValue(((CodeType) next.getValue()).getValueAsString());
 			} else if (next.getValue() instanceof BooleanType) {
 				property.setType(TermConceptPropertyTypeEnum.BOOLEAN);
 				property.setValue(((BooleanType) next.getValue()).getValueAsString());
@@ -3509,8 +3517,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				property.setType(TermConceptPropertyTypeEnum.DECIMAL);
 				property.setValue(((DecimalType) next.getValue()).getValueAsString());
 			} else if (next.getValue() instanceof DateTimeType) {
-				// DateType is not supported because it's not
-				// supported in CodeSystem.setValue
 				property.setType(TermConceptPropertyTypeEnum.DATETIME);
 				property.setValue(((DateTimeType) next.getValue()).getValueAsString());
 			} else if (next.getValue() instanceof Coding) {

@@ -1,20 +1,19 @@
-package ca.uhn.fhir.jpa.provider;
+package ca.uhn.fhir.jpa.term.custom;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.BaseTest;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r5.model.HumanName;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TerminologyUploaderProviderTest extends BaseTest {
+public class CodeSystemToCustomCsvConverterTest extends BaseTest {
 	@Test
 	public void testCanonicalizeR3() {
-		TerminologyUploaderProvider provider = new TerminologyUploaderProvider();
-		provider.setContext(FhirContext.forDstu3Cached());
+		CodeSystemToCustomCsvConverter provider = new CodeSystemToCustomCsvConverter(FhirContext.forDstu3Cached());
 
 		org.hl7.fhir.dstu3.model.CodeSystem input = new org.hl7.fhir.dstu3.model.CodeSystem();
 		input.addConcept().setCode("FOO").setDisplay("Foo");
@@ -26,8 +25,7 @@ public class TerminologyUploaderProviderTest extends BaseTest {
 
 	@Test
 	public void testCanonicalizeR4() {
-		TerminologyUploaderProvider provider = new TerminologyUploaderProvider();
-		provider.setContext(FhirContext.forR4Cached());
+		CodeSystemToCustomCsvConverter provider = new CodeSystemToCustomCsvConverter(FhirContext.forR4Cached());
 
 		org.hl7.fhir.r4.model.CodeSystem input = new org.hl7.fhir.r4.model.CodeSystem();
 		input.addConcept().setCode("FOO").setDisplay("Foo");
@@ -39,8 +37,7 @@ public class TerminologyUploaderProviderTest extends BaseTest {
 
 	@Test
 	public void testCanonicalizeR5() {
-		TerminologyUploaderProvider provider = new TerminologyUploaderProvider();
-		provider.setContext(FhirContext.forR5Cached());
+		CodeSystemToCustomCsvConverter provider = new CodeSystemToCustomCsvConverter(FhirContext.forR5Cached());
 
 		org.hl7.fhir.r5.model.CodeSystem input = new org.hl7.fhir.r5.model.CodeSystem();
 		input.addConcept().setCode("FOO").setDisplay("Foo");
@@ -52,8 +49,7 @@ public class TerminologyUploaderProviderTest extends BaseTest {
 
 	@Test
 	public void testCanonicalizeR5_WrongType() {
-		TerminologyUploaderProvider provider = new TerminologyUploaderProvider();
-		provider.setContext(FhirContext.forR5Cached());
+		CodeSystemToCustomCsvConverter provider = new CodeSystemToCustomCsvConverter(FhirContext.forR5Cached());
 
 		org.hl7.fhir.r5.model.Patient input = new org.hl7.fhir.r5.model.Patient();
 

@@ -17,12 +17,15 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.entity;
+package org.hl7.fhir.common.hapi.validation.util;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /**
- * @see TermConceptProperty#getType()
+ * An enum representing the possible types of a concept property
  */
 public enum TermConceptPropertyTypeEnum {
 	/**
@@ -33,27 +36,50 @@ public enum TermConceptPropertyTypeEnum {
 	/**
 	 * String
 	 */
-	STRING,
+	STRING("string", true),
+	/**
+	 * Code
+	 */
+	CODE("code", true),
 	/**
 	 * Coding
 	 */
-	CODING,
+	CODING("Coding", false),
 	/**
 	 * Boolean values
 	 */
-	BOOLEAN,
+	BOOLEAN("boolean", true),
 	/**
 	 * Integer values
 	 */
-	INTEGER,
+	INTEGER("integer", true),
 	/**
 	 * Decimal or float values.
 	 */
-	DECIMAL,
+	DECIMAL("decimal", true),
 	/**
 	 * Date and time values.
 	 */
-	DATETIME;
+	DATETIME("dateTime", true);
+
+	private static final Map<String, TermConceptPropertyTypeEnum> ourDatatypeMap = new HashMap<>();
+	private final String myDatatype;
+	private final boolean myPrimitive;
+
+	static {
+		for (var value : TermConceptPropertyTypeEnum.values()) {
+			ourDatatypeMap.put(value.myDatatype, value);
+		}
+	}
+
+	TermConceptPropertyTypeEnum(String theDatatype, boolean thePrimitive) {
+		myDatatype = theDatatype;
+		myPrimitive = thePrimitive;
+	}
+
+	public boolean isPrimitive() {
+		return myPrimitive;
+	}
 
 	public static TermConceptPropertyTypeEnum fromString(String theString) {
 		TermConceptPropertyTypeEnum retVal;
@@ -63,5 +89,9 @@ public enum TermConceptPropertyTypeEnum {
 			retVal = TermConceptPropertyTypeEnum.STRING;
 		}
 		return retVal;
+	}
+
+	public static TermConceptPropertyTypeEnum forDatatype(String theDatatype) {
+		return ourDatatypeMap.get(theDatatype);
 	}
 }

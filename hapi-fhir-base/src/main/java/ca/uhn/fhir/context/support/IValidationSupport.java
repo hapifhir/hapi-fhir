@@ -774,6 +774,10 @@ public interface IValidationSupport {
 	// can support arbitrary types. We do not restrict against the types in the spec.
 	// Some of the types in the spec are not yet implemented as well.
 	// @see https://github.com/hapifhir/hapi-fhir/issues/5700
+	String TYPE_CODE = "code";
+	String TYPE_INTEGER = "integer";
+	String TYPE_DECIMAL = "decimal";
+	String TYPE_DATETIME = "dateTime";
 	String TYPE_STRING = "string";
 	String TYPE_BOOLEAN = "boolean";
 	String TYPE_CODING = "Coding";
@@ -799,6 +803,98 @@ public interface IValidationSupport {
 		@Override
 		public String getType() {
 			return TYPE_STRING;
+		}
+	}
+
+	class IntegerConceptProperty extends BaseConceptProperty {
+		private final Integer myValue;
+
+		/**
+		 * Constructor
+		 *
+		 * @param theName The name
+		 */
+		public IntegerConceptProperty(String theName, Integer theValue) {
+			super(theName);
+			myValue = theValue;
+		}
+
+		public Integer getValue() {
+			return myValue;
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_INTEGER;
+		}
+	}
+
+	class DecimalConceptProperty extends BaseConceptProperty {
+		private final String myValue;
+
+		/**
+		 * Constructor
+		 *
+		 * @param theName The name
+		 */
+		public DecimalConceptProperty(String theName, String theValue) {
+			super(theName);
+			myValue = theValue;
+		}
+
+		public String getValue() {
+			return myValue;
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_DECIMAL;
+		}
+	}
+
+	class DateTimeConceptProperty extends BaseConceptProperty {
+		private final String myValue;
+
+		/**
+		 * Constructor
+		 *
+		 * @param theName The name
+		 */
+		public DateTimeConceptProperty(String theName, String theValue) {
+			super(theName);
+			myValue = theValue;
+		}
+
+		public String getValue() {
+			return myValue;
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_DATETIME;
+		}
+	}
+
+	class CodeConceptProperty extends BaseConceptProperty {
+		private final String myValue;
+
+		/**
+		 * Constructor
+		 *
+		 * @param theName The name
+		 */
+		public CodeConceptProperty(String theName, String theValue) {
+			super(theName);
+			myValue = theValue;
+		}
+
+		public String getValue() {
+			return myValue;
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_CODE;
 		}
 	}
 
@@ -1247,7 +1343,9 @@ public interface IValidationSupport {
 			if (isNotBlank(getCodeSystemVersion())) {
 				ParametersUtil.addParameterToParametersString(theContext, retVal, "version", getCodeSystemVersion());
 			}
-			ParametersUtil.addParameterToParametersString(theContext, retVal, "display", getCodeDisplay());
+			if (isNotBlank(getCodeDisplay())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, "display", getCodeDisplay());
+			}
 			ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "abstract", isCodeIsAbstract());
 
 			if (myProperties != null) {
@@ -1291,6 +1389,24 @@ public interface IValidationSupport {
 			ParametersUtil.addPartCode(theContext, theProperty, "code", theConceptProperty.getPropertyName());
 			String propertyType = theConceptProperty.getType();
 			switch (propertyType) {
+				case TYPE_DECIMAL:
+					DecimalConceptProperty decimalConceptProperty = (DecimalConceptProperty) theConceptProperty;
+					ParametersUtil.addPartDecimal(
+							theContext, theProperty, "value", Double.parseDouble(decimalConceptProperty.getValue()));
+					break;
+				case TYPE_DATETIME:
+					DateTimeConceptProperty dateTimeConceptProperty = (DateTimeConceptProperty) theConceptProperty;
+					ParametersUtil.addPartPrimitive(
+							theContext, theProperty, "value", "dateTime", dateTimeConceptProperty.getValue());
+					break;
+				case TYPE_INTEGER:
+					IntegerConceptProperty integerConceptProperty = (IntegerConceptProperty) theConceptProperty;
+					ParametersUtil.addPartInteger(theContext, theProperty, "value", integerConceptProperty.getValue());
+					break;
+				case TYPE_CODE:
+					CodeConceptProperty codeConceptProperty = (CodeConceptProperty) theConceptProperty;
+					ParametersUtil.addPartCode(theContext, theProperty, "value", codeConceptProperty.getValue());
+					break;
 				case TYPE_STRING:
 					StringConceptProperty stringConceptProperty = (StringConceptProperty) theConceptProperty;
 					ParametersUtil.addPartString(theContext, theProperty, "value", stringConceptProperty.getValue());

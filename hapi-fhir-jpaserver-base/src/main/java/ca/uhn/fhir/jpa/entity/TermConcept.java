@@ -275,7 +275,7 @@ public class TermConcept implements Serializable {
 	}
 
 	private TermConceptProperty addProperty(
-			@Nonnull TermConceptPropertyTypeEnum thePropertyType,
+			@Nonnull org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum thePropertyType,
 			@Nonnull String thePropertyName,
 			@Nonnull String thePropertyValue) {
 		Validate.notBlank(thePropertyName);
@@ -298,13 +298,19 @@ public class TermConcept implements Serializable {
 			@Nonnull String thePropertyCodeSystem,
 			@Nonnull String thePropertyCode,
 			String theDisplayName) {
-		return addProperty(TermConceptPropertyTypeEnum.CODING, thePropertyName, thePropertyCode)
+		return addProperty(
+						org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.CODING,
+						thePropertyName,
+						thePropertyCode)
 				.setCodeSystem(thePropertyCodeSystem)
 				.setDisplay(theDisplayName);
 	}
 
 	public TermConceptProperty addPropertyString(@Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
-		return addProperty(TermConceptPropertyTypeEnum.STRING, thePropertyName, thePropertyValue);
+		return addProperty(
+				org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.STRING,
+				thePropertyName,
+				thePropertyValue);
 	}
 
 	@Override
@@ -362,7 +368,7 @@ public class TermConcept implements Serializable {
 		List<Coding> retVal = new ArrayList<>();
 		for (TermConceptProperty next : getProperties()) {
 			if (thePropertyName.equals(next.getKey())) {
-				if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
+				if (next.getType() == org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.CODING) {
 					Coding coding = new Coding();
 					coding.setSystem(next.getCodeSystem());
 					coding.setCode(next.getValue());
@@ -446,7 +452,7 @@ public class TermConcept implements Serializable {
 		List<String> retVal = new ArrayList<>();
 		for (TermConceptProperty next : getProperties()) {
 			if (thePropertyName.equals(next.getKey())) {
-				if (next.getType() == TermConceptPropertyTypeEnum.STRING) {
+				if (next.getType() == org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.STRING) {
 					retVal.add(next.getValue());
 				}
 			}

@@ -58,9 +58,6 @@ public abstract class BaseResponseTerminologyInterceptor {
 			case GET_TAGS:
 			case GET_PAGE:
 			case GRAPHQL_REQUEST:
-			case EXTENDED_OPERATION_SERVER:
-			case EXTENDED_OPERATION_TYPE:
-			case EXTENDED_OPERATION_INSTANCE:
 			case CREATE:
 			case DELETE:
 			case TRANSACTION:
@@ -75,6 +72,9 @@ public abstract class BaseResponseTerminologyInterceptor {
 				return Collections.emptyList();
 
 				// Do apply to these operations
+			case EXTENDED_OPERATION_SERVER:
+			case EXTENDED_OPERATION_TYPE:
+			case EXTENDED_OPERATION_INSTANCE:
 			case HISTORY_INSTANCE:
 			case HISTORY_SYSTEM:
 			case HISTORY_TYPE:

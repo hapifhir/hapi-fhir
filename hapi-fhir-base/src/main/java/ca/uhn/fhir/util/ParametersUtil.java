@@ -560,6 +560,14 @@ public class ParametersUtil {
 		return part;
 	}
 
+	public static void addPartPrimitive(
+			FhirContext theContext, IBase theParameter, String theName, String theType, String theValue) {
+		IPrimitiveType<?> value =
+				(IPrimitiveType<?>) theContext.getElementDefinition(theType).newInstance();
+		value.setValueAsString(theValue);
+		addPart(theContext, theParameter, theName, value);
+	}
+
 	public static IBase createPart(FhirContext theContext, IBase thePart, String theName) {
 		BaseRuntimeElementCompositeDefinition<?> def =
 				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(thePart.getClass());
