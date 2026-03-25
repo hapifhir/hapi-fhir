@@ -39,16 +39,16 @@ import java.util.stream.Stream;
  */
 class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<ResourceIndexedComboStringUnique> {
 	private static final String INDEXES_REQUEST_USERDATA_KEY =
-		UniqueIndexPreExistenceChecker.class.getName() + "_INDEXES";
+			UniqueIndexPreExistenceChecker.class.getName() + "_INDEXES";
 
 	private final FhirContext myFhirContext;
 	private final IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	private final IHapiTransactionService myTransactionSvc;
 
 	UniqueIndexPreExistenceChecker(
-		FhirContext theFhirContext,
-		IResourceIndexedComboStringUniqueDao theResourceIndexedCompositeStringUniqueDao,
-		IHapiTransactionService theTransactionSvc) {
+			FhirContext theFhirContext,
+			IResourceIndexedComboStringUniqueDao theResourceIndexedCompositeStringUniqueDao,
+			IHapiTransactionService theTransactionSvc) {
 		myFhirContext = theFhirContext;
 		myResourceIndexedCompositeStringUniqueDao = theResourceIndexedCompositeStringUniqueDao;
 		myTransactionSvc = theTransactionSvc;
@@ -56,10 +56,10 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 
 	@Override
 	public void preSave(
-		RequestDetails theRequestDetails,
-		TransactionDetails theTransactionDetails,
-		Collection<ResourceIndexedComboStringUnique> theParamsToRemove,
-		Collection<ResourceIndexedComboStringUnique> theParamsToAdd) {
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
+			Collection<ResourceIndexedComboStringUnique> theParamsToRemove,
+			Collection<ResourceIndexedComboStringUnique> theParamsToAdd) {
 
 		assert !theParamsToAdd.isEmpty() || !theParamsToRemove.isEmpty();
 
@@ -71,13 +71,14 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 			/// within {@link TransactionIndexes}, and store that in the {@link TransactionDetails}
 			/// UserData.
 			TransactionIndexes transactionIndexes =
-				(TransactionIndexes) theTransactionDetails.getUserData().get(INDEXES_REQUEST_USERDATA_KEY);
+					(TransactionIndexes) theTransactionDetails.getUserData().get(INDEXES_REQUEST_USERDATA_KEY);
 			if (transactionIndexes == null) {
 				HashSet<ResourceIndexedComboStringUnique> indexesToRemove = new HashSet<>();
 				HashSet<ResourceIndexedComboStringUnique> indexesToAdd = new HashSet<>();
 				transactionIndexes = new TransactionIndexes(indexesToRemove, indexesToAdd);
 				theTransactionDetails.getUserData().put(INDEXES_REQUEST_USERDATA_KEY, transactionIndexes);
-				theTransactionDetails.addRollbackUndoAction(new MyRollbackAction(theRequestDetails, indexesToRemove, indexesToAdd));
+				theTransactionDetails.addRollbackUndoAction(
+						new MyRollbackAction(theRequestDetails, indexesToRemove, indexesToAdd));
 			}
 
 			transactionIndexes.indexesToRemove().addAll(theParamsToRemove);
@@ -85,13 +86,13 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 				boolean added = transactionIndexes.indexesToAdd().add(param);
 				if (!added) {
 					String msg = myFhirContext
-						.getLocalizer()
-						.getMessage(
-							BaseHapiFhirDao.class,
-							"uniqueIndexConflictFailureInSameFhirTransaction",
-							param.getResource().getResourceType(),
-							param.getIndexString(),
-							getSearchParameterId(param));
+							.getLocalizer()
+							.getMessage(
+									BaseHapiFhirDao.class,
+									"uniqueIndexConflictFailureInSameFhirTransaction",
+									param.getResource().getResourceType(),
+									param.getIndexString(),
+									getSearchParameterId(param));
 
 					// Use ResourceVersionConflictException here because the HapiTransactionService
 					// catches this and can retry it if needed
@@ -99,7 +100,6 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 				}
 			}
 		}
-
 	}
 
 	private static String getSearchParameterId(ResourceIndexedComboStringUnique theIndex) {
@@ -116,9 +116,8 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 	 * that are being added or removed in the current transaction.
 	 */
 	private record TransactionIndexes(
-		Set<ResourceIndexedComboStringUnique> indexesToRemove,
-		Set<ResourceIndexedComboStringUnique> indexesToAdd) {
-	}
+			Set<ResourceIndexedComboStringUnique> indexesToRemove,
+			Set<ResourceIndexedComboStringUnique> indexesToAdd) {}
 
 	/**
 	 * This action is performed only if the transaction is rolled back.
@@ -128,7 +127,10 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 		private final HashSet<ResourceIndexedComboStringUnique> myIndexesToRemove;
 		private final HashSet<ResourceIndexedComboStringUnique> myIndexesToAdd;
 
-		public MyRollbackAction(RequestDetails theRequestDetails, HashSet<ResourceIndexedComboStringUnique> theIndexesToRemove, HashSet<ResourceIndexedComboStringUnique> theIndexesToAdd) {
+		public MyRollbackAction(
+				RequestDetails theRequestDetails,
+				HashSet<ResourceIndexedComboStringUnique> theIndexesToRemove,
+				HashSet<ResourceIndexedComboStringUnique> theIndexesToAdd) {
 			myRequestDetails = theRequestDetails;
 			myIndexesToRemove = theIndexesToRemove;
 			myIndexesToAdd = theIndexesToAdd;
@@ -144,21 +146,23 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 		private boolean isCausedByUniqueComboConstraintFailure(Exception theException) {
 			if (theException instanceof ResourceVersionConflictException) {
 				Throwable cause = theException.getCause();
-				if (cause instanceof org.hibernate.exception.ConstraintViolationException constraintViolationException) {
+				if (cause
+						instanceof org.hibernate.exception.ConstraintViolationException constraintViolationException) {
 					String constraintName = constraintViolationException.getConstraintName();
 					constraintName = StringUtils.upperCase(constraintName, Locale.US);
-					return Strings.CS.contains(constraintName, ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING);
+					return Strings.CS.contains(
+							constraintName, ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING);
 				}
 			}
 			return false;
 		}
 
 		private void validateNoExistingUniqueIndexesMatchAny(
-			RequestDetails theRequestDetails,
-			Collection<ResourceIndexedComboStringUnique> theParamsToRemove,
-			Collection<ResourceIndexedComboStringUnique> theParamsToAdd) {
+				RequestDetails theRequestDetails,
+				Collection<ResourceIndexedComboStringUnique> theParamsToRemove,
+				Collection<ResourceIndexedComboStringUnique> theParamsToAdd) {
 			Map<String, ResourceIndexedComboStringUnique> existingStringToParam =
-				fetchExistingMatchingParams(theRequestDetails, theParamsToAdd);
+					fetchExistingMatchingParams(theRequestDetails, theParamsToAdd);
 			for (ResourceIndexedComboStringUnique theIndex : theParamsToAdd) {
 				ResourceIndexedComboStringUnique existing = existingStringToParam.get(theIndex.getIndexString());
 				if (existing != null) {
@@ -180,17 +184,17 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 					}
 
 					String msg = myFhirContext
-						.getLocalizer()
-						.getMessage(
-							BaseHapiFhirDao.class,
-							"uniqueIndexConflictFailure",
-							existing.getResource().getResourceType(),
-							theIndex.getIndexString(),
-							existing.getResource()
-								.getIdDt()
-								.toUnqualifiedVersionless()
-								.getValue(),
-							getSearchParameterId(theIndex));
+							.getLocalizer()
+							.getMessage(
+									BaseHapiFhirDao.class,
+									"uniqueIndexConflictFailure",
+									existing.getResource().getResourceType(),
+									theIndex.getIndexString(),
+									existing.getResource()
+											.getIdDt()
+											.toUnqualifiedVersionless()
+											.getValue(),
+									getSearchParameterId(theIndex));
 
 					// Use ResourceVersionConflictException here because the HapiTransactionService
 					// catches this and can retry it if needed
@@ -199,32 +203,33 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 			}
 		}
 
-
 		private Map<String, ResourceIndexedComboStringUnique> fetchExistingMatchingParams(
-			RequestDetails theRequestDetails, Collection<ResourceIndexedComboStringUnique> theParamsToRemove) {
-			ImmutableListMultimap<Optional<Integer>, ResourceIndexedComboStringUnique> partitionIdToParam = Multimaps.index(
-				theParamsToRemove, t -> Optional.ofNullable(t.getPartitionId().getPartitionId()));
+				RequestDetails theRequestDetails, Collection<ResourceIndexedComboStringUnique> theParamsToRemove) {
+			ImmutableListMultimap<Optional<Integer>, ResourceIndexedComboStringUnique> partitionIdToParam =
+					Multimaps.index(
+							theParamsToRemove,
+							t -> Optional.ofNullable(t.getPartitionId().getPartitionId()));
 			Map<String, ResourceIndexedComboStringUnique> existingStringToParam = null;
 			for (Optional<Integer> partitionId : partitionIdToParam.keySet()) {
 				List<ResourceIndexedComboStringUnique> params = partitionIdToParam.get(partitionId);
 				Stream<String> paramIndexStringsStream =
-					params.stream().map(ResourceIndexedComboStringUnique::getIndexString);
+						params.stream().map(ResourceIndexedComboStringUnique::getIndexString);
 				List<List<String>> paramIndexStringsChunks =
-					QueryChunker.chunk(paramIndexStringsStream).toList();
+						QueryChunker.chunk(paramIndexStringsStream).toList();
 				for (List<String> paramIndexStrings : paramIndexStringsChunks) {
 
 					List<ResourceIndexedComboStringUnique> existingParams = myTransactionSvc
-						.withRequest(theRequestDetails)
-						.withRequestPartitionId(RequestPartitionId.fromPartitionId(partitionId.orElse(null)))
-						.execute(() -> {
-							if (partitionId.isEmpty()) {
-								return myResourceIndexedCompositeStringUniqueDao.findByQueryStringNullPartitionAndFetchResource(
-									paramIndexStrings);
-							} else {
-								return myResourceIndexedCompositeStringUniqueDao.findByQueryStringAndFetchResource(
-									partitionId.get(), paramIndexStrings);
-							}
-						});
+							.withRequest(theRequestDetails)
+							.withRequestPartitionId(RequestPartitionId.fromPartitionId(partitionId.orElse(null)))
+							.execute(() -> {
+								if (partitionId.isEmpty()) {
+									return myResourceIndexedCompositeStringUniqueDao
+											.findByQueryStringNullPartitionAndFetchResource(paramIndexStrings);
+								} else {
+									return myResourceIndexedCompositeStringUniqueDao.findByQueryStringAndFetchResource(
+											partitionId.get(), paramIndexStrings);
+								}
+							});
 
 					if (!existingParams.isEmpty()) {
 						if (existingStringToParam == null) {
@@ -243,6 +248,5 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 
 			return existingStringToParam;
 		}
-
 	}
 }

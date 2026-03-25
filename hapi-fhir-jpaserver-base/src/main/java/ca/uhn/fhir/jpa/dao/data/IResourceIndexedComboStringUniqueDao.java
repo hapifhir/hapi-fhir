@@ -32,7 +32,8 @@ public interface IResourceIndexedComboStringUniqueDao extends JpaRepository<Reso
 
 	@Query(
 			"SELECT r FROM ResourceIndexedComboStringUnique r JOIN FETCH r.myResource WHERE r.myPartitionIdValue IS NULL AND r.myIndexString IN (:str)")
-	List<ResourceIndexedComboStringUnique> findByQueryStringNullPartitionAndFetchResource(@Param("str") List<String> theQueryStrings);
+	List<ResourceIndexedComboStringUnique> findByQueryStringNullPartitionAndFetchResource(
+			@Param("str") List<String> theQueryStrings);
 
 	@Query(
 			"SELECT r FROM ResourceIndexedComboStringUnique r JOIN FETCH r.myResource WHERE r.myPartitionIdValue = :pid AND r.myIndexString IN (:str)")
