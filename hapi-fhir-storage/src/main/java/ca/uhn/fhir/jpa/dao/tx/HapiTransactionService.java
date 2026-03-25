@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.dao.DaoFailureUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IExceptionAwareRollbackAction;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -658,10 +659,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 					Runnable rollbackUndoAction = rollbackUndoActions.get(i);
 					rollbackUndoAction.run();
 
-					if (rollbackUndoAction
-							instanceof
-							ca.uhn.fhir.rest.api.server.storage.IExceptionAwareRollbackAction
-							exceptionConvertingRollbackAction) {
+					if (rollbackUndoAction instanceof IExceptionAwareRollbackAction exceptionConvertingRollbackAction) {
 						cause = exceptionConvertingRollbackAction.onRollback(theCause);
 						cause = getIfNull(cause, theCause);
 					}
