@@ -1952,6 +1952,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		if (!equalPropertyFilters.isEmpty()) {
 			Collection<TermConcept> concepts = myConceptDao.fetchConceptsAndPropertiesByVersionPid(theVersion.getPid());
+			// Pre-load designations into the session cache to avoid N+1 lazy loading in the loop below
+			myConceptDao.fetchConceptsAndDesignationsByVersionPid(theVersion.getPid());
 			for (TermConcept next : concepts) {
 				if (conceptMatchesAllPropertyFilters(next, equalPropertyFilters)) {
 					addCodeIfNotAlreadyAdded(
@@ -2017,8 +2019,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			TermConcept theConcept, List<ValueSet.ConceptSetFilterComponent> theFilters) {
 		for (ValueSet.ConceptSetFilterComponent filter : theFilters) {
 			boolean matchesFilter = theConcept.getProperties().stream()
-					.anyMatch(p -> filter.getProperty().equals(p.getKey())
-							&& filter.getValue().equals(p.getValue()));
+					.anyMatch(p -> Objects.equals(filter.getProperty(), p.getKey())
+							&& Objects.equals(filter.getValue(), p.getValue()));
 			if (!matchesFilter) {
 				return false;
 			}

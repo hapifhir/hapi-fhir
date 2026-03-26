@@ -43,7 +43,6 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4ValueSetHSearchDisabledTest.class);
 
-
 	@Autowired
 	private FhirContext myFhirCtx;
 	@Autowired
@@ -151,31 +150,12 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 
 	@Test
 	void testExpandByPropertyEqualFilter_whenHibernateSearchDisabled() {
-		// Set up - CodeSystem with 4 concepts, each with a TTY property
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setId("v3-rxNorm");
-		codeSystem.setUrl("http://www.nlm.nih.gov/research/umls/rxnorm");
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		codeSystem.addConcept().setCode("748856").setDisplay("Yaz 28 Day Pack")
-			.addProperty().setCode("TTY").setValue(new StringType("BPCK"));
-		codeSystem.addConcept().setCode("748832").setDisplay("Levonorgestrel Pack")
-			.addProperty().setCode("TTY").setValue(new StringType("GPCK"));
-		codeSystem.addConcept().setCode("95267").setDisplay("glucose 500 MG/ML Oral Solution")
-			.addProperty().setCode("TTY").setValue(new StringType("SCD"));
-		codeSystem.addConcept().setCode("91668").setDisplay("tetracycline Ophthalmic Ointment")
-			.addProperty().setCode("TTY").setValue(new StringType("SBD"));
+		// Set up - CodeSystem with 3 concepts, each with a TTY property
+		CodeSystem codeSystem = mockCodeSystem("cs-id-1");
 		persistCodeSystem(codeSystem);
 
-		// ValueSet filtering on TTY=SBD and TTY=SCD
-		ValueSet valueSet = new ValueSet();
-		valueSet.setId("NonPackSemanticDrugVS");
-		valueSet.setUrl("http://hl7.org/fhir/us/davinci-drug-formulary/ValueSet/NonPackSemanticDrugVS");
-		valueSet.getCompose().addInclude()
-			.setSystem("http://www.nlm.nih.gov/research/umls/rxnorm")
-			.addFilter().setProperty("TTY").setOp(ValueSet.FilterOperator.EQUAL).setValue("SBD");
-		valueSet.getCompose().addInclude()
-			.setSystem("http://www.nlm.nih.gov/research/umls/rxnorm")
-			.addFilter().setProperty("TTY").setOp(ValueSet.FilterOperator.EQUAL).setValue("SCD");
+		// ValueSet filtering on TTY=SBD
+		ValueSet valueSet = mockValueSet("vs-id-1", "cs-id-1");
 		persistValueSet(valueSet);
 
 		// Execute
@@ -189,9 +169,82 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 
 		// Verify
+		assertThat(codeSystem.getConcept()).hasSize(3);
 		List<String> codes = expanded.getExpansion().getContains().stream()
 			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
 			.toList();
-		assertThat(codes).containsExactlyInAnyOrder("91668", "95267");
+		assertThat(codes).containsExactlyInAnyOrder("Code-0", "Code-1");
+	}
+
+	@Test
+	void testExpandByPropertyEqualFilter_doesNotCauseNPlus1DesignationQueries() {
+		CodeSystem codeSystem = mockCodeSystem("cs-id-2");
+		persistCodeSystem(codeSystem);
+
+		ValueSet valueSet = mockValueSet("vs-id-2", "cs-id-2");
+		persistValueSet(valueSet);
+
+		// Execute with query capture
+		myCaptureQueriesListener.clear();
+		Parameters responseParam = myServer.getFhirClient()
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
+		ValueSet expanded = (ValueSet) responseParam.getParameter().get(0).getResource();
+
+		// Verify
+		List<String> codes = expanded.getExpansion().getContains().stream()
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.toList();
+		assertThat(codes).containsExactlyInAnyOrder("Code-0", "Code-1");
+
+		// Check for N+1: count queries that hit the designation table to make sure
+		// it's not doing one query per concept to fetch designations
+		long designationQueries = myCaptureQueriesListener.getSelectQueries().stream()
+			.map(q -> q.getSql(true, false))
+			.filter(sql -> sql.toLowerCase().contains("trm_concept_desig"))
+			.count();
+		ourLog.info("Designation queries: {}", designationQueries);
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertThat(designationQueries)
+			.as("Expected at most 1 designation query (eager fetch), but got N+1 lazy loads")
+			.isLessThanOrEqualTo(1);
+	}
+
+	private CodeSystem mockCodeSystem(String id) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId(id);
+		codeSystem.setUrl("https://example.org/" + id);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		for (int i = 0; i < 2; i++) {
+			CodeSystem.ConceptDefinitionComponent concept = codeSystem.addConcept()
+				.setCode("Code-" + i)
+				.setDisplay("Display-" + i);
+			concept.addProperty().setCode("TTY").setValue(new StringType("SBD"));
+			concept.addDesignation().setLanguage("en").setValue("Designation " + i);
+		}
+
+		CodeSystem.ConceptDefinitionComponent concept = codeSystem.addConcept()
+			.setCode("Code-2")
+			.setDisplay("Display-2");
+		concept.addProperty().setCode("TTY").setValue(new StringType("TEST"));
+		concept.addDesignation().setLanguage("en").setValue("Desig-test");
+
+		return codeSystem;
+	}
+
+	private ValueSet mockValueSet(String id, String codeSystemId) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId(id);
+		valueSet.setUrl("https://example.org/" + id);
+		valueSet.getCompose().addInclude()
+			.setSystem("https://example.org/" + codeSystemId)
+			.addFilter().setProperty("TTY").setOp(ValueSet.FilterOperator.EQUAL).setValue("SBD");
+
+		return valueSet;
 	}
 }
