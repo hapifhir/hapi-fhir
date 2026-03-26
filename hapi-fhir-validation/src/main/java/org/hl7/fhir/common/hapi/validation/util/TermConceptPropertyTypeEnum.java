@@ -19,7 +19,11 @@
  */
 package org.hl7.fhir.common.hapi.validation.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -28,6 +32,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * An enum representing the possible types of a concept property
  */
 public enum TermConceptPropertyTypeEnum {
+
 	/**
 	 * Do not change order - the ordinal is used by hibernate in the column.
 	 * TermConceptProperty#getType()
@@ -62,6 +67,7 @@ public enum TermConceptPropertyTypeEnum {
 	 */
 	DATETIME("dateTime", true);
 
+	private static final Logger ourLog = LoggerFactory.getLogger(TermConceptPropertyTypeEnum.class);
 	private static final Map<String, TermConceptPropertyTypeEnum> ourDatatypeMap = new HashMap<>();
 	private final String myDatatype;
 	private final boolean myPrimitive;
@@ -84,8 +90,10 @@ public enum TermConceptPropertyTypeEnum {
 	public static TermConceptPropertyTypeEnum fromString(String theString) {
 		TermConceptPropertyTypeEnum retVal;
 		try {
-			retVal = TermConceptPropertyTypeEnum.valueOf(defaultString(theString));
+			retVal =
+					TermConceptPropertyTypeEnum.valueOf(defaultString(theString).toUpperCase(Locale.US));
 		} catch (Exception e) {
+			ourLog.warn("Unknown Concept Property Type: {}", theString);
 			retVal = TermConceptPropertyTypeEnum.STRING;
 		}
 		return retVal;

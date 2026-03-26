@@ -124,14 +124,20 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			String codeSystemUrl = theCodeSystemUrl.getValue();
 			codeSystemUrl = trim(codeSystemUrl);
 
-			UploadStatistics stats = switch (codeSystemUrl) {
-				case ITermLoaderSvc.ICD10_URI -> myTerminologyLoaderSvc.loadIcd10(localFiles, theRequestDetails);
-				case ITermLoaderSvc.ICD10CM_URI -> myTerminologyLoaderSvc.loadIcd10cm(localFiles, theRequestDetails);
-				case ITermLoaderSvc.IMGTHLA_URI -> myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
-				case ITermLoaderSvc.LOINC_URI -> myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
-				case ITermLoaderSvc.SCT_URI -> myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
-				default -> myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
-			};
+			UploadStatistics stats =
+					switch (codeSystemUrl) {
+						case ITermLoaderSvc.ICD10_URI -> myTerminologyLoaderSvc.loadIcd10(
+								localFiles, theRequestDetails);
+						case ITermLoaderSvc.ICD10CM_URI -> myTerminologyLoaderSvc.loadIcd10cm(
+								localFiles, theRequestDetails);
+						case ITermLoaderSvc.IMGTHLA_URI -> myTerminologyLoaderSvc.loadImgthla(
+								localFiles, theRequestDetails);
+						case ITermLoaderSvc.LOINC_URI -> myTerminologyLoaderSvc.loadLoinc(
+								localFiles, theRequestDetails);
+						case ITermLoaderSvc.SCT_URI -> myTerminologyLoaderSvc.loadSnomedCt(
+								localFiles, theRequestDetails);
+						default -> myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
+					};
 
 			IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 			ParametersUtil.addParameterToParametersBoolean(getContext(), retVal, RESP_PARAM_SUCCESS, true);

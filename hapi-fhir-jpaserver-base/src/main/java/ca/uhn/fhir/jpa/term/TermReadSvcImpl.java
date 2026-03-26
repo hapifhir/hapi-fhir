@@ -73,7 +73,6 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -2834,15 +2833,18 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							result.getProperties().add(property);
 						}
 						case INTEGER -> {
-							IntegerConceptProperty property = new IntegerConceptProperty(next.getKey(), new IntegerDt(next.getValue()).getValue());
+							IntegerConceptProperty property = new IntegerConceptProperty(
+									next.getKey(), new IntegerDt(next.getValue()).getValue());
 							result.getProperties().add(property);
 						}
 						case DECIMAL -> {
-							DecimalConceptProperty property = new DecimalConceptProperty(next.getKey(), new DecimalDt(next.getValue()).getValue());
+							DecimalConceptProperty property = new DecimalConceptProperty(
+									next.getKey(), new DecimalDt(next.getValue()).getValue());
 							result.getProperties().add(property);
 						}
 						case DATETIME -> {
-							DateTimeConceptProperty property = new DateTimeConceptProperty(next.getKey(), next.getValue());
+							DateTimeConceptProperty property =
+									new DateTimeConceptProperty(next.getKey(), next.getValue());
 							result.getProperties().add(property);
 						}
 						default -> throw new InternalErrorException(Msg.code(905) + "Unknown type: " + next.getType());

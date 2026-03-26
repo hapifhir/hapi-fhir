@@ -1394,7 +1394,10 @@ public interface IValidationSupport {
 					DecimalConceptProperty decimalConceptProperty = (DecimalConceptProperty) theConceptProperty;
 					if (decimalConceptProperty.getValue() != null) {
 						ParametersUtil.addPartDecimal(
-							theContext, theProperty, "value", decimalConceptProperty.getValue().doubleValue());
+								theContext,
+								theProperty,
+								"value",
+								decimalConceptProperty.getValue().doubleValue());
 					}
 					break;
 				case TYPE_DATETIME:

@@ -135,10 +135,11 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 	}
 
 	@Test
-	public void testDeltaAdd() throws IOException {
+	public void testDeltaAdd_ByCsv() throws IOException {
 
 		myFiles.addFileText(loadResource("/custom_term/concepts.csv"), "concepts.csv");
 		myFiles.addFileText(loadResource("/custom_term/hierarchy.csv"), "hierarchy.csv");
+		myFiles.addFileText(loadResource("/custom_term/properties.csv"), "properties.csv");
 
 		UploadStatistics stats = new UploadStatistics(100, new IdType("CodeSystem/100"));
 		when(myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(eq("http://foo/system"), any())).thenReturn(stats);
@@ -164,11 +165,28 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		assertEquals("NEUT", set.getRootConcepts().get(0).getChildren().get(1).getChild().getCode());
 		assertEquals("Neutrophils", set.getRootConcepts().get(0).getChildren().get(1).getChild().getDisplay());
 
+		// Properties
+		TermConcept hbCode = set.getRootConcepts().get(0).getChildren().get(0).getChild();
+		assertEquals("HB", hbCode.getCode());
+		assertEquals(TermConceptPropertyTypeEnum.STRING, hbCode.getPropertyType("color"));
+		assertEquals("red", hbCode.getStringProperty("color"));
+		assertEquals(TermConceptPropertyTypeEnum.CODING, hbCode.getPropertyType("loinc_equiv"));
+		assertEquals("http://loinc.org", hbCode.getCodingProperties("loinc_equiv").get(0).getSystem());
+		assertEquals("1-2345", hbCode.getCodingProperties("loinc_equiv").get(0).getCode());
+		assertEquals(TermConceptPropertyTypeEnum.INTEGER, hbCode.getPropertyType("sequence"));
+		assertEquals("25", hbCode.getPrimitiveProperty("sequence"));
+		assertEquals(TermConceptPropertyTypeEnum.BOOLEAN, hbCode.getPropertyType("archived"));
+		assertEquals("false", hbCode.getPrimitiveProperty("archived"));
+		assertEquals(TermConceptPropertyTypeEnum.DATETIME, hbCode.getPropertyType("created"));
+		assertEquals("2022-01-01", hbCode.getPrimitiveProperty("created"));
+		assertEquals(TermConceptPropertyTypeEnum.DECIMAL, hbCode.getPropertyType("k_score"));
+		assertEquals("1.23", hbCode.getPrimitiveProperty("k_score"));
+
 	}
 
 	@ParameterizedTest
 	@EnumSource(value = TermConceptPropertyTypeEnum.class)
-	void testDeltaAdd_PropertyCoding(TermConceptPropertyTypeEnum thePropertyType) {
+	void testDeltaAdd_ByCodeSystem_PropertyCoding(TermConceptPropertyTypeEnum thePropertyType) {
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://foo/system");

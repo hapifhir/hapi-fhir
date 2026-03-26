@@ -91,8 +91,8 @@ public class PropertyHandler implements IZipContentsHandlerCsv {
 					conceptProperty.setValue(coding.getCode());
 					conceptProperty.setDisplay(coding.getDisplay());
 				}
-				default ->
-					throw new IllegalArgumentException(Msg.code(2886) + "Unable to handle property type: " + type);
+				default -> throw new IllegalArgumentException(
+						Msg.code(2886) + "Unable to handle property type: " + type);
 			}
 
 			conceptProperties.add(conceptProperty);

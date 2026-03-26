@@ -51,7 +51,7 @@ public class CodeSystemToCustomCsvConverter {
 	 */
 	@Nonnull
 	public List<ITermLoaderSvc.FileDescriptor> convertCodeSystemsToFileDescriptors(
-		@Nullable Collection<IBaseResource> theInputCodeSystems) {
+			@Nullable Collection<IBaseResource> theInputCodeSystems) {
 
 		List<ITermLoaderSvc.FileDescriptor> outputFiles = new ArrayList<>();
 		Map<String, String> codes = new LinkedHashMap<>();
@@ -169,13 +169,14 @@ public class CodeSystemToCustomCsvConverter {
 		ValidateUtil.isTrueOrThrowInvalidRequest(
 				resourceDef.getName().equals("CodeSystem"), "Resource '%s' is not a CodeSystem", resourceDef.getName());
 
-		CodeSystem nextCodeSystem = switch (myFhirContext.getVersion().getVersion()) {
-			case DSTU3 -> (CodeSystem) VersionConvertorFactory_30_40.convertResource(
-				(org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem, new BaseAdvisor_30_40(false));
-			case R5 -> (CodeSystem) VersionConvertorFactory_40_50.convertResource(
-				(org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, new BaseAdvisor_40_50(false));
-			default -> (CodeSystem) theCodeSystem;
-		};
+		CodeSystem nextCodeSystem =
+				switch (myFhirContext.getVersion().getVersion()) {
+					case DSTU3 -> (CodeSystem) VersionConvertorFactory_30_40.convertResource(
+							(org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem, new BaseAdvisor_30_40(false));
+					case R5 -> (CodeSystem) VersionConvertorFactory_40_50.convertResource(
+							(org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, new BaseAdvisor_40_50(false));
+					default -> (CodeSystem) theCodeSystem;
+				};
 		return nextCodeSystem;
 	}
 

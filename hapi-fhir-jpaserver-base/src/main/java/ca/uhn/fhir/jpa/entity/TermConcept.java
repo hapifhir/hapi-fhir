@@ -27,6 +27,7 @@ import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
@@ -75,6 +76,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericFie
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hibernate.type.SqlTypes;
+import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.r4.model.Coding;
 
 import java.io.Serializable;
@@ -448,6 +450,15 @@ public class TermConcept implements Serializable {
 		return this;
 	}
 
+	@Nullable
+	public TermConceptPropertyTypeEnum getPropertyType(String thePropertyName) {
+		return myProperties.stream()
+				.filter(t -> t.getKey().equals(thePropertyName))
+				.findFirst()
+				.map(TermConceptProperty::getType)
+				.orElse(null);
+	}
+
 	public List<String> getStringProperties(String thePropertyName) {
 		List<String> retVal = new ArrayList<>();
 		for (TermConceptProperty next : getProperties()) {
@@ -458,6 +469,18 @@ public class TermConcept implements Serializable {
 			}
 		}
 		return retVal;
+	}
+
+	/**
+	 * Returns the value of the first property having a given property name. The property
+	 * must be a primitive property (e.g. a string, integer, etc.)
+	 */
+	public String getPrimitiveProperty(String thePropertyName) {
+		return myProperties.stream()
+				.filter(t -> t.getKey().equals(thePropertyName))
+				.findFirst()
+				.map(TermConceptProperty::getValue)
+				.orElse(null);
 	}
 
 	public String getStringProperty(String thePropertyName) {
