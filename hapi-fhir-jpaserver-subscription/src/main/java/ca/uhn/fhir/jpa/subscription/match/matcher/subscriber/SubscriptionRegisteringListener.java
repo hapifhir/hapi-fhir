@@ -102,7 +102,7 @@ public class SubscriptionRegisteringListener implements IMessageListener<Resourc
 
 		IIdType payloadId = payload.getPayloadId(myFhirContext).toUnqualifiedVersionless();
 		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
-		RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
+		RequestDetails systemRequestDetails = createRequestDetails(payload);
 		IBaseResource payloadResource;
 		try {
 			payloadResource = subscriptionDao.read(payloadId, systemRequestDetails, true);
@@ -154,7 +154,7 @@ public class SubscriptionRegisteringListener implements IMessageListener<Resourc
 	 * Subscriptions while partitioning was enabled). If any partition matches these criteria,
 	 * {@link RequestPartitionId#defaultPartition(IDefaultPartitionSettings)} is used to get the default partition.
 	 */
-	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
+	private RequestDetails createRequestDetails(ResourceModifiedMessage payload) {
 		Integer defaultPartitionId = getDefaultPartitionId();
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
 		if (payloadPartitionId == null || payloadPartitionId.isPartition(defaultPartitionId)) {
