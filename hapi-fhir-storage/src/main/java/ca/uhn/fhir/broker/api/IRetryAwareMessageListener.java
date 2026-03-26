@@ -51,7 +51,7 @@ public interface IRetryAwareMessageListener<T> extends IMessageListener<T> {
 	 * @param theMessageDeliveryContext details about the message delivery if available
 	 * @param theMessage                the message that was received
 	 */
-	@Deprecated(since = "8.7.0")
+	@Deprecated(since = "8.9.7")
 	default void handleMessage(
 			@Nonnull IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage) {
 		throw new UnsupportedOperationException("Not supported");

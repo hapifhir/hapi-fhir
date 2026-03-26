@@ -1,0 +1,11 @@
+---
+type: add
+issue: 7670
+title: "Added the interface IAsyncMessageListener that can be used
+      to allow for message handling workers to engage in long-running
+      processes and not trigger rebalances (that potentially can lead
+      to duplicate work or rebalancing issues on message brokers).
+      NB: This should be used sparingly, as it's almost always a better
+      idea to increase the polling interval of whatever message broker
+      is backing the system.
+"

@@ -19,11 +19,6 @@ import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
-import ca.uhn.fhir.broker.api.IBrokerClient;
-import ca.uhn.fhir.broker.api.IChannelNamer;
-import ca.uhn.fhir.broker.api.IChannelProducer;
-import ca.uhn.fhir.broker.api.IChannelSettings;
-import ca.uhn.fhir.broker.impl.LinkedBlockingBrokerClient;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
@@ -52,10 +47,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -88,37 +80,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @ContextConfiguration(classes = {
-	Batch2FastSchedulerConfig.class,
-	JpaJobPersistenceImplTest.TestConfig.class
+	Batch2FastSchedulerConfig.class
 })
 @Import(SpyOverrideConfig.class)
 public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
-
-	@Configuration
-	static class TestConfig {
-
-		@Primary
-		@Bean
-		IChannelProducer<JobWorkNotification> producer(IChannelProducer<JobWorkNotification> myProducer) {
-			return spy(myProducer);
-		}
-
-		@Bean
-		IBrokerClient brokerClient() {
-			return new LinkedBlockingBrokerClient(new IChannelNamer() {
-				@Override
-				public String getChannelName(String theNameComponent, IChannelSettings theChannelSettings) {
-					return theNameComponent + "-test";
-				}
-			});
-		}
-	}
 
 	public static final String JOB_DEFINITION_ID = "definition-id";
 	public static final String FIRST_STEP_ID = TestJobDefinitionUtils.FIRST_STEP_ID;
@@ -142,9 +112,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	// this is our spy
 	@Autowired
 	private BatchJobSender myBatchSender;
-
-	@Autowired
-	IChannelProducer<JobWorkNotification> myProducer;
 
 	@Autowired
 	private IJobMaintenanceService myMaintenanceService;
