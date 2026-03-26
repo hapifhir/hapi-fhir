@@ -992,6 +992,10 @@
 			<id>kathbigra</id>
 			<name>Faisal Dilawar</name>
 		</developer>
+		<developer>
+			<id>mjga-trifork</id>
+			<name>Michael Jensen Garde</name>
+		</developer>
 	</developers>
 
 	<licenses>

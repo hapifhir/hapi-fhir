@@ -519,6 +519,21 @@ public class SearchQueryBuilder {
 		}
 	}
 
+	/**
+	 * Build a join {@link Condition} from two equal-length column arrays (as returned by {@link #toJoinColumns}).
+	 */
+	public static Condition toJoinCondition(DbColumn[] theFromColumns, DbColumn[] theToColumns) {
+		assert theFromColumns.length == theToColumns.length;
+		if (theFromColumns.length == 1) {
+			return BinaryCondition.equalTo(theFromColumns[0], theToColumns[0]);
+		}
+		Condition[] conditions = new Condition[theFromColumns.length];
+		for (int i = 0; i < theFromColumns.length; i++) {
+			conditions[i] = BinaryCondition.equalTo(theFromColumns[i], theToColumns[i]);
+		}
+		return ComboCondition.and(conditions);
+	}
+
 	public boolean isIncludePartitionIdInJoins() {
 		return mySelectPartitionId && myPartitionSettings.isDatabasePartitionMode();
 	}

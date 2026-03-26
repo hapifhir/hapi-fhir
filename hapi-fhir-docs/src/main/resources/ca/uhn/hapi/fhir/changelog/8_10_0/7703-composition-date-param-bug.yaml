@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 7703
+title: "Previously, when a composite unique SearchParameter included a Date-type component with an
+  uplifted refchain SearchParameter (e.g. composition.medicationdispense.whenprepared),
+  searching with a date-time value containing a timezone offset (e.g. -04:00) would return
+  zero results, and conditional updates using the same criteria would fail with a 409 Conflict.
+  The search now correctly detects uplifted refchain search parameters to handle timezone
+  normalization correctly."
