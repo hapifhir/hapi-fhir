@@ -63,9 +63,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	private static final String RESP_PARAM_SUCCESS = "success";
 
 	@Autowired
-	private FhirContext myFhirContext;
-
-	@Autowired
 	private ITermLoaderSvc myTerminologyLoaderSvc;
 
 	/**
@@ -181,7 +178,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			validateHaveFiles(theFiles, theCodeSystems);
 
 			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
-			files.addAll(new CodeSystemToCustomCsvConverter(myFhirContext)
+			files.addAll(new CodeSystemToCustomCsvConverter(getContext())
 					.convertCodeSystemsToFileDescriptors(theCodeSystems));
 			UploadStatistics outcome =
 					myTerminologyLoaderSvc.loadDeltaAdd(theSystem.getValue(), files, theRequestDetails);
@@ -220,7 +217,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			validateHaveFiles(theFiles, theCodeSystems);
 
 			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
-			files.addAll(new CodeSystemToCustomCsvConverter(myFhirContext)
+			files.addAll(new CodeSystemToCustomCsvConverter(getContext())
 					.convertCodeSystemsToFileDescriptors(theCodeSystems));
 			UploadStatistics outcome =
 					myTerminologyLoaderSvc.loadDeltaRemove(theSystem.getValue(), files, theRequestDetails);
