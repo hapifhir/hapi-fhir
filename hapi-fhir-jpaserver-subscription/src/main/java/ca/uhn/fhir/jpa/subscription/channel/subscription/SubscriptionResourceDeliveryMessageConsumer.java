@@ -40,6 +40,7 @@ public class SubscriptionResourceDeliveryMessageConsumer implements AutoCloseabl
 
 	public SubscriptionResourceDeliveryMessageConsumer(IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
 		myConsumer = theConsumer;
+		// see if we can refactor to get rid of this cast
 		myMultiplexingListener = (MultiplexingListener<ResourceDeliveryMessage>) theConsumer.getMessageListener();
 	}
 
@@ -48,8 +49,8 @@ public class SubscriptionResourceDeliveryMessageConsumer implements AutoCloseabl
 	}
 
 	public boolean removeListener(IMessageListener<ResourceDeliveryMessage> theListener) {
-		if (theListener instanceof AutoCloseable) {
-			IoUtils.closeQuietly((AutoCloseable) theListener, ourLog);
+		if (theListener instanceof AutoCloseable autoCloseable) {
+			IoUtils.closeQuietly(autoCloseable, ourLog);
 		}
 		return myMultiplexingListener.removeListener(theListener);
 	}

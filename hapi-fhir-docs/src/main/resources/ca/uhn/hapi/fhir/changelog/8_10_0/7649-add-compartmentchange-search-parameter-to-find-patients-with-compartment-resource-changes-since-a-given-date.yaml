@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7649
+title: "Added a new `_compartmentLastUpdated` search parameter for Patient searches. This parameter accepts a date
+  range and returns Patient resources that have either been directly updated within the specified date range,
+  or that have compartment resources (e.g. Observations, Conditions) created or updated within that range."
