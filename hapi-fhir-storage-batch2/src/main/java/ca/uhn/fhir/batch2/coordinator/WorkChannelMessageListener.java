@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.broker.api.IAsyncMessageListener;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -44,9 +45,18 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * This handler receives batch work request messages and performs the batch work requested by the message
+ * This handler receives batch work request messages and performs the batch work requested by the message.
+ *
+ * We are using an {@link IAsyncMessageListener} because some of our batchjobs
+ * may run very long processes (lookin' at you, bulkexport) and we don't want these
+ * long processes to fail and cause rebalances because
+ * this might result in duplicate chunks piling up and either stalling the job indefinitely,
+ * or producing duplicate results.
+ *
+ * NB: we don't control the timeout settings of their messaging service (only consumers do that),
+ * so this is the best we can do aside from logging (which we already do).
  */
-public class WorkChannelMessageListener implements IMessageListener<JobWorkNotification> {
+public class WorkChannelMessageListener implements IAsyncMessageListener<JobWorkNotification> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IJobPersistence myJobPersistence;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
