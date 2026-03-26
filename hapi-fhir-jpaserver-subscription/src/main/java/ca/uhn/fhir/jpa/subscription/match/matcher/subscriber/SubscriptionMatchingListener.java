@@ -127,7 +127,6 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 		}
 	}
 
-	// TODO - update
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		IIdType resourceId = theMsg.getPayloadId(myFhirContext);
 

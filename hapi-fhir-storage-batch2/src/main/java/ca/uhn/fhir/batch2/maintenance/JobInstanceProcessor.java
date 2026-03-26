@@ -404,25 +404,21 @@ public class JobInstanceProcessor {
 	 */
 	private void updateChunkAndSendToQueue(WorkChunkMetadata theChunk) {
 		String chunkId = theChunk.getId();
-		try {
-			myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
-				ourLog.info("Updated {} workchunk with id {}", updated, chunkId);
-				if (updated == 1) {
-					sendNotification(theChunk);
-				} else {
-					// means the work chunk is likely already gone...
-					// we'll log and skip it. If it's still in the DB, the next pass
-					// will pick it up. Otherwise, it's no longer important
-					ourLog.error(
-						"Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; found {}, expected 1; skipping work chunk.",
-						theChunk.getInstanceId(),
-						theChunk.getId(),
-						updated);
-				}
-			});
-		} catch (Exception ex) {
-			ourLog.error("ZZZZZZ error creating new workchunk");
-		}
+		myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
+			ourLog.info("Updated {} workchunk with id {}", updated, chunkId);
+			if (updated == 1) {
+				sendNotification(theChunk);
+			} else {
+				// means the work chunk is likely already gone...
+				// we'll log and skip it. If it's still in the DB, the next pass
+				// will pick it up. Otherwise, it's no longer important
+				ourLog.error(
+					"Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; found {}, expected 1; skipping work chunk.",
+					theChunk.getInstanceId(),
+					theChunk.getId(),
+					updated);
+			}
+		});
 	}
 
 	private void sendNotification(WorkChunkMetadata theChunk) {

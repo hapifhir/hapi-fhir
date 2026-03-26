@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.mdm.broker;
 
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -74,7 +75,7 @@ public class MdmMessageListener implements IMessageListener<ResourceModifiedMess
 	private IMdmModelConverterSvc myModelConverter;
 
 	@Override
-	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage) throws MessagingException {
+	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage, IChannelConsumer<ResourceModifiedMessage> theConsumer) throws MessagingException {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
 		ResourceModifiedMessage msg = theMessage.getPayload();
