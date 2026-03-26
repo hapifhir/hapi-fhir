@@ -156,6 +156,18 @@ public class MatchUrlService {
 						paramMap.setLastUpdated(p1);
 					}
 				}
+			} else if (Constants.PARAM_COMPARTMENT_LAST_UPDATED.equals(nextParamName)) {
+				if (!paramList.isEmpty()) {
+					if (paramList.size() > 2) {
+						throw new InvalidRequestException(Msg.code(2877) + "Failed to parse match URL[" + theMatchUrl
+								+ "] - Can not have more than 2 " + Constants.PARAM_COMPARTMENT_LAST_UPDATED
+								+ " parameter repetitions");
+					} else {
+						DateRangeParam p1 = new DateRangeParam();
+						p1.setValuesAsQueryTokens(myFhirContext, nextParamName, paramList);
+						paramMap.setCompartmentLastUpdated(p1);
+					}
+				}
 			} else if (Constants.PARAM_HAS.equals(nextParamName)) {
 				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(
 						myFhirContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);

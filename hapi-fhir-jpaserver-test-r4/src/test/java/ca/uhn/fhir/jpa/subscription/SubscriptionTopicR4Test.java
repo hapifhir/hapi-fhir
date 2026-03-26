@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
@@ -146,6 +147,40 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
 	}
 	
+	@Test
+	void testNotificationEventTimestamp_isInstantType() throws Exception {
+		// setup
+		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE);
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
+		waitForRegisteredSubscriptionTopicCount();
+		createTopicSubscription("Encounter?participant-type=PRPF");
+		waitForActivatedSubscriptionCount(1);
+
+		// execute
+		Encounter sentEncounter = buildEncounter(Encounter.EncounterStatus.FINISHED, "PRPF");
+		createResource(sentEncounter, true);
+
+		// verify
+		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
+		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, receivedBundle);
+		Parameters parameters = (Parameters) resources.get(0);
+
+		Parameters.ParametersParameterComponent notificationEvent = parameters.getParameter("notification-event");
+		assertThat(notificationEvent).isNotNull();
+
+		Parameters.ParametersParameterComponent timestampPart = notificationEvent.getPart().stream()
+				.filter(p -> "timestamp".equals(p.getName()))
+				.findFirst()
+				.orElseThrow(() -> new AssertionError("timestamp part not found in notification-event"));
+
+		assertThat(timestampPart.getValue())
+				.as("timestamp should be InstantType, not DateType")
+				.isInstanceOf(InstantType.class);
+		assertThat(((InstantType) timestampPart.getValue()).getValue())
+				.as("timestamp value should not be null")
+				.isNotNull();
+	}
+
 	@Test
 	void testSubscriptionTopicShapeWithIncludeAndRevInclude() throws Exception {
 		// Create organization, patient, and observations
