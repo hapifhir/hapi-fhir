@@ -73,6 +73,8 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public static final int SRC_PATH_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
+	public static final String TABLE_NAME = "HFJ_RES_LINK";
+	public static final String SRC_RESOURCE_ID = "SRC_RESOURCE_ID";
 	public static final String TARGET_RES_PARTITION_ID = "TARGET_RES_PARTITION_ID";
 	public static final String TARGET_RESOURCE_ID = "TARGET_RESOURCE_ID";
 	public static final String FK_RESLINK_TARGET = "FK_RESLINK_TARGET";
