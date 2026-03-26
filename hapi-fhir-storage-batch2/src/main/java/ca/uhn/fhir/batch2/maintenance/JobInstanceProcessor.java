@@ -273,9 +273,9 @@ public class JobInstanceProcessor {
 		}
 
 		if (workChunkStatuses.size() > 1) {
-			ourLog.error("Found unexpected workchunks:\n"
-					+ String.join(
-							", ", workChunkStatuses.stream().map(m -> m.name()).collect(Collectors.toSet())));
+			ourLog.warn(
+					"Found unexpected workchunk statuses: {}",
+					workChunkStatuses.stream().map(WorkChunkStatusEnum::name).collect(Collectors.joining(", ")));
 		}
 
 		// all workchunks for the current step are in COMPLETED -> proceed.

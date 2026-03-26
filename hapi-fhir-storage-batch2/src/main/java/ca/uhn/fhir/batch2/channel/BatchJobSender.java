@@ -43,8 +43,7 @@ public class BatchJobSender {
 		ISendResult result = myWorkChannelProducer.send(message);
 
 		if (!result.isSuccessful()) {
-			ourLog.error("Error sending work notification {}", theJobWorkNotification);
-			throw new RuntimeException("Failure sending work notifaction");
+			throw new RuntimeException("Failure sending work notification: " + theJobWorkNotification);
 		}
 	}
 }

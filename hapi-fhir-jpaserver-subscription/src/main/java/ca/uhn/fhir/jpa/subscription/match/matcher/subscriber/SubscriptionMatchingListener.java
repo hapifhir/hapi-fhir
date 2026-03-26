@@ -91,7 +91,6 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 		matchActiveSubscriptionsAndDeliver(msg);
 	}
 
-	// TODO - update
 	public void matchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		switch (theMsg.getOperationType()) {
 			case CREATE:

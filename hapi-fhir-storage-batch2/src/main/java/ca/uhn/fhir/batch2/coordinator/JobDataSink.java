@@ -97,7 +97,6 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		myLastChunkId.set(chunkId);
 
 		if (!myGatedExecution) {
-			//			try {
 			myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
 				if (updated == 1) {
 					JobWorkNotification workNotification = new JobWorkNotification(
@@ -109,9 +108,6 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 							updated);
 				}
 			});
-			//			} catch (Exception ex) {
-			//				ourLog.error("YYYYYYError updating workchunk;");
-			//			}
 		}
 	}
 

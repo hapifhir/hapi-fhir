@@ -246,7 +246,6 @@ public class WorkChannelMessageListener implements IAsyncMessageListener<JobWork
 			// Load the job instance and work chunk IDs into the logging MDC context
 			BatchJobTracingContext.setBatchJobIds(
 					theWorkNotification.getInstanceId(), theWorkNotification.getChunkId());
-			// this is duplicated
 			ourLog.info("Received work notification for {}", theWorkNotification);
 
 			// There are three paths through this code:

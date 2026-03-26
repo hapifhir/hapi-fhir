@@ -1,16 +1,9 @@
 package ca.uhn.fhir.jpa.batch2;
 
-import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
-import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
-import ca.uhn.fhir.batch2.api.JobCompletionDetails;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.api.RunOutcome;
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
@@ -18,9 +11,7 @@ import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
-import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
@@ -32,11 +23,9 @@ import ca.uhn.fhir.broker.api.IBrokerClient;
 import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IChannelSettings;
-import ca.uhn.fhir.broker.api.ISendResult;
 import ca.uhn.fhir.broker.impl.LinkedBlockingBrokerClient;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
@@ -44,12 +33,8 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
-import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.testjob.TestJobDefinitionUtils;
 import ca.uhn.fhir.testjob.models.FirstStepOutput;
-import ca.uhn.fhir.testjob.models.TestJobParameters;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest;
 import ca.uhn.hapi.fhir.batch2.test.configs.SpyOverrideConfig;
@@ -57,9 +42,7 @@ import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import jakarta.annotation.Nonnull;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -92,14 +75,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -173,10 +151,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	@Autowired
 	public JobDefinitionRegistry myJobDefinitionRegistry;
-
-//	// in production ,this is likely to be some brand of kafka
-//	@Autowired
-//	private ISpringMessagingChannelProducer myChannelProducer;
 
 	@AfterEach
 	public void after() {
@@ -1110,255 +1084,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			myInterceptorRegistry.unregisterInterceptor(poststorageBatchJobCreateInterceptor);
 			myInterceptorRegistry.unregisterInterceptor(prestorageBatchJobCreateInterceptor);
 		}
-	}
-
-	// TODO - require a test to verify if a slow running step results in sender resending a work chunk
-
-	@Disabled
-	@Test
-	public void simulatedSlowWorkerResultingInDuplicateNotificationsAndWorkChunkProcessing() {
-		// setup
-		// we'll be manually running steps
-//		myMaintenanceService.enableMaintenancePass(false);
-		String jobId = new Exception()
-			.getStackTrace()[0].getMethodName();
-
-		/*
-		 * we'll use a series of gates to simulate a slow job step
-		 *
-		 * 1st Gate - Beginning of first step
-		 * 2nd Gate - When the second (duplicate) notification is sent
-		 * 3rd Gate - End of first step; blocks only 2nd worker
-		 * 4th Gate - Beginning of second step
-		 * 5th Gate - When 1st worker is in step 2, and 2nd worker is in step 1
-		 * 6th Gate - Notification of 2nd worker's step 1 completion
-		 * 7th Gate - Step 2
-		 */
-		AtomicReference<JobWorkNotification> notificationRef = new AtomicReference<>();
-		AtomicBoolean firstGate = new AtomicBoolean();
-		AtomicBoolean secondGate = new AtomicBoolean();
-		AtomicInteger thirdGate = new AtomicInteger();
-		AtomicBoolean forthGate = new AtomicBoolean();
-		AtomicBoolean fifthGate = new AtomicBoolean();
-		AtomicBoolean sixthGate = new AtomicBoolean();
-		AtomicBoolean seventhGate = new AtomicBoolean();
-
-		JobDefinition<? extends IModelJson> jobDef = TestJobDefinitionUtils.buildGatedJobDefinition(
-			jobId,
-			new IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput>() {
-				@Override
-				public @NotNull RunOutcome run(@NotNull StepExecutionDetails<TestJobParameters, VoidModel> theStepExecutionDetails, @NotNull IJobDataSink<FirstStepOutput> theDataSink) throws JobExecutionFailedException {
-					ourLog.debug("\nFIRST GATE ------ " + theStepExecutionDetails.getChunkId());
-					firstGate.set(true);
-
-					// wait for the notification to be resent before we complete the work
-					// this simulates a 'slow running' worker
-					await()
-						.until(() -> {
-							ourLog.debug("\nWAITING ON 2nd GATE");
-							return secondGate.get();
-						});
-
-					// 1st worker skips this gate
-					int v = thirdGate.getAndIncrement();
-					ourLog.debug("\nTHIRD GATE -------" + v + " : " + theStepExecutionDetails.getChunkId());
-					if (v == 1) {
-						// block 2nd worker here
-						// so 1st worker can continue on to step 2
-						// while 2nd worker is "still working" in step 1
-						await()
-							.until(() -> {
-								ourLog.info("\nWAITING ON 5th GATE " + theStepExecutionDetails.getChunkId());
-								return fifthGate.get();
-							});
-					}
-
-					FirstStepOutput output = new FirstStepOutput();
-					theDataSink.accept(output);
-
-					return RunOutcome.SUCCESS;
-				}
-			},
-			new IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel>() {
-				@Override
-				public @NotNull RunOutcome run(@NotNull StepExecutionDetails<TestJobParameters, FirstStepOutput> theStepExecutionDetails, @NotNull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
-					ourLog.info("\nFOURTH GATE ------ " + theStepExecutionDetails.getChunkId());
-					forthGate.set(true);
-					// block 1st worker here
-					await().until(() -> {
-						ourLog.info("\nWAITING ON 7th GATE");
-						return seventhGate.get();
-					});
-					return RunOutcome.SUCCESS;
-				}
-			},
-			new IJobCompletionHandler<TestJobParameters>() {
-				@Override
-				public void jobComplete(JobCompletionDetails<TestJobParameters> theDetails) {
-
-				}
-			}
-		);
-		myJobDefinitionRegistry.addJobDefinition(jobDef);
-
-		// we will spy this service to capture the notification
-		// and use it to make a second notification delivery
-
-		doAnswer(invocation -> {
-			JobWorkNotificationJsonMessage msg = (JobWorkNotificationJsonMessage) invocation.getArguments()[0];
-			ourLog.info("NOTIFICATION RECEIVED : \n"
-				+ msg.getPayload().toString());
-
-			if (notificationRef.get() == null) {
-				notificationRef.set(msg.getPayload());
-				return ISendResult.FAILURE;
-			}
-
-			ourLog.info("\nFIFTH GATE SET " + fifthGate.get());
-			// if 2nd worker has been released from step 1...
-			if (fifthGate.get()) {
-				// we'll alert when the new notification arrives
-				// for workchunk creation
-				ourLog.info("\nSIXTH GATE -------");
-				sixthGate.set(true);
-			}
-
-			invocation.callRealMethod();
-			return ((ISendResult) () -> true);
-		}).when(myProducer).send(any());
-//		doAnswer(invocation -> {
-//			JobWorkNotification notification = (JobWorkNotification) invocation.getArguments()[0];
-//			ourLog.info("NOTIFICATION RECEIVED : \n"
-//				+ notification.toString());
-//
-//			if (notificationRef.get() == null) {
-//				notificationRef.set(notification);
-//			}
-//
-//			ourLog.info("\nFIFTH GATE SET " + fifthGate.get());
-//			// if 2nd worker has been released from step 1...
-//			if (fifthGate.get()) {
-//				// we'll alert when the new notification arrives
-//				// for workchunk creation
-//				ourLog.info("\nSIXTH GATE -------");
-//				sixthGate.set(true);
-//			}
-//
-//			invocation.callRealMethod();
-//			return null;
-//		}).when(myBatchSender).sendWorkChannelMessage(any());
-
-		// test
-		RequestDetails rds = new SystemRequestDetails();
-		JobInstanceStartRequest start = new JobInstanceStartRequest();
-		start.setJobDefinitionId(jobId);
-		start.setParameters(new TestJobParameters());
-
-		// START!
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(rds, start);
-		assertNotNull(startResponse);
-
-		// wait for 1st worker to enter step 1
-		await()
-			.until(() -> {
-				ourLog.debug("\nWAITING ON 1st GATE");
-				myMaintenanceService.runMaintenancePass();
-				return firstGate.get();
-			});
-
-		// we reset our first gate to block the 2nd worker
-		firstGate.set(false);
-		// then resend our notification (simulate a timeout)
-		myBatchSender.sendWorkChannelMessage(notificationRef.get());
-
-		// await the 2nd worker entering first step
-		await()
-			.until(() -> {
-				ourLog.debug("\nWAITING ON 1st GATE for 2nd worker");
-				myMaintenanceService.runMaintenancePass();
-				return firstGate.get();
-			});
-
-		// release the 1st worker
-		ourLog.debug("\nSECOND GATE ------");
-		secondGate.set(true);
-
-		// wait for the 2nd worker to hit the end of the first step
-		// (NB: the 1st worker will increment gate, but not be blocked in step 1)
-		await()
-			.until(() -> {
-				myMaintenanceService.runMaintenancePass();
-				int v = thirdGate.get();
-				ourLog.debug("\nWAITING ON 3rd GATE " + v);
-				return v >= 1;
-			});
-
-		// wait for 1st worker to reach second step
-		// (this may have already happened waiting for 2nd worker to hit end of first step)
-		// but we want to make sure we're in a state where:
-		// 1st worker is in second step
-		// 2nd worker is in first step
-		await().until(() -> {
-			myMaintenanceService.runMaintenancePass();
-			ourLog.info("\nWAITING ON 4th GATE");
-			return forthGate.get();
-		});
-
-		/*
-		 * We should now have 1 worker in step 1, 1 worker in step 2
-		 * First Workchunk completed already.
-		 * A duplicate workchunk being released
-		 */
-		// release the 2nd worker
-		ourLog.info("\nFIFTH GATE -----");
-		fifthGate.set(true);
-
-		// this should allow creation of the new GATE_WAITING chunk
-		// while 1st worker is still in second step
-		await()
-			.until(() -> {
-				checkJobStatus(startResponse);
-				myMaintenanceService.runMaintenancePass();
-				ourLog.info("\nWAITING ON 6th GATE");
-				return sixthGate.get();
-			});
-
-		// second notification has been sent; release all workers
-		ourLog.info("\nSEVENTH GATE -----");
-		seventhGate.set(true);
-
-		// await completion
-		await().atMost(5, TimeUnit.SECONDS)
-			.until(() -> {
-				ourLog.info("\nWAITING ON JOB COMPLETION");
-				BatchInstanceStatusDTO status = checkJobStatus(startResponse);
-				return status.status == StatusEnum.COMPLETED;
-			});
-
-		// verify success
-		runInTransaction(() -> {
-			BatchInstanceStatusDTO status = myJobInstanceRepository.fetchBatchInstanceStatus(startResponse.getInstanceId());
-			assertEquals(StatusEnum.COMPLETED, status.status);
-		});
-	}
-
-	private BatchInstanceStatusDTO checkJobStatus(Batch2JobStartResponse startResponse) {
-		BatchInstanceStatusDTO status = runInTransaction(() -> {
-				return myJobInstanceRepository.fetchBatchInstanceStatus(startResponse.getInstanceId());
-			});
-		List<BatchWorkChunkStatusDTO> wcs = runInTransaction(() -> {
-			return myWorkChunkRepository.fetchWorkChunkStatusForInstance(startResponse.getInstanceId());
-		});
-//		ourLog.info("Found " + wcs.size() + " workchunks");
-		for (BatchWorkChunkStatusDTO wc : wcs) {
-//			ourLog.info(wc.stepId + " - " + wc.status.name());
-			if (wc.status == WorkChunkStatusEnum.GATE_WAITING) {
-				ourLog.error("GATE WAITING !!!!!!!!!");
-			}
-		}
-
-//		ourLog.info("\nJob status is " + status.status.name());
-		return status;
 	}
 
 	@Test
