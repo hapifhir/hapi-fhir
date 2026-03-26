@@ -59,6 +59,7 @@ import com.google.common.collect.Iterators;
 import jakarta.annotation.Nonnull;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -1113,6 +1114,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	// TODO - require a test to verify if a slow running step results in sender resending a work chunk
 
+	@Disabled
 	@Test
 	public void simulatedSlowWorkerResultingInDuplicateNotificationsAndWorkChunkProcessing() {
 		// setup

@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -312,20 +311,4 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean advanceJobStepAndUpdateChunkStatus(
 			String theJobInstanceId, String theNextStepId, boolean theIsReductionStepBoolean);
-
-	/**
-	 * Flips any GATE_WAITING chunks for the current gated step to READY
-	 * (or REDUCTION_READY for reduction steps). This is a safety net for late-arriving
-	 * chunks that were created after step advancement already happened.
-	 *
-	 * @param theJobInstanceId the id of the job instance
-	 * @param theCurrentStepId the current gated step id
-	 * @param theIsReductionStep whether the current step is a reduction step
-	 * @return the number of chunks that were updated
-	 */
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	default int releaseGateWaitingChunksForCurrentStep(
-		String theJobInstanceId, String theCurrentStepId, boolean theIsReductionStep) {
-		throw new NotImplementedException("Not implemented");
-	}
 }

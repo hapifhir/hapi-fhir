@@ -693,28 +693,4 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			theJobInstanceId,
 			theNextStepId);
 	}
-
-	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public int releaseGateWaitingChunksForCurrentStep(
-		String theJobInstanceId, String theCurrentStepId, boolean theIsReductionStep) {
-		ourLog.debug(
-			"Safety net: checking for late-arriving GATE_WAITING chunks for instance {} step {}.",
-			theJobInstanceId,
-			theCurrentStepId);
-		WorkChunkStatusEnum targetStatus =
-			theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
-		// Only target GATE_WAITING chunks here (not QUEUED). QUEUED chunks have already been dispatched
-		// to workers and should not be re-flipped. The QUEUED legacy handling is only needed during
-		// step advancement (in flipGateWaitingChunksForStep), not during the safety net maintenance pass.
-		int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
-			theJobInstanceId, theCurrentStepId, List.of(WorkChunkStatusEnum.GATE_WAITING), targetStatus);
-		ourLog.debug(
-			"Safety net: updated {} late-arriving GATE_WAITING chunks to {} for instance {} step {}.",
-			numChanged,
-			targetStatus,
-			theJobInstanceId,
-			theCurrentStepId);
-		return numChanged;
-	}
 }
