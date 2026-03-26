@@ -587,8 +587,13 @@ public class ConsentInterceptor {
 		return retVal;
 	}
 
-	private boolean isSkipServiceForRequest(RequestDetails theRequestDetails) {
-		// TODO MM: we could potentially aggregate all checks to skip consent into a single method
+	/**
+	 * Determine if consent should be bypassed for the given request.
+	 * @param theRequestDetails the request
+	 * @return true if the consent checks should be skipped for the request, false otherwise
+	 */
+	protected boolean isSkipServiceForRequest(RequestDetails theRequestDetails) {
+		// we could potentially aggregate all checks to skip consent into a single method
 		// isRequestAuthorized, isAllowListed into isSkipServiceForRequest
 		return isMetadataPath(theRequestDetails)
 				|| isMetaOperation(theRequestDetails)
@@ -611,8 +616,6 @@ public class ConsentInterceptor {
 	 * Call this method to bypass consent checking for a particular request {@link RequestDetails}.
 	 * Skipping consent is needed for resources that are modified in async system processing
 	 * e.g. SearchParameter initialization with subscriptions and subscription (matching) messages enabled.
-	 * This is a short term solution and is to be replaced by a long term solution.
-	 * {@see https://github.com/hapifhir/hapi-fhir/issues/7542}
 	 * @param theRequestDetails the request
 	 */
 	public static void skipAllConsentForRequest(@Nonnull RequestDetails theRequestDetails) {

@@ -1920,6 +1920,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				isNotBlank(theSystem),
 				"Can not expand ValueSet without explicit system - Hibernate Search is not enabled on this server.");
 
+		List<ValueSet.ConceptSetFilterComponent> equalPropertyFilters = new ArrayList<>();
 		for (ValueSet.ConceptSetFilterComponent nextFilter : theInclude.getFilter()) {
 			boolean handled = false;
 			switch (nextFilter.getProperty().toLowerCase()) {
@@ -1935,9 +1936,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					}
 					break;
 				default:
-					// TODO - we need to handle other properties (fields)
-					// and other operations (not just is-a)
-					// in some (preferably generic) way
+					if (nextFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+						equalPropertyFilters.add(nextFilter);
+						handled = true;
+					}
 					break;
 			}
 
@@ -1945,6 +1947,27 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				throwInvalidFilter(
 						nextFilter,
 						" - Note that Hibernate Search is disabled on this server so not all ValueSet expansion functionality is available.");
+			}
+		}
+
+		if (!equalPropertyFilters.isEmpty()) {
+			Collection<TermConcept> concepts = myConceptDao.fetchConceptsAndPropertiesByVersionPid(theVersion.getPid());
+			// Pre-load designations into the session cache to avoid N+1 lazy loading in the loop below
+			myConceptDao.fetchConceptsAndDesignationsByVersionPid(theVersion.getPid());
+			for (TermConcept next : concepts) {
+				if (conceptMatchesAllPropertyFilters(next, equalPropertyFilters)) {
+					addCodeIfNotAlreadyAdded(
+							theValueSetCodeAccumulator,
+							theAddedCodes,
+							theAdd,
+							theSystem,
+							theInclude.getVersion(),
+							next.getCode(),
+							next.getDisplay(),
+							next.getId(),
+							next.getParentPidsAsString(),
+							next.getDesignations());
+				}
 			}
 		}
 
@@ -1990,6 +2013,19 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					null,
 					designations);
 		}
+	}
+
+	private boolean conceptMatchesAllPropertyFilters(
+			TermConcept theConcept, List<ValueSet.ConceptSetFilterComponent> theFilters) {
+		for (ValueSet.ConceptSetFilterComponent filter : theFilters) {
+			boolean matchesFilter = theConcept.getProperties().stream()
+					.anyMatch(p -> Objects.equals(filter.getProperty(), p.getKey())
+							&& Objects.equals(filter.getValue(), p.getValue()));
+			if (!matchesFilter) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private void addConceptAndChildren(
