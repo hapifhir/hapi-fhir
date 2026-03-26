@@ -73,6 +73,9 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -2830,6 +2833,18 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							CodeConceptProperty property = new CodeConceptProperty(next.getKey(), next.getValue());
 							result.getProperties().add(property);
 						}
+						case INTEGER -> {
+							IntegerConceptProperty property = new IntegerConceptProperty(next.getKey(), new IntegerDt(next.getValue()).getValue());
+							result.getProperties().add(property);
+						}
+						case DECIMAL -> {
+							DecimalConceptProperty property = new DecimalConceptProperty(next.getKey(), new DecimalDt(next.getValue()).getValue());
+							result.getProperties().add(property);
+						}
+						case DATETIME -> {
+							DateTimeConceptProperty property = new DateTimeConceptProperty(next.getKey(), next.getValue());
+							result.getProperties().add(property);
+						}
 						default -> throw new InternalErrorException(Msg.code(905) + "Unknown type: " + next.getType());
 					}
 				}
@@ -3501,12 +3516,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			property.setConcept(termConcept);
 			property.setCodeSystemVersion(theCodeSystemVersion);
 
-			if (next.getValue() instanceof StringType) {
-				property.setType(TermConceptPropertyTypeEnum.STRING);
-				property.setValue(next.getValueStringType().getValue());
-			} else if (next.getValue() instanceof CodeType) {
+			if (next.getValue() instanceof CodeType) {
 				property.setType(TermConceptPropertyTypeEnum.CODE);
 				property.setValue(((CodeType) next.getValue()).getValueAsString());
+			} else if (next.getValue() instanceof StringType) {
+				property.setType(TermConceptPropertyTypeEnum.STRING);
+				property.setValue(next.getValueStringType().getValue());
 			} else if (next.getValue() instanceof BooleanType) {
 				property.setType(TermConceptPropertyTypeEnum.BOOLEAN);
 				property.setValue(((BooleanType) next.getValue()).getValueAsString());

@@ -11,6 +11,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
@@ -19,12 +20,19 @@ import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * This class converts one or more CodeSystems containing concepts as well as their
+ * hierarchies and properties into the equivalent CSV files, suitable for passing
+ * to the {@link ITermLoaderSvc}.
+ */
 public class CodeSystemToCustomCsvConverter {
 
 	private final FhirContext myFhirContext;
@@ -36,15 +44,23 @@ public class CodeSystemToCustomCsvConverter {
 		myFhirContext = theFhirContext;
 	}
 
-	public void convertCodeSystemsToFileDescriptors(
-			List<ITermLoaderSvc.FileDescriptor> theFiles, List<IBaseResource> theCodeSystems) {
+	/**
+	 * Converts a collection of CodeSystem resources into CSV files
+	 *
+	 * @param theInputCodeSystems The CodeSystem resources to convert, or {@literal null}
+	 */
+	@Nonnull
+	public List<ITermLoaderSvc.FileDescriptor> convertCodeSystemsToFileDescriptors(
+		@Nullable Collection<IBaseResource> theInputCodeSystems) {
+
+		List<ITermLoaderSvc.FileDescriptor> outputFiles = new ArrayList<>();
 		Map<String, String> codes = new LinkedHashMap<>();
 		Map<String, List<CodeSystem.ConceptPropertyComponent>> codeToProperties = new LinkedHashMap<>();
 
 		Multimap<String, String> codeToParentCodes = ArrayListMultimap.create();
 
-		if (theCodeSystems != null) {
-			for (IBaseResource nextCodeSystemUncast : theCodeSystems) {
+		if (theInputCodeSystems != null) {
+			for (IBaseResource nextCodeSystemUncast : theInputCodeSystems) {
 				CodeSystem nextCodeSystem = canonicalizeCodeSystem(nextCodeSystemUncast);
 				convertCodeSystemCodesToCsv(
 						nextCodeSystem.getConcept(), codes, codeToProperties, null, codeToParentCodes);
@@ -52,7 +68,7 @@ public class CodeSystemToCustomCsvConverter {
 		}
 
 		// Create concept file
-		if (codes.size() > 0) {
+		if (!codes.isEmpty()) {
 			StringBuilder b = new StringBuilder();
 			b.append(ConceptHandler.CODE);
 			b.append(",");
@@ -68,11 +84,11 @@ public class CodeSystemToCustomCsvConverter {
 			String fileName = TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE;
 			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
 					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
-			theFiles.add(fileDescriptor);
+			outputFiles.add(fileDescriptor);
 		}
 
 		// Create hierarchy file
-		if (codeToParentCodes.size() > 0) {
+		if (!codeToParentCodes.isEmpty()) {
 			StringBuilder b = new StringBuilder();
 			b.append(HierarchyHandler.CHILD);
 			b.append(",");
@@ -88,10 +104,10 @@ public class CodeSystemToCustomCsvConverter {
 			String fileName = TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE;
 			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
 					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
-			theFiles.add(fileDescriptor);
+			outputFiles.add(fileDescriptor);
 		}
 		// Create codeToProperties file
-		if (codeToProperties.size() > 0) {
+		if (!codeToProperties.isEmpty()) {
 			StringBuilder b = new StringBuilder();
 			b.append(PropertyHandler.CODE);
 			b.append(",");
@@ -140,8 +156,10 @@ public class CodeSystemToCustomCsvConverter {
 			String fileName = TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE;
 			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
 					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
-			theFiles.add(fileDescriptor);
+			outputFiles.add(fileDescriptor);
 		}
+
+		return outputFiles;
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
@@ -151,19 +169,13 @@ public class CodeSystemToCustomCsvConverter {
 		ValidateUtil.isTrueOrThrowInvalidRequest(
 				resourceDef.getName().equals("CodeSystem"), "Resource '%s' is not a CodeSystem", resourceDef.getName());
 
-		CodeSystem nextCodeSystem;
-		switch (myFhirContext.getVersion().getVersion()) {
-			case DSTU3:
-				nextCodeSystem = (CodeSystem) VersionConvertorFactory_30_40.convertResource(
-						(org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem, new BaseAdvisor_30_40(false));
-				break;
-			case R5:
-				nextCodeSystem = (CodeSystem) VersionConvertorFactory_40_50.convertResource(
-						(org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, new BaseAdvisor_40_50(false));
-				break;
-			default:
-				nextCodeSystem = (CodeSystem) theCodeSystem;
-		}
+		CodeSystem nextCodeSystem = switch (myFhirContext.getVersion().getVersion()) {
+			case DSTU3 -> (CodeSystem) VersionConvertorFactory_30_40.convertResource(
+				(org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem, new BaseAdvisor_30_40(false));
+			case R5 -> (CodeSystem) VersionConvertorFactory_40_50.convertResource(
+				(org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, new BaseAdvisor_40_50(false));
+			default -> (CodeSystem) theCodeSystem;
+		};
 		return nextCodeSystem;
 	}
 

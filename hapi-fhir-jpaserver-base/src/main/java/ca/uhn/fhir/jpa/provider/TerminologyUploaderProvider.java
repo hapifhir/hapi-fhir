@@ -108,7 +108,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			throw new InvalidRequestException(Msg.code(1137) + "Missing mandatory parameter: " + PARAM_SYSTEM);
 		}
 
-		if (theFiles == null || theFiles.size() == 0) {
+		if (theFiles == null || theFiles.isEmpty()) {
 			throw new InvalidRequestException(
 					Msg.code(1138) + "No '" + PARAM_FILE + "' parameter, or package had no data");
 		}
@@ -124,27 +124,14 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			String codeSystemUrl = theCodeSystemUrl.getValue();
 			codeSystemUrl = trim(codeSystemUrl);
 
-			UploadStatistics stats;
-			switch (codeSystemUrl) {
-				case ITermLoaderSvc.ICD10_URI:
-					stats = myTerminologyLoaderSvc.loadIcd10(localFiles, theRequestDetails);
-					break;
-				case ITermLoaderSvc.ICD10CM_URI:
-					stats = myTerminologyLoaderSvc.loadIcd10cm(localFiles, theRequestDetails);
-					break;
-				case ITermLoaderSvc.IMGTHLA_URI:
-					stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
-					break;
-				case ITermLoaderSvc.LOINC_URI:
-					stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
-					break;
-				case ITermLoaderSvc.SCT_URI:
-					stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
-					break;
-				default:
-					stats = myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
-					break;
-			}
+			UploadStatistics stats = switch (codeSystemUrl) {
+				case ITermLoaderSvc.ICD10_URI -> myTerminologyLoaderSvc.loadIcd10(localFiles, theRequestDetails);
+				case ITermLoaderSvc.ICD10CM_URI -> myTerminologyLoaderSvc.loadIcd10cm(localFiles, theRequestDetails);
+				case ITermLoaderSvc.IMGTHLA_URI -> myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
+				case ITermLoaderSvc.LOINC_URI -> myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
+				case ITermLoaderSvc.SCT_URI -> myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
+				default -> myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
+			};
 
 			IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 			ParametersUtil.addParameterToParametersBoolean(getContext(), retVal, RESP_PARAM_SUCCESS, true);
@@ -188,8 +175,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			validateHaveFiles(theFiles, theCodeSystems);
 
 			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
-			new CodeSystemToCustomCsvConverter(myFhirContext)
-					.convertCodeSystemsToFileDescriptors(files, theCodeSystems);
+			files.addAll(new CodeSystemToCustomCsvConverter(myFhirContext)
+					.convertCodeSystemsToFileDescriptors(theCodeSystems));
 			UploadStatistics outcome =
 					myTerminologyLoaderSvc.loadDeltaAdd(theSystem.getValue(), files, theRequestDetails);
 			return toDeltaResponse(outcome);
@@ -227,8 +214,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			validateHaveFiles(theFiles, theCodeSystems);
 
 			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
-			new CodeSystemToCustomCsvConverter(myFhirContext)
-					.convertCodeSystemsToFileDescriptors(files, theCodeSystems);
+			files.addAll(new CodeSystemToCustomCsvConverter(myFhirContext)
+					.convertCodeSystemsToFileDescriptors(theCodeSystems));
 			UploadStatistics outcome =
 					myTerminologyLoaderSvc.loadDeltaRemove(theSystem.getValue(), files, theRequestDetails);
 			return toDeltaResponse(outcome);

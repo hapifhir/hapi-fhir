@@ -189,7 +189,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		}
 
 		CodeSystemToCustomCsvConverter converter = new CodeSystemToCustomCsvConverter(myFhirContext);
-		converter.convertCodeSystemsToFileDescriptors(myFiles.getFiles(), List.of(codeSystem));
+		myFiles.getFiles().addAll(converter.convertCodeSystemsToFileDescriptors(List.of(codeSystem)));
 
 		UploadStatistics stats = new UploadStatistics(100, new IdType("CodeSystem/100"));
 		when(myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(eq("http://foo/system"), any())).thenReturn(stats);

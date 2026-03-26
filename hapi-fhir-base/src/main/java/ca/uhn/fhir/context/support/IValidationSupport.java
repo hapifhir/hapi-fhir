@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -830,19 +831,19 @@ public interface IValidationSupport {
 	}
 
 	class DecimalConceptProperty extends BaseConceptProperty {
-		private final String myValue;
+		private final BigDecimal myValue;
 
 		/**
 		 * Constructor
 		 *
 		 * @param theName The name
 		 */
-		public DecimalConceptProperty(String theName, String theValue) {
+		public DecimalConceptProperty(String theName, BigDecimal theValue) {
 			super(theName);
 			myValue = theValue;
 		}
 
-		public String getValue() {
+		public BigDecimal getValue() {
 			return myValue;
 		}
 
@@ -1391,8 +1392,10 @@ public interface IValidationSupport {
 			switch (propertyType) {
 				case TYPE_DECIMAL:
 					DecimalConceptProperty decimalConceptProperty = (DecimalConceptProperty) theConceptProperty;
-					ParametersUtil.addPartDecimal(
-							theContext, theProperty, "value", Double.parseDouble(decimalConceptProperty.getValue()));
+					if (decimalConceptProperty.getValue() != null) {
+						ParametersUtil.addPartDecimal(
+							theContext, theProperty, "value", decimalConceptProperty.getValue().doubleValue());
+					}
 					break;
 				case TYPE_DATETIME:
 					DateTimeConceptProperty dateTimeConceptProperty = (DateTimeConceptProperty) theConceptProperty;

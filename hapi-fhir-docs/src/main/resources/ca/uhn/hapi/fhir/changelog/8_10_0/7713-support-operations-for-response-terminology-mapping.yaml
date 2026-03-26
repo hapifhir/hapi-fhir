@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7713
+title: "The `ResponseTerminologyDisplayPopulationInterceptor` and `ResponseTerminologyTranslationInterceptor`
+   will now modify the responses to FHIR extended operations (e.g. `Patient/$everything`), and not just 
+   search/read operations."

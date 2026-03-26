@@ -491,7 +491,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				break;
 			case IValidationSupport.TYPE_DECIMAL:
 				DecimalType decimalType = (DecimalType) theValue;
-				conceptProperty = new DecimalConceptProperty(theName, decimalType.getValueAsString());
+				conceptProperty = new DecimalConceptProperty(theName, decimalType.getValue());
 				break;
 			case IValidationSupport.TYPE_DATETIME:
 				DateTimeType dateTimeType = (DateTimeType) theValue;

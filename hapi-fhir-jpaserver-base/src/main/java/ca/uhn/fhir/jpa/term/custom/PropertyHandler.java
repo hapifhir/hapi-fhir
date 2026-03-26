@@ -82,16 +82,17 @@ public class PropertyHandler implements IZipContentsHandlerCsv {
 			conceptProperty.setKey(key);
 			conceptProperty.setType(typeEnum);
 
-			if (typeEnum.isPrimitive()) {
-				conceptProperty.setValue(value);
-			} else if (typeEnum == TermConceptPropertyTypeEnum.CODING) {
-				Coding coding = new Coding();
-				FhirContext.forR4Cached().newJsonParser().parseInto(value, coding);
-				conceptProperty.setCodeSystem(coding.getSystem());
-				conceptProperty.setValue(coding.getCode());
-				conceptProperty.setDisplay(coding.getDisplay());
-			} else {
-				throw new IllegalArgumentException(Msg.code(2886) + "Unable to handle property type: " + type);
+			switch (typeEnum) {
+				case BOOLEAN, INTEGER, DECIMAL, DATETIME, CODE, STRING -> conceptProperty.setValue(value);
+				case CODING -> {
+					Coding coding = new Coding();
+					FhirContext.forR4Cached().newJsonParser().parseInto(value, coding);
+					conceptProperty.setCodeSystem(coding.getSystem());
+					conceptProperty.setValue(coding.getCode());
+					conceptProperty.setDisplay(coding.getDisplay());
+				}
+				default ->
+					throw new IllegalArgumentException(Msg.code(2886) + "Unable to handle property type: " + type);
 			}
 
 			conceptProperties.add(conceptProperty);
