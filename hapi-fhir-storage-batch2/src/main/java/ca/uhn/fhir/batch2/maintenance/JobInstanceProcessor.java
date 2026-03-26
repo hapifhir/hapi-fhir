@@ -105,7 +105,7 @@ public class JobInstanceProcessor {
 		}
 
 		JobDefinition<? extends IModelJson> jobDefinition =
-			myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
+				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
 
 		// move POLL_WAITING -> READY
 		processPollingChunks(theInstance.getInstanceId());
@@ -274,7 +274,8 @@ public class JobInstanceProcessor {
 
 		if (workChunkStatuses.size() > 1) {
 			ourLog.error("Found unexpected workchunks:\n"
-				+ String.join(", ", workChunkStatuses.stream().map(m -> m.name()).collect(Collectors.toSet())));
+					+ String.join(
+							", ", workChunkStatuses.stream().map(m -> m.name()).collect(Collectors.toSet())));
 		}
 
 		// all workchunks for the current step are in COMPLETED -> proceed.
@@ -350,10 +351,10 @@ public class JobInstanceProcessor {
 				// we'll log and skip it. If it's still in the DB, the next pass
 				// will pick it up. Otherwise, it's no longer important
 				ourLog.error(
-					"Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; found {}, expected 1; skipping work chunk.",
-					theChunk.getInstanceId(),
-					theChunk.getId(),
-					updated);
+						"Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; found {}, expected 1; skipping work chunk.",
+						theChunk.getInstanceId(),
+						theChunk.getId(),
+						updated);
 			}
 		});
 	}

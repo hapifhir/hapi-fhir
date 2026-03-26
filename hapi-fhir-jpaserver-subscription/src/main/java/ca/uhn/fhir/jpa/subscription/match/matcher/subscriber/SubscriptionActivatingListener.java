@@ -82,7 +82,9 @@ public class SubscriptionActivatingListener implements IMessageListener<Resource
 	}
 
 	@Override
-	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage, IChannelConsumer<ResourceModifiedMessage> theConsumer) {
+	public void handleMessage(
+			@Nonnull IMessage<ResourceModifiedMessage> theMessage,
+			IChannelConsumer<ResourceModifiedMessage> theConsumer) {
 		ResourceModifiedMessage payload = theMessage.getPayload();
 
 		if (!payload.hasResourceType(myFhirContext, "Subscription")) {

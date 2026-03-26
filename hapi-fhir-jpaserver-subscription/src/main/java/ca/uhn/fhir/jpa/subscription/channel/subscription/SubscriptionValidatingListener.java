@@ -28,7 +28,6 @@ import ca.uhn.fhir.rest.server.messaging.IMessageDeliveryContext;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 
 public class SubscriptionValidatingListener implements IRetryAwareMessageListener<ResourceDeliveryMessage> {
 	private final ISubscriptionDeliveryValidator mySubscriptionDeliveryValidator;

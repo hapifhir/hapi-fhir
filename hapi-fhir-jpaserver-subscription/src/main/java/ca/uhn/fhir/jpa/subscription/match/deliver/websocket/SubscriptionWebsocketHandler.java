@@ -157,7 +157,9 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		}
 
 		@Override
-		public void handleMessage(@Nonnull IMessage<ResourceDeliveryMessage> theMessage, IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
+		public void handleMessage(
+				@Nonnull IMessage<ResourceDeliveryMessage> theMessage,
+				IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
 			try {
 				ResourceDeliveryMessage msg = theMessage.getPayload();
 				handleSubscriptionPayload(msg);

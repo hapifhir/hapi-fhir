@@ -52,12 +52,15 @@ public interface IRetryAwareMessageListener<T> extends IMessageListener<T> {
 	 * @param theMessage                the message that was received
 	 */
 	@Deprecated(since = "8.7.0")
-	default void handleMessage(@Nonnull IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage) {
+	default void handleMessage(
+			@Nonnull IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage) {
 		throw new UnsupportedOperationException("Not supported");
 	}
 
-
-	void handleMessage(@Nonnull IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage, IChannelConsumer<T> theConsumer);
+	void handleMessage(
+			@Nonnull IMessageDeliveryContext theMessageDeliveryContext,
+			@Nonnull IMessage<T> theMessage,
+			IChannelConsumer<T> theConsumer);
 
 	/**
 	 *

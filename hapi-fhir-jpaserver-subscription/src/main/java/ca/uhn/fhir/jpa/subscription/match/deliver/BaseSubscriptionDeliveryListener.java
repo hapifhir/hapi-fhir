@@ -78,7 +78,9 @@ public abstract class BaseSubscriptionDeliveryListener implements IMessageListen
 	private MatchUrlService myMatchUrlService;
 
 	@Override
-	public void handleMessage(@Nonnull IMessage<ResourceDeliveryMessage> theMessage, IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
+	public void handleMessage(
+			@Nonnull IMessage<ResourceDeliveryMessage> theMessage,
+			IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
 		ResourceDeliveryMessage msg = theMessage.getPayload();
 		String subscriptionId = msg.getSubscriptionId(myFhirContext);
 		if (subscriptionId == null) {

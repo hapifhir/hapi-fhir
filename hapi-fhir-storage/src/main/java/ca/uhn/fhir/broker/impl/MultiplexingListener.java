@@ -55,13 +55,16 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 	}
 
 	@Override
-	public void handleMessage(@Nonnull IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage) {
+	public void handleMessage(
+			@Nonnull IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage) {
 		this.handleMessage(theMessageDeliveryContext, theMessage, null);
 	}
 
 	@Override
 	public void handleMessage(
-		@Nullable IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage, IChannelConsumer<T> theConsumer) {
+			@Nullable IMessageDeliveryContext theMessageDeliveryContext,
+			@Nonnull IMessage<T> theMessage,
+			IChannelConsumer<T> theConsumer) {
 		checkState();
 
 		Class<?> messageClass = theMessage.getPayload().getClass();
@@ -74,8 +77,8 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 					messageClass);
 			return;
 		}
-		mySubListeners.forEach(
-				listener -> IRetryAwareMessageListener.handleMessage(listener, theMessageDeliveryContext, theMessage, theConsumer));
+		mySubListeners.forEach(listener ->
+				IRetryAwareMessageListener.handleMessage(listener, theMessageDeliveryContext, theMessage, theConsumer));
 	}
 
 	@Override

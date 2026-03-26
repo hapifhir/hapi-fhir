@@ -16,5 +16,4 @@ package ca.uhn.fhir.broker.api;
  * -
  * This should be used sparingly!
  */
-public interface IAsyncMessageListener<T> extends IMessageListener<T> {
-}
+public interface IAsyncMessageListener<T> extends IMessageListener<T> {}

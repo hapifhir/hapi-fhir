@@ -20,7 +20,6 @@
 package ca.uhn.fhir.broker.api;
 
 import ca.uhn.fhir.rest.server.messaging.IMessage;
-import jakarta.annotation.Nonnull;
 
 /**
  * A message listener processes messages received by a {@link IChannelConsumer}

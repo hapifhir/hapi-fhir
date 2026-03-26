@@ -97,21 +97,21 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		myLastChunkId.set(chunkId);
 
 		if (!myGatedExecution) {
-//			try {
-				myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
-					if (updated == 1) {
-						JobWorkNotification workNotification = new JobWorkNotification(
+			//			try {
+			myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
+				if (updated == 1) {
+					JobWorkNotification workNotification = new JobWorkNotification(
 							myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
-						myBatchJobSender.sendWorkChannelMessage(workNotification);
-					} else {
-						ourLog.error(
+					myBatchJobSender.sendWorkChannelMessage(workNotification);
+				} else {
+					ourLog.error(
 							"Expected to have updated 1 workchunk, but instead found {}. Chunk is not sent to queue.",
 							updated);
-					}
-				});
-//			} catch (Exception ex) {
-//				ourLog.error("YYYYYYError updating workchunk;");
-//			}
+				}
+			});
+			//			} catch (Exception ex) {
+			//				ourLog.error("YYYYYYError updating workchunk;");
+			//			}
 		}
 	}
 

@@ -75,7 +75,10 @@ public class MdmMessageListener implements IMessageListener<ResourceModifiedMess
 	private IMdmModelConverterSvc myModelConverter;
 
 	@Override
-	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage, IChannelConsumer<ResourceModifiedMessage> theConsumer) throws MessagingException {
+	public void handleMessage(
+			@Nonnull IMessage<ResourceModifiedMessage> theMessage,
+			IChannelConsumer<ResourceModifiedMessage> theConsumer)
+			throws MessagingException {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
 		ResourceModifiedMessage msg = theMessage.getPayload();
