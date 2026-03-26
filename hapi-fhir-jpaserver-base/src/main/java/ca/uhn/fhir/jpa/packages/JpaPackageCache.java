@@ -39,8 +39,8 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.packages.loader.IPackageLoader;
 import ca.uhn.fhir.jpa.packages.loader.NpmPackageData;
-import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -136,7 +136,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private PartitionSettings myPartitionSettings;
 
 	@Autowired
-	private PackageLoaderSvc myPackageLoaderSvc;
+	private IPackageLoader myPackageLoaderSvc;
 
 	@Autowired(required = false) // It is possible that some implementers will not create such a bean.
 	private IBinaryStorageSvc myBinaryStorageSvc;

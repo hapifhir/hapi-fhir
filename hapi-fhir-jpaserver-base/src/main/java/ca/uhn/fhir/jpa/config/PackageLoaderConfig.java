@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.packages.loader.IPackageLoader;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import org.hl7.fhir.utilities.npm.PackageServer;
@@ -30,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
 public class PackageLoaderConfig {
 
 	@Bean
-	public PackageLoaderSvc packageLoaderSvc() {
+	public IPackageLoader packageLoaderSvc() {
 		PackageLoaderSvc svc = new PackageLoaderSvc();
 		svc.getPackageServers().clear();
 		svc.getPackageServers().add(PackageServer.primaryServer());

@@ -48,10 +48,11 @@ import java.nio.file.Paths;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class PackageLoaderSvc extends BasePackageCacheManager {
+public class PackageLoaderSvc extends BasePackageCacheManager implements IPackageLoader {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageLoaderSvc.class);
 
+	@Override
 	public NpmPackageData fetchPackageFromPackageSpec(PackageInstallationSpec theSpec) throws IOException {
 		if (isNotBlank(theSpec.getPackageUrl())) {
 			byte[] contents = loadPackageUrlContents(theSpec.getPackageUrl());
@@ -73,6 +74,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	 * 			as fetched from the server
 	 * @throws IOException
 	 */
+	@Override
 	public NpmPackageData fetchPackageFromPackageSpec(String thePackageId, String thePackageVersion)
 			throws FHIRException, IOException {
 		return fetchPackageFromServerInternal(thePackageId, thePackageVersion);
@@ -87,10 +89,8 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 					Msg.code(1301) + "Unable to locate package " + thePackageId + "#" + thePackageVersion);
 		}
 
-		NpmPackageData npmPackage = createNpmPackageDataFromData(
+		return createNpmPackageDataFromData(
 				thePackageId, thePackageVersion == null ? pkg.version : thePackageVersion, pkg.url, pkg.stream);
-
-		return npmPackage;
 	}
 
 	/**
@@ -104,8 +104,9 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	 * @return
 	 * @throws IOException
 	 */
+	@Override
 	public NpmPackageData createNpmPackageDataFromData(
-			String thePackageId, String thePackageVersionId, String theSourceDesc, InputStream thePackageTgzInputStream)
+		String thePackageId, String thePackageVersionId, String theSourceDesc, InputStream thePackageTgzInputStream)
 			throws IOException {
 		Validate.notBlank(thePackageId, "thePackageId must not be null");
 		Validate.notBlank(thePackageVersionId, "thePackageVersionId must not be null");
@@ -151,13 +152,13 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 				+ "Or use JpaPackageCache for a cache implementation.");
 	}
 
+	@Override
 	public byte[] loadPackageUrlContents(String thePackageUrl) {
 		if (thePackageUrl.startsWith("classpath:")) {
 			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:".length()));
 		} else if (thePackageUrl.startsWith("file:")) {
 			try {
-				byte[] bytes = Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
-				return bytes;
+				return Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
 			} catch (IOException | URISyntaxException e) {
 				throw new InternalErrorException(
 						Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
