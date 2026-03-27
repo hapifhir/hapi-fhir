@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7683
+title: "Previously, the resource provided in Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED had an updated versionId reflecting the new deleted version, 
+        but a meta.lastUpdated value reflecting the last modification before the delete. 
+        Now meta.lastUpdated correctly reflects the time of deletion, matching the versionId. 
+        Fix submitted by Tue Toft Nørgård (@ttnTrifork)"

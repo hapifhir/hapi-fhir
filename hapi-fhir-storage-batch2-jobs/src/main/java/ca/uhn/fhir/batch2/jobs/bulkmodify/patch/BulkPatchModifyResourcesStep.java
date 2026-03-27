@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patch;
 
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationRequest;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationResponse;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyResourcesIndividuallyStep;
-import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import jakarta.annotation.Nonnull;
@@ -43,15 +44,16 @@ public class BulkPatchModifyResourcesStep<PT extends BulkPatchJobParameters>
 	@Nullable
 	@Override
 	protected BulkPatchModificationContext preModifyResources(
-			PT theJobParameters, List<TypedPidAndVersionJson> thePids) {
-		IBaseResource patch = theJobParameters.getFhirPatch(myFhirContext);
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			List<IBaseResource> theResources) {
+		IBaseResource patch = theStepExecutionDetails.getParameters().getFhirPatch(myFhirContext);
 		return new BulkPatchModificationContext(patch);
 	}
 
 	@Nonnull
 	@Override
 	protected ResourceModificationResponse modifyResource(
-			PT theJobParameters,
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
 			BulkPatchModificationContext theModificationContext,
 			@Nonnull ResourceModificationRequest theModificationRequest) {
 		IBaseResource resourceToPatch = theModificationRequest.getResource();
@@ -61,7 +63,10 @@ public class BulkPatchModifyResourcesStep<PT extends BulkPatchJobParameters>
 	}
 
 	@Override
-	protected boolean isRewriteHistory(BulkPatchModificationContext theState, IBaseResource theResource) {
+	protected boolean isRewriteHistory(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			BulkPatchModificationContext theState,
+			IBaseResource theResource) {
 		return myRewriteHistory;
 	}
 
