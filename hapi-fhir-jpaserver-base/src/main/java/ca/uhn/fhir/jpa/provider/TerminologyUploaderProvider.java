@@ -76,8 +76,16 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 	@PostConstruct
-	public void start() {
-		myCodeSystemToCustomCsvConverter = new CodeSystemToCustomCsvConverter(getContext());
+	public void startIfNecessary() {
+		if (myCodeSystemToCustomCsvConverter == null && getContext() != null) {
+			myCodeSystemToCustomCsvConverter = new CodeSystemToCustomCsvConverter(getContext());
+		}
+	}
+
+	@Override
+	public void setContext(FhirContext theContext) {
+		super.setContext(theContext);
+		startIfNecessary();
 	}
 
 	/**
