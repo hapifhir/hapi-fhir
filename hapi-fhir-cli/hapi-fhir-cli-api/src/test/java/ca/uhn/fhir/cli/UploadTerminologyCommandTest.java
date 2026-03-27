@@ -207,7 +207,7 @@ public class UploadTerminologyCommandTest {
 		assertThat(listOfDescriptors).hasSize(2);
 		assertEquals("concepts.csv", listOfDescriptors.get(0).getFilename());
 		String uploadFile = IOUtils.toString(listOfDescriptors.get(0).getInputStream(), Charsets.UTF_8);
-		assertThat(uploadFile).as(uploadFile).contains("\"CODE\",\"Display\"");
+		assertThat(uploadFile).as(uploadFile).contains("CODE,Display");
 	}
 
 	@ParameterizedTest
