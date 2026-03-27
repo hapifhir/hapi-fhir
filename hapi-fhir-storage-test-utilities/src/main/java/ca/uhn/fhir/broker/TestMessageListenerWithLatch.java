@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.broker;
 
-import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
@@ -27,6 +26,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +79,7 @@ public class TestMessageListenerWithLatch<M extends IMessage<P>, P>
 	}
 
 	@Override
-	public void handleMessage(IMessage<P> theMessage, IChannelConsumer<P> theConsumer) {
+	public void handleMessage(@Nonnull IMessage<P> theMessage) {
 		if (myCallback != null) {
 			myCallback.accept(theMessage);
 		}

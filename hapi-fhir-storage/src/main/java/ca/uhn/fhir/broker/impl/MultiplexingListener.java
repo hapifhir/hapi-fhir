@@ -20,7 +20,6 @@
 package ca.uhn.fhir.broker.impl;
 
 import ca.uhn.fhir.broker.api.BrokerListenerClosedException;
-import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.api.IRetryAwareMessageListener;
 import ca.uhn.fhir.context.ConfigurationException;
@@ -56,15 +55,7 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 
 	@Override
 	public void handleMessage(
-			@Nonnull IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage) {
-		this.handleMessage(theMessageDeliveryContext, theMessage, null);
-	}
-
-	@Override
-	public void handleMessage(
-			@Nullable IMessageDeliveryContext theMessageDeliveryContext,
-			@Nonnull IMessage<T> theMessage,
-			IChannelConsumer<T> theConsumer) {
+			@Nullable IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage) {
 		checkState();
 
 		Class<?> messageClass = theMessage.getPayload().getClass();
@@ -77,8 +68,8 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 					messageClass);
 			return;
 		}
-		mySubListeners.forEach(listener ->
-				IRetryAwareMessageListener.handleMessage(listener, theMessageDeliveryContext, theMessage, theConsumer));
+		mySubListeners.forEach(
+				listener -> IRetryAwareMessageListener.handleMessage(listener, theMessageDeliveryContext, theMessage));
 	}
 
 	@Override

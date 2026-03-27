@@ -30,10 +30,10 @@ import jakarta.annotation.Nonnull;
 public interface IRetryAwareMessageListener<T> extends IMessageListener<T> {
 
 	/**
-	 * Use {@link IRetryAwareMessageListener#handleMessage(IMessageListener, IMessageDeliveryContext, IMessage, IChannelConsumer)} to properly
+	 * Use {@link IRetryAwareMessageListener#handleMessage(IMessageListener, IMessageDeliveryContext, IMessage)} to properly
 	 * call instances of {@link IRetryAwareMessageListener}
 	 */
-	default void handleMessage(@Nonnull IMessage<T> theMessage, IChannelConsumer<T> theConsumer) {
+	default void handleMessage(@Nonnull IMessage<T> theMessage) {
 		IMessageDeliveryContext messageDeliveryContext;
 
 		if (theMessage instanceof IMessageDeliveryContext) {
@@ -42,7 +42,7 @@ public interface IRetryAwareMessageListener<T> extends IMessageListener<T> {
 			messageDeliveryContext = () -> 0;
 		}
 
-		IRetryAwareMessageListener.handleMessage(this, messageDeliveryContext, theMessage, null);
+		IRetryAwareMessageListener.handleMessage(this, messageDeliveryContext, theMessage);
 	}
 
 	/**
@@ -51,16 +51,7 @@ public interface IRetryAwareMessageListener<T> extends IMessageListener<T> {
 	 * @param theMessageDeliveryContext details about the message delivery if available
 	 * @param theMessage                the message that was received
 	 */
-	@Deprecated(since = "8.9.7")
-	default void handleMessage(
-			@Nonnull IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage) {
-		throw new UnsupportedOperationException("Not supported");
-	}
-
-	void handleMessage(
-			@Nonnull IMessageDeliveryContext theMessageDeliveryContext,
-			@Nonnull IMessage<T> theMessage,
-			IChannelConsumer<T> theConsumer);
+	void handleMessage(@Nonnull IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage);
 
 	/**
 	 *
@@ -75,13 +66,12 @@ public interface IRetryAwareMessageListener<T> extends IMessageListener<T> {
 	static <P> void handleMessage(
 			IMessageListener<P> theMessageListener,
 			@Nonnull IMessageDeliveryContext theMessageDeliveryContext,
-			IMessage<P> theMessage,
-			IChannelConsumer<P> theConsumer) {
+			IMessage<P> theMessage) {
 		if (theMessageListener instanceof IRetryAwareMessageListener) {
 			IRetryAwareMessageListener<P> listener = (IRetryAwareMessageListener<P>) theMessageListener;
-			listener.handleMessage(theMessageDeliveryContext, theMessage, theConsumer);
+			listener.handleMessage(theMessageDeliveryContext, theMessage);
 		} else {
-			theMessageListener.handleMessage(theMessage, theConsumer);
+			theMessageListener.handleMessage(theMessage);
 		}
 	}
 }

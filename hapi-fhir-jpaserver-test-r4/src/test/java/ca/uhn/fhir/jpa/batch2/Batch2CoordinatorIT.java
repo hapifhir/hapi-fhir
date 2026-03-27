@@ -28,7 +28,6 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
-import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -313,7 +312,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 			// simulate a rollback and submit a job
 			ourLog.info("Attempting to replay work notification for job id {} and work chunk {}.", instanceId, chunkId);
-			myWorkChannelMessageListener.handleMessage(msg, (IChannelConsumer<JobWorkNotification>) null);
+			myWorkChannelMessageListener.handleMessage(msg);
 
 			List<ILoggingEvent> events = myLogbackTestExtension.getLogEvents(e -> e.getLevel() == Level.WARN
 				&& e.getFormattedMessage().contains("Unknown chunk id " + chunkId));

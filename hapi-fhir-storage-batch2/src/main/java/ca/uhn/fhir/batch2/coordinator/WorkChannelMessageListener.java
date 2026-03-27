@@ -28,7 +28,6 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.broker.api.IAsyncMessageListener;
-import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -86,9 +85,8 @@ public class WorkChannelMessageListener implements IAsyncMessageListener<JobWork
 	}
 
 	@Override
-	public void handleMessage(
-			IMessage<JobWorkNotification> theMessage, IChannelConsumer<JobWorkNotification> theConsumer) {
-		handleWorkChannelMessage(theMessage.getPayload(), theConsumer);
+	public void handleMessage(@Nonnull IMessage<JobWorkNotification> theMessage) {
+		handleWorkChannelMessage(theMessage.getPayload());
 	}
 
 	public Class<JobWorkNotification> getPayloadType() {
@@ -240,8 +238,7 @@ public class WorkChannelMessageListener implements IAsyncMessageListener<JobWork
 		}
 	}
 
-	private void handleWorkChannelMessage(
-			JobWorkNotification theWorkNotification, IChannelConsumer<JobWorkNotification> theConsumer) {
+	private void handleWorkChannelMessage(JobWorkNotification theWorkNotification) {
 		try {
 			// Load the job instance and work chunk IDs into the logging MDC context
 			BatchJobTracingContext.setBatchJobIds(

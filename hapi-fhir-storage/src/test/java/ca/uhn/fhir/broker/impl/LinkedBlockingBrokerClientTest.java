@@ -153,7 +153,7 @@ class LinkedBlockingBrokerClientTest {
 		private final PointcutLatch myLatch = new PointcutLatch("MyMessageListener");
 
 		@Override
-		public void handleMessage(@Nonnull IMessage<MyTestMessageValue> theMessage, IChannelConsumer<MyTestMessageValue> theConsumer) {
+		public void handleMessage(@Nonnull IMessage<MyTestMessageValue> theMessage) {
 			ourLog.info("Received {}", theMessage);
 			myLatch.call(theMessage);
 		}

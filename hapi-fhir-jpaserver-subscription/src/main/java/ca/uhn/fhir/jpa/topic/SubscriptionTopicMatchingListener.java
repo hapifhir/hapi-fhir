@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
-import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -79,9 +78,7 @@ public class SubscriptionTopicMatchingListener implements IMessageListener<Resou
 	}
 
 	@Override
-	public void handleMessage(
-			@Nonnull IMessage<ResourceModifiedMessage> theMessage,
-			IChannelConsumer<ResourceModifiedMessage> theConsumer) {
+	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage) {
 		ResourceModifiedMessage payload = theMessage.getPayload();
 
 		if (payload.getResource(myFhirContext) == null) {

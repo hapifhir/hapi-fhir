@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IRetryAwareMessageListener;
 import ca.uhn.fhir.jpa.subscription.api.ISubscriptionDeliveryValidator;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
@@ -41,9 +40,8 @@ public class SubscriptionValidatingListener implements IRetryAwareMessageListene
 
 	@Override
 	public void handleMessage(
-			@Nullable IMessageDeliveryContext theMessageDeliveryContext,
-			@Nonnull IMessage<ResourceDeliveryMessage> theMessage,
-			IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
+			@Nonnull IMessageDeliveryContext theMessageDeliveryContext,
+			@Nonnull IMessage<ResourceDeliveryMessage> theMessage) {
 		if (theMessageDeliveryContext != null
 				&& theMessageDeliveryContext.getRetryCount() > 0
 				&& mySubscriptionDeliveryValidator != null) {

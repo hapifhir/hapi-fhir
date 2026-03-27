@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
-import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.api.ISendResult;
 import ca.uhn.fhir.context.FhirContext;
@@ -82,9 +81,7 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 	}
 
 	@Override
-	public void handleMessage(
-			@Nonnull IMessage<ResourceModifiedMessage> theMessage,
-			IChannelConsumer<ResourceModifiedMessage> theConsumer) {
+	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage) {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
 		ResourceModifiedMessage msg = theMessage.getPayload();

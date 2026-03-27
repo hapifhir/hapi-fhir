@@ -20,6 +20,7 @@
 package ca.uhn.fhir.broker.api;
 
 import ca.uhn.fhir.rest.server.messaging.IMessage;
+import jakarta.annotation.Nonnull;
 
 /**
  * A message listener processes messages received by a {@link IChannelConsumer}
@@ -31,9 +32,8 @@ public interface IMessageListener<T> {
 	 * This method is called whenever a new message is received.
 	 *
 	 * @param theMessage the message that was received
-	 * @param theConsumer the consumer that received the message
 	 */
-	void handleMessage(IMessage<T> theMessage, IChannelConsumer<T> theConsumer);
+	void handleMessage(@Nonnull IMessage<T> theMessage);
 
 	/**
 	 * @return the type of payload this message listener is expecting to receive
