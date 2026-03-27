@@ -105,6 +105,7 @@ public class StepExecutor {
 			}
 			throw new JobStepFailedException(Msg.code(2041) + e.getMessage(), e);
 		} catch (Throwable t) {
+			// fixme MB-LS - can we delete this block?  This seems unsafe.  Rolling back means Kafka will retry delivery later.
 			ourLog.error("Unexpected failure executing job {} step {}", jobDefinitionId, targetStepId, t);
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
 				myJobPersistence.onWorkChunkFailed(chunkId, t.toString());
