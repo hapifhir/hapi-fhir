@@ -16,6 +16,13 @@ import org.hibernate.dialect.MySQL8Dialect;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServer2012Dialect;
 import org.hibernate.dialect.SQLServerDialect;
+import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import com.healthmarketscience.sqlbuilder.ComboCondition;
+import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -431,6 +438,48 @@ public class SearchQueryBuilderTest {
 
 	}
 	
+	@Test
+	void toJoinCondition_singleColumn_returnsBinaryCondition() {
+		DbSchema schema = createSchema();
+		DbTable fromTable = schema.addTable("FROM_TABLE");
+		DbTable toTable = schema.addTable("TO_TABLE");
+		DbColumn fromCol = fromTable.addColumn("RES_ID");
+		DbColumn toCol = toTable.addColumn("RES_ID");
+
+		Condition result = SearchQueryBuilder.toJoinCondition(
+				new DbColumn[]{fromCol}, new DbColumn[]{toCol});
+
+		assertThat(result)
+				.isInstanceOf(BinaryCondition.class)
+				.hasToString("(t0.RES_ID = t1.RES_ID)");
+	}
+
+	@Test
+	void toJoinCondition_multipleColumns_returnsComboCondition() {
+		DbSchema schema = createSchema();
+		DbTable fromTable = schema.addTable("FROM_TABLE");
+		DbTable toTable = schema.addTable("TO_TABLE");
+		DbColumn fromA = fromTable.addColumn("COL_A");
+		DbColumn fromB = fromTable.addColumn("COL_B");
+		DbColumn fromC = fromTable.addColumn("COL_C");
+		DbColumn toA = toTable.addColumn("COL_A");
+		DbColumn toB = toTable.addColumn("COL_B");
+		DbColumn toC = toTable.addColumn("COL_C");
+
+		Condition result = SearchQueryBuilder.toJoinCondition(
+				new DbColumn[]{fromA, fromB, fromC},
+				new DbColumn[]{toA, toB, toC});
+
+		assertThat(result)
+				.isInstanceOf(ComboCondition.class)
+				.hasToString("((t0.COL_A = t1.COL_A) AND (t0.COL_B = t1.COL_B) AND (t0.COL_C = t1.COL_C))");
+	}
+
+	private static DbSchema createSchema() {
+		DbSpec spec = new DbSpec();
+		return spec.addDefaultSchema();
+	}
+
 	@Configuration
 	public static class MyConfig {
 

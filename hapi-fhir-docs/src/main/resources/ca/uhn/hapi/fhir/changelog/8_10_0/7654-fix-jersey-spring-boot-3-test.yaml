@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7654
+title: "Fixed SampleJerseyRestfulServerApplicationTest which had been disabled since the Spring Boot 3
+      migration. Adds a JerseyConfig ResourceConfig bean, JerseyConformanceProvider, and bumps
+      Jersey from 3.0.3 to 3.1.11 to align with Spring Boot 3.x Jakarta EE 10 requirements. Fix contributed by Faisal Dilawar."
