@@ -123,7 +123,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	 * transaction as rollback).
 	 */
 	@Nullable
-	private IBaseResource findResourceByIdWithNoException(IIdType id, Class<? extends IBaseResource> type) {
+	protected IBaseResource findResourceByIdWithNoException(IIdType id, Class<? extends IBaseResource> type) {
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.setLoadSynchronousUpTo(1)
 				.add(IAnyResource.SP_RES_ID, new TokenParam(id.getValue()));
@@ -166,7 +166,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		return (T) doFetchResource(theClass, theUri);
 	}
 
-	private <T extends IBaseResource> IBaseResource doFetchResource(@Nullable Class<T> theClass, String theUri) {
+	protected <T extends IBaseResource> IBaseResource doFetchResource(@Nullable Class<T> theClass, String theUri) {
 		if (theClass == null) {
 			List<Supplier<IBaseResource>> fetchers = List.of(
 					() -> doFetchResource(myValueSetType, theUri),

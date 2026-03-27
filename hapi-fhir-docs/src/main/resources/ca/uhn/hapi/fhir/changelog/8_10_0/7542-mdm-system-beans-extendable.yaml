@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7542
+title: "MDM beans that perform DAO reads as part of system operations (e.g.  MDM initialization) can now be extended."
