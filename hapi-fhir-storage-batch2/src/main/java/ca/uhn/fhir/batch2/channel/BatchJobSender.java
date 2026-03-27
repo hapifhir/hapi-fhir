@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.ISendResult;
+import ca.uhn.fhir.i18n.Msg;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ public class BatchJobSender {
 		ISendResult result = myWorkChannelProducer.send(message);
 
 		if (!result.isSuccessful()) {
-			throw new RuntimeException("Failure sending work notification: " + theJobWorkNotification);
+			throw new RuntimeException(Msg.code(2887) + "Failure sending work notification: " + theJobWorkNotification);
 		}
 	}
 }
