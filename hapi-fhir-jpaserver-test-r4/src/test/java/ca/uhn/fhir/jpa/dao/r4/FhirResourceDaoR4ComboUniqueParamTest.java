@@ -829,7 +829,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		assertThat(uniqueSearchParams).hasSize(1);
 		assertThat(uniqueSearchParams.get(0).getComponents()).hasSize(3);
 
-		executeReindex();
+		executeReindex(true);
 
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
@@ -844,7 +844,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX)).hasSize(1);
 
-		executeReindex();
+		executeReindex(true);
 
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
@@ -1011,6 +1011,11 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	private void executeReindex(String... theUrls) {
+		boolean expectFailure = false;
+		executeReindex(expectFailure, theUrls);
+	}
+
+	private void executeReindex(boolean theExpectFailure, String... theUrls) {
 		ReindexJobParameters parameters = new ReindexJobParameters();
 		for (String url : theUrls) {
 			parameters.addUrl(url);
@@ -1020,7 +1025,11 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		startRequest.setParameters(parameters);
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		ourLog.info("Started reindex job with id {}", res.getInstanceId());
-		myBatch2JobHelper.awaitJobCompletion(res);
+		if (theExpectFailure) {
+			myBatch2JobHelper.awaitJobFailure(res.getInstanceId());
+		} else {
+			myBatch2JobHelper.awaitJobCompletion(res);
+		}
 	}
 
 
