@@ -50,6 +50,8 @@ public interface IHapiScheduler {
 
 	void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 
+	void scheduleCronJob(String theCronExpression, ScheduledJobDefinition theJobDefinition);
+
 	Set<JobKey> getJobKeysForUnitTest() throws SchedulerException;
 
 	default void triggerJobImmediately(ScheduledJobDefinition theJobDefinition) {}

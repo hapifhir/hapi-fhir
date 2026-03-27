@@ -27,6 +27,11 @@ import java.util.Set;
 
 public interface ISchedulerService {
 
+	public enum JobType {
+		LOCAL,
+		CLUSTERED
+	}
+
 	@VisibleForTesting
 	void purgeAllScheduledJobsForUnitTest() throws SchedulerException;
 
@@ -59,6 +64,10 @@ public interface ISchedulerService {
 	 * @param theJobDefinition  The Job to fire
 	 */
 	void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+
+	void scheduleLocalJob(String theCronExpression, ScheduledJobDefinition theJobDefinition);
+
+	void scheduleClusteredJob(String theCronExpression, ScheduledJobDefinition theJobDefinition);
 
 	@VisibleForTesting
 	Set<JobKey> getLocalJobKeysForUnitTest() throws SchedulerException;
