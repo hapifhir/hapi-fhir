@@ -5,13 +5,15 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.util.CsvUtil;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ValidateUtil;
-import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
@@ -40,7 +42,8 @@ public class CodeSystemToCustomCsvConverter {
 	/**
 	 * Constructor
 	 */
-	public CodeSystemToCustomCsvConverter(FhirContext theFhirContext) {
+	public CodeSystemToCustomCsvConverter(@Nonnull FhirContext theFhirContext) {
+		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		myFhirContext = theFhirContext;
 	}
 
@@ -69,18 +72,15 @@ public class CodeSystemToCustomCsvConverter {
 
 		// Create concept file
 		if (!codes.isEmpty()) {
-			StringBuilder b = new StringBuilder();
-			b.append(ConceptHandler.CODE);
-			b.append(",");
-			b.append(ConceptHandler.DISPLAY);
-			b.append("\n");
-			for (Map.Entry<String, String> nextEntry : codes.entrySet()) {
-				b.append(csvEscape(nextEntry.getKey()));
-				b.append(",");
-				b.append(csvEscape(nextEntry.getValue()));
-				b.append("\n");
-			}
-			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
+			String[] headerFields = {ConceptHandler.CODE, ConceptHandler.DISPLAY};
+			CsvUtil.ICsvProducer csvProducer = csvPrinter -> {
+				for (Map.Entry<String, String> nextEntry : codes.entrySet()) {
+					csvPrinter.print(nextEntry.getKey());
+					csvPrinter.print(nextEntry.getValue());
+					csvPrinter.println();
+				}
+			};
+			byte[] bytes = CsvUtil.writeCsvToByteArray(headerFields, csvProducer);
 			String fileName = TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE;
 			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
 					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
@@ -89,18 +89,15 @@ public class CodeSystemToCustomCsvConverter {
 
 		// Create hierarchy file
 		if (!codeToParentCodes.isEmpty()) {
-			StringBuilder b = new StringBuilder();
-			b.append(HierarchyHandler.CHILD);
-			b.append(",");
-			b.append(HierarchyHandler.PARENT);
-			b.append("\n");
-			for (Map.Entry<String, String> nextEntry : codeToParentCodes.entries()) {
-				b.append(csvEscape(nextEntry.getKey()));
-				b.append(",");
-				b.append(csvEscape(nextEntry.getValue()));
-				b.append("\n");
-			}
-			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
+			String[] headerFields = {HierarchyHandler.CHILD, HierarchyHandler.PARENT};
+			CsvUtil.ICsvProducer csvProducer = csvPrinter -> {
+				for (Map.Entry<String, String> nextEntry : codeToParentCodes.entries()) {
+					csvPrinter.print(nextEntry.getKey());
+					csvPrinter.print(nextEntry.getValue());
+					csvPrinter.println();
+				}
+			};
+			byte[] bytes = CsvUtil.writeCsvToByteArray(headerFields, csvProducer);
 			String fileName = TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE;
 			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
 					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
@@ -108,51 +105,48 @@ public class CodeSystemToCustomCsvConverter {
 		}
 		// Create codeToProperties file
 		if (!codeToProperties.isEmpty()) {
-			StringBuilder b = new StringBuilder();
-			b.append(PropertyHandler.CODE);
-			b.append(",");
-			b.append(PropertyHandler.KEY);
-			b.append(",");
-			b.append(PropertyHandler.VALUE);
-			b.append(",");
-			b.append(PropertyHandler.TYPE);
-			b.append("\n");
+			String[] headerFields = {
+				PropertyHandler.CODE, PropertyHandler.KEY, PropertyHandler.VALUE, PropertyHandler.TYPE
+			};
+			CsvUtil.ICsvProducer csvProducer = csvPrinter -> {
+				IParser jsonParser = myFhirContext.newJsonParser().setPrettyPrint(false);
+				for (Map.Entry<String, List<CodeSystem.ConceptPropertyComponent>> nextEntry :
+						codeToProperties.entrySet()) {
+					for (CodeSystem.ConceptPropertyComponent propertyComponent : nextEntry.getValue()) {
+						if (propertyComponent.getValue() == null) {
+							continue;
+						}
 
-			for (Map.Entry<String, List<CodeSystem.ConceptPropertyComponent>> nextEntry : codeToProperties.entrySet()) {
-				for (CodeSystem.ConceptPropertyComponent propertyComponent : nextEntry.getValue()) {
-					if (propertyComponent.getValue() == null) {
-						continue;
+						csvPrinter.print(nextEntry.getKey());
+						csvPrinter.print(propertyComponent.getCode());
+
+						String valueType = myFhirContext
+								.getElementDefinition(
+										propertyComponent.getValue().getClass())
+								.getName();
+						TermConceptPropertyTypeEnum propertyType = TermConceptPropertyTypeEnum.forDatatype(valueType);
+						if (propertyType == null) {
+							throw new InvalidRequestException(Msg.code(2885)
+									+ "Don't know how to handle value of type: "
+									+ myFhirContext
+											.getElementDefinition(
+													propertyComponent.getValue().getClass())
+											.getName());
+						}
+
+						if (propertyType.isPrimitive()) {
+							csvPrinter.print(propertyComponent.getValue().primitiveValue());
+						} else {
+							csvPrinter.print(jsonParser.encodeToString(propertyComponent.getValue()));
+						}
+
+						csvPrinter.print(propertyType.name());
+						csvPrinter.println();
 					}
-
-					b.append(csvEscape(nextEntry.getKey()));
-					b.append(",");
-					b.append(csvEscape(propertyComponent.getCode()));
-					b.append(",");
-
-					String valueType = myFhirContext
-							.getElementDefinition(propertyComponent.getValue().getClass())
-							.getName();
-					TermConceptPropertyTypeEnum propertyType = TermConceptPropertyTypeEnum.forDatatype(valueType);
-					if (propertyType == null) {
-						throw new InvalidRequestException(Msg.code(2885) + "Don't know how to handle value of type: "
-								+ myFhirContext
-										.getElementDefinition(
-												propertyComponent.getValue().getClass())
-										.getName());
-					}
-
-					if (propertyType.isPrimitive()) {
-						b.append(csvEscape(propertyComponent.getValue().primitiveValue()));
-					} else {
-						b.append(csvEscape(myFhirContext.newJsonParser().encodeToString(propertyComponent.getValue())));
-					}
-
-					b.append(",");
-					b.append(csvEscape(propertyType.name()));
-					b.append("\n");
 				}
-			}
-			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
+			};
+
+			byte[] bytes = CsvUtil.writeCsvToByteArray(headerFields, csvProducer);
 			String fileName = TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE;
 			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
 					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
@@ -169,15 +163,15 @@ public class CodeSystemToCustomCsvConverter {
 		ValidateUtil.isTrueOrThrowInvalidRequest(
 				resourceDef.getName().equals("CodeSystem"), "Resource '%s' is not a CodeSystem", resourceDef.getName());
 
-		CodeSystem nextCodeSystem =
-				switch (myFhirContext.getVersion().getVersion()) {
-					case DSTU3 -> (CodeSystem) VersionConvertorFactory_30_40.convertResource(
-							(org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem, new BaseAdvisor_30_40(false));
-					case R5 -> (CodeSystem) VersionConvertorFactory_40_50.convertResource(
-							(org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, new BaseAdvisor_40_50(false));
-					default -> (CodeSystem) theCodeSystem;
-				};
-		return nextCodeSystem;
+		return switch (myFhirContext.getVersion().getVersion()) {
+			case DSTU3 -> (CodeSystem) VersionConvertorFactory_30_40.convertResource(
+					(org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem, new BaseAdvisor_30_40(false));
+			case R5 -> (CodeSystem) VersionConvertorFactory_40_50.convertResource(
+					(org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, new BaseAdvisor_40_50(false));
+			case R4 -> (CodeSystem) theCodeSystem;
+			default -> throw new IllegalStateException(Msg.code(2888) + "Can't canonicalize FHIR version: "
+					+ myFhirContext.getVersion().getVersion());
+		};
 	}
 
 	private void convertCodeSystemCodesToCsv(
@@ -199,12 +193,5 @@ public class CodeSystemToCustomCsvConverter {
 						nextConcept.getConcept(), theCodes, theProperties, nextConcept.getCode(), theCodeToParentCodes);
 			}
 		}
-	}
-
-	private static String csvEscape(String theValue) {
-		if (theValue == null) {
-			return "";
-		}
-		return '"' + theValue.replace("\"", "\"\"").replace("\n", "\\n").replace("\r", "") + '"';
 	}
 }

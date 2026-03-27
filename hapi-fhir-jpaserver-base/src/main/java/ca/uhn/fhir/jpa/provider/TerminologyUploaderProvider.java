@@ -34,6 +34,7 @@ import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -62,6 +63,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	private static final String RESP_PARAM_SUCCESS = "success";
 
+	private CodeSystemToCustomCsvConverter myCodeSystemToCustomCsvConverter;
+
 	@Autowired
 	private ITermLoaderSvc myTerminologyLoaderSvc;
 
@@ -70,6 +73,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	 */
 	public TerminologyUploaderProvider() {
 		this(null, null);
+	}
+
+	@PostConstruct
+	public void start() {
+		myCodeSystemToCustomCsvConverter = new CodeSystemToCustomCsvConverter(getContext());
 	}
 
 	/**
@@ -178,8 +186,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			validateHaveFiles(theFiles, theCodeSystems);
 
 			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
-			files.addAll(new CodeSystemToCustomCsvConverter(getContext())
-					.convertCodeSystemsToFileDescriptors(theCodeSystems));
+			files.addAll(myCodeSystemToCustomCsvConverter.convertCodeSystemsToFileDescriptors(theCodeSystems));
 			UploadStatistics outcome =
 					myTerminologyLoaderSvc.loadDeltaAdd(theSystem.getValue(), files, theRequestDetails);
 			return toDeltaResponse(outcome);
@@ -217,8 +224,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			validateHaveFiles(theFiles, theCodeSystems);
 
 			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
-			files.addAll(new CodeSystemToCustomCsvConverter(getContext())
-					.convertCodeSystemsToFileDescriptors(theCodeSystems));
+			files.addAll(myCodeSystemToCustomCsvConverter.convertCodeSystemsToFileDescriptors(theCodeSystems));
 			UploadStatistics outcome =
 					myTerminologyLoaderSvc.loadDeltaRemove(theSystem.getValue(), files, theRequestDetails);
 			return toDeltaResponse(outcome);
