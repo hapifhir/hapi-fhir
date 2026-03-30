@@ -51,6 +51,10 @@ public abstract class BaseResponseTerminologyInterceptor {
 	@Nonnull
 	protected List<IBaseResource> toListForProcessing(RequestDetails theRequestDetails, IBaseResource theResource) {
 
+		if (theResource == null) {
+			return Collections.emptyList();
+		}
+
 		switch (theRequestDetails.getRestOperationType()) {
 				// Don't apply to these operations
 			case ADD_TAGS:

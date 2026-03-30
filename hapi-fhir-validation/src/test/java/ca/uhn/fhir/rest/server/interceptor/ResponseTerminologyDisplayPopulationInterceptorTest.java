@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -149,6 +150,19 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseVal
 		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
 		assertNull(p.getMaritalStatus().getCoding().get(0).getDisplay());
 	}
+	
+	@Test
+	public void testDontPopulateCodingIfNoneFound_Operation() {
+		myServerExtension.getRestfulServer().registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(myCtx.getValidationSupport()));
+		
+		// Test
+		Parameters outcome = myClient
+			.operation()
+			.onType("Patient")
+			.named("$operation-with-no-response")
+			.withNoParameters(Parameters.class)
+			.execute();
+	}
 
 	private static class NullableValidationSupport implements IValidationSupport {
 
@@ -177,6 +191,11 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseVal
 			Parameters retVal = new Parameters();
 			retVal.addParameter("coding", new Coding("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus", "A", null));
 			return retVal;
+		}
+
+		@Operation(name = "$operation-with-no-response", typeName = "Patient", manualResponse = true)
+		public void operationWithNoResponse(HttpServletResponse theServletResponse) {
+			theServletResponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
 		}
 
 	}
