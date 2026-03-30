@@ -179,7 +179,7 @@ public class QueryStack {
 				theSqlBuilder,
 				theSearchParamRegistry,
 				thePartitionSettings,
-				EnumSet.of(PredicateBuilderTypeEnum.DATE));
+				EnumSet.of(PredicateBuilderTypeEnum.DATE, PredicateBuilderTypeEnum.REFERENCE));
 	}
 
 	/**

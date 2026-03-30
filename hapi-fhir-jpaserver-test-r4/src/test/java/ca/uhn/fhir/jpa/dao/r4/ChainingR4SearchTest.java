@@ -77,6 +77,33 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	// Created by claude-sonnet-4-6
+	public void testMultipleChainsOnSameReferenceReuseSingleJoin() {
+		// Setup
+		createPatient(withId("P0"), withFamily("Smith"), withGiven("John"), withGender("male"));
+		createPatient(withId("P1"), withFamily("Jones"), withGiven("Jane"), withGender("female"));
+		createCoverage(withId("C0"), withReference("beneficiary", "Patient/P0"));
+		createCoverage(withId("C1"), withReference("beneficiary", "Patient/P1"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Coverage.SP_PATIENT, new ReferenceParam("family", "Smith"));
+		map.add(Coverage.SP_PATIENT, new ReferenceParam("given", "John"));
+		map.add(Coverage.SP_PATIENT, new ReferenceParam("gender", "male"));
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider search = myCoverageDao.search(map, newSrd());
+
+		// Verify correct results
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly("Coverage/C0");
+
+		// Verify only 1 HFJ_RES_LINK join is used (not one per chained param)
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertEquals(1, StringUtils.countMatches(querySql, "HFJ_RES_LINK"), querySql);
+	}
+
+	@Test
 	public void testChainsWithNoValueShouldBeIgnored() {
 		// Setup
 		createPatient(withId("P0"), withGender("male"));
