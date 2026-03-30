@@ -19,9 +19,20 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import org.hl7.fhir.utilities.npm.NpmPackage;
+
 public interface IPackageInstallerSvc {
 
 	PackageInstallOutcomeJson install(PackageInstallationSpec theSpec);
 
 	PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theSpec);
+
+	/**
+	 * Installs a single npm package. Exposed publicly to support asynchronous operation.
+	 * @param npmPackage          the package to install
+	 * @param theInstallationSpec the specification providing control flags
+	 * @param theOutcome          accumulates outcome messages
+	 */
+	void installPackage(
+		NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome);
 }

@@ -222,7 +222,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL
 						|| theInstallationSpec.getInstallMode()
 								== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-					install(npmPackage, theInstallationSpec, retVal);
+					installPackage(npmPackage, theInstallationSpec, retVal);
 
 					if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
 						retVal.getMessage()
@@ -254,8 +254,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 *
 	 * @throws ImplementationGuideInstallationException if installation fails
 	 */
-	private void install(
-			NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome)
+	@Override
+	public void installPackage(
+		NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome)
 			throws ImplementationGuideInstallationException {
 		String name = npmPackage.getNpm().get("name").asJsonString().getValue();
 		String version = npmPackage.getNpm().get("version").asJsonString().getValue();
@@ -369,7 +370,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 						if (theInstallationSpec.getInstallMode()
 								== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
-							install(dependency, theInstallationSpec, theOutcome);
+							installPackage(dependency, theInstallationSpec, theOutcome);
 						}
 					}
 				} catch (IOException e) {
