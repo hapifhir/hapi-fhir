@@ -6,13 +6,21 @@ import ca.uhn.fhir.test.utilities.SearchTestUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Questionnaire;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_EVERYTHING;
+import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -237,4 +245,46 @@ interface TuplePredicateSearchTest extends ITestDataBuilder {
 		List<String> ids = SearchTestUtil.toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids).containsExactly(femaleObsId.toUnqualifiedVersionless().getValue());
 	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"Patient?_sort=birthdate",
+		"Patient?_sort=identifier",
+		"Patient?_sort=family",
+		"Patient?_sort=given",
+		"Patient?_sort=_id",
+		"Patient?_sort=_lastUpdated",
+		"Patient?_sort=birthdate,identifier",
+		"Patient?_sort=birthdate,_id",
+		"Patient?_sort=birthdate,_lastUpdated",
+	})
+	default void testSortOnSparseField(String theSearchUrl) {
+		List<String> expectedIds = new ArrayList<>();
+		for (int i = 1; i <= 33; i++) {
+			String date = LocalDate.now().plusDays(i).toString();
+			expectedIds.add(createPatient(withId("YES-" + i), withBirthdate(date), withFamily("HELLO" + i), withIdentifier("http://foo", Integer.toString(i)), withActiveTrue()).toUnqualifiedVersionless().getValue());
+			expectedIds.add(createPatient(withId("NO-" + i), withActiveTrue()).toUnqualifiedVersionless().getValue());
+			expectedIds.add(createPatient(withActiveTrue()).toUnqualifiedVersionless().getValue());
+		}
+
+		Context ctx = getTuplePredicateSearchTestContext();
+		List<String> ids = new ArrayList<>();
+		Bundle results = ctx.server().getFhirClient()
+			.search()
+			.byUrl(theSearchUrl)
+			.returnBundle(Bundle.class)
+			.execute();
+		while (true) {
+			List<String> nextIdBatch = SearchTestUtil.toUnqualifiedVersionlessIdValues(results);
+			ids.addAll(nextIdBatch);
+
+			if (results.getLink("next") == null || nextIdBatch.isEmpty()) {
+				break;
+			}
+			results = ctx.server().getFhirClient().loadPage().next(results).execute();
+		}
+
+		assertThat(ids).containsExactlyInAnyOrder(expectedIds.toArray(new String[0]));
+	}
+
 }
