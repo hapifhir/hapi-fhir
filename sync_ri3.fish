@@ -52,15 +52,60 @@ cp ~/workspace/fhir/tags/stu3/build/implementations/java/org.hl7.fhir.dstu3/src/
 # Copy Spreadsheets
 rm hapi-tinder-plugin/src/main/resources/res/dstu3/*.xml; cp ~/workspace/fhir/tags/stu3/build/source/*/*-spreadsheet.xml hapi-tinder-plugin/src/main/resources/res/dstu3/; rm hapi-tinder-plugin/src/main/resources/res/dstu3/*-*-*.xml
 
-# Copy Validation Resources
-cp ~/workspace/fhir/tags/stu3/build/publish/*.sch hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/schema/
+# Download Validation Resources from Official HL7 FHIR STU3 Release
+# This ensures we get STU3-specific files without newer FHIR version elements
+# See: https://github.com/hapifhir/hapi-fhir/issues/6546
 
-cp ~/workspace/fhir/tags/stu3/build/publish/fhir-single.xsd  hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/schema/
-cp ~/workspace/fhir/tags/stu3/build/publish/fhir-xhtml.xsd   hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/schema/
-cp ~/workspace/fhir/tags/stu3/build/publish/xml.xsd   hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/schema/
+# Configurable base URL - defaults to official HL7 FHIR STU3 release
+set -q FHIR_STU3_URL; or set FHIR_STU3_URL "https://hl7.org/fhir/STU3"
 
-cp ~/workspace/fhir/tags/stu3/build/publish/profiles-*.xml hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/profile/
-cp ~/workspace/fhir/tags/stu3/build/publish/v2-tables.xml  hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/valueset/
-cp ~/workspace/fhir/tags/stu3/build/publish/v3-codesystems.xml   hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/valueset/
-cp ~/workspace/fhir/tags/stu3/build/publish/valuesets.xml    hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3/valueset/
+echo "Downloading STU3 validation resources from: $FHIR_STU3_URL"
 
+# Helper function to download a file with error handling
+function download_file
+    set url $argv[1]
+    set dest $argv[2]
+    echo "  Downloading: $url"
+    if not curl -fsSL --retry 3 --retry-delay 2 -o "$dest" "$url"
+        echo "ERROR: Failed to download $url" >&2
+        exit 1
+    end
+end
+
+set BASE_DIR "hapi-fhir-validation-resources-dstu3/src/main/resources/org/hl7/fhir/instance/model/dstu3"
+
+# Download schema and schematron files from ZIP
+# The ZIP contains all XSD and SCH files needed for validation
+set SCHEMA_DIR "$BASE_DIR/schema"
+set TEMP_ZIP "/tmp/fhir-stu3-xsd-"(random)".zip"
+
+echo "  Downloading: $FHIR_STU3_URL/fhir-all-xsd.zip"
+if not curl -fsSL --retry 3 --retry-delay 2 -o "$TEMP_ZIP" "$FHIR_STU3_URL/fhir-all-xsd.zip"
+    echo "ERROR: Failed to download $FHIR_STU3_URL/fhir-all-xsd.zip" >&2
+    exit 1
+end
+
+# Extract XSD files
+echo "  Extracting XSD files..."
+unzip -o -j "$TEMP_ZIP" "*.xsd" -d "$SCHEMA_DIR/" > /dev/null
+
+# Extract SCH (Schematron) files
+echo "  Extracting SCH (Schematron) files..."
+unzip -o -j "$TEMP_ZIP" "*.sch" -d "$SCHEMA_DIR/" > /dev/null
+
+# Cleanup
+rm -f "$TEMP_ZIP"
+
+# Download profile files
+set PROFILE_DIR "$BASE_DIR/profile"
+download_file "$FHIR_STU3_URL/profiles-resources.xml" "$PROFILE_DIR/profiles-resources.xml"
+download_file "$FHIR_STU3_URL/profiles-types.xml" "$PROFILE_DIR/profiles-types.xml"
+download_file "$FHIR_STU3_URL/profiles-others.xml" "$PROFILE_DIR/profiles-others.xml"
+
+# Download valueset files
+set VALUESET_DIR "$BASE_DIR/valueset"
+download_file "$FHIR_STU3_URL/valuesets.xml" "$VALUESET_DIR/valuesets.xml"
+download_file "$FHIR_STU3_URL/v2-tables.xml" "$VALUESET_DIR/v2-tables.xml"
+download_file "$FHIR_STU3_URL/v3-codesystems.xml" "$VALUESET_DIR/v3-codesystems.xml"
+
+echo "STU3 validation resources downloaded successfully."

@@ -18,25 +18,65 @@ for i in $(find $FHIRTRUNK/build/source/datatypes | grep xml | grep -v spreadshe
 # Compartments
 cp ~/workspace/fhir/trunk/build/source/compartments.xml  hapi-tinder-plugin/src/main/resources/compartment/
 
-# ValueSets
-cp $FHIRTRUNK/build/publish/valuesets.xml hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/valueset/
-cp $FHIRTRUNK/build/publish/v3-codesystems.xml hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/valueset/
-cp $FHIRTRUNK/build/publish/v2-tables.xml hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/valueset/
+# Download Validation Resources from Official HL7 FHIR DSTU2.1 Release
+# This ensures we get DSTU2.1-specific files without newer FHIR version elements
+# See: https://github.com/hapifhir/hapi-fhir/issues/6546
 
-# Profiles
-touch ./hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/profile/_.xml
-rm ./hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/profile/*.xml
-for i in $(find $FHIRTRUNK/build/publish | grep -E "publish\/[a-z]+\.profile.xml$"); do echo $i; cp $i hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/profile/; done
+# Configurable base URL - defaults to official HL7 FHIR DSTU2.1 release
+FHIR_DSTU21_URL="${FHIR_DSTU21_URL:-https://hl7.org/fhir/DSTU2.1}"
 
-# Schematron
-touch hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/schema/a.sch
-rm hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/schema/*.sch
-for i in $(ls $FHIRTRUNK/build/publish/*.sch | grep -v -); do cp -v $i ./hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/schema/; done
+echo "Downloading DSTU2.1 validation resources from: ${FHIR_DSTU21_URL}"
 
-# Schema
-cp $FHIRTRUNK/build/publish/fhir-single.xsd ./hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/schema/
-cp $FHIRTRUNK/build/publish/fhir-xhtml.xsd ./hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/schema/
-cp $FHIRTRUNK/build/publish/xml.xsd ./hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION/schema/
+# Helper function to download a file with error handling
+download_file() {
+    local url="$1"
+    local dest="$2"
+    echo "  Downloading: ${url}"
+    if ! curl -fsSL --retry 3 --retry-delay 2 -o "${dest}" "${url}"; then
+        echo "ERROR: Failed to download ${url}" >&2
+        exit 1
+    fi
+}
+
+BASE_DIR="hapi-fhir-validation-resources-$PROJVERSION/src/main/resources/org/hl7/fhir/instance/model/$PACKAGEVERSION"
+
+# Download valueset files
+VALUESET_DIR="${BASE_DIR}/valueset"
+download_file "${FHIR_DSTU21_URL}/valuesets.xml" "${VALUESET_DIR}/valuesets.xml"
+download_file "${FHIR_DSTU21_URL}/v2-tables.xml" "${VALUESET_DIR}/v2-tables.xml"
+download_file "${FHIR_DSTU21_URL}/v3-codesystems.xml" "${VALUESET_DIR}/v3-codesystems.xml"
+
+# Download profile files
+PROFILE_DIR="${BASE_DIR}/profile"
+touch "${PROFILE_DIR}/_.xml"
+rm "${PROFILE_DIR}"/*.xml 2>/dev/null || true
+download_file "${FHIR_DSTU21_URL}/profiles-resources.xml" "${PROFILE_DIR}/profiles-resources.xml"
+download_file "${FHIR_DSTU21_URL}/profiles-types.xml" "${PROFILE_DIR}/profiles-types.xml"
+download_file "${FHIR_DSTU21_URL}/profiles-others.xml" "${PROFILE_DIR}/profiles-others.xml"
+
+# Download schema and schematron files from ZIP
+# The ZIP contains all XSD and SCH files needed for validation
+SCHEMA_DIR="${BASE_DIR}/schema"
+TEMP_ZIP="/tmp/fhir-dstu21-xsd-$$.zip"
+
+echo "  Downloading: ${FHIR_DSTU21_URL}/fhir-all-xsd.zip"
+if ! curl -fsSL --retry 3 --retry-delay 2 -o "${TEMP_ZIP}" "${FHIR_DSTU21_URL}/fhir-all-xsd.zip"; then
+    echo "ERROR: Failed to download ${FHIR_DSTU21_URL}/fhir-all-xsd.zip" >&2
+    exit 1
+fi
+
+# Extract XSD files
+echo "  Extracting XSD files..."
+unzip -o -j "${TEMP_ZIP}" "*.xsd" -d "${SCHEMA_DIR}/" > /dev/null
+
+# Extract SCH (Schematron) files
+echo "  Extracting SCH (Schematron) files..."
+unzip -o -j "${TEMP_ZIP}" "*.sch" -d "${SCHEMA_DIR}/" > /dev/null
+
+# Cleanup
+rm -f "${TEMP_ZIP}"
+
+echo "DSTU2.1 validation resources downloaded successfully."
 
 # Copy Model
 #TODO reenable

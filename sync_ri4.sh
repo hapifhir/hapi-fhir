@@ -55,14 +55,62 @@ cp /home/james/git/fhir/temp/java/org.hl7.fhir.r4/src/org/hl7/fhir/r4/formats/Js
 mkdir -p hapi-tinder-plugin/src/main/resources/res/r4/
 rm hapi-tinder-plugin/src/main/resources/res/r4/*.xml; cp ~/git/fhir/source/*/*-spreadsheet.xml hapi-tinder-plugin/src/main/resources/res/r4/; rm hapi-tinder-plugin/src/main/resources/res/r4/*-*-*.xml
 
-# Copy Validation Resources
-cp ~/git/fhir/publish/*.sch            hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/schema/
-cp ~/git/fhir/publish/fhir-single.xsd  hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/schema/
-cp ~/git/fhir/publish/fhir-xhtml.xsd   hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/schema/
-cp ~/git/fhir/publish/xml.xsd          hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/schema/
+# Download Validation Resources from Official HL7 FHIR R4 Release
+# This ensures we get R4-specific files without R5/R6 elements that may be present in local FHIR builds
+# See: https://github.com/hapifhir/hapi-fhir/issues/6546
 
-cp ~/git/fhir/publish/profiles-*.xml       hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/profile/
-cp ~/git/fhir/publish/v2-tables.xml        hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset/
-cp ~/git/fhir/publish/v3-codesystems.xml   hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset/
-cp ~/git/fhir/publish/valuesets.xml        hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset/
-cp ~/git/fhir/publish/extension-definitions.xml hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/extension/
+# Configurable base URL - defaults to official HL7 FHIR R4 release
+FHIR_R4_URL="${FHIR_R4_URL:-https://hl7.org/fhir/R4}"
+
+echo "Downloading R4 validation resources from: ${FHIR_R4_URL}"
+
+# Helper function to download a file with error handling
+download_file() {
+    local url="$1"
+    local dest="$2"
+    echo "  Downloading: ${url}"
+    if ! curl -fsSL --retry 3 --retry-delay 2 -o "${dest}" "${url}"; then
+        echo "ERROR: Failed to download ${url}" >&2
+        exit 1
+    fi
+}
+
+# Download valueset files
+VALUESET_DIR="hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset"
+download_file "${FHIR_R4_URL}/valuesets.xml" "${VALUESET_DIR}/valuesets.xml"
+download_file "${FHIR_R4_URL}/v2-tables.xml" "${VALUESET_DIR}/v2-tables.xml"
+download_file "${FHIR_R4_URL}/v3-codesystems.xml" "${VALUESET_DIR}/v3-codesystems.xml"
+
+# Download profile files
+PROFILE_DIR="hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/profile"
+download_file "${FHIR_R4_URL}/profiles-resources.xml" "${PROFILE_DIR}/profiles-resources.xml"
+download_file "${FHIR_R4_URL}/profiles-types.xml" "${PROFILE_DIR}/profiles-types.xml"
+download_file "${FHIR_R4_URL}/profiles-others.xml" "${PROFILE_DIR}/profiles-others.xml"
+
+# Download extension definitions
+EXTENSION_DIR="hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/extension"
+download_file "${FHIR_R4_URL}/extension-definitions.xml" "${EXTENSION_DIR}/extension-definitions.xml"
+
+# Download schema and schematron files from ZIP
+# The ZIP contains all XSD and SCH files needed for validation
+SCHEMA_DIR="hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/schema"
+TEMP_ZIP="/tmp/fhir-r4-xsd-$$.zip"
+
+echo "  Downloading: ${FHIR_R4_URL}/fhir-all-xsd.zip"
+if ! curl -fsSL --retry 3 --retry-delay 2 -o "${TEMP_ZIP}" "${FHIR_R4_URL}/fhir-all-xsd.zip"; then
+    echo "ERROR: Failed to download ${FHIR_R4_URL}/fhir-all-xsd.zip" >&2
+    exit 1
+fi
+
+# Extract XSD files
+echo "  Extracting XSD files..."
+unzip -o -j "${TEMP_ZIP}" "*.xsd" -d "${SCHEMA_DIR}/" > /dev/null
+
+# Extract SCH (Schematron) files
+echo "  Extracting SCH (Schematron) files..."
+unzip -o -j "${TEMP_ZIP}" "*.sch" -d "${SCHEMA_DIR}/" > /dev/null
+
+# Cleanup
+rm -f "${TEMP_ZIP}"
+
+echo "R4 validation resources downloaded successfully."
