@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -32,11 +31,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IExceptionAwareRollbackAction;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.Multimaps;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -47,9 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * This {@link ISearchParamPreSynchronizeHook} is invoked right before synchronizing
@@ -174,7 +168,6 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 			return cause;
 		}
 
-
 		/**
 		 * Given an exception thrown during processing in the JPA server, checks whether
 		 * the exception is caused by a unique constraint violation on the
@@ -246,7 +239,8 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 		private Map<String, ResourceIndexedComboStringUnique> fetchExistingMatchingParams(
 				RequestDetails theRequestDetails, Collection<ResourceIndexedComboStringUnique> theParamsToAdd) {
 
-			ListMultimap<PartitionablePartitionId, String> partitionToQueryString = MultimapBuilder.hashKeys().arrayListValues().build();
+			ListMultimap<PartitionablePartitionId, String> partitionToQueryString =
+					MultimapBuilder.hashKeys().arrayListValues().build();
 			for (ResourceIndexedComboStringUnique param : theParamsToAdd) {
 				partitionToQueryString.put(param.getPartitionId(), param.getIndexString());
 			}
@@ -257,13 +251,16 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 				QueryChunker.chunk(params, chunk -> {
 					fetchMatchingIndexStrings(theRequestDetails, partitionId, chunk, existingStringToParam);
 				});
-
 			}
 
 			return existingStringToParam;
 		}
 
-		private void fetchMatchingIndexStrings(RequestDetails theRequestDetails, PartitionablePartitionId thePartitionId, List<String> theUniqueIndexStrings, Map<String, ResourceIndexedComboStringUnique> theMapToPopulate) {
+		private void fetchMatchingIndexStrings(
+				RequestDetails theRequestDetails,
+				PartitionablePartitionId thePartitionId,
+				List<String> theUniqueIndexStrings,
+				Map<String, ResourceIndexedComboStringUnique> theMapToPopulate) {
 			List<ResourceIndexedComboStringUnique> existingParams = myTransactionSvc
 					.withRequest(theRequestDetails)
 					.withRequestPartitionId(thePartitionId.toPartitionId())
