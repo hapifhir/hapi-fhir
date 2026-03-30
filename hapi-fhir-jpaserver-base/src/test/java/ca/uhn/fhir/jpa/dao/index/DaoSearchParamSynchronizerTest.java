@@ -58,7 +58,7 @@ public class DaoSearchParamSynchronizerTest {
 	@Mock
 	private ISearchParamIdentityCacheSvc searchParamIdentityCacheSvc;
 
-
+	private final PartitionSettings myPartitionSettings = new PartitionSettings();
 	private ResourceIndexedSearchParams existingParams;
 
 	@BeforeEach
@@ -94,9 +94,8 @@ public class DaoSearchParamSynchronizerTest {
 
 		verify(entityManager, never()).remove(any(BaseResourceIndex.class));
 		verify(entityManager, times(1)).persist(THE_SEARCH_PARAM_NUMBER);
-		PartitionSettings partitionSettings = new PartitionSettings();
 		long expectedSpIdentity = BaseResourceIndexedSearchParam
-			.calculateHashIdentity(partitionSettings, RequestPartitionId.defaultPartition(partitionSettings), "Patient", GRITTSCORE);
+			.calculateHashIdentity(myPartitionSettings, RequestPartitionId.defaultPartition(myPartitionSettings), "Patient", GRITTSCORE);
 		verify(searchParamIdentityCacheSvc, times(1))
 			.findOrCreateSearchParamIdentity(expectedSpIdentity, "Patient", GRITTSCORE);
 	}
