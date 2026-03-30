@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.Include;
@@ -1389,6 +1390,74 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		assertThat(warningsAndErrors).as(outcome).isEmpty();
 
 		return myCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(theResource);
+	}
+
+	@Test
+	void testGetHl7BaseUrl() {
+		assertThat(ServerCapabilityStatementProvider.getHl7BaseUrl(FhirVersionEnum.DSTU2))
+			.isEqualTo("https://hl7.org/fhir/DSTU2/");
+		assertThat(ServerCapabilityStatementProvider.getHl7BaseUrl(FhirVersionEnum.DSTU2_HL7ORG))
+			.isEqualTo("https://hl7.org/fhir/DSTU2/");
+		assertThat(ServerCapabilityStatementProvider.getHl7BaseUrl(FhirVersionEnum.DSTU3))
+			.isEqualTo("https://hl7.org/fhir/STU3/");
+		assertThat(ServerCapabilityStatementProvider.getHl7BaseUrl(FhirVersionEnum.R4))
+			.isEqualTo("https://hl7.org/fhir/R4/");
+		assertThat(ServerCapabilityStatementProvider.getHl7BaseUrl(FhirVersionEnum.R4B))
+			.isEqualTo("https://hl7.org/fhir/R4B/");
+		assertThat(ServerCapabilityStatementProvider.getHl7BaseUrl(FhirVersionEnum.R5))
+			.isEqualTo("https://hl7.org/fhir/R5/");
+	}
+
+	@Test
+	void testTransformRelativeUrls() {
+		// Test simple link
+		String input = "Date first version recorded\r\n* [CarePlan](careplan.html): Time period plan covers";
+		String expected = "Date first version recorded\r\n* [CarePlan](https://hl7.org/fhir/R4/careplan.html): Time period plan covers";
+		assertThat(ServerCapabilityStatementProvider.transformRelativeUrls(input, FhirVersionEnum.R4))
+			.isEqualTo(expected);
+
+		// Test multiple links
+		input = "* [AllergyIntolerance](allergyintolerance.html): Date recorded\r\n* [CarePlan](careplan.html): Time period";
+		expected = "* [AllergyIntolerance](https://hl7.org/fhir/R4/allergyintolerance.html): Date recorded\r\n* [CarePlan](https://hl7.org/fhir/R4/careplan.html): Time period";
+		assertThat(ServerCapabilityStatementProvider.transformRelativeUrls(input, FhirVersionEnum.R4))
+			.isEqualTo(expected);
+
+		// Test link with fragment
+		input = "[Patient](patient.html#search): Patient resource";
+		expected = "[Patient](https://hl7.org/fhir/R4/patient.html#search): Patient resource";
+		assertThat(ServerCapabilityStatementProvider.transformRelativeUrls(input, FhirVersionEnum.R4))
+			.isEqualTo(expected);
+
+		// Test that absolute links are not modified
+		input = "[FHIR](https://hl7.org/fhir/): The FHIR spec";
+		assertThat(ServerCapabilityStatementProvider.transformRelativeUrls(input, FhirVersionEnum.R4))
+			.isEqualTo(input);
+
+		// Test null input
+		assertThat(ServerCapabilityStatementProvider.transformRelativeUrls(null, FhirVersionEnum.R4))
+			.isNull();
+
+		// Test different FHIR versions
+		input = "[Patient](patient.html): Patient resource";
+		assertThat(ServerCapabilityStatementProvider.transformRelativeUrls(input, FhirVersionEnum.DSTU3))
+			.isEqualTo("[Patient](https://hl7.org/fhir/STU3/patient.html): Patient resource");
+		assertThat(ServerCapabilityStatementProvider.transformRelativeUrls(input, FhirVersionEnum.R5))
+			.isEqualTo("[Patient](https://hl7.org/fhir/R5/patient.html): Patient resource");
+	}
+
+	@Test
+	void testTransformRelativeUrls_resourceWithHyphen() {
+		// Test resource names with hyphens (like family-member-history)
+		String input = "[FamilyMemberHistory](familymemberhistory.html): When history was recorded";
+		String expected = "[FamilyMemberHistory](https://hl7.org/fhir/R4/familymemberhistory.html): When history was recorded";
+		assertThat(ServerCapabilityStatementProvider.transformRelativeUrls(input, FhirVersionEnum.R4))
+			.isEqualTo(expected);
+
+		// Test resource names with numbers
+		input = "[Stu3Resource](stu3resource.html): A resource";
+		expected = "[Stu3Resource](https://hl7.org/fhir/R4/stu3resource.html): A resource";
+		assertThat(ServerCapabilityStatementProvider.transformRelativeUrls(input, FhirVersionEnum.R4))
+			.isEqualTo(expected);
 	}
 
 	public static class BulkDataExportProvider {

@@ -1,17 +1,20 @@
 package ca.uhn.fhir.jpa.packages;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.implementationguide.ImplementationGuideCreator;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -22,17 +25,26 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	public static final String VERSION_1 = "abc";
@@ -247,6 +259,73 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		// meta.source should be set regardless of version policy
 		assertThat(actual.getMeta().getSource()).isEqualTo(PACKAGE_ID_1 + "|" + PACKAGE_VERSION);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void install_installOnly_persistsResourcesButNotThePkg(boolean theEmbedContent, @TempDir Path theTempDir) throws IOException {
+		// setup
+		String spUrl = "http://example.com";
+		IFhirResourceDao<SearchParameter> dao = myDaoRegistry.getResourceDao(SearchParameter.class);
+
+		ImplementationGuideCreator creator = new ImplementationGuideCreator(myFhirContext);
+		creator.setDirectory(theTempDir);
+
+		SearchParameter sp = new SearchParameter();
+		sp.setUrl(spUrl);
+		sp.setName("My Param");
+		sp.setCode("my-param");
+		sp.setDescription("My custom search parameter on Patient");
+		sp.addBase("Patient");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Patient.identifier");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		creator.addResourceToIG("SearchParameter", sp);
+
+		// ensure it doesn't already exist
+		SearchParameterMap spmap = new SearchParameterMap();
+		spmap.setLoadSynchronous(true);
+		spmap.add(SearchParameter.SP_URL, new UriParam(spUrl));
+		IBundleProvider provider = dao.search(spmap, new SystemRequestDetails());
+		assertTrue(provider.isEmpty());
+
+		// create the spec
+		PackageInstallationSpec installedSpec = new PackageInstallationSpec();
+		installedSpec
+			.setName(creator.getPackageName())
+			.setVersion(creator.getPackageVersion())
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY)
+			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION)
+		;
+
+		if (theEmbedContent) {
+			installedSpec.setPackageContents(Files.readAllBytes(creator.createTestIG()));
+		} else {
+			installedSpec.setPackageUrl("file://" + creator.createTestIG().toString());
+		}
+
+		// test
+		PackageInstallOutcomeJson outcome = mySvc.install(installedSpec);
+
+		// verify
+		assertNotNull(outcome);
+		assertTrue(outcome.getMessage().stream()
+			.anyMatch(m -> m.contains("Resources have been successfully installed")));
+
+		// the questionnaire should now exist
+		provider = dao.search(spmap, new SystemRequestDetails());
+		assertFalse(provider.isEmpty());
+		assertEquals(1, provider.size());
+		SearchParameter retval = (SearchParameter) provider.getResourceListComplete().get(0);
+		assertEquals(spUrl, retval.getUrl());
+		assertEquals(sp.getName(), retval.getName());
+
+		// no packages stored
+		runInTransaction(() -> {
+			Optional<NpmPackageVersionEntity> npmVersionEntity = myPackageVersionDao.findByPackageIdAndVersion(creator.getPackageName(), creator.getPackageVersion());
+			assertFalse(npmVersionEntity.isPresent());
+		});
 	}
 
 	@Test

@@ -411,6 +411,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 			nullable = true)
 	private ResourceTypeEntity myResourceTypeEntity;
 
+	@OptimisticLock(excluded = true)
 	@Column(name = "RES_TYPE_ID", nullable = true)
 	private Short myResourceTypeId;
 

@@ -1234,6 +1234,13 @@ public abstract class BaseJpaTest extends BaseTest {
 		return Date.from(theLocalDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 	}
 
+	protected String getValidPatientSearchParams() {
+		return mySearchParamRegistry
+			.getValidSearchParameterNamesIncludingMeta(
+				"Patient", ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
+			.toString();
+	}
+
 	@Nonnull
 	public static SystemRequestDetails newSrd() {
 		return new SystemRequestDetails();

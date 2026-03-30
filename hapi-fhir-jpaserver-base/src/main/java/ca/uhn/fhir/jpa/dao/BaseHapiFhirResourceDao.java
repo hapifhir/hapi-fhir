@@ -832,9 +832,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
 		}
 
-		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
-			throw new ResourceVersionConflictException(
-					Msg.code(961) + "Trying to delete " + theId + " but this is not the current version");
+		if (theId.hasVersionIdPart()) {
+			boolean versionMatches =
+					theId.isVersionIdPartValidLong() && Long.parseLong(theId.getVersionIdPart()) == entity.getVersion();
+			if (!versionMatches) {
+				throw new ResourceVersionConflictException(
+						Msg.code(961) + "Trying to delete " + theId + " but this is not the current version");
+			}
 		}
 
 		JpaPid persistentId = entity.getId();
@@ -876,6 +880,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable savedEntity = updateEntityForDelete(theRequestDetails, theTransactionDetails, entity);
 		IIdType idBeforeDelete = new IdDt(resourceToDelete.getIdElement());
 		resourceToDelete.setId(entity.getIdDt());
+		resourceToDelete.getMeta().setLastUpdated(savedEntity.getUpdatedDate());
 
 		// Notify JPA interceptors
 		HookParams hookParams = new HookParams()
@@ -1066,6 +1071,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			updateEntityForDelete(theRequestDetails, transactionDetails, entity);
 			IdType oldVersionId = new IdType(entity.getIdDt().getValue());
 			resourceToDelete.setId(entity.getIdDt());
+			resourceToDelete.getMeta().setLastUpdated(entity.getUpdatedDate());
 
 			// Notify JPA interceptors
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {

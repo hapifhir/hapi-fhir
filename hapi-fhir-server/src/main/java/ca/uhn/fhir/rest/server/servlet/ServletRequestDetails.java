@@ -88,7 +88,8 @@ public class ServletRequestDetails extends RequestDetails implements IHasServlet
 		myServer = theRequestDetails.getServer();
 		myServletRequest = theRequestDetails.getServletRequest();
 		myServletResponse = theRequestDetails.getServletResponse();
-		if (myHeaders != null) {
+		if (myHeaders != null || theRequestDetails.myHeaders != null) {
+			initHeaders();
 			myHeaders.putAll(theRequestDetails.myHeaders);
 		}
 	}

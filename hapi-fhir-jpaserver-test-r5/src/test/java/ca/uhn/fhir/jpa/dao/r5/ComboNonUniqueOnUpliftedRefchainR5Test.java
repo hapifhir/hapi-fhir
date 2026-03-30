@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -18,6 +19,7 @@ import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.Group;
 import org.hl7.fhir.r5.model.HealthcareService;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Reference;
@@ -454,6 +456,84 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU);
 
+	}
+
+	@Test
+	void testUpliftedRefchainTokenOrSearchUsesSingleTokenTable() {
+		createSpEncounterSubjectWithChains("identifier");
+
+		Patient patientA = new Patient();
+		patientA.addIdentifier().setSystem("http://patient").setValue("123");
+		IIdType patientAId = myPatientDao.create(patientA, newSrd()).getId().toUnqualifiedVersionless();
+
+		Patient patientB = new Patient();
+		patientB.addIdentifier().setSystem("http://patient").setValue("456");
+		IIdType patientBId = myPatientDao.create(patientB, newSrd()).getId().toUnqualifiedVersionless();
+
+		Encounter encounterA = new Encounter();
+		encounterA.setSubject(new Reference(patientAId));
+		DaoMethodOutcome encounterAId = myEncounterDao.create(encounterA, newSrd());
+
+		Encounter encounterB = new Encounter();
+		encounterB.setSubject(new Reference(patientBId));
+		DaoMethodOutcome encounterBId = myEncounterDao.create(encounterB, newSrd());
+
+		ReferenceOrListParam orList = new ReferenceOrListParam();
+		orList.addOr(new ReferenceParam(null, "identifier", "http://patient|123"));
+		orList.addOr(new ReferenceParam(null, "identifier", "http://patient|456"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous().add("subject", orList);
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome))
+				.containsExactlyInAnyOrder(
+						encounterAId.getId().toUnqualifiedVersionless().getValue(),
+						encounterBId.getId().toUnqualifiedVersionless().getValue());
+
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		assertThat(searchSql).as(searchSql).containsOnlyOnce("HFJ_SPIDX_TOKEN");
+	}
+
+	@Test
+	void testUpliftedRefchainTokenOrSearchWithDifferentQualifiersDoesNotMergeIncorrectly() {
+		createSpEncounterSubjectWithChains("identifier");
+
+		Patient patientA = new Patient();
+		patientA.addIdentifier().setSystem("http://common").setValue("X");
+		IIdType patientAId = myPatientDao.create(patientA, newSrd()).getId().toUnqualifiedVersionless();
+
+		Group groupB = new Group();
+		groupB.addIdentifier().setSystem("http://common").setValue("X");
+		IIdType groupBId = myGroupDao.create(groupB, newSrd()).getId().toUnqualifiedVersionless();
+
+		Encounter encounterA = new Encounter();
+		encounterA.setSubject(new Reference(patientAId));
+		DaoMethodOutcome encounterAId = myEncounterDao.create(encounterA, newSrd());
+
+		Encounter encounterB = new Encounter();
+		encounterB.setSubject(new Reference(groupBId));
+		DaoMethodOutcome encounterBId = myEncounterDao.create(encounterB, newSrd());
+
+		ReferenceOrListParam orList = new ReferenceOrListParam();
+		orList.addOr(new ReferenceParam("Patient", "identifier", "http://common|X"));
+		orList.addOr(new ReferenceParam("Group", "identifier", "http://common|Y"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous().add("subject", orList);
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome))
+				.containsExactlyInAnyOrder(
+						encounterAId.getId().toUnqualifiedVersionless().getValue(),
+						encounterBId.getId().toUnqualifiedVersionless().getValue());
+
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		assertThat(searchSql).as(searchSql).containsPattern("INNER\\s+JOIN\\s+HFJ_SPIDX_TOKEN");
 	}
 
 	private void assertIndexStringsExactly(String... expectedIndexString) {

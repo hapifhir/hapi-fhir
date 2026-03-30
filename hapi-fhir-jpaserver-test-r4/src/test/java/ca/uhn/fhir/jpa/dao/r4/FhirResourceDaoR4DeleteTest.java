@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -22,7 +24,11 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -255,5 +261,80 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		assertNotEquals(originalId, daoMethodOutcome.getId().getIdPartAsLong());
 		assertTrue(daoMethodOutcome.getCreated().booleanValue());
 		assertThat(firstObservationId.getIdPart()).isNotEqualTo(daoMethodOutcome.getId());
+	}
+
+	/**
+	 * When deleting a resource with a non-numeric version ID (e.g. from a corrupted or
+	 * non-numeric ETag), the server should throw a ResourceVersionConflictException (409)
+	 * rather than a NumberFormatException (500).
+	 * See SMILE-8708.
+	 */
+	@Test
+	void testDeleteWithNonNumericVersionId_returnsConflict() {
+		// Create a patient
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		// Attempt to delete with a non-numeric version in the ID
+		IdType idWithNonNumericVersion = new IdType("Patient", id.getIdPart(), "A23");
+
+		assertThatThrownBy(() -> myPatientDao.delete(idWithNonNumericVersion, mySrd))
+			.isInstanceOf(ResourceVersionConflictException.class)
+			.hasMessageContaining("Trying to delete");
+	}
+
+	@Test
+	public void testDeletedResourceInPrecommitHookHasCorrectLastUpdated() {
+		// Setup - create a patient
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		// Register interceptor to capture the resource from the PRECOMMIT hook
+		AtomicReference<Date> hookLastUpdated = new AtomicReference<>();
+		myInterceptorRegistry.registerAnonymousInterceptor(
+			Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, (thePointcut, theParams) -> {
+				IBaseResource resource = theParams.get(IBaseResource.class, 0);
+				hookLastUpdated.set(resource.getMeta().getLastUpdated());
+			});
+
+		// Test - delete the patient
+		myPatientDao.delete(id, mySrd);
+
+		// Verify - the hook resource's lastUpdated should match the DB entity
+		assertNotNull(hookLastUpdated.get(), "Hook should have captured lastUpdated");
+		runInTransaction(() -> {
+			ResourceTable entity = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
+			assertEquals(entity.getUpdatedDate(), hookLastUpdated.get(),
+				"Resource lastUpdated in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated timestamp in the DB");
+		});
+	}
+
+	@Test
+	void testDeleteByUrl_PrecommitHookHasCorrectLastUpdated() {
+		// Setup - create a patient with a searchable attribute
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		// Register interceptor to capture the resource from the PRECOMMIT hook
+		AtomicReference<Date> hookLastUpdated = new AtomicReference<>();
+		myInterceptorRegistry.registerAnonymousInterceptor(
+			Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, (thePointcut, theParams) -> {
+				IBaseResource resource = theParams.get(IBaseResource.class, 0);
+				hookLastUpdated.set(resource.getMeta().getLastUpdated());
+			});
+
+		// Test - delete by URL (triggers deletePidList path)
+		myPatientDao.deleteByUrl("Patient?active=true", mySrd);
+
+		// Verify - the hook resource's lastUpdated should match the DB entity
+		assertNotNull(hookLastUpdated.get(), "Hook should have captured lastUpdated");
+		runInTransaction(() -> {
+			ResourceTable entity = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
+			assertEquals(entity.getUpdatedDate(), hookLastUpdated.get(),
+				"Resource lastUpdated in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated timestamp in the DB");
+		});
 	}
 }

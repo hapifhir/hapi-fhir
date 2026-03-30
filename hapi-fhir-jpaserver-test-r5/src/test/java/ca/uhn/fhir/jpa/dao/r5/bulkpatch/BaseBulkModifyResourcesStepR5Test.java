@@ -9,7 +9,6 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.api.ResourceModificationResp
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyResourcesIndividuallyStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParameters;
-import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -76,8 +75,8 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 		WorkChunk chunk = new WorkChunk().setId("my-chunk-id");
 		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(jobParameters, data, new JobInstance(), chunk, myJobStepExecutionServices);
 
-		when(myMockStep.modifyResource(any(), any(), any())).thenAnswer(t->{
-			ResourceModificationRequest request = t.getArgument(2, ResourceModificationRequest.class);
+		when(myMockStep.modifyResource(any(), any())).thenAnswer(t -> {
+			ResourceModificationRequest request = t.getArgument(1, ResourceModificationRequest.class);
 			Patient patient = (Patient) request.getResource();
 			// Delete Patient/P2, leave Patient/P1 alone
 			if ("P2".equals(patient.getIdElement().getIdPart())) {
@@ -114,10 +113,10 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(new BulkPatchJobParameters(), data, new JobInstance(), chunk, myJobStepExecutionServices);
 
 		when(myMockStep.isRewriteHistory(any(), any())).thenReturn(true);
-		when(myMockStep.modifyResource(any(), any(), any())).thenReturn(ResourceModificationResponse.delete());
+		when(myMockStep.modifyResource(any(), any())).thenReturn(ResourceModificationResponse.delete());
 
 		// Test & Verify
-		assertThatThrownBy(()->myStep.run(stepExecutionDetails, mySink))
+		assertThatThrownBy(() -> myStep.run(stepExecutionDetails, mySink))
 			.isInstanceOf(JobExecutionFailedException.class)
 			.hasMessageContaining("Can't store deleted resources as history rewrites");
 	}
@@ -125,7 +124,7 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 	@Nonnull
 	private TypedPidAndVersionListWorkChunkJson createWorkChunkForAllResources() {
 		TypedPidAndVersionListWorkChunkJson data = new TypedPidAndVersionListWorkChunkJson();
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			for (ResourceTable next : myResourceTableDao.findAll()) {
 				data.addTypedPidWithNullPartitionForUnitTest(next.getResourceType(), next.getId().getId(), next.getVersion());
 			}
@@ -134,12 +133,21 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 	}
 
 
+	interface IMockStep {
+
+		Object preModifyResources(StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> theJobParameters, List<IBaseResource> thePids);
+
+		ResourceModificationResponse modifyResource(Object theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
+
+		boolean isRewriteHistory(Object theState, IBaseResource theResource);
+	}
+
 	public static class MyBulkModifyResourcesStep extends BaseBulkModifyResourcesIndividuallyStep<BulkPatchJobParameters, Object> {
 
 		private IMockStep myMockStep;
 
 		@Override
-		public boolean isRewriteHistory(Object theState, IBaseResource theResource) {
+		public boolean isRewriteHistory(StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, Object theState, IBaseResource theResource) {
 			return myMockStep.isRewriteHistory(theState, theResource);
 		}
 
@@ -150,29 +158,19 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 
 		@Nullable
 		@Override
-		protected Object preModifyResources(BulkPatchJobParameters theJobParameters, List<TypedPidAndVersionJson> thePids) {
-			return myMockStep.preModifyResources(theJobParameters, thePids);
+		protected Object preModifyResources(StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, List<IBaseResource> theResources) {
+			return myMockStep.preModifyResources(theStepExecutionDetails, theResources);
 		}
 
 		@Override
-		protected ResourceModificationResponse modifyResource(BulkPatchJobParameters theJobParameters, Object theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest) {
-			return myMockStep.modifyResource(theJobParameters, theModificationContext, theModificationRequest);
+		protected ResourceModificationResponse modifyResource(StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails, Object theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest) {
+			return myMockStep.modifyResource(theModificationContext, theModificationRequest);
 		}
 
 		void setMockStep(IMockStep theMockStep) {
 			assert myMockStep == null;
 			myMockStep = theMockStep;
 		}
-	}
-
-
-	interface IMockStep {
-
-		Object preModifyResources(BulkPatchJobParameters theJobParameters, List<TypedPidAndVersionJson> thePids);
-
-		ResourceModificationResponse modifyResource(BulkPatchJobParameters theJobParameters, Object theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
-
-		boolean isRewriteHistory(Object theState, IBaseResource theResource);
 	}
 
 }

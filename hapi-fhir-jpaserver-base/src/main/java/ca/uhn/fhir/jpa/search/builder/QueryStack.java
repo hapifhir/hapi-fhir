@@ -56,7 +56,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
+import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.PredicateBuilderFactory;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -96,11 +96,9 @@ import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.Expression;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.SetOperationQuery;
-import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.UnionQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
@@ -1084,6 +1082,7 @@ public class QueryStack {
 							new ArrayList<>(),
 							Collections.singletonList(referenceParam),
 							operation,
+							searchParam,
 							theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
 					return theQueryStack3.createPredicateQuantity(
@@ -1425,6 +1424,7 @@ public class QueryStack {
 			List<String> theQualifiers,
 			List<? extends IQueryParameterType> theList,
 			SearchFilterParser.CompareOperation theOperation,
+			RuntimeSearchParam theSearchParam,
 			RequestPartitionId theRequestPartitionId) {
 		return createPredicateReference(
 				theSourceJoinColumn,
@@ -1433,6 +1433,7 @@ public class QueryStack {
 				theQualifiers,
 				theList,
 				theOperation,
+				theSearchParam,
 				theRequestPartitionId,
 				mySqlBuilder);
 	}
@@ -1445,6 +1446,7 @@ public class QueryStack {
 			List<String> theQualifiers,
 			List<? extends IQueryParameterType> theList,
 			SearchFilterParser.CompareOperation theOperation,
+			RuntimeSearchParam theSearchParam,
 			RequestPartitionId theRequestPartitionId,
 			SearchQueryBuilder theSqlBuilder) {
 
@@ -1476,6 +1478,7 @@ public class QueryStack {
 			return predicateBuilder.createPredicate(
 					myRequestDetails,
 					theResourceName,
+					theSearchParam,
 					theParamName,
 					theQualifiers,
 					theList,
@@ -1541,17 +1544,21 @@ public class QueryStack {
 			collateChainedSearchOptions(referenceLinks, nextChain, leafNodes, theEmbeddedChainedSearchModeEnum);
 		}
 
+		boolean usePartitionIdInJoins = mySqlBuilder.isIncludePartitionIdInJoins();
 		UnionQuery union = null;
-		if (wantChainedAndNormal) {
+		if (wantChainedAndNormal && !usePartitionIdInJoins) {
 			union = new UnionQuery(SetOperationQuery.Type.UNION_ALL);
 		}
 
 		List<Condition> predicates = new ArrayList<>();
+		List<SearchQueryBuilder> childBuilders = new ArrayList<>();
 		for (List<String> nextReferenceLink : referenceLinks.keySet()) {
-			for (LeafNodeDefinition leafNodeDefinition : referenceLinks.get(nextReferenceLink)) {
+			Collection<LeafNodeDefinition> mergedLeafNodes =
+					mergeLeafNodeDefinitionsByStructure(referenceLinks.get(nextReferenceLink));
+			for (LeafNodeDefinition leafNodeDefinition : mergedLeafNodes) {
 				SearchQueryBuilder builder;
 				if (wantChainedAndNormal) {
-					builder = mySqlBuilder.newChildSqlBuilder(mySqlBuilder.isIncludePartitionIdInJoins());
+					builder = mySqlBuilder.newChildSqlBuilder(usePartitionIdInJoins);
 				} else {
 					builder = mySqlBuilder;
 				}
@@ -1584,7 +1591,11 @@ public class QueryStack {
 
 				if (wantChainedAndNormal) {
 					builder.addPredicate(containedCondition);
-					union.addQueries(builder.getSelect());
+					if (usePartitionIdInJoins) {
+						childBuilders.add(builder);
+					} else {
+						union.addQueries(builder.getSelect());
+					}
 				} else {
 					predicates.add(containedCondition);
 				}
@@ -1594,16 +1605,15 @@ public class QueryStack {
 		Condition retVal;
 		if (wantChainedAndNormal) {
 
-			if (theSourceJoinColumn == null) {
+			if (usePartitionIdInJoins) {
 				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false, null);
-				DbColumn[] joinColumns = root.getJoinColumns();
-				Object joinColumnObject;
-				if (joinColumns.length == 1) {
-					joinColumnObject = joinColumns[0];
-				} else {
-					joinColumnObject = ColumnTupleObject.from(joinColumns);
-				}
-				retVal = new InCondition(joinColumnObject, union);
+				PartitionableJoinColumns outerColumns = PartitionableJoinColumns.from(
+						theSourceJoinColumn != null ? theSourceJoinColumn : root.getJoinColumns());
+				retVal = mySqlBuilder.getTuplePredicateBuilder().toInSubquery(childBuilders, outerColumns);
+			} else if (theSourceJoinColumn == null) {
+				BaseJoiningPredicateBuilder root = mySqlBuilder.getOrCreateFirstPredicateBuilder(false, null);
+				PartitionableJoinColumns joinColumns = PartitionableJoinColumns.from(root.getJoinColumns());
+				retVal = new InCondition(joinColumns.getResourceIdColumn(), union);
 			} else {
 				// -- for the resource link, need join with target_resource_id
 				retVal = new InCondition(theSourceJoinColumn, union);
@@ -1617,6 +1627,31 @@ public class QueryStack {
 		// restore the state of this collection to turn caching back on before we exit
 		myReusePredicateBuilderTypes.addAll(cachedReusePredicateBuilderTypes);
 		return retVal;
+	}
+
+	/**
+	 * Multiple OR values on the same uplifted leaf are represented as multiple leaf instances.
+	 * Merge those values so that predicate builders can emit a single indexed OR (or IN) path
+	 * instead of creating repeated self-joins.
+	 */
+	private Collection<LeafNodeDefinition> mergeLeafNodeDefinitionsByStructure(
+			Set<LeafNodeDefinition> theLeafNodeDefinitions) {
+		Map<LeafNodeDefinitionKey, LeafNodeDefinition> mergedLeafNodes = new HashMap<>();
+
+		for (LeafNodeDefinition nextLeafNode : theLeafNodeDefinitions) {
+			LeafNodeDefinitionKey leafNodeDefinitionKey = new LeafNodeDefinitionKey(nextLeafNode);
+			LeafNodeDefinition existingLeafNode = mergedLeafNodes.get(leafNodeDefinitionKey);
+			if (existingLeafNode == null) {
+				mergedLeafNodes.put(leafNodeDefinitionKey, nextLeafNode);
+				continue;
+			}
+
+			ArrayList<IQueryParameterType> mergedOrValues = Lists.newArrayList(existingLeafNode.getOrValues());
+			mergedOrValues.addAll(nextLeafNode.getOrValues());
+			mergedLeafNodes.put(leafNodeDefinitionKey, existingLeafNode.withOrValues(mergedOrValues));
+		}
+
+		return mergedLeafNodes.values();
 	}
 
 	private void collateChainedSearchOptions(
@@ -1876,6 +1911,7 @@ public class QueryStack {
 					theQualifiers,
 					theOrValues,
 					theOperation,
+					theParamDefinition,
 					theRequestPartitionId,
 					theSqlBuilder);
 			default -> throw new InvalidRequestException(
@@ -2058,18 +2094,11 @@ public class QueryStack {
 				TagPredicateBuilder tagSelector = sqlBuilder.addTagPredicateBuilder(null);
 				sqlBuilder.addPredicate(
 						tagSelector.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId));
-				SelectQuery sql = sqlBuilder.getSelect();
 
 				join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-				Expression subSelect = new Subquery(sql);
-
-				Object left;
-				if (selectPartitionId) {
-					left = new ColumnTupleObject(join.getJoinColumns());
-				} else {
-					left = join.getResourceIdColumn();
-				}
-				tagPredicate = new InCondition(left, subSelect).setNegate(true);
+				tagPredicate = mySqlBuilder
+						.getTuplePredicateBuilder()
+						.toNotInSubquery(sqlBuilder, tagSelector, PartitionableJoinColumns.from(join.getJoinColumns()));
 
 			} else {
 				// Tag table can't be a query root because it will include deleted resources, and can't select by
@@ -2243,20 +2272,12 @@ public class QueryStack {
 			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(
 					tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
-			SelectQuery sql = sqlBuilder.getSelect();
-			Expression subSelect = new Subquery(sql);
 
 			join = theSqlBuilder.getOrCreateFirstPredicateBuilder();
-
-			DbColumn[] leftColumns;
-			if (theSourceJoinColumn == null) {
-				leftColumns = join.getJoinColumns();
-			} else {
-				leftColumns = theSourceJoinColumn;
-			}
-
-			Object left = new ColumnTupleObject(leftColumns);
-			predicate = new InCondition(left, subSelect).setNegate(true);
+			PartitionableJoinColumns outerColumns = PartitionableJoinColumns.from(
+					theSourceJoinColumn != null ? theSourceJoinColumn : join.getJoinColumns());
+			predicate =
+					theSqlBuilder.getTuplePredicateBuilder().toNotInSubquery(sqlBuilder, tokenSelector, outerColumns);
 
 		} else {
 			Boolean isMissing = theList.get(0).getMissing();
@@ -2545,6 +2566,7 @@ public class QueryStack {
 									new ArrayList<>(),
 									nextAnd,
 									null,
+									nextParamDef,
 									theRequestPartitionId));
 						} else {
 							andPredicates.add(createPredicateReferenceForEmbeddedChainedSearchResource(
@@ -3184,6 +3206,44 @@ public class QueryStack {
 		public LeafNodeDefinition withParam(RuntimeSearchParam theParamDefinition) {
 			return new LeafNodeDefinition(
 					theParamDefinition, myOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
+		}
+
+		public LeafNodeDefinition withOrValues(ArrayList<IQueryParameterType> theOrValues) {
+			return new LeafNodeDefinition(
+					myParamDefinition, theOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
+		}
+	}
+
+	private static final class LeafNodeDefinitionKey {
+		private final RuntimeSearchParam myParamDefinition;
+		private final String myLeafTarget;
+		private final String myLeafParamName;
+		private final String myLeafPathPrefix;
+		private final List<String> myQualifiers;
+
+		private LeafNodeDefinitionKey(LeafNodeDefinition theLeafNodeDefinition) {
+			myParamDefinition = theLeafNodeDefinition.getParamDefinition();
+			myLeafTarget = theLeafNodeDefinition.getLeafTarget();
+			myLeafParamName = theLeafNodeDefinition.getLeafParamName();
+			myLeafPathPrefix = theLeafNodeDefinition.getLeafPathPrefix();
+			myQualifiers = theLeafNodeDefinition.getQualifiers();
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			LeafNodeDefinitionKey that = (LeafNodeDefinitionKey) o;
+			return Objects.equals(myParamDefinition, that.myParamDefinition)
+					&& Objects.equals(myLeafTarget, that.myLeafTarget)
+					&& Objects.equals(myLeafParamName, that.myLeafParamName)
+					&& Objects.equals(myLeafPathPrefix, that.myLeafPathPrefix)
+					&& Objects.equals(myQualifiers, that.myQualifiers);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myParamDefinition, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
 		}
 	}
 
