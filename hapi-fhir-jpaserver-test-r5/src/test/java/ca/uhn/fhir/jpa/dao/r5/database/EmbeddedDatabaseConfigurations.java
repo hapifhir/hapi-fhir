@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r5.database;
 
+import ca.uhn.fhir.jpa.embedded.H2EmbeddedDatabase;
 import ca.uhn.fhir.jpa.embedded.MsSqlEmbeddedDatabase;
 import ca.uhn.fhir.jpa.embedded.Oracle21EmbeddedDatabase;
 import ca.uhn.fhir.jpa.embedded.Oracle23EmbeddedDatabase;
 import ca.uhn.fhir.jpa.embedded.PostgresEmbeddedDatabase;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect;
@@ -34,6 +36,17 @@ public class EmbeddedDatabaseConfigurations {
 			return new JpaDatabaseContextConfigParamObject(
 				new PostgresEmbeddedDatabase(),
 				HapiFhirPostgresDialect.class.getName()
+			);
+		}
+	}
+
+	@Configuration
+	public static class H2 {
+		@Bean
+		public JpaDatabaseContextConfigParamObject jpaDatabaseParamObject() {
+			return new JpaDatabaseContextConfigParamObject(
+				new H2EmbeddedDatabase(),
+				HapiFhirH2Dialect.class.getName()
 			);
 		}
 	}

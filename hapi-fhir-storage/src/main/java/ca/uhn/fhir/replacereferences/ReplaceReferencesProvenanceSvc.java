@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nullable;
@@ -238,10 +237,7 @@ public class ReplaceReferencesProvenanceSvc {
 		// we want the most recent one.
 		map.setSort(new SortSpec("recorded", SortOrderEnum.DESC));
 
-		// TODO: PatientIdPartitionInterceptor should be returning the default partition as a part of
-		// the response when Provenance has policy `NON_UNIQUE_COMPARTMENT_IN_DEFAULT`. It doesn't
-		// currently. We shouldn't hardcode allPartitions once we fix that.
-		IBundleProvider searchBundle = myProvenanceDao.search(map, SystemRequestDetails.forAllPartitions());
+		IBundleProvider searchBundle = myProvenanceDao.search(map, theRequestDetails);
 		// 'activity' is not available as a search parameter in r4, was added in r5,
 		// so we need to filter the results manually.
 		return filterByActivity(searchBundle.getAllResources());

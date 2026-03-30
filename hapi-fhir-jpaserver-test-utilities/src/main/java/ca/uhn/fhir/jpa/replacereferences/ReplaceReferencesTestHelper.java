@@ -122,10 +122,7 @@ public class ReplaceReferencesTestHelper {
 	public List<IBaseResource> searchProvenance(IIdType theTargetId) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add("target", new ReferenceParam(theTargetId.toUnqualifiedVersionless()));
-		// Use all-partitions request to find Provenance regardless of which partition it's stored in.
-		// In patient-id partitioning mode with NON_UNIQUE_COMPARTMENT_IN_DEFAULT policy, merge Provenance
-		// referencing multiple patients is stored in the default partition, not a patient-specific partition.
-		IBundleProvider searchBundle = myProvenanceDao.search(map, SystemRequestDetails.forAllPartitions());
+		IBundleProvider searchBundle = myProvenanceDao.search(map, mySrd);
 		return searchBundle.getAllResources();
 	}
 
