@@ -51,12 +51,16 @@ import java.util.stream.Stream;
  * This {@link ISearchParamPreSynchronizeHook} is invoked right before synchronizing
  * unique index search parameters (i.e. {@link ResourceIndexedComboStringUnique}) to the database.
  * It registers a rollback action (which will only be executed if the transaction is rolled back)
- * that checks to see if the rollback is related to a unique constraint violation, and if so
+ * that checks to see if the rollback is related to a unique constraint violation. If so,
  * it executes a database query to figure out which unique indexes entity caused the violation
  * (i.e. which duplicate value actually caused the failure) so that we can provide a friendly
  * error message.
  */
 class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<ResourceIndexedComboStringUnique> {
+
+	/*
+	 * Note: This class is tested by FhirResourceDaoR4ComboUniqueParamTest
+	 */
 	private static final String INDEXES_REQUEST_USERDATA_KEY =
 			UniqueIndexPreExistenceChecker.class.getName() + "_INDEXES";
 
@@ -155,6 +159,7 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 			myIndexesToAdd = theIndexesToAdd;
 		}
 
+		@Nonnull
 		@Override
 		public RuntimeException onRollback(@Nonnull RuntimeException theCause) {
 			RuntimeException cause = theCause;
@@ -229,12 +234,13 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 		}
 
 		private Map<String, ResourceIndexedComboStringUnique> fetchExistingMatchingParams(
-				RequestDetails theRequestDetails, Collection<ResourceIndexedComboStringUnique> theParamsToRemove) {
+				RequestDetails theRequestDetails, Collection<ResourceIndexedComboStringUnique> theParamsToAdd) {
 			ImmutableListMultimap<Optional<Integer>, ResourceIndexedComboStringUnique> partitionIdToParam =
 					Multimaps.index(
-							theParamsToRemove,
+							theParamsToAdd,
 							t -> Optional.ofNullable(t.getPartitionId().getPartitionId()));
-			Map<String, ResourceIndexedComboStringUnique> existingStringToParam = null;
+			Map<String, ResourceIndexedComboStringUnique> existingStringToParam = new HashMap<>();
+
 			for (Optional<Integer> partitionId : partitionIdToParam.keySet()) {
 				List<ResourceIndexedComboStringUnique> params = partitionIdToParam.get(partitionId);
 				Stream<String> paramIndexStringsStream =
@@ -257,9 +263,6 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 							});
 
 					if (!existingParams.isEmpty()) {
-						if (existingStringToParam == null) {
-							existingStringToParam = new HashMap<>();
-						}
 						for (ResourceIndexedComboStringUnique existingParam : existingParams) {
 							existingStringToParam.put(existingParam.getIndexString(), existingParam);
 						}
