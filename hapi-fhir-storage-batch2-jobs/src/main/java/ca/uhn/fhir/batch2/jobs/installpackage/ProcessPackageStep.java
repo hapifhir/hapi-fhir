@@ -17,18 +17,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-public class ProcessPackageStep implements IJobStepWorker<PackageInstallationJobParameters, PackageContentsJson, InstallationOutcomeJson> {
+public class ProcessPackageStep
+		implements IJobStepWorker<PackageInstallationJobParameters, PackageContentsJson, InstallationOutcomeJson> {
 
 	@Autowired
 	IPackageInstallerSvc myPackageInstallerSvc;
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> theStepExecutionDetails, @Nonnull IJobDataSink<InstallationOutcomeJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull
+					StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<InstallationOutcomeJson> theDataSink)
+			throws JobExecutionFailedException {
 		try {
-			NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(theStepExecutionDetails.getData().getContents()));
+			NpmPackage npmPackage = NpmPackage.fromPackage(
+					new ByteArrayInputStream(theStepExecutionDetails.getData().getContents()));
 			PackageInstallOutcomeJson packageOutcome = new PackageInstallOutcomeJson();
-			myPackageInstallerSvc.installPackage(npmPackage, theStepExecutionDetails.getParameters().getInstallationSpec(), packageOutcome);
+			myPackageInstallerSvc.installPackage(
+					npmPackage, theStepExecutionDetails.getParameters().getInstallationSpec(), packageOutcome);
 
 			InstallationOutcomeJson outcome = new InstallationOutcomeJson();
 			outcome.getOutcomes().add(packageOutcome);

@@ -12,6 +12,7 @@ public class PackageInstallationJobParameters extends BaseBatchJobParameters {
 	public PackageInstallationSpec getInstallationSpec() {
 		return myInstallationSpec;
 	}
+
 	public void setInstallationSpec(PackageInstallationSpec theInstallationSpec) {
 		myInstallationSpec = theInstallationSpec;
 	}

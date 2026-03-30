@@ -34,5 +34,5 @@ public interface IPackageInstallerSvc {
 	 * @param theOutcome          accumulates outcome messages
 	 */
 	void installPackage(
-		NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome);
+			NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome);
 }

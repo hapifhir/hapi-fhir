@@ -23,10 +23,14 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PackageInstallationJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<PackageContentsJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<PackageInstallationJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<PackageContentsJson> theDataSink)
+			throws JobExecutionFailedException {
 
 		try {
-			NpmPackageData npmPackage = myPackageLoader.fetchPackageFromPackageSpec(theStepExecutionDetails.getParameters().getInstallationSpec());
+			NpmPackageData npmPackage = myPackageLoader.fetchPackageFromPackageSpec(
+					theStepExecutionDetails.getParameters().getInstallationSpec());
 			PackageContentsJson contents = new PackageContentsJson();
 			contents.setContents(Base64.getEncoder().encode(npmPackage.getBytes()));
 			theDataSink.accept(contents);

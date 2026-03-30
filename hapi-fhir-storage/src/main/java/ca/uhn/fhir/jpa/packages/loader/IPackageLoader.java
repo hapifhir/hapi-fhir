@@ -43,7 +43,7 @@ public interface IPackageLoader extends IPackageCacheManager {
 	 * @throws IOException if the specified data source cannot be accessed
 	 */
 	NpmPackageData fetchPackageFromPackageSpec(String thePackageId, String thePackageVersion)
-		throws FHIRException, IOException;
+			throws FHIRException, IOException;
 
 	/**
 	 * Creates an NpmPackage data object.
@@ -57,8 +57,8 @@ public interface IPackageLoader extends IPackageCacheManager {
 	 * @throws IOException
 	 */
 	NpmPackageData createNpmPackageDataFromData(
-		String thePackageId, String thePackageVersionId, String theSourceDesc, InputStream thePackageTgzInputStream)
-		throws IOException;
+			String thePackageId, String thePackageVersionId, String theSourceDesc, InputStream thePackageTgzInputStream)
+			throws IOException;
 
 	/**
 	 * Loads the package contents as raw bytes

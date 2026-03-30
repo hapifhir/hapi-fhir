@@ -11,6 +11,7 @@ public class PackageContentsJson implements IModelJson {
 	public byte[] getContents() {
 		return myContents;
 	}
+
 	public void setContents(byte[] theContents) {
 		myContents = theContents;
 	}
