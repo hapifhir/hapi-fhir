@@ -923,14 +923,22 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		ReindexJobParameters jobParameters = new ReindexJobParameters();
 
 		/*
-		 * Because there are only two resources, if we use a normal batch size both resources will be
-		 * reindexed in the same work chunk so neither will be able to write a duplicate unique index.
-		 * If we use a batch size of 1, one should succeed. In both cases, the job should fail because
-		 * at least one resource should fail. We just want to make sure that both paths produce
+		 * Two paths here to verify reindex failure modes when a new unique index was added,
+		 * and multiple resources have the duplicate values meaning they violate the added
+		 * unique constraint:
+		 *
+		 * If we use a batch size of 1, one chunk should succeed but the other should fail.
+		 * If we use a large batch size, both resources will be in the same chunk and both
+		 * will fail.
+		 *
+		 * In both cases, the job should fail because at least one resource has failed to
+		 * reindex. We just want to make sure that both paths produce
 		 * the same result.
 		 */
 		if (theIndividualBatches) {
 			jobParameters.setBatchSize(1);
+		} else {
+			jobParameters.setBatchSize(100);
 		}
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
@@ -1063,7 +1071,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		// This observation will fail
 		String failingId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
 		// This observation will succeed
-		String passingId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
+		myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
 		myReindexTestHelper.createAlleleSearchParameter();
 		mySearchParamRegistry.forceRefresh();
 

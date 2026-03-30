@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -32,6 +33,9 @@ import ca.uhn.fhir.rest.api.server.storage.IExceptionAwareRollbackAction;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multimaps;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
@@ -170,6 +174,12 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 			return cause;
 		}
 
+
+		/**
+		 * Given an exception thrown during processing in the JPA server, checks whether
+		 * the exception is caused by a unique constraint violation on the
+		 * {@link ResourceIndexedComboStringUnique} table.
+		 */
 		private boolean isCausedByUniqueComboConstraintFailure(Exception theException) {
 			if (theException instanceof ResourceVersionConflictException) {
 				Throwable cause = theException.getCause();
@@ -235,46 +245,43 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 
 		private Map<String, ResourceIndexedComboStringUnique> fetchExistingMatchingParams(
 				RequestDetails theRequestDetails, Collection<ResourceIndexedComboStringUnique> theParamsToAdd) {
-			ImmutableListMultimap<Optional<Integer>, ResourceIndexedComboStringUnique> partitionIdToParam =
-					Multimaps.index(
-							theParamsToAdd,
-							t -> Optional.ofNullable(t.getPartitionId().getPartitionId()));
-			Map<String, ResourceIndexedComboStringUnique> existingStringToParam = new HashMap<>();
 
-			for (Optional<Integer> partitionId : partitionIdToParam.keySet()) {
-				List<ResourceIndexedComboStringUnique> params = partitionIdToParam.get(partitionId);
-				Stream<String> paramIndexStringsStream =
-						params.stream().map(ResourceIndexedComboStringUnique::getIndexString);
-				List<List<String>> paramIndexStringsChunks =
-						QueryChunker.chunk(paramIndexStringsStream).toList();
-				for (List<String> paramIndexStrings : paramIndexStringsChunks) {
-
-					List<ResourceIndexedComboStringUnique> existingParams = myTransactionSvc
-							.withRequest(theRequestDetails)
-							.withRequestPartitionId(RequestPartitionId.fromPartitionId(partitionId.orElse(null)))
-							.execute(() -> {
-								if (partitionId.isEmpty()) {
-									return myResourceIndexedCompositeStringUniqueDao
-											.findByQueryStringNullPartitionAndFetchResource(paramIndexStrings);
-								} else {
-									return myResourceIndexedCompositeStringUniqueDao.findByQueryStringAndFetchResource(
-											partitionId.get(), paramIndexStrings);
-								}
-							});
-
-					if (!existingParams.isEmpty()) {
-						for (ResourceIndexedComboStringUnique existingParam : existingParams) {
-							existingStringToParam.put(existingParam.getIndexString(), existingParam);
-						}
-					}
-				}
+			ListMultimap<PartitionablePartitionId, String> partitionToQueryString = MultimapBuilder.hashKeys().arrayListValues().build();
+			for (ResourceIndexedComboStringUnique param : theParamsToAdd) {
+				partitionToQueryString.put(param.getPartitionId(), param.getIndexString());
 			}
 
-			if (existingStringToParam == null) {
-				return Map.of();
+			Map<String, ResourceIndexedComboStringUnique> existingStringToParam = new HashMap<>();
+			for (PartitionablePartitionId partitionId : partitionToQueryString.keySet()) {
+				List<String> params = partitionToQueryString.get(partitionId);
+				QueryChunker.chunk(params, chunk -> {
+					fetchMatchingIndexStrings(theRequestDetails, partitionId, chunk, existingStringToParam);
+				});
+
 			}
 
 			return existingStringToParam;
+		}
+
+		private void fetchMatchingIndexStrings(RequestDetails theRequestDetails, PartitionablePartitionId thePartitionId, List<String> theUniqueIndexStrings, Map<String, ResourceIndexedComboStringUnique> theMapToPopulate) {
+			List<ResourceIndexedComboStringUnique> existingParams = myTransactionSvc
+					.withRequest(theRequestDetails)
+					.withRequestPartitionId(thePartitionId.toPartitionId())
+					.execute(() -> {
+						if (thePartitionId.getPartitionId() == null) {
+							return myResourceIndexedCompositeStringUniqueDao
+									.findByQueryStringNullPartitionAndFetchResource(theUniqueIndexStrings);
+						} else {
+							return myResourceIndexedCompositeStringUniqueDao.findByQueryStringAndFetchResource(
+									thePartitionId.getPartitionId(), theUniqueIndexStrings);
+						}
+					});
+
+			if (!existingParams.isEmpty()) {
+				for (ResourceIndexedComboStringUnique existingParam : existingParams) {
+					theMapToPopulate.put(existingParam.getIndexString(), existingParam);
+				}
+			}
 		}
 	}
 }

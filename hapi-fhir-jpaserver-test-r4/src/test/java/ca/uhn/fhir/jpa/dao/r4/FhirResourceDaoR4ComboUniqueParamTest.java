@@ -864,9 +864,10 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	 * set.
 	 */
 	@SuppressWarnings("removal")
-	@Test
-	public void testDuplicateUniqueValuesAreRejectedWithChecking_TestingDisabled() {
-		myStorageSettings.setUniqueIndexesCheckedBeforeSave(false);
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void testDuplicateUniqueValuesAreRejectedWithChecking_TestingDisabled(boolean theDisabled) {
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(theDisabled);
 		assertFalse(myStorageSettings.isUniqueIndexesCheckedBeforeSave());
 
 		createBirthdateAndGenderSps(true);

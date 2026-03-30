@@ -370,12 +370,9 @@ public class HapiTransactionService implements IHapiTransactionService {
 						retriesRemaining = maxRetries - i;
 					}
 
-					RuntimeException runtimeException;
-					if (e instanceof RuntimeException) {
-						runtimeException = (RuntimeException) e;
-					} else {
-						runtimeException = new InternalErrorException(Msg.code(2884) + e.getMessage(), e);
-					}
+					RuntimeException runtimeException = e instanceof RuntimeException re
+						? re
+						: new InternalErrorException(Msg.code(2884) + e.getMessage(), e);
 
 					// we roll back on all exceptions.
 					runtimeException = theExecutionBuilder.rollbackTransactionProcessingChanges(
