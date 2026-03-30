@@ -158,6 +158,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IJobStepExecutionServices myJobStepExecutionServices;
 	@Autowired
+	protected IJobStepExecutionServices myJobStepExecutionServices;
+	@Autowired
 	protected IResourceIdentifierCacheSvc myResourceIdentifierCacheSvc;
 	@Autowired
 	protected MemoryCacheService myMemoryCacheSvc;
