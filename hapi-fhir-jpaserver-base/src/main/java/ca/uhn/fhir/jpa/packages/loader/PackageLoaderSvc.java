@@ -179,4 +179,14 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 			}
 		}
 	}
+
+	@Override
+	public String getLatestVersion(String statedId, boolean milestonesOnly) throws IOException {
+		return null;
+	}
+
+	@Override
+	public String getLatestVersion(String statedId, String versionFilter) throws IOException {
+		return null;
+	}
 }

@@ -52,7 +52,7 @@ import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.utilities.npm.PackageLoadController;import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.slf4j.Logger;
 
@@ -466,6 +466,16 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	@Override
 	public CodeSystem fetchCodeSystem(
 			String system, IWorkerContext.VersionResolutionRules rules, String version, Resource sourceOfReference) {
+		return fetchCodeSystem(system, rules, version, sourceOfReference, true);
+	}
+
+	@Override
+	public CodeSystem fetchCodeSystem(
+			String system,
+			IWorkerContext.VersionResolutionRules rules,
+			String version,
+			Resource sourceOfReference,
+			boolean checkForImplicits) {
 		if (StringUtils.isNotBlank(version)) {
 			system = system + "|" + version;
 		}
@@ -646,25 +656,30 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 			@Override
 			public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader)
-					throws FileNotFoundException, IOException, FHIRException {
+					throws FHIRException {
 				return 0;
 			}
 
 			@Override
-			public int loadPackage(NpmPackage pi) throws FileNotFoundException, IOException, FHIRException {
+			public int loadPackage(NpmPackage pi) throws  FHIRException {
 				return 0;
 			}
 
 			@Override
-			public int loadPackage(String idAndVer) throws FileNotFoundException, IOException, FHIRException {
+			public int loadPackage(String idAndVer) throws  FHIRException {
 				return 0;
 			}
 
 			@Override
 			public int loadFromPackageAndDependencies(
 					NpmPackage pi, IContextResourceLoader loader, BasePackageCacheManager pcm)
-					throws FileNotFoundException, IOException, FHIRException {
+					throws FHIRException {
 				return 0;
+			}
+
+			@Override
+            public PackageLoadController getPackageLoadController() {
+				return null;
 			}
 		};
 	}

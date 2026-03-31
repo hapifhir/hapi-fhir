@@ -78,9 +78,18 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		}
 	}
 
-	@Override
 	public CodeSystem fetchCodeSystem(
 			String theSystem, IWorkerContext.VersionResolutionRules rules, String version, Resource sourceOfReference) {
+		return fetchCodeSystem(theSystem, rules, version, sourceOfReference, true);
+	}
+
+	@Override
+	public CodeSystem fetchCodeSystem(
+			String theSystem,
+			IWorkerContext.VersionResolutionRules rules,
+			String version,
+			Resource sourceOfReference,
+			boolean checkForImplicits) {
 		if (myValidationSupport == null) {
 			return null;
 		} else {
