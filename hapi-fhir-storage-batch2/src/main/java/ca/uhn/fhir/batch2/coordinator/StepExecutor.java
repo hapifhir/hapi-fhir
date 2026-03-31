@@ -115,8 +115,8 @@ public class StepExecutor {
 		if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
 			int recordsProcessed = outcome.getRecordsProcessed();
 			int recoveredErrorCount = theDataSink.getRecoveredErrorCount();
-			WorkChunkCompletionEvent event = new WorkChunkCompletionEvent(
-					chunkId, recordsProcessed, recoveredErrorCount, theDataSink.getRecoveredWarning());
+			WorkChunkCompletionEvent event =
+					new WorkChunkCompletionEvent(chunkId, recordsProcessed, recoveredErrorCount, null);
 
 			myJobPersistence.onWorkChunkCompletion(event);
 		}

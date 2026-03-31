@@ -79,6 +79,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -97,6 +100,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 @Import({PatientIdPartitionInterceptorR4Test.TestConfig.class, TestDaoSearch.Config.class})
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4Test {
+	// Captures the contents between parentheses in a "PARTITION_ID IN (...)" SQL clause
+	private static final Pattern PARTITION_ID_IN_PATTERN = Pattern.compile("PARTITION_ID IN \\(([^)]+)\\)");
 	public static final int ALTERNATE_DEFAULT_ID = -1;
 	public static final int PATIENT_A_COMPARTMENT_ID = 65;
 
@@ -422,7 +427,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			MANDATORY_SINGLE_COMPARTMENT      , 65                , FAIL             , true                     , 65
 			ALWAYS_USE_PARTITION_ID/5         , 5                 , 5                , true                     , 5
 			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1               , false                    , ALL
-			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1               , true                     , 65
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1               , true                     , '65,-1'
 			""")
 	void testResourceTypePolicies_PatientCompartmentResource(String thePolicyString, int thePatientSpecificDocRefCompartmentId, String theDocRefNoPatientCompartmentString, boolean theIncludePatientIdInSearch, String theExpectedSearchPartitionString) {
 		/*
@@ -480,7 +485,16 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			assertTrue(searchQuery.getRequestPartitionId().isAllPartitions());
 			assertThat(searchQuery.getSql(true, true)).doesNotContain("PARTITION_ID =");
 			assertThat(searchQuery.getSql(true, true)).doesNotContain("PARTITION_ID IN");
+		} else if (theExpectedSearchPartitionString.contains(",")) {
+			// Multiple expected partitions — verify PARTITION_ID IN (...) clause
+			List<Integer> expectedPartitions = Arrays.stream(theExpectedSearchPartitionString.split(","))
+				.map(String::trim)
+				.map(Integer::parseInt)
+				.toList();
+			assertThat(searchQuery.getRequestPartitionId().getPartitionIds()).containsExactlyInAnyOrderElementsOf(expectedPartitions);
+			assertThat(parseMultiplePartitionIdsFromSqlInClause(searchQuery.getSql(true, true))).containsExactlyInAnyOrderElementsOf(expectedPartitions);
 		} else {
+			// Single expected partition — verify PARTITION_ID = ... clause
 			int partition = Integer.parseInt(theExpectedSearchPartitionString);
 			assertThat(searchQuery.getRequestPartitionId().getPartitionIds()).containsExactly(partition);
 			assertThat(searchQuery.getSql(true, true)).containsAnyOf(
@@ -1093,6 +1107,19 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			ResourceTable table = myResourceTableDao.findByTypeAndFhirId(theResourceId.getResourceType(), theResourceId.getIdPart()).orElseThrow();
 			assertEquals(theExpectedPartitionId, Objects.requireNonNull(table.getPartitionId().getPartitionId()).intValue());
 		});
+	}
+
+	/**
+	 * Extracts partition IDs from a PARTITION_ID IN (...) clause in a SQL string.
+	 */
+	private List<Integer> parseMultiplePartitionIdsFromSqlInClause(String theSql) {
+		Matcher matcher = PARTITION_ID_IN_PATTERN.matcher(theSql);
+		assertThat(matcher.find()).as("Expected PARTITION_ID IN (...) in SQL: " + theSql).isTrue();
+		return Arrays.stream(matcher.group(1).split(","))
+			.map(String::trim)
+			.map(s -> s.replace("'", ""))
+			.map(Integer::parseInt)
+			.toList();
 	}
 
 	private int getResourcePartition(IIdType theResourceId) {

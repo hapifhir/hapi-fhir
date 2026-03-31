@@ -880,6 +880,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable savedEntity = updateEntityForDelete(theRequestDetails, theTransactionDetails, entity);
 		IIdType idBeforeDelete = new IdDt(resourceToDelete.getIdElement());
 		resourceToDelete.setId(entity.getIdDt());
+		resourceToDelete.getMeta().setLastUpdated(savedEntity.getUpdatedDate());
 
 		// Notify JPA interceptors
 		HookParams hookParams = new HookParams()
@@ -1070,6 +1071,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			updateEntityForDelete(theRequestDetails, transactionDetails, entity);
 			IdType oldVersionId = new IdType(entity.getIdDt().getValue());
 			resourceToDelete.setId(entity.getIdDt());
+			resourceToDelete.getMeta().setLastUpdated(entity.getUpdatedDate());
 
 			// Notify JPA interceptors
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
@@ -1778,11 +1780,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IIdType id = myFhirContext.getVersion().newIdType(entity.getResourceType(), entity.getFhirId());
 		retVal.setResourceId(id);
 
-		if (entity == null) {
-			retVal.addWarning("Unable to find entity with PID: " + jpaPid.getId());
-			return retVal;
-		}
-
 		boolean reindexSearchParameters =
 				theReindexParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
 		boolean correctCurrentVersion =
@@ -1876,7 +1873,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			reindexSearchParameters(resource, entity, theTransactionDetails);
 		} catch (Exception e) {
 			ourLog.warn("Failure during reindex: {}", e.toString());
-			theReindexOutcome.addWarning("Failed to reindex resource " + entity.getIdDt() + ": " + e);
+			theReindexOutcome.addWarning("Failed to reindex resource " + entity.getIdDt() + ": " + e.getMessage());
 			myResourceTableDao.updateIndexStatus(entity.getId(), EntityIndexStatusEnum.INDEXING_FAILED);
 		}
 	}

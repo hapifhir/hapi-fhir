@@ -20,7 +20,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IWarningProcessor;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -35,7 +34,6 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 	private final JobWorkCursor<PT, IT, OT> myJobWorkCursor;
 	private int myRecoveredErrorCount;
 	protected final String myJobDefinitionId;
-	private IWarningProcessor myWarningProcessor;
 
 	protected BaseDataSink(String theInstanceId, JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 		myInstanceId = theInstanceId;
@@ -50,25 +48,11 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 	@Override
 	public void recoveredError(String theMessage) {
 		ourLog.error("Error during job[{}] step[{}]: {}", myInstanceId, myJobWorkCursor.getCurrentStepId(), theMessage);
-		if (myWarningProcessor != null) {
-			myWarningProcessor.recoverWarningMessage(theMessage);
-		}
 		myRecoveredErrorCount++;
-	}
-
-	public void setWarningProcessor(IWarningProcessor theWarningProcessor) {
-		myWarningProcessor = theWarningProcessor;
 	}
 
 	public int getRecoveredErrorCount() {
 		return myRecoveredErrorCount;
-	}
-
-	public String getRecoveredWarning() {
-		if (myWarningProcessor != null) {
-			return myWarningProcessor.getRecoveredWarningMessage();
-		}
-		return null;
 	}
 
 	public abstract int getWorkChunkCount();

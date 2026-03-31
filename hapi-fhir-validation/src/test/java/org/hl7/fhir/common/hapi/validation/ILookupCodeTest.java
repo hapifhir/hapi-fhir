@@ -19,8 +19,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_BOOLEAN;
+import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_CODE;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_CODING;
+import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_DATETIME;
+import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_DECIMAL;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_GROUP;
+import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_INTEGER;
 import static ca.uhn.fhir.context.support.IValidationSupport.TYPE_STRING;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM;
@@ -223,6 +227,26 @@ public interface ILookupCodeTest {
 		assertEquals(theExpectedProperty.getPropertyName(), theProperty.getPropertyName());
 		assertEquals(theExpectedProperty.getType(), theProperty.getType());
 		switch (theProperty.getType()) {
+			case TYPE_INTEGER -> {
+				IValidationSupport.IntegerConceptProperty expected = (IValidationSupport.IntegerConceptProperty) theExpectedProperty;
+				IValidationSupport.IntegerConceptProperty actual = (IValidationSupport.IntegerConceptProperty) theProperty;
+				assertEquals(expected.getValue(), actual.getValue());
+			}
+			case TYPE_DECIMAL -> {
+				IValidationSupport.DecimalConceptProperty expected = (IValidationSupport.DecimalConceptProperty) theExpectedProperty;
+				IValidationSupport.DecimalConceptProperty actual = (IValidationSupport.DecimalConceptProperty) theProperty;
+				assertEquals(expected.getValue(), actual.getValue());
+			}
+			case TYPE_DATETIME -> {
+				IValidationSupport.DateTimeConceptProperty expected = (IValidationSupport.DateTimeConceptProperty) theExpectedProperty;
+				IValidationSupport.DateTimeConceptProperty actual = (IValidationSupport.DateTimeConceptProperty) theProperty;
+				assertEquals(expected.getValue(), actual.getValue());
+			}
+			case TYPE_CODE -> {
+				IValidationSupport.CodeConceptProperty expected = (IValidationSupport.CodeConceptProperty) theExpectedProperty;
+				IValidationSupport.CodeConceptProperty actual = (IValidationSupport.CodeConceptProperty) theProperty;
+				assertEquals(expected.getValue(), actual.getValue());
+			}
 			case TYPE_STRING -> {
 				StringConceptProperty expected = (StringConceptProperty) theExpectedProperty;
 				StringConceptProperty actual = (StringConceptProperty) theProperty;

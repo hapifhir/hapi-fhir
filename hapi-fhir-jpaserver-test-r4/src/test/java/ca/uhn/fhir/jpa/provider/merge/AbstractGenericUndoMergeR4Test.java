@@ -17,14 +17,12 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -47,7 +45,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_OUTCOME;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
@@ -92,21 +89,19 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 		super.after();
 
 		myStorageSettings.setDefaultTransactionEntriesForWrite(new JpaStorageSettings().getDefaultTransactionEntriesForWrite());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 	}
 
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setAllowMultipleDelete(true);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 		// we need to keep the version on Provenance.target fields to
 		// verify that Provenance resources were saved with versioned target references
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
-		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext);
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry);
 	}
 
 
@@ -333,30 +328,6 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 		callUndoOnScenarioAndAssertException(scenario, ResourceNotFoundException.class, 404, "HAPI-2747");
 	}
 
-
-	@Test
-	void testUndoMerge_ProvenanceExistsButMissingContainedResourceForInputParams_Fails() {
-		// Setup: Create scenario without referencing resources
-		AbstractMergeTestScenario<T> scenario = createScenario();
-		scenario.persistTestData();
-
-		// Create a Provenance with merge activity but missing contained Parameters resource
-		IIdType sourceId = scenario.readSourceResource().getIdElement();
-		IIdType targetId = scenario.readTargetResource().getIdElement();
-
-		Provenance provenance = new Provenance();
-		provenance.addTarget(new Reference(targetId.withVersion("1")));
-		provenance.addTarget(new Reference(sourceId.withVersion("1")));
-		provenance.setActivity(new CodeableConcept().addCoding(new Coding()
-			.setSystem("http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle")
-			.setCode("merge")));
-		myProvenanceDao.create(provenance, mySrd);
-
-		// Execute: Attempt undo-merge, expecting it to fail because Provenance is missing contained input params
-		callUndoOnScenarioAndAssertException(scenario, InternalErrorException.class, 500, "HAPI-2749");
-	}
-
-
 	@Test
 	void testUndoMerge_ProvenanceExistsButMissingContainedResourceTargetUpdateOutput_Fails() {
 		// Setup: Create scenario without referencing resources
@@ -432,30 +403,7 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 	}
 
 	protected void assertResourcesAreEqualIgnoringVersionAndLastUpdated(IBaseResource theBefore, IBaseResource theAfter) {
-		// the resources should have the same versionless id
-		assertThat(theBefore.getIdElement().toVersionless()).isEqualTo(theAfter.getIdElement().toVersionless());
-
-		FhirTerser terser = myFhirContext.newTerser();
-
-		// Create a copy of the before resource since we will modify some of its meta data to match the after resource
-		IBaseResource copyOfTheBefore = terser.clone(theBefore);
-
-		copyOfTheBefore.getMeta().setLastUpdated(theAfter.getMeta().getLastUpdated());
-		copyOfTheBefore.getMeta().setVersionId(theAfter.getMeta().getVersionId());
-		copyOfTheBefore.setId(theAfter.getIdElement());
-
-		// Copy meta.source from after to before using terser
-		List<IBase> sourceValues = terser.getValues(theAfter, "meta.source");
-		if (!sourceValues.isEmpty()) {
-			String sourceValue = terser.getSinglePrimitiveValueOrNull(theAfter, "meta.source");
-			if (sourceValue != null) {
-				terser.addElement(copyOfTheBefore, "meta.source", sourceValue);
-			}
-		}
-
-		String before = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(copyOfTheBefore);
-		String after = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theAfter);
-		assertThat(after).isEqualTo(before);
+		myHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(theBefore, theAfter);
 	}
 
 	@Test

@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7702
+jira: SMILE-11441
+title: "ValueSet expansion now supports `compose.include` filters using the EQUAL operator on concept properties
+  when Hibernate Search is disabled. Previously, such filters would fail with an error."

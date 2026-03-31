@@ -2091,14 +2091,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		cs.addConcept().setCode("B").setDisplay("Code B");
 		myCodeSystemDao.update(cs, mySrd);
 
-		// Previous precalculated expansion should still hold
-		expansion = myValueSetDao.expand(new IdType("ValueSet/vs"), new ValueSetExpansionOptions(), mySrd);
-		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
-
-		// Invalidate the precalculated expansion
-		myTermSvc.invalidatePreCalculatedExpansion(new IdType("ValueSet/vs"), mySrd);
-
-		// Expand (should not use a precalculated expansion)
+		// Pre-calculated expansion is automatically invalidated when the CodeSystem is updated,
+		// so the expansion falls back to in-memory and returns the updated codes
 		expansion = myValueSetDao.expand(new IdType("ValueSet/vs"), new ValueSetExpansionOptions(), mySrd);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).contains("Performing in-memory expansion without parameters");
@@ -2146,6 +2140,58 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		outcome = myValueSetDao.validateCode(vs.getUrlElement(), null, new StringType("A"), cs.getUrlElement(), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated");
+	}
+
+	/**
+	 * Reproduces SMILE-9809: When a CodeSystem is updated with new codes, validating a resource
+	 * against a code that only exists in the updated version should succeed. The pre-calculated
+	 * ValueSet expansion should be automatically invalidated when the referenced CodeSystem changes.
+	 * <p>
+	 * Currently fails because the stale pre-calculated expansion is used and the new code is not found.
+	 */
+	@Test
+	public void testValidateCode_afterCodeSystemUpdate_preCalculatedExpansionIsAutomaticallyInvalidated() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Create a CodeSystem with initial codes (version 1)
+		CodeSystem cs = new CodeSystem();
+		cs.setId("fmc-order-status-cs");
+		cs.setUrl("http://example.org/fmc-order-status-cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept().setCode("suspend").setDisplay("Suspend");
+		cs.addConcept().setCode("active").setDisplay("Active");
+		myCodeSystemDao.update(cs, mySrd);
+
+		// Create a ValueSet that includes all codes from the CodeSystem
+		ValueSet vs = new ValueSet();
+		vs.setId("fmc-order-status-vs");
+		vs.setUrl("http://example.org/fmc-order-status-vs");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://example.org/fmc-order-status-cs");
+		myValueSetDao.update(vs, mySrd);
+
+		// Pre-expand the ValueSet
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Verify the expansion is pre-calculated and contains the v1 codes
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/fmc-order-status-vs"), new ValueSetExpansionOptions(), mySrd);
+		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).contains("ValueSet was expanded using an expansion that was pre-calculated");
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactlyInAnyOrder("suspend", "active");
+
+		// Update the CodeSystem to add new codes (version 2)
+		cs.addConcept().setCode("order-received").setDisplay("Order Received");
+		cs.addConcept().setCode("completed").setDisplay("Completed");
+		myCodeSystemDao.update(cs, mySrd);
+
+		// Validating a code from v2 ("order-received") should succeed because the
+		// pre-calculated expansion must be automatically invalidated when the CodeSystem changes.
+		// This is the bug: currently the stale expansion (v1) is used and "order-received" is not found.
+		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(
+			vs.getUrlElement(), null, new StringType("order-received"),
+			cs.getUrlElement(), null, null, null, mySrd);
+		assertTrue(outcome.isOk(), "Validating a code added in the updated CodeSystem should succeed, but got: " + outcome.getMessage());
 	}
 
 	@Test
