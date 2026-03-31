@@ -434,7 +434,7 @@ public class SearchParamRegistryImpl
 						newRuntimeSp.getUri(), nextBase, newRuntimeSp.getName())) {
 					ourLog.debug(
 							"Attempted to disable a non-disableable search parameter. {} will remain active in cache.",
-							newRuntimeSp.getPath());
+							newRuntimeSp.getUri());
 					return 0;
 				}
 			}
