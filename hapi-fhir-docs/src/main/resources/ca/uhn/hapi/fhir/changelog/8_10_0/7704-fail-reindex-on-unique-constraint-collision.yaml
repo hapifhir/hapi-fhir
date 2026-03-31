@@ -1,0 +1,5 @@
+---
+type: change
+issue: 7704
+title: "When performing a `$reindex` operation, if a unique constraint defined in a Unique Combo SearchParameter is violated, 
+   the reindex operation will now fail instead of ignoring the violation with a warning."

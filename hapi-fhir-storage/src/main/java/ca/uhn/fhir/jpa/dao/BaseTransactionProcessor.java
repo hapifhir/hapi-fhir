@@ -1693,7 +1693,7 @@ public abstract class BaseTransactionProcessor {
 			theTransactionStopWatch.startTask("Flush writes to database");
 
 			// flush the changes
-			flushSession(theIdToPersistedOutcome);
+			flushSession(theTransactionDetails, theIdToPersistedOutcome);
 
 			theTransactionStopWatch.endCurrentTask();
 
@@ -2355,7 +2355,8 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
-	protected abstract void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome);
+	protected abstract void flushSession(
+			@Nonnull TransactionDetails theTransactionDetails, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome);
 
 	private void validateResourcePresent(IBaseResource theResource, Integer theOrder, String theVerb) {
 		if (theResource == null) {

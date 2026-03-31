@@ -1,0 +1,8 @@
+---
+type: add
+issue: 7713
+title: "Support has been extended for all valid CodeSystem concept property types supported by the FHIR 
+   spec (string, code, coding, integer, decimal, datetime, boolean) across the entire terminology stack,
+   including the $lookup operation, the IValidationSupport#lookupCode(...) method, and the 
+   RemoteTerminologyServiceValidationSupport interceptor.
+   Previously only string and boolean were fully supported."
