@@ -1131,7 +1131,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	@Override
-	protected void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
+	protected void flushSession(
+			@Nonnull TransactionDetails theTransactionDetails, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
 		try {
 			int insertionCount;
 			int updateCount;

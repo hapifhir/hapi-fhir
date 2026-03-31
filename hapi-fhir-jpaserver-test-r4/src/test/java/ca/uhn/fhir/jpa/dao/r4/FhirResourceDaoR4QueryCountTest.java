@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
+import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -58,6 +59,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
@@ -122,6 +124,7 @@ import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
@@ -142,6 +145,7 @@ import java.util.stream.IntStream;
 import static ca.uhn.fhir.jpa.subscription.FhirR4Util.createSubscription;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -199,6 +203,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	private IJobStepExecutionServices myJobStepExecutionServices;
 	private AuthorizationInterceptor myAuthInterceptor;
 	private ConsentInterceptor myConsentInterceptor;
+	private ComboSearchParameterTestHelper myComboSearchParameterTestHelper;
 
 	@AfterEach
 	public void afterResetDao() {
@@ -220,7 +225,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myStorageSettings.setTagStorageMode(defaultStorageSettings.getTagStorageMode());
 		myStorageSettings.setExpungeEnabled(false);
 		myStorageSettings.setUniqueIndexesEnabled(defaultStorageSettings.isUniqueIndexesEnabled());
-		myStorageSettings.setUniqueIndexesCheckedBeforeSave(defaultStorageSettings.isUniqueIndexesCheckedBeforeSave());
 		myStorageSettings.setFetchSizeDefaultMaximum(defaultStorageSettings.getFetchSizeDefaultMaximum());
 
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
@@ -247,6 +251,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myReindexTestHelper = new ReindexTestHelper(myFhirContext, myDaoRegistry, mySearchParamRegistry);
 		initResourceTypeCacheFromConfig();
+
+		myComboSearchParameterTestHelper = new ComboSearchParameterTestHelper(mySearchParameterDao, mySearchParamRegistry);
 	}
 
 	@ParameterizedTest
@@ -999,6 +1005,84 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(3, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
+	}
+
+	@Test
+	public void testCreateAndUpdateUniqueSp() {
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
+
+		/*
+		 * Create a patient
+		 */
+		myCaptureQueriesListener.clear();
+		IIdType id = createPatient(
+			withIdentifier("http://foo", "id1"),
+			withIdentifier("http://foo", "id2"),
+			withIdentifier("http://foo", "id3")
+		);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(0);
+		assertThat(myCaptureQueriesListener.getInsertQueries()).hasSize(4);
+		assertThat(myCaptureQueriesListener.getUpdateQueries()).hasSize(0);
+		assertThat(myCaptureQueriesListener.getDeleteQueries()).hasSize(0);
+
+		/*
+		 * Update the patient - No change to unique indexes
+		 */
+		myCaptureQueriesListener.clear();
+		createPatient(
+			withId(id.getIdPart()),
+			withIdentifier("http://foo", "id1"),
+			withIdentifier("http://foo", "id2"),
+			withIdentifier("http://foo", "id3"),
+			withActiveTrue()
+		);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(4);
+		assertThat(myCaptureQueriesListener.getInsertQueries()).hasSize(2);
+		assertThat(myCaptureQueriesListener.getUpdateQueries()).hasSize(1);
+		assertThat(myCaptureQueriesListener.getDeleteQueries()).hasSize(0);
+
+		/*
+		 * Update the patient - With change to unique indexes
+		 */
+		myCaptureQueriesListener.clear();
+		createPatient(
+			withId(id.getIdPart()),
+			withIdentifier("http://foo", "id1"),
+			withIdentifier("http://foo", "id4"),
+			withIdentifier("http://foo", "id5"),
+			withActiveTrue()
+		);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(4);
+		assertThat(myCaptureQueriesListener.getInsertQueries()).hasSize(1);
+		assertThat(myCaptureQueriesListener.getUpdateQueries()).hasSize(3);
+		assertThat(myCaptureQueriesListener.getDeleteQueries()).hasSize(0);
+	}
+
+	@Test
+	public void testCreateAndUpdateUniqueSp_WithCollision() {
+		// Setup
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
+		createPatient(withIdentifier("http://foo", "id1"));
+
+		// Test
+		myCaptureQueriesListener.clear();
+		assertThatThrownBy(() -> createPatient(
+			withIdentifier("http://foo", "id1"),
+			withIdentifier("http://foo", "id2"),
+			withIdentifier("http://foo", "id3")))
+			.isInstanceOf(ResourceVersionConflictException.class)
+			.hasMessageContaining("Can not create resource of type Patient as it would create a duplicate unique index matching query: Patient?identifier=http%3A%2F%2Ffoo%7Cid1");
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(1);
+		assertThat(myCaptureQueriesListener.getInsertQueries()).hasSize(4);
+		assertThat(myCaptureQueriesListener.getUpdateQueries()).hasSize(0);
+		assertThat(myCaptureQueriesListener.getDeleteQueries()).hasSize(0);
 	}
 
 	@Test
@@ -2913,6 +2997,87 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	@Test
+	void testTransactionWithMultipleUniqueIndexes() {
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id1"),
+				withIdentifier("http://foo", "id2"),
+				withIdentifier("http://foo", "id3")
+			));
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id4"),
+				withIdentifier("http://foo", "id5"),
+				withIdentifier("http://foo", "id6")
+			));
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id7"),
+				withIdentifier("http://foo", "id8"),
+				withIdentifier("http://foo", "id9")
+			));
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(0);
+		assertThat(myCaptureQueriesListener.getInsertQueries()).hasSize(4);
+		assertThat(myCaptureQueriesListener.getUpdateQueries()).hasSize(0);
+		assertThat(myCaptureQueriesListener.getDeleteQueries()).hasSize(0);
+
+	}
+
+
+	@Test
+	void testTransactionWithMultipleUniqueIndexes_WithCollision() {
+		// Setup
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
+
+		createPatient(
+			withIdentifier("http://foo", "id1"),
+			withIdentifier("http://foo", "id2"),
+			withIdentifier("http://foo", "id3")
+		);
+
+		// Test
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id1"),
+				withIdentifier("http://foo", "id2"),
+				withIdentifier("http://foo", "id3")
+			));
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id4"),
+				withIdentifier("http://foo", "id5"),
+				withIdentifier("http://foo", "id6")
+			));
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id7"),
+				withIdentifier("http://foo", "id8"),
+				withIdentifier("http://foo", "id9")
+			));
+
+		myCaptureQueriesListener.clear();
+		assertThatThrownBy(()->mySystemDao.transaction(newSrd(), bb.getBundleTyped()))
+			.isInstanceOf(ResourceVersionConflictException.class)
+				.hasMessageContaining("Can not create resource of type Patient as it would create a duplicate unique index matching query: Patient?identifier=http%3A%2F%2Ffoo%7Cid1");
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(1);
+		assertThat(myCaptureQueriesListener.getInsertQueries()).hasSize(4);
+		assertThat(myCaptureQueriesListener.getUpdateQueries()).hasSize(0);
+		assertThat(myCaptureQueriesListener.getDeleteQueries()).hasSize(0);
+
+	}
+
 	/**
 	 * See the class javadoc before changing the counts in this test!
 	 */
@@ -3773,7 +3938,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		Bundle inputBundle = myReindexTestHelper.createTransactionBundleWith20Observation(true);
 		mySystemDao.transaction(mySrd, inputBundle);
-		assertEquals(21, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(7, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
@@ -3794,7 +3959,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Test
 	public void testTransaction_ComboParamIndexesInUse_NoPreCheck() {
 		myStorageSettings.setUniqueIndexesEnabled(true);
-		myStorageSettings.setUniqueIndexesCheckedBeforeSave(false);
 
 		myReindexTestHelper.createUniqueCodeSearchParameter();
 		myReindexTestHelper.createNonUniqueStatusAndCodeSearchParameter();
