@@ -61,14 +61,14 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	/**
 	 * Pause requesting new messages from the broker until resume() is called.
 	 */
-	default void pause() {
+	default void pause(String theTopic, int thePartition) {
 		throw new UnsupportedOperationException(Msg.code(2655));
 	}
 
 	/**
 	 * Resume requesting messages from the broker.
 	 */
-	default void resume() {
+	default void resume(String theTopic, int thePartition) {
 		throw new UnsupportedOperationException(Msg.code(2656));
 	}
 
