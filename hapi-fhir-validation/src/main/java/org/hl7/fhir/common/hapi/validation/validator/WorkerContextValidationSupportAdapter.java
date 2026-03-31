@@ -52,12 +52,11 @@ import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.hl7.fhir.utilities.npm.PackageLoadController;import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.utilities.npm.PackageLoadController;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.slf4j.Logger;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -655,30 +654,28 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			public void cachePackage(PackageInformation packageInfo) {}
 
 			@Override
-			public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader)
-					throws FHIRException {
+			public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader) throws FHIRException {
 				return 0;
 			}
 
 			@Override
-			public int loadPackage(NpmPackage pi) throws  FHIRException {
+			public int loadPackage(NpmPackage pi) throws FHIRException {
 				return 0;
 			}
 
 			@Override
-			public int loadPackage(String idAndVer) throws  FHIRException {
+			public int loadPackage(String idAndVer) throws FHIRException {
 				return 0;
 			}
 
 			@Override
 			public int loadFromPackageAndDependencies(
-					NpmPackage pi, IContextResourceLoader loader, BasePackageCacheManager pcm)
-					throws FHIRException {
+					NpmPackage pi, IContextResourceLoader loader, BasePackageCacheManager pcm) throws FHIRException {
 				return 0;
 			}
 
 			@Override
-            public PackageLoadController getPackageLoadController() {
+			public PackageLoadController getPackageLoadController() {
 				return null;
 			}
 		};
