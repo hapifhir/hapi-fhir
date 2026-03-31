@@ -22,6 +22,7 @@ package ca.uhn.fhir.broker.jms;
 import ca.uhn.fhir.broker.api.ChannelConsumerStartFailureException;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.broker.model.ConsumerPauseParams;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
@@ -131,12 +132,12 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	}
 
 	@Override
-	public void pause(String theTopic, int thePartition) {
+	public void pause(ConsumerPauseParams thePauseParams) {
 		mySpringMessagingChannelReceiver.pause();
 	}
 
 	@Override
-	public void resume(String theTopic, int thePartition) {
+	public void resume(ConsumerPauseParams thePauseParams) {
 		checkState();
 		mySpringMessagingChannelReceiver.resume();
 	}
