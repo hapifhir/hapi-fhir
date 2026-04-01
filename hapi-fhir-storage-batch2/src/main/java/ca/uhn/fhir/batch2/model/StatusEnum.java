@@ -39,6 +39,12 @@ import java.util.Set;
 public enum StatusEnum {
 
 	/**
+	 * Task is being built, and is not yet ready to be executed. When the task
+	 * is ready for execution, it should be transitioned to {@link #QUEUED}.
+	 */
+	BUILDING(true, false, true),
+
+	/**
 	 * Task is waiting to execute and should begin with no intervention required.
 	 */
 	QUEUED(true, false, true),
@@ -185,6 +191,9 @@ public enum StatusEnum {
 	public static boolean isLegalStateTransition(StatusEnum theOrigStatus, StatusEnum theNewStatus) {
 		boolean canTransition;
 		switch (theOrigStatus) {
+			case BUILDING:
+				canTransition = theNewStatus == QUEUED || theNewStatus == CANCELLED;
+				break;
 			case QUEUED:
 				// initial state can transition to anything
 				canTransition = true;

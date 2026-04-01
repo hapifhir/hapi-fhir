@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
+import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.testjob.TestJobDefinitionUtils;
 import ca.uhn.fhir.testjob.models.FirstStepOutput;
 import ca.uhn.fhir.util.JsonUtil;
@@ -54,6 +55,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -70,6 +74,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -77,6 +82,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.endsWith;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -134,6 +140,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		for (int i = 0; i < 10; i++) {
 			storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, i, JsonUtil.serialize(new NdJsonFileJson().setNdJsonText("{}")), false);
 		}
+		mySvc.storeNewAttachment(instanceId, new byte[]{1,2,3,4});
 
 		// Execute
 
@@ -782,6 +789,25 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertEquals(0, workChunk2.getErrorCount());
 		}
 	}
+
+	@Test
+	public void testAttachment_StoreAndFetch() {
+		// Setup
+		String matchingString = RandomTextUtils.newSecureRandomAlphaNumericString(20000);
+		byte[] bytes = matchingString.getBytes(StandardCharsets.UTF_8);
+
+		JobInstance instance = createInstance(true, false);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Test
+		String attachmentId = mySvc.storeNewAttachment(instanceId, bytes);
+		byte[] fetchedBytes = mySvc.fetchAttachmentData(instanceId, attachmentId);
+
+		// Verify
+		assertArrayEquals(bytes, fetchedBytes);
+
+	}
+
 
 	@ParameterizedTest
 	@CsvSource({

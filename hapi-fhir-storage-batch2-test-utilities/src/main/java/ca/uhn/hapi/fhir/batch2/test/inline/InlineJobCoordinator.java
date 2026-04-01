@@ -92,7 +92,6 @@ public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinat
 
 		final JobInstance jobInstance = JobInstance.fromJobDefinition(myJobDefinition);
 		jobInstance.setParameters(jobParameters);
-		jobInstance.setStatus(StatusEnum.QUEUED);
 		// Allow the test code to pass its own job instance ID so that it may use it to retrieve the job execution results
 		jobInstance.setInstanceId(requestDetails.getHeader(JOB_INSTANCE_ID_FOR_TESTING));
 

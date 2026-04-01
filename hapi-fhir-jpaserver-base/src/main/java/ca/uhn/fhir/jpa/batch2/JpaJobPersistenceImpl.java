@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
+import ca.uhn.fhir.batch2.api.StoreAttachmemtRequest;
 import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
@@ -36,15 +37,18 @@ import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkMetadataViewRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkMetadataView;
 import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.Logs;
 import com.fasterxml.jackson.core.JsonParser;
@@ -88,6 +92,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final String CREATE_TIME = "myCreateTime";
 
+	private final IBatch2AttachmentRepository myAttachmentRepository;
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
 	private final IBatch2WorkChunkMetadataViewRepository myWorkChunkMetadataViewRepo;
@@ -99,14 +104,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	 * Constructor
 	 */
 	public JpaJobPersistenceImpl(
+			IBatch2AttachmentRepository theAttachmentRepository,
 			IBatch2JobInstanceRepository theJobInstanceRepository,
 			IBatch2WorkChunkRepository theWorkChunkRepository,
 			IBatch2WorkChunkMetadataViewRepository theWorkChunkMetadataViewRepo,
 			IHapiTransactionService theTransactionService,
 			EntityManager theEntityManager,
 			IInterceptorBroadcaster theInterceptorBroadcaster) {
+		Validate.notNull(theAttachmentRepository, "theAttachmentRepository");
 		Validate.notNull(theJobInstanceRepository, "theJobInstanceRepository");
 		Validate.notNull(theWorkChunkRepository, "theWorkChunkRepository");
+		myAttachmentRepository = theAttachmentRepository;
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
 		myWorkChunkMetadataViewRepo = theWorkChunkMetadataViewRepo;
@@ -550,6 +558,32 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public String storeNewAttachment(StoreAttachmemtRequest theRequest) {
+		String attachmentId = UUID.randomUUID().toString();
+			String instanceId = theRequest.getInstanceId();
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			Batch2JobAttachmentEntity attachment = new Batch2JobAttachmentEntity(instanceId, attachmentId);
+			attachment.setFilename(theRequest.getFilename());
+			myEntityManager.persist(attachment);
+		});
+		return attachmentId;
+	}
+
+	@Override
+	public byte[] fetchAttachmentData(String theInstanceId, String theAttachmentId) {
+
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			Batch2JobAttachmentEntity.Batch2WorkChunkAttachmentEntityPk pk = new Batch2JobAttachmentEntity.Batch2WorkChunkAttachmentEntityPk(theInstanceId, theAttachmentId);
+			Batch2JobAttachmentEntity attachment = myEntityManager.find(Batch2JobAttachmentEntity.class, pk);
+			if (attachment == null) {
+				// FIXME: add code and test
+				throw new ResourceNotFoundException("Attachment not found with instance ID " + theInstanceId + " and attachment ID " + theAttachmentId);
+			}
+			return attachment.getData();
+		});
+	}
+
+	@Override
 	public boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier) {
 		/*
 		 * We may already have a copy of the entity in the L1 cache, and it may be
@@ -582,6 +616,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteInstanceAndChunks(String theInstanceId) {
 		ourLog.info("Deleting instance and chunks: {}", theInstanceId);
+		myAttachmentRepository.deleteAllForInstance(theInstanceId);
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 		myJobInstanceRepository.deleteById(theInstanceId);
 	}

@@ -51,6 +51,7 @@ import java.util.Set;
 public class JobInstanceProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
+	public static final long CANCEL_BUILDING_THRESHOLD = DateUtils.MILLIS_PER_HOUR;
 
 	// 10k; we want to get as many as we can
 	private static final int WORK_CHUNK_METADATA_BATCH_SIZE = 10000;
@@ -97,6 +98,11 @@ public class JobInstanceProcessor {
 			return;
 		}
 
+		if (theInstance.getStatus() == StatusEnum.BUILDING) {
+			autoCancelJobIfItHasBeenBuildingForTooLong(theInstance);
+			return;
+		}
+
 		boolean cancelUpdate = handleCancellation(theInstance);
 		if (cancelUpdate) {
 			// reload after update
@@ -136,6 +142,23 @@ public class JobInstanceProcessor {
 		enqueueReadyChunks(theInstance, jobDefinition);
 
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
+	}
+
+	private void autoCancelJobIfItHasBeenBuildingForTooLong(JobInstance theInstance) {
+		// FIXME: add test for this method
+		long cutoff = System.currentTimeMillis() - CANCEL_BUILDING_THRESHOLD;
+		long created = theInstance.getCreateTime().getTime();
+		boolean cancelled = created < cutoff;
+		if (cancelled) {
+			ourLog.info("Job {} has been BUILDING for too long, moving to CANCELLED", theInstance.getInstanceId());
+			myJobPersistence.updateInstance(theInstance.getInstanceId(), instance -> {
+				boolean changed = myJobInstanceStatusUpdater.updateInstanceStatus(instance, StatusEnum.CANCELLED);
+				if (changed) {
+					instance.setErrorMessage("Job has been BUILDING for too long, moving to CANCELLED state");
+				}
+				return changed;
+			});
+		}
 	}
 
 	private boolean handleCancellation(JobInstance theInstance) {

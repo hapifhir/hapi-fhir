@@ -203,6 +203,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 
 	public static JobInstance fromJobDefinition(JobDefinition<?> theJobDefinition) {
 		JobInstance instance = new JobInstance();
+		instance.setStatus(theJobDefinition.getInitialStatus());
 		instance.setJobDefinition(theJobDefinition);
 		if (theJobDefinition.isGatedExecution()) {
 			instance.setFastTracking(true);

@@ -170,6 +170,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(
 			Pageable thePageable, String theInstanceId, Set<WorkChunkStatusEnum> theStates);
 
+
 	/**
 	 * Callback to update a JobInstance within a locked transaction.
 	 * Return true from the callback if the record write should continue, or false if
@@ -183,6 +184,21 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 		 */
 		boolean doUpdate(JobInstance theInstance);
 	}
+
+	/**
+	 * Stores an attachment associated with a specific job instance
+	 * @param theRequest The request containing the attachment data
+	 * @return Returns a unique ID for the attachment
+	 */
+	String storeNewAttachment(StoreAttachmemtRequest theRequest);
+
+	/**
+	 * Fetches the attachment data for a specific attachment ID
+	 * @param theInstanceId The job instance ID
+	 * @param theAttachmentId The attachment ID
+	 * @return The bytes of the attachment data
+	 */
+	byte[] fetchAttachmentData(String theInstanceId, String theAttachmentId);
 
 	/**
 	 * Brute-force hack for now to create a tx boundary - takes a write-lock on the instance
@@ -272,7 +288,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 		JobInstance instance = JobInstance.fromJobDefinition(theJobDefinition);
 		instance.setParameters(theParameters);
-		instance.setStatus(StatusEnum.QUEUED);
 
 		String instanceId = storeNewInstance(theRequestDetails, instance);
 		ourLog.info(

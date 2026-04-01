@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.config.BaseBatch2Config;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
+import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkMetadataViewRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
@@ -38,13 +39,15 @@ public class JpaBatch2Config extends BaseBatch2Config {
 
 	@Bean
 	public IJobPersistence batch2JobInstancePersister(
-			IBatch2JobInstanceRepository theJobInstanceRepository,
-			IBatch2WorkChunkRepository theWorkChunkRepository,
-			IBatch2WorkChunkMetadataViewRepository theWorkChunkMetadataViewRepo,
-			IHapiTransactionService theTransactionService,
-			EntityManager theEntityManager,
-			IInterceptorBroadcaster theInterceptorBroadcaster) {
+		IBatch2AttachmentRepository theAttachmentRepository,
+		IBatch2JobInstanceRepository theJobInstanceRepository,
+		IBatch2WorkChunkRepository theWorkChunkRepository,
+		IBatch2WorkChunkMetadataViewRepository theWorkChunkMetadataViewRepo,
+		IHapiTransactionService theTransactionService,
+		EntityManager theEntityManager,
+		IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new JpaJobPersistenceImpl(
+			theAttachmentRepository,
 				theJobInstanceRepository,
 				theWorkChunkRepository,
 				theWorkChunkMetadataViewRepo,
