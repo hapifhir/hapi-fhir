@@ -1057,16 +1057,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
-	public String getLatestVersion(String statedId, boolean milestonesOnly)  {
+	public String getLatestVersion(String statedId, boolean milestonesOnly) {
 		// As of release 6.9.4 of org.hl7.fhir.core, this is only used internally by the supporting implementations for
-        // the Validator CLI (not InstanceValidator). It is not called except in that specific use case.
-        throw new UnsupportedOperationException(Msg.code(2892));
+		// the Validator CLI (not InstanceValidator). It is not called except in that specific use case.
+		throw new UnsupportedOperationException(Msg.code(2892));
 	}
 
 	@Override
-	public String getLatestVersion(String statedId, String versionFilter)  {
+	public String getLatestVersion(String statedId, String versionFilter) {
 		// As of release 6.9.4 of org.hl7.fhir.core, this is only used internally by the supporting implementations for
-        // the Validator CLI (not InstanceValidator). It is not called except in that specific use case.
-        throw new UnsupportedOperationException(Msg.code(2893));
+		// the Validator CLI (not InstanceValidator). It is not called except in that specific use case.
+		throw new UnsupportedOperationException(Msg.code(2893));
 	}
 }
