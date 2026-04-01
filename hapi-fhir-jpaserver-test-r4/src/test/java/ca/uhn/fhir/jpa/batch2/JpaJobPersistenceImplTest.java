@@ -181,6 +181,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		});
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testFetchInstanceWithStatusAndCutoff_statues() {
 		myCaptureQueriesListener.clear();
@@ -260,7 +261,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@MethodSource("provideStatuses")
-	public void testStartChunkOnlyWorksOnValidChunks(WorkChunkStatusEnum theStatus, boolean theShouldBeStartedByConsumer) throws InterruptedException {
+	public void testStartChunkOnlyWorksOnValidChunks(WorkChunkStatusEnum theStatus, boolean theShouldBeStartedByConsumer) {
 		// Setup
 		JobInstance instance = createInstance();
 		myMaintenanceService.enableMaintenancePass(false);
@@ -270,7 +271,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(JOB_DEFINITION_ID, JOB_DEF_VER, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, false);
 		String chunkId = mySvc.onWorkChunkCreate(batchWorkChunk);
 		Optional<Batch2WorkChunkEntity> byId = myWorkChunkRepository.findById(chunkId);
-		Batch2WorkChunkEntity entity = byId.get();
+		Batch2WorkChunkEntity entity = byId.orElseThrow();
 		entity.setStatus(theStatus);
 		myWorkChunkRepository.save(entity);
 
@@ -1056,6 +1057,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	public void testFetchInstanceAndWorkChunkStatus() {
 		// Setup
+
 		List<String> chunkIds = new ArrayList<>();
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
@@ -1114,9 +1116,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 						sink.accept(new FirstStepOutput());
 						return RunOutcome.SUCCESS;
 					},
-					(step, sink) -> {
-						return RunOutcome.SUCCESS;
-					},
+					(step, sink) -> RunOutcome.SUCCESS,
 					theDetails -> {
 
 					}
@@ -1129,9 +1129,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 						sink.accept(new FirstStepOutput());
 						return RunOutcome.SUCCESS;
 					},
-					(step, sink) -> {
-						return RunOutcome.SUCCESS;
-					},
+					(step, sink) -> RunOutcome.SUCCESS,
 					theDetails -> {
 
 					}

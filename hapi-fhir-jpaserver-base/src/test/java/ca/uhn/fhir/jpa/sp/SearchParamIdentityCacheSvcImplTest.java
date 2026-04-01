@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 class SearchParamIdentityCacheSvcImplTest {
 
 	private static final Long PATIENT_GIVEN_HASH_IDENTITY = BaseResourceIndexedSearchParam
-		.calculateHashIdentity(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Patient", "given");
+		.calculateHashIdentity(new PartitionSettings(), RequestPartitionId.defaultPartition(new PartitionSettings()), "Patient", "given");
 
 	@InjectMocks
 	SearchParamIdentityCacheSvcImpl mySearchParamIdentityCacheSvc;

@@ -402,10 +402,15 @@ public class StorageSettings {
 	 * being otherwise used.
 	 * <p>
 	 * In this mode:
-	 * <p>
-	 * - Tags/Profiles/Security Labels will not be updated on existing resources that already have them
-	 * - Resources modification checks will be skipped in favour of a simple hash check
-	 * - Extra resource ID caching is enabled
+	 * <ul>
+	 * <li>Tags/Profiles/Security Labels will not be updated on existing resources that already have them</li>
+	 * <li>Resources modification checks will be skipped in favour of a simple hash check</li>
+	 * <li>Extra resource ID caching is enabled</li>
+	 * <li>Unique combo SearchParameter indexes are not pre-checked for potential uniqueness violations before save
+	 * (note that this does not mean that uniqueness is not enforced, only that a pre-check is skipped which fails
+	 * fast with a friendly error message if a resource write would violate a unique constraint</li>
+	 * </ul>
+	 * </p>
 	 *
 	 * @since 5.5.0
 	 */
@@ -419,10 +424,15 @@ public class StorageSettings {
 	 * being otherwise used.
 	 * <p>
 	 * In this mode:
+	 * <ul>
+	 * <li>Tags/Profiles/Security Labels will not be updated on existing resources that already have them</li>
+	 * <li>Resources modification checks will be skipped in favour of a simple hash check</li>
+	 * <li>Extra resource ID caching is enabled</li>
+	 * <li>Unique combo SearchParameter indexes are not pre-checked for potential uniqueness violations before save
+	 * (note that this does not mean that uniqueness is not enforced, only that a pre-check is skipped which fails
+	 * fast with a friendly error message if a resource write would violate a unique constraint</li>
+	 * </ul>
 	 * <p>
-	 * - Tags/Profiles/Security Labels will not be updated on existing resources that already have them
-	 * - Resources modification checks will be skipped in favour of a simple hash check
-	 * - Extra resource ID caching is enabled
 	 *
 	 * @since 5.5.0
 	 */

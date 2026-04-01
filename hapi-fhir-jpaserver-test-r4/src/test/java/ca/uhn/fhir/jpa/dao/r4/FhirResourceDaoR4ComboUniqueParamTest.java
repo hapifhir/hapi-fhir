@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.tuple.Pair;
@@ -46,6 +47,8 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -59,7 +62,9 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -177,34 +182,6 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.addComponent()
 			.setExpression("Observation")
 			.setDefinition("/SearchParameter/observation-subject");
-		sp.addExtension()
-			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
-			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(sp, mySrd);
-		mySearchParamRegistry.forceRefresh();
-	}
-
-	private void createUniqueIndexPatientIdentifier() {
-
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-identifier");
-		sp.setCode("identifier");
-		sp.setExpression("Patient.identifier");
-		sp.setType(Enumerations.SearchParamType.TOKEN);
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		mySearchParameterDao.update(sp, mySrd);
-
-		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-uniq-identifier");
-		sp.setCode("patient-uniq-identifier");
-		sp.setExpression("Patient");
-		sp.setType(Enumerations.SearchParamType.COMPOSITE);
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("/SearchParameter/patient-identifier");
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
@@ -415,7 +392,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	@Test
 	public void testHashesCalculated() {
 		myStorageSettings.setHibernateSearchIndexSearchParams(false);
-		createUniqueIndexPatientIdentifier();
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
 
 		Patient pt = new Patient();
 		pt.setActive(true);
@@ -572,7 +549,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	private Pair<String, String> prepareDoubleMatchingSearchParameterAndPatient() {
 		myStorageSettings.setHibernateSearchIndexSearchParams(false);
-		createUniqueIndexPatientIdentifier();
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
 
 		Patient pt = new Patient();
 		pt.setActive(true);
@@ -720,7 +697,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testDoubleMatchingOnOr_ConditionalCreate() {
-		createUniqueIndexPatientIdentifier();
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
 
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("urn").setValue("111");
@@ -765,7 +742,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testDoubleMatchingPut() {
-		createUniqueIndexPatientIdentifier();
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
 
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("urn").setValue("111");
@@ -852,7 +829,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		assertThat(uniqueSearchParams).hasSize(1);
 		assertThat(uniqueSearchParams.get(0).getComponents()).hasSize(3);
 
-		executeReindex();
+		executeReindex(true);
 
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
@@ -867,7 +844,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX)).hasSize(1);
 
-		executeReindex();
+		executeReindex(true);
 
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
@@ -880,9 +857,18 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	}
 
-	@Test
-	public void testDuplicateUniqueValuesAreRejectedWithChecking_TestingDisabled() {
-		myStorageSettings.setUniqueIndexesCheckedBeforeSave(false);
+	/**
+	 * The {@link ca.uhn.fhir.jpa.api.config.JpaStorageSettings#setUniqueIndexesCheckedBeforeSave(boolean)}
+	 * setting is no longer used and has no effect. At some point we will remove that setting entirely
+	 * and we can just remove this test. For now, it just ensures that we behave normally with the setting
+	 * set.
+	 */
+	@SuppressWarnings("removal")
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void testDuplicateUniqueValuesAreRejectedWithChecking_TestingDisabled(boolean theDisabled) {
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(theDisabled);
+		assertFalse(myStorageSettings.isUniqueIndexesCheckedBeforeSave());
 
 		createBirthdateAndGenderSps(true);
 
@@ -891,12 +877,9 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
 		myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
-		try {
-			myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
-			fail();
-		} catch (ResourceVersionConflictException e) {
-			assertEquals(Msg.code(550) + Msg.code(824) + "The operation has failed with a unique index constraint failure. This probably means that the operation was trying to create/update a resource that would have resulted in a duplicate value for a unique index.", e.getMessage());
-		}
+		assertThatThrownBy(()->myPatientDao.create(pt1, mySrd))
+			.isInstanceOf(ResourceVersionConflictException.class)
+			.hasMessageContaining("Can not create resource of type Patient as it would create a duplicate unique index matching query");
 	}
 
 	@Test
@@ -1029,6 +1012,11 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	private void executeReindex(String... theUrls) {
+		boolean expectFailure = false;
+		executeReindex(expectFailure, theUrls);
+	}
+
+	private void executeReindex(boolean theExpectFailure, String... theUrls) {
 		ReindexJobParameters parameters = new ReindexJobParameters();
 		for (String url : theUrls) {
 			parameters.addUrl(url);
@@ -1038,7 +1026,11 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		startRequest.setParameters(parameters);
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
 		ourLog.info("Started reindex job with id {}", res.getInstanceId());
-		myBatch2JobHelper.awaitJobCompletion(res);
+		if (theExpectFailure) {
+			myBatch2JobHelper.awaitJobFailure(res.getInstanceId());
+		} else {
+			myBatch2JobHelper.awaitJobCompletion(res);
+		}
 	}
 
 
@@ -1353,10 +1345,12 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
 		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
-		List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
-		assertThat(uniques.size()).as(uniques.toString()).isEqualTo(1);
-		assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
-		assertEquals("Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale", uniques.get(0).getIndexString());
+		runInTransaction(()->{
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
+			assertThat(uniques.size()).as(uniques.toString()).isEqualTo(1);
+			assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			assertEquals("Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale", uniques.get(0).getIndexString());
+		});
 	}
 
 	@Test
@@ -1458,18 +1452,20 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		pt1.setManagingOrganization(new Reference("Organization/ORG"));
 		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
-		List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
-		Collections.sort(uniques);
+		runInTransaction(()->{
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
+			Collections.sort(uniques);
 
-		assertThat(uniques).hasSize(3);
-		assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
-		assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
+			assertThat(uniques).hasSize(3);
+			assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
 
-		assertEquals("Patient/" + id1.getIdPart(), uniques.get(1).getResource().getIdDt().toUnqualifiedVersionless().getValue());
-		assertEquals("Patient?name=GIVEN1&organization=Organization%2FORG", uniques.get(1).getIndexString());
+			assertEquals("Patient/" + id1.getIdPart(), uniques.get(1).getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			assertEquals("Patient?name=GIVEN1&organization=Organization%2FORG", uniques.get(1).getIndexString());
 
-		assertEquals("Patient/" + id1.getIdPart(), uniques.get(2).getResource().getIdDt().toUnqualifiedVersionless().getValue());
-		assertEquals("Patient?name=GIVEN2&organization=Organization%2FORG", uniques.get(2).getIndexString());
+			assertEquals("Patient/" + id1.getIdPart(), uniques.get(2).getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			assertEquals("Patient?name=GIVEN2&organization=Organization%2FORG", uniques.get(2).getIndexString());
+		});
 	}
 
 	@Test
@@ -1854,5 +1850,47 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	}
 
+	@Test
+	void testTransaction_WithConflictWithinTransaction() {
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id1")
+			));
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id1")
+			));
+
+		assertThatThrownBy(()->mySystemDao.transaction(newSrd(), bb.getBundleTyped()))
+			.isInstanceOf(ResourceVersionConflictException.class)
+			.hasMessageContaining("Multiple resources of type Patient in the same FHIR transaction would create a duplicate unique index matching query: Patient?identifier=http%3A%2F%2Ffoo%7Cid1 (new unique index created by SearchParameter/patient-uniq-identifier)");
+	}
+
+	@Test
+	void testTransaction_WithConflictAgainstPreExisting() {
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
+
+		createPatient(withIdentifier("http://foo", "id1"));
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id1")
+			));
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id2")
+			));
+
+		assertThatThrownBy(()->mySystemDao.transaction(newSrd(), bb.getBundleTyped()))
+			.isInstanceOf(ResourceVersionConflictException.class)
+			.hasMessageContaining("Can not create resource of type Patient as it would create a duplicate unique index matching query: Patient?identifier=http%3A%2F%2Ffoo%7Cid1")
+			.hasMessageContaining("existing index belongs to Patient/")
+			.hasMessageContaining("new unique index created by SearchParameter/patient-uniq-identifier");
+
+	}
 
 }
