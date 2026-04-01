@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -5657,8 +5658,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(1, outcome.sizeOrThrowNpe());
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertEquals(3, countMatches(searchSql, "JOIN"));
+		assertEquals(2, countMatches(searchSql, "JOIN"));
 		assertEquals(1, countMatches(searchSql, "SELECT"));
+		assertEquals(1, countMatches(searchSql, "HFJ_RES_LINK"), searchSql);
 
 	}
 
