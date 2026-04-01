@@ -1131,7 +1131,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				// Synchronize search param indexes
 				AddRemoveCount searchParamAddRemoveCount =
 						myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(
-								newParams, entity, existingParams);
+								theRequest, theTransactionDetails, newParams, entity, existingParams);
 
 				newParams.populateResourceTableParamCollections(entity);
 

@@ -28,12 +28,15 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.io.Serial;
+
 /**
  * Represents an <b>HTTP 404 Resource Not Found</b> response, which means that the request is pointing to a resource that does not exist.
  */
 @CoverageIgnore
 public class ResourceNotFoundException extends BaseServerResponseException {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_404_NOT_FOUND;
