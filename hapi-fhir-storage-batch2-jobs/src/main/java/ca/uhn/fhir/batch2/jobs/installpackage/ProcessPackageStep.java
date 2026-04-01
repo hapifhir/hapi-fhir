@@ -8,8 +8,10 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.InstallationOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,12 @@ public class ProcessPackageStep
 
 	@Autowired
 	IPackageInstallerSvc myPackageInstallerSvc;
+
+	@Autowired
+	ISearchParamRegistryController mySearchParamRegistryController;
+
+	@Autowired
+	IValidationSupport myValidationSupport;
 
 	@Nonnull
 	@Override
@@ -36,6 +44,10 @@ public class ProcessPackageStep
 			PackageInstallOutcomeJson packageOutcome = new PackageInstallOutcomeJson();
 			myPackageInstallerSvc.installPackage(
 					npmPackage, theStepExecutionDetails.getParameters().getInstallationSpec(), packageOutcome);
+
+			mySearchParamRegistryController.refreshCacheIfNecessary();
+
+			myValidationSupport.invalidateCaches();
 
 			InstallationOutcomeJson outcome = new InstallationOutcomeJson();
 			outcome.getOutcomes().add(packageOutcome);

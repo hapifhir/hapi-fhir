@@ -9,9 +9,11 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +40,12 @@ public class ProcessPackageStepTest {
 
 	@Mock
 	IPackageInstallerSvc myPackageInstallerSvc;
+
+	@Mock
+	private ISearchParamRegistryController mySearchParamRegistryController;
+
+	@Mock
+	IValidationSupport myValidationSupport;
 
 	@InjectMocks
 	private ProcessPackageStep myStep;
