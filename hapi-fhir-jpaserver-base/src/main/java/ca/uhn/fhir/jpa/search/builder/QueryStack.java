@@ -1469,10 +1469,20 @@ public class QueryStack {
 					theSourceJoinColumn,
 					theRequestPartitionId));
 		} else {
+			// Include the resource type qualifier in the cache key so that conditions targeting
+			// different resource types (e.g. performer:Practitioner vs performer:Organization)
+			// each get their own HFJ_RES_LINK join rather than sharing one.
+			String cacheParamName = theParamName;
+			if (!theList.isEmpty() && theList.get(0) instanceof ReferenceParam refParam) {
+				String resourceType = refParam.getResourceType();
+				if (isNotBlank(resourceType)) {
+					cacheParamName = theParamName + ":" + resourceType;
+				}
+			}
 			ResourceLinkPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(
 							PredicateBuilderTypeEnum.REFERENCE,
 							theSourceJoinColumn,
-							theParamName,
+							cacheParamName,
 							() -> theSqlBuilder.addReferencePredicateBuilder(this, theSourceJoinColumn))
 					.getResult();
 			return predicateBuilder.createPredicate(

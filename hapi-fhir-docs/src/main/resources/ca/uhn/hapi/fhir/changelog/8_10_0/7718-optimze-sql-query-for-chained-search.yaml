@@ -1,8 +1,0 @@
----
-type: fix
-issue: 7718
-jira: SMILE-11851
-title: "Previously, chained search would generate SQL queries with multiple joins to the `HFJ_RES_LINK` table. 
-E.g., search for Coverage resources by beneficiary attributes such as family name, given name and birthdate 
-would generate the SQL query with a separate join to the `HFJ_RES_LINK` table for each parameter. This has been fixed
-and the SQL query is optimized to use a single join to the `HFJ_RES_LINK` table in this scenario."

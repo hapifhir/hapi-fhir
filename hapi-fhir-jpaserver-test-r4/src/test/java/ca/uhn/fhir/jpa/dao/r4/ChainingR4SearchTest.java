@@ -19,6 +19,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -78,12 +80,15 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 	@Test
 	// Created by claude-sonnet-4-6
-	public void testMultipleChainsOnSameReferenceReuseSingleJoin() {
+	void testMultipleChainsOnSameReferenceReuseSingleJoin() {
 		// Setup
 		createPatient(withId("P0"), withFamily("Smith"), withGiven("John"), withGender("male"));
 		createPatient(withId("P1"), withFamily("Jones"), withGiven("Jane"), withGender("female"));
+		// P2 partially matches: family=Smith matches but given=Sarah and gender=female do not
+		createPatient(withId("P2"), withFamily("Smith"), withGiven("Sarah"), withGender("female"));
 		createCoverage(withId("C0"), withReference("beneficiary", "Patient/P0"));
 		createCoverage(withId("C1"), withReference("beneficiary", "Patient/P1"));
+		createCoverage(withId("C2"), withReference("beneficiary", "Patient/P2"));
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(Coverage.SP_PATIENT, new ReferenceParam("family", "Smith"));
@@ -98,9 +103,36 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly("Coverage/C0");
 
 		// Verify only 1 HFJ_RES_LINK join is used (not one per chained param)
-		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		String querySql = selectQueries.get(0).getSql(false, false);
-		assertEquals(1, StringUtils.countMatches(querySql, "HFJ_RES_LINK"), querySql);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(1);
+	}
+
+	@Test
+	// Created by claude-sonnet-4-6
+	void testMultipleQualifiedChainsOnMultiValuedReferenceUseSeparateJoins() {
+		// Setup
+		createPractitioner(withId("Prac1"), withFamily("Smith"));
+		createOrganization(withId("Org1"), withName("Lab"));
+
+		// DR1 has both a Practitioner named Smith AND an Organization named Lab as performers
+		createResource("DiagnosticReport", withId("DR1"),
+			withReference("performer", "Practitioner/Prac1"),
+			withReference("performer", "Organization/Org1"));
+
+		// DR2 has only the Practitioner - no Organization performer -> should NOT match
+		createResource("DiagnosticReport", withId("DR2"),
+			withReference("performer", "Practitioner/Prac1"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam("Practitioner", "name", "Smith"));
+		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam("Organization", "name", "Lab"));
+
+		// Execute
+		IBundleProvider results = myDiagnosticReportDao.search(map, newSrd());
+
+		// Verify - Only DR1 has both performer types
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder("DiagnosticReport/DR1");
 	}
 
 	@Test
