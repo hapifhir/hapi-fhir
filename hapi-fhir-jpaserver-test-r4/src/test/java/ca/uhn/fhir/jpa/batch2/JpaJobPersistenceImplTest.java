@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import ca.uhn.fhir.batch2.api.StoreAttachmemtRequest;
 import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
@@ -800,7 +801,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
 		// Test
-		String attachmentId = mySvc.storeNewAttachment(instanceId, bytes);
+		StoreAttachmemtRequest request;
+		String attachmentId = mySvc.storeNewAttachment(request);
 		byte[] fetchedBytes = mySvc.fetchAttachmentData(instanceId, attachmentId);
 
 		// Verify

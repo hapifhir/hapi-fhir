@@ -2,7 +2,17 @@ package ca.uhn.fhir.batch2.api;
 
 public enum AttachmentContentTypeEnum {
 
-	PLAIN_TEXT,
-	CSV
+	GZIP(false),
+	PLAIN_TEXT(true),
+	CSV(true);
 
+	private final boolean mySupportsCompression;
+
+	AttachmentContentTypeEnum(boolean theSupportsCompression) {
+		mySupportsCompression = theSupportsCompression;
+	}
+
+	public boolean isSupportsCompression() {
+		return mySupportsCompression;
+	}
 }

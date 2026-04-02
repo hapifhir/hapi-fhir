@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
@@ -22,18 +23,28 @@ public class Batch2JobAttachmentEntity {
 
 	@EmbeddedId
 	private Batch2WorkChunkAttachmentEntityPk myId;
-	@Column(name = "FILENAME", length = ID_MAX_LENGTH, nullable = true)
-	private String myFilename;
-	@Enumerated(jakarta.persistence.EnumType.STRING)
-	@Column(name = "CMP_STATUS", length = 10, nullable = false)
-	private CompressionEnum myCompressedStatus;
+
 	@ManyToOne
 	@JoinColumn(name = "JOB_INSTANCE_ID", referencedColumnName = "ID", insertable = false, updatable = false)
 	private Batch2JobInstanceEntity myJobInstance;
+
+	@Column(name = "FILENAME", length = ID_MAX_LENGTH, nullable = true)
+	private String myFilename;
+
+	@Enumerated(jakarta.persistence.EnumType.STRING)
+	@Column(name = "CONTENT_TYPE", length = 20, nullable = false)
+	private AttachmentContentTypeEnum myContentType;
+
+	@Enumerated(jakarta.persistence.EnumType.STRING)
+	@Column(name = "CMP_STATUS", length = 10, nullable = false)
+	private CompressionEnum myCompressedStatus;
+
 	@Column(name = "ATTACHMENT_DATA", length = Length.LONG32, nullable = false)
 	private byte[] myAttachmentData;
+
 	@Column(name = "ATTACHMENT_LENGTH_CMP", nullable = false)
 	private long myAttachmentLengthCompressed;
+
 	@Column(name = "ATTACHMENT_LENGTH_UC", nullable = false)
 	private long myAttachmentLengthUncompressed;
 
@@ -59,8 +70,36 @@ public class Batch2JobAttachmentEntity {
 		myFilename = theFilename;
 	}
 
+	public void setContentType(AttachmentContentTypeEnum theContentType) {
+		myContentType = theContentType;
+	}
+
 	public byte[] getData() {
 		return myAttachmentData;
+	}
+
+	public void setData(byte[] theData) {
+		myAttachmentData = theData;
+	}
+
+	public void setCompressedStatus(CompressionEnum theCompressedStatus) {
+		myCompressedStatus = theCompressedStatus;
+	}
+
+	public void setAttachmentLengthCompressed(long theAttachmentLengthCompressed) {
+		myAttachmentLengthCompressed = theAttachmentLengthCompressed;
+	}
+
+	public void setAttachmentLengthUncompressed(long theAttachmentLengthUncompressed) {
+		myAttachmentLengthUncompressed = theAttachmentLengthUncompressed;
+	}
+
+	public enum CompressionEnum {
+		/**
+		 * Reordering is ok
+		 */
+		NONE,
+		GZIP
 	}
 
 	@Embeddable
@@ -98,15 +137,6 @@ public class Batch2JobAttachmentEntity {
 		public int hashCode() {
 			return Objects.hash(myJobInstanceId, myAttachmentId);
 		}
-	}
-
-
-	public enum CompressionEnum {
-		/**
-		 * Reordering is ok
-		 */
-		NONE,
-		GZIP
 	}
 
 

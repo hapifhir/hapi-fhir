@@ -9,6 +9,14 @@ public class StoreAttachmemtRequest {
 	private String myFilename;
 	private String myInstanceId;
 
+	public InputStream getInputStream() {
+		return myInputStream;
+	}
+
+	public AttachmentContentTypeEnum getContentType() {
+		return myContentType;
+	}
+
 	public String getInstanceId() {
 		return myInstanceId;
 	}
