@@ -1,4 +1,0 @@
----
-type: fix
-issue: 7681
-title: "Programmatic/Internal system requests (e.g. those triggered by MDM operations) may cause errors under certain partition scenarios. This has been fixed."
