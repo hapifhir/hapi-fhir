@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -33,6 +36,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
@@ -55,6 +59,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -135,6 +140,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
+
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
 
 	/**
 	 * Constructor
@@ -327,6 +335,21 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		for (int i = 0; i < count.length; i++) {
 			ourLog.info(String.format("-- Created or updated %s resources of type %s", count[i], installTypes.get(i)));
 		}
+	}
+
+	/**
+	 * Starts an asynchronous batch job to install a package asynchronously as a background process
+	 * @param theInstallationSpec the specification defining the package to install
+	 * @return the instance id of the job, needed for polling for updates
+	 */
+	@Override
+	public String installAsynchronously(PackageInstallationSpec theInstallationSpec) {
+		PackageInstallationJobParameters parameters = new PackageInstallationJobParameters();
+		parameters.setInstallationSpec(theInstallationSpec);
+		JobInstanceStartRequest startRequest =
+				new JobInstanceStartRequest(Batch2JobDefinitionConstants.INSTALL_PACKAGE, parameters);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
+		return response.getInstanceId();
 	}
 
 	private void fetchAndInstallDependencies(

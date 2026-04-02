@@ -35,4 +35,11 @@ public interface IPackageInstallerSvc {
 	 */
 	void installPackage(
 			NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome);
+
+	/**
+	 * Starts an asynchronous batch job to install a package asynchronously as a background process
+	 * @param theInstallationSpec the specification defining the package to install
+	 * @return the instance id of the job, needed for polling for updates
+	 */
+	String installAsynchronously(PackageInstallationSpec theInstallationSpec);
 }

@@ -20,6 +20,7 @@ public class InstallPackageAppCtx {
 				.setJobDescription("Install NPM Package")
 				.setJobDefinitionVersion(1)
 				.setParametersType(PackageInstallationJobParameters.class)
+				.gatedExecution()
 				.addFirstStep("fetch-package", "Fetch the NPM Package", PackageContentsJson.class, fetchPackageStep())
 				.addIntermediateStep(
 						"process-package",
