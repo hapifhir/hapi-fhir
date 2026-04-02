@@ -62,6 +62,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -69,10 +70,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -438,6 +442,210 @@ public class PackageInstallerSvcImplTest {
 		Communication communication = new Communication();
 		communication.setStatus(theCommunicationStatus);
 		return communication;
+	}
+
+	@Nested
+	class CrossVersionDependencyTest {
+
+		private static final String CROSS_VERSION_PKG_ID = "hl7.fhir.uv.extensions";
+		private static final String CROSS_VERSION_PKG_VERSION = "5.1.0-snapshot1";
+		private static final String CROSS_VERSION_R4_PKG_ID = "hl7.fhir.uv.extensions.r4";
+		private static final String MAIN_PKG_ID = "hl7.fhir.us.core";
+		private static final String MAIN_PKG_VERSION = "8.0.1";
+
+		/**
+		 * Primary reproduction test for GL-8591.
+		 * <p>
+		 * When an R4 server installs an IG with fetchDependencies=true and a transitive
+		 * dependency declares FHIR version 5.0.0 (a cross-version package), the installer
+		 * should attempt to load the version-specific variant (e.g., {package}.r4) instead
+		 * of failing with HAPI-1288.
+		 * <p>
+		 * Currently FAILS because fetchAndInstallDependencies() does not perform
+		 * version-specific substitution — it passes the R5 dependency directly to
+		 * install() which calls assertFhirVersionsAreCompatible() and throws.
+		 */
+		@Test
+		void testFetchDependencies_crossVersionDependencyWithR4Variant_shouldSubstituteAndSucceed() throws Exception {
+			// Setup: main R4 package that depends on a cross-version (R5) package
+			NpmPackage theMainPackage = createPackageWithDependency(
+				MAIN_PKG_ID, MAIN_PKG_VERSION,
+				FhirVersionEnum.R4.getFhirVersionString(),
+				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
+
+			// The cross-version dependency declares FHIR version 5.0.0
+			NpmPackage theCrossVersionDep = createSimplePackage(
+				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION,
+				FhirVersionEnum.R5.getFhirVersionString());
+
+			// The R4-specific variant that should be substituted
+			NpmPackage theR4Variant = createSimplePackage(
+				CROSS_VERSION_R4_PKG_ID, CROSS_VERSION_PKG_VERSION,
+				FhirVersionEnum.R4.getFhirVersionString());
+
+			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
+			when(myPackageCacheManager.installPackage(any())).thenReturn(theMainPackage);
+			// When the installer loads the cross-version dep, return the R5 package
+			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+				.thenReturn(theCrossVersionDep);
+			// FIXME: remove lenient() once the fix makes the code reach this stub
+			lenient()
+				.when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_R4_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+				.thenReturn(theR4Variant);
+
+			PackageInstallationSpec theSpec = new PackageInstallationSpec();
+			theSpec.setName(MAIN_PKG_ID);
+			theSpec.setVersion(MAIN_PKG_VERSION);
+			theSpec.setFetchDependencies(true);
+			theSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+			ByteArrayOutputStream theStream = new ByteArrayOutputStream();
+			theMainPackage.save(theStream);
+			theSpec.setPackageContents(theStream.toByteArray());
+
+			// Test: install should succeed by substituting the .r4 variant
+			// Currently FAILS with HAPI-1288 because no substitution logic exists
+			PackageInstallOutcomeJson theOutcome = mySvc.install(theSpec);
+
+			// Verify: the installation completed without error
+			assertThat(theOutcome).isNotNull();
+			assertThat(theOutcome.getMessage()).isNotEmpty();
+		}
+
+		/**
+		 * When assertFhirVersionsAreCompatible is called with R5 version (5.0.0) and
+		 * R4 version (4.0.1), it should throw HAPI-1288. This is the CORRECT behavior —
+		 * genuinely incompatible versions must be rejected.
+		 */
+		@Test
+		void testAssertFhirVersionsAreCompatible_r5PackageOnR4Server_throwsHapi1288() {
+			String theR5Version = FhirVersionEnum.R5.getFhirVersionString();
+			String theR4Version = FhirVersionEnum.R4.getFhirVersionString();
+
+			assertThatThrownBy(() -> mySvc.assertFhirVersionsAreCompatible(theR5Version, theR4Version))
+				.isInstanceOf(ImplementationGuideInstallationException.class)
+				.hasMessageContaining("HAPI-1288");
+		}
+
+		/**
+		 * Regression guard: R4 and R4B versions must remain compatible.
+		 * The assertFhirVersionsAreCompatible method uses startsWith("R4") on
+		 * the raw string arguments — this works when the caller passes enum-style
+		 * names like "R4" and "R4B" (as the existing testPackageCompatibility does).
+		 * Note: the actual NpmPackage.fhirVersion() returns version strings like "4.0.1"
+		 * and "4.3.0", NOT enum names, so the startsWith("R4") fallback does not apply
+		 * in the real dependency-fetching code path.
+		 */
+		@Test
+		void testAssertFhirVersionsAreCompatible_r4AndR4b_areCompatible() {
+			// Using the enum name strings — this is what the existing test does
+			// and how the R4↔R4B compatibility path is exercised
+			mySvc.assertFhirVersionsAreCompatible("R4", "R4B");
+			mySvc.assertFhirVersionsAreCompatible("R4B", "R4");
+		}
+
+		/**
+		 * When a cross-version dependency is excluded via dependencyExcludes, it should
+		 * be skipped entirely — no version check, no substitution needed.
+		 */
+		@Test
+		void testFetchDependencies_excludedCrossVersionDep_shouldBeSkipped() throws Exception {
+			// Setup: main R4 package that depends on a cross-version (R5) package
+			NpmPackage theMainPackage = createPackageWithDependency(
+				MAIN_PKG_ID, MAIN_PKG_VERSION,
+				FhirVersionEnum.R4.getFhirVersionString(),
+				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
+
+			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
+			when(myPackageCacheManager.installPackage(any())).thenReturn(theMainPackage);
+
+			PackageInstallationSpec theSpec = new PackageInstallationSpec();
+			theSpec.setName(MAIN_PKG_ID);
+			theSpec.setVersion(MAIN_PKG_VERSION);
+			theSpec.setFetchDependencies(true);
+			theSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+			// Exclude the cross-version dependency by regex
+			theSpec.addDependencyExclude("hl7\\.fhir\\.uv\\.extensions");
+			ByteArrayOutputStream theStream = new ByteArrayOutputStream();
+			theMainPackage.save(theStream);
+			theSpec.setPackageContents(theStream.toByteArray());
+
+			// Test: install should succeed because the problematic dep is excluded
+			PackageInstallOutcomeJson theOutcome = mySvc.install(theSpec);
+
+			// Verify: installation completed and the dep was never loaded
+			assertThat(theOutcome).isNotNull();
+			verify(myPackageCacheManager, never()).loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION));
+		}
+
+		/**
+		 * When a cross-version dependency has no version-specific variant available,
+		 * the installation should still fail with HAPI-1288 — there is no fallback.
+		 * <p>
+		 * Note: The .r4 variant mock uses lenient() because the current code (before
+		 * the fix) throws on the R5 dep before attempting substitution. After the fix,
+		 * the code will try loading the .r4 variant and then fail cleanly.
+		 */
+		@Test
+		void testFetchDependencies_crossVersionDependencyWithNoR4Variant_shouldFail() throws Exception {
+			// Setup: main R4 package that depends on a cross-version (R5) package
+			NpmPackage theMainPackage = createPackageWithDependency(
+				MAIN_PKG_ID, MAIN_PKG_VERSION,
+				FhirVersionEnum.R4.getFhirVersionString(),
+				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
+
+			// The cross-version dependency declares FHIR version 5.0.0
+			NpmPackage theCrossVersionDep = createSimplePackage(
+				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION,
+				FhirVersionEnum.R5.getFhirVersionString());
+
+			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
+			when(myPackageCacheManager.installPackage(any())).thenReturn(theMainPackage);
+			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+				.thenReturn(theCrossVersionDep);
+			// FIXME: remove lenient() once the fix makes the code reach this stub
+			lenient()
+				.when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_R4_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+				.thenThrow(new IOException("Package not found: " + CROSS_VERSION_R4_PKG_ID));
+
+			PackageInstallationSpec theSpec = new PackageInstallationSpec();
+			theSpec.setName(MAIN_PKG_ID);
+			theSpec.setVersion(MAIN_PKG_VERSION);
+			theSpec.setFetchDependencies(true);
+			theSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+			ByteArrayOutputStream theStream = new ByteArrayOutputStream();
+			theMainPackage.save(theStream);
+			theSpec.setPackageContents(theStream.toByteArray());
+
+			// Test: install should fail because no .r4 variant is available
+			assertThatThrownBy(() -> mySvc.install(theSpec))
+				.isInstanceOf(ImplementationGuideInstallationException.class)
+				.hasMessageContaining("HAPI-1288");
+		}
+
+		@Nonnull
+		private NpmPackage createPackageWithDependency(
+				String theName, String theVersion, String theFhirVersion,
+				String theDepName, String theDepVersion) {
+			PackageGenerator theManifest = new PackageGenerator();
+			theManifest.name(theName);
+			theManifest.version(theVersion);
+			theManifest.description("a test package");
+			theManifest.fhirVersions(List.of(theFhirVersion));
+			theManifest.dependency(theDepName, theDepVersion);
+
+			return NpmPackage.empty(theManifest);
+		}
+
+		@Nonnull
+		private NpmPackage createSimplePackage(String theName, String theVersion, String theFhirVersion) {
+			PackageGenerator theManifest = new PackageGenerator();
+			theManifest.name(theName);
+			theManifest.version(theVersion);
+			theManifest.description("a test package");
+			theManifest.fhirVersions(List.of(theFhirVersion));
+
+			return NpmPackage.empty(theManifest);
+		}
 	}
 
 }
