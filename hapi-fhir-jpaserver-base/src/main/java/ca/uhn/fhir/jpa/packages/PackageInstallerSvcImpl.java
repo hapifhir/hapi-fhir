@@ -62,7 +62,6 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -403,19 +402,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		String dependencyFhirVersion = theDependency.fhirVersion();
 		String serverFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();
 
-		FhirVersionEnum dependencyVersionEnum = FhirVersionEnum.forVersionString(dependencyFhirVersion);
-		FhirVersionEnum serverVersionEnum = FhirVersionEnum.forVersionString(serverFhirVersion);
-
-		if (dependencyVersionEnum == null || serverVersionEnum == null) {
+		if (areFhirVersionsCompatible(dependencyFhirVersion, serverFhirVersion)) {
 			return theDependency;
 		}
 
-		boolean versionsAreCompatible = dependencyVersionEnum.equals(serverVersionEnum);
-		if (!versionsAreCompatible && dependencyFhirVersion.startsWith("R4") && serverFhirVersion.startsWith("R4")) {
-			versionsAreCompatible = true;
-		}
-
-		if (versionsAreCompatible) {
+		FhirVersionEnum serverVersionEnum = FhirVersionEnum.forVersionString(serverFhirVersion);
+		if (serverVersionEnum == null) {
 			return theDependency;
 		}
 
@@ -481,20 +473,34 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	protected void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion)
 			throws ImplementationGuideInstallationException {
 
-		FhirVersionEnum fhirVersionEnum = FhirVersionEnum.forVersionString(fhirVersion);
-		FhirVersionEnum currentFhirVersionEnum = FhirVersionEnum.forVersionString(currentFhirVersion);
-		Validate.notNull(fhirVersionEnum, "Invalid FHIR version string: %s", fhirVersion);
-		Validate.notNull(currentFhirVersionEnum, "Invalid FHIR version string: %s", currentFhirVersion);
-		boolean compatible = fhirVersionEnum.equals(currentFhirVersionEnum);
-		if (!compatible && fhirVersion.startsWith("R4") && currentFhirVersion.startsWith("R4")) {
-			compatible = true;
-		}
-		if (!compatible) {
+		if (!areFhirVersionsCompatible(fhirVersion, currentFhirVersion)) {
 			throw new ImplementationGuideInstallationException(Msg.code(1288)
 					+ String.format(
 							"Cannot install implementation guide: FHIR versions mismatch (expected <=%s, package uses %s)",
 							currentFhirVersion, fhirVersion));
 		}
+	}
+
+	/**
+	 * Checks whether two FHIR version strings are compatible. Versions are compatible if they
+	 * resolve to the same {@link FhirVersionEnum}, or if both are in the R4 family (R4 or R4B).
+	 *
+	 * @param theFhirVersion the package's FHIR version string (e.g., "4.0.1", "4.3.0")
+	 * @param theCurrentFhirVersion the server's FHIR version string
+	 * @return {@code true} if the versions are compatible
+	 */
+	private static boolean areFhirVersionsCompatible(String theFhirVersion, String theCurrentFhirVersion) {
+		FhirVersionEnum fhirVersionEnum = FhirVersionEnum.forVersionString(theFhirVersion);
+		FhirVersionEnum currentFhirVersionEnum = FhirVersionEnum.forVersionString(theCurrentFhirVersion);
+		if (fhirVersionEnum == null || currentFhirVersionEnum == null) {
+			return false;
+		}
+		if (fhirVersionEnum.equals(currentFhirVersionEnum)) {
+			return true;
+		}
+		boolean bothR4Family = (fhirVersionEnum == FhirVersionEnum.R4 || fhirVersionEnum == FhirVersionEnum.R4B)
+				&& (currentFhirVersionEnum == FhirVersionEnum.R4 || currentFhirVersionEnum == FhirVersionEnum.R4B);
+		return bothR4Family;
 	}
 
 	/**
