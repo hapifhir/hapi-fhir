@@ -19,10 +19,14 @@
  */
 package ca.uhn.fhir.jpa.term.custom;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
+import org.hl7.fhir.r4.model.Coding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -71,12 +75,26 @@ public class PropertyHandler implements IZipContentsHandlerCsv {
 				return;
 			}
 
+			TermConceptPropertyTypeEnum typeEnum = TermConceptPropertyTypeEnum.fromString(type);
+			Validate.notNull(typeEnum, "Invalid property type[%s] for key: %s", type, key);
+
 			TermConceptProperty conceptProperty = new TermConceptProperty();
 			conceptProperty.setKey(key);
-			conceptProperty.setValue(value);
-			// TODO: check this for different types, other types should be added once TermConceptPropertyTypeEnum
-			// contain different types
-			conceptProperty.setType(TermConceptPropertyTypeEnum.STRING);
+			conceptProperty.setType(typeEnum);
+
+			switch (typeEnum) {
+				case BOOLEAN, INTEGER, DECIMAL, DATETIME, CODE, STRING -> conceptProperty.setValue(value);
+				case CODING -> {
+					Coding coding = new Coding();
+					FhirContext.forR4Cached().newJsonParser().parseInto(value, coding);
+					conceptProperty.setCodeSystem(coding.getSystem());
+					conceptProperty.setValue(coding.getCode());
+					conceptProperty.setDisplay(coding.getDisplay());
+				}
+				default -> throw new IllegalArgumentException(
+						Msg.code(2886) + "Unable to handle property type: " + type);
+			}
+
 			conceptProperties.add(conceptProperty);
 			myCode2Properties.put(code, conceptProperties);
 		}

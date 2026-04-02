@@ -1,9 +1,16 @@
 CODE,KEY, VALUE, TYPE
 
-CHEM,color,green,String
-HB,color,red,String
-NEUT,color,pink,String
-NEUT,shape,spherical,String
+CHEM,color,green,string
 
-MICRO,color,yellow,String
-C&S,color,blue,String
+HB, color      ,red       ,string
+HB, sequence   ,25        ,integer
+HB, archived   ,false     ,boolean
+HB, created    ,2022-01-01,dateTime
+HB, k_score    ,1.23      ,decimal
+HB, loinc_equiv,"{""system"":""http://loinc.org"", ""code"":""1-2345""}", Coding
+
+NEUT,color,pink,string
+NEUT,shape,spherical,string
+
+MICRO,color,yellow,string
+C&S,color,blue,string

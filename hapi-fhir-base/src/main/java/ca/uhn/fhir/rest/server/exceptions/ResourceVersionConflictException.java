@@ -25,6 +25,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
+import java.io.Serial;
+
 /**
  * Represents an <b>HTTP 409 Conflict</b> response. This exception should be
  * thrown in methods which accept a version (e.g. {@link Update}, {@link Delete})
@@ -33,6 +35,8 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 @CoverageIgnore
 public class ResourceVersionConflictException extends BaseServerResponseException {
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_409_CONFLICT;
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -63,5 +67,17 @@ public class ResourceVersionConflictException extends BaseServerResponseExceptio
 	public ResourceVersionConflictException(
 			String theMessage, Throwable theCause, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theCause, theOperationOutcome);
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param theMessage
+	 *            The message
+	 * @param theCause The cause
+	 * @since 8.10.0
+	 */
+	public ResourceVersionConflictException(String theMessage, Throwable theCause) {
+		super(STATUS_CODE, theMessage, theCause);
 	}
 }

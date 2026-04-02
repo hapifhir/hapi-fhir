@@ -101,14 +101,21 @@ public class TransactionDetails {
 	 * @since 5.5.0
 	 */
 	public List<Runnable> getRollbackUndoActions() {
+		if (myRollbackUndoActions.isEmpty()) {
+			// Empty collection is immutable already
+			return myRollbackUndoActions;
+		}
 		return Collections.unmodifiableList(myRollbackUndoActions);
 	}
 
 	/**
 	 * Add an action that should be executed if the transaction is rolled back. If a rollback is triggered, the
-	 * actions will be executed in reverse order in order to leave .
+	 * actions will be executed in reverse order in order to undo any state changes or perform other cleanup.
+	 *
+	 * @param theRunnable The action to execute (can optionally be an instance of {@link IExceptionAwareRollbackAction})
 	 *
 	 * @since 5.5.0
+	 * @see IExceptionAwareRollbackAction
 	 */
 	public void addRollbackUndoAction(@Nonnull Runnable theRunnable) {
 		assert theRunnable != null;

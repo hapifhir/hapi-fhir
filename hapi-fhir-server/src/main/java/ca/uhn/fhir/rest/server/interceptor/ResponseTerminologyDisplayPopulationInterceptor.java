@@ -30,7 +30,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.IModelVisitor;
+import ca.uhn.fhir.util.IModelVisitor2;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -84,15 +84,14 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 		}
 	}
 
-	private class MappingVisitor implements IModelVisitor {
+	private class MappingVisitor implements IModelVisitor2 {
 
 		@Override
-		public void acceptElement(
-				IBaseResource theResource,
+		public boolean acceptElement(
 				IBase theElement,
-				List<String> thePathToElement,
-				BaseRuntimeChildDefinition theChildDefinition,
-				BaseRuntimeElementDefinition<?> theDefinition) {
+				List<IBase> theContainingElementPath,
+				List<BaseRuntimeChildDefinition> theChildDefinitionPath,
+				List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
 			if (myCodingType.isAssignableFrom(theElement.getClass())) {
 				String system = myCodingSystemChild
 						.getAccessor()
@@ -107,7 +106,7 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 						.map(t -> t.getValueAsString())
 						.orElse(null);
 				if (isBlank(system) || isBlank(code)) {
-					return;
+					return false;
 				}
 
 				String display = myCodingDisplayChild
@@ -117,7 +116,7 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 						.map(t -> t.getValueAsString())
 						.orElse(null);
 				if (isNotBlank(display)) {
-					return;
+					return false;
 				}
 
 				ValidationSupportContext validationSupportContext = new ValidationSupportContext(myValidationSupport);
@@ -132,6 +131,8 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 					}
 				}
 			}
+
+			return true;
 		}
 	}
 }
