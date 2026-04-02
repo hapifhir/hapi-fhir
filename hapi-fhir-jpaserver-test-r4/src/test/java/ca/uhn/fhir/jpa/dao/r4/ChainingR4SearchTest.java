@@ -20,11 +20,9 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Meta;
@@ -46,7 +44,6 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -129,10 +126,16 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam("Organization", "name", "Lab"));
 
 		// Execute
+		myCaptureQueriesListener.clear();
 		IBundleProvider results = myDiagnosticReportDao.search(map, newSrd());
 
 		// Verify - Only DR1 has both performer types
 		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder("DiagnosticReport/DR1");
+
+		// Verify 2 HFJ_RES_LINK joins are used, one for each performer type (Practitioner and Organization)
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(2);
 	}
 
 	@Test
