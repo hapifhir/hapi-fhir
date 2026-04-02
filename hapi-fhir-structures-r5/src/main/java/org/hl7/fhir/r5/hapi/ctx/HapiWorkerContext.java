@@ -364,10 +364,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		}
 	}
 
-	public <T extends Resource> T fetchResource(Class<T> class_, String uri, FhirPublication fhirVersion) {
-		throw new UnsupportedOperationException(Msg.code(2466));
-	}
-
 	@Override
 	public <T extends org.hl7.fhir.r5.model.Resource> T fetchResourceWithException(
 			Class<T> theClass, String theUri, IWorkerContext.VersionResolutionRules rules) throws FHIRException {
