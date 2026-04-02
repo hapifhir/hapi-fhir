@@ -363,6 +363,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 						// resolve in local cache or on packages.fhir.org
 						NpmPackage dependency = myPackageCacheManager.loadPackage(id, ver);
+
+						// If the dependency's FHIR version is incompatible with the server,
+						// attempt to load a version-specific variant (e.g., {id}.r4 for R4 servers)
+						dependency = substituteVersionSpecificPackageIfNeeded(dependency, id, ver);
+
 						// recursive call to install dependencies of a package before
 						// installing the package
 						fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
@@ -377,6 +382,95 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 							Msg.code(1287) + String.format("Cannot resolve dependency %s#%s", id, ver), e);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Checks if a dependency package's FHIR version is compatible with the server's FHIR version.
+	 * If incompatible, attempts to load a version-specific variant by appending a FHIR version
+	 * suffix (e.g., ".r4" for R4/R4B servers, ".r5" for R5, ".r3" for DSTU3).
+	 * <p>
+	 * This handles cross-version packages like {@code hl7.fhir.uv.extensions} which declare
+	 * FHIR version 5.0.0 but have R4-specific counterparts like {@code hl7.fhir.uv.extensions.r4}.
+	 *
+	 * @param theDependency the loaded dependency package
+	 * @param theId the package ID
+	 * @param theVersion the package version
+	 * @return the original package if compatible, or the version-specific variant if found
+	 */
+	private NpmPackage substituteVersionSpecificPackageIfNeeded(
+			NpmPackage theDependency, String theId, String theVersion) {
+		String dependencyFhirVersion = theDependency.fhirVersion();
+		String serverFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();
+
+		FhirVersionEnum dependencyVersionEnum = FhirVersionEnum.forVersionString(dependencyFhirVersion);
+		FhirVersionEnum serverVersionEnum = FhirVersionEnum.forVersionString(serverFhirVersion);
+
+		if (dependencyVersionEnum == null || serverVersionEnum == null) {
+			return theDependency;
+		}
+
+		boolean versionsAreCompatible = dependencyVersionEnum.equals(serverVersionEnum);
+		if (!versionsAreCompatible && dependencyFhirVersion.startsWith("R4") && serverFhirVersion.startsWith("R4")) {
+			versionsAreCompatible = true;
+		}
+
+		if (versionsAreCompatible) {
+			return theDependency;
+		}
+
+		String suffix = getVersionSpecificSuffix(serverVersionEnum);
+		if (suffix == null) {
+			return theDependency;
+		}
+
+		String variantId = theId + suffix;
+		ourLog.warn(
+				"Dependency {}#{} declares FHIR version {} which is incompatible with server FHIR version {}. "
+						+ "Attempting to load version-specific variant: {}#{}",
+				theId,
+				theVersion,
+				dependencyFhirVersion,
+				serverFhirVersion,
+				variantId,
+				theVersion);
+
+		try {
+			NpmPackage variant = myPackageCacheManager.loadPackage(variantId, theVersion);
+			ourLog.info(
+					"Successfully substituted {}#{} with version-specific variant {}#{}",
+					theId,
+					theVersion,
+					variantId,
+					theVersion);
+			return variant;
+		} catch (IOException e) {
+			ourLog.warn(
+					"Could not find version-specific variant {}#{}. "
+							+ "Proceeding with original package {}#{} which may fail version compatibility checks.",
+					variantId,
+					theVersion,
+					theId,
+					theVersion);
+			return theDependency;
+		}
+	}
+
+	/**
+	 * Returns the version-specific package suffix for the given FHIR version,
+	 * or {@code null} if no suffix mapping exists.
+	 */
+	private static String getVersionSpecificSuffix(FhirVersionEnum theVersion) {
+		switch (theVersion) {
+			case R4:
+			case R4B:
+				return ".r4";
+			case R5:
+				return ".r5";
+			case DSTU3:
+				return ".r3";
+			default:
+				return null;
 		}
 	}
 

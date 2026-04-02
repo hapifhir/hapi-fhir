@@ -76,7 +76,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -488,9 +487,7 @@ public class PackageInstallerSvcImplTest {
 			// When the installer loads the cross-version dep, return the R5 package
 			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
 				.thenReturn(theCrossVersionDep);
-			// FIXME: remove lenient() once the fix makes the code reach this stub
-			lenient()
-				.when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_R4_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_R4_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
 				.thenReturn(theR4Variant);
 
 			PackageInstallationSpec theSpec = new PackageInstallationSpec();
@@ -580,10 +577,6 @@ public class PackageInstallerSvcImplTest {
 		/**
 		 * When a cross-version dependency has no version-specific variant available,
 		 * the installation should still fail with HAPI-1288 — there is no fallback.
-		 * <p>
-		 * Note: The .r4 variant mock uses lenient() because the current code (before
-		 * the fix) throws on the R5 dep before attempting substitution. After the fix,
-		 * the code will try loading the .r4 variant and then fail cleanly.
 		 */
 		@Test
 		void testFetchDependencies_crossVersionDependencyWithNoR4Variant_shouldFail() throws Exception {
@@ -602,9 +595,7 @@ public class PackageInstallerSvcImplTest {
 			when(myPackageCacheManager.installPackage(any())).thenReturn(theMainPackage);
 			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
 				.thenReturn(theCrossVersionDep);
-			// FIXME: remove lenient() once the fix makes the code reach this stub
-			lenient()
-				.when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_R4_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_R4_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
 				.thenThrow(new IOException("Package not found: " + CROSS_VERSION_R4_PKG_ID));
 
 			PackageInstallationSpec theSpec = new PackageInstallationSpec();
