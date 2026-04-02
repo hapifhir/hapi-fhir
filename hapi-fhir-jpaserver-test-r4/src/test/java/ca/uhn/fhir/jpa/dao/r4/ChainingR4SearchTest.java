@@ -77,7 +77,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 	@Test
 	// Created by claude-sonnet-4-6
-	void testMultipleChainsOnSameReferenceReuseSingleJoin() {
+	void testMultipleChainsOnSameResourceTypeReference_ReuseSingleJoin() {
 		// Setup
 		createPatient(withId("P0"), withFamily("Smith"), withGiven("John"), withGender("male"));
 		createPatient(withId("P1"), withFamily("Jones"), withGiven("Jane"), withGender("female"));
@@ -107,7 +107,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 	@Test
 	// Created by claude-sonnet-4-6
-	void testMultipleQualifiedChainsOnMultiValuedReferenceUseSeparateJoins() {
+	void testMultipleQualifiedChainsOnMultiValuedReference_UseSeparateJoins() {
 		// Setup
 		createPractitioner(withId("Prac1"), withFamily("Smith"));
 		createOrganization(withId("Org1"), withName("Lab"));
