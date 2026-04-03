@@ -1,5 +1,5 @@
 ---
 type: fix
 issue: 7681
-title: "Programmatic/Internal system requests (e.g. those triggered by MDM operations) may cause an NullPointerException 
-if the operation type is null when using Patient ID partition. This has been fixed."
+title: "Programmatic/Internal system requests (e.g. those triggered by MDM operations) could previously cause a NullPointerException 
+if the operation type is null when using Patient ID Partition Mode. This has been fixed."
