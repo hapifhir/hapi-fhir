@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
@@ -278,6 +279,104 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 			verify(myMemoryCacheService, never()).putAfterCommit(eq(MemoryCacheService.CacheEnum.MATCH_URL), eq(thePatientMatchUrl), any());
 		}
 
+	}
+
+	/**
+	 * When cross-partition references are enabled and a search uses an unqualified reference
+	 * (bare ID without resource type prefix, e.g. subject=123 instead of subject=Patient/123),
+	 * the search should succeed by falling back to the search parameter's declared target types
+	 * to determine potential partitions.
+	 * <p>
+	 * Reproduces GL-8588: calculatePotentialCrossPartitionsForPredicateTarget throws HAPI-2870
+	 * when the reference parameter value lacks a resource type prefix.
+	 */
+	@Test
+	void testCrossPartitionReference_SearchWithUnqualifiedReference_ShouldSucceed() {
+		// Setup - Create a Patient in partition 1
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		initializeCrossReferencesInterceptor();
+
+		// Create an Observation in partition 2 referencing the patient (qualified)
+		Observation o = new Observation();
+		o.setStatus(Enumerations.ObservationStatus.FINAL);
+		o.setSubject(new Reference(patientId));
+		IIdType observationId = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
+
+		// Test - Search using an unqualified reference (bare ID, no "Patient/" prefix)
+		// This is the bug scenario: subject=<bare-id> instead of subject=Patient/<id>
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add("subject", new ReferenceParam(patientId.getIdPart()));
+		IBundleProvider results = myObservationDao.search(params, mySrd);
+
+		// Verify - The search should succeed and find the observation
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(results);
+		assertThat(resultIds).containsExactly(observationId.getValue());
+	}
+
+	/**
+	 * When cross-partition references are enabled and a search uses a qualified reference
+	 * (e.g. subject=Patient/123), the search should succeed normally.
+	 * Adjacent test for GL-8588: verifies the qualified reference path works.
+	 */
+	@Test
+	void testCrossPartitionReference_SearchWithQualifiedReference_ShouldSucceed() {
+		// Setup - Create a Patient in partition 1
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		initializeCrossReferencesInterceptor();
+
+		// Create an Observation in partition 2 referencing the patient (qualified)
+		Observation o = new Observation();
+		o.setStatus(Enumerations.ObservationStatus.FINAL);
+		o.setSubject(new Reference(patientId));
+		IIdType observationId = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
+
+		// Test - Search using a qualified reference (Patient/<id>)
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add("subject", new ReferenceParam("Patient", null, patientId.getIdPart()));
+		IBundleProvider results = myObservationDao.search(params, mySrd);
+
+		// Verify - The search should succeed and find the observation
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(results);
+		assertThat(resultIds).containsExactly(observationId.getValue());
+	}
+
+	/**
+	 * When cross-partition references are NOT enabled, a search with an unqualified reference
+	 * should succeed because calculatePotentialCrossPartitionsForPredicateTarget is never called.
+	 * Adjacent test for GL-8588: verifies the non-cross-partition path is unaffected.
+	 */
+	@Test
+	void testNonCrossPartition_SearchWithUnqualifiedReference_ShouldSucceed() {
+		// Setup - Disable cross-partition references and partitioning for this test
+		// so that both Patient and Observation live in the default partition
+		myPartitionSettings.setPartitioningEnabled(false);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+
+		// Create a Patient
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		// Create an Observation referencing the patient
+		Observation o = new Observation();
+		o.setStatus(Enumerations.ObservationStatus.FINAL);
+		o.setSubject(new Reference(patientId));
+		IIdType observationId = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
+
+		// Test - Search using an unqualified reference (bare ID, no "Patient/" prefix)
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add("subject", new ReferenceParam(patientId.getIdPart()));
+		IBundleProvider results = myObservationDao.search(params, mySrd);
+
+		// Verify - The search should succeed and find the observation
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(results);
+		assertThat(resultIds).containsExactly(observationId.getValue());
 	}
 
 	private void initializeCrossReferencesInterceptor() {
