@@ -213,7 +213,9 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 							// there could be multiple of these, so we only delete the first
 							if (!theTransactionDetails.getDeletedResourceIds().contains(goldenPid)) {
 								IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
-								deleteGoldenResource(goldenPid, dao, theRequest);
+								RequestDetails allPartitionsRequest = new SystemRequestDetails()
+										.setRequestPartitionId(RequestPartitionId.allPartitions());
+								deleteGoldenResource(goldenPid, dao, allPartitionsRequest);
 								/*
 								 * We will add the removed id to the deleted list so that
 								 * the deletedResourceId list is accurate for what has been
