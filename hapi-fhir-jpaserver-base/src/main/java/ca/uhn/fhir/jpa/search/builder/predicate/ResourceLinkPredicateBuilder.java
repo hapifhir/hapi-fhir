@@ -373,25 +373,20 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					 * target types to determine potential partitions, similar to how the
 					 * chained reference case handles unknown targets.
 					 */
-					if (!theParam.getTargets().isEmpty()) {
-						for (String targetType : theParam.getTargets()) {
-							if (myDaoRegistry.isResourceTypeSupported(targetType)) {
-								try {
-									RequestPartitionId nextPartitionId =
-											myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-													theRequest, targetType);
-									predicateTargetPartitionId = nextPartitionId.mergeIds(predicateTargetPartitionId);
-								} catch (Exception e) {
-									ourLog.debug(
-											"Could not determine partition for target type {}, skipping",
-											targetType,
-											e);
-								}
+					for (String targetType : theParam.getTargets()) {
+						if (myDaoRegistry.isResourceTypeSupported(targetType)) {
+							try {
+								RequestPartitionId nextPartitionId =
+										myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+												theRequest, targetType);
+								predicateTargetPartitionId = nextPartitionId.mergeIds(predicateTargetPartitionId);
+							} catch (Exception e) {
+								ourLog.debug(
+										"Could not determine partition for target type {}, skipping",
+										targetType,
+										e);
 							}
 						}
-					} else {
-						predicateTargetPartitionId = RequestPartitionId.allPartitions();
-						break;
 					}
 				} else {
 					IIdType id = myFhirContext.getVersion().newIdType(resourceType, resourceId);
