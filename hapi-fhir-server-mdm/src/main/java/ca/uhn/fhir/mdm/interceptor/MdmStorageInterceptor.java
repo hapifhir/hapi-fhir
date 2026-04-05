@@ -270,8 +270,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 				IResourcePersistentId goldenPid = extractGoldenPid(theResource, matches.get(0));
 				if (!theTransactionDetails.getDeletedResourceIds().contains(goldenPid)) {
 					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
-					RequestDetails allPartitionsRequest =
-							SystemRequestDetails.forAllPartitions();
+					RequestDetails allPartitionsRequest = SystemRequestDetails.forAllPartitions();
 					cleanUpPossibleMatches(possibleMatches, dao, goldenPid, allPartitionsRequest);
 					String resourceType = dao.getResourceType().getSimpleName();
 					IIdType goldenId = myIdHelperSvc.resourceIdFromPidOrThrowException(goldenPid, resourceType);
