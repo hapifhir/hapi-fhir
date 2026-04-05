@@ -361,11 +361,11 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 				if (isBlank(resourceId)) {
 					/*
-					 * If no ID part is present, we can't narrow by a specific resource,
-					 * so target all partitions.
+					 * If no ID part is present at all, we can't narrow the partition
+					 * by a specific resource. Just skip this parameter value — the
+					 * downstream search will handle it (and likely match nothing).
 					 */
-					predicateTargetPartitionId = RequestPartitionId.allPartitions();
-					break;
+					continue;
 				} else if (isBlank(resourceType)) {
 					/*
 					 * If the reference value is unqualified (e.g. ?subject=123 instead of
