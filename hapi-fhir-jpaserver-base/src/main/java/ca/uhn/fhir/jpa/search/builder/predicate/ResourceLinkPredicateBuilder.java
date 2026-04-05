@@ -68,7 +68,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -359,15 +358,45 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 				 */
 				String resourceType = refParam.getResourceType();
 				String resourceId = refParam.getIdPart();
-				if (isBlank(resourceType) || isBlank(resourceId)) {
-					throw new InvalidRequestException(Msg.code(2870) + "Parameter \""
-							+ UrlUtil.sanitizeUrlPart(paramName) + "\" must be in the format [resourceType]/[id]");
-				}
 
-				IIdType id = myFhirContext.getVersion().newIdType(resourceType, resourceId);
-				RequestPartitionId nextPartitionId =
-						myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, id);
-				predicateTargetPartitionId = nextPartitionId.mergeIds(predicateTargetPartitionId);
+				if (isBlank(resourceId)) {
+					/*
+					 * If no ID part is present, we can't narrow by a specific resource,
+					 * so target all partitions.
+					 */
+					predicateTargetPartitionId = RequestPartitionId.allPartitions();
+					break;
+				} else if (isBlank(resourceType)) {
+					/*
+					 * If the reference value is unqualified (e.g. ?subject=123 instead of
+					 * ?subject=Patient/123), fall back to the search parameter's declared
+					 * target types to determine potential partitions, similar to how the
+					 * chained reference case handles unknown targets.
+					 */
+					if (!theParam.getTargets().isEmpty()) {
+						for (String targetType : theParam.getTargets()) {
+							if (myDaoRegistry.isResourceTypeSupported(targetType)) {
+								try {
+									RequestPartitionId nextPartitionId =
+											myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+													theRequest, targetType);
+									predicateTargetPartitionId = nextPartitionId.mergeIds(predicateTargetPartitionId);
+								} catch (Exception e) {
+									ourLog.trace(
+											"Could not determine partition for target type {}, skipping", targetType);
+								}
+							}
+						}
+					} else {
+						predicateTargetPartitionId = RequestPartitionId.allPartitions();
+						break;
+					}
+				} else {
+					IIdType id = myFhirContext.getVersion().newIdType(resourceType, resourceId);
+					RequestPartitionId nextPartitionId =
+							myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, id);
+					predicateTargetPartitionId = nextPartitionId.mergeIds(predicateTargetPartitionId);
+				}
 			} else {
 
 				/*
