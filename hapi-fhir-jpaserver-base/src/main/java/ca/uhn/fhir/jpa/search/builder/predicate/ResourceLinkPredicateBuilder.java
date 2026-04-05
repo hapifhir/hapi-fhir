@@ -382,8 +382,10 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 													theRequest, targetType);
 									predicateTargetPartitionId = nextPartitionId.mergeIds(predicateTargetPartitionId);
 								} catch (Exception e) {
-									ourLog.trace(
-											"Could not determine partition for target type {}, skipping", targetType);
+									ourLog.debug(
+											"Could not determine partition for target type {}, skipping",
+											targetType,
+											e);
 								}
 							}
 						}
