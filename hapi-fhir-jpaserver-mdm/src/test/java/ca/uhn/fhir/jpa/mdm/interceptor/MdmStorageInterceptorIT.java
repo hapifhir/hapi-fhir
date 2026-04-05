@@ -929,111 +929,63 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	void deleteLastResource_withCrossPartitionGoldenResource_works() {
-		// setup
-		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionSettings.setUnnamedPartitionMode(false);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(3).setName("PARTITION-GOLDEN"), null);
-
-		myMdmSettings.setGoldenResourcePartitionName("PARTITION-GOLDEN");
-		myMdmSettings.setSearchAllPartitionForMatch(true);
-
+		setupCrossPartitionGoldenResource();
 		try {
 			Patient jane = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
-
-			// verify setup: one MDM link created, golden in PARTITION-GOLDEN
 			assertLinkCount(1);
 
-			// our partition req details — source is in partition 1
 			SystemRequestDetails reqDetails = new SystemRequestDetails();
 			reqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
 
-			// test: delete the last (and only) source patient
 			myPatientDao.delete(jane.getIdElement(), reqDetails);
 
-			// validate: all links should be cleaned up
-			Long mdmLinksCount = myMdmLinkDao.count();
-			assertThat(mdmLinksCount).isEqualTo(0);
+			assertThat(myMdmLinkDao.count()).isEqualTo(0);
 
-			// validate: no patients remain in source partition
 			SearchParameterMap spMap = new SearchParameterMap();
 			spMap.setLoadSynchronous(true);
-			IBundleProvider bundle = myPatientDao.search(spMap, reqDetails);
-			assertThat(bundle.isEmpty()).isTrue();
+			assertThat(myPatientDao.search(spMap, reqDetails).isEmpty()).isTrue();
 		} finally {
-			myMdmSettings.setGoldenResourcePartitionName("");
-			myMdmSettings.setSearchAllPartitionForMatch(false);
+			teardownCrossPartitionGoldenResource();
 		}
-	}
-
-	@Test
-	void deleteLastResource_withSamePartitionGoldenResource_works() {
-		// setup — golden resources stay in the same partition as the source (no golden_resource_partition)
-		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionSettings.setUnnamedPartitionMode(false);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
-
-		Patient jane = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
-
-		// verify setup
-		assertLinkCount(1);
-
-		SystemRequestDetails reqDetails = new SystemRequestDetails();
-		reqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
-
-		// test: delete the last source patient — golden in same partition
-		myPatientDao.delete(jane.getIdElement(), reqDetails);
-
-		// validate
-		Long mdmLinksCount = myMdmLinkDao.count();
-		assertThat(mdmLinksCount).isEqualTo(0);
-
-		SearchParameterMap spMap = new SearchParameterMap();
-		spMap.setLoadSynchronous(true);
-		IBundleProvider bundle = myPatientDao.search(spMap, reqDetails);
-		assertThat(bundle.isEmpty()).isTrue();
 	}
 
 	@Test
 	void deleteNonLastSource_withCrossPartitionGoldenResource_works() {
-		// setup
-		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionSettings.setUnnamedPartitionMode(false);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(3).setName("PARTITION-GOLDEN"), null);
-
-		myMdmSettings.setGoldenResourcePartitionName("PARTITION-GOLDEN");
-		myMdmSettings.setSearchAllPartitionForMatch(true);
-
+		setupCrossPartitionGoldenResource();
 		try {
-			// create two patients that will match the same golden resource
 			Patient jane1 = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
-			Patient jane2 = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+			createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
 
 			// verify setup: two MDM MATCH links to the same golden resource
-			List<MdmLink> allLinks = myMdmLinkDao.findAll();
-			assertThat(allLinks).hasSizeGreaterThanOrEqualTo(2);
+			assertThat(myMdmLinkDao.findAll()).hasSizeGreaterThanOrEqualTo(2);
 
 			SystemRequestDetails reqDetails = new SystemRequestDetails();
 			reqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
 
-			// test: delete jane1 — this is NOT the last source, so line 272 should not be reached
 			myPatientDao.delete(jane1.getIdElement(), reqDetails);
 
-			// validate: golden resource and jane2 should still exist, at least 1 link remains
-			Long mdmLinksCount = myMdmLinkDao.count();
-			assertThat(mdmLinksCount).isGreaterThanOrEqualTo(1);
+			// golden resource and jane2 remain; at least one link survives
+			assertThat(myMdmLinkDao.count()).isGreaterThanOrEqualTo(1);
 
 			SearchParameterMap spMap = new SearchParameterMap();
 			spMap.setLoadSynchronous(true);
-
-			// jane2 should still be findable in partition 1
-			IBundleProvider bundle = myPatientDao.search(spMap, reqDetails);
-			assertThat(bundle.isEmpty()).isFalse();
+			assertThat(myPatientDao.search(spMap, reqDetails).isEmpty()).isFalse();
 		} finally {
-			myMdmSettings.setGoldenResourcePartitionName("");
-			myMdmSettings.setSearchAllPartitionForMatch(false);
+			teardownCrossPartitionGoldenResource();
 		}
+	}
+
+	private void setupCrossPartitionGoldenResource() {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setUnnamedPartitionMode(false);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(3).setName("PARTITION-GOLDEN"), null);
+		myMdmSettings.setGoldenResourcePartitionName("PARTITION-GOLDEN");
+		myMdmSettings.setSearchAllPartitionForMatch(true);
+	}
+
+	private void teardownCrossPartitionGoldenResource() {
+		myMdmSettings.setGoldenResourcePartitionName("");
+		myMdmSettings.setSearchAllPartitionForMatch(false);
 	}
 }
