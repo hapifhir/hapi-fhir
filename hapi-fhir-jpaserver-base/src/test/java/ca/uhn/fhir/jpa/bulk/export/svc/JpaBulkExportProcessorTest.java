@@ -202,7 +202,7 @@ public class JpaBulkExportProcessorTest {
 		// when
 		when(mySearchParamRegistry.hasActiveSearchParam(anyString(), anyString(), any()))
 			.thenReturn(true);
-		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters), any(boolean.class)))
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters), eq(true)))
 			.thenReturn(maps);
 		// from getSearchBuilderForLocalResourceType
 		when(mySearchBuilderFactory.newSearchBuilder(eq(parameters.getResourceType()), any()))
