@@ -1499,7 +1499,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public <MT extends IBaseMetaType> DaoMethodOutcome metaAddOperation(
 			IIdType theResourceId, MT theMetaAdd, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 
@@ -1519,6 +1518,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId,
 			TransactionDetails theTransactionDetails) {
+		HapiTransactionService.requireTransaction();
 
 		IIdType resourceId = theResourceId;
 		if (theResourceId.hasVersionIdPart()
@@ -1585,7 +1585,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public <MT extends IBaseMetaType> DaoMethodOutcome metaDeleteOperation(
 			IIdType theResourceId, MT theMetaDel, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 
@@ -1599,13 +1598,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						theResourceId, theMetaDel, theRequest, requestPartitionId, theTransactionDetails));
 	}
 
-	@Transactional
 	public <MT extends IBaseMetaType> DaoMethodOutcome doMetaDeleteOperation(
 			IIdType theResourceId,
 			MT theMetaDel,
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId,
 			TransactionDetails theTransactionDetails) {
+		HapiTransactionService.requireTransaction();
+
 		StopWatch w = new StopWatch();
 
 		IIdType resourceId = theResourceId;
@@ -2098,8 +2098,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * If we're partitioned, but not in Database Partition Mode, then the PARTITION_ID
 		 * column isn't a part of the PK and we need to explicitly add a WHERE clause for it.
 		 */
-		boolean needExplicitPartitionSelector =
-				myPartitionSettings.isPartitioningEnabled() && !myPartitionSettings.isDatabasePartitionMode() && !theRequestPartitionId.isAllPartitions();
+		boolean needExplicitPartitionSelector = myPartitionSettings.isPartitioningEnabled()
+				&& !myPartitionSettings.isDatabasePartitionMode()
+				&& !theRequestPartitionId.isAllPartitions();
 
 		/*
 		 * If the TransactionDetails indicates that we've already pre-resolved
@@ -2250,43 +2251,27 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return entity;
 	}
 
-	@Transactional
 	@Override
-	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm) {
-		removeTag(theId, theTagType, theScheme, theTerm, null);
+	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode) {
+		removeTag(theId, theTagType, theSystem, theCode, null);
 	}
 
-	@Transactional
 	@Override
 	public void removeTag(
-			IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, RequestDetails theRequest) {
-		StopWatch w = new StopWatch();
-		BaseHasResource<?> entity = readEntity(theId, theRequest);
-		if (entity == null) {
-			throw new ResourceNotFoundException(Msg.code(1999) + theId);
-		}
+			IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode, RequestDetails theRequest) {
 
-		for (BaseTag next : new ArrayList<>(entity.getTags())) {
-			if (Objects.equals(next.getTag().getTagType(), theTagType)
-					&& Objects.equals(next.getTag().getSystem(), theScheme)
-					&& Objects.equals(next.getTag().getCode(), theTerm)) {
-				myEntityManager.remove(next);
-				entity.getTags().remove(next);
+		IBaseMetaType instance =
+				(IBaseMetaType) myFhirContext.getElementDefinition("Meta").newInstance();
+		switch (theTagType) {
+			case TAG -> instance.addTag().setSystem(theSystem).setCode(theCode);
+			case PROFILE -> {
+				assert theSystem == null;
+				instance.addProfile(theCode);
 			}
+			case SECURITY_LABEL -> instance.addSecurity().setSystem(theSystem).setCode(theCode);
 		}
 
-		if (entity.getTags().isEmpty()) {
-			entity.setHasTags(false);
-		}
-
-		myEntityManager.merge(entity);
-
-		ourLog.debug(
-				"Processed remove tag {}/{} on {} in {}ms",
-				theScheme,
-				theTerm,
-				theId.getValue(),
-				w.getMillisAndRestart());
+		metaDeleteOperation(theId, instance, theRequest, new TransactionDetails());
 	}
 
 	/**
