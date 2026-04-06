@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -350,6 +351,21 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				new JobInstanceStartRequest(Batch2JobDefinitionConstants.INSTALL_PACKAGE, parameters);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 		return response.getInstanceId();
+	}
+
+	@Override
+	public PackageInstallationStatusJson checkInstallationStatus(String theJobId) {
+		JobInstance jobInstance = myJobCoordinator.getInstance(theJobId);
+
+		PackageInstallationStatusJson status = new PackageInstallationStatusJson();
+		status.setJobId(theJobId);
+		status.setStatus(jobInstance.getStatus().name());
+		status.setProgress(jobInstance.getProgress());
+		status.setCurrentStep(jobInstance.getCurrentGatedStepId());
+		status.setStartTime(jobInstance.getStartTime());
+		status.setOutcome(jobInstance.getReport());
+
+		return status;
 	}
 
 	private void fetchAndInstallDependencies(

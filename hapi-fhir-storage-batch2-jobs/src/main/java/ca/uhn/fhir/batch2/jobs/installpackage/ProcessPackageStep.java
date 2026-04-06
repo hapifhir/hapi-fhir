@@ -11,13 +11,16 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParame
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
+import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
+import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Base64;
 
 public class ProcessPackageStep
 		implements IJobStepWorker<PackageInstallationJobParameters, PackageContentsJson, InstallationOutcomeJson> {
@@ -39,11 +42,24 @@ public class ProcessPackageStep
 			@Nonnull IJobDataSink<InstallationOutcomeJson> theDataSink)
 			throws JobExecutionFailedException {
 		try {
-			NpmPackage npmPackage = NpmPackage.fromPackage(
-					new ByteArrayInputStream(theStepExecutionDetails.getData().getContents()));
+			byte[] encodedContents = theStepExecutionDetails.getData().getContents();
+			byte[] decodedContents = Base64.getDecoder().decode(encodedContents);
+			NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(decodedContents));
 			PackageInstallOutcomeJson packageOutcome = new PackageInstallOutcomeJson();
-			myPackageInstallerSvc.installPackage(
-					npmPackage, theStepExecutionDetails.getParameters().getInstallationSpec(), packageOutcome);
+
+			PackageInstallationSpec installationSpec =
+					theStepExecutionDetails.getParameters().getInstallationSpec();
+
+			myPackageInstallerSvc.installPackage(npmPackage, installationSpec, packageOutcome);
+
+			if (installationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
+				packageOutcome
+						.getMessage()
+						.add(
+								"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
+			}
+
+			System.out.println(JsonUtil.serialize(packageOutcome, true));
 
 			mySearchParamRegistryController.refreshCacheIfNecessary();
 
@@ -52,9 +68,11 @@ public class ProcessPackageStep
 			InstallationOutcomeJson outcome = new InstallationOutcomeJson();
 			outcome.getOutcomes().add(packageOutcome);
 
+			System.out.println(JsonUtil.serialize(outcome, true));
+
 			theDataSink.accept(outcome);
 		} catch (IOException e) {
-			// error handling is in the scop of a later ticket
+			// error handling is in the scope of a later ticket
 			throw new RuntimeException(e);
 		}
 		return RunOutcome.SUCCESS;

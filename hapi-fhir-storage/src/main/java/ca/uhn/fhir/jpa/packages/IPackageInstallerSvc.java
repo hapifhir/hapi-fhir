@@ -42,4 +42,6 @@ public interface IPackageInstallerSvc {
 	 * @return the instance id of the job, needed for polling for updates
 	 */
 	String installAsynchronously(PackageInstallationSpec theInstallationSpec);
+
+	PackageInstallationStatusJson checkInstallationStatus(String theJobId);
 }
