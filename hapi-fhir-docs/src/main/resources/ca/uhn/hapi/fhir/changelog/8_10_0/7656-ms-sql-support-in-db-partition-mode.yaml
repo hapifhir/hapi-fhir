@@ -1,5 +1,6 @@
 ---
 type: fix
+backport: 8.6.8
 issue: 7656
 jira: SMILE-11857
 title: "Previously, when running in Database Partition Mode, searches using `_security`, `_tag`,
