@@ -1807,7 +1807,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		StopWatch w = new StopWatch();
-		BaseHasResource<?> entity = readEntity(theTransactionDetails, theId, theRequestPartitionId);
+		BaseHasResource<?> entity = readEntity(theTransactionDetails, theId, theRequestPartitionId, false, false);
 		validateResourceType(entity);
 
 		T retVal = myJpaStorageResourceParser.toResource(theRequest, myResourceType, entity, null, false);
@@ -1861,7 +1861,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> readEntity(null, theId, requestPartitionId));
+				.execute(() -> readEntity(null, theId, requestPartitionId, false, false));
 	}
 
 	@Override
@@ -2069,22 +2069,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	// FIXME: evaluate, can we call the other readEntity below?
-	private BaseHasResource<?> readEntity(
-			TransactionDetails theTransactionDetails, IIdType theId, RequestPartitionId requestPartitionId) {
-		return readEntity(theTransactionDetails, theId, requestPartitionId, false, false);
-	}
-
 	@Nonnull
 	private BaseHasResource<?> readEntity(
-			TransactionDetails theTransactionDetails,
-			IIdType theId,
-			RequestPartitionId theRequestPartitionId,
+			@Nullable TransactionDetails theTransactionDetails,
+			@Nonnull IIdType theId,
+			@Nonnull RequestPartitionId theRequestPartitionId,
 			boolean theJoinTags,
 			boolean theJoinResourceTable) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		JpaPid pid = (JpaPid) theTransactionDetails.getResolvedResourceId(theId);
+		JpaPid pid = null;
+		if (theTransactionDetails != null) {
+			pid = (JpaPid) theTransactionDetails.getResolvedResourceId(theId);
+		}
 		boolean preResolved = pid != null;
 
 		if (!preResolved) {

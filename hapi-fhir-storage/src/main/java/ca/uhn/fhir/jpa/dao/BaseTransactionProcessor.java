@@ -1780,29 +1780,58 @@ public abstract class BaseTransactionProcessor {
 			RequestDetails theRequestDetailsForEntry,
 			IBase theResponseBundleEntry,
 			TransactionDetails theTransactionDetails) {
-		IIdType instanceId = theParsedRequestOperation.targetInstance();
-		boolean metaAdd = JpaConstants.OPERATION_META_ADD.equals(theParsedRequestOperation.operationName());
-		if (metaAdd || JpaConstants.OPERATION_META_DELETE.equals(theParsedRequestOperation.operationName())) {
-			IBaseParameters request = (IBaseParameters) theResource;
-			IBaseMetaType meta = (IBaseMetaType) ParametersUtil.getNamedParameterValue(myContext, request, "meta")
-					// FIXME: add better exception and test
-					.orElseThrow();
-
-			IFhirResourceDao resourceDao = getDaoOrThrowException(myContext
-					.getResourceDefinition(instanceId.getResourceType())
-					.getImplementingClass());
-			DaoMethodOutcome outcome;
-			if (metaAdd) {
-				outcome = resourceDao.metaAddOperation(
-						instanceId, meta, theRequestDetailsForEntry, theTransactionDetails);
-			} else {
-				outcome = resourceDao.metaDeleteOperation(
-						instanceId, meta, theRequestDetailsForEntry, theTransactionDetails);
+		switch (theParsedRequestOperation.operation()) {
+			case META_ADD, META_DELETE -> {
+				IIdType instanceId = theParsedRequestOperation.targetInstance();
+				invokeOperationMetaAddOrDeleteInTransaction(
+						theParsedRequestOperation,
+						theResource,
+						theRequestDetailsForEntry,
+						theResponseBundleEntry,
+						theTransactionDetails,
+						instanceId,
+						theParsedRequestOperation.operation() == TransactionOperationEnum.META_ADD);
 			}
-
-			myVersionAdapter.setResponseOutcome(theResponseBundleEntry, outcome.getOperationOutcome());
-			myVersionAdapter.setResponseStatus(theResponseBundleEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
+			case UNSUPPORTED -> throw new InvalidRequestException(
+					Msg.code(2899) + "Operation " + UrlUtil.sanitizeUrlPart(theParsedRequestOperation.operationName())
+							+ " is not supported in a FHIR transaction");
 		}
+	}
+
+	private void invokeOperationMetaAddOrDeleteInTransaction(
+			ParsedRequestOperation theParsedRequestOperation,
+			IBaseResource theResource,
+			RequestDetails theRequestDetailsForEntry,
+			IBase theResponseBundleEntry,
+			TransactionDetails theTransactionDetails,
+			IIdType instanceId,
+			boolean metaAdd) {
+		IBaseMetaType meta = null;
+		if (theResource instanceof IBaseParameters request) {
+			meta = (IBaseMetaType) ParametersUtil.getNamedParameterValue(myContext, request, "meta")
+					.filter(t -> t instanceof IBaseMetaType)
+					.orElse(null);
+		}
+
+		if (meta == null) {
+			throw new InvalidRequestException(Msg.code(2898) + theParsedRequestOperation.operationName()
+					+ " request must have a parameter named 'meta' of type 'Meta'");
+		}
+
+		IFhirResourceDao resourceDao = getDaoOrThrowException(
+				myContext.getResourceDefinition(instanceId.getResourceType()).getImplementingClass());
+		DaoMethodOutcome outcome =
+				switch (theParsedRequestOperation.operation()) {
+					case META_ADD -> resourceDao.metaAddOperation(
+							instanceId, meta, theRequestDetailsForEntry, theTransactionDetails);
+					case META_DELETE -> resourceDao.metaDeleteOperation(
+							instanceId, meta, theRequestDetailsForEntry, theTransactionDetails);
+					case UNSUPPORTED -> throw new IllegalStateException(
+							Msg.code(2900) + "Can't handle this operation here");
+				};
+
+		myVersionAdapter.setResponseOutcome(theResponseBundleEntry, outcome.getOperationOutcome());
+		myVersionAdapter.setResponseStatus(theResponseBundleEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
 	}
 
 	/**
@@ -2415,7 +2444,13 @@ public abstract class BaseTransactionProcessor {
 		if (operationName.startsWith("$")) {
 			String prefix = theUrl.substring(0, lastSlashIdx);
 			IIdType id = myContext.getVersion().newIdType(prefix);
-			return Optional.of(new ParsedRequestOperation(operationName, id));
+			TransactionOperationEnum operation =
+					switch (operationName) {
+						case JpaConstants.OPERATION_META_ADD -> TransactionOperationEnum.META_ADD;
+						case JpaConstants.OPERATION_META_DELETE -> TransactionOperationEnum.META_DELETE;
+						default -> TransactionOperationEnum.UNSUPPORTED;
+					};
+			return Optional.of(new ParsedRequestOperation(operationName, operation, id));
 		}
 
 		return Optional.empty();
@@ -2580,7 +2615,18 @@ public abstract class BaseTransactionProcessor {
 		myPartitionSettings = thePartitionSettings;
 	}
 
-	public record ParsedRequestOperation(@Nonnull String operationName, IIdType targetInstance) {}
+	public record ParsedRequestOperation(
+			@Nonnull String operationName,
+			@Nonnull TransactionOperationEnum operation,
+			@Nonnull IIdType targetInstance) {}
+
+	public enum TransactionOperationEnum {
+		META_ADD,
+
+		META_DELETE,
+
+		UNSUPPORTED;
+	}
 
 	/**
 	 * Transaction Order, per the spec:
