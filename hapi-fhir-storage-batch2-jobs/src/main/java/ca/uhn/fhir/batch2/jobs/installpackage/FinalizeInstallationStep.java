@@ -29,7 +29,6 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.InstallationOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
-import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
 
 /**
@@ -48,8 +47,6 @@ public class FinalizeInstallationStep
 	public ChunkOutcome consume(
 			ChunkExecutionDetails<PackageInstallationJobParameters, InstallationOutcomeJson> theChunkDetails) {
 		// Since recursively installing dependencies isn't in scope yet, there's nothing to consolidate
-		System.out.println(JsonUtil.serialize(theChunkDetails.getData(), true));
-
 		myOutcome = theChunkDetails.getData().getOutcomes().stream().findFirst().orElse(null);
 
 		return ChunkOutcome.SUCCESS();
@@ -63,8 +60,6 @@ public class FinalizeInstallationStep
 							theStepExecutionDetails,
 			@Nonnull IJobDataSink<PackageInstallOutcomeJson> theDataSink)
 			throws JobExecutionFailedException {
-
-		System.out.println(JsonUtil.serialize(myOutcome, true));
 
 		theDataSink.accept(myOutcome);
 

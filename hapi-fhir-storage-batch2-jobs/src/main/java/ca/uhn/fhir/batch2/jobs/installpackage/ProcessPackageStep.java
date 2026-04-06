@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
-import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,8 +77,6 @@ public class ProcessPackageStep
 								"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
 			}
 
-			System.out.println(JsonUtil.serialize(packageOutcome, true));
-
 			mySearchParamRegistryController.refreshCacheIfNecessary();
 
 			myValidationSupport.invalidateCaches();
@@ -87,12 +84,9 @@ public class ProcessPackageStep
 			InstallationOutcomeJson outcome = new InstallationOutcomeJson();
 			outcome.getOutcomes().add(packageOutcome);
 
-			System.out.println(JsonUtil.serialize(outcome, true));
-
 			theDataSink.accept(outcome);
 		} catch (IOException e) {
 			// error handling is in the scope of a later ticket
-			throw new RuntimeException(e);
 		}
 		return RunOutcome.SUCCESS;
 	}

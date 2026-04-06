@@ -55,7 +55,6 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 			theDataSink.accept(contents);
 		} catch (IOException e) {
 			// We're only concerned with the happy path for now - error handling is a separate MR
-			throw new RuntimeException(e);
 		}
 
 		return RunOutcome.SUCCESS;
