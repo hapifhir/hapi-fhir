@@ -481,6 +481,42 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testPatientBulkExportWithSince_onlyReturnsResourcesUpdatedAfterSince() {
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+
+		// Create Patient BEFORE the _since cutoff
+		Patient patient0 = new Patient();
+		patient0.setId("P0");
+		patient0.setActive(true);
+		myClient.update().resource(patient0).execute();
+
+		// Sleep to ensure time separation, then capture the _since timestamp
+		TestUtil.sleepAtLeast(1000);
+		Date since = InstantType.now().getValue();
+
+		Patient patient1 = new Patient();
+		patient1.setId("P1");
+		patient1.setActive(true);
+		myClient.update().resource(patient1).execute();
+
+		Encounter encounter = new Encounter();
+		encounter.setSubject(new Reference("Patient/P1"));
+		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
+		String encounterId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
+
+		// Set the export options with _since
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		options.setSince(since);
+
+		// Verify that only the resources updated after the _since timestamp are returned
+		verifyBulkExportResults(options, List.of("Patient/P1", encounterId), List.of("Patient/P0"));
+	}
+
+	@Test
 	public void testBulkExportParametersPersistExtraData() {
 		// setup
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
