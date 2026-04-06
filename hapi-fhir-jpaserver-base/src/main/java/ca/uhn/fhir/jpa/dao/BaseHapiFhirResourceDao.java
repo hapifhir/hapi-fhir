@@ -136,6 +136,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.HttpServletResponse;
@@ -1526,7 +1527,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		StopWatch w = new StopWatch();
-		// FIXME: add SQL test with partitions for add and delete
 		BaseHasResource<?> entity;
 
 		entity = readEntity(theTransactionDetails, resourceId, theRequestPartitionId, true, true);
@@ -2129,7 +2129,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				if (theJoinResourceTable) {
 					root.fetch("myResourceTable");
 					if (theJoinTags) {
-						root.fetch("myResourceTable").fetch("myTags").fetch("myTag");
+						root.fetch("myResourceTable")
+								.fetch("myTags", JoinType.LEFT)
+								.fetch("myTag", JoinType.LEFT);
 					}
 				}
 			} else {
@@ -2139,7 +2141,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 
 			if (theJoinTags) {
-				root.fetch("myTags").fetch("myTag");
+				root.fetch("myTags", JoinType.LEFT).fetch("myTag", JoinType.LEFT);
 			}
 
 			if (needExplicitPartitionSelector) {
