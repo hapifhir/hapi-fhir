@@ -20,12 +20,23 @@ package ca.uhn.fhir.storage.test;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseTransactionProcessor;
 import ca.uhn.fhir.jpa.dao.IdSubstitutionMap;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.Map;
+import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -127,4 +138,37 @@ public class BaseTransactionProcessorTest {
 		final String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "?identifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea");
 		assertEquals("?identifier=http://tempuri.org|2&based-on=Task/1", outcome);
 	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		Patient/A/$meta-add    , Patient , A , $meta-add
+		Patient                ,         ,   ,
+		Patient/A              ,         ,   ,
+		                       ,         ,   ,
+		""")
+	void testParseUrlForOperationInvocation(String theUrl, String theType, String theId, String theOperationName) {
+		// Setup
+		BaseTransactionProcessor svc = new BaseTransactionProcessor() {
+			@Override
+			protected void flushSession(@Nonnull TransactionDetails theTransactionDetails, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
+
+			}
+		};
+		svc.setContext(FhirContext.forR4Cached());
+
+		// Test
+		Optional<BaseTransactionProcessor.ParsedRequestOperation> actual = svc.parseUrlForOperationInvocation(theUrl);
+
+		// Verify
+		if (isNotBlank(theOperationName)) {
+			assertThat(actual).isNotEmpty();
+			BaseTransactionProcessor.ParsedRequestOperation parsed = actual.orElseThrow();
+			assertEquals(theType, parsed.targetInstance().getResourceType());
+			assertEquals(theId, parsed.targetInstance().getIdPart());
+			assertEquals(theOperationName, parsed.operationName());
+		} else {
+			assertThat(actual).isEmpty();
+		}
+	}
+
 }

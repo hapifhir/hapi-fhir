@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -62,6 +63,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -75,6 +77,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
@@ -94,6 +97,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionId;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static ca.uhn.fhir.util.IoUtil.runTimes;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
@@ -866,6 +870,49 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		});
 
 	}
+
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', textBlock = """
+		1         | rt1_0.PARTITION_ID in ('1')
+		NULL      | rt1_0.PARTITION_ID is null
+		NULL,1    | rt1_0.PARTITION_ID in ('1') or rt1_0.PARTITION_ID is null
+		""")
+	public void testMetaAdd(String thePartitionId, String theExpectedSelectSql) {
+		// Setup
+		myPartitionSettings.setPartitioningEnabled(true);
+
+		switch (thePartitionId) {
+			case "1" -> {
+				addNextTargetPartitionForCreate(myPartitionId);
+				addNextTargetPartitionsForRead(myPartitionId);
+			}
+			case "NULL" -> {
+				addNextTargetPartitionForCreateDefaultPartition();
+				addNextTargetPartitionForReadDefaultPartition();
+			}
+			case "NULL,1" -> {
+				addNextTargetPartitionForCreateDefaultPartition();
+				addNextTargetPartitionsForRead(null, myPartitionId);
+			}
+			default -> throw new IllegalArgumentException("Invalid partition ID: " + thePartitionId);
+		};
+
+		createPatient(withId("A"), withTag("http://foo", "bar0"));
+
+		// Test
+		Meta metaAdd = new Meta();
+		metaAdd.addTag("http://foo", "bar1", null);
+		myCaptureQueriesListener.clear();
+		myPatientDao.metaAddOperation(new IdType("Patient/A"), metaAdd, mySrd, new TransactionDetails());
+
+		// Verify
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectSqlContains(0, theExpectedSelectSql)
+		);
+	}
+
+
 
 	@Test
 	public void testRead_PidId_AllPartitions() {

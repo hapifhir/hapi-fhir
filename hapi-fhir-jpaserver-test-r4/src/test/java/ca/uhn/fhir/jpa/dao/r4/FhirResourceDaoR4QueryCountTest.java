@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.reindex.ReindexTestHelper;
@@ -93,6 +94,7 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -124,7 +126,6 @@ import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
@@ -143,6 +144,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.jpa.subscription.FhirR4Util.createSubscription;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -170,7 +173,7 @@ import static org.mockito.Mockito.when;
  * single individual SQL statement adds up when we're doing operations at scale,
  * so don't ever blindly adjust numbers in this test without figuring out why.
  */
-@SuppressWarnings("JavadocBlankLines")
+@SuppressWarnings({"JavadocBlankLines", "unchecked"})
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test {
 
@@ -1176,6 +1179,171 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# TagStorageMode , ID                   , Select , Insert
+		VERSIONED        , Patient/A            , 4      , 3
+		VERSIONED        , Patient/A/_history/2 , 2      , 2
+		VERSIONED        , Patient/A/_history/3 , 3      , 3
+		NON_VERSIONED    , Patient/A            , 3      , 2
+		NON_VERSIONED    , Patient/A/_history/2 , 3      , 2
+		NON_VERSIONED    , Patient/A/_history/3 , 3      , 2
+		""")
+	public void testMetaAdd(StorageSettings.TagStorageModeEnum theTagStorageMode, String theIdToUpdate, int theExpectedSelectCount, int theExpectedInsertCount) {
+		myStorageSettings.setTagStorageMode(theTagStorageMode);
+
+		// Create a patient with 3 versions
+		createPatient(withId("A"), withTag("http://foo", "bar1"));
+		createPatient(withId("A"), withTag("http://foo", "bar1"), withTag("http://foo", "bar2"));
+		createPatient(withId("A"), withTag("http://foo", "bar1"), withTag("http://foo", "bar2"), withTag("http://foo", "bar3"));
+
+		myCaptureQueriesListener.clear();
+		Meta metaAdd = new Meta();
+		metaAdd.addTag("http://foo", "bar4", null);
+		myPatientDao.metaAddOperation(new IdType(theIdToUpdate), metaAdd, newSrd());
+
+		assertThat(myCaptureQueriesListener).has(onCurrentThread()
+			.selectCount(theExpectedSelectCount)
+			.updateCount(0)
+			.insertCount(theExpectedInsertCount)
+			.deleteCount(0)
+			.commitCount(1)
+			.rollbackCount(0));
+
+		// Verify that the tag actually got added
+		Patient actualPatient = myPatientDao.read(new IdType(theIdToUpdate), newSrd());
+		List<String> allTags = actualPatient.getMeta().getTag().stream().map(Coding::getCode).toList();
+		if (theTagStorageMode == StorageSettings.TagStorageModeEnum.NON_VERSIONED) {
+			assertThat(allTags)
+				.containsExactlyInAnyOrder("bar1", "bar2", "bar3", "bar4");
+		} else {
+			if (theIdToUpdate.contains("/_history/2")) {
+				assertThat(allTags)
+					.containsExactlyInAnyOrder("bar1", "bar2", "bar4");
+			} else {
+				assertThat(allTags)
+					.containsExactlyInAnyOrder("bar1", "bar2", "bar3", "bar4");
+			}
+		}
+
+		runInTransaction(()->{
+			ResourceTable resourceTable = myResourceTableDao.findByTypeAndFhirId("Patient", "A").orElseThrow();
+			ResourceHistoryTable resourceHistoryTable = myResourceHistoryTableDao.findForIdAndVersion(resourceTable.getId().toFk(), 3);
+
+			if (theTagStorageMode == StorageSettings.TagStorageModeEnum.VERSIONED && theIdToUpdate.endsWith("_history/2")) {
+				assertThat(resourceTable.getTags()).hasSize(3);
+				assertThat(resourceHistoryTable.getTags()).hasSize(3);
+			} else {
+				assertThat(resourceTable.getTags()).hasSize(4);
+				if (theTagStorageMode == StorageSettings.TagStorageModeEnum.VERSIONED) {
+					assertThat(resourceHistoryTable.getTags()).hasSize(4);
+				} else {
+					assertThat(resourceHistoryTable.getTags()).hasSize(0);
+				}
+			}
+
+		});
+
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		true  , 2
+		false , 1
+		""")
+	public void testMetaGet(boolean theClearCache, int theExpectedSelect) {
+		// Setup
+		createPatient(withId("A"),
+			withTag("http://foo", "bar1"),
+			withTag("http://foo", "bar2"),
+			withTag("http://foo", "bar3"));
+
+		// Test
+		if (theClearCache) {
+			myMemoryCacheService.invalidateAllCaches();
+		}
+		myCaptureQueriesListener.clear();
+		myPatientDao.metaGetOperation(Meta.class, new IdType("Patient/A"), newSrd());
+
+		// Verify
+		assertThat(myCaptureQueriesListener).has(onCurrentThread()
+			.selectCount(theExpectedSelect)
+			.updateCount(0)
+			.insertCount(0)
+			.deleteCount(0)
+			.commitCount(1)
+			.rollbackCount(0));
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# TagStorageMode , ID                   , Select , Update , Delete , Insert
+		VERSIONED        , Patient/A            , 3      , 0      , 2      , 0
+		VERSIONED        , Patient/A/_history/2 , 1      , 0      , 1      , 0
+		VERSIONED        , Patient/A/_history/3 , 2      , 0      , 2      , 0
+		NON_VERSIONED    , Patient/A            , 2      , 0      , 1      , 0
+		NON_VERSIONED    , Patient/A/_history/2 , 2      , 0      , 1      , 0
+		NON_VERSIONED    , Patient/A/_history/3 , 2      , 0      , 1      , 0
+		""")
+	public void testMetaRemove(StorageSettings.TagStorageModeEnum theTagStorageMode, String theIdToUpdate, int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedDeleteCount, int theExpectedInsertCount) {
+		myStorageSettings.setTagStorageMode(theTagStorageMode);
+
+		// Create a patient with 3 versions
+		createPatient(withId("A"), withTag("http://foo", "bar1"));
+		createPatient(withId("A"), withTag("http://foo", "bar1"), withTag("http://foo", "bar2"));
+		createPatient(withId("A"), withTag("http://foo", "bar1"), withTag("http://foo", "bar2"), withTag("http://foo", "bar3"));
+
+		myCaptureQueriesListener.clear();
+		Meta metaAdd = new Meta();
+		metaAdd.addTag("http://foo", "bar2", null);
+		myPatientDao.metaDeleteOperation(new IdType(theIdToUpdate), metaAdd, newSrd());
+
+		assertThat(myCaptureQueriesListener).has(onCurrentThread()
+			.selectCount(theExpectedSelectCount)
+			.updateCount(theExpectedUpdateCount)
+			.insertCount(theExpectedInsertCount)
+			.deleteCount(theExpectedDeleteCount)
+			.commitCount(1)
+			.rollbackCount(0));
+
+		// Verify that the tag actually got removed
+		Patient actualPatient = myPatientDao.read(new IdType(theIdToUpdate), newSrd());
+		List<String> allTags = actualPatient.getMeta().getTag().stream().map(Coding::getCode).toList();
+		if (theTagStorageMode == StorageSettings.TagStorageModeEnum.NON_VERSIONED) {
+			assertThat(allTags)
+				.containsExactlyInAnyOrder("bar1", "bar3");
+		} else {
+			if (theIdToUpdate.contains("/_history/2")) {
+				assertThat(allTags)
+					.containsExactlyInAnyOrder("bar1");
+			} else {
+				assertThat(allTags)
+					.containsExactlyInAnyOrder("bar1", "bar3");
+			}
+		}
+
+		runInTransaction(()->{
+			ResourceTable resourceTable = myResourceTableDao.findByTypeAndFhirId("Patient", "A").orElseThrow();
+			ResourceHistoryTable resourceHistoryTable = myResourceHistoryTableDao.findForIdAndVersion(resourceTable.getId().toFk(), 3);
+
+			if (theTagStorageMode == StorageSettings.TagStorageModeEnum.VERSIONED && theIdToUpdate.endsWith("_history/2")) {
+				assertThat(resourceTable.getTags()).hasSize(3);
+				assertThat(resourceHistoryTable.getTags()).hasSize(3);
+			} else {
+				assertThat(resourceTable.getTags()).hasSize(2);
+				if (theTagStorageMode == StorageSettings.TagStorageModeEnum.VERSIONED) {
+					assertThat(resourceHistoryTable.getTags()).hasSize(2);
+				} else {
+					assertThat(resourceHistoryTable.getTags()).hasSize(0);
+				}
+			}
+
+		});
+
+	}
+
+
+
 	/**
 	 * See the class javadoc before changing the counts in this test!
 	 */
@@ -1666,10 +1834,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// This really generates a surprising number of selects and commits. We
 		// could stand to reduce this!
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(56, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(71, myCaptureQueriesListener.countCommits());
-		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(56)
+				.insertCount(151)
+				.updateCount(3)
+				.commitCount(71)
+				.noOtherCounts()
+		);
 	}
 
 	/**
@@ -2368,6 +2540,82 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		ourLog.info("Observation:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(observation));
 		assertEquals("Patient/P0/_history/1", observation.getSubject().getReference());
 		assertEquals("Encounter/E0/_history/1", observation.getEncounter().getReference());
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# TagStorageMode , SELECT , INSERT
+		NON_VERSIONED    , 5      , 22
+		VERSIONED        , 15     , 42
+		""")
+	public void testTransactionWithMetaAdd(StorageSettings.TagStorageModeEnum theTagStorageModeEnum, int theSelectCount, int theInsertCount) {
+		// Setup
+		myStorageSettings.setTagStorageMode(theTagStorageModeEnum);
+
+		for (int i = 0; i < 10; i++) {
+			createPatient(withId("P" + i), withTag("http://foo", "bar0"));
+		}
+
+		// Test
+		Meta meta = new Meta();
+		meta.addTag("http://foo", "bar1", null);
+		meta.addTag("http://foo", "bar2", null);
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		for (int i = 0; i < 10; i++) {
+			bb.addTransactionMetaAddEntry(new IdType("Patient/P" + i), meta);
+		}
+		Bundle requestBundle = bb.getBundleTyped();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, requestBundle);
+
+		// Verify
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectCount(theSelectCount)
+				.insertCount(theInsertCount)
+				.commitCount(1)
+				.noOtherCounts()
+		);
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# TagStorageMode , SELECT , DELETE
+		NON_VERSIONED    , 3      , 2
+		VERSIONED        , 13     , 4
+		""")
+	public void testTransactionWithMetaDelete(StorageSettings.TagStorageModeEnum theTagStorageModeEnum, int theSelectCount, int theDeleteCount) {
+		// Setup
+		myStorageSettings.setTagStorageMode(theTagStorageModeEnum);
+
+		for (int i = 0; i < 10; i++) {
+			createPatient(withId("P" + i), withTag("http://foo", "bar0"), withTag("http://foo", "bar1"), withTag("http://foo", "bar2"));
+		}
+
+		// Test
+		Meta meta = new Meta();
+		meta.addTag("http://foo", "bar1", null);
+		meta.addTag("http://foo", "bar2", null);
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		for (int i = 0; i < 10; i++) {
+			bb.addTransactionMetaDeleteEntry(new IdType("Patient/P" + 1), meta);
+		}
+		Bundle requestBundle = bb.getBundleTyped();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, requestBundle);
+
+		// Verify
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectCount(theSelectCount)
+				.deleteCount(theDeleteCount)
+				.commitCount(1)
+				.noOtherCounts()
+		);
 	}
 
 	/**

@@ -61,6 +61,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -115,6 +116,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -131,13 +133,19 @@ import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.function.TriFunction;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -161,6 +169,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -174,6 +183,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
+import static ca.uhn.fhir.jpa.dao.index.IdHelperService.EMPTY_PREDICATE_ARRAY;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.SINGLE_RESULT;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -1145,13 +1155,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	private <MT extends IBaseMetaType> void doMetaAdd(
+	private <MT extends IBaseMetaType> int doMetaAdd(
 			MT theMetaAdd,
 			BaseHasResource<?> theEntity,
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails) {
 		IBaseResource oldVersion = myJpaStorageResourceParser.toResource(theEntity, false);
 
+		int addedTags = 0;
 		List<TagDefinition> tags = toTagList(theMetaAdd);
 		for (TagDefinition nextDef : tags) {
 
@@ -1168,6 +1179,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 
 			if (!entityHasTag) {
+				addedTags++;
 				theEntity.setHasTags(true);
 
 				TagDefinition def = cacheTagDefinitionDao.getTagOrNull(
@@ -1189,36 +1201,42 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		validateMetaCount(theEntity.getTags().size());
 
-		myEntityManager.merge(theEntity);
+		if (addedTags > 0) {
+			myEntityManager.merge(theEntity);
 
-		// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
-		IBaseResource newVersion = myJpaStorageResourceParser.toResource(theEntity, false);
-		HookParams preStorageParams = new HookParams()
+			// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
+			IBaseResource newVersion = myJpaStorageResourceParser.toResource(theEntity, false);
+			HookParams preStorageParams = new HookParams()
 				.add(IBaseResource.class, oldVersion)
 				.add(IBaseResource.class, newVersion)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 				.add(TransactionDetails.class, theTransactionDetails);
-		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, preStorageParams);
+			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, preStorageParams);
 
-		// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
-		HookParams preCommitParams = new HookParams()
+			// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
+			HookParams preCommitParams = new HookParams()
 				.add(IBaseResource.class, oldVersion)
 				.add(IBaseResource.class, newVersion)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 				.add(TransactionDetails.class, theTransactionDetails)
 				.add(
-						InterceptorInvocationTimingEnum.class,
-						theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
-		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
+					InterceptorInvocationTimingEnum.class,
+					theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
+			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
+		}
+
+		return addedTags;
 	}
 
-	private <MT extends IBaseMetaType> void doMetaDelete(
+	private <MT extends IBaseMetaType> int doMetaDelete(
 			MT theMetaDel,
 			BaseHasResource theEntity,
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails) {
+
+		int deleted = 0;
 
 		// todo mb update hibernate search index if we are storing resources - it assumes inline tags.
 		IBaseResource oldVersion = myJpaStorageResourceParser.toResource(theEntity, false);
@@ -1232,37 +1250,44 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						&& Objects.equals(next.getTag().getCode(), nextDef.getCode())) {
 					myEntityManager.remove(next);
 					theEntity.getTags().remove(next);
+					deleted++;
 				}
 			}
 		}
 
-		if (theEntity.getTags().isEmpty()) {
-			theEntity.setHasTags(false);
-		}
+		if (deleted > 0) {
 
-		theEntity = myEntityManager.merge(theEntity);
+			if (theEntity.getTags().isEmpty()) {
+				theEntity.setHasTags(false);
+			}
 
-		// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
-		IBaseResource newVersion = myJpaStorageResourceParser.toResource(theEntity, false);
-		HookParams preStorageParams = new HookParams()
+			theEntity = myEntityManager.merge(theEntity);
+
+			// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
+			IBaseResource newVersion = myJpaStorageResourceParser.toResource(theEntity, false);
+			HookParams preStorageParams = new HookParams()
 				.add(IBaseResource.class, oldVersion)
 				.add(IBaseResource.class, newVersion)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 				.add(TransactionDetails.class, theTransactionDetails);
-		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, preStorageParams);
+			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, preStorageParams);
 
-		HookParams preCommitParams = new HookParams()
+			HookParams preCommitParams = new HookParams()
 				.add(IBaseResource.class, oldVersion)
 				.add(IBaseResource.class, newVersion)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 				.add(TransactionDetails.class, theTransactionDetails)
 				.add(
-						InterceptorInvocationTimingEnum.class,
-						theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
+					InterceptorInvocationTimingEnum.class,
+					theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
 
-		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
+			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
+
+		}
+
+		return deleted;
 	}
 
 	@Override
@@ -1378,13 +1403,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
 				.execute(() -> {
-					IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
-					BaseHasResource entity = readEntity(id, requestPartitionId);
-
+					JpaPid resourcePid = myIdHelperService.resolveResourceIdentityPid(requestPartitionId, getResourceName(), theId.getIdPart(), ResolveIdentityMode.includeDeleted().cacheOk());
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
 							myResourceName,
-							entity.getResourceId(),
+							resourcePid,
 							theSince,
 							theUntil,
 							theOffset,
@@ -1408,13 +1431,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
 				.execute(() -> {
-					IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
-					BaseHasResource entity = readEntity(id, requestPartitionId);
-
+					JpaPid resourcePid = myIdHelperService.resolveResourceIdentityPid(requestPartitionId, getResourceName(), theId.getIdPart(), ResolveIdentityMode.includeDeleted().cacheOk());
 					return myPersistedJpaBundleProviderFactory.history(
 							theRequest,
 							myResourceName,
-							entity.getResourceId(),
+							resourcePid,
 							theHistorySearchDateRangeParam.getLowerBoundAsInstant(),
 							theHistorySearchDateRangeParam.getUpperBoundAsInstant(),
 							theHistorySearchDateRangeParam.getOffset(),
@@ -1479,101 +1500,181 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	@Transactional
-	public <MT extends IBaseMetaType> MT metaAddOperation(
-			IIdType theResourceId, MT theMetaAdd, RequestDetails theRequest) {
+	public <MT extends IBaseMetaType> DaoMethodOutcome metaAddOperation(
+			IIdType theResourceId, MT theMetaAdd, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
-						theRequest, JpaConstants.OPERATION_META_ADD);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequest, myResourceName, theResourceId);
 
-		myTransactionService
+		return myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> doMetaAddOperation(theResourceId, theMetaAdd, theRequest, requestPartitionId));
-
-		@SuppressWarnings("unchecked")
-		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequest);
-		return retVal;
+				.execute(() -> doMetaAddOperation(theResourceId, theMetaAdd, theRequest, requestPartitionId, theTransactionDetails));
 	}
 
-	protected <MT extends IBaseMetaType> void doMetaAddOperation(
-			IIdType theResourceId, MT theMetaAdd, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		TransactionDetails transactionDetails = new TransactionDetails();
+	protected <MT extends IBaseMetaType> DaoMethodOutcome doMetaAddOperation(
+		IIdType theResourceId, MT theMetaAdd, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails) {
 
-		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theResourceId, theRequestPartitionId);
-
-		if (isNull(entity)) {
-			throw new ResourceNotFoundException(Msg.code(1993) + theResourceId);
+		IIdType resourceId = theResourceId;
+		if (theResourceId.hasVersionIdPart() && myStorageSettings.getTagStorageMode() != StorageSettings.TagStorageModeEnum.VERSIONED) {
+			resourceId = resourceId.withVersion(null);
 		}
 
-		ResourceTable latestVersion =
-				readEntityLatestVersion(theRequest, theResourceId, theRequestPartitionId, transactionDetails);
-		if (latestVersion.getVersion() != entity.getVersion()) {
-			doMetaAdd(theMetaAdd, entity, theRequest, transactionDetails);
-		} else {
-			doMetaAdd(theMetaAdd, latestVersion, theRequest, transactionDetails);
+		StopWatch w = new StopWatch();
+		// FIXME: add SQL test with partitions for add and delete
+		BaseHasResource<?> entity;
 
-			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(
-					entity.getResourceId().toFk(), entity.getVersion());
-			doMetaAdd(theMetaAdd, history, theRequest, transactionDetails);
+		entity = readEntity(theTransactionDetails, resourceId, theRequestPartitionId, true, true);
+		int addedTags = doMetaAdd(theMetaAdd, entity, theRequest, theTransactionDetails);
+
+		/*
+		 * If we're in VERSIONED tag mode and we're updating the last version, we need to
+		 * modify the set of tags associated with the ResourceTable entity as well as the
+		 * set of tags associated with the ResourceHistoryTable entity.
+		 */
+		if (myStorageSettings.getTagStorageMode() == StorageSettings.TagStorageModeEnum.VERSIONED) {
+			if (theResourceId.hasVersionIdPart()) {
+				ResourceTable resourceTable = ((ResourceHistoryTable) entity).getResourceTable();
+				if (resourceTable.getVersion() == theResourceId.getVersionIdPartAsLong()) {
+					doMetaAdd(theMetaAdd, resourceTable, theRequest, theTransactionDetails);
+				}
+			} else {
+				IIdType versionedId = theResourceId.withVersion(Long.toString(entity.getVersion()));
+				BaseHasResource<?> resourceHistoryTable = readEntity(theTransactionDetails, versionedId, theRequestPartitionId, true, true);
+				doMetaAdd(theMetaAdd, resourceHistoryTable, theRequest, theTransactionDetails);
+			}
 		}
 
 		ourLog.debug("Processed metaAddOperation on {} in {}ms", theResourceId, w.getMillisAndRestart());
+
+		Class<MT> aClass = (Class<MT>) theMetaAdd.getClass();
+		MT metaResponse = toMeta(aClass, entity);
+
+		IBaseParameters parametersResponse = ParametersUtil.newInstance(myFhirContext);
+		ParametersUtil.addParameterToParameters(myFhirContext, parametersResponse, "return", metaResponse);
+
+		DaoMethodOutcome outcome = new DaoMethodOutcome();
+		outcome.setCreated(false);
+		outcome.setResource(parametersResponse);
+		outcome.setId(resourceId);
+
+		StorageResponseCodeEnum responseCode;
+		String msg;
+		if (addedTags > 0) {
+			outcome.setNop(false);
+			msg = getContext()
+				.getLocalizer()
+				.getMessageSanitized(
+					BaseStorageDao.class,
+					"successfulMetaAdd",
+					addedTags,
+					resourceId.getValue());
+			responseCode = StorageResponseCodeEnum.SUCCESSFUL_META_ADD;
+		} else {
+			outcome.setNop(false);
+			msg = getContext()
+				.getLocalizer()
+				.getMessageSanitized(
+					BaseStorageDao.class,
+					"successfulMetaAddNoChange",
+					resourceId.getValue());
+			responseCode = StorageResponseCodeEnum.SUCCESSFUL_META_ADD_NO_CHANGE;
+		}
+
+		outcome.setOperationOutcome(createInfoOperationOutcome(msg, responseCode));
+		return outcome;
+
 	}
 
 	@Override
 	@Transactional
-	public <MT extends IBaseMetaType> MT metaDeleteOperation(
-			IIdType theResourceId, MT theMetaDel, RequestDetails theRequest) {
+	public <MT extends IBaseMetaType> DaoMethodOutcome metaDeleteOperation(
+			IIdType theResourceId, MT theMetaDel, RequestDetails theRequest,  TransactionDetails theTransactionDetails) {
 
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
-						theRequest, JpaConstants.OPERATION_META_DELETE);
+			myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequest, myResourceName, theResourceId);
 
-		myTransactionService
+		return myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> doMetaDeleteOperation(theResourceId, theMetaDel, theRequest, requestPartitionId));
-
-		@SuppressWarnings("unchecked")
-		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequest);
-		return retVal;
+				.execute(() -> doMetaDeleteOperation(theResourceId, theMetaDel, theRequest, requestPartitionId, theTransactionDetails));
 	}
 
 	@Transactional
-	public <MT extends IBaseMetaType> void doMetaDeleteOperation(
-			IIdType theResourceId, MT theMetaDel, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		TransactionDetails transactionDetails = new TransactionDetails();
+	public <MT extends IBaseMetaType> DaoMethodOutcome doMetaDeleteOperation(
+		IIdType theResourceId, MT theMetaDel, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails) {
 		StopWatch w = new StopWatch();
 
-		BaseHasResource entity = readEntity(theResourceId, theRequestPartitionId);
-
-		if (isNull(entity)) {
-			throw new ResourceNotFoundException(Msg.code(1994) + theResourceId);
+		IIdType resourceId = theResourceId;
+		if (theResourceId.hasVersionIdPart() && myStorageSettings.getTagStorageMode() != StorageSettings.TagStorageModeEnum.VERSIONED) {
+			resourceId = resourceId.withVersion(null);
 		}
 
-		ResourceTable latestVersion =
-				readEntityLatestVersion(theRequest, theResourceId, theRequestPartitionId, transactionDetails);
-		boolean nonVersionedTags =
-				myStorageSettings.getTagStorageMode() != JpaStorageSettings.TagStorageModeEnum.VERSIONED;
+		BaseHasResource<?> entity = readEntity(theTransactionDetails, resourceId, theRequestPartitionId, true, true);
 
-		if (latestVersion.getVersion() != entity.getVersion() || nonVersionedTags) {
-			doMetaDelete(theMetaDel, entity, theRequest, transactionDetails);
-		} else {
-			doMetaDelete(theMetaDel, latestVersion, theRequest, transactionDetails);
-			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(
-					entity.getResourceId().toFk(), entity.getVersion());
-			doMetaDelete(theMetaDel, history, theRequest, transactionDetails);
-		}
+		int deletedTags = doMetaDelete(theMetaDel, entity, theRequest, theTransactionDetails);
 
 		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", theResourceId.getValue(), w.getMillisAndRestart());
+
+		/*
+		 * If we're in VERSIONED tag mode and we're updating the last version, we need to
+		 * modify the set of tags associated with the ResourceTable entity as well as the
+		 * set of tags associated with the ResourceHistoryTable entity.
+		 */
+		if (myStorageSettings.getTagStorageMode() == StorageSettings.TagStorageModeEnum.VERSIONED) {
+			if (theResourceId.hasVersionIdPart()) {
+				ResourceTable resourceTable = ((ResourceHistoryTable) entity).getResourceTable();
+				if (resourceTable.getVersion() == theResourceId.getVersionIdPartAsLong()) {
+					doMetaDelete(theMetaDel, resourceTable, theRequest, theTransactionDetails);
+				}
+			} else {
+				IIdType versionedId = theResourceId.withVersion(Long.toString(entity.getVersion()));
+				BaseHasResource<?> resourceHistoryTable = readEntity(theTransactionDetails, versionedId, theRequestPartitionId, true, true);
+				doMetaDelete(theMetaDel, resourceHistoryTable, theRequest, theTransactionDetails);
+			}
+		}
+
+		Class<MT> aClass = (Class<MT>) theMetaDel.getClass();
+		MT metaResponse = toMeta(aClass, entity);
+
+		IBaseParameters parametersResponse = ParametersUtil.newInstance(myFhirContext);
+		ParametersUtil.addParameterToParameters(myFhirContext, parametersResponse, "return", metaResponse);
+
+		DaoMethodOutcome outcome = new DaoMethodOutcome();
+		outcome.setCreated(false);
+		outcome.setResource(parametersResponse);
+		outcome.setId(resourceId);
+
+		StorageResponseCodeEnum responseCode;
+		String msg;
+		if (deletedTags > 0) {
+			outcome.setNop(false);
+			msg = getContext()
+				.getLocalizer()
+				.getMessageSanitized(
+					BaseStorageDao.class,
+					"successfulMetaDelete",
+					deletedTags,
+					resourceId.getValue());
+			responseCode = StorageResponseCodeEnum.SUCCESSFUL_META_DELETE;
+		} else {
+			outcome.setNop(false);
+			msg = getContext()
+				.getLocalizer()
+				.getMessageSanitized(
+					BaseStorageDao.class,
+					"successfulMetaDeleteNoChange",
+					resourceId.getValue());
+			responseCode = StorageResponseCodeEnum.SUCCESSFUL_META_DELETE_NO_CHANGE;
+		}
+
+		outcome.setOperationOutcome(createInfoOperationOutcome(msg, responseCode));
+		return outcome;
 	}
 
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequest) {
+		TransactionDetails transactionDetails = new TransactionDetails();
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
 				theRequest, myResourceName, theId);
 
@@ -1581,18 +1682,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
 				.execute(() -> {
-					Set<TagDefinition> tagDefs = new HashSet<>();
-					BaseHasResource<?> entity = readEntity(theId, requestPartitionId);
-					for (BaseTag next : entity.getTags()) {
-						tagDefs.add(next.getTag());
-					}
-					MT retVal = toMetaDt(theType, tagDefs);
-
-					retVal.setLastUpdated(entity.getUpdatedDate());
-					retVal.setVersionId(Long.toString(entity.getVersion()));
-
-					return retVal;
+					BaseHasResource<?> entity = readEntity(transactionDetails, theId, requestPartitionId, true, true);
+					return toMeta(theType, entity);
 				});
+	}
+
+	@Nonnull
+	private <MT extends IBaseMetaType> MT toMeta(Class<MT> theType, BaseHasResource<?> entity) {
+		Set<TagDefinition> tagDefs = new HashSet<>();
+		for (BaseTag next : entity.getTags()) {
+			tagDefs.add(next.getTag());
+		}
+		MT retVal = toMetaDt(theType, tagDefs);
+
+		retVal.setLastUpdated(entity.getUpdatedDate());
+		retVal.setVersionId(Long.toString(entity.getVersion()));
+		return retVal;
 	}
 
 	@Override
@@ -1691,15 +1796,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withRequest(theRequest)
 				.withTransactionDetails(transactionDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.read(partition -> doReadInTransaction(theId, theRequest, theDeletedOk, partition));
+				.read(partition -> doReadInTransaction(theId, transactionDetails, theRequest, theDeletedOk, partition));
 	}
 
 	private T doReadInTransaction(
-			IIdType theId, RequestDetails theRequest, boolean theDeletedOk, RequestPartitionId theRequestPartitionId) {
+			IIdType theId, TransactionDetails theTransactionDetails, RequestDetails theRequest, boolean theDeletedOk, RequestPartitionId theRequestPartitionId) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		StopWatch w = new StopWatch();
-		BaseHasResource<?> entity = readEntity(theId, theRequestPartitionId);
+		BaseHasResource<?> entity = readEntity(theTransactionDetails, theId, theRequestPartitionId);
 		validateResourceType(entity);
 
 		T retVal = myJpaStorageResourceParser.toResource(theRequest, myResourceType, entity, null, false);
@@ -1753,7 +1858,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> readEntity(theId, requestPartitionId));
+				.execute(() -> readEntity(null, theId, requestPartitionId));
 	}
 
 	@Override
@@ -1961,105 +2066,116 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	private BaseHasResource<?> readEntity(IIdType theId, RequestPartitionId requestPartitionId) {
+	// FIXME: evaluate, can we call the other readEntity below?
+	private BaseHasResource<?> readEntity(TransactionDetails theTransactionDetails, IIdType theId, RequestPartitionId requestPartitionId) {
+		return readEntity(theTransactionDetails, theId, requestPartitionId, false, false);
+	}
+
+
+	@Nonnull
+	private BaseHasResource<?> readEntity(TransactionDetails theTransactionDetails, IIdType theId, RequestPartitionId theRequestPartitionId, boolean theJoinTags, boolean theJoinResourceTable) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		BaseHasResource entity;
-		JpaPid pid = myIdHelperService
+		JpaPid pid = (JpaPid) theTransactionDetails.getResolvedResourceId(theId);
+		boolean preResolved = pid != null;
+
+		if (!preResolved) {
+			pid = myIdHelperService
 				.resolveResourceIdentity(
-						requestPartitionId,
-						getResourceName(),
-						theId.getIdPart(),
-						ResolveIdentityMode.includeDeleted().cacheOk())
+					theRequestPartitionId,
+					getResourceName(),
+					theId.getIdPart(),
+					ResolveIdentityMode.includeDeleted().cacheOk())
 				.getPersistentId();
-		Set<Integer> readPartitions = null;
-		if (requestPartitionId.isAllPartitions()) {
-			entity = myEntityManager.find(ResourceTable.class, pid);
-		} else {
-			readPartitions = myRequestPartitionHelperService.toReadPartitions(requestPartitionId);
-			if (readPartitions.size() == 1) {
-				if (readPartitions.contains(null)) {
-					entity = myResourceTableDao
-							.readByPartitionIdNull(pid.getId())
-							.orElse(null);
-				} else {
-					entity = myResourceTableDao
-							.readByPartitionId(readPartitions.iterator().next(), pid.getId())
-							.orElse(null);
+		}
+
+		/*
+		 * If we're partitioned, but not in Database Partition Mode, then the PARTITION_ID
+		 * column isn't a part of the PK and we need to explicitly add a WHERE clause for it.
+		 */
+		boolean needExplicitPartitionSelector = myPartitionSettings.isPartitioningEnabled() && !myPartitionSettings.isDatabasePartitionMode();
+
+		/*
+		 * If the TransactionDetails indicates that we've already pre-resolved
+		 * the resource, we can assume it's already in the L1 cache.
+		 */
+		BaseHasResource<?> retVal = null;
+		if (isBlank(theId.getVersionIdPart())) {
+			if (preResolved || (!theJoinTags && !needExplicitPartitionSelector)) {
+				retVal = myEntityManager.find(ResourceTable.class, pid);
+			}
+		}
+
+		if (retVal == null) {
+			CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<? extends BaseHasResource<?>> query;
+			Root<? extends BaseHasResource<?>> root;
+			List<Predicate> predicates = new ArrayList<>(3);
+
+			if (theId.hasVersionIdPart()) {
+				query = cb.createQuery(ResourceHistoryTable.class);
+				root = query.from(ResourceHistoryTable.class);
+				predicates.add(cb.equal(root.get("myResourcePid"), JpaPidFk.fromPid(pid)));
+				predicates.add(cb.equal(root.get("myResourceVersion"), theId.getVersionIdPartAsLong()));
+				if (theJoinResourceTable) {
+					root.fetch("myResourceTable");
+					if (theJoinTags) {
+						root.fetch("myResourceTable").fetch("myTags").fetch("myTag");
+					}
 				}
 			} else {
+				query = cb.createQuery(ResourceTable.class);
+				root = query.from(ResourceTable.class);
+				predicates.add(cb.equal(root.get("myPid"), pid));
+			}
+
+			if (theJoinTags) {
+				root.fetch("myTags").fetch("myTag");
+			}
+
+			if (needExplicitPartitionSelector) {
+				Set<Integer> readPartitions = myRequestPartitionHelperService.toReadPartitions(theRequestPartitionId);
 				if (readPartitions.contains(null)) {
-					List<Integer> readPartitionsWithoutNull =
-							readPartitions.stream().filter(Objects::nonNull).collect(Collectors.toList());
-					entity = myResourceTableDao
-							.readByPartitionIdsOrNull(readPartitionsWithoutNull, pid.getId())
-							.orElse(null);
+					Predicate partitionIsNull = cb.isNull(root.get("myPartitionIdValue"));
+					if (readPartitions.size() == 1) {
+						predicates.add(partitionIsNull);
+					} else {
+						readPartitions.remove(null);
+						predicates.add(cb.or(partitionIsNull, root.get("myPartitionIdValue").in(readPartitions.toArray())));
+					}
 				} else {
-					entity = myResourceTableDao
-							.readByPartitionIds(readPartitions, pid.getId())
-							.orElse(null);
+					predicates.add(root.get("myPartitionIdValue").in(readPartitions.toArray()));
 				}
 			}
-		}
 
-		// Verify that the resource is for the correct partition
-		if (entity != null && readPartitions != null && entity.getPartitionId() != null) {
-			if (!readPartitions.contains(entity.getPartitionId().getPartitionId())) {
-				ourLog.debug(
-						"Performing a read for PartitionId={} but entity has partition: {}",
-						requestPartitionId,
-						entity.getPartitionId());
-				entity = null;
+			query.where(cb.and(predicates.toArray(EMPTY_PREDICATE_ARRAY)));
+
+			try {
+				retVal = myEntityManager.createQuery(query).getSingleResult();
+			} catch (NoResultException e) {
+				// fall through
 			}
 		}
 
-		if (theId.hasVersionIdPart()) {
-			if (!theId.isVersionIdPartValidLong()) {
-				throw new ResourceNotFoundException(Msg.code(978)
-						+ getContext()
-								.getLocalizer()
-								.getMessageSanitized(
-										BaseStorageDao.class,
-										"invalidVersion",
-										theId.getVersionIdPart(),
-										theId.toUnqualifiedVersionless()));
-			}
-			if (entity != null && entity.getVersion() != theId.getVersionIdPartAsLong()) {
-				entity = null;
-			}
-		}
-
-		if (entity == null) {
+		if (retVal == null) {
 			if (theId.hasVersionIdPart()) {
-				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(
-						"SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER",
-						ResourceHistoryTable.class);
-				q.setParameter("RID", pid.getId());
-				q.setParameter("RTYP", myResourceName);
-				q.setParameter("RVER", theId.getVersionIdPartAsLong());
-				try {
-					entity = q.getSingleResult();
-				} catch (NoResultException e) {
-					throw new ResourceNotFoundException(Msg.code(979)
-							+ getContext()
-									.getLocalizer()
-									.getMessageSanitized(
-											BaseStorageDao.class,
-											"invalidVersion",
-											theId.getVersionIdPart(),
-											theId.toUnqualifiedVersionless()));
-				}
+				throw new ResourceNotFoundException(Msg.code(979)
+					+ getContext()
+					.getLocalizer()
+					.getMessageSanitized(
+						BaseStorageDao.class,
+						"invalidVersion",
+						theId.getVersionIdPart(),
+						theId.toUnqualifiedVersionless()));
+			} else {
+				throw new ResourceNotFoundException(Msg.code(1996) + "Resource " + theId + " is not known");
 			}
 		}
 
-		if (entity == null) {
-			throw new ResourceNotFoundException(Msg.code(1996) + "Resource " + theId + " is not known");
-		}
+		validateResourceType(retVal);
+		validateGivenIdIsAppropriateToRetrieveResource(theId, retVal);
 
-		validateResourceType(entity);
-		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
-
-		return entity;
+		return retVal;
 	}
 
 	@Override

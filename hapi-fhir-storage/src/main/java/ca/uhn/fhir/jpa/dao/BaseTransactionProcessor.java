@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -88,6 +89,7 @@ import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -106,6 +108,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -551,8 +554,7 @@ public abstract class BaseTransactionProcessor {
 		for (int i = 0; i < requestEntriesSize; i++) {
 
 			nextResponseEntry = responseMap.get(i);
-			if (nextResponseEntry instanceof ServerResponseExceptionHolder) {
-				ServerResponseExceptionHolder caughtEx = (ServerResponseExceptionHolder) nextResponseEntry;
+			if (nextResponseEntry instanceof ServerResponseExceptionHolder caughtEx) {
 				if (caughtEx.getException() != null) {
 					IBase nextEntry = myVersionAdapter.addEntry(response);
 					populateEntryWithOperationOutcome(caughtEx.getException(), nextEntry);
@@ -721,12 +723,11 @@ public abstract class BaseTransactionProcessor {
 							Msg.code(530) + "Can not invoke read operation on nested transaction");
 				}
 
-				if (!(theRequestDetails instanceof ServletRequestDetails)) {
+				if (!(theRequestDetails instanceof ServletRequestDetails srd)) {
 					throw new MethodNotAllowedException(
 							Msg.code(531) + "Can not call transaction GET methods from this context");
 				}
 
-				ServletRequestDetails srd = (ServletRequestDetails) theRequestDetails;
 				Integer originalOrder = theOriginalRequestOrder.get(nextReqEntry);
 				IBase nextRespEntry =
 						(IBase) myVersionAdapter.getEntries(theResponse).get(originalOrder);
@@ -775,9 +776,7 @@ public abstract class BaseTransactionProcessor {
 		Optional<IBaseExtension<?, ?>> partitionIdsExtensionOptional =
 				myVersionAdapter.getEntryRequestExtensionByUrl(theReqEntry, EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS);
 		if (partitionIdsExtensionOptional.isPresent()
-				&& partitionIdsExtensionOptional.get().getValue() instanceof IPrimitiveType<?>) {
-			IPrimitiveType<?> valueAsPrimitiveType =
-					(IPrimitiveType<?>) partitionIdsExtensionOptional.get().getValue();
+				&& partitionIdsExtensionOptional.get().getValue() instanceof IPrimitiveType<?> valueAsPrimitiveType) {
 			String value = valueAsPrimitiveType.getValueAsString();
 			theRequestDetails.setHeaders(Constants.HEADER_X_REQUEST_PARTITION_IDS, List.of(value));
 		}
@@ -1425,16 +1424,26 @@ public abstract class BaseTransactionProcessor {
 
 				switch (verb) {
 					case "POST": {
-						// CREATE
+						// CREATE (or $operation)
 						validateResourcePresent(res, order, verb);
 
-						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
+						// Generally POST means that we're doing a create or conditional create,
+						// but it can also be an operation invocation.
+						Optional<ParsedRequestOperation> parsedOperationOpt = parseUrlForOperationInvocation(url);
+						if (parsedOperationOpt.isPresent()) {
+							ParsedRequestOperation parsedOperation = parsedOperationOpt.get();
+							invokeOperationInTransaction(parsedOperation, res, requestDetailsForEntry, nextRespEntry, theTransactionDetails);
+							break;
+						}
+
+						// Ok, it's a create / conditional create
 						res.setId((String) null);
 
 						DaoMethodOutcome outcome;
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						// create individual resource
+						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 						outcome =
 								resourceDao.create(res, matchUrl, false, requestDetailsForEntry, theTransactionDetails);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
@@ -1573,8 +1582,7 @@ public abstract class BaseTransactionProcessor {
 						IBaseParameters patchBodyParameters = null;
 						PatchTypeEnum patchType = null;
 
-						if (res instanceof IBaseBinary) {
-							IBaseBinary binary = (IBaseBinary) res;
+						if (res instanceof IBaseBinary binary) {
 							if (binary.getContent() != null && binary.getContent().length > 0) {
 								patchBody = toUtf8String(binary.getContent());
 							}
@@ -1765,28 +1773,50 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
+	private void invokeOperationInTransaction(ParsedRequestOperation theParsedRequestOperation, IBaseResource theResource, RequestDetails theRequestDetailsForEntry, IBase theResponseBundleEntry, TransactionDetails theTransactionDetails) {
+		IIdType instanceId = theParsedRequestOperation.targetInstance();
+		boolean metaAdd = JpaConstants.OPERATION_META_ADD.equals(theParsedRequestOperation.operationName());
+		if (metaAdd || JpaConstants.OPERATION_META_DELETE.equals(theParsedRequestOperation.operationName())) {
+			IBaseParameters request = (IBaseParameters) theResource;
+			IBaseMetaType meta = (IBaseMetaType) ParametersUtil.getNamedParameterValue(myContext, request, "meta")
+				// FIXME: add better exception and test
+				.orElseThrow();
+
+			IFhirResourceDao resourceDao = getDaoOrThrowException(myContext.getResourceDefinition(instanceId.getResourceType()).getImplementingClass());
+			DaoMethodOutcome outcome;
+			if (metaAdd) {
+				outcome = resourceDao.metaAddOperation(instanceId, meta, theRequestDetailsForEntry, theTransactionDetails);
+			} else {
+				outcome = resourceDao.metaDeleteOperation(instanceId, meta, theRequestDetailsForEntry, theTransactionDetails);
+			}
+
+			myVersionAdapter.setResponseOutcome(theResponseBundleEntry, outcome.getOperationOutcome());
+			myVersionAdapter.setResponseStatus(theResponseBundleEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
+		}
+	}
+
 	/**
 	 * Subclasses may override this in order to invoke specific operations when
-	 * we're finished handling all the write entries in the transaction bundle
-	 * with a given verb.
-	 */
+     * we're finished handling all the write entries in the transaction bundle
+     * with a given verb.
+     */
 	protected void handleVerbChangeInTransactionWriteOperations() {
 		// nothing
 	}
 
 	/**
-	 * Implement to handle post transaction processing
-	 */
+     * Implement to handle post transaction processing
+     */
 	protected void postTransactionProcess(TransactionDetails theTransactionDetails) {
 		// nothing
 	}
 
 	/**
-	 * Check for if a resource id should be matched in a conditional update
-	 * If the FHIR version is older than R4, it follows the old specifications and does not match
-	 * If the resource id has been resolved, then it is an existing resource and does not need to be matched
-	 * If the resource id is local or a placeholder, the id is temporary and should not be matched
-	 */
+     * Check for if a resource id should be matched in a conditional update
+     * If the FHIR version is older than R4, it follows the old specifications and does not match
+     * If the resource id has been resolved, then it is an existing resource and does not need to be matched
+     * If the resource id is local or a placeholder, the id is temporary and should not be matched
+     */
 	private boolean shouldConditionalUpdateMatchId(TransactionDetails theTransactionDetails, IIdType theId) {
 		if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
 			return false;
@@ -1803,13 +1833,9 @@ public abstract class BaseTransactionProcessor {
 
 	private boolean shouldSwapBinaryToActualResource(
 			IBaseResource theResource, String theResourceType, IIdType theNextResourceId) {
-		if ("Binary".equalsIgnoreCase(theResourceType)
-				&& theNextResourceId.getResourceType() != null
-				&& !theNextResourceId.getResourceType().equalsIgnoreCase("Binary")) {
-			return true;
-		} else {
-			return false;
-		}
+		return "Binary".equalsIgnoreCase(theResourceType)
+			&& theNextResourceId.getResourceType() != null
+			&& !theNextResourceId.getResourceType().equalsIgnoreCase("Binary");
 	}
 
 	private void setConditionalUrlToBeValidatedLater(
@@ -1820,9 +1846,9 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * After transaction processing and resolution of indexes and references, we want to validate that the resources that were stored _actually_
-	 * match the conditional URLs that they were brought in on.
-	 */
+     * After transaction processing and resolution of indexes and references, we want to validate that the resources that were stored _actually_
+     * match the conditional URLs that they were brought in on.
+     */
 	private void validateAllInsertsMatchTheirConditionalUrls(
 			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 			Map<String, IIdType> conditionalUrlToIdMap,
@@ -1892,12 +1918,12 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Checks for any delete conflicts.
-	 *
-	 * @param theDeleteConflicts  - set of delete conflicts
-	 * @param theDeletedResources - set of deleted resources
-	 * @param theUpdatedResources - list of updated resources
-	 */
+     * Checks for any delete conflicts.
+     *
+     * @param theDeleteConflicts  - set of delete conflicts
+     * @param theDeletedResources - set of deleted resources
+     * @param theUpdatedResources - list of updated resources
+     */
 	private void checkForDeleteConflicts(
 			DeleteConflictList theDeleteConflicts,
 			Set<String> theDeletedResources,
@@ -1947,27 +1973,27 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * This method replaces any placeholder references in the
-	 * source transaction Bundle with their actual targets, then stores the resource contents and indexes
-	 * in the database. This is trickier than you'd think because of a couple of possibilities during the
-	 * save:
-	 * * There may be resources that have not changed (e.g. an update/PUT with a resource body identical
-	 * to what is already in the database)
-	 * * There may be resources with auto-versioned references, meaning we're replacing certain references
-	 * in the resource with a versioned references, referencing the current version at the time of the
-	 * transaction processing
-	 * * There may by auto-versioned references pointing to these unchanged targets
-	 * <p>
-	 * If we're not doing any auto-versioned references, we'll just iterate through all resources in the
-	 * transaction and save them one at a time.
-	 * <p>
-	 * However, if we have any auto-versioned references we do this in 2 passes: First the resources from the
-	 * transaction that don't have any auto-versioned references are stored. We do them first since there's
-	 * a chance they may be a NOP and we'll need to account for their version number not actually changing.
-	 * Then we do a second pass for any resources that have auto-versioned references. These happen in a separate
-	 * pass because it's too complex to try and insert the auto-versioned references and still
-	 * account for NOPs, so we block NOPs in that pass.
-	 */
+     * This method replaces any placeholder references in the
+     * source transaction Bundle with their actual targets, then stores the resource contents and indexes
+     * in the database. This is trickier than you'd think because of a couple of possibilities during the
+     * save:
+     * * There may be resources that have not changed (e.g. an update/PUT with a resource body identical
+     * to what is already in the database)
+     * * There may be resources with auto-versioned references, meaning we're replacing certain references
+     * in the resource with a versioned references, referencing the current version at the time of the
+     * transaction processing
+     * * There may by auto-versioned references pointing to these unchanged targets
+     * <p>
+     * If we're not doing any auto-versioned references, we'll just iterate through all resources in the
+     * transaction and save them one at a time.
+     * <p>
+     * However, if we have any auto-versioned references we do this in 2 passes: First the resources from the
+     * transaction that don't have any auto-versioned references are stored. We do them first since there's
+     * a chance they may be a NOP and we'll need to account for their version number not actually changing.
+     * Then we do a second pass for any resources that have auto-versioned references. These happen in a separate
+     * pass because it's too complex to try and insert the auto-versioned references and still
+     * account for NOPs, so we block NOPs in that pass.
+     */
 	private void resolveReferencesThenSaveAndIndexResources(
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails,
@@ -1987,7 +2013,7 @@ public abstract class BaseTransactionProcessor {
 				ourLog.debug(
 						"Have indexed {} entities out of {} in transaction",
 						i,
-						theIdToPersistedOutcome.values().size());
+						theIdToPersistedOutcome.size());
 			}
 
 			if (nextOutcome.isNop()) {
@@ -2249,16 +2275,16 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * We should replace the references when
-	 * 1. It is not a reference we should keep the client-supplied version for as configured by `DontStripVersionsFromReferences` or
-	 * 2. It is a reference that has been identified for auto versioning or
-	 * 3. Is a placeholder reference
-	 *
-	 * @param theReferencesToAutoVersion               list of references identified for auto versioning
-	 * @param theReferencesToKeepClientSuppliedVersion list of references that we should not strip the version for
-	 * @param theResourceReference                     the resource reference
-	 * @return true if we should replace the resource reference, false if we should keep the client provided reference
-	 */
+     * We should replace the references when
+     * 1. It is not a reference we should keep the client-supplied version for as configured by `DontStripVersionsFromReferences` or
+     * 2. It is a reference that has been identified for auto versioning or
+     * 3. Is a placeholder reference
+     *
+     * @param theReferencesToAutoVersion               list of references identified for auto versioning
+     * @param theReferencesToKeepClientSuppliedVersion list of references that we should not strip the version for
+     * @param theResourceReference                     the resource reference
+     * @return true if we should replace the resource reference, false if we should keep the client provided reference
+     */
 	private boolean shouldReplaceResourceReference(
 			Set<IBaseReference> theReferencesToAutoVersion,
 			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion,
@@ -2367,6 +2393,28 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
+	@Nonnull
+	public Optional<ParsedRequestOperation> parseUrlForOperationInvocation(String theUrl) {
+		if (isBlank(theUrl)) {
+			return Optional.empty();
+		}
+
+		int lastSlashIdx = theUrl.lastIndexOf('/');
+		if (lastSlashIdx == -1) {
+			return Optional.empty();
+		}
+
+		String operationName = theUrl.substring(lastSlashIdx + 1);
+		if (operationName.startsWith("$")) {
+			String prefix = theUrl.substring(0, lastSlashIdx);
+			IIdType id = myContext.getVersion().newIdType(prefix);
+			return Optional.of(new ParsedRequestOperation(operationName, id));
+		}
+
+		return Optional.empty();
+	}
+
+
 	private IIdType newIdType(String theResourceType, String theResourceId, String theVersion) {
 		IdType id = new IdType(theResourceType, theResourceId, theVersion);
 		return myContext.getVersion().newIdType().setValue(id.getValue());
@@ -2403,14 +2451,14 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Extracts the transaction url from the entry and verifies it's:
-	 * <li>not null or blank (unless it is a POST), and</li>
-	 * <li>is a relative url matching the resourceType it is about</li>
-	 * <p>
-	 * For POST requests, the url is allowed to be blank to preserve the existing behavior.
-	 * <p>
-	 * Returns the transaction url (or throws an InvalidRequestException if url is missing or not valid)
-	 */
+     * Extracts the transaction url from the entry and verifies it's:
+     * <li>not null or blank (unless it is a POST), and</li>
+     * <li>is a relative url matching the resourceType it is about</li>
+     * <p>
+     * For POST requests, the url is allowed to be blank to preserve the existing behavior.
+     * <p>
+     * Returns the transaction url (or throws an InvalidRequestException if url is missing or not valid)
+     */
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
 		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
 		if (url.isEmpty() || isValidResourceTypeUrl(url)) {
@@ -2426,12 +2474,12 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Returns true if the provided url is a valid entry request.url.
-	 * <p>
-	 * This means:
-	 * a) not an absolute url (does not start with http/https)
-	 * b) starts with either a ResourceType or /ResourceType
-	 */
+     * Returns true if the provided url is a valid entry request.url.
+     * <p>
+     * This means:
+     * a) not an absolute url (does not start with http/https)
+     * b) starts with either a ResourceType or /ResourceType
+     */
 	private boolean isValidResourceTypeUrl(@Nonnull String theUrl) {
 		if (UrlUtil.isAbsolute(theUrl)) {
 			return false;
@@ -2456,10 +2504,10 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Extracts the transaction url from the entry and verifies that it is not null/blank, unless it is a POST,
-	 * and returns it. For POST requests allows null or blank values to keep the existing behaviour and returns
-	 * an empty string in that case.
-	 */
+     * Extracts the transaction url from the entry and verifies that it is not null/blank, unless it is a POST,
+     * and returns it. For POST requests allows null or blank values to keep the existing behaviour and returns
+     * an empty string in that case.
+     */
 	private String extractTransactionUrlOrThrowException(IBase nextEntry, String verb) {
 		String url = myVersionAdapter.getEntryRequestUrl(nextEntry);
 		if ("POST".equals(verb) && isBlank(url)) {
@@ -2526,17 +2574,20 @@ public abstract class BaseTransactionProcessor {
 		myPartitionSettings = thePartitionSettings;
 	}
 
+	public record ParsedRequestOperation(@Nonnull String operationName, IIdType targetInstance) {}
+
 	/**
-	 * Transaction Order, per the spec:
-	 * <p>
-	 * Process any DELETE interactions
-	 * Process any POST interactions
-	 * Process any PUT interactions
-	 * Process any PATCH interactions
-	 * Process any GET interactions
-	 */
+     * Transaction Order, per the spec:
+     * <p>
+     * Process any DELETE interactions
+     * Process any POST interactions
+     * Process any PUT interactions
+     * Process any PATCH interactions
+     * Process any GET interactions
+     */
 	// @formatter:off
 	public class TransactionSorter implements Comparator<IBase> {
+
 
 		private final Set<String> myPlaceholderIds;
 
@@ -2588,7 +2639,6 @@ public abstract class BaseTransactionProcessor {
 
 			return o1 - o2;
 		}
-
 		private int toOrder(IBase theO1) {
 			int o1 = 0;
 			if (myVersionAdapter.getEntryRequestVerb(myContext, theO1) != null) {
@@ -2615,8 +2665,8 @@ public abstract class BaseTransactionProcessor {
 			}
 			return o1;
 		}
-	}
 
+	}
 	public class RetriableBundleTask implements Runnable {
 
 		private final CountDownLatch myCompletedLatch;
@@ -2625,6 +2675,7 @@ public abstract class BaseTransactionProcessor {
 		private final Map<Integer, Object> myResponseMap;
 		private final int myResponseOrder;
 		private final boolean myNestedMode;
+
 		private BaseServerResponseException myLastSeenException;
 
 		protected RetriableBundleTask(
@@ -2713,24 +2764,24 @@ public abstract class BaseTransactionProcessor {
 			ourLog.debug("processing batch for {} is completed", myVersionAdapter.getEntryRequestUrl(myNextReqEntry));
 			myCompletedLatch.countDown();
 		}
-
 		private void populateResponseMapWithLastSeenException() {
 			ServerResponseExceptionHolder caughtEx = new ServerResponseExceptionHolder();
 			caughtEx.setException(myLastSeenException);
 			myResponseMap.put(myResponseOrder, caughtEx);
 		}
-	}
 
+	}
 	private static class ServerResponseExceptionHolder {
+
 		private BaseServerResponseException myException;
 
 		public BaseServerResponseException getException() {
 			return myException;
 		}
-
 		public void setException(BaseServerResponseException myException) {
 			this.myException = myException;
 		}
+
 	}
 
 	public static boolean isPlaceholder(IIdType theId) {
@@ -2815,4 +2866,6 @@ public abstract class BaseTransactionProcessor {
 	private static boolean isUrnEscaped(@Nonnull String theId) {
 		return theId.startsWith(URN_PREFIX_ESCAPED);
 	}
+
+
 }

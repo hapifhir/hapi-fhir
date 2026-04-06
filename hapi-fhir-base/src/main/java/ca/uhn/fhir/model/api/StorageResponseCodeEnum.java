@@ -55,8 +55,25 @@ public enum StorageResponseCodeEnum implements ICodingEnum {
 			"Conditional patch succeeded: No changes were detected so no action was taken.", true),
 	AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE("Automatically created placeholder resource.", false),
 	FAILURE("Failed to process resource.", false),
-	;
 
+	/**
+	 * @since 8.10.0
+ 	 */
+	SUCCESSFUL_META_ADD("Meta add succeeded.", false),
+	/**
+	 * @since 8.10.0
+ 	 */
+	SUCCESSFUL_META_ADD_NO_CHANGE("Meta add succeeded: No changes were detected so no action was taken.", true),
+	/**
+	 * @since 8.10.0
+ 	 */
+	SUCCESSFUL_META_DELETE("Meta delete succeeded.", false),
+	/**
+	 * @since 8.10.0
+ 	 */
+	SUCCESSFUL_META_DELETE_NO_CHANGE("Meta delete succeeded: No changes were detected so no action was taken.", true),
+
+	;
 	public static final String SYSTEM = "https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code";
 
 	private final String myDisplay;
