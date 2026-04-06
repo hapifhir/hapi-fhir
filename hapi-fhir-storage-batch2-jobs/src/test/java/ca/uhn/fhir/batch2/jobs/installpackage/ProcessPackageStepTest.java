@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -73,7 +74,7 @@ public class ProcessPackageStepTest {
 		InputStream stream = ProcessPackageStepTest.class.getResourceAsStream("usCorePackage.tgz");
 		byte[] packageBytes = stream.readAllBytes();
 		PackageContentsJson packageContentsJson = new PackageContentsJson();
-		packageContentsJson.setContents(packageBytes);
+		packageContentsJson.setContents(Base64.getEncoder().encode(packageBytes));
 		NpmPackage expectedPackage = NpmPackage.fromPackage(new ByteArrayInputStream(packageBytes));
 
 		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =

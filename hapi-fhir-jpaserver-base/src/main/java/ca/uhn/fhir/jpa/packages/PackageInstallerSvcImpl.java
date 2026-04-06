@@ -349,7 +349,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		parameters.setInstallationSpec(theInstallationSpec);
 		JobInstanceStartRequest startRequest =
 				new JobInstanceStartRequest(Batch2JobDefinitionConstants.INSTALL_PACKAGE, parameters);
-		Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(createRequestDetails(), startRequest);
 		return response.getInstanceId();
 	}
 

@@ -43,5 +43,10 @@ public interface IPackageInstallerSvc {
 	 */
 	String installAsynchronously(PackageInstallationSpec theInstallationSpec);
 
+	/**
+	 * Retrieves the current status of an asynchronous package installer job.
+	 * @param theJobId the id of the job
+	 * @return a JSON object containing the status report
+	 */
 	PackageInstallationStatusJson checkInstallationStatus(String theJobId);
 }
