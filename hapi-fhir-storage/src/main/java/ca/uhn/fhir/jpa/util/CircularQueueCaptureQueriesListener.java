@@ -65,13 +65,17 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 
 	@Override
 	public String toString() {
-		return "          Current Thread | All Threads\n" +
-			"  SELECT    " + String.format("%-14d", countSelectQueries()) + " | " + countSelectQueriesForCurrentThread() + "\n" +
-			"  INSERT    " + String.format("%-14d", countInsertQueries()) + " | " + countInsertQueriesForCurrentThread() + "\n" +
-			"  UPDATE    " + String.format("%-14d", countUpdateQueries()) + " | " + countUpdateQueriesForCurrentThread() + "\n" +
-			"  DELETE    " + String.format("%-14d", countDeleteQueries()) + " | " + countDeleteQueriesForCurrentThread() + "\n" +
-			"  COMMIT                   | " + countCommits() + "\n" +
-			"  ROLLBACK                 | " + countRollbacks();
+		return "          Current Thread | All Threads\n" + "  SELECT    "
+				+ String.format("%-14d", countSelectQueries()) + " | " + countSelectQueriesForCurrentThread() + "\n"
+				+ "  INSERT    "
+				+ String.format("%-14d", countInsertQueries()) + " | " + countInsertQueriesForCurrentThread() + "\n"
+				+ "  UPDATE    "
+				+ String.format("%-14d", countUpdateQueries()) + " | " + countUpdateQueriesForCurrentThread() + "\n"
+				+ "  DELETE    "
+				+ String.format("%-14d", countDeleteQueries()) + " | " + countDeleteQueriesForCurrentThread() + "\n"
+				+ "  COMMIT                   | "
+				+ countCommits() + "\n" + "  ROLLBACK                 | "
+				+ countRollbacks();
 	}
 
 	@Nonnull

@@ -317,7 +317,8 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		if (theMeta == null) {
 			throw new InvalidRequestException(Msg.code(554) + "Input contains no parameter with name 'meta'");
 		}
-		DaoMethodOutcome metaAddOutcome = getDao().metaAddOperation(theId, theMeta, theRequestDetails, new TransactionDetails());
+		DaoMethodOutcome metaAddOutcome =
+				getDao().metaAddOperation(theId, theMeta, theRequestDetails, new TransactionDetails());
 		return (IBaseParameters) metaAddOutcome.getResource();
 	}
 
@@ -333,7 +334,8 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		if (theMeta == null) {
 			throw new InvalidRequestException(Msg.code(555) + "Input contains no parameter with name 'meta'");
 		}
-		DaoMethodOutcome metaDeleteOutcome = getDao().metaDeleteOperation(theId, theMeta, theRequestDetails, new TransactionDetails());
+		DaoMethodOutcome metaDeleteOutcome =
+				getDao().metaDeleteOperation(theId, theMeta, theRequestDetails, new TransactionDetails());
 		return (IBaseParameters) metaDeleteOutcome.getResource();
 	}
 

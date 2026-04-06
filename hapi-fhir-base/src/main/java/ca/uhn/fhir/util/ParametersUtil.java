@@ -106,12 +106,11 @@ public class ParametersUtil {
 	 * @since 8.10.0
 	 */
 	public static Optional<IBase> getNamedParameterValue(
-		FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		List<IBase> namedParameters = getNamedParameters(theCtx, theParameters, theParameterName);
 		return collectChildrenByNameAndType(theCtx, namedParameters, "value[x]", IBase.class).stream()
-			.findFirst();
+				.findFirst();
 	}
-
 
 	private static <T extends IBase> List<T> collectChildrenByNameAndType(
 			FhirContext theCtx, List<IBase> theNamedParameters, String theChildName, Class<T> childrenType) {

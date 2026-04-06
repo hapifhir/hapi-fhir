@@ -389,7 +389,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					Optional<ParsedRequestOperation> operation = parseUrlForOperationInvocation(requestUrl);
 					if (operation.isPresent()) {
 						String operationName = operation.get().operationName();
-						if (JpaConstants.OPERATION_META_ADD.equals(operationName) || JpaConstants.OPERATION_META_DELETE.equals(operationName)) {
+						if (JpaConstants.OPERATION_META_ADD.equals(operationName)
+								|| JpaConstants.OPERATION_META_DELETE.equals(operationName)) {
 							idsToPreResolve.put(operation.get().targetInstance(), PrefetchReasonEnum.DIRECT_TARGET);
 						}
 					}

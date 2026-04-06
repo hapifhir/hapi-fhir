@@ -361,7 +361,8 @@ public class BundleBuilder {
 		addTransactionMetaAddOrDelete(theId, theMeta, RestOperationTypeEnum.META_DELETE);
 	}
 
-	private void addTransactionMetaAddOrDelete(IIdType theId, IBaseMetaType theMeta, RestOperationTypeEnum operationName) {
+	private void addTransactionMetaAddOrDelete(
+			IIdType theId, IBaseMetaType theMeta, RestOperationTypeEnum operationName) {
 		setBundleFieldIfNotAlreadySet("type", "transaction");
 
 		IBaseParameters requestResource = ParametersUtil.newInstance(myContext);
