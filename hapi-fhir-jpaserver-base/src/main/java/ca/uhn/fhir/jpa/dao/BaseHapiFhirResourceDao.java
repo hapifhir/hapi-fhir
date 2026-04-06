@@ -2099,7 +2099,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * column isn't a part of the PK and we need to explicitly add a WHERE clause for it.
 		 */
 		boolean needExplicitPartitionSelector =
-				myPartitionSettings.isPartitioningEnabled() && !myPartitionSettings.isDatabasePartitionMode();
+				myPartitionSettings.isPartitioningEnabled() && !myPartitionSettings.isDatabasePartitionMode() && !theRequestPartitionId.isAllPartitions();
 
 		/*
 		 * If the TransactionDetails indicates that we've already pre-resolved
