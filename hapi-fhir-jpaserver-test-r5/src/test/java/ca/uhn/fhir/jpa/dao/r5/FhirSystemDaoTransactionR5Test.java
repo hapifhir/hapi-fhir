@@ -1034,6 +1034,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		bb.addTransactionMetaAddEntry(new IdType("Patient/A"), meta);
 		bb.addTransactionMetaAddEntry(new IdType("Patient/B"), meta);
 		Bundle requestBundle = bb.getBundleTyped();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
 
 		Bundle responseBundle = mySystemDao.transaction(mySrd, requestBundle);
 
@@ -1102,6 +1103,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		bb.addTransactionMetaDeleteEntry(new IdType("Patient/A"), meta);
 		bb.addTransactionMetaDeleteEntry(new IdType("Patient/B"), meta);
 		Bundle requestBundle = bb.getBundleTyped();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
 
 		Bundle responseBundle = mySystemDao.transaction(mySrd, requestBundle);
 
