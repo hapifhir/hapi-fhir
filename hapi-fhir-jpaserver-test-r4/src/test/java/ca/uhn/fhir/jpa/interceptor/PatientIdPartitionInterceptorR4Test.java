@@ -232,6 +232,30 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			.hasMessageContaining("Policy does not allow resource of type \"Provenance\" to be created in multiple Patient compartments: Patient/A, Patient/B");
 	}
 
+	@ParameterizedTest
+	@CsvSource({"MANDATORY_SINGLE_COMPARTMENT", "OPTIONAL_SINGLE_COMPARTMENT"})
+	void testCreateProvenance_InMultiplePatientCompartments_withPrimaryCompartmentExtension(String thePolicy) {
+		// Setup
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		mySvc.setResourceTypePolicies(Map.of("Provenance", ResourceCompartmentStoragePolicy.parse(thePolicy)));
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("B"), withActiveTrue());
+
+		// Test
+		Provenance provenance = new Provenance();
+		provenance.addTarget().setReference("Patient/A");
+		provenance.addTarget().setReference("Patient/B");
+		provenance.addExtension()
+			.setUrl("http://hapifhir.io/fhir/StructureDefinition/primary-patient-compartment")
+			.setValue(new Reference("Patient/A"));
+		IIdType provenanceId = myProvenanceDao.create(provenance, newSrd()).getId();
+
+		// Verify
+		int patientBPartitionId = PatientIdPartitionInterceptor.defaultPartitionAlgorithm("B");
+		assertThat(PATIENT_A_COMPARTMENT_ID).isNotEqualTo(patientBPartitionId);
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, provenanceId);
+	}
+
 	@Test
 	public void testCreatePatient_ClientAssignedId() {
 		createPatientA();

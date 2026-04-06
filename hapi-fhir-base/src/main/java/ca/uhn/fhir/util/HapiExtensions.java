@@ -22,6 +22,19 @@ package ca.uhn.fhir.util;
 public class HapiExtensions {
 
 	/**
+	 * When a resource belongs to multiple Patient compartments, this extension specifies
+	 * which Patient should be considered the primary compartment owner for partition assignment.
+	 * <p>
+	 * This extension should be of type <code>Reference</code> (to a Patient resource)
+	 * and should be placed on the resource itself.
+	 * </p>
+	 *
+	 * @since 8.10.0
+	 */
+	public static final String EXT_PRIMARY_PATIENT_COMPARTMENT =
+			"http://hapifhir.io/fhir/StructureDefinition/primary-patient-compartment";
+
+	/**
 	 * <p>
 	 * This extension should be of type <code>string</code> and should be
 	 * placed on the <code>Subscription.channel</code> element

@@ -47,7 +47,9 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.PreviousVersionReader;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import jakarta.annotation.Nonnull;
@@ -56,6 +58,7 @@ import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -254,6 +257,12 @@ public class PatientIdPartitionInterceptor {
 					return nonUniqueCompartmentPolicy.get();
 				}
 
+				// Check if the resource specifies a primary patient compartment via extension
+				Optional<String> primaryPatientId = extractPrimaryPatientCompartmentId(resource, oCompartmentIdentity);
+				if (primaryPatientId.isPresent()) {
+					return provideSingleCompartmentPartition(theRequestDetails, primaryPatientId.get());
+				}
+
 				throw new InvalidRequestException(Msg.code(1324) + "Policy does not allow resource of type \""
 						+ resourceDef.getName()
 						+ "\" to be created in multiple Patient compartments: "
@@ -281,6 +290,56 @@ public class PatientIdPartitionInterceptor {
 				return throwNonCompartmentMemberInstanceFailureResponse(resource);
 			}
 		}
+	}
+
+	/**
+	 * Extracts and validates the patient ID from the
+	 * {@link HapiExtensions#EXT_PRIMARY_PATIENT_COMPARTMENT} extension, if present.
+	 *
+	 * @param theResource the resource to check for the extension
+	 * @param theCompartmentIdentities the set of patient IDs (bare ID parts) that the resource belongs to
+	 * @return the validated patient ID part, or empty if the extension is absent.
+	 * @throws InvalidRequestException if the extension is present but the value is invalid or references
+	 *         a patient not in the compartment list
+	 */
+	@Nonnull
+	private Optional<String> extractPrimaryPatientCompartmentId(
+			IBaseResource theResource, Collection<String> theCompartmentIdentities) {
+		IBaseExtension<?, ?> extension =
+				ExtensionUtil.getExtensionByUrl(theResource, HapiExtensions.EXT_PRIMARY_PATIENT_COMPARTMENT);
+		if (extension == null) {
+			return Optional.empty();
+		}
+
+		IBase value = extension.getValue();
+		if (!(value instanceof IBaseReference)) {
+			throw new InvalidRequestException(Msg.code(2894) + "Extension "
+					+ HapiExtensions.EXT_PRIMARY_PATIENT_COMPARTMENT + " must have a Reference value");
+		}
+
+		IIdType referenceElement = ((IBaseReference) value).getReferenceElement();
+		String resourceType = referenceElement.getResourceType();
+		if (!"Patient".equals(resourceType)) {
+			throw new InvalidRequestException(Msg.code(2895) + "Extension "
+					+ HapiExtensions.EXT_PRIMARY_PATIENT_COMPARTMENT
+					+ " must reference a Patient resource, but found: " + referenceElement.getValue());
+		}
+
+		String idPart = referenceElement.getIdPart();
+		if (isBlank(idPart)) {
+			throw new InvalidRequestException(Msg.code(2896) + "Extension "
+					+ HapiExtensions.EXT_PRIMARY_PATIENT_COMPARTMENT
+					+ " has a Patient reference with a blank ID");
+		}
+
+		if (!theCompartmentIdentities.contains(idPart)) {
+			throw new InvalidRequestException(Msg.code(2897) + "Extension "
+					+ HapiExtensions.EXT_PRIMARY_PATIENT_COMPARTMENT + " references Patient/" + idPart
+					+ " which is not a compartment of this resource. Compartments are: "
+					+ theCompartmentIdentities.stream().map(t -> "Patient/" + t).collect(Collectors.joining(", ")));
+		}
+
+		return Optional.of(idPart);
 	}
 
 	private IBaseResource getPreviousVersion(IBaseResource theResource) {

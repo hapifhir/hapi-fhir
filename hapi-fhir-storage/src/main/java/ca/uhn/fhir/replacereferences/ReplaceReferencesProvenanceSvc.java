@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -130,6 +131,17 @@ public class ReplaceReferencesProvenanceSvc {
 
 		theUpdatedReferencingResourceIds.forEach(id -> provenance.addTarget(new Reference(id)));
 		theContainedResources.forEach(c -> provenance.addContained((Resource) c));
+
+		// When the target is a Patient, the Provenance targets both source and target Patients,
+		// placing it in two Patient compartments. The extension tells PatientIdPartitionInterceptor
+		// to use the target Patient's partition.
+		if ("Patient".equals(theTargetId.getResourceType())) {
+			provenance
+					.addExtension()
+					.setUrl(HapiExtensions.EXT_PRIMARY_PATIENT_COMPARTMENT)
+					.setValue(new Reference(theTargetId.toUnqualifiedVersionless()));
+		}
+
 		return provenance;
 	}
 

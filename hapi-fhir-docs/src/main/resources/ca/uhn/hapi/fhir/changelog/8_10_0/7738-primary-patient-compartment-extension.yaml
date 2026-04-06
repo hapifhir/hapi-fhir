@@ -1,0 +1,10 @@
+---
+type: add
+issue: 7738
+title: "When using Patient ID Partition Mode, resources belonging to multiple Patient
+  compartments can now optionally specify a primary-patient-compartment extension
+  to indicate which Patient should determine the partition. This avoids errors
+  when using the MANDATORY_SINGLE_COMPARTMENT and OPTIONAL_SINGLE_COMPARTMENT
+  policies with multi-compartment resources. The Provenance resources created
+  during Patient merge and replace-references operations now use this extension
+  automatically."
