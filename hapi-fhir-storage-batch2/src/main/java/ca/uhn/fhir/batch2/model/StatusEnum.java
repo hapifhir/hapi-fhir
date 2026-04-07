@@ -189,10 +189,16 @@ public enum StatusEnum {
 	}
 
 	public static boolean isLegalStateTransition(StatusEnum theOrigStatus, StatusEnum theNewStatus) {
+
+		// Can't go back to BUILDING ever
+		if (theNewStatus == StatusEnum.BUILDING && theOrigStatus != StatusEnum.BUILDING) {
+			return false;
+		}
+
 		boolean canTransition;
 		switch (theOrigStatus) {
 			case BUILDING:
-				canTransition = theNewStatus == QUEUED || theNewStatus == CANCELLED;
+				canTransition = theNewStatus == QUEUED || theNewStatus == CANCELLED || theNewStatus == BUILDING;
 				break;
 			case QUEUED:
 				// initial state can transition to anything

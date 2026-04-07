@@ -24,12 +24,17 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.hibernate.Length;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -49,18 +54,25 @@ public class Batch2JobAttachmentEntity implements Serializable {
 	private Batch2WorkChunkAttachmentEntityPk myId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "JOB_INSTANCE_ID", referencedColumnName = "ID", insertable = false, updatable = false)
+	@JoinColumn(
+			name = "JOB_INSTANCE_ID",
+			referencedColumnName = "ID",
+			insertable = false,
+			updatable = false,
+			foreignKey = @ForeignKey(name = "FK_BT2JA_INSTANCE"))
 	private Batch2JobInstanceEntity myJobInstance;
 
 	@Column(name = "FILENAME", length = ID_MAX_LENGTH, nullable = false)
 	private String myFilename;
 
-	// FIXME: restore?
-	//	@Enumerated(jakarta.persistence.EnumType.STRING)
-	@Column(name = "CONTENT_TYPE", nullable = false)
+	@Column(name = "CONTENT_TYPE", nullable = false, length = 50)
+	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private AttachmentContentTypeEnum myContentType;
-	//	@Enumerated(jakarta.persistence.EnumType.STRING)
-	@Column(name = "CMP_STATUS", nullable = false)
+
+	@Column(name = "CMP_STATUS", nullable = false, length = 50)
+	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private CompressionEnum myCompressedStatus;
 
 	@Column(name = "ATTACHMENT_DATA", length = Length.LONG32, nullable = false)

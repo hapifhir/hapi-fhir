@@ -15,17 +15,26 @@ class StatusEnumTest {
 	}
 	@Test
 	public void testNotEndedStatuses() {
-		assertThat(StatusEnum.getNotEndedStatuses()).containsExactlyInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.ERRORED, StatusEnum.FINALIZE);
+		assertThat(StatusEnum.getNotEndedStatuses()).containsExactlyInAnyOrder(StatusEnum.BUILDING, StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.ERRORED, StatusEnum.FINALIZE);
 	}
 
 	@ParameterizedTest
 	@CsvSource({
+		"BUILDING, BUILDING, true",
+		"BUILDING, QUEUED, true",
+		"BUILDING, IN_PROGRESS, false",
+		"BUILDING, COMPLETED, false",
+		"BUILDING, CANCELLED, true",
+		"BUILDING, ERRORED, false",
+		"BUILDING, FAILED, false",
+
 		"QUEUED, QUEUED, true",
 		"QUEUED, IN_PROGRESS, true",
 		"QUEUED, COMPLETED, true",
 		"QUEUED, CANCELLED, true",
 		"QUEUED, ERRORED, true",
 		"QUEUED, FAILED, true",
+		"QUEUED, BUILDING, false",
 
 		"IN_PROGRESS, QUEUED, false",
 		"IN_PROGRESS, IN_PROGRESS, true",
@@ -33,6 +42,7 @@ class StatusEnumTest {
 		"IN_PROGRESS, CANCELLED, true",
 		"IN_PROGRESS, ERRORED, true",
 		"IN_PROGRESS, FAILED, true",
+		"IN_PROGRESS, BUILDING, false",
 
 		"COMPLETED, QUEUED, false",
 		"COMPLETED, IN_PROGRESS, false",
@@ -40,6 +50,7 @@ class StatusEnumTest {
 		"COMPLETED, CANCELLED, false",
 		"COMPLETED, ERRORED, false",
 		"COMPLETED, FAILED, false",
+		"COMPLETED, BUILDING, false",
 
 		"CANCELLED, QUEUED, false",
 		"CANCELLED, IN_PROGRESS, false",
@@ -47,6 +58,7 @@ class StatusEnumTest {
 		"CANCELLED, CANCELLED, false",
 		"CANCELLED, ERRORED, false",
 		"CANCELLED, FAILED, false",
+		"CANCELLED, BUILDING, false",
 
 		"ERRORED, QUEUED, false",
 		"ERRORED, IN_PROGRESS, true",
@@ -54,6 +66,7 @@ class StatusEnumTest {
 		"ERRORED, CANCELLED, true",
 		"ERRORED, ERRORED, true",
 		"ERRORED, FAILED, true",
+		"ERRORED, BUILDING, false",
 
 		"FAILED, QUEUED, false",
 		"FAILED, IN_PROGRESS, false",
@@ -61,11 +74,14 @@ class StatusEnumTest {
 		"FAILED, CANCELLED, false",
 		"FAILED, ERRORED, false",
 		"FAILED, FAILED, true",
+		"FAILED, BUILDING, false",
+
 		"FINALIZE, COMPLETED, true",
 		"FINALIZE, IN_PROGRESS, false",
 		"FINALIZE, QUEUED, false",
 		"FINALIZE, FAILED, true",
 		"FINALIZE, ERRORED, true",
+		"FINALIZE, BUILDING, false",
 	})
 	public void testStateTransition(StatusEnum origStatus, StatusEnum newStatus, boolean expected) {
 		assertEquals(expected, StatusEnum.isLegalStateTransition(origStatus, newStatus));
@@ -86,6 +102,6 @@ class StatusEnumTest {
 
 	@Test
 	public void testEnumSize() {
-		assertThat(StatusEnum.values().length).as("Update testStateTransition() with new cases").isEqualTo(7);
+		assertThat(StatusEnum.values().length).as("Update testStateTransition() with new cases").isEqualTo(8);
 	}
 }

@@ -146,7 +146,6 @@ public class JobInstanceProcessor {
 	}
 
 	private void autoCancelJobIfItHasBeenBuildingForTooLong(JobInstance theInstance) {
-		// FIXME: add test for this method
 		long cutoff = System.currentTimeMillis() - CANCEL_BUILDING_THRESHOLD;
 		long created = theInstance.getCreateTime().getTime();
 		boolean cancelled = created < cutoff;
