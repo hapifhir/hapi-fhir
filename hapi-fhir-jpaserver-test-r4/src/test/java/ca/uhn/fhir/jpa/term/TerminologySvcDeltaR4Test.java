@@ -587,6 +587,43 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 
 	@Test
+	public void testRemove_lookupCodeReturnsNotFoundAfterRemoval() {
+		// Setup: create code system and add a concept
+		CustomTerminologySet delta = new CustomTerminologySet();
+		delta.addRootConcept("codeA", "displayA");
+		delta.addRootConcept("codeB", "displayB");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+
+		// Verify lookupCode succeeds for both codes
+		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(resultA).isNotNull();
+		assertThat(resultA.isFound()).isTrue();
+		assertThat(resultA.getCodeDisplay()).isEqualTo("displayA");
+
+		IValidationSupport.LookupCodeResult resultB = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
+		assertThat(resultB).isNotNull();
+		assertThat(resultB.isFound()).isTrue();
+
+		// Remove codeA
+		CustomTerminologySet removeDelta = new CustomTerminologySet();
+		removeDelta.addRootConcept("codeA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", removeDelta);
+
+		// Verify lookupCode fails for removed code and succeeds for remaining code
+		IValidationSupport.LookupCodeResult afterRemoveA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(afterRemoveA.isFound()).isFalse();
+
+		IValidationSupport.LookupCodeResult afterRemoveB = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
+		assertThat(afterRemoveB).isNotNull();
+		assertThat(afterRemoveB.isFound()).isTrue();
+		assertThat(afterRemoveB.getCodeDisplay()).isEqualTo("displayB");
+	}
+
+	@Test
 	public void testRemove_UnknownSystem() {
 
 		CustomTerminologySet delta = new CustomTerminologySet();

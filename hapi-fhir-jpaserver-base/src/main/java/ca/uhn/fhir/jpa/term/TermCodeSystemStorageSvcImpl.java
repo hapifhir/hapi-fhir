@@ -185,6 +185,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			addConceptInHierarchy(csv, parentCodes, nextRootConcept, retVal, codeToConcept, 0);
 		}
 
+		myTerminologySvc.invalidateCaches();
+
 		return retVal;
 	}
 
@@ -226,6 +228,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		for (TermConcept code : allFoundTermConcepts) {
 			deleteEverythingRelatedToConcept(code, removeCounter);
 		}
+
+		myTerminologySvc.invalidateCaches();
 
 		return new UploadStatistics(removeCounter.get(), target);
 	}
