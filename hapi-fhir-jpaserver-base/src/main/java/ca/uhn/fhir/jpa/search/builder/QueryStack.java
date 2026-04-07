@@ -1469,8 +1469,7 @@ public class QueryStack {
 					theSourceJoinColumn,
 					theRequestPartitionId));
 		} else {
-			// Include the resource type qualifier in the cache key so that conditions targeting
-			// different resource types (e.g. performer:Practitioner vs performer:Organization)
+			// Include resource type in cache key so each target type gets its own HFJ_RES_LINK join.
 			String cacheParamName = theParamName;
 			if (!theList.isEmpty() && theList.get(0) instanceof ReferenceParam refParam) {
 				// Only the 1st element is inspected because callers are expected to have already split OR-lists
