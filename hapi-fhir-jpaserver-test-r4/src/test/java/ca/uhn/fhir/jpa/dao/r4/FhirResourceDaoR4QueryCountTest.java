@@ -2584,7 +2584,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@CsvSource(textBlock = """
 		# TagStorageMode , SELECT , DELETE
 		NON_VERSIONED    , 3      , 2
-		VERSIONED        , 13     , 4
+		VERSIONED        , 4      , 4
 		""")
 	public void testTransactionWithMetaDelete(StorageSettings.TagStorageModeEnum theTagStorageModeEnum, int theSelectCount, int theDeleteCount) {
 		// Setup

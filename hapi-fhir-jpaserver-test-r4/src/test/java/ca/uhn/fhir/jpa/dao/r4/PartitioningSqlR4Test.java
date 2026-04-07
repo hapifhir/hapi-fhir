@@ -97,6 +97,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionId;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static ca.uhn.fhir.util.IoUtil.runTimes;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
@@ -873,7 +874,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@ParameterizedTest
 	@CsvSource(delimiter = '|', textBlock = """
-		1         | rt1_0.PARTITION_ID in ('1')
+		1         | rt1_0.PARTITION_ID='1'
 		NULL      | rt1_0.PARTITION_ID is null
 		NULL,1    | rt1_0.PARTITION_ID in ('1') or rt1_0.PARTITION_ID is null
 		""")
@@ -3285,22 +3286,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids).containsExactly(id.withVersion("2").getValue(), id.withVersion("1").getValue());
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(3);
-
-		// Resolve resource
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("SQL:{}", searchSql);
-		assertThat(countMatches(searchSql, "PARTITION_ID=")).as(searchSql).isEqualTo(1);
-
-		// Fetch history resource
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
-		ourLog.info("SQL:{}", searchSql);
-		assertThat(countMatches(searchSql, "rht1_0.PARTITION_ID=")).as(searchSql).isEqualTo(1);
-
-		// Fetch history resource
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
-		ourLog.info("SQL:{}", searchSql);
-		assertThat(countMatches(searchSql, "rht1_0.PARTITION_ID=")).as(searchSql.replace(" ", "").toUpperCase()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(2)
+				.commitCount(3)
+				.selectSqlContains(0, "PARTITION_ID='1'")
+				.selectSqlContains(1, "PARTITION_ID='1'")
+		);
 	}
 
 	@Test
@@ -3351,22 +3343,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(2, size);
 		assertThat(ids).containsExactly(id.withVersion("2").getValue(), id.withVersion("1").getValue());
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(3);
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(2)
+				.commitCount(3)
+				.selectSqlContains(0, "PARTITION_ID is null")
+				.selectSqlContains(1, "PARTITION_ID is null")
+		);
 
-		// Fetch history resource
-		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("SQL:{}", sql);
-		assertEquals(0, countMatches(sql, "PARTITION_ID="));
-
-		// Fetch history resource
-		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
-		ourLog.info("SQL:{}", sql);
-		assertEquals(0, countMatches(sql, "PARTITION_ID="));
-
-		// Fetch history resource
-		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
-		ourLog.info("SQL:{}", sql);
-		assertEquals(0, countMatches(sql, "PARTITION_ID="));
 	}
 
 	@Test
