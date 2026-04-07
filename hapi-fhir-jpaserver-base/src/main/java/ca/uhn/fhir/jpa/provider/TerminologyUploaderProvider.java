@@ -20,15 +20,11 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.custom.ConceptHandler;
-import ca.uhn.fhir.jpa.term.custom.HierarchyHandler;
-import ca.uhn.fhir.jpa.term.custom.PropertyHandler;
+import ca.uhn.fhir.jpa.term.custom.CodeSystemToCustomCsvConverter;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -37,20 +33,13 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
-import com.google.common.base.Charsets;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
-import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
-import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CodeSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -58,9 +47,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -76,6 +63,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	private static final String RESP_PARAM_SUCCESS = "success";
 
+	private CodeSystemToCustomCsvConverter myCodeSystemToCustomCsvConverter;
+
 	@Autowired
 	private ITermLoaderSvc myTerminologyLoaderSvc;
 
@@ -84,6 +73,19 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	 */
 	public TerminologyUploaderProvider() {
 		this(null, null);
+	}
+
+	@PostConstruct
+	public void startIfNecessary() {
+		if (myCodeSystemToCustomCsvConverter == null && getContext() != null) {
+			myCodeSystemToCustomCsvConverter = new CodeSystemToCustomCsvConverter(getContext());
+		}
+	}
+
+	@Override
+	public void setContext(FhirContext theContext) {
+		super.setContext(theContext);
+		startIfNecessary();
 	}
 
 	/**
@@ -119,7 +121,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			throw new InvalidRequestException(Msg.code(1137) + "Missing mandatory parameter: " + PARAM_SYSTEM);
 		}
 
-		if (theFiles == null || theFiles.size() == 0) {
+		if (theFiles == null || theFiles.isEmpty()) {
 			throw new InvalidRequestException(
 					Msg.code(1138) + "No '" + PARAM_FILE + "' parameter, or package had no data");
 		}
@@ -135,27 +137,20 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			String codeSystemUrl = theCodeSystemUrl.getValue();
 			codeSystemUrl = trim(codeSystemUrl);
 
-			UploadStatistics stats;
-			switch (codeSystemUrl) {
-				case ITermLoaderSvc.ICD10_URI:
-					stats = myTerminologyLoaderSvc.loadIcd10(localFiles, theRequestDetails);
-					break;
-				case ITermLoaderSvc.ICD10CM_URI:
-					stats = myTerminologyLoaderSvc.loadIcd10cm(localFiles, theRequestDetails);
-					break;
-				case ITermLoaderSvc.IMGTHLA_URI:
-					stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
-					break;
-				case ITermLoaderSvc.LOINC_URI:
-					stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
-					break;
-				case ITermLoaderSvc.SCT_URI:
-					stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
-					break;
-				default:
-					stats = myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
-					break;
-			}
+			UploadStatistics stats =
+					switch (codeSystemUrl) {
+						case ITermLoaderSvc.ICD10_URI -> myTerminologyLoaderSvc.loadIcd10(
+								localFiles, theRequestDetails);
+						case ITermLoaderSvc.ICD10CM_URI -> myTerminologyLoaderSvc.loadIcd10cm(
+								localFiles, theRequestDetails);
+						case ITermLoaderSvc.IMGTHLA_URI -> myTerminologyLoaderSvc.loadImgthla(
+								localFiles, theRequestDetails);
+						case ITermLoaderSvc.LOINC_URI -> myTerminologyLoaderSvc.loadLoinc(
+								localFiles, theRequestDetails);
+						case ITermLoaderSvc.SCT_URI -> myTerminologyLoaderSvc.loadSnomedCt(
+								localFiles, theRequestDetails);
+						default -> myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
+					};
 
 			IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 			ParametersUtil.addParameterToParametersBoolean(getContext(), retVal, RESP_PARAM_SUCCESS, true);
@@ -199,7 +194,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			validateHaveFiles(theFiles, theCodeSystems);
 
 			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
-			convertCodeSystemsToFileDescriptors(files, theCodeSystems);
+			files.addAll(myCodeSystemToCustomCsvConverter.convertCodeSystemsToFileDescriptors(theCodeSystems));
 			UploadStatistics outcome =
 					myTerminologyLoaderSvc.loadDeltaAdd(theSystem.getValue(), files, theRequestDetails);
 			return toDeltaResponse(outcome);
@@ -237,144 +232,12 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			validateHaveFiles(theFiles, theCodeSystems);
 
 			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
-			convertCodeSystemsToFileDescriptors(files, theCodeSystems);
+			files.addAll(myCodeSystemToCustomCsvConverter.convertCodeSystemsToFileDescriptors(theCodeSystems));
 			UploadStatistics outcome =
 					myTerminologyLoaderSvc.loadDeltaRemove(theSystem.getValue(), files, theRequestDetails);
 			return toDeltaResponse(outcome);
 		} finally {
 			endRequest(theServletRequest);
-		}
-	}
-
-	private void convertCodeSystemsToFileDescriptors(
-			List<ITermLoaderSvc.FileDescriptor> theFiles, List<IBaseResource> theCodeSystems) {
-		Map<String, String> codes = new LinkedHashMap<>();
-		Map<String, List<CodeSystem.ConceptPropertyComponent>> codeToProperties = new LinkedHashMap<>();
-
-		Multimap<String, String> codeToParentCodes = ArrayListMultimap.create();
-
-		if (theCodeSystems != null) {
-			for (IBaseResource nextCodeSystemUncast : theCodeSystems) {
-				CodeSystem nextCodeSystem = canonicalizeCodeSystem(nextCodeSystemUncast);
-				convertCodeSystemCodesToCsv(
-						nextCodeSystem.getConcept(), codes, codeToProperties, null, codeToParentCodes);
-			}
-		}
-
-		// Create concept file
-		if (codes.size() > 0) {
-			StringBuilder b = new StringBuilder();
-			b.append(ConceptHandler.CODE);
-			b.append(",");
-			b.append(ConceptHandler.DISPLAY);
-			b.append("\n");
-			for (Map.Entry<String, String> nextEntry : codes.entrySet()) {
-				b.append(csvEscape(nextEntry.getKey()));
-				b.append(",");
-				b.append(csvEscape(nextEntry.getValue()));
-				b.append("\n");
-			}
-			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
-			String fileName = TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE;
-			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
-					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
-			theFiles.add(fileDescriptor);
-		}
-
-		// Create hierarchy file
-		if (codeToParentCodes.size() > 0) {
-			StringBuilder b = new StringBuilder();
-			b.append(HierarchyHandler.CHILD);
-			b.append(",");
-			b.append(HierarchyHandler.PARENT);
-			b.append("\n");
-			for (Map.Entry<String, String> nextEntry : codeToParentCodes.entries()) {
-				b.append(csvEscape(nextEntry.getKey()));
-				b.append(",");
-				b.append(csvEscape(nextEntry.getValue()));
-				b.append("\n");
-			}
-			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
-			String fileName = TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE;
-			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
-					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
-			theFiles.add(fileDescriptor);
-		}
-		// Create codeToProperties file
-		if (codeToProperties.size() > 0) {
-			StringBuilder b = new StringBuilder();
-			b.append(PropertyHandler.CODE);
-			b.append(",");
-			b.append(PropertyHandler.KEY);
-			b.append(",");
-			b.append(PropertyHandler.VALUE);
-			b.append(",");
-			b.append(PropertyHandler.TYPE);
-			b.append("\n");
-
-			for (Map.Entry<String, List<CodeSystem.ConceptPropertyComponent>> nextEntry : codeToProperties.entrySet()) {
-				for (CodeSystem.ConceptPropertyComponent propertyComponent : nextEntry.getValue()) {
-					b.append(csvEscape(nextEntry.getKey()));
-					b.append(",");
-					b.append(csvEscape(propertyComponent.getCode()));
-					b.append(",");
-					// TODO: check this for different types, other types should be added once
-					// TermConceptPropertyTypeEnum contain different types
-					b.append(csvEscape(propertyComponent.getValueStringType().getValue()));
-					b.append(",");
-					b.append(csvEscape(propertyComponent.getValue().primitiveValue()));
-					b.append("\n");
-				}
-			}
-			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
-			String fileName = TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE;
-			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
-					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
-			theFiles.add(fileDescriptor);
-		}
-	}
-
-	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-	@Nonnull
-	CodeSystem canonicalizeCodeSystem(@Nonnull IBaseResource theCodeSystem) {
-		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theCodeSystem);
-		ValidateUtil.isTrueOrThrowInvalidRequest(
-				resourceDef.getName().equals("CodeSystem"), "Resource '%s' is not a CodeSystem", resourceDef.getName());
-
-		CodeSystem nextCodeSystem;
-		switch (getContext().getVersion().getVersion()) {
-			case DSTU3:
-				nextCodeSystem = (CodeSystem) VersionConvertorFactory_30_40.convertResource(
-						(org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem, new BaseAdvisor_30_40(false));
-				break;
-			case R5:
-				nextCodeSystem = (CodeSystem) VersionConvertorFactory_40_50.convertResource(
-						(org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, new BaseAdvisor_40_50(false));
-				break;
-			default:
-				nextCodeSystem = (CodeSystem) theCodeSystem;
-		}
-		return nextCodeSystem;
-	}
-
-	private void convertCodeSystemCodesToCsv(
-			List<CodeSystem.ConceptDefinitionComponent> theConcept,
-			Map<String, String> theCodes,
-			Map<String, List<CodeSystem.ConceptPropertyComponent>> theProperties,
-			String theParentCode,
-			Multimap<String, String> theCodeToParentCodes) {
-		for (CodeSystem.ConceptDefinitionComponent nextConcept : theConcept) {
-			if (isNotBlank(nextConcept.getCode())) {
-				theCodes.put(nextConcept.getCode(), nextConcept.getDisplay());
-				if (isNotBlank(theParentCode)) {
-					theCodeToParentCodes.put(nextConcept.getCode(), theParentCode);
-				}
-				if (nextConcept.getProperty() != null) {
-					theProperties.put(nextConcept.getCode(), nextConcept.getProperty());
-				}
-				convertCodeSystemCodesToCsv(
-						nextConcept.getConcept(), theCodes, theProperties, nextConcept.getCode(), theCodeToParentCodes);
-			}
 		}
 	}
 
@@ -472,12 +335,5 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				throw new InternalErrorException(Msg.code(1142) + theE);
 			}
 		}
-	}
-
-	private static String csvEscape(String theValue) {
-		if (theValue == null) {
-			return "";
-		}
-		return '"' + theValue.replace("\"", "\"\"").replace("\n", "\\n").replace("\r", "") + '"';
 	}
 }
