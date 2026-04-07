@@ -153,6 +153,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addIndex("20260407.12", "IDX_BT2JA_INST_ID_AND_FN")
 				.unique(true)
 				.withColumns("JOB_INSTANCE_ID", "FILENAME");
+		attachment
+				.addForeignKey("20260607.13", "FK_BT2JA_INSTANCE")
+				.toColumn("JOB_INSTANCE_ID")
+				.references("BT2_JOB_INSTANCE", "JOB_INSTANCE_ID");
 	}
 
 	protected void init880() {
