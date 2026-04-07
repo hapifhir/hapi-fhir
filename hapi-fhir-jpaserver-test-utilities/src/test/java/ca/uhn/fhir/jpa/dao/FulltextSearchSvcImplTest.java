@@ -3,11 +3,13 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -44,7 +46,7 @@ class FulltextSearchSvcImplTest extends BaseJpaR4Test {
 
 		// When/Then: searchForResources should not throw validation exception
 		// Note: It may throw other exceptions related to Lucene setup, but not the validation ones
-		assertThatThrownBy(() -> myFulltextSearchSvc.searchForResources("Patient", params, mySrd))
+		assertThatThrownBy(() -> myObservationDao.search(params, mySrd))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("HAPI-2566")
 			.hasMessageContaining("Fulltext searching is not enabled");
@@ -52,18 +54,36 @@ class FulltextSearchSvcImplTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@CsvSource({
-		"_text",
-		"_content"
+		", 2",
+		"_text, 1",
+		"_content, 1"
 	})
-	void testSearchForResources_WhenFulltextContentEnabled(String theParam) {
+	void testSearchForResources_WhenFulltextContentEnabled(String theParam, int resourceCount) {
 		// Given: Fulltext indexing is enabled and parameters are registered
+		// Create test data - add Observation resources with searchable content
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+		mySearchParamRegistry.forceRefresh();
+
+		Observation obs1 = new Observation();
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.getCode().addCoding().setDisplay("test observation");
+		obs1.getText().setDivAsString("<div>test narrative content</div>");
+		myObservationDao.create(obs1, mySrd);
+
+		Observation obs2 = new Observation();
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		myObservationDao.create(obs2, mySrd);
+
 		SearchParameterMap params = new SearchParameterMap();
-		params.add(theParam, new StringParam("test"));
+		if (theParam != null) {
+			params.add(theParam, new StringParam("test"));
+		}
 
 		// When/Then: searchForResources should not throw validation exception
-		myStorageSettings.setHibernateSearchIndexFullText(true);
-		List<IBaseResource> resources = myFulltextSearchSvc.searchForResources("Observation", params, mySrd);
+		IBundleProvider observations = myObservationDao.search(params, mySrd);
+		List<IBaseResource> resources = observations.getResources(0, 10);
 
-		assertThat(resources).isEmpty();
+		assertThat(resources).hasSize(resourceCount);
+		assertThat(resources.get(0).getIdElement()).hasToString(obs1.getId());
 	}
 }
