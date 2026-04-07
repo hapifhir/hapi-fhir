@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -11,11 +12,6 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import com.google.common.collect.Lists;
-import org.hibernate.dialect.DerbyDialect;
-import org.hibernate.dialect.MySQL8Dialect;
-import org.hibernate.dialect.PostgreSQLDialect;
-import org.hibernate.dialect.SQLServer2012Dialect;
-import org.hibernate.dialect.SQLServerDialect;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -23,6 +19,11 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import org.hibernate.dialect.DerbyDialect;
+import org.hibernate.dialect.MySQL8Dialect;
+import org.hibernate.dialect.PostgreSQLDialect;
+import org.hibernate.dialect.SQLServer2012Dialect;
+import org.hibernate.dialect.SQLServerDialect;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -485,7 +486,7 @@ public class SearchQueryBuilderTest {
 	 * Test for SQL GROUP BY issue (6709) with coordinate near sorting and offset.
 	 */
 	@Test
-	public void testCoordinateNearSortingWithGroupByHandlesSQLCorrectly() {
+	void testCoordinateNearSortingWithGroupByHandlesSQLCorrectly() {
 		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new PostgreSQLDialect());
 
@@ -510,10 +511,10 @@ public class SearchQueryBuilderTest {
 
 		assertTrue(sql.contains("SELECT"), "SQL should contain SELECT clause");
 
-		// Find distance calculation column name (MHD0, MHD1, etc.)
-		java.util.regex.Pattern distanceColumnPattern = java.util.regex.Pattern.compile("MHD\\d+");
+		// Find distance calculation column name (EUC_DIST0, EUC_DIST1, etc.)
+		java.util.regex.Pattern distanceColumnPattern = java.util.regex.Pattern.compile("EUC_DIST\\d+");
 		java.util.regex.Matcher matcher = distanceColumnPattern.matcher(sql);
-		assertTrue(matcher.find(), "SQL should contain distance calculation column (MHD0, MHD1, etc.)");
+		assertTrue(matcher.find(), "SQL should contain distance calculation column (EUC_DIST0, EUC_DIST1, etc.)");
 		String distanceColumnName = matcher.group();
 
 		// Verify GROUP BY clause exists
@@ -527,7 +528,6 @@ public class SearchQueryBuilderTest {
 		}
 		String groupByClause = sql.substring(groupByIndex, orderByIndex).trim();
 
-		// This assertion should FAIL and expose the bug: MHD0 is NOT in the GROUP BY clause
 		assertTrue(groupByClause.contains(distanceColumnName),
 			"Distance calculation column (" + distanceColumnName + ") must be included in GROUP BY clause when GROUP BY is present. " +
 				"This prevents PostgreSQL error: 'column must appear in the GROUP BY clause'. " +
@@ -536,6 +536,10 @@ public class SearchQueryBuilderTest {
 		// Verify ORDER BY contains distance column
 		assertTrue(sql.contains("ORDER BY " + distanceColumnName),
 			"SQL should contain ORDER BY with " + distanceColumnName + " distance calculation");
+
+		// Verify offset/limit pagination is present (bug reproduction requires offset path)
+		assertTrue(sql.contains("offset ? rows fetch next ? rows only"),
+			"SQL should include offset pagination syntax for this reproduction scenario");
 
 		// Verify bind variables
 		assertThat(generatedSql.getBindVariables()).contains(latitude, longitude);
@@ -562,8 +566,18 @@ public class SearchQueryBuilderTest {
 		}
 
 		@Bean
-		public ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc searchParamIdentityCacheSvc() {
-			return org.mockito.Mockito.mock(ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc.class);
+		public ISearchParamIdentityCacheSvc searchParamIdentityCacheSvc() {
+			return new ISearchParamIdentityCacheSvc() {
+				@Override
+				public boolean hasInFlightTasks() {
+					return false;
+				}
+
+				@Override
+				public void findOrCreateSearchParamIdentity(Long theHashIdentity, String theResourceType, String theParamName) {
+					// no-op for this unit test context
+				}
+			};
 		}
 
 		@Bean
