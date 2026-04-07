@@ -141,7 +141,7 @@ Cache-Control: no-store, max-results=20
 * [This page](https://www.openhealthhub.org/t/hapi-terminology-server-uk-snomed-ct-import/592) has information on loading national editions (UK specifically) of SNOMED CT files into the database.
 
 
-<a name="cascading-deletes"/>
+<a id="cascading-deletes"></a>
 
 # Cascading Deletes
 
@@ -150,7 +150,7 @@ An interceptor called `CascadingDeleteInterceptor` may be registered against the
 * The request may include the following parameter: `_cascade=delete`
 * The request may include the following header: `X-Cascade: delete`
 
-<a name="retry-on-version-conflict"/>
+<a id="retry-on-version-conflict"></a>
 
 # Version Conflicts
 
