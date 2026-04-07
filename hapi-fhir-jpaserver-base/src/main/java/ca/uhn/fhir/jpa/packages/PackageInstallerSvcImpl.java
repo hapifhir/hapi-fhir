@@ -434,6 +434,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 		IBaseResource existingResource =
 				!searchResult.isEmpty() ? searchResult.getResources(0, 1).get(0) : null;
+
+		if (existingResource != null
+				&& isNotPresentCodeSystem(existingResource)
+				&& !theInstallationSpec.isOverwriteNotPresentCodeSystems()) {
+			ourLog.info("Skipping update of CodeSystem with content=not-present matching {}", resourceQuery);
+			return;
+		}
+
 		boolean isInstalled = false;
 		if (theInstallationSpec.isDryRun()) {
 			constructDryRunReport(theResource, existingResource, map, theOutcome);
@@ -598,6 +606,20 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private boolean isSearchParameter(IBaseResource theResource) {
 		return theResource.fhirType().equals(ResourceType.SearchParameter.name());
+	}
+
+	/**
+	 * Returns true if the given resource is a CodeSystem with content=not-present.
+	 * Such CodeSystems store their concepts in terminology tables rather than inline,
+	 * and should not be overwritten by IG packages by default.
+	 */
+	private boolean isNotPresentCodeSystem(IBaseResource theResource) {
+		if (!theResource.fhirType().equals(ResourceType.CodeSystem.name())) {
+			return false;
+		}
+		FhirTerser terser = myFhirContext.newTerser();
+		Optional<String> content = terser.getSinglePrimitiveValue(theResource, "CodeSystem.content");
+		return content.isPresent() && "not-present".equals(content.get());
 	}
 
 	private boolean allowMultipleVersionsForResource(

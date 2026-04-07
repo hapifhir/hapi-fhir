@@ -1,0 +1,9 @@
+---
+type: add
+issue: 7743
+title: "`CodeSystem` resources with `content=not-present` (e.g. those loaded via `$upload-external-code-system`)
+  are now protected from being overwritten during IG package installation by default. Previously,
+  installing an IG package containing a `CodeSystem` with the same URL would replace externally loaded
+  terminology (such as `ICD-10-CM`) with the IG's small subset of concepts. A new
+  `overwriteNotPresentCodeSystems` property has been added to the package installation spec to allow
+  overriding this protection when needed."
