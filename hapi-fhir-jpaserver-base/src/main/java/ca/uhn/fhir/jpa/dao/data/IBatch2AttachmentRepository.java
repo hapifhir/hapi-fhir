@@ -25,12 +25,23 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface IBatch2AttachmentRepository
-		extends JpaRepository<Batch2JobAttachmentEntity, Batch2JobAttachmentEntity.Batch2WorkChunkAttachmentEntityPk>, IHapiFhirJpaRepository {
+import java.util.Optional;
 
+public interface IBatch2AttachmentRepository
+		extends JpaRepository<Batch2JobAttachmentEntity, Batch2JobAttachmentEntity.Batch2WorkChunkAttachmentEntityPk>,
+				IHapiFhirJpaRepository {
+
+	default Optional<Batch2JobAttachmentEntity> findById(String theInstanceId, String theAttachmentId) {
+		return findById(
+				new Batch2JobAttachmentEntity.Batch2WorkChunkAttachmentEntityPk(theInstanceId, theAttachmentId));
+	}
 
 	@Modifying
 	@Query("DELETE FROM Batch2JobAttachmentEntity e WHERE e.myId.myJobInstanceId = :instanceId")
 	void deleteAllForInstance(@Param("instanceId") String theInstanceId);
 
+	@Query(
+			"SELECT e FROM Batch2JobAttachmentEntity e WHERE e.myId.myJobInstanceId = :instanceId AND e.myFilename = :filename")
+	Optional<Batch2JobAttachmentEntity> findByIdAndFilename(
+			@Param("instanceId") String theInstanceId, @Param("filename") String theFilename);
 }

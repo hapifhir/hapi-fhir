@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
+import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
@@ -48,6 +50,7 @@ import org.springframework.transaction.annotation.Propagation;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -191,6 +194,22 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	}
 
 	@Override
+	public void enqueueBuildingJobForExecution(String theInstanceId) {
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			JobInstance instance = getInstance(theInstanceId);
+			instance.setStatus(StatusEnum.BUILDING);
+			boolean changed = myJobPersistence.markInstanceAsStatusWhenStatusIn(
+					theInstanceId, StatusEnum.QUEUED, Set.of(StatusEnum.BUILDING));
+			if (changed) {
+				ourLog.info("Moving job instance[{}] from status BUILDING to QUEUED", theInstanceId);
+			} else {
+				throw new InvalidRequestException(Msg.code(2901) + "Job instance is in " + instance.getStatus()
+						+ " status and cannot be enqueued for execution");
+			}
+		});
+	}
+
+	@Override
 	public Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theFetchRequest) {
 		return myJobQuerySvc.fetchAllInstances(theFetchRequest);
 	}
@@ -200,5 +219,27 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	@Override
 	public JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException {
 		return myJobPersistence.cancelInstance(theInstanceId);
+	}
+
+	@Override
+	public void addAttachmentToBuildingJob(String theInstanceId, AttachmentDetails theAttachmentDetails) {
+
+		/*
+		 * Note that we block any attachments from being added to a job by the outside world
+		 * once the job is no longer in BUILDING status. Step processors can still add attachments
+		 * though by working directly against the job persistence.
+		 */
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			Optional<JobInstance> instance = myJobPersistence.fetchInstance(theInstanceId);
+			ValidateUtil.isTrueOrThrowInvalidRequest(
+					instance.isPresent(), "Job instance does not exist: %s", theAttachmentDetails);
+			ValidateUtil.isTrueOrThrowInvalidRequest(
+					instance.get().getStatus() == StatusEnum.BUILDING,
+					"Job instance %s is not in BUILDING status: %s",
+					instance.get().getInstanceId(),
+					instance.get().getStatus());
+
+			myJobPersistence.storeNewAttachment(theInstanceId, theAttachmentDetails);
+		});
 	}
 }

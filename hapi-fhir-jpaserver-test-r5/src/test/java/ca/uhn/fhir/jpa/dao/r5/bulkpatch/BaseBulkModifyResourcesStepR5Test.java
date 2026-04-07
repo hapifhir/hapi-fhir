@@ -12,21 +12,13 @@ import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParameters;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r5.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,11 +29,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -79,64 +67,6 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testDeleteResource(boolean theDryRun) {
-		// start
-final List<IResourcePersistentId<?>> resourceIDs = null; //getResourceIDs(theStepExecutionDetails);
-Set<String> fhirIds = myIdHelper.translatePidsToFhirResourceIds(new HashSet<>(resourceIDs));
-
-IFhirResourceDao taskDao = myDaoRegistry.getResourceDao("Task");
-SearchParameterMap params = new SearchParameterMap();
-params.setLoadSynchronous(true);
-params.add(IAnyResource.SP_RES_ID, new TokenOrListParam(null, fhirIds.toArray(new String[0])));
-List<IBaseResource> allResources = taskDao.search(params).getAllResources();
-List<Task> allTasks = allResources.stream().filter(t->t instanceof Task).map(t->(Task)t).toList();
-
-Map<String, String> taskIdToFocusId = new HashMap<>();
-Map<String, String> taskIdToReasonId = new HashMap<>();
-
-Multimap<String, String> typeToTargetResources = HashMultimap.create();
-for (Task task : allTasks) {
-	IIdType reasonReference = task.getReasonReference().getReferenceElement();
-	if (reasonReference != null && reasonReference.hasIdPart()) {
-		typeToTargetResources.put(reasonReference.getResourceType(), reasonReference.getIdPart());
-		taskIdToReasonId.put(task.getIdElement().getIdPart(), reasonReference.toUnqualifiedVersionless().getValue());
-	}
-	IIdType focusReference = task.getFocus().getReferenceElement();
-	if (focusReference != null && focusReference.hasIdPart()) {
-		typeToTargetResources.put(reasonReference.getResourceType(), reasonReference.getIdPart());
-		taskIdToFocusId.put(task.getIdElement().getIdPart(), focusReference.toUnqualifiedVersionless().getValue());
-	}
-}
-
-Map<String, IBaseResource> idToTargetResource = new HashMap<>();
-for (String resourceType : typeToTargetResources.keySet()) {
-	List<String> resourceIds = typeToTargetResources.get(resourceType);
-	IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
-	params = new SearchParameterMap();
-	params.setLoadSynchronous(true);
-	params.add(IAnyResource.SP_RES_ID, new TokenOrListParam(null, resourceIds.toArray(new String[0])));
-	dao.search(params).getAllResources().forEach(r->idToTargetResource.put(r.getIdElement().toUnqualifiedVersionless().getValue(), r));
-}
-
-for (Task task : allTasks) {
-	String reasonId = taskIdToReasonId.get(task.getIdElement().getIdPart());
-	if (reasonId != null) {
-		IBaseResource reasonResource = idToTargetResource.get(reasonId);
-		if (reasonResource != null) {
-			// ... add meta to this
-		}
-	}
-	String focusId = taskIdToFocusId.get(task.getIdElement().getIdPart());
-	if (focusId != null) {
-		IBaseResource reasonResource = idToTargetResource.get(focusId);
-		if (reasonResource != null) {
-			// ... add meta to this
-		}
-	}
-}
-		// end
-
-
-
 		createPatient(withId("P1"), withFamily("Family1"));
 		createPatient(withId("P2"), withFamily("Family2"));
 		TypedPidAndVersionListWorkChunkJson data = createWorkChunkForAllResources();

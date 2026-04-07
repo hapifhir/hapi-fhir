@@ -39,15 +39,15 @@ public class JpaBatch2Config extends BaseBatch2Config {
 
 	@Bean
 	public IJobPersistence batch2JobInstancePersister(
-		IBatch2AttachmentRepository theAttachmentRepository,
-		IBatch2JobInstanceRepository theJobInstanceRepository,
-		IBatch2WorkChunkRepository theWorkChunkRepository,
-		IBatch2WorkChunkMetadataViewRepository theWorkChunkMetadataViewRepo,
-		IHapiTransactionService theTransactionService,
-		EntityManager theEntityManager,
-		IInterceptorBroadcaster theInterceptorBroadcaster) {
+			IBatch2AttachmentRepository theAttachmentRepository,
+			IBatch2JobInstanceRepository theJobInstanceRepository,
+			IBatch2WorkChunkRepository theWorkChunkRepository,
+			IBatch2WorkChunkMetadataViewRepository theWorkChunkMetadataViewRepo,
+			IHapiTransactionService theTransactionService,
+			EntityManager theEntityManager,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new JpaJobPersistenceImpl(
-			theAttachmentRepository,
+				theAttachmentRepository,
 				theJobInstanceRepository,
 				theWorkChunkRepository,
 				theWorkChunkMetadataViewRepo,

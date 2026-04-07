@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -98,15 +99,15 @@ public class JobInstanceProcessor {
 			return;
 		}
 
-		if (theInstance.getStatus() == StatusEnum.BUILDING) {
-			autoCancelJobIfItHasBeenBuildingForTooLong(theInstance);
-			return;
-		}
-
 		boolean cancelUpdate = handleCancellation(theInstance);
 		if (cancelUpdate) {
 			// reload after update
 			theInstance = myJobPersistence.fetchInstance(myInstanceId).orElseThrow();
+		}
+
+		if (theInstance.getStatus() == StatusEnum.BUILDING) {
+			autoCancelJobIfItHasBeenBuildingForTooLong(theInstance);
+			return;
 		}
 
 		JobDefinition<? extends IModelJson> jobDefinition =
@@ -155,6 +156,7 @@ public class JobInstanceProcessor {
 				boolean changed = myJobInstanceStatusUpdater.updateInstanceStatus(instance, StatusEnum.CANCELLED);
 				if (changed) {
 					instance.setErrorMessage("Job has been BUILDING for too long, moving to CANCELLED state");
+					instance.setEndTime(new Date());
 				}
 				return changed;
 			});

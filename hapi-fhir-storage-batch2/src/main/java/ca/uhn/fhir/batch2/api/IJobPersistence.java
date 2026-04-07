@@ -32,6 +32,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -170,7 +171,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(
 			Pageable thePageable, String theInstanceId, Set<WorkChunkStatusEnum> theStates);
 
-
 	/**
 	 * Callback to update a JobInstance within a locked transaction.
 	 * Return true from the callback if the record write should continue, or false if
@@ -187,18 +187,33 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Stores an attachment associated with a specific job instance
+	 *
+	 * @param theInstanceId   The job instance ID
 	 * @param theRequest The request containing the attachment data
 	 * @return Returns a unique ID for the attachment
 	 */
-	String storeNewAttachment(StoreAttachmemtRequest theRequest);
+	String storeNewAttachment(String theInstanceId, AttachmentDetails theRequest);
 
 	/**
 	 * Fetches the attachment data for a specific attachment ID
-	 * @param theInstanceId The job instance ID
+	 *
+	 * @param theInstanceId   The job instance ID
 	 * @param theAttachmentId The attachment ID
 	 * @return The bytes of the attachment data
+	 * @throws ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException If the attachment ID cannot be found
 	 */
-	byte[] fetchAttachmentData(String theInstanceId, String theAttachmentId);
+	AttachmentDetails fetchAttachmentById(String theInstanceId, String theAttachmentId)
+			throws ResourceNotFoundException;
+
+	/**
+	 * Fetches the attachment data for a specific attachment filename
+	 * @param theInstanceId   The job instance ID
+	 * @param theFilename The attachment filename
+	 * @return The bytes of the attachment data
+	 * @throws ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException If the attachment filename cannot be found
+	 */
+	AttachmentDetails fetchAttachmentByFilename(String theInstanceId, String theFilename)
+			throws ResourceNotFoundException;
 
 	/**
 	 * Brute-force hack for now to create a tx boundary - takes a write-lock on the instance

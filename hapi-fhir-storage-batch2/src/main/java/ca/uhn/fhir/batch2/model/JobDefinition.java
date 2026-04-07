@@ -196,6 +196,7 @@ public class JobDefinition<PT extends IModelJson> {
 		}
 
 		Builder(
+				StatusEnum theInitialStatus,
 				List<JobDefinitionStep<PT, ?, ?>> theSteps,
 				String theJobDefinitionId,
 				int theJobDefinitionVersion,
@@ -206,6 +207,7 @@ public class JobDefinition<PT extends IModelJson> {
 				boolean theGatedExecution,
 				IJobCompletionHandler<PT> theCompletionHandler,
 				IJobCompletionHandler<PT> theErrorHandler) {
+			myInitialStatus = theInitialStatus;
 			mySteps = theSteps;
 			myJobDefinitionId = theJobDefinitionId;
 			myJobDefinitionVersion = theJobDefinitionVersion;
@@ -252,6 +254,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps.add(new JobDefinitionStep<>(
 					theStepId, theStepDescription, theStepWorker, VoidModel.class, theOutputType));
 			return new Builder<>(
+					myInitialStatus,
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
@@ -281,6 +284,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps.add(new JobDefinitionStep<>(
 					theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
 			return new Builder<>(
+					myInitialStatus,
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
@@ -307,6 +311,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps.add(new JobDefinitionStep<>(
 					theStepId, theStepDescription, theStepWorker, myNextInputType, VoidModel.class));
 			return new Builder<>(
+					myInitialStatus,
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
@@ -331,6 +336,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps.add(new JobDefinitionReductionStep<>(
 					theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
 			return new Builder<>(
+					myInitialStatus,
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
