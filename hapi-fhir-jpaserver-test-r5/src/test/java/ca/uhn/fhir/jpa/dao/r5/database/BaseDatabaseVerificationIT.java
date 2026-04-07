@@ -13,10 +13,13 @@ import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.QueryTestCases;
 import ca.uhn.fhir.jpa.test.config.TestR5Config;
+import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -29,6 +32,7 @@ import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.Location;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Parameters;
@@ -210,6 +214,39 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		// Verify
 		List<String> actualIds = toUnqualifiedVersionlessIdValues(results);
 		assertThat(actualIds).asList().containsExactly(prId.getValue(), pId.getValue());
+	}
+
+	@Test
+	void testSortNear() {
+		// Setup
+		IGenericClient client = myServer.getFhirClient();
+
+		Location location = new Location();
+		location.setId("chin");
+		location.getPosition()
+			.setLatitude(CoordCalculatorTestUtil.LATITUDE_CHIN)
+			.setLongitude(CoordCalculatorTestUtil.LATITUDE_CHIN);
+		client.update().resource(location).execute();
+
+		location = new Location();
+		location.setId("belleville");
+		location.getPosition()
+			.setLatitude(CoordCalculatorTestUtil.LATITUDE_BELLEVILLE)
+			.setLongitude(CoordCalculatorTestUtil.LATITUDE_BELLEVILLE);
+		client.update().resource(location).execute();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		Bundle result = client
+			.search()
+			.byUrl("Location?near=" + CoordCalculatorTestUtil.LATITUDE_UHN + "|" + CoordCalculatorTestUtil.LONGITUDE_UHN + "&_sort=Location:near")
+			.returnBundle(Bundle.class)
+			.execute();
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		List<String> ids = toUnqualifiedVersionlessIdValues(result);
+		assertThat(ids).containsExactly();
 	}
 
 
