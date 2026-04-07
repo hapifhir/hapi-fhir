@@ -513,13 +513,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		// Verify - without _since and that both patients and encounters show up
+		// Verify - without _since and both patients and encounters are exported
 		verifyBulkExportResults(options, List.of("Patient/P1", encounterId1, "Patient/P2", encounterId2), List.of());
 
+		// Verify - with _since and only the second patient and encounter show up
 		options.setSince(since);
-		// Verify - only the second patient and encounter show up
 		verifyBulkExportResults(options, List.of("Patient/P2", encounterId2), List.of("Patient/P1", encounterId1));
-
 	}
 
 	@Test
