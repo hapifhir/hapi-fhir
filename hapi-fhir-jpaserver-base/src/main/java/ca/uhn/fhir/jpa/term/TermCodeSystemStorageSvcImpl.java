@@ -531,6 +531,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		if (!myDeferredStorageSvc.isStorageQueueEmpty(true)) {
 			ourLog.info("Note that some concept saving has been deferred");
 		}
+
+		myTerminologySvc.invalidateCaches();
 	}
 
 	private TermCodeSystemVersion getExistingTermCodeSystemVersion(

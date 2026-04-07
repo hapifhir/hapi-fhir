@@ -614,6 +614,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		// Verify lookupCode fails for removed code and succeeds for remaining code
 		IValidationSupport.LookupCodeResult afterRemoveA = myTermSvc.lookupCode(
 			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(afterRemoveA).isNotNull();
 		assertThat(afterRemoveA.isFound()).isFalse();
 
 		IValidationSupport.LookupCodeResult afterRemoveB = myTermSvc.lookupCode(
@@ -644,6 +645,77 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		vs = myValueSetDao.expand(vs, null);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		return vs;
+	}
+
+	@Test
+	public void testDeleteCodeSystem_lookupReturnsNotFoundAfterDeletion() {
+		// Setup: create a CodeSystem with concepts
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo/cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("codeA").setDisplay("displayA");
+		cs.addConcept().setCode("codeB").setDisplay("displayB");
+		myCodeSystemDao.create(cs, mySrd);
+
+		// Verify lookup succeeds (populates the cache)
+		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(resultA).isNotNull();
+		assertThat(resultA.isFound()).isTrue();
+
+		// Delete via the FHIR DAO (same as a user calling DELETE /CodeSystem/...)
+		myCodeSystemDao.deleteByUrl("CodeSystem?url=http://foo/cs", mySrd);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete("termCodeSystemDeleteJob");
+
+		// Verify lookup fails after deletion
+		IValidationSupport.LookupCodeResult afterDeleteA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(afterDeleteA).isNotNull();
+		assertThat(afterDeleteA.isFound()).isFalse();
+
+		IValidationSupport.LookupCodeResult afterDeleteB = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
+		assertThat(afterDeleteB).isNotNull();
+		assertThat(afterDeleteB.isFound()).isFalse();
+	}
+
+	@Test
+	public void testStoreNewCodeSystemVersion_lookupReflectsNewConcepts() {
+		// Setup: create a CodeSystem with content=complete and one concept
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo/cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("codeA").setDisplay("displayA");
+		myCodeSystemDao.create(cs, mySrd);
+
+		// Verify initial lookup succeeds
+		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(resultA).isNotNull();
+		assertThat(resultA.isFound()).isTrue();
+		assertThat(resultA.getCodeDisplay()).isEqualTo("displayA");
+
+		// Update the CodeSystem with different concepts
+		CodeSystem csUpdated = new CodeSystem();
+		csUpdated.setUrl("http://foo/cs");
+		csUpdated.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		csUpdated.addConcept().setCode("codeB").setDisplay("displayB");
+		csUpdated.addConcept().setCode("codeC").setDisplay("displayC");
+		myCodeSystemDao.update(csUpdated, mySrd);
+
+		// Verify new concepts are found
+		IValidationSupport.LookupCodeResult resultB = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
+		assertThat(resultB).isNotNull();
+		assertThat(resultB.isFound()).isTrue();
+		assertThat(resultB.getCodeDisplay()).isEqualTo("displayB");
+
+		// Verify old concept from replaced version is no longer found
+		IValidationSupport.LookupCodeResult resultAAfter = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(resultAAfter).isNotNull();
+		assertThat(resultAAfter.isFound()).isFalse();
 	}
 
 	private void createNotPresentCodeSystem() {
