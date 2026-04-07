@@ -2084,6 +2084,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			List<Predicate> predicates = new ArrayList<>(3);
 
 			if (theId.hasVersionIdPart()) {
+				if (!theId.isVersionIdPartValidLong()) {
+					throw new ResourceNotFoundException(Msg.code(978)
+						+ getContext()
+						.getLocalizer()
+						.getMessageSanitized(
+							BaseStorageDao.class,
+							"invalidVersion",
+							theId.getVersionIdPart(),
+							theId.toUnqualifiedVersionless()));
+				}
+
 				/*
 				 * We're looking for a specific version of a resource, fetch
 				 * the entity from ResourceHistoryTable
