@@ -761,7 +761,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(0)).endsWith(" where (rt1_0.RES_TYPE='Organization' and rt1_0.FHIR_ID='O')");
 		}
 
-		if (myIncludePartitionIdsInSql) {
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(1)).endsWith(" from HFJ_RESOURCE rt1_0 where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + pid + "','0'))");
+		} else if (myIncludePartitionIdsInSql) {
 			if (myPartitionSettings.getDefaultPartitionId() == null) {
 				assertThat(getSelectSql(1)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.PARTITION_ID is null and rt1_0.RES_ID='" + pid + "'");
 			} else {
@@ -795,7 +797,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
-		if (myIncludePartitionIdsInSql) {
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(0)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+		} else if (myIncludePartitionIdsInSql) {
 			assertThat(getSelectSql(0)).endsWith(" where rt1_0.PARTITION_ID='1' and rt1_0.RES_ID='" + id + "'");
 		} else {
 			assertThat(getSelectSql(0)).endsWith(" where rt1_0.RES_ID='" + id + "'");
@@ -823,7 +827,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
-		if (myIncludePartitionIdsInSql) {
+		if (myIncludePartitionIdsInPks) {
+			assertThat(getSelectSql(0)).endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+		} else if (myIncludePartitionIdsInSql) {
 			assertThat(getSelectSql(0)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.PARTITION_ID='1' and rt1_0.RES_ID='" + id + "'");
 		} else {
 			assertThat(getSelectSql(0)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.RES_ID='" + id + "'");
