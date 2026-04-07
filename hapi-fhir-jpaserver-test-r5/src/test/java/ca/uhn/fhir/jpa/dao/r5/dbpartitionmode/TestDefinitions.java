@@ -516,25 +516,20 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actualIds).asList().containsExactlyInAnyOrder("Patient/" + id.getIdPart() + "/_history/3", "Patient/" + id.getIdPart() + "/_history/2", "Patient/" + id.getIdPart() + "/_history/1");
 
+		int index = 0;
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).endsWith("from HFJ_RESOURCE rt1_0 where rt1_0.PARTITION_ID='1' and rt1_0.RES_ID='" + id.getIdPartAsLong() + "'");
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' and rht1_0.PARTITION_ID='1'", getSelectSql(index++));
 		} else {
-			assertThat(getSelectSql(0)).endsWith("from HFJ_RESOURCE rt1_0 where rt1_0.RES_ID='" + id.getIdPartAsLong() + "'");
+			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "'", getSelectSql(index++));
 		}
 
 		if (myIncludePartitionIdsInSql) {
-			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' and rht1_0.PARTITION_ID='1'", getSelectSql(1));
+			assertThat(getSelectSql(index++)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' and rht1_0.PARTITION_ID='1'");
 		} else {
-			assertEquals("select count(*) from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "'", getSelectSql(1));
+			assertThat(getSelectSql(index++)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' ");
 		}
 
-		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(2)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' and rht1_0.PARTITION_ID='1'");
-		} else {
-			assertThat(getSelectSql(2)).contains(" from HFJ_RES_VER rht1_0 where rht1_0.RES_ID='" + id.getIdPartAsLong() + "' ");
-		}
-
-		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(index, myCaptureQueriesListener.countSelectQueries());
 	}
 
 	@Test

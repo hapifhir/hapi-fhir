@@ -2086,13 +2086,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (theId.hasVersionIdPart()) {
 				if (!theId.isVersionIdPartValidLong()) {
 					throw new ResourceNotFoundException(Msg.code(978)
-						+ getContext()
-						.getLocalizer()
-						.getMessageSanitized(
-							BaseStorageDao.class,
-							"invalidVersion",
-							theId.getVersionIdPart(),
-							theId.toUnqualifiedVersionless()));
+							+ getContext()
+									.getLocalizer()
+									.getMessageSanitized(
+											BaseStorageDao.class,
+											"invalidVersion",
+											theId.getVersionIdPart(),
+											theId.toUnqualifiedVersionless()));
 				}
 
 				/*
@@ -2101,6 +2101,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				 */
 				query = cb.createQuery(ResourceHistoryTable.class);
 				root = query.from(ResourceHistoryTable.class);
+				addPartitionPredicateIfNecessary(
+						theRequestPartitionId, needExplicitPartitionSelector, cb, root, predicates);
 				predicates.add(cb.equal(root.get("myResourcePid"), JpaPidFk.fromPid(pid)));
 				predicates.add(cb.equal(root.get("myResourceVersion"), theId.getVersionIdPartAsLong()));
 				if (theJoinResourceTable) {
@@ -2118,29 +2120,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				 */
 				query = cb.createQuery(ResourceTable.class);
 				root = query.from(ResourceTable.class);
+				addPartitionPredicateIfNecessary(
+						theRequestPartitionId, needExplicitPartitionSelector, cb, root, predicates);
 				predicates.add(cb.equal(root.get("myPid"), pid));
 			}
 
 			if (theJoinTags) {
 				root.fetch("myTags", JoinType.LEFT).fetch("myTag", JoinType.LEFT);
-			}
-
-			if (needExplicitPartitionSelector) {
-				Set<Integer> readPartitions = myRequestPartitionHelperService.toReadPartitions(theRequestPartitionId);
-				if (readPartitions.contains(null)) {
-					// Because the list of partitions can include null, we need to handle that possibilty separately
-					// since you can just do FOO IN (NULL) in SQL
-					Predicate partitionIsNull = cb.isNull(root.get("myPartitionIdValue"));
-					if (readPartitions.size() == 1) {
-						predicates.add(partitionIsNull);
-					} else {
-						readPartitions.remove(null);
-						predicates.add(cb.or(
-								partitionIsNull, root.get("myPartitionIdValue").in(readPartitions.toArray())));
-					}
-				} else {
-					predicates.add(root.get("myPartitionIdValue").in(readPartitions.toArray()));
-				}
 			}
 
 			query.where(cb.and(predicates.toArray(EMPTY_PREDICATE_ARRAY)));
@@ -2171,6 +2157,42 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateGivenIdIsAppropriateToRetrieveResource(theId, retVal);
 
 		return retVal;
+	}
+
+	private void addPartitionPredicateIfNecessary(
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			boolean needExplicitPartitionSelector,
+			CriteriaBuilder cb,
+			Root<? extends BaseHasResource<?>> root,
+			List<Predicate> predicates) {
+		if (needExplicitPartitionSelector) {
+			Set<Integer> readPartitions = myRequestPartitionHelperService.toReadPartitions(theRequestPartitionId);
+			if (readPartitions.contains(null)) {
+				// Because the list of partitions can include null, we need to handle that possibilty separately
+				// since you can just do FOO IN (NULL) in SQL
+				Predicate partitionIsNull = cb.isNull(root.get("myPartitionIdValue"));
+				if (readPartitions.size() == 1) {
+					predicates.add(partitionIsNull);
+				} else {
+					readPartitions.remove(null);
+					predicates.add(cb.or(partitionIsNull, toPartitionPredicate(cb, root, readPartitions)));
+				}
+			} else {
+				predicates.add(toPartitionPredicate(cb, root, readPartitions));
+			}
+		}
+	}
+
+	private static Predicate toPartitionPredicate(
+			CriteriaBuilder cb, Root<? extends BaseHasResource<?>> root, Set<Integer> readPartitions) {
+		Predicate predicate;
+		if (readPartitions.size() == 1) {
+			predicate = cb.equal(
+					root.get("myPartitionIdValue"), readPartitions.iterator().next());
+		} else {
+			predicate = root.get("myPartitionIdValue").in(readPartitions.toArray());
+		}
+		return predicate;
 	}
 
 	@Override
