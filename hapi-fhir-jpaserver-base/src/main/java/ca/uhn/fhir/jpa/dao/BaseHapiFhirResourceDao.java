@@ -1825,7 +1825,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> readEntity(null, theId, requestPartitionId, false, false));
+				.execute(() -> readEntity(new TransactionDetails(), theId, requestPartitionId, false, false));
 	}
 
 	@Override
