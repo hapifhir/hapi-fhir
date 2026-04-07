@@ -639,7 +639,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				try {
 					readerStream = new GZIPInputStream(readerStream);
 				} catch (IOException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(2906) + e.getMessage(), e);
 				}
 			}
 
