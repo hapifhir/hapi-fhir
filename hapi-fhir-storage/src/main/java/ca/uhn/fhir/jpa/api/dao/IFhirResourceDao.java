@@ -208,7 +208,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 			RequestDetails theRequestDetails);
 
 	/**
-	 * @deprecated Call {@link #metaDeleteOperation(IIdType, IBaseMetaType, RequestDetails, TransactionDetails)}
+	 * @deprecated Call {@link #metaAddOperation(IIdType, IBaseMetaType, RequestDetails, TransactionDetails)}
 	 */
 	@Deprecated(since = "8.10.0", forRemoval = true)
 	default <MT extends IBaseMetaType> MT metaAddOperation(

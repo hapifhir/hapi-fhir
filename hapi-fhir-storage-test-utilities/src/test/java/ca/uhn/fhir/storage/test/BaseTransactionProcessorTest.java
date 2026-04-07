@@ -260,6 +260,9 @@ public class BaseTransactionProcessorTest {
 		Patient/A/$meta-add    , Patient , A , $meta-add
 		Patient                ,         ,   ,
 		Patient/A              ,         ,   ,
+		A/$meta-add            ,         ,   ,
+		$meta-add              ,         ,   ,
+		/$meta-add             ,         ,   ,
 		                       ,         ,   ,
 		""")
 	void testParseUrlForOperationInvocation(String theUrl, String theType, String theId, String theOperationName) {

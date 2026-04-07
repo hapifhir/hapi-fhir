@@ -4,9 +4,9 @@ import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.assertj.core.api.Condition;
 import org.assertj.core.description.Description;
-import org.thymeleaf.util.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -233,7 +233,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		public Optional<String> test(CircularQueueCaptureQueriesListener theListener) {
 			Optional<String> retVal = super.test(theListener);
 			if (retVal.isEmpty()) {
-				if (myExpectAtIndex != null) {
+				if (myExpectAtIndex != null && myExpectedSql != null) {
 					SqlQuery statement = getActualStatements(theListener).get(myExpectAtIndex);
 					String renderedSql = statement.getSql(true, false);
 					if (!renderedSql.contains(myExpectedSql)) {

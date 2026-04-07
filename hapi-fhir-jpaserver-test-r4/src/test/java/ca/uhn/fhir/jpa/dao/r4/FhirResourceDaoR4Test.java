@@ -2442,6 +2442,22 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
 		outcome = myPatientDao.metaAddOperation(id.withVersion("1"), meta, mySrd, new TransactionDetails());
+		assertFalse(outcome.isNop());
+		newMeta = (Meta) ParametersUtil.getNamedParameterValue(myFhirContext, (IBaseParameters) outcome.getResource(), "return").orElseThrow();
+		assertThat(newMeta.getProfile()).hasSize(2);
+		assertThat(newMeta.getSecurity()).hasSize(2);
+		assertThat(newMeta.getTag()).hasSize(2);
+
+		/*
+		 * Meta-Add on previous version - Same call should have no effect
+		 */
+
+		meta = new Meta();
+		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
+		meta.addProfile("http://profile/1");
+		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
+		outcome = myPatientDao.metaAddOperation(id.withVersion("1"), meta, mySrd, new TransactionDetails());
+		assertTrue(outcome.isNop());
 		newMeta = (Meta) ParametersUtil.getNamedParameterValue(myFhirContext, (IBaseParameters) outcome.getResource(), "return").orElseThrow();
 		assertThat(newMeta.getProfile()).hasSize(2);
 		assertThat(newMeta.getSecurity()).hasSize(2);

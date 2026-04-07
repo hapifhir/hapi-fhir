@@ -33,6 +33,7 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -723,5 +724,15 @@ public class ParametersUtil {
 			}
 		}
 		return retVal;
+	}
+
+	/**
+	 * Create a Parameters resource with a single return parameter
+	 */
+	public static <MT extends IBaseMetaType> IBaseResource createParametersWithSingleReturn(
+			FhirContext theContext, IBase theReturn) {
+		IBaseParameters parametersResponse = newInstance(theContext);
+		ParametersUtil.addParameterToParameters(theContext, parametersResponse, "return", theReturn);
+		return parametersResponse;
 	}
 }

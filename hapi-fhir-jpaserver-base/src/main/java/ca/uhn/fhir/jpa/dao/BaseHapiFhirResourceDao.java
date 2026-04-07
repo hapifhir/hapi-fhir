@@ -145,7 +145,6 @@ import org.apache.commons.lang3.function.TriFunction;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -177,6 +176,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1508,80 +1508,21 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> doMetaAddOperation(
-						theResourceId, theMetaAdd, theRequest, requestPartitionId, theTransactionDetails));
-	}
+				.execute(() -> {
+					Function<BaseHasResource<?>, Integer> updateFunction =
+							entity -> doMetaAdd(theMetaAdd, entity, theRequest, theTransactionDetails);
 
-	protected <MT extends IBaseMetaType> DaoMethodOutcome doMetaAddOperation(
-			IIdType theResourceId,
-			MT theMetaAdd,
-			RequestDetails theRequest,
-			RequestPartitionId theRequestPartitionId,
-			TransactionDetails theTransactionDetails) {
-		HapiTransactionService.requireTransaction();
-
-		IIdType resourceId = theResourceId;
-		if (theResourceId.hasVersionIdPart()
-				&& myStorageSettings.getTagStorageMode() != StorageSettings.TagStorageModeEnum.VERSIONED) {
-			resourceId = resourceId.withVersion(null);
-		}
-
-		StopWatch w = new StopWatch();
-		BaseHasResource<?> entity;
-
-		entity = readEntity(theTransactionDetails, resourceId, theRequestPartitionId, true, true);
-		int addedTags = doMetaAdd(theMetaAdd, entity, theRequest, theTransactionDetails);
-
-		/*
-		 * If we're in VERSIONED tag mode and we're updating the last version, we need to
-		 * modify the set of tags associated with the ResourceTable entity as well as the
-		 * set of tags associated with the ResourceHistoryTable entity.
-		 */
-		if (myStorageSettings.getTagStorageMode() == StorageSettings.TagStorageModeEnum.VERSIONED) {
-			if (theResourceId.hasVersionIdPart()) {
-				ResourceTable resourceTable = ((ResourceHistoryTable) entity).getResourceTable();
-				if (resourceTable.getVersion() == theResourceId.getVersionIdPartAsLong()) {
-					doMetaAdd(theMetaAdd, resourceTable, theRequest, theTransactionDetails);
-				}
-			} else {
-				IIdType versionedId = theResourceId.withVersion(Long.toString(entity.getVersion()));
-				BaseHasResource<?> resourceHistoryTable =
-						readEntity(theTransactionDetails, versionedId, theRequestPartitionId, true, true);
-				doMetaAdd(theMetaAdd, resourceHistoryTable, theRequest, theTransactionDetails);
-			}
-		}
-
-		ourLog.debug("Processed metaAddOperation on {} in {}ms", theResourceId, w.getMillisAndRestart());
-
-		Class<MT> aClass = (Class<MT>) theMetaAdd.getClass();
-		MT metaResponse = toMeta(aClass, entity);
-
-		IBaseParameters parametersResponse = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParameters(myFhirContext, parametersResponse, "return", metaResponse);
-
-		DaoMethodOutcome outcome = new DaoMethodOutcome();
-		outcome.setCreated(false);
-		outcome.setResource(parametersResponse);
-		outcome.setId(resourceId);
-
-		StorageResponseCodeEnum responseCode;
-		String msg;
-		if (addedTags > 0) {
-			outcome.setNop(false);
-			msg = getContext()
-					.getLocalizer()
-					.getMessageSanitized(BaseStorageDao.class, "successfulMetaAdd", addedTags, resourceId.getValue());
-			responseCode = StorageResponseCodeEnum.SUCCESSFUL_META_ADD;
-		} else {
-			outcome.setNop(false);
-			msg = getContext()
-					.getLocalizer()
-					.getMessageSanitized(BaseStorageDao.class, "successfulMetaAddNoChange", resourceId.getValue());
-			responseCode = StorageResponseCodeEnum.SUCCESSFUL_META_ADD_NO_CHANGE;
-		}
-
-		outcome.setOperationOutcome(createInfoOperationOutcome(msg, responseCode));
-		return outcome;
+					return doMetaAddOrDeleteOperation(
+							updateFunction,
+							theResourceId,
+							theMetaAdd,
+							requestPartitionId,
+							theTransactionDetails,
+							StorageResponseCodeEnum.SUCCESSFUL_META_ADD,
+							"successfulMetaAdd",
+							StorageResponseCodeEnum.SUCCESSFUL_META_ADD_NO_CHANGE,
+							"successfulMetaAddNoChange");
+				});
 	}
 
 	@Override
@@ -1594,19 +1535,35 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> doMetaDeleteOperation(
-						theResourceId, theMetaDel, theRequest, requestPartitionId, theTransactionDetails));
+				.execute(() -> {
+					Function<BaseHasResource<?>, Integer> updateFunction =
+							entity -> doMetaDelete(theMetaDel, entity, theRequest, theTransactionDetails);
+
+					return doMetaAddOrDeleteOperation(
+							updateFunction,
+							theResourceId,
+							theMetaDel,
+							requestPartitionId,
+							theTransactionDetails,
+							StorageResponseCodeEnum.SUCCESSFUL_META_DELETE,
+							"successfulMetaDelete",
+							StorageResponseCodeEnum.SUCCESSFUL_META_DELETE_NO_CHANGE,
+							"successfulMetaDeleteNoChange");
+				});
 	}
 
-	public <MT extends IBaseMetaType> DaoMethodOutcome doMetaDeleteOperation(
+	protected <MT extends IBaseMetaType> DaoMethodOutcome doMetaAddOrDeleteOperation(
+			Function<BaseHasResource<?>, Integer> theUpdateFunction,
 			IIdType theResourceId,
-			MT theMetaDel,
-			RequestDetails theRequest,
+			MT theMetaAdd,
 			RequestPartitionId theRequestPartitionId,
-			TransactionDetails theTransactionDetails) {
-		HapiTransactionService.requireTransaction();
+			TransactionDetails theTransactionDetails,
+			StorageResponseCodeEnum theResponseCodeSuccess,
+			String theLocalizationKeySuccess,
+			StorageResponseCodeEnum theResponseCodeNoOp,
+			String theLocalizationKeyNoOp) {
 
-		StopWatch w = new StopWatch();
+		HapiTransactionService.requireTransaction();
 
 		IIdType resourceId = theResourceId;
 		if (theResourceId.hasVersionIdPart()
@@ -1614,57 +1571,64 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			resourceId = resourceId.withVersion(null);
 		}
 
-		BaseHasResource<?> entity = readEntity(theTransactionDetails, resourceId, theRequestPartitionId, true, true);
+		StopWatch w = new StopWatch();
+		BaseHasResource<?> entity;
 
-		int deletedTags = doMetaDelete(theMetaDel, entity, theRequest, theTransactionDetails);
+		entity = readEntity(theTransactionDetails, resourceId, theRequestPartitionId, true, true);
+		int addedTags = theUpdateFunction.apply(entity);
 
-		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", theResourceId.getValue(), w.getMillisAndRestart());
-
-		/*
-		 * If we're in VERSIONED tag mode and we're updating the last version, we need to
-		 * modify the set of tags associated with the ResourceTable entity as well as the
-		 * set of tags associated with the ResourceHistoryTable entity.
-		 */
-		if (myStorageSettings.getTagStorageMode() == StorageSettings.TagStorageModeEnum.VERSIONED) {
-			if (theResourceId.hasVersionIdPart()) {
-				ResourceTable resourceTable = ((ResourceHistoryTable) entity).getResourceTable();
+		if (addedTags > 0 && myStorageSettings.getTagStorageMode() == StorageSettings.TagStorageModeEnum.VERSIONED) {
+			/*
+			 * Whether we have a ResourceHistoryTable or a ResourceTable in hand depends on whether the
+			 * caller suppplied a versioned ID or not. Whichever one we have, we want to update the other one.
+			 */
+			if (entity instanceof ResourceHistoryTable historyTable) {
+				/*
+				 * If we're in VERSIONED tag mode and we were updating a specific version, and that version
+				 * was the latest version, we also need to update the tags associated with the ResourceTable entity.
+				 */
+				ResourceTable resourceTable = historyTable.getResourceTable();
 				if (resourceTable.getVersion() == theResourceId.getVersionIdPartAsLong()) {
-					doMetaDelete(theMetaDel, resourceTable, theRequest, theTransactionDetails);
+					theUpdateFunction.apply(resourceTable);
 				}
 			} else {
+				/*
+				 * If we're in VERSIONED tag mode, and we were updating the latest version, we also need
+				 * to update the tags associated with the ResourceHistoryTable entity for the current
+				 * version.
+				 */
 				IIdType versionedId = theResourceId.withVersion(Long.toString(entity.getVersion()));
 				BaseHasResource<?> resourceHistoryTable =
 						readEntity(theTransactionDetails, versionedId, theRequestPartitionId, true, true);
-				doMetaDelete(theMetaDel, resourceHistoryTable, theRequest, theTransactionDetails);
+				theUpdateFunction.apply(resourceHistoryTable);
 			}
 		}
 
-		Class<MT> aClass = (Class<MT>) theMetaDel.getClass();
-		MT metaResponse = toMeta(aClass, entity);
+		ourLog.debug("Processed meta operation on {} in {}ms", theResourceId, w.getMillisAndRestart());
 
-		IBaseParameters parametersResponse = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParameters(myFhirContext, parametersResponse, "return", metaResponse);
+		Class<MT> aClass = (Class<MT>) theMetaAdd.getClass();
+		MT metaResponse = toMeta(aClass, entity);
 
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 		outcome.setCreated(false);
-		outcome.setResource(parametersResponse);
+		outcome.setResource(ParametersUtil.createParametersWithSingleReturn(getContext(), metaResponse));
 		outcome.setId(resourceId);
 
 		StorageResponseCodeEnum responseCode;
 		String msg;
-		if (deletedTags > 0) {
+		if (addedTags > 0) {
 			outcome.setNop(false);
 			msg = getContext()
 					.getLocalizer()
 					.getMessageSanitized(
-							BaseStorageDao.class, "successfulMetaDelete", deletedTags, resourceId.getValue());
-			responseCode = StorageResponseCodeEnum.SUCCESSFUL_META_DELETE;
+							BaseStorageDao.class, theLocalizationKeySuccess, addedTags, resourceId.getValue());
+			responseCode = theResponseCodeSuccess;
 		} else {
-			outcome.setNop(false);
+			outcome.setNop(true);
 			msg = getContext()
 					.getLocalizer()
-					.getMessageSanitized(BaseStorageDao.class, "successfulMetaDeleteNoChange", resourceId.getValue());
-			responseCode = StorageResponseCodeEnum.SUCCESSFUL_META_DELETE_NO_CHANGE;
+					.getMessageSanitized(BaseStorageDao.class, theLocalizationKeyNoOp, resourceId.getValue());
+			responseCode = theResponseCodeNoOp;
 		}
 
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg, responseCode));
@@ -2120,6 +2084,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			List<Predicate> predicates = new ArrayList<>(3);
 
 			if (theId.hasVersionIdPart()) {
+				/*
+				 * We're looking for a specific version of a resource, fetch
+				 * the entity from ResourceHistoryTable
+				 */
 				query = cb.createQuery(ResourceHistoryTable.class);
 				root = query.from(ResourceHistoryTable.class);
 				predicates.add(cb.equal(root.get("myResourcePid"), JpaPidFk.fromPid(pid)));
@@ -2133,6 +2101,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					}
 				}
 			} else {
+				/*
+				 * We're looking for the latest version of a resource, fetch
+				 * the entity from ResourceTable
+				 */
 				query = cb.createQuery(ResourceTable.class);
 				root = query.from(ResourceTable.class);
 				predicates.add(cb.equal(root.get("myPid"), pid));
@@ -2145,6 +2117,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (needExplicitPartitionSelector) {
 				Set<Integer> readPartitions = myRequestPartitionHelperService.toReadPartitions(theRequestPartitionId);
 				if (readPartitions.contains(null)) {
+					// Because the list of partitions can include null, we need to handle that possibilty separately
+					// since you can just do FOO IN (NULL) in SQL
 					Predicate partitionIsNull = cb.isNull(root.get("myPartitionIdValue"));
 					if (readPartitions.size() == 1) {
 						predicates.add(partitionIsNull);
@@ -2265,7 +2239,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		switch (theTagType) {
 			case TAG -> instance.addTag().setSystem(theSystem).setCode(theCode);
 			case PROFILE -> {
-				assert theSystem == null;
+				assert theSystem == null || BaseHapiFhirDao.NS_JPA_PROFILE.equals(theSystem);
 				instance.addProfile(theCode);
 			}
 			case SECURITY_LABEL -> instance.addSecurity().setSystem(theSystem).setCode(theCode);

@@ -342,7 +342,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			queriesStrings = newList;
 		}
 
-		return String.join("\n", queriesStrings);
+		return String.join(System.lineSeparator(), queriesStrings);
 	}
 
 	@Nonnull

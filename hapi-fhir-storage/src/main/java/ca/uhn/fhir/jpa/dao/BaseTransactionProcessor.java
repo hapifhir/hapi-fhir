@@ -1789,8 +1789,7 @@ public abstract class BaseTransactionProcessor {
 						theRequestDetailsForEntry,
 						theResponseBundleEntry,
 						theTransactionDetails,
-						instanceId,
-						theParsedRequestOperation.operation() == TransactionOperationEnum.META_ADD);
+						instanceId);
 			}
 			case UNSUPPORTED -> throw new InvalidRequestException(
 					Msg.code(2899) + "Operation " + UrlUtil.sanitizeUrlPart(theParsedRequestOperation.operationName())
@@ -1804,8 +1803,7 @@ public abstract class BaseTransactionProcessor {
 			RequestDetails theRequestDetailsForEntry,
 			IBase theResponseBundleEntry,
 			TransactionDetails theTransactionDetails,
-			IIdType instanceId,
-			boolean metaAdd) {
+			IIdType instanceId) {
 		IBaseMetaType meta = null;
 		if (theResource instanceof IBaseParameters request) {
 			meta = (IBaseMetaType) ParametersUtil.getNamedParameterValue(myContext, request, "meta")
@@ -2444,13 +2442,15 @@ public abstract class BaseTransactionProcessor {
 		if (operationName.startsWith("$")) {
 			String prefix = theUrl.substring(0, lastSlashIdx);
 			IIdType id = myContext.getVersion().newIdType(prefix);
-			TransactionOperationEnum operation =
-					switch (operationName) {
-						case JpaConstants.OPERATION_META_ADD -> TransactionOperationEnum.META_ADD;
-						case JpaConstants.OPERATION_META_DELETE -> TransactionOperationEnum.META_DELETE;
-						default -> TransactionOperationEnum.UNSUPPORTED;
-					};
-			return Optional.of(new ParsedRequestOperation(operationName, operation, id));
+			if (id.hasResourceType() && id.hasIdPart()) {
+				TransactionOperationEnum operation =
+						switch (operationName) {
+							case JpaConstants.OPERATION_META_ADD -> TransactionOperationEnum.META_ADD;
+							case JpaConstants.OPERATION_META_DELETE -> TransactionOperationEnum.META_DELETE;
+							default -> TransactionOperationEnum.UNSUPPORTED;
+						};
+				return Optional.of(new ParsedRequestOperation(operationName, operation, id));
+			}
 		}
 
 		return Optional.empty();
