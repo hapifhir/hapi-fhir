@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CircularQueueCaptureQueriesListenerAssertionsTest {
 
-	private CircularQueueCaptureQueriesListener myListener = new CircularQueueCaptureQueriesListener();
+	private final CircularQueueCaptureQueriesListener myListener = new CircularQueueCaptureQueriesListener();
 
 	@Mock
 	private QueryInfo myQueryInfo;
