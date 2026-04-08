@@ -890,6 +890,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IIdType idBeforeDelete = new IdDt(resourceToDelete.getIdElement());
 		resourceToDelete.setId(entity.getIdDt());
 		resourceToDelete.getMeta().setLastUpdated(savedEntity.getUpdatedDate());
+		resourceToDelete.getMeta().setVersionId(savedEntity.getIdDt().getVersionIdPart());
 
 		// Notify JPA interceptors
 		HookParams hookParams = new HookParams()
@@ -1081,6 +1082,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			IdType oldVersionId = new IdType(entity.getIdDt().getValue());
 			resourceToDelete.setId(entity.getIdDt());
 			resourceToDelete.getMeta().setLastUpdated(entity.getUpdatedDate());
+			resourceToDelete.getMeta().setVersionId(entity.getIdDt().getVersionIdPart());
 
 			// Notify JPA interceptors
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {

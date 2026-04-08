@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -286,56 +286,60 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeletedResourceInPrecommitHookHasCorrectLastUpdated() {
+	public void testDeletedResourceInPrecommitHookHasCorrectMetaData() {
 		// Setup - create a patient
 		Patient p = new Patient();
 		p.setActive(true);
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		// Register interceptor to capture the resource from the PRECOMMIT hook
-		AtomicReference<Date> hookLastUpdated = new AtomicReference<>();
+		AtomicReference<IBaseMetaType> hookMeta = new AtomicReference<>();
 		myInterceptorRegistry.registerAnonymousInterceptor(
 			Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, (thePointcut, theParams) -> {
 				IBaseResource resource = theParams.get(IBaseResource.class, 0);
-				hookLastUpdated.set(resource.getMeta().getLastUpdated());
+				hookMeta.set(resource.getMeta());
 			});
 
 		// Test - delete the patient
 		myPatientDao.delete(id, mySrd);
 
-		// Verify - the hook resource's lastUpdated should match the DB entity
-		assertNotNull(hookLastUpdated.get(), "Hook should have captured lastUpdated");
+		// Verify - the hook resource's meta data should match the DB entity
+		assertNotNull(hookMeta.get(), "Hook should have captured Meta element");
 		runInTransaction(() -> {
-			ResourceTable entity = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow();
-			assertEquals(entity.getUpdatedDate(), hookLastUpdated.get(),
-				"Resource lastUpdated in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated timestamp in the DB");
+			ResourceTable entity = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
+			assertEquals(entity.getIdDt().getVersionIdPart(), hookMeta.get().getVersionId(),
+				"Resource meta.versionId in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated version id in the DB");
+			assertEquals(entity.getUpdatedDate(), hookMeta.get().getLastUpdated(),
+				"Resource meta.lastUpdated in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated timestamp in the DB");
 		});
 	}
 
 	@Test
-	void testDeleteByUrl_PrecommitHookHasCorrectLastUpdated() {
+	void testDeleteByUrl_PrecommitHookHasCorrectMetaData() {
 		// Setup - create a patient with a searchable attribute
 		Patient p = new Patient();
 		p.setActive(true);
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		// Register interceptor to capture the resource from the PRECOMMIT hook
-		AtomicReference<Date> hookLastUpdated = new AtomicReference<>();
+		AtomicReference<IBaseMetaType> hookMeta = new AtomicReference<>();
 		myInterceptorRegistry.registerAnonymousInterceptor(
 			Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, (thePointcut, theParams) -> {
 				IBaseResource resource = theParams.get(IBaseResource.class, 0);
-				hookLastUpdated.set(resource.getMeta().getLastUpdated());
+				hookMeta.set(resource.getMeta());
 			});
 
 		// Test - delete by URL (triggers deletePidList path)
 		myPatientDao.deleteByUrl("Patient?active=true", mySrd);
 
-		// Verify - the hook resource's lastUpdated should match the DB entity
-		assertNotNull(hookLastUpdated.get(), "Hook should have captured lastUpdated");
+		// Verify - the hook resource's meta data should match the DB entity
+		assertNotNull(hookMeta.get(), "Hook should have captured Meta element");
 		runInTransaction(() -> {
-			ResourceTable entity = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow();
-			assertEquals(entity.getUpdatedDate(), hookLastUpdated.get(),
-				"Resource lastUpdated in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated timestamp in the DB");
+			ResourceTable entity = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
+			assertEquals(entity.getIdDt().getVersionIdPart(), hookMeta.get().getVersionId(),
+				"Resource meta.versionId in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated version id in the DB");
+			assertEquals(entity.getUpdatedDate(), hookMeta.get().getLastUpdated(),
+				"Resource meta.lastUpdated in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated timestamp in the DB");
 		});
 	}
 }
