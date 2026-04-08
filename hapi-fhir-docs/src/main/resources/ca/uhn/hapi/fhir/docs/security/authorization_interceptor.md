@@ -49,7 +49,7 @@ See the following diagram for an example of how this works.
 <img src="/hapi-fhir/docs/images/hapi_authorizationinterceptor_write_normal.svg" alt="Write Authorization"/>
 
 
-<a name="authorizing-sub-operations"/>
+<a id="authorizing-sub-operations"></a>
 
 # Authorizing Sub-Operations
 

@@ -313,13 +313,13 @@ To add a cache control directive in a request:
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ClientExamples.java|cacheControl}}
 ```
 
-<a name="etags"/>
+<a id="etags"></a>
 
 # ETags
 
 ETag features are added simply by adding fluent method calls to the client method chain, as shown in the following examples.
 
-<a name="read_etags"/>
+<a id="read_etags"></a>
 
 ## Read / VRead ETags
 
@@ -335,7 +335,7 @@ This method will add the following header to the request:
 If-None-Match: "W/001"
 ```
 
-<a name="update_etags"/>
+<a id="update_etags"></a>
 
 ## Update ETags
 
