@@ -50,7 +50,7 @@ class CircularQueueCaptureQueriesListenerAssertionsTest {
 		})
 			// Verify
 			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining(theVerb + "    1              | 1")
+			.hasMessageContaining(theVerb + "         1              | 1")
 			.hasMessageContaining(theVerb + "     Expected[2] Actual[1]");
 
 	}

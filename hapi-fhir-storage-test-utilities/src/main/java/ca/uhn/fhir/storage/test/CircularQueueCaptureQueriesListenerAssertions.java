@@ -119,6 +119,11 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			return this;
 		}
 
+		public QueryCondition connectionCount(int theConnectionCount) {
+			myTests.add(new TestConnections(theConnectionCount, myAllThreads));
+			return this;
+		}
+
 		public QueryCondition noOtherCounts() {
 			if (!myHaveSelectCounts) {
 				selectCount(0);
@@ -179,7 +184,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			myListener = theListener;
 			return myTests.stream().allMatch(t -> t.test(theListener).isEmpty());
 		}
-	}
+    }
 
 	private abstract static class BaseTest {
 		protected final int myExpectCount;
@@ -406,6 +411,24 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		@Override
 		protected int getCount(CircularQueueCaptureQueriesListener theListener) {
 			return theListener.countRollbacks();
+		}
+	}
+
+	private static class TestConnections extends BaseTest {
+
+		private TestConnections(int theExpectCount, boolean theForCurrentThread) {
+			super(theExpectCount, theForCurrentThread);
+		}
+
+		@Nonnull
+		@Override
+		protected String getName() {
+			return "GET_CONNECTION";
+		}
+
+		@Override
+		protected int getCount(CircularQueueCaptureQueriesListener theListener) {
+			return theListener.countGetConnections();
 		}
 	}
 
