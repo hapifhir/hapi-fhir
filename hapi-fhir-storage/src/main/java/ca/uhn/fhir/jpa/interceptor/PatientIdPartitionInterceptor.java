@@ -81,6 +81,7 @@ import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.manda
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 /**
  * This interceptor allows JPA servers to be partitioned by Patient ID. It selects the compartment for read/create operations
@@ -484,13 +485,14 @@ public class PatientIdPartitionInterceptor {
 				} else if (nextEntry.getMethod() == RequestTypeEnum.PUT
 						&& isNotBlank(nextEntry.getFullUrl())
 						&& isNotBlank(nextEntry.getUrl())
-						&& isBlank(nextEntry.getConditionalUrl())
 						&& !Strings.CS.equals(nextEntry.getFullUrl(), nextEntry.getUrl())) {
 					idSubstitutions.put(nextEntry.getFullUrl(), nextEntry.getUrl());
 				}
 			}
 		}
 
+		// idSubstitution is a map of fullUrl -> Patient/id.  if it has entries, go through all references
+		// and replace fullUrls with the Patient/id.
 		if (!idSubstitutions.isEmpty()) {
 			for (BundleEntryParts entry : parsedEntries) {
 				IBaseResource resource = entry.getResource();
@@ -510,11 +512,15 @@ public class PatientIdPartitionInterceptor {
 			}
 		}
 
+		// at this point, references to Patient resources through fullUrl as UUID will have been
+		// replaced with a direct reference (Patient/id).  now we deal with non-Patient resources which may be referred
+		// to by their fullUrl as UUID.  we build a map of fullUrl -> Resource so we can access it later when attempting
+		// to determine partition.
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(myFhirContext, theBundle);
 		Map<String, IBaseResource> placeholderToResource = new HashMap<>();
 		for (BundleEntryParts nextEntry : entries) {
 			String fullUrl = nextEntry.getFullUrl();
-			if (fullUrl != null && fullUrl.startsWith("urn:uuid:")) {
+			if (startsWith(fullUrl, "urn:uuid:")) {
 				if (nextEntry.getResource() != null) {
 					placeholderToResource.put(fullUrl, nextEntry.getResource());
 				}

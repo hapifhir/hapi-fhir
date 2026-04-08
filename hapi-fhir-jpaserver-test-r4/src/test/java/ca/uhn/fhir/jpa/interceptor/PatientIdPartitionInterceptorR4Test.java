@@ -8,6 +8,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.cache.IResourceIdentifierCacheSvc;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -36,6 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirPatchBuilder;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MultimapCollector;
@@ -107,7 +110,13 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
 
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private IResourceIdentifierCacheSvc myResourceIdentifierCacheSvc;
+
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
+	private PatientIdentifierPreResolutionInterceptor myPatientIdentifierPreResolutionInterceptor;
 	private PatientIdPartitionInterceptor mySvc;
 
 	@Override
@@ -123,6 +132,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setDefaultPartitionId(ALTERNATE_DEFAULT_ID);
+
+
 
 		initResourceTypeCacheFromConfig();
 	}
@@ -830,6 +841,35 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		}
 	}
 
+	@Test
+	public void testTransaction_ConditionallyCreatedPatientAndConditionallyCreatedObservationInUUIDServerIdMode() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+//		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+		String patientInlineMatchUrl = "Patient?identifier=http://ids|A";
+		BundleBuilder tx = new BundleBuilder(myFhirContext);
+
+//		Patient p = new Patient();
+//		p.addIdentifier().setSystem("http://ids").setValue("A");
+//		tx.addTransactionUpdateEntry(p).conditional(patientInlineMatchUrl);
+
+		Observation o = new Observation();
+		o.addIdentifier().setSystem("http://ids").setValue("B");
+		o.setSubject(new Reference(patientInlineMatchUrl));  // Patient?identifier=http://ids|A
+		tx.addTransactionUpdateEntry(o).conditional("Observation?identifier=http://ids|B");
+
+		Bundle bundle = (Bundle) tx.getBundle();
+		String bundleAsString = myFhirContext.newJsonParser().encodeResourceToString(bundle);
+		ourLog.info("Bundle: {}", bundleAsString);
+
+		mySystemDao.transaction(mySrd, bundle);
+	}
+
+	@Test
+	public void testPlaceholderWithInlineConditionalUrl(){
+		fail("Not yet implemented");
+	}
 
 	@Test
 	public void testTransaction_SplitAncillaryAndPatient_NewTransactionPerPartition() {
