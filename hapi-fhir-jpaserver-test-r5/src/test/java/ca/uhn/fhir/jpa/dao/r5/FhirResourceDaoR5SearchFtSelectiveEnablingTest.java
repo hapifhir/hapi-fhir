@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest;
 import ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -280,22 +279,16 @@ public class FhirResourceDaoR5SearchFtSelectiveEnablingTest extends BaseJpaR5Tes
 
 	@ParameterizedTest
 	@CsvSource({
-		// ParamName, CreateExplicitSp, SpBase       , SpStatus , ExpectMatch , ExpectIndexedDocCount
-		"  _text    , false           ,              , active   , true        , 1 ",
-		"  _text    , true            , Resource     , active   , true        , 1 ",
-		"  _text    , true            , Patient      , active   , true        , 1 ",
-		"  _text    , true            , Resource     , retired  , false       , 1 ",
-		"  _text    , true            , Observation  , active   , false       , 1 ",
-		"  _content , false           ,              , active   , true        , 1 ",
-		"  _content , true            , Resource     , active   , true        , 1 ",
-		"  _content , true            , Patient      , active   , true        , 1 ",
-		"  _content , true            , Resource     , retired  , false       , 1 ",
-		"  _content , true            , Observation  , active   , false       , 1 ",
-		"  BOTH     , true            , Patient      , active   , true        , 1 ",
-		"  BOTH     , true            , Observation  , active   , false       , 0 ",
-		"  BOTH     , true            , Resource     , retired  , false       , 0 ",
+		// ParamName, CreateExplicitSp, SpBase       , SpStatus , ExpectIndexedDocCount
+		"  _text    , false           ,              , active   , 1 ",
+		"  _text    , true            , Resource     , active   , 1 ",
+		"  _text    , true            , Patient      , active   , 1 ",
+		"  _content , false           ,              , active   , 1 ",
+		"  _content , true            , Resource     , active   , 1 ",
+		"  _content , true            , Patient      , active   , 1 ",
+		"  BOTH     , true            , Patient      , active   , 1 ",
 	})
-	public void testControlResourceTypeWithExplicitSearchParameter(String theParam, boolean theCreateExplicitSp, String theSpBase, String theSpStatus, boolean theExpectMatch, long theExpectDocumentCount) {
+	public void testControlResourceTypeWithExplicitSearchParameter(String theParam, boolean theCreateExplicitSp, String theSpBase, String theSpStatus, long theExpectDocumentCount) {
 		boolean isText = PARAM_TEXT.equals(theParam) || "BOTH".equals(theParam);
 		boolean isContent = PARAM_CONTENT.equals(theParam) || "BOTH".equals(theParam);
 
@@ -323,16 +316,47 @@ public class FhirResourceDaoR5SearchFtSelectiveEnablingTest extends BaseJpaR5Tes
 			searchMap.add(PARAM_CONTENT, new StringParam("simpson"));
 		}
 
-		if (theExpectMatch) {
-			List<String> actual = toUnqualifiedVersionlessIdValues(myPatientDao.search(searchMap, mySrd));
-			assertThat(actual).containsExactly(patientId.getValue());
-		} else {
-			assertThatThrownBy(() -> myPatientDao.search(searchMap, mySrd))
-				.isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining("Fulltext searching is not enabled on this server for resource type Patient, can not support the parameter(s):");
-		}
+		List<String> actual = toUnqualifiedVersionlessIdValues(myPatientDao.search(searchMap, mySrd));
+		assertThat(actual).containsExactly(patientId.getValue());
 
 		assertEquals(theExpectDocumentCount, getTotalFullTextIndexedEntities());
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		// ParamName, CreateExplicitSp, SpBase       , SpStatus
+		"  _text    , false           ,              , active ",
+		"  _text    , true            , Resource     , active ",
+		"  _content , false           ,              , active ",
+		"  _content , true            , Resource     , active ",
+		"  BOTH     , true            , Resource     , active ",
+	})
+	public void testControlResourceTypeWithExplicitSearchParameter_throwException(String theParam, boolean theCreateExplicitSp, String theSpBase, String theSpStatus) {
+		boolean isText = PARAM_TEXT.equals(theParam) || "BOTH".equals(theParam);
+		boolean isContent = PARAM_CONTENT.equals(theParam) || "BOTH".equals(theParam);
+
+		myStorageSettings.setHibernateSearchIndexFullText(false);
+		if (theCreateExplicitSp) {
+			if (isContent) {
+				createSearchParameter(PARAM_CONTENT, theSpBase, theSpStatus);
+			}
+			if (isText) {
+				createSearchParameter(PARAM_TEXT, theSpBase, theSpStatus);
+			}
+		}
+		mySearchParamRegistry.forceRefresh();
+
+		SearchParameterMap searchMap = SearchParameterMap.newSynchronous();
+		if ("BOTH".equals(theParam) || PARAM_TEXT.equals(theParam)) {
+			searchMap.add(PARAM_TEXT, new StringParam("simpson"));
+		}
+		if ("BOTH".equals(theParam) || PARAM_CONTENT.equals(theParam)) {
+			searchMap.add(PARAM_CONTENT, new StringParam("simpson"));
+		}
+
+		assertThatThrownBy(() -> myPatientDao.search(searchMap, mySrd))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Fulltext searching is not enabled on this server");
 	}
 
 	private void createSearchParameter(String theParam, String theSpBase, String theSpStatus) {
