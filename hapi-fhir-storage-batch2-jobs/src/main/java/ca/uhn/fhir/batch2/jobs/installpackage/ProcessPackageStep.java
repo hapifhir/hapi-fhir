@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -49,7 +48,10 @@ public class ProcessPackageStep
 
 	IValidationSupport myValidationSupport;
 
-	public ProcessPackageStep(IPackageInstallerSvc thePackageInstallerSvc, ISearchParamRegistryController theSearchParamRegistryController, IValidationSupport theValidationSupport) {
+	public ProcessPackageStep(
+			IPackageInstallerSvc thePackageInstallerSvc,
+			ISearchParamRegistryController theSearchParamRegistryController,
+			IValidationSupport theValidationSupport) {
 		this.myPackageInstallerSvc = thePackageInstallerSvc;
 		this.mySearchParamRegistryController = theSearchParamRegistryController;
 		this.myValidationSupport = theValidationSupport;
