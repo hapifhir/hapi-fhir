@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7726
+title: "Previously, installing NPM packages would cause an exception if installMode was set to INSTALL_ONLY and no 
+package contents were provided. This has been fixed."
