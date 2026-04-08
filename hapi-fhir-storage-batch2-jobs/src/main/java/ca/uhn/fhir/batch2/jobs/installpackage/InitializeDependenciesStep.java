@@ -49,12 +49,20 @@ public class InitializeDependenciesStep
 
 		// copy the raw package contents into the result for use in future steps
 		result.setContents(encodedContents);
+		result.setReport(outcome);
+
+		PackageInstallationSpec installationSpec =
+				theStepExecutionDetails.getParameters().getInstallationSpec();
+
+		// exit early if the specification asks us to skip processing dependencies
+		if (!installationSpec.isFetchDependencies()) {
+			result.setDependencyJobIds(new ArrayList<>());
+			theDataSink.accept(result);
+			return RunOutcome.SUCCESS;
+		}
 
 		try {
 			NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(decodedContents));
-
-			PackageInstallationSpec installationSpec =
-					theStepExecutionDetails.getParameters().getInstallationSpec();
 
 			List<PackageUtils.DependentPackage> dependencies =
 					PackageUtils.extractDependentPackages(npmPackage, installationSpec, outcome);
@@ -66,7 +74,6 @@ public class InitializeDependenciesStep
 			// error handling is in the scope of a later ticket
 		}
 
-		result.setReport(outcome);
 		theDataSink.accept(result);
 
 		return RunOutcome.SUCCESS;

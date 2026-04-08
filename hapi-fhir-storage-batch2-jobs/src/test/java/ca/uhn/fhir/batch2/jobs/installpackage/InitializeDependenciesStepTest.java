@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -113,6 +114,79 @@ public class InitializeDependenciesStepTest {
 			new PackageUtils.DependentPackage("hl7.fhir.uv.sdc", "3.0.0"),
 			new PackageUtils.DependentPackage("us.cdc.phinvads", "0.12.0"),
 			new PackageUtils.DependentPackage("us.nlm.vsac", "0.24.0"));
+	}
+
+	@Test
+	public void testRun_fetchDependenciesFalse_succeeds() throws Exception {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		installationSpec.setFetchDependencies(false);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+
+		InputStream stream = InitializeDependenciesStepTest.class.getResourceAsStream("usCorePackage.tgz");
+		byte[] packageBytes = stream.readAllBytes();
+		byte[] encodedBytes = Base64.getEncoder().encode(packageBytes);
+		PackageContentsJson packageContentsJson = new PackageContentsJson();
+		packageContentsJson.setContents(encodedBytes);
+
+		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
+			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		// execute
+		RunOutcome outcome = myStep.run(details, myJobDataSink);
+
+		// validate
+		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+
+		verify(myJobDataSink).accept(myPackageWithDependenciesCaptor.capture());
+		PackageWithDependenciesJson outcomeJson = myPackageWithDependenciesCaptor.getValue();
+		assertThat(outcomeJson).isNotNull();
+		assertThat(outcomeJson.getContents()).isEqualTo(encodedBytes);
+		assertThat(outcomeJson.getDependencyJobIds()).isEmpty();
+		assertThat(outcomeJson.getReport().getMessage()).isEmpty();
+
+		verifyNoInteractions(myJobCoordinator);
+	}
+
+	@Test
+	public void testRun_noDependenciesToProcess_succeeds() throws Exception {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		installationSpec.setFetchDependencies(true);
+		// This is unlikely in production, but a convenient way to simulate a package that has no dependencies
+		installationSpec.setDependencyExcludes(List.of(".*"));
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+
+		InputStream stream = InitializeDependenciesStepTest.class.getResourceAsStream("usCorePackage.tgz");
+		byte[] packageBytes = stream.readAllBytes();
+		byte[] encodedBytes = Base64.getEncoder().encode(packageBytes);
+		PackageContentsJson packageContentsJson = new PackageContentsJson();
+		packageContentsJson.setContents(encodedBytes);
+
+		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
+			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		// execute
+		RunOutcome outcome = myStep.run(details, myJobDataSink);
+
+		// validate
+		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+
+		verify(myJobDataSink).accept(myPackageWithDependenciesCaptor.capture());
+		PackageWithDependenciesJson outcomeJson = myPackageWithDependenciesCaptor.getValue();
+		assertThat(outcomeJson).isNotNull();
+		assertThat(outcomeJson.getContents()).isEqualTo(encodedBytes);
+		assertThat(outcomeJson.getDependencyJobIds()).isEmpty();
+		// the report contains a lot of nonsense that we don't want to assert on, but we do want to confirm it exists
+		assertThat(outcomeJson.getReport()).isNotNull();
+
+		verifyNoInteractions(myJobCoordinator);
 	}
 
 	private static class JobIdIncrementor implements Answer<Batch2JobStartResponse> {
