@@ -1804,7 +1804,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (reindexSearchParameters) {
-			reindexSearchParameters(entity, retVal, theTransactionDetails);
+			boolean searchParameterReindexSucceeded = reindexSearchParameters(entity, retVal, theTransactionDetails);
+			if (searchParameterReindexSucceeded) {
+				reindexFullTextIndex(entity, retVal);
+			}
 		}
 
 		if (optimizeStorage) {
@@ -1868,15 +1871,32 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@SuppressWarnings("unchecked")
-	private void reindexSearchParameters(
+	private boolean reindexSearchParameters(
 			ResourceTable entity, ReindexOutcome theReindexOutcome, TransactionDetails theTransactionDetails) {
 		try {
 			T resource = (T) myJpaStorageResourceParser.toResource(entity, false);
 			reindexSearchParameters(resource, entity, theTransactionDetails);
+			return true;
 		} catch (Exception e) {
 			ourLog.warn("Failure during reindex: {}", e.toString());
 			theReindexOutcome.addWarning("Failed to reindex resource " + entity.getIdDt() + ": " + e.getMessage());
 			myResourceTableDao.updateIndexStatus(entity.getId(), EntityIndexStatusEnum.INDEXING_FAILED);
+			return false;
+		}
+	}
+
+	private void reindexFullTextIndex(ResourceTable theEntity, ReindexOutcome theReindexOutcome) {
+		if (mySearchDao == null) {
+			return;
+		}
+
+		try {
+			mySearchDao.reindex(theEntity);
+		} catch (Exception e) {
+			ourLog.warn("Failure during fulltext reindex: {}", e.toString());
+			theReindexOutcome.addWarning(
+					"Failed to reindex fulltext index for resource " + theEntity.getIdDt() + ": " + e);
+			myResourceTableDao.updateIndexStatus(theEntity.getId(), EntityIndexStatusEnum.INDEXING_FAILED);
 		}
 	}
 
