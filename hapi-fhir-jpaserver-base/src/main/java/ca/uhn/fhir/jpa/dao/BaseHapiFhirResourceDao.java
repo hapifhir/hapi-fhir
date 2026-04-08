@@ -1638,16 +1638,30 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequest) {
 		TransactionDetails transactionDetails = new TransactionDetails();
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-				theRequest, myResourceName, theId);
+		IIdType id;
+		if (theId.hasVersionIdPart()
+				&& myStorageSettings.getTagStorageMode() == StorageSettings.TagStorageModeEnum.NON_VERSIONED) {
+			id = theId.toVersionless();
+		} else {
+			id = theId;
+		}
 
-		return myTransactionService
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequest, myResourceName, id);
+
+		MT retVal = myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
 				.execute(() -> {
-					BaseHasResource<?> entity = readEntity(transactionDetails, theId, requestPartitionId, true, true);
+					BaseHasResource<?> entity = readEntity(transactionDetails, id, requestPartitionId, true, true);
 					return toMeta(theType, entity);
 				});
+
+		if (theId.hasVersionIdPart()) {
+			retVal.setVersionId(theId.getVersionIdPart());
+		}
+
+		return retVal;
 	}
 
 	@Nonnull
@@ -1730,7 +1744,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		T retVal = myJpaStorageResourceParser.toResource(null, myResourceType, entity.get(), null, false);
 
-		ourLog.debug("Processed read on {} in {}ms", jpaPid, w.getMillis());
+		ourLog.debug("Processed read by PID on {} in {}ms", jpaPid, w.getMillis());
 		return retVal;
 	}
 
@@ -1771,7 +1785,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		StopWatch w = new StopWatch();
-		BaseHasResource<?> entity = readEntity(theTransactionDetails, theId, theRequestPartitionId, false, false);
+		BaseHasResource<?> entity = readEntity(theTransactionDetails, theId, theRequestPartitionId, false, true);
 		validateResourceType(entity);
 
 		T retVal = myJpaStorageResourceParser.toResource(theRequest, myResourceType, entity, null, false);
@@ -1780,14 +1794,26 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (isDeleted(entity)) {
 				throw createResourceGoneException(entity);
 			}
+
+			// If the ResourceTable entity has been marked as deleted but the
+			// current ResourceHistoryTable has not, we still want to indicate that
+			// the resource is deleted (this is most likely because someone manually
+			// deleted the resource by manipulating the DB)
+			if (entity instanceof ResourceHistoryTable resourceHistoryTable) {
+				ResourceTable resourceTable = resourceHistoryTable.getResourceTable();
+				if (resourceHistoryTable.getVersion() == resourceTable.getVersion() && isDeleted(resourceTable)) {
+					throw createResourceGoneException(entity);
+				}
+			}
 		}
+
 		// If the resolved fhir model is null, we don't need to run pre-access over or pre-show over it.
 		if (retVal != null) {
 			invokeStoragePreAccessResources(theId, theRequest, retVal);
 			retVal = invokeStoragePreShowResources(theRequest, retVal);
 		}
 
-		ourLog.debug("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
+		ourLog.debug("Processed read by ID on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;
 	}
 
@@ -2040,6 +2066,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			boolean theJoinTags,
 			boolean theJoinResourceTable) {
+
+		assert !(theJoinTags
+						&& myStorageSettings.getTagStorageMode() == StorageSettings.TagStorageModeEnum.NON_VERSIONED
+						&& theId.hasVersionIdPart())
+				: "Attempting to join tags on a versioned ID indicates a potential bug in NON_VERSIONED tag storage mode since we will be returning an entity that can't contain tags in this mode";
+
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		JpaPid pid = null;
