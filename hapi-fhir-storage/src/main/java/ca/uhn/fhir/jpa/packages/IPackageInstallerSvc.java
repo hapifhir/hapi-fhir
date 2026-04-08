@@ -19,9 +19,34 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import org.hl7.fhir.utilities.npm.NpmPackage;
+
 public interface IPackageInstallerSvc {
 
 	PackageInstallOutcomeJson install(PackageInstallationSpec theSpec);
 
 	PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theSpec);
+
+	/**
+	 * Installs a single npm package. Exposed publicly to support asynchronous operation.
+	 * @param npmPackage          the package to install
+	 * @param theInstallationSpec the specification providing control flags
+	 * @param theOutcome          accumulates outcome messages
+	 */
+	void installPackage(
+			NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome);
+
+	/**
+	 * Starts an asynchronous batch job to install a package asynchronously as a background process
+	 * @param theInstallationSpec the specification defining the package to install
+	 * @return the instance id of the job, needed for polling for updates
+	 */
+	String installAsynchronously(PackageInstallationSpec theInstallationSpec);
+
+	/**
+	 * Retrieves the current status of an asynchronous package installer job.
+	 * @param theJobId the id of the job
+	 * @return a JSON object containing the status report
+	 */
+	PackageInstallationStatusJson checkInstallationStatus(String theJobId);
 }

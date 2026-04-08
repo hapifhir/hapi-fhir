@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI-FHIR Storage Batch2 Jobs
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -17,15 +17,24 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.util;
+package ca.uhn.fhir.batch2.jobs.installpackage.model;
 
-public class Batch2JobDefinitionConstants {
+import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-	// Bulk Export job
-	public static final String BULK_EXPORT = "BULK_EXPORT";
+import java.util.ArrayList;
+import java.util.List;
 
-	// Install Package
-	public static final String INSTALL_PACKAGE = "INSTALL_PACKAGE";
+public class InstallationOutcomeJson implements IModelJson {
+	@JsonProperty("outcomes")
+	List<PackageInstallOutcomeJson> myOutcomes = new ArrayList<>();
 
-	private Batch2JobDefinitionConstants() {}
+	public List<PackageInstallOutcomeJson> getOutcomes() {
+		return myOutcomes;
+	}
+
+	public void setOutcomes(List<PackageInstallOutcomeJson> theOutcomes) {
+		myOutcomes = theOutcomes;
+	}
 }

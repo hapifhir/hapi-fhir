@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.packages;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -7,6 +10,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
@@ -61,6 +65,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -113,6 +118,9 @@ public class PackageInstallerSvcImplTest {
 	@Mock
 	private SearchParameterDaoValidator mySearchParameterDaoValidatorMock;
 
+	@Mock
+	private IJobCoordinator myJobCoordinatorMock;
+
 	@Spy
 	private FhirContext myCtx = FhirContext.forR4Cached();
 	@Spy
@@ -134,6 +142,8 @@ public class PackageInstallerSvcImplTest {
 	private ArgumentCaptor<SearchParameter> mySearchParameterCaptor;
 	@Captor
 	private ArgumentCaptor<RequestDetails> myRequestDetailsCaptor;
+	@Captor
+	private ArgumentCaptor<JobInstanceStartRequest> myJobInstanceStartRequestCaptor;
 
 	@Test
 	public void testPackageCompatibility() {
@@ -265,6 +275,26 @@ public class PackageInstallerSvcImplTest {
 		assertTrue(requestDetails instanceof SystemRequestDetails);
 		SystemRequestDetails systemRequestDetails = (SystemRequestDetails) requestDetails;
 		assertEquals(RequestPartitionId.fromPartitionId(7), systemRequestDetails.getRequestPartitionId());
+	}
+
+	@Test
+	public void testInstallAsynchronously() {
+		PackageInstallationSpec spec = new PackageInstallationSpec();
+		spec.setName("test spec");
+
+		String expectedJobId = UUID.randomUUID().toString();
+		Batch2JobStartResponse response = new Batch2JobStartResponse();
+		response.setInstanceId(expectedJobId);
+
+		when(myJobCoordinatorMock.startInstance(any(RequestDetails.class), myJobInstanceStartRequestCaptor.capture()))
+			.thenReturn(response);
+
+		String actualJobId = mySvc.installAsynchronously(spec);
+
+		assertThat(actualJobId).isEqualTo(expectedJobId);
+		assertThat(myJobInstanceStartRequestCaptor.getValue().getParameters(PackageInstallationJobParameters.class)
+			.getInstallationSpec().getName())
+			.isEqualTo("test spec");
 	}
 
 	@Test

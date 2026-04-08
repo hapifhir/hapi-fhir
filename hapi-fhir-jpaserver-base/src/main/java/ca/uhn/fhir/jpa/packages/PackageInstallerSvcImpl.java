@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -33,6 +37,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
@@ -55,6 +60,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -135,6 +141,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
+
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
 
 	/**
 	 * Constructor
@@ -222,7 +231,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL
 						|| theInstallationSpec.getInstallMode()
 								== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-					install(npmPackage, theInstallationSpec, retVal);
+					installPackage(npmPackage, theInstallationSpec, retVal);
 
 					if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
 						retVal.getMessage()
@@ -254,7 +263,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 *
 	 * @throws ImplementationGuideInstallationException if installation fails
 	 */
-	private void install(
+	@Override
+	public void installPackage(
 			NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome)
 			throws ImplementationGuideInstallationException {
 		String name = npmPackage.getNpm().get("name").asJsonString().getValue();
@@ -328,6 +338,36 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
+	/**
+	 * Starts an asynchronous batch job to install a package asynchronously as a background process
+	 * @param theInstallationSpec the specification defining the package to install
+	 * @return the instance id of the job, needed for polling for updates
+	 */
+	@Override
+	public String installAsynchronously(PackageInstallationSpec theInstallationSpec) {
+		PackageInstallationJobParameters parameters = new PackageInstallationJobParameters();
+		parameters.setInstallationSpec(theInstallationSpec);
+		JobInstanceStartRequest startRequest =
+				new JobInstanceStartRequest(Batch2JobDefinitionConstants.INSTALL_PACKAGE, parameters);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(createRequestDetails(), startRequest);
+		return response.getInstanceId();
+	}
+
+	@Override
+	public PackageInstallationStatusJson checkInstallationStatus(String theJobId) {
+		JobInstance jobInstance = myJobCoordinator.getInstance(theJobId);
+
+		PackageInstallationStatusJson status = new PackageInstallationStatusJson();
+		status.setJobId(theJobId);
+		status.setStatus(jobInstance.getStatus().name());
+		status.setProgress(jobInstance.getProgress());
+		status.setCurrentStep(jobInstance.getCurrentGatedStepId());
+		status.setStartTime(jobInstance.getStartTime());
+		status.setOutcome(jobInstance.getReport());
+
+		return status;
+	}
+
 	private void fetchAndInstallDependencies(
 			NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome)
 			throws ImplementationGuideInstallationException {
@@ -369,7 +409,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 						if (theInstallationSpec.getInstallMode()
 								== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
-							install(dependency, theInstallationSpec, theOutcome);
+							installPackage(dependency, theInstallationSpec, theOutcome);
 						}
 					}
 				} catch (IOException e) {

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,7 +40,7 @@ import java.util.Map;
 		getterVisibility = JsonAutoDetect.Visibility.NONE,
 		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
 		setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class PackageInstallOutcomeJson {
+public class PackageInstallOutcomeJson implements IModelJson {
 
 	@JsonProperty("messages")
 	private List<String> myMessage;
