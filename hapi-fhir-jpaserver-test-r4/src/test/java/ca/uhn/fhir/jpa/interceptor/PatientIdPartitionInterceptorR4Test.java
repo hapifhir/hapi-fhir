@@ -90,6 +90,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -403,13 +404,13 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Patient patient = myPatientDao.read(patientVersionOne);
 		assertEquals("1", patient.getIdElement().getVersionIdPart());
 
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-
-		List<SqlQuery> selectQueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-		assertEquals(2, selectQueriesForCurrentThread.size());
-		assertThat(selectQueriesForCurrentThread.get(0).getSql(false, false)).contains("PARTITION_ID=?");
-		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).doesNotContain("PARTITION_ID=");
-		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).doesNotContain("PARTITION_ID in");
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectCount(1)
+				.commitCount(1)
+				.noOtherCounts()
+				.selectSqlContains(0, "PARTITION_ID='65'")
+		);
 	}
 
 	@SuppressWarnings("GrazieInspection")
