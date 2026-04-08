@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.jpa.packages.loader.IPackageLoader;
 import ca.uhn.fhir.jpa.packages.loader.NpmPackageData;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -40,7 +41,6 @@ public class FetchPackageStepTest {
 	@Mock
 	private IPackageLoader myPackageLoader;
 
-	@InjectMocks
 	private FetchPackageStep step;
 
 	@Mock
@@ -49,6 +49,11 @@ public class FetchPackageStepTest {
 	private ArgumentCaptor<PackageContentsJson> myPackageContentsCaptor;
 	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
+
+	@BeforeEach
+	public void beforeEach() {
+		step = new FetchPackageStep(myPackageLoader);
+	}
 
 	@Test
 	public void testRun_installOnlyNoDependencies_succeeds() throws Exception {

@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -48,7 +49,6 @@ public class ProcessPackageStepTest {
 	@Mock
 	IValidationSupport myValidationSupport;
 
-	@InjectMocks
 	private ProcessPackageStep myStep;
 
 	@Captor
@@ -60,6 +60,11 @@ public class ProcessPackageStepTest {
 	private ArgumentCaptor<InstallationOutcomeJson> myInstallationOutcomeCaptor;
 	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
+
+	@BeforeEach
+	public void beforeEach() {
+		myStep = new ProcessPackageStep(myPackageInstallerSvc, mySearchParamRegistryController, myValidationSupport);
+	}
 
 	@Test
 	public void testRun_installOnly_succeeds() throws Exception {

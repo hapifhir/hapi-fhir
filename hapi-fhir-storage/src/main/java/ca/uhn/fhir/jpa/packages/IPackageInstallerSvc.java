@@ -19,12 +19,33 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
 public interface IPackageInstallerSvc {
 
+	/**
+	 * Loads and installs an IG from a file on disk or the Simplifier repo using
+	 * the {@link IPackageCacheManager}.
+	 * <p>
+	 * Installs the IG by persisting instances of the following types of resources:
+	 * <p>
+	 * - NamingSystem, CodeSystem, ValueSet, StructureDefinition (with snapshots),
+	 * ConceptMap, SearchParameter, Subscription
+	 * <p>
+	 * Creates the resources if non-existent, updates them otherwise.
+	 *
+	 * @param theSpec The details about what should be installed
+	 * @return a JSON object describing the changes that were made
+	 */
 	PackageInstallOutcomeJson install(PackageInstallationSpec theSpec);
 
+	/**
+	 * Removes a package from the {@link IPackageCacheManager}.
+	 *
+	 * @param theSpec The details about what should be removed
+	 * @return a JSON object describing the changes that were made
+	 */
 	PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theSpec);
 
 	/**

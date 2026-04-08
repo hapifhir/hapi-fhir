@@ -43,14 +43,17 @@ import java.util.Base64;
 public class ProcessPackageStep
 		implements IJobStepWorker<PackageInstallationJobParameters, PackageContentsJson, InstallationOutcomeJson> {
 
-	@Autowired
 	IPackageInstallerSvc myPackageInstallerSvc;
 
-	@Autowired
 	ISearchParamRegistryController mySearchParamRegistryController;
 
-	@Autowired
 	IValidationSupport myValidationSupport;
+
+	public ProcessPackageStep(IPackageInstallerSvc thePackageInstallerSvc, ISearchParamRegistryController theSearchParamRegistryController, IValidationSupport theValidationSupport) {
+		this.myPackageInstallerSvc = thePackageInstallerSvc;
+		this.mySearchParamRegistryController = theSearchParamRegistryController;
+		this.myValidationSupport = theValidationSupport;
+	}
 
 	@Nonnull
 	@Override

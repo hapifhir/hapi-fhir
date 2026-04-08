@@ -14,6 +14,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -32,7 +33,6 @@ public class FinalizeInstallationStepTest {
 	public static final String CHUNK_ID = "chunk-id";
 	public static final JobInstance ourTestInstance = JobInstance.fromInstanceId(INSTANCE_ID);
 
-	@InjectMocks
 	private FinalizeInstallationStep myStep;
 
 	@Mock
@@ -41,6 +41,11 @@ public class FinalizeInstallationStepTest {
 	private ArgumentCaptor<PackageInstallOutcomeJson> myOutcomeCaptor;
 	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
+
+	@BeforeEach
+	public void beforeEach() {
+		myStep = new FinalizeInstallationStep();
+	}
 
 	@Test
 	public void testRun_installOnlyNoDependencies_succeeds() throws Exception {

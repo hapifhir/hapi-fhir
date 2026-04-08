@@ -23,7 +23,12 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.InstallationOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
+import ca.uhn.fhir.jpa.packages.loader.IPackageLoader;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,6 +36,18 @@ import static ca.uhn.fhir.util.Batch2JobDefinitionConstants.INSTALL_PACKAGE;
 
 @Configuration
 public class InstallPackageAppCtx {
+
+	@Autowired
+	private IPackageLoader myPackageLoader;
+
+	@Autowired
+	IPackageInstallerSvc myPackageInstallerSvc;
+
+	@Autowired
+	ISearchParamRegistryController mySearchParamRegistryController;
+
+	@Autowired
+	IValidationSupport myValidationSupport;
 
 	@Bean("installPackageJobDefinition")
 	public JobDefinition<PackageInstallationJobParameters> installPackageJobDefinition() {
@@ -56,12 +73,12 @@ public class InstallPackageAppCtx {
 
 	@Bean
 	public FetchPackageStep fetchPackageStep() {
-		return new FetchPackageStep();
+		return new FetchPackageStep(myPackageLoader);
 	}
 
 	@Bean
 	public ProcessPackageStep processPackageStep() {
-		return new ProcessPackageStep();
+		return new ProcessPackageStep(myPackageInstallerSvc, mySearchParamRegistryController, myValidationSupport);
 	}
 
 	@Bean

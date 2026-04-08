@@ -37,8 +37,11 @@ import java.util.Base64;
 
 public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallationJobParameters, PackageContentsJson> {
 
-	@Autowired
 	private IPackageLoader myPackageLoader;
+
+	public FetchPackageStep(IPackageLoader thePackageLoader) {
+		this.myPackageLoader = thePackageLoader;
+	}
 
 	@Nonnull
 	@Override
