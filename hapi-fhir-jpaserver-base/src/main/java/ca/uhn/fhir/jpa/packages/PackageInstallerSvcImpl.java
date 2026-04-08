@@ -429,19 +429,19 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			ourLog.info("Skipping update of existing resource matching {}", resourceQuery);
 			return;
 		}
-		if (!searchResult.isEmpty()) {
-			ourLog.info("Updating existing resource matching {}", resourceQuery);
-		}
 		IBaseResource existingResource =
 				!searchResult.isEmpty() ? searchResult.getResources(0, 1).get(0) : null;
 
 		if (existingResource != null
-				&& isNotPresentCodeSystem(existingResource)
-				&& !theInstallationSpec.isOverwriteNotPresentCodeSystems()) {
+				&& isContentNotPresentCodeSystem(existingResource)
+				&& !theInstallationSpec.isOverwriteContentNotPresentCodeSystems()) {
 			ourLog.info("Skipping update of CodeSystem with content=not-present matching {}", resourceQuery);
 			return;
 		}
 
+		if (!searchResult.isEmpty()) {
+			ourLog.info("Updating existing resource matching {}", resourceQuery);
+		}
 		boolean isInstalled = false;
 		if (theInstallationSpec.isDryRun()) {
 			constructDryRunReport(theResource, existingResource, map, theOutcome);
@@ -613,7 +613,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * Such CodeSystems store their concepts in terminology tables rather than inline,
 	 * and should not be overwritten by IG packages by default.
 	 */
-	private boolean isNotPresentCodeSystem(IBaseResource theResource) {
+	private boolean isContentNotPresentCodeSystem(IBaseResource theResource) {
 		if (!theResource.fhirType().equals(ResourceType.CodeSystem.name())) {
 			return false;
 		}

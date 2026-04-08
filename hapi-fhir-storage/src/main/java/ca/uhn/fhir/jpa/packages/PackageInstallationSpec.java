@@ -44,7 +44,7 @@ import java.util.function.Supplier;
 	"additionalResourceFolders",
 	"versionPolicy",
 	"dryRun",
-	"overwriteNotPresentCodeSystems"
+	"overwriteContentNotPresentCodeSystems"
 })
 @ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -115,10 +115,10 @@ public class PackageInstallationSpec {
 
 	@Schema(
 			description =
-					"When true, CodeSystems with content=not-present will be overwritten by CodeSystems from the package. "
-							+ "Defaults to false, which protects not-present CodeSystems from being replaced by IG packages.")
-	@JsonProperty("overwriteNotPresentCodeSystems")
-	private boolean myOverwriteNotPresentCodeSystems = false;
+					"When true, a `CodeSystem` with `content=not-present` will be overwritten by a `CodeSystem` from the package. "
+							+ "Defaults to false, which protects an externally loaded `CodeSystem` from being replaced by IG packages.")
+	@JsonProperty("overwriteContentNotPresentCodeSystems")
+	private boolean myOverwriteContentNotPresentCodeSystems = false;
 
 	@JsonIgnore
 	private byte[] myPackageContents;
@@ -245,12 +245,12 @@ public class PackageInstallationSpec {
 		return myDryRun;
 	}
 
-	public boolean isOverwriteNotPresentCodeSystems() {
-		return myOverwriteNotPresentCodeSystems;
+	public boolean isOverwriteContentNotPresentCodeSystems() {
+		return myOverwriteContentNotPresentCodeSystems;
 	}
 
-	public PackageInstallationSpec setOverwriteNotPresentCodeSystems(boolean theOverwriteNotPresentCodeSystems) {
-		myOverwriteNotPresentCodeSystems = theOverwriteNotPresentCodeSystems;
+	public PackageInstallationSpec setOverwriteContentNotPresentCodeSystems(boolean theOverwriteNotPresentCodeSystems) {
+		myOverwriteContentNotPresentCodeSystems = theOverwriteNotPresentCodeSystems;
 		return this;
 	}
 

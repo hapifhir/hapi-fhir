@@ -1747,7 +1747,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testInstallR4Package_doesNotOverwriteNotPresentCodeSystem(@TempDir Path theTempDir) throws IOException {
+	public void testInstallR4Package_doesNotOverwriteContentNotPresentCodeSystem(@TempDir Path theTempDir) throws IOException {
 		// Setup: create an externally loaded CodeSystem with content=not-present and add concepts via delta
 		String codeSystemUrl = "http://example.org/CodeSystem/external-cs";
 

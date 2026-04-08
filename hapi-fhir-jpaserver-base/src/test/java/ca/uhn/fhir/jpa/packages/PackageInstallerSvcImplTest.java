@@ -326,7 +326,7 @@ public class PackageInstallerSvcImplTest {
 	}
 
 	@Test
-	public void testInstallPackage_overwritesNotPresentCodeSystem_whenOverrideEnabled() throws IOException {
+	public void testInstallPackage_overwritesContentNotPresentCodeSystem_whenOverrideEnabled() throws IOException {
 		// Setup: a CodeSystem with content=not-present already exists
 		CodeSystem existingCs = new CodeSystem();
 		existingCs.setId("CodeSystem/existingcs");
@@ -340,8 +340,8 @@ public class PackageInstallerSvcImplTest {
 		igCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		igCs.addConcept().setCode("A00").setDisplay("Cholera");
 
-		PackageInstallationSpec spec = setupResourceInPackage(existingCs, igCs, myCodeSystemDao);
-		spec.setOverwriteNotPresentCodeSystems(true);
+		PackageInstallationSpec spec = setupResourceInPackage(existingCs, igCs, myCodeSystemDao)
+			.setOverwriteContentNotPresentCodeSystems(true);
 
 		// Test
 		mySvc.install(spec);
