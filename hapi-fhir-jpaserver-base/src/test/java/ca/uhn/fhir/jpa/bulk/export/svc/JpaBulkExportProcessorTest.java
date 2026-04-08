@@ -330,7 +330,7 @@ public class JpaBulkExportProcessorTest {
 		// queryResourceTypeWithReferencesToPatients
 		SearchParameterMap observationSpMap = new SearchParameterMap();
 		RuntimeResourceDefinition observationDef = myFhirContext.getResourceDefinition("Observation");
-		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(eq(observationDef), eq(parameters), any(boolean.class)))
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(eq(observationDef), eq(parameters), eq(true)))
 			.thenReturn(Collections.singletonList(observationSpMap));
 		when(mySearchBuilderFactory.newSearchBuilder(eq("Observation"), eq(Observation.class)))
 			.thenReturn(observationSearchBuilder);
@@ -384,7 +384,7 @@ public class JpaBulkExportProcessorTest {
 		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(
 			any(RuntimeResourceDefinition.class),
 			any(ExportPIDIteratorParameters.class),
-			any(boolean.class)
+			eq(true)
 		)).thenReturn(Collections.singletonList(new SearchParameterMap()));
 		when(mySearchBuilderFactory.newSearchBuilder(
 			anyString(),

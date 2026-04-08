@@ -481,9 +481,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testPatientBulkExportWithSince_onlyReturnsResourcesUpdatedAfterSince() {
-		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
-
+	public void testPatientBulkExport_returnsResourcesBasedOnSince() {
 		// Create Patient BEFORE the _since cutoff
 		Patient patient1 = new Patient();
 		patient1.setId("P1");
