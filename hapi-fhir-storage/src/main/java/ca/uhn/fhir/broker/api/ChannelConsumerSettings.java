@@ -23,6 +23,11 @@ public class ChannelConsumerSettings extends BaseChannelSettings {
 	public static final Integer DEFAULT_CHANNEL_CONSUMERS = 2;
 
 	private Integer myConcurrentConsumers = DEFAULT_CHANNEL_CONSUMERS;
+	/**
+	 * This is the timeout setting of the broker.
+	 * It is the time after which message redelivery happens.
+	 */
+	private long myAckTimeoutMs;
 
 	/**
 	 * Constructor
@@ -38,5 +43,13 @@ public class ChannelConsumerSettings extends BaseChannelSettings {
 	public ChannelConsumerSettings setConcurrentConsumers(int theConcurrentConsumers) {
 		myConcurrentConsumers = theConcurrentConsumers;
 		return this;
+	}
+
+	public long getAckTimeoutMs() {
+		return myAckTimeoutMs;
+	}
+
+	public void setAckTimeoutMs(long theAckTimeoutMs) {
+		myAckTimeoutMs = theAckTimeoutMs;
 	}
 }

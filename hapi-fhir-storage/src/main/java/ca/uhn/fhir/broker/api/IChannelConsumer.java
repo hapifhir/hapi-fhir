@@ -59,6 +59,12 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	IMessageListener<T> getMessageListener();
 
 	/**
+	 * This is the timeout setting of the broker.
+	 * It is the time after which message redelivery will happen.
+	 */
+	long getAckTimeoutMs();
+
+	/**
 	 * Pause requesting new messages from the broker until resume() is called.
 	 */
 	default void pause() {

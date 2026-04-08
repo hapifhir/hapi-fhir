@@ -44,13 +44,17 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	private MessageHandler myMessageHandler;
 	private boolean myClosed;
 
+	protected final long myRedeliveryDelayMs;
+
 	public SpringMessagingReceiverAdapter(
 			Class<? extends IMessage<T>> theMessageType,
 			ISpringMessagingChannelReceiver theSpringMessagingChannelReceiver,
-			IMessageListener<T> theMessageListener) {
+			IMessageListener<T> theMessageListener,
+			long theRedeliveryDelayMs) {
 		myMessageType = theMessageType;
 		mySpringMessagingChannelReceiver = theSpringMessagingChannelReceiver;
 		myMessageListener = theMessageListener;
+		myRedeliveryDelayMs = theRedeliveryDelayMs;
 	}
 
 	public void subscribe(MessageHandler theMessageHandler) {
@@ -139,5 +143,10 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	public void resume() {
 		checkState();
 		mySpringMessagingChannelReceiver.resume();
+	}
+
+	@Override
+	public long getAckTimeoutMs() {
+		return myRedeliveryDelayMs;
 	}
 }

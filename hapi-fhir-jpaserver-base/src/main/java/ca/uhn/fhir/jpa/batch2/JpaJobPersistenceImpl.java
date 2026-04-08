@@ -129,6 +129,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
 		entity.setStatus(getOnCreateStatus(theBatchWorkChunk));
+		entity.setLastHeartbeat(new Date());
 
 		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
 		ourLog.trace(

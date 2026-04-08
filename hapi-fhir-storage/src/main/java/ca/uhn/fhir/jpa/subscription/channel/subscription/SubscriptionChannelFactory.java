@@ -86,6 +86,7 @@ public class SubscriptionChannelFactory {
 		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
 		if (theOptions != null) {
 			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
+			config.setAckTimeoutMs(theOptions.getAckTimeoutMs());
 		}
 		return config;
 	}
@@ -106,6 +107,7 @@ public class SubscriptionChannelFactory {
 		if (theOptions != null) {
 			config.setQualifyChannelName(theOptions.isQualifyChannelName());
 			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
+			config.setAckTimeoutMs(theOptions.getAckTimeoutMs());
 		}
 		return config;
 	}

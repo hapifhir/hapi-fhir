@@ -437,12 +437,12 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		assertThat(myJobPersistence.fetchInstancesByJobDefinitionId(JOB_DEF_ID, 100, 0)).hasSize(size);
 	}
 
-
 	private void assertInstanceStatus(StatusEnum theInProgress) {
 		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
 		assertThat(instance).isPresent();
 		assertEquals(theInProgress, instance.get().getStatus());
 	}
+
 	@Nonnull
 	private static JobDefinition<? extends IModelJson> buildGatedJobDefinition(IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> theSecondStep, IJobStepWorker<TestJobParameters, SecondStepOutput, VoidModel> theLastStep) {
 		return JobDefinition.newBuilder()

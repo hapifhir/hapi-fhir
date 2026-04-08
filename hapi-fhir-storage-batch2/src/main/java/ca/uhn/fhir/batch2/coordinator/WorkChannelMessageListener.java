@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -53,6 +54,8 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final JobStepExecutorFactory myJobStepExecutorFactory;
 
+	private long myAckTimeoutMs = -1;
+
 	public WorkChannelMessageListener(
 			@Nonnull IJobPersistence theJobPersistence,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
@@ -73,6 +76,10 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				theJobMaintenanceService,
 				theJobDefinitionRegistry,
 				theInterceptorService);
+	}
+
+	public void setAckTimeoutMs(long theMs) {
+		myAckTimeoutMs = theMs;
 	}
 
 	public Class<JobWorkNotification> getPayloadType() {
@@ -148,21 +155,60 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 		 * Load the chunk, and mark it as dequeued.
 		 */
 		Optional<MessageProcess> updateChunkStatusAndValidate() {
-			return myJobPersistence
+			Optional<WorkChunk> workChunkOp = myJobPersistence
 					.onWorkChunkDequeue(myChunkId)
 					.or(() -> {
 						ourLog.error("Unable to find chunk with ID {} - Aborting.  {}", myChunkId, myWorkNotification);
 						return Optional.empty();
-					})
-					.map(chunk -> {
-						myWorkChunk = chunk;
-						ourLog.debug(
-								"Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]",
-								myChunkId,
-								myWorkChunk.getTargetStepId(),
-								myWorkChunk.getStartTime());
-						return this;
 					});
+			//					.map(chunk -> {
+			//
+			//						// TODO - handle the different flows here?
+			//						// if in prog
+			//						//     if heartbeat < 2x - continue
+			//						//     else log, sleep for a bit, throw to put back on stack
+			//
+			//						myWorkChunk = chunk;
+			//						ourLog.debug(
+			//								"Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]",
+			//								myChunkId,
+			//								myWorkChunk.getTargetStepId(),
+			//								myWorkChunk.getStartTime());
+			////						return this;
+			//						return myWorkChunk;
+			//					});
+
+			if (workChunkOp.isPresent()) {
+				myWorkChunk = workChunkOp.get();
+
+				ourLog.debug(
+						"Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]",
+						myChunkId,
+						myWorkChunk.getTargetStepId(),
+						myWorkChunk.getStartTime());
+
+				//						// TODO - handle the different flows here?
+				//						// if in prog
+				//						//     if heartbeat < 2x - continue
+				//						//     else log, sleep for a bit, throw to put back on stack
+
+				/*
+				 * If the workchunk is already IN_PROGRESS, there's 2 possibilities:
+				 * * it was picked up and is still being worked on by a slow worker
+				 * * it was picked up and the worker died while processing it
+				 *
+				 * Either way, redelivery is happening here
+				 */
+				if (myWorkChunk.getStatus() == WorkChunkStatusEnum.IN_PROGRESS) {
+					// check the heartbeat to see what's happening
+					ourLog.warn("\nXXXXXX " + myAckTimeoutMs);
+					//					if (myWorkChunk.getLastHeartbeat() < sometime) {
+					//
+					//					}
+				}
+			}
+
+			return Optional.of(this);
 		}
 
 		/**

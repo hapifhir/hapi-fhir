@@ -132,6 +132,7 @@ public abstract class BaseBatch2Config {
 	public IChannelProducer<JobWorkNotification> batch2ProcessingChannelProducer(IBrokerClient theBrokerClient) {
 		ChannelProducerSettings settings =
 				new ChannelProducerSettings().setConcurrentConsumers(getConcurrentConsumers());
+
 		return theBrokerClient.getOrCreateProducer(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
 
@@ -158,10 +159,14 @@ public abstract class BaseBatch2Config {
 	@Bean
 	public IChannelConsumer<JobWorkNotification> batch2ProcessingChannelConsumer(
 			IBrokerClient theBrokerClient, WorkChannelMessageListener theWorkChannelMessageListener) {
-		ChannelConsumerSettings settings =
-				new ChannelConsumerSettings().setConcurrentConsumers(getConcurrentConsumers());
-		return theBrokerClient.getOrCreateConsumer(
+		ChannelConsumerSettings settings = new ChannelConsumerSettings();
+		settings.setConcurrentConsumers(getConcurrentConsumers());
+		IChannelConsumer<JobWorkNotification> consumer = theBrokerClient.getOrCreateConsumer(
 				CHANNEL_NAME, JobWorkNotificationJsonMessage.class, theWorkChannelMessageListener, settings);
+
+		// set the consumer timeout to the workchannelmessagelistener
+		theWorkChannelMessageListener.setAckTimeoutMs(consumer.getAckTimeoutMs());
+		return consumer;
 	}
 
 	@Bean
