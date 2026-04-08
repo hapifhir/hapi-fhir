@@ -1,7 +1,0 @@
----
-type: add
-issue: 7637
-title: "A new test utility interface for building FHIR Subscription 
-resources was added - `ITestSubscriptionBuilder`. `ITestDataBuilder` methods (doCreateResource, doUpdateResource,  
-doDeleteResource, getFhirContext) are now default methods, making build-only implementations simpler."
-
