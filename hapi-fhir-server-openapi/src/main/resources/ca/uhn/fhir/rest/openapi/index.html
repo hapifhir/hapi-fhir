@@ -43,6 +43,22 @@
 <script src="./swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
 <script>
     window.onload = function() {
+		 //Uncheck send empty value by default
+		 const UncheckSendEmptyValuePlugin = function() {
+			 return {
+				 wrapComponents: {
+					 ParameterIncludeEmpty: (Original, { React }) => (props) => {
+						 props.isIncludedOptions.defaultValue = false;
+						 return React.createElement(Original, props)
+					 },
+					 TryItOutButton: (Original, { React }) => (props) => {
+						 if (props.isOAS3 && props.hasUserEditedBody) { props.hasUserEditedBody = false; }
+						 return React.createElement(Original, props)
+					 }
+				 }
+			 }
+		 };
+
         // Begin Swagger UI call region
         const ui = SwaggerUIBundle({
             url: "[[${OPENAPI_DOCS} + '?page=' + ${PAGE}]]",
@@ -53,6 +69,7 @@
                 SwaggerUIStandalonePreset
             ],
             plugins: [
+					UncheckSendEmptyValuePlugin
                 // SwaggerUIBundle.plugins.DownloadUrl
             ],
             // layout: "StandaloneLayout",
