@@ -221,32 +221,33 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		// Setup
 		IGenericClient client = myServer.getFhirClient();
 
-		Location location = new Location();
-		location.setId("chin");
-		location.getPosition()
-			.setLatitude(CoordCalculatorTestUtil.LATITUDE_CHIN)
-			.setLongitude(CoordCalculatorTestUtil.LATITUDE_CHIN);
-		client.update().resource(location).execute();
+		// Mannheim
+		double latitude = 49.49;
+		double longitude = 8.46;
 
-		location = new Location();
-		location.setId("belleville");
-		location.getPosition()
-			.setLatitude(CoordCalculatorTestUtil.LATITUDE_BELLEVILLE)
-			.setLongitude(CoordCalculatorTestUtil.LATITUDE_BELLEVILLE);
-		client.update().resource(location).execute();
+		// Create 3 real locations around Mannheim
+		String heiderlberg = createLocation(49.3988, 8.6724).toUnqualifiedVersionless().getValue(); // Heidelberg
+		String lufwigshafen = createLocation(49.4774, 8.4452).toUnqualifiedVersionless().getValue(); // Ludwigshafen
+		String mannheim = createLocation(latitude, longitude).toUnqualifiedVersionless().getValue();
 
 		// Test
 		myCaptureQueriesListener.clear();
 		Bundle result = client
 			.search()
-			.byUrl("Location?near=" + CoordCalculatorTestUtil.LATITUDE_UHN + "|" + CoordCalculatorTestUtil.LONGITUDE_UHN + "&_sort=Location:near")
+			.byUrl("Location?near=49.49|8.46|5000|km&_sort=Location:near")
 			.returnBundle(Bundle.class)
 			.execute();
 		myCaptureQueriesListener.logSelectQueries();
 
 		// Verify
 		List<String> ids = toUnqualifiedVersionlessIdValues(result);
-		assertThat(ids).containsExactly();
+		assertThat(ids).as(ids.toString()).containsExactly(mannheim, lufwigshafen, heiderlberg);
+	}
+
+	private IIdType createLocation(double lat, double lon) {
+		Location loc = new Location();
+		loc.setPosition(new Location.LocationPositionComponent().setLatitude(lat).setLongitude(lon));
+		return myServer.getFhirClient().create().resource(loc).execute().getId();
 	}
 
 
