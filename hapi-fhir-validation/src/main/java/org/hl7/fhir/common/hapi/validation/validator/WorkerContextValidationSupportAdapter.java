@@ -985,8 +985,13 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends Resource> List<T> fetchResourceVersions(Class<T> class_, String url) {
+		T resource = fetchResource(class_, url, null);
+		if (resource != null) {
+			return List.of(resource);
+		}
 		return List.of();
 	}
 
