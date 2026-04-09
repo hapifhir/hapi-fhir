@@ -1469,15 +1469,17 @@ public class QueryStack {
 					theSourceJoinColumn,
 					theRequestPartitionId));
 		} else {
-			// Include resource type in cache key so each target type gets its own HFJ_RES_LINK join.
+			// Include all distinct resource types from the OR-group in cache key to  produce a unique key
 			String cacheParamName = theParamName;
-			if (!theList.isEmpty() && theList.get(0) instanceof ReferenceParam refParam) {
-				// Only the 1st element is inspected because callers are expected to have already split OR-lists
-				// by resource type, so all elements target the same type.
-				String resourceType = refParam.getResourceType();
-				if (isNotBlank(resourceType)) {
-					cacheParamName = theParamName + ":" + resourceType;
-				}
+			String typeQualifier = theList.stream()
+					.filter(ReferenceParam.class::isInstance)
+					.map(p -> ((ReferenceParam) p).getResourceType())
+					.filter(StringUtils::isNotBlank)
+					.distinct()
+					.sorted()
+					.collect(Collectors.joining("|"));
+			if (isNotBlank(typeQualifier)) {
+				cacheParamName = theParamName + ":" + typeQualifier;
 			}
 			ResourceLinkPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(
 							PredicateBuilderTypeEnum.REFERENCE,
