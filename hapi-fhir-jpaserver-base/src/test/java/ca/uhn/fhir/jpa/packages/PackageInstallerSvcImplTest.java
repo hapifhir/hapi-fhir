@@ -297,6 +297,61 @@ public class PackageInstallerSvcImplTest {
 		assertEquals("existingcs", codeSystem.getIdPart());
 	}
 
+	@Test
+	public void testInstallPackage_skipsNotPresentCodeSystem() throws IOException {
+		// Setup: a CodeSystem with content=not-present already exists
+		CodeSystem existingCs = new CodeSystem();
+		existingCs.setId("CodeSystem/existingcs");
+		existingCs.setUrl("http://my-code-system");
+		existingCs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+
+		// A complete CodeSystem from an IG package with the same URL
+		CodeSystem igCs = new CodeSystem();
+		igCs.setId("CodeSystem/igcs");
+		igCs.setUrl("http://my-code-system");
+		igCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		igCs.addConcept().setCode("A00").setDisplay("Cholera");
+
+		PackageInstallationSpec spec = setupResourceInPackage(existingCs, igCs, myCodeSystemDao);
+
+		// Test
+		mySvc.install(spec);
+
+		// Verify: neither create nor update should be called for the CodeSystem
+		verify(myCodeSystemDao, times(0)).update(any(), any(RequestDetails.class));
+		verify(myCodeSystemDao, times(0)).create(any(), any(RequestDetails.class));
+
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage(
+			"Skipping update of CodeSystem with content=not-present matching ?url=http%3A//my-code-system");
+	}
+
+	@Test
+	public void testInstallPackage_overwritesContentNotPresentCodeSystem_whenOverrideEnabled() throws IOException {
+		// Setup: a CodeSystem with content=not-present already exists
+		CodeSystem existingCs = new CodeSystem();
+		existingCs.setId("CodeSystem/existingcs");
+		existingCs.setUrl("http://my-code-system");
+		existingCs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+
+		// A complete CodeSystem from an IG package with the same URL
+		CodeSystem igCs = new CodeSystem();
+		igCs.setId("CodeSystem/igcs");
+		igCs.setUrl("http://my-code-system");
+		igCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		igCs.addConcept().setCode("A00").setDisplay("Cholera");
+
+		PackageInstallationSpec spec = setupResourceInPackage(existingCs, igCs, myCodeSystemDao)
+			.setOverwriteContentNotPresentCodeSystems(true);
+
+		// Test
+		mySvc.install(spec);
+
+		// Verify: update should be called since override is enabled
+		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
+		CodeSystem codeSystem = myCodeSystemCaptor.getValue();
+		assertEquals("existingcs", codeSystem.getIdPart());
+	}
+
 	public enum InstallType {
 		CREATE, SPLIT_AND_CREATE, UPDATE, UPDATE_OVERRIDE
 	}
