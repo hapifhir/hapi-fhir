@@ -14,12 +14,13 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
+import ca.uhn.fhir.util.JsonUtil;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -27,9 +28,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -41,6 +45,7 @@ public class ConsolidateDependenciesStepTest {
 	public static final String CHUNK_ID = "chunk-id";
 	public static final JobInstance ourTestInstance = JobInstance.fromInstanceId(INSTANCE_ID);
 	public static final String DEPENDENCY_JOB_ID = "dependency-job-id";
+	public static final String DEPENDENCY_JOB_2_ID = "dependency-job-2-id";
 
 	@Mock
 	private IJobCoordinator myJobCoordinator;
@@ -60,7 +65,7 @@ public class ConsolidateDependenciesStepTest {
 	}
 
 	@Test
-	public void testRun_noDependencies_succeeds() throws Exception {
+	public void testRun_noDependencies_succeeds() {
 		// set up
 		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
 		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
@@ -98,7 +103,7 @@ public class ConsolidateDependenciesStepTest {
 
 	@ParameterizedTest
 	@EnumSource(value = StatusEnum.class, names = {"QUEUED", "IN_PROGRESS", "FINALIZE", "ERRORED"})
-	public void testRun_dependenciesNotComplete_throwsException(StatusEnum theStatus) throws Exception {
+	public void testRun_dependenciesNotComplete_throwsException(StatusEnum theStatus) {
 		// set up
 		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
 		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
@@ -130,4 +135,72 @@ public class ConsolidateDependenciesStepTest {
 		assertThatThrownBy(() -> myStep.run(details, myJobDataSink)).isInstanceOf(RetryChunkLaterException.class);
 	}
 
+	@Test
+	public void testRun_consolidateDependencies_succeeds() {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		installationSpec.setFetchDependencies(true);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+
+		String fakePackageContents = "pass through data";
+		byte[] encodedBytes = Base64.getEncoder().encode(fakePackageContents.getBytes());
+
+		PackageInstallOutcomeJson report = new PackageInstallOutcomeJson();
+		report.getMessage().add("Main package message");
+
+		PackageWithDependenciesJson packageWithDependencies = new PackageWithDependenciesJson();
+		packageWithDependencies.setContents(encodedBytes);
+		packageWithDependencies.setReport(report);
+		packageWithDependencies.setDependencyJobIds(List.of(DEPENDENCY_JOB_ID, DEPENDENCY_JOB_2_ID));
+
+		JobInstance jobInstance1 = createJobInstance(DEPENDENCY_JOB_ID, List.of("SearchParameter", "SearchParameter", "StructureDefinition"));
+		JobInstance jobInstance2 = createJobInstance(DEPENDENCY_JOB_2_ID, List.of("SearchParameter", "CodeSystem", "ValueSet"));
+
+		when(myJobCoordinator.getInstance(anyString())).thenReturn(jobInstance1, jobInstance2);
+
+		StepExecutionDetails<PackageInstallationJobParameters, PackageWithDependenciesJson> details =
+			new StepExecutionDetails<>(params, packageWithDependencies, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		// execute
+		RunOutcome outcome = myStep.run(details, myJobDataSink);
+
+		// validate
+		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+
+		verify(myJobCoordinator, times(2)).getInstance(anyString());
+
+		verify(myJobDataSink).accept(myPackageContentsCaptor.capture());
+		PackageContentsJson packageContentsJson = myPackageContentsCaptor.getValue();
+		assertThat(packageContentsJson.getContents()).isEqualTo(encodedBytes);
+		assertThat(packageContentsJson.getReport().getMessage()).contains(
+			"Main package message",
+			"Message from dependent job dependency-job-id",
+			"Message from dependent job dependency-job-2-id");
+		Map<String,Integer> expectedResources = Map.of(
+			"SearchParameter", 3,
+			"StructureDefinition", 1,
+			"CodeSystem", 1,
+			"ValueSet", 1);
+		assertThat(packageContentsJson.getReport().getResourcesInstalled()).isEqualTo(expectedResources);
+	}
+
+	@Nonnull
+	private static JobInstance createJobInstance(String theInstanceId, List<String> theResourceTypes) {
+		JobInstance jobInstance = new JobInstance();
+		jobInstance.setInstanceId(theInstanceId);
+		jobInstance.setStatus(StatusEnum.COMPLETED);
+
+		PackageInstallOutcomeJson report = new PackageInstallOutcomeJson();
+		report.getMessage().add("Message from dependent job " + theInstanceId);
+		for (String resourceType : theResourceTypes) {
+			report.incrementResourcesInstalled(resourceType);
+		}
+
+		jobInstance.setReport(JsonUtil.serialize(report));
+
+		return jobInstance;
+	}
 }

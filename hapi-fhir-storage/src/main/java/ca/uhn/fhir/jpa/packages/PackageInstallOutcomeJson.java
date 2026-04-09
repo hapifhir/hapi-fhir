@@ -101,12 +101,11 @@ public class PackageInstallOutcomeJson implements IModelJson {
 	}
 
 	public void incrementResourcesInstalled(String theResourceType) {
-		Integer existing = getResourcesInstalled().get(theResourceType);
-		if (existing == null) {
-			getResourcesInstalled().put(theResourceType, 1);
-		} else {
-			getResourcesInstalled().put(theResourceType, existing + 1);
-		}
+		getResourcesInstalled().merge(theResourceType, 1, Integer::sum);
+	}
+
+	public void increaseResourcesInstalled(String theResourceType, int theCount) {
+		getResourcesInstalled().merge(theResourceType, theCount, Integer::sum);
 	}
 
 	@Override
