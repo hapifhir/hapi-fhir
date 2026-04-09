@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6529
+jira: SMILE-9966
+title: "Added implied validation profile rules in order to enforce specific implementation guides so that resources are validated when no profiles are specified under meta."
