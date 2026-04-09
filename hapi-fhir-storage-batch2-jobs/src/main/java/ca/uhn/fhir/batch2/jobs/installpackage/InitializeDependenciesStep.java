@@ -27,7 +27,7 @@ import java.util.List;
 public class InitializeDependenciesStep
 		implements IJobStepWorker<PackageInstallationJobParameters, PackageContentsJson, PackageWithDependenciesJson> {
 
-	private IJobCoordinator myJobCoordinator;
+	private final IJobCoordinator myJobCoordinator;
 
 	public InitializeDependenciesStep(IJobCoordinator myJobCoordinator) {
 		this.myJobCoordinator = myJobCoordinator;
