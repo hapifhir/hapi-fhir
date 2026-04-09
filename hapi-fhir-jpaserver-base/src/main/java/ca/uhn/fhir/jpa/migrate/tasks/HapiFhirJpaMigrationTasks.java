@@ -132,6 +132,108 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init840();
 		init860();
 		init880();
+		init8100();
+	}
+
+	// TODO: this will most likey be merged after V8_10_0, should be renamed lated
+	protected void init8100() {
+		Builder version = forVersion(VersionEnum.V8_10_0);
+		// Add HFJ_SPIDX2_TOKEN_COMMON table
+		{
+			Builder.BuilderAddTableByColumns spidx2TokenCommon =
+				version.addTableByColumns("20260408.10", "HFJ_SPIDX2_TOKEN_COMMON", "HASH_SYS_AND_VALUE");
+
+			spidx2TokenCommon
+				.addColumn("HASH_SYS_AND_VALUE")
+				.nonNullable()
+				.type(ColumnTypeEnum.LONG);
+			spidx2TokenCommon
+				.addColumn("SYSTEM_ID")
+				.nonNullable()
+				.type(ColumnTypeEnum.LONG);
+			spidx2TokenCommon
+				.addColumn("HASH_IDENTITY")
+				.nonNullable()
+				.type(ColumnTypeEnum.LONG);
+			spidx2TokenCommon
+				.addColumn("HASH_VALUE")
+				.nonNullable()
+				.type(ColumnTypeEnum.LONG);
+			spidx2TokenCommon
+				.addColumn("SP_VALUE")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 200);
+
+			spidx2TokenCommon
+				.addIndex("20260408.20", "IDX_SP_TOKEN_COMMON_SYSTEM")
+				.unique(false)
+				.withColumns("SYSTEM_ID", "HASH_SYS_AND_VALUE");
+			spidx2TokenCommon
+				.addIndex("20260408.30", "IDX_SP_TOKEN_COMMON_VALUE")
+				.unique(false)
+				.withColumns("HASH_VALUE", "HASH_SYS_AND_VALUE");
+			spidx2TokenCommon
+				.addIndex("20260408.40", "IDX_SP_TOKEN_IDENTITY")
+				.unique(false)
+				.withColumns("HASH_IDENTITY", "HASH_SYS_AND_VALUE");
+		}
+
+		// Add HFJ_SPIDX2_TOKEN_IDENTIFIER table
+		{
+			version.addIdGenerator("20260408.50", "SEQ_SPIDX2_TOKEN_IDENTIFIER");
+			Builder.BuilderAddTableByColumns spidx2TokenIdentifier =
+				version.addTableByColumns("20260408.60", "HFJ_SPIDX2_TOKEN_IDENTIFIER", "SP_ID");
+
+			spidx2TokenIdentifier
+				.addColumn("SP_ID")
+				.nonNullable()
+				.type(ColumnTypeEnum.LONG);
+			spidx2TokenIdentifier
+				.addColumn("RES_ID")
+				.nonNullable()
+				.type(ColumnTypeEnum.LONG);
+			spidx2TokenIdentifier
+				.addColumn("HASH_IDENTITY")
+				.nonNullable()
+				.type(ColumnTypeEnum.LONG);
+			spidx2TokenIdentifier
+				.addColumn("SP_SYSTEM_URL_ID")
+				.nonNullable()
+				.type(ColumnTypeEnum.LONG);
+			spidx2TokenIdentifier
+				.addColumn("HASH_VALUE")
+				.nonNullable()
+				.type(ColumnTypeEnum.LONG);
+			spidx2TokenIdentifier
+				.addColumn("TYPE_HASH_SYS_AND_VALUE")
+				.nullable()
+				.type(ColumnTypeEnum.LONG);
+			spidx2TokenIdentifier
+				.addColumn("PARTITION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+			spidx2TokenIdentifier
+				.addColumn("SP_VALUE")
+				.nonNullable()
+				.type(ColumnTypeEnum.STRING, 768);
+
+			spidx2TokenIdentifier
+				.addIndex("20260408.80", "IDX_SP_TOKEN_ID_HASH_SYSTEM")
+				.unique(false)
+				.withColumns("HASH_IDENTITY", "SP_SYSTEM_URL_ID", "RES_ID", "PARTITION_ID");
+			spidx2TokenIdentifier
+				.addIndex("20260408.90", "IDX_SP_TOKEN_ID_HASH")
+				.unique(false)
+				.withColumns("HASH_IDENTITY", "RES_ID", "PARTITION_ID", "SP_SYSTEM_URL_ID");
+			spidx2TokenIdentifier
+				.addIndex("20260408.100", "IDX_SP_TOKEN_ID_HASH_VALUE")
+				.unique(false)
+				.withColumns("HASH_IDENTITY", "HASH_VALUE", "RES_ID", "PARTITION_ID", "SP_SYSTEM_URL_ID", "TYPE_HASH_SYS_AND_VALUE");
+			spidx2TokenIdentifier
+				.addIndex("20260408.110", "IDX_SP_TOKEN_ID_RES_ID")
+				.unique(false)
+				.withColumns("RES_ID");
+		}
 	}
 
 	protected void init880() {
