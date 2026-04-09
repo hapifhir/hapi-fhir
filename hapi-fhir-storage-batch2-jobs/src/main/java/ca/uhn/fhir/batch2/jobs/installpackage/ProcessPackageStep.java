@@ -65,10 +65,13 @@ public class ProcessPackageStep
 			@Nonnull IJobDataSink<InstallationOutcomeJson> theDataSink)
 			throws JobExecutionFailedException {
 		try {
-			byte[] encodedContents = theStepExecutionDetails.getData().getContents();
+			PackageContentsJson packageContents = theStepExecutionDetails.getData();
+			byte[] encodedContents = packageContents.getContents();
 			byte[] decodedContents = Base64.getDecoder().decode(encodedContents);
 			NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(decodedContents));
-			PackageInstallOutcomeJson packageOutcome = new PackageInstallOutcomeJson();
+
+			// we will be appending new data to the report we received from upstream
+			PackageInstallOutcomeJson packageOutcome = packageContents.getReport();
 
 			PackageInstallationSpec installationSpec =
 					theStepExecutionDetails.getParameters().getInstallationSpec();

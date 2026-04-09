@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -80,6 +79,7 @@ public class ProcessPackageStepTest {
 		byte[] packageBytes = stream.readAllBytes();
 		PackageContentsJson packageContentsJson = new PackageContentsJson();
 		packageContentsJson.setContents(Base64.getEncoder().encode(packageBytes));
+		packageContentsJson.setReport(new PackageInstallOutcomeJson());
 		NpmPackage expectedPackage = NpmPackage.fromPackage(new ByteArrayInputStream(packageBytes));
 
 		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
