@@ -73,8 +73,9 @@ public class ProcessPackageStep
 			// we will be appending new data to the report we received from upstream
 			PackageInstallOutcomeJson packageOutcome = packageContents.getReport();
 
+			PackageInstallationJobParameters parameters = theStepExecutionDetails.getParameters();
 			PackageInstallationSpec installationSpec =
-					theStepExecutionDetails.getParameters().getInstallationSpec();
+					parameters.getInstallationSpec();
 
 			myPackageInstallerSvc.installPackage(npmPackage, installationSpec, packageOutcome);
 
@@ -85,9 +86,12 @@ public class ProcessPackageStep
 								"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
 			}
 
-			mySearchParamRegistryController.refreshCacheIfNecessary();
+			// to prevent wasted effort, we only want to refresh the caches once, at the end of the root job
+			if (!parameters.isDependencyJob()) {
+				mySearchParamRegistryController.refreshCacheIfNecessary();
 
-			myValidationSupport.invalidateCaches();
+				myValidationSupport.invalidateCaches();
+			}
 
 			InstallationOutcomeJson outcome = new InstallationOutcomeJson();
 			outcome.getOutcomes().add(packageOutcome);

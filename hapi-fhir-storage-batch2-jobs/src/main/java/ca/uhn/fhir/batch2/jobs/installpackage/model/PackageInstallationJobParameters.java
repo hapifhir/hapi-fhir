@@ -28,11 +28,22 @@ public class PackageInstallationJobParameters extends BaseBatchJobParameters {
 	@JsonProperty("spec")
 	private PackageInstallationSpec myInstallationSpec;
 
+	@JsonProperty("isDependencyJob")
+	private boolean myIsDependencyJob = false;
+
 	public PackageInstallationSpec getInstallationSpec() {
 		return myInstallationSpec;
 	}
 
 	public void setInstallationSpec(PackageInstallationSpec theInstallationSpec) {
 		myInstallationSpec = theInstallationSpec;
+	}
+
+	public boolean isDependencyJob() {
+		return myIsDependencyJob;
+	}
+
+	public void setDependencyJob(boolean theDependencyJob) {
+		myIsDependencyJob = theDependencyJob;
 	}
 }

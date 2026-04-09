@@ -114,6 +114,12 @@ public class InitializeDependenciesStepTest {
 			new PackageUtils.DependentPackage("hl7.fhir.uv.sdc", "3.0.0"),
 			new PackageUtils.DependentPackage("us.cdc.phinvads", "0.12.0"),
 			new PackageUtils.DependentPackage("us.nlm.vsac", "0.24.0"));
+
+		startRequests.stream()
+			.map(JobInstanceStartRequest::getParameters)
+			.map(t -> JsonUtil.deserialize(t, PackageInstallationJobParameters.class))
+			.map(PackageInstallationJobParameters::isDependencyJob)
+			.forEach(t -> assertThat(t).isTrue());
 	}
 
 	@Test

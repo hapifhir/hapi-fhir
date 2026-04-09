@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessPackageStepTest {
@@ -102,5 +103,35 @@ public class ProcessPackageStepTest {
 		InstallationOutcomeJson outcomeJson = myInstallationOutcomeCaptor.getValue();
 		assertThat(outcomeJson).isNotNull();
 		assertThat(outcomeJson.getOutcomes()).hasSize(1);
+	}
+
+	@Test
+	public void testRun_childJob_doesNotReindex() throws Exception {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		installationSpec.setFetchDependencies(false);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+		params.setDependencyJob(true);
+
+		InputStream stream = ProcessPackageStepTest.class.getResourceAsStream("usCorePackage.tgz");
+		byte[] packageBytes = stream.readAllBytes();
+		PackageContentsJson packageContentsJson = new PackageContentsJson();
+		packageContentsJson.setContents(Base64.getEncoder().encode(packageBytes));
+		packageContentsJson.setReport(new PackageInstallOutcomeJson());
+
+		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
+			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		// execute
+		RunOutcome outcome = myStep.run(details, myJobDataSink);
+
+		// validate
+		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+
+		verifyNoInteractions(mySearchParamRegistryController);
+		verifyNoInteractions(myValidationSupport);
 	}
 }
