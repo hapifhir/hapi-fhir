@@ -153,4 +153,29 @@ public class RepositoryValidatingInterceptorExamples {
 				.disallowProfile("https://fhir.nhs.uk/R4/StructureDefinition/UKCore-Patient");
 		// END SNIPPET: disallowProfiles
 	}
+
+	public void impliedProfileIfNotExplicit() {
+		RepositoryValidatingRuleBuilder ruleBuilder = myAppCtx.getBean(RepositoryValidatingRuleBuilder.class);
+
+		// START SNIPPET: impliedProfileIfNotExplicit
+		// Patient resource defaults to implied US Core Patient profile if no profile is declared
+		ruleBuilder
+				.forResourcesOfType("Patient")
+				.impliedProfileIfNotExplicit(
+						"http://www.hl7.org/fhir/us/core/StructureDefinition-us-core-patient.html");
+		// If profile is declared, implied profile is ignored
+		// END SNIPPET: impliedProfileIfNotExplicit
+	}
+
+	public void impliedProfileAlways() {
+		RepositoryValidatingRuleBuilder ruleBuilder = myAppCtx.getBean(RepositoryValidatingRuleBuilder.class);
+
+		// START SNIPPET: impliedProfileAlways
+		// Patient resource will always use implied US Core Patient profile
+		ruleBuilder
+				.forResourcesOfType("Patient")
+				.impliedProfileAlways("http://www.hl7.org/fhir/us/core/StructureDefinition-us-core-patient.html");
+		// Ignores profiles declared in resource
+		// END SNIPPET: impliedProfileAlways
+	}
 }

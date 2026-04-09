@@ -410,6 +410,119 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	public void testImpliedProfileIfNotExplicit_NoProfileDeclared_ValidationApplied() {
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Patient")
+			.impliedProfileIfNotExplicit("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient")
+			.build();
+		myValInterceptor.setRules(rules);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		try {
+			myPatientDao.create(patient);
+			fail();
+		} catch (PreconditionFailedException e) {
+			OperationOutcome outcome = (OperationOutcome) e.getOperationOutcome();
+			String issueText = outcome.getIssueFirstRep().getDiagnostics();
+			assertThat(issueText).contains("Constraint failed");
+		}
+	}
+
+	@Test
+	public void testImpliedProfileIfNotExplicit_ValidResource_Success() {
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Patient")
+			.impliedProfileIfNotExplicit("http://hl7.org/fhir/StructureDefinition/Patient")
+			.build();
+		myValInterceptor.setRules(rules);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.addIdentifier().setSystem("http://example.com").setValue("12345");
+		patient.addName().setFamily("Test").addGiven("Patient");
+		patient.setGender(org.hl7.fhir.r4.model.Enumerations.AdministrativeGender.MALE);
+
+		IIdType id = myPatientDao.create(patient).getId();
+		assertEquals("1", id.getVersionIdPart());
+	}
+
+	@Test
+	public void testImpliedProfileIfNotExplicit_ProfileDeclared_NoImpliedValidation() {
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Patient")
+			.impliedProfileIfNotExplicit("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient")
+			.build();
+		myValInterceptor.setRules(rules);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/Patient");
+
+		IIdType id = myPatientDao.create(patient).getId();
+		assertEquals("1", id.getVersionIdPart());
+	}
+
+	@Test
+	public void testImpliedProfileAlways_NoProfileDeclared_ValidationApplied() {
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Patient")
+			.impliedProfileAlways("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient")
+			.build();
+		myValInterceptor.setRules(rules);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		try {
+			myPatientDao.create(patient);
+			fail();
+		} catch (PreconditionFailedException e) {
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			String issueText = oo.getIssueFirstRep().getDiagnostics();
+			assertThat(issueText).contains("Constraint failed");
+		}
+	}
+
+	@Test
+	public void testImpliedProfileAlways_ProfileDeclared_ImpliedValidationStillApplied() {
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Patient")
+			.impliedProfileAlways("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient")
+			.build();
+		myValInterceptor.setRules(rules);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/Patient");
+
+		try {
+			myPatientDao.create(patient);
+			fail();
+		} catch (PreconditionFailedException e) {
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			String issueText = oo.getIssueFirstRep().getDiagnostics();
+			assertThat(issueText).contains("Constraint failed");
+		}
+	}
+
+	@Test
+	public void testImpliedProfileAlways_ValidResource_Success() {
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Patient")
+			.impliedProfileAlways("http://hl7.org/fhir/StructureDefinition/Patient")
+			.build();
+		myValInterceptor.setRules(rules);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.getMeta().addProfile("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient");
+
+		IIdType id = myPatientDao.create(patient).getId();
+		assertEquals("1", id.getVersionIdPart());
+	}
 
 	private RepositoryValidatingRuleBuilder newRuleBuilder() {
 		return myApplicationContext.getBean(RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class);
