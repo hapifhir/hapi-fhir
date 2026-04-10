@@ -19,32 +19,35 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
-import ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator;
 
 import java.io.Serializable;
 
 @Entity
 @Table(
-	name = ResourceIndexedSearchParamTokenIdentifier.HFJ_SPIDX2_TOKEN_IDENTIFIER, indexes = {
-	@Index(
-		name = "IDX_SP_TOKEN_ID_HASH_SYSTEM",
-		columnList = "HASH_IDENTITY,SP_SYSTEM_URL_ID,RES_ID,PARTITION_ID"),
-	@Index(
-		name = "IDX_SP_TOKEN_ID_HASH",
-		columnList = "HASH_IDENTITY,RES_ID,PARTITION_ID,SP_SYSTEM_URL_ID"),
-	@Index(
-		name = "IDX_SP_TOKEN_ID_HASH_VALUE",
-		columnList = "HASH_IDENTITY,HASH_VALUE,RES_ID,PARTITION_ID,SP_SYSTEM_URL_ID,TYPE_HASH_SYS_AND_VALUE"),
-	@Index(name = "IDX_SP_TOKEN_ID_RES_ID", columnList = "RES_ID")
-})
+		name = ResourceIndexedSearchParamTokenIdentifier.HFJ_SPIDX2_TOKEN_IDENTIFIER,
+		indexes = {
+			@Index(
+					name = "IDX_SP_TOKEN_ID_HASH_SYSTEM",
+					columnList = "HASH_IDENTITY,SP_SYSTEM_URL_ID,RES_ID,PARTITION_ID"),
+			@Index(name = "IDX_SP_TOKEN_ID_HASH", columnList = "HASH_IDENTITY,RES_ID,PARTITION_ID,SP_SYSTEM_URL_ID"),
+			@Index(
+					name = "IDX_SP_TOKEN_ID_HASH_VALUE",
+					columnList =
+							"HASH_IDENTITY,HASH_VALUE,RES_ID,PARTITION_ID,SP_SYSTEM_URL_ID,TYPE_HASH_SYS_AND_VALUE"),
+			@Index(name = "IDX_SP_TOKEN_ID_RES_ID", columnList = "RES_ID")
+		})
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	public static final String HFJ_SPIDX2_TOKEN_IDENTIFIER = "HFJ_SPIDX2_TOKEN_IDENTIFIER";
 	public static final int MAX_LENGTH = 768;
@@ -56,6 +59,8 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	private Long myId;
 
 	// TODO: move this to new BasePartitionable class (without PartitionDate) ?
+	@Id
+	@PartitionedIdProperty
 	@Column(name = "PARTITION_ID", nullable = true)
 	private Integer myPartitionId;
 
@@ -77,6 +82,5 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	@Column(name = "TYPE_HASH_SYS_AND_VALUE", nullable = true)
 	private Long myTypeHashSystemAndValue;
 
-	public ResourceIndexedSearchParamTokenIdentifier() {
-	}
+	public ResourceIndexedSearchParamTokenIdentifier() {}
 }

@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 
@@ -29,31 +31,25 @@ import java.io.Serializable;
 
 @Entity
 @Table(
-		name = ResourceIndexedSearchParamTokenCommon.HFJ_SPIDX2_TOKEN_COMMON,
+		name = ResourceIndexedSearchParamTokenCommonRes.HFJ_SPIDX2_TOKEN_COMMON_RES,
 		indexes = {
-			@Index(name = "IDX_SP_TOKEN_COMMON_SYSTEM", columnList = "SYSTEM_ID,HASH_SYS_AND_VALUE"),
-			@Index(name = "IDX_SP_TOKEN_COMMON_VALUE", columnList = "HASH_VALUE,HASH_SYS_AND_VALUE"),
-			@Index(name = "IDX_SP_TOKEN_IDENTITY", columnList = "HASH_IDENTITY,HASH_SYS_AND_VALUE")
+			@Index(name = "HFJ_SPIDX2_TOKEN_COMMON_RES_HASH", columnList = "HASH_SYS_AND_VALUE, RES_ID, PARTITION_ID"),
 		})
-public class ResourceIndexedSearchParamTokenCommon implements Serializable {
-	public static final String HFJ_SPIDX2_TOKEN_COMMON = "HFJ_SPIDX2_TOKEN_COMMON";
-	public static final int MAX_LENGTH = 200;
+@IdClass(ResIdPartitionIdAndHashSystemAndValue.class)
+public class ResourceIndexedSearchParamTokenCommonRes implements Serializable {
+	public static final String HFJ_SPIDX2_TOKEN_COMMON_RES = "HFJ_SPIDX2_TOKEN_COMMON_RES";
+
+	@Id
+	@Column(name = "RES_ID", nullable = false)
+	private Long myResourceId;
 
 	@Id
 	@Column(name = "HASH_SYS_AND_VALUE", nullable = false)
 	private long myHashSystemAndValue;
 
-	@Column(name = "SYSTEM_ID", nullable = false)
-	private long mySystemId;
-
-	@Column(name = "SP_VALUE", length = MAX_LENGTH, nullable = true)
-	private String myValue;
-
-	@Column(name = "HASH_IDENTITY", nullable = false)
-	private long myHashIdentity;
-
-	@Column(name = "HASH_VALUE", nullable = false)
-	private long myHashValue;
-
-	public ResourceIndexedSearchParamTokenCommon() {}
+	// TODO: move this to new BasePartitionable class (without PartitionDate) ?
+	@Id
+	@PartitionedIdProperty
+	@Column(name = "PARTITION_ID", nullable = true)
+	private Integer myPartitionId;
 }
