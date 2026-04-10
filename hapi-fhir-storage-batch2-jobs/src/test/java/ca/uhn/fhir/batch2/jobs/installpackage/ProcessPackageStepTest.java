@@ -1,12 +1,13 @@
 package ca.uhn.fhir.batch2.jobs.installpackage;
 
+import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.installpackage.model.InstallationOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -55,9 +56,9 @@ public class ProcessPackageStepTest {
 	private ArgumentCaptor<NpmPackage> myNpmPackageCaptor;
 
 	@Mock
-	private IJobDataSink<InstallationOutcomeJson> myJobDataSink;
+	private IJobDataSink<PackageInstallOutcomeJson> myJobDataSink;
 	@Captor
-	private ArgumentCaptor<InstallationOutcomeJson> myInstallationOutcomeCaptor;
+	private ArgumentCaptor<PackageInstallOutcomeJson> myInstallationOutcomeCaptor;
 	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
 
@@ -78,19 +79,25 @@ public class ProcessPackageStepTest {
 
 		InputStream stream = ProcessPackageStepTest.class.getResourceAsStream("usCorePackage.tgz");
 		byte[] packageBytes = stream.readAllBytes();
+		PackageInstallOutcomeJson expectedReport = new PackageInstallOutcomeJson();
+
 		PackageContentsJson packageContentsJson = new PackageContentsJson();
 		packageContentsJson.setContents(Base64.getEncoder().encode(packageBytes));
-		packageContentsJson.setReport(new PackageInstallOutcomeJson());
+		packageContentsJson.setReport(expectedReport);
 		NpmPackage expectedPackage = NpmPackage.fromPackage(new ByteArrayInputStream(packageBytes));
 
-		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
+		ChunkExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> chunkDetails =
+			new ChunkExecutionDetails<>(packageContentsJson, params, INSTANCE_ID, CHUNK_ID);
+		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> stepDetails =
 			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
 
 		// execute
-		RunOutcome outcome = myStep.run(details, myJobDataSink);
+		ChunkOutcome chunkOutcome = myStep.consume(chunkDetails);
+		RunOutcome runOutcome = myStep.run(stepDetails, myJobDataSink);
 
 		// validate
-		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+		assertThat(chunkOutcome.getStatus()).isEqualTo(ChunkOutcome.Status.SUCCESS);
+		assertThat(runOutcome).isEqualTo(RunOutcome.SUCCESS);
 
 		verify(myPackageInstallerSvc).installPackage(myNpmPackageCaptor.capture(), eq(installationSpec), any(PackageInstallOutcomeJson.class));
 		NpmPackage actualPackage = myNpmPackageCaptor.getValue();
@@ -100,9 +107,8 @@ public class ProcessPackageStepTest {
 		assertThat(actualPackage.getSize()).isEqualTo(expectedPackage.getSize());
 
 		verify(myJobDataSink).accept(myInstallationOutcomeCaptor.capture());
-		InstallationOutcomeJson outcomeJson = myInstallationOutcomeCaptor.getValue();
-		assertThat(outcomeJson).isNotNull();
-		assertThat(outcomeJson.getOutcomes()).hasSize(1);
+		PackageInstallOutcomeJson outcomeJson = myInstallationOutcomeCaptor.getValue();
+		assertThat(outcomeJson).isSameAs(expectedReport);
 	}
 
 	@Test

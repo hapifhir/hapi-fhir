@@ -50,4 +50,26 @@ public class PackageUtilsTest {
 				"Not installing dependency de.fhir.medication because it matches exclude criteria: ^de\\..*",
 				"Package packageName#packageVersion depends on package hl7.fhir.uv.cqm#2.0.0");
 	}
+
+	@Test
+	public void testExtractDependentPackages_packageHasNoDependencies_returnEmptyList() {
+		// set up
+		JsonObject npm = new JsonObject();
+		npm.add("name", "packageName");
+		npm.add("version", "packageVersion");
+
+		NpmPackage npmPackage = NpmPackage.empty();
+		npmPackage.setNpm(npm);
+
+		PackageInstallationSpec packageInstallationSpec = new PackageInstallationSpec();
+
+		PackageInstallOutcomeJson outcome = new PackageInstallOutcomeJson();
+
+		// execute
+		List<PackageUtils.DependentPackage> actualPackages =
+			PackageUtils.extractDependentPackages(npmPackage, packageInstallationSpec, outcome);
+
+		// validate
+		assertThat(actualPackages).isEmpty();
+	}
 }

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.packages.util;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import com.google.common.collect.Lists;
+import org.hl7.fhir.utilities.json.model.JsonElement;
 import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
@@ -37,7 +38,7 @@ public class PackageUtils {
 	/**
 	 * Default install types
 	 */
-	public static List<String> DEFAULT_INSTALL_TYPES = Collections.unmodifiableList(Lists.newArrayList(
+	public static final List<String> DEFAULT_INSTALL_TYPES = Collections.unmodifiableList(Lists.newArrayList(
 			"NamingSystem",
 			"CodeSystem",
 			"ValueSet",
@@ -51,10 +52,15 @@ public class PackageUtils {
 			PackageInstallationSpec theInstallationSpec,
 			PackageInstallOutcomeJson theOutcome) {
 		List<DependentPackage> retVal = Lists.newArrayList();
-		JsonObject dependenciesElement =
-				theNpmPackage.getNpm().get("dependencies").asJsonObject();
-		for (String id : dependenciesElement.getNames()) {
-			String ver = dependenciesElement.getJsonString(id).asString();
+		JsonElement dependenciesElement = theNpmPackage.getNpm().get("dependencies");
+
+		if (dependenciesElement == null) {
+			return retVal;
+		}
+
+		JsonObject dependenciesObject = dependenciesElement.asJsonObject();
+		for (String id : dependenciesObject.getNames()) {
+			String ver = dependenciesObject.getJsonString(id).asString();
 			theOutcome
 					.getMessage()
 					.add("Package " + theNpmPackage.id() + "#" + theNpmPackage.version() + " depends on package " + id

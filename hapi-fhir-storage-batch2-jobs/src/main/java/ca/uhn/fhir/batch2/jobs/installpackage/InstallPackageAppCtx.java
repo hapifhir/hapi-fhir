@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.batch2.jobs.installpackage;
 
-import ca.uhn.fhir.batch2.jobs.installpackage.model.InstallationOutcomeJson;
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageWithDependenciesJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
@@ -49,6 +50,9 @@ public class InstallPackageAppCtx {
 	@Autowired
 	IValidationSupport myValidationSupport;
 
+	@Autowired
+	IJobCoordinator myJobCoordinator;
+
 	@Bean("installPackageJobDefinition")
 	public JobDefinition<PackageInstallationJobParameters> installPackageJobDefinition() {
 		return JobDefinition.newBuilder()
@@ -59,15 +63,20 @@ public class InstallPackageAppCtx {
 				.gatedExecution()
 				.addFirstStep("fetch-package", "Fetch the NPM Package", PackageContentsJson.class, fetchPackageStep())
 				.addIntermediateStep(
+						"initialize-dependencies",
+						"Spawn sub-jobs to process package dependencies",
+						PackageWithDependenciesJson.class,
+						initializeDependenciesStep())
+				.addIntermediateStep(
+						"consolidate-dependencies",
+						"Wait for sub-jobs to complete",
+						PackageContentsJson.class,
+						consolidateDependenciesStep())
+				.addFinalReducerStep(
 						"process-package",
 						"Install the contents of the NPM package",
-						InstallationOutcomeJson.class,
-						processPackageStep())
-				.addFinalReducerStep(
-						"finalize",
-						"Refresh caches and consolidate output",
 						PackageInstallOutcomeJson.class,
-						finalizeInstallationStep())
+						processPackageStep())
 				.build();
 	}
 
@@ -77,12 +86,17 @@ public class InstallPackageAppCtx {
 	}
 
 	@Bean
-	public ProcessPackageStep processPackageStep() {
-		return new ProcessPackageStep(myPackageInstallerSvc, mySearchParamRegistryController, myValidationSupport);
+	public InitializeDependenciesStep initializeDependenciesStep() {
+		return new InitializeDependenciesStep(myJobCoordinator);
 	}
 
 	@Bean
-	public FinalizeInstallationStep finalizeInstallationStep() {
-		return new FinalizeInstallationStep();
+	public ConsolidateDependenciesStep consolidateDependenciesStep() {
+		return new ConsolidateDependenciesStep(myJobCoordinator);
+	}
+
+	@Bean
+	public ProcessPackageStep processPackageStep() {
+		return new ProcessPackageStep(myPackageInstallerSvc, mySearchParamRegistryController, myValidationSupport);
 	}
 }

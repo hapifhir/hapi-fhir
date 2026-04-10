@@ -101,7 +101,8 @@ public class InitializeDependenciesStep
 	}
 
 	@Nonnull
-	private static JobInstanceStartRequest buildStartRequest(PackageUtils.DependentPackage theDependency, PackageInstallationSpec theParentInstallationSpec) {
+	private static JobInstanceStartRequest buildStartRequest(
+			PackageUtils.DependentPackage theDependency, PackageInstallationSpec theParentInstallationSpec) {
 		PackageInstallationSpec dependencySpec = new PackageInstallationSpec(theParentInstallationSpec);
 		dependencySpec.setName(theDependency.name());
 		dependencySpec.setVersion(theDependency.version());

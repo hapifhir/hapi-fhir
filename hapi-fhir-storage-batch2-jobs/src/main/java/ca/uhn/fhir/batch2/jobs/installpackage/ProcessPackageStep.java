@@ -19,14 +19,15 @@
  */
 package ca.uhn.fhir.batch2.jobs.installpackage;
 
+import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.installpackage.model.InstallationOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
@@ -40,13 +41,16 @@ import java.io.IOException;
 import java.util.Base64;
 
 public class ProcessPackageStep
-		implements IJobStepWorker<PackageInstallationJobParameters, PackageContentsJson, InstallationOutcomeJson> {
+		implements IReductionStepWorker<
+				PackageInstallationJobParameters, PackageContentsJson, PackageInstallOutcomeJson> {
 
 	IPackageInstallerSvc myPackageInstallerSvc;
 
 	ISearchParamRegistryController mySearchParamRegistryController;
 
 	IValidationSupport myValidationSupport;
+
+	PackageInstallOutcomeJson myPackageOutcome;
 
 	public ProcessPackageStep(
 			IPackageInstallerSvc thePackageInstallerSvc,
@@ -62,10 +66,41 @@ public class ProcessPackageStep
 	public RunOutcome run(
 			@Nonnull
 					StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> theStepExecutionDetails,
-			@Nonnull IJobDataSink<InstallationOutcomeJson> theDataSink)
+			@Nonnull IJobDataSink<PackageInstallOutcomeJson> theDataSink)
 			throws JobExecutionFailedException {
+
+		PackageInstallationJobParameters parameters = theStepExecutionDetails.getParameters();
+
+		// to prevent wasted effort, we only want to refresh the caches once, at the end of the root job
+		if (!parameters.isDependencyJob()) {
+			mySearchParamRegistryController.refreshCacheIfNecessary();
+
+			myValidationSupport.invalidateCaches();
+		}
+
+		theDataSink.accept(myPackageOutcome);
+
+		return RunOutcome.SUCCESS;
+	}
+
+	@Override
+	public IReductionStepWorker<PackageInstallationJobParameters, PackageContentsJson, PackageInstallOutcomeJson>
+			newInstance() {
+		return new ProcessPackageStep(myPackageInstallerSvc, mySearchParamRegistryController, myValidationSupport);
+	}
+
+	/**
+	 * This is a bit of an edge case. There is only one chunk to consume.
+	 * The forking of parallel sub-jobs for dependency processing has already been re-joined.
+	 * But we need this final step to be a reduction step in order to be able to return a non-void response
+	 * object as part of the final job status.
+	 */
+	@Nonnull
+	@Override
+	public ChunkOutcome consume(
+			ChunkExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> theChunkDetails) {
 		try {
-			PackageContentsJson packageContents = theStepExecutionDetails.getData();
+			PackageContentsJson packageContents = theChunkDetails.getData();
 			byte[] encodedContents = packageContents.getContents();
 			byte[] decodedContents = Base64.getDecoder().decode(encodedContents);
 			NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(decodedContents));
@@ -73,9 +108,8 @@ public class ProcessPackageStep
 			// we will be appending new data to the report we received from upstream
 			PackageInstallOutcomeJson packageOutcome = packageContents.getReport();
 
-			PackageInstallationJobParameters parameters = theStepExecutionDetails.getParameters();
-			PackageInstallationSpec installationSpec =
-					parameters.getInstallationSpec();
+			PackageInstallationJobParameters parameters = theChunkDetails.getParameters();
+			PackageInstallationSpec installationSpec = parameters.getInstallationSpec();
 
 			myPackageInstallerSvc.installPackage(npmPackage, installationSpec, packageOutcome);
 
@@ -86,20 +120,10 @@ public class ProcessPackageStep
 								"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
 			}
 
-			// to prevent wasted effort, we only want to refresh the caches once, at the end of the root job
-			if (!parameters.isDependencyJob()) {
-				mySearchParamRegistryController.refreshCacheIfNecessary();
-
-				myValidationSupport.invalidateCaches();
-			}
-
-			InstallationOutcomeJson outcome = new InstallationOutcomeJson();
-			outcome.getOutcomes().add(packageOutcome);
-
-			theDataSink.accept(outcome);
+			myPackageOutcome = packageOutcome;
 		} catch (IOException e) {
 			// error handling is in the scope of a later ticket
 		}
-		return RunOutcome.SUCCESS;
+		return ChunkOutcome.SUCCESS();
 	}
 }
