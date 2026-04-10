@@ -190,7 +190,6 @@ public class SearchParameterValidatingInterceptorTest {
 
 	}
 
-	// try to retire a non-disableable --> throw
 	@Test
 	void whenRetireBuiltInNonDisableableSearchParam_thenExceptionIsThrown() {
 		// Created by Claude Sonnet 4.6
@@ -210,7 +209,6 @@ public class SearchParameterValidatingInterceptorTest {
 				.hasMessageContaining("2875");
 	}
 
-	// try to retire a custom on non-disableable type --> allowed
 	@Test
 	void whenRetireCustomSpOnNonDisableableResourceType_thenIsAllowed() {
 		// Created by Claude Sonnet 4.6
@@ -233,7 +231,6 @@ public class SearchParameterValidatingInterceptorTest {
 		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails)).doesNotThrowAnyException();
 	}
 
-	// try to retire Subscription:status (Subscription:* pattern) --> throw
 	@Test
 	void whenRetireBuiltInNonDisableableSubscriptionSp_thenExceptionIsThrown() {
 		// Created by Claude Sonnet 4.6
@@ -252,7 +249,6 @@ public class SearchParameterValidatingInterceptorTest {
 				.hasMessageContaining("2875");
 	}
 
-	// try to retire SearchParameter:url (SearchParameter:* pattern) --> throw
 	@Test
 	void whenRetireBuiltInNonDisableableSearchParameterSp_thenExceptionIsThrown() {
 		// Created by Claude Sonnet 4.6
@@ -271,7 +267,6 @@ public class SearchParameterValidatingInterceptorTest {
 				.hasMessageContaining("2875");
 	}
 
-	// try to retire ValueSet:url (*:url pattern) --> throw
 	@Test
 	void whenRetireBuiltInNonDisableableUrlSp_thenExceptionIsThrown() {
 		// Created by Claude Sonnet 4.6
@@ -289,8 +284,7 @@ public class SearchParameterValidatingInterceptorTest {
 				.isInstanceOf(UnprocessableEntityException.class)
 				.hasMessageContaining("2875");
 	}
-
-	// try to retire a shared SP with a non-disableable base (Basic) and disableable bases (Patient) --> throw
+	
 	@Test
 	void whenRetireSharedSpWithNonDisableableBase_thenExceptionIsThrown() {
 		// Created by Claude Sonnet 4.6
@@ -303,16 +297,15 @@ public class SearchParameterValidatingInterceptorTest {
 		sp.setName("patient");
 		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
-		sp.setExpression("Patient.id");
+		sp.setExpression("Basic.subject.where(resolve() is Patient) | Condition.subject.where(resolve() is Patient)");
 		sp.addBase("Basic");
-		sp.addBase("Patient");
+		sp.addBase("Condition");
 
 		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails))
 				.isInstanceOf(UnprocessableEntityException.class)
 				.hasMessageContaining("2875");
 	}
 
-	// try to update a mandatory SP but still active --> allowed
 	@Test
 	void whenUpdateBuiltInNonDisableableSearchParamKeepingActive_thenIsAllowed() {
 		// Created by Claude Sonnet 4.6

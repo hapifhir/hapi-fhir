@@ -481,7 +481,6 @@ public class SearchParamRegistryImplTest {
 
 	}
 
-	// A retired mandatroy non-shared SP in DB will remain Active in cache
 	@Test
 	void testNonDisableableBuiltInSearchParam_RetiredInDbStaysActiveInCache() {
 		// Created by Claude Sonnet 4.6
@@ -515,7 +514,6 @@ public class SearchParamRegistryImplTest {
 		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, basicCode.getStatus());
 	}
 
-	// clarify that this is an update to the basic-code - verify that the custom description is brought into docs
 	@Test
 	void testNonDisableableBuiltInSearchParam_ActiveInDbUpdatesCache() {
 		// Created by Claude Sonnet 4.6
@@ -551,7 +549,6 @@ public class SearchParamRegistryImplTest {
 		assertEquals("customised description", basicCode.getDescription());
 	}
 
-	// given a custom Sp on a nondisablebale --> it is retireable
 	@Test
 	void testCustomSpOnNonDisableableResourceType_RetiredInDbIsRemovedFromCache() {
 		// Created by Claude Sonnet 4.6
@@ -593,9 +590,6 @@ public class SearchParamRegistryImplTest {
 				"Subscription", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
 	}
 
-	// Shared SP retired completely — L1 guard is all-or-nothing: if any base is non-disableable,
-	// the entire built-in entry is preserved (ALL bases stay active), including the disableable ones.
-	// This differs from the CDR L3 guard which narrows the base list to only non-disableable bases.
 	@Test
 	void testSharedSpWithNonDisableableBase_RetiredInDbKeepsAllBasesActiveInCache() {
 		// Created by Claude Sonnet 4.6
@@ -610,7 +604,7 @@ public class SearchParamRegistryImplTest {
 		sharedSp.setName("patient");
 		sharedSp.setStatus(Enumerations.PublicationStatus.RETIRED);
 		sharedSp.setType(Enumerations.SearchParamType.REFERENCE);
-		sharedSp.setExpression("Condition.subject.where(resolve() is Patient)");
+		sharedSp.setExpression("Basic.subject.where(resolve() is Patient) | Condition.subject.where(resolve() is Patient)");
 		sharedSp.addBase("Basic");
 		sharedSp.addBase("Condition");
 
