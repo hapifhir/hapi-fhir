@@ -1023,7 +1023,8 @@ public class SearchQueryBuilder {
 
 		Object distanceExpression = euclideanDistance;
 		if (mySelect.toString().contains("GROUP BY")) {
-			// Always use MIN: we want the closest distance per resource
+			// GROUP BY requires the distance expression to be aggregated.
+			// MIN(...) is semantically neutral here because each resource has only one distance.
 			FunctionCall aggregateDistance = FunctionCall.min();
 			aggregateDistance.addCustomParams(euclideanDistance);
 			distanceExpression = aggregateDistance;
