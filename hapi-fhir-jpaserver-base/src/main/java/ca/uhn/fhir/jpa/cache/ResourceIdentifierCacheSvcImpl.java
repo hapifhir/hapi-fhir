@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.svc.IResourceIdentifierCacheSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierPatientUniqueEntityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierSystemEntityDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;

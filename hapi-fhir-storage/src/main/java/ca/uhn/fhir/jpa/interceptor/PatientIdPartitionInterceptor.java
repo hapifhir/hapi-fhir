@@ -92,6 +92,10 @@ import static org.apache.commons.lang3.StringUtils.startsWith;
  */
 @Interceptor
 public class PatientIdPartitionInterceptor {
+
+	public static final int STORAGE_TRANSACTION_PROCESSING_ORDER_PRE_RESOLUTION_PARTITION = 0;
+	public static final int STORAGE_TRANSACTION_PROCESSING_ORDER_PATIENT_ID_PARTITION = 1;
+
 	private static final String PATIENT_STR = "Patient";
 	public static final String PLACEHOLDER_TO_REFERENCE_KEY =
 			PatientIdPartitionInterceptor.class.getName() + "_placeholderToResource";
@@ -450,7 +454,9 @@ public class PatientIdPartitionInterceptor {
 	 * reference that's just a placeholder ID, we can look up the target of that and figure out which
 	 * compartment that Encounter actually belongs to.
 	 */
-	@Hook(Pointcut.STORAGE_TRANSACTION_PROCESSING)
+	@Hook(
+		value = Pointcut.STORAGE_TRANSACTION_PROCESSING,
+		order = STORAGE_TRANSACTION_PROCESSING_ORDER_PATIENT_ID_PARTITION)
 	public void transaction(RequestDetails theRequestDetails, IBaseBundle theBundle) {
 		FhirTerser terser = myFhirContext.newTerser();
 

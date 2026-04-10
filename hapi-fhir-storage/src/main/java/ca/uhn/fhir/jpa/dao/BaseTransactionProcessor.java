@@ -84,6 +84,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
+import ca.uhn.fhir.storage.PatientInlineMatchUrlPreCreationService;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
@@ -244,6 +245,18 @@ public abstract class BaseTransactionProcessor {
 
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+
+		// FIXME: wire it that service
+		//
+		// FIXME: placeholder are currenlty created in DaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo.
+		// for placeholder resource consistence (identiers/extensions), logic of building (not creating) a placeholder resource
+		// needs extraction so it can be wired in the PatientInlineMatchUrlPreCreationService.
+		//
+		// FIXME: the execution of conditionalCreatePatientsForInlineMatchUrls needs to either be wrapped in a clause
+		// evaluating myStorageSettings.isAutoCreatePlaceholderReferenceTargets() or have the evaluation done within the
+		// invocation.
+		PatientInlineMatchUrlPreCreationService patientInlineMatchUrlPreCreationService = new PatientInlineMatchUrlPreCreationService(myContext, myMatchUrlService);
+		patientInlineMatchUrlPreCreationService.conditionallyCreatePatientsForInlineMatchUrls(theRequest);
 
 		// Interceptor call: STORAGE_TRANSACTION_PROCESSING
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
