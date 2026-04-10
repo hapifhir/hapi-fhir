@@ -190,6 +190,7 @@ public class SearchParameterValidatingInterceptorTest {
 
 	}
 
+	// try to retire a non-disableable --> throw
 	@Test
 	void whenRetireBuiltInNonDisableableSearchParam_thenExceptionIsThrown() {
 		// Created by Claude Sonnet 4.6
@@ -209,6 +210,7 @@ public class SearchParameterValidatingInterceptorTest {
 				.hasMessageContaining("2875");
 	}
 
+	// try to retire a custom on non-disableable type --> allowed
 	@Test
 	void whenRetireCustomSpOnNonDisableableResourceType_thenIsAllowed() {
 		// Created by Claude Sonnet 4.6
@@ -231,6 +233,86 @@ public class SearchParameterValidatingInterceptorTest {
 		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails)).doesNotThrowAnyException();
 	}
 
+	// try to retire Subscription:status (Subscription:* pattern) --> throw
+	@Test
+	void whenRetireBuiltInNonDisableableSubscriptionSp_thenExceptionIsThrown() {
+		// Created by Claude Sonnet 4.6
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/Subscription-status");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/Subscription-status");
+		sp.setCode("status");
+		sp.setName("status");
+		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Subscription.status");
+		sp.addBase("Subscription");
+
+		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageContaining("2875");
+	}
+
+	// try to retire SearchParameter:url (SearchParameter:* pattern) --> throw
+	@Test
+	void whenRetireBuiltInNonDisableableSearchParameterSp_thenExceptionIsThrown() {
+		// Created by Claude Sonnet 4.6
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/SearchParameter-url");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/SearchParameter-url");
+		sp.setCode("url");
+		sp.setName("url");
+		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		sp.setType(Enumerations.SearchParamType.URI);
+		sp.setExpression("SearchParameter.url");
+		sp.addBase("SearchParameter");
+
+		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageContaining("2875");
+	}
+
+	// try to retire ValueSet:url (*:url pattern) --> throw
+	@Test
+	void whenRetireBuiltInNonDisableableUrlSp_thenExceptionIsThrown() {
+		// Created by Claude Sonnet 4.6
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/conformance-url");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/conformance-url");
+		sp.setCode("url");
+		sp.setName("url");
+		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		sp.setType(Enumerations.SearchParamType.URI);
+		sp.setExpression("ValueSet.url");
+		sp.addBase("ValueSet");
+
+		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageContaining("2875");
+	}
+
+	// try to retire a shared SP with a non-disableable base (Basic) and disableable bases (Patient) --> throw
+	@Test
+	void whenRetireSharedSpWithNonDisableableBase_thenExceptionIsThrown() {
+		// Created by Claude Sonnet 4.6
+		// clinical-patient spans [Basic (non-disableable), Patient (disableable)].
+		// Retiring the whole SP must be blocked because Basic:* is non-disableable.
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/clinical-patient");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/clinical-patient");
+		sp.setCode("patient");
+		sp.setName("patient");
+		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Patient.id");
+		sp.addBase("Basic");
+		sp.addBase("Patient");
+
+		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageContaining("2875");
+	}
+
+	// try to update a mandatory SP but still active --> allowed
 	@Test
 	void whenUpdateBuiltInNonDisableableSearchParamKeepingActive_thenIsAllowed() {
 		// Created by Claude Sonnet 4.6
