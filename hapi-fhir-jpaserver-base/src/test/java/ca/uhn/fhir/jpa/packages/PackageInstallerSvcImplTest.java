@@ -20,7 +20,6 @@ import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
-import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -28,7 +27,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
-import ch.qos.logback.classic.Logger;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -71,12 +69,12 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -249,7 +247,7 @@ public class PackageInstallerSvcImplTest {
 		myPartitionSettings.setDefaultPartitionId(42);
 
 		RequestDetails requestDetails = mySvc.createRequestDetails();
-		assertTrue(requestDetails instanceof SystemRequestDetails);
+		assertInstanceOf(SystemRequestDetails.class, requestDetails);
 		SystemRequestDetails systemRequestDetails = (SystemRequestDetails) requestDetails;
 
 		assertEquals(RequestPartitionId.fromPartitionId(42), systemRequestDetails.getRequestPartitionId());
@@ -272,7 +270,7 @@ public class PackageInstallerSvcImplTest {
 		verify(myCodeSystemDao).create(any(CodeSystem.class), myRequestDetailsCaptor.capture());
 		RequestDetails requestDetails = myRequestDetailsCaptor.getValue();
 
-		assertTrue(requestDetails instanceof SystemRequestDetails);
+		assertInstanceOf(SystemRequestDetails.class, requestDetails);
 		SystemRequestDetails systemRequestDetails = (SystemRequestDetails) requestDetails;
 		assertEquals(RequestPartitionId.fromPartitionId(7), systemRequestDetails.getRequestPartitionId());
 	}
@@ -322,8 +320,63 @@ public class PackageInstallerSvcImplTest {
 		// Verify
 		verify(myCodeSystemDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertThat(map.toNormalizedQueryString(myCtx)).startsWith("?url=http%3A//my-code-system");
+		assertThat(map.toNormalizedQueryString()).startsWith("?url=http%3A//my-code-system");
 
+		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
+		CodeSystem codeSystem = myCodeSystemCaptor.getValue();
+		assertEquals("existingcs", codeSystem.getIdPart());
+	}
+
+	@Test
+	public void testInstallPackage_skipsNotPresentCodeSystem() throws IOException {
+		// Setup: a CodeSystem with content=not-present already exists
+		CodeSystem existingCs = new CodeSystem();
+		existingCs.setId("CodeSystem/existingcs");
+		existingCs.setUrl("http://my-code-system");
+		existingCs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+
+		// A complete CodeSystem from an IG package with the same URL
+		CodeSystem igCs = new CodeSystem();
+		igCs.setId("CodeSystem/igcs");
+		igCs.setUrl("http://my-code-system");
+		igCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		igCs.addConcept().setCode("A00").setDisplay("Cholera");
+
+		PackageInstallationSpec spec = setupResourceInPackage(existingCs, igCs, myCodeSystemDao);
+
+		// Test
+		mySvc.install(spec);
+
+		// Verify: neither create nor update should be called for the CodeSystem
+		verify(myCodeSystemDao, times(0)).update(any(), any(RequestDetails.class));
+		verify(myCodeSystemDao, times(0)).create(any(), any(RequestDetails.class));
+
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage(
+			"Skipping update of CodeSystem with content=not-present matching ?url=http%3A//my-code-system");
+	}
+
+	@Test
+	public void testInstallPackage_overwritesContentNotPresentCodeSystem_whenOverrideEnabled() throws IOException {
+		// Setup: a CodeSystem with content=not-present already exists
+		CodeSystem existingCs = new CodeSystem();
+		existingCs.setId("CodeSystem/existingcs");
+		existingCs.setUrl("http://my-code-system");
+		existingCs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+
+		// A complete CodeSystem from an IG package with the same URL
+		CodeSystem igCs = new CodeSystem();
+		igCs.setId("CodeSystem/igcs");
+		igCs.setUrl("http://my-code-system");
+		igCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		igCs.addConcept().setCode("A00").setDisplay("Cholera");
+
+		PackageInstallationSpec spec = setupResourceInPackage(existingCs, igCs, myCodeSystemDao)
+			.setOverwriteContentNotPresentCodeSystems(true);
+
+		// Test
+		mySvc.install(spec);
+
+		// Verify: update should be called since override is enabled
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
 		CodeSystem codeSystem = myCodeSystemCaptor.getValue();
 		assertEquals("existingcs", codeSystem.getIdPart());
@@ -392,16 +445,17 @@ public class PackageInstallerSvcImplTest {
 		assertEquals(theInstallBase, capturedSP.getBase().stream().map(CodeType::getCode).toList());
 	}
 
-	private PackageInstallationSpec setupResourceInPackage(IBaseResource myExistingResource, IBaseResource myInstallResource,
-														   IFhirResourceDao myFhirResourceDao) throws IOException {
-		NpmPackage pkg = createPackage(myInstallResource, myInstallResource.getClass().getSimpleName());
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private PackageInstallationSpec setupResourceInPackage(IBaseResource theExistingResource, IBaseResource theInstallResource,
+	                                                       IFhirResourceDao theFhirResourceDao) throws IOException {
+		NpmPackage pkg = createPackage(theInstallResource, theInstallResource.getClass().getSimpleName());
 
 		when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 		when(myPackageCacheManager.installPackage(any())).thenReturn(pkg);
-		when(myDaoRegistry.getResourceDao(myInstallResource.getClass())).thenReturn(myFhirResourceDao);
-		when(myFhirResourceDao.search(any(), any())).thenReturn(myExistingResource != null ?
-			new SimpleBundleProvider(myExistingResource) : new SimpleBundleProvider());
-		if (myInstallResource.getClass().getSimpleName().equals("SearchParameter")) {
+		when(myDaoRegistry.getResourceDao(theInstallResource.getClass())).thenReturn(theFhirResourceDao);
+		when(theFhirResourceDao.search(any(), any())).thenReturn(theExistingResource != null ?
+			new SimpleBundleProvider(theExistingResource) : new SimpleBundleProvider());
+		if (theInstallResource.getClass().getSimpleName().equals("SearchParameter")) {
 			when(mySearchParameterHelper.buildSearchParameterMapFromCanonical(any())).thenReturn(Optional.of(mySearchParameterMap));
 		}
 

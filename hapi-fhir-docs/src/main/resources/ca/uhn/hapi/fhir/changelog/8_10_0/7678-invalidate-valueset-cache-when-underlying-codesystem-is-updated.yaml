@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7347
+jira: SMILE-9809
+title: "Previously, updating a CodeSystem with new codes could cause validation to incorrectly
+  reject those codes. This has been fixed."

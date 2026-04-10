@@ -33,6 +33,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ServerCapabilityStatementProviderJpaR4Test.class);
+	private static final Set<String> MUST_CHECK_NULL_URL_PARAMS =
+			Set.of("_has", "_list", "_language", Constants.PARAM_COMPARTMENT_LAST_UPDATED);
 	private ResponseHighlighterInterceptor myResponseHighlightingInterceptor = new ResponseHighlighterInterceptor();
 
 	@AfterEach
@@ -302,10 +304,8 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 		for (CapabilityStatement.CapabilityStatementRestResourceComponent nextResource : cs.getRestFirstRep().getResource()) {
 			for (CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
-				if (nextSp.getName().equals("_has") || nextSp.getName().equals("_list") || nextSp.getName().equals("_language")) {
-					if (nextSp.getDefinition() == null) {
-						continue;
-					}
+				if (MUST_CHECK_NULL_URL_PARAMS.contains(nextSp.getName()) && nextSp.getDefinition() == null) {
+					continue;
 				}
 				if (!allSearchParamUrls.contains(nextSp.getDefinition())) {
 					fail("Invalid search parameter: " + nextSp.getName() + " has definition URL: " + nextSp.getDefinition());

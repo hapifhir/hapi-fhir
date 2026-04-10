@@ -911,22 +911,48 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		);
 	}
 
-	@Test
-	public void testReindex_DuplicateResourceBeforeEnforceUniqueShouldSaveWarning() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testReindex_DuplicateResourceBeforeEnforceUniqueShouldSaveWarning(boolean theIndividualBatches) {
+		// Setup
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 		myReindexTestHelper.createObservationWithStatusAndCode();
 		myReindexTestHelper.createObservationWithStatusAndCode();
+		myReindexTestHelper.createUniqueCodeSearchParameter();
 
-		DaoMethodOutcome searchParameter = myReindexTestHelper.createUniqueCodeSearchParameter();
+		ReindexJobParameters jobParameters = new ReindexJobParameters();
+
+		/*
+		 * Two paths here to verify reindex failure modes when a new unique index was added,
+		 * and multiple resources have the duplicate values meaning they violate the added
+		 * unique constraint:
+		 *
+		 * If we use a batch size of 1, one chunk should succeed but the other should fail.
+		 * If we use a large batch size, both resources will be in the same chunk and both
+		 * will fail.
+		 *
+		 * In both cases, the job should fail because at least one resource has failed to
+		 * reindex. We just want to make sure that both paths produce
+		 * the same result.
+		 */
+		if (theIndividualBatches) {
+			jobParameters.setBatchSize(1);
+		} else {
+			jobParameters.setBatchSize(100);
+		}
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(JOB_REINDEX);
-		startRequest.setParameters(new ReindexJobParameters());
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
-		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse);
+		startRequest.setParameters(jobParameters);
 
-		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
-		assertNotNull(myJob.getWarningMessages());
-		assertThat(myJob.getWarningMessages()).contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString());
+		// Test
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
+		JobInstance myJob = myBatch2JobHelper.awaitJobFailure(startResponse);
+
+		// Verify
+		assertEquals(StatusEnum.FAILED, myJob.getStatus());
+		assertThat(myJob.getErrorMessage()).contains("See report for details");
+		assertThat(myJob.getReport()).contains("Observation as it would create a duplicate unique index matching query: Observation?code=http%3A%2F%2Floinc.org%7C29463-7");
 	}
 
 	@Test
@@ -1045,7 +1071,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		// This observation will fail
 		String failingId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
 		// This observation will succeed
-		String passingId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
+		myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
 		myReindexTestHelper.createAlleleSearchParameter();
 		mySearchParamRegistry.forceRefresh();
 

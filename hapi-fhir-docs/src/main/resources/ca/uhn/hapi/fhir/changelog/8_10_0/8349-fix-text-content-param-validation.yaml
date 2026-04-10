@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8349
+jira: SMILE-11363
+title: "There were validation failures when fulltext indexing was enabled but content indexing was disabled, breaking the ability to manually 
+populate _text parameters that worked in HAPI-FHIR version 7.6.0. This has been fixed so that no failures occur when both Full Text Indexing and Full Text Content Indexing are enabled."

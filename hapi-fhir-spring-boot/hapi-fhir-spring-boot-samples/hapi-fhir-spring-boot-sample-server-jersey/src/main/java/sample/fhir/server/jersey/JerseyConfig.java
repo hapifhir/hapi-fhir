@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server - Batch2 Task Processor
+ * hapi-fhir-spring-boot-sample-server-jersey
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -17,17 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.api;
+package sample.fhir.server.jersey;
 
-public interface IWarningProcessor {
+import jakarta.ws.rs.ApplicationPath;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.stereotype.Component;
+import sample.fhir.server.jersey.provider.JerseyConformanceProvider;
+import sample.fhir.server.jersey.provider.PatientResourceProvider;
 
-	/**
-	 * Data Sink may invoke this method to indicate that an error occurred during
-	 * processing in work chunks but that it is non-fatal and should be saved as a warning.
-	 *
-	 * @param theErrorMessage An error message to be processed.
-	 */
-	public void recoverWarningMessage(String theErrorMessage);
+// Created by claude-sonnet-4-6
+@Component
+@ApplicationPath("/fhir")
+public class JerseyConfig extends ResourceConfig {
 
-	public String getRecoveredWarningMessage();
+	public JerseyConfig() {
+		register(JerseyConformanceProvider.class);
+		register(PatientResourceProvider.class);
+	}
 }

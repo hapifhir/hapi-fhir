@@ -116,9 +116,4 @@ public class ObservationMergeTestScenario extends AbstractMergeTestScenario<Obse
 	public AbstractMergeTestScenario<Observation> withMultipleReferencingResources(int theCount) {
 		return withReferences(List.of(ReferencingTestResourceType.of("DiagnosticReport", theCount)));
 	}
-
-	@Override
-	protected void assertActiveFieldIfSupported(@Nonnull Observation theResource, boolean theExpectedValue) {
-		// Observation does NOT have an active field - no validation needed
-	}
 }

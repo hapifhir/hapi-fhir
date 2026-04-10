@@ -17,14 +17,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -48,9 +46,9 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 		myPartitionLookupSvc.createPartition(partition, mySrd);
 
 		// validate precondition
-		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous(), newSrd()).size());
 		assertEquals("PART", myPartitionLookupSvc.getPartitionById(123).getName());
-		assertEquals(123, myPartitionLookupSvc.getPartitionByName("PART").getId());
+		assertEquals(123, Objects.requireNonNull(myPartitionLookupSvc.getPartitionByName("PART")).getId());
 
 		// execute
 		myExpungeEverythingService.expungeEverything(mySrd);
@@ -79,9 +77,9 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 		myStorageSettings.setWriteToSearchParamIdentityTable(true);
 		createPatient(withActiveTrue());
 		long patientActiveHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings,
-			RequestPartitionId.defaultPartition(), "Patient", Patient.SP_ACTIVE);
+			RequestPartitionId.defaultPartition(myPartitionSettings), "Patient", Patient.SP_ACTIVE);
 		long patientDeceasedHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings,
-			RequestPartitionId.defaultPartition(), "Patient", Patient.SP_DECEASED);
+			RequestPartitionId.defaultPartition(myPartitionSettings), "Patient", Patient.SP_DECEASED);
 
 		// validate precondition
 		await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
