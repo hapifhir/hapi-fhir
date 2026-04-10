@@ -143,6 +143,23 @@ public class SearchParamValidatingInterceptor {
 		}
 	}
 
+	/**
+	 * Validates a SearchParameter resource on update/PUT, enforcing two constraints:
+	 * <ol>
+	 *   <li>Built-in non-disableable search parameters (see
+	 *       {@link ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache#NON_DISABLEABLE_SEARCH_PARAMS})
+	 *       may not have their status changed to anything other than {@code active}.</li>
+	 *   <li>A new SearchParameter (PUT-as-create) may not overlap an existing one with the
+	 *       same base and code.</li>
+	 * </ol>
+	 *
+	 * <p>Validation is skipped when {@link #SKIP_VALIDATION} is set in the request user-data
+	 * (used internally by the CDR seeder to bypass the non-disableable check).
+	 *
+	 * @param theResource       the SearchParameter resource being updated
+	 * @param theRequestDetails the current request context
+	 * @throws ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException if validation fails
+	 */
 	public void validateSearchParamOnUpdate(IBaseResource theResource, RequestDetails theRequestDetails) {
 		if (isNotSearchParameterResource(theResource)) {
 			return;
