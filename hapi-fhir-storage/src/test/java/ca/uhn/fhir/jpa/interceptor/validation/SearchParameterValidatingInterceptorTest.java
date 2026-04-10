@@ -21,6 +21,8 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -190,21 +193,57 @@ public class SearchParameterValidatingInterceptorTest {
 
 	}
 
-	@Test
-	void whenRetireBuiltInNonDisableableSearchParam_thenExceptionIsThrown() {
+	static Stream<SearchParameter> nonDisableableBuiltInSearchParams() {
 		// Created by Claude Sonnet 4.6
-		// Retiring Basic:code (built-in non-disableable) via API must be blocked
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/Basic-code");
-		sp.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
-		sp.setCode("code");
-		sp.setName("code");
-		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		sp.setType(Enumerations.SearchParamType.TOKEN);
-		sp.setExpression("Basic.code");
-		sp.addBase("Basic");
+		// One representative SP per non-disableable pattern: Basic:*, Subscription:*, SearchParameter:*, *:url
+		SearchParameter basicCode = new SearchParameter();
+		basicCode.setId("SearchParameter/Basic-code");
+		basicCode.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
+		basicCode.setCode("code");
+		basicCode.setName("code");
+		basicCode.setStatus(Enumerations.PublicationStatus.RETIRED);
+		basicCode.setType(Enumerations.SearchParamType.TOKEN);
+		basicCode.setExpression("Basic.code");
+		basicCode.addBase("Basic");
 
-		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails))
+		SearchParameter subscriptionStatus = new SearchParameter();
+		subscriptionStatus.setId("SearchParameter/Subscription-status");
+		subscriptionStatus.setUrl("http://hl7.org/fhir/SearchParameter/Subscription-status");
+		subscriptionStatus.setCode("status");
+		subscriptionStatus.setName("status");
+		subscriptionStatus.setStatus(Enumerations.PublicationStatus.RETIRED);
+		subscriptionStatus.setType(Enumerations.SearchParamType.TOKEN);
+		subscriptionStatus.setExpression("Subscription.status");
+		subscriptionStatus.addBase("Subscription");
+
+		SearchParameter searchParameterUrl = new SearchParameter();
+		searchParameterUrl.setId("SearchParameter/SearchParameter-url");
+		searchParameterUrl.setUrl("http://hl7.org/fhir/SearchParameter/SearchParameter-url");
+		searchParameterUrl.setCode("url");
+		searchParameterUrl.setName("url");
+		searchParameterUrl.setStatus(Enumerations.PublicationStatus.RETIRED);
+		searchParameterUrl.setType(Enumerations.SearchParamType.URI);
+		searchParameterUrl.setExpression("SearchParameter.url");
+		searchParameterUrl.addBase("SearchParameter");
+
+		SearchParameter conformanceUrl = new SearchParameter();
+		conformanceUrl.setId("SearchParameter/conformance-url");
+		conformanceUrl.setUrl("http://hl7.org/fhir/SearchParameter/conformance-url");
+		conformanceUrl.setCode("url");
+		conformanceUrl.setName("url");
+		conformanceUrl.setStatus(Enumerations.PublicationStatus.RETIRED);
+		conformanceUrl.setType(Enumerations.SearchParamType.URI);
+		conformanceUrl.setExpression("ValueSet.url");
+		conformanceUrl.addBase("ValueSet");
+
+		return Stream.of(basicCode, subscriptionStatus, searchParameterUrl, conformanceUrl);
+	}
+
+	@ParameterizedTest
+	@MethodSource("nonDisableableBuiltInSearchParams")
+	void whenRetireBuiltInNonDisableableSp_thenExceptionIsThrown(SearchParameter theSp) {
+		// Created by Claude Sonnet 4.6
+		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, theSp, myRequestDetails))
 				.isInstanceOf(UnprocessableEntityException.class)
 				.hasMessageContaining("2875");
 	}
@@ -231,60 +270,6 @@ public class SearchParameterValidatingInterceptorTest {
 		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails)).doesNotThrowAnyException();
 	}
 
-	@Test
-	void whenRetireBuiltInNonDisableableSubscriptionSp_thenExceptionIsThrown() {
-		// Created by Claude Sonnet 4.6
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/Subscription-status");
-		sp.setUrl("http://hl7.org/fhir/SearchParameter/Subscription-status");
-		sp.setCode("status");
-		sp.setName("status");
-		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		sp.setType(Enumerations.SearchParamType.TOKEN);
-		sp.setExpression("Subscription.status");
-		sp.addBase("Subscription");
-
-		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails))
-				.isInstanceOf(UnprocessableEntityException.class)
-				.hasMessageContaining("2875");
-	}
-
-	@Test
-	void whenRetireBuiltInNonDisableableSearchParameterSp_thenExceptionIsThrown() {
-		// Created by Claude Sonnet 4.6
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/SearchParameter-url");
-		sp.setUrl("http://hl7.org/fhir/SearchParameter/SearchParameter-url");
-		sp.setCode("url");
-		sp.setName("url");
-		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		sp.setType(Enumerations.SearchParamType.URI);
-		sp.setExpression("SearchParameter.url");
-		sp.addBase("SearchParameter");
-
-		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails))
-				.isInstanceOf(UnprocessableEntityException.class)
-				.hasMessageContaining("2875");
-	}
-
-	@Test
-	void whenRetireBuiltInNonDisableableUrlSp_thenExceptionIsThrown() {
-		// Created by Claude Sonnet 4.6
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/conformance-url");
-		sp.setUrl("http://hl7.org/fhir/SearchParameter/conformance-url");
-		sp.setCode("url");
-		sp.setName("url");
-		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		sp.setType(Enumerations.SearchParamType.URI);
-		sp.setExpression("ValueSet.url");
-		sp.addBase("ValueSet");
-
-		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails))
-				.isInstanceOf(UnprocessableEntityException.class)
-				.hasMessageContaining("2875");
-	}
-	
 	@Test
 	void whenRetireSharedSpWithNonDisableableBase_thenExceptionIsThrown() {
 		// Created by Claude Sonnet 4.6
