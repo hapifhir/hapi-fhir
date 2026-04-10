@@ -1,7 +1,6 @@
 ---
 type: fix
 issue: 7744
-title: "Previously, the terminology cache was not invalidated after $apply-codesystem-delta-remove, 
-CodeSystem create/update, or CodeSystem deletion. This caused $lookup to return stale results, such as still finding 
-a concept after it was removed via delta-remove, or returning old concepts after a CodeSystem was updated or deleted. 
-This has been corrected so that the cache is now invalidated after all terminology mutations."
+title: "Previously, the `$lookup` operation would return stale results after updating an externally loaded `CodeSystem` 
+using [$apply-codesystem-delta-add](/docs/terminology/uploading.html#delta-add-operation) 
+or [$apply-codesystem-delta-add](/docs/terminology/uploading.html#delta-remove-operation). This has been fixed."
