@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.loader.IPackageLoader;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -38,65 +37,63 @@ import static ca.uhn.fhir.util.Batch2JobDefinitionConstants.INSTALL_PACKAGE;
 @Configuration
 public class InstallPackageAppCtx {
 
-	@Autowired
-	private IPackageLoader myPackageLoader;
-
-	@Autowired
-	IPackageInstallerSvc myPackageInstallerSvc;
-
-	@Autowired
-	ISearchParamRegistryController mySearchParamRegistryController;
-
-	@Autowired
-	IValidationSupport myValidationSupport;
-
-	@Autowired
-	IJobCoordinator myJobCoordinator;
-
 	@Bean("installPackageJobDefinition")
-	public JobDefinition<PackageInstallationJobParameters> installPackageJobDefinition() {
+	public JobDefinition<PackageInstallationJobParameters> installPackageJobDefinition(
+			IPackageLoader thePackageLoader,
+			IPackageInstallerSvc thePackageInstallerSvc,
+			ISearchParamRegistryController theSearchParamRegistryController,
+			IValidationSupport theValidationSupport,
+			IJobCoordinator theJobCoordinator) {
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(INSTALL_PACKAGE)
 				.setJobDescription("Install NPM Package")
 				.setJobDefinitionVersion(1)
 				.setParametersType(PackageInstallationJobParameters.class)
 				.gatedExecution()
-				.addFirstStep("fetch-package", "Fetch the NPM Package", PackageContentsJson.class, fetchPackageStep())
+				.addFirstStep(
+						"fetch-package",
+						"Fetch the NPM Package",
+						PackageContentsJson.class,
+						fetchPackageStep(thePackageLoader))
 				.addIntermediateStep(
 						"initialize-dependencies",
 						"Spawn sub-jobs to process package dependencies",
 						PackageWithDependenciesJson.class,
-						initializeDependenciesStep())
+						initializeDependenciesStep(theJobCoordinator))
 				.addIntermediateStep(
 						"consolidate-dependencies",
 						"Wait for sub-jobs to complete",
 						PackageContentsJson.class,
-						consolidateDependenciesStep())
+						consolidateDependenciesStep(theJobCoordinator))
 				.addFinalReducerStep(
 						"process-package",
 						"Install the contents of the NPM package",
 						PackageInstallOutcomeJson.class,
-						processPackageStep())
+						processPackageStep(
+								thePackageInstallerSvc, theSearchParamRegistryController, theValidationSupport))
 				.build();
 	}
 
 	@Bean
-	public FetchPackageStep fetchPackageStep() {
-		return new FetchPackageStep(myPackageLoader);
+	public FetchPackageStep fetchPackageStep(IPackageLoader thePackageLoader) {
+		return new FetchPackageStep(thePackageLoader);
 	}
 
 	@Bean
-	public InitializeDependenciesStep initializeDependenciesStep() {
-		return new InitializeDependenciesStep(myJobCoordinator);
+	public InitializeDependenciesStep initializeDependenciesStep(IJobCoordinator theJobCoordinator) {
+		return new InitializeDependenciesStep(theJobCoordinator);
 	}
 
 	@Bean
-	public ConsolidateDependenciesStep consolidateDependenciesStep() {
-		return new ConsolidateDependenciesStep(myJobCoordinator);
+	public ConsolidateDependenciesStep consolidateDependenciesStep(IJobCoordinator theJobCoordinator) {
+		return new ConsolidateDependenciesStep(theJobCoordinator);
 	}
 
 	@Bean
-	public ProcessPackageStep processPackageStep() {
-		return new ProcessPackageStep(myPackageInstallerSvc, mySearchParamRegistryController, myValidationSupport);
+	public ProcessPackageStep processPackageStep(
+			IPackageInstallerSvc thePackageInstallerSvc,
+			ISearchParamRegistryController theSearchParamRegistryController,
+			IValidationSupport theValidationSupport) {
+		return new ProcessPackageStep(thePackageInstallerSvc, theSearchParamRegistryController, theValidationSupport);
 	}
 }
