@@ -266,7 +266,6 @@ public class SearchParameterValidatingInterceptorTest {
 		sp.setExpression("Subscription.status");
 		sp.addBase("Subscription");
 
-		// Should not throw
 		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails)).doesNotThrowAnyException();
 	}
 
@@ -296,7 +295,6 @@ public class SearchParameterValidatingInterceptorTest {
 		// Created by Claude Sonnet 4.6
 		when(myDaoRegistry.getResourceDao(SearchParamValidatingInterceptor.SEARCH_PARAM)).thenReturn(myIFhirResourceDao);
 
-		// Updating a non-disableable SP with ACTIVE status is fine
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/Basic-code");
 		sp.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
@@ -312,7 +310,6 @@ public class SearchParameterValidatingInterceptorTest {
 
 		sp.setDescription("foo");
 
-		// Should not throw
 		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails)).doesNotThrowAnyException();
 	}
 

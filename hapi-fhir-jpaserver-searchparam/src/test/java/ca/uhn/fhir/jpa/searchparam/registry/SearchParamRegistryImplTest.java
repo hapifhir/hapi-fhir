@@ -501,7 +501,6 @@ public class SearchParamRegistryImplTest {
 		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenReturn(versionMap);
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(basicCodeSp));
 
-		// Test
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
 		assertDbCalled();
