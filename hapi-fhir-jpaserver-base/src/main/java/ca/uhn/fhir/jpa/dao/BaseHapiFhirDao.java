@@ -1285,7 +1285,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			// constraint failure, ie updating the same resource at the same time
 			encodedResource = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 			// For some reason the current version entity is not attached until after using updateEntity
-			historyEntity = ((ResourceTable) readEntity(theResourceId, theRequest)).getCurrentVersionEntity();
+			historyEntity =
+					((ResourceTable) readEntity(theResourceId.toVersionless(), theRequest)).getCurrentVersionEntity();
+			historyEntity.setUpdated(theTransactionDetails.getTransactionDate());
 
 			// Update version/lastUpdated so that interceptors see the correct version
 			myJpaStorageResourceParser.updateResourceMetadata(savedEntity, theResource);

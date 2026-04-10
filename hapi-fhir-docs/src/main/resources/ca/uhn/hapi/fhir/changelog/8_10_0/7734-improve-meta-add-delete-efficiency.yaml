@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 7734
+title: "The `$meta-add` and `$meta-delete` operations have been optimized for
+  significantly better performance when operating at scale."

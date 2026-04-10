@@ -796,8 +796,6 @@ public class ResponseHighlighterInterceptor {
 
 				outputBuffer.append("<a href=\"#L");
 				outputBuffer.append(i);
-				outputBuffer.append("\" name=\"L");
-				outputBuffer.append(i);
 				outputBuffer.append("\" id=\"L");
 				outputBuffer.append(i);
 				outputBuffer.append("\">");
