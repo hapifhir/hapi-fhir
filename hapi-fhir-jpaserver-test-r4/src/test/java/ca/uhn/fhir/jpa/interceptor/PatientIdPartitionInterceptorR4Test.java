@@ -64,6 +64,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -233,8 +234,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@ParameterizedTest
-	@CsvSource({"MANDATORY_SINGLE_COMPARTMENT", "OPTIONAL_SINGLE_COMPARTMENT"})
-	void testCreateProvenance_InMultiplePatientCompartments_withPrimaryCompartmentExtension(String thePolicy) {
+	@CsvSource({"MANDATORY_SINGLE_COMPARTMENT", "OPTIONAL_SINGLE_COMPARTMENT", "NON_UNIQUE_COMPARTMENT_IN_DEFAULT"})
+	void testCreateProvenance_InMultiplePatientCompartments_withCompartmentExtension(String thePolicy) {
 		// Setup
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		mySvc.setResourceTypePolicies(Map.of("Provenance", ResourceCompartmentStoragePolicy.parse(thePolicy)));
@@ -246,13 +247,13 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		provenance.addTarget().setReference("Patient/A");
 		provenance.addTarget().setReference("Patient/B");
 		provenance.addExtension()
-			.setUrl("http://hapifhir.io/fhir/StructureDefinition/primary-patient-compartment")
-			.setValue(new Reference("Patient/A"));
+			.setUrl("http://hapifhir.io/fhir/StructureDefinition/patient-compartment")
+			.setValue(new StringType("Patient/A"));
 		IIdType provenanceId = myProvenanceDao.create(provenance, newSrd()).getId();
 
 		// Verify
 		int patientBPartitionId = PatientIdPartitionInterceptor.defaultPartitionAlgorithm("B");
-		assertThat(PATIENT_A_COMPARTMENT_ID).isNotEqualTo(patientBPartitionId);
+		assertThat(patientBPartitionId).isNotEqualTo(PATIENT_A_COMPARTMENT_ID);
 		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, provenanceId);
 	}
 

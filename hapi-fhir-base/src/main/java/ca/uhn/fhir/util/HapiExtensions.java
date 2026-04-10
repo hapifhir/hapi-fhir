@@ -22,19 +22,6 @@ package ca.uhn.fhir.util;
 public class HapiExtensions {
 
 	/**
-	 * When a resource belongs to multiple Patient compartments, this extension specifies
-	 * which Patient should be considered the primary compartment owner for partition assignment.
-	 * <p>
-	 * This extension should be of type <code>Reference</code> (to a Patient resource)
-	 * and should be placed on the resource itself.
-	 * </p>
-	 *
-	 * @since 8.10.0
-	 */
-	public static final String EXT_PRIMARY_PATIENT_COMPARTMENT =
-			"http://hapifhir.io/fhir/StructureDefinition/primary-patient-compartment";
-
-	/**
 	 * <p>
 	 * This extension should be of type <code>string</code> and should be
 	 * placed on the <code>Subscription.channel</code> element
@@ -243,6 +230,24 @@ public class HapiExtensions {
 	 */
 	public static final String EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS =
 			"http://hapifhir.io/fhir/ns/StructureDefinition/request-partition-ids";
+
+	/**
+	 * Specifies the Patient compartment assignment for a resource when using PatientIdPartitionInterceptor.
+	 * <p>
+	 * This extension should be of type <code>string</code> with one of two allowed values:
+	 * <ul>
+	 *   <li><code>"Patient/&lt;id&gt;"</code> — assign to the specified Patient's partition</li>
+	 *   <li><code>"NONE"</code> — no Patient compartment; route to the default partition</li>
+	 * </ul>
+	 * Only affects compartment-based policies, not <code>ALWAYS_USE_*</code> policies.
+	 * </p>
+	 *
+	 * @see ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy
+	 * @since 8.10.0
+	 */
+	public static final String EXT_PATIENT_COMPARTMENT =
+			"http://hapifhir.io/fhir/StructureDefinition/patient-compartment";
+
 	/**
 	 * Non instantiable
 	 */

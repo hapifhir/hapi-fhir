@@ -17,8 +17,11 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.test.junit.StringToIntegerListArgumentConverter;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
@@ -221,7 +224,7 @@ class PatientIdPartitionInterceptorTest {
 	}
 
 	@Nested
-	class PrimaryPatientCompartmentExtension {
+	class PatientCompartmentExtension {
 
 		private Observation createObservationInMultipleCompartments() {
 			Observation obs = new Observation();
@@ -230,84 +233,128 @@ class PatientIdPartitionInterceptorTest {
 			return obs;
 		}
 
-		private void addPrimaryCompartmentExtension(Observation theObs, String thePatientReference) {
-			theObs.addExtension()
-				.setUrl("http://hapifhir.io/fhir/StructureDefinition/primary-patient-compartment")
-				.setValue(new Reference(thePatientReference));
+		private void addCompartmentExtension(DomainResource theResource, String theValue) {
+			theResource.addExtension()
+				.setUrl("http://hapifhir.io/fhir/StructureDefinition/patient-compartment")
+				.setValue(new StringType(theValue));
 		}
 
-		@ParameterizedTest
-		@CsvSource({"MANDATORY_SINGLE_COMPARTMENT", "OPTIONAL_SINGLE_COMPARTMENT"})
-		void testCreate_multipleCompartments_withExtension_resolvesToExtensionPatient(String thePolicy) {
-			mySvc.setResourceTypePolicies(Map.of("Observation", ResourceCompartmentStoragePolicy.parse(thePolicy)));
+		@Test
+		void testCreate_extensionOnPatient_rejected() {
+			Patient patient = new Patient();
+			patient.setId("PAT-A");
+			addCompartmentExtension(patient, "Patient/PAT-A");
 
-			Observation obs = createObservationInMultipleCompartments();
-			addPrimaryCompartmentExtension(obs, "Patient/1");
-
-			RequestPartitionId actual = mySvc.identifyForCreate(obs, new ServletRequestDetails());
-
-			int patient1PartitionId = PatientIdPartitionInterceptor.defaultPartitionAlgorithm("1");
-			int patient2PartitionId = PatientIdPartitionInterceptor.defaultPartitionAlgorithm("2");
-			// Guard: ensure the two patients hash to different partitions, otherwise the test proves nothing
-			assertThat(patient1PartitionId).isNotEqualTo(patient2PartitionId);
-			assertFalse(actual.isAllPartitions());
-			assertThat(actual.getPartitionIds()).containsExactly(patient1PartitionId);
-		}
-
-		@ParameterizedTest
-		@CsvSource({"MANDATORY_SINGLE_COMPARTMENT", "OPTIONAL_SINGLE_COMPARTMENT"})
-		void testCreate_multipleCompartments_withExtension_patientNotInCompartmentList(String thePolicy) {
-			mySvc.setResourceTypePolicies(Map.of("Observation", ResourceCompartmentStoragePolicy.parse(thePolicy)));
-
-			Observation obs = createObservationInMultipleCompartments();
-			addPrimaryCompartmentExtension(obs, "Patient/999");
-
-			assertThatThrownBy(() -> mySvc.identifyForCreate(obs, new ServletRequestDetails()))
+			assertThatThrownBy(() -> mySvc.identifyForCreate(patient, new ServletRequestDetails()))
 				.isInstanceOf(InvalidRequestException.class)
-				.hasMessage("HAPI-2897: Extension http://hapifhir.io/fhir/StructureDefinition/primary-patient-compartment references Patient/999 which is not a compartment of this resource. Compartments are: Patient/1, Patient/2");
+				.hasMessageContaining("HAPI-2908")
+				.hasMessageContaining("is not applicable to Patient resources");
 		}
 
-		@ParameterizedTest
-		@CsvSource({"MANDATORY_SINGLE_COMPARTMENT", "OPTIONAL_SINGLE_COMPARTMENT"})
-		void testCreate_multipleCompartments_withExtension_nonPatientResourceType(String thePolicy) {
-			mySvc.setResourceTypePolicies(Map.of("Observation", ResourceCompartmentStoragePolicy.parse(thePolicy)));
+		@Test
+		void testCreate_extensionOnNonCompartmentResource_rejected() {
+			// Organization is not a patient-compartment resource type
+			Organization org = new Organization();
+			addCompartmentExtension(org, "Patient/1");
 
-			Observation obs = createObservationInMultipleCompartments();
-			addPrimaryCompartmentExtension(obs, "Observation/123");
-
-			assertThatThrownBy(() -> mySvc.identifyForCreate(obs, new ServletRequestDetails()))
+			assertThatThrownBy(() -> mySvc.identifyForCreate(org, new ServletRequestDetails()))
 				.isInstanceOf(InvalidRequestException.class)
-				.hasMessage("HAPI-2895: Extension http://hapifhir.io/fhir/StructureDefinition/primary-patient-compartment must reference a Patient resource, but found: Observation/123");
+				.hasMessageContaining("HAPI-2909")
+				.hasMessageContaining("is not applicable to resource type 'Organization'");
 		}
 
-		@ParameterizedTest
-		@CsvSource({"MANDATORY_SINGLE_COMPARTMENT", "OPTIONAL_SINGLE_COMPARTMENT"})
-		void testCreate_multipleCompartments_withExtension_nonReferenceValue(String thePolicy) {
-			mySvc.setResourceTypePolicies(Map.of("Observation", ResourceCompartmentStoragePolicy.parse(thePolicy)));
-
+		@Test
+		void testCreate_withNonStringValue_throwsError() {
 			Observation obs = createObservationInMultipleCompartments();
 			obs.addExtension()
-				.setUrl("http://hapifhir.io/fhir/StructureDefinition/primary-patient-compartment")
-				.setValue(new StringType("Patient/1"));
+				.setUrl("http://hapifhir.io/fhir/StructureDefinition/patient-compartment")
+				.setValue(new Reference("Patient/1"));
 
 			assertThatThrownBy(() -> mySvc.identifyForCreate(obs, new ServletRequestDetails()))
 				.isInstanceOf(InvalidRequestException.class)
-				.hasMessage("HAPI-2894: Extension http://hapifhir.io/fhir/StructureDefinition/primary-patient-compartment must have a Reference value");
+				.hasMessageContaining("HAPI-2894");
 		}
 
 		@ParameterizedTest
-		@CsvSource({"NON_UNIQUE_COMPARTMENT_IN_DEFAULT", "ALWAYS_USE_DEFAULT_PARTITION"})
-		void testCreate_multipleCompartments_withDefaultPartitionPolicy_extensionIgnored(String thePolicy) {
-			mySvc.setResourceTypePolicies(Map.of("Observation", ResourceCompartmentStoragePolicy.parse(thePolicy)));
+		@CsvSource(delimiter = '|', useHeadersInDisplayName = true, textBlock = """
+			policy                            | extensionValue   | expectedPartition | expectedErrorCode
+
+			# Patient/<id> routes to specified patient's partition
+			# (an empty policy '' falls back to MANDATORY default for patient-compartment resources)
+			MANDATORY_SINGLE_COMPARTMENT      | Patient/1        | PATIENT1          |
+			OPTIONAL_SINGLE_COMPARTMENT       | Patient/1        | PATIENT1          |
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT | Patient/1        | PATIENT1          |
+			''                                | Patient/1        | PATIENT1          |
+
+			# NONE routes to default partition; rejected under MANDATORY (which is also the default) policy
+			OPTIONAL_SINGLE_COMPARTMENT       | NONE             | DEFAULT           |
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT | NONE             | DEFAULT           |
+			MANDATORY_SINGLE_COMPARTMENT      | NONE             |                   | HAPI-2895
+			''                                | NONE             |                   | HAPI-2895
+
+			# ALWAYS_USE_* policies ignores the extension
+			ALWAYS_USE_DEFAULT_PARTITION      | Patient/1        | DEFAULT           |
+			ALWAYS_USE_PARTITION_ID/5         | Patient/1        | 5                 |
+
+			# Input validation error cases, validation runs before any policy-aware branch,
+			# so each invalid value must be rejected under every compartment-based policy
+			# (including the empty '' policy which falls back to the MANDATORY default)
+
+			# Patient ID is not in the resource's compartment list (resource only has Patient/1, Patient/2)
+			MANDATORY_SINGLE_COMPARTMENT      | Patient/999      |                   | HAPI-2897
+			OPTIONAL_SINGLE_COMPARTMENT       | Patient/999      |                   | HAPI-2897
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT | Patient/999      |                   | HAPI-2897
+			''                                | Patient/999      |                   | HAPI-2897
+
+			# "Patient/" prefix with no ID part — fails Patient/<id> parsing
+			MANDATORY_SINGLE_COMPARTMENT      | Patient/         |                   | HAPI-2896
+			OPTIONAL_SINGLE_COMPARTMENT       | Patient/         |                   | HAPI-2896
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT | Patient/         |                   | HAPI-2896
+			''                                | Patient/         |                   | HAPI-2896
+
+			# Value is neither "NONE" nor a "Patient/<id>"
+			MANDATORY_SINGLE_COMPARTMENT      | SomethingInvalid |                   | HAPI-2896
+			OPTIONAL_SINGLE_COMPARTMENT       | SomethingInvalid |                   | HAPI-2896
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT | SomethingInvalid |                   | HAPI-2896
+			''                                | SomethingInvalid |                   | HAPI-2896
+
+			# Reference is to a non-Patient resource type
+			MANDATORY_SINGLE_COMPARTMENT      | Observation/1    |                   | HAPI-2896
+			OPTIONAL_SINGLE_COMPARTMENT       | Observation/1    |                   | HAPI-2896
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT | Observation/1    |                   | HAPI-2896
+			''                                | Observation/1    |                   | HAPI-2896
+
+			# Empty string — doesn't match "NONE" and fails Patient/<id> parsing ('' is JUnit CSV syntax for empty)
+			MANDATORY_SINGLE_COMPARTMENT      | ''               |                   | HAPI-2896
+			OPTIONAL_SINGLE_COMPARTMENT       | ''               |                   | HAPI-2896
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT | ''               |                   | HAPI-2896
+			''                                | ''               |                   | HAPI-2896
+			""")
+		void testCreate_extensionOnCompartmentResource(String thePolicy, String theExtensionValue, String theExpectedPartition, String theExpectedErrorCode) {
+			if (isNotBlank(thePolicy)) {
+				mySvc.setResourceTypePolicies(Map.of("Observation", ResourceCompartmentStoragePolicy.parse(thePolicy)));
+			}
 
 			Observation obs = createObservationInMultipleCompartments();
-			addPrimaryCompartmentExtension(obs, "Patient/1");
+			addCompartmentExtension(obs, theExtensionValue);
 
-			RequestPartitionId actual = mySvc.identifyForCreate(obs, new ServletRequestDetails());
+			if (isNotBlank(theExpectedErrorCode)) {
+				assertThatThrownBy(() -> mySvc.identifyForCreate(obs, new ServletRequestDetails()))
+					.isInstanceOf(InvalidRequestException.class)
+					.hasMessageContaining(theExpectedErrorCode);
+			} else {
+				RequestPartitionId actual = mySvc.identifyForCreate(obs, new ServletRequestDetails());
+				assertThat(actual.getPartitionIds()).containsExactly(resolveExpectedPartitionId(theExpectedPartition));
+			}
+		}
 
-			assertThat(actual.getPartitionIds()).containsExactly(myPartitionSettings.getDefaultPartitionId());
+		private Integer resolveExpectedPartitionId(String theExpected) {
+			return switch (theExpected) {
+				case "PATIENT1" -> PatientIdPartitionInterceptor.defaultPartitionAlgorithm("1");
+				case "DEFAULT" -> myPartitionSettings.getDefaultPartitionId();
+				default -> Integer.parseInt(theExpected);
+			};
 		}
 	}
-
 
 }
