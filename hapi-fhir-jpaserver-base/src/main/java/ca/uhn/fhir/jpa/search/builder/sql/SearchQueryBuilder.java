@@ -1021,13 +1021,18 @@ public class SearchQueryBuilder {
 				.addCustomParams(
 						new ComboExpression(ComboExpression.Op.ADD, squaredLatitudeDiff, squaredLongitudeDiff));
 
+		Object distanceExpression = euclideanDistance;
+		if (mySelect.toString().contains("GROUP BY")) {
+			// Grouped queries need an aggregate distance so the SQL stays valid across dialects.
+			FunctionCall aggregateDistance = theAscending ? FunctionCall.min() : FunctionCall.max();
+			aggregateDistance.addCustomParams(euclideanDistance);
+			distanceExpression = aggregateDistance;
+		}
+
 		String columnName = "EUC_DIST" + (myNextNearnessColumnId++);
-		mySelect.addAliasedColumn(euclideanDistance, columnName);
+		mySelect.addAliasedColumn(distanceExpression, columnName);
 		String ordering = theAscending ? "" : " DESC";
 		mySelect.addCustomOrderings(columnName + ordering);
-		if (mySelect.toString().contains("GROUP BY")) {
-			mySelect.addCustomGroupings(columnName);
-		}
 	}
 
 	public void addSortString(DbColumn theColumnValueNormalized, boolean theAscending) {

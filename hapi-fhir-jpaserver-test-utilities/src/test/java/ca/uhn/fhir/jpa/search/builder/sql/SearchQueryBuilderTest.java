@@ -489,8 +489,16 @@ public class SearchQueryBuilderTest {
 	void testCoordinateNearSortingWithGroupByHandlesSQLCorrectly() {
 		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new PostgreSQLDialect());
-
-		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, "Location", mySqlBuilderFactory, dialectProvider, false, false);
+		SearchQueryBuilder builder = new SearchQueryBuilder(
+				myFhirContext,
+				myStorageSettings,
+				myPartitionSettings,
+				myRequestPartitionId,
+				"Location",
+				mySqlBuilderFactory,
+				dialectProvider,
+				false,
+				false);
 
 		// Add coordinate distance sorting
 		ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder coordsPredicate =
@@ -520,7 +528,7 @@ public class SearchQueryBuilderTest {
 		// Verify GROUP BY clause exists
 		assertTrue(sql.contains("GROUP BY"), "SQL should contain GROUP BY clause (this test specifically tests the GROUP BY scenario)");
 
-		// Extract GROUP BY clause and verify distance column is included
+		// Extract GROUP BY clause
 		int groupByIndex = sql.indexOf("GROUP BY");
 		int orderByIndex = sql.indexOf("ORDER BY");
 		if (orderByIndex == -1) {
@@ -528,10 +536,8 @@ public class SearchQueryBuilderTest {
 		}
 		String groupByClause = sql.substring(groupByIndex, orderByIndex).trim();
 
-		assertTrue(groupByClause.contains(distanceColumnName),
-			"Distance calculation column (" + distanceColumnName + ") must be included in GROUP BY clause when GROUP BY is present. " +
-				"This prevents PostgreSQL error: 'column must appear in the GROUP BY clause'. " +
-				"SQL: " + sql + ", GROUP BY clause: " + groupByClause);
+		assertThat(sql).contains("MIN(");
+		assertThat(groupByClause).doesNotContain(distanceColumnName);
 
 		// Verify ORDER BY contains distance column
 		assertTrue(sql.contains("ORDER BY " + distanceColumnName),
