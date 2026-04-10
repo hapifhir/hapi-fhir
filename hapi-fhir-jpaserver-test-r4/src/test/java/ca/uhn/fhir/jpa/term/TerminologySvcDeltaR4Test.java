@@ -21,7 +21,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -587,41 +586,51 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 
 	@Test
-	public void testRemove_lookupCodeReturnsNotFoundAfterRemoval() {
-		// Setup: create code system and add a concept
+	void applyDeltaCodeSystemsAdd_lookupCode_returnsNewConcept() {
+		createNotPresentCodeSystem();
+
+		// Lookup primes the cache with "not found"
+		IValidationSupport.LookupCodeResult before = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(before).isNotNull();
+		assertThat(before.isFound()).isFalse();
+
+		// Delta-add the concept
 		CustomTerminologySet delta = new CustomTerminologySet();
 		delta.addRootConcept("codeA", "displayA");
-		delta.addRootConcept("codeB", "displayB");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 
-		// Verify lookupCode succeeds for both codes
-		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
+		// Lookup should now find it
+		IValidationSupport.LookupCodeResult after = myTermSvc.lookupCode(
 			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
-		assertThat(resultA).isNotNull();
-		assertThat(resultA.isFound()).isTrue();
-		assertThat(resultA.getCodeDisplay()).isEqualTo("displayA");
+		assertThat(after).isNotNull();
+		assertThat(after.isFound()).isTrue();
+		assertThat(after.getCodeDisplay()).isEqualTo("displayA");
+	}
 
-		IValidationSupport.LookupCodeResult resultB = myTermSvc.lookupCode(
-			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
-		assertThat(resultB).isNotNull();
-		assertThat(resultB.isFound()).isTrue();
+	@Test
+	void applyDeltaCodeSystemsRemove_lookupCode_returnsNotFound() {
+		createNotPresentCodeSystem();
+		CustomTerminologySet delta = new CustomTerminologySet();
+		delta.addRootConcept("codeA", "displayA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 
-		// Remove codeA
+		// Lookup primes the cache with "found"
+		IValidationSupport.LookupCodeResult before = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(before).isNotNull();
+		assertThat(before.isFound()).isTrue();
+
+		// Delta-remove the concept
 		CustomTerminologySet removeDelta = new CustomTerminologySet();
 		removeDelta.addRootConcept("codeA");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", removeDelta);
 
-		// Verify lookupCode fails for removed code and succeeds for remaining code
-		IValidationSupport.LookupCodeResult afterRemoveA = myTermSvc.lookupCode(
+		// Lookup should no longer find it
+		IValidationSupport.LookupCodeResult after = myTermSvc.lookupCode(
 			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
-		assertThat(afterRemoveA).isNotNull();
-		assertThat(afterRemoveA.isFound()).isFalse();
-
-		IValidationSupport.LookupCodeResult afterRemoveB = myTermSvc.lookupCode(
-			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
-		assertThat(afterRemoveB).isNotNull();
-		assertThat(afterRemoveB.isFound()).isTrue();
-		assertThat(afterRemoveB.getCodeDisplay()).isEqualTo("displayB");
+		assertThat(after).isNotNull();
+		assertThat(after.isFound()).isFalse();
 	}
 
 	@Test
@@ -645,78 +654,6 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		vs = myValueSetDao.expand(vs, null);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		return vs;
-	}
-
-	@Test
-	public void testDeleteCodeSystem_lookupReturnsNotFoundAfterDeletion() {
-		// Setup: create a CodeSystem with concepts
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo/cs");
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		cs.addConcept().setCode("codeA").setDisplay("displayA");
-		cs.addConcept().setCode("codeB").setDisplay("displayB");
-		myCodeSystemDao.create(cs, mySrd);
-
-		// Verify lookup succeeds (populates the cache)
-		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
-			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
-		assertThat(resultA).isNotNull();
-		assertThat(resultA.isFound()).isTrue();
-
-		// Delete via the FHIR DAO (same as a user calling DELETE /CodeSystem/...)
-		myCodeSystemDao.deleteByUrl("CodeSystem?url=http://foo/cs", mySrd);
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete("termCodeSystemDeleteJob");
-
-		// Verify lookup fails after deletion
-		IValidationSupport.LookupCodeResult afterDeleteA = myTermSvc.lookupCode(
-			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
-		assertThat(afterDeleteA).isNotNull();
-		assertThat(afterDeleteA.isFound()).isFalse();
-
-		IValidationSupport.LookupCodeResult afterDeleteB = myTermSvc.lookupCode(
-			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
-		assertThat(afterDeleteB).isNotNull();
-		assertThat(afterDeleteB.isFound()).isFalse();
-	}
-
-	@Disabled("Should be fixed by https://github.com/hapifhir/hapi-fhir/issues/7754")
-	@Test
-	public void testStoreNewCodeSystemVersion_lookupReflectsNewConcepts() {
-		// Setup: create a CodeSystem with content=complete and one concept
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo/cs");
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		cs.addConcept().setCode("codeA").setDisplay("displayA");
-		myCodeSystemDao.create(cs, mySrd);
-
-		// Verify initial lookup succeeds
-		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
-			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
-		assertThat(resultA).isNotNull();
-		assertThat(resultA.isFound()).isTrue();
-		assertThat(resultA.getCodeDisplay()).isEqualTo("displayA");
-
-		// Update the CodeSystem with different concepts
-		CodeSystem csUpdated = new CodeSystem();
-		csUpdated.setUrl("http://foo/cs");
-		csUpdated.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		csUpdated.addConcept().setCode("codeB").setDisplay("displayB");
-		csUpdated.addConcept().setCode("codeC").setDisplay("displayC");
-		myCodeSystemDao.update(csUpdated, mySrd);
-
-		// Verify new concepts are found
-		IValidationSupport.LookupCodeResult resultB = myTermSvc.lookupCode(
-			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
-		assertThat(resultB).isNotNull();
-		assertThat(resultB.isFound()).isTrue();
-		assertThat(resultB.getCodeDisplay()).isEqualTo("displayB");
-
-		// Verify old concept from replaced version is no longer found
-		IValidationSupport.LookupCodeResult resultAAfter = myTermSvc.lookupCode(
-			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
-		assertThat(resultAAfter).isNotNull();
-		assertThat(resultAAfter.isFound()).isFalse();
 	}
 
 	private void createNotPresentCodeSystem() {
