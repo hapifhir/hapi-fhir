@@ -13,13 +13,10 @@ import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.QueryTestCases;
 import ca.uhn.fhir.jpa.test.config.TestR5Config;
-import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -32,9 +29,9 @@ import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.Location;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Location;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
@@ -226,22 +223,22 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		double longitude = 8.46;
 
 		// Create 3 real locations around Mannheim
-		String heiderlberg = createLocation(49.3988, 8.6724).toUnqualifiedVersionless().getValue(); // Heidelberg
-		String lufwigshafen = createLocation(49.4774, 8.4452).toUnqualifiedVersionless().getValue(); // Ludwigshafen
+		String heidelberg = createLocation(49.3988, 8.6724).toUnqualifiedVersionless().getValue(); // Heidelberg
+		String ludwigshafen = createLocation(49.4774, 8.4452).toUnqualifiedVersionless().getValue(); // Ludwigshafen
 		String mannheim = createLocation(latitude, longitude).toUnqualifiedVersionless().getValue();
 
 		// Test
 		myCaptureQueriesListener.clear();
 		Bundle result = client
 			.search()
-			.byUrl("Location?near=49.49|8.46|5000|km&_sort=Location:near")
+			.byUrl("Location?near=49.49|8.46|5000|km&_sort=Location:near&_count=10&_offset=0")
 			.returnBundle(Bundle.class)
 			.execute();
 		myCaptureQueriesListener.logSelectQueries();
 
 		// Verify
 		List<String> ids = toUnqualifiedVersionlessIdValues(result);
-		assertThat(ids).as(ids.toString()).containsExactly(mannheim, lufwigshafen, heiderlberg);
+		assertThat(ids).as(ids.toString()).containsExactly(mannheim, ludwigshafen, heidelberg);
 	}
 
 	private IIdType createLocation(double lat, double lon) {
@@ -249,8 +246,6 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		loc.setPosition(new Location.LocationPositionComponent().setLatitude(lat).setLongitude(lon));
 		return myServer.getFhirClient().create().resource(loc).execute().getId();
 	}
-
-
 	@ParameterizedTest
 	@MethodSource("ca.uhn.fhir.jpa.test.QueryTestCases#get")
 	void testSyntaxForVariousQueries(QueryTestCases theQueryTestCase) {
