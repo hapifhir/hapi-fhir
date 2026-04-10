@@ -1021,8 +1021,17 @@ public class SearchQueryBuilder {
 				.addCustomParams(
 						new ComboExpression(ComboExpression.Op.ADD, squaredLatitudeDiff, squaredLongitudeDiff));
 
+		Object distanceExpression = euclideanDistance;
+		if (mySelect.toString().contains("GROUP BY")) {
+			// GROUP BY requires the distance expression to be aggregated.
+			// MIN(...) is semantically neutral here because each resource has only one distance.
+			FunctionCall aggregateDistance = FunctionCall.min();
+			aggregateDistance.addCustomParams(euclideanDistance);
+			distanceExpression = aggregateDistance;
+		}
+
 		String columnName = "EUC_DIST" + (myNextNearnessColumnId++);
-		mySelect.addAliasedColumn(euclideanDistance, columnName);
+		mySelect.addAliasedColumn(distanceExpression, columnName);
 		String ordering = theAscending ? "" : " DESC";
 		mySelect.addCustomOrderings(columnName + ordering);
 	}

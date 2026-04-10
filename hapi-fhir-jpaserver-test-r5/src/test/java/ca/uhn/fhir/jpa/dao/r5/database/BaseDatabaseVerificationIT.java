@@ -31,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Location;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
@@ -212,7 +213,39 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		assertThat(actualIds).asList().containsExactly(prId.getValue(), pId.getValue());
 	}
 
+	@Test
+	void testSortNear() {
+		// Setup
+		IGenericClient client = myServer.getFhirClient();
 
+		// Mannheim
+		double latitude = 49.49;
+		double longitude = 8.46;
+
+		// Create 3 real locations around Mannheim
+		String heidelberg = createLocation(49.3988, 8.6724).toUnqualifiedVersionless().getValue(); // Heidelberg
+		String ludwigshafen = createLocation(49.4774, 8.4452).toUnqualifiedVersionless().getValue(); // Ludwigshafen
+		String mannheim = createLocation(latitude, longitude).toUnqualifiedVersionless().getValue();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		Bundle result = client
+			.search()
+			.byUrl("Location?near=49.49|8.46|5000|km&_sort=Location:near&_count=10&_offset=0")
+			.returnBundle(Bundle.class)
+			.execute();
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		List<String> ids = toUnqualifiedVersionlessIdValues(result);
+		assertThat(ids).as(ids.toString()).containsExactly(mannheim, ludwigshafen, heidelberg);
+	}
+
+	private IIdType createLocation(double lat, double lon) {
+		Location loc = new Location();
+		loc.setPosition(new Location.LocationPositionComponent().setLatitude(lat).setLongitude(lon));
+		return myServer.getFhirClient().create().resource(loc).execute().getId();
+	}
 	@ParameterizedTest
 	@MethodSource("ca.uhn.fhir.jpa.test.QueryTestCases#get")
 	void testSyntaxForVariousQueries(QueryTestCases theQueryTestCase) {
