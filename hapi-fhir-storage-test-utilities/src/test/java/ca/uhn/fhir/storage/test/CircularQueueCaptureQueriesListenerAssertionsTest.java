@@ -66,7 +66,7 @@ class CircularQueueCaptureQueriesListenerAssertionsTest {
 		assertThatThrownBy(()-> {
 			// Test
 			assertThat(myListener).has(
-				onCurrentThread().selectSqlContains(0, "hello")
+				onCurrentThread().selectSqlAtIndex(0).contains("hello")
 			);
 		})
 			// Verify

@@ -29,8 +29,11 @@ import org.assertj.core.description.Description;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Assertj class for asserting a set of {@link CircularQueueCaptureQueriesListener} counts.
@@ -84,10 +87,10 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			return this;
 		}
 
-		public QueryCondition selectSqlContains(int theIndex, String theExpectedSelectSql) {
-			myTests.add(new TestSelect(theIndex, myAllThreads, theExpectedSelectSql));
-			return this;
+		public StatementAtIndexBuilder selectSqlAtIndex(int theIndex) {
+			return new StatementAtIndexBuilder(theIndex);
 		}
+
 
 		public QueryCondition updateCount(int theCount) {
 			myHaveUpdateCounts = true;
@@ -184,7 +187,34 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			myListener = theListener;
 			return myTests.stream().allMatch(t -> t.test(theListener).isEmpty());
 		}
-    }
+
+
+		public class StatementAtIndexBuilder {
+
+			private final int myIndex;
+
+			public StatementAtIndexBuilder(int theIndex) {
+				myIndex = theIndex;
+			}
+
+			public QueryCondition contains(String theExpectedSql) {
+				myTests.add(new TestSelect(myIndex, myAllThreads, theExpectedSql, SqlMatchModeEnum.CONTAINS));
+				return QueryCondition.this;
+			}
+
+			public QueryCondition doesNotContain(String theNotExpectedSql) {
+				myTests.add(new TestSelect(myIndex, myAllThreads, theNotExpectedSql, SqlMatchModeEnum.DOES_NOT_CONTAIN));
+				return QueryCondition.this;
+			}
+
+			public QueryCondition endsWith(String theNotExpectedSql) {
+				myTests.add(new TestSelect(myIndex, myAllThreads, theNotExpectedSql, SqlMatchModeEnum.ENDS_WITH));
+				return QueryCondition.this;
+			}
+
+		}
+
+	}
 
 	private abstract static class BaseTest {
 		protected final int myExpectCount;
@@ -227,6 +257,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 		private final Integer myExpectAtIndex;
 		private final String myExpectedSql;
+		private final SqlMatchModeEnum mySqlMatchMode;
 
 		/**
 		 * Constructor for a statement counting assertion
@@ -235,16 +266,18 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			super(theExpectCount, theForCurrentThread);
 			myExpectAtIndex = null;
 			myExpectedSql = null;
+			mySqlMatchMode = null;
 		}
 
 		/**
 		 * Constructor for a statement matching assertion
 		 */
-		public BaseSqlStatementTest(int theIndex, boolean theForCurrentThread, String theExpectedSql) {
+		public BaseSqlStatementTest(int theIndex, boolean theForCurrentThread, String theExpectedSql, SqlMatchModeEnum theSqlMatchMode) {
 			super(NO_COUNT, theForCurrentThread);
 
 			myExpectAtIndex = theIndex;
 			myExpectedSql = theExpectedSql;
+			mySqlMatchMode = theSqlMatchMode;
 		}
 
 		@Override
@@ -260,9 +293,34 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 				if (myExpectAtIndex != null && myExpectedSql != null) {
 					SqlQuery statement = getActualStatements(theListener).get(myExpectAtIndex);
 					String renderedSql = statement.getSql(true, false);
-					if (!renderedSql.contains(myExpectedSql)) {
-						retVal = Optional.of("Expected SQL: " + renderedSql + "\nTo contain: " + myExpectedSql);
-					}
+					retVal = switch (requireNonNull(mySqlMatchMode)) {
+						case CONTAINS -> {
+							if (!renderedSql.contains(myExpectedSql)) {
+								yield Optional.of("\nExpected SQL: " + renderedSql + "\n" +
+														   "  to contain: " + myExpectedSql);
+							} else {
+								yield Optional.empty();
+							}
+						}
+						case DOES_NOT_CONTAIN -> {
+							if (renderedSql.contains(myExpectedSql)) {
+								yield Optional.of("\nExpected SQL  : " + renderedSql + "\n" +
+									"not to contain: " + myExpectedSql);
+							} else {
+								yield Optional.empty();
+							}
+						}
+						case ENDS_WITH -> {
+							if (!renderedSql.endsWith(myExpectedSql)) {
+								yield Optional.of("\nExpected SQL: " + renderedSql + "\n" +
+														   " to end with: " + myExpectedSql);
+							} else {
+								yield Optional.empty();
+							}
+						}
+					};
+
+
 				}
 			}
 			return retVal;
@@ -284,8 +342,8 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			super(theExpectCount, theForCurrentThread);
 		}
 
-		private TestSelect(int theIndex, boolean theForCurrentThread, String theExpectedSql) {
-			super(theIndex, theForCurrentThread, theExpectedSql);
+		private TestSelect(int theIndex, boolean theForCurrentThread, String theExpectedSql, SqlMatchModeEnum theSqlMatchMode) {
+			super(theIndex, theForCurrentThread, theExpectedSql, theSqlMatchMode);
 		}
 
 		@Nonnull
@@ -430,6 +488,14 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		protected int getCount(CircularQueueCaptureQueriesListener theListener) {
 			return theListener.countGetConnections();
 		}
+	}
+
+	private enum SqlMatchModeEnum {
+
+		CONTAINS,
+		DOES_NOT_CONTAIN,
+		ENDS_WITH
+
 	}
 
 }
