@@ -1023,8 +1023,8 @@ public class SearchQueryBuilder {
 
 		Object distanceExpression = euclideanDistance;
 		if (mySelect.toString().contains("GROUP BY")) {
-			// Grouped queries need an aggregate distance so the SQL stays valid across dialects.
-			FunctionCall aggregateDistance = theAscending ? FunctionCall.min() : FunctionCall.max();
+			// Always use MIN: we want the closest distance per resource
+			FunctionCall aggregateDistance = FunctionCall.min();
 			aggregateDistance.addCustomParams(euclideanDistance);
 			distanceExpression = aggregateDistance;
 		}
