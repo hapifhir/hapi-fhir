@@ -40,13 +40,13 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
-import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
-import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
+import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -74,7 +74,6 @@ import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
@@ -149,13 +148,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	 * Constructor
 	 */
 	public ResourceLinkPredicateBuilder(QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
-		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable(ResourceLink.TABLE_NAME));
+		myColumnSrcResourceId = getTable().addColumn(ResourceLink.SRC_RESOURCE_ID);
 		myColumnSrcPartitionId = getTable().addColumn("PARTITION_ID");
 		myColumnSrcType = getTable().addColumn("SOURCE_RESOURCE_TYPE");
 		myColumnSrcPath = getTable().addColumn("SRC_PATH");
-		myColumnTargetResourceId = getTable().addColumn("TARGET_RESOURCE_ID");
-		myColumnTargetPartitionId = getTable().addColumn("TARGET_RES_PARTITION_ID");
+		myColumnTargetResourceId = getTable().addColumn(ResourceLink.TARGET_RESOURCE_ID);
+		myColumnTargetPartitionId = getTable().addColumn(ResourceLink.TARGET_RES_PARTITION_ID);
 		myColumnTargetResourceUrl = getTable().addColumn("TARGET_RESOURCE_URL");
 		myColumnTargetResourceType = getTable().addColumn("TARGET_RESOURCE_TYPE");
 
@@ -942,14 +941,12 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		if (theTargetPids != null && theTargetPids.length >= 1) {
 			// if resource ids are provided, we'll create the predicate
 			// with ids in or equal to this value
-			if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
-				Object left = ColumnTupleObject.from(getJoinColumnsForTarget());
-				JpaPidValueTuples right = JpaPidValueTuples.from(getSearchQueryBuilder(), theTargetPids);
-				condition = new InCondition(left, right);
-			} else {
-				condition = QueryParameterUtils.toEqualToOrInPredicate(
-						myColumnTargetResourceId, generatePlaceholders(JpaPid.toLongList(theTargetPids)));
-			}
+			PartitionableJoinColumns joinColumns = getSearchQueryBuilder().isIncludePartitionIdInJoins()
+					? PartitionableJoinColumns.newPartitioned(getColumnTargetPartitionId(), myColumnTargetResourceId)
+					: PartitionableJoinColumns.newNonPartitioned(myColumnTargetResourceId);
+			condition = getSearchQueryBuilder()
+					.getTuplePredicateBuilder()
+					.toInPredicate(joinColumns, List.of(theTargetPids), false);
 		} else {
 			// ... otherwise we look for resource types
 			condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));

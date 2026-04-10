@@ -73,7 +73,7 @@ Note that this rule alone does not actually enforce validation against the speci
 }
 ```
 
-<a name="require-validation"/>
+<a id="require-validation"></a>
 
 # Rules: Require Validation to Declared Profiles
 

@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestDstu3Config;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -22,6 +23,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -156,6 +158,40 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 		assertThat(map.getLastUpdated().getLowerBound().getValueAsString()).isEqualTo("2020-01-01");
 		assertThat(map.containsKey("_id")).isTrue();
 		assertThat(map.get("_id").get(0).get(0)).isEqualTo(new StringParam("123"));
+	}
+
+	@Test
+	void testCompartmentLastUpdated_parsedFromMatchUrl() {
+		var map = myMatchUrlService.translateMatchUrl(
+				"Patient?_compartmentLastUpdated=ge2024-01-15", ourCtx.getResourceDefinition("Patient"));
+
+		assertThat(map.getCompartmentLastUpdated())
+				.isNotNull()
+				.returns("2024-01-15", r -> r.getLowerBound().getValueAsString())
+				.returns(null, DateRangeParam::getUpperBound);
+	}
+
+	@Test
+	void testCompartmentLastUpdated_rangeFromMatchUrl() {
+		var map = myMatchUrlService.translateMatchUrl(
+				"Patient?_compartmentLastUpdated=ge2024-01-01&_compartmentLastUpdated=le2024-01-31",
+				ourCtx.getResourceDefinition("Patient"));
+
+		assertThat(map.getCompartmentLastUpdated())
+				.isNotNull()
+				.satisfies(range -> {
+					assertThat(range.getLowerBound().getValueAsString()).isEqualTo("2024-01-01");
+					assertThat(range.getUpperBound().getValueAsString()).isEqualTo("2024-01-31");
+				});
+	}
+
+	@Test
+	void testCompartmentLastUpdated_moreThanTwoRepetitions_throwsException() {
+		assertThatThrownBy(() -> myMatchUrlService.translateMatchUrl(
+				"Patient?_compartmentLastUpdated=ge2024-01-01&_compartmentLastUpdated=le2024-01-31&_compartmentLastUpdated=ge2024-02-01",
+				ourCtx.getResourceDefinition("Patient")))
+				.hasMessageStartingWith(Msg.code(2877))
+				.hasMessageContaining("Can not have more than 2");
 	}
 
 	@Override

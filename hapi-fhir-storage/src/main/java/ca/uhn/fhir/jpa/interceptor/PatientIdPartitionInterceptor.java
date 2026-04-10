@@ -383,6 +383,10 @@ public class PatientIdPartitionInterceptor {
 			}
 		}
 
+		Validate.notNull(
+				theReadDetails.getRestOperationType(),
+				"REST operation type must be set on RequestDetails before invoking partition identification.");
+
 		//noinspection EnumSwitchStatementWhichMissesCases
 		switch (theReadDetails.getRestOperationType()) {
 			case DELETE:
@@ -406,7 +410,20 @@ public class PatientIdPartitionInterceptor {
 							List<String> idParts = getResourceIdsForSearchParam(params, paramName);
 							if (!idParts.isEmpty()) {
 								ResourceCompartmentStoragePolicy policy = getPolicyForResourceType(theReadDetails);
-								return provideMultipleCompartmentPartition(theRequestDetails, idParts);
+								RequestPartitionId partitionId =
+										provideMultipleCompartmentPartition(theRequestDetails, idParts);
+								// If the policy defines a non-unique compartment partition (e.g.
+								// NON_UNIQUE_COMPARTMENT_IN_DEFAULT uses the default partition), include
+								// it in the search. A resource could live in the patient's partition
+								// (single-patient reference) or the non-unique compartment partition
+								// (multi-patient reference), so we need to search both.
+								Optional<RequestPartitionId> nonUniqueCompartmentPartition =
+										policy.getPartitionIdForNonUniqueCompartment(myPartitionSettings);
+								if (nonUniqueCompartmentPartition.isPresent()) {
+									partitionId =
+											nonUniqueCompartmentPartition.get().mergeIds(partitionId);
+								}
+								return partitionId;
 							}
 						}
 					}

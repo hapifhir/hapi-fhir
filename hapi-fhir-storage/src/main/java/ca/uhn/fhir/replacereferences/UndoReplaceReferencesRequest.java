@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.replacereferences;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -40,8 +39,6 @@ public class UndoReplaceReferencesRequest {
 	@Nonnull
 	public final IIdType targetId;
 
-	public final RequestPartitionId partitionId;
-
 	/**
 	 * The maximum number of resource that can be processed in a single undo operation.
 	 * If the undo operation requires updating more resources than this limit,
@@ -51,13 +48,9 @@ public class UndoReplaceReferencesRequest {
 	public final int resourceLimit;
 
 	public UndoReplaceReferencesRequest(
-			@Nonnull IIdType theSourceId,
-			@Nonnull IIdType theTargetId,
-			RequestPartitionId thePartitionId,
-			int theResourceLimit) {
+			@Nonnull IIdType theSourceId, @Nonnull IIdType theTargetId, int theResourceLimit) {
 		sourceId = theSourceId.toUnqualifiedVersionless();
 		targetId = theTargetId.toUnqualifiedVersionless();
-		partitionId = thePartitionId;
 		resourceLimit = theResourceLimit;
 	}
 }
