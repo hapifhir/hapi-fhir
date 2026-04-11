@@ -241,7 +241,7 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@ParameterizedTest
 	@MethodSource("nonDisableableBuiltInSearchParams")
-	void whenRetireBuiltInNonDisableableSp_thenExceptionIsThrown(SearchParameter theSp) {
+	void testBuiltInNonDisableableSp_whenRetired_throwsException(SearchParameter theSp) {
 		// Created by Claude Sonnet 4.6
 		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, theSp, myRequestDetails))
 				.isInstanceOf(UnprocessableEntityException.class)
@@ -249,7 +249,7 @@ public class SearchParameterValidatingInterceptorTest {
 	}
 
 	@Test
-	void whenRetireCustomSpOnNonDisableableResourceType_thenIsAllowed() {
+	void testCustomSpOnNonDisableableResource_whenRetired_isAllowed() {
 		// Created by Claude Sonnet 4.6
 		when(myDaoRegistry.getResourceDao(SearchParamValidatingInterceptor.SEARCH_PARAM)).thenReturn(myIFhirResourceDao);
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(List.of());
@@ -270,7 +270,7 @@ public class SearchParameterValidatingInterceptorTest {
 	}
 
 	@Test
-	void whenRetireSharedSpWithNonDisableableBase_thenExceptionIsThrown() {
+	void testSharedSpWithNonDisableableBase_whenRetired_throwsException() {
 		// Created by Claude Sonnet 4.6
 		// clinical-patient spans [Basic (non-disableable), Patient (disableable)].
 		// Retiring the whole SP must be blocked because Basic:* is non-disableable.
@@ -291,7 +291,7 @@ public class SearchParameterValidatingInterceptorTest {
 	}
 
 	@Test
-	void whenUpdateBuiltInNonDisableableSearchParamKeepingActive_thenIsAllowed() {
+	void testBuiltInNonDisableableSp_whenUpdatedKeepingActive_isAllowed() {
 		// Created by Claude Sonnet 4.6
 		when(myDaoRegistry.getResourceDao(SearchParamValidatingInterceptor.SEARCH_PARAM)).thenReturn(myIFhirResourceDao);
 

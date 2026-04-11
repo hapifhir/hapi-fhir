@@ -30,7 +30,7 @@ public class ReadOnlySearchParamCacheTest {
 	}
 
 	@Test
-	void testIsNonDisableableBuiltInSearchParam_builtInNonDisableable() {
+	void testIsNonDisableableBuiltInSearchParam_builtInUri_returnsTrue() {
 		// Created by Claude Sonnet 4.6
 		// Basic:* pattern
 		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/Basic-code", "Basic", "code"));
@@ -43,7 +43,7 @@ public class ReadOnlySearchParamCacheTest {
 	}
 
 	@Test
-	void testIsNonDisableableBuiltInSearchParam_customUrlReturnsFalse() {
+	void testIsNonDisableableBuiltInSearchParam_customUri_returnsFalse() {
 		// Created by Claude Sonnet 4.6
 		// Custom URL on a non-disableable resource type must NOT be protected
 		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/Basic-custom", "Basic", "custom"));
@@ -54,7 +54,7 @@ public class ReadOnlySearchParamCacheTest {
 	}
 
 	@Test
-	void testIsNonDisableableBuiltInSearchParam_builtInButDisableable() {
+	void testIsNonDisableableBuiltInSearchParam_builtInUriDisableableResource_returnsFalse() {
 		// Created by Claude Sonnet 4.6
 		// Built-in URL but resource type not in NON_DISABLEABLE_SEARCH_PARAMS
 		assertFalse(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/Patient-name", "Patient", "name"));
