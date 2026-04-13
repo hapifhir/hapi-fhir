@@ -272,9 +272,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
 					RequestDetails allPartitionsRequest = SystemRequestDetails.forAllPartitions();
 					cleanUpPossibleMatches(possibleMatches, dao, goldenPid, allPartitionsRequest);
-					String resourceType = dao.getResourceType().getSimpleName();
-					IIdType goldenId = myIdHelperSvc.resourceIdFromPidOrThrowException(goldenPid, resourceType);
-					IAnyResource goldenResource = (IAnyResource) dao.read(goldenId, allPartitionsRequest);
+					IAnyResource goldenResource = (IAnyResource) dao.readByPid(goldenPid);
 					myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(goldenResource);
 					/*
 					 * Mark the golden resource for deletion.
