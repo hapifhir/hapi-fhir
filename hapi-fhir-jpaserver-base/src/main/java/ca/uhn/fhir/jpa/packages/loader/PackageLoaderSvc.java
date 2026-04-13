@@ -48,11 +48,10 @@ import java.nio.file.Paths;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class PackageLoaderSvc extends BasePackageCacheManager implements IPackageLoader {
+public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageLoaderSvc.class);
 
-	@Override
 	public NpmPackageData fetchPackageFromPackageSpec(PackageInstallationSpec theSpec) throws IOException {
 		if (isNotBlank(theSpec.getPackageUrl())) {
 			byte[] contents = loadPackageUrlContents(theSpec.getPackageUrl());
@@ -74,7 +73,6 @@ public class PackageLoaderSvc extends BasePackageCacheManager implements IPackag
 	 * 			as fetched from the server
 	 * @throws IOException
 	 */
-	@Override
 	public NpmPackageData fetchPackageFromPackageSpec(String thePackageId, String thePackageVersion)
 			throws FHIRException, IOException {
 		return fetchPackageFromServerInternal(thePackageId, thePackageVersion);
@@ -104,7 +102,6 @@ public class PackageLoaderSvc extends BasePackageCacheManager implements IPackag
 	 * @return
 	 * @throws IOException
 	 */
-	@Override
 	public NpmPackageData createNpmPackageDataFromData(
 			String thePackageId, String thePackageVersionId, String theSourceDesc, InputStream thePackageTgzInputStream)
 			throws IOException {
@@ -152,7 +149,6 @@ public class PackageLoaderSvc extends BasePackageCacheManager implements IPackag
 				+ "Or use JpaPackageCache for a cache implementation.");
 	}
 
-	@Override
 	public byte[] loadPackageUrlContents(String thePackageUrl) {
 		if (thePackageUrl.startsWith("classpath:")) {
 			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:".length()));
