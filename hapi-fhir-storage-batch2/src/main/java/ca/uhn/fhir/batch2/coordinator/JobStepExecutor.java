@@ -40,6 +40,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.Nonnull;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -183,6 +184,13 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 
 			if (status == WorkChunkStatusEnum.IN_PROGRESS) {
 				myWorkChunkPersistence.onWorkChunkHeartbeat(workchunkId);
+			} else {
+				try {
+					context.getScheduler().unscheduleJob(context.getTrigger().getKey());
+				} catch (SchedulerException ex) {
+					ourLog.info("Failed to unschedule job {}", getClass().getName(), ex);
+					throw new RuntimeException(ex);
+				}
 			}
 		}
 	}
