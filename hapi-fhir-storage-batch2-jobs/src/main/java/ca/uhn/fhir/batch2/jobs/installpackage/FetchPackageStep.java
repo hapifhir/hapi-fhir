@@ -30,15 +30,17 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParame
 import ca.uhn.fhir.jpa.packages.loader.IPackageLoader;
 import ca.uhn.fhir.jpa.packages.loader.NpmPackageData;
 import jakarta.annotation.Nonnull;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.Base64;
 
 public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallationJobParameters, PackageContentsJson> {
 
-	@Autowired
 	private IPackageLoader myPackageLoader;
+
+	public FetchPackageStep(IPackageLoader thePackageLoader) {
+		this.myPackageLoader = thePackageLoader;
+	}
 
 	@Nonnull
 	@Override

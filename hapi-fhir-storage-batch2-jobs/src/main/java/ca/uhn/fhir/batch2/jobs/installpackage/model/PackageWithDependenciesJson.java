@@ -26,15 +26,42 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InstallationOutcomeJson implements IModelJson {
-	@JsonProperty("outcomes")
-	List<PackageInstallOutcomeJson> myOutcomes = new ArrayList<>();
+public class PackageWithDependenciesJson implements IModelJson {
 
-	public List<PackageInstallOutcomeJson> getOutcomes() {
-		return myOutcomes;
+	@JsonProperty("contents")
+	private byte[] myContents;
+
+	@JsonProperty("dependencyJobIds")
+	private List<String> myDependencyJobIds = new ArrayList<>();
+
+	@JsonProperty("report")
+	private PackageInstallOutcomeJson myReport;
+
+	public byte[] getContents() {
+		return myContents;
 	}
 
-	public void setOutcomes(List<PackageInstallOutcomeJson> theOutcomes) {
-		myOutcomes = theOutcomes;
+	public void setContents(byte[] theContents) {
+		myContents = theContents;
+	}
+
+	public List<String> getDependencyJobIds() {
+		return myDependencyJobIds;
+	}
+
+	public void setDependencyJobIds(List<String> theDependencyJobIds) {
+		myDependencyJobIds = theDependencyJobIds;
+	}
+
+	public void addDependencyJobId(String theDependencyJobId) {
+		myDependencyJobIds.add(theDependencyJobId);
+	}
+
+	public PackageInstallOutcomeJson getReport() {
+		return myReport;
+	}
+
+	public void setReport(PackageInstallOutcomeJson theReport) {
+		myReport = theReport;
 	}
 }

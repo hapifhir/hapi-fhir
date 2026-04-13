@@ -1,12 +1,13 @@
 package ca.uhn.fhir.batch2.jobs.installpackage;
 
+import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.installpackage.model.InstallationOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -15,11 +16,11 @@ import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -31,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessPackageStepTest {
@@ -48,18 +50,22 @@ public class ProcessPackageStepTest {
 	@Mock
 	IValidationSupport myValidationSupport;
 
-	@InjectMocks
 	private ProcessPackageStep myStep;
 
 	@Captor
 	private ArgumentCaptor<NpmPackage> myNpmPackageCaptor;
 
 	@Mock
-	private IJobDataSink<InstallationOutcomeJson> myJobDataSink;
+	private IJobDataSink<PackageInstallOutcomeJson> myJobDataSink;
 	@Captor
-	private ArgumentCaptor<InstallationOutcomeJson> myInstallationOutcomeCaptor;
+	private ArgumentCaptor<PackageInstallOutcomeJson> myInstallationOutcomeCaptor;
 	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
+
+	@BeforeEach
+	public void beforeEach() {
+		myStep = new ProcessPackageStep(myPackageInstallerSvc, mySearchParamRegistryController, myValidationSupport);
+	}
 
 	@Test
 	public void testRun_installOnly_succeeds() throws Exception {
@@ -73,9 +79,54 @@ public class ProcessPackageStepTest {
 
 		InputStream stream = ProcessPackageStepTest.class.getResourceAsStream("usCorePackage.tgz");
 		byte[] packageBytes = stream.readAllBytes();
+		PackageInstallOutcomeJson expectedReport = new PackageInstallOutcomeJson();
+
 		PackageContentsJson packageContentsJson = new PackageContentsJson();
 		packageContentsJson.setContents(Base64.getEncoder().encode(packageBytes));
+		packageContentsJson.setReport(expectedReport);
 		NpmPackage expectedPackage = NpmPackage.fromPackage(new ByteArrayInputStream(packageBytes));
+
+		ChunkExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> chunkDetails =
+			new ChunkExecutionDetails<>(packageContentsJson, params, INSTANCE_ID, CHUNK_ID);
+		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> stepDetails =
+			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		// execute
+		ChunkOutcome chunkOutcome = myStep.consume(chunkDetails);
+		RunOutcome runOutcome = myStep.run(stepDetails, myJobDataSink);
+
+		// validate
+		assertThat(chunkOutcome.getStatus()).isEqualTo(ChunkOutcome.Status.SUCCESS);
+		assertThat(runOutcome).isEqualTo(RunOutcome.SUCCESS);
+
+		verify(myPackageInstallerSvc).installPackage(myNpmPackageCaptor.capture(), eq(installationSpec), any(PackageInstallOutcomeJson.class));
+		NpmPackage actualPackage = myNpmPackageCaptor.getValue();
+		assertThat(actualPackage).isNotNull();
+		assertThat(actualPackage.id()).isEqualTo(expectedPackage.id());
+		assertThat(actualPackage.title()).isEqualTo(expectedPackage.title());
+		assertThat(actualPackage.getSize()).isEqualTo(expectedPackage.getSize());
+
+		verify(myJobDataSink).accept(myInstallationOutcomeCaptor.capture());
+		PackageInstallOutcomeJson outcomeJson = myInstallationOutcomeCaptor.getValue();
+		assertThat(outcomeJson).isSameAs(expectedReport);
+	}
+
+	@Test
+	public void testRun_childJob_doesNotReindex() throws Exception {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		installationSpec.setFetchDependencies(false);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+		params.setDependencyJob(true);
+
+		InputStream stream = ProcessPackageStepTest.class.getResourceAsStream("usCorePackage.tgz");
+		byte[] packageBytes = stream.readAllBytes();
+		PackageContentsJson packageContentsJson = new PackageContentsJson();
+		packageContentsJson.setContents(Base64.getEncoder().encode(packageBytes));
+		packageContentsJson.setReport(new PackageInstallOutcomeJson());
 
 		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
 			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
@@ -86,16 +137,7 @@ public class ProcessPackageStepTest {
 		// validate
 		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
 
-		verify(myPackageInstallerSvc).installPackage(myNpmPackageCaptor.capture(), eq(installationSpec), any(PackageInstallOutcomeJson.class));
-		NpmPackage actualPackage = myNpmPackageCaptor.getValue();
-		assertThat(actualPackage).isNotNull();
-		assertThat(actualPackage.id()).isEqualTo(expectedPackage.id());
-		assertThat(actualPackage.title()).isEqualTo(expectedPackage.title());
-		assertThat(actualPackage.getSize()).isEqualTo(expectedPackage.getSize());
-
-		verify(myJobDataSink).accept(myInstallationOutcomeCaptor.capture());
-		InstallationOutcomeJson outcomeJson = myInstallationOutcomeCaptor.getValue();
-		assertThat(outcomeJson).isNotNull();
-		assertThat(outcomeJson.getOutcomes()).hasSize(1);
+		verifyNoInteractions(mySearchParamRegistryController);
+		verifyNoInteractions(myValidationSupport);
 	}
 }

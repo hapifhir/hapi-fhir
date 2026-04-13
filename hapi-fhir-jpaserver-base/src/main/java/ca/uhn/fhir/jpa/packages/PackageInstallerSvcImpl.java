@@ -44,6 +44,7 @@ import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
+import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
@@ -76,7 +77,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
@@ -371,51 +371,36 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private void fetchAndInstallDependencies(
 			NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome)
 			throws ImplementationGuideInstallationException {
-		if (npmPackage.getNpm().has("dependencies")) {
-			JsonObject dependenciesElement =
-					npmPackage.getNpm().get("dependencies").asJsonObject();
-			for (String id : dependenciesElement.getNames()) {
-				String ver = dependenciesElement.getJsonString(id).asString();
-				try {
+		List<PackageUtils.DependentPackage> dependentPackages =
+				PackageUtils.extractDependentPackages(npmPackage, theInstallationSpec, theOutcome);
+
+		for (PackageUtils.DependentPackage nextPackage : dependentPackages) {
+			try {
+				if (theInstallationSpec.isDryRun()) {
 					theOutcome
 							.getMessage()
-							.add("Package " + npmPackage.id() + "#" + npmPackage.version() + " depends on package " + id
-									+ "#" + ver);
+							.add(String.format(
+									"Installation would install %s:%s", nextPackage.name(), nextPackage.version()));
+				} else {
 
-					boolean skip = false;
-					for (String next : theInstallationSpec.getDependencyExcludes()) {
-						if (id.matches(next)) {
-							theOutcome
-									.getMessage()
-									.add("Not installing dependency " + id + " because it matches exclude criteria: "
-											+ next);
-							skip = true;
-							break;
-						}
+					// resolve in local cache or on packages.fhir.org
+					NpmPackage dependency =
+							myPackageCacheManager.loadPackage(nextPackage.name(), nextPackage.version());
+					// recursive call to install dependencies of a package before
+					// installing the package
+					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
+
+					if (theInstallationSpec.getInstallMode()
+							== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
+						installPackage(dependency, theInstallationSpec, theOutcome);
 					}
-					if (skip) {
-						continue;
-					}
-
-					if (theInstallationSpec.isDryRun()) {
-						theOutcome.getMessage().add(String.format("Installation would install %s:%s", id, ver));
-					} else {
-
-						// resolve in local cache or on packages.fhir.org
-						NpmPackage dependency = myPackageCacheManager.loadPackage(id, ver);
-						// recursive call to install dependencies of a package before
-						// installing the package
-						fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
-
-						if (theInstallationSpec.getInstallMode()
-								== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
-							installPackage(dependency, theInstallationSpec, theOutcome);
-						}
-					}
-				} catch (IOException e) {
-					throw new ImplementationGuideInstallationException(
-							Msg.code(1287) + String.format("Cannot resolve dependency %s#%s", id, ver), e);
 				}
+			} catch (IOException e) {
+				throw new ImplementationGuideInstallationException(
+						Msg.code(1287)
+								+ String.format(
+										"Cannot resolve dependency %s#%s", nextPackage.name(), nextPackage.version()),
+						e);
 			}
 		}
 	}
