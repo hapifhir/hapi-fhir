@@ -1026,11 +1026,18 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 	}
 
 
-	@Test
-	void testInterceptorAccessToTransactionContents() {
-		createPatient(withId("A"), withIdentifier("http://patients", "123"));
-
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		true
+		false
+		""")
+	void testInterceptorCanResolveReferenceTargetWithinTransaction(boolean theReferenceSourceAlreadyExists) {
 		AtomicBoolean foundOrganization = new AtomicBoolean(false);
+
+		if (theReferenceSourceAlreadyExists) {
+			createPatient(withId("A"), withIdentifier("http://patients", "123"));
+		}
+
 
 		@Interceptor
 		class MyInterceptor {
@@ -1049,12 +1056,8 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 			}
 
 			private void processResource(IBaseResource resource, TransactionDetails transactionDetails) {
-				Reference reference = null;
 				if (resource instanceof Patient patient) {
-					reference = patient.getManagingOrganization();
-				}
-
-				if (reference != null) {
+					Reference reference = patient.getManagingOrganization();
 					IBaseResource target = transactionDetails.getResolvedResource(reference.getReferenceElement());
 					if (target != null) {
 						foundOrganization.set(true);
