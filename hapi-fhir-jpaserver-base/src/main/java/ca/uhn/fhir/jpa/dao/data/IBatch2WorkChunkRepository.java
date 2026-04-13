@@ -150,6 +150,10 @@ public interface IBatch2WorkChunkRepository
 			@Param("newStatus") WorkChunkStatusEnum theNewStatus);
 
 	@Modifying
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myLastHeartbeat = :now WHERE e.myId = :id")
+	int updateWorkChunkHeartbeat(@Param("id") String theWorkChunkId, @Param("now") Date theNow);
+
+	@Modifying
 	@Query(
 			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :newStatus WHERE e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus IN ( :oldStatuses )")
 	int updateAllChunksForStepWithStatus(

@@ -75,7 +75,6 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	@Override
 	public void init() throws SchedulerException {
-
 		setProperties();
 		myFactory.setQuartzProperties(myProperties);
 		myFactory.setBeanName(myInstanceName);
@@ -224,6 +223,15 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			return !currentlyExecutingJobs.isEmpty();
 		} catch (SchedulerException ex) {
 			throw new RuntimeException(Msg.code(2521) + " Failed during  check for scheduled jobs", ex);
+		}
+	}
+
+	public void stopJob(ScheduledJobDefinition theScheduledJobDefinition) {
+		try {
+			myScheduler.unscheduleJob(theScheduledJobDefinition.toTriggerKey());
+		} catch (SchedulerException ex) {
+			ourLog.error("Failed to unschedule job " + theScheduledJobDefinition.toTriggerKey().toString());
+			throw new RuntimeException(ex);
 		}
 	}
 

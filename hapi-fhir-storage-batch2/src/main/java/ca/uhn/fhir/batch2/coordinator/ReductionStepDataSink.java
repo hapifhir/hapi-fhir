@@ -55,7 +55,7 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			IJobPersistence thePersistence,
 			JobDefinitionRegistry theJobDefinitionRegistry,
 			IInterceptorService theInterceptorService) {
-		super(theInstanceId, theJobWorkCursor);
+		super(theInstanceId, null, theJobWorkCursor);
 		myJobPersistence = thePersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myInterceptorService = theInterceptorService;
@@ -125,6 +125,12 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 
 			throw new JobExecutionFailedException(Msg.code(2097) + ("No instance found with Id " + instanceId));
 		}
+	}
+
+	@Override
+	public void heartbeat() {
+		throw new UnsupportedOperationException(
+				"Reduction steps are not associated with any one workchunk, but with a multitude of cunks being 'reduced' to a single one.");
 	}
 
 	@Override

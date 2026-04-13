@@ -43,6 +43,11 @@ public class HapiNullScheduler implements IHapiScheduler {
 	public void shutdown() {}
 
 	@Override
+	public void stopJob(ScheduledJobDefinition theDefinition) {
+		// nothing
+	}
+
+	@Override
 	public boolean isStarted() {
 		return true;
 	}

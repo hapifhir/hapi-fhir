@@ -47,4 +47,9 @@ class InlineJobDataSink<OT extends IModelJson> implements IJobDataSink<OT> {
 		// not implemented
 	}
 
+	@Override
+	public void heartbeat() {
+		// not implemented
+	}
+
 }

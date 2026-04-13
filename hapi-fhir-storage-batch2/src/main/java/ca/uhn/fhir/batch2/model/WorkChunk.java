@@ -23,6 +23,7 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
 import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import ca.uhn.fhir.util.JsonUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -101,6 +102,9 @@ public class WorkChunk extends WorkChunkMetadata {
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myLastHeartbeat;
+
+	@JsonIgnore
+	private WorkChunkStatusEnum myPreviousStatus;
 
 	/**
 	 * Constructor
@@ -256,6 +260,14 @@ public class WorkChunk extends WorkChunkMetadata {
 
 	public void setLastHeartbeat(Date theLastHeartbeat) {
 		myLastHeartbeat = theLastHeartbeat;
+	}
+
+	public WorkChunkStatusEnum getPreviousStatus() {
+		return myPreviousStatus;
+	}
+
+	public void setPreviousStatus(WorkChunkStatusEnum thePreviousStatus) {
+		myPreviousStatus = thePreviousStatus;
 	}
 
 	@Override

@@ -46,10 +46,12 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import jakarta.annotation.Nonnull;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -138,13 +140,14 @@ public abstract class BaseBatch2Config {
 
 	@Bean
 	public WorkChannelMessageListener workChannelMessageListener(
-			@Nonnull IJobPersistence theJobPersistence,
-			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull BatchJobSender theBatchJobSender,
-			@Nonnull WorkChunkProcessor theExecutorSvc,
-			@Nonnull IJobMaintenanceService theJobMaintenanceService,
-			IHapiTransactionService theHapiTransactionService,
-			IInterceptorBroadcaster theInterceptorBroadcaster) {
+		@Nonnull IJobPersistence theJobPersistence,
+		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+		@Nonnull BatchJobSender theBatchJobSender,
+		@Nonnull WorkChunkProcessor theExecutorSvc,
+		@Nonnull IJobMaintenanceService theJobMaintenanceService,
+		IHapiTransactionService theHapiTransactionService,
+		IInterceptorBroadcaster theInterceptorBroadcaster,
+		ISchedulerService theSchedulerSvc) {
 		return new WorkChannelMessageListener(
 				theJobPersistence,
 				theJobDefinitionRegistry,
@@ -153,7 +156,20 @@ public abstract class BaseBatch2Config {
 				theJobMaintenanceService,
 				theHapiTransactionService,
 				theInterceptorBroadcaster,
-				myInterceptorService);
+				myInterceptorService,
+				theSchedulerSvc);
+	}
+
+	/**
+	 * Spring ensures SmartInitializingSingleton is created/run after
+	 * all non-lazy beans in this class (and inheriters) are instantiated.
+	 * This allows us to set the property, even if this class is overriden.
+	 */
+	@Bean
+	public SmartInitializingSingleton batch2AckTimeoutInitializer(
+			WorkChannelMessageListener theWorkChannelMessageListener,
+			IChannelConsumer<JobWorkNotification> theChannelConsumer) {
+		return () -> theWorkChannelMessageListener.setAckTimeoutMs(theChannelConsumer.getAckTimeoutMs());
 	}
 
 	@Bean
@@ -161,12 +177,8 @@ public abstract class BaseBatch2Config {
 			IBrokerClient theBrokerClient, WorkChannelMessageListener theWorkChannelMessageListener) {
 		ChannelConsumerSettings settings = new ChannelConsumerSettings();
 		settings.setConcurrentConsumers(getConcurrentConsumers());
-		IChannelConsumer<JobWorkNotification> consumer = theBrokerClient.getOrCreateConsumer(
+		return theBrokerClient.getOrCreateConsumer(
 				CHANNEL_NAME, JobWorkNotificationJsonMessage.class, theWorkChannelMessageListener, settings);
-
-		// set the consumer timeout to the workchannelmessagelistener
-		theWorkChannelMessageListener.setAckTimeoutMs(consumer.getAckTimeoutMs());
-		return consumer;
 	}
 
 	@Bean

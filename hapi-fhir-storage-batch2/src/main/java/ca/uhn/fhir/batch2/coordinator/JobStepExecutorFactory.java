@@ -26,16 +26,26 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
 
 public class JobStepExecutorFactory {
+	/**
+	 * Minimum timeout we wait for.
+	 */
+	public static final long DEFAULT_ACK_TIMEOUT = 1001;
+
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobStepExecutorSvc;
 	private final IJobMaintenanceService myJobMaintenanceService;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final IInterceptorService myInterceptorService;
+	private final ISchedulerService myIHapiScheduler;
+
+	private long myAckTimeoutMS = -1;
 
 	public JobStepExecutorFactory(
 			@Nonnull IJobPersistence theJobPersistence,
@@ -43,13 +53,24 @@ public class JobStepExecutorFactory {
 			@Nonnull WorkChunkProcessor theExecutorSvc,
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull IInterceptorService theInterceptorService) {
+			@Nonnull IInterceptorService theInterceptorService,
+			ISchedulerService theScheduler
+	) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myJobStepExecutorSvc = theExecutorSvc;
 		myJobMaintenanceService = theJobMaintenanceService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myInterceptorService = theInterceptorService;
+		myIHapiScheduler = theScheduler;
+	}
+
+	public void setAckTimeoutMS(long theAckTimeoutMS) {
+		myAckTimeoutMS = theAckTimeoutMS;
+	}
+
+	public long getAckTimeoutMS() {
+		return myAckTimeoutMS;
 	}
 
 	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
@@ -65,6 +86,9 @@ public class JobStepExecutorFactory {
 				myJobStepExecutorSvc,
 				myJobMaintenanceService,
 				myJobDefinitionRegistry,
-				myInterceptorService);
+				myInterceptorService,
+				myIHapiScheduler,
+				Math.min(myAckTimeoutMS, DEFAULT_ACK_TIMEOUT)
+		);
 	}
 }

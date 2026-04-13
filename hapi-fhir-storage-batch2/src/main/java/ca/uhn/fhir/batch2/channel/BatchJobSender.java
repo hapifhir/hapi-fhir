@@ -22,23 +22,42 @@ package ca.uhn.fhir.batch2.channel;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.broker.api.IChannelProducer;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.function.Function;
 
 public class BatchJobSender {
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchJobSender.class);
 	private final IChannelProducer<JobWorkNotification> myWorkChannelProducer;
 
+	private Function<JobWorkNotification, JobWorkNotificationJsonMessage> myMessageCreationFn;
+
 	public BatchJobSender(@Nonnull IChannelProducer<JobWorkNotification> theWorkChannelProducer) {
 		myWorkChannelProducer = theWorkChannelProducer;
+
+		setMessageCreationFn(null);
 	}
 
 	public void sendWorkChannelMessage(JobWorkNotification theJobWorkNotification) {
-		JobWorkNotificationJsonMessage message = new JobWorkNotificationJsonMessage();
-		message.setPayload(theJobWorkNotification);
+		JobWorkNotificationJsonMessage message = myMessageCreationFn.apply(theJobWorkNotification);
 
 		ourLog.info("Sending work notification for {}", theJobWorkNotification);
 		myWorkChannelProducer.send(message);
+	}
+
+	@VisibleForTesting
+	public void setMessageCreationFn(
+			Function<JobWorkNotification, JobWorkNotificationJsonMessage> theMessageCreationFn) {
+		myMessageCreationFn = theMessageCreationFn;
+		if (myMessageCreationFn == null) {
+			myMessageCreationFn = (input) -> {
+				JobWorkNotificationJsonMessage message = new JobWorkNotificationJsonMessage();
+				message.setPayload(input);
+				return message;
+			};
+		}
 	}
 }
