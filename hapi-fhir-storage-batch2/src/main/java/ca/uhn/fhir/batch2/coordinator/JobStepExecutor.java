@@ -21,11 +21,13 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IWorkChunkPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -93,7 +95,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		definition.setJobClass(HeartbeatJob.class);
 		definition.setId(String.join("%s-%s", myInstanceId, myWorkChunk.getId()));
 		definition.addJobData(CHUNK_ID, myWorkChunk.getId());
-		myIHapiScheduler.scheduleClusteredJob(Math.min(myAckTimeoutMs/3, 500), definition);
+		myIHapiScheduler.scheduleClusteredJob(Math.min(myAckTimeoutMs / 3, 500), definition);
 	}
 
 	@WithSpan(JOB_STEP_EXECUTION_SPAN_NAME)
@@ -170,13 +172,18 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	public static class HeartbeatJob implements HapiJob {
 
 		@Autowired
-		private IJobPersistence myJobPersistence;
+		private IWorkChunkPersistence myWorkChunkPersistence;
 
 		@Override
 		public void execute(JobExecutionContext context) throws JobExecutionException {
-			String workchunkId = (String)context.getMergedJobDataMap().get(CHUNK_ID);
-			ourLog.info("\nMMMMM " + workchunkId);
-			myJobPersistence.onWorkChunkHeartbeat(workchunkId);
+			String workchunkId = (String) context.getMergedJobDataMap().get(CHUNK_ID);
+
+			WorkChunkStatusEnum status = myWorkChunkPersistence.getWorkChunkStatus(workchunkId);
+			ourLog.info("WorkChunk {} has status {}", workchunkId, status.name());
+
+			if (status == WorkChunkStatusEnum.IN_PROGRESS) {
+				myWorkChunkPersistence.onWorkChunkHeartbeat(workchunkId);
+			}
 		}
 	}
 }

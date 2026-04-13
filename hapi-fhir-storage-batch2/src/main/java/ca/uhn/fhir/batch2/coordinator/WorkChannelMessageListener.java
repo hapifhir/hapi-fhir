@@ -35,7 +35,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.util.Logs;
@@ -68,8 +67,7 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 			IHapiTransactionService theHapiTransactionService,
 			IInterceptorBroadcaster theInterceptorBroadcaster,
 			@Nonnull IInterceptorService theInterceptorService,
-			ISchedulerService theScheduler
-	) {
+			ISchedulerService theScheduler) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myHapiTransactionService = theHapiTransactionService;
@@ -204,8 +202,9 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 		 */
 		private Optional<MessageProcess> handlePotentiallySlowWorkChunk() {
 			if (myWorkChunk.getPreviousStatus() == WorkChunkStatusEnum.IN_PROGRESS) {
-				ourLog.debug("Acktimeout (how long a broker will wait for a listener before redelivery) is {}ms",
-					myJobStepExecutorFactory.getAckTimeoutMS());
+				ourLog.debug(
+						"Acktimeout (how long a broker will wait for a listener before redelivery) is {}ms",
+						myJobStepExecutorFactory.getAckTimeoutMS());
 				long lastHeartbeatMs = myWorkChunk.getLastHeartbeat().getTime();
 				long now = Instant.now().toEpochMilli();
 
@@ -213,14 +212,16 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				// the '1' is deliberate to indicate if this is
 				// a user setting or our default min
 				// (hopefully users don't specify singular ms times)
-				long minTimeout = Math.max(myJobStepExecutorFactory.getAckTimeoutMS(), JobStepExecutorFactory.DEFAULT_ACK_TIMEOUT);
+				long minTimeout = Math.max(
+						myJobStepExecutorFactory.getAckTimeoutMS(), JobStepExecutorFactory.DEFAULT_ACK_TIMEOUT);
 				long twiceAckTime = 2 * minTimeout;
 
 				long duration = now - lastHeartbeatMs;
 
 				if (duration <= twiceAckTime) {
-					String msg = String.format("WorkChunk %s is stuck in step %s for job %s. This might be a redelivered message. Will retry later.",
-						myWorkChunk.getId(), myWorkChunk.getTargetStepId(), myWorkChunk.getJobDefinitionId());
+					String msg = String.format(
+							"WorkChunk %s is stuck in step %s for job %s. This might be a redelivered message. Will retry later.",
+							myWorkChunk.getId(), myWorkChunk.getTargetStepId(), myWorkChunk.getJobDefinitionId());
 					ourLog.warn(msg);
 					try {
 						Thread.sleep(minTimeout);

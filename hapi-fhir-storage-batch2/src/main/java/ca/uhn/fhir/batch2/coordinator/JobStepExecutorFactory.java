@@ -26,7 +26,6 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
@@ -54,8 +53,7 @@ public class JobStepExecutorFactory {
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull IInterceptorService theInterceptorService,
-			ISchedulerService theScheduler
-	) {
+			ISchedulerService theScheduler) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myJobStepExecutorSvc = theExecutorSvc;
@@ -88,7 +86,6 @@ public class JobStepExecutorFactory {
 				myJobDefinitionRegistry,
 				myInterceptorService,
 				myIHapiScheduler,
-				Math.min(myAckTimeoutMS, DEFAULT_ACK_TIMEOUT)
-		);
+				Math.min(myAckTimeoutMS, DEFAULT_ACK_TIMEOUT));
 	}
 }

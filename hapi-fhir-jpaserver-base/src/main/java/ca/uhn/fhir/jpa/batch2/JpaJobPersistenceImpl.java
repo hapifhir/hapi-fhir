@@ -549,6 +549,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public WorkChunkStatusEnum getWorkChunkStatus(String theWorkChunkId) {
+		Batch2WorkChunkEntity chunkOp =
+				myWorkChunkRepository.findById(theWorkChunkId).orElseThrow();
+
+		return chunkOp.getStatus();
+	}
+
+	@Override
 	public Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(
 			Pageable thePageable, String theInstanceId, Set<WorkChunkStatusEnum> theStates) {
 		Page<Batch2WorkChunkMetadataView> page =

@@ -46,7 +46,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -140,14 +139,14 @@ public abstract class BaseBatch2Config {
 
 	@Bean
 	public WorkChannelMessageListener workChannelMessageListener(
-		@Nonnull IJobPersistence theJobPersistence,
-		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-		@Nonnull BatchJobSender theBatchJobSender,
-		@Nonnull WorkChunkProcessor theExecutorSvc,
-		@Nonnull IJobMaintenanceService theJobMaintenanceService,
-		IHapiTransactionService theHapiTransactionService,
-		IInterceptorBroadcaster theInterceptorBroadcaster,
-		ISchedulerService theSchedulerSvc) {
+			@Nonnull IJobPersistence theJobPersistence,
+			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+			@Nonnull BatchJobSender theBatchJobSender,
+			@Nonnull WorkChunkProcessor theExecutorSvc,
+			@Nonnull IJobMaintenanceService theJobMaintenanceService,
+			IHapiTransactionService theHapiTransactionService,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			ISchedulerService theSchedulerSvc) {
 		return new WorkChannelMessageListener(
 				theJobPersistence,
 				theJobDefinitionRegistry,

@@ -230,7 +230,8 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		try {
 			myScheduler.unscheduleJob(theScheduledJobDefinition.toTriggerKey());
 		} catch (SchedulerException ex) {
-			ourLog.error("Failed to unschedule job " + theScheduledJobDefinition.toTriggerKey().toString());
+			ourLog.error("Failed to unschedule job "
+					+ theScheduledJobDefinition.toTriggerKey().toString());
 			throw new RuntimeException(ex);
 		}
 	}
