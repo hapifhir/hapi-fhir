@@ -2,5 +2,5 @@
 type: fix
 issue: 7744
 title: "Previously, the `$lookup` operation would return stale results after updating an externally loaded `CodeSystem` 
-using [$apply-codesystem-delta-add](/docs/terminology/uploading.html#delta-add-operation) 
-or [$apply-codesystem-delta-remove](/docs/terminology/uploading.html#delta-remove-operation). This has been fixed."
+using `$apply-codesystem-delta-add`
+or `$apply-codesystem-delta-remove`. This has been fixed."
