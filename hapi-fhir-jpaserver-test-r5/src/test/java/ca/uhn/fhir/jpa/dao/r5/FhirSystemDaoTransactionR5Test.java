@@ -14,13 +14,16 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,7 +54,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED;
+import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -988,7 +994,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		createPatient(withId("A"), withFamily("HELLO"), withActiveTrue());
 
 		class MyInterceptor {
-			@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+			@Hook(STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 			public void onResourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
 				Patient patient = (Patient) theNewResource;
 				patient.getNameFirstRep().setFamily("HELLO");
@@ -1017,6 +1023,60 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		// Verify
 		Patient actual = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertEquals("HELLO", actual.getNameFirstRep().getFamily());
+	}
+
+
+	@Test
+	void testInterceptorAccessToTransactionContents() {
+		createPatient(withId("A"), withIdentifier("http://patients", "123"));
+
+		AtomicBoolean foundOrganization = new AtomicBoolean(false);
+
+		@Interceptor
+		class MyInterceptor {
+
+			@Hook(STORAGE_PRESTORAGE_RESOURCE_CREATED)
+			public void resourceCreated(IBaseResource resource, TransactionDetails transactionDetails) {
+				processResource(resource, transactionDetails);
+			}
+
+			@Hook(STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+			public void resourceUpdated(
+				IBaseResource oldResource,
+				IBaseResource newResource,
+				TransactionDetails transactionDetails) {
+				processResource(newResource, transactionDetails);
+			}
+
+			private void processResource(IBaseResource resource, TransactionDetails transactionDetails) {
+				Reference reference = null;
+				if (resource instanceof Patient patient) {
+					reference = patient.getManagingOrganization();
+				}
+
+				if (reference != null) {
+					IBaseResource target = transactionDetails.getResolvedResource(reference.getReferenceElement());
+					if (target != null) {
+						foundOrganization.set(true);
+					}
+				}
+			}
+
+		}
+		registerInterceptor(new MyInterceptor());
+
+		String organizationUuid = IdType.newRandomUuid().getValue();
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(buildOrganization(withIdentifier("http://orgs", "123")), null, organizationUuid)
+			.conditional("Organization?identifier=http://orgs|123");
+		bb.addTransactionUpdateEntry(buildPatient(withIdentifier("http://patients", "123"), withOrganization(organizationUuid)))
+			.conditional("Patient?identifier=http://patients|123");
+		Bundle requestBundle = bb.getBundleTyped();
+		ourLog.info("HC45560: requestBundle: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
+
+		mySystemDao.transaction(newSrd(), requestBundle);
+
+		assertTrue(foundOrganization.get());
 	}
 
 
