@@ -12,6 +12,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.util.JsonUtil;
@@ -77,6 +78,7 @@ public class InitializeDependenciesStepTest {
 		byte[] encodedBytes = Base64.getEncoder().encode(packageBytes);
 		PackageContentsJson packageContentsJson = new PackageContentsJson();
 		packageContentsJson.setContents(encodedBytes);
+		packageContentsJson.setReport(new PackageInstallOutcomeJson());
 
 		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
 			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
@@ -137,6 +139,7 @@ public class InitializeDependenciesStepTest {
 		byte[] encodedBytes = Base64.getEncoder().encode(packageBytes);
 		PackageContentsJson packageContentsJson = new PackageContentsJson();
 		packageContentsJson.setContents(encodedBytes);
+		packageContentsJson.setReport(new PackageInstallOutcomeJson());
 
 		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
 			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
@@ -174,6 +177,7 @@ public class InitializeDependenciesStepTest {
 		byte[] encodedBytes = Base64.getEncoder().encode(packageBytes);
 		PackageContentsJson packageContentsJson = new PackageContentsJson();
 		packageContentsJson.setContents(encodedBytes);
+		packageContentsJson.setReport(new PackageInstallOutcomeJson());
 
 		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
 			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
