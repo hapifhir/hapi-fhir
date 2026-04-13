@@ -436,14 +436,16 @@ public class RuntimeSearchParam {
 		private final String myExpression;
 		private final String myReference;
 		private final String myComboUpliftChain;
+		private final boolean myComboRangedDate;
 
 		/**
 		 * Constructor
 		 */
-		public Component(String theExpression, String theReference, String theComboUpliftChain) {
+		public Component(String theExpression, String theReference, String theComboUpliftChain, boolean theComboRangedDate) {
 			myExpression = theExpression;
 			myReference = theReference;
 			myComboUpliftChain = theComboUpliftChain;
+			myComboRangedDate = theComboRangedDate;
 		}
 
 		@Override
@@ -453,6 +455,10 @@ public class RuntimeSearchParam {
 					.append("reference", myReference)
 					.append("chain", myComboUpliftChain)
 					.toString();
+		}
+
+		public boolean isComboRangedDate() {
+			return myComboRangedDate;
 		}
 
 		public String getExpression() {

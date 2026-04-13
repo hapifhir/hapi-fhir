@@ -166,7 +166,8 @@ public enum JpaParamUtil {
 			if (componentParam == null) {
 				throw new InternalErrorException(Msg.code(499) + "Can not find SearchParameter: " + url);
 			}
-			compositeList.add(new ComponentAndCorrespondingParam(next, componentParam));
+			boolean comboRangedDate = next.isComboRangedDate();
+			compositeList.add(new ComponentAndCorrespondingParam(next, componentParam, comboRangedDate));
 		}
 		return compositeList;
 	}
@@ -236,14 +237,16 @@ public enum JpaParamUtil {
 		private final RuntimeSearchParam myComponentParameter;
 		private final String myParamName;
 		private final String myChain;
+		private final boolean myComboRangedDate;
 
 		/**
 		 * Constructor
 		 */
 		ComponentAndCorrespondingParam(
-				@Nonnull RuntimeSearchParam.Component theComponent, @Nonnull RuntimeSearchParam theComponentParameter) {
+				@Nonnull RuntimeSearchParam.Component theComponent, @Nonnull RuntimeSearchParam theComponentParameter, boolean theComboRangedDate) {
 			this.myComponent = theComponent;
 			this.myComponentParameter = theComponentParameter;
+			this.myComboRangedDate = theComboRangedDate;
 
 			int dotIdx = theComponentParameter.getName().indexOf(".");
 			if (dotIdx != -1) {
@@ -300,6 +303,10 @@ public enum JpaParamUtil {
 		@Nonnull
 		public String getCombinedParamName() {
 			return myCombinedParamName;
+		}
+
+		public boolean isComboRangedDate() {
+			return myComboRangedDate;
 		}
 	}
 }

@@ -30,7 +30,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r5.model.Extension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -43,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Comparator;
 import java.util.List;
 
+import static oracle.jdbc.OracleTypeMetaData.ArrayStorage.withCode;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -337,6 +337,16 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		logCapturedMessages();
 		assertThat(myMessages.toString()).contains("Using NON_UNIQUE index(es) for query for search: Patient?family=SIMPSON&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=HOMER");
 		myMessages.clear();
+
+	}
+
+	@Test
+	public void testRangedDate() {
+		myComboSearchParameterTestHelper.createObservationSubjectCodeAndRangedEffective();
+
+		createPatient(withId("P0"), withActiveTrue());
+
+		createObservation(withId("O0"), withSubject("Patient/P0"), withObservationCode("http://foo", "bar"), withObservationEffectiveInstant("2022-01-01T00:00:00Z"));
 
 	}
 

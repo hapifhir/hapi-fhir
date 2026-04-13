@@ -31,6 +31,7 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SearchParameter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class ComboSearchParameterTestHelper {
@@ -60,7 +61,7 @@ public class ComboSearchParameterTestHelper {
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
-		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+		storeSearchParameter(sp);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-uniq-identifier");
@@ -75,7 +76,7 @@ public class ComboSearchParameterTestHelper {
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+		storeSearchParameter(sp);
 		mySearchParamRegistry.forceRefresh();
 	}
 
@@ -87,7 +88,7 @@ public class ComboSearchParameterTestHelper {
 		sp.setExpression("Patient.gender");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
-		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+		storeSearchParameter(sp);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate");
@@ -96,7 +97,7 @@ public class ComboSearchParameterTestHelper {
 		sp.setExpression("Patient.birthDate");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
-		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+		storeSearchParameter(sp);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-gender-birthdate");
@@ -116,7 +117,7 @@ public class ComboSearchParameterTestHelper {
 			next.accept(sp);
 		}
 
-		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+		storeSearchParameter(sp);
 
 		mySearchParamRegistry.forceRefresh();
 	}
@@ -129,7 +130,7 @@ public class ComboSearchParameterTestHelper {
 		sp.setExpression("Patient.name.family");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
-		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+		storeSearchParameter(sp);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-gender");
@@ -138,7 +139,7 @@ public class ComboSearchParameterTestHelper {
 		sp.setExpression("Patient.gender");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
-		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+		storeSearchParameter(sp);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-family-gender");
@@ -158,9 +159,69 @@ public class ComboSearchParameterTestHelper {
 			next.accept(sp);
 		}
 
-		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+		storeSearchParameter(sp);
 
 		mySearchParamRegistry.forceRefresh();
+	}
+
+	public void createObservationSubjectCodeAndRangedEffective() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/observation-subject");
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setCode("subject");
+		sp.setExpression("Observation.subject");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.OBSERVATION);
+		storeSearchParameter(sp);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/observation-code");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setCode("code");
+		sp.setExpression("Observation.code");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.OBSERVATION);
+		storeSearchParameter(sp);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/observation-date");
+		sp.setType(Enumerations.SearchParamType.DATE);
+		sp.setCode("date");
+		sp.setExpression("Observation.effective.ofType(dateTime) | Observation.effective.ofType(Period) | Observation.effective.ofType(Timing) | Observation.effective.ofType(instant)");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.OBSERVATION);
+		storeSearchParameter(sp);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/observation-subject-code-ranged-date");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.OBSERVATION);
+		sp.addComponent()
+			.setExpression("Observation")
+			.setDefinition("SearchParameter/observation-subject");
+		sp.addComponent()
+			.setExpression("Observation")
+			.setDefinition("SearchParameter/observation-code");
+		sp.addComponent()
+			.setExpression("Observation")
+			.setDefinition("SearchParameter/observation-date")
+			.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED)
+			.setValue(new BooleanType(true));
+
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(false));
+		storeSearchParameter(sp);
+
+		mySearchParamRegistry.forceRefresh();
+
+	}
+
+	private void storeSearchParameter(SearchParameter theSearchParameter) {
+		assertTrue(theSearchParameter.getIdElement().hasIdPart());
+		mySearchParameterDao.update(fromCanonoical(theSearchParameter), new SystemRequestDetails());
 	}
 
 	private IBaseResource fromCanonoical(SearchParameter theSearchParameter) {
@@ -168,7 +229,7 @@ public class ComboSearchParameterTestHelper {
 	}
 
 
-	@FunctionalInterface
+    @FunctionalInterface
 	public interface ISearchParamCustomizer {
 
 		void accept(SearchParameter theSearchParameter);

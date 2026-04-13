@@ -153,6 +153,10 @@ public interface ITestDataBuilder {
 		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "dateTime", theDate);
 	}
 
+	default ICreationArgument withInstantAt(String thePath, String theDate) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "instant", theDate);
+	}
+
 	/**
 	 * Set [Resource].identifier.system and [Resource].identifier.value
 	 */
@@ -463,6 +467,10 @@ public interface ITestDataBuilder {
 
 	default ICreationArgument withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
 		return withObservationCode(theSystem, theCode, null);
+	}
+
+	default ICreationArgument withObservationEffectiveInstant(@Nullable String theInstant) {
+		return withInstantAt("effectiveInstant", theInstant);
 	}
 
 	default ICreationArgument withObservationCode(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {

@@ -529,28 +529,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					findParameterIndexes(theIndexes, next);
 
 			Collection<ResourceLink> linksForCompositePart = null;
+			Collection<String> linksForCompositePartWantPaths = null;
 			RestSearchParameterTypeEnum paramType =
 					JpaParamUtil.getParameterTypeForComposite(mySearchParamRegistry, next);
 
 			switch (paramType) {
 				case REFERENCE:
 					linksForCompositePart = theIndexes.myLinks;
-					break;
-				case NUMBER:
-				case DATE:
-				case STRING:
-				case TOKEN:
-				case QUANTITY:
-				case URI:
-				case SPECIAL:
-				case COMPOSITE:
-				case HAS:
-					break;
-			}
-
-			Collection<String> linksForCompositePartWantPaths = null;
-			switch (paramType) {
-				case REFERENCE:
 					linksForCompositePartWantPaths = new HashSet<>(nextComponentParameter.getPathsSplit());
 					break;
 				case NUMBER:

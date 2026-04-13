@@ -909,7 +909,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Verify
 		assertThat(myCaptureQueriesListener).has(
 			onCurrentThread()
-				.selectSqlContains(0, theExpectedSelectSql)
+				.selectSqlAtIndex(0).contains(theExpectedSelectSql)
 		);
 	}
 
@@ -3290,8 +3290,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			onAllThreads()
 				.selectCount(2)
 				.commitCount(3)
-				.selectSqlContains(0, "PARTITION_ID='1'")
-				.selectSqlContains(1, "PARTITION_ID='1'")
+				.selectSqlAtIndex(0).contains("PARTITION_ID='1'")
+				.selectSqlAtIndex(1).contains("PARTITION_ID='1'")
 		);
 	}
 
@@ -3347,8 +3347,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			onAllThreads()
 				.selectCount(2)
 				.commitCount(3)
-				.selectSqlContains(0, "PARTITION_ID is null")
-				.selectSqlContains(1, "PARTITION_ID is null")
+				.selectSqlAtIndex(0).contains("PARTITION_ID is null")
+				.selectSqlAtIndex(1).contains("PARTITION_ID is null")
 		);
 
 	}
