@@ -27,19 +27,22 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
-import ca.uhn.fhir.jpa.packages.loader.IPackageLoader;
-import ca.uhn.fhir.jpa.packages.loader.NpmPackageData;
+import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
+import ca.uhn.fhir.jpa.packages.NpmPackageUtils;
+import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 
 public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallationJobParameters, PackageContentsJson> {
 
-	private IPackageLoader myPackageLoader;
+	private final IHapiPackageCacheManager myPackageCacheManager;
 
-	public FetchPackageStep(IPackageLoader thePackageLoader) {
-		this.myPackageLoader = thePackageLoader;
+	public FetchPackageStep(IHapiPackageCacheManager thePackageCacheManager) {
+		this.myPackageCacheManager = thePackageCacheManager;
 	}
 
 	@Nonnull
@@ -50,10 +53,20 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 			throws JobExecutionFailedException {
 
 		try {
-			NpmPackageData npmPackage = myPackageLoader.fetchPackageFromPackageSpec(
+			NpmPackage npmPackage = myPackageCacheManager.installPackage(
 					theStepExecutionDetails.getParameters().getInstallationSpec());
+
+			// We need to convert the package back to bytes so we can serialize it between steps
+			// Note that these are not the identical bytes that were found by the cache,
+			// but they should be equivalent
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			npmPackage.save(outputStream);
+
+			PackageInstallOutcomeJson outcome = new PackageInstallOutcomeJson();
+			outcome.getMessage().addAll(NpmPackageUtils.getProcessingMessages(npmPackage));
+
 			PackageContentsJson contents = new PackageContentsJson();
-			contents.setContents(Base64.getEncoder().encode(npmPackage.getBytes()));
+			contents.setContents(Base64.getEncoder().encode(outputStream.toByteArray()));
 			theDataSink.accept(contents);
 		} catch (IOException e) {
 			// We're only concerned with the happy path for now - error handling is a separate MR

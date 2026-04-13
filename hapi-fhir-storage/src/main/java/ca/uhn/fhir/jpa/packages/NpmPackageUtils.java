@@ -19,16 +19,31 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import org.hl7.fhir.utilities.npm.NpmPackage;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class NpmPackageUtils {
 
+	private NpmPackageUtils() {
+		/* This utility class should not be instantiated */
+	}
+
 	/**
 	 * Msg structure when an npm package has successfully been added to the cache
 	 */
-	public static String SUCCESSFULLY_INSTALLED_MSG_TEMPLATE = "Successfully added package %s#%s to registry";
+	public static final String SUCCESSFULLY_INSTALLED_MSG_TEMPLATE = "Successfully added package %s#%s to registry";
 
 	public static boolean isSuccessfulMsg(String theMsg) {
 		return isNotBlank(theMsg) && theMsg.contains("Successfully added package");
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<String> getProcessingMessages(NpmPackage thePackage) {
+		return (List<String>)
+				thePackage.getUserData().computeIfAbsent("JpPackageCache_ProcessingMessages", t -> new ArrayList<>());
 	}
 }

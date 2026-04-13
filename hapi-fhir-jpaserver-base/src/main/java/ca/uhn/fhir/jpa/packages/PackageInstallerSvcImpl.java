@@ -222,7 +222,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					throw new IOException(Msg.code(1284) + "Package not found");
 				}
 
-				retVal.getMessage().addAll(JpaPackageCache.getProcessingMessages(npmPackage));
+				retVal.getMessage().addAll(NpmPackageUtils.getProcessingMessages(npmPackage));
 
 				if (theInstallationSpec.isFetchDependencies()) {
 					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal);
