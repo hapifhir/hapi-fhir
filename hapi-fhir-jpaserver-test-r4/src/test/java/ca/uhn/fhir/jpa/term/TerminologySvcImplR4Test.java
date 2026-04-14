@@ -608,7 +608,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		cs.setUrl("http://foo/cs");
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.addConcept().setCode("codeA").setDisplay("displayA");
-		myCodeSystemDao.create(cs, mySrd);
+		IIdType id = myCodeSystemDao.create(cs, mySrd).getId();
 
 		// Verify initial lookup succeeds
 		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
@@ -619,6 +619,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		// Update the CodeSystem with different concepts
 		CodeSystem csUpdated = new CodeSystem();
+		csUpdated.setId(id.toVersionless());
 		csUpdated.setUrl("http://foo/cs");
 		csUpdated.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		csUpdated.addConcept().setCode("codeB").setDisplay("displayB");
@@ -656,12 +657,14 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		// Prime: read and verify pre-expanded, which populates myValueSetCache with EXPANDED status
-		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, new SystemRequestDetails());
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, mySrd);
 		assertThat(myTermSvc.isValueSetPreExpandedForCodeValidation(valueSet)).isTrue();
 
 		// Update the ValueSet — JpaResourceDaoValueSet calls storeTermValueSet, which
 		// deletes the old TermValueSet and creates a new one with NOT_EXPANDED status.
 		// Without the fix, myValueSetCache still holds the stale EXPANDED entry.
+		// A content change is required so the DAO considers the resource modified nd invokes storeTermValueSet.
+		valueSet.setTitle("Updated");
 		myValueSetDao.update(valueSet, mySrd);
 
 		// The cache must be cleared: re-checking should reflect NOT_EXPANDED from the DB
@@ -677,7 +680,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		// Prime: read and verify pre-expanded, which populates myValueSetCache with EXPANDED status
-		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, new SystemRequestDetails());
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, mySrd);
 		assertThat(myTermSvc.isValueSetPreExpandedForCodeValidation(valueSet)).isTrue();
 
 		// Delete the ValueSet — JpaResourceDaoValueSet calls deleteValueSetAndChildren,
@@ -701,7 +704,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
-		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, new SystemRequestDetails());
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, mySrd);
 
 		// Prime both caches with valid lookups
 		IValidationSupport.CodeValidationResult csResult = myTermSvc.validateCode(
