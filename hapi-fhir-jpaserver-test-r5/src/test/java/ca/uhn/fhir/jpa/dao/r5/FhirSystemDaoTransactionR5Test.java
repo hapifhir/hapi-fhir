@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -23,7 +22,6 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -69,6 +67,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("unchecked")
 public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 	@Override
@@ -97,7 +96,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 
 	/**
-	 * If an inline match URL is the same as a conditional create in the same transaction, make sure we
+	 * If an inline match URL is the same as a conditional-create in the same transaction, make sure we
 	 * don't issue a select for it
 	 */
 	@ParameterizedTest(name = "{index}: {0}")
@@ -1025,13 +1024,23 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("HELLO", actual.getNameFirstRep().getFamily());
 	}
 
-
+	/**
+	 * Given: A FHIR transaction which creates/updates an Organization, and a Patient with a reference to that
+	 * Organization.
+	 * <p>
+	 * Expect: An interceptor on the XXX_PRESTORAGE pointcuts should be able to look up the Organization by
+	 * reference from within the {@link TransactionDetails}.
+	 */
 	@ParameterizedTest
 	@CsvSource(textBlock = """
-		true
-		false
+		# PatientAlreadyExists , OrgAction      , ExpectFound
+		true                   , CREATE         , true
+		true                   , UPDATE         , true
+		true                   , COND_CREATE    , true
+		true                   , COND_UPDATE    , true
+		false                  , COND_UPDATE    , true
 		""")
-	void testInterceptorCanResolveReferenceTargetWithinTransaction(boolean theReferenceSourceAlreadyExists) {
+	void testInterceptorCanResolveReferenceTargetWithinTransaction(boolean theReferenceSourceAlreadyExists, String theOrgAction, boolean theExpectFound) {
 		AtomicBoolean foundOrganization = new AtomicBoolean(false);
 
 		if (theReferenceSourceAlreadyExists) {
@@ -1070,19 +1079,32 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		String organizationUuid = IdType.newRandomUuid().getValue();
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
-		bb.addTransactionUpdateEntry(buildOrganization(withIdentifier("http://orgs", "123")), null, organizationUuid)
-			.conditional("Organization?identifier=http://orgs|123");
+		switch (theOrgAction) {
+			case "CREATE" ->
+				bb.addTransactionCreateEntry(buildOrganization(withId("O1"), withIdentifier("http://orgs", "123")), organizationUuid);
+			case "UPDATE" ->
+				bb.addTransactionUpdateEntry(buildOrganization(withId("O1"), withIdentifier("http://orgs", "123")), "Organization/O1", organizationUuid);
+			case "COND_CREATE" ->
+				bb.addTransactionCreateEntry(buildOrganization(withIdentifier("http://orgs", "123")), organizationUuid)
+					.conditional("Organization?identifier=http://orgs|123");
+			case "COND_UPDATE" ->
+				bb.addTransactionUpdateEntry(buildOrganization(withIdentifier("http://orgs", "123")), null, organizationUuid)
+					.conditional("Organization?identifier=http://orgs|123");
+		}
+
 		bb.addTransactionUpdateEntry(buildPatient(withIdentifier("http://patients", "123"), withOrganization(organizationUuid)))
 			.conditional("Patient?identifier=http://patients|123");
 		Bundle requestBundle = bb.getBundleTyped();
+
 		ourLog.info("HC45560: requestBundle: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
 
 		mySystemDao.transaction(newSrd(), requestBundle);
 
-		assertTrue(foundOrganization.get());
+		assertEquals(theExpectFound, foundOrganization.get());
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Test
 	void testMetaAdd_Added() {
 		// Setup
@@ -1223,8 +1245,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 	@Nonnull
 	private static List<String> toMetaTagCodes(Patient actualA) {
-		List<String> metaTagCodes = actualA.getMeta().getTag().stream().map(Coding::getCode).toList();
-		return metaTagCodes;
+		return actualA.getMeta().getTag().stream().map(Coding::getCode).toList();
 	}
 
 
