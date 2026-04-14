@@ -25,21 +25,39 @@ import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for edge cases in merge operations that don't fit the generic resource pattern.
@@ -50,11 +68,14 @@ public class MergeEdgeCaseR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	protected Batch2JobHelper myBatch2JobHelper;
 
+	@Autowired
+	protected ResourceLinkServiceFactory myLinkServiceFactory;
+
 	protected MergeOperationTestHelper myHelper;
 
 	@BeforeEach
 	public void beforeMergeEdgeCase() {
-		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext);
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry);
 	}
 
 	@Test
@@ -126,5 +147,98 @@ public class MergeEdgeCaseR4Test extends BaseResourceProviderR4Test {
 			params,
 			InvalidRequestException.class,
 			expectedErrorMessages.toArray(new String[0]));
+	}
+
+	@Nested
+	class PatientCompartmentTests {
+
+		private static final String TEST_PATIENT_ID = "Patient/compartment-test-patient";
+
+		@BeforeEach
+		void beforePatientCompartment() {
+			Patient patient = new Patient();
+			patient.setId(TEST_PATIENT_ID);
+			myClient.update().resource(patient).execute();
+		}
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		void testMergeObservation_differentPatientCompartments_failsWithUnprocessableEntityException(boolean thePreview) {
+			IIdType patient2Id = myClient.create().resource(new Patient()).execute().getId().toUnqualifiedVersionless();
+
+			IIdType sourceId = createObservationWithPatient(TEST_PATIENT_ID, "source-id");
+			IIdType targetId = createObservationWithPatient(patient2Id.getValue(), "target-id");
+
+			MergeTestParameters params = new MergeTestParameters()
+				.sourceResource(new Reference(sourceId))
+				.targetResource(new Reference(targetId))
+				.deleteSource(false)
+				.preview(thePreview);
+
+			String expectedMessage = String.format(
+				"Source and target resources belong to different patients and cannot be merged. "
+					+ "Source belongs to Patient/compartment-test-patient, Target belongs to Patient/%s.",
+				patient2Id.getIdPart());
+			myHelper.callMergeAndValidateException(
+				"Observation",
+				params,
+				UnprocessableEntityException.class,
+				expectedMessage);
+		}
+
+		static Stream<Arguments> sameOrNoPatientScenarios() {
+			return Stream.of(
+				Arguments.of("both reference same patient", TEST_PATIENT_ID, TEST_PATIENT_ID),
+				Arguments.of("only source has patient ref", TEST_PATIENT_ID, null),
+				Arguments.of("only target has patient ref", null, TEST_PATIENT_ID),
+				Arguments.of("neither has patient ref", null, null)
+			);
+		}
+
+		@ParameterizedTest(name = "{0}")
+		@MethodSource("sameOrNoPatientScenarios")
+		void testMergeObservation_sameOrNoPatientCompartment_succeeds(
+				String theDescription, String theSourcePatientRef, String theTargetPatientRef) {
+			IIdType sourceId = createObservationWithPatient(theSourcePatientRef, "source-id");
+			IIdType targetId = createObservationWithPatient(theTargetPatientRef, "target-id");
+
+			MergeTestParameters params = new MergeTestParameters()
+				.sourceResource(new Reference(sourceId))
+				.targetResource(new Reference(targetId))
+				.deleteSource(false)
+				.preview(false);
+
+			Parameters outParams = myHelper.callMergeOperation("Observation", params, false);
+			myHelper.validateSyncSuccessMessage(outParams);
+		}
+
+		private IIdType createObservationWithPatient(@Nullable String thePatientRef, @Nonnull String theIdentifierValue) {
+			Observation obs = new Observation();
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			obs.getCode().addCoding().setSystem("http://loinc.org").setCode("test-code");
+			if (thePatientRef != null) {
+				obs.setSubject(new Reference(thePatientRef));
+			}
+			obs.addIdentifier(new Identifier().setSystem("http://test.org").setValue(theIdentifierValue));
+			return myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"$merge", "$hapi.fhir.merge"})
+	void testMerge_NonParameterRequestBody_Returns400BadRequest(String theOperationName) throws IOException {
+		HttpClientExtension clientExtension = new HttpClientExtension();
+		clientExtension.initialize();
+		try (CloseableHttpClient client = clientExtension.getClient()) {
+			HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + theOperationName);
+			post.addHeader("Content-Type", "application/fhir+json");
+			post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(new Patient()), StandardCharsets.UTF_8));
+			try (CloseableHttpResponse response = client.execute(post)) {
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+				String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+				assertThat(responseContent).contains("There are no source resource parameters provided");
+				assertThat(responseContent).contains("There are no target resource parameters provided");
+			}
+		}
 	}
 }

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7630
+title: "Previously, the `compareTo` method used to determine interceptor invocation order could return an incorrect result 
+        due to integer overflow when comparing two `@Interceptor` or `@Hook` order values, when the difference between them overflows int range (e.g., Integer.MIN_VALUE - 100). 
+        Fix submitted by Tue Toft Nørgård (@ttnTrifork)"

@@ -40,6 +40,10 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, TermConcept.
 			+ "WHERE t.myCodeSystemVersionPid = :pid")
 	List<TermConcept> fetchConceptsAndDesignationsByVersionPid(@Param("pid") Long theCodeSystemVersionPid);
 
+	@Query("SELECT DISTINCT t FROM TermConcept t LEFT JOIN FETCH t.myProperties "
+			+ "WHERE t.myCodeSystemVersionPid = :pid")
+	List<TermConcept> fetchConceptsAndPropertiesByVersionPid(@Param("pid") Long theCodeSystemVersionPid);
+
 	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
 

@@ -1,0 +1,11 @@
+---
+type: add
+issue: 7609
+title: "Added a flag to PackageInstallationSpec to allow
+      a dry-run to be run and a report be generated
+      outlining whatever changes would result from a
+      non-dry run (count of resources by type that would be installed;
+      list of resources by unique ids that would be overwritten;
+      and list of dependencies that would also be installed, if package
+      defines dependencies to be installed)
+"

@@ -308,9 +308,9 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			TermConcept microCode = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "NEUT").get();
 			assertEquals(2, microCode.getProperties().size());
 			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "HB").get();
-			assertEquals(1, code.getProperties().size());
+			assertEquals(6, code.getProperties().size());
 			Integer codeProperties = myTermConceptPropertyDao.countByCodeSystemVersion(version.getPid());
-			assertEquals(6, codeProperties);
+			assertEquals(11, codeProperties);
 			Optional<TermConceptProperty> first = code.getProperties().stream().filter(property -> "color".equalsIgnoreCase(property.getKey()) && "red".equalsIgnoreCase(property.getValue())).findFirst();
 			if (!first.isPresent()) {
 				String failureMessage = String.format("Concept %s did not contain property with key %s and value %s ", code.getCode(), "property1", "property1Value");

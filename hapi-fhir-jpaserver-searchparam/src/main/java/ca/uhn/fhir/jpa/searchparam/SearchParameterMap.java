@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +83,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 	private EverythingModeEnum myEverythingMode = null;
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
+	private DateRangeParam myCompartmentLastUpdated;
 	private boolean myLoadSynchronous;
 	private Integer myLoadSynchronousUpTo;
 	private Set<Include> myRevIncludes;
@@ -128,6 +130,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 		map.setLastN(isLastN());
 		map.setLastNMax(getLastNMax());
 		map.setLastUpdated(getLastUpdated());
+		map.setCompartmentLastUpdated(getCompartmentLastUpdated());
 		map.setLoadSynchronous(isLoadSynchronous());
 		map.setNearDistanceParam(getNearDistanceParam());
 		map.setLoadSynchronousUpTo(getLoadSynchronousUpTo());
@@ -257,6 +260,17 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 		}
 	}
 
+	private void addCompartmentLastUpdatedParam(
+			StringBuilder theBuilder, ParamPrefixEnum thePrefix, DateParam theDateParam) {
+		if (theDateParam != null && isNotBlank(theDateParam.getValueAsString())) {
+			addUrlParamSeparator(theBuilder);
+			theBuilder.append(Constants.PARAM_COMPARTMENT_LAST_UPDATED);
+			theBuilder.append('=');
+			theBuilder.append(thePrefix.getValue());
+			theBuilder.append(theDateParam.getValueAsString());
+		}
+	}
+
 	public SearchParameterMap addRevInclude(Include theInclude) {
 		getRevIncludes().add(theInclude);
 		return this;
@@ -345,6 +359,20 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 
 	public void setLastUpdated(DateRangeParam theLastUpdated) {
 		myLastUpdated = theLastUpdated;
+	}
+
+	/**
+	 * Returns null if there is no compartment last updated value
+	 */
+	public DateRangeParam getCompartmentLastUpdated() {
+		if (myCompartmentLastUpdated == null || myCompartmentLastUpdated.isEmpty()) {
+			return null;
+		}
+		return myCompartmentLastUpdated;
+	}
+
+	public void setCompartmentLastUpdated(DateRangeParam theCompartmentLastUpdated) {
+		myCompartmentLastUpdated = theCompartmentLastUpdated;
 	}
 
 	/**
@@ -555,6 +583,19 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 			}
 		}
 
+		if (getCompartmentLastUpdated() != null) {
+			DateParam ccLb = getCompartmentLastUpdated().getLowerBound();
+			DateParam ccUb = getCompartmentLastUpdated().getUpperBound();
+
+			if (isNotEqualsComparator(ccLb, ccUb)) {
+				addCompartmentLastUpdatedParam(
+						b, NOT_EQUAL, getCompartmentLastUpdated().getLowerBound());
+			} else {
+				addCompartmentLastUpdatedParam(b, GREATERTHAN_OR_EQUALS, ccLb);
+				addCompartmentLastUpdatedParam(b, LESSTHAN_OR_EQUALS, ccUb);
+			}
+		}
+
 		if (getCount() != null) {
 			addUrlParamSeparator(b);
 			b.append(Constants.PARAM_COUNT);
@@ -654,10 +695,17 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 	}
 
 	public void clean() {
-		for (Map.Entry<String, List<List<IQueryParameterType>>> nextParamEntry : this.entrySet()) {
+		for (Iterator<Map.Entry<String, List<List<IQueryParameterType>>>> iterator =
+						this.entrySet().iterator();
+				iterator.hasNext(); ) {
+			Map.Entry<String, List<List<IQueryParameterType>>> nextParamEntry = iterator.next();
 			String nextParamName = nextParamEntry.getKey();
 			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
 			cleanParameter(nextParamName, andOrParams);
+
+			if (andOrParams.isEmpty()) {
+				iterator.remove();
+			}
 		}
 	}
 
@@ -963,6 +1011,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 				&& myEverythingMode == that.myEverythingMode
 				&& Objects.equals(myIncludes, that.myIncludes)
 				&& Objects.equals(myLastUpdated, that.myLastUpdated)
+				&& Objects.equals(myCompartmentLastUpdated, that.myCompartmentLastUpdated)
 				&& Objects.equals(myLoadSynchronousUpTo, that.myLoadSynchronousUpTo)
 				&& Objects.equals(myRevIncludes, that.myRevIncludes)
 				&& Objects.equals(mySort, that.mySort)
@@ -983,6 +1032,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 				myEverythingMode,
 				myIncludes,
 				myLastUpdated,
+				myCompartmentLastUpdated,
 				myLoadSynchronous,
 				myLoadSynchronousUpTo,
 				myRevIncludes,

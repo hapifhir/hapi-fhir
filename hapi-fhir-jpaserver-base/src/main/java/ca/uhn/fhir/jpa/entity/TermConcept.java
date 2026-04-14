@@ -27,6 +27,7 @@ import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
@@ -75,6 +76,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericFie
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hibernate.type.SqlTypes;
+import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.r4.model.Coding;
 
 import java.io.Serializable;
@@ -275,7 +277,7 @@ public class TermConcept implements Serializable {
 	}
 
 	private TermConceptProperty addProperty(
-			@Nonnull TermConceptPropertyTypeEnum thePropertyType,
+			@Nonnull org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum thePropertyType,
 			@Nonnull String thePropertyName,
 			@Nonnull String thePropertyValue) {
 		Validate.notBlank(thePropertyName);
@@ -298,13 +300,19 @@ public class TermConcept implements Serializable {
 			@Nonnull String thePropertyCodeSystem,
 			@Nonnull String thePropertyCode,
 			String theDisplayName) {
-		return addProperty(TermConceptPropertyTypeEnum.CODING, thePropertyName, thePropertyCode)
+		return addProperty(
+						org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.CODING,
+						thePropertyName,
+						thePropertyCode)
 				.setCodeSystem(thePropertyCodeSystem)
 				.setDisplay(theDisplayName);
 	}
 
 	public TermConceptProperty addPropertyString(@Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
-		return addProperty(TermConceptPropertyTypeEnum.STRING, thePropertyName, thePropertyValue);
+		return addProperty(
+				org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.STRING,
+				thePropertyName,
+				thePropertyValue);
 	}
 
 	@Override
@@ -362,7 +370,7 @@ public class TermConcept implements Serializable {
 		List<Coding> retVal = new ArrayList<>();
 		for (TermConceptProperty next : getProperties()) {
 			if (thePropertyName.equals(next.getKey())) {
-				if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
+				if (next.getType() == org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.CODING) {
 					Coding coding = new Coding();
 					coding.setSystem(next.getCodeSystem());
 					coding.setCode(next.getValue());
@@ -442,16 +450,37 @@ public class TermConcept implements Serializable {
 		return this;
 	}
 
+	@Nullable
+	public TermConceptPropertyTypeEnum getPropertyType(String thePropertyName) {
+		return myProperties.stream()
+				.filter(t -> t.getKey().equals(thePropertyName))
+				.findFirst()
+				.map(TermConceptProperty::getType)
+				.orElse(null);
+	}
+
 	public List<String> getStringProperties(String thePropertyName) {
 		List<String> retVal = new ArrayList<>();
 		for (TermConceptProperty next : getProperties()) {
 			if (thePropertyName.equals(next.getKey())) {
-				if (next.getType() == TermConceptPropertyTypeEnum.STRING) {
+				if (next.getType() == org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.STRING) {
 					retVal.add(next.getValue());
 				}
 			}
 		}
 		return retVal;
+	}
+
+	/**
+	 * Returns the value of the first property having a given property name. The property
+	 * must be a primitive property (e.g. a string, integer, etc.)
+	 */
+	public String getPrimitiveProperty(String thePropertyName) {
+		return myProperties.stream()
+				.filter(t -> t.getKey().equals(thePropertyName))
+				.findFirst()
+				.map(TermConceptProperty::getValue)
+				.orElse(null);
 	}
 
 	public String getStringProperty(String thePropertyName) {

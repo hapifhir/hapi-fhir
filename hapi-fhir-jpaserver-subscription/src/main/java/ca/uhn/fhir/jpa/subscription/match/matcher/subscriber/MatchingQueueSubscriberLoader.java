@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -64,26 +65,15 @@ public class MatchingQueueSubscriberLoader {
 	private SubscriptionSettings mySubscriptionSettings;
 
 	protected IChannelConsumer<ResourceModifiedMessage> myMatchingConsumer;
-	private MultiplexingListener<ResourceModifiedMessage> myMultiplexingListener;
 
 	@EventListener(ContextRefreshedEvent.class)
 	@Order(IHapiBootOrder.SUBSCRIPTION_MATCHING_CHANNEL_HANDLER)
 	public void subscribeToMatchingChannel() {
 		if (myMatchingConsumer == null) {
-			myMultiplexingListener = new MultiplexingListener<>(ResourceModifiedMessage.class);
-
+			IMessageListener<ResourceModifiedMessage> matchingConsumerListener = buildMatchingConsumerListener();
 			myMatchingConsumer = mySubscriptionChannelFactory.newMatchingConsumer(
-					SUBSCRIPTION_MATCHING_CHANNEL_NAME, myMultiplexingListener, getChannelConsumerSettings());
-			myMultiplexingListener.addListener(mySubscriptionMatchingListener);
-			myMultiplexingListener.addListener(mySubscriptionActivatingListener);
-			myMultiplexingListener.addListener(mySubscriptionRegisteringListener);
-			if (mySubscriptionTopicMatchingListener != null) {
-				ourLog.info("Starting SubscriptionTopic Matching Subscriber");
-				myMultiplexingListener.addListener(mySubscriptionTopicMatchingListener);
-			}
-			if (mySubscriptionTopicRegisteringListener != null) {
-				myMultiplexingListener.addListener(mySubscriptionTopicRegisteringListener);
-			}
+					SUBSCRIPTION_MATCHING_CHANNEL_NAME, matchingConsumerListener, getChannelConsumerSettings());
+
 			if (myMatchingConsumer != null) { // can be null in mock tests
 				ourLog.info(
 						"Subscription Matching Subscriber subscribed to Matching Channel {} with name {}",
@@ -91,6 +81,22 @@ public class MatchingQueueSubscriberLoader {
 						SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			}
 		}
+	}
+
+	protected MultiplexingListener<ResourceModifiedMessage> buildMatchingConsumerListener() {
+		MultiplexingListener<ResourceModifiedMessage> multiplexingListener =
+				new MultiplexingListener<>(ResourceModifiedMessage.class);
+		multiplexingListener.addListener(mySubscriptionMatchingListener);
+		multiplexingListener.addListener(mySubscriptionActivatingListener);
+		multiplexingListener.addListener(mySubscriptionRegisteringListener);
+		if (mySubscriptionTopicMatchingListener != null) {
+			ourLog.info("Starting SubscriptionTopic Matching Subscriber");
+			multiplexingListener.addListener(mySubscriptionTopicMatchingListener);
+		}
+		if (mySubscriptionTopicRegisteringListener != null) {
+			multiplexingListener.addListener(mySubscriptionTopicRegisteringListener);
+		}
+		return multiplexingListener;
 	}
 
 	private ChannelConsumerSettings getChannelConsumerSettings() {
@@ -110,8 +116,6 @@ public class MatchingQueueSubscriberLoader {
 					SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			IoUtils.closeQuietly(myMatchingConsumer, ourLog);
 		}
-		if (myMultiplexingListener != null) {
-			IoUtils.closeQuietly(myMultiplexingListener, ourLog);
-		}
+		// no need to close the listener as the consumer already does that
 	}
 }

@@ -6,8 +6,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
-import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
@@ -142,11 +140,11 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	protected Subscription createSubscription(String theCriteria, String thePayload, Extension theExtension) {
 		String id = null;
 
-		return createSubscription(theCriteria, thePayload, theExtension, id);
+		return createOrUpdateSubscription(theCriteria, thePayload, theExtension, id);
 	}
 
 	@Nonnull
-	protected Subscription createSubscription(String theCriteria, String thePayload, Extension theExtension, String id) {
+	protected Subscription createOrUpdateSubscription(String theCriteria, String thePayload, Extension theExtension, String id) {
 		Subscription subscription = newSubscription(theCriteria, thePayload);
 		if (theExtension != null) {
 			subscription.getChannel().addExtension(theExtension);
@@ -155,18 +153,19 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 			subscription.setId(id);
 		}
 
-		subscription = postOrPutSubscription(subscription);
+		subscription = createOrUpdateSubscription(subscription);
 		return subscription;
 	}
 
-	protected Subscription postOrPutSubscription(IBaseResource theSubscription) {
+	protected Subscription createOrUpdateSubscription(IBaseResource theSubscription) {
 		MethodOutcome methodOutcome;
 		if (theSubscription.getIdElement().isEmpty()) {
 			 methodOutcome = myClient.create().resource(theSubscription).execute();
 		} else {
 			 methodOutcome =  myClient.update().resource(theSubscription).execute();
 		}
-		theSubscription.setId(methodOutcome.getId().getIdPart());
+		// remove the version since there is async updates happening (e.g. subscription activation)
+		theSubscription.setId(methodOutcome.getId().toUnqualifiedVersionless());
 		mySubscriptionIds.add(methodOutcome.getId());
 		return (Subscription) theSubscription;
 	}

@@ -118,3 +118,131 @@ The following provides a full implementation of an interceptor that prevents mat
 ```
 
 See the [Pointcut](/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html) JavaDoc for further details on the pointcut MDM_BEFORE_PERSISTED_RESOURCE_CHECKED.
+
+---
+
+# Custom Matching and Similarity Algorithms
+
+HAPI MDM supports registering custom matcher and similarity algorithms via a factory registration pattern. This allows you to extend the [built-in set of algorithms](/hapi-fhir/docs/server_jpa_mdm/mdm_rules.html) without modifying core code.
+
+## Custom Matcher Algorithms
+
+To add a custom matcher algorithm:
+
+1. Implement the `IMdmFieldMatcher` interface from `ca.uhn.fhir.mdm.rules.matcher.models`.
+2. Register it with the `IMatcherFactory` bean using `register(name, matcher)`.
+3. Reference the algorithm by name in your MDM rules JSON.
+
+The `IMdmFieldMatcher` interface requires a single `matches()` method that returns `true` if two field values match. You may also override `isMatchingEmptyFields()` to return `true` if your matcher should be invoked when one or both fields are empty (defaults to `false`).
+
+### Example: Registering a Custom Matcher
+
+```java
+@Configuration
+public class CustomMdmMatcherConfig {
+
+   @Autowired
+   private IMatcherFactory myMatcherFactory;
+
+   @PostConstruct
+   public void registerCustomMatchers() {
+      myMatcherFactory.register("PHONETIC_SPANISH", new SpanishPhoneticMatcher());
+   }
+}
+```
+
+Where `SpanishPhoneticMatcher` implements `IMdmFieldMatcher`:
+
+```java
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+public class SpanishPhoneticMatcher implements IMdmFieldMatcher {
+
+   @Override
+   public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
+      // IBase values from FHIRPath are typically IPrimitiveType for simple fields
+      // like name.given or name.family. Cast and call getValueAsString() to get
+      // the string representation.
+      if (!(theLeftBase instanceof IPrimitiveType) || !(theRightBase instanceof IPrimitiveType)) {
+         return false;
+      }
+      String left = ((IPrimitiveType<?>) theLeftBase).getValueAsString();
+      String right = ((IPrimitiveType<?>) theRightBase).getValueAsString();
+      if (left == null || right == null) {
+         return false;
+      }
+      return spanishPhoneticEncode(left).equals(spanishPhoneticEncode(right));
+   }
+}
+```
+
+Then reference it in your MDM rules JSON:
+
+```json
+{
+   "name": "firstname-spanish",
+   "resourceType": "Patient",
+   "resourcePath": "name.given",
+   "matcher": {
+      "algorithm": "PHONETIC_SPANISH"
+   }
+}
+```
+
+## Custom Similarity Algorithms
+
+To add a custom similarity algorithm:
+
+1. Implement the `IMdmFieldSimilarity` interface from `ca.uhn.fhir.mdm.rules.similarity`.
+2. Register it with the `ISimilarityFactory` bean using `register(name, similarity)`.
+3. Reference the algorithm by name in your MDM rules JSON with a `matchThreshold`.
+
+The `IMdmFieldSimilarity` interface requires a single `similarity()` method that returns a score between `0.0` (no match) and `1.0` (exact match).
+
+### Example: Registering a Custom Similarity Algorithm
+
+```java
+@Configuration
+public class CustomMdmSimilarityConfig {
+
+   @Autowired
+   private ISimilarityFactory mySimilarityFactory;
+
+   @PostConstruct
+   public void registerCustomSimilarities() {
+      mySimilarityFactory.register("WEIGHTED_EDIT_DISTANCE",
+         (theFhirContext, theLeftBase, theRightBase, theExact) -> {
+            if (!(theLeftBase instanceof IPrimitiveType) || !(theRightBase instanceof IPrimitiveType)) {
+               return 0.0;
+            }
+            String left = ((IPrimitiveType<?>) theLeftBase).getValueAsString();
+            String right = ((IPrimitiveType<?>) theRightBase).getValueAsString();
+            if (left == null || right == null) {
+               return 0.0;
+            }
+            return calculateWeightedEditDistance(left, right);
+         });
+   }
+}
+```
+
+Then reference it in your MDM rules JSON:
+
+```json
+{
+   "name": "lastname-weighted",
+   "resourceType": "Patient",
+   "resourcePath": "name.family",
+   "similarity": {
+      "algorithm": "WEIGHTED_EDIT_DISTANCE",
+      "matchThreshold": 0.85
+   }
+}
+```
+
+## Validation
+
+Unknown algorithm names in MDM rules are caught at configuration time. If an algorithm name in your rules JSON does not match any built-in or registered custom algorithm, HAPI FHIR will report an error when the MDM rules are loaded, so you can catch misconfigurations early.

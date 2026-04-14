@@ -51,6 +51,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	public void afterClearInterceptor() {
 		myServer.unregisterInterceptor(ourValidatingInterceptor);
 		ourValidatingInterceptor = null;
+		myStorageSettings.getTreatBaseUrlsAsLocal().clear();
 	}
 
 
@@ -273,6 +274,47 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			IOUtils.closeQuietly(response);
 		}
 
+	}
+
+	// Created by Claude Sonnet 4.6
+	/**
+	 * Verify that searching QuestionnaireResponse by a versioned canonical questionnaire URL works
+	 * when the server base URL is in TreatBaseUrlsAsLocal.
+	 * Without the fix, ResourceLinkPredicateBuilder strips the base URL and tries to resolve
+	 * "my-q|1.0" as a local FHIR resource ID (invalid), returning no results.
+	 */
+	@Test
+	void testSearch_withVersionedCanonicalQuestionnaireAndLocalBaseUrl_shouldReturnQuestionnaireResponse() {
+		// GIVEN: The canonical URL base is treated as local (triggers the bug)
+		String baseUrl = "https://example.org";
+		myStorageSettings.getTreatBaseUrlsAsLocal().add(baseUrl);
+
+		String canonicalUrl = baseUrl + "/Questionnaire/my-q";
+		String versionedCanonical = canonicalUrl + "|1.0";
+
+		Questionnaire questionnaire = new Questionnaire();
+		questionnaire.setId("my-q");
+		questionnaire.setUrl(canonicalUrl);
+		questionnaire.setVersion("1.0");
+		questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myQuestionnaireDao.update(questionnaire, mySrd);
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setId("my-qr");
+		qr.setQuestionnaire(versionedCanonical);
+		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		IIdType qrId = myQuestionnaireResponseDao.update(qr, mySrd).getId().toUnqualifiedVersionless();
+
+		// WHEN: Searching by the versioned canonical URL
+		Bundle results = myClient.search()
+			.byUrl("QuestionnaireResponse?questionnaire=" + versionedCanonical)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		// THEN: The QuestionnaireResponse is found
+		assertThat(results.getEntry()).hasSize(1);
+		assertThat(results.getEntry().get(0).getResource().getIdElement()
+			.toUnqualifiedVersionless().getValue()).isEqualTo(qrId.getValue());
 	}
 
 	/**

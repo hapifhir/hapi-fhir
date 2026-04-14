@@ -40,21 +40,24 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
-import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
-import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
+import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -65,12 +68,12 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
@@ -99,8 +102,8 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static ca.uhn.fhir.rest.api.Constants.VALID_MODIFIERS;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder implements ICanMakeMissingParamPredicate {
@@ -145,13 +148,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	 * Constructor
 	 */
 	public ResourceLinkPredicateBuilder(QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
-		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable(ResourceLink.TABLE_NAME));
+		myColumnSrcResourceId = getTable().addColumn(ResourceLink.SRC_RESOURCE_ID);
 		myColumnSrcPartitionId = getTable().addColumn("PARTITION_ID");
 		myColumnSrcType = getTable().addColumn("SOURCE_RESOURCE_TYPE");
 		myColumnSrcPath = getTable().addColumn("SRC_PATH");
-		myColumnTargetResourceId = getTable().addColumn("TARGET_RESOURCE_ID");
-		myColumnTargetPartitionId = getTable().addColumn("TARGET_RES_PARTITION_ID");
+		myColumnTargetResourceId = getTable().addColumn(ResourceLink.TARGET_RESOURCE_ID);
+		myColumnTargetPartitionId = getTable().addColumn(ResourceLink.TARGET_RES_PARTITION_ID);
 		myColumnTargetResourceUrl = getTable().addColumn("TARGET_RESOURCE_URL");
 		myColumnTargetResourceType = getTable().addColumn("TARGET_RESOURCE_TYPE");
 
@@ -211,6 +214,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	public Condition createPredicate(
 			RequestDetails theRequest,
 			String theResourceType,
+			RuntimeSearchParam theParam,
 			String theParamName,
 			List<String> theQualifiers,
 			List<? extends IQueryParameterType> theReferenceOrParamList,
@@ -221,37 +225,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		List<String> targetQualifiedUrls = new ArrayList<>();
 
 		/*
-		 * If we're allowing cross-partition references, we should first figure out what partition the
-		 * link search should be able to touch
+		 * If we're allowing cross-partition references, we first need to figure out which
+		 * partition(s) the target of the reference could be in since it will not necessarily
+		 * be in the current request partition (where the source resource would be)
 		 */
-		RequestPartitionId requestPartitionId = theRequestPartitionId;
+		RequestPartitionId predicateTargetPartitionId = theRequestPartitionId;
 		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
-			for (IQueryParameterType next : theReferenceOrParamList) {
-
-				Validate.isTrue(
-						next instanceof ReferenceParam,
-						"Unexpected type %s for param %s",
-						next.getClass(),
-						theParamName);
-				ReferenceParam refParam = (ReferenceParam) next;
-				if (isNotBlank(refParam.getResourceType()) && isNotBlank(refParam.getIdPart())) {
-					String resourceType = refParam.getResourceType();
-					String resourceId = refParam.getIdPart();
-
-					IIdType id = myFhirContext.getVersion().newIdType(resourceType, resourceId);
-					RequestPartitionId nextPartitionId =
-							myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, id);
-					requestPartitionId = requestPartitionId.mergeIds(nextPartitionId);
-					continue;
-				}
-
-				SearchParameterMap map = new SearchParameterMap();
-				map.add(theParamName, next);
-				RequestPartitionId nextPartitionId =
-						myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-								theRequest, theResourceType, map);
-				requestPartitionId = requestPartitionId.mergeIds(nextPartitionId);
-			}
+			predicateTargetPartitionId = calculatePotentialCrossPartitionsForPredicateTarget(
+					theRequest, theRequestPartitionId, theParam, theReferenceOrParamList);
 		}
 
 		for (int orIdx = 0; orIdx < theReferenceOrParamList.size(); orIdx++) {
@@ -268,7 +249,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					IIdType dt = new IdDt(ref.getBaseUrl(), ref.getResourceType(), ref.getIdPart(), null);
 
 					if (dt.hasBaseUrl()) {
-						if (myStorageSettings.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
+						if (myStorageSettings.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())
+								&& !dt.getIdPart().contains("|")) {
 							dt = dt.toUnqualified();
 							targetIds.add(dt);
 						} else {
@@ -293,7 +275,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 							theReferenceOrParamList,
 							ref,
 							theRequest,
-							requestPartitionId);
+							predicateTargetPartitionId);
 				}
 
 			} else {
@@ -312,7 +294,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		boolean inverse = (theOperation != null) && (theOperation != SearchFilterParser.CompareOperation.eq);
 
 		List<JpaPid> pids = myIdHelperService.resolveResourcePids(
-				requestPartitionId,
+				predicateTargetPartitionId,
 				targetIds,
 				ResolveIdentityMode.includeDeleted().cacheOk());
 		List<Long> targetPidList = pids.stream().map(JpaPid::getId).collect(Collectors.toList());
@@ -324,6 +306,119 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			Condition retVal = createPredicateReference(inverse, pathsToMatch, targetPidList, targetQualifiedUrls);
 			return combineWithRequestPartitionIdPredicate(getRequestPartitionId(), retVal);
 		}
+	}
+
+	/**
+	 * If cross-partition references are allowed, this method calculates a {@link RequestPartitionId} that
+	 * covers all possible partitions that could hold potential targets for the given reference
+	 * so that we can resolve it.
+	 *
+	 * @param theRequest The request details
+	 * @param theRequestPartitionId The outer request partition which was used to resolve the source
+	 *                              resource containing the reference
+	 * @param theParam The SearchParameter indexing the reference
+	 * @param theReferenceOrParamList The actual parameter values for the SearchParameter referenced by {@literal theParam}
+	 * @return The calculated request partition ID for potential cross-partition targets
+	 */
+	private RequestPartitionId calculatePotentialCrossPartitionsForPredicateTarget(
+			RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId,
+			RuntimeSearchParam theParam,
+			List<? extends IQueryParameterType> theReferenceOrParamList) {
+		Validate.isTrue(
+				myPartitionSettings.isAllowUnqualifiedCrossPartitionReference(),
+				"This method must only be called if AllowUnqualifiedCrossPartitionReference is enabled. This is a bug.");
+
+		/*
+		 * In named partition mode, we also include the outer request partition as a part
+		 * of the targets. We do this because named partition mode is used for scenarios
+		 * like multi-tenancy where the outer request partition is a likely place for
+		 * references to live too. In unnamed partition mode, the expectation is that
+		 * the interceptor will always return a very specific list of partitions that
+		 * could potentially hold any reference.
+		 */
+		RequestPartitionId predicateTargetPartitionId = null;
+		if (!myPartitionSettings.isUnnamedPartitionMode()) {
+			predicateTargetPartitionId = theRequestPartitionId;
+		}
+
+		String paramName = theParam.getName();
+
+		for (IQueryParameterType next : theReferenceOrParamList) {
+
+			Validate.isTrue(
+					next instanceof ReferenceParam, "Unexpected type %s for param %s", next.getClass(), paramName);
+			ReferenceParam refParam = (ReferenceParam) next;
+
+			if (isBlank(refParam.getChain())) {
+
+				/*
+				 * This is a standard reference by resource ID (?subject=Patient/A)
+				 * so we can determine the partition for the specific resource being
+				 * referenced.
+				 */
+				String resourceType = refParam.getResourceType();
+				String resourceId = refParam.getIdPart();
+				if (isBlank(resourceType) || isBlank(resourceId)) {
+					throw new InvalidRequestException(Msg.code(2870) + "Parameter \""
+							+ UrlUtil.sanitizeUrlPart(paramName) + "\" must be in the format [resourceType]/[id]");
+				}
+
+				IIdType id = myFhirContext.getVersion().newIdType(resourceType, resourceId);
+				RequestPartitionId nextPartitionId =
+						myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, id);
+				predicateTargetPartitionId = nextPartitionId.mergeIds(predicateTargetPartitionId);
+			} else {
+
+				/*
+				 * If we're chaining into target resources in an environment where cross-partition
+				 * references are allowed, we need to figure out which partitions the target might be
+				 * on so that we can correctly target them in cases where partitioning is based
+				 * on the resource type.
+				 *
+				 * Most reference parameters declare a target resource type (or a small number of
+				 * resource types) so we can just ask the partition interceptor to tell us
+				 * which partition would handle the chained search for each potential target
+				 * type. If the reference doesn't declare any target types, we'll just
+				 * assume it's a Reference(All) and target all partitions.
+				 */
+				if (!theParam.getTargets().isEmpty()) {
+					String chain = refParam.getChain();
+					chain = StringUtils.substringBefore(chain, '.');
+
+					for (String targetType : theParam.getTargets()) {
+						if (myDaoRegistry.isResourceTypeSupported(targetType)) {
+							RuntimeSearchParam chainParam = mySearchParamRegistry.getActiveSearchParam(
+									targetType, chain, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+							if (chainParam != null) {
+								QualifiedParamList chainParamList = QualifiedParamList.singleton(refParam.getValue());
+								IQueryParameterAnd<?> targetParam = JpaParamUtil.parseQueryParams(
+										mySearchParamRegistry,
+										myFhirContext,
+										chainParam,
+										chain,
+										List.of(chainParamList));
+								SearchParameterMap targetParamMap = new SearchParameterMap();
+								targetParamMap.add(chain, targetParam);
+
+								RequestPartitionId nextPartitionId =
+										myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+												theRequest, targetType, targetParamMap);
+								predicateTargetPartitionId = nextPartitionId.mergeIds(predicateTargetPartitionId);
+							}
+						}
+					}
+				} else {
+					predicateTargetPartitionId = RequestPartitionId.allPartitions();
+					break;
+				}
+			}
+		}
+
+		// Just in case
+		predicateTargetPartitionId = getIfNull(predicateTargetPartitionId, theRequestPartitionId);
+
+		return predicateTargetPartitionId;
 	}
 
 	private void validateModifierUse(RequestDetails theRequest, String theResourceType, ReferenceParam theRef) {
@@ -846,14 +941,12 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		if (theTargetPids != null && theTargetPids.length >= 1) {
 			// if resource ids are provided, we'll create the predicate
 			// with ids in or equal to this value
-			if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
-				Object left = ColumnTupleObject.from(getJoinColumnsForTarget());
-				JpaPidValueTuples right = JpaPidValueTuples.from(getSearchQueryBuilder(), theTargetPids);
-				condition = new InCondition(left, right);
-			} else {
-				condition = QueryParameterUtils.toEqualToOrInPredicate(
-						myColumnTargetResourceId, generatePlaceholders(JpaPid.toLongList(theTargetPids)));
-			}
+			PartitionableJoinColumns joinColumns = getSearchQueryBuilder().isIncludePartitionIdInJoins()
+					? PartitionableJoinColumns.newPartitioned(getColumnTargetPartitionId(), myColumnTargetResourceId)
+					: PartitionableJoinColumns.newNonPartitioned(myColumnTargetResourceId);
+			condition = getSearchQueryBuilder()
+					.getTuplePredicateBuilder()
+					.toInPredicate(joinColumns, List.of(theTargetPids), false);
 		} else {
 			// ... otherwise we look for resource types
 			condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
