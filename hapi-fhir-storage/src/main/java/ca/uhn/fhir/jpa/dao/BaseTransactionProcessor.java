@@ -402,11 +402,14 @@ public abstract class BaseTransactionProcessor {
 		// without the resource (consent is preserved for the response). Without this restoration,
 		// resolveReferencesThenSaveAndIndexResources() skips the entry because it sees a null resource,
 		// leaving HFJ_RESOURCE rows without matching HFJ_RES_VER rows.
+		// Note: getWrittenResource() holds the pre-hook resource captured before consent could null it,
+		// so it is always the correct persisted resource type (e.g. Patient), even for PATCH entries
+		// where theRes is the patch document (Binary or Parameters).
 		if (!theOutcome.isNop()
 				&& theOutcome.getResource() == null
 				&& theOutcome.getEntity() != null
-				&& theRes != null) {
-			theOutcome.setResource(theRes);
+				&& theOutcome.getWrittenResource() != null) {
+			theOutcome.setResource(theOutcome.getWrittenResource());
 		}
 	}
 

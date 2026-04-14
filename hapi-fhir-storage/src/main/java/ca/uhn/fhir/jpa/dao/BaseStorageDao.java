@@ -356,6 +356,9 @@ public abstract class BaseStorageDao {
 		outcome.setId(id);
 		if (theEntity.getDeleted() == null) {
 			outcome.setResource(theResource);
+			// Capture the resource before STORAGE_PREACCESS_RESOURCES may null it (e.g. consent REJECT),
+			// so the transaction processor can still complete the write for bundle entries.
+			outcome.setWrittenResource(theResource);
 		}
 		outcome.setEntity(theEntity);
 
