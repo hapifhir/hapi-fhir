@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
-import ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy;
 import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -84,8 +83,6 @@ public class CrossPartitionMergePatientIdModeR4Test extends BaseResourceProvider
 
 		myPartitionInterceptor = new PatientIdPartitionInterceptor(
 			getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
-		myPartitionInterceptor.setResourceTypePolicies(Map.of(
-			"Provenance", ResourceCompartmentStoragePolicy.nonUniqueCompartmentInDefault()));
 		registerInterceptor(myPartitionInterceptor);
 
 		myPartitionSettings.setPartitioningEnabled(true);
