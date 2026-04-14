@@ -402,9 +402,9 @@ public abstract class BaseTransactionProcessor {
 		// without the resource (consent is preserved for the response). Without this restoration,
 		// resolveReferencesThenSaveAndIndexResources() skips the entry because it sees a null resource,
 		// leaving HFJ_RESOURCE rows without matching HFJ_RES_VER rows.
-		if (theOutcome.getResource() == null
+		if (!theOutcome.isNop()
+				&& theOutcome.getResource() == null
 				&& theOutcome.getEntity() != null
-				&& !theOutcome.isNop()
 				&& theRes != null) {
 			theOutcome.setResource(theRes);
 		}
