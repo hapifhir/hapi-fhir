@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED;
 import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED;
@@ -91,7 +92,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 			myPartitionSettings.setPartitioningEnabled(defaults.isPartitioningEnabled());
 		}
 
-		myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof FixedPartitionInterceptor);
+		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof FixedPartitionInterceptor);
 	}
 
 
@@ -736,7 +737,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		logAllResources();
 		logAllResourceVersions();
 
-		assertThrows(ResourceGoneException.class, ()->myPatientDao.read(resourceId.withVersion("2"), mySrd));
+		assertThrows(ResourceGoneException.class, () -> myPatientDao.read(resourceId.withVersion("2"), mySrd));
 		actual = myPatientDao.read(resourceId.withVersion("3"), mySrd);
 		assertEquals("3", actual.getIdElement().getVersionIdPart());
 		actual = myPatientDao.read(resourceId.toVersionless(), mySrd);
@@ -853,8 +854,6 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertFalse(actual.isDeleted());
 		assertFalse(actual.getActive());
 	}
-
-
 
 
 	/**
@@ -998,11 +997,13 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 				Patient patient = (Patient) theNewResource;
 				patient.getNameFirstRep().setFamily("HELLO");
 			}
+
 			@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 			public void onPreSearch(SearchParameterMap theSearchParameterMap) {
 				theSearchParameterMap.remove("family");
 				theSearchParameterMap.add("family", new StringParam("HELLO"));
 			}
+
 			@Hook(Pointcut.STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA)
 			public void onPreVerifyConditionalUrl(PreVerifyConditionalMatchCriteriaRequest theRequest) {
 				theRequest.setConditionalUrl("Patient?family=HELLO");
@@ -1033,15 +1034,23 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 	 */
 	@ParameterizedTest
 	@CsvSource(textBlock = """
-		# PatientAlreadyExists , OrgAction      , ExpectFound
-		true                   , CREATE         , true
-		true                   , UPDATE         , true
-		true                   , COND_CREATE    , true
-		true                   , COND_UPDATE    , true
-		false                  , COND_UPDATE    , true
+		# PatientAlreadyExists , PatientAction , OrgAction      , ExpectFound
+		true                   , COND_UPDATE   , CREATE         , true
+		true                   , COND_UPDATE   , UPDATE         , true
+		true                   , COND_UPDATE   , COND_CREATE    , true
+		true                   , COND_UPDATE   , COND_UPDATE    , true
+		false                  , COND_UPDATE   , COND_UPDATE    , true
+		# If the Patient has a POST verb, it will happen first because of the FHIR
+		# transaction processing rules, so we can't make the reference target resolvable at the time
+		# it is processed
+		true                   , CREATE        , COND_UPDATE    , false
+		false                  , CREATE        , COND_UPDATE    , false
+		true                   , COND_CREATE   , COND_UPDATE    , false
+		false                  , COND_CREATE   , COND_UPDATE    , false
 		""")
-	void testInterceptorCanResolveReferenceTargetWithinTransaction(boolean theReferenceSourceAlreadyExists, String theOrgAction, boolean theExpectFound) {
+	void testInterceptorCanResolveReferenceTargetWithinTransaction(boolean theReferenceSourceAlreadyExists, String thePatientAction, String theOrgAction, boolean theExpectFound) {
 		AtomicBoolean foundOrganization = new AtomicBoolean(false);
+		AtomicInteger interceptorCallCount = new AtomicInteger(0);
 
 		if (theReferenceSourceAlreadyExists) {
 			createPatient(withId("A"), withIdentifier("http://patients", "123"));
@@ -1066,6 +1075,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 			private void processResource(IBaseResource resource, TransactionDetails transactionDetails) {
 				if (resource instanceof Patient patient) {
+					interceptorCallCount.incrementAndGet();
 					Reference reference = patient.getManagingOrganization();
 					IBaseResource target = transactionDetails.getResolvedResource(reference.getReferenceElement());
 					if (target != null) {
@@ -1090,17 +1100,28 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 			case "COND_UPDATE" ->
 				bb.addTransactionUpdateEntry(buildOrganization(withIdentifier("http://orgs", "123")), null, organizationUuid)
 					.conditional("Organization?identifier=http://orgs|123");
+			default -> throw new IllegalArgumentException("Unknown action: " + theOrgAction);
 		}
 
-		bb.addTransactionUpdateEntry(buildPatient(withIdentifier("http://patients", "123"), withOrganization(organizationUuid)))
-			.conditional("Patient?identifier=http://patients|123");
+		switch (thePatientAction) {
+			case "CREATE" ->
+				bb.addTransactionCreateEntry(buildPatient(withIdentifier("http://patients", "123"), withOrganization(organizationUuid)));
+			case "COND_CREATE" ->
+				bb.addTransactionCreateEntry(buildPatient(withIdentifier("http://patients", "123"), withOrganization(organizationUuid)))
+					.conditional("Patient?identifier=http://patients|123");
+			case "COND_UPDATE" ->
+				bb.addTransactionUpdateEntry(buildPatient(withIdentifier("http://patients", "123"), withOrganization(organizationUuid)))
+					.conditional("Patient?identifier=http://patients|123");
+			default -> throw new IllegalArgumentException("Unknown action: " + theOrgAction);
+		}
 		Bundle requestBundle = bb.getBundleTyped();
-
-		ourLog.info("HC45560: requestBundle: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
 
 		mySystemDao.transaction(newSrd(), requestBundle);
 
 		assertEquals(theExpectFound, foundOrganization.get());
+		if (theExpectFound) {
+			assertEquals(1, interceptorCallCount.get());
+		}
 	}
 
 
