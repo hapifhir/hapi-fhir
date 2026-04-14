@@ -45,7 +45,6 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Mock
 	private IInterceptorService myInterceptorService;
-	// TODO - test
 	@Mock
 	private ISchedulerService myIHapiScheduler;
 	@Mock

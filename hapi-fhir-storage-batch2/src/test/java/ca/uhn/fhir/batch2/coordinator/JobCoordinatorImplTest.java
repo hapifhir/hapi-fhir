@@ -99,7 +99,6 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Mock
 	private IInterceptorService myInterceptorService;
-	// todo - verify or make test
 	@Mock
 	private ISchedulerService myIHapiScheduler;
 	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();

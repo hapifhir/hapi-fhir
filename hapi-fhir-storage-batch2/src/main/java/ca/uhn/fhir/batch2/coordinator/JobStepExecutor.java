@@ -185,6 +185,12 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			if (status == WorkChunkStatusEnum.IN_PROGRESS) {
 				myWorkChunkPersistence.onWorkChunkHeartbeat(workchunkId);
 			} else {
+				/*
+				 * If it's no longer in progress, it's either going to be
+				 * COMPLETED or some failure state.
+				 * In either case, this listener is no longer required to keep track
+				 * of it (and we'll stop the job/heartbeat)
+				 */
 				try {
 					context.getScheduler().unscheduleJob(context.getTrigger().getKey());
 				} catch (SchedulerException ex) {

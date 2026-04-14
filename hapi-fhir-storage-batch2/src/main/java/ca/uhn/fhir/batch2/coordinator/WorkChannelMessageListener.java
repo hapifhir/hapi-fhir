@@ -30,6 +30,7 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -227,7 +228,7 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 						throw new RuntimeException(ex);
 					}
 					// throw to requeue chunk
-					throw new DelayChunkException(msg);
+					throw new DelayChunkException(Msg.code(2887) + " " + msg);
 				} // else - do nothing and proceed
 			} else if (myWorkChunk.getPreviousStatus() == WorkChunkStatusEnum.COMPLETED) {
 				// our slow worker has completed this step; discard
