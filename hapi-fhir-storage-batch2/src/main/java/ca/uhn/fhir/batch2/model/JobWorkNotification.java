@@ -20,10 +20,11 @@
 package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.messaging.IHasPayloadMessageKey;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 
-public class JobWorkNotification implements IModelJson {
+public class JobWorkNotification implements IHasPayloadMessageKey, IModelJson {
 
 	@JsonProperty(value = "jobDefinitionId")
 	private String myJobDefinitionId;

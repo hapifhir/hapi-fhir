@@ -94,7 +94,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private void scheduleHeartbeat() {
 		ScheduledJobDefinition definition = new ScheduledJobDefinition();
 		definition.setJobClass(HeartbeatJob.class);
-		definition.setId(String.join("%s-%s", myInstanceId, myWorkChunk.getId()));
+		definition.setId(String.format("BATCH2-HEARTBEAT-%s-%s", myInstanceId, myWorkChunk.getId()));
 		definition.addJobData(CHUNK_ID, myWorkChunk.getId());
 		myIHapiScheduler.scheduleClusteredJob(Math.min(myAckTimeoutMs / 3, 500), definition);
 	}

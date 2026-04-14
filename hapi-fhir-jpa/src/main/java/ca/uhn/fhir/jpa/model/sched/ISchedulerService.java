@@ -89,14 +89,4 @@ public interface ISchedulerService {
 	default boolean isClusteredSchedulingEnabled() {
 		return false;
 	}
-
-	/**
-	 * Stops the provided job
-	 */
-	void stopLocalJob(ScheduledJobDefinition theScheduledJobDef);
-
-	/**
-	 * Stops the provided job
-	 */
-	void stopClusteredJob(ScheduledJobDefinition theScheduledJobDef);
 }

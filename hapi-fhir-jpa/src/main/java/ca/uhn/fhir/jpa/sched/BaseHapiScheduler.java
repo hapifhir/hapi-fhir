@@ -226,16 +226,6 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		}
 	}
 
-	public void stopJob(ScheduledJobDefinition theScheduledJobDefinition) {
-		try {
-			myScheduler.unscheduleJob(theScheduledJobDefinition.toTriggerKey());
-		} catch (SchedulerException ex) {
-			ourLog.error("Failed to unschedule job "
-					+ theScheduledJobDefinition.toTriggerKey().toString());
-			throw new RuntimeException(ex);
-		}
-	}
-
 	@Override
 	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		Validate.isTrue(theIntervalMillis >= 100);

@@ -37,8 +37,7 @@ public class BatchJobSender {
 
 	public BatchJobSender(@Nonnull IChannelProducer<JobWorkNotification> theWorkChannelProducer) {
 		myWorkChannelProducer = theWorkChannelProducer;
-
-		setMessageCreationFn(null);
+		myMessageCreationFn = JobWorkNotificationJsonMessage::new;
 	}
 
 	public void sendWorkChannelMessage(JobWorkNotification theJobWorkNotification) {
@@ -53,11 +52,7 @@ public class BatchJobSender {
 			Function<JobWorkNotification, JobWorkNotificationJsonMessage> theMessageCreationFn) {
 		myMessageCreationFn = theMessageCreationFn;
 		if (myMessageCreationFn == null) {
-			myMessageCreationFn = (input) -> {
-				JobWorkNotificationJsonMessage message = new JobWorkNotificationJsonMessage();
-				message.setPayload(input);
-				return message;
-			};
+			myMessageCreationFn = JobWorkNotificationJsonMessage::new;
 		}
 	}
 }

@@ -33,6 +33,8 @@ import jakarta.annotation.Nonnull;
 public class JobStepExecutorFactory {
 	/**
 	 * Minimum timeout we wait for.
+	 * the "1" is deliberate because we want a value that (hopefully)
+	 * users don't set so if we see it in logs, we'll know
 	 */
 	public static final long DEFAULT_ACK_TIMEOUT = 1001;
 

@@ -31,12 +31,6 @@ public interface IHapiScheduler {
 
 	void shutdown();
 
-	/**
-	 * Stops and removes the given job.
-	 * If it needs to be re-run, a new job instance will be required
-	 */
-	void stopJob(ScheduledJobDefinition theScheduledJobDefinition);
-
 	boolean isStarted();
 
 	void clear() throws SchedulerException;

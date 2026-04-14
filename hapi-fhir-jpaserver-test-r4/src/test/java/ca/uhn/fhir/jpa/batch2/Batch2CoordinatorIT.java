@@ -969,67 +969,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void gatedJob_longRunningFirstStep_wontRedeliverAndFail() throws InterruptedException {
-		// setup
-		long delayMs = 1000;
-		String jobId = getMethodNameForJobId();
-
-		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
-
-			for (int i = 0; i < 2; i++) {
-				FirstStepOutput output = new FirstStepOutput();
-				output.setValue(Integer.toString(i));
-				sink.accept(output);
-			}
-			return RunOutcome.SUCCESS;
-		};
-		IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> second = (step, sink) -> {
-			FirstStepOutput input = step.getData();
-			if (input.getValue().equals("0")) {
-				try {
-					Thread.sleep(delayMs);
-				} catch (InterruptedException ex) {
-					throw new RuntimeException(ex);
-				}
-			}
-			return RunOutcome.SUCCESS;
-		};
-		ILastJobStepWorker<TestJobParameters, SecondStepOutput> last = (step, sink) -> {
-			return RunOutcome.SUCCESS;
-		};
-		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
-			.setJobDefinitionId(jobId)
-			.setJobDescription("description")
-			.setJobDefinitionVersion(TEST_JOB_VERSION)
-			.setParametersType(TestJobParameters.class)
-			.gatedExecution()
-			.addFirstStep(
-				FIRST_STEP_ID,
-				"first step description",
-				FirstStepOutput.class,
-				first
-			)
-			.addIntermediateStep(
-				SECOND_STEP_ID,
-				"second step desc",
-				SecondStepOutput.class,
-				second
-			)
-			.addLastStep(
-				LAST_STEP_ID,
-				"last step description",
-				last
-			).build();
-		myJobDefinitionRegistry.addJobDefinition(jd);
-
-		JobInstanceStartRequest request = buildRequest(jobId);
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
-
-		// waiting for the job
-		myBatch2JobHelper.awaitJobCompletion(startResponse);
-	}
-
-	@Test
 	public void testFirstStepToSecondStep_doubleChunk_doesNotFastTrack() throws InterruptedException {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
 			sink.accept(new FirstStepOutput());

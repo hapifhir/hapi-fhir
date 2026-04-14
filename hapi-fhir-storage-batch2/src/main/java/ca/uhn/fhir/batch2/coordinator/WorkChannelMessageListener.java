@@ -201,7 +201,8 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 		 * continue unimpeded as before. (ie, normal processing)
 		 */
 		private Optional<MessageProcess> handlePotentiallySlowWorkChunk() {
-			if (myWorkChunk.getPreviousStatus() == WorkChunkStatusEnum.IN_PROGRESS) {
+			if (myWorkChunk.getPreviousStatus() == WorkChunkStatusEnum.IN_PROGRESS
+					&& myWorkChunk.getLastHeartbeat() != null) {
 				ourLog.debug(
 						"Acktimeout (how long a broker will wait for a listener before redelivery) is {}ms",
 						myJobStepExecutorFactory.getAckTimeoutMS());
@@ -209,9 +210,6 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				long now = Instant.now().toEpochMilli();
 
 				// we want at least a base minimum
-				// the '1' is deliberate to indicate if this is
-				// a user setting or our default min
-				// (hopefully users don't specify singular ms times)
 				long minTimeout = Math.max(
 						myJobStepExecutorFactory.getAckTimeoutMS(), JobStepExecutorFactory.DEFAULT_ACK_TIMEOUT);
 				long twiceAckTime = 2 * minTimeout;
