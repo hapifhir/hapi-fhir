@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -19,10 +20,10 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Meta;
@@ -44,7 +45,6 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -74,6 +74,110 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+	}
+
+	@Test
+	// Created by claude-sonnet-4-6
+	void testMultipleChainsOnSameResourceTypeReference_ReuseSingleJoin() {
+		// Setup
+		createPatient(withId("P0"), withFamily("Smith"), withGiven("John"), withGender("male"));
+		createPatient(withId("P1"), withFamily("Jones"), withGiven("Jane"), withGender("female"));  // does not match
+		createPatient(withId("P2"), withFamily("Smith"), withGiven("Sarah"), withGender("female")); // partially matches
+		createCoverage(withId("C0"), withReference("beneficiary", "Patient/P0"));
+		createCoverage(withId("C1"), withReference("beneficiary", "Patient/P1"));
+		createCoverage(withId("C2"), withReference("beneficiary", "Patient/P2"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Coverage.SP_PATIENT, new ReferenceParam("family", "Smith"));
+		map.add(Coverage.SP_PATIENT, new ReferenceParam("given", "John"));
+		map.add(Coverage.SP_PATIENT, new ReferenceParam("gender", "male"));
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider search = myCoverageDao.search(map, newSrd());
+
+		// Verify - only C0 returned
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly("Coverage/C0");
+
+		// Verify - only 1 HFJ_RES_LINK join is used (not one per chained param)
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(1);
+	}
+
+	@Test
+	// Created by claude-sonnet-4-6
+	void testMultipleQualifiedChainsOnMultiValuedReference_UseSeparateJoins() {
+		// Setup
+		createPractitioner(withId("Prac1"), withFamily("Smith"));
+		createOrganization(withId("Org1"), withName("Lab"));
+
+		// DR1 has both a Practitioner named Smith AND an Organization named Lab as performers
+		createResource("DiagnosticReport", withId("DR1"),
+			withReference("performer", "Practitioner/Prac1"),
+			withReference("performer", "Organization/Org1"));
+
+		// DR2 has only the Practitioner - no Organization performer -> should NOT match
+		createResource("DiagnosticReport", withId("DR2"),
+			withReference("performer", "Practitioner/Prac1"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam("Practitioner", "name", "Smith"));
+		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam("Organization", "name", "Lab"));
+
+		// Execute
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myDiagnosticReportDao.search(map, newSrd());
+
+		// Verify - Only DR1 is returned
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder("DiagnosticReport/DR1");
+
+		// Verify - 2 HFJ_RES_LINK joins are used, one for each performer type (Practitioner vs Organization)
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(2);
+	}
+
+	@Test
+	void testMixedTypeOrGroupAndClause_UseSeparateJoinsRegardlessOfElementOrder() {
+		// Setup: DR1 has two Organization performers: Lab and Acme
+		createOrganization(withId("OrgLab"), withName("Lab"));
+		createOrganization(withId("OrgAcme"), withName("Acme"));
+		createPractitioner(withId("Prac1"), withFamily("Smith"));
+
+		// DR1 matches: performer includes both OrgLab (satisfies clause 1) and OrgAcme (satisfies clause 2)
+		createResource("DiagnosticReport", withId("DR1"),
+			withReference("performer", "Organization/OrgLab"),
+			withReference("performer", "Organization/OrgAcme"));
+
+		// DR2 has only OrgLab — satisfies clause 1's OR-group but NOT clause 2 (Acme)
+		createResource("DiagnosticReport", withId("DR2"),
+			withReference("performer", "Organization/OrgLab"));
+
+		// AND clause 1: mixed-type OR-group
+		ReferenceOrListParam clause1 = new ReferenceOrListParam()
+			.add(new ReferenceParam("Organization", "name", "Lab"))
+			.add(new ReferenceParam("Practitioner", "name", "Smith"));
+
+		// AND clause 2: single-type OR-group
+		ReferenceOrListParam clause2 = new ReferenceOrListParam()
+			.add(new ReferenceParam("Organization", "name", "Acme"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(DiagnosticReport.SP_PERFORMER, clause1);
+		map.add(DiagnosticReport.SP_PERFORMER, clause2);
+
+		// Execute
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myDiagnosticReportDao.search(map, newSrd());
+
+		// Verify - only DR1 is returned
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder("DiagnosticReport/DR1");
+
+		// Verify - 2 HFJ_RES_LINK joins — each AND clause must bind independently
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(2);
 	}
 
 	@Test

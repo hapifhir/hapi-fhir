@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -566,6 +567,78 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id.getIdPartAsLong()));
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 		});
+	}
+
+	@Test
+	void deleteCodeSystem_lookupCode_returnsNotFound() {
+		// Setup: create a CodeSystem with concepts
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo/cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("codeA").setDisplay("displayA");
+		cs.addConcept().setCode("codeB").setDisplay("displayB");
+		myCodeSystemDao.create(cs, mySrd);
+
+		// Verify lookup succeeds (populates the cache)
+		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(resultA).isNotNull();
+		assertThat(resultA.isFound()).isTrue();
+
+		// Delete via the FHIR DAO (same as a user calling DELETE /CodeSystem/...)
+		myCodeSystemDao.deleteByUrl("CodeSystem?url=http://foo/cs", mySrd);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete("termCodeSystemDeleteJob");
+
+		// Verify lookup fails after deletion
+		IValidationSupport.LookupCodeResult afterDeleteA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(afterDeleteA).isNotNull();
+		assertThat(afterDeleteA.isFound()).isFalse();
+
+		IValidationSupport.LookupCodeResult afterDeleteB = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
+		assertThat(afterDeleteB).isNotNull();
+		assertThat(afterDeleteB.isFound()).isFalse();
+	}
+
+	@Disabled("Should be fixed by https://github.com/hapifhir/hapi-fhir/issues/7754")
+	@Test
+	void updateCodeSystem_lookupCode_reflectsNewConcepts() {
+		// Setup: create a CodeSystem with content=complete and one concept
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo/cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("codeA").setDisplay("displayA");
+		myCodeSystemDao.create(cs, mySrd);
+
+		// Verify initial lookup succeeds
+		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(resultA).isNotNull();
+		assertThat(resultA.isFound()).isTrue();
+		assertThat(resultA.getCodeDisplay()).isEqualTo("displayA");
+
+		// Update the CodeSystem with different concepts
+		CodeSystem csUpdated = new CodeSystem();
+		csUpdated.setUrl("http://foo/cs");
+		csUpdated.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		csUpdated.addConcept().setCode("codeB").setDisplay("displayB");
+		csUpdated.addConcept().setCode("codeC").setDisplay("displayC");
+		myCodeSystemDao.update(csUpdated, mySrd);
+
+		// Verify new concepts are found
+		IValidationSupport.LookupCodeResult resultB = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
+		assertThat(resultB).isNotNull();
+		assertThat(resultB.isFound()).isTrue();
+		assertThat(resultB.getCodeDisplay()).isEqualTo("displayB");
+
+		// Verify old concept from replaced version is no longer found
+		IValidationSupport.LookupCodeResult resultAAfter = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(resultAAfter).isNotNull();
+		assertThat(resultAAfter.isFound()).isFalse();
 	}
 
 	@Test

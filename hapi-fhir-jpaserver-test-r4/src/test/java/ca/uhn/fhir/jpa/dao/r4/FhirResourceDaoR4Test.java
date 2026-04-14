@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -44,6 +45,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasParam;
@@ -61,6 +63,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -69,6 +72,7 @@ import org.apache.commons.lang3.Validate;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Age;
@@ -2391,7 +2395,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
-		Meta newMeta = myPatientDao.metaDeleteOperation(id.withVersion("1"), meta, mySrd);
+		DaoMethodOutcome outcome = myPatientDao.metaDeleteOperation(id.withVersion("1"), meta, mySrd, new TransactionDetails());
+		Meta newMeta = (Meta) ParametersUtil.getNamedParameterValue(myFhirContext, (IBaseParameters) outcome.getResource(), "return").orElseThrow();
 		assertThat(newMeta.getProfile()).hasSize(1);
 		assertThat(newMeta.getSecurity()).hasSize(1);
 		assertThat(newMeta.getTag()).hasSize(1);
@@ -2436,7 +2441,24 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
-		newMeta = myPatientDao.metaAddOperation(id.withVersion("1"), meta, mySrd);
+		outcome = myPatientDao.metaAddOperation(id.withVersion("1"), meta, mySrd, new TransactionDetails());
+		assertFalse(outcome.isNop());
+		newMeta = (Meta) ParametersUtil.getNamedParameterValue(myFhirContext, (IBaseParameters) outcome.getResource(), "return").orElseThrow();
+		assertThat(newMeta.getProfile()).hasSize(2);
+		assertThat(newMeta.getSecurity()).hasSize(2);
+		assertThat(newMeta.getTag()).hasSize(2);
+
+		/*
+		 * Meta-Add on previous version - Same call should have no effect
+		 */
+
+		meta = new Meta();
+		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
+		meta.addProfile("http://profile/1");
+		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
+		outcome = myPatientDao.metaAddOperation(id.withVersion("1"), meta, mySrd, new TransactionDetails());
+		assertTrue(outcome.isNop());
+		newMeta = (Meta) ParametersUtil.getNamedParameterValue(myFhirContext, (IBaseParameters) outcome.getResource(), "return").orElseThrow();
 		assertThat(newMeta.getProfile()).hasSize(2);
 		assertThat(newMeta.getSecurity()).hasSize(2);
 		assertThat(newMeta.getTag()).hasSize(2);
@@ -2459,7 +2481,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
-		newMeta = myPatientDao.metaDeleteOperation(id.toVersionless(), meta, mySrd);
+		outcome = myPatientDao.metaDeleteOperation(id.toVersionless(), meta, mySrd, new TransactionDetails());
+		newMeta = (Meta) ParametersUtil.getNamedParameterValue(myFhirContext, (IBaseParameters) outcome.getResource(), "return").orElseThrow();
 		assertThat(newMeta.getProfile()).hasSize(1);
 		assertThat(newMeta.getSecurity()).hasSize(1);
 		assertThat(newMeta.getTag()).hasSize(1);
@@ -2475,7 +2498,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
-		newMeta = myPatientDao.metaAddOperation(id.toVersionless(), meta, mySrd);
+		outcome = myPatientDao.metaAddOperation(id.toVersionless(), meta, mySrd, new TransactionDetails());
+		newMeta = (Meta) ParametersUtil.getNamedParameterValue(myFhirContext, (IBaseParameters) outcome.getResource(), "return").orElseThrow();
 		assertThat(newMeta.getProfile()).hasSize(2);
 		assertThat(newMeta.getSecurity()).hasSize(2);
 		assertThat(newMeta.getTag()).hasSize(2);
@@ -3061,7 +3085,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			metaAdd.addTag().setSystem(null).setCode("Dog").setDisplay("Puppies");
 			metaAdd.addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1");
 			metaAdd.addProfile("http://profile/1");
-			myPatientDao.metaAddOperation(id1, metaAdd, mySrd);
+			myPatientDao.metaAddOperation(id1, metaAdd, mySrd, new TransactionDetails());
 		}
 		{
 			Patient patient = new Patient();
@@ -3131,7 +3155,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			metaDel.addTag().setSystem(null).setCode("Dog");
 			metaDel.addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1");
 			metaDel.addProfile("http://profile/1");
-			myPatientDao.metaDeleteOperation(id1, metaDel, mySrd);
+			myPatientDao.metaDeleteOperation(id1, metaDel, mySrd, new TransactionDetails());
 		}
 
 		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
@@ -4144,8 +4168,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
 
-		myPatientDao.metaAddOperation(patientId, new Meta().addTag("http://foo", "Cat", "Kittens"), null);
-		myPatientDao.metaAddOperation(patientId, new Meta().addTag("http://foo", "Cow", "Calves"), null);
+		myPatientDao.metaAddOperation(patientId, new Meta().addTag("http://foo", "Cat", "Kittens"), null, new TransactionDetails());
+		myPatientDao.metaAddOperation(patientId, new Meta().addTag("http://foo", "Cow", "Calves"), null, new TransactionDetails());
 
 		retrieved = myPatientDao.read(patientId, mySrd);
 		published = (ArrayList<Coding>) retrieved.getMeta().getTag();
@@ -4378,7 +4402,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 	public void testDontReuseErrorSearches() {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("Patient/123"));
-		String normalized = map.toNormalizedQueryString(myFhirContext);
+		String normalized = map.toNormalizedQueryString();
 		String uuid = UUID.randomUUID().toString();
 
 		runInTransaction(() -> {

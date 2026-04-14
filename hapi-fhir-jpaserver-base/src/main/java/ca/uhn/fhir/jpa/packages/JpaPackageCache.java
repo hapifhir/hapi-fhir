@@ -565,10 +565,17 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			sourceDescription = theInstallationSpec.getPackageUrl();
 		}
 
-		if (theInstallationSpec.isDryRun()
-				|| theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-			// non-storing of NPM paths
+		boolean isNonStoringMode = theInstallationSpec.isDryRun()
+				|| theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY;
+
+		// non-storing of NPM paths
+		if (isNonStoringMode && theInstallationSpec.getPackageContents() != null) {
 			return NpmPackage.fromPackage(new ByteArrayInputStream(theInstallationSpec.getPackageContents()));
+		}
+		if (isNonStoringMode) {
+			return newTxTemplate()
+					.execute(tx -> loadPackageFromCacheOnlyInner(
+							theInstallationSpec.getName(), theInstallationSpec.getVersion()));
 		}
 
 		if (theInstallationSpec.getPackageContents() != null) {
