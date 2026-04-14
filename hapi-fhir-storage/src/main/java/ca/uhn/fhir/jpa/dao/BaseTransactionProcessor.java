@@ -338,7 +338,8 @@ public abstract class BaseTransactionProcessor {
 			IBase theNewEntry,
 			String theResourceType,
 			IBaseResource theRes,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails) {
 		IIdType newId = theOutcome.getId().toUnqualified();
 		IIdType resourceId =
 				isPlaceholder(theNextResourceId) ? theNextResourceId : theNextResourceId.toUnqualifiedVersionless();
@@ -382,11 +383,30 @@ public abstract class BaseTransactionProcessor {
 			if (preferReturn != null) {
 				if (preferReturn == PreferReturnEnum.REPRESENTATION) {
 					if (theOutcome.getResource() != null) {
-						theOutcome.fireResourceViewCallbacks();
-						myVersionAdapter.setResource(theNewEntry, theOutcome.getResource());
+						// Defer firing resource view callbacks (e.g. STORAGE_PRESHOW_RESOURCES / consent
+						// canSeeResource) until after the transaction has committed. Firing them inside the
+						// active transaction can cause consent interceptors returning REJECT to disrupt
+						// in-flight writes, leaving HFJ_RESOURCE rows without matching HFJ_RES_VER rows.
+						theTransactionDetails.addDeferredResourceViewCallback(() -> {
+							theOutcome.fireResourceViewCallbacks();
+							myVersionAdapter.setResource(theNewEntry, theOutcome.getResource());
+						});
 					}
 				}
 			}
+		}
+
+		// If a STORAGE_PREACCESS_RESOURCES hook (e.g. a REJECT consent policy) nulled the resource on
+		// the outcome, restore it so that resolveReferencesThenSaveAndIndexResources() can complete
+		// the write (call createHistoryEntry() etc.). All response-building above has already run
+		// without the resource (consent is preserved for the response). Without this restoration,
+		// resolveReferencesThenSaveAndIndexResources() skips the entry because it sees a null resource,
+		// leaving HFJ_RESOURCE rows without matching HFJ_RES_VER rows.
+		if (theOutcome.getResource() == null
+				&& theOutcome.getEntity() != null
+				&& !theOutcome.isNop()
+				&& theRes != null) {
+			theOutcome.setResource(theRes);
 		}
 	}
 
@@ -639,7 +659,8 @@ public abstract class BaseTransactionProcessor {
 		 *
 		 * Entries with a type of GET are removed from the bundle so that they
 		 * can be processed at the very end. We do this because the incoming resources
-		 * are saved in a two-phase way in order to deal with interdependencies, and
+		 * are first persisted without indexing to handle interdependencies, then
+		 * indexed and stored as history entries once all IDs are resolved — and
 		 * we want the GET processing to use the final indexing state
 		 */
 		final IBaseBundle response =
@@ -924,6 +945,12 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		theTransactionStopWatch.endCurrentTask();
+
+		// Fire resource view callbacks (e.g. STORAGE_PRESHOW_RESOURCES / consent canSeeResource)
+		// now that the transaction has committed. Firing them inside the transaction could allow
+		// consent interceptors returning REJECT to disrupt in-flight writes, leaving
+		// HFJ_RESOURCE rows without matching HFJ_RES_VER rows.
+		theTransactionDetails.fireDeferredResourceViewCallbacks();
 
 		for (Map.Entry<IBase, IIdType> nextEntry : entriesToProcess.entrySet()) {
 			String responseLocation = nextEntry.getValue().toUnqualified().getValue();
@@ -1459,7 +1486,8 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									requestDetailsForEntry);
+									requestDetailsForEntry,
+									theTransactionDetails);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						theTransactionDetails.addResolvedResource(outcome.getId(), outcome::getResource);
@@ -1566,7 +1594,8 @@ public abstract class BaseTransactionProcessor {
 								nextRespEntry,
 								resourceType,
 								res,
-								requestDetailsForEntry);
+								requestDetailsForEntry,
+								theTransactionDetails);
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						break;
 					}
@@ -1651,7 +1680,8 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									requestDetailsForEntry);
+									requestDetailsForEntry,
+									theTransactionDetails);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 

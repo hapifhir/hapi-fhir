@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7769
+title: "Previously, when a ConsentInterceptor returned REJECT from canSeeResource during a
+  FHIR batch or transaction bundle write, the resource history entry (HFJ_RES_VER) was not
+  created even though the resource itself (HFJ_RESOURCE) was persisted, leaving the database
+  in an inconsistent state. The server returned 200 OK with no indication of the problem. This has
+  been fixed."
