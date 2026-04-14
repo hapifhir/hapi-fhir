@@ -185,6 +185,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			addConceptInHierarchy(csv, parentCodes, nextRootConcept, retVal, codeToConcept, 0);
 		}
 
+		myTerminologySvc.invalidateCodeSystemCaches();
+
 		return retVal;
 	}
 
@@ -226,6 +228,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		for (TermConcept code : allFoundTermConcepts) {
 			deleteEverythingRelatedToConcept(code, removeCounter);
 		}
+
+		myTerminologySvc.invalidateCodeSystemCaches();
 
 		return new UploadStatistics(removeCounter.get(), target);
 	}
@@ -527,6 +531,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		if (!myDeferredStorageSvc.isStorageQueueEmpty(true)) {
 			ourLog.info("Note that some concept saving has been deferred");
 		}
+
+		myTerminologySvc.updateCodeSystemVersionCache(theSystemUri, codeSystemToStore);
 	}
 
 	private TermCodeSystemVersion getExistingTermCodeSystemVersion(

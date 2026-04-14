@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -574,4 +575,156 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			assertFalse(termConcept.isPresent());
 		});
 	}
+
+	@Test
+	void deleteCodeSystem_lookupCode_allCodesNotFound() {
+		// Setup: create a CodeSystem with concepts
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo/cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("codeA").setDisplay("displayA");
+		cs.addConcept().setCode("codeB").setDisplay("displayB");
+		myCodeSystemDao.create(cs, mySrd);
+
+		// Verify lookup succeeds (populates the cache)
+		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(resultA).isNotNull();
+		assertThat(resultA.isFound()).isTrue();
+
+		// Delete via the FHIR DAO (same as a user calling DELETE /CodeSystem/...)
+		myCodeSystemDao.deleteByUrl("CodeSystem?url=http://foo/cs", mySrd);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete("termCodeSystemDeleteJob");
+
+		// Verify lookup fails after deletion
+		IValidationSupport.LookupCodeResult afterDeleteA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(afterDeleteA).isNotNull();
+		assertThat(afterDeleteA.isFound()).isFalse();
+
+		IValidationSupport.LookupCodeResult afterDeleteB = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
+		assertThat(afterDeleteB).isNotNull();
+		assertThat(afterDeleteB.isFound()).isFalse();
+	}
+
+	@Test
+	void updateCodeSystem_lookupCode_reflectsNewConcepts() {
+		// Setup: create a CodeSystem with content=complete and one concept
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo/cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("codeA").setDisplay("displayA");
+		IIdType id = myCodeSystemDao.create(cs, mySrd).getId();
+
+		// Verify initial lookup succeeds
+		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(resultA).isNotNull();
+		assertThat(resultA.isFound()).isTrue();
+		assertThat(resultA.getCodeDisplay()).isEqualTo("displayA");
+
+		// Update the CodeSystem with different concepts
+		CodeSystem csUpdated = new CodeSystem();
+		csUpdated.setId(id.toVersionless());
+		csUpdated.setUrl("http://foo/cs");
+		csUpdated.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		csUpdated.addConcept().setCode("codeB").setDisplay("displayB");
+		csUpdated.addConcept().setCode("codeC").setDisplay("displayC");
+		myCodeSystemDao.update(csUpdated, mySrd);
+
+		// Verify new concepts are found
+		IValidationSupport.LookupCodeResult resultB = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
+		assertThat(resultB).isNotNull();
+		assertThat(resultB.isFound()).isTrue();
+		assertThat(resultB.getCodeDisplay()).isEqualTo("displayB");
+
+		// Verify old concept from replaced version is no longer found
+		IValidationSupport.LookupCodeResult resultAAfter = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(resultAAfter).isNotNull();
+		assertThat(resultAAfter.isFound()).isFalse();
+	}
+
+	@Test
+	void updateValueSet_preExpanded_isValueSetPreExpandedForCodeValidation_returnsFalse() throws Exception {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Setup: code system + ValueSet, then pre-expand so the TermValueSet has EXPANDED status
+		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Prime: read and verify pre-expanded, which populates myValueSetCache with EXPANDED status
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		assertThat(myTermSvc.isValueSetPreExpandedForCodeValidation(valueSet)).isTrue();
+
+		// Update the ValueSet — JpaResourceDaoValueSet calls storeTermValueSet, which
+		// deletes the old TermValueSet and creates a new one with NOT_EXPANDED status.
+		// Without the fix, myValueSetCache still holds the stale EXPANDED entry.
+		myValueSetDao.update(valueSet, mySrd);
+
+		// The cache must be cleared: re-checking should reflect NOT_EXPANDED from the DB
+		assertThat(myTermSvc.isValueSetPreExpandedForCodeValidation(valueSet)).isFalse();
+	}
+
+	@Test
+	void deleteValueSet_preExpanded_isValueSetPreExpandedForCodeValidation_returnsFalse() throws Exception {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Setup: code system + ValueSet, then pre-expand so the TermValueSet has EXPANDED status
+		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Prime: read and verify pre-expanded, which populates myValueSetCache with EXPANDED status
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		assertThat(myTermSvc.isValueSetPreExpandedForCodeValidation(valueSet)).isTrue();
+
+		// Delete the ValueSet — JpaResourceDaoValueSet calls deleteValueSetAndChildren,
+		// which must invalidate the cache.
+		// Without the fix, myValueSetCache still holds the stale EXPANDED entry.
+		myValueSetDao.delete(myExtensionalVsId, mySrd);
+
+		// The cache must be cleared: the TermValueSet no longer exists in the DB
+		assertThat(myTermSvc.isValueSetPreExpandedForCodeValidation(valueSet)).isFalse();
+	}
+
+	@Test
+	void invalidateCaches_codeSystemAndValueSetLookupsStillReflectDatabaseState() throws Exception {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Setup: code system used by getCurrentCodeSystemVersion
+		createCodeSystem();
+
+		// Setup: pre-expanded ValueSet used by getValueSetEntity
+		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+
+		// Prime both caches with valid lookups
+		IValidationSupport.CodeValidationResult csResult = myTermSvc.validateCode(
+			valCtx, new ConceptValidationOptions(), CS_URL, "ParentWithNoChildrenA", null, null);
+		assertThat(csResult.isOk()).isTrue();
+
+		IValidationSupport.CodeValidationResult vsResult = myTermSvc.validateCodeIsInPreExpandedValueSet(
+			valCtx, optsGuess, valueSet, null, "11378-7", null, null, null);
+		assertThat(vsResult.isOk()).isTrue();
+
+		// Directly invalidate both caches (not via a delta operation)
+		myTermSvc.invalidateCaches();
+
+		// Code system version cache must repopulate from DB — lookup still correct
+		IValidationSupport.CodeValidationResult csResultAfter = myTermSvc.validateCode(
+			valCtx, new ConceptValidationOptions(), CS_URL, "ParentWithNoChildrenA", null, null);
+		assertThat(csResultAfter.isOk()).isTrue();
+
+		// Value set cache must repopulate from DB — validation still correct
+		IValidationSupport.CodeValidationResult vsResultAfter = myTermSvc.validateCodeIsInPreExpandedValueSet(
+			valCtx, optsGuess, valueSet, null, "11378-7", null, null, null);
+		assertThat(vsResultAfter.isOk()).isTrue();
+	}
+
 }
