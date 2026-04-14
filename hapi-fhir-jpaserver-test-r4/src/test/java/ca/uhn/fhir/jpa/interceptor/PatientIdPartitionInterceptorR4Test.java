@@ -72,7 +72,9 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -87,6 +89,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1370,6 +1373,197 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		// This should NOT throw "HAPI-2223: Partition IDs have not been set"
 		IBundleProvider result = myOrganizationDao.search(searchMap, blankTenantRequest);
 		assertThat(result.size()).isEqualTo(1);
+	}
+
+
+	@SafeVarargs
+	static Consumer<Bundle> bundleAssert(int theExpectedSize, Consumer<Bundle> ...theOtherAssertions) {
+		return theBundle -> {
+			assertThat(theBundle.getEntry()).size().isEqualTo(theExpectedSize);
+			for (Consumer<Bundle> theAssertion : theOtherAssertions) {
+				theAssertion.accept(theBundle);
+			}
+		};
+	}
+
+	static List<Arguments> referenceScenarioSupplier() {
+		return List.of(
+			Arguments.of(
+				"create Observation | local reference to existing patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "Patient/pat1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"create Observation | placeholder reference to unconditional new patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				bundleAssert(2)
+			),
+			Arguments.of(
+				"create Observation | placeholder reference to unconditional new patient | reverse order",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}, {
+							    "fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient"}
+							}
+						]
+					}
+					""",
+				bundleAssert(2)
+			),
+			Arguments.of(
+				"create Observation | placeholder reference to conditional-create of existing patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+							    "fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|ident1"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				bundleAssert(2)
+			),
+			Arguments.of(
+				"create Observation with logical reference to existing patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"conditional-update Observation with logical reference to existing patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|ident1"}
+								},
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obs1"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"Observation with logical reference to patient in bundle with redundant conditional create",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ],
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|ident1"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+								},
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obs1"}
+							}
+						]
+					}
+					""",
+				bundleAssert(2)
+			)
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("referenceScenarioSupplier()")
+	void testTransaction_allReferenceScenarios(String theComment, String theBundle, Consumer<Bundle> theAssertions) {
+		// fixed setup
+		createPatient(
+			withId("pat1"),
+			withIdentifier("old-sys", "ident1"),
+			withIdentifier("new-sys", "newId1")
+		);
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+
+		// then
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		// expections
+		assertNotNull(resultBundle);
+		assertNotNull(theAssertions);
+		theAssertions.accept(resultBundle);
+
 	}
 
 	@Interceptor
