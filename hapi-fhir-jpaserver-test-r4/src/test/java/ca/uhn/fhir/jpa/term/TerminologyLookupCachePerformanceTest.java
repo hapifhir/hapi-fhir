@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 // Created by claude-opus-4-6
-//@Disabled("Performance test — run manually to compare cache implementations")
+@Disabled("Performance test — run manually to compare cache implementations")
 class TerminologyLookupCachePerformanceTest extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologyLookupCachePerformanceTest.class);
@@ -106,6 +106,7 @@ class TerminologyLookupCachePerformanceTest extends BaseJpaR4Test {
 		for (int i = 0; i < LOOKUP_ITERATIONS; i++) {
 			IValidationSupport.CodeValidationResult result =
 				myTermSvc.validateCode(valCtx, opts, url, "codeA", null, null);
+			assertThat(result).isNotNull();
 			assertThat(result.isOk()).isTrue();
 		}
 		long elapsedMs = sw.getMillis();
