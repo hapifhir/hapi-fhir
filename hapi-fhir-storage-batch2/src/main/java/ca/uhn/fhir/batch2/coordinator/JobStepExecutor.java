@@ -96,7 +96,8 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		definition.setJobClass(HeartbeatJob.class);
 		definition.setId(String.format("BATCH2-HEARTBEAT-%s-%s", myInstanceId, myWorkChunk.getId()));
 		definition.addJobData(CHUNK_ID, myWorkChunk.getId());
-		myIHapiScheduler.scheduleClusteredJob(Math.min(myAckTimeoutMs / 3, 500), definition);
+		// we don't want a time that's <100ms (or worse, negative)
+		myIHapiScheduler.scheduleClusteredJob(Math.max(myAckTimeoutMs / 3, 500), definition);
 	}
 
 	@WithSpan(JOB_STEP_EXECUTION_SPAN_NAME)

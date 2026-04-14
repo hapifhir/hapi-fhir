@@ -230,6 +230,9 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 					// throw to requeue chunk
 					throw new DelayChunkException(Msg.code(2887) + " " + msg);
 				} // else - do nothing and proceed
+				// TODO LS - we might want to consider capping how long we wait,
+				// 			but for now we'll keep sleeping forever until the
+				//			slow worker finishes or stops updating the chunk
 			} else if (myWorkChunk.getPreviousStatus() == WorkChunkStatusEnum.COMPLETED) {
 				// our slow worker has completed this step; discard
 				return Optional.empty();

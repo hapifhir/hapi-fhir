@@ -396,6 +396,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		if (!theStatus.isIncomplete()) {
 			workChunk.setEndTime(new Date());
 		}
+		workChunk.setLastHeartbeat(new Date());
 
 		return workChunk;
 	}
