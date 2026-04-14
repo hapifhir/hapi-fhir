@@ -427,6 +427,12 @@ public class SearchParamRegistryImpl
 		 * the retired/inactive DB version. This protects critical system search parameters
 		 * (e.g. Basic:code needed by the R4 SubscriptionTopic registry) from being
 		 * effectively retired even when the DB record has been updated.
+		 *
+		 * Non-disableable SPs should not be retirable via normal API calls or DB seeding
+		 * (those layers have their own guards), but this acts as a last-resort safety net
+		 * at the cache layer. It is intentionally all-or-nothing — this method manages
+		 * cache slot registration, not SP base lists, so returning 0 is simpler and safer
+		 * than attempting partial base narrowing here.
 		 */
 		if (newRuntimeSp.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
 			for (String nextBase : newRuntimeSp.getBase()) {
