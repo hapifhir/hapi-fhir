@@ -67,6 +67,7 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 
 			PackageContentsJson contents = new PackageContentsJson();
 			contents.setContents(Base64.getEncoder().encode(outputStream.toByteArray()));
+			contents.setReport(outcome);
 			theDataSink.accept(contents);
 		} catch (IOException e) {
 			// We're only concerned with the happy path for now - error handling is a separate MR

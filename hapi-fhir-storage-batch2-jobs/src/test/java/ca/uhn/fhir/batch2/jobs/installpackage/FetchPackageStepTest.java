@@ -80,6 +80,7 @@ public class FetchPackageStepTest {
 		verify(myJobDataSink).accept(myPackageContentsCaptor.capture());
 		PackageContentsJson contents = myPackageContentsCaptor.getValue();
 		assertThat(contents).isNotNull();
+		assertThat(contents.getReport()).isNotNull();
 		byte[] decodedBytes = Base64.getDecoder().decode(contents.getContents());
 		NpmPackage jobPackage = NpmPackage.fromPackage(new ByteArrayInputStream(decodedBytes));
 
