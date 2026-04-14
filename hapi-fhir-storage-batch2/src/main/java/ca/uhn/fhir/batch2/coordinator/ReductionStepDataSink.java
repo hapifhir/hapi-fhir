@@ -129,8 +129,8 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 
 	@Override
 	public void heartbeat() {
-		throw new UnsupportedOperationException(
-				"Reduction steps are not associated with any one workchunk, but with a multitude of cunks being 'reduced' to a single one.");
+		throw new UnsupportedOperationException(Msg.code(2914) +
+				" Reduction steps are not associated with any one workchunk, but with a multitude of cunks being 'reduced' to a single one.");
 	}
 
 	@Override

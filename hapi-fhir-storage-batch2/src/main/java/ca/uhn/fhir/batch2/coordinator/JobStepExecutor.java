@@ -30,6 +30,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -196,7 +197,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 					context.getScheduler().unscheduleJob(context.getTrigger().getKey());
 				} catch (SchedulerException ex) {
 					ourLog.info("Failed to unschedule job {}", getClass().getName(), ex);
-					throw new RuntimeException(ex);
+					throw new RuntimeException(Msg.code(2912), ex);
 				}
 			}
 		}

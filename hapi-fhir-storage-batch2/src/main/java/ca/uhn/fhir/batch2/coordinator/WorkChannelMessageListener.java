@@ -226,7 +226,7 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 					try {
 						Thread.sleep(minTimeout);
 					} catch (InterruptedException ex) {
-						throw new RuntimeException(ex);
+						throw new RuntimeException(Msg.code(2913), ex);
 					}
 					// throw to requeue chunk
 					throw new DelayChunkException(Msg.code(2887) + " " + msg);
