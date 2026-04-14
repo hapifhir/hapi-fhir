@@ -210,7 +210,8 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				long lastHeartbeatMs = myWorkChunk.getLastHeartbeat().getTime();
 				long now = Instant.now().toEpochMilli();
 
-				// we want at least a base minimum
+				// we want at least a base minimum, in case the broker hasn't set a value
+				// (without a broker, ack-timeout might not be set)
 				long minTimeout = Math.max(
 						myJobStepExecutorFactory.getAckTimeoutMS(), JobStepExecutorFactory.DEFAULT_ACK_TIMEOUT);
 				long twiceAckTime = 2 * minTimeout;
