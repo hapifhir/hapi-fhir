@@ -213,7 +213,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
 
 			if (theRequestPartitionId != null) {
+				// FIXME-EHP:
+				//
 				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
+
+				// FIXME-EHP:
+				createPlaceHolders(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
+				// now that we have prefetched and created placeholders, resolve(replache) the inlineMatchUrls
+				resolveInlineMatchUrls(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
 			}
 
 			return super.doTransactionWriteOperations(
@@ -231,6 +238,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		} finally {
 			myEntityManager.setFlushMode(initialFlushMode);
 		}
+	}
+
+	private void createPlaceHolders(RequestDetails theRequest, TransactionDetails theTransactionDetails, List<IBase> theEntries, ITransactionProcessorVersionAdapter<?, ?> theVersionAdapter, RequestPartitionId theRequestPartitionId) {
+
+	}
+
+	private void resolveInlineMatchUrls(RequestDetails theRequest, TransactionDetails theTransactionDetails, List<IBase> theEntries, ITransactionProcessorVersionAdapter<?, ?> theVersionAdapter, RequestPartitionId theRequestPartitionId) {
+
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -694,6 +709,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						});
 					});
 		}
+
+		// FIXME:
+		// create placeholder resource here
+		// preFetchSearchParameterMaps will add MatchUrlToResolve.myRequestUrl as NOT_FOUND in the transactionDetails),
+		//
 	}
 
 	/**

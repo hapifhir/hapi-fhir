@@ -246,13 +246,17 @@ public abstract class BaseTransactionProcessor {
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
 
-		// FIXME: wire it that service
+		// FIXME-EHP:
+		// common entry point for batch and systemProvider bundle processing see BaseHapiFhirSystemDao.transaction()
+
+
+		// FIXME-EHP: wire it that service
 		//
-		// FIXME: placeholder are currenlty created in DaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo.
+		// FIXME-EHP: placeholder are currenlty created in DaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo.
 		// for placeholder resource consistence (identiers/extensions), logic of building (not creating) a placeholder resource
 		// needs extraction so it can be wired in the PatientInlineMatchUrlPreCreationService.
 		//
-		// FIXME: the execution of conditionalCreatePatientsForInlineMatchUrls needs to either be wrapped in a clause
+		// FIXME-EHP: the execution of conditionalCreatePatientsForInlineMatchUrls needs to either be wrapped in a clause
 		// evaluating myStorageSettings.isAutoCreatePlaceholderReferenceTargets() or have the evaluation done within the
 		// invocation.
 		PatientInlineMatchUrlPreCreationService patientInlineMatchUrlPreCreationService = new PatientInlineMatchUrlPreCreationService(myContext, myMatchUrlService);
