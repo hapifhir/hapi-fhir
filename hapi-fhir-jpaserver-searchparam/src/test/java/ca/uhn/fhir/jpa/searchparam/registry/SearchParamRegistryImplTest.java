@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl.isNonDisableableBuiltInSearchParam;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -592,6 +593,8 @@ public class SearchParamRegistryImplTest {
 	@Test
 	void testSharedSpWithNonDisableableBase_RetiredInDbKeepsAllBasesActiveInCache() {
 		// Created by Claude Sonnet 4.6
+		// Note: Basic is not a real base of clinical-patient in R4 (it is in R5+). The SP here is
+		// synthetic — constructed to exercise the mixed-base guard logic without requiring R5.
 		// clinical-patient spans many bases including Basic (non-disableable) and Condition (disableable).
 		// When the DB entry is RETIRED, the L1 guard detects Basic is non-disableable and skips the
 		// override entirely — so ALL bases that exist in the built-in cache remain active,
@@ -706,6 +709,37 @@ public class SearchParamRegistryImplTest {
 			return mock(IValidationSupport.class);
 		}
 
+	}
+
+	@Test
+	void testIsNonDisableableBuiltInSearchParam_builtInUri_returnsTrue() {
+		// Created by Claude Sonnet 4.6
+		// Basic:* pattern
+		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/Basic-code", "Basic", "code"));
+		// *:url pattern
+		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/conformance-url", "ValueSet", "url"));
+		// Subscription:* pattern
+		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/Subscription-status", "Subscription", "status"));
+		// SearchParameter:* pattern
+		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/SearchParameter-url", "SearchParameter", "url"));
+	}
+
+	@Test
+	void testIsNonDisableableBuiltInSearchParam_customUri_returnsFalse() {
+		// Created by Claude Sonnet 4.6
+		// Custom URL on a non-disableable resource type must NOT be protected
+		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/Basic-custom", "Basic", "custom"));
+		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/Subscription-foo", "Subscription", "foo"));
+		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/CustomResource-url", "CustomResource", "url"));
+		// Null URI
+		assertFalse(isNonDisableableBuiltInSearchParam(null, "Basic", "code"));
+	}
+
+	@Test
+	void testIsNonDisableableBuiltInSearchParam_builtInUriDisableableResource_returnsFalse() {
+		// Created by Claude Sonnet 4.6
+		// Built-in URL but resource type not in SearchParamRegistryImpl.NON_DISABLEABLE_SEARCH_PARAMS
+		assertFalse(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/Patient-name", "Patient", "name"));
 	}
 
 }

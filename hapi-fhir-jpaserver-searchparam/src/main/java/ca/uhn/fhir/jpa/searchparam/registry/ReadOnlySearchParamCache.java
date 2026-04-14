@@ -40,26 +40,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ReadOnlySearchParamCache {
 
-	/**
-	 * URL prefix shared by all canonical HL7 built-in search parameters.
-	 * Used to distinguish built-in SPs (which may be non-disableable) from
-	 * custom/user-defined SPs.
-	 */
-	public static final String BUILT_IN_SEARCH_PARAM_URI_PREFIX = "http://hl7.org/fhir/SearchParameter/";
-
-	/**
-	 * Search parameter patterns that must remain active regardless of enable/disable configuration,
-	 * because they are required for core system operation.
-	 * <ul>
-	 *   <li>{@code *:url} — used by the validator and terminology services</li>
-	 *   <li>{@code Subscription:*} — used by the Subscription module</li>
-	 *   <li>{@code SearchParameter:*} — used by the search parameter registry</li>
-	 *   <li>{@code Basic:*} — used by the R4 SubscriptionTopic registry</li>
-	 * </ul>
-	 */
-	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
-			Set.of("*:url", "Subscription:*", "SearchParameter:*", "Basic:*");
-
 	// resourceName -> searchParamName -> searchparam
 	protected final Map<String, ResourceSearchParams> myResourceNameToSpNameToSp;
 	protected final Map<String, RuntimeSearchParam> myUrlToParam;
@@ -206,35 +186,6 @@ public class ReadOnlySearchParamCache {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Returns {@code true} if the given search parameter is a built-in (HL7) search
-	 * parameter that must remain active regardless of enable/disable configuration.
-	 *
-	 * <p>A search parameter is considered non-disableable and built-in if:
-	 * <ol>
-	 *   <li>Its URI starts with {@link #BUILT_IN_SEARCH_PARAM_URI_PREFIX}, AND</li>
-	 *   <li>It matches at least one pattern in
-	 *       {@link #NON_DISABLEABLE_SEARCH_PARAMS}.</li>
-	 * </ol>
-	 *
-	 * <p>This check is intentionally limited to built-in SPs (by URI prefix) so that
-	 * custom user-defined SPs on the same resource types (e.g. a custom SP on
-	 * {@code Subscription}) remain fully manageable.
-	 *
-	 * @param theUri           the SearchParameter URL; may be {@code null}
-	 * @param theResourceBase  the base resource type (e.g. {@code "Basic"})
-	 * @param theParamName     the search parameter code/name (e.g. {@code "code"})
-	 * @return {@code true} if this SP is a built-in non-disableable parameter
-	 */
-	public static boolean isNonDisableableBuiltInSearchParam(
-			String theUri, String theResourceBase, String theParamName) {
-		// Created by Claude Sonnet 4.6
-		if (theUri == null || !theUri.startsWith(BUILT_IN_SEARCH_PARAM_URI_PREFIX)) {
-			return false;
-		}
-		return searchParamMatchesAtLeastOnePattern(NON_DISABLEABLE_SEARCH_PARAMS, theResourceBase, theParamName);
 	}
 
 	public static ReadOnlySearchParamCache fromRuntimeSearchParamCache(

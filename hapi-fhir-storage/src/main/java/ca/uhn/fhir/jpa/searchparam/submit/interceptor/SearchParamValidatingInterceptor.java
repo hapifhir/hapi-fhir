@@ -29,7 +29,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -147,7 +147,7 @@ public class SearchParamValidatingInterceptor {
 	 * Validates a SearchParameter resource on update/PUT, enforcing two constraints:
 	 * <ol>
 	 *   <li>Built-in non-disableable search parameters (see
-	 *       {@link ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache#NON_DISABLEABLE_SEARCH_PARAMS})
+	 *       {@link ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl#NON_DISABLEABLE_SEARCH_PARAMS})
 	 *       may not have their status changed to anything other than {@code active}.</li>
 	 *   <li>A new SearchParameter (PUT-as-create) may not overlap an existing one with the
 	 *       same base and code.</li>
@@ -189,11 +189,12 @@ public class SearchParamValidatingInterceptor {
 		 */
 		if (runtimeSearchParam.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
 			for (String nextBase : runtimeSearchParam.getBase()) {
-				if (ReadOnlySearchParamCache.isNonDisableableBuiltInSearchParam(
+				if (SearchParamRegistryImpl.isNonDisableableBuiltInSearchParam(
 						runtimeSearchParam.getUri(), nextBase, runtimeSearchParam.getName())) {
 					throw new UnprocessableEntityException(
 							Msg.code(2875) + "Cannot change the status of built-in search parameter "
 									+ nextBase + ":" + runtimeSearchParam.getName()
+									+ " (with URL " + runtimeSearchParam.getUri() + ")"
 									+ " because it is required for system operation. This parameter should be kept active.");
 				}
 			}

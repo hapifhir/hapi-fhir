@@ -79,6 +79,19 @@ public class SearchParamRegistryImpl
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	public static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
+
+	/**
+	 * Search parameter patterns that must remain active regardless of enable/disable configuration,
+	 * because they are required for core system operation.
+	 * <ul>
+	 *   <li>{@code *:url} — used by the validator and terminology services</li>
+	 *   <li>{@code Subscription:*} — used by the Subscription module</li>
+	 *   <li>{@code SearchParameter:*} — used by the search parameter registry</li>
+	 *   <li>{@code Basic:*} — used by the R4 SubscriptionTopic registry</li>
+	 * </ul>
+	 */
+	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
+			Set.of("*:url", "Subscription:*", "SearchParameter:*", "Basic:*");
 	public static final String PARAM_LANGUAGE_ID = "SearchParameter/Resource-language";
 	public static final String PARAM_LANGUAGE_DESCRIPTION = "Language of the resource content";
 	public static final String PARAM_LANGUAGE_PATH = "language";
@@ -360,7 +373,7 @@ public class SearchParamRegistryImpl
 				myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(
 						myFhirContext,
 						mySearchParameterCanonicalizer,
-						ReadOnlySearchParamCache.NON_DISABLEABLE_SEARCH_PARAMS);
+						NON_DISABLEABLE_SEARCH_PARAMS);
 			}
 		}
 		return myBuiltInSearchParams;
@@ -389,6 +402,35 @@ public class SearchParamRegistryImpl
 			retval += overrideSearchParam(theSearchParamCache, searchParam);
 		}
 		return retval;
+	}
+
+	/**
+	 * Returns {@code true} if the given search parameter is a built-in (HL7) search
+	 * parameter that must remain active regardless of enable/disable configuration.
+	 *
+	 * <p>A search parameter is considered non-disableable and built-in if:
+	 * <ol>
+	 *   <li>Its URI starts with {@link ca.uhn.fhir.rest.api.Constants#BUILT_IN_SEARCH_PARAM_URI_PREFIX}, AND</li>
+	 *   <li>It matches at least one pattern in {@link #NON_DISABLEABLE_SEARCH_PARAMS}.</li>
+	 * </ol>
+	 *
+	 * <p>This check is intentionally limited to built-in SPs (by URI prefix) so that
+	 * custom user-defined SPs on the same resource types (e.g. a custom SP on
+	 * {@code Subscription}) remain fully manageable.
+	 *
+	 * @param theUri           the SearchParameter URL; may be {@code null}
+	 * @param theResourceBase  the base resource type (e.g. {@code "Basic"})
+	 * @param theParamName     the search parameter code/name (e.g. {@code "code"})
+	 * @return {@code true} if this SP is a built-in non-disableable parameter
+	 */
+	public static boolean isNonDisableableBuiltInSearchParam(
+			String theUri, @Nonnull String theResourceBase, @Nonnull String theParamName) {
+		// Created by Claude Sonnet 4.6
+		if (theUri == null || !theUri.startsWith(Constants.BUILT_IN_SEARCH_PARAM_URI_PREFIX)) {
+			return false;
+		}
+		return ReadOnlySearchParamCache.searchParamMatchesAtLeastOnePattern(
+				NON_DISABLEABLE_SEARCH_PARAMS, theResourceBase, theParamName);
 	}
 
 	/**
@@ -432,11 +474,16 @@ public class SearchParamRegistryImpl
 		 * (those layers have their own guards), but this acts as a last-resort safety net
 		 * at the cache layer. It is intentionally all-or-nothing — this method manages
 		 * cache slot registration, not SP base lists, so returning 0 is simpler and safer
-		 * than attempting partial base narrowing here.
+		 * than attempting partial base narrowing here. As a consequence, for SPs spanning
+		 * both non-disableable and disableable bases, the full built-in entry is preserved
+		 * in cache. For example, if clinical-patient (bases: Basic, Condition) is somehow
+		 * fully retired in the DB, Condition-based searches will still be active in cache
+		 * because Basic.patient is mandatory. Base narrowing is the responsibility of the
+		 * DB seeding layer.
 		 */
 		if (newRuntimeSp.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
 			for (String nextBase : newRuntimeSp.getBase()) {
-				if (ReadOnlySearchParamCache.isNonDisableableBuiltInSearchParam(
+				if (isNonDisableableBuiltInSearchParam(
 						newRuntimeSp.getUri(), nextBase, newRuntimeSp.getName())) {
 					ourLog.debug(
 							"Attempted to disable a non-disableable search parameter. {} will remain active in cache.",
