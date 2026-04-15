@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7542
+title: "MDM beans `MdmLoader` and `MdmMessageListener` that perform DAO reads as part of MDM initialization 
+(`updateSubscriptions`) and MDM message handling (`handleMessage`) can now be extended."
+
