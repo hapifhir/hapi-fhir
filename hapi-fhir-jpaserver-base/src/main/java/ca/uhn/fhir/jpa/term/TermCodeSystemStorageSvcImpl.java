@@ -532,7 +532,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			ourLog.info("Note that some concept saving has been deferred");
 		}
 
-		myTerminologySvc.updateCodeSystemVersionCache(theSystemUri, codeSystemToStore);
+		if (isMakeVersionCurrent) {
+			myTerminologySvc.updateCodeSystemVersionCache(theSystemUri, codeSystemToStore);
+		}
 	}
 
 	private TermCodeSystemVersion getExistingTermCodeSystemVersion(
