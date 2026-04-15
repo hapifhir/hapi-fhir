@@ -106,14 +106,21 @@ public class InitializeDependenciesStep
 
 		PackageInstallationSpec installationSpec =
 				theStepExecutionDetails.getParameters().getInstallationSpec();
+		PackageInstallOutcomeJson outcome = theStepExecutionDetails.getData().getReport();
 
 		for (PackageUtils.DependentPackage nextDependency : theDependencies) {
-			// create a new installation spec, retaining all the control parameters, but targeting the dependency
-			// package
-			JobInstanceStartRequest startRequest = buildStartRequest(nextDependency, installationSpec);
-			Batch2JobStartResponse response =
-					myJobCoordinator.startInstance(theStepExecutionDetails.newSystemRequestDetails(), startRequest);
-			jobIds.add(response.getInstanceId());
+			if (installationSpec.isDryRun()) {
+				outcome.getMessage()
+						.add(String.format(
+								"Installation would install %s#%s", nextDependency.name(), nextDependency.version()));
+			} else {
+				// create a new installation spec, retaining all the control parameters, but targeting the dependency
+				// package
+				JobInstanceStartRequest startRequest = buildStartRequest(nextDependency, installationSpec);
+				Batch2JobStartResponse response =
+						myJobCoordinator.startInstance(theStepExecutionDetails.newSystemRequestDetails(), startRequest);
+				jobIds.add(response.getInstanceId());
+			}
 		}
 
 		return jobIds;
