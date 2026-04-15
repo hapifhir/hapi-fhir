@@ -155,7 +155,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	 * But upon processing, this value will be updated by workers to
 	 * let other workers know the chunk is still being processed.
 	 */
-	@Column(name = "LAST_HEARTBEAT", nullable = false)
+	@Column(name = "LAST_HEARTBEAT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myLastHeartbeat;
 

@@ -198,7 +198,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// slow running batch jobs
 		{
 			Builder.BuilderWithTableName resource = version.onTable("BT2_WORK_CHUNK");
-			resource.addColumn("20260407.60", "LAST_HEARTBEAT").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+			resource.addColumn("20260407.60", "LAST_HEARTBEAT").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 		}
 	}
 
