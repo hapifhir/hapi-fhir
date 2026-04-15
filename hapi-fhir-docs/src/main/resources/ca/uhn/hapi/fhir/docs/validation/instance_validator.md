@@ -59,7 +59,7 @@ to validate the resource. It will not work unless you include the
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ValidatorExamples.java|instanceValidator}}
 ```
 
-<a name="packages"/>
+<a id="packages"></a>
 
 # Validating Using Packages
 
@@ -78,7 +78,7 @@ The following example shows the use of [NpmPackageValidationSupport](./validatio
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ValidatorExamples.java|npm}}
 ```
 
-<a name="validation-message-post-processing-interceptor"></a>
+<a id="validation-message-post-processing-interceptor"></a>
 
 # Modifying Validation Message Severity Via Interceptor
 
@@ -108,7 +108,7 @@ and register it with the interceptor service.
 ```
 
 
-<a name="migrating-to-5x"></a>
+<a id="migrating-to-5x"></a>
 
 # Migrating to HAPI FHIR 5.x
 

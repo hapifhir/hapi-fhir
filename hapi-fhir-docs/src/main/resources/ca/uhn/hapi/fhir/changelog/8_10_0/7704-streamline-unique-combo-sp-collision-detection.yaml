@@ -1,0 +1,11 @@
+---
+type: perf
+issue: 7704
+title: "When unique combo search parameters are in place, we try to provide
+   a friendly error message in cases where the user has tried to write a
+   resource that would cause a collision. This change moves that detection
+   into a code path where it only executes when collisions are actually
+   detected, significantly improving performance when writing resources
+   affected by unique combo SPs. The JpaStorageSettings setting to
+   enable/disable this checking has been deprecated and no longer has any
+   effect, as there is no need to disable this check."

@@ -34,6 +34,9 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -478,6 +481,22 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		String fhirType = theValue.fhirType();
 		switch (fhirType) {
+			case IValidationSupport.TYPE_CODE:
+				CodeType codeType = (CodeType) theValue;
+				conceptProperty = new CodeConceptProperty(theName, codeType.getValue());
+				break;
+			case IValidationSupport.TYPE_INTEGER:
+				IntegerType integerType = (IntegerType) theValue;
+				conceptProperty = new IntegerConceptProperty(theName, integerType.getValue());
+				break;
+			case IValidationSupport.TYPE_DECIMAL:
+				DecimalType decimalType = (DecimalType) theValue;
+				conceptProperty = new DecimalConceptProperty(theName, decimalType.getValue());
+				break;
+			case IValidationSupport.TYPE_DATETIME:
+				DateTimeType dateTimeType = (DateTimeType) theValue;
+				conceptProperty = new DateTimeConceptProperty(theName, dateTimeType.getValueAsString());
+				break;
 			case IValidationSupport.TYPE_STRING:
 				StringType stringType = (StringType) theValue;
 				conceptProperty = new StringConceptProperty(theName, stringType.getValue());
