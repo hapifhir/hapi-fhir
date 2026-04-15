@@ -389,9 +389,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					// If the dependency's FHIR version is incompatible with the server,
 					// attempt to load a version-specific variant (e.g., {id}.r4 for R4 servers)
 					dependency = substituteVersionSpecificPackageIfNeeded(
-							dependency,
-							nextPackage.name(),
-							nextPackage.version());
+							dependency, nextPackage.name(), nextPackage.version());
 
 					// recursive call to install dependencies of a package before
 					// installing the package
