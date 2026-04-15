@@ -1,6 +1,0 @@
-
----
-type: add
-issue: 7542
-title: "Custom validation support based on `JpaPersistedResourceValidationSupport` can now extend 
- method findResourceByIdWithNoException which uses DAO search to lookup validation resources."
