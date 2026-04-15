@@ -731,4 +731,82 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		assertThat(vsResultAfter.isOk()).isTrue();
 	}
 
+	@Test
+	void lookupCode_versionedAndUnversionedCodeSystem_resolvesIndependently() {
+		// Setup: two CodeSystem resources with same URL, different versions
+		CodeSystem csV1 = new CodeSystem();
+		csV1.setUrl("http://foo/cs");
+		csV1.setVersion("v1");
+		csV1.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		csV1.addConcept().setCode("code-v1").setDisplay("Display V1");
+		myCodeSystemDao.create(csV1, mySrd);
+
+		CodeSystem csV2 = new CodeSystem();
+		csV2.setUrl("http://foo/cs");
+		csV2.setVersion("v2");
+		csV2.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		csV2.addConcept().setCode("code-v2").setDisplay("Display V2");
+		myCodeSystemDao.create(csV2, mySrd);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
+
+		// Versioned lookup url|v1 resolves to v1 concepts
+		IValidationSupport.LookupCodeResult v1Found = myTermSvc.lookupCode(
+			valCtx, new LookupCodeRequest("http://foo/cs|v1", "code-v1"));
+		assertThat(v1Found).isNotNull();
+		assertThat(v1Found.isFound()).isTrue();
+		assertThat(v1Found.getCodeDisplay()).isEqualTo("Display V1");
+
+		// Versioned lookup url|v2 resolves to v2 concepts
+		IValidationSupport.LookupCodeResult v2Found = myTermSvc.lookupCode(
+			valCtx, new LookupCodeRequest("http://foo/cs|v2", "code-v2"));
+		assertThat(v2Found).isNotNull();
+		assertThat(v2Found.isFound()).isTrue();
+		assertThat(v2Found.getCodeDisplay()).isEqualTo("Display V2");
+
+		// Cross-version: v2 concept not found via v1 cache key
+		IValidationSupport.LookupCodeResult v1ForV2Code = myTermSvc.lookupCode(
+			valCtx, new LookupCodeRequest("http://foo/cs|v1", "code-v2"));
+		assertThat(v1ForV2Code).isNotNull();
+		assertThat(v1ForV2Code.isFound()).isFalse();
+
+		// Unversioned lookup resolves to current version (v2, the most recently stored)
+		IValidationSupport.LookupCodeResult unversioned = myTermSvc.lookupCode(
+			valCtx, new LookupCodeRequest("http://foo/cs", "code-v2"));
+		assertThat(unversioned).isNotNull();
+		assertThat(unversioned.isFound()).isTrue();
+	}
+
+	@Test
+	void isValueSetPreExpandedForCodeValidation_versionedValueSets_resolveIndependently() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Setup: code system referenced by both ValueSet versions
+		createCodeSystem();
+
+		// Create two ValueSet resources with same URL but different versions
+		ValueSet vsV1 = new ValueSet();
+		vsV1.setUrl("http://foo/vs");
+		vsV1.setVersion("v1");
+		vsV1.getCompose().addInclude().setSystem(CS_URL);
+		IIdType vsV1Id = myValueSetDao.create(vsV1, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet vsV2 = new ValueSet();
+		vsV2.setUrl("http://foo/vs");
+		vsV2.setVersion("v2");
+		vsV2.getCompose().addInclude().setSystem(CS_URL);
+		IIdType vsV2Id = myValueSetDao.create(vsV2, mySrd).getId().toUnqualifiedVersionless();
+
+		// Pre-expand both TermValueSet entities
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Read back so url and version fields are populated from stored resources
+		ValueSet vsV1Read = myValueSetDao.read(vsV1Id, mySrd);
+		ValueSet vsV2Read = myValueSetDao.read(vsV2Id, mySrd);
+
+		// Both versioned ValueSets independently resolve to their own TermValueSet entity.
+		assertThat(myTermSvc.isValueSetPreExpandedForCodeValidation(vsV1Read)).isTrue();
+		assertThat(myTermSvc.isValueSetPreExpandedForCodeValidation(vsV2Read)).isTrue();
+	}
+
 }
