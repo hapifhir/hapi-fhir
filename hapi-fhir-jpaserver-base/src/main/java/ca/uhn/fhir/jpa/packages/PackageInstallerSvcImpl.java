@@ -201,20 +201,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (enabled) {
 			try {
 
-				boolean exists = myTxService
-						.withSystemRequest()
-						.withRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId())
-						.execute(() -> {
-							Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(
-									theInstallationSpec.getName(), theInstallationSpec.getVersion());
-							return existing.isPresent();
-						});
-				if (exists) {
-					ourLog.info(
-							"Package {}#{} is already installed",
-							theInstallationSpec.getName(),
-							theInstallationSpec.getVersion());
-				}
+				validatePackageAlreadyExists(theInstallationSpec);
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
 				if (npmPackage == null) {
@@ -253,6 +240,23 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		return retVal;
+	}
+
+	private void validatePackageAlreadyExists(PackageInstallationSpec theInstallationSpec) {
+		boolean exists = myTxService
+				.withSystemRequest()
+				.withRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId())
+				.execute(() -> {
+					Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(
+							theInstallationSpec.getName(), theInstallationSpec.getVersion());
+					return existing.isPresent();
+				});
+		if (exists) {
+			ourLog.info(
+					"Package {}#{} is already installed",
+					theInstallationSpec.getName(),
+					theInstallationSpec.getVersion());
+		}
 	}
 
 	/**
@@ -344,6 +348,16 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 */
 	@Override
 	public String installAsynchronously(PackageInstallationSpec theInstallationSpec) {
+		if (!enabled) {
+			ourLog.info(
+					"Package installation is not supported for FHIR version {}",
+					myFhirContext.getVersion().getVersion());
+
+			return null;
+		}
+
+		validatePackageAlreadyExists(theInstallationSpec);
+
 		PackageInstallationJobParameters parameters = new PackageInstallationJobParameters();
 		parameters.setInstallationSpec(theInstallationSpec);
 		JobInstanceStartRequest startRequest =
