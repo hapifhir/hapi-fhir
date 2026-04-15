@@ -92,6 +92,7 @@ public class SearchParamRegistryImpl
 	 */
 	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
 			Set.of("*:url", "Subscription:*", "SearchParameter:*", "Basic:*");
+
 	public static final String PARAM_LANGUAGE_ID = "SearchParameter/Resource-language";
 	public static final String PARAM_LANGUAGE_DESCRIPTION = "Language of the resource content";
 	public static final String PARAM_LANGUAGE_PATH = "language";
@@ -371,9 +372,7 @@ public class SearchParamRegistryImpl
 			} else {
 				// Only the built-in search params that can not be disabled will be supported automatically
 				myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(
-						myFhirContext,
-						mySearchParameterCanonicalizer,
-						NON_DISABLEABLE_SEARCH_PARAMS);
+						myFhirContext, mySearchParameterCanonicalizer, NON_DISABLEABLE_SEARCH_PARAMS);
 			}
 		}
 		return myBuiltInSearchParams;
@@ -483,8 +482,7 @@ public class SearchParamRegistryImpl
 		 */
 		if (newRuntimeSp.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
 			for (String nextBase : newRuntimeSp.getBase()) {
-				if (isNonDisableableBuiltInSearchParam(
-						newRuntimeSp.getUri(), nextBase, newRuntimeSp.getName())) {
+				if (isNonDisableableBuiltInSearchParam(newRuntimeSp.getUri(), nextBase, newRuntimeSp.getName())) {
 					ourLog.debug(
 							"Attempted to disable a non-disableable search parameter. {} will remain active in cache.",
 							newRuntimeSp.getUri());
