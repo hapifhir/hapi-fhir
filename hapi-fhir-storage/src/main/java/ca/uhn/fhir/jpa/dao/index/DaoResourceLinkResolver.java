@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.rest.api.Constants;
@@ -101,6 +102,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	@Override
 	public IResourceLookup findTargetResource(
 			@Nonnull RequestPartitionId theRequestPartitionId,
@@ -124,7 +128,10 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		T persistentId = null;
 		if (theTransactionDetails != null) {
 			T resolvedResourceId = (T) theTransactionDetails.getResolvedResourceId(targetResourceId);
-			if (resolvedResourceId != null && resolvedResourceId.getId() != null) {
+			if (resolvedResourceId != null
+					&& resolvedResourceId.getId() != null
+					&& myRequestPartitionHelperSvc.isPidPartitionWithinRequestPartition(
+							theRequestPartitionId, resolvedResourceId)) {
 				persistentId = resolvedResourceId;
 
 				if (resolvedResourceId.getAssociatedResourceId() == null) {
