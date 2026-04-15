@@ -2178,14 +2178,20 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		if (StringUtils.isBlank(url)) {
 			return Optional.empty();
 		}
+		String version = theValueSet.getVersion();
+		String cacheKey = isNotBlank(version) ? url + "|" + version : url;
 		if (myValueSetCache == null) {
-			return fetchValueSetEntity(url);
+			return fetchValueSetEntity(cacheKey);
 		}
-		return myValueSetCache.get(url, this::fetchValueSetEntity);
+		return myValueSetCache.get(cacheKey, this::fetchValueSetEntity);
 	}
 
-	private Optional<TermValueSet> fetchValueSetEntity(String theUrl) {
-		return myTermValueSetDao.findByUrl(theUrl);
+	private Optional<TermValueSet> fetchValueSetEntity(String theCacheKey) {
+		String version = getVersionFromIdentifier(theCacheKey);
+		if (version != null) {
+			return myTermValueSetDao.findTermValueSetByUrlAndVersion(getUrlFromIdentifier(theCacheKey), version);
+		}
+		return myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theCacheKey);
 	}
 
 	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
