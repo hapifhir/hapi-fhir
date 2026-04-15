@@ -110,14 +110,16 @@ public class ProcessPackageStep
 
 			PackageInstallationJobParameters parameters = theChunkDetails.getParameters();
 			PackageInstallationSpec installationSpec = parameters.getInstallationSpec();
+			if (installationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY
+					|| installationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
+				myPackageInstallerSvc.installPackage(npmPackage, installationSpec, packageOutcome);
 
-			myPackageInstallerSvc.installPackage(npmPackage, installationSpec, packageOutcome);
-
-			if (installationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-				packageOutcome
-						.getMessage()
-						.add(
-								"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
+				if (installationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
+					packageOutcome
+							.getMessage()
+							.add(
+									"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
+				}
 			}
 
 			myPackageOutcome = packageOutcome;

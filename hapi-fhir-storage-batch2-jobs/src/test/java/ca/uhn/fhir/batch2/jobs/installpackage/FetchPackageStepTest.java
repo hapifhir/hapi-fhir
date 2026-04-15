@@ -9,9 +9,8 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
-import ca.uhn.fhir.jpa.packages.loader.IPackageLoader;
-import ca.uhn.fhir.jpa.packages.loader.NpmPackageData;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +37,7 @@ public class FetchPackageStepTest {
 	public static final JobInstance ourTestInstance = JobInstance.fromInstanceId(INSTANCE_ID);
 
 	@Mock
-	private IPackageLoader myPackageLoader;
+	private IHapiPackageCacheManager myPackageLoader;
 
 	private FetchPackageStep step;
 
@@ -59,14 +58,8 @@ public class FetchPackageStepTest {
 		// set up
 		InputStream stream = FetchPackageStepTest.class.getResourceAsStream("usCorePackage.tgz");
 		byte[] packageBytes = stream.readAllBytes();
-		NpmPackageData npmPackage = new NpmPackageData(
-			"hl7.fhir.us.core",
-			"8.0.1",
-			"The US Core Implementation Guide",
-			packageBytes,
-			NpmPackage.fromPackage(new ByteArrayInputStream(packageBytes)),
-			new ByteArrayInputStream(packageBytes));
-		when(myPackageLoader.fetchPackageFromPackageSpec(any())).thenReturn(npmPackage);
+		NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(packageBytes));
+		when(myPackageLoader.installPackage(any())).thenReturn(npmPackage);
 
 		PackageInstallationSpec theInstallationSpec = new PackageInstallationSpec();
 		theInstallationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
@@ -87,7 +80,19 @@ public class FetchPackageStepTest {
 		verify(myJobDataSink).accept(myPackageContentsCaptor.capture());
 		PackageContentsJson contents = myPackageContentsCaptor.getValue();
 		assertThat(contents).isNotNull();
+		assertThat(contents.getReport()).isNotNull();
 		byte[] decodedBytes = Base64.getDecoder().decode(contents.getContents());
-		assertThat(decodedBytes).isEqualTo(packageBytes);
+		NpmPackage jobPackage = NpmPackage.fromPackage(new ByteArrayInputStream(decodedBytes));
+
+		// assert that the package we got out is equivalent to the package we sent in. They will not be identical at the byte level
+		assertThat(jobPackage.title()).isEqualTo(npmPackage.title());
+		assertThat(jobPackage.version()).isEqualTo(npmPackage.version());
+		assertThat(jobPackage.description()).isEqualTo(npmPackage.description());
+		assertThat(jobPackage.getSize()).isEqualTo(npmPackage.getSize());
+		assertThat(jobPackage.dependencies()).containsExactlyInAnyOrderElementsOf(npmPackage.dependencies());
+		assertThat(jobPackage.getFolders().keySet()).containsExactlyInAnyOrderElementsOf(npmPackage.getFolders().keySet());
+		for (String key : jobPackage.getFolders().keySet()) {
+			assertThat(jobPackage.list(key)).containsExactlyInAnyOrderElementsOf(npmPackage.list(key));
+		}
 	}
 }

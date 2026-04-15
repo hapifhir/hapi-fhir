@@ -25,9 +25,9 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParame
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageWithDependenciesJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
-import ca.uhn.fhir.jpa.packages.loader.IPackageLoader;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +39,7 @@ public class InstallPackageAppCtx {
 
 	@Bean("installPackageJobDefinition")
 	public JobDefinition<PackageInstallationJobParameters> installPackageJobDefinition(
-			IPackageLoader thePackageLoader,
+			IHapiPackageCacheManager thePackageCacheManager,
 			IPackageInstallerSvc thePackageInstallerSvc,
 			ISearchParamRegistryController theSearchParamRegistryController,
 			IValidationSupport theValidationSupport,
@@ -54,7 +54,7 @@ public class InstallPackageAppCtx {
 						"fetch-package",
 						"Fetch the NPM Package",
 						PackageContentsJson.class,
-						fetchPackageStep(thePackageLoader))
+						fetchPackageStep(thePackageCacheManager))
 				.addIntermediateStep(
 						"initialize-dependencies",
 						"Spawn sub-jobs to process package dependencies",
@@ -75,8 +75,8 @@ public class InstallPackageAppCtx {
 	}
 
 	@Bean
-	public FetchPackageStep fetchPackageStep(IPackageLoader thePackageLoader) {
-		return new FetchPackageStep(thePackageLoader);
+	public FetchPackageStep fetchPackageStep(IHapiPackageCacheManager thePackageCacheManager) {
+		return new FetchPackageStep(thePackageCacheManager);
 	}
 
 	@Bean

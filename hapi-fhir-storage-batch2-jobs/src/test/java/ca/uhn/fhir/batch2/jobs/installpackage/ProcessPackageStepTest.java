@@ -19,6 +19,8 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -31,6 +33,7 @@ import java.util.Base64;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -109,6 +112,38 @@ public class ProcessPackageStepTest {
 		verify(myJobDataSink).accept(myInstallationOutcomeCaptor.capture());
 		PackageInstallOutcomeJson outcomeJson = myInstallationOutcomeCaptor.getValue();
 		assertThat(outcomeJson).isSameAs(expectedReport);
+	}
+
+	@ParameterizedTest
+	@CsvSource({"INSTALL_ONLY,1",
+	"STORE_AND_INSTALL,1",
+	"STORE_ONLY,0"})
+	public void testRun_installModes(PackageInstallationSpec.InstallModeEnum theInstallMode, int theExpectedCalls) throws Exception {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setInstallMode(theInstallMode);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+
+		InputStream stream = ProcessPackageStepTest.class.getResourceAsStream("usCorePackage.tgz");
+		byte[] packageBytes = stream.readAllBytes();
+		PackageInstallOutcomeJson expectedReport = new PackageInstallOutcomeJson();
+
+		PackageContentsJson packageContentsJson = new PackageContentsJson();
+		packageContentsJson.setContents(Base64.getEncoder().encode(packageBytes));
+		packageContentsJson.setReport(expectedReport);
+
+		ChunkExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> chunkDetails =
+			new ChunkExecutionDetails<>(packageContentsJson, params, INSTANCE_ID, CHUNK_ID);
+
+		// execute
+		ChunkOutcome chunkOutcome = myStep.consume(chunkDetails);
+
+		// validate
+		assertThat(chunkOutcome.getStatus()).isEqualTo(ChunkOutcome.Status.SUCCESS);
+
+		verify(myPackageInstallerSvc, times(theExpectedCalls)).installPackage(any(), any(), any());
 	}
 
 	@Test

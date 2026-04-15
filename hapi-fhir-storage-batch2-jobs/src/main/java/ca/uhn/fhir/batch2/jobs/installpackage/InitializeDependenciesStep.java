@@ -61,7 +61,7 @@ public class InitializeDependenciesStep
 			throws JobExecutionFailedException {
 
 		PackageWithDependenciesJson result = new PackageWithDependenciesJson();
-		PackageInstallOutcomeJson outcome = new PackageInstallOutcomeJson();
+		PackageInstallOutcomeJson outcome = theStepExecutionDetails.getData().getReport();
 
 		byte[] encodedContents = theStepExecutionDetails.getData().getContents();
 		byte[] decodedContents = Base64.getDecoder().decode(encodedContents);
@@ -125,6 +125,8 @@ public class InitializeDependenciesStep
 		PackageInstallationSpec dependencySpec = new PackageInstallationSpec(theParentInstallationSpec);
 		dependencySpec.setName(theDependency.name());
 		dependencySpec.setVersion(theDependency.version());
+		dependencySpec.setPackageUrl(null);
+		dependencySpec.setPackageContents(null);
 
 		PackageInstallationJobParameters parameters = new PackageInstallationJobParameters();
 		parameters.setInstallationSpec(dependencySpec);
