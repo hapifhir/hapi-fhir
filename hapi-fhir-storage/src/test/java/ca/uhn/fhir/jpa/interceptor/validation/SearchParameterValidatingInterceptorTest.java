@@ -303,12 +303,11 @@ public class SearchParameterValidatingInterceptorTest {
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setExpression("Basic.code");
+		sp.setDescription("foo");
 		sp.addBase("Basic");
 
 		setPersistedSearchParameterIds(Collections.singletonList(sp));
 		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(sp.getId()));
-
-		sp.setDescription("foo");
 
 		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails)).doesNotThrowAnyException();
 	}
