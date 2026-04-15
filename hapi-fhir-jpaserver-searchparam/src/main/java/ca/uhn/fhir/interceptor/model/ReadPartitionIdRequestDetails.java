@@ -181,6 +181,11 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 	}
 
 	public static ReadPartitionIdRequestDetails forSearchType(
+		String theResourceType, SearchParameterMap theParams) {
+		return forSearchType(theResourceType, theParams, null);
+	}
+
+	public static ReadPartitionIdRequestDetails forSearchType(
 			String theResourceType, SearchParameterMap theParams, IBaseResource theConditionalOperationTargetOrNull) {
 		return new ReadPartitionIdRequestDetails(
 				theResourceType,

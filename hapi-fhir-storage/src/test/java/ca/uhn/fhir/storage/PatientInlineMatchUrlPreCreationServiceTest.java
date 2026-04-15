@@ -46,7 +46,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.conditionallyCreatePatientsForInlineMatchUrls(bundle);
+		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
 
 		// Verify
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
@@ -82,7 +82,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.conditionallyCreatePatientsForInlineMatchUrls(bundle);
+		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
 
 		// Verify - only 1 Patient entry added (deduplication)
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
@@ -109,7 +109,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.conditionallyCreatePatientsForInlineMatchUrls(bundle);
+		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
 
 		// Verify - 2 Patient entries added
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
@@ -133,7 +133,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.conditionallyCreatePatientsForInlineMatchUrls(bundle);
+		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
 
 		// Verify - no entries added
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
@@ -152,7 +152,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.conditionallyCreatePatientsForInlineMatchUrls(bundle);
+		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
 
 		// Verify - no entries added
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
@@ -166,7 +166,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 
 		// Execute
-		mySvc.conditionallyCreatePatientsForInlineMatchUrls(bundle);
+		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
 
 		// Verify
 		assertThat(bundle.getEntry()).isEmpty();
@@ -183,7 +183,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute & Verify
-		assertThatThrownBy(() -> mySvc.conditionallyCreatePatientsForInlineMatchUrls(bundle))
+		assertThatThrownBy(() -> mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle))
 				.isInstanceOf(PreconditionFailedException.class)
 				.hasMessageContaining("must have both a system and a value");
 	}
@@ -199,7 +199,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute & Verify
-		assertThatThrownBy(() -> mySvc.conditionallyCreatePatientsForInlineMatchUrls(bundle))
+		assertThatThrownBy(() -> mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle))
 				.isInstanceOf(PreconditionFailedException.class)
 				.hasMessageContaining("must have both a system and a value");
 	}
@@ -215,7 +215,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute & Verify
-		assertThatThrownBy(() -> mySvc.conditionallyCreatePatientsForInlineMatchUrls(bundle))
+		assertThatThrownBy(() -> mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle))
 				.isInstanceOf(PreconditionFailedException.class)
 				.hasMessageContaining("Can not include multiple parameters");
 	}
@@ -234,7 +234,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.conditionallyCreatePatientsForInlineMatchUrls(bundle);
+		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
 
 		// Verify - no Patient entry added because focus is not a patient compartment reference
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
@@ -256,7 +256,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.conditionallyCreatePatientsForInlineMatchUrls(bundle);
+		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
 
 		// Verify - only 1 Patient entry added for the inline match URL
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
@@ -279,7 +279,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.conditionallyCreatePatientsForInlineMatchUrls(bundle);
+		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
 
 		// Verify the Patient entry is a POST with ifNoneExist
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);

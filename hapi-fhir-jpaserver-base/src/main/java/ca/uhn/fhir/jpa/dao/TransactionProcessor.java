@@ -213,8 +213,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			ITransactionProcessorVersionAdapter<?, ?> versionAdapter = getVersionAdapter();
 
 			if (theRequestPartitionId != null) {
-				// FIXME-EHP:
-				//
 				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
 
 				// FIXME-EHP:

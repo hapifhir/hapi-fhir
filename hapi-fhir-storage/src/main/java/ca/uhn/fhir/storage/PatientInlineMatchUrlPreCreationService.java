@@ -79,7 +79,7 @@ public class PatientInlineMatchUrlPreCreationService {
 	 *
 	 * @param theBundle the transaction bundle to process
 	 */
-	public void conditionallyCreatePatientsForInlineMatchUrls(IBaseBundle theBundle) {
+	public void addConditionalCreateEntriesForInlineMatchUrls(IBaseBundle theBundle) {
 		FhirTerser terser = myFhirContext.newTerser();
 
 		Set<String> inlineMatchUrls = new LinkedHashSet<>();
