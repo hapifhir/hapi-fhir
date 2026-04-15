@@ -69,7 +69,6 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -386,7 +385,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					// resolve in local cache or on packages.fhir.org
 					NpmPackage dependency =
 							myPackageCacheManager.loadPackage(nextPackage.name(), nextPackage.version());
-					// recursive call to install dependencies of a package before
+// If the dependency's FHIR version is incompatible with the server,
+						// attempt to load a version-specific variant (e.g., {id}.r4 for R4 servers)
+						dependency = substituteVersionSpecificPackageIfNeeded(dependency, id, ver);					// recursive call to install dependencies of a package before
 					// installing the package
 					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
 
@@ -406,26 +407,122 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	/**
+	 * Checks if a dependency package's FHIR version is compatible with the server's FHIR version.
+	 * If incompatible, attempts to load a version-specific variant by appending a FHIR version
+	 * suffix (e.g., ".r4" for R4/R4B servers, ".r5" for R5, ".r3" for DSTU3).
+	 * <p>
+	 * This handles cross-version packages like {@code hl7.fhir.uv.extensions} which declare
+	 * FHIR version 5.0.0 but have R4-specific counterparts like {@code hl7.fhir.uv.extensions.r4}.
+	 *
+	 * @param theDependency the loaded dependency package
+	 * @param theId the package ID
+	 * @param theVersion the package version
+	 * @return the original package if compatible, or the version-specific variant if found
+	 */
+	private NpmPackage substituteVersionSpecificPackageIfNeeded(
+			NpmPackage theDependency, String theId, String theVersion) {
+		String dependencyFhirVersion = theDependency.fhirVersion();
+		String serverFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();
+
+		if (areFhirVersionsCompatible(dependencyFhirVersion, serverFhirVersion)) {
+			return theDependency;
+		}
+
+		FhirVersionEnum serverVersionEnum = FhirVersionEnum.forVersionString(serverFhirVersion);
+		if (serverVersionEnum == null) {
+			return theDependency;
+		}
+
+		String suffix = getVersionSpecificSuffix(serverVersionEnum);
+		if (suffix == null) {
+			return theDependency;
+		}
+
+		String variantId = theId + suffix;
+		ourLog.warn(
+				"Dependency {}#{} declares FHIR version {} which is incompatible with server FHIR version {}. "
+						+ "Attempting to load version-specific variant: {}#{}",
+				theId,
+				theVersion,
+				dependencyFhirVersion,
+				serverFhirVersion,
+				variantId,
+				theVersion);
+
+		try {
+			NpmPackage variant = myPackageCacheManager.loadPackage(variantId, theVersion);
+			ourLog.info(
+					"Successfully substituted {}#{} with version-specific variant {}#{}",
+					theId,
+					theVersion,
+					variantId,
+					theVersion);
+			return variant;
+		} catch (IOException e) {
+			ourLog.warn(
+					"Could not find version-specific variant {}#{}. "
+							+ "Proceeding with original package {}#{} which may fail version compatibility checks.",
+					variantId,
+					theVersion,
+					theId,
+					theVersion);
+			return theDependency;
+		}
+	}
+
+	/**
+	 * Returns the version-specific package suffix for the given FHIR version,
+	 * or {@code null} if no suffix mapping exists.
+	 */
+	private static String getVersionSpecificSuffix(FhirVersionEnum theVersion) {
+		switch (theVersion) {
+			case R4:
+			case R4B:
+				return ".r4";
+			case R5:
+				return ".r5";
+			case DSTU3:
+				return ".r3";
+			default:
+				return null;
+		}
+	}
+
+	/**
 	 * Asserts if package FHIR version is compatible with current FHIR version
 	 * by using semantic versioning rules.
 	 */
 	protected void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion)
 			throws ImplementationGuideInstallationException {
 
-		FhirVersionEnum fhirVersionEnum = FhirVersionEnum.forVersionString(fhirVersion);
-		FhirVersionEnum currentFhirVersionEnum = FhirVersionEnum.forVersionString(currentFhirVersion);
-		Validate.notNull(fhirVersionEnum, "Invalid FHIR version string: %s", fhirVersion);
-		Validate.notNull(currentFhirVersionEnum, "Invalid FHIR version string: %s", currentFhirVersion);
-		boolean compatible = fhirVersionEnum.equals(currentFhirVersionEnum);
-		if (!compatible && fhirVersion.startsWith("R4") && currentFhirVersion.startsWith("R4")) {
-			compatible = true;
-		}
-		if (!compatible) {
+		if (!areFhirVersionsCompatible(fhirVersion, currentFhirVersion)) {
 			throw new ImplementationGuideInstallationException(Msg.code(1288)
 					+ String.format(
 							"Cannot install implementation guide: FHIR versions mismatch (expected <=%s, package uses %s)",
 							currentFhirVersion, fhirVersion));
 		}
+	}
+
+	/**
+	 * Checks whether two FHIR version strings are compatible. Versions are compatible if they
+	 * resolve to the same {@link FhirVersionEnum}, or if both are in the R4 family (R4 or R4B).
+	 *
+	 * @param theFhirVersion the package's FHIR version string (e.g., "4.0.1", "4.3.0")
+	 * @param theCurrentFhirVersion the server's FHIR version string
+	 * @return {@code true} if the versions are compatible
+	 */
+	private static boolean areFhirVersionsCompatible(String theFhirVersion, String theCurrentFhirVersion) {
+		FhirVersionEnum fhirVersionEnum = FhirVersionEnum.forVersionString(theFhirVersion);
+		FhirVersionEnum currentFhirVersionEnum = FhirVersionEnum.forVersionString(theCurrentFhirVersion);
+		if (fhirVersionEnum == null || currentFhirVersionEnum == null) {
+			return false;
+		}
+		if (fhirVersionEnum.equals(currentFhirVersionEnum)) {
+			return true;
+		}
+		boolean bothR4Family = (fhirVersionEnum == FhirVersionEnum.R4 || fhirVersionEnum == FhirVersionEnum.R4B)
+				&& (currentFhirVersionEnum == FhirVersionEnum.R4 || currentFhirVersionEnum == FhirVersionEnum.R4B);
+		return bothR4Family;
 	}
 
 	/**
