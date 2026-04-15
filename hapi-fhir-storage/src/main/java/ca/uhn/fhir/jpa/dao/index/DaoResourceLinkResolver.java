@@ -76,6 +76,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -130,8 +131,11 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			T resolvedResourceId = (T) theTransactionDetails.getResolvedResourceId(targetResourceId);
 			if (resolvedResourceId != null
 					&& resolvedResourceId.getId() != null
-					&& myRequestPartitionHelperSvc.isPidPartitionWithinRequestPartition(
-							theRequestPartitionId, resolvedResourceId)) {
+					&& (myRequestPartitionHelperSvc.isPidPartitionWithinRequestPartition(
+									theRequestPartitionId, resolvedResourceId)
+							|| Objects.equals(
+									resolvedResourceId.getPartitionId(),
+									myRequestPartitionHelperSvc.getDefaultPartitionId()))) {
 				persistentId = resolvedResourceId;
 
 				if (resolvedResourceId.getAssociatedResourceId() == null) {
