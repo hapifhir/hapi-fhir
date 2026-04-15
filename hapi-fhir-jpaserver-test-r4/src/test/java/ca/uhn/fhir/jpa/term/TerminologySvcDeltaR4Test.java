@@ -1,9 +1,8 @@
 package ca.uhn.fhir.jpa.term;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -35,8 +34,8 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -585,6 +584,54 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 	}
 
+
+	@Test
+	void applyDeltaCodeSystemsAdd_lookupCode_returnsNewConcept() {
+		createNotPresentCodeSystem();
+
+		// Lookup primes the cache with "not found"
+		IValidationSupport.LookupCodeResult before = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(before).isNotNull();
+		assertThat(before.isFound()).isFalse();
+
+		// Delta-add the concept
+		CustomTerminologySet delta = new CustomTerminologySet();
+		delta.addRootConcept("codeA", "displayA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+
+		// Lookup should now find it
+		IValidationSupport.LookupCodeResult after = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(after).isNotNull();
+		assertThat(after.isFound()).isTrue();
+		assertThat(after.getCodeDisplay()).isEqualTo("displayA");
+	}
+
+	@Test
+	void applyDeltaCodeSystemsRemove_lookupCode_returnsNotFound() {
+		createNotPresentCodeSystem();
+		CustomTerminologySet delta = new CustomTerminologySet();
+		delta.addRootConcept("codeA", "displayA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+
+		// Lookup primes the cache with "found"
+		IValidationSupport.LookupCodeResult before = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(before).isNotNull();
+		assertThat(before.isFound()).isTrue();
+
+		// Delta-remove the concept
+		CustomTerminologySet removeDelta = new CustomTerminologySet();
+		removeDelta.addRootConcept("codeA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", removeDelta);
+
+		// Lookup should no longer find it
+		IValidationSupport.LookupCodeResult after = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(after).isNotNull();
+		assertThat(after.isFound()).isFalse();
+	}
 
 	@Test
 	public void testRemove_UnknownSystem() {
