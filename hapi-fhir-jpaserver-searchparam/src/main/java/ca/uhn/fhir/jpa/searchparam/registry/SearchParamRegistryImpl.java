@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
@@ -76,10 +77,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParamRegistryImpl
 		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
-	public static final int MAX_MANAGED_PARAM_COUNT = 10000;
-	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
-
 	/**
 	 * Search parameter patterns that must remain active regardless of enable/disable configuration,
 	 * because they are required for core system operation.
@@ -91,8 +88,11 @@ public class SearchParamRegistryImpl
 	 * </ul>
 	 */
 	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
-			Set.of("*:url", "Subscription:*", "SearchParameter:*", "Basic:*");
+		Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*", "Basic:*"));
 
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
+	public static final int MAX_MANAGED_PARAM_COUNT = 10000;
+	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 	public static final String PARAM_LANGUAGE_ID = "SearchParameter/Resource-language";
 	public static final String PARAM_LANGUAGE_DESCRIPTION = "Language of the resource content";
 	public static final String PARAM_LANGUAGE_PATH = "language";
