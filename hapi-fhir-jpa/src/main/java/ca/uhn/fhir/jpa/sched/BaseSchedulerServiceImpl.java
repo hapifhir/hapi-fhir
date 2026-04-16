@@ -256,6 +256,9 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	}
 
 	private void unscheduleJobs(IHapiScheduler theScheduler, TriggerKey... theKeys) {
+		if (isSchedulingDisabled()) {
+			return;
+		}
 		theScheduler.unscheduleJobs(theKeys);
 	}
 

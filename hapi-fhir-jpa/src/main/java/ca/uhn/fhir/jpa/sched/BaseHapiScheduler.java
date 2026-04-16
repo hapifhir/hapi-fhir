@@ -235,8 +235,14 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		try {
 			myScheduler.unscheduleJobs(Arrays.asList(theKeys));
 		} catch (SchedulerException ex) {
-			// TODO - add your error code here
-			throw new RuntimeException(ex);
+			throw new RuntimeException(
+					Msg.code(2912) + " Failed to unschedule job(s) for batch2: "
+							+ String.join(
+									", ",
+									Arrays.stream(theKeys)
+											.map(k -> k.getGroup() + "|" + k.getName())
+											.collect(Collectors.toSet())),
+					ex);
 		}
 	}
 
