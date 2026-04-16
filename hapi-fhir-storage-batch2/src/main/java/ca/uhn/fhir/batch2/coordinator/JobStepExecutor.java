@@ -44,7 +44,6 @@ import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Date;
@@ -105,7 +104,6 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 				myWorkChunk == null ? null : myWorkChunk.getId());
 
 		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput;
-		ScheduledJobDefinition scheduledJobDef = null;
 		try (HeartbeatJobHandle handle = scheduleHeartbeat()) {
 			stepExecutorOutput = myJobExecutorSvc.doExecution(myCursor, myInstance, myWorkChunk);
 		} catch (IOException ex) {
@@ -175,7 +173,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		return new HeartbeatJobHandle(myIHapiScheduler, myAckTimeout, myInstanceId, myWorkChunk);
 	}
 
-	public static class HeartbeatJobHandle implements Closeable {
+	public static class HeartbeatJobHandle implements AutoCloseable {
 
 		private final ISchedulerService myScheduleSvc;
 
@@ -194,7 +192,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			definition.addJobData(CHUNK_ID, theWorkChunk.getId());
 			myTriggerKey = definition.toTriggerKey();
 			// we don't want a time that's <100ms
-			myScheduleSvc.scheduleClusteredJob(Math.max(theAckTimeout.toMillis() / 3, 500), definition);
+			myScheduleSvc.scheduleLocalJob(Math.max(theAckTimeout.toMillis() / 3, 500), definition);
 		}
 
 		@Override
