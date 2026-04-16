@@ -302,7 +302,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				}
 				String msg = "Package version already exists in local storage, no action taken: " + packageId + "#"
 						+ packageVersionId;
-				NpmPackageUtils.getProcessingMessages(existingPackage).add(msg);
+				NpmPackageUtils.addProcessingMessage(existingPackage, msg);
 				ourLog.info(msg);
 				return existingPackage;
 			}
@@ -314,14 +314,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			String packageAuthor = truncateStorageString(npmPackage.getNpm().asString("author"));
 
 			if (currentVersion) {
-				NpmPackageUtils.getProcessingMessages(npmPackage)
-						.add("Marking package " + packageId + "#" + initialPackageVersionId + " as current version");
+				NpmPackageUtils.addProcessingMessage(
+						npmPackage,
+						"Marking package " + packageId + "#" + initialPackageVersionId + " as current version");
 				pkg.setCurrentVersionId(packageVersionId);
 				pkg.setDescription(packageDesc);
 				myPackageDao.save(pkg);
 			} else {
-				NpmPackageUtils.getProcessingMessages(npmPackage)
-						.add("Package " + packageId + "#" + initialPackageVersionId + " is not the newest version");
+				NpmPackageUtils.addProcessingMessage(
+						npmPackage,
+						"Package " + packageId + "#" + initialPackageVersionId + " is not the newest version");
 			}
 
 			packageVersion = new NpmPackageVersionEntity();
@@ -367,7 +369,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					} else if (nextFile.toLowerCase().endsWith(".json")) {
 						resource = jsonParser.parseResource(contentsString);
 					} else {
-						NpmPackageUtils.getProcessingMessages(npmPackage).add("Not indexing file: " + nextFile);
+						NpmPackageUtils.addProcessingMessage(npmPackage, "Not indexing file: " + nextFile);
 						continue;
 					}
 
@@ -423,13 +425,14 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					String resType = packageContext.getResourceType(resource);
 					String msg = "Indexing " + resType + " Resource[" + dirName + '/' + nextFile + "] with URL: "
 							+ defaultString(url) + "|" + defaultString(version);
-					NpmPackageUtils.getProcessingMessages(npmPackage).add(msg);
+					NpmPackageUtils.addProcessingMessage(npmPackage, msg);
 					ourLog.info("{}: Package[{}#{}] ", msg, packageId, packageVersionId);
 				}
 			}
 
-			NpmPackageUtils.getProcessingMessages(npmPackage)
-					.add(String.format(
+			NpmPackageUtils.addProcessingMessage(
+					npmPackage,
+					String.format(
 							NpmPackageUtils.SUCCESSFULLY_INSTALLED_MSG_TEMPLATE,
 							npmPackage.id(),
 							npmPackage.version()));
@@ -531,11 +534,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		try {
 			// and add it to the cache
 			NpmPackage retVal = addPackageToCacheInternal(pkgData);
-			NpmPackageUtils.getProcessingMessages(retVal)
-					.add(
-							0,
-							"Package fetched from server at: "
-									+ pkgData.getPackage().url());
+			NpmPackageUtils.addFirstProcessingMessage(
+					retVal,
+					"Package fetched from server at: " + pkgData.getPackage().url());
 			return retVal;
 		} finally {
 			pkgData.getInputStream().close();
