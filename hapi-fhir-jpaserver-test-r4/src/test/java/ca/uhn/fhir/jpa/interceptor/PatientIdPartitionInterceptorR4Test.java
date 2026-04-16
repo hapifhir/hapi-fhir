@@ -1386,8 +1386,228 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		};
 	}
 
+	static List<Arguments> patientScenarioSupplier() {
+		return List.of(
+			// POSTs
+			Arguments.of(
+				"create Patient | Patient already exists",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"create Patient | Patient does not exist",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "newIden"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"conditional-create Patient | Patient already exists",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|ident1"}
+							}
+						]
+					}
+					""",
+				bundleAssert(0)
+			),
+			Arguments.of(
+				"conditional-create Patient | Patient does not exist",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "newIden"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|newIden"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			// PUTs
+			Arguments.of(
+				"create Patient with client-assigned ID | Patient already exist",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"id" : "pat1"
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+								},
+								"request" : { "method" : "PUT", "url" : "Patient"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"create Patient with client-assigned ID | Patient does not exist",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"id" : "p-123"
+									"identifier" : [ { "system" : "old-sys", "value" : "newIdent"} ]
+								},
+								"request" : { "method" : "PUT", "url" : "Patient"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"conditional-update Patient without ID | Patient already exist",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+								},
+								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|ident1"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"conditional-update Patient without ID | Patient does not exist",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "newIden"} ]
+								},
+								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|newIden"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"conditional-update Patient with ID | Patient already exist",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"id" : pat1,
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+								},
+								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|ident1"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"conditional-update Patient with ID | Patient does not exist",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"id" : P-123,
+									"identifier" : [ { "system" : "old-sys", "value" : "newIden"} ]
+								},
+								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|newIden"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			)
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("patientScenarioSupplier()")
+	void testTransaction_allPatientScenarios(String theComment, String theBundle, Consumer<Bundle> theAssertions) {
+		// fixed setup
+		createPatient(
+			withId("pat1"),
+			withIdentifier("old-sys", "ident1"),
+			withIdentifier("new-sys", "newId1")
+		);
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+
+		// then
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		// expections
+		assertNotNull(resultBundle);
+		assertNotNull(theAssertions);
+		theAssertions.accept(resultBundle);
+
+	}
+
 	static List<Arguments> referenceScenarioSupplier() {
 		return List.of(
+			Arguments.of(
+				"conditional-update Patient | local reference to existing patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
 			Arguments.of(
 				"create Observation | local reference to existing patient",
 				"""
@@ -1525,7 +1745,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ],
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
 								},
 								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|ident1"}
 							}, {
