@@ -45,24 +45,29 @@ public class BatchJobSender {
 	 * directly controls the partition instead of relying on whatever the randomly assigned
 	 * guid hashes out to.
 	 */
-	private Function<JobWorkNotification, JobWorkNotificationJsonMessage> myMessageCreationFn;
+	private Function<JobWorkNotification, JobWorkNotificationJsonMessage> myMessageCreationFn = JobWorkNotificationJsonMessage::new;
 
 	public BatchJobSender(@Nonnull IChannelProducer<JobWorkNotification> theWorkChannelProducer) {
 		myWorkChannelProducer = theWorkChannelProducer;
 	}
 
 	public void sendWorkChannelMessage(JobWorkNotification theJobWorkNotification) {
-		JobWorkNotificationJsonMessage message = myMessageCreationFn != null
-				? myMessageCreationFn.apply(theJobWorkNotification)
-				: new JobWorkNotificationJsonMessage(theJobWorkNotification);
-
+		JobWorkNotificationJsonMessage message = myMessageCreationFn.apply(theJobWorkNotification);
 		ourLog.info("Sending work notification for {}", theJobWorkNotification);
 		myWorkChannelProducer.send(message);
 	}
 
+	/**
+	 * Visible to allow overwriting JobWorkNotificationJsonMessage in testing.
+	 * This should not be used in production code.
+	 * Pass "null" to reset.
+	 */
 	@VisibleForTesting
 	public void setMessageCreationFn(
 			Function<JobWorkNotification, JobWorkNotificationJsonMessage> theMessageCreationFn) {
 		myMessageCreationFn = theMessageCreationFn;
+		if (myMessageCreationFn == null) {
+			myMessageCreationFn = JobWorkNotificationJsonMessage::new;
+		}
 	}
 }

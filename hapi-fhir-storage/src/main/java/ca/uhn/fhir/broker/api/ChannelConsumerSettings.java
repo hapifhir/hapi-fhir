@@ -39,9 +39,11 @@ public class ChannelConsumerSettings extends BaseChannelSettings {
 	}
 
 	public ChannelConsumerSettings(ChannelConsumerSettings theSettings) {
+		super();
 		setQualifyChannelName(theSettings.isQualifyChannelName());
 		setRetryConfiguration(theSettings.getRetryConfigurationParameters());
-		setAckTimeout(theSettings.myAckTimeout);
+		setConcurrentConsumers(theSettings.getConcurrentConsumers());
+		setAckTimeout(theSettings.getAckTimeout());
 	}
 
 	public Integer getConcurrentConsumers() {

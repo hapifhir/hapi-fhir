@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -39,9 +40,12 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.Nonnull;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Date;
 
@@ -102,17 +106,12 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 
 		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput;
 		ScheduledJobDefinition scheduledJobDef = null;
-		try {
-			scheduledJobDef = scheduleHeartbeat();
-
+		try (HeartbeatJobHandle handle = scheduleHeartbeat()) {
 			stepExecutorOutput = myJobExecutorSvc.doExecution(myCursor, myInstance, myWorkChunk);
-		} finally {
-			// make sure we remove the scheduled job after work has completed/errored out.
-			// otherwise, we will have countless pointless jobs hanging around updating
-			// chunks we no longer care about
-			if (scheduledJobDef != null) {
-				myIHapiScheduler.unscheduleLocalJobs(scheduledJobDef.toTriggerKey());
-			}
+		} catch (IOException ex) {
+			String msg = "Heartbeat job failed";
+			ourLog.error(msg);
+			throw new RuntimeException(Msg.code(2914) + " " + msg, ex);
 		}
 
 		if (!stepExecutorOutput.isSuccessful()) {
@@ -172,15 +171,35 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		}
 	}
 
-	private ScheduledJobDefinition scheduleHeartbeat() {
-		String jobId = String.format("%s-%s-%s", SCHEDULED_JOB_ID_PREFIX, myInstanceId, myWorkChunk.getId());
-		ScheduledJobDefinition definition = new ScheduledJobDefinition();
-		definition.setJobClass(HeartbeatJob.class);
-		definition.setId(jobId);
-		definition.addJobData(CHUNK_ID, myWorkChunk.getId());
-		// we don't want a time that's <100ms
-		myIHapiScheduler.scheduleClusteredJob(Math.max(myAckTimeout.toMillis() / 3, 500), definition);
-		return definition;
+	private HeartbeatJobHandle scheduleHeartbeat() {
+		return new HeartbeatJobHandle(myIHapiScheduler, myAckTimeout, myInstanceId, myWorkChunk);
+	}
+
+	public static class HeartbeatJobHandle implements Closeable {
+
+		private final ISchedulerService myScheduleSvc;
+
+		private final TriggerKey myTriggerKey;
+
+		public HeartbeatJobHandle(ISchedulerService theSchedulerService,
+								  Duration theAckTimeout,
+								  String theInstanceId,
+								  WorkChunk theWorkChunk) {
+			myScheduleSvc = theSchedulerService;
+			String jobId = String.format("%s-%s-%s", SCHEDULED_JOB_ID_PREFIX, theInstanceId, theWorkChunk.getId());
+			ScheduledJobDefinition definition = new ScheduledJobDefinition();
+			definition.setJobClass(HeartbeatJob.class);
+			definition.setId(jobId);
+			definition.addJobData(CHUNK_ID, theWorkChunk.getId());
+			myTriggerKey = definition.toTriggerKey();
+			// we don't want a time that's <100ms
+			myScheduleSvc.scheduleClusteredJob(Math.max(theAckTimeout.toMillis() / 3, 500), definition);
+		}
+
+		@Override
+		public void close() throws IOException {
+			myScheduleSvc.unscheduleLocalJobs(myTriggerKey);
+		}
 	}
 
 	public static class HeartbeatJob implements HapiJob {

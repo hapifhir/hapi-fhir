@@ -179,15 +179,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			return Optional.empty();
 		} else {
 			Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
-			if (chunk.isEmpty()) {
-				return Optional.empty();
-			}
-			Optional<WorkChunk> chunkToReturn = chunk.map(c -> {
+			return chunk.map(c -> {
 				WorkChunk ret = toChunk(c);
 				ret.setPreviousStatus(chunkLock.getStatus());
 				return ret;
 			});
-			return chunkToReturn;
 		}
 	}
 
