@@ -53,6 +53,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class SearchParameterDaoValidator {
 
 	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*([A-Z][a-zA-Z]+\\.)?[a-z].*");
+	private static final String RESOURCE = "Resource";
+	private static final String DOMAIN_RESOURCE = "DomainResource";
 
 	private final FhirContext myFhirContext;
 	private final JpaStorageSettings myStorageSettings;
@@ -217,21 +219,21 @@ public class SearchParameterDaoValidator {
 
 		String[] paths = expression.split("\\|");
 
-		boolean allBasesAreGeneric = bases.stream().allMatch(b -> "Resource".equals(b) || "DomainResource".equals(b));
+		boolean allBasesAreGeneric = bases.stream().allMatch(b -> RESOURCE.equals(b) || DOMAIN_RESOURCE.equals(b));
 
 		if (allBasesAreGeneric) {
 			for (String path : paths) {
 				String prefix = extractTypePrefix(path.trim());
-				if (prefix != null && !"Resource".equals(prefix) && !"DomainResource".equals(prefix)) {
-					throw new UnprocessableEntityException(Msg.code(2910) + "SearchParameter.expression " + expression
-							+ " uses type-specific prefix " + prefix
-							+ " but base is [" + String.join(", ", bases)
+				if (prefix != null && !RESOURCE.equals(prefix) && !DOMAIN_RESOURCE.equals(prefix)) {
+					throw new UnprocessableEntityException(Msg.code(2910) + "SearchParameter.expression '" + expression
+							+ "' uses type-specific prefix '" + prefix
+							+ "' but base is [" + String.join(", ", bases)
 							+ "]. Expression must use Resource or DomainResource prefix when base is generic.");
 				}
 			}
 		} else {
 			for (String base : bases) {
-				if ("Resource".equals(base) || "DomainResource".equals(base)) {
+				if (RESOURCE.equals(base) || DOMAIN_RESOURCE.equals(base)) {
 					continue;
 				}
 				boolean anyPathMatchesBase = false;
@@ -239,21 +241,15 @@ public class SearchParameterDaoValidator {
 					String prefix = extractTypePrefix(path.trim());
 					if (prefix == null
 							|| base.equals(prefix)
-							|| "Resource".equals(prefix)
-							|| "DomainResource".equals(prefix)) {
+							|| RESOURCE.equals(prefix)
+							|| DOMAIN_RESOURCE.equals(prefix)) {
 						anyPathMatchesBase = true;
 						break;
 					}
 				}
 				if (!anyPathMatchesBase) {
-					List<String> expressionPrefixes = java.util.Arrays.stream(paths)
-							.map(p -> extractTypePrefix(p.trim()))
-							.filter(Objects::nonNull)
-							.toList();
-					throw new UnprocessableEntityException(Msg.code(2911) + "SearchParameter.expression \"" + expression
-							+ "\" does not match any of the declared base resource types [" + base
-							+ "]. Expression type prefix(es) " + expressionPrefixes
-							+ " do not match the declared base.");
+					throw new UnprocessableEntityException(Msg.code(2911) +
+						"No path in expression '" + expression +  "' matches the base [" + base + "].");
 				}
 			}
 		}

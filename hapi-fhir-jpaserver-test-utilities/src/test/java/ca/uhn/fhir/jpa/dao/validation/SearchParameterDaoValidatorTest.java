@@ -226,12 +226,31 @@ public class SearchParameterDaoValidatorTest {
         sp.setStatus(ACTIVE);
         sp.setExpression("Person.practitioner");
 
-        assertThatThrownBy(() -> mySvc.validate(sp))
-                .isInstanceOf(UnprocessableEntityException.class)
-                .hasMessageContaining("HAPI-2911")
-                .hasMessageContaining("does not match any of the declared base resource types")
-                .hasMessageContaining("PractitionerRole");
+		assertThatThrownBy(() -> mySvc.validate(sp))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("HAPI-2911")
+			.hasMessageContaining("No path in expression")
+			.hasMessageContaining("PractitionerRole");
     }
+
+	@Test
+	void testValidateExpressionAgainstBase_mixedBase_expressionDoesNotMatchBase_fails() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/practitionerrole-practitioner");
+		sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
+		sp.addBase(RESOURCE);
+		sp.addBase(PRACTITIONERROLE);
+		sp.setCode("practitioner");
+		sp.setType(REFERENCE);
+		sp.setStatus(ACTIVE);
+		sp.setExpression("Person.practitioner");
+
+		assertThatThrownBy(() -> mySvc.validate(sp))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("HAPI-2911")
+			.hasMessageContaining("No path in expression")
+			.hasMessageContaining("PractitionerRole");
+	}
 
     @Test
     void testValidateExpressionAgainstBase_resourceBase_withSpecificExpressionPrefix_fails() {
