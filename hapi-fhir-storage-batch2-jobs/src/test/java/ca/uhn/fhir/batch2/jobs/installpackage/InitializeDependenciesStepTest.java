@@ -32,6 +32,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -197,6 +198,51 @@ public class InitializeDependenciesStepTest {
 		assertThat(outcomeJson.getReport()).isNotNull();
 
 		verifyNoInteractions(myJobCoordinator);
+	}
+
+	@Test
+	public void testRun_dryRun_succeeds() throws Exception {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		installationSpec.setFetchDependencies(true);
+		installationSpec.setDryRun(true);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+
+		InputStream stream = InitializeDependenciesStepTest.class.getResourceAsStream("usCorePackage.tgz");
+		byte[] packageBytes = stream.readAllBytes();
+		byte[] encodedBytes = Base64.getEncoder().encode(packageBytes);
+		PackageContentsJson packageContentsJson = new PackageContentsJson();
+		packageContentsJson.setContents(encodedBytes);
+		packageContentsJson.setReport(new PackageInstallOutcomeJson());
+
+		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
+			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		// execute
+		RunOutcome outcome = myStep.run(details, myJobDataSink);
+
+		// validate
+		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+
+		verify(myJobDataSink).accept(myPackageWithDependenciesCaptor.capture());
+		PackageWithDependenciesJson outcomeJson = myPackageWithDependenciesCaptor.getValue();
+		assertThat(outcomeJson).isNotNull();
+		assertThat(outcomeJson.getContents()).isEqualTo(encodedBytes);
+		assertThat(outcomeJson.getDependencyJobIds()).isEmpty();
+		assertThat(outcomeJson.getReport().getMessage())
+			.contains(
+				"Installation would install hl7.fhir.r4.core#4.0.1",
+				"Installation would install hl7.terminology.r4#7.0.0",
+				"Installation would install hl7.fhir.uv.extensions.r4#5.2.0",
+				"Installation would install hl7.fhir.uv.smart-app-launch#2.2.0",
+				"Installation would install hl7.fhir.uv.sdc#3.0.0",
+				"Installation would install us.cdc.phinvads#0.12.0",
+				"Installation would install us.nlm.vsac#0.24.0");
+
+		verify(myJobCoordinator, never()).startInstance(any(), any());
 	}
 
 	private static class JobIdIncrementor implements Answer<Batch2JobStartResponse> {
