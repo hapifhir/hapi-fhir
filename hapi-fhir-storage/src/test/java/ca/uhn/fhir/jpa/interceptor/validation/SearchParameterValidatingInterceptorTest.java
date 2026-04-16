@@ -270,7 +270,7 @@ public class SearchParameterValidatingInterceptorTest {
 	}
 
 	@Test
-	void testSharedSpWithNonDisableableBase_whenRetired_throwsException() {
+	void testSharedBaseSpWithNonDisableableBase_whenRetired_throwsException() {
 		// Created by Claude Sonnet 4.6
 		// clinical-patient spans [Basic (non-disableable), Condition (disableable)].
 		// Retiring the whole SP must be blocked because Basic:* is non-disableable.

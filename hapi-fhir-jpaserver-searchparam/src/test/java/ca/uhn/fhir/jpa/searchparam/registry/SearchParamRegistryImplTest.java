@@ -591,7 +591,7 @@ public class SearchParamRegistryImplTest {
 	}
 
 	@Test
-	void testSharedSpWithNonDisableableBase_RetiredInDbKeepsAllBasesActiveInCache() {
+	void testSharedBaseSpWithNonDisableableBase_RetiredInDbKeepsAllBasesActiveInCache() {
 		// Created by Claude Sonnet 4.6
 		// Note: Basic is not a real base of clinical-patient in R4 (it is in R5+). The SP here is
 		// synthetic — constructed to exercise the mixed-base guard logic without requiring R5.
