@@ -97,13 +97,12 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		// pre-seeding), creating a second FHIR resource for the same CodeSystem URL should succeed
 		// because the existing TermCodeSystemVersion is a 0-concept placeholder.
 		//
-		// The real-world scenario: PackageInstallerSvc pre-seeds SNOMED from hl7.terminology.r4
+		// The real-world scenario: Package pre-seeding creates SNOMED from hl7.terminology.r4
 		// (creating Resource A). Later, either a second pre-seed run or $upload-external-code-system
-		// creates/resolves to a different FHIR resource (Resource B) for the same URL. The
-		// NOTPRESENT early-return path in storeNewCodeSystemVersionIfNeeded() calls
-		// getOrCreateDistinctTermCodeSystem() which triggers checkForCodeSystemVersionDuplicate().
-		// The existing version (0 concepts, points to Resource A) should be re-pointable to
-		// Resource B, but instead Msg.code(848) is thrown.
+		// creates a different FHIR resource (Resource B) for the same URL. The NOTPRESENT
+		// early-return path triggers a version duplicate check. The existing version (0 concepts,
+		// points to Resource A) should be re-pointable to Resource B, but instead a
+		// version-already-exists error (Msg.code(848)) is thrown.
 
 		// Step 1: Create first NOTPRESENT CodeSystem (simulates package pre-seed install)
 		CodeSystem cs1 = new CodeSystem();
@@ -125,9 +124,8 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 		// Step 2: Create a second NOTPRESENT CodeSystem with the same URL.
 		// This simulates the scenario where a new FHIR resource is created for the same
-		// CodeSystem URL (e.g. PackageInstallerSvc.install() calling dao.create() on a
-		// subsequent pre-seed run when conditional search fails to find the existing resource,
-		// or $upload-external-code-system's createOrUpdateCodeSystem() creating a new resource).
+		// CodeSystem URL (e.g. a subsequent pre-seed run when the conditional search fails
+		// to find the existing resource, or $upload-external-code-system creating a new resource).
 		CodeSystem cs2 = new CodeSystem();
 		cs2.setUrl("http://snomed.info/sct");
 		cs2.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
