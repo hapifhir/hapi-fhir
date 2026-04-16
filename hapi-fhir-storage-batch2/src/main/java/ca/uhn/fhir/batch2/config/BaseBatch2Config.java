@@ -162,13 +162,18 @@ public abstract class BaseBatch2Config {
 	/**
 	 * Spring ensures SmartInitializingSingleton is created/run after
 	 * all non-lazy beans in this class (and inheriters) are instantiated.
-	 * This allows us to set the property, even if this class is overriden.
+	 * This allows us to set the property, even if this class is overwritten.
+	 *
+	 * In this case, we're using the SmartInitializingSingleton because we need
+	 * to pull the AckTimeout from the backing broker configs (kafka, pulsar, whatever).
+	 *
+	 * And that can't happen until we have constructed a broker to begin with.
 	 */
 	@Bean
 	public SmartInitializingSingleton batch2AckTimeoutInitializer(
 			WorkChannelMessageListener theWorkChannelMessageListener,
 			IChannelConsumer<JobWorkNotification> theChannelConsumer) {
-		return () -> theWorkChannelMessageListener.setAckTimeoutMs(theChannelConsumer.getAckTimeoutMs());
+		return () -> theWorkChannelMessageListener.setAckTimeout(theChannelConsumer.getAckTimeout());
 	}
 
 	@Bean

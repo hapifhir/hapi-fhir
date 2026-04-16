@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.broker.api;
 
+import java.time.Duration;
+
 public class ChannelConsumerSettings extends BaseChannelSettings {
 	public static final Integer DEFAULT_CHANNEL_CONSUMERS = 2;
 
@@ -27,13 +29,19 @@ public class ChannelConsumerSettings extends BaseChannelSettings {
 	 * This is the timeout setting of the broker.
 	 * It is the time after which message redelivery happens.
 	 */
-	private long myAckTimeoutMs;
+	private Duration myAckTimeout;
 
 	/**
 	 * Constructor
 	 */
 	public ChannelConsumerSettings() {
 		super();
+	}
+
+	public ChannelConsumerSettings(ChannelConsumerSettings theSettings) {
+		setQualifyChannelName(theSettings.isQualifyChannelName());
+		setRetryConfiguration(theSettings.getRetryConfigurationParameters());
+		setAckTimeout(theSettings.myAckTimeout);
 	}
 
 	public Integer getConcurrentConsumers() {
@@ -45,11 +53,11 @@ public class ChannelConsumerSettings extends BaseChannelSettings {
 		return this;
 	}
 
-	public long getAckTimeoutMs() {
-		return myAckTimeoutMs;
+	public Duration getAckTimeout() {
+		return myAckTimeout;
 	}
 
-	public void setAckTimeoutMs(long theAckTimeoutMs) {
-		myAckTimeoutMs = theAckTimeoutMs;
+	public void setAckTimeout(Duration theAckTimeout) {
+		myAckTimeout = theAckTimeout;
 	}
 }

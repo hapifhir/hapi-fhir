@@ -43,6 +43,7 @@ import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -84,8 +85,8 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				myIHapiScheduler);
 	}
 
-	public void setAckTimeoutMs(long theMs) {
-		myJobStepExecutorFactory.setAckTimeoutMS(theMs);
+	public void setAckTimeout(Duration theTimeout) {
+		myJobStepExecutorFactory.setAckTimeout(theTimeout);
 	}
 
 	public Class<JobWorkNotification> getPayloadType() {
@@ -206,14 +207,17 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 					&& myWorkChunk.getLastHeartbeat() != null) {
 				ourLog.debug(
 						"Acktimeout (how long a broker will wait for a listener before redelivery) is {}ms",
-						myJobStepExecutorFactory.getAckTimeoutMS());
+						myJobStepExecutorFactory.getAckTimeout().toMillis());
 				long lastHeartbeatMs = myWorkChunk.getLastHeartbeat().getTime();
 				long now = Instant.now().toEpochMilli();
 
-				// we want at least a base minimum, in case the broker hasn't set a value
-				// (without a broker, ack-timeout might not be set)
-				long minTimeout = Math.max(
-						myJobStepExecutorFactory.getAckTimeoutMS(), JobStepExecutorFactory.DEFAULT_ACK_TIMEOUT);
+				/*
+				 * This should always be a positive value, since
+				 * that's what the step execution factory will return.
+				 *
+				 * But it could be a value that's very very small.
+				 */
+				long minTimeout = myJobStepExecutorFactory.getAckTimeout().toMillis();
 				long twiceAckTime = 2 * minTimeout;
 
 				long duration = now - lastHeartbeatMs;
@@ -352,7 +356,7 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 						 * The executeStep() method actually performs the processing of a given work chunk, but
 						 * this execution can optionally be wrapped by interceptors wanting to influence the processing.
 						 */
-						Runnable runnable = () -> process.myStepExector.processstep();
+						Runnable runnable = () -> process.myStepExector.processStep();
 
 						myInterceptorBroadcaster.runWithFilterHooks(
 								Pointcut.BATCH2_CHUNK_PROCESS_FILTER, params, runnable);

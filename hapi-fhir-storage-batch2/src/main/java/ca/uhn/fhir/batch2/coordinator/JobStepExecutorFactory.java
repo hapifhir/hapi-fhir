@@ -30,13 +30,9 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
 
+import java.time.Duration;
+
 public class JobStepExecutorFactory {
-	/**
-	 * Minimum timeout we wait for.
-	 * the "1" is deliberate because we want a value that (hopefully)
-	 * users don't set so if we see it in logs, we'll know
-	 */
-	public static final long DEFAULT_ACK_TIMEOUT = 1001;
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
@@ -46,7 +42,7 @@ public class JobStepExecutorFactory {
 	private final IInterceptorService myInterceptorService;
 	private final ISchedulerService myIHapiScheduler;
 
-	private long myAckTimeoutMS = -1;
+	private Duration myAckTimeout;
 
 	public JobStepExecutorFactory(
 			@Nonnull IJobPersistence theJobPersistence,
@@ -65,12 +61,23 @@ public class JobStepExecutorFactory {
 		myIHapiScheduler = theScheduler;
 	}
 
-	public void setAckTimeoutMS(long theAckTimeoutMS) {
-		myAckTimeoutMS = theAckTimeoutMS;
+	public void setAckTimeout(Duration theAckTimeout) {
+		myAckTimeout = theAckTimeout;
 	}
 
-	public long getAckTimeoutMS() {
-		return myAckTimeoutMS;
+	/**
+	 * Time before message redelivery.
+	 *
+	 * If this isn't set by the broker, a default value of 1001ms will be
+	 * returned.
+	 * (the '1ms' is deliberate in hopes to return a value that is
+	 * hopefully not set by users in case we see it in logs)
+	 */
+	public @Nonnull Duration getAckTimeout() {
+		if (myAckTimeout == null) {
+			myAckTimeout = Duration.ofMillis(1001);
+		}
+		return myAckTimeout;
 	}
 
 	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
@@ -88,6 +95,6 @@ public class JobStepExecutorFactory {
 				myJobDefinitionRegistry,
 				myInterceptorService,
 				myIHapiScheduler,
-				Math.min(myAckTimeoutMS, DEFAULT_ACK_TIMEOUT));
+				getAckTimeout());
 	}
 }

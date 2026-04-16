@@ -33,15 +33,28 @@ public class BatchJobSender {
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchJobSender.class);
 	private final IChannelProducer<JobWorkNotification> myWorkChannelProducer;
 
+	/**
+	 * Function used to convert the JobWorkNotification into the JobWorkNotificationJsonMessage.
+	 * We provide this as a function so that it can be overridden so that parts of the message itself
+	 * can be overwritten.
+	 *
+	 * The most important of these is the getMessageKey method, which, for some message brokers (kafka),
+	 * is used to control the partition to which the message is sent.
+	 *
+	 * Overwritting the key in this case allows for more deterministic tests where the test
+	 * directly controls the partition instead of relying on whatever the randomly assigned
+	 * guid hashes out to.
+	 */
 	private Function<JobWorkNotification, JobWorkNotificationJsonMessage> myMessageCreationFn;
 
 	public BatchJobSender(@Nonnull IChannelProducer<JobWorkNotification> theWorkChannelProducer) {
 		myWorkChannelProducer = theWorkChannelProducer;
-		myMessageCreationFn = JobWorkNotificationJsonMessage::new;
 	}
 
 	public void sendWorkChannelMessage(JobWorkNotification theJobWorkNotification) {
-		JobWorkNotificationJsonMessage message = myMessageCreationFn.apply(theJobWorkNotification);
+		JobWorkNotificationJsonMessage message = myMessageCreationFn != null
+				? myMessageCreationFn.apply(theJobWorkNotification)
+				: new JobWorkNotificationJsonMessage(theJobWorkNotification);
 
 		ourLog.info("Sending work notification for {}", theJobWorkNotification);
 		myWorkChannelProducer.send(message);
@@ -51,8 +64,5 @@ public class BatchJobSender {
 	public void setMessageCreationFn(
 			Function<JobWorkNotification, JobWorkNotificationJsonMessage> theMessageCreationFn) {
 		myMessageCreationFn = theMessageCreationFn;
-		if (myMessageCreationFn == null) {
-			myMessageCreationFn = JobWorkNotificationJsonMessage::new;
-		}
 	}
 }

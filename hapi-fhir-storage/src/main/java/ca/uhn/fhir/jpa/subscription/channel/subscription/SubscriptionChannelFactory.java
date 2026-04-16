@@ -86,7 +86,7 @@ public class SubscriptionChannelFactory {
 		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
 		if (theOptions != null) {
 			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
-			config.setAckTimeoutMs(theOptions.getAckTimeoutMs());
+			config.setAckTimeout(theOptions.getAckTimeout());
 		}
 		return config;
 	}
@@ -102,13 +102,13 @@ public class SubscriptionChannelFactory {
 	}
 
 	protected ChannelConsumerSettings newConsumerConfigForMatchingChannel(ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = new ChannelConsumerSettings();
-		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
+		ChannelConsumerSettings config;
 		if (theOptions != null) {
-			config.setQualifyChannelName(theOptions.isQualifyChannelName());
-			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
-			config.setAckTimeoutMs(theOptions.getAckTimeoutMs());
+			config = new ChannelConsumerSettings(theOptions);
+		} else {
+			config = new ChannelConsumerSettings();
 		}
+		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
 		return config;
 	}
 

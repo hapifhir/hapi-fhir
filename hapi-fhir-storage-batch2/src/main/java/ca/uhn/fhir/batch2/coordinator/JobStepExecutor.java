@@ -27,10 +27,8 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -41,10 +39,10 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.Nonnull;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
 import java.util.Date;
 
 import static ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils.JOB_STEP_EXECUTION_SPAN_NAME;
@@ -52,6 +50,7 @@ import static ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils.JOB_STEP_EXECUT
 public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
+	public static final String SCHEDULED_JOB_ID_PREFIX = "BATCH2-HEARTBEAT";
 	private static final String CHUNK_ID = "chunk-id";
 
 	private final IJobPersistence myJobPersistence;
@@ -66,7 +65,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private final JobWorkCursor<PT, IT, OT> myCursor;
 	private final ISchedulerService myIHapiScheduler;
 
-	private final long myAckTimeoutMs;
+	private final Duration myAckTimeout;
 
 	JobStepExecutor(
 			@Nonnull IJobPersistence theJobPersistence,
@@ -78,7 +77,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull IInterceptorService theInterceptorService,
 			ISchedulerService theScheduler,
-			long theAckTimeoutMs) {
+			Duration theAckTimeout) {
 		myJobPersistence = theJobPersistence;
 		myDefinition = theCursor.jobDefinition;
 		myInstance = theInstance;
@@ -89,20 +88,11 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		myJobMaintenanceService = theJobMaintenanceService;
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
 		myIHapiScheduler = theScheduler;
-		myAckTimeoutMs = theAckTimeoutMs;
-	}
-
-	private void scheduleHeartbeat() {
-		ScheduledJobDefinition definition = new ScheduledJobDefinition();
-		definition.setJobClass(HeartbeatJob.class);
-		definition.setId(String.format("BATCH2-HEARTBEAT-%s-%s", myInstanceId, myWorkChunk.getId()));
-		definition.addJobData(CHUNK_ID, myWorkChunk.getId());
-		// we don't want a time that's <100ms (or worse, negative)
-		myIHapiScheduler.scheduleClusteredJob(Math.max(myAckTimeoutMs / 3, 500), definition);
+		myAckTimeout = theAckTimeout;
 	}
 
 	@WithSpan(JOB_STEP_EXECUTION_SPAN_NAME)
-	public void processstep() {
+	public void processStep() {
 		BatchJobOpenTelemetryUtils.addAttributesToCurrentSpan(
 				myInstance.getJobDefinitionId(),
 				myInstance.getJobDefinitionVersion(),
@@ -110,10 +100,20 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 				myCursor.getCurrentStepId(),
 				myWorkChunk == null ? null : myWorkChunk.getId());
 
-		scheduleHeartbeat();
+		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput;
+		ScheduledJobDefinition scheduledJobDef = null;
+		try {
+			scheduledJobDef = scheduleHeartbeat();
 
-		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput =
-				myJobExecutorSvc.doExecution(myCursor, myInstance, myWorkChunk);
+			stepExecutorOutput = myJobExecutorSvc.doExecution(myCursor, myInstance, myWorkChunk);
+		} finally {
+			// make sure we remove the scheduled job after work has completed/errored out.
+			// otherwise, we will have countless pointless jobs hanging around updating
+			// chunks we no longer care about
+			if (scheduledJobDef != null) {
+				myIHapiScheduler.unscheduleLocalJobs(scheduledJobDef.toTriggerKey());
+			}
+		}
 
 		if (!stepExecutorOutput.isSuccessful()) {
 			return;
@@ -172,6 +172,17 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		}
 	}
 
+	private ScheduledJobDefinition scheduleHeartbeat() {
+		String jobId = String.format("%s-%s-%s", SCHEDULED_JOB_ID_PREFIX, myInstanceId, myWorkChunk.getId());
+		ScheduledJobDefinition definition = new ScheduledJobDefinition();
+		definition.setJobClass(HeartbeatJob.class);
+		definition.setId(jobId);
+		definition.addJobData(CHUNK_ID, myWorkChunk.getId());
+		// we don't want a time that's <100ms
+		myIHapiScheduler.scheduleClusteredJob(Math.max(myAckTimeout.toMillis() / 3, 500), definition);
+		return definition;
+	}
+
 	public static class HeartbeatJob implements HapiJob {
 
 		@Autowired
@@ -181,25 +192,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		public void execute(JobExecutionContext context) throws JobExecutionException {
 			String workchunkId = (String) context.getMergedJobDataMap().get(CHUNK_ID);
 
-			WorkChunkStatusEnum status = myWorkChunkPersistence.getWorkChunkStatus(workchunkId);
-			ourLog.info("WorkChunk {} has status {}", workchunkId, status.name());
-
-			if (status == WorkChunkStatusEnum.IN_PROGRESS) {
-				myWorkChunkPersistence.onWorkChunkHeartbeat(workchunkId);
-			} else {
-				/*
-				 * If it's no longer in progress, it's either going to be
-				 * COMPLETED or some failure state.
-				 * In either case, this listener is no longer required to keep track
-				 * of it (and we'll stop the job/heartbeat)
-				 */
-				try {
-					context.getScheduler().unscheduleJob(context.getTrigger().getKey());
-				} catch (SchedulerException ex) {
-					ourLog.info("Failed to unschedule job {}", getClass().getName(), ex);
-					throw new RuntimeException(Msg.code(2912), ex);
-				}
-			}
+			myWorkChunkPersistence.onWorkChunkHeartbeat(workchunkId);
 		}
 	}
 }

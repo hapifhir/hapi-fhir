@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -223,6 +224,19 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			return !currentlyExecutingJobs.isEmpty();
 		} catch (SchedulerException ex) {
 			throw new RuntimeException(Msg.code(2521) + " Failed during  check for scheduled jobs", ex);
+		}
+	}
+
+	@Override
+	public void unscheduleJobs(TriggerKey... theKeys) {
+		assert theKeys != null;
+		assert theKeys.length >= 1;
+
+		try {
+			myScheduler.unscheduleJobs(Arrays.asList(theKeys));
+		} catch (SchedulerException ex) {
+			// TODO - add your error code here
+			throw new RuntimeException(ex);
 		}
 	}
 

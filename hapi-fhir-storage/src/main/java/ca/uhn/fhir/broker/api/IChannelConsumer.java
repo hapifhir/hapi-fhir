@@ -22,6 +22,8 @@ package ca.uhn.fhir.broker.api;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 
+import java.time.Duration;
+
 /**
  * Receives messages from a Message Broker.
  *
@@ -60,9 +62,12 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 
 	/**
 	 * This is the timeout setting of the broker.
-	 * It is the time after which message redelivery will happen.
+	 *
+	 * The mechanism is largely broker specific. But for general purposes,
+	 * this is the time, after which, a message will be redelivered if it
+	 * hasn't finished being processed.
 	 */
-	long getAckTimeoutMs();
+	Duration getAckTimeout();
 
 	/**
 	 * Pause requesting new messages from the broker until resume() is called.

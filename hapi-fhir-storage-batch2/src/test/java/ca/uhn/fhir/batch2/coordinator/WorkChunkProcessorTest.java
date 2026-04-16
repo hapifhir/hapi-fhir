@@ -477,11 +477,6 @@ public class WorkChunkProcessorTest {
 		}
 
 		@Override
-		public void heartbeat() {
-
-		}
-
-		@Override
 		public int getWorkChunkCount() {
 			return 0;
 		}

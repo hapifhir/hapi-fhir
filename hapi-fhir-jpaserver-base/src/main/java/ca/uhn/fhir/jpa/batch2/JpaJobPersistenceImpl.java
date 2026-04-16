@@ -129,7 +129,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
 		entity.setStatus(getOnCreateStatus(theBatchWorkChunk));
-		entity.setLastHeartbeat(new Date());
 
 		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
 		ourLog.trace(
@@ -180,9 +179,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			return Optional.empty();
 		} else {
 			Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
-			WorkChunk chunkToReturn = chunk.map(this::toChunk).orElseThrow();
-			chunkToReturn.setPreviousStatus(chunkLock.getStatus());
-			return Optional.of(chunkToReturn);
+			if (chunk.isEmpty()) {
+				return Optional.empty();
+			}
+			Optional<WorkChunk> chunkToReturn = chunk.map(c -> {
+				WorkChunk ret = toChunk(c);
+				ret.setPreviousStatus(chunkLock.getStatus());
+				return ret;
+			});
+			return chunkToReturn;
 		}
 	}
 
@@ -546,14 +551,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return myWorkChunkRepository
 				.fetchChunksForStep(theInstanceId, theStepId)
 				.map(this::toChunk);
-	}
-
-	@Override
-	public WorkChunkStatusEnum getWorkChunkStatus(String theWorkChunkId) {
-		Batch2WorkChunkEntity chunkOp =
-				myWorkChunkRepository.findById(theWorkChunkId).orElseThrow();
-
-		return chunkOp.getStatus();
 	}
 
 	@Override

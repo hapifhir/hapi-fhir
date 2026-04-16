@@ -52,11 +52,6 @@ class FinalStepDataSink<PT extends IModelJson, IT extends IModelJson> extends Ba
 	}
 
 	@Override
-	public void heartbeat() {
-		// TODO - nothing - but we could... should we?
-	}
-
-	@Override
 	public int getWorkChunkCount() {
 		return 0;
 	}

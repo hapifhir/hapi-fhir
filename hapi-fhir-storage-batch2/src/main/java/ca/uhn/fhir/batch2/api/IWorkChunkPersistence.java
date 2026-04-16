@@ -150,9 +150,4 @@ public interface IWorkChunkPersistence {
 	 */
 	@Transactional(propagation = Propagation.MANDATORY, readOnly = true)
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
-
-	/**
-	 * Fetches the workchunk status of a given workchunk
-	 */
-	WorkChunkStatusEnum getWorkChunkStatus(String theWorkChunkId);
 }

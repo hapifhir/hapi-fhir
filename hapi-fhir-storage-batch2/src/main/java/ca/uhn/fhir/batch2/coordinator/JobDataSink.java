@@ -96,8 +96,6 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(() -> myJobPersistence.onWorkChunkCreate(batchWorkChunk));
 
-		heartbeat();
-
 		myLastChunkId.set(chunkId);
 
 		if (!myGatedExecution) {
@@ -118,14 +116,6 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	@Override
 	public int getWorkChunkCount() {
 		return myChunkCounter.get();
-	}
-
-	@Override
-	public void heartbeat() {
-		myHapiTransactionService
-				.withSystemRequestOnDefaultPartition()
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> myJobPersistence.onWorkChunkHeartbeat(myWorkChunk.getId()));
 	}
 
 	public String getOnlyChunkId() {

@@ -31,6 +31,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -242,6 +243,20 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 				StopWatch.formatMillis(theIntervalMillis));
 		defaultGroup(theJobDefinition);
 		theScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
+	}
+
+	@Override
+	public void unscheduleLocalJobs(TriggerKey... theKeys) {
+		unscheduleJobs(getLocalHapiScheduler(), theKeys);
+	}
+
+	@Override
+	public void unscheduleClusteredJobs(TriggerKey... theKeys) {
+		unscheduleJobs(getClusteredScheduler(), theKeys);
+	}
+
+	private void unscheduleJobs(IHapiScheduler theScheduler, TriggerKey... theKeys) {
+		theScheduler.unscheduleJobs(theKeys);
 	}
 
 	@VisibleForTesting

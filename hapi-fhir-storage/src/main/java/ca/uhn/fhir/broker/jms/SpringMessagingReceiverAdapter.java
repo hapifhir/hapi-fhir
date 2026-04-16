@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.MessageHandler;
 
+import java.time.Duration;
+
 /**
  * Adapt a Spring Messaging (JMS) Queue to {@link IChannelConsumer}
  *
@@ -44,17 +46,17 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	private MessageHandler myMessageHandler;
 	private boolean myClosed;
 
-	protected final long myRedeliveryDelayMs;
+	protected final Duration myRedeliveryDelay;
 
 	public SpringMessagingReceiverAdapter(
 			Class<? extends IMessage<T>> theMessageType,
 			ISpringMessagingChannelReceiver theSpringMessagingChannelReceiver,
 			IMessageListener<T> theMessageListener,
-			long theRedeliveryDelayMs) {
+			Duration theRedeliveryDelay) {
 		myMessageType = theMessageType;
 		mySpringMessagingChannelReceiver = theSpringMessagingChannelReceiver;
 		myMessageListener = theMessageListener;
-		myRedeliveryDelayMs = theRedeliveryDelayMs;
+		myRedeliveryDelay = theRedeliveryDelay;
 	}
 
 	public void subscribe(MessageHandler theMessageHandler) {
@@ -146,7 +148,7 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	}
 
 	@Override
-	public long getAckTimeoutMs() {
-		return myRedeliveryDelayMs;
+	public Duration getAckTimeout() {
+		return myRedeliveryDelay;
 	}
 }

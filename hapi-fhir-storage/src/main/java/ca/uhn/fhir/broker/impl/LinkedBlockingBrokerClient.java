@@ -55,7 +55,7 @@ public class LinkedBlockingBrokerClient implements IBrokerClient {
 				theMessageType,
 				springMessagingChannelReceiver,
 				theMessageListener,
-				theChannelConsumerSettings.getAckTimeoutMs());
+				theChannelConsumerSettings.getAckTimeout());
 		MessageHandler handler = new SpringMessagingMessageHandlerAdapter<>(theMessageType, theMessageListener);
 		retval.subscribe(handler);
 		return retval;

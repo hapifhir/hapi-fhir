@@ -67,14 +67,4 @@ public interface IJobDataSink<OT extends IModelJson> {
 	 * @param theMessage An error message. This will be logged, and in the future it may be stored
 	 */
 	void recoveredError(String theMessage);
-
-	/**
-	 * A keep-alive method.
-	 * Useful for long-running processes.
-	 * Calling accept() will automatically call this method.
-	 *
-	 * But if no new workchunks are being created during the long-running
-	 * process, this method is exposed for use at the job-creators discretion.
-	 */
-	void heartbeat();
 }
