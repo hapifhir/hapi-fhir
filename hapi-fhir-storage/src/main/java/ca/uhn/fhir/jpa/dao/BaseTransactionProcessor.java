@@ -268,10 +268,11 @@ public abstract class BaseTransactionProcessor {
 		// evaluating myStorageSettings.isAutoCreatePlaceholderReferenceTargets() or have the evaluation done within the
 		// invocation.
 		// - modify the service in order to have it create entries for all inlineMatchUrls, not only the one referring a Patient
-		// resource
+		// resource, do it for all resources
 		PatientInlineMatchUrlPreCreationService patientInlineMatchUrlPreCreationService =
 				new PatientInlineMatchUrlPreCreationService(myContext, myMatchUrlService);
 		patientInlineMatchUrlPreCreationService.addConditionalCreateEntriesForInlineMatchUrls(theRequest);
+		// POST, ifNoneExit=Patient?identifier=system|123
 
 		// Interceptor call: STORAGE_TRANSACTION_PROCESSING
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
@@ -299,7 +300,11 @@ public abstract class BaseTransactionProcessor {
 			response = processTransactionAsSubRequest(
 					theRequestDetails, transactionDetails, theRequest, actionName, theNestedMode);
 
-			// FIXME-EHP: find a way to remove the synthetic entries
+			// FIXME-TG: find a way to remove the synthetic entries processing results
+			// inbound bundle.entries[Patient, Coverage, x, y, z, zz] - resources
+			// inbound bundle.entries[PatientPlaceHolder, Patient, Coverage] - resources
+			// outbound bundle.entries[responsePatient, responseCoverage] - processing result
+			// outbound.bundle.entries[5]
 
 		}
 
@@ -916,6 +921,7 @@ public abstract class BaseTransactionProcessor {
 					writeOperationsDetails);
 		}
 
+		// FIXME-TG: just a bookmark, nothing to fix
 		RequestPartitionId requestPartitionId =
 				determineRequestPartitionIdForWriteEntries(theRequestDetails, theTransactionDetails, theEntries);
 
@@ -1073,6 +1079,9 @@ public abstract class BaseTransactionProcessor {
 					String resourceType = myContext.getResourceType(resource);
 					String ifNoneExistStr = myVersionAdapter.getEntryIfNoneExist(theEntry);
 
+					// FIXME-TG:
+					// added to show that we need a different determination process for conditional create.
+					// this code may or may not work.
 					if (isNotBlank(ifNoneExistStr)) {
 						MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
 								myMatchUrlService.parseAndTranslateMatchUrl(ifNoneExistStr);
@@ -1102,11 +1111,12 @@ public abstract class BaseTransactionProcessor {
 
 							if (StringUtils.equals(resourceIdSpecifiedInIfNoneExist, resourceIdFromEntryResource)) {
 								nextWriteEntryRequestPartitionId =
+									// FIXME-TG, this will fail a test and that is correct, good catch
 										myRequestPartitionHelperService.determineCreatePartitionForRequest(
 												requestDetailsForEntry, resource, resourceType);
 
 							} else {
-								// FIXME-EHP: this msg code is not unique.  provide a unique one
+								// FIXME-TG: this msg code is not unique.  provide a unique one
 								throw new InvalidRequestException(
 										Msg.code(2542)
 												+ "Value for parameter '_id' in ifNoneExist request property does not match the resource id");
@@ -1121,6 +1131,9 @@ public abstract class BaseTransactionProcessor {
 					break;
 				}
 				case PUT: {
+					// FIXME-TG:
+					// added to show that we need a different determination process for conditional update.
+					// this code may or may not work.
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					if (resource != null) {
 						String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
