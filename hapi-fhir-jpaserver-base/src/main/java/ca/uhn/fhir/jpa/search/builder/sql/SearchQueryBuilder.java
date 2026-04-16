@@ -519,6 +519,21 @@ public class SearchQueryBuilder {
 		}
 	}
 
+	/**
+	 * Build a join {@link Condition} from two equal-length column arrays (as returned by {@link #toJoinColumns}).
+	 */
+	public static Condition toJoinCondition(DbColumn[] theFromColumns, DbColumn[] theToColumns) {
+		assert theFromColumns.length == theToColumns.length;
+		if (theFromColumns.length == 1) {
+			return BinaryCondition.equalTo(theFromColumns[0], theToColumns[0]);
+		}
+		Condition[] conditions = new Condition[theFromColumns.length];
+		for (int i = 0; i < theFromColumns.length; i++) {
+			conditions[i] = BinaryCondition.equalTo(theFromColumns[i], theToColumns[i]);
+		}
+		return ComboCondition.and(conditions);
+	}
+
 	public boolean isIncludePartitionIdInJoins() {
 		return mySelectPartitionId && myPartitionSettings.isDatabasePartitionMode();
 	}
@@ -1006,8 +1021,17 @@ public class SearchQueryBuilder {
 				.addCustomParams(
 						new ComboExpression(ComboExpression.Op.ADD, squaredLatitudeDiff, squaredLongitudeDiff));
 
+		Object distanceExpression = euclideanDistance;
+		if (mySelect.toString().contains("GROUP BY")) {
+			// GROUP BY requires the distance expression to be aggregated.
+			// MIN(...) is semantically neutral here because each resource has only one distance.
+			FunctionCall aggregateDistance = FunctionCall.min();
+			aggregateDistance.addCustomParams(euclideanDistance);
+			distanceExpression = aggregateDistance;
+		}
+
 		String columnName = "EUC_DIST" + (myNextNearnessColumnId++);
-		mySelect.addAliasedColumn(euclideanDistance, columnName);
+		mySelect.addAliasedColumn(distanceExpression, columnName);
 		String ordering = theAscending ? "" : " DESC";
 		mySelect.addCustomOrderings(columnName + ordering);
 	}

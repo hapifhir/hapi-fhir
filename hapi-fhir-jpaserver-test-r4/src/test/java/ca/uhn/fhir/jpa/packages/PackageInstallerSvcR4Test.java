@@ -2,6 +2,9 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.implementationguide.ImplementationGuideCreator;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -11,6 +14,7 @@ import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
@@ -1742,5 +1746,160 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(snapshotMessages).hasSize(5);
 	}
 
+	@Test
+	public void testInstallR4Package_doesNotOverwriteContentNotPresentCodeSystem(@TempDir Path theTempDir) throws IOException {
+		// Setup: create an externally loaded CodeSystem with content=not-present and add concepts via delta
+		String codeSystemUrl = "http://example.org/CodeSystem/external-cs";
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(codeSystemUrl);
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myCodeSystemDao.create(cs, new SystemRequestDetails());
+
+		CustomTerminologySet delta = new CustomTerminologySet();
+		delta.addRootConcept("originalA", "Original Concept A");
+		delta.addRootConcept("originalB", "Original Concept B");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(codeSystemUrl, delta);
+
+		// Verify concepts are accessible via lookup
+		IValidationSupport.LookupCodeResult lookupBefore = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest(codeSystemUrl, "originalA"));
+		assertThat(lookupBefore).isNotNull();
+		assertThat(lookupBefore.isFound()).isTrue();
+
+		// Verify resource state before IG install
+		CodeSystem csBefore = fetchCodeSystemByUrl(codeSystemUrl);
+		assertThat(csBefore.getContent()).isEqualTo(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		String versionIdBefore = csBefore.getMeta().getVersionId();
+
+		// Build an IG package containing a complete CodeSystem with the same URL but different concepts
+		String igCodeSystemStr = """
+			{
+			    "resourceType": "CodeSystem",
+			    "url": "%s",
+			    "status": "active",
+			    "content": "complete",
+			    "concept": [
+			      { "code": "igCodeX", "display": "IG Concept X" },
+			      { "code": "igCodeY", "display": "IG Concept Y" }
+			    ]
+			}
+			""".formatted(codeSystemUrl);
+
+		String igName = "test.external.cs.guard";
+		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, igName, "1.0.0");
+		igCreator.setDirectory(Files.createDirectory(theTempDir.resolve("ig")));
+
+		CodeSystem igCs = myFhirContext.newJsonParser().parseResource(CodeSystem.class, igCodeSystemStr);
+		igCreator.addResourceToIG("codesystem", igCs);
+
+		Path igPath = igCreator.createTestIG();
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName(igName)
+			.setVersion("1.0.0")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setPackageContents(Files.readAllBytes(igPath));
+
+		// Test: install the IG
+		myPackageInstallerSvc.install(spec);
+
+		// Verify: the CodeSystem resource was not modified
+		CodeSystem csAfter = fetchCodeSystemByUrl(codeSystemUrl);
+		assertThat(csAfter.getContent())
+			.as("CodeSystem should still have content=not-present after IG install")
+			.isEqualTo(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		assertThat(csAfter.getMeta().getVersionId())
+			.as("Resource version should not have changed")
+			.isEqualTo(versionIdBefore);
+
+		// Verify: original concepts are still accessible
+		IValidationSupport.LookupCodeResult lookupAfterA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest(codeSystemUrl, "originalA"));
+		assertThat(lookupAfterA.isFound()).isTrue();
+
+		IValidationSupport.LookupCodeResult lookupAfterB = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest(codeSystemUrl, "originalB"));
+		assertThat(lookupAfterB.isFound()).isTrue();
+
+		// Verify: IG concepts were NOT added
+		IValidationSupport.LookupCodeResult lookupIgX = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest(codeSystemUrl, "igCodeX"));
+		assertThat(lookupIgX.isFound()).isFalse();
+	}
+
+	@Test
+	public void testInstallR4Package_doesOverwriteNonExternalCodeSystem(@TempDir Path theTempDir) throws IOException {
+		// Setup: create a complete CodeSystem (not externally loaded) with one concept
+		String codeSystemUrl = "http://example.org/CodeSystem/complete-cs";
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(codeSystemUrl);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept().setCode("originalCode").setDisplay("Original Display");
+		myCodeSystemDao.create(cs, new SystemRequestDetails());
+
+		// Verify resource state before IG install
+		CodeSystem csBefore = fetchCodeSystemByUrl(codeSystemUrl);
+		assertThat(csBefore.getContent()).isEqualTo(CodeSystem.CodeSystemContentMode.COMPLETE);
+		String versionIdBefore = csBefore.getMeta().getVersionId();
+
+		// Build an IG package containing a complete CodeSystem with the same URL but different concepts
+		String igCodeSystemStr = """
+			{
+			    "resourceType": "CodeSystem",
+			    "url": "%s",
+			    "status": "active",
+			    "content": "complete",
+			    "concept": [
+			      { "code": "igCodeX", "display": "IG Concept X" },
+			      { "code": "igCodeY", "display": "IG Concept Y" }
+			    ]
+			}
+			""".formatted(codeSystemUrl);
+
+		String igName = "test.complete.cs.overwrite";
+		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, igName, "1.0.0");
+		igCreator.setDirectory(Files.createDirectory(theTempDir.resolve("ig")));
+
+		CodeSystem igCs = myFhirContext.newJsonParser().parseResource(CodeSystem.class, igCodeSystemStr);
+		igCreator.addResourceToIG("codesystem", igCs);
+
+		Path igPath = igCreator.createTestIG();
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName(igName)
+			.setVersion("1.0.0")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setPackageContents(Files.readAllBytes(igPath));
+
+		// Test: install the IG
+		myPackageInstallerSvc.install(spec);
+
+		// Verify: the CodeSystem resource WAS updated
+		CodeSystem csAfter = fetchCodeSystemByUrl(codeSystemUrl);
+		assertThat(csAfter.getContent()).isEqualTo(CodeSystem.CodeSystemContentMode.COMPLETE);
+		assertThat(csAfter.getMeta().getVersionId())
+			.as("Resource version should have changed after IG overwrite")
+			.isNotEqualTo(versionIdBefore);
+
+		// Verify: IG concepts are now accessible
+		IValidationSupport.LookupCodeResult lookupIgX = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest(codeSystemUrl, "igCodeX"));
+		assertThat(lookupIgX.isFound()).isTrue();
+		assertThat(lookupIgX.getCodeDisplay()).isEqualTo("IG Concept X");
+
+		IValidationSupport.LookupCodeResult lookupIgY = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest(codeSystemUrl, "igCodeY"));
+		assertThat(lookupIgY.isFound()).isTrue();
+	}
+
+	private CodeSystem fetchCodeSystemByUrl(String theUrl) {
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(CodeSystem.SP_URL, new UriParam(theUrl));
+		IBundleProvider result = myCodeSystemDao.search(map, new SystemRequestDetails());
+		assertThat(result.sizeOrThrowNpe()).isEqualTo(1);
+		return (CodeSystem) result.getResources(0, 1).get(0);
+	}
 
 }

@@ -154,6 +154,7 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR5Config.class, TestDaoSearch.Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
+
 	@Autowired
 	protected IJobStepExecutionServices myJobStepExecutionServices;
 	@Autowired

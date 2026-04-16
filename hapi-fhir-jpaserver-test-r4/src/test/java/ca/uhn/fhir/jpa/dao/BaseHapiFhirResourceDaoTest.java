@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -46,6 +47,8 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -56,6 +59,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
@@ -102,6 +106,12 @@ import static org.mockito.Mockito.when;
 class BaseHapiFhirResourceDaoTest {
 	public static final String RESOURCE_TYPE = "Patient";
 	public static final String RESOURCE_ID = "123";
+
+	@Spy
+	private PartitionSettings myPartitionSettings;
+
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	private CriteriaBuilder myCriteriaBuilder;
 
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -220,8 +230,8 @@ class BaseHapiFhirResourceDaoTest {
 		when(myIdHelperService.resolveResourceIdentity(any(), eq("Patient"), eq("1"), argThat(ResolveIdentityMode::isIncludeDeleted)))
 			.thenReturn(mockDeletedResourceLookup);
 
-		when(myEntityManager.createQuery(any(), eq(ResourceHistoryTable.class))).thenReturn(mock());
-		when(myEntityManager.find(any(), any())).thenReturn(null); // Simulate that the entity is expunged and not found in the db
+		when(myEntityManager.getCriteriaBuilder()).thenReturn(myCriteriaBuilder);
+		when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(mock());
 
 		// ACT && ASSERT
 		assertThrows(ResourceNotFoundException.class, () -> mySvc.readEntity(versionedId, requestDetails));

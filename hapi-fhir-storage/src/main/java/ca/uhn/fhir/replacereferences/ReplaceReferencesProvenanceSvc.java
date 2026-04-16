@@ -22,6 +22,7 @@ package ca.uhn.fhir.replacereferences;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
@@ -31,9 +32,10 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -95,7 +97,7 @@ public class ReplaceReferencesProvenanceSvc {
 
 	protected Provenance createProvenanceObject(
 			IIdType theTargetId,
-			@Nullable IIdType theSourceId,
+			IIdType theSourceId,
 			List<IIdType> theUpdatedReferencingResourceIds,
 			Date theStartTime,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -125,13 +127,41 @@ public class ReplaceReferencesProvenanceSvc {
 		provenance.addReason(activityReasonCodeableConcept);
 
 		provenance.addTarget(new Reference(theTargetId));
-		if (theSourceId != null) {
-			provenance.addTarget(new Reference(theSourceId));
-		}
+		provenance.addTarget(new Reference(theSourceId));
 
 		theUpdatedReferencingResourceIds.forEach(id -> provenance.addTarget(new Reference(id)));
 		theContainedResources.forEach(c -> provenance.addContained((Resource) c));
+
+		addPatientCompartmentExtension(provenance, theTargetId);
+
 		return provenance;
+	}
+
+	/**
+	 * Sets the {@link HapiExtensions#EXT_PATIENT_COMPARTMENT} extension on the Provenance to control
+	 * which partition it is stored in. The Provenance targets multiple resources that may span
+	 * Patient compartments, so the extension tells PatientIdPartitionInterceptor which partition to use.
+	 */
+	private void addPatientCompartmentExtension(Provenance theProvenance, IIdType theTargetId) {
+		if ("Patient".equals(theTargetId.getResourceType())) {
+			// operation on Patients: route to the target Patient's partition
+			ExtensionUtil.setExtensionAsString(
+					myFhirContext,
+					theProvenance,
+					HapiExtensions.EXT_PATIENT_COMPARTMENT,
+					theTargetId.toUnqualifiedVersionless().getValue());
+		} else {
+			// Non-Patient target: could be a compartmental resource (e.g., Observation) or a
+			// non-compartmental resource (e.g., Organization). In both cases we route the Provenance
+			// to the default partition. Even for compartmental resources, storing the Provenance in
+			// a specific Patient's partition would make it unfindable during undo — the undo search
+			// (e.g., Provenance?target=Observation/B) can't derive which Patient partition to look in.
+			ExtensionUtil.setExtensionAsString(
+					myFhirContext,
+					theProvenance,
+					HapiExtensions.EXT_PATIENT_COMPARTMENT,
+					PatientIdPartitionInterceptor.PATIENT_COMPARTMENT_NONE);
+		}
 	}
 
 	/**
@@ -238,10 +268,7 @@ public class ReplaceReferencesProvenanceSvc {
 		// we want the most recent one.
 		map.setSort(new SortSpec("recorded", SortOrderEnum.DESC));
 
-		// TODO: PatientIdPartitionInterceptor should be returning the default partition as a part of
-		// the response when Provenance has policy `NON_UNIQUE_COMPARTMENT_IN_DEFAULT`. It doesn't
-		// currently. We shouldn't hardcode allPartitions once we fix that.
-		IBundleProvider searchBundle = myProvenanceDao.search(map, SystemRequestDetails.forAllPartitions());
+		IBundleProvider searchBundle = myProvenanceDao.search(map, theRequestDetails);
 		// 'activity' is not available as a search parameter in r4, was added in r5,
 		// so we need to filter the results manually.
 		return filterByActivity(searchBundle.getAllResources());

@@ -48,6 +48,7 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -316,10 +317,9 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		if (theMeta == null) {
 			throw new InvalidRequestException(Msg.code(554) + "Input contains no parameter with name 'meta'");
 		}
-		IBaseMetaType metaAddOperation = getDao().metaAddOperation(theId, theMeta, theRequestDetails);
-		IBaseParameters parameters = ParametersUtil.newInstance(getContext());
-		ParametersUtil.addParameterToParameters(getContext(), parameters, "return", metaAddOperation);
-		return parameters;
+		DaoMethodOutcome metaAddOutcome =
+				getDao().metaAddOperation(theId, theMeta, theRequestDetails, new TransactionDetails());
+		return (IBaseParameters) metaAddOutcome.getResource();
 	}
 
 	@Description("Delete tags, profiles, and/or security labels from a resource")
@@ -334,10 +334,9 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		if (theMeta == null) {
 			throw new InvalidRequestException(Msg.code(555) + "Input contains no parameter with name 'meta'");
 		}
-		IBaseMetaType metaDelete = getDao().metaDeleteOperation(theId, theMeta, theRequestDetails);
-		IBaseParameters parameters = ParametersUtil.newInstance(getContext());
-		ParametersUtil.addParameterToParameters(getContext(), parameters, "return", metaDelete);
-		return parameters;
+		DaoMethodOutcome metaDeleteOutcome =
+				getDao().metaDeleteOperation(theId, theMeta, theRequestDetails, new TransactionDetails());
+		return (IBaseParameters) metaDeleteOutcome.getResource();
 	}
 
 	@Update

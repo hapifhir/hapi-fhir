@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7699
+title: "There was a bug where PatientIdPartitionInterceptor did not include the default partition when
+  searching for resources with NON_UNIQUE_COMPARTMENT_IN_DEFAULT policy, causing resources stored in the
+  default partition (due to referencing multiple patients) to be missed during searches. This has been fixed."

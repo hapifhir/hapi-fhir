@@ -66,6 +66,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -83,6 +84,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -92,6 +96,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -103,6 +109,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 @Import({PatientIdPartitionInterceptorR4Test.TestConfig.class, TestDaoSearch.Config.class})
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4Test {
+	// Captures the contents between parentheses in a "PARTITION_ID IN (...)" SQL clause
+	private static final Pattern PARTITION_ID_IN_PATTERN = Pattern.compile("PARTITION_ID IN \\(([^)]+)\\)");
 	public static final int ALTERNATE_DEFAULT_ID = -1;
 	public static final int PATIENT_A_COMPARTMENT_ID = 65;
 
@@ -241,6 +249,30 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertThatThrownBy(()->myProvenanceDao.create(provenance, newSrd()))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("Policy does not allow resource of type \"Provenance\" to be created in multiple Patient compartments: Patient/A, Patient/B");
+	}
+
+	@ParameterizedTest
+	@CsvSource({"MANDATORY_SINGLE_COMPARTMENT", "OPTIONAL_SINGLE_COMPARTMENT", "NON_UNIQUE_COMPARTMENT_IN_DEFAULT"})
+	void testCreateProvenance_InMultiplePatientCompartments_withCompartmentExtension(String thePolicy) {
+		// Setup
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		mySvc.setResourceTypePolicies(Map.of("Provenance", ResourceCompartmentStoragePolicy.parse(thePolicy)));
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("B"), withActiveTrue());
+
+		// Test
+		Provenance provenance = new Provenance();
+		provenance.addTarget().setReference("Patient/A");
+		provenance.addTarget().setReference("Patient/B");
+		provenance.addExtension()
+			.setUrl("http://hapifhir.io/fhir/StructureDefinition/patient-compartment")
+			.setValue(new StringType("Patient/A"));
+		IIdType provenanceId = myProvenanceDao.create(provenance, newSrd()).getId();
+
+		// Verify
+		int patientBPartitionId = PatientIdPartitionInterceptor.defaultPartitionAlgorithm("B");
+		assertThat(patientBPartitionId).isNotEqualTo(PATIENT_A_COMPARTMENT_ID);
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, provenanceId);
 	}
 
 	@Test
@@ -415,13 +447,13 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Patient patient = myPatientDao.read(patientVersionOne);
 		assertEquals("1", patient.getIdElement().getVersionIdPart());
 
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-
-		List<SqlQuery> selectQueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-		assertEquals(2, selectQueriesForCurrentThread.size());
-		assertThat(selectQueriesForCurrentThread.get(0).getSql(false, false)).contains("PARTITION_ID=?");
-		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).doesNotContain("PARTITION_ID=");
-		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).doesNotContain("PARTITION_ID in");
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectCount(1)
+				.commitCount(1)
+				.noOtherCounts()
+				.selectSqlContains(0, "PARTITION_ID='65'")
+		);
 	}
 
 	@SuppressWarnings("GrazieInspection")
@@ -440,7 +472,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			MANDATORY_SINGLE_COMPARTMENT      , 65                , FAIL             , true                     , 65
 			ALWAYS_USE_PARTITION_ID/5         , 5                 , 5                , true                     , 5
 			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1               , false                    , ALL
-			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1               , true                     , 65
+			NON_UNIQUE_COMPARTMENT_IN_DEFAULT , 65                , -1               , true                     , '65,-1'
 			""")
 	void testResourceTypePolicies_PatientCompartmentResource(String thePolicyString, int thePatientSpecificDocRefCompartmentId, String theDocRefNoPatientCompartmentString, boolean theIncludePatientIdInSearch, String theExpectedSearchPartitionString) {
 		/*
@@ -498,7 +530,16 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			assertTrue(searchQuery.getRequestPartitionId().isAllPartitions());
 			assertThat(searchQuery.getSql(true, true)).doesNotContain("PARTITION_ID =");
 			assertThat(searchQuery.getSql(true, true)).doesNotContain("PARTITION_ID IN");
+		} else if (theExpectedSearchPartitionString.contains(",")) {
+			// Multiple expected partitions — verify PARTITION_ID IN (...) clause
+			List<Integer> expectedPartitions = Arrays.stream(theExpectedSearchPartitionString.split(","))
+				.map(String::trim)
+				.map(Integer::parseInt)
+				.toList();
+			assertThat(searchQuery.getRequestPartitionId().getPartitionIds()).containsExactlyInAnyOrderElementsOf(expectedPartitions);
+			assertThat(parseMultiplePartitionIdsFromSqlInClause(searchQuery.getSql(true, true))).containsExactlyInAnyOrderElementsOf(expectedPartitions);
 		} else {
+			// Single expected partition — verify PARTITION_ID = ... clause
 			int partition = Integer.parseInt(theExpectedSearchPartitionString);
 			assertThat(searchQuery.getRequestPartitionId().getPartitionIds()).containsExactly(partition);
 			assertThat(searchQuery.getSql(true, true)).containsAnyOf(
@@ -714,11 +755,14 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myOrganizationDao.history(new IdType("Organization/C"), null, null, null, mySrd);
-		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, outcome.size());
-		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("PARTITION_ID=?");
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("PARTITION_ID=?");
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(1)
+				.commitCount(2)
+				.noOtherCounts()
+				.selectSqlContains(0, "PARTITION_ID='-1'")
+		);
 	}
 
 	@Test
@@ -1277,6 +1321,19 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			ResourceTable table = myResourceTableDao.findByTypeAndFhirId(theResourceId.getResourceType(), theResourceId.getIdPart()).orElseThrow();
 			assertEquals(theExpectedPartitionId, Objects.requireNonNull(table.getPartitionId().getPartitionId()).intValue());
 		});
+	}
+
+	/**
+	 * Extracts partition IDs from a PARTITION_ID IN (...) clause in a SQL string.
+	 */
+	private List<Integer> parseMultiplePartitionIdsFromSqlInClause(String theSql) {
+		Matcher matcher = PARTITION_ID_IN_PATTERN.matcher(theSql);
+		assertThat(matcher.find()).as("Expected PARTITION_ID IN (...) in SQL: " + theSql).isTrue();
+		return Arrays.stream(matcher.group(1).split(","))
+			.map(String::trim)
+			.map(s -> s.replace("'", ""))
+			.map(Integer::parseInt)
+			.toList();
 	}
 
 	private int getResourcePartition(IIdType theResourceId) {

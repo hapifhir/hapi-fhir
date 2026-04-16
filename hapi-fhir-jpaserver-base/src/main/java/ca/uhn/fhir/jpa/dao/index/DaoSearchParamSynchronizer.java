@@ -20,25 +20,25 @@
 package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
@@ -71,33 +71,113 @@ public class DaoSearchParamSynchronizer {
 	@Autowired
 	private FhirContext myFhirContext;
 
+	@Autowired
+	private IHapiTransactionService myTransactionService;
+
+	private UniqueIndexPreExistenceChecker myUniqueIndexPreExistenceChecker;
+
+	@PostConstruct
+	void start() {
+		myUniqueIndexPreExistenceChecker = new UniqueIndexPreExistenceChecker(
+				myFhirContext, myResourceIndexedCompositeStringUniqueDao, myTransactionService);
+	}
+
 	public AddRemoveCount synchronizeSearchParamsToDatabase(
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
 			ResourceIndexedSearchParams theParams,
 			ResourceTable theEntity,
 			ResourceIndexedSearchParams existingParams) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
-		synchronize(theEntity, retVal, theParams.myStringParams, existingParams.myStringParams, null);
-		synchronize(theEntity, retVal, theParams.myTokenParams, existingParams.myTokenParams, null);
-		synchronize(theEntity, retVal, theParams.myNumberParams, existingParams.myNumberParams, null);
-		synchronize(theEntity, retVal, theParams.myQuantityParams, existingParams.myQuantityParams, null);
 		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myStringParams,
+				existingParams.myStringParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myTokenParams,
+				existingParams.myTokenParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myNumberParams,
+				existingParams.myNumberParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myQuantityParams,
+				existingParams.myQuantityParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
 				theEntity,
 				retVal,
 				theParams.myQuantityNormalizedParams,
 				existingParams.myQuantityNormalizedParams,
 				null);
-		synchronize(theEntity, retVal, theParams.myDateParams, existingParams.myDateParams, null);
-		synchronize(theEntity, retVal, theParams.myUriParams, existingParams.myUriParams, null);
-		synchronize(theEntity, retVal, theParams.myCoordsParams, existingParams.myCoordsParams, null);
-		synchronize(theEntity, retVal, theParams.myLinks, existingParams.myLinks, null);
-		synchronize(theEntity, retVal, theParams.myComboTokenNonUnique, existingParams.myComboTokenNonUnique, null);
 		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myDateParams,
+				existingParams.myDateParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myUriParams,
+				existingParams.myUriParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myCoordsParams,
+				existingParams.myCoordsParams,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myLinks,
+				existingParams.myLinks,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myComboTokenNonUnique,
+				existingParams.myComboTokenNonUnique,
+				null);
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
 				theEntity,
 				retVal,
 				theParams.myComboStringUniques,
 				existingParams.myComboStringUniques,
-				new UniqueIndexPreExistenceChecker());
+				myUniqueIndexPreExistenceChecker);
 
 		// make sure links are indexed
 		theEntity.setResourceLinks(theParams.myLinks);
@@ -121,11 +201,13 @@ public class DaoSearchParamSynchronizer {
 	}
 
 	private <T extends BaseResourceIndex> void synchronize(
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails,
 			ResourceTable theEntity,
 			AddRemoveCount theAddRemoveCount,
 			Collection<T> theNewParams,
 			Collection<T> theExistingParams,
-			@Nullable IPreSaveHook<T> theAddParamPreSaveHook) {
+			@Nullable ISearchParamPreSynchronizeHook<T> theAddParamPreSaveHook) {
 		Collection<T> newParams = theNewParams;
 		for (T next : newParams) {
 			next.setResourceId(theEntity.getId().getId());
@@ -174,8 +256,8 @@ public class DaoSearchParamSynchronizer {
 		List<T> paramsToRemove = subtract(theExistingParams, newParams);
 		List<T> paramsToAdd = subtract(newParams, theExistingParams);
 
-		if (theAddParamPreSaveHook != null) {
-			theAddParamPreSaveHook.preSave(paramsToRemove, paramsToAdd);
+		if (theAddParamPreSaveHook != null && (!paramsToAdd.isEmpty() || !paramsToRemove.isEmpty())) {
+			theAddParamPreSaveHook.preSave(theRequest, theTransactionDetails, paramsToRemove, paramsToAdd);
 		}
 
 		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
@@ -332,65 +414,5 @@ public class DaoSearchParamSynchronizer {
 			}
 		}
 		return retVal;
-	}
-
-	private interface IPreSaveHook<T> {
-
-		void preSave(Collection<T> theParamsToRemove, Collection<T> theParamsToAdd);
-	}
-
-	private class UniqueIndexPreExistenceChecker implements IPreSaveHook<ResourceIndexedComboStringUnique> {
-
-		@Override
-		public void preSave(
-				Collection<ResourceIndexedComboStringUnique> theParamsToRemove,
-				Collection<ResourceIndexedComboStringUnique> theParamsToAdd) {
-			if (myStorageSettings.isUniqueIndexesCheckedBeforeSave()) {
-				for (ResourceIndexedComboStringUnique theIndex : theParamsToAdd) {
-					ResourceIndexedComboStringUnique existing =
-							myResourceIndexedCompositeStringUniqueDao.findByQueryString(theIndex.getIndexString());
-					if (existing != null) {
-
-						/*
-						 * If we're reindexing, and the previous index row is being updated
-						 * to add previously missing hashes, we may falsely detect that the index
-						 * creation is going to fail.
-						 */
-						boolean existingIndexIsScheduledForRemoval = false;
-						for (var next : theParamsToRemove) {
-							if (existing == next) {
-								existingIndexIsScheduledForRemoval = true;
-								break;
-							}
-						}
-						if (existingIndexIsScheduledForRemoval) {
-							continue;
-						}
-
-						String searchParameterId = "(unknown)";
-						if (theIndex.getSearchParameterId() != null) {
-							searchParameterId = theIndex.getSearchParameterId().getValue();
-						}
-
-						String msg = myFhirContext
-								.getLocalizer()
-								.getMessage(
-										BaseHapiFhirDao.class,
-										"uniqueIndexConflictFailure",
-										existing.getResource().getResourceType(),
-										theIndex.getIndexString(),
-										existing.getResource()
-												.getIdDt()
-												.toUnqualifiedVersionless()
-												.getValue(),
-										searchParameterId);
-
-						// Use ResourceVersionConflictException here because the HapiTransactionService
-						// catches this and can retry it if needed
-						throw new ResourceVersionConflictException(Msg.code(1093) + msg);
-					}
-				}
-			}
-		}
 	}
 }

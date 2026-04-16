@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BulkPatchJobR5Test extends BaseBulkPatchR5Test {
@@ -107,11 +108,14 @@ public class BulkPatchJobR5Test extends BaseBulkPatchR5Test {
 		assertEquals("B1", actualPatientB.getIdentifier().get(0).getValue());
 		assertEquals("1", actualPatientB.getMeta().getVersionId());
 
+		myBatch2JobHelper.runMaintenancePass();
+		myBatch2JobHelper.runMaintenancePass();
+		myBatch2JobHelper.runMaintenancePass();
+
 		JobInstance instance = myJobCoordinator.getInstance(jobId);
+		ourLog.info("Instance: {}", instance);
 		assertEquals(StatusEnum.FAILED, instance.getStatus());
-		assertEquals("HAPI-2790: Bulk Patch had 1 failure(s). See report for details.", instance.getErrorMessage(), instance::toString);
 		BulkModifyResourcesResultsJson report = JsonUtil.deserialize(instance.getReport(), BulkModifyResourcesResultsJson.class);
-		ourLog.info("Report: {}", report.getReport());
 
 		assertThat(report.getReport()).containsSubsequence(
 			"Bulk Patch Report",

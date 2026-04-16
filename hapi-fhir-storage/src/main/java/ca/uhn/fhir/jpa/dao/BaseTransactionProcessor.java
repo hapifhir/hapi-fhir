@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -91,6 +92,7 @@ import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -110,6 +112,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -575,8 +578,7 @@ public abstract class BaseTransactionProcessor {
 		for (int i = 0; i < requestEntriesSize; i++) {
 
 			nextResponseEntry = responseMap.get(i);
-			if (nextResponseEntry instanceof ServerResponseExceptionHolder) {
-				ServerResponseExceptionHolder caughtEx = (ServerResponseExceptionHolder) nextResponseEntry;
+			if (nextResponseEntry instanceof ServerResponseExceptionHolder caughtEx) {
 				if (caughtEx.getException() != null) {
 					IBase nextEntry = myVersionAdapter.addEntry(response);
 					populateEntryWithOperationOutcome(caughtEx.getException(), nextEntry);
@@ -745,12 +747,11 @@ public abstract class BaseTransactionProcessor {
 							Msg.code(530) + "Can not invoke read operation on nested transaction");
 				}
 
-				if (!(theRequestDetails instanceof ServletRequestDetails)) {
+				if (!(theRequestDetails instanceof ServletRequestDetails srd)) {
 					throw new MethodNotAllowedException(
 							Msg.code(531) + "Can not call transaction GET methods from this context");
 				}
 
-				ServletRequestDetails srd = (ServletRequestDetails) theRequestDetails;
 				Integer originalOrder = theOriginalRequestOrder.get(nextReqEntry);
 				IBase nextRespEntry =
 						(IBase) myVersionAdapter.getEntries(theResponse).get(originalOrder);
@@ -799,9 +800,7 @@ public abstract class BaseTransactionProcessor {
 		Optional<IBaseExtension<?, ?>> partitionIdsExtensionOptional =
 				myVersionAdapter.getEntryRequestExtensionByUrl(theReqEntry, EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS);
 		if (partitionIdsExtensionOptional.isPresent()
-				&& partitionIdsExtensionOptional.get().getValue() instanceof IPrimitiveType<?>) {
-			IPrimitiveType<?> valueAsPrimitiveType =
-					(IPrimitiveType<?>) partitionIdsExtensionOptional.get().getValue();
+				&& partitionIdsExtensionOptional.get().getValue() instanceof IPrimitiveType<?> valueAsPrimitiveType) {
 			String value = valueAsPrimitiveType.getValueAsString();
 			theRequestDetails.setHeaders(Constants.HEADER_X_REQUEST_PARTITION_IDS, List.of(value));
 		}
@@ -1512,16 +1511,27 @@ public abstract class BaseTransactionProcessor {
 
 				switch (verb) {
 					case "POST": {
-						// CREATE
+						// CREATE (or $operation)
 						validateResourcePresent(res, order, verb);
 
-						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
+						// Generally POST means that we're doing a create or conditional create,
+						// but it can also be an operation invocation.
+						Optional<ParsedRequestOperation> parsedOperationOpt = parseUrlForOperationInvocation(url);
+						if (parsedOperationOpt.isPresent()) {
+							ParsedRequestOperation parsedOperation = parsedOperationOpt.get();
+							invokeOperationInTransaction(
+									parsedOperation, res, requestDetailsForEntry, nextRespEntry, theTransactionDetails);
+							break;
+						}
+
+						// Ok, it's a create / conditional create
 						res.setId((String) null);
 
 						DaoMethodOutcome outcome;
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						// create individual resource
+						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 						outcome =
 								resourceDao.create(res, matchUrl, false, requestDetailsForEntry, theTransactionDetails);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
@@ -1660,8 +1670,7 @@ public abstract class BaseTransactionProcessor {
 						IBaseParameters patchBodyParameters = null;
 						PatchTypeEnum patchType = null;
 
-						if (res instanceof IBaseBinary) {
-							IBaseBinary binary = (IBaseBinary) res;
+						if (res instanceof IBaseBinary binary) {
 							if (binary.getContent() != null && binary.getContent().length > 0) {
 								patchBody = toUtf8String(binary.getContent());
 							}
@@ -1780,7 +1789,7 @@ public abstract class BaseTransactionProcessor {
 			theTransactionStopWatch.startTask("Flush writes to database");
 
 			// flush the changes
-			flushSession(theIdToPersistedOutcome);
+			flushSession(theTransactionDetails, theIdToPersistedOutcome);
 
 			theTransactionStopWatch.endCurrentTask();
 
@@ -1852,6 +1861,64 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
+	private void invokeOperationInTransaction(
+			ParsedRequestOperation theParsedRequestOperation,
+			IBaseResource theResource,
+			RequestDetails theRequestDetailsForEntry,
+			IBase theResponseBundleEntry,
+			TransactionDetails theTransactionDetails) {
+		switch (theParsedRequestOperation.operation()) {
+			case META_ADD, META_DELETE -> {
+				IIdType instanceId = theParsedRequestOperation.targetInstance();
+				invokeOperationMetaAddOrDeleteInTransaction(
+						theParsedRequestOperation,
+						theResource,
+						theRequestDetailsForEntry,
+						theResponseBundleEntry,
+						theTransactionDetails,
+						instanceId);
+			}
+			case UNSUPPORTED -> throw new InvalidRequestException(
+					Msg.code(2899) + "Operation " + UrlUtil.sanitizeUrlPart(theParsedRequestOperation.operationName())
+							+ " is not supported in a FHIR transaction");
+		}
+	}
+
+	private void invokeOperationMetaAddOrDeleteInTransaction(
+			ParsedRequestOperation theParsedRequestOperation,
+			IBaseResource theResource,
+			RequestDetails theRequestDetailsForEntry,
+			IBase theResponseBundleEntry,
+			TransactionDetails theTransactionDetails,
+			IIdType instanceId) {
+		IBaseMetaType meta = null;
+		if (theResource instanceof IBaseParameters request) {
+			meta = (IBaseMetaType) ParametersUtil.getNamedParameterValue(myContext, request, "meta")
+					.filter(t -> t instanceof IBaseMetaType)
+					.orElse(null);
+		}
+
+		if (meta == null) {
+			throw new InvalidRequestException(Msg.code(2898) + theParsedRequestOperation.operationName()
+					+ " request must have a parameter named 'meta' of type 'Meta'");
+		}
+
+		IFhirResourceDao resourceDao = getDaoOrThrowException(
+				myContext.getResourceDefinition(instanceId.getResourceType()).getImplementingClass());
+		DaoMethodOutcome outcome =
+				switch (theParsedRequestOperation.operation()) {
+					case META_ADD -> resourceDao.metaAddOperation(
+							instanceId, meta, theRequestDetailsForEntry, theTransactionDetails);
+					case META_DELETE -> resourceDao.metaDeleteOperation(
+							instanceId, meta, theRequestDetailsForEntry, theTransactionDetails);
+					case UNSUPPORTED -> throw new IllegalStateException(
+							Msg.code(2900) + "Can't handle this operation here");
+				};
+
+		myVersionAdapter.setResponseOutcome(theResponseBundleEntry, outcome.getOperationOutcome());
+		myVersionAdapter.setResponseStatus(theResponseBundleEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
+	}
+
 	/**
      * Subclasses may override this in order to invoke specific operations when
      * we're finished handling all the write entries in the transaction bundle
@@ -1890,13 +1957,9 @@ public abstract class BaseTransactionProcessor {
 
 	private boolean shouldSwapBinaryToActualResource(
 			IBaseResource theResource, String theResourceType, IIdType theNextResourceId) {
-		if ("Binary".equalsIgnoreCase(theResourceType)
+		return "Binary".equalsIgnoreCase(theResourceType)
 				&& theNextResourceId.getResourceType() != null
-				&& !theNextResourceId.getResourceType().equalsIgnoreCase("Binary")) {
-			return true;
-		} else {
-			return false;
-		}
+				&& !theNextResourceId.getResourceType().equalsIgnoreCase("Binary");
 	}
 
 	private void setConditionalUrlToBeValidatedLater(
@@ -2071,10 +2134,7 @@ public abstract class BaseTransactionProcessor {
 		for (DaoMethodOutcome nextOutcome : theIdToPersistedOutcome.values()) {
 
 			if (i++ % 250 == 0) {
-				ourLog.debug(
-						"Have indexed {} entities out of {} in transaction",
-						i,
-						theIdToPersistedOutcome.values().size());
+				ourLog.debug("Have indexed {} entities out of {} in transaction", i, theIdToPersistedOutcome.size());
 			}
 
 			if (nextOutcome.isNop()) {
@@ -2442,7 +2502,8 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
-	protected abstract void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome);
+	protected abstract void flushSession(
+			@Nonnull TransactionDetails theTransactionDetails, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome);
 
 	private void validateResourcePresent(IBaseResource theResource, Integer theOrder, String theVerb) {
 		if (theResource == null) {
@@ -2451,6 +2512,35 @@ public abstract class BaseTransactionProcessor {
 					.getMessage(BaseTransactionProcessor.class, "missingMandatoryResource", theVerb, theOrder);
 			throw new InvalidRequestException(Msg.code(543) + msg);
 		}
+	}
+
+	@Nonnull
+	public Optional<ParsedRequestOperation> parseUrlForOperationInvocation(String theUrl) {
+		if (isBlank(theUrl)) {
+			return Optional.empty();
+		}
+
+		int lastSlashIdx = theUrl.lastIndexOf('/');
+		if (lastSlashIdx == -1) {
+			return Optional.empty();
+		}
+
+		String operationName = theUrl.substring(lastSlashIdx + 1);
+		if (operationName.startsWith("$")) {
+			String prefix = theUrl.substring(0, lastSlashIdx);
+			IIdType id = myContext.getVersion().newIdType(prefix);
+			if (id.hasResourceType() && id.hasIdPart()) {
+				TransactionOperationEnum operation =
+						switch (operationName) {
+							case JpaConstants.OPERATION_META_ADD -> TransactionOperationEnum.META_ADD;
+							case JpaConstants.OPERATION_META_DELETE -> TransactionOperationEnum.META_DELETE;
+							default -> TransactionOperationEnum.UNSUPPORTED;
+						};
+				return Optional.of(new ParsedRequestOperation(operationName, operation, id));
+			}
+		}
+
+		return Optional.empty();
 	}
 
 	private IIdType newIdType(String theResourceType, String theResourceId, String theVersion) {
@@ -2612,6 +2702,19 @@ public abstract class BaseTransactionProcessor {
 		myPartitionSettings = thePartitionSettings;
 	}
 
+	public record ParsedRequestOperation(
+			@Nonnull String operationName,
+			@Nonnull TransactionOperationEnum operation,
+			@Nonnull IIdType targetInstance) {}
+
+	public enum TransactionOperationEnum {
+		META_ADD,
+
+		META_DELETE,
+
+		UNSUPPORTED;
+	}
+
 	/**
      * Transaction Order, per the spec:
      * <p>
@@ -2711,6 +2814,7 @@ public abstract class BaseTransactionProcessor {
 		private final Map<Integer, Object> myResponseMap;
 		private final int myResponseOrder;
 		private final boolean myNestedMode;
+
 		private BaseServerResponseException myLastSeenException;
 
 		protected RetriableBundleTask(
@@ -2808,6 +2912,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private static class ServerResponseExceptionHolder {
+
 		private BaseServerResponseException myException;
 
 		public BaseServerResponseException getException() {
