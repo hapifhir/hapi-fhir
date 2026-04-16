@@ -1456,9 +1456,11 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						]
 					}
 					""",
-				bundleAssert(1)
+				bundleAssert(1) // to be verified.  i think this throws an exception.  if it
+				// returns 1, version has to be 1 and same identifier
 			),
 			Arguments.of(
+				// redundant
 				"create Patient | Patient does not exist",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
@@ -1511,6 +1513,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			),
 			// PUTs
 			Arguments.of(
+				// FIXME-TG:  // "Patient/pat1" in the url
 				"create Patient with client-assigned ID | Patient already exist",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
@@ -1521,7 +1524,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 									"id" : "pat1"
 									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
 								},
-								"request" : { "method" : "PUT", "url" : "Patient"}
+								"request" : { "method" : "PUT", "url" : "Patient"} 
 							}
 						]
 					}
@@ -1529,6 +1532,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				bundleAssert(1)
 			),
 			Arguments.of(
+				// FIXME-TG: same here
 				"create Patient with client-assigned ID | Patient does not exist",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
