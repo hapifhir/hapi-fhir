@@ -181,10 +181,11 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 
 		private final TriggerKey myTriggerKey;
 
-		public HeartbeatJobHandle(ISchedulerService theSchedulerService,
-								  Duration theAckTimeout,
-								  String theInstanceId,
-								  WorkChunk theWorkChunk) {
+		public HeartbeatJobHandle(
+				ISchedulerService theSchedulerService,
+				Duration theAckTimeout,
+				String theInstanceId,
+				WorkChunk theWorkChunk) {
 			myScheduleSvc = theSchedulerService;
 			String jobId = String.format("%s-%s-%s", SCHEDULED_JOB_ID_PREFIX, theInstanceId, theWorkChunk.getId());
 			ScheduledJobDefinition definition = new ScheduledJobDefinition();

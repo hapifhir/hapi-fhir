@@ -45,7 +45,8 @@ public class BatchJobSender {
 	 * directly controls the partition instead of relying on whatever the randomly assigned
 	 * guid hashes out to.
 	 */
-	private Function<JobWorkNotification, JobWorkNotificationJsonMessage> myMessageCreationFn = JobWorkNotificationJsonMessage::new;
+	private Function<JobWorkNotification, JobWorkNotificationJsonMessage> myMessageCreationFn =
+			JobWorkNotificationJsonMessage::new;
 
 	public BatchJobSender(@Nonnull IChannelProducer<JobWorkNotification> theWorkChannelProducer) {
 		myWorkChannelProducer = theWorkChannelProducer;
