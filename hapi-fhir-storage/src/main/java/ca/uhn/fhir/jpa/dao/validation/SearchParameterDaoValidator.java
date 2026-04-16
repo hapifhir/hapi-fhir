@@ -248,8 +248,8 @@ public class SearchParameterDaoValidator {
 					}
 				}
 				if (!anyPathMatchesBase) {
-					throw new UnprocessableEntityException(Msg.code(2911) +
-						"No path in expression '" + expression +  "' matches the base [" + base + "].");
+					throw new UnprocessableEntityException(Msg.code(2911) + "No path in expression '" + expression
+							+ "' matches the base [" + base + "].");
 				}
 			}
 		}
