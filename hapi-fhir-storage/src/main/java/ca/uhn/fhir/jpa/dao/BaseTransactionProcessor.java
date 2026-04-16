@@ -1141,7 +1141,7 @@ public abstract class BaseTransactionProcessor {
 
 							if (nextWriteEntryRequestPartitionId == null) {
 								nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineReadPartitionForRequest(
+									myRequestPartitionHelperService.determineCreatePartitionForRequest(
 										requestDetailsForEntry, resource, resourceType);
 								if (resourceId != null) {
 									theTransactionDetails.addResolvedPartition(
