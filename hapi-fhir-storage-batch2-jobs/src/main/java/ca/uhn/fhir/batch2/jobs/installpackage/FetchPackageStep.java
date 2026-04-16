@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.NpmPackageUtils;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
@@ -39,8 +40,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.Base64;
 
 public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallationJobParameters, PackageContentsJson> {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FetchPackageStep.class);
 
 	private final IHapiPackageCacheManager myPackageCacheManager;
 
@@ -62,8 +61,7 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 
 			if (npmPackage == null) {
 				String message = formatErrorMessage(installationSpec);
-				ourLog.error(message);
-				throw new JobExecutionFailedException(message);
+				throw new JobExecutionFailedException(Msg.code(2915) + message);
 			}
 
 			// We need to convert the package back to bytes so we can serialize it between steps
@@ -80,7 +78,7 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 			contents.setReport(outcome);
 			theDataSink.accept(contents);
 		} catch (Exception e) {
-			throw new JobExecutionFailedException("Error occurred while retrieving package", e);
+			throw new JobExecutionFailedException(Msg.code(2916) + "Error occurred while retrieving package", e);
 		}
 
 		return RunOutcome.SUCCESS;

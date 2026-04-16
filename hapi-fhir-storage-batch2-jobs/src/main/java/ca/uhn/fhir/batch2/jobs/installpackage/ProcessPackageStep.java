@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
@@ -43,8 +44,6 @@ import java.util.Base64;
 public class ProcessPackageStep
 		implements IReductionStepWorker<
 				PackageInstallationJobParameters, PackageContentsJson, PackageInstallOutcomeJson> {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ProcessPackageStep.class);
 
 	IPackageInstallerSvc myPackageInstallerSvc;
 
@@ -128,8 +127,7 @@ public class ProcessPackageStep
 			myPackageOutcome = packageOutcome;
 		} catch (Exception e) {
 			String message = formatErrorMessage(installationSpec);
-			ourLog.error(message, e);
-			throw new JobExecutionFailedException(message, e);
+			throw new JobExecutionFailedException(Msg.code(2917) + message, e);
 		}
 		return ChunkOutcome.SUCCESS();
 	}
