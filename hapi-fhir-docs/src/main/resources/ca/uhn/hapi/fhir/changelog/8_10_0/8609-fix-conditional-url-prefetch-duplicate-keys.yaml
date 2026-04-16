@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7783
+title: "Fixed JPA transaction processor prefetch bug where conditional URLs with duplicate
+     parameter keys were incorrectly processed instead of being skipped, causing
+     incorrect resource matching."
