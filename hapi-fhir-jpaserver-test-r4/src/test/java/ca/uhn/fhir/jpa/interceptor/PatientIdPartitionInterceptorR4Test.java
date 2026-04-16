@@ -84,16 +84,16 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
@@ -127,7 +127,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	private IResourceIdentifierCacheSvc myResourceIdentifierCacheSvc;
 
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
-	private PatientIdentifierPreResolutionInterceptor myPatientIdentifierPreResolutionInterceptor;
 	private PatientIdPartitionInterceptor mySvc;
 
 	private final String oldPayerSystem = "urn:uudid:old-payer-sytem";
@@ -137,13 +136,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	public void before() throws Exception {
 		super.before();
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		myPatientIdentifierPreResolutionInterceptor = new PatientIdentifierPreResolutionInterceptor(getFhirContext(), myPartitionSettings, myMatchUrlService, myResourceIdentifierCacheSvc);
-		myPatientIdentifierPreResolutionInterceptor.setPreResolveIdentifierPatientSystems(oldPayerSystem);
 		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
 		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);
-		myInterceptorRegistry.registerInterceptor(myPatientIdentifierPreResolutionInterceptor);
 
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
@@ -158,7 +154,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		super.after();
 		myInterceptorRegistry.unregisterInterceptor(mySvc);
 		myInterceptorRegistry.unregisterInterceptor(myForceOffsetSearchModeInterceptor);
-		myInterceptorRegistry.unregisterInterceptor(myPatientIdentifierPreResolutionInterceptor);
 
 		PartitionSettings defaultSettings = new PartitionSettings();
 		myPartitionSettings.setPartitioningEnabled(defaultSettings.isPartitioningEnabled());

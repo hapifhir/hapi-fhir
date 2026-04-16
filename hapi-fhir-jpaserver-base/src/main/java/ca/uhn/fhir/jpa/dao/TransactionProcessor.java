@@ -217,9 +217,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
 
 				// FIXME-EHP:
-				createPlaceHolders(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
+				createPlaceHolders(
+						theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
 				// now that we have prefetched and created placeholders, resolve(replache) the inlineMatchUrls
-				resolveInlineMatchUrls(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
+				resolveInlineMatchUrls(
+						theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
 			}
 
 			return super.doTransactionWriteOperations(
@@ -239,13 +241,19 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 	}
 
-	private void createPlaceHolders(RequestDetails theRequest, TransactionDetails theTransactionDetails, List<IBase> theEntries, ITransactionProcessorVersionAdapter<?, ?> theVersionAdapter, RequestPartitionId theRequestPartitionId) {
+	private void createPlaceHolders(
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails,
+			List<IBase> theEntries,
+			ITransactionProcessorVersionAdapter<?, ?> theVersionAdapter,
+			RequestPartitionId theRequestPartitionId) {}
 
-	}
-
-	private void resolveInlineMatchUrls(RequestDetails theRequest, TransactionDetails theTransactionDetails, List<IBase> theEntries, ITransactionProcessorVersionAdapter<?, ?> theVersionAdapter, RequestPartitionId theRequestPartitionId) {
-
-	}
+	private void resolveInlineMatchUrls(
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails,
+			List<IBase> theEntries,
+			ITransactionProcessorVersionAdapter<?, ?> theVersionAdapter,
+			RequestPartitionId theRequestPartitionId) {}
 
 	@SuppressWarnings("rawtypes")
 	private void preFetch(

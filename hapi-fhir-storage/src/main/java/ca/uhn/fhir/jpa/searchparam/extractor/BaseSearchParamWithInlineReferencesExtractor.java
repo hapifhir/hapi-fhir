@@ -139,10 +139,10 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				IIdType newId = null;
 				if (matches.isEmpty()) {
 					// FIXME-EHP:
-				// extract to new service CreatePlaceholderService and remove -->>
+					// extract to new service CreatePlaceholderService and remove -->>
 					Optional<IBasePersistedResource> placeholderOpt =
-						// FIXME-EHP:
-						    //  extract from DaoResourceLinkResolver
+							// FIXME-EHP:
+							//  extract from DaoResourceLinkResolver
 							myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(
 									matchResourceType, nextRef, null, theRequestDetails, theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
