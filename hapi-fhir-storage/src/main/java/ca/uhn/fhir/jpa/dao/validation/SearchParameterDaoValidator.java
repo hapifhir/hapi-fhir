@@ -35,6 +35,7 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SearchParameter;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -189,6 +190,94 @@ public class SearchParameterDaoValidator {
 			throw new UnprocessableEntityException(Msg.code(1120) + "SearchParameter.expression value \"" + expression
 					+ "\" is invalid due to missing/incorrect path");
 		}
+
+		if (!isResourceOfTypeComposite && !isResourceOfTypeSpecial) {
+			validateExpressionAgainstBase(theSearchParameter);
+		}
+	}
+
+	/**
+	 * Validates that the FHIRPath expression's resource type prefix is consistent with the declared
+	 * base resource types. If base is a specific resource type (e.g. PractitionerRole), at least one
+	 * expression path segment must start with that resource type. If base is Resource or DomainResource,
+	 * the expression must use a Resource. or DomainResource. prefix — a specific type prefix (e.g. Person.)
+	 * is rejected as a misconfiguration since the parameter would be registered against all resource types
+	 * but only extract values from that one specific type.
+	 */
+	private void validateExpressionAgainstBase(SearchParameter theSearchParameter) {
+		String expression = getExpression(theSearchParameter);
+		List<String> bases = theSearchParameter.getBase().stream()
+				.map(IPrimitiveType::getValueAsString)
+				.filter(Objects::nonNull)
+				.toList();
+
+		if (bases.isEmpty()) {
+			return;
+		}
+
+		String[] paths = expression.split("\\|");
+
+		boolean allBasesAreGeneric = bases.stream().allMatch(b -> "Resource".equals(b) || "DomainResource".equals(b));
+
+		if (allBasesAreGeneric) {
+			for (String path : paths) {
+				String prefix = extractTypePrefix(path.trim());
+				if (prefix != null && !"Resource".equals(prefix) && !"DomainResource".equals(prefix)) {
+					throw new UnprocessableEntityException(Msg.code(2910) + "SearchParameter.expression " + expression
+							+ " uses type-specific prefix " + prefix
+							+ " but base is [" + String.join(", ", bases)
+							+ "]. Expression must use Resource or DomainResource prefix when base is generic.");
+				}
+			}
+		} else {
+			for (String base : bases) {
+				if ("Resource".equals(base) || "DomainResource".equals(base)) {
+					continue;
+				}
+				boolean anyPathMatchesBase = false;
+				for (String path : paths) {
+					String prefix = extractTypePrefix(path.trim());
+					if (prefix == null
+							|| base.equals(prefix)
+							|| "Resource".equals(prefix)
+							|| "DomainResource".equals(prefix)) {
+						anyPathMatchesBase = true;
+						break;
+					}
+				}
+				if (!anyPathMatchesBase) {
+					List<String> expressionPrefixes = java.util.Arrays.stream(paths)
+							.map(p -> extractTypePrefix(p.trim()))
+							.filter(Objects::nonNull)
+							.toList();
+					throw new UnprocessableEntityException(Msg.code(2911) + "SearchParameter.expression \"" + expression
+							+ "\" does not match any of the declared base resource types [" + base
+							+ "]. Expression type prefix(es) " + expressionPrefixes
+							+ " do not match the declared base.");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Extracts the resource type prefix from a FHIRPath expression path segment.
+	 * Returns null if no type-qualified prefix is present.
+	 */
+	private static String extractTypePrefix(String thePath) {
+		// Strip any leading parentheses or spaces
+		int start = 0;
+		while (start < thePath.length() && (thePath.charAt(start) == '(' || thePath.charAt(start) == ' ')) {
+			start++;
+		}
+		String trimmed = thePath.substring(start);
+		int dotIndex = trimmed.indexOf('.');
+		if (dotIndex > 0) {
+			String candidate = trimmed.substring(0, dotIndex);
+			if (Character.isUpperCase(candidate.charAt(0))) {
+				return candidate;
+			}
+		}
+		return null;
 	}
 
 	private void validateExpressionIsParsable(SearchParameter theSearchParameter) {

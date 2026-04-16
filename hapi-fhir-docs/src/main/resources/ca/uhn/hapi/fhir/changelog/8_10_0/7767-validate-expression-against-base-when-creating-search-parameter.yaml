@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 7767
+title: "Previously, when creating a custom SearchParameter, the server did not validate
+  that the FHIRPath expression's resource type prefix was consistent with the declared
+  base resource types. For example, a SearchParameter with base PractitionerRole could
+  be created with an expression starting with Person. without any error. Now, validation
+  ensures that each declared base resource type has at least one matching expression
+  path prefix, and that SearchParameters with a generic base (Resource or DomainResource)
+  do not use a specific resource type prefix in their expression."
