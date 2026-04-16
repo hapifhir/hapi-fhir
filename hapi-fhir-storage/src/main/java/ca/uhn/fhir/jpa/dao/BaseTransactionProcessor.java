@@ -263,10 +263,12 @@ public abstract class BaseTransactionProcessor {
 		// resource
 		// needs extraction so it can be wired in the PatientInlineMatchUrlPreCreationService.
 		//
-		// FIXME-EHP: the execution of conditionalCreatePatientsForInlineMatchUrls needs to either be wrapped in a
-		// clause
+		// FIXME-EHP:
+		// - the execution of conditionalCreatePatientsForInlineMatchUrls needs to either be wrapped in a clause
 		// evaluating myStorageSettings.isAutoCreatePlaceholderReferenceTargets() or have the evaluation done within the
 		// invocation.
+		// - modify the service in order to have it create entries for all inlineMatchUrls, not only the one referring a Patient
+		// resource
 		PatientInlineMatchUrlPreCreationService patientInlineMatchUrlPreCreationService =
 				new PatientInlineMatchUrlPreCreationService(myContext, myMatchUrlService);
 		patientInlineMatchUrlPreCreationService.addConditionalCreateEntriesForInlineMatchUrls(theRequest);
@@ -671,6 +673,13 @@ public abstract class BaseTransactionProcessor {
 		final IBaseBundle response =
 				myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTIONRESPONSE.toCode());
 		List<IBase> getEntries = new ArrayList<>();
+
+		// FIXME-TG:
+		// pay very close attention to how and were 'originalRequestOrder' is used.  each entry in the bundle will be processed
+		// and produce an outcome.  many clients will checks the outcome of a resource processing through direct access (outcome[x])
+		// as opposed of in a loop.  if we add conditional creates as placeholders for inlineMatchUrls (see patientInlineMatchUrlPreCreationService.addConditionalCreateEntriesForInlineMatchUrls),
+		// the original order will be skewed.  we have to find a way to track/detect added conditional creates and remove them when we're done
+		// processing the bundle
 		final IdentityHashMap<IBase, Integer> originalRequestOrder = new IdentityHashMap<>();
 		for (int i = 0; i < requestEntries.size(); i++) {
 			IBase requestEntry = requestEntries.get(i);
