@@ -68,13 +68,14 @@ public class JobStepExecutorFactory {
 	/**
 	 * Time before message redelivery.
 	 *
-	 * If this isn't set by the broker, a default value of 1001ms will be
+	 * If this isn't set by the broker (or the broker value is
+	 * extremely low), a default value of 1001ms will be
 	 * returned.
 	 * (the '1ms' is deliberate in hopes to return a value that is
 	 * hopefully not set by users in case we see it in logs)
 	 */
 	public @Nonnull Duration getAckTimeout() {
-		if (myAckTimeout == null) {
+		if (myAckTimeout == null || myAckTimeout.toMillis() < 500) {
 			myAckTimeout = Duration.ofMillis(1001);
 		}
 		return myAckTimeout;
