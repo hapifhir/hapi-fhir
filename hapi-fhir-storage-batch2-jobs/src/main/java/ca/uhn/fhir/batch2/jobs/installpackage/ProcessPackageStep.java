@@ -34,15 +34,17 @@ import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.Base64;
 
 public class ProcessPackageStep
 		implements IReductionStepWorker<
 				PackageInstallationJobParameters, PackageContentsJson, PackageInstallOutcomeJson> {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ProcessPackageStep.class);
 
 	IPackageInstallerSvc myPackageInstallerSvc;
 
@@ -99,6 +101,9 @@ public class ProcessPackageStep
 	@Override
 	public ChunkOutcome consume(
 			ChunkExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> theChunkDetails) {
+		PackageInstallationJobParameters parameters = theChunkDetails.getParameters();
+		PackageInstallationSpec installationSpec = parameters.getInstallationSpec();
+
 		try {
 			PackageContentsJson packageContents = theChunkDetails.getData();
 			byte[] encodedContents = packageContents.getContents();
@@ -108,8 +113,6 @@ public class ProcessPackageStep
 			// we will be appending new data to the report we received from upstream
 			PackageInstallOutcomeJson packageOutcome = packageContents.getReport();
 
-			PackageInstallationJobParameters parameters = theChunkDetails.getParameters();
-			PackageInstallationSpec installationSpec = parameters.getInstallationSpec();
 			if (installationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY
 					|| installationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
 				myPackageInstallerSvc.installPackage(npmPackage, installationSpec, packageOutcome);
@@ -123,9 +126,26 @@ public class ProcessPackageStep
 			}
 
 			myPackageOutcome = packageOutcome;
-		} catch (IOException e) {
-			// error handling is in the scope of a later ticket
+		} catch (Exception e) {
+			String message = formatErrorMessage(installationSpec);
+			ourLog.error(message, e);
+			throw new JobExecutionFailedException(message, e);
 		}
 		return ChunkOutcome.SUCCESS();
+	}
+
+	@Nonnull
+	private static String formatErrorMessage(PackageInstallationSpec theInstallationSpec) {
+		String message;
+		if (StringUtils.isNotBlank(theInstallationSpec.getPackageUrl())) {
+			message = String.format("Unable to install NPM package from URL %s.", theInstallationSpec.getPackageUrl());
+		} else if (theInstallationSpec.getPackageContents() != null) {
+			message = "Unable to install NPM package from contained bytes.";
+		} else {
+			message = String.format(
+					"Unable to install NPM package %s#%s.",
+					theInstallationSpec.getName(), theInstallationSpec.getVersion());
+		}
+		return message;
 	}
 }
