@@ -2,4 +2,4 @@
 type: "add"
 issue: "7735"
 jira: "SMILE-11429"
-title: "Asynchronous package installation is supported as a batch job."
+title: "HAPI FHIR supports asynchronous package installation using a batch job."
