@@ -441,7 +441,8 @@ public class RuntimeSearchParam {
 		/**
 		 * Constructor
 		 */
-		public Component(String theExpression, String theReference, String theComboUpliftChain, boolean theComboRangedDate) {
+		public Component(
+				String theExpression, String theReference, String theComboUpliftChain, boolean theComboRangedDate) {
 			myExpression = theExpression;
 			myReference = theReference;
 			myComboUpliftChain = theComboUpliftChain;

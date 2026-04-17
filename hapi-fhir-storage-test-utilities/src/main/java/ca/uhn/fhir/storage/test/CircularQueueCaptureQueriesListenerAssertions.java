@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.assertj.core.api.Condition;
 import org.assertj.core.description.Description;
@@ -207,11 +208,26 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 				return QueryCondition.this;
 			}
 
-			public QueryCondition endsWith(String theNotExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, theNotExpectedSql, SqlMatchModeEnum.ENDS_WITH));
+			public QueryCondition endsWith(String theExpectedSql) {
+				myTests.add(new TestSelect(myIndex, myAllThreads, theExpectedSql, SqlMatchModeEnum.ENDS_WITH));
 				return QueryCondition.this;
 			}
 
+			/**
+			 * @param theExpectContain If {@literal true} then the SQL statement must contain the given SQL, otherwise it must not contain it.
+			 */
+			public QueryCondition mightContain(boolean theExpectContain, String theExpectedOrNotExpectedSql) {
+				if (theExpectContain) {
+					return contains(theExpectedOrNotExpectedSql);
+				} else {
+					return doesNotContain(theExpectedOrNotExpectedSql);
+				}
+			}
+
+			public QueryCondition countInstances(int theExpectedCount, String theExpectedSql) {
+				myTests.add(new TestSelect(myIndex, myAllThreads, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES, theExpectedCount));
+				return QueryCondition.this;
+			}
 		}
 
 	}
@@ -258,6 +274,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		private final Integer myExpectAtIndex;
 		private final String myExpectedSql;
 		private final SqlMatchModeEnum mySqlMatchMode;
+		private final int myExpectedCount;
 
 		/**
 		 * Constructor for a statement counting assertion
@@ -267,17 +284,26 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			myExpectAtIndex = null;
 			myExpectedSql = null;
 			mySqlMatchMode = null;
+			myExpectedCount = 0;
 		}
 
 		/**
 		 * Constructor for a statement matching assertion
 		 */
 		public BaseSqlStatementTest(int theIndex, boolean theForCurrentThread, String theExpectedSql, SqlMatchModeEnum theSqlMatchMode) {
+			this(theIndex, theForCurrentThread, theExpectedSql, theSqlMatchMode, 0);
+		}
+
+		/**
+		 * Constructor for a statement matching assertion
+		 */
+		public BaseSqlStatementTest(int theIndex, boolean theForCurrentThread, String theExpectedSql, SqlMatchModeEnum theSqlMatchMode, int theExpectedCount) {
 			super(NO_COUNT, theForCurrentThread);
 
 			myExpectAtIndex = theIndex;
 			myExpectedSql = theExpectedSql;
 			mySqlMatchMode = theSqlMatchMode;
+			myExpectedCount = theExpectedCount;
 		}
 
 		@Override
@@ -306,6 +332,15 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							if (renderedSql.contains(myExpectedSql)) {
 								yield Optional.of("\nExpected SQL  : " + renderedSql + "\n" +
 									"not to contain: " + myExpectedSql);
+							} else {
+								yield Optional.empty();
+							}
+						}
+						case COUNT_INSTANCES -> {
+							int matchCount = StringUtils.countMatches(renderedSql, myExpectedSql);
+							if (matchCount != myExpectedCount) {
+								yield Optional.of("\nExpected SQL: " + renderedSql + "\n" +
+									" to contain " + myExpectedCount + " but found " + matchCount + " instances of : " + myExpectedSql);
 							} else {
 								yield Optional.empty();
 							}
@@ -344,6 +379,10 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 		private TestSelect(int theIndex, boolean theForCurrentThread, String theExpectedSql, SqlMatchModeEnum theSqlMatchMode) {
 			super(theIndex, theForCurrentThread, theExpectedSql, theSqlMatchMode);
+		}
+
+		public TestSelect(int theIndex, boolean theForCurrentThread, String theExpectedSql, SqlMatchModeEnum theSqlMatchMode, int theExpectedCount) {
+			super(theIndex, theForCurrentThread, theExpectedSql, theSqlMatchMode, theExpectedCount);
 		}
 
 		@Nonnull
@@ -494,6 +533,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 		CONTAINS,
 		DOES_NOT_CONTAIN,
+		COUNT_INSTANCES,
 		ENDS_WITH
 
 	}

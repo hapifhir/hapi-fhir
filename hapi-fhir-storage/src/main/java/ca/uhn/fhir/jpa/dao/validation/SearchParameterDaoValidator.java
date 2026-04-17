@@ -32,9 +32,11 @@ import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.SearchParameter;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -122,7 +124,8 @@ public class SearchParameterDaoValidator {
 			if (fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
 				// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
 			} else {
-				maybeValidateCompositeSpForUniqueIndexing(searchParameter);
+				maybeValidateComboSpForUniqueIndexing(searchParameter);
+				maybeValidateComboSpForNonUniqueIndexing(searchParameter);
 				maybeValidateSearchParameterExpressionsOnSave(searchParameter);
 				maybeValidateCompositeWithComponent(searchParameter);
 			}
@@ -149,12 +152,49 @@ public class SearchParameterDaoValidator {
 		return isCompositeSp(theSearchParameter) && theSearchParameter.hasComponent();
 	}
 
-	private boolean isCompositeSpForUniqueIndexing(SearchParameter theSearchParameter) {
+	private boolean isComboSpForUniqueIndexing(SearchParameter theSearchParameter) {
 		return isCompositeSp(theSearchParameter) && hasAnyExtensionUniqueSetTo(theSearchParameter, true);
 	}
 
-	private void maybeValidateCompositeSpForUniqueIndexing(SearchParameter theSearchParameter) {
-		if (isCompositeSpForUniqueIndexing(theSearchParameter)) {
+	private boolean isComboSpForNonUniqueIndexing(SearchParameter theSearchParameter) {
+		return isCompositeSp(theSearchParameter) && hasAnyExtensionUniqueSetTo(theSearchParameter, false);
+	}
+
+	private void maybeValidateComboSpForNonUniqueIndexing(SearchParameter theSearchParameter) {
+		if (isComboSpForNonUniqueIndexing(theSearchParameter)) {
+
+			// Make sure we don't have multiple ranged date parameters
+			int rangedDateParams = 0;
+			for (SearchParameter.SearchParameterComponentComponent component : theSearchParameter.getComponent()) {
+
+				if (!component.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED).isEmpty()) {
+					rangedDateParams++;
+
+					String definition = component.getDefinition();
+					RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParamByUrl(definition, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
+					if (sp == null) {
+						throw new UnprocessableEntityException(
+							Msg.code(2922) + "SearchParameter component can not be found: " + definition);
+					}
+					if (sp.getParamType() != RestSearchParameterTypeEnum.DATE) {
+						throw new UnprocessableEntityException(
+								Msg.code(2921) + "SearchParameter must not have component with extension[url=" + HapiExtensions.EXT_SP_COMBO_DATE_RANGED + "] for non-date type search parameter");
+					}
+
+				}
+
+			}
+
+			if (rangedDateParams > 1) {
+				throw new UnprocessableEntityException(
+						Msg.code(2919) + "SearchParameter must not have multiple components with extension: " + HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
+			}
+
+		}
+	}
+
+	private void maybeValidateComboSpForUniqueIndexing(SearchParameter theSearchParameter) {
+		if (isComboSpForUniqueIndexing(theSearchParameter)) {
 			if (!theSearchParameter.hasComponent()) {
 				throw new UnprocessableEntityException(
 						Msg.code(1115) + "SearchParameter is marked as unique but has no components");
@@ -164,6 +204,13 @@ public class SearchParameterDaoValidator {
 					throw new UnprocessableEntityException(
 							Msg.code(1116) + "SearchParameter is marked as unique but is missing component.definition");
 				}
+
+				List<Extension> dateRangedExtension = next.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
+				if (!dateRangedExtension.isEmpty()) {
+					throw new UnprocessableEntityException(
+						Msg.code(2920) + "Unique Combo SearchParameter instances may not use extension: " + HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
+				}
+
 			}
 		}
 	}
@@ -266,7 +313,7 @@ public class SearchParameterDaoValidator {
 			// combo non-unique search parameter or composite Search Parameter with HSearch indexing
 		} else if (hasAnyExtensionUniqueSetTo(theSearchParameter, false)
 				|| // combo non-unique search parameter
-				myStorageSettings.isAdvancedHSearchIndexing()) { // composite Search Parameter with HSearch indexing
+				myStorageSettings.isHibernateSearchIndexSearchParams()) { // composite Search Parameter with HSearch indexing
 			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER, REFERENCE);
 		} else { // composite Search Parameter (JPA only)
 			return Set.of(STRING, TOKEN, DATE, QUANTITY);

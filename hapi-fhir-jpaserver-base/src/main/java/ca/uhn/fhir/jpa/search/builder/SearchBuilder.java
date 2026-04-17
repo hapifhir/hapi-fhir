@@ -160,6 +160,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE;
@@ -170,6 +171,7 @@ import static ca.uhn.fhir.jpa.util.InClauseNormalizer.normalizeIdListForInClause
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.stripStart;
@@ -2485,9 +2487,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<JpaParamUtil.ComponentAndCorrespondingParam> theComboParamComponents) {
 
 		List<List<IQueryParameterType>> inputs = new ArrayList<>(theComboParamComponents.size());
+		List<List<DateParam>> dateParams = new ArrayList<>(2);
 		List<Runnable> searchParameterConsumerTasks = new ArrayList<>(theComboParamComponents.size());
 		for (JpaParamUtil.ComponentAndCorrespondingParam nextComponent : theComboParamComponents) {
 			boolean foundMatch = false;
+			List<List<IQueryParameterType>> sameNameParametersAndList = theParams.get(nextComponent.getParamName());
 
 			/*
 			 * The following List<List<IQueryParameterType>> is a list of query parameters where the
@@ -2501,9 +2505,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			 * each component, we remove the components from the source SearchParameterMap
 			 * since we're going to consume them and add a predicate to the SQL builder.
 			 */
-			List<List<IQueryParameterType>> sameNameParametersAndList = theParams.get(nextComponent.getParamName());
 			if (sameNameParametersAndList != null) {
-				boolean parameterIsChained = false;
+
 				for (int andIndex = 0; andIndex < sameNameParametersAndList.size(); andIndex++) {
 					List<IQueryParameterType> sameNameParametersOrList = sameNameParametersAndList.get(andIndex);
 					IQueryParameterType firstValue = sameNameParametersOrList.get(0);
@@ -2514,15 +2517,55 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						}
 					}
 
-					if (!validateParamValuesAreValidForComboParam(
-							theRequest, theParams, theComboParam, nextComponent, sameNameParametersOrList)) {
-						continue;
-					}
+					if (nextComponent.isComboRangedDate()) {
+						if (firstValue.getMissing() != null) {
+							return false;
+						}
 
-					inputs.add(sameNameParametersOrList);
-					searchParameterConsumerTasks.add(() -> sameNameParametersAndList.remove(sameNameParametersOrList));
-					foundMatch = true;
-					break;
+						List<DateParam> dateParamOrList = new ArrayList<>(sameNameParametersOrList.size());
+						for (IQueryParameterType dateParamUntyped : sameNameParametersOrList) {
+							DateParam dateParam = (DateParam) dateParamUntyped;
+							switch (getIfNull(dateParam.getPrefix(), EQUAL)) {
+								case APPROXIMATE, ENDS_BEFORE, STARTS_AFTER -> {
+									firePerformanceInfo(theRequest, "Can not use combo param to search for parameter " + nextComponent.getParamName() + " because the modifier " + dateParam.getPrefix().getValue() + " prevents it");
+									return false;
+								}
+								case EQUAL, GREATERTHAN, GREATERTHAN_OR_EQUALS, LESSTHAN, LESSTHAN_OR_EQUALS,
+								     NOT_EQUAL -> dateParamOrList.add(dateParam);
+							}
+						}
+						dateParams.add(dateParamOrList);
+
+						/*
+						 * If the precision is YEAR or MONTH or DAY, we can rely purely on the combo index's ordinal
+						 * column. If the precision is more than that, we will use the combo index's ordinal, but we
+						 * will also need to apply the
+						 */
+						if (dateParamOrList.stream().allMatch(t -> t.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal() || ParameterUtil.isTimeAllZeros(t))) {
+							searchParameterConsumerTasks.add(() -> sameNameParametersAndList.remove(sameNameParametersOrList));
+						}
+						foundMatch = true;
+
+						/*
+						 * Note: No "break;" here even though the other paths have one. For most
+						 * parameters if we have multiple ANDs we want separate JOINs against
+						 * the uniqueness table so we will handle them the next time we enter
+						 * this method. But for dates we want to use the same join because
+						 * multiple joins means a date range.
+						 */
+
+					} else {
+
+						if (!validateParamValuesAreValidForComboParam(
+								theRequest, theParams, theComboParam, nextComponent, sameNameParametersOrList)) {
+							continue;
+						}
+
+						inputs.add(sameNameParametersOrList);
+						searchParameterConsumerTasks.add(() -> sameNameParametersAndList.remove(sameNameParametersOrList));
+						foundMatch = true;
+						break;
+					}
 				}
 			} else if (!nextComponent.getParamName().equals(nextComponent.getCombinedParamName())) {
 
@@ -2564,20 +2607,22 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		}
 
-		if (CartesianProductUtil.calculateCartesianProductSize(inputs) > 500) {
-			ourLog.debug(
-					"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations");
+		int searchParamCombinations = CartesianProductUtil.calculateCartesianProductSize(inputs);
+		if (searchParamCombinations > 500) {
+			// Interceptor broadcast: JPA_PERFTRACE_INFO
+			String message = "Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations";
+			firePerformanceInfo(theRequest, message);
 			return false;
 		}
 
 		searchParameterConsumerTasks.forEach(Runnable::run);
 
 		List<List<IQueryParameterType>> inputPermutations = Lists.cartesianProduct(inputs);
-		List<String> indexStrings = new ArrayList<>(CartesianProductUtil.calculateCartesianProductSize(inputs));
+		List<String> indexStrings = new ArrayList<>(searchParamCombinations);
 		for (List<IQueryParameterType> nextPermutation : inputPermutations) {
 
 			List<String> parameters = new ArrayList<>();
-			for (int paramIndex = 0; paramIndex < theComboParamComponents.size(); paramIndex++) {
+			for (int paramIndex = 0; paramIndex < nextPermutation.size(); paramIndex++) {
 
 				JpaParamUtil.ComponentAndCorrespondingParam componentAndCorrespondingParam =
 						theComboParamComponents.get(paramIndex);
@@ -2644,26 +2689,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		indexStrings.sort(Comparator.naturalOrder());
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
-		IInterceptorBroadcaster compositeBroadcaster =
-				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
-		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
-			String indexStringForLog = indexStrings.size() > 1 ? indexStrings.toString() : indexStrings.get(0);
-			StorageProcessingMessage msg = new StorageProcessingMessage()
-					.setMessage("Using " + theComboParam.getComboSearchParamType() + " index(es) for query for search: "
-							+ indexStringForLog);
-			HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
-					.add(StorageProcessingMessage.class, msg);
-			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
-		}
+		String indexStringForLog = indexStrings.size() > 1 ? indexStrings.toString() : indexStrings.get(0);
+		String perfMessage = "Using " + theComboParam.getComboSearchParamType() + " index(es) for query for search: "
+			+ indexStringForLog;
+		firePerformanceInfo(theRequest, perfMessage);
 
+		// Add the predicate
 		switch (requireNonNull(theComboParam.getComboSearchParamType())) {
 			case UNIQUE:
 				theQueryStack.addPredicateCompositeUnique(indexStrings, myRequestPartitionId);
 				break;
 			case NON_UNIQUE:
-				theQueryStack.addPredicateCompositeNonUnique(indexStrings, myRequestPartitionId);
+				theQueryStack.addPredicateCompositeNonUnique(indexStrings, dateParams, myRequestPartitionId);
 				break;
 		}
 

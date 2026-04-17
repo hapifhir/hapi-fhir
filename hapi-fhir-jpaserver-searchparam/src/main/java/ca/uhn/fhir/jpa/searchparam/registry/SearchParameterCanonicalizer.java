@@ -441,7 +441,6 @@ public class SearchParameterCanonicalizer {
 							(IPrimitiveType<String>) nextComponentExtension.getValue();
 					comboUpliftChain = upliftChainValue.getValueAsString();
 				} else if (HapiExtensions.EXT_SP_COMBO_DATE_RANGED.equals(nextComponentExtension.getUrl())) {
-					// FIXME: add SP validation for only one ranged date
 					IPrimitiveType<Boolean> rangedValue =
 						(IPrimitiveType<Boolean>) nextComponentExtension.getValue();
 					ranged = rangedValue.getValue();

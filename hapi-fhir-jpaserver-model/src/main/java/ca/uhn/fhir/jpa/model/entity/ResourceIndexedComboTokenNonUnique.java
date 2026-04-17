@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -42,13 +43,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.time.ZonedDateTime;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 @Entity
 @Table(
 	name = ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU,
 	indexes = {
 		@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE,RES_ID,PARTITION_ID", unique = false),
+		@Index(name = "IDX_IDXCMBTOKNU_HASHC_DORD", columnList = "HASH_COMPLETE,DATE_ORDINAL,RES_ID,PARTITION_ID", unique = false),
 		@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 	})
 @IdClass(IdAndPartitionId.class)
@@ -95,8 +97,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 
 	@Column(name = "DATE_ORDINAL", nullable = true)
 	private Integer myDateOrdinal;
-	@Column(name = "DATETIME_EXACT", nullable = true)
-	private ZonedDateTime myDate;
 	@Column(name = "IDX_STRING", nullable = true, length = ResourceIndexedComboStringUnique.MAX_STRING_LENGTH)
 	private String myIndexString;
 	@Transient
@@ -115,14 +115,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		myResource = theEntity;
 		myIndexString = theQueryString;
 		calculateHashes();
-	}
-
-	public ZonedDateTime getDateExact() {
-		return myDate;
-	}
-
-	public void setDateExact(ZonedDateTime theDate) {
-		myDate = theDate;
 	}
 
 	public Integer getDateOrdinal() {
@@ -157,9 +149,8 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		ResourceIndexedComboTokenNonUnique that = (ResourceIndexedComboTokenNonUnique) theO;
 
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getHashComplete(), that.getHashComplete());
 		b.append(getDateOrdinal(), that.getDateOrdinal());
-		b.append(getDateExact(), that.getDateExact());
+		b.append(getHashComplete(), that.getHashComplete());
 		return b.isEquals();
 	}
 
@@ -208,6 +199,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		calculateHashes();
 
 		HashCodeBuilder builder = new HashCodeBuilder(17, 37);
+		builder.append(getDateOrdinal());
 		builder.append(getHashComplete());
 		return builder.toHashCode();
 	}
@@ -241,6 +233,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 	@Override
 	public int compareTo(ResourceIndexedComboTokenNonUnique theO) {
 		CompareToBuilder b = new CompareToBuilder();
+		b.append(myDateOrdinal, theO.getDateOrdinal());
 		b.append(myHashComplete, theO.getHashComplete());
 		return b.toComparison();
 	}
@@ -250,9 +243,14 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		return new ToStringBuilder(this)
 			.append("id", myId)
 			.append("resourceId", myResourceId)
+			.append("dateOrdinal", myDateOrdinal)
 			.append("hashComplete", myHashComplete)
 			.append("indexString", myIndexString)
 			.toString();
+	}
+
+	public void applyRangedDate(@Nonnull ResourceIndexedSearchParamDate theDateParam) {
+		myDateOrdinal = getIfNull(theDateParam.getValueHighDateOrdinal(), theDateParam.getValueLowDateOrdinal());
 	}
 
 	public static long calculateHashComplete(

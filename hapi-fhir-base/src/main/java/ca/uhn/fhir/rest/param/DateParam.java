@@ -202,6 +202,22 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 		}
 	}
 
+	public final Integer getHour() {
+		return myValue.getHour();
+	}
+
+	public final Integer getMinute() {
+		return myValue.getMinute();
+	}
+
+	public final Integer getSecond() {
+		return myValue.getSecond();
+	}
+
+	public final Integer getMillis() {
+		return myValue.getMillis();
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {

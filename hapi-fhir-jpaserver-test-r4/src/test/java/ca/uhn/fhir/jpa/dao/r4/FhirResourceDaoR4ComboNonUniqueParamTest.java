@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -39,9 +41,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static oracle.jdbc.OracleTypeMetaData.ArrayStorage.withCode;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,6 +59,9 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 	@Autowired
 	IInterceptorService myInterceptorService;
+	@Autowired
+	MatchUrlService myMatchUrlService;
+
 	private boolean myInterceptorFound = false;
 
 	@BeforeEach
@@ -341,13 +348,128 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testRangedDate() {
+	public void testRangedDate_Create() {
+		// Setup
 		myComboSearchParameterTestHelper.createObservationSubjectCodeAndRangedEffective();
 
 		createPatient(withId("P0"), withActiveTrue());
 
-		createObservation(withId("O0"), withSubject("Patient/P0"), withObservationCode("http://foo", "bar"), withObservationEffectiveInstant("2022-01-01T00:00:00Z"));
+		// Test
+		createObservation(
+			withId("O0"),
+			withSubject("Patient/P0"),
+			withObservationCode("http://foo", "bar"),
+			withObservationEffectiveInstant("2022-01-02T03:44:55Z"));
 
+		// Verify
+		runInTransaction(() -> {
+			List<ResourceIndexedComboTokenNonUnique> indexes = myResourceIndexedComboTokensNonUniqueDao.findAll();
+			assertEquals(1, indexes.size());
+
+			assertEquals("Observation?code=http%3A%2F%2Ffoo%7Cbar&subject=Patient%2FP0", indexes.get(0).getIndexString());
+			assertEquals(20220102, indexes.get(0).getDateOrdinal());
+		});
+	}
+
+	@ParameterizedTest
+	@CsvSource(delimiter = '~', textBlock = """
+		# Expect ~ Use   ~ Use   ~ Observation          ~ Date
+		# Match  ~ Combo ~ Date  ~ Date
+		#        ~ Table ~ Table ~
+		
+		# YEAR Precision
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=2022
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=2023
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=ne2022
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=eq2022
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2021
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2022
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=ge2022
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=le2022
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=le2023
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=le2021
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=lt2022
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=lt2023
+		
+		# MONTH Precision
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=2022-01
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=2022-02
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=ne2022-01
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=eq2022-01
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2022-01
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2022-02
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2021-12
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=ge2022-01
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=le2022-01
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=lt2022-01
+		
+		# DAY Precision
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=2022-01-02
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=2022-01-03
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=ne2022-01-02
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=eq2022-01-02
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2022-01-02
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=ge2022-01-02
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=le2022-01-02
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=lt2022-01-02
+		
+		# Range
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2021&date=lt2023
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2020&date=lt2021
+		
+		# Better than DAY Precision with zero time (doesn't need to use standard date index table)
+		true     ~ true  ~ false ~ 2022-01-01T03:44:55Z ~ date=gt2022-01-01T00:00Z
+		true     ~ true  ~ false ~ 2022-01-01T03:44:55Z ~ date=gt2022-01-01T00:00:00Z
+		true     ~ true  ~ false ~ 2022-01-01T03:44:55Z ~ date=gt2022-01-01T00:00:00.000Z
+		true     ~ true  ~ false ~ 2022-01-01T03:44:55Z ~ date=gt2022-01-01T00:00:00-04:00
+		true     ~ true  ~ false ~ 2022-01-01T03:44:55Z ~ date=ge2022-01-01T00:00:00Z
+		
+		# Better than DAY Precision (should also use standard date index table)
+		true     ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=2022-01-02T03:44:55Z
+		true     ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=gt2022-01-02T03:00:00Z
+		false    ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=gt2022-01-02T04:00:00Z
+		true     ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=lt2022-01-02T04:00:00Z
+		false    ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=lt2022-01-02T03:00:00Z
+		
+		# Other Qualifiers that aren't supported for combo param
+		true     ~ false ~ true  ~ 2022-01-02T03:44:55Z ~ date:missing=false
+		true     ~ false ~ true  ~ 2022-01-02T03:44:55Z ~ date=sa2021-01-02
+		true     ~ false ~ true  ~ 2022-01-02T03:44:55Z ~ date=eb2023-01-02
+		""")
+	public void testRangedDate_Search(boolean theExpectMatch, boolean theExpectUseComboTable, boolean theExpectUseDateTable, String theObsEffectiveDate, String theDate) {
+		// Setup
+		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
+		myComboSearchParameterTestHelper.createObservationSubjectCodeAndRangedEffective();
+
+		createPatient(withId("P0"), withActiveTrue());
+
+		createObservation(
+			withId("O0"),
+			withSubject("Patient/P0"),
+			withObservationCode("http://foo", "bar"),
+			withObservationEffectiveInstant(theObsEffectiveDate));
+
+		// Test
+		String queryUrl = "Observation?" + theDate + "&subject=Patient/P0&code=http://foo|bar";
+		SearchParameterMap spMap = myMatchUrlService.getResourceSearch(queryUrl).getSearchParameterMap();
+		spMap.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myObservationDao.search(spMap, newSrd());
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(results);
+
+		// Verify
+		if (theExpectMatch) {
+			assertThat(resultIds).containsExactly("Observation/O0");
+		} else {
+			assertThat(resultIds).isEmpty();
+		}
+
+		assertThat(myCaptureQueriesListener).has(
+			// Make sure we searched the non-unique index table
+			onCurrentThread()
+				.selectSqlAtIndex(0).countInstances(theExpectUseComboTable ? 1 : 0, ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.selectSqlAtIndex(0).mightContain(theExpectUseDateTable, ResourceIndexedSearchParamDate.HFJ_SPIDX_DATE)
+		);
 	}
 
 

@@ -50,6 +50,7 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
+import jakarta.persistence.Index;
 import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
@@ -132,6 +133,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init820();
 		init840();
 		init860();
+		init880();
 		init8_10_0();
 	}
 
@@ -140,6 +142,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
 			.dropIndex("20260410.10", "IDX_IDXCMBTOKNU_STR");
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+			.addIndex("20260410.20", "IDX_IDXCMBTOKNU_HASHC_DORD")
+			.unique(false)
+			.withColumns("HASH_COMPLETE","DATE_ORDINAL","RES_ID","PARTITION_ID");
+
 
 	}
 

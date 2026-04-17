@@ -465,8 +465,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private SearchParamSet<ResourceIndexedComboStringUnique> createComboUniqueParam(
 			String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
 		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
+
+		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
+			JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theRuntimeParam);
+
 		Set<String> queryStringsToPopulate =
-				extractParameterCombinationsForComboParam(theParams, theResourceType, theRuntimeParam);
+				extractParameterCombinationsForComboParam(compositeComponents, theParams, theResourceType, theRuntimeParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
 			ourLog.trace(
@@ -502,28 +506,57 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private SearchParamSet<ResourceIndexedComboTokenNonUnique> createComboNonUniqueParam(
 			String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
 		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
-		Set<String> queryStringsToPopulate =
-				extractParameterCombinationsForComboParam(theParams, theResourceType, theRuntimeParam);
 
-		for (String nextQueryString : queryStringsToPopulate) {
-			ourLog.trace("Adding composite unique SP: {}", nextQueryString);
-			ResourceIndexedComboTokenNonUnique nonUniqueParam = new ResourceIndexedComboTokenNonUnique();
-			nonUniqueParam.setPartitionSettings(myPartitionSettings);
-			nonUniqueParam.setIndexString(nextQueryString);
-			nonUniqueParam.setSearchParameterId(theRuntimeParam.getId());
-			retVal.add(nonUniqueParam);
+		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
+			JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theRuntimeParam);
+
+		Optional<JpaParamUtil.ComponentAndCorrespondingParam> rangedDateParam = compositeComponents.stream().filter(t->t.isComboRangedDate()).findFirst();
+		List<ResourceIndexedSearchParamDate> rangedDateChoices = new ArrayList<>();
+		if (rangedDateParam.isPresent()) {
+
+			Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart =
+				findParameterIndexes(theParams, rangedDateParam.get());
+			for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
+				rangedDateChoices.add((ResourceIndexedSearchParamDate) nextParam);
+			}
+		}
+
+		Set<String> queryStringsToPopulate =
+				extractParameterCombinationsForComboParam(compositeComponents, theParams, theResourceType, theRuntimeParam);
+
+		if (rangedDateChoices.isEmpty()) {
+			rangedDateChoices.add(null);
+		}
+
+		for (ResourceIndexedSearchParamDate nextRangedDateChoice : rangedDateChoices) {
+			for (String nextQueryString : queryStringsToPopulate) {
+				ourLog.trace("Adding composite unique SP: {}", nextQueryString);
+				ResourceIndexedComboTokenNonUnique nonUniqueParam = new ResourceIndexedComboTokenNonUnique();
+				nonUniqueParam.setPartitionSettings(myPartitionSettings);
+				nonUniqueParam.setIndexString(nextQueryString);
+				nonUniqueParam.setSearchParameterId(theRuntimeParam.getId());
+				if (nextRangedDateChoice != null) {
+					nonUniqueParam.applyRangedDate(nextRangedDateChoice);
+				}
+				retVal.add(nonUniqueParam);
+			}
 		}
 		return retVal;
 	}
 
+	/**
+	 * Excludes ranged data params
+	 */
 	@Nonnull
 	private Set<String> extractParameterCombinationsForComboParam(
-			ResourceIndexedSearchParams theIndexes, String theResourceType, RuntimeSearchParam theParam) {
+		List<JpaParamUtil.ComponentAndCorrespondingParam> theCompositeComponents, ResourceIndexedSearchParams theIndexes, String theResourceType, RuntimeSearchParam theParam) {
 		List<List<String>> partsChoices = new ArrayList<>();
 
-		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
-				JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theParam);
-		for (JpaParamUtil.ComponentAndCorrespondingParam next : compositeComponents) {
+		for (JpaParamUtil.ComponentAndCorrespondingParam next : theCompositeComponents) {
+			if (next.isComboRangedDate()) {
+				continue;
+			}
+
 			RuntimeSearchParam nextComponentParameter = next.getComponentParameter();
 			Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart =
 					findParameterIndexes(theIndexes, next);
@@ -550,7 +583,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 
-			ArrayList<String> nextChoicesList = new ArrayList<>();
+			List<String> nextChoicesList = new ArrayList<>();
+
 			partsChoices.add(nextChoicesList);
 
 			String paramName = next.getCombinedParamName();
@@ -560,8 +594,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
 
 					if (theParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE
-							&& nextParamAsClientParam instanceof DateParam) {
-						DateParam date = (DateParam) nextParamAsClientParam;
+							&& nextParamAsClientParam instanceof DateParam date) {
 						if (date.getPrecision() != TemporalPrecisionEnum.DAY) {
 							continue;
 						}
@@ -2418,4 +2451,5 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	public void setExtractResourceLevelParams(boolean theExtractResourceLevelParams) {
 		myExtractResourceLevelParams = theExtractResourceLevelParams;
 	}
+
 }

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ParameterUtilTest {
@@ -112,4 +113,38 @@ public class ParameterUtilTest {
 		);
 	}
 
+	@ParameterizedTest
+	@MethodSource("sourceIsTimeAllZeros")
+	public void testIsTimeAllZeros(String theInput, boolean theExpected) {
+		DateParam dateParam = theInput != null ? new DateParam(theInput) : null;
+		assertThat(ParameterUtil.isTimeAllZeros(dateParam)).isEqualTo(theExpected);
+	}
+
+	private static Stream<Arguments> sourceIsTimeAllZeros() {
+		return Stream.of(
+			// Day precision
+			Arguments.of("2021-01-01", true),
+			// Year precision
+			Arguments.of("2021", true),
+			// Month precision
+			Arguments.of("2021-01", true),
+			// Second precision, all zeros
+			Arguments.of("2021-01-01T00:00:00", true),
+			// Milli precision, all zeros
+			Arguments.of("2021-01-01T00:00:00.000", true),
+			// Minute precision, all zeros
+			Arguments.of("2021-01-01T00:00", true),
+			// Not all zeros
+			Arguments.of("2021-01-01T00:00:01", false),
+			Arguments.of("2021-01-01T00:01:00", false),
+			Arguments.of("2021-01-01T01:00:00", false),
+			Arguments.of("2021-01-01T00:00:00.001", false),
+			// With timezone, all zeros in that timezone
+			Arguments.of("2021-01-01T00:00:00Z", true),
+			Arguments.of("2021-01-01T00:00:00+05:00", true),
+			// Null or empty
+			Arguments.of(null, false),
+			Arguments.of("", false)
+		);
+	}
 }
