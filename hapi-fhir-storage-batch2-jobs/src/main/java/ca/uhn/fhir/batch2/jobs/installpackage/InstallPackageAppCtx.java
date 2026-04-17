@@ -76,8 +76,7 @@ public class InstallPackageAppCtx {
 
 	@Bean
 	public FetchPackageStep fetchPackageStep(
-			IHapiPackageCacheManager thePackageCacheManager,
-			IPackageInstallerSvc thePackageInstallerSvc) {
+			IHapiPackageCacheManager thePackageCacheManager, IPackageInstallerSvc thePackageInstallerSvc) {
 		return new FetchPackageStep(thePackageCacheManager, thePackageInstallerSvc);
 	}
 

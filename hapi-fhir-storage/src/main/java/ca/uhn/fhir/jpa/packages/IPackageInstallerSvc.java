@@ -84,6 +84,5 @@ public interface IPackageInstallerSvc {
 	 * @param theVersion the package version
 	 * @return the original package if compatible, or the version-specific variant if found
 	 */
-	NpmPackage substituteVersionSpecificPackageIfNeeded(
-			NpmPackage theDependency, String theId, String theVersion);
+	NpmPackage substituteVersionSpecificPackageIfNeeded(NpmPackage theDependency, String theId, String theVersion);
 }

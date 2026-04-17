@@ -46,8 +46,7 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 	private final IPackageInstallerSvc myPackageInstallerSvc;
 
 	public FetchPackageStep(
-			IHapiPackageCacheManager thePackageCacheManager,
-			IPackageInstallerSvc thePackageInstallerSvc) {
+			IHapiPackageCacheManager thePackageCacheManager, IPackageInstallerSvc thePackageInstallerSvc) {
 		this.myPackageCacheManager = thePackageCacheManager;
 		this.myPackageInstallerSvc = thePackageInstallerSvc;
 	}
@@ -67,9 +66,7 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 			if (theStepExecutionDetails.getParameters().isDependencyJob()) {
 				// Adjust the dependency package as needed to match the FHIR version of the server
 				npmPackage = myPackageInstallerSvc.substituteVersionSpecificPackageIfNeeded(
-						npmPackage,
-						installationSpec.getName(),
-						installationSpec.getVersion());
+						npmPackage, installationSpec.getName(), installationSpec.getVersion());
 			}
 
 			if (npmPackage == null) {
