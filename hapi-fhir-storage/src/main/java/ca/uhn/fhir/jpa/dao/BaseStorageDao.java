@@ -343,7 +343,7 @@ public abstract class BaseStorageDao {
 			IBaseResource theResource, RequestDetails theRequestDetails) {
 		if (myPartitionSettings.isPartitioningEnabled()
 				&& myPartitionSettings.getAllowReferencesAcrossPartitions()
-						!= PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
+						== PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED) {
 			return myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
 					theRequestDetails, theResource, myFhirContext.getResourceType(theResource));
 		}

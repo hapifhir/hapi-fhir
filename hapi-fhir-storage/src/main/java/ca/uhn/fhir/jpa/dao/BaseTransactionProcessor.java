@@ -2184,9 +2184,18 @@ public abstract class BaseTransactionProcessor {
 				RequestPartitionId writePartition = null;
 				if (myPartitionSettings.isPartitioningEnabled()
 						&& myPartitionSettings.getAllowReferencesAcrossPartitions()
-								!= PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
-					writePartition = myRequestPartitionHelperService.determineCreatePartitionForRequest(
-							theRequest, theResource, myContext.getResourceType(theResource));
+								== PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED) {
+					String resourceType = myContext.getResourceType(theResource);
+					String resourceCacheKey = theResource.getIdElement().hasIdPart()
+							? resourceType + "/" + theResource.getIdElement().getIdPart()
+							: null;
+					writePartition = resourceCacheKey != null
+							? theTransactionDetails.getResolvedPartition(resourceCacheKey)
+							: null;
+					if (writePartition == null) {
+						writePartition = myRequestPartitionHelperService.determineCreatePartitionForRequest(
+								theRequest, theResource, resourceType);
+					}
 				}
 
 				for (IBaseReference baseRef : theReferencesToAutoVersion) {
@@ -2206,7 +2215,7 @@ public abstract class BaseTransactionProcessor {
 							if (writePartition != null && !writePartition.hasPartitionId(pid.getPartitionId())) {
 								// The referenced resource exists but in a different partition.
 								// Reject it: auto-versioning must not produce cross-partition links.
-								throw new InvalidRequestException(Msg.code(2607) + "Resource "
+								throw new InvalidRequestException(Msg.code(2918) + "Resource "
 										+ id.toUnqualifiedVersionless().getValue()
 										+ " is referenced by auto-version-references-at-path but exists in a"
 										+ " different partition. Cross-partition references are not allowed.");

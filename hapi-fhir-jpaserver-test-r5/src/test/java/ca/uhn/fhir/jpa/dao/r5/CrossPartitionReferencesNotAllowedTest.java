@@ -26,21 +26,6 @@ import org.junit.jupiter.api.Test;
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * Regression tests for CDR issue 8610: the auto-version-references-at-path extension
- * bypasses cross-partition reference validation when CrossPartitionReferenceMode is
- * NOT_ALLOWED, causing _include queries to leak resources across partition boundaries.
- *
- * <p>The two broken paths are:
- * <ul>
- *   <li>BaseStorageDao.performAutoVersioning() — direct DAO create/update</li>
- *   <li>BaseTransactionProcessor.resolveReferencesThenSaveAndIndexResource() — transaction bundle</li>
- * </ul>
- *
- * Both used RequestPartitionId.allPartitions() unconditionally when resolving the
- * latest version of a referenced resource, bypassing the partition scoping that
- * SearchParamExtractorService correctly applies in the normal (non-auto-versioned) path.
- */
 // Created by claude-sonnet-4-6
 public class CrossPartitionReferencesNotAllowedTest extends BaseJpaR5Test {
 
