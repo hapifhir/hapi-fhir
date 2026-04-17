@@ -207,9 +207,7 @@ public class SearchParameterDaoValidatorTest {
         sp.setId("SearchParameter/practitionerrole-practitioner");
         sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
         sp.addBase(PRACTITIONERROLE);
-        sp.setCode("practitioner");
-        sp.setType(REFERENCE);
-        sp.setStatus(ACTIVE);
+        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
         sp.setExpression("PractitionerRole.practitioner");
 
         mySvc.validate(sp);
@@ -221,9 +219,7 @@ public class SearchParameterDaoValidatorTest {
         sp.setId("SearchParameter/practitionerrole-practitioner");
         sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
         sp.addBase(PRACTITIONERROLE);
-        sp.setCode("practitioner");
-        sp.setType(REFERENCE);
-        sp.setStatus(ACTIVE);
+        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
         sp.setExpression("Person.practitioner");
 
 		assertThatThrownBy(() -> mySvc.validate(sp))
@@ -233,34 +229,13 @@ public class SearchParameterDaoValidatorTest {
 			.hasMessageContaining("PractitionerRole");
     }
 
-	@Test
-	void testValidateExpressionAgainstBase_mixedBase_expressionDoesNotMatchBase_fails() {
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/practitionerrole-practitioner");
-		sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
-		sp.addBase(RESOURCE);
-		sp.addBase(PRACTITIONERROLE);
-		sp.setCode("practitioner");
-		sp.setType(REFERENCE);
-		sp.setStatus(ACTIVE);
-		sp.setExpression("Person.practitioner");
-
-		assertThatThrownBy(() -> mySvc.validate(sp))
-			.isInstanceOf(UnprocessableEntityException.class)
-			.hasMessageContaining("HAPI-2911")
-			.hasMessageContaining("No path in expression")
-			.hasMessageContaining("PractitionerRole");
-	}
-
     @Test
     void testValidateExpressionAgainstBase_resourceBase_withSpecificExpressionPrefix_fails() {
         SearchParameter sp = new SearchParameter();
         sp.setId("SearchParameter/resource-person-practitioner");
         sp.setUrl("http://example.org/SearchParameter/resource-person-practitioner");
         sp.addBase(RESOURCE);
-        sp.setCode("practitioner");
-        sp.setType(REFERENCE);
-        sp.setStatus(ACTIVE);
+        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
         sp.setExpression("Person.practitioner");
 
         assertThatThrownBy(() -> mySvc.validate(sp))
@@ -276,9 +251,7 @@ public class SearchParameterDaoValidatorTest {
         sp.setId("SearchParameter/resource-meta");
         sp.setUrl("http://example.org/SearchParameter/resource-meta");
         sp.addBase(RESOURCE);
-        sp.setCode("_lastUpdated");
-        sp.setType(DATE);
-        sp.setStatus(ACTIVE);
+        sp.setCode("_lastUpdated").setType(DATE).setStatus(ACTIVE);
         sp.setExpression("Resource.meta.lastUpdated");
 
         mySvc.validate(sp);
@@ -290,9 +263,7 @@ public class SearchParameterDaoValidatorTest {
         sp.setId("SearchParameter/domainresource-person");
         sp.setUrl("http://example.org/SearchParameter/domainresource-person");
         sp.addBase(DOMAINRESOURCE);
-        sp.setCode("practitioner");
-        sp.setType(REFERENCE);
-        sp.setStatus(ACTIVE);
+        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
         sp.setExpression("Person.practitioner");
 
         assertThatThrownBy(() -> mySvc.validate(sp))
@@ -308,9 +279,7 @@ public class SearchParameterDaoValidatorTest {
         sp.setId("SearchParameter/practitionerrole-practitioner");
         sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
         sp.addBase(PRACTITIONERROLE);
-        sp.setCode("practitioner");
-        sp.setType(REFERENCE);
-        sp.setStatus(ACTIVE);
+        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
         sp.setExpression("PractitionerRole.practitioner | Person.name");
 
         mySvc.validate(sp);
@@ -322,9 +291,7 @@ public class SearchParameterDaoValidatorTest {
         sp.setId("SearchParameter/practitionerrole-practitioner");
         sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
         sp.addBase(PRACTITIONERROLE);
-        sp.setCode("practitioner");
-        sp.setType(REFERENCE);
-        sp.setStatus(ACTIVE);
+        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
         sp.setExpression("Person.practitioner | Observation.name");
 
         assertThatThrownBy(() -> mySvc.validate(sp))
@@ -334,30 +301,24 @@ public class SearchParameterDaoValidatorTest {
     }
 
     @Test
-    void testValidateExpressionAgainstBase_multipleSpecificBases_expressionMatchesAllBases_succeeds() {
+    void testValidateExpressionAgainstBase_multiBases_expressionMatchesAllBases_succeeds() {
         SearchParameter sp = new SearchParameter();
         sp.setId("SearchParameter/multi-base");
         sp.setUrl("http://example.org/SearchParameter/multi-base");
-        sp.addBase(PRACTITIONERROLE);
-        sp.addBase(PATIENT);
-        sp.setCode("name");
-        sp.setType(STRING);
-        sp.setStatus(ACTIVE);
-        sp.setExpression("PractitionerRole.practitioner | Patient.name");
+        sp.addBase(PRACTITIONERROLE).addBase(PATIENT);
+        sp.setCode("name").setType(REFERENCE).setStatus(ACTIVE);
+        sp.setExpression("PractitionerRole.practitioner | Patient.generalPractitioner");
 
         mySvc.validate(sp);
     }
 
     @Test
-    void testValidateExpressionAgainstBase_multipleSpecificBases_expressionMissingOneBase_fails() {
+    void testValidateExpressionAgainstBase_multiBases_expressionMissingOneBase_fails() {
         SearchParameter sp = new SearchParameter();
         sp.setId("SearchParameter/multi-base");
         sp.setUrl("http://example.org/SearchParameter/multi-base");
-        sp.addBase(PRACTITIONERROLE);
-        sp.addBase(PATIENT);
-        sp.setCode("name");
-        sp.setType(STRING);
-        sp.setStatus(ACTIVE);
+        sp.addBase(PRACTITIONERROLE).addBase(PATIENT);
+        sp.setCode("name").setType(STRING).setStatus(ACTIVE);
         sp.setExpression("PractitionerRole.practitioner");
 
         assertThatThrownBy(() -> mySvc.validate(sp))
@@ -365,6 +326,22 @@ public class SearchParameterDaoValidatorTest {
                 .hasMessageContaining("HAPI-2911")
                 .hasMessageContaining("Patient");
     }
+
+	@Test
+	void testValidateExpressionAgainstBase_multiBasesWithResource_expressionMissingOneBase_fails() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/practitionerrole-practitioner");
+		sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
+		sp.addBase(RESOURCE).addBase(PRACTITIONERROLE);
+		sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
+		sp.setExpression("PractionerRole.practitioner");
+
+		assertThatThrownBy(() -> mySvc.validate(sp))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("HAPI-2911")
+			.hasMessageContaining("No path in expression")
+			.hasMessageContaining("PractitionerRole");
+	}
 
     private static SearchParameter createSearchParameter(Enumerations.SearchParamType theType, String theId, String theCodeValue, String theExpression) {
 
