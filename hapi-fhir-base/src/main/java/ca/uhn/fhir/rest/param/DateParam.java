@@ -33,6 +33,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.io.Serial;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -43,6 +44,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class DateParam extends BaseParamWithPrefix<DateParam>
 		implements /*IQueryParameterType , */ IQueryParameterOr<DateParam> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final DateParamDateTimeHolder myValue = new DateParamDateTimeHolder();
@@ -202,18 +204,30 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 		}
 	}
 
+	/**
+	 * @since 8.10.0
+	 */
 	public final Integer getHour() {
 		return myValue.getHour();
 	}
 
+	/**
+	 * @since 8.10.0
+	 */
 	public final Integer getMinute() {
 		return myValue.getMinute();
 	}
 
+	/**
+	 * @since 8.10.0
+	 */
 	public final Integer getSecond() {
 		return myValue.getSecond();
 	}
 
+	/**
+	 * @since 8.10.0
+	 */
 	public final Integer getMillis() {
 		return myValue.getMillis();
 	}
@@ -223,10 +237,9 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 		if (obj == this) {
 			return true;
 		}
-		if (!(obj instanceof DateParam)) {
+		if (!(obj instanceof DateParam other)) {
 			return false;
 		}
-		DateParam other = (DateParam) obj;
 		return Objects.equals(getValue(), other.getValue()) && Objects.equals(getPrefix(), other.getPrefix());
 	}
 

@@ -307,6 +307,15 @@ public enum JpaParamUtil {
 			return myCombinedParamName;
 		}
 
+		/**
+		 * Is this component a ranged date? A maximum of one component per combo search param can
+		 * be a ranged date parameter, which will be stored in a dedicated column in the
+		 * combo index table as opposed to being added to the regular search string. We do this
+		 * so that the date can be searched using comparators (e.g. gt2022).
+		 *
+		 * @see RuntimeSearchParam.Component#isComboRangedDate()
+		 * @since 8.10.0
+		 */
 		public boolean isComboRangedDate() {
 			return myComboRangedDate;
 		}
