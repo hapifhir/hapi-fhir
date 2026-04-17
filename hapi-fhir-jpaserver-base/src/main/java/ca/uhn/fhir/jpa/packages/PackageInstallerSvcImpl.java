@@ -403,7 +403,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					// If the dependency's FHIR version is incompatible with the server,
 					// attempt to load a version-specific variant (e.g., {id}.r4 for R4 servers)
 					dependency = substituteVersionSpecificPackageIfNeeded(
-							dependency, nextPackage.name(), nextPackage.version());
+							dependency,
+							nextPackage.name(),
+							nextPackage.version());
 
 					// recursive call to install dependencies of a package before
 					// installing the package
@@ -437,7 +439,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * @param theVersion the package version
 	 * @return the original package if compatible, or the version-specific variant if found
 	 */
-	private NpmPackage substituteVersionSpecificPackageIfNeeded(
+	@Override
+	public NpmPackage substituteVersionSpecificPackageIfNeeded(
 			NpmPackage theDependency, String theId, String theVersion) {
 		String dependencyFhirVersion = theDependency.fhirVersion();
 		String serverFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();

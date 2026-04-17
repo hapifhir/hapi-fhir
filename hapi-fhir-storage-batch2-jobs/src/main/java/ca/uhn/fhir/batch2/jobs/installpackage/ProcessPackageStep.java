@@ -45,13 +45,13 @@ public class ProcessPackageStep
 		implements IReductionStepWorker<
 				PackageInstallationJobParameters, PackageContentsJson, PackageInstallOutcomeJson> {
 
-	IPackageInstallerSvc myPackageInstallerSvc;
+	private final IPackageInstallerSvc myPackageInstallerSvc;
 
-	ISearchParamRegistryController mySearchParamRegistryController;
+	private final ISearchParamRegistryController mySearchParamRegistryController;
 
-	IValidationSupport myValidationSupport;
+	private final IValidationSupport myValidationSupport;
 
-	PackageInstallOutcomeJson myPackageOutcome;
+	private PackageInstallOutcomeJson myPackageOutcome;
 
 	public ProcessPackageStep(
 			IPackageInstallerSvc thePackageInstallerSvc,

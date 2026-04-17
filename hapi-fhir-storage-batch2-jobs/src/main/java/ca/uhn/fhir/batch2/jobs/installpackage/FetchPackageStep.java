@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
+import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.NpmPackageUtils;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
@@ -42,9 +43,13 @@ import java.util.Base64;
 public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallationJobParameters, PackageContentsJson> {
 
 	private final IHapiPackageCacheManager myPackageCacheManager;
+	private final IPackageInstallerSvc myPackageInstallerSvc;
 
-	public FetchPackageStep(IHapiPackageCacheManager thePackageCacheManager) {
+	public FetchPackageStep(
+			IHapiPackageCacheManager thePackageCacheManager,
+			IPackageInstallerSvc thePackageInstallerSvc) {
 		this.myPackageCacheManager = thePackageCacheManager;
+		this.myPackageInstallerSvc = thePackageInstallerSvc;
 	}
 
 	@Nonnull
@@ -58,6 +63,14 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 			PackageInstallationSpec installationSpec =
 					theStepExecutionDetails.getParameters().getInstallationSpec();
 			NpmPackage npmPackage = myPackageCacheManager.installPackage(installationSpec);
+
+			if (theStepExecutionDetails.getParameters().isDependencyJob()) {
+				// Adjust the dependency package as needed to match the FHIR version of the server
+				npmPackage = myPackageInstallerSvc.substituteVersionSpecificPackageIfNeeded(
+						npmPackage,
+						installationSpec.getName(),
+						installationSpec.getVersion());
+			}
 
 			if (npmPackage == null) {
 				String message = formatErrorMessage(installationSpec);

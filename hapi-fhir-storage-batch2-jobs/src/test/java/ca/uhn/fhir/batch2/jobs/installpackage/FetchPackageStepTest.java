@@ -11,6 +11,7 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParame
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
+import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,8 @@ public class FetchPackageStepTest {
 
 	@Mock
 	private IHapiPackageCacheManager myPackageLoader;
+	@Mock
+	private IPackageInstallerSvc myPackageInstallerSvc;
 
 	private FetchPackageStep step;
 
@@ -52,7 +55,7 @@ public class FetchPackageStepTest {
 
 	@BeforeEach
 	public void beforeEach() {
-		step = new FetchPackageStep(myPackageLoader);
+		step = new FetchPackageStep(myPackageLoader, myPackageInstallerSvc);
 	}
 
 	@Test
