@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7681
+title: "Programmatic/Internal system requests (e.g. those triggered by MDM operations) may cause errors under certain 
+partition scenarios if the operation type is not populated. This has been fixed."

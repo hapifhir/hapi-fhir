@@ -63,6 +63,35 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	private AtomicInteger myCommitCounter;
 	private AtomicInteger myRollbackCounter;
 
+	@Override
+	public String toString() {
+		return "          Current Thread | All Threads\n" + "  SELECT         "
+				+ renderForToString(countSelectQueries()) + " | "
+				+ renderForToString(countSelectQueriesForCurrentThread()) + "\n"
+				+ "  INSERT         "
+				+ renderForToString(countInsertQueries()) + " | "
+				+ renderForToString(countInsertQueriesForCurrentThread()) + "\n"
+				+ "  UPDATE         "
+				+ renderForToString(countUpdateQueries()) + " | "
+				+ renderForToString(countUpdateQueriesForCurrentThread()) + "\n"
+				+ "  DELETE         "
+				+ renderForToString(countDeleteQueries()) + " | "
+				+ renderForToString(countDeleteQueriesForCurrentThread()) + "\n"
+				+ "  COMMIT                        | "
+				+ renderForToString(countCommits()) + "\n"
+				+ "  ROLLBACK                      | "
+				+ renderForToString(countRollbacks()) + "\n"
+				+ "  GET_CONNECTION                | "
+				+ renderForToString(countGetConnections());
+	}
+
+	private String renderForToString(int theCount) {
+		if (theCount == 0) {
+			return String.format("%-14s", '-');
+		}
+		return String.format("%-14d", theCount);
+	}
+
 	@Nonnull
 	private Predicate<String> mySelectQueryInclusionCriteria = DEFAULT_SELECT_INCLUSION_CRITERIA;
 
@@ -286,19 +315,9 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public String logSelectQueriesForCurrentThread(int... theIndexes) {
 		List<SqlQuery> queries = getSelectQueriesForCurrentThread();
-		List<String> queriesStrings = renderQueriesForLogging(true, true, queries);
+		String name = "SELECT";
 
-		List<String> newList = new ArrayList<>();
-		if (theIndexes != null && theIndexes.length > 0) {
-			for (int index : theIndexes) {
-				newList.add(queriesStrings.get(index));
-			}
-			queriesStrings = newList;
-		}
-
-		String joined = String.join("\n", queriesStrings);
-		ourLog.info("Select Queries:\n{}", joined);
-		return joined;
+		return formatAndLogQueries(queries, name, theIndexes);
 	}
 
 	/**
@@ -316,6 +335,28 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		List<String> queriesStrings = renderQueriesForLogging(theInlineParams, theFormatSql, queries);
 		ourLog.info("Select Queries:\n{}", String.join("\n", queriesStrings));
 		return queries;
+	}
+
+	@Nonnull
+	public static String formatAndLogQueries(List<SqlQuery> theQueries, String theName, int... theIndexes) {
+		String joined = formatQueries(theQueries, theIndexes);
+		ourLog.info("{} Queries:\n{}", theName, joined);
+		return joined;
+	}
+
+	@Nonnull
+	public static String formatQueries(List<SqlQuery> theQueries, int... theIndexes) {
+		List<String> queriesStrings = renderQueriesForLogging(true, true, theQueries);
+
+		List<String> newList = new ArrayList<>();
+		if (theIndexes != null && theIndexes.length > 0) {
+			for (int index : theIndexes) {
+				newList.add(queriesStrings.get(index));
+			}
+			queriesStrings = newList;
+		}
+
+		return String.join(System.lineSeparator(), queriesStrings);
 	}
 
 	@Nonnull
@@ -469,7 +510,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	}
 
 	@Nonnull
-	private static Integer countQueries(List<SqlQuery> theQueries) {
+	public static Integer countQueries(List<SqlQuery> theQueries) {
 		return theQueries.stream().map(t -> t.getSize()).reduce(0, Integer::sum);
 	}
 

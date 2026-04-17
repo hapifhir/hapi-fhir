@@ -162,7 +162,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		Set<String> patientSearchParams = getPatientActiveSearchParamsForResourceType(theParams.getResourceType());
 		for (String patientSearchParam : patientSearchParams) {
 			List<SearchParameterMap> maps =
-					myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, false);
+					myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, true);
 			for (SearchParameterMap map : maps) {
 				// Ensure users did not monkey with the patient compartment search parameter.
 				validateSearchParametersForPatient(map, theParams);

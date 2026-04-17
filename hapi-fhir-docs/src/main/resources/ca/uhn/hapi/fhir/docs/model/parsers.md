@@ -53,7 +53,7 @@ When using the [HAPI FHIR Server](../server_plain/), summary mode can be request
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/Parser.java|encodingSummary}}
 ``` 
 
-<a name="parser-options"/>
+<a id="parser-options"></a>
 
 # Global Parser Configuration
 

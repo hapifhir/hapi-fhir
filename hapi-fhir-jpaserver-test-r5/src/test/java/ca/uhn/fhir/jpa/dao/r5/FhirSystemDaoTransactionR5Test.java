@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -27,10 +28,13 @@ import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.ConceptMap;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Quantity;
@@ -1015,6 +1019,150 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("HELLO", actual.getNameFirstRep().getFamily());
 	}
 
+
+	@Test
+	void testMetaAdd_Added() {
+		// Setup
+		createPatient(withId("A"), withTag("http://foo", "bar0"));
+		createPatient(withId("B"), withTag("http://foo", "bar0"));
+
+		// Test
+		Meta meta = new Meta();
+		meta.addTag().setSystem("http://foo").setCode("bar1");
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionMetaAddEntry(new IdType("Patient/A"), meta);
+		bb.addTransactionMetaAddEntry(new IdType("Patient/B"), meta);
+		Bundle requestBundle = bb.getBundleTyped();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
+
+		Bundle responseBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		// Verify
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
+		assertEquals(2, responseBundle.getEntry().size());
+		assertEquals("200 OK", responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertEquals("200 OK", responseBundle.getEntry().get(1).getResponse().getStatus());
+		OperationOutcome oo = (OperationOutcome) responseBundle.getEntry().get(0).getResponse().getOutcome();
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_META_ADD.getCode(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertThat(oo.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay()).isEqualTo("Meta add succeeded.");
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo("Successfully invoked $meta-add and added 1 elements to resource \"Patient/A\".");
+
+		Patient actualA = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertThat(toMetaTagCodes(actualA)).containsExactly("bar0", "bar1");
+		Patient actualB = myPatientDao.read(new IdType("Patient/B"), mySrd);
+		assertThat(toMetaTagCodes(actualB)).containsExactly("bar0", "bar1");
+	}
+
+	@Test
+	void testMetaAdd_NoChange() {
+		// Setup
+		createPatient(withId("A"), withTag("http://foo", "bar0"));
+		createPatient(withId("B"), withTag("http://foo", "bar0"));
+
+		// Test
+		Meta meta = new Meta();
+		meta.addTag().setSystem("http://foo").setCode("bar0");
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionMetaAddEntry(new IdType("Patient/A"), meta);
+		bb.addTransactionMetaAddEntry(new IdType("Patient/B"), meta);
+		Bundle requestBundle = bb.getBundleTyped();
+
+		Bundle responseBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		// Verify
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
+		assertEquals(2, responseBundle.getEntry().size());
+		assertEquals("200 OK", responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertEquals("200 OK", responseBundle.getEntry().get(1).getResponse().getStatus());
+		OperationOutcome oo = (OperationOutcome) responseBundle.getEntry().get(0).getResponse().getOutcome();
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_META_ADD_NO_CHANGE.getCode(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertThat(oo.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay()).isEqualTo("Meta add succeeded: No changes were detected so no action was taken.");
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo("Successfully invoked $meta-add with no changes detected.");
+
+		Patient actualA = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertThat(toMetaTagCodes(actualA)).containsExactly("bar0");
+		Patient actualB = myPatientDao.read(new IdType("Patient/B"), mySrd);
+		assertThat(toMetaTagCodes(actualB)).containsExactly("bar0");
+	}
+
+	@Test
+	void testMetaDeleted_Removed() {
+		// Setup
+		createPatient(withId("A"), withTag("http://foo", "bar0"), withTag("http://foo", "bar1"));
+		createPatient(withId("B"), withTag("http://foo", "bar0"), withTag("http://foo", "bar1"));
+
+		// Test
+		Meta meta = new Meta();
+		meta.addTag().setSystem("http://foo").setCode("bar1");
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionMetaDeleteEntry(new IdType("Patient/A"), meta);
+		bb.addTransactionMetaDeleteEntry(new IdType("Patient/B"), meta);
+		Bundle requestBundle = bb.getBundleTyped();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
+
+		Bundle responseBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		// Verify
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
+		assertEquals(2, responseBundle.getEntry().size());
+		assertEquals("200 OK", responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertEquals("200 OK", responseBundle.getEntry().get(1).getResponse().getStatus());
+		OperationOutcome oo = (OperationOutcome) responseBundle.getEntry().get(0).getResponse().getOutcome();
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_META_DELETE.getCode(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertThat(oo.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay()).isEqualTo("Meta delete succeeded.");
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo("Successfully invoked $meta-delete and deleted 1 elements from resource \"Patient/A\".");
+
+		Patient actualA = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertThat(toMetaTagCodes(actualA)).containsExactly("bar0");
+		Patient actualB = myPatientDao.read(new IdType("Patient/B"), mySrd);
+		assertThat(toMetaTagCodes(actualB)).containsExactly("bar0");
+	}
+
+	@Test
+	void testMetaDelete_NoChange() {
+		// Setup
+		createPatient(withId("A"), withTag("http://foo", "bar0"));
+		createPatient(withId("B"), withTag("http://foo", "bar0"));
+
+		// Test
+		Meta meta = new Meta();
+		meta.addTag().setSystem("http://foo").setCode("bar1");
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionMetaDeleteEntry(new IdType("Patient/A"), meta);
+		bb.addTransactionMetaDeleteEntry(new IdType("Patient/B"), meta);
+		Bundle requestBundle = bb.getBundleTyped();
+
+		Bundle responseBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		// Verify
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
+		assertEquals(2, responseBundle.getEntry().size());
+		assertEquals("200 OK", responseBundle.getEntry().get(0).getResponse().getStatus());
+		assertEquals("200 OK", responseBundle.getEntry().get(1).getResponse().getStatus());
+		OperationOutcome oo = (OperationOutcome) responseBundle.getEntry().get(0).getResponse().getOutcome();
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_META_DELETE_NO_CHANGE.getCode(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertThat(oo.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay()).isEqualTo("Meta delete succeeded: No changes were detected so no action was taken.");
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo("Successfully invoked $meta-delete with no changes detected.");
+
+		Patient actualA = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertThat(toMetaTagCodes(actualA)).containsExactly("bar0");
+		Patient actualB = myPatientDao.read(new IdType("Patient/B"), mySrd);
+		assertThat(toMetaTagCodes(actualB)).containsExactly("bar0");
+	}
+
+	@Nonnull
+	private static List<String> toMetaTagCodes(Patient actualA) {
+		List<String> metaTagCodes = actualA.getMeta().getTag().stream().map(Coding::getCode).toList();
+		return metaTagCodes;
+	}
 
 
 	@Nonnull
