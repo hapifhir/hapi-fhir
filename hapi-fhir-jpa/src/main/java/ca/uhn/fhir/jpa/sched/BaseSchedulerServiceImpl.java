@@ -128,10 +128,10 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		IHapiScheduler retval;
 		if (theClustered) {
 			ourLog.info("Creating Clustered Scheduler");
-			retval = getClusteredScheduler();
+			retval = createClusteredScheduler();
 		} else {
 			ourLog.info("Creating Local Scheduler");
-			retval = getLocalHapiScheduler();
+			retval = createLocalHapiScheduler();
 		}
 		retval.init();
 		return retval;
@@ -141,9 +141,15 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		return !isLocalSchedulingEnabled() || isSchedulingDisabledForUnitTests();
 	}
 
-	protected abstract IHapiScheduler getLocalHapiScheduler();
+	/**
+	 * Creates a new hapi scheduler.
+	 */
+	protected abstract IHapiScheduler createLocalHapiScheduler();
 
-	protected abstract IHapiScheduler getClusteredScheduler();
+	/**
+	 * Creates a new clustered scheduler
+	 */
+	protected abstract IHapiScheduler createClusteredScheduler();
 
 	@EventListener(ContextRefreshedEvent.class)
 	public void start() {
@@ -247,12 +253,12 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	@Override
 	public void unscheduleLocalJobs(TriggerKey... theKeys) {
-		unscheduleJobs(getLocalHapiScheduler(), theKeys);
+		unscheduleJobs(myLocalScheduler, theKeys);
 	}
 
 	@Override
 	public void unscheduleClusteredJobs(TriggerKey... theKeys) {
-		unscheduleJobs(getClusteredScheduler(), theKeys);
+		unscheduleJobs(myClusteredScheduler, theKeys);
 	}
 
 	private void unscheduleJobs(IHapiScheduler theScheduler, TriggerKey... theKeys) {
