@@ -134,7 +134,7 @@ public class InitializeDependenciesStep
 				}
 			} catch (Exception e) {
 				String message = String.format(
-						"Failed to launch child child job for dependency package %s#%s. Skipping this dependency.",
+						"Failed to launch child job for dependency package %s#%s. Skipping this dependency.",
 						nextDependency.name(), nextDependency.version());
 				ourLog.warn(message, e);
 				theDataSink.recoveredError(message);
