@@ -320,7 +320,7 @@ public class InitializeDependenciesStepTest {
 		assertThat(outcomeJson.getDependencyJobIds()).isEmpty();
 
 		verify(myJobDataSink, atLeastOnce()).recoveredError(myStringCaptor.capture());
-		assertThat(myStringCaptor.getAllValues()).contains("Failed to launch child child job for dependency package hl7.fhir.r4.core#4.0.1. Skipping this dependency.");
+		assertThat(myStringCaptor.getAllValues()).contains("Failed to launch child job for dependency package hl7.fhir.r4.core#4.0.1. Skipping this dependency.");
 
 	}
 
