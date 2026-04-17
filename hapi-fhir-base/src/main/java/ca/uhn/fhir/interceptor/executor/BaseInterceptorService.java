@@ -263,7 +263,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 		theObjects.sort((a, b) -> {
 			Integer orderA = interceptorToOrder.get(a);
 			Integer orderB = interceptorToOrder.get(b);
-			return orderA - orderB;
+			return Integer.compare(orderA, orderB);
 		});
 	}
 
@@ -686,7 +686,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 
 		@Override
 		public int compareTo(IInvoker theInvoker) {
-			return myOrder - theInvoker.getOrder();
+			return Integer.compare(myOrder, theInvoker.getOrder());
 		}
 	}
 }

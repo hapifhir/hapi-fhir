@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 7718
+jira: SMILE-11851
+title: "Previously, chained searches such as searching Coverage resources by multiple beneficiary attributes 
+(e.g., family name, given name, and gender) would generate redundant joins to the HFJ_RES_LINK table instead of 
+reusing a single join. This has been fixed by making the reference predicate builder cache key resource-type-aware 
+and enabling join reuse for reference predicates."
+

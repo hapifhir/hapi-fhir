@@ -15,6 +15,7 @@ import org.hl7.fhir.dstu3.fhirpath.TypeDetails;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
@@ -138,7 +139,8 @@ public class FhirPathDstu3 implements IFhirPath {
 			}
 
 			@Override
-			public Base resolveReference(FHIRPathEngine engine, Object appContext, String theUrl, Base refContext)
+			public Base resolveReference(
+					FHIRPathEngine engine, Object appContext, String theUrl, Identifier identifier, Base refContext)
 					throws FHIRException {
 				return (Base) theEvaluationContext.resolveReference(new IdType(theUrl), null);
 			}

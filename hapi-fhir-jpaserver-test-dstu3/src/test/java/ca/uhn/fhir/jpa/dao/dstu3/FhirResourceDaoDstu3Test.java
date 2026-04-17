@@ -2028,7 +2028,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE + "AAAA", new DateParam(ParamPrefixEnum.GREATERTHAN, "2000-01-01")).setLoadSynchronous(true)));
 			assertThat(found).isEmpty();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1223) + "Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: " + getValidPatientSearchParams(), e.getMessage());
 		}
 	}
 
@@ -2060,7 +2060,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_TAG + "AAAA", new TokenParam(TEST_PARAM_VALUE_CODING_1)).setLoadSynchronous(true), new SystemRequestDetails()));
 			assertThat(found).isEmpty();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"" + SP_RES_TAG+"AAAA" + "\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1223) + "Unknown search parameter \"" + SP_RES_TAG+"AAAA" + "\" for resource type \"Patient\". Valid search parameters for this search are: " + getValidPatientSearchParams(), e.getMessage());
 		}
 	}
 
@@ -2091,7 +2091,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_PROFILE + "AAAA", new UriParam(profileA)).setLoadSynchronous(true), new SystemRequestDetails()));
 			assertThat(found).isEmpty();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"" + SP_RES_PROFILE+"AAAA" + "\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1223) + "Unknown search parameter \"" + SP_RES_PROFILE+"AAAA" + "\" for resource type \"Patient\". Valid search parameters for this search are: " + getValidPatientSearchParams(), e.getMessage());
 		}
 	}
 
@@ -2123,7 +2123,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			found = toList(myPatientDao.search(new SearchParameterMap(SP_RES_SECURITY + "AAAA", new TokenParam(TEST_PARAM_VALUE_CODING_1)).setLoadSynchronous(true), new SystemRequestDetails()));
 			assertThat(found).isEmpty();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"" + SP_RES_SECURITY+"AAAA" + "\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1223) + "Unknown search parameter \"" + SP_RES_SECURITY+"AAAA" + "\" for resource type \"Patient\". Valid search parameters for this search are: " + getValidPatientSearchParams(), e.getMessage());
 		}
 	}
 

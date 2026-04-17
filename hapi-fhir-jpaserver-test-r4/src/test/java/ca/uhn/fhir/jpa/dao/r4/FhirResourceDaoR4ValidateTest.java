@@ -2243,6 +2243,35 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 
+	// Created by Claude Sonnet 4.6
+	@Test
+	void testValidateQuestionnaireResponseWithVersionedCanonicalReference() {
+		Questionnaire q = new Questionnaire();
+		q.setId("q-versioned");
+		q.setUrl("http://foo/q");
+		q.setVersion("1.0");
+		q.addItem().setLinkId("link0").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		myQuestionnaireDao.update(q, mySrd);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>aaa</div>");
+		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaireElement().setValue("http://foo/q|1.0");
+		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
+
+		MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
+		OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
+		String encoded = encode(oo);
+		ourLog.info(encoded);
+
+		// Validator will have resolved the questionnaire and validated against it. I will, however
+		// report a structural error (missing required 'link0'), but NOT a "could not be resolved" warning.
+		assertHasErrors(oo);
+		assertThat(encoded).doesNotContain("could not be resolved");
+		assertEquals("No response answer found for required item 'link0'", oo.getIssueFirstRep().getDiagnostics());
+	}
+
 	@Test
 	void testValidateCodeInUnknownCodeSystemWithRequiredBinding() throws IOException {
 		Condition condition = loadResourceFromClasspath(Condition.class, "/r4/code-in-unknown-system-with-required-binding.xml");

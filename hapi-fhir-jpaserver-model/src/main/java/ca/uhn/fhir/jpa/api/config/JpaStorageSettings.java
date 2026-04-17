@@ -166,7 +166,6 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myEnforceReferentialIntegrityOnDelete = true;
 	private Set<String> myEnforceReferentialIntegrityOnDeleteDisableForPaths = Collections.emptySet();
 	private boolean myUniqueIndexesEnabled = true;
-	private boolean myUniqueIndexesCheckedBeforeSave = true;
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
 	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
@@ -1650,33 +1649,21 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * When using {@link #setUniqueIndexesEnabled(boolean) unique indexes}, if this
-	 * setting is set to <code>true</code> (default is <code>true</code>) the system
-	 * will test for the existence of a particular unique index value prior to saving
-	 * a new one.
-	 * <p>
-	 * This causes friendlier error messages to be generated, but adds an
-	 * extra round-trip to the database for eavh save so it can cause
-	 * a small performance hit.
-	 * </p>
+	 * @deprecated As of 8.10.0, this setting is no longer used and the server
+	 * will always use optimized logic to determine whether to test unique indexes
 	 */
+	@Deprecated(since = "8.10.0", forRemoval = true)
 	public boolean isUniqueIndexesCheckedBeforeSave() {
-		return myUniqueIndexesCheckedBeforeSave;
+		return false;
 	}
 
 	/**
-	 * When using {@link #setUniqueIndexesEnabled(boolean) unique indexes}, if this
-	 * setting is set to <code>true</code> (default is <code>true</code>) the system
-	 * will test for the existence of a particular unique index value prior to saving
-	 * a new one.
-	 * <p>
-	 * This causes friendlier error messages to be generated, but adds an
-	 * extra round-trip to the database for each save so it can cause
-	 * a small performance hit.
-	 * </p>
+	 * @deprecated As of 8.10.0, this setting is no longer used and the server
+	 * will always use optimized logic to determine whether to test unique indexes
 	 */
+	@Deprecated(since = "8.10.0", forRemoval = true)
 	public void setUniqueIndexesCheckedBeforeSave(boolean theUniqueIndexesCheckedBeforeSave) {
-		myUniqueIndexesCheckedBeforeSave = theUniqueIndexesCheckedBeforeSave;
+		// nothing
 	}
 
 	/**

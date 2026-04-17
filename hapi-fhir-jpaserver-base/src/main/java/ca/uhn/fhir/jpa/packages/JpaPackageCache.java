@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.packages.loader.NpmPackageData;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -345,6 +346,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			} catch (IOException e) {
 				throw new InternalErrorException(Msg.code(2371) + e);
 			}
+			IParser jsonParser = packageContext.newJsonParser();
+
 			for (Map.Entry<String, List<String>> nextTypeToFiles : packageFolderTypes.entrySet()) {
 				String nextType = nextTypeToFiles.getKey();
 				for (String nextFile : nextTypeToFiles.getValue()) {
@@ -362,7 +365,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					if (nextFile.toLowerCase().endsWith(".xml")) {
 						resource = packageContext.newXmlParser().parseResource(contentsString);
 					} else if (nextFile.toLowerCase().endsWith(".json")) {
-						resource = packageContext.newJsonParser().parseResource(contentsString);
+						resource = jsonParser.parseResource(contentsString);
 					} else {
 						getProcessingMessages(npmPackage).add("Not indexing file: " + nextFile);
 						continue;
@@ -375,10 +378,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					 */
 					String contentType = Constants.CT_FHIR_JSON_NEW;
 					ResourceUtil.removeNarrative(packageContext, resource);
-					byte[] minimizedContents = packageContext
-							.newJsonParser()
-							.encodeResourceToString(resource)
-							.getBytes(StandardCharsets.UTF_8);
+					byte[] minimizedContents =
+							jsonParser.encodeResourceToString(resource).getBytes(StandardCharsets.UTF_8);
 
 					IBaseBinary resourceBinary = createPackageResourceBinary(minimizedContents, contentType);
 					ResourceTable persistedResource = createResourceBinary(resourceBinary);
@@ -428,7 +429,10 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			}
 
 			getProcessingMessages(npmPackage)
-					.add("Successfully added package " + npmPackage.id() + "#" + npmPackage.version() + " to registry");
+					.add(String.format(
+							NpmPackageUtils.SUCCESSFULLY_INSTALLED_MSG_TEMPLATE,
+							npmPackage.id(),
+							npmPackage.version()));
 
 			return npmPackage;
 		});
@@ -521,7 +525,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			return cachedPackage;
 		}
 
-		// otherwise we have to load it from packageloader
+		// otherwise we have to load it from myPackageLoaderSvc
 		NpmPackageData pkgData = myPackageLoaderSvc.fetchPackageFromPackageSpec(thePackageId, thePackageVersion);
 
 		try {
@@ -559,6 +563,19 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			byte[] contents = myPackageLoaderSvc.loadPackageUrlContents(theInstallationSpec.getPackageUrl());
 			theInstallationSpec.setPackageContents(contents);
 			sourceDescription = theInstallationSpec.getPackageUrl();
+		}
+
+		boolean isNonStoringMode = theInstallationSpec.isDryRun()
+				|| theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY;
+
+		// non-storing of NPM paths
+		if (isNonStoringMode && theInstallationSpec.getPackageContents() != null) {
+			return NpmPackage.fromPackage(new ByteArrayInputStream(theInstallationSpec.getPackageContents()));
+		}
+		if (isNonStoringMode) {
+			return newTxTemplate()
+					.execute(tx -> loadPackageFromCacheOnlyInner(
+							theInstallationSpec.getName(), theInstallationSpec.getVersion()));
 		}
 
 		if (theInstallationSpec.getPackageContents() != null) {
@@ -1044,5 +1061,19 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			}
 		}
 		return retVal;
+	}
+
+	@Override
+	public String getLatestVersion(String statedId, boolean milestonesOnly) {
+		// As of release 6.9.4 of org.hl7.fhir.core, this is only used internally by the supporting implementations for
+		// the Validator CLI (not InstanceValidator). It is not called except in that specific use case.
+		throw new UnsupportedOperationException(Msg.code(2892));
+	}
+
+	@Override
+	public String getLatestVersion(String statedId, String versionFilter) {
+		// As of release 6.9.4 of org.hl7.fhir.core, this is only used internally by the supporting implementations for
+		// the Validator CLI (not InstanceValidator). It is not called except in that specific use case.
+		throw new UnsupportedOperationException(Msg.code(2893));
 	}
 }

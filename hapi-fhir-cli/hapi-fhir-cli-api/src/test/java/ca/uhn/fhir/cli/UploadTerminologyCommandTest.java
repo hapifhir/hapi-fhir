@@ -69,20 +69,19 @@ public class UploadTerminologyCommandTest {
 	private static final String FHIR_VERSION_R4 = "R4";
 	private FhirContext myCtx;
 	private final String myConceptsFileName = "target/concepts.csv";
-	private File myConceptsFile = new File(myConceptsFileName);
+	private final File myConceptsFile = new File(myConceptsFileName);
 	private final String myHierarchyFileName = "target/hierarchy.csv";
-	private File myHierarchyFile = new File(myHierarchyFileName);
+	private final File myHierarchyFile = new File(myHierarchyFileName);
 	private final String myCodeSystemFileName = "target/codesystem.json";
-	private File myCodeSystemFile = new File(myCodeSystemFileName);
+	private final File myCodeSystemFile = new File(myCodeSystemFileName);
 	private final String myTextFileName = "target/hello.txt";
-	private File myTextFile = new File(myTextFileName);
+	private final File myTextFile = new File(myTextFileName);
 	private final String myPropertiesFileName = "target/hello.properties";
-	private File myPropertiesFile = new File(myTextFileName);
+	private final File myPropertiesFile = new File(myTextFileName);
 	private File myArchiveFile;
 	private String myArchiveFileName;
 	private final String myICD10URL = "http://hl7.org/fhir/sid/icd-10-cm";
 	private final String myICD10FileName = new File("src/test/resources").getAbsolutePath() + "/icd10cm_tabular_2021.xml";
-	private File myICD10File = new File(myICD10FileName);
 
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
@@ -130,7 +129,7 @@ public class UploadTerminologyCommandTest {
 	}
 
 	@AfterEach
-	public void afterEach() throws Exception {
+	public void afterEach() {
 		FileUtils.deleteQuietly(myConceptsFile);
 		FileUtils.deleteQuietly(myHierarchyFile);
 		FileUtils.deleteQuietly(myCodeSystemFile);
@@ -208,7 +207,7 @@ public class UploadTerminologyCommandTest {
 		assertThat(listOfDescriptors).hasSize(2);
 		assertEquals("concepts.csv", listOfDescriptors.get(0).getFilename());
 		String uploadFile = IOUtils.toString(listOfDescriptors.get(0).getInputStream(), Charsets.UTF_8);
-		assertThat(uploadFile).as(uploadFile).contains("\"CODE\",\"Display\"");
+		assertThat(uploadFile).as(uploadFile).contains("CODE,Display");
 	}
 
 	@ParameterizedTest
@@ -271,7 +270,7 @@ public class UploadTerminologyCommandTest {
 	}
 
 	@Test
-	public void testModifyingSizeLimitConvertsCorrectlyR4() throws ParseException {
+	public void testModifyingSizeLimitConvertsCorrectlyR4() {
 
 		UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
 		uploadTerminologyCommand.setTransferSizeLimitHuman("1GB");
@@ -315,7 +314,7 @@ public class UploadTerminologyCommandTest {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeltaAddInvalidFileName(String theFhirVersion, boolean theIncludeTls) throws IOException {
+	public void testDeltaAddInvalidFileName(String theFhirVersion, boolean theIncludeTls) {
 		try {
 			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 				new String[]{
