@@ -483,9 +483,6 @@ public class JobInstance implements IModelJson, IJobInstance {
 
 	@Override
 	public void setFastTracking(boolean theFastTracking) {
-		if (!theFastTracking) {
-			new Exception().printStackTrace();
-		}
 		myFastTracking = theFastTracking;
 	}
 
