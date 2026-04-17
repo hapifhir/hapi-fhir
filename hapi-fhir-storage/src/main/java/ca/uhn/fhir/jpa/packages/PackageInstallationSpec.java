@@ -43,7 +43,8 @@ import java.util.function.Supplier;
 	"reloadExisting",
 	"additionalResourceFolders",
 	"versionPolicy",
-	"dryRun"
+	"dryRun",
+	"overwriteContentNotPresentCodeSystems"
 })
 @ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -111,6 +112,13 @@ public class PackageInstallationSpec {
 					"Boolean value to signify dry-run status or not. False is default. But if true is specified, nothing will be persisted and a report will be generated outlining changes that would result if set false.")
 	@JsonProperty("dryRun")
 	private boolean myDryRun = false;
+
+	@Schema(
+			description =
+					"When true, a `CodeSystem` with `content=not-present` will be overwritten by a `CodeSystem` from the package. "
+							+ "Defaults to false, which protects an externally loaded `CodeSystem` from being replaced by IG packages.")
+	@JsonProperty("overwriteContentNotPresentCodeSystems")
+	private boolean myOverwriteContentNotPresentCodeSystems = false;
 
 	@JsonIgnore
 	private byte[] myPackageContents;
@@ -235,6 +243,15 @@ public class PackageInstallationSpec {
 
 	public boolean isDryRun() {
 		return myDryRun;
+	}
+
+	public boolean isOverwriteContentNotPresentCodeSystems() {
+		return myOverwriteContentNotPresentCodeSystems;
+	}
+
+	public PackageInstallationSpec setOverwriteContentNotPresentCodeSystems(boolean theOverwriteNotPresentCodeSystems) {
+		myOverwriteContentNotPresentCodeSystems = theOverwriteNotPresentCodeSystems;
+		return this;
 	}
 
 	public enum InstallModeEnum {

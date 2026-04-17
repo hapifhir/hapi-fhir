@@ -62,6 +62,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -69,8 +70,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -297,6 +300,61 @@ public class PackageInstallerSvcImplTest {
 		assertEquals("existingcs", codeSystem.getIdPart());
 	}
 
+	@Test
+	public void testInstallPackage_skipsNotPresentCodeSystem() throws IOException {
+		// Setup: a CodeSystem with content=not-present already exists
+		CodeSystem existingCs = new CodeSystem();
+		existingCs.setId("CodeSystem/existingcs");
+		existingCs.setUrl("http://my-code-system");
+		existingCs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+
+		// A complete CodeSystem from an IG package with the same URL
+		CodeSystem igCs = new CodeSystem();
+		igCs.setId("CodeSystem/igcs");
+		igCs.setUrl("http://my-code-system");
+		igCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		igCs.addConcept().setCode("A00").setDisplay("Cholera");
+
+		PackageInstallationSpec spec = setupResourceInPackage(existingCs, igCs, myCodeSystemDao);
+
+		// Test
+		mySvc.install(spec);
+
+		// Verify: neither create nor update should be called for the CodeSystem
+		verify(myCodeSystemDao, times(0)).update(any(), any(RequestDetails.class));
+		verify(myCodeSystemDao, times(0)).create(any(), any(RequestDetails.class));
+
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage(
+			"Skipping update of CodeSystem with content=not-present matching ?url=http%3A//my-code-system");
+	}
+
+	@Test
+	public void testInstallPackage_overwritesContentNotPresentCodeSystem_whenOverrideEnabled() throws IOException {
+		// Setup: a CodeSystem with content=not-present already exists
+		CodeSystem existingCs = new CodeSystem();
+		existingCs.setId("CodeSystem/existingcs");
+		existingCs.setUrl("http://my-code-system");
+		existingCs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+
+		// A complete CodeSystem from an IG package with the same URL
+		CodeSystem igCs = new CodeSystem();
+		igCs.setId("CodeSystem/igcs");
+		igCs.setUrl("http://my-code-system");
+		igCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		igCs.addConcept().setCode("A00").setDisplay("Cholera");
+
+		PackageInstallationSpec spec = setupResourceInPackage(existingCs, igCs, myCodeSystemDao)
+			.setOverwriteContentNotPresentCodeSystems(true);
+
+		// Test
+		mySvc.install(spec);
+
+		// Verify: update should be called since override is enabled
+		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
+		CodeSystem codeSystem = myCodeSystemCaptor.getValue();
+		assertEquals("existingcs", codeSystem.getIdPart());
+	}
+
 	public enum InstallType {
 		CREATE, SPLIT_AND_CREATE, UPDATE, UPDATE_OVERRIDE
 	}
@@ -438,6 +496,194 @@ public class PackageInstallerSvcImplTest {
 		Communication communication = new Communication();
 		communication.setStatus(theCommunicationStatus);
 		return communication;
+	}
+
+	@Nested
+	class CrossVersionDependencyTest {
+
+		private static final String CROSS_VERSION_PKG_ID = "hl7.fhir.uv.extensions";
+		private static final String CROSS_VERSION_PKG_VERSION = "5.1.0-snapshot1";
+		private static final String CROSS_VERSION_R4_PKG_ID = "hl7.fhir.uv.extensions.r4";
+		private static final String MAIN_PKG_ID = "hl7.fhir.us.core";
+		private static final String MAIN_PKG_VERSION = "8.0.1";
+
+		/**
+		 * Primary reproduction test for GL-8591.
+		 * <p>
+		 * When an R4 server installs an IG with fetchDependencies=true and a transitive
+		 * dependency declares FHIR version 5.0.0 (a cross-version package), the installer
+		 * should attempt to load the version-specific variant (e.g., {package}.r4) instead
+		 * of failing with HAPI-1288.
+		 */
+		@Test
+		void testFetchDependencies_crossVersionDependencyWithR4Variant_shouldSubstituteAndSucceed() throws Exception {
+			// Setup: main R4 package that depends on a cross-version (R5) package
+			NpmPackage mainPackage = createPackageWithDependency(
+				MAIN_PKG_ID, MAIN_PKG_VERSION,
+				FhirVersionEnum.R4.getFhirVersionString(),
+				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
+
+			// The cross-version dependency declares FHIR version 5.0.0
+			NpmPackage crossVersionDep = createSimplePackage(
+				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION,
+				FhirVersionEnum.R5.getFhirVersionString());
+
+			// The R4-specific variant that should be substituted
+			NpmPackage r4Variant = createSimplePackage(
+				CROSS_VERSION_R4_PKG_ID, CROSS_VERSION_PKG_VERSION,
+				FhirVersionEnum.R4.getFhirVersionString());
+
+			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
+			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
+			// When the installer loads the cross-version dep, return the R5 package
+			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+				.thenReturn(crossVersionDep);
+			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_R4_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+				.thenReturn(r4Variant);
+
+			PackageInstallationSpec spec = new PackageInstallationSpec();
+			spec.setName(MAIN_PKG_ID);
+			spec.setVersion(MAIN_PKG_VERSION);
+			spec.setFetchDependencies(true);
+			spec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			mainPackage.save(stream);
+			spec.setPackageContents(stream.toByteArray());
+
+			// Test: install should succeed by substituting the .r4 variant
+			PackageInstallOutcomeJson outcome = mySvc.install(spec);
+
+			// Verify: the installation completed without error
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.getMessage()).isNotEmpty();
+		}
+
+		/**
+		 * When assertFhirVersionsAreCompatible is called with R5 version (5.0.0) and
+		 * R4 version (4.0.1), it should throw HAPI-1288. This is the CORRECT behavior —
+		 * genuinely incompatible versions must be rejected.
+		 */
+		@Test
+		void testAssertFhirVersionsAreCompatible_r5PackageOnR4Server_throwsHapi1288() {
+			String r5Version = FhirVersionEnum.R5.getFhirVersionString();
+			String r4Version = FhirVersionEnum.R4.getFhirVersionString();
+
+			assertThatThrownBy(() -> mySvc.assertFhirVersionsAreCompatible(r5Version, r4Version))
+				.isInstanceOf(ImplementationGuideInstallationException.class)
+				.hasMessageContaining("HAPI-1288");
+		}
+
+		/**
+		 * Regression guard: R4 and R4B versions must remain compatible.
+		 * Both enum-style names ("R4", "R4B") and numeric version strings ("4.0.1", "4.3.0")
+		 * are resolved via {@link FhirVersionEnum#forVersionString} and then compared using
+		 * the R4-family check in {@code areFhirVersionsCompatible}.
+		 */
+		@Test
+		void testAssertFhirVersionsAreCompatible_r4AndR4b_areCompatible() {
+			// Using the enum name strings — this is what the existing test does
+			// and how the R4↔R4B compatibility path is exercised
+			mySvc.assertFhirVersionsAreCompatible("R4", "R4B");
+			mySvc.assertFhirVersionsAreCompatible("R4B", "R4");
+		}
+
+		/**
+		 * When a cross-version dependency is excluded via dependencyExcludes, it should
+		 * be skipped entirely — no version check, no substitution needed.
+		 */
+		@Test
+		void testFetchDependencies_excludedCrossVersionDep_shouldBeSkipped() throws Exception {
+			// Setup: main R4 package that depends on a cross-version (R5) package
+			NpmPackage mainPackage = createPackageWithDependency(
+				MAIN_PKG_ID, MAIN_PKG_VERSION,
+				FhirVersionEnum.R4.getFhirVersionString(),
+				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
+
+			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
+			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
+
+			PackageInstallationSpec spec = new PackageInstallationSpec();
+			spec.setName(MAIN_PKG_ID);
+			spec.setVersion(MAIN_PKG_VERSION);
+			spec.setFetchDependencies(true);
+			spec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+			// Exclude the cross-version dependency by regex
+			spec.addDependencyExclude("hl7\\.fhir\\.uv\\.extensions");
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			mainPackage.save(stream);
+			spec.setPackageContents(stream.toByteArray());
+
+			// Test: install should succeed because the problematic dep is excluded
+			PackageInstallOutcomeJson outcome = mySvc.install(spec);
+
+			// Verify: installation completed and the dep was never loaded
+			assertThat(outcome).isNotNull();
+			verify(myPackageCacheManager, never()).loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION));
+		}
+
+		/**
+		 * When a cross-version dependency has no version-specific variant available,
+		 * the installation should still fail with HAPI-1288 — there is no fallback.
+		 */
+		@Test
+		void testFetchDependencies_crossVersionDependencyWithNoR4Variant_shouldFail() throws Exception {
+			// Setup: main R4 package that depends on a cross-version (R5) package
+			NpmPackage mainPackage = createPackageWithDependency(
+				MAIN_PKG_ID, MAIN_PKG_VERSION,
+				FhirVersionEnum.R4.getFhirVersionString(),
+				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
+
+			// The cross-version dependency declares FHIR version 5.0.0
+			NpmPackage crossVersionDep = createSimplePackage(
+				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION,
+				FhirVersionEnum.R5.getFhirVersionString());
+
+			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
+			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
+			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+				.thenReturn(crossVersionDep);
+			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_R4_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+				.thenThrow(new IOException("Package not found: " + CROSS_VERSION_R4_PKG_ID));
+
+			PackageInstallationSpec spec = new PackageInstallationSpec();
+			spec.setName(MAIN_PKG_ID);
+			spec.setVersion(MAIN_PKG_VERSION);
+			spec.setFetchDependencies(true);
+			spec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			mainPackage.save(stream);
+			spec.setPackageContents(stream.toByteArray());
+
+			// Test: install should fail because no .r4 variant is available
+			assertThatThrownBy(() -> mySvc.install(spec))
+				.isInstanceOf(ImplementationGuideInstallationException.class)
+				.hasMessageContaining("HAPI-1288");
+		}
+
+		@Nonnull
+		private NpmPackage createPackageWithDependency(
+				String theName, String theVersion, String theFhirVersion,
+				String theDepName, String theDepVersion) {
+			PackageGenerator manifest = new PackageGenerator();
+			manifest.name(theName);
+			manifest.version(theVersion);
+			manifest.description("a test package");
+			manifest.fhirVersions(List.of(theFhirVersion));
+			manifest.dependency(theDepName, theDepVersion);
+
+			return NpmPackage.empty(manifest);
+		}
+
+		@Nonnull
+		private NpmPackage createSimplePackage(String theName, String theVersion, String theFhirVersion) {
+			PackageGenerator manifest = new PackageGenerator();
+			manifest.name(theName);
+			manifest.version(theVersion);
+			manifest.description("a test package");
+			manifest.fhirVersions(List.of(theFhirVersion));
+
+			return NpmPackage.empty(manifest);
+		}
 	}
 
 }

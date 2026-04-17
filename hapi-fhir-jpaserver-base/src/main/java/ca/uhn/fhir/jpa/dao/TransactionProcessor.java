@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -368,17 +369,30 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			if (resource != null) {
 				String verb = theVersionAdapter.getEntryRequestVerb(myFhirContext, nextEntry);
 
-				/*
-				 * Pre-fetch any resources that are being updated or patched within
-				 * the transaction
-				 */
 				if ("PUT".equals(verb) || "PATCH".equals(verb)) {
+					/*
+					 * Pre-fetch any resources that are being updated or patched within
+					 * the transaction
+					 */
 					String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
 					if (countMatches(requestUrl, '?') == 0) {
 						IIdType id = myFhirContext.getVersion().newIdType();
 						id.setValue(requestUrl);
 						IIdType unqualifiedVersionless = id.toUnqualifiedVersionless();
 						idsToPreResolve.put(unqualifiedVersionless, PrefetchReasonEnum.DIRECT_TARGET);
+					}
+				} else if ("POST".equals(verb)) {
+					/*
+					 * Pre-fetch any resources that are having operations applied to them
+					 */
+					String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
+					Optional<ParsedRequestOperation> operation = parseUrlForOperationInvocation(requestUrl);
+					if (operation.isPresent()) {
+						String operationName = operation.get().operationName();
+						if (JpaConstants.OPERATION_META_ADD.equals(operationName)
+								|| JpaConstants.OPERATION_META_DELETE.equals(operationName)) {
+							idsToPreResolve.put(operation.get().targetInstance(), PrefetchReasonEnum.DIRECT_TARGET);
+						}
 					}
 				}
 

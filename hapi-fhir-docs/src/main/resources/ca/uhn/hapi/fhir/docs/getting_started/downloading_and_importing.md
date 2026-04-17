@@ -53,7 +53,7 @@ compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:${project.version}'
 compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${project.version}'
 ```
 
-<a name="snapshot"/>
+<a id="snapshot"></a>
 
 # Snapshot Builds
 

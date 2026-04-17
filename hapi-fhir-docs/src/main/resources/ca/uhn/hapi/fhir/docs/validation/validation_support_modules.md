@@ -50,7 +50,7 @@ This module acts as a simple terminology service that can validate codes against
 This module contains a series of HashMaps that store loaded conformance resources in memory. Typically this is initialized at startup in order to add custom conformance resources into the chain.
 
 
-<a name="npmpackagevalidationsupport"/>
+<a id="npmpackagevalidationsupport"></a>
 
 # NpmPackageValidationSupport
 
