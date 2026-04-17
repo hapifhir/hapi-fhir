@@ -50,6 +50,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import jakarta.annotation.Nonnull;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -132,6 +133,7 @@ public abstract class BaseBatch2Config {
 	public IChannelProducer<JobWorkNotification> batch2ProcessingChannelProducer(IBrokerClient theBrokerClient) {
 		ChannelProducerSettings settings =
 				new ChannelProducerSettings().setConcurrentConsumers(getConcurrentConsumers());
+
 		return theBrokerClient.getOrCreateProducer(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
 
@@ -143,7 +145,8 @@ public abstract class BaseBatch2Config {
 			@Nonnull WorkChunkProcessor theExecutorSvc,
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			IHapiTransactionService theHapiTransactionService,
-			IInterceptorBroadcaster theInterceptorBroadcaster) {
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			ISchedulerService theSchedulerSvc) {
 		return new WorkChannelMessageListener(
 				theJobPersistence,
 				theJobDefinitionRegistry,
@@ -152,14 +155,32 @@ public abstract class BaseBatch2Config {
 				theJobMaintenanceService,
 				theHapiTransactionService,
 				theInterceptorBroadcaster,
-				myInterceptorService);
+				myInterceptorService,
+				theSchedulerSvc);
+	}
+
+	/**
+	 * Spring ensures SmartInitializingSingleton is created/run after
+	 * all non-lazy beans in this class (and inheriters) are instantiated.
+	 * This allows us to set the property, even if this class is overwritten.
+	 *
+	 * In this case, we're using the SmartInitializingSingleton because we need
+	 * to pull the AckTimeout from the backing broker configs (kafka, pulsar, whatever).
+	 *
+	 * And that can't happen until we have constructed a broker to begin with.
+	 */
+	@Bean
+	public SmartInitializingSingleton batch2AckTimeoutInitializer(
+			WorkChannelMessageListener theWorkChannelMessageListener,
+			IChannelConsumer<JobWorkNotification> theChannelConsumer) {
+		return () -> theWorkChannelMessageListener.setAckTimeout(theChannelConsumer.getAckTimeout());
 	}
 
 	@Bean
 	public IChannelConsumer<JobWorkNotification> batch2ProcessingChannelConsumer(
 			IBrokerClient theBrokerClient, WorkChannelMessageListener theWorkChannelMessageListener) {
-		ChannelConsumerSettings settings =
-				new ChannelConsumerSettings().setConcurrentConsumers(getConcurrentConsumers());
+		ChannelConsumerSettings settings = new ChannelConsumerSettings();
+		settings.setConcurrentConsumers(getConcurrentConsumers());
 		return theBrokerClient.getOrCreateConsumer(
 				CHANNEL_NAME, JobWorkNotificationJsonMessage.class, theWorkChannelMessageListener, settings);
 	}

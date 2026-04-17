@@ -150,6 +150,16 @@ public class Batch2WorkChunkEntity implements Serializable {
 	private Integer myPollAttempts;
 
 	/**
+	 * Records the last time that this chunk registered work being done.
+	 * By default, this is creation time.
+	 * But upon processing, this value will be updated by workers to
+	 * let other workers know the chunk is still being processed.
+	 */
+	@Column(name = "LAST_HEARTBEAT", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myLastHeartbeat;
+
+	/**
 	 * Default constructor for Hibernate.
 	 */
 	public Batch2WorkChunkEntity() {
@@ -176,7 +186,8 @@ public class Batch2WorkChunkEntity implements Serializable {
 			Integer theRecordsProcessed,
 			String theWarningMessage,
 			Date theNextPollTime,
-			Integer thePollAttempts) {
+			Integer thePollAttempts,
+			Date theLastHeartbeat) {
 		myId = theId;
 		mySequence = theSequence;
 		myJobDefinitionId = theJobDefinitionId;
@@ -194,6 +205,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myWarningMessage = theWarningMessage;
 		myNextPollTime = theNextPollTime;
 		myPollAttempts = thePollAttempts != null ? thePollAttempts : 0;
+		myLastHeartbeat = theLastHeartbeat;
 	}
 
 	public static Batch2WorkChunkEntity fromWorkChunk(WorkChunk theWorkChunk) {
@@ -214,7 +226,8 @@ public class Batch2WorkChunkEntity implements Serializable {
 				theWorkChunk.getRecordsProcessed(),
 				theWorkChunk.getWarningMessage(),
 				theWorkChunk.getNextPollTime(),
-				theWorkChunk.getPollAttempts());
+				theWorkChunk.getPollAttempts(),
+				theWorkChunk.getLastHeartbeat());
 		entity.setSerializedData(theWorkChunk.getData());
 
 		return entity;
@@ -372,6 +385,14 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myPollAttempts = thePollAttempts;
 	}
 
+	public Date getLastHeartbeat() {
+		return myLastHeartbeat;
+	}
+
+	public void setLastHeartbeat(Date theLastHeartbeat) {
+		myLastHeartbeat = theLastHeartbeat;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -393,6 +414,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 				.append("warningMessage", myWarningMessage)
 				.append("nextPollTime", myNextPollTime)
 				.append("pollAttempts", myPollAttempts)
+				.append("lastHeartbeat", myLastHeartbeat)
 				.toString();
 	}
 }

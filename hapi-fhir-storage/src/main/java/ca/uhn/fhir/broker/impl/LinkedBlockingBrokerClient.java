@@ -52,7 +52,10 @@ public class LinkedBlockingBrokerClient implements IBrokerClient {
 		LinkedBlockingChannel springMessagingChannelReceiver =
 				myLinkedBlockingChannelFactory.getOrCreateReceiver(theChannelName, theChannelConsumerSettings);
 		SpringMessagingReceiverAdapter<T> retval = new SpringMessagingReceiverAdapter<>(
-				theMessageType, springMessagingChannelReceiver, theMessageListener);
+				theMessageType,
+				springMessagingChannelReceiver,
+				theMessageListener,
+				theChannelConsumerSettings.getAckTimeout());
 		MessageHandler handler = new SpringMessagingMessageHandlerAdapter<>(theMessageType, theMessageListener);
 		retval.subscribe(handler);
 		return retval;

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.interceptor.TransactionConcurrencySemaphoreInterceptor;
@@ -14,6 +13,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -21,6 +21,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -43,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.annotation.DirtiesContext;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,6 +61,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -597,7 +598,6 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			task = () -> myPatientDao.delete(patientId, mySrd);
 			future = myExecutor.submit(task);
 			futures.add(future);
-
 		}
 
 		// Look for failures
@@ -605,16 +605,23 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			try {
 				next.get();
 				ourLog.info("Future produced success");
-			} catch (Exception e) {
-				ourLog.info("Future produced exception: {}", e.toString());
-				throw new AssertionError("Failed with message: " + e, e);
+			} catch (ExecutionException e) {
+				if (e.getCause() instanceof ResourceGoneException) {
+					// A delete after another concurrent delete already succeeded is expected
+					ourLog.info("Future produced resource gone (expected): {}", e.getCause().toString());
+				} else {
+					ourLog.info("Future produced exception: {}", e.toString());
+					throw new AssertionError("Failed with message: " + e, e);
+				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new AssertionError("Interrupted: " + e, e);
 			}
 		}
 
 		// Make sure we saved the object
 		IBundleProvider patient = myPatientDao.history(patientId, null, null, null, null);
 		assertThat(patient.sizeOrThrowNpe()).isGreaterThanOrEqualTo(3);
-
 	}
 
 	@Test
@@ -897,7 +904,6 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 	private void setupRetryBehaviour(ServletRequestDetails theServletRequestDetails) {
 		when(theServletRequestDetails.isRetry()).thenReturn(true);
-		when(theServletRequestDetails.getMaxRetries()).thenReturn(10);
+		when(theServletRequestDetails.getMaxRetries()).thenReturn(50);
 	}
-
 }

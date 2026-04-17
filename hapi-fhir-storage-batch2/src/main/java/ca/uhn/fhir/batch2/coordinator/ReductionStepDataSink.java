@@ -55,7 +55,7 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			IJobPersistence thePersistence,
 			JobDefinitionRegistry theJobDefinitionRegistry,
 			IInterceptorService theInterceptorService) {
-		super(theInstanceId, theJobWorkCursor);
+		super(theInstanceId, null, theJobWorkCursor);
 		myJobPersistence = thePersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myInterceptorService = theInterceptorService;

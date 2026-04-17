@@ -93,7 +93,7 @@ public class WorkChunkProcessor {
 		PT parameters = theInstance.getParameters(jobDefinition.getParametersType());
 
 		IJobStepWorker<PT, IT, OT> worker = step.getJobStepWorker();
-		BaseDataSink<PT, IT, OT> dataSink = getDataSink(theCursor, jobDefinition, instanceId);
+		BaseDataSink<PT, IT, OT> dataSink = getDataSink(theCursor, theWorkChunk, jobDefinition, instanceId);
 
 		assert !step.isReductionStep();
 
@@ -119,13 +119,16 @@ public class WorkChunkProcessor {
 	 */
 	@SuppressWarnings("unchecked")
 	<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> BaseDataSink<PT, IT, OT> getDataSink(
-			JobWorkCursor<PT, IT, OT> theCursor, JobDefinition<PT> theJobDefinition, String theInstanceId) {
+			JobWorkCursor<PT, IT, OT> theCursor,
+			WorkChunk theWorkChunk,
+			JobDefinition<PT> theJobDefinition,
+			String theInstanceId) {
 		BaseDataSink<PT, IT, OT> dataSink;
 
 		assert !theCursor.isReductionStep();
 		if (theCursor.isFinalStep()) {
 			dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(
-					theJobDefinition.getJobDefinitionId(), theInstanceId, theCursor.asFinalCursor());
+					theJobDefinition.getJobDefinitionId(), theInstanceId, theWorkChunk, theCursor.asFinalCursor());
 		} else {
 			dataSink = new JobDataSink<>(
 					myBatchJobSender,
@@ -133,6 +136,7 @@ public class WorkChunkProcessor {
 					theJobDefinition,
 					theInstanceId,
 					theCursor,
+					theWorkChunk,
 					myHapiTransactionService);
 		}
 		return dataSink;

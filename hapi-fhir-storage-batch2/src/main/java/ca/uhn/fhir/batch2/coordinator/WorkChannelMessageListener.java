@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
+import ca.uhn.fhir.batch2.api.DelayChunkException;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
@@ -27,18 +28,23 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -52,6 +58,7 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 	private final IHapiTransactionService myHapiTransactionService;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final JobStepExecutorFactory myJobStepExecutorFactory;
+	private final ISchedulerService myIHapiScheduler;
 
 	public WorkChannelMessageListener(
 			@Nonnull IJobPersistence theJobPersistence,
@@ -61,18 +68,25 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			IHapiTransactionService theHapiTransactionService,
 			IInterceptorBroadcaster theInterceptorBroadcaster,
-			@Nonnull IInterceptorService theInterceptorService) {
+			@Nonnull IInterceptorService theInterceptorService,
+			ISchedulerService theScheduler) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myHapiTransactionService = theHapiTransactionService;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		myIHapiScheduler = theScheduler;
 		myJobStepExecutorFactory = new JobStepExecutorFactory(
 				theJobPersistence,
 				theBatchJobSender,
 				theExecutorSvc,
 				theJobMaintenanceService,
 				theJobDefinitionRegistry,
-				theInterceptorService);
+				theInterceptorService,
+				myIHapiScheduler);
+	}
+
+	public void setAckTimeout(Duration theTimeout) {
+		myJobStepExecutorFactory.setAckTimeout(theTimeout);
 	}
 
 	public Class<JobWorkNotification> getPayloadType() {
@@ -148,21 +162,89 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 		 * Load the chunk, and mark it as dequeued.
 		 */
 		Optional<MessageProcess> updateChunkStatusAndValidate() {
-			return myJobPersistence
+			Optional<WorkChunk> workChunkOp = myJobPersistence
 					.onWorkChunkDequeue(myChunkId)
 					.or(() -> {
 						ourLog.error("Unable to find chunk with ID {} - Aborting.  {}", myChunkId, myWorkNotification);
 						return Optional.empty();
-					})
-					.map(chunk -> {
-						myWorkChunk = chunk;
-						ourLog.debug(
-								"Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]",
-								myChunkId,
-								myWorkChunk.getTargetStepId(),
-								myWorkChunk.getStartTime());
-						return this;
 					});
+
+			// no workchunk found - return empty (discard msg)
+			if (workChunkOp.isEmpty()) {
+				return Optional.empty();
+			}
+
+			myWorkChunk = workChunkOp.get();
+
+			ourLog.debug(
+					"Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]",
+					myChunkId,
+					myWorkChunk.getTargetStepId(),
+					myWorkChunk.getStartTime());
+
+			return handlePotentiallySlowWorkChunk();
+		}
+
+		/**
+		 * If the workchunk was in IN_PROGRESS before, there's 2 possibilities:
+		 * 1) it was picked up and is still being worked on by a slow worker
+		 * 2) it was picked up and the worker died while processing it
+		 *
+		 * If it is a slow worker, we'll stall for a bit and throw; this should
+		 * allow the broker to requeue the message for another worker
+		 * If the worker is dead, we'll wait a bit and retry later. if this timeout
+		 * becomes too great, we'll fail the job.
+		 *
+		 * If the workchunk was in COMPLETED state when it arrives here,
+		 * it means this *was* a slow worker, and it has now completed.
+		 * We should discard the message and allow processing to continue.
+		 *
+		 * If workchunk status was anything else, we'll let it
+		 * continue unimpeded as before. (ie, normal processing)
+		 */
+		private Optional<MessageProcess> handlePotentiallySlowWorkChunk() {
+			if (myWorkChunk.getPreviousStatus() == WorkChunkStatusEnum.IN_PROGRESS
+					&& myWorkChunk.getLastHeartbeat() != null) {
+				ourLog.debug(
+						"Acktimeout (how long a broker will wait for a listener before redelivery) is {}ms",
+						myJobStepExecutorFactory.getAckTimeout().toMillis());
+				long lastHeartbeatMs = myWorkChunk.getLastHeartbeat().getTime();
+				long now = Instant.now().toEpochMilli();
+
+				/*
+				 * This should always be a positive value, since
+				 * that's what the step execution factory will return.
+				 *
+				 * But it could be a value that's very very small.
+				 */
+				long minTimeout = myJobStepExecutorFactory.getAckTimeout().toMillis();
+				long twiceAckTime = 2 * minTimeout;
+
+				long duration = now - lastHeartbeatMs;
+
+				if (duration <= twiceAckTime) {
+					String msg = String.format(
+							"WorkChunk %s is stuck in step %s for job %s. This might be a redelivered message. Will retry later.",
+							myWorkChunk.getId(), myWorkChunk.getTargetStepId(), myWorkChunk.getJobDefinitionId());
+					ourLog.warn(msg);
+					try {
+						Thread.sleep(minTimeout);
+					} catch (InterruptedException ex) {
+						throw new RuntimeException(Msg.code(2913), ex);
+					}
+					// throw to requeue chunk
+					throw new DelayChunkException(Msg.code(2887) + " " + msg);
+				} // else - do nothing and proceed
+				// TODO LS - we might want to consider capping how long we wait,
+				// 			but for now we'll keep sleeping forever until the
+				//			slow worker finishes or stops updating the chunk
+			} else if (myWorkChunk.getPreviousStatus() == WorkChunkStatusEnum.COMPLETED) {
+				// our slow worker has completed this step; discard
+				return Optional.empty();
+			}
+			// else - do nothing and proceed as before
+
+			return Optional.of(this);
 		}
 
 		/**
@@ -274,7 +356,7 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 						 * The executeStep() method actually performs the processing of a given work chunk, but
 						 * this execution can optionally be wrapped by interceptors wanting to influence the processing.
 						 */
-						Runnable runnable = () -> process.myStepExector.executeStep();
+						Runnable runnable = () -> process.myStepExector.processStep();
 
 						myInterceptorBroadcaster.runWithFilterHooks(
 								Pointcut.BATCH2_CHUNK_PROCESS_FILTER, params, runnable);

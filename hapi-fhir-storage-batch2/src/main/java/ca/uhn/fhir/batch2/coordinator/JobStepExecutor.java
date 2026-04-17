@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IWorkChunkPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
@@ -28,19 +29,32 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.Nonnull;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.TriggerKey;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.util.Date;
 
 import static ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils.JOB_STEP_EXECUTION_SPAN_NAME;
 
 public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+
+	public static final String SCHEDULED_JOB_ID_PREFIX = "BATCH2-HEARTBEAT";
+	private static final String CHUNK_ID = "chunk-id";
 
 	private final IJobPersistence myJobPersistence;
 	private final WorkChunkProcessor myJobExecutorSvc;
@@ -52,6 +66,9 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private final String myInstanceId;
 	private final WorkChunk myWorkChunk;
 	private final JobWorkCursor<PT, IT, OT> myCursor;
+	private final ISchedulerService myIHapiScheduler;
+
+	private final Duration myAckTimeout;
 
 	JobStepExecutor(
 			@Nonnull IJobPersistence theJobPersistence,
@@ -61,7 +78,9 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			@Nonnull WorkChunkProcessor theExecutor,
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull IInterceptorService theInterceptorService) {
+			@Nonnull IInterceptorService theInterceptorService,
+			ISchedulerService theScheduler,
+			Duration theAckTimeout) {
 		myJobPersistence = theJobPersistence;
 		myDefinition = theCursor.jobDefinition;
 		myInstance = theInstance;
@@ -71,11 +90,12 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		myJobExecutorSvc = theExecutor;
 		myJobMaintenanceService = theJobMaintenanceService;
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
+		myIHapiScheduler = theScheduler;
+		myAckTimeout = theAckTimeout;
 	}
 
 	@WithSpan(JOB_STEP_EXECUTION_SPAN_NAME)
-	public void executeStep() {
-
+	public void processStep() {
 		BatchJobOpenTelemetryUtils.addAttributesToCurrentSpan(
 				myInstance.getJobDefinitionId(),
 				myInstance.getJobDefinitionVersion(),
@@ -83,8 +103,14 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 				myCursor.getCurrentStepId(),
 				myWorkChunk == null ? null : myWorkChunk.getId());
 
-		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput =
-				myJobExecutorSvc.doExecution(myCursor, myInstance, myWorkChunk);
+		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput;
+		try (HeartbeatJobHandle handle = scheduleHeartbeat()) {
+			stepExecutorOutput = myJobExecutorSvc.doExecution(myCursor, myInstance, myWorkChunk);
+		} catch (IOException ex) {
+			String msg = "Heartbeat job failed";
+			ourLog.error(msg);
+			throw new RuntimeException(Msg.code(2914) + " " + msg, ex);
+		}
 
 		if (!stepExecutorOutput.isSuccessful()) {
 			return;
@@ -140,6 +166,51 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 				instance.setFastTracking(false);
 				return true;
 			});
+		}
+	}
+
+	private HeartbeatJobHandle scheduleHeartbeat() {
+		return new HeartbeatJobHandle(myIHapiScheduler, myAckTimeout, myInstanceId, myWorkChunk);
+	}
+
+	public static class HeartbeatJobHandle implements AutoCloseable {
+
+		private final ISchedulerService myScheduleSvc;
+
+		private final TriggerKey myTriggerKey;
+
+		public HeartbeatJobHandle(
+				ISchedulerService theSchedulerService,
+				Duration theAckTimeout,
+				String theInstanceId,
+				WorkChunk theWorkChunk) {
+			myScheduleSvc = theSchedulerService;
+			String jobId = String.format("%s-%s-%s", SCHEDULED_JOB_ID_PREFIX, theInstanceId, theWorkChunk.getId());
+			ScheduledJobDefinition definition = new ScheduledJobDefinition();
+			definition.setJobClass(HeartbeatJob.class);
+			definition.setId(jobId);
+			definition.addJobData(CHUNK_ID, theWorkChunk.getId());
+			myTriggerKey = definition.toTriggerKey();
+			// we don't want a time that's <100ms
+			myScheduleSvc.scheduleLocalJob(Math.max(theAckTimeout.toMillis() / 3, 500), definition);
+		}
+
+		@Override
+		public void close() throws IOException {
+			myScheduleSvc.unscheduleLocalJobs(myTriggerKey);
+		}
+	}
+
+	public static class HeartbeatJob implements HapiJob {
+
+		@Autowired
+		private IWorkChunkPersistence myWorkChunkPersistence;
+
+		@Override
+		public void execute(JobExecutionContext context) throws JobExecutionException {
+			String workchunkId = (String) context.getMergedJobDataMap().get(CHUNK_ID);
+
+			myWorkChunkPersistence.onWorkChunkHeartbeat(workchunkId);
 		}
 	}
 }

@@ -113,6 +113,11 @@
  *    <li> As a special case, if the first chunk produces no children, the job advances IN_PROGRESS->COMPLETE
  *         {@link ca.uhn.fhir.batch2.coordinator.JobStepExecutor#executeStep()}
  *         </li>
+ *    <li> If the state change was from IN_PROGRESS->IN_PROGRESS, this signals a potentially slow (or dead) worker.
+ *         Said chunks may be delayed and put back onto the queue to give slow workers time to catch up (so as not to
+ *         duplicate work - which might compromise data in the case of certain non-idempotent options).
+ *         {@link ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener.MessageProcess#handlePotentiallySlowWorkChunk()}
+ *        </li>
  *    <li> Other transitions happen during maintenance runs. If a job is running, and the user has requested cancellation,
  *         the job transitions (IN_PROGRESS or ERRORED) -> CANCELLED.
  *         </li>

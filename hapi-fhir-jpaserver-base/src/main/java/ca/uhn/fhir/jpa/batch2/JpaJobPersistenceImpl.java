@@ -179,7 +179,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			return Optional.empty();
 		} else {
 			Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
-			return chunk.map(this::toChunk);
+			return chunk.map(c -> {
+				WorkChunk ret = toChunk(c);
+				ret.setPreviousStatus(chunkLock.getStatus());
+				return ret;
+			});
 		}
 	}
 
@@ -419,6 +423,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public void onWorkChunkHeartbeat(String theChunkId) {
+		myWorkChunkRepository.updateWorkChunkHeartbeat(theChunkId, new Date());
+	}
+
+	@Override
 	public void onWorkChunkFailed(String theChunkId, String theErrorMessage) {
 		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
 		String errorMessage = truncateErrorMessage(theErrorMessage);
@@ -430,15 +439,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
-		myTransactionService
-				.withSystemRequestOnDefaultPartition()
-				.execute(() -> myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
-						theEvent.getChunkId(),
-						new Date(),
-						theEvent.getRecordsProcessed(),
-						theEvent.getRecoveredErrorCount(),
-						WorkChunkStatusEnum.COMPLETED,
-						theEvent.getRecoveredWarningMessage()));
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
+					theEvent.getChunkId(),
+					new Date(),
+					theEvent.getRecordsProcessed(),
+					theEvent.getRecoveredErrorCount(),
+					WorkChunkStatusEnum.COMPLETED,
+					theEvent.getRecoveredWarningMessage());
+		});
 	}
 
 	@Nullable

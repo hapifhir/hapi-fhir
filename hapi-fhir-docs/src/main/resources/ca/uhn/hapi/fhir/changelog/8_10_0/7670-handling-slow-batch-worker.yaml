@@ -1,0 +1,13 @@
+---
+type: add
+issue: 7670
+jira: SMILE-11603
+title: "Added a \"heartbeat\" mechanic to Batch2 to allow
+      slow running workers to have more time to process
+      larger jobs.
+      A heartbeat will be set on the workchunk every so often
+      to signal that work is still being done.
+      The frequency of the heartbeat will depend on broker level
+      settings, which must be passed in. Otherwise a minimum
+      of ~1s is assumed as a \"timeout threshold\".
+"

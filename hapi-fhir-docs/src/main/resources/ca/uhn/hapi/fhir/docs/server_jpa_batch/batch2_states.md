@@ -72,6 +72,7 @@ stateDiagram-v2
   on_receive --> IN_PROGRESS : start execution
   
   IN_PROGRESS --> execute: execute
+  execute --> IN_PROGRESS : encountered duplicate chunk \n potentially slow running (or dead) worker triggered redelivery \n if the 'heartbeat' is still within acceptable range, delay and requeue for later
   execute --> ERROR       : on re-triable error
   execute --> COMPLETED   : success\n maybe trigger instance first_step_finished
   execute --> FAILED      : on unrecoverable \n or too many errors

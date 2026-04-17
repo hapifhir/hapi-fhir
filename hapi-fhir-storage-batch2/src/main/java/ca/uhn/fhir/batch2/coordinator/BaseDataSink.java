@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IWarningProcessor;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
@@ -36,11 +37,13 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 	private int myRecoveredErrorCount;
 	protected final String myJobDefinitionId;
 	private IWarningProcessor myWarningProcessor;
+	protected WorkChunk myWorkChunk;
 
-	protected BaseDataSink(String theInstanceId, JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
+	protected BaseDataSink(String theInstanceId, WorkChunk theWorkChunk, JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 		myInstanceId = theInstanceId;
 		myJobWorkCursor = theJobWorkCursor;
 		myJobDefinitionId = theJobWorkCursor.getJobDefinition().getJobDefinitionId();
+		myWorkChunk = theWorkChunk;
 	}
 
 	public String getInstanceId() {

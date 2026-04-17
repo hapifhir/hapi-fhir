@@ -31,6 +31,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,10 +128,10 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		IHapiScheduler retval;
 		if (theClustered) {
 			ourLog.info("Creating Clustered Scheduler");
-			retval = getClusteredScheduler();
+			retval = createClusteredScheduler();
 		} else {
 			ourLog.info("Creating Local Scheduler");
-			retval = getLocalHapiScheduler();
+			retval = createLocalHapiScheduler();
 		}
 		retval.init();
 		return retval;
@@ -140,9 +141,15 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		return !isLocalSchedulingEnabled() || isSchedulingDisabledForUnitTests();
 	}
 
-	protected abstract IHapiScheduler getLocalHapiScheduler();
+	/**
+	 * Creates a new hapi scheduler.
+	 */
+	protected abstract IHapiScheduler createLocalHapiScheduler();
 
-	protected abstract IHapiScheduler getClusteredScheduler();
+	/**
+	 * Creates a new clustered scheduler
+	 */
+	protected abstract IHapiScheduler createClusteredScheduler();
 
 	@EventListener(ContextRefreshedEvent.class)
 	public void start() {
@@ -242,6 +249,23 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 				StopWatch.formatMillis(theIntervalMillis));
 		defaultGroup(theJobDefinition);
 		theScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
+	}
+
+	@Override
+	public void unscheduleLocalJobs(TriggerKey... theKeys) {
+		unscheduleJobs(myLocalScheduler, theKeys);
+	}
+
+	@Override
+	public void unscheduleClusteredJobs(TriggerKey... theKeys) {
+		unscheduleJobs(myClusteredScheduler, theKeys);
+	}
+
+	private void unscheduleJobs(IHapiScheduler theScheduler, TriggerKey... theKeys) {
+		if (isSchedulingDisabled()) {
+			return;
+		}
+		theScheduler.unscheduleJobs(theKeys);
 	}
 
 	@VisibleForTesting
