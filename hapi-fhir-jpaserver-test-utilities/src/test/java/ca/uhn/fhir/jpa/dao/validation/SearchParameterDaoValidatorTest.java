@@ -257,6 +257,17 @@ public class SearchParameterDaoValidatorTest {
         mySvc.validate(sp);
     }
 
+	@Test
+	void testValidateExpressionAgainstBase_resourceMixedWithSpecificBases_expressionMatchesSpecific_success() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/practitionerrole-practitioner");
+		sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
+		sp.addBase(RESOURCE).addBase(PRACTITIONERROLE);
+		sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
+		sp.setExpression("PractitionerRole.practitioner");
+		mySvc.validate(sp);
+	}
+
     @Test
     void testValidateExpressionAgainstBase_domainResourceBase_withSpecificExpressionPrefix_fails() {
         SearchParameter sp = new SearchParameter();
@@ -326,22 +337,6 @@ public class SearchParameterDaoValidatorTest {
                 .hasMessageContaining("HAPI-2911")
                 .hasMessageContaining("Patient");
     }
-
-	@Test
-	void testValidateExpressionAgainstBase_multiBasesWithResource_expressionMissingOneBase_fails() {
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/practitionerrole-practitioner");
-		sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
-		sp.addBase(RESOURCE).addBase(PRACTITIONERROLE);
-		sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
-		sp.setExpression("PractionerRole.practitioner");
-
-		assertThatThrownBy(() -> mySvc.validate(sp))
-			.isInstanceOf(UnprocessableEntityException.class)
-			.hasMessageContaining("HAPI-2911")
-			.hasMessageContaining("No path in expression")
-			.hasMessageContaining("PractitionerRole");
-	}
 
     private static SearchParameter createSearchParameter(Enumerations.SearchParamType theType, String theId, String theCodeValue, String theExpression) {
 

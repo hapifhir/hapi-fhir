@@ -199,12 +199,9 @@ public class SearchParameterDaoValidator {
 	}
 
 	/**
-	 * Validates that the FHIRPath expression's resource type prefix is consistent with the declared
-	 * base resource types. If base is a specific resource type (e.g. PractitionerRole), at least one
-	 * expression path segment must start with that resource type. If base is Resource or DomainResource,
-	 * the expression must use a Resource. or DomainResource. prefix — a specific type prefix (e.g. Person.)
-	 * is rejected as a misconfiguration since the parameter would be registered against all resource types
-	 * but only extract values from that one specific type.
+	 * Validate expression prefixes against declared base(s):
+	 * - For generic bases (Resource or DomainResource), prefixes must be Resource or DomainResource.
+	 * - For a specific base (e.g. PractitionerRole), at least one path must start with that type.
 	 */
 	private void validateExpressionAgainstBase(SearchParameter theSearchParameter) {
 		String expression = getExpression(theSearchParameter);
@@ -219,9 +216,9 @@ public class SearchParameterDaoValidator {
 
 		String[] paths = expression.split("\\|");
 
-		boolean allBasesAreGeneric = bases.stream().allMatch(b -> RESOURCE.equals(b) || DOMAIN_RESOURCE.equals(b));
+		boolean allBasesGeneric = bases.stream().allMatch(b -> RESOURCE.equals(b) || DOMAIN_RESOURCE.equals(b));
 
-		if (allBasesAreGeneric) {
+		if (allBasesGeneric) {
 			for (String path : paths) {
 				String prefix = extractTypePrefix(path.trim());
 				if (prefix != null && !RESOURCE.equals(prefix) && !DOMAIN_RESOURCE.equals(prefix)) {
@@ -231,26 +228,26 @@ public class SearchParameterDaoValidator {
 							+ "]. Expression must use Resource or DomainResource prefix when base is generic.");
 				}
 			}
-		} else {
-			for (String base : bases) {
-				if (RESOURCE.equals(base) || DOMAIN_RESOURCE.equals(base)) {
-					continue;
+			return;
+		}
+		for (String base : bases) {
+			if (RESOURCE.equals(base) || DOMAIN_RESOURCE.equals(base)) {
+				continue;
+			}
+			boolean anyPathMatchesBase = false;
+			for (String path : paths) {
+				String prefix = extractTypePrefix(path.trim());
+				if (prefix == null
+						|| base.equals(prefix)
+						|| RESOURCE.equals(prefix)
+						|| DOMAIN_RESOURCE.equals(prefix)) {
+					anyPathMatchesBase = true;
+					break;
 				}
-				boolean anyPathMatchesBase = false;
-				for (String path : paths) {
-					String prefix = extractTypePrefix(path.trim());
-					if (prefix == null
-							|| base.equals(prefix)
-							|| RESOURCE.equals(prefix)
-							|| DOMAIN_RESOURCE.equals(prefix)) {
-						anyPathMatchesBase = true;
-						break;
-					}
-				}
-				if (!anyPathMatchesBase) {
-					throw new UnprocessableEntityException(Msg.code(2911) + "No path in expression '" + expression
-							+ "' matches the base [" + base + "].");
-				}
+			}
+			if (!anyPathMatchesBase) {
+				throw new UnprocessableEntityException(
+						Msg.code(2911) + "No path in expression '" + expression + "' matches the base [" + base + "].");
 			}
 		}
 	}
