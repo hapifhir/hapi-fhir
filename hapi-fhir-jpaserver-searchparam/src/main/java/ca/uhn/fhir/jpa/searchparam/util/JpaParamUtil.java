@@ -243,7 +243,9 @@ public enum JpaParamUtil {
 		 * Constructor
 		 */
 		ComponentAndCorrespondingParam(
-				@Nonnull RuntimeSearchParam.Component theComponent, @Nonnull RuntimeSearchParam theComponentParameter, boolean theComboRangedDate) {
+				@Nonnull RuntimeSearchParam.Component theComponent,
+				@Nonnull RuntimeSearchParam theComponentParameter,
+				boolean theComboRangedDate) {
 			this.myComponent = theComponent;
 			this.myComponentParameter = theComponentParameter;
 			this.myComboRangedDate = theComboRangedDate;

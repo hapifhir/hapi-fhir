@@ -31,7 +31,6 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -127,8 +126,10 @@ public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchPar
 					if (ordinalLow == ordinalHigh) {
 						condition = BinaryCondition.equalTo(myColumnDateOrdinal, generatePlaceholder(ordinalLow));
 					} else {
-						BinaryCondition conditionLow = BinaryCondition.greaterThanOrEq(myColumnDateOrdinal, generatePlaceholder(ordinalLow));
-						BinaryCondition conditionHigh = BinaryCondition.lessThanOrEq(myColumnDateOrdinal, generatePlaceholder(ordinalHigh));
+						BinaryCondition conditionLow =
+								BinaryCondition.greaterThanOrEq(myColumnDateOrdinal, generatePlaceholder(ordinalLow));
+						BinaryCondition conditionHigh =
+								BinaryCondition.lessThanOrEq(myColumnDateOrdinal, generatePlaceholder(ordinalHigh));
 						condition = QueryParameterUtils.toAndPredicate(conditionLow, conditionHigh);
 					}
 					if (dateParam.getPrefix() == ParamPrefixEnum.NOT_EQUAL) {
@@ -137,19 +138,23 @@ public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchPar
 					orValues.add(condition);
 				}
 				case GREATERTHAN -> {
-					Condition conditionLow = BinaryCondition.greaterThan(myColumnDateOrdinal, generatePlaceholder(ordinalHigh));
+					Condition conditionLow =
+							BinaryCondition.greaterThan(myColumnDateOrdinal, generatePlaceholder(ordinalHigh));
 					orValues.add(conditionLow);
 				}
 				case GREATERTHAN_OR_EQUALS -> {
-					Condition conditionLow = BinaryCondition.greaterThanOrEq(myColumnDateOrdinal, generatePlaceholder(ordinalLow));
+					Condition conditionLow =
+							BinaryCondition.greaterThanOrEq(myColumnDateOrdinal, generatePlaceholder(ordinalLow));
 					orValues.add(conditionLow);
 				}
 				case LESSTHAN -> {
-					Condition conditionHigh = BinaryCondition.lessThan(myColumnDateOrdinal, generatePlaceholder(ordinalLow));
+					Condition conditionHigh =
+							BinaryCondition.lessThan(myColumnDateOrdinal, generatePlaceholder(ordinalLow));
 					orValues.add(conditionHigh);
 				}
 				case LESSTHAN_OR_EQUALS -> {
-					Condition conditionHigh = BinaryCondition.lessThanOrEq(myColumnDateOrdinal, generatePlaceholder(ordinalHigh));
+					Condition conditionHigh =
+							BinaryCondition.lessThanOrEq(myColumnDateOrdinal, generatePlaceholder(ordinalHigh));
 					orValues.add(conditionHigh);
 				}
 			}

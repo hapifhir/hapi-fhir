@@ -167,29 +167,31 @@ public class SearchParameterDaoValidator {
 			int rangedDateParams = 0;
 			for (SearchParameter.SearchParameterComponentComponent component : theSearchParameter.getComponent()) {
 
-				if (!component.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED).isEmpty()) {
+				if (!component
+						.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED)
+						.isEmpty()) {
 					rangedDateParams++;
 
 					String definition = component.getDefinition();
-					RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParamByUrl(definition, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
+					RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParamByUrl(
+							definition, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 					if (sp == null) {
 						throw new UnprocessableEntityException(
-							Msg.code(2922) + "SearchParameter component can not be found: " + definition);
+								Msg.code(2922) + "SearchParameter component can not be found: " + definition);
 					}
 					if (sp.getParamType() != RestSearchParameterTypeEnum.DATE) {
-						throw new UnprocessableEntityException(
-								Msg.code(2921) + "SearchParameter must not have component with extension[url=" + HapiExtensions.EXT_SP_COMBO_DATE_RANGED + "] for non-date type search parameter");
+						throw new UnprocessableEntityException(Msg.code(2921)
+								+ "SearchParameter must not have component with extension[url="
+								+ HapiExtensions.EXT_SP_COMBO_DATE_RANGED + "] for non-date type search parameter");
 					}
-
 				}
-
 			}
 
 			if (rangedDateParams > 1) {
 				throw new UnprocessableEntityException(
-						Msg.code(2919) + "SearchParameter must not have multiple components with extension: " + HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
+						Msg.code(2919) + "SearchParameter must not have multiple components with extension: "
+								+ HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
 			}
-
 		}
 	}
 
@@ -208,9 +210,9 @@ public class SearchParameterDaoValidator {
 				List<Extension> dateRangedExtension = next.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
 				if (!dateRangedExtension.isEmpty()) {
 					throw new UnprocessableEntityException(
-						Msg.code(2920) + "Unique Combo SearchParameter instances may not use extension: " + HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
+							Msg.code(2920) + "Unique Combo SearchParameter instances may not use extension: "
+									+ HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
 				}
-
 			}
 		}
 	}
@@ -313,7 +315,8 @@ public class SearchParameterDaoValidator {
 			// combo non-unique search parameter or composite Search Parameter with HSearch indexing
 		} else if (hasAnyExtensionUniqueSetTo(theSearchParameter, false)
 				|| // combo non-unique search parameter
-				myStorageSettings.isHibernateSearchIndexSearchParams()) { // composite Search Parameter with HSearch indexing
+				myStorageSettings
+						.isHibernateSearchIndexSearchParams()) { // composite Search Parameter with HSearch indexing
 			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER, REFERENCE);
 		} else { // composite Search Parameter (JPA only)
 			return Set.of(STRING, TOKEN, DATE, QUANTITY);

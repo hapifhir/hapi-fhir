@@ -106,7 +106,6 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -2859,7 +2858,10 @@ public class QueryStack {
 		mySqlBuilder.addPredicate(predicate);
 	}
 
-	public void addPredicateCompositeNonUnique(List<String> theIndexStrings, List<List<DateParam>> theDateParams, RequestPartitionId theRequestPartitionId) {
+	public void addPredicateCompositeNonUnique(
+			List<String> theIndexStrings,
+			List<List<DateParam>> theDateParams,
+			RequestPartitionId theRequestPartitionId) {
 		ComboNonUniqueSearchParameterPredicateBuilder predicateBuilder =
 				mySqlBuilder.addComboNonUniquePredicateBuilder();
 
@@ -2870,7 +2872,6 @@ public class QueryStack {
 			Condition datePredicate = predicateBuilder.createPredicateDateParams(theDateParams);
 			mySqlBuilder.addPredicate(datePredicate);
 		}
-
 	}
 
 	// expand out the pids

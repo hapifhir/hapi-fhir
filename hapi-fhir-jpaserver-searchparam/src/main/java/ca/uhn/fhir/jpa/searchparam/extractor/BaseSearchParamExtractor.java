@@ -467,10 +467,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
 
 		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
-			JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theRuntimeParam);
+				JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theRuntimeParam);
 
-		Set<String> queryStringsToPopulate =
-				extractParameterCombinationsForComboParam(compositeComponents, theParams, theResourceType, theRuntimeParam);
+		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(
+				compositeComponents, theParams, theResourceType, theRuntimeParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
 			ourLog.trace(
@@ -508,21 +508,22 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
 
 		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
-			JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theRuntimeParam);
+				JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theRuntimeParam);
 
-		Optional<JpaParamUtil.ComponentAndCorrespondingParam> rangedDateParam = compositeComponents.stream().filter(t->t.isComboRangedDate()).findFirst();
+		Optional<JpaParamUtil.ComponentAndCorrespondingParam> rangedDateParam =
+				compositeComponents.stream().filter(t -> t.isComboRangedDate()).findFirst();
 		List<ResourceIndexedSearchParamDate> rangedDateChoices = new ArrayList<>();
 		if (rangedDateParam.isPresent()) {
 
 			Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart =
-				findParameterIndexes(theParams, rangedDateParam.get());
+					findParameterIndexes(theParams, rangedDateParam.get());
 			for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
 				rangedDateChoices.add((ResourceIndexedSearchParamDate) nextParam);
 			}
 		}
 
-		Set<String> queryStringsToPopulate =
-				extractParameterCombinationsForComboParam(compositeComponents, theParams, theResourceType, theRuntimeParam);
+		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(
+				compositeComponents, theParams, theResourceType, theRuntimeParam);
 
 		if (rangedDateChoices.isEmpty()) {
 			rangedDateChoices.add(null);
@@ -549,7 +550,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 */
 	@Nonnull
 	private Set<String> extractParameterCombinationsForComboParam(
-		List<JpaParamUtil.ComponentAndCorrespondingParam> theCompositeComponents, ResourceIndexedSearchParams theIndexes, String theResourceType, RuntimeSearchParam theParam) {
+			List<JpaParamUtil.ComponentAndCorrespondingParam> theCompositeComponents,
+			ResourceIndexedSearchParams theIndexes,
+			String theResourceType,
+			RuntimeSearchParam theParam) {
 		List<List<String>> partsChoices = new ArrayList<>();
 
 		for (JpaParamUtil.ComponentAndCorrespondingParam next : theCompositeComponents) {
@@ -2451,5 +2455,4 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	public void setExtractResourceLevelParams(boolean theExtractResourceLevelParams) {
 		myExtractResourceLevelParams = theExtractResourceLevelParams;
 	}
-
 }

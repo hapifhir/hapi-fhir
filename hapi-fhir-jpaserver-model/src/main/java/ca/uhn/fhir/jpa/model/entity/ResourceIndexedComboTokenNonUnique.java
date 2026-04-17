@@ -47,46 +47,49 @@ import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 @Entity
 @Table(
-	name = ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU,
-	indexes = {
-		@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE,RES_ID,PARTITION_ID", unique = false),
-		@Index(name = "IDX_IDXCMBTOKNU_HASHC_DORD", columnList = "HASH_COMPLETE,DATE_ORDINAL,RES_ID,PARTITION_ID", unique = false),
-		@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
-	})
+		name = ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU,
+		indexes = {
+			@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE,RES_ID,PARTITION_ID", unique = false),
+			@Index(
+					name = "IDX_IDXCMBTOKNU_HASHC_DORD",
+					columnList = "HASH_COMPLETE,DATE_ORDINAL,RES_ID,PARTITION_ID",
+					unique = false),
+			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
+		})
 @IdClass(IdAndPartitionId.class)
 public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
-	implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
+		implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
 
 	public static final String HFJ_IDX_CMB_TOK_NU = "HFJ_IDX_CMB_TOK_NU";
 
 	@GenericGenerator(
-		name = "SEQ_IDXCMBTOKNU_ID",
-		type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
+			name = "SEQ_IDXCMBTOKNU_ID",
+			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMBTOKNU_ID")
 	@Id
 	@Column(name = "PID")
 	private Long myId;
 
 	@ManyToOne(
-		optional = false,
-		fetch = FetchType.LAZY,
-		cascade = {})
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
 	@JoinColumns(
-		value = {
-			@JoinColumn(
-				name = "RES_ID",
-				referencedColumnName = "RES_ID",
-				insertable = false,
-				updatable = false,
-				nullable = true),
-			@JoinColumn(
-				name = "PARTITION_ID",
-				referencedColumnName = "PARTITION_ID",
-				insertable = false,
-				updatable = false,
-				nullable = true)
-		},
-		foreignKey = @ForeignKey(name = "FK_IDXCMBTOKNU_RES_ID"))
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true)
+			},
+			foreignKey = @ForeignKey(name = "FK_IDXCMBTOKNU_RES_ID"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", updatable = false, nullable = true)
@@ -97,8 +100,10 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 
 	@Column(name = "DATE_ORDINAL", nullable = true)
 	private Integer myDateOrdinal;
+
 	@Column(name = "IDX_STRING", nullable = true, length = ResourceIndexedComboStringUnique.MAX_STRING_LENGTH)
 	private String myIndexString;
+
 	@Transient
 	private transient PartitionSettings myPartitionSettings;
 
@@ -110,7 +115,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 	}
 
 	public ResourceIndexedComboTokenNonUnique(
-		PartitionSettings thePartitionSettings, ResourceTable theEntity, String theQueryString) {
+			PartitionSettings thePartitionSettings, ResourceTable theEntity, String theQueryString) {
 		myPartitionSettings = thePartitionSettings;
 		myResource = theEntity;
 		myIndexString = theQueryString;
@@ -241,12 +246,12 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("id", myId)
-			.append("resourceId", myResourceId)
-			.append("dateOrdinal", myDateOrdinal)
-			.append("hashComplete", myHashComplete)
-			.append("indexString", myIndexString)
-			.toString();
+				.append("id", myId)
+				.append("resourceId", myResourceId)
+				.append("dateOrdinal", myDateOrdinal)
+				.append("hashComplete", myHashComplete)
+				.append("indexString", myIndexString)
+				.toString();
 	}
 
 	public void applyRangedDate(@Nonnull ResourceIndexedSearchParamDate theDateParam) {
@@ -254,7 +259,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 	}
 
 	public static long calculateHashComplete(
-		PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
+			PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
 		return SearchParamHash.hashSearchParam(partitionSettings, requestPartitionId, queryString);
 	}

@@ -160,7 +160,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE;
@@ -2527,11 +2526,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							DateParam dateParam = (DateParam) dateParamUntyped;
 							switch (getIfNull(dateParam.getPrefix(), EQUAL)) {
 								case APPROXIMATE, ENDS_BEFORE, STARTS_AFTER -> {
-									firePerformanceInfo(theRequest, "Can not use combo param to search for parameter " + nextComponent.getParamName() + " because the modifier " + dateParam.getPrefix().getValue() + " prevents it");
+									firePerformanceInfo(
+											theRequest,
+											"Can not use combo param to search for parameter "
+													+ nextComponent.getParamName() + " because the modifier "
+													+ dateParam.getPrefix().getValue() + " prevents it");
 									return false;
 								}
-								case EQUAL, GREATERTHAN, GREATERTHAN_OR_EQUALS, LESSTHAN, LESSTHAN_OR_EQUALS,
-								     NOT_EQUAL -> dateParamOrList.add(dateParam);
+								case EQUAL,
+										GREATERTHAN,
+										GREATERTHAN_OR_EQUALS,
+										LESSTHAN,
+										LESSTHAN_OR_EQUALS,
+										NOT_EQUAL -> dateParamOrList.add(dateParam);
 							}
 						}
 						dateParams.add(dateParamOrList);
@@ -2541,8 +2548,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						 * column. If the precision is more than that, we will use the combo index's ordinal, but we
 						 * will also need to apply the
 						 */
-						if (dateParamOrList.stream().allMatch(t -> t.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal() || ParameterUtil.isTimeAllZeros(t))) {
-							searchParameterConsumerTasks.add(() -> sameNameParametersAndList.remove(sameNameParametersOrList));
+						if (dateParamOrList.stream()
+								.allMatch(t -> t.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()
+										|| ParameterUtil.isTimeAllZeros(t))) {
+							searchParameterConsumerTasks.add(
+									() -> sameNameParametersAndList.remove(sameNameParametersOrList));
 						}
 						foundMatch = true;
 
@@ -2562,7 +2572,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						}
 
 						inputs.add(sameNameParametersOrList);
-						searchParameterConsumerTasks.add(() -> sameNameParametersAndList.remove(sameNameParametersOrList));
+						searchParameterConsumerTasks.add(
+								() -> sameNameParametersAndList.remove(sameNameParametersOrList));
 						foundMatch = true;
 						break;
 					}
@@ -2610,7 +2621,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		int searchParamCombinations = CartesianProductUtil.calculateCartesianProductSize(inputs);
 		if (searchParamCombinations > 500) {
 			// Interceptor broadcast: JPA_PERFTRACE_INFO
-			String message = "Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations";
+			String message =
+					"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations";
 			firePerformanceInfo(theRequest, message);
 			return false;
 		}
@@ -2691,7 +2703,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
 		String indexStringForLog = indexStrings.size() > 1 ? indexStrings.toString() : indexStrings.get(0);
 		String perfMessage = "Using " + theComboParam.getComboSearchParamType() + " index(es) for query for search: "
-			+ indexStringForLog;
+				+ indexStringForLog;
 		firePerformanceInfo(theRequest, perfMessage);
 
 		// Add the predicate

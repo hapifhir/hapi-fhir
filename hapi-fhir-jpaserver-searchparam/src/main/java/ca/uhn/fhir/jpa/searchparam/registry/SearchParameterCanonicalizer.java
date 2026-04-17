@@ -315,7 +315,7 @@ public class SearchParameterCanonicalizer {
 							.toUnqualifiedVersionless()
 							.getValue(),
 					null,
-				false));
+					false));
 		}
 
 		return new RuntimeSearchParam(
@@ -441,8 +441,7 @@ public class SearchParameterCanonicalizer {
 							(IPrimitiveType<String>) nextComponentExtension.getValue();
 					comboUpliftChain = upliftChainValue.getValueAsString();
 				} else if (HapiExtensions.EXT_SP_COMBO_DATE_RANGED.equals(nextComponentExtension.getUrl())) {
-					IPrimitiveType<Boolean> rangedValue =
-						(IPrimitiveType<Boolean>) nextComponentExtension.getValue();
+					IPrimitiveType<Boolean> rangedValue = (IPrimitiveType<Boolean>) nextComponentExtension.getValue();
 					ranged = rangedValue.getValue();
 				}
 			}
