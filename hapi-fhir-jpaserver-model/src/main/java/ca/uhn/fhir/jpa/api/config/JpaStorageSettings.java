@@ -213,6 +213,7 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myFilterParameterEnabled = false;
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation =
 			StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
+	private TokenIndexStrategyEnum myTokenIndexStrategy = TokenIndexStrategyEnum.WRITE_OLD_QUERY_OLD;
 	private HistoryCountModeEnum myHistoryCountMode = DEFAULT_HISTORY_COUNT_MODE;
 	private int myInternalSynchronousSearchSize = DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE;
 	/**
@@ -1815,6 +1816,47 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
+	 * Controls how token-index reads and writes are routed between the legacy
+	 * {@code HFJ_SPIDX_TOKEN} table and the new compressed token index tables
+	 * ({@code HFJ_SPIDX2_TOKEN_COMMON}, {@code HFJ_SPIDX2_TOKEN_COMMON_RES},
+	 * {@code HFJ_SPIDX2_TOKEN_IDENTIFIER}).
+	 *
+	 * <p>This setting exposes four phases for a zero-downtime migration:
+	 * <ol>
+	 *   <li>{@link TokenIndexStrategyEnum#WRITE_OLD_QUERY_OLD} — writes to the legacy table; queries the legacy table.</li>
+	 *   <li>{@link TokenIndexStrategyEnum#WRITE_BOTH_QUERY_OLD} — writes to both the legacy and the new tables; queries the legacy table.</li>
+	 *   <li>{@link TokenIndexStrategyEnum#WRITE_BOTH_QUERY_NEW} — writes to both the legacy and the new tables; queries the new tables.</li>
+	 *   <li>{@link TokenIndexStrategyEnum#WRITE_NEW_QUERY_NEW} — writes to the new tables; queries the new tables.</li>
+	 * </ol>
+	 *
+	 * <p>Default is {@link TokenIndexStrategyEnum#WRITE_OLD_QUERY_OLD}.
+	 */
+	public TokenIndexStrategyEnum getTokenIndexStrategy() {
+		return myTokenIndexStrategy;
+	}
+
+	/**
+	 * Controls how token-index reads and writes are routed between the legacy
+	 * {@code HFJ_SPIDX_TOKEN} table and the new compressed token index tables
+	 * ({@code HFJ_SPIDX2_TOKEN_COMMON}, {@code HFJ_SPIDX2_TOKEN_COMMON_RES},
+	 * {@code HFJ_SPIDX2_TOKEN_IDENTIFIER}).
+	 *
+	 * <p>This setting exposes four phases for a zero-downtime migration:
+	 * <ol>
+	 *   <li>{@link TokenIndexStrategyEnum#WRITE_OLD_QUERY_OLD} — writes to the legacy table; queries the legacy table.</li>
+	 *   <li>{@link TokenIndexStrategyEnum#WRITE_BOTH_QUERY_OLD} — writes to both the legacy and the new tables; queries the legacy table.</li>
+	 *   <li>{@link TokenIndexStrategyEnum#WRITE_BOTH_QUERY_NEW} — writes to both the legacy and the new tables; queries the new tables.</li>
+	 *   <li>{@link TokenIndexStrategyEnum#WRITE_NEW_QUERY_NEW} — writes to the new tables; queries the new tables.</li>
+	 * </ol>
+	 *
+	 * <p>Default is {@link TokenIndexStrategyEnum#WRITE_OLD_QUERY_OLD}.
+	 */
+	public void setTokenIndexStrategy(TokenIndexStrategyEnum theTokenIndexStrategy) {
+		Validate.notNull(theTokenIndexStrategy, "theTokenIndexStrategy must not be null");
+		myTokenIndexStrategy = theTokenIndexStrategy;
+	}
+
+	/**
 	 * This setting indicate whether a provided `Resource.meta.source` requestID (formatted as `sourceURI#requestID`)
 	 * should be preserved or overwritten.
 	 *
@@ -2811,5 +2853,37 @@ public class JpaStorageSettings extends StorageSettings {
 		 * </p>
 		 */
 		ANY
+	}
+
+	/**
+	 * Routing strategy for token-index reads and writes between the legacy
+	 * {@code HFJ_SPIDX_TOKEN} table and the new compressed token index tables
+	 * ({@code HFJ_SPIDX2_TOKEN_COMMON}, {@code HFJ_SPIDX2_TOKEN_COMMON_RES},
+	 * {@code HFJ_SPIDX2_TOKEN_IDENTIFIER}).
+	 *
+	 * @see JpaStorageSettings#setTokenIndexStrategy(TokenIndexStrategyEnum)
+	 */
+	public enum TokenIndexStrategyEnum {
+		/**
+		 * Write to and query the legacy {@code HFJ_SPIDX_TOKEN} table only.
+		 */
+		WRITE_OLD_QUERY_OLD,
+
+		/**
+		 * Write to both the legacy and the new {@code HFJ_SPIDX2_TOKEN_*} tables, and query the legacy
+		 * {@code HFJ_SPIDX_TOKEN} table.
+		 */
+		WRITE_BOTH_QUERY_OLD,
+
+		/**
+		 * Write to both the legacy and the new {@code HFJ_SPIDX2_TOKEN_*} tables, and query the new
+		 * {@code HFJ_SPIDX2_TOKEN_*} tables.
+		 */
+		WRITE_BOTH_QUERY_NEW,
+
+		/**
+		 * Write to and query the new {@code HFJ_SPIDX2_TOKEN_*} tables only.
+		 */
+		WRITE_NEW_QUERY_NEW
 	}
 }
