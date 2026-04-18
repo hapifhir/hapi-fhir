@@ -72,7 +72,7 @@ class CircularQueueCaptureQueriesListenerAssertionsTest {
 			// Verify
 			.isInstanceOf(AssertionError.class)
 			.hasMessageContaining("Expected SQL: SELECT")
-			.hasMessageContaining("To contain: hello");
+			.hasMessageContaining("to contain: hello");
 
 	}
 

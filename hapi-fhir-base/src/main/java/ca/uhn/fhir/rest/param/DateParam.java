@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -207,6 +208,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 	/**
 	 * @since 8.10.0
 	 */
+	@Nullable
 	public final Integer getHour() {
 		return myValue.getHour();
 	}
@@ -214,6 +216,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 	/**
 	 * @since 8.10.0
 	 */
+	@Nullable
 	public final Integer getMinute() {
 		return myValue.getMinute();
 	}
@@ -221,6 +224,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 	/**
 	 * @since 8.10.0
 	 */
+	@Nullable
 	public final Integer getSecond() {
 		return myValue.getSecond();
 	}
@@ -228,6 +232,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam>
 	/**
 	 * @since 8.10.0
 	 */
+	@Nullable
 	public final Integer getMillis() {
 		return myValue.getMillis();
 	}

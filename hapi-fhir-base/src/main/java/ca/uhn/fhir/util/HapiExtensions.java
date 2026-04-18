@@ -116,6 +116,14 @@ public class HapiExtensions {
 
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
 
+	/**
+	 * This extension is placed on a combo non-unique SearchParameter, on
+	 * <code>SearchParameter.component</code> with a <code>boolean </code>
+	 * value of <code>true</code> if the parameter is a ranged date parameter.
+	 * It may only be placed on one component, of type <code>date</code>.
+	 *
+	 * @since 8.10.0
+	 */
 	public static final String EXT_SP_COMBO_DATE_RANGED =
 			"http://hapifhir.io/fhir/StructureDefinition/sp-combo-date-ranged";
 

@@ -51,7 +51,7 @@ import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 		indexes = {
 			@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE,RES_ID,PARTITION_ID", unique = false),
 			@Index(
-					name = "IDX_IDXCMBTOKNU_HASHC_DORD",
+					name = "IDX_IDXCMBTOKNU_HD",
 					columnList = "HASH_COMPLETE,DATE_ORDINAL,RES_ID,PARTITION_ID",
 					unique = false),
 			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
