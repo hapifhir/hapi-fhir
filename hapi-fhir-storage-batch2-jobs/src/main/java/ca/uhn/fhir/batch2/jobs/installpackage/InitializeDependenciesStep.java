@@ -44,6 +44,11 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+/**
+ * This is the second step of the asynchronous package install batch job. It inspects the package to determine
+ * what other packages it is dependent on, and launches a child job to install each of these dependency packages.
+ * If a child job cannot be started, that dependency will be skipped, but the job will continue.
+ */
 public class InitializeDependenciesStep
 		implements IJobStepWorker<PackageInstallationJobParameters, PackageContentsJson, PackageWithDependenciesJson> {
 

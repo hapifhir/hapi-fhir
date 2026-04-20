@@ -43,6 +43,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This is the third step of the asynchronous package install batch job. This step waits for all the child jobs
+ * started by {@link InitializeDependenciesStep} to complete, then consolidates the output of all the jobs into
+ * a single output object that is passed along to subsequent steps. If a child job ends in an error state,
+ * that error will be logged, but the job will continue.
+ */
 public class ConsolidateDependenciesStep
 		implements IJobStepWorker<PackageInstallationJobParameters, PackageWithDependenciesJson, PackageContentsJson> {
 

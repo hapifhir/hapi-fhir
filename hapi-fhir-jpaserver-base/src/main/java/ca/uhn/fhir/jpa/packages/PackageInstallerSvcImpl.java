@@ -100,7 +100,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageInstallerSvcImpl.class);
 	private static final String OUR_PIPE_CHARACTER = "|";
 
-	boolean enabled = true;
+	private boolean myEnabled = true;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -167,7 +167,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				ourLog.info(
 						"IG installation not supported for version: {}",
 						myFhirContext.getVersion().getVersion());
-				enabled = false;
+				myEnabled = false;
 			}
 		}
 	}
@@ -198,7 +198,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	public PackageInstallOutcomeJson install(PackageInstallationSpec theInstallationSpec)
 			throws ImplementationGuideInstallationException {
 		PackageInstallOutcomeJson retVal = new PackageInstallOutcomeJson();
-		if (enabled) {
+		if (myEnabled) {
 			try {
 
 				logIfPackageAlreadyInstalled(theInstallationSpec);
@@ -350,7 +350,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 */
 	@Override
 	public String installAsynchronously(PackageInstallationSpec theInstallationSpec) {
-		if (!enabled) {
+		if (!myEnabled) {
 			ourLog.info(
 					"Package installation is not supported for FHIR version {}",
 					myFhirContext.getVersion().getVersion());

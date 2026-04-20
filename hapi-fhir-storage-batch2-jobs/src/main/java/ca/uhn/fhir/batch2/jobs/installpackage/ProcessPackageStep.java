@@ -41,6 +41,13 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
 
+/**
+ * This is the final step of the asynchronous package install batch job. It installs the contents of the
+ * package as resources in the repository.
+ * This step is implemented as a reduction step because we need to be able to return a non-void result
+ * from the job. However, the preceding step only produces one work chunk, so there isn't actually
+ * any reduction taking place.
+ */
 public class ProcessPackageStep
 		implements IReductionStepWorker<
 				PackageInstallationJobParameters, PackageContentsJson, PackageInstallOutcomeJson> {

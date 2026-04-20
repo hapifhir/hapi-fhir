@@ -40,6 +40,10 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
 
+/**
+ * This is the first step of an asynchronous package install batch job. It fetches the package to be installed from
+ * a source location given in the specification object and passes it to subsequent steps.
+ */
 public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallationJobParameters, PackageContentsJson> {
 
 	private final IHapiPackageCacheManager myPackageCacheManager;
