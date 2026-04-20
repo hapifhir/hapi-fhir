@@ -164,7 +164,7 @@ public class ComboSearchParameterTestHelper {
 		mySearchParamRegistry.forceRefresh();
 	}
 
-	public void createObservationSubjectCodeAndRangedEffective() {
+	public IBaseResource createObservationSubjectCodeAndRangedEffective() {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/observation-subject");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
@@ -213,15 +213,18 @@ public class ComboSearchParameterTestHelper {
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(false));
-		storeSearchParameter(sp);
+		IBaseResource retVal = storeSearchParameter(sp);
 
 		mySearchParamRegistry.forceRefresh();
 
+		return retVal;
 	}
 
-	private void storeSearchParameter(SearchParameter theSearchParameter) {
+	private IBaseResource storeSearchParameter(SearchParameter theSearchParameter) {
 		assertTrue(theSearchParameter.getIdElement().hasIdPart());
-		mySearchParameterDao.update(fromCanonoical(theSearchParameter), new SystemRequestDetails());
+		IBaseResource nonCanonicalResource = fromCanonoical(theSearchParameter);
+		mySearchParameterDao.update(nonCanonicalResource, new SystemRequestDetails());
+		return nonCanonicalResource;
 	}
 
 	private IBaseResource fromCanonoical(SearchParameter theSearchParameter) {

@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -39,6 +40,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
@@ -52,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4ComboNonUniqueParamTest.class);
 	public static final String ORG_ID_UNQUALIFIED = "my-org";
 	public static final String ORG_ID_QUALIFIED = "Organization/" + ORG_ID_UNQUALIFIED;
 
@@ -350,7 +354,8 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	@Test
 	public void testRangedDate_Create() {
 		// Setup
-		myComboSearchParameterTestHelper.createObservationSubjectCodeAndRangedEffective();
+		IBaseResource comboSp = myComboSearchParameterTestHelper.createObservationSubjectCodeAndRangedEffective();
+		ourLog.info("Combo: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(comboSp));
 
 		createPatient(withId("P0"), withActiveTrue());
 
