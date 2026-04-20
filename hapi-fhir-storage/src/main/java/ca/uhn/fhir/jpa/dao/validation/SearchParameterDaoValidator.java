@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SearchParameter;
@@ -205,23 +206,26 @@ public class SearchParameterDaoValidator {
 	 */
 	private void validateExpressionAgainstBase(SearchParameter theSearchParameter) {
 		String expression = getExpression(theSearchParameter);
+		if (isBlank(expression)) {
+			return;
+		}
+
 		List<String> bases = theSearchParameter.getBase().stream()
 				.map(IPrimitiveType::getValueAsString)
 				.filter(Objects::nonNull)
 				.toList();
-
 		if (bases.isEmpty()) {
 			return;
 		}
 
-		String[] paths = expression.split("\\|");
+		String[] paths = SearchParameterUtil.splitSearchParameterExpressions(expression);
 
-		boolean allBasesGeneric = bases.stream().allMatch(b -> RESOURCE.equals(b) || DOMAIN_RESOURCE.equals(b));
+		boolean allBasesGeneric = bases.stream().allMatch(SearchParameterDaoValidator::isGenericBase);
 
 		if (allBasesGeneric) {
 			for (String path : paths) {
-				String prefix = extractTypePrefix(path.trim());
-				if (prefix != null && !RESOURCE.equals(prefix) && !DOMAIN_RESOURCE.equals(prefix)) {
+				String prefix = SearchParameterUtil.extractTypePrefix(path.trim());
+				if (prefix != null && !isGenericBase(prefix)) {
 					throw new UnprocessableEntityException(Msg.code(2910) + "SearchParameter.expression '" + expression
 							+ "' uses type-specific prefix '" + prefix
 							+ "' but base is [" + String.join(", ", bases)
@@ -231,16 +235,13 @@ public class SearchParameterDaoValidator {
 			return;
 		}
 		for (String base : bases) {
-			if (RESOURCE.equals(base) || DOMAIN_RESOURCE.equals(base)) {
+			if (isGenericBase(base)) {
 				continue;
 			}
 			boolean anyPathMatchesBase = false;
 			for (String path : paths) {
-				String prefix = extractTypePrefix(path.trim());
-				if (prefix == null
-						|| base.equals(prefix)
-						|| RESOURCE.equals(prefix)
-						|| DOMAIN_RESOURCE.equals(prefix)) {
+				String prefix = SearchParameterUtil.extractTypePrefix(path.trim());
+				if (prefix == null || base.equals(prefix) || isGenericBase(prefix)) {
 					anyPathMatchesBase = true;
 					break;
 				}
@@ -252,25 +253,8 @@ public class SearchParameterDaoValidator {
 		}
 	}
 
-	/**
-	 * Extracts the resource type prefix from a FHIRPath expression path segment.
-	 * Returns null if no type-qualified prefix is present.
-	 */
-	private static String extractTypePrefix(String thePath) {
-		// Strip any leading parentheses or spaces
-		int start = 0;
-		while (start < thePath.length() && (thePath.charAt(start) == '(' || thePath.charAt(start) == ' ')) {
-			start++;
-		}
-		String trimmed = thePath.substring(start);
-		int dotIndex = trimmed.indexOf('.');
-		if (dotIndex > 0) {
-			String candidate = trimmed.substring(0, dotIndex);
-			if (Character.isUpperCase(candidate.charAt(0))) {
-				return candidate;
-			}
-		}
-		return null;
+	private static boolean isGenericBase(String base) {
+		return RESOURCE.equals(base) || DOMAIN_RESOURCE.equals(base);
 	}
 
 	private void validateExpressionIsParsable(SearchParameter theSearchParameter) {

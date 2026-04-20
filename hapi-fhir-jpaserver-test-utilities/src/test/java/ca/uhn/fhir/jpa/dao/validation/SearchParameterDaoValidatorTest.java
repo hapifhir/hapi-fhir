@@ -338,6 +338,21 @@ public class SearchParameterDaoValidatorTest {
                 .hasMessageContaining("Patient");
     }
 
+	@Test
+	void testValidateExpressionAgainstBase_whereClauseWithInnerPipe_baseMismatch_shouldFail() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/practitionerrole-telecom-where");
+		sp.setUrl("http://example.org/SearchParameter/practitionerrole-telecom-where");
+		sp.addBase(PRACTITIONERROLE);
+		sp.setCode("telecom").setType(TOKEN).setStatus(ACTIVE);
+		sp.setExpression("Patient.telecom.where(system='mail' | system='phone')");
+
+		assertThatThrownBy(() -> mySvc.validate(sp))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("HAPI-2911")
+			.hasMessageContaining("PractitionerRole");
+	}
+
     private static SearchParameter createSearchParameter(Enumerations.SearchParamType theType, String theId, String theCodeValue, String theExpression) {
 
         SearchParameter retVal = new SearchParameter();
