@@ -58,6 +58,12 @@ public interface IHapiScheduler {
 	 */
 	void unscheduleJobs(TriggerKey... theTriggerKeys);
 
+	/**
+	 * Schedules a job on this scheduler to run on a schedule defined by the Quartz
+	 * cron expression.
+	 * @param theCronExpression The Quartz cron expression
+	 * @param theJobDefinition the JobDefinition to run
+	 */
 	void scheduleCronJob(String theCronExpression, ScheduledJobDefinition theJobDefinition);
 
 	Set<JobKey> getJobKeysForUnitTest() throws SchedulerException;
