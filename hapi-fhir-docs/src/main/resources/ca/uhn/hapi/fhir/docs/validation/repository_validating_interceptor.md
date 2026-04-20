@@ -146,8 +146,8 @@ Use the following rule to apply validation against a specific profile regardless
 
 This rule will:
 - Always apply validation against the specified profile
-- Apply validation even if the resource declares conformance to different profiles
-- Effectively enforce a mandatory Implementation Guide across all resources of the specified type
+- Apply validation to the different profiles declared in the resource
+- Effectively enforce a mandatory profile across all resources of the specified type
 
 # Adding Validation Outcome to HTTP Response
 

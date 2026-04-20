@@ -37,6 +37,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 
 import java.util.ArrayList;
@@ -46,8 +47,36 @@ import java.util.List;
 class RequireValidationRule extends BaseTypedRule {
 	private final FhirInstanceValidator myValidator;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+	private final String myImpliedProfileUrl;
+	private final ImpliedProfileMode myImpliedProfileMode;
 	private ResultSeverityEnum myRejectOnSeverity = ResultSeverityEnum.ERROR;
 	private List<TagOnSeverity> myTagOnSeverity = Collections.emptyList();
+
+	public enum ImpliedProfileMode {
+		IF_NOT_EXPLICIT,
+		ALWAYS
+	}
+
+	public RequireValidationRule(
+			FhirContext theFhirContext,
+			String theType,
+			IValidationSupport theValidationSupport,
+			ValidatorResourceFetcher theValidatorResourceFetcher,
+			ValidatorPolicyAdvisor theValidationPolicyAdvisor,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			String theImpliedProfileUrl,
+			ImpliedProfileMode theImpliedProfileMode) {
+		super(theFhirContext, theType);
+
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		myImpliedProfileUrl = theImpliedProfileUrl;
+		myImpliedProfileMode = theImpliedProfileMode;
+
+		myValidator = new FhirInstanceValidator(theValidationSupport);
+		myValidator.setValidatorResourceFetcher(theValidatorResourceFetcher);
+		myValidator.setValidatorPolicyAdvisor(theValidationPolicyAdvisor);
+		myValidator.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+	}
 
 	public RequireValidationRule(
 			FhirContext theFhirContext,
@@ -56,14 +85,15 @@ class RequireValidationRule extends BaseTypedRule {
 			ValidatorResourceFetcher theValidatorResourceFetcher,
 			ValidatorPolicyAdvisor theValidationPolicyAdvisor,
 			IInterceptorBroadcaster theInterceptorBroadcaster) {
-		super(theFhirContext, theType);
-
-		myInterceptorBroadcaster = theInterceptorBroadcaster;
-
-		myValidator = new FhirInstanceValidator(theValidationSupport);
-		myValidator.setValidatorResourceFetcher(theValidatorResourceFetcher);
-		myValidator.setValidatorPolicyAdvisor(theValidationPolicyAdvisor);
-		myValidator.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+		this(
+				theFhirContext,
+				theType,
+				theValidationSupport,
+				theValidatorResourceFetcher,
+				theValidationPolicyAdvisor,
+				theInterceptorBroadcaster,
+				null,
+				null);
 	}
 
 	void setBestPracticeWarningLevel(BestPracticeWarningLevel theBestPracticeWarningLevel) {
@@ -74,11 +104,18 @@ class RequireValidationRule extends BaseTypedRule {
 	@Override
 	public RuleEvaluation evaluate(RequestDetails theRequestDetails, @Nonnull IBaseResource theResource) {
 
+		IBaseResource resourceToValidate = theResource;
+
+		// Handle implied profile validation if configured
+		if (myImpliedProfileUrl != null && myImpliedProfileMode != null) {
+			resourceToValidate = handleImpliedProfileValidation(theResource);
+		}
+
 		FhirValidator validator = getFhirContext().newValidator();
 		validator.setInterceptorBroadcaster(
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails));
 		validator.registerValidatorModule(myValidator);
-		ValidationResult outcome = validator.validateWithResult(theResource);
+		ValidationResult outcome = validator.validateWithResult(resourceToValidate);
 
 		for (SingleValidationMessage next : outcome.getMessages()) {
 			if (next.getSeverity().ordinal() >= ResultSeverityEnum.ERROR.ordinal()) {
@@ -104,6 +141,33 @@ class RequireValidationRule extends BaseTypedRule {
 		return RuleEvaluation.forSuccess(this);
 	}
 
+	private IBaseResource handleImpliedProfileValidation(IBaseResource theResource) {
+		List<String> declaredProfiles = theResource.getMeta().getProfile().stream()
+				.map(IPrimitiveType::getValueAsString)
+				.toList();
+
+		boolean shouldApplyImpliedProfile = false;
+
+		// Create a copy of the resource for validation
+		IBaseResource resourceCopy = getFhirContext()
+				.newJsonParser()
+				.parseResource(getFhirContext().newJsonParser().encodeResourceToString(theResource));
+
+		if (myImpliedProfileMode == ImpliedProfileMode.ALWAYS) {
+			shouldApplyImpliedProfile = true;
+		} else if (myImpliedProfileMode == ImpliedProfileMode.IF_NOT_EXPLICIT) {
+			shouldApplyImpliedProfile = declaredProfiles.isEmpty();
+		}
+
+		if (!shouldApplyImpliedProfile) {
+			return theResource;
+		} else if (!declaredProfiles.contains(myImpliedProfileUrl)) {
+			resourceCopy.getMeta().addProfile(myImpliedProfileUrl);
+		}
+
+		return resourceCopy;
+	}
+
 	public void rejectOnSeverity(ResultSeverityEnum theSeverity) {
 		myRejectOnSeverity = theSeverity;
 	}
@@ -124,11 +188,16 @@ class RequireValidationRule extends BaseTypedRule {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("resourceType", getResourceType())
 				.append("rejectOnSeverity", myRejectOnSeverity)
-				.append("tagOnSeverity", myTagOnSeverity)
-				.toString();
+				.append("tagOnSeverity", myTagOnSeverity);
+
+		if (myImpliedProfileUrl != null) {
+			builder.append("impliedProfileUrl", myImpliedProfileUrl).append("impliedProfileMode", myImpliedProfileMode);
+		}
+
+		return builder.toString();
 	}
 
 	public FhirInstanceValidator getValidator() {

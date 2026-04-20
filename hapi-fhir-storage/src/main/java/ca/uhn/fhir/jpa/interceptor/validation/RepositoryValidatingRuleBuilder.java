@@ -155,15 +155,15 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 		public FinalizedTypedRule impliedProfileIfNotExplicit(String theProfile) {
 			Validate.notNull(theProfile, "theProfile must not be null");
 			Validate.notEmpty(theProfile, "theProfile must not be null or empty");
-			myRules.add(new RuleImpliedProfileValidation(
+			myRules.add(new RequireValidationRule(
 					myFhirContext,
 					myType,
-					theProfile,
-					RuleImpliedProfileValidation.ImpliedProfileMode.IF_NOT_EXPLICIT,
 					myValidationSupport,
 					myValidatorResourceFetcher,
 					myValidationPolicyAdvisor,
-					myInterceptorBroadcaster));
+					myInterceptorBroadcaster,
+					theProfile,
+					RequireValidationRule.ImpliedProfileMode.IF_NOT_EXPLICIT));
 			return new FinalizedTypedRule(myType);
 		}
 
@@ -178,15 +178,15 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 		public FinalizedTypedRule impliedProfileAlways(String theProfile) {
 			Validate.notNull(theProfile, "theProfile must not be null");
 			Validate.notEmpty(theProfile, "theProfile must not be null or empty");
-			myRules.add(new RuleImpliedProfileValidation(
+			myRules.add(new RequireValidationRule(
 					myFhirContext,
 					myType,
-					theProfile,
-					RuleImpliedProfileValidation.ImpliedProfileMode.ALWAYS,
 					myValidationSupport,
 					myValidatorResourceFetcher,
 					myValidationPolicyAdvisor,
-					myInterceptorBroadcaster));
+					myInterceptorBroadcaster,
+					theProfile,
+					RequireValidationRule.ImpliedProfileMode.ALWAYS));
 			return new FinalizedTypedRule(myType);
 		}
 

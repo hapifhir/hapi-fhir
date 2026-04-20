@@ -520,8 +520,14 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		patient.setActive(true);
 		patient.getMeta().addProfile("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient");
 
-		IIdType id = myPatientDao.create(patient).getId();
-		assertEquals("1", id.getVersionIdPart());
+		try {
+			myPatientDao.create(patient);
+			fail();
+		} catch (PreconditionFailedException e) {
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			String issueText = oo.getIssueFirstRep().getDiagnostics();
+			assertThat(issueText).contains("Constraint failed");
+		}
 	}
 
 	private RepositoryValidatingRuleBuilder newRuleBuilder() {
