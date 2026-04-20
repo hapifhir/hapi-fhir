@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTypeInterceptor;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirPatchBuilder;
 import ca.uhn.fhir.util.FhirTerser;
@@ -335,10 +336,15 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	/**
 	 * SMILE-11985
 	 */
-	@Test
-	public void testCreateEob_AutoPlaceholderCreationOfOtherResourceInCompartment() throws IOException {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testCreateEob_AutoPlaceholderCreationOfOtherResourceInCompartment(boolean theRegisterOtherInterceptor) {
 		// Setup
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		if (theRegisterOtherInterceptor) {
+			AutoCreatePlaceholderReferenceEnabledByTypeInterceptor interceptor = new AutoCreatePlaceholderReferenceEnabledByTypeInterceptor("Patient", "Coverage");
+			registerInterceptor(interceptor);
+		}
 
 		// Test
 		ExplanationOfBenefit request = new ExplanationOfBenefit();

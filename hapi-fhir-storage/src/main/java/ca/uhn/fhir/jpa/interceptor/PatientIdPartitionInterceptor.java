@@ -47,6 +47,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.interceptor.InterceptorOrders;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.PreviousVersionReader;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest;
@@ -323,7 +324,9 @@ public class PatientIdPartitionInterceptor {
 	 *
 	 * @since 8.10.0
 	 */
-	@Hook(Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE)
+	@Hook(
+			value = Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE,
+			order = InterceptorOrders.AUTO_CREATE_PLACEHOLDER_MODIFY)
 	void autoCreatePlaceholderReference(AutoCreatePlaceholderReferenceTargetRequest theRequest) {
 		IBaseResource source = theRequest.getSourceResource();
 		IBaseResource target = theRequest.getTargetResourceToCreate();
