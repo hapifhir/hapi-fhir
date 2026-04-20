@@ -36,7 +36,8 @@ public class AutoCreatePlaceholderReferenceTargetRequest {
 	/**
 	 * Constructor
 	 */
-	public AutoCreatePlaceholderReferenceTargetRequest(IBaseResource theSourceResource, IBaseResource theTargetResourceToCreate) {
+	public AutoCreatePlaceholderReferenceTargetRequest(
+			IBaseResource theSourceResource, IBaseResource theTargetResourceToCreate) {
 		mySourceResource = theSourceResource;
 		myTargetResourceToCreate = theTargetResourceToCreate;
 	}

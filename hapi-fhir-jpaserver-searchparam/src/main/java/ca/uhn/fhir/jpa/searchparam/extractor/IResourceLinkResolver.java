@@ -44,11 +44,12 @@ public interface IResourceLinkResolver {
 	 * @param theTransactionDetails The current TransactionDetails object
 	 */
 	IResourceLookup findTargetResource(
-		IBaseResource theResource, @Nonnull RequestPartitionId theRequestPartitionId,
-		String theSourceResourceName,
-		PathAndRef thePathAndRef,
-		RequestDetails theRequest,
-		TransactionDetails theTransactionDetails);
+			IBaseResource theResource,
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			String theSourceResourceName,
+			PathAndRef thePathAndRef,
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails);
 
 	/**
 	 * This method resolves the target of a reference found within a resource that is being created/updated. We do this

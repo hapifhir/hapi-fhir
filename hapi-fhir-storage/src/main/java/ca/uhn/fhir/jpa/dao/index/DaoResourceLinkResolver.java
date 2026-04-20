@@ -103,11 +103,12 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 
 	@Override
 	public IResourceLookup findTargetResource(
-		IBaseResource theResource, @Nonnull RequestPartitionId theRequestPartitionId,
-		String theSourceResourceName,
-		PathAndRef thePathAndRef,
-		RequestDetails theRequest,
-		TransactionDetails theTransactionDetails) {
+			IBaseResource theResource,
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			String theSourceResourceName,
+			PathAndRef thePathAndRef,
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails) {
 
 		IBaseReference targetReference = thePathAndRef.getRef();
 		String sourcePath = thePathAndRef.getPath();
@@ -279,8 +280,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	 * @param theIdToAssignToPlaceholder If specified, the placeholder resource created will be given a specific ID
 	 */
 	public <T extends IBaseResource> Optional<IBasePersistedResource> createPlaceholderTargetIfConfiguredToDoSo(
-		IBaseResource theSource,
-		Class<T> theType,
+			IBaseResource theSource,
+			Class<T> theType,
 			IBaseReference theReference,
 			@Nullable String theIdToAssignToPlaceholder,
 			RequestDetails theRequest,
