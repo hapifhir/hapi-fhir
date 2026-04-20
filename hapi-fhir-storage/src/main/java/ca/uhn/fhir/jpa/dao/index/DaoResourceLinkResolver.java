@@ -103,11 +103,11 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 
 	@Override
 	public IResourceLookup findTargetResource(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theSourceResourceName,
-			PathAndRef thePathAndRef,
-			RequestDetails theRequest,
-			TransactionDetails theTransactionDetails) {
+		IBaseResource theResource, @Nonnull RequestPartitionId theRequestPartitionId,
+		String theSourceResourceName,
+		PathAndRef thePathAndRef,
+		RequestDetails theRequest,
+		TransactionDetails theTransactionDetails) {
 
 		IBaseReference targetReference = thePathAndRef.getRef();
 		String sourcePath = thePathAndRef.getPath();
@@ -158,7 +158,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		} catch (ResourceNotFoundException e) {
 
 			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(
-					type, targetReference, idPart, theRequest, theTransactionDetails);
+					theResource, type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
 				if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
@@ -279,7 +279,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	 * @param theIdToAssignToPlaceholder If specified, the placeholder resource created will be given a specific ID
 	 */
 	public <T extends IBaseResource> Optional<IBasePersistedResource> createPlaceholderTargetIfConfiguredToDoSo(
-			Class<T> theType,
+		IBaseResource theSource,
+		Class<T> theType,
 			IBaseReference theReference,
 			@Nullable String theIdToAssignToPlaceholder,
 			RequestDetails theRequest,
@@ -329,7 +330,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 			if (interceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE)) {
 				AutoCreatePlaceholderReferenceTargetRequest request =
-						new AutoCreatePlaceholderReferenceTargetRequest(newResource);
+						new AutoCreatePlaceholderReferenceTargetRequest(theSource, newResource);
 				HookParams params = new HookParams()
 						.add(AutoCreatePlaceholderReferenceTargetRequest.class, request)
 						.add(RequestDetails.class, theRequest)

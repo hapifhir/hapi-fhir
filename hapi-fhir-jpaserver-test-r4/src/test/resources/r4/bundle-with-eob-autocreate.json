@@ -1,0 +1,226 @@
+{
+  "resourceType": "ExplanationOfBenefit",
+  "meta": {
+    "lastUpdated": "2026-02-06T17:28:04.354-06:00"
+  },
+  "id": "PriorAuth-FHIR-14868-05-TEST",
+  "language": "en-US",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/extension-levelOfServiceCode",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "https://codesystem.x12.org/005010/1338",
+            "code": "U",
+            "display": "Urgent"
+          }
+        ]
+      }
+    }
+  ],
+  "identifier": [
+    {
+      "system": "https://www.exampleplan.com/fhir/EOBIdentifier",
+      "value": "ORGFHIR1482705TEST"
+    }
+  ],
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+        "code": "institutional"
+      }
+    ],
+    "text": "Institutional"
+  },
+  "use": "preauthorization",
+  "patient": {
+    "reference": "Patient/Pat1"
+  },
+  "billablePeriod": {
+    "start": "2021-10-01",
+    "end": "2021-10-31"
+  },
+  "created": "2021-09-20T00:00:00+00:00",
+  "insurer": {
+    "reference": "Organization/Payer1",
+    "display": "Example Health Plan"
+  },
+  "provider": {
+    "reference": "Organization/Payer2",
+    "display": "Another Example Health Plan"
+  },
+  "fundsReserveRequested": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/fundsreserve",
+        "code": "provider",
+        "display": "Provider"
+      }
+    ]
+  },
+  "fundsReserve": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/fundsreserve",
+        "code": "none",
+        "display": "None"
+      }
+    ]
+  },
+  "related": [
+    {
+      "relationship": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship",
+            "code": "associated",
+            "display": "Associated Claim"
+          }
+        ]
+      }
+    }
+  ],
+  "outcome": "queued",
+  "preAuthRefPeriod": [
+    {
+      "start": "2021-10-01",
+      "end": "2021-10-31"
+    }
+  ],
+  "careTeam": [
+    {
+      "sequence": 1,
+      "provider": {
+        "reference": "Organization/Payer1"
+      },
+      "responsible": true
+    }
+  ],
+  "diagnosis": [
+    {
+      "sequence": 1,
+      "diagnosisCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/icd-10-cm",
+            "code": "G89.4"
+          }
+        ]
+      },
+      "type": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+              "code": "principal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "insurance": [
+    {
+      "focal": true,
+      "coverage": {
+        "reference": "Coverage/Coverage1"
+      }
+    }
+  ],
+  "item": [
+    {
+      "sequence": 1,
+      "category": {
+        "coding": [
+          {
+            "system": "https://x12.org/codes/service-type-codes",
+            "code": "3",
+            "display": "Consultation"
+          }
+        ]
+      },
+      "productOrService": {
+        "coding": [
+          {
+            "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes",
+            "code": "BB201",
+            "display": "Behavior Only, ADL Index 6 - 10/Medicare 5 day assessment (Full)"
+          }
+        ]
+      },
+      "adjudication": [
+        {
+          "id": "1",
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "number",
+                  "valueString": "AUTH0001"
+                },
+                {
+                  "url": "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/extension-reviewActionCode",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "https://codesystem.x12.org/005010/306",
+                        "code": "A1",
+                        "display": "Certified in total"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "url": "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/extension-reviewAction"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/base-ext-when-adjudicated",
+              "valueDateTime": "2024-07-23T17:26:23.217+00:00"
+            }
+          ],
+          "category": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/adjudication",
+                "code": "submitted",
+                "display": "Submitted Amount"
+              }
+            ]
+          },
+          "amount": {
+            "value": 300.99,
+            "currency": "USD"
+          }
+        }
+      ]
+    }
+  ],
+  "total": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/PriorAuthorizationUtilization",
+          "valueQuantity": {
+            "value": 1
+          }
+        }
+      ],
+      "category": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/us/davinci-pdex/CodeSystem/PriorAuthorizationValueCodes",
+            "code": "eligible",
+            "display": "Eligible"
+          }
+        ]
+      },
+      "amount": {
+        "value": 100,
+        "currency": "USD"
+      }
+    }
+  ]
+}

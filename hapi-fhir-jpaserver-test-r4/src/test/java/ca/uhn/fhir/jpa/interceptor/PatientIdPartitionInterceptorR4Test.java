@@ -51,6 +51,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -80,6 +81,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Arrays;
@@ -328,6 +330,28 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			assertEquals("Encounter", observation.getResourceType());
 			assertEquals(65, observation.getPartitionId().getPartitionId());
 		});
+	}
+
+	/**
+	 * SMILE-11985
+	 */
+	@Test
+	public void testCreateEob_AutoPlaceholderCreationOfOtherResourceInCompartment() throws IOException {
+		// Setup
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		// Test
+		ExplanationOfBenefit request = new ExplanationOfBenefit();
+		request.setId("A");
+		request.setPatient(new Reference("Patient/PAT1"));
+		request.addInsurance().setCoverage(new Reference("Coverage/COV1"));
+
+		myExplanationOfBenefitDao.update(request, newSrd());
+
+		 // Verify
+		Coverage actualCoverage = myCoverageDao.read(new IdType("Coverage/COV1"), newSrd());
+		List<IIdType> compartmentOwners = myFhirContext.newTerser().getCompartmentOwnersForResource("Patient", actualCoverage, Set.of());
+		assertThat(compartmentOwners).containsExactly(new IdType("Patient/PAT1"));
 	}
 
 	/**

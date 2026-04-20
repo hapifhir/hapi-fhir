@@ -30,13 +30,24 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 public class AutoCreatePlaceholderReferenceTargetRequest {
 
-	private final IBaseResource myTargetResourceToCreate;
+	private final IBaseResource mySourceResource;
 
+	private final IBaseResource myTargetResourceToCreate;
 	/**
 	 * Constructor
 	 */
-	public AutoCreatePlaceholderReferenceTargetRequest(IBaseResource theTargetResourceToCreate) {
+	public AutoCreatePlaceholderReferenceTargetRequest(IBaseResource theSourceResource, IBaseResource theTargetResourceToCreate) {
+		mySourceResource = theSourceResource;
 		myTargetResourceToCreate = theTargetResourceToCreate;
+	}
+
+	/**
+	 * Provides the resource containing the reference whose target is being automatically created.
+	 *
+	 * @since 8.10.0
+	 */
+	public IBaseResource getSourceResource() {
+		return mySourceResource;
 	}
 
 	/**

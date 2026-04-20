@@ -18,15 +18,11 @@ import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r5.model.Device;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Patient;
@@ -290,7 +286,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 				.withRequest(theDetails.getRequestDetails())
 				.withTransactionDetails(theDetails.getTransactionDetails())
 				.withRequestPartitionId(referenceTargetPartition)
-				.execute(() -> myResourceLinkResolver.findTargetResource(referenceTargetPartition, theDetails.getSourceResourceName(), theDetails.getPathAndRef(), theDetails.getRequestDetails(), theDetails.getTransactionDetails()));
+				.execute(() -> myResourceLinkResolver.findTargetResource(, referenceTargetPartition, theDetails.getSourceResourceName(), theDetails.getPathAndRef(), theDetails.getRequestDetails(), theDetails.getTransactionDetails()));
 
 			return targetResource;
 		});

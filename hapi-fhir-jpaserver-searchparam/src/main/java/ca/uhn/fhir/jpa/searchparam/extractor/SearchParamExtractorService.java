@@ -587,6 +587,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 						theRequestPartitionId,
 						theExistingParams,
 						theNewParams,
+						theResource,
 						theEntity,
 						theTransactionDetails,
 						sourceResourceName,
@@ -601,16 +602,16 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 	}
 
 	private void extractResourceLinks(
-			RequestPartitionId theRequestPartitionId,
-			ResourceIndexedSearchParams theExistingParams,
-			ResourceIndexedSearchParams theNewParams,
-			ResourceTable theEntity,
-			TransactionDetails theTransactionDetails,
-			String theSourceResourceName,
-			RuntimeSearchParam theRuntimeSearchParam,
-			PathAndRef thePathAndRef,
-			boolean theFailOnInvalidReference,
-			RequestDetails theRequest) {
+		RequestPartitionId theRequestPartitionId,
+		ResourceIndexedSearchParams theExistingParams,
+		ResourceIndexedSearchParams theNewParams,
+		IBaseResource theResource, ResourceTable theEntity,
+		TransactionDetails theTransactionDetails,
+		String theSourceResourceName,
+		RuntimeSearchParam theRuntimeSearchParam,
+		PathAndRef thePathAndRef,
+		boolean theFailOnInvalidReference,
+		RequestDetails theRequest) {
 		IBaseReference nextReference = thePathAndRef.getRef();
 		IIdType nextId = nextReference.getReferenceElement();
 		String path = thePathAndRef.getPath();
@@ -775,6 +776,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 						theRequestPartitionId,
 						theSourceResourceName,
 						thePathAndRef,
+						theResource,
 						theEntity,
 						transactionDate,
 						nextId,
@@ -983,14 +985,14 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 
 	@SuppressWarnings("unchecked")
 	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(
-			RequestPartitionId theRequestPartitionId,
-			String theSourceResourceName,
-			PathAndRef thePathAndRef,
-			ResourceTable theEntity,
-			Date theUpdateTime,
-			IIdType theNextId,
-			RequestDetails theRequest,
-			TransactionDetails theTransactionDetails) {
+		RequestPartitionId theRequestPartitionId,
+		String theSourceResourceName,
+		PathAndRef thePathAndRef,
+		IBaseResource theResource, ResourceTable theEntity,
+		Date theUpdateTime,
+		IIdType theNextId,
+		RequestDetails theRequest,
+		TransactionDetails theTransactionDetails) {
 		JpaPid resolvedResourceId = (JpaPid) theTransactionDetails.getResolvedResourceId(theNextId);
 
 		if (resolvedResourceId != null
@@ -1044,20 +1046,20 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 						requestPartitionId = RequestPartitionId.fromPartitionId(resolvedResourceId.getPartitionId());
 					}
 					targetResource = myResourceLinkResolver.findTargetResource(
-							requestPartitionId,
-							theSourceResourceName,
-							thePathAndRef,
-							theRequest,
-							theTransactionDetails);
+						theResource,
+						requestPartitionId,
+						theSourceResourceName,
+						thePathAndRef,
+						theRequest, theTransactionDetails);
 				}
 
 			} else {
-				targetResource = myResourceLinkResolver.findTargetResource(
-						theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+				targetResource = myResourceLinkResolver.findTargetResource(theResource,
+					theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
 			}
 		} else {
-			targetResource = myResourceLinkResolver.findTargetResource(
-					theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+			targetResource = myResourceLinkResolver.findTargetResource(theResource,
+				theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
 		}
 
 		if (targetResource == null) {

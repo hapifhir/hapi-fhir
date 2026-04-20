@@ -136,7 +136,7 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				IIdType newId = null;
 				if (matches.isEmpty()) {
 					Optional<IBasePersistedResource> placeholderOpt =
-							myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(
+							myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(theResource,
 									matchResourceType, nextRef, null, theRequestDetails, theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
 						match = (T) placeholderOpt.get().getPersistentId();
