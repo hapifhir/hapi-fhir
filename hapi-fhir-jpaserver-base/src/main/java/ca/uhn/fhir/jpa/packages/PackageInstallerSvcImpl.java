@@ -201,7 +201,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (enabled) {
 			try {
 
-				validatePackageAlreadyExists(theInstallationSpec);
+				logIfPackageAlreadyInstalled(theInstallationSpec);
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
 				if (npmPackage == null) {
@@ -242,7 +242,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return retVal;
 	}
 
-	private void validatePackageAlreadyExists(PackageInstallationSpec theInstallationSpec) {
+	private void logIfPackageAlreadyInstalled(PackageInstallationSpec theInstallationSpec) {
 		boolean exists = myTxService
 				.withSystemRequest()
 				.withRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId())
@@ -334,10 +334,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				}
 			}
 		}
-		ourLog.info(String.format("Finished installation of package %s#%s:", name, version));
+		ourLog.info("Finished installation of package {}#{}:", name, version);
 
-		for (int i = 0; i < count.length; i++) {
-			ourLog.info(String.format("-- Created or updated %s resources of type %s", count[i], installTypes.get(i)));
+		if (ourLog.isInfoEnabled()) {
+			for (int i = 0; i < count.length; i++) {
+				ourLog.info("-- Created or updated {} resources of type {}", count[i], installTypes.get(i));
+			}
 		}
 	}
 
@@ -356,7 +358,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return null;
 		}
 
-		validatePackageAlreadyExists(theInstallationSpec);
+		logIfPackageAlreadyInstalled(theInstallationSpec);
 
 		PackageInstallationJobParameters parameters = new PackageInstallationJobParameters();
 		parameters.setInstallationSpec(theInstallationSpec);
