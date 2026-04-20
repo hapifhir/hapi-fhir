@@ -249,6 +249,7 @@ public class JobMaintenanceStateInformation {
 		WorkChunk chunk = createBaseWorkChunk();
 		chunk.setStatus(initialStatus);
 		chunk.setTargetStepId(stepId);
+		chunk.setLastHeartbeat(new Date());
 		theAdder.accept(chunk);
 	}
 
