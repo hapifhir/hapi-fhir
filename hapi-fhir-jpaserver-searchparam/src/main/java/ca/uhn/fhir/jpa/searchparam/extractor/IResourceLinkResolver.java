@@ -36,7 +36,7 @@ public interface IResourceLinkResolver {
 	 * <p>
 	 * This method returns an {@link IResourceLookup} to avoid needing to resolve the entire resource.
 	 *
-	 * @param theResource
+	 * @param theSourceResource     The resource containing the reference
 	 * @param theRequestPartitionId The partition ID of the target resource
 	 * @param theSourceResourceName The resource type for the resource containing the reference
 	 * @param thePathAndRef         The path and reference
@@ -44,7 +44,7 @@ public interface IResourceLinkResolver {
 	 * @param theTransactionDetails The current TransactionDetails object
 	 */
 	IResourceLookup findTargetResource(
-			IBaseResource theResource,
+			IBaseResource theSourceResource,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theSourceResourceName,
 			PathAndRef thePathAndRef,

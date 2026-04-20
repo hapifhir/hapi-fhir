@@ -103,7 +103,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 
 	@Override
 	public IResourceLookup findTargetResource(
-			IBaseResource theResource,
+			IBaseResource theSourceResource,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theSourceResourceName,
 			PathAndRef thePathAndRef,
@@ -159,7 +159,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		} catch (ResourceNotFoundException e) {
 
 			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(
-					theResource, type, targetReference, idPart, theRequest, theTransactionDetails);
+				theSourceResource, type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
 				if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
