@@ -24,10 +24,12 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
+import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -259,8 +261,9 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			ourLog.debug("Scheduling interval job");
 			ScheduleBuilder<? extends Trigger> schedule = SimpleScheduleBuilder.simpleSchedule()
 					.withIntervalInMilliseconds(theIntervalMillis)
-					.withMisfireHandlingInstructionIgnoreMisfires()// We ignore misfires in cases of multiple JVMs each
+					// We ignore misfires in cases of multiple JVMs each
 					// trying to fire.
+					.withMisfireHandlingInstructionIgnoreMisfires()
 					.repeatForever();
 
 			Trigger trigger = TriggerBuilder.newTrigger()
@@ -272,11 +275,16 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 			triggers.add(trigger);
 		} else {
+			if (!CronExpression.isValidExpression(theCronExpression)) {
+				String msg = String.format("Invalid cron expression: %s", theCronExpression);
+				ourLog.error(msg);
+				throw new InvalidRequestException(msg);
+			}
+
 			ourLog.debug("Scheduling cron job");
 			CronScheduleBuilder cronSchedule = CronScheduleBuilder.cronSchedule(theCronExpression)
 					.withMisfireHandlingInstructionIgnoreMisfires(); // We ignore misfires in cases of multiple JVMs
 			// each
-
 			Trigger trigger = TriggerBuilder.newTrigger()
 					.forJob(jobDetail)
 					.withIdentity(triggerKey)

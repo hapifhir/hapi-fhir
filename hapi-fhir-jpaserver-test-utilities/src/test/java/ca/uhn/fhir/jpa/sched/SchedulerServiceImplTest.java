@@ -37,6 +37,7 @@ import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = SchedulerServiceImplTest.TestConfiguration.class)
@@ -146,6 +147,30 @@ public class SchedulerServiceImplTest {
 		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
 		assertThat(sw.getMillis()).isGreaterThan(3000L);
 		assertThat(sw.getMillis()).isLessThan(3500L);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void scheduleJob_withInvalidCronExpression_throws(boolean theUseClustered) {
+		String cronExpression = "1";
+		String methodName = new Exception()
+			.getStackTrace()[0]
+			.getMethodName();
+
+		ScheduledJobDefinition definition = new ScheduledJobDefinition();
+		definition.setId(methodName);
+		definition.setJobClass(CronJob.class);
+
+		// test
+		try {
+			if (theUseClustered) {
+				mySvc.scheduleClusteredJob(cronExpression, definition);
+			} else {
+				mySvc.scheduleLocalJob(cronExpression, definition);
+			}
+		} catch (Exception ex) {
+			assertTrue(ex.getMessage().contains("Invalid cron expression"));
+		}
 	}
 
 	@ParameterizedTest
