@@ -31,6 +31,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.model.PerformanceTracingLogger;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
@@ -73,7 +74,6 @@ import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CartesianProductUtil;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.api.model.PerformanceTracingLogger;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
@@ -2588,14 +2588,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 								 */
 								if (dateParam.getPrecision().ordinal() > TemporalPrecisionEnum.DAY.ordinal()) {
 									shouldRemoveParamFromQuery = false;
-									myPerformanceTracingLogger.firePerformanceInfo(theRequest, "Search is indexed with a combo search param. It may perform better if a date without a time is supplied for the " + nextComponent.getParamName() + " parameter");
+									myPerformanceTracingLogger.firePerformanceInfo(
+											theRequest,
+											"Search is indexed with a combo search param. It may perform better if a date without a time is supplied for the "
+													+ nextComponent.getParamName() + " parameter");
 									break;
 								}
 							}
 						}
 						if (shouldRemoveParamFromQuery) {
 							searchParameterConsumerTasks.add(
-								() -> sameNameParametersAndList.remove(sameNameParametersOrList));
+									() -> sameNameParametersAndList.remove(sameNameParametersOrList));
 						}
 
 						foundMatch = true;
@@ -3289,8 +3292,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			myResultsIterator = null;
 		}
 	}
-
-
 
 	public static int getMaximumPageSize() {
 		if (myMaxPageSizeForTests != null) {

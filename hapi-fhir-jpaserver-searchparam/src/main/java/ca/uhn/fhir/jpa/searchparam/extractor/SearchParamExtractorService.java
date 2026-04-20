@@ -848,7 +848,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 					Strings.CS.equals(resourceLink.getSourcePath(), thePathAndRef.getPath());
 
 			boolean hasMatchingResourceType =
-				Strings.CS.equals(resourceLink.getTargetResourceType(), referenceElement.getResourceType());
+					Strings.CS.equals(resourceLink.getTargetResourceType(), referenceElement.getResourceType());
 
 			boolean hasMatchingResourceId = false;
 			Optional<String> idPartOpt = targetResourceIdMap.get(resourceLink.getTargetResourcePk());
@@ -1136,7 +1136,8 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 		return mySearchParamExtractor.extractParamValuesAsStrings(theActiveSearchParam, theResource);
 	}
 
-	public void extractSearchParamComboUnique(RequestDetails theRequestDetails, ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
+	public void extractSearchParamComboUnique(
+			RequestDetails theRequestDetails, ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
 		String resourceType = theEntity.getResourceType();
 		Set<ResourceIndexedComboStringUnique> comboUniques =
 				mySearchParamExtractor.extractSearchParamComboUnique(theRequestDetails, resourceType, theParams);
@@ -1144,7 +1145,8 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 		populateResourceTableForComboParams(theParams.myComboStringUniques, theEntity);
 	}
 
-	public void extractSearchParamComboNonUnique(RequestDetails theRequestDetails, ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
+	public void extractSearchParamComboNonUnique(
+			RequestDetails theRequestDetails, ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
 		String resourceType = theEntity.getResourceType();
 		Set<ResourceIndexedComboTokenNonUnique> comboNonUniques =
 				mySearchParamExtractor.extractSearchParamComboNonUnique(theRequestDetails, resourceType, theParams);

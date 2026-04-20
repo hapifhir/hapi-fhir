@@ -456,7 +456,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(
-		RequestDetails theRequestDetails, String theResourceType, ResourceIndexedSearchParams theParams) {
+			RequestDetails theRequestDetails, String theResourceType, ResourceIndexedSearchParams theParams) {
 		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
 		List<RuntimeSearchParam> runtimeComboUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(
 				theResourceType, ComboSearchParamType.UNIQUE, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
@@ -470,16 +470,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private SearchParamSet<ResourceIndexedComboStringUnique> createComboUniqueParam(
-		RequestDetails theRequestDetails,
-		String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
+			RequestDetails theRequestDetails,
+			String theResourceType,
+			ResourceIndexedSearchParams theParams,
+			RuntimeSearchParam theRuntimeParam) {
 		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
 
 		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
 				JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theRuntimeParam);
 
 		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(
-			theRequestDetails,
-				compositeComponents, theParams, theResourceType, theRuntimeParam);
+				theRequestDetails, compositeComponents, theParams, theResourceType, theRuntimeParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
 			ourLog.trace(
@@ -497,7 +498,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(
-		RequestDetails theRequestDetails, String theResourceType, ResourceIndexedSearchParams theParams) {
+			RequestDetails theRequestDetails, String theResourceType, ResourceIndexedSearchParams theParams) {
 		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
 		List<RuntimeSearchParam> runtimeComboNonUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(
 				theResourceType,
@@ -513,8 +514,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private SearchParamSet<ResourceIndexedComboTokenNonUnique> createComboNonUniqueParam(
-		RequestDetails theRequestDetails,
-			String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
+			RequestDetails theRequestDetails,
+			String theResourceType,
+			ResourceIndexedSearchParams theParams,
+			RuntimeSearchParam theRuntimeParam) {
 		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
 
 		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
@@ -532,8 +535,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 		}
 
-		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(theRequestDetails,
-				compositeComponents, theParams, theResourceType, theRuntimeParam);
+		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(
+				theRequestDetails, compositeComponents, theParams, theResourceType, theRuntimeParam);
 
 		if (rangedDateChoices.isEmpty()) {
 			rangedDateChoices.add(null);
@@ -560,7 +563,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 */
 	@Nonnull
 	private Set<String> extractParameterCombinationsForComboParam(
-		RequestDetails theRequestDetails,
+			RequestDetails theRequestDetails,
 			List<JpaParamUtil.ComponentAndCorrespondingParam> theCompositeComponents,
 			ResourceIndexedSearchParams theIndexes,
 			String theResourceType,
@@ -613,7 +616,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					if (theParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE
 							&& nextParamAsClientParam instanceof DateParam date) {
 						if (date.getPrecision().ordinal() < TemporalPrecisionEnum.DAY.ordinal()) {
-							myPerformanceTracingLogger.firePerformanceInfo(theRequestDetails, "Not creating a non-unique combo index entry for index[" + theParam.getName() + "] because value for component " + next.getParamName() + " has precision < DAY");
+							myPerformanceTracingLogger.firePerformanceInfo(
+									theRequestDetails,
+									"Not creating a non-unique combo index entry for index[" + theParam.getName()
+											+ "] because value for component " + next.getParamName()
+											+ " has precision < DAY");
 							continue;
 						}
 						if (date.getPrecision().ordinal() > TemporalPrecisionEnum.DAY.ordinal()) {

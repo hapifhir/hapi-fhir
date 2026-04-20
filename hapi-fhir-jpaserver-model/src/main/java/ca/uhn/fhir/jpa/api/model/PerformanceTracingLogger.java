@@ -35,17 +35,15 @@ public class PerformanceTracingLogger {
 
 	private void firePerformanceMessage(RequestDetails theRequest, String theMessage, Pointcut thePointcut) {
 		IInterceptorBroadcaster compositeBroadcaster =
-			CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 		if (compositeBroadcaster.hasHooks(thePointcut)) {
 			StorageProcessingMessage message = new StorageProcessingMessage();
 			message.setMessage(theMessage);
 			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest)
-				.add(StorageProcessingMessage.class, message);
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(StorageProcessingMessage.class, message);
 			compositeBroadcaster.callHooks(thePointcut, params);
 		}
 	}
-
-
 }
