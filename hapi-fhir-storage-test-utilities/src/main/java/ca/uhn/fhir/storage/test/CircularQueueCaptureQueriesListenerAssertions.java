@@ -228,6 +228,14 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 				myTests.add(new TestSelect(myIndex, myAllThreads, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES, theExpectedCount));
 				return QueryCondition.this;
 			}
+
+			/**
+			 * Does the SQL match exactly?
+			 */
+			public Condition<? super CircularQueueCaptureQueriesListener> matches(String theExpectedSql) {
+				myTests.add(new TestSelect(myIndex, myAllThreads, theExpectedSql, SqlMatchModeEnum.MATCHES));
+				return QueryCondition.this;
+			}
 		}
 
 	}
@@ -341,6 +349,14 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							if (matchCount != myExpectedCount) {
 								yield Optional.of("\nExpected SQL: " + renderedSql + "\n" +
 									" to contain " + myExpectedCount + " but found " + matchCount + " instances of : " + myExpectedSql);
+							} else {
+								yield Optional.empty();
+							}
+						}
+						case MATCHES -> {
+							if (!renderedSql.equals(myExpectedSql)) {
+								yield Optional.of("\nExpected SQL  : " + renderedSql + "\n" +
+									"to match      : " + myExpectedSql);
 							} else {
 								yield Optional.empty();
 							}
@@ -534,7 +550,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		CONTAINS,
 		DOES_NOT_CONTAIN,
 		COUNT_INSTANCES,
-		ENDS_WITH
+		MATCHES, ENDS_WITH
 
 	}
 

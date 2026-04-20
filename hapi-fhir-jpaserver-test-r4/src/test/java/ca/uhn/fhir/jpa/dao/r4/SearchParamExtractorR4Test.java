@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
@@ -133,7 +134,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 	@Test
 	public void testTokenText_DisabledInSearchParam_Coding() {
-		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", null).get("code");
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.ALL).get("code");
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
 		codeSearchParam.addExtension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(true)));
 		mySearchParamRegistry.addSearchParam(codeSearchParam);
@@ -186,7 +187,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setSuppressStringIndexingInTokens(true);
 
-		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", null).get("code");
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.ALL).get("code");
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
 		codeSearchParam.addExtension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(false)));
 		mySearchParamRegistry.addSearchParam(codeSearchParam);
@@ -220,7 +221,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		enc.addLocation().setLocation(new Reference("Location/123"));
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
-		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location", null);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location", ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(enc, false);
 		assertThat(links).hasSize(1);
@@ -235,7 +236,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		consent.setSource(new Reference().setReference("Consent/999"));
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
-		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE, null);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(consent, false);
 		assertThat(links).hasSize(1);
@@ -250,7 +251,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		p.addIdentifier().setSystem("sys").setValue("val");
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
-		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Patient", Patient.SP_IDENTIFIER, null);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Patient", Patient.SP_IDENTIFIER, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> params = extractor.extractSearchParamTokens(p, param);
 		assertThat(params).hasSize(1);
@@ -325,7 +326,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
 			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(200));
 
-		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", null).get("component-value-quantity");
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.ALL).get("component-value-quantity");
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		List<String> list = extractor.extractParamValuesAsStrings(existingCodeSp, o1);

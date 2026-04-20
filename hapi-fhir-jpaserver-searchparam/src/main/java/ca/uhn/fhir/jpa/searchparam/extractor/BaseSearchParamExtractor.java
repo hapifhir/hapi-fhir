@@ -196,18 +196,15 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			StorageSettings theStorageSettings,
 			PartitionSettings thePartitionSettings,
 			FhirContext theCtx,
-			ISearchParamRegistry theSearchParamRegistry,
-			IInterceptorBroadcaster theInterceptorBroadcaster) {
+			ISearchParamRegistry theSearchParamRegistry) {
 		Objects.requireNonNull(theStorageSettings);
 		Objects.requireNonNull(theCtx);
 		Objects.requireNonNull(theSearchParamRegistry);
-		Objects.requireNonNull(theInterceptorBroadcaster);
 
 		myStorageSettings = theStorageSettings;
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
 		myPartitionSettings = thePartitionSettings;
-		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
 	@Override

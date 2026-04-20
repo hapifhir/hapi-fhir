@@ -475,10 +475,12 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
-		2021-02-02              , 2021-02-02              , true
-		2021-02-02T11:22:33Z    , 2021-02-02T11:22:33Z    , true
+		# Observation Date      , Search URL Date         , Expect Match , Expect Use Date Index Table
+		2021-02-02              , 2021-02-02              , true         , false
+		2021-02-02T11:22:33Z    , 2021-02-02T11:22:33Z    , true         , true
+		2021-02-02T11:22:33Z    , 2021-02-02T11:22:01Z    , false        , true
 		""")
-	public void testStringAndDate_Create(String theObservationDate, String theSearchDate, boolean theExpectMatch) {
+	public void testStringAndDate_Create(String theObservationDate, String theSearchDate, boolean theExpectMatch, boolean theExpectUseDateIndexTable) {
 		createStringAndDateCombo_ObservationValueAndEffective();
 
 		IIdType id1 = createObservation(
@@ -507,13 +509,26 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		IBundleProvider results = myObservationDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
+		if (theExpectMatch) {
+			assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
+		} else {
+			assertThat(actual).isEmpty();
+		}
 
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '-53995296465088005') fetch first '10000' rows only";
-		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
+		if (theExpectUseDateIndexTable) {
+			String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_SPIDX_DATE";
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread().selectSqlAtIndex(0).contains(expected)
+			);
+		} else {
+			String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '-53995296465088005') fetch first '10000' rows only";
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread().selectSqlAtIndex(0).matches(expected)
+			);
+		}
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("[INFO Using NON_UNIQUE index(es) for query for search: Observation?date=2021-02-02&value-string=HELLO]");
+		assertThat(myMessages.toString()).contains("INFO Using NON_UNIQUE index(es) for query for search: Observation?date=2021-02-02&value-string=HELLO");
 		myMessages.clear();
 	}
 
@@ -1140,8 +1155,8 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		 */
 		@ParameterizedTest
 		@CsvSource(value = {
-			"2021-01-02T12:00:01.000Z , false",
-			"2021-01-02T12:00:01Z     , false",
+			"2021-01-02T12:00:01.000Z , true",
+			"2021-01-02T12:00:01Z     , true",
 			"2021-01-02               , true", // <-- DAY precision
 			"2021-01                  , false",
 			"2021                     , false",
@@ -1173,7 +1188,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 				assertComboIndexUsed();
 			} else {
 				assertComboIndexNotUsed();
-				assertThat(myMessages.toString()).contains("INFO Search with params [date, note-text] is not a candidate for combo searching - Date search with non-DAY precision for parameter 'date'");
+				assertThat(myMessages.toString()).contains("INFO Search with params [date, note-text] is not a candidate for combo searching - Date search with less than DAY precision for parameter 'date'");
 			}
 		}
 

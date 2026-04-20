@@ -175,6 +175,7 @@ import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.stripStart;
+import static org.apache.commons.lang3.StringUtils.substring;
 
 /**
  * The SearchBuilder is responsible for actually forming the SQL query that handles
@@ -2575,8 +2576,28 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						}
 
 						inputs.add(sameNameParametersOrList);
-						searchParameterConsumerTasks.add(
+
+						boolean shouldRemoveParamFromQuery = true;
+						for (IQueryParameterType next : sameNameParametersOrList) {
+							if (next instanceof DateParam dateParam) {
+								/*
+								 * We only index the date portion of DateTime values in the non-unique
+								 * index table, so if the search includes more precision, we need to
+								 * keep the param name and value in the map so that we'll also join
+								 * on the standard date index table for the time component.
+								 */
+								if (dateParam.getPrecision().ordinal() > TemporalPrecisionEnum.DAY.ordinal()) {
+									shouldRemoveParamFromQuery = false;
+									myPerformanceTracingLogger.firePerformanceInfo(theRequest, "Search is indexed with a combo search param. It may perform better if a date without a time is supplied for the " + nextComponent.getParamName() + " parameter");
+									break;
+								}
+							}
+						}
+						if (shouldRemoveParamFromQuery) {
+							searchParameterConsumerTasks.add(
 								() -> sameNameParametersAndList.remove(sameNameParametersOrList));
+						}
+
 						foundMatch = true;
 						break;
 					}
@@ -2647,6 +2668,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// The only prefix accepted when combo searching is 'eq' (see validateParamValuesAreValidForComboParam).
 				// As a result, we strip the prefix if present.
 				String nextOrValue = stripStart(nextOr.getValueAsQueryToken(), EQUAL.getValue());
+
+				if (nextOr instanceof DateParam) {
+					nextOrValue = substring(nextOrValue, 0, 10);
+				}
 
 				RestSearchParameterTypeEnum paramType = JpaParamUtil.getParameterTypeForComposite(
 						mySearchParamRegistry, componentAndCorrespondingParam);
