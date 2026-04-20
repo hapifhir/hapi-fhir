@@ -253,8 +253,8 @@ public class SearchParameterDaoValidator {
 		}
 	}
 
-	private static boolean isGenericBase(String base) {
-		return RESOURCE.equals(base) || DOMAIN_RESOURCE.equals(base);
+	private static boolean isGenericBase(String theBase) {
+		return RESOURCE.equals(theBase) || DOMAIN_RESOURCE.equals(theBase);
 	}
 
 	private void validateExpressionIsParsable(SearchParameter theSearchParameter) {
