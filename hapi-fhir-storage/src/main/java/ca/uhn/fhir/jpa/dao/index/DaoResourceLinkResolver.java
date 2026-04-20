@@ -159,7 +159,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		} catch (ResourceNotFoundException e) {
 
 			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(
-				theSourceResource, type, targetReference, idPart, theRequest, theTransactionDetails);
+					theSourceResource, type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
 				if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
