@@ -1255,6 +1255,10 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			myTestValue = theV;
 			return this;
 		}
+
+		public String getValue() {
+			return myTestValue;
+		}
 	}
 
 	static class SecondStepOutput implements IModelJson {
