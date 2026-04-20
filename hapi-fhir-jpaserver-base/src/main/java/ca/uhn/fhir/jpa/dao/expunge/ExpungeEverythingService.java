@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -76,10 +78,13 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -98,6 +103,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.util.comparator.Comparators;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -122,6 +129,9 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
+	@Autowired
+	private IJobMaintenanceService myJobMaintenanceService;
 
 	private int deletedResourceEntityCount;
 
@@ -167,12 +177,9 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 					counter.addAndGet(doExpungeEverythingQuery(
 							"UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
 				});
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, Batch2WorkChunkEntity.class, requestPartitionId));
+		counter.addAndGet(expungeBatch2Entities(theRequest, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
 				theRequest, ResourceIdentifierPatientUniqueEntity.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, Batch2JobInstanceEntity.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
 				theRequest, NpmPackageVersionResourceEntity.class, requestPartitionId));
 		counter.addAndGet(
@@ -404,5 +411,64 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
 		ourLog.debug("SqlQuery affected {} rows in {}: {}", outcome, sw, theQuery);
 		return outcome;
+	}
+
+	private static final int EXPUNGE_BATCH2_MAX_RETRIES = 10;
+
+	/**
+	 * Deletes Batch2WorkChunkEntity and Batch2JobInstanceEntity while holding the maintenance
+	 * semaphore (via {@link IJobMaintenanceService#holdMaintenanceForExpunge()}) to prevent any
+	 * concurrent maintenance pass from inserting or updating batch2 entities during deletion.
+	 *
+	 * <p>The semaphore hold prevents maintenance on the local JVM. In clustered deployments,
+	 * maintenance on another node could still create new work chunks between passes. The retry
+	 * loop catches FK constraint violations and retries the deletion cycle.
+	 *
+	 * <p>Work chunks have a foreign key (FK_BT2WC_INSTANCE) referencing job instances, so we
+	 * delete work chunks before job instances.
+	 */
+	// Created by claude-opus-4-6
+	@VisibleForTesting
+	int expungeBatch2Entities(RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		HapiTransactionService.noTransactionAllowed();
+
+		// Hold the maintenance semaphore while deleting batch2 entities.
+		// This prevents the local maintenance job from inserting/updating work chunks and job
+		// instances while we are deleting them, eliminating FK violations and deadlocks.
+		try (Closeable ignored = myJobMaintenanceService.holdMaintenanceForExpunge()) {
+			int outcome = 0;
+			int consecutiveFailures = 0;
+			while (true) {
+				int deleted;
+				try {
+					// Delete work chunks first (child FK), then job instances (parent)
+					deleted = 0;
+					deleted += expungeEverythingByTypeWithoutPurging(
+							theRequest, Batch2WorkChunkEntity.class, theRequestPartitionId);
+					deleted += expungeEverythingByTypeWithoutPurging(
+							theRequest, Batch2JobInstanceEntity.class, theRequestPartitionId);
+				} catch (ResourceVersionConflictException e) {
+					// In clustered deployments, maintenance on another node may create new
+					// work chunks, causing FK violations when we delete job instances.
+					consecutiveFailures++;
+					if (consecutiveFailures > EXPUNGE_BATCH2_MAX_RETRIES) {
+						throw e;
+					}
+					ourLog.info(
+							"Retrying batch2 entity deletion due to constraint conflict (attempt {}/{})",
+							consecutiveFailures,
+							EXPUNGE_BATCH2_MAX_RETRIES);
+					continue;
+				}
+				consecutiveFailures = 0;
+				outcome += deleted;
+				if (deleted == 0) {
+					break;
+				}
+			}
+			return outcome;
+		} catch (IOException e) {
+			throw new InternalErrorException(Msg.code(2844) + "Error releasing maintenance hold", e);
+		}
 	}
 }

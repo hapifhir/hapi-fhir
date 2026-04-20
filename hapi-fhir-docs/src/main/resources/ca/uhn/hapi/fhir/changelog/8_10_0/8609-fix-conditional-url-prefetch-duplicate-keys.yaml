@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7783
+title: "Previously, providing duplicate identifiers (identifier=system1|123&identifier=system2|456) as conditional URL with a conditional create or update could lead to incorrect resource matching. This problem is fixed."

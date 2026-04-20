@@ -443,9 +443,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void hookPreShow(
 			RequestDetails theRequestDetails, IPreResourceShowDetails theDetails, Pointcut thePointcut) {
-		for (int i = 0; i < theDetails.size(); i++) {
-			IBaseResource next = theDetails.getResource(i);
-			checkOutgoingResourceAndFailIfDeny(theRequestDetails, next, thePointcut);
+		for (IBaseResource resource : theDetails.getAllResources()) {
+			checkOutgoingResourceAndFailIfDeny(theRequestDetails, resource, thePointcut);
 		}
 	}
 

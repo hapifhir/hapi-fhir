@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletResponse;
@@ -207,18 +208,44 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 			RequestDetails theRequestDetails);
 
 	/**
-	 * Not supported in DSTU1!
-	 *
-	 * @param theRequestDetails The request details including permissions and partitioning information
+	 * @deprecated Call {@link #metaAddOperation(IIdType, IBaseMetaType, RequestDetails, TransactionDetails)}
 	 */
-	<MT extends IBaseMetaType> MT metaAddOperation(IIdType theId1, MT theMetaAdd, RequestDetails theRequestDetails);
+	@Deprecated(since = "8.10.0", forRemoval = true)
+	default <MT extends IBaseMetaType> MT metaAddOperation(
+			IIdType theId1, MT theMetaAdd, RequestDetails theRequestDetails) {
+		DaoMethodOutcome outcome = metaAddOperation(theId1, theMetaAdd, theRequestDetails, new TransactionDetails());
+		return (MT)
+				ParametersUtil.getNamedParameterValue(getContext(), (IBaseParameters) outcome.getResource(), "return")
+						.orElseThrow();
+	}
+
+	/**
+	 * @deprecated Call {@link #metaDeleteOperation(IIdType, IBaseMetaType, RequestDetails, TransactionDetails)}
+	 */
+	@Deprecated(since = "8.10.0", forRemoval = true)
+	default <MT extends IBaseMetaType> MT metaDeleteOperation(
+			IIdType theId1, MT theMetaDel, RequestDetails theRequestDetails) {
+		DaoMethodOutcome outcome = metaDeleteOperation(theId1, theMetaDel, theRequestDetails, new TransactionDetails());
+		return (MT)
+				ParametersUtil.getNamedParameterValue(getContext(), (IBaseParameters) outcome.getResource(), "return")
+						.orElseThrow();
+	}
 
 	/**
 	 * Not supported in DSTU1!
 	 *
 	 * @param theRequestDetails The request details including permissions and partitioning information
 	 */
-	<MT extends IBaseMetaType> MT metaDeleteOperation(IIdType theId1, MT theMetaDel, RequestDetails theRequestDetails);
+	<MT extends IBaseMetaType> DaoMethodOutcome metaAddOperation(
+			IIdType theId1, MT theMetaAdd, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
+
+	/**
+	 * Not supported in DSTU1!
+	 *
+	 * @param theRequestDetails The request details including permissions and partitioning information
+	 */
+	<MT extends IBaseMetaType> DaoMethodOutcome metaDeleteOperation(
+			IIdType theId1, MT theMetaDel, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
 	/**
 	 * Not supported in DSTU1!

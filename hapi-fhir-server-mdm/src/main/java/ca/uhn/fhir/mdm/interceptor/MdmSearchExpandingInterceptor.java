@@ -56,8 +56,8 @@ public class MdmSearchExpandingInterceptor {
 	private MdmSearchExpansionSvc myMdmSearchExpansionSvc;
 
 	@Hook(
-			value = Pointcut.STORAGE_PRESEARCH_REGISTERED,
-			order = MdmConstants.ORDER_PRESEARCH_REGISTERED_MDM_SEARCH_EXPANDING_INTERCEPTOR)
+			value = Pointcut.STORAGE_PRESEARCH_PARTITION_SELECTED,
+			order = MdmConstants.STORAGE_PRESEARCH_PARTITION_SELECTED_MDM_SEARCH_EXPANDING_INTERCEPTOR)
 	public void hook(
 			RequestDetails theRequestDetails,
 			SearchParameterMap theSearchParameterMap,

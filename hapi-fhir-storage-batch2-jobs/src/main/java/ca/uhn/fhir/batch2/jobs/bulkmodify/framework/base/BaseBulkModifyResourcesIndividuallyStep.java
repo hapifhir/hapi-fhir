@@ -37,10 +37,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.util.HashingWriter;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
@@ -50,14 +49,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.io.IOException;
-import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 /**
  * This is the base class for any <b>bulk modification</b> or <b>bulk rewrite</b> jobs. Any new bulk modification
- * job type should subclass this class, and implement {@link #modifyResource(BaseBulkModifyJobParameters, Object, ResourceModificationRequest)}.
+ * job type should subclass this class, and implement {@link #modifyResource(StepExecutionDetails, Object, ResourceModificationRequest)}.
  * Several other methods are provided which can also be overridden.
  *
  * @param <PT> The job parameters type
@@ -73,7 +71,6 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	@Override
 	protected void processPidsInTransaction(
 			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
-			PT theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
 			TransactionDetails theTransactionDetails,
@@ -86,14 +83,14 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 		// Perform the modification (handled by subclasses)
 		C modificationContext;
 		try {
-			modificationContext = modifyResourcesInTransaction(theState, theJobParameters, thePids);
+			modificationContext = modifyResourcesInTransaction(theStepExecutionDetails, theState, thePids);
 		} catch (JobExecutionFailedException e) {
 			theState.setJobFailure(e);
 			throw e;
 		}
 
 		// Store the modified resources to the DB
-		if (!theJobParameters.isDryRun()) {
+		if (!theStepExecutionDetails.getParameters().isDryRun()) {
 			storeResourcesInTransaction(
 					theStepExecutionDetails, modificationContext, theState, thePids, theTransactionDetails);
 		} else {
@@ -145,7 +142,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 					// individually here. This could be made more efficient with some kind
 					// of bulk versioned fetch in the future.
 					IIdType nextVersionedId = resource.getIdElement().withVersion(Long.toString(nextVersion));
-					RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+					RequestDetails requestDetails = createRequestDetails(theStepExecutionDetails, null, null);
 					IBaseResource resourceVersion = dao.read(nextVersionedId, requestDetails, true);
 
 					// Don't try to modify resource versions that are already deleted
@@ -159,28 +156,46 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 		}
 	}
 
-	private C modifyResourcesInTransaction(State theState, PT theJobParameters, List<TypedPidAndVersionJson> thePids) {
+	private C modifyResourcesInTransaction(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			State theState,
+			List<TypedPidAndVersionJson> thePids) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
-		C modificationContext = preModifyResources(theJobParameters, thePids);
-
+		List<IBaseResource> resources = new ArrayList<>(thePids.size());
+		List<HashingWriter> preModificationHashes = new ArrayList<>(thePids.size());
+		List<String> resourceTypes = new ArrayList<>(thePids.size());
+		List<String> resourceIds = new ArrayList<>(thePids.size());
+		List<String> resourceVersions = new ArrayList<>(thePids.size());
 		for (TypedPidAndVersionJson pid : thePids) {
+			IBaseResource resource = theState.getResourceForPid(pid);
+			resources.add(resource);
+			preModificationHashes.add(hashResource(resource));
+			resourceTypes.add(myFhirContext.getResourceType(resource));
+			resourceIds.add(resource.getIdElement().getIdPart());
+			resourceVersions.add(resource.getIdElement().getVersionIdPart());
+		}
+
+		C modificationContext = preModifyResources(theStepExecutionDetails, resources);
+
+		for (int i = 0; i < thePids.size(); i++) {
+			TypedPidAndVersionJson pid = thePids.get(i);
 			if (!theState.isPidInState(pid, StateEnum.INITIAL)) {
 				// If we found that a resource version was deleted, we move it
 				// straight to UNCHANGED status
 				continue;
 			}
 
-			IBaseResource resource = theState.getResourceForPid(pid);
-			String resourceType = myFhirContext.getResourceType(resource);
-			String resourceId = resource.getIdElement().getIdPart();
-			String resourceVersion = resource.getIdElement().getVersionIdPart();
+			IBaseResource resource = resources.get(i);
+			String resourceType = resourceTypes.get(i);
+			String resourceId = resourceIds.get(i);
+			String resourceVersion = resourceVersions.get(i);
 
-			try (HashingWriter preModificationHash = hashResource(resource)) {
+			try (HashingWriter preModificationHash = preModificationHashes.get(i)) {
 
 				ResourceModificationRequest modificationRequest = new ResourceModificationRequest(resource);
 				ResourceModificationResponse modificationResponse =
-						modifyResource(theJobParameters, modificationContext, modificationRequest);
+						modifyResource(theStepExecutionDetails, modificationContext, modificationRequest);
 				if (modificationResponse == null) {
 					throw new JobExecutionFailedException(Msg.code(2789)
 							+ "Null response from Modification for Resource[" + resource.getIdElement() + "]");
@@ -226,9 +241,9 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	}
 
 	@Nonnull
-	private HashingWriter hashResource(IBaseResource resource) {
-		try (HashingWriter preModificationHash = new HashingWriter()) {
-			preModificationHash.append(resource);
+	private ca.uhn.fhir.util.HashingWriter hashResource(IBaseResource resource) {
+		try (ca.uhn.fhir.util.HashingWriter preModificationHash = new ca.uhn.fhir.util.HashingWriter()) {
+			preModificationHash.append(myFhirContext, resource);
 			return preModificationHash;
 		}
 	}
@@ -287,38 +302,40 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	}
 
 	@Nonnull
-	private SystemRequestDetails createRequestDetails(
-			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
-			C theModificationContext,
-			IBaseResource theResource) {
+	protected SystemRequestDetails createRequestDetails(
+			@Nonnull StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			@Nullable C theModificationContext,
+			@Nullable IBaseResource theResource) {
 		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-		requestDetails.setRewriteHistory(isRewriteHistory(theModificationContext, theResource));
+		if (theResource != null) {
+			requestDetails.setRewriteHistory(
+					isRewriteHistory(theStepExecutionDetails, theModificationContext, theResource));
+		}
 		return requestDetails;
-	}
-
-	/**
-	 * Subclasses may override this method to indicate that this resource should be stored
-	 * as a history rewrite
-	 */
-	@SuppressWarnings("unused")
-	protected boolean isRewriteHistory(C theState, IBaseResource theResource) {
-		return false;
 	}
 
 	/**
 	 * Subclasses may override this method, which will be called immediately before beginning processing
 	 * of a resource batch. It can be used to perform any shared processing that would otherwise need
-	 * to be repeated, such as looking up context resources, parsing a patch object in the job parameters
+	 * to be repeated, such as looking up context resources, parsing a patch object in the job parameters,
 	 * or other expensive operations.
+	 * <p>
+	 * This method may also perform modifications to the resources in the chunk if it is more
+	 * efficient to do so as a batch. In this case, the step should keep track of which resources
+	 * were actually modified, so that {@link #modifyResource(StepExecutionDetails, Object, ResourceModificationRequest)}
+	 * can return an appropriate response for each resource indicating whether the resource was modified.
+	 * </p>
 	 *
-	 * @param theJobParameters The parameters for the current instance of the job
-	 * @param thePids          The PIDs of the resources to be modified. The PIDs will be in the same order as the resources in the chunk.
-	 * @return A context object which will be passed to {@link #modifyResource(PT, Object, ResourceModificationRequest)}
+	 * @param theStepExecutionDetails The details of the current step execution. This can be used to obtain {@link RequestDetails} objects for DAO calls.
+	 * @param theResources            The resources to be modified. The resources will be in the same order as the PIDs in the chunk.
+	 * @return A context object which will be passed to {@link #modifyResource(StepExecutionDetails, Object, ResourceModificationRequest)}
 	 * 	during each invocation. The format of the context object is up to the subclass, the framework
 	 * 	won't look at it and doesn't care if it is {@literal null}.
 	 */
 	@Nullable
-	protected C preModifyResources(PT theJobParameters, List<TypedPidAndVersionJson> thePids) {
+	protected C preModifyResources(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			List<IBaseResource> theResources) {
 		return null;
 	}
 
@@ -330,43 +347,11 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 	 *     <li>The modified resource must be of the same resource type as the original</li>
 	 *     <li>The version must not be modified</li>
 	 * </ul>
+	 *
+	 * @param theStepExecutionDetails The details of the current step execution. This can be used to obtain {@link RequestDetails} objects for DAO calls.
 	 */
 	protected abstract ResourceModificationResponse modifyResource(
-			PT theJobParameters, C theModificationContext, @Nonnull ResourceModificationRequest theModificationRequest);
-
-	@SuppressWarnings("UnstableApiUsage")
-	private class HashingWriter extends Writer {
-
-		private final Hasher myHasher = Hashing.goodFastHash(128).newHasher();
-
-		@Override
-		public void write(@Nonnull char[] cbuf, final int off, final int len) {
-			for (int i = off; i < off + len; i++) {
-				myHasher.putChar(cbuf[i]);
-			}
-		}
-
-		@Override
-		public void flush() {
-			// nothing
-		}
-
-		@Override
-		public void close() {
-			// nothing
-		}
-
-		public void append(IBaseResource theResource) {
-			try {
-				myFhirContext.newJsonParser().setPrettyPrint(false).encodeResourceToWriter(theResource, this);
-			} catch (IOException e) {
-				// This shouldn't happen since we don't do any IO in this writer
-				throw new JobExecutionFailedException(Msg.code(2785) + "Failed to calculate resource hash", e);
-			}
-		}
-
-		public boolean matches(HashingWriter thePostModificationHash) {
-			return myHasher.hash().equals(thePostModificationHash.myHasher.hash());
-		}
-	}
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			C theModificationContext,
+			@Nonnull ResourceModificationRequest theModificationRequest);
 }

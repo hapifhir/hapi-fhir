@@ -30,6 +30,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
+import java.util.List;
+
+import org.hl7.fhir.r4.model.StringType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,7 +42,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4ValueSetHSearchDisabledTest.class);
-
 
 	@Autowired
 	private FhirContext myFhirCtx;
@@ -146,5 +148,103 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 
 	}
 
+	@Test
+	void testExpandByPropertyEqualFilter_whenHibernateSearchDisabled() {
+		// Set up - CodeSystem with 3 concepts, each with a TTY property
+		CodeSystem codeSystem = mockCodeSystem("cs-id-1");
+		persistCodeSystem(codeSystem);
 
+		// ValueSet filtering on TTY=SBD
+		ValueSet valueSet = mockValueSet("vs-id-1", "cs-id-1");
+		persistValueSet(valueSet);
+
+		// Execute
+		Parameters responseParam = myServer.getFhirClient()
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
+		ValueSet expanded = (ValueSet) responseParam.getParameter().get(0).getResource();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+
+		// Verify
+		assertThat(codeSystem.getConcept()).hasSize(3);
+		List<String> codes = expanded.getExpansion().getContains().stream()
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.toList();
+		assertThat(codes).containsExactlyInAnyOrder("Code-0", "Code-1");
+	}
+
+	@Test
+	void testExpandByPropertyEqualFilter_doesNotCauseNPlus1DesignationQueries() {
+		CodeSystem codeSystem = mockCodeSystem("cs-id-2");
+		persistCodeSystem(codeSystem);
+
+		ValueSet valueSet = mockValueSet("vs-id-2", "cs-id-2");
+		persistValueSet(valueSet);
+
+		// Execute with query capture
+		myCaptureQueriesListener.clear();
+		Parameters responseParam = myServer.getFhirClient()
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
+		ValueSet expanded = (ValueSet) responseParam.getParameter().get(0).getResource();
+
+		// Verify
+		List<String> codes = expanded.getExpansion().getContains().stream()
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.toList();
+		assertThat(codes).containsExactlyInAnyOrder("Code-0", "Code-1");
+
+		// Check for N+1: count queries that hit the designation table to make sure
+		// it's not doing one query per concept to fetch designations
+		long designationQueries = myCaptureQueriesListener.getSelectQueries().stream()
+			.map(q -> q.getSql(true, false))
+			.filter(sql -> sql.toLowerCase().contains("trm_concept_desig"))
+			.count();
+		ourLog.info("Designation queries: {}", designationQueries);
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertThat(designationQueries)
+			.as("Expected at most 1 designation query (eager fetch), but got N+1 lazy loads")
+			.isLessThanOrEqualTo(1);
+	}
+
+	private CodeSystem mockCodeSystem(String id) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId(id);
+		codeSystem.setUrl("https://example.org/" + id);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		for (int i = 0; i < 2; i++) {
+			CodeSystem.ConceptDefinitionComponent concept = codeSystem.addConcept()
+				.setCode("Code-" + i)
+				.setDisplay("Display-" + i);
+			concept.addProperty().setCode("TTY").setValue(new StringType("SBD"));
+			concept.addDesignation().setLanguage("en").setValue("Designation " + i);
+		}
+
+		CodeSystem.ConceptDefinitionComponent concept = codeSystem.addConcept()
+			.setCode("Code-2")
+			.setDisplay("Display-2");
+		concept.addProperty().setCode("TTY").setValue(new StringType("TEST"));
+		concept.addDesignation().setLanguage("en").setValue("Desig-test");
+
+		return codeSystem;
+	}
+
+	private ValueSet mockValueSet(String id, String codeSystemId) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId(id);
+		valueSet.setUrl("https://example.org/" + id);
+		valueSet.getCompose().addInclude()
+			.setSystem("https://example.org/" + codeSystemId)
+			.addFilter().setProperty("TTY").setOp(ValueSet.FilterOperator.EQUAL).setValue("SBD");
+
+		return valueSet;
+	}
 }

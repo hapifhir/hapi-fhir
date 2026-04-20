@@ -1,6 +1,7 @@
 ---
 type: add
 issue: 7406
+backport: 8.6.2
 title: "A new parameter has been added to the `$hapi.fhir.bulk-patch` and
    `$hapi.fhir.bulk-patch-rewrite-history` operations which can be used to
    explicitly specify the partition(s) to use when applying these

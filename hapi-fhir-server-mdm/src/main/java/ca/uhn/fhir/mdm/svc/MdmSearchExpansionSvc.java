@@ -24,7 +24,9 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.MdmSearchExpansionResults;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -37,6 +39,7 @@ import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
+import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -45,10 +48,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class MdmSearchExpansionSvc {
-	private static final String EXPANSION_RESULTS = MdmSearchExpansionSvc.class.getName() + "_EXPANSION_RESULTS";
 	private static final String RESOURCE_NAME = MdmSearchExpansionSvc.class.getName() + "_RESOURCE_NAME";
 	private static final String QUERY_STRING = MdmSearchExpansionSvc.class.getName() + "_QUERY_STRING";
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
@@ -61,6 +64,8 @@ public class MdmSearchExpansionSvc {
 
 	@Autowired
 	private MdmExpandersHolder myMdmExpandersHolder;
+
+	private IMdmSettings myMdmSettings;
 
 	/**
 	 * This method looks through all the reference parameters within a {@link SearchParameterMap}
@@ -96,11 +101,12 @@ public class MdmSearchExpansionSvc {
 			if (!Objects.equals(resourceName, theRequestDetails.getUserData().get(RESOURCE_NAME))
 					|| !Objects.equals(
 							queryString, theRequestDetails.getUserData().get(QUERY_STRING))) {
-				theRequestDetails.getUserData().remove(EXPANSION_RESULTS);
+				MdmSearchExpansionResults.clearCachedExpansionResults(theRequestDetails);
 			}
 		}
 
-		MdmSearchExpansionResults expansionResults = getCachedExpansionResults(theRequestDetails);
+		MdmSearchExpansionResults expansionResults =
+				MdmSearchExpansionResults.getCachedExpansionResults(theRequestDetails);
 		if (expansionResults != null) {
 			return expansionResults;
 		}
@@ -108,8 +114,7 @@ public class MdmSearchExpansionSvc {
 		expansionResults = new MdmSearchExpansionResults();
 
 		final RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-						theRequestDetails, theRequestDetails.getResourceName(), theSearchParameterMap);
+				determineReadPartitionForSearch(theRequestDetails, theSearchParameterMap);
 
 		for (Map.Entry<String, List<List<IQueryParameterType>>> set : theSearchParameterMap.entrySet()) {
 			String paramName = set.getKey();
@@ -122,7 +127,7 @@ public class MdmSearchExpansionSvc {
 			}
 		}
 
-		theRequestDetails.getUserData().put(EXPANSION_RESULTS, expansionResults);
+		MdmSearchExpansionResults.cacheExpansionResults(theRequestDetails, expansionResults);
 
 		/*
 		 * Note: Do this at the end so that the query string reflects the post-translated
@@ -133,6 +138,26 @@ public class MdmSearchExpansionSvc {
 		theRequestDetails.getUserData().put(QUERY_STRING, queryString);
 
 		return expansionResults;
+	}
+
+	private RequestPartitionId determineReadPartitionForSearch(
+			RequestDetails theRequestDetails, SearchParameterMap theSearchParameterMap) {
+		RequestPartitionId retVal;
+
+		// When search_all_partition is enabled, MDM expansion should search across all partitions
+		// This is essential for PATIENT_ID partition mode where each patient exists in its own partition
+		if (shouldSearchAllPartitionForMatch()) {
+			retVal = RequestPartitionId.allPartitions();
+		} else {
+			retVal = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+					theRequestDetails, theRequestDetails.getResourceName(), theSearchParameterMap);
+		}
+
+		return retVal;
+	}
+
+	private boolean shouldSearchAllPartitionForMatch() {
+		return nonNull(myMdmSettings) && myMdmSettings.getSearchAllPartitionForMatch();
 	}
 
 	private void expandAnyReferenceParameters(
@@ -168,7 +193,8 @@ public class MdmSearchExpansionSvc {
 
 					// Rebuild the search param list.
 					if (!expandedResourceIds.isEmpty()) {
-						ourLog.debug("Parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
+						ourLog.atLevel(Level.DEBUG)
+								.log("Parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
 						toRemove.add(refParam);
 						for (String resourceId : expandedResourceIds) {
 							IIdType nextReference =
@@ -224,8 +250,7 @@ public class MdmSearchExpansionSvc {
 		IIdType id;
 		Creator<? extends IQueryParameterType> creator;
 		boolean mdmExpand = false;
-		if (theIdParameter instanceof TokenParam) {
-			TokenParam param = (TokenParam) theIdParameter;
+		if (theIdParameter instanceof TokenParam param) {
 			mdmExpand = theParamTester.shouldExpand(IAnyResource.SP_RES_ID, param);
 			String value = param.getValue();
 			value = addResourceTypeIfNecessary(theResourceName, value);
@@ -277,14 +302,10 @@ public class MdmSearchExpansionSvc {
 
 	@FunctionalInterface
 	public interface IParamTester {
-
 		boolean shouldExpand(String theParamName, BaseParam theParam);
 	}
 
-	@Nullable
-	public static MdmSearchExpansionResults getCachedExpansionResults(@Nonnull RequestDetails theRequestDetails) {
-		MdmSearchExpansionResults expansionResults =
-				(MdmSearchExpansionResults) theRequestDetails.getUserData().get(EXPANSION_RESULTS);
-		return expansionResults;
+	public void setMdmSettings(IMdmSettings theMdmSettings) {
+		myMdmSettings = theMdmSettings;
 	}
 }

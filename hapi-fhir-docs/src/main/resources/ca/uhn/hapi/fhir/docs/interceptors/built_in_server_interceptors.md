@@ -2,7 +2,7 @@
 
 This page describes some server interceptors that are shipped with HAPI FHIR out of the box. Of course, you are also welcome to create your own.
 
-<a name="logging_interceptor"/>
+<a id="logging_interceptor"></a>
 
 # Logging: Logging Interceptor
 
@@ -24,7 +24,7 @@ This interceptor will then produce output similar to the following:
 2014-09-04 03:30:00.443 Source[127.0.0.1] Operation[search-type Organization] UA[Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)] Params[]
 ```
 
-<a name="request-tenant-partition-interceptor"/>
+<a id="request-tenant-partition-interceptor"></a>
 
 # Partitioning: Multitenant Request Partition
 
@@ -106,7 +106,7 @@ A sample response to this query is shown below:
 }
 ```
 
-<a name="static-capabilitystatement"/>
+<a id="static-capabilitystatement"></a>
 
 # Response Customizing: Static CapabilityStatement
 
@@ -123,7 +123,7 @@ The following example shows how to register the StaticCapabilityStatementInterce
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|staticCapabilityStatementInterceptor}}
 ```
 
-<a name="request_and_response_validation"/>
+<a id="request_and_response_validation"></a>
 
 # Validation: Request and Response Validation
 
@@ -151,7 +151,7 @@ The following example shows how to register this interceptor within a HAPI FHIR 
 **See Also:** The [Repository Validating Interceptor](/docs/validation/repository_validating_interceptor.html) provides a different and potentially more powerful way of validating data when paired with a HAPI FHIR JPA Server.
 
 
-<a name="lenient_searching"/>
+<a id="lenient_searching"></a>
 
 # Search: Allow Lenient Searching
 
@@ -303,7 +303,7 @@ The ResponseSizeCapturingInterceptor can be used to capture the number of charac
 The CascadingDeleteInterceptor allows clients to request deletes be cascaded to other resources that contain incoming references. See [Cascading Deletes](/docs/server_jpa/configuration.html#cascading-deletes) for more information. 
 
 
-<a name="overridepathbasedreferentialintegrityfordeletesinterceptor"/>
+<a id="overridepathbasedreferentialintegrityfordeletesinterceptor"></a>
 
 # JPA Server: Disable Referential Integrity for Some Paths
 

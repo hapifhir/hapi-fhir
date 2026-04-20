@@ -1,0 +1,7 @@
+---
+type: add
+issue: 7487
+title: "When using the JPA server in partitioned mode with Cross-Partition References enabled, the
+   partition detection logic for resolving reference targets has been improved so that partition
+   strategies which dictate specific partitions for specific resource types may be properly combined
+   with strategies such as Patient ID Partition mode."

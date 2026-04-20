@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5.database;
 
 import ca.uhn.fhir.jpa.annotation.OracleTest;
-import ca.uhn.fhir.jpa.embedded.Oracle23EmbeddedDatabase;
-import ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -11,31 +9,18 @@ import jakarta.persistence.PersistenceContext;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Patient;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ContextConfiguration(classes = {
-	DatabaseVerificationWithOracle23IT.TestConfig.class
+	EmbeddedDatabaseConfigurations.Oracle23.class
 })
 @OracleTest
 public class DatabaseVerificationWithOracle23IT extends BaseDatabaseVerificationIT {
 
 	@PersistenceContext
 	private EntityManager myEntityManager;
-
-	@Configuration
-	public static class TestConfig {
-		@Bean
-		public JpaDatabaseContextConfigParamObject jpaDatabaseParamObject(){
-			return new JpaDatabaseContextConfigParamObject(
-				new Oracle23EmbeddedDatabase(),
-				HapiFhirOracleDialect.class.getName()
-			);
-		}
-	}
 
 	/**
 	 * Tests boolean field transitions: true → false → null.

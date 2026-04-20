@@ -34,7 +34,7 @@ public class TestElasticsearchContainerHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestElasticsearchContainerHelper.class);
 
 
-	public static final String ELASTICSEARCH_VERSION = "7.17.3";
+	public static final String ELASTICSEARCH_VERSION = "7.17.25";
 	public static final String ELASTICSEARCH_IMAGE = "docker.elastic.co/elasticsearch/elasticsearch:" + ELASTICSEARCH_VERSION;
 
 	public static ElasticsearchContainer getEmbeddedElasticSearch() {

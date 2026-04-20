@@ -391,6 +391,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		final String queryString = theParams.toNormalizedQueryString();
 		ourLog.debug("Registering new search {}", searchUuid);
 
+		// Invoke any STORAGE_PRESEARCH_PARTITION_SELECTED interceptor hooks
+		NonPersistedSearch nonPersistedSearch = new NonPersistedSearch(theResourceType);
+		nonPersistedSearch.setUuid(searchUuid);
+		myStorageInterceptorHooks.callStoragePresearchPartitionSelected(
+				theRequestDetails, theParams, nonPersistedSearch);
+
 		RequestPartitionId requestPartitionId = null;
 		if (theRequestDetails instanceof SystemRequestDetails srd) {
 			requestPartitionId = srd.getRequestPartitionId();
@@ -400,12 +406,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		// partition after invoking STORAGE_PRESEARCH_REGISTERED just in case any interceptors
 		// made changes which could affect the calculated partition
 		if (requestPartitionId == null) {
-
-			// Invoke any STORAGE_PRESEARCH_PARTITION_SELECTED interceptor hooks
-			NonPersistedSearch search = new NonPersistedSearch(theResourceType);
-			search.setUuid(searchUuid);
-			myStorageInterceptorHooks.callStoragePresearchPartitionSelected(theRequestDetails, theParams, search);
-
 			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
 					theRequestDetails, theResourceType, theParams);
 		}

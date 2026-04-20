@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.StructureDefinition;
@@ -30,25 +31,31 @@ import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
 public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorPolicyAdvisor.class);
-
 	@Autowired
 	private ValidationSettings myValidationSettings;
 
 	@Autowired
 	private FhirContext myFhirContext;
+
+	@VisibleForTesting
+	public void setValidationSettingsForUnitTest(ValidationSettings theValidationSettings) {
+		myValidationSettings = theValidationSettings;
+	}
+
+	@VisibleForTesting
+	public void setFhirContextForUnitTest(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
 
 	@Override
 	public EnumSet<ResourceValidationAction> policyForResource(
@@ -116,11 +123,23 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 			boolean valid,
 			IMessagingServices msgServices,
 			List<ValidationMessage> messages) {
-		return Arrays.asList();
+		return List.of();
 	}
 
 	@Override
 	public boolean isSuppressMessageId(String path, String messageId) {
+		if (myValidationSettings != null
+				&& !myValidationSettings
+						.getLocalReferenceValidationDefaultPolicy()
+						.checkValid()) {
+			// The InstanceValidator hardcodes CHECK_VALID for bundle-internal (INTERNAL) and
+			// contained references, bypassing the policy advisor's policyForReference method.
+			// When our configured policy would not have validated reference targets (e.g. IGNORE),
+			// suppress the profile-match errors that arise from the hardcoded CHECK_VALID behavior.
+			if (I18nConstants.REFERENCE_REF_CANTMATCHCHOICE.equals(messageId)) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -131,9 +150,11 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 			String path,
 			String url,
 			ReferenceDestinationType destinationType) {
-		int slashIdx = url.indexOf("/");
-		if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
-			return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
+		if (myFhirContext != null && myValidationSettings != null) {
+			int slashIdx = url.indexOf("/");
+			if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
+				return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
+			}
 		}
 		return ReferenceValidationPolicy.IGNORE;
 	}

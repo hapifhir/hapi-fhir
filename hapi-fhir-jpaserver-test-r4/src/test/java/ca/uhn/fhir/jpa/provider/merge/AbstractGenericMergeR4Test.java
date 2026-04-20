@@ -23,8 +23,10 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.jpa.merge.AbstractMergeTestScenario;
 import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
-import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
+import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.GenericMergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
@@ -53,7 +55,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MERGE_OUTPUT_PARAM_TASK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
@@ -102,13 +103,33 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 	@Nonnull
 	protected abstract String getResourceTypeName();
 
+	/**
+	 * Returns the operation name to invoke. Default: "$hapi.fhir.merge" (generic endpoint).
+	 * Override to "$merge" for Patient-specific FHIR-standard endpoint testing.
+	 */
+	@Nonnull
+	protected String getOperationName() {
+		return "$hapi.fhir.merge";
+	}
+
+	/**
+	 * Returns the parameter names for this endpoint. Default: generic names (source-resource, etc.).
+	 * Override with {@link ca.uhn.fhir.merge.PatientMergeOperationInputParameterNames} for
+	 * Patient/$merge endpoint testing.
+	 */
+	@Nonnull
+	protected AbstractMergeOperationInputParameterNames getParameterNames() {
+		return new GenericMergeOperationInputParameterNames();
+	}
+
 	@BeforeEach
 	public void beforeGenericMerge() {
 		// we need to keep the version on Provenance.target fields to verify that Provenance resources were saved
 		// with versioned target references, and delete-source on merge works correctly.
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
-		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext);
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry,
+				getOperationName(), getParameterNames());
 		myReplaceReferencesTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 	}
 
@@ -398,11 +419,12 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.preview(false);
 
 		// Validate error
+		AbstractMergeOperationInputParameterNames paramNames = getParameterNames();
 		myHelper.callMergeAndValidateException(
 				getResourceTypeName(),
 				params,
 				InvalidRequestException.class,
-				"There are no source resource parameters provided, include either a 'source-resource', or a 'source-resource-identifier' parameter");
+				"There are no source resource parameters provided, include either a '" + paramNames.getSourceResourceParameterName() + "', or a '" + paramNames.getSourceIdentifiersParameterName() + "' parameter");
 	}
 
 	@Test
@@ -414,11 +436,12 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				.preview(false);
 
 		// Validate error
+		AbstractMergeOperationInputParameterNames paramNames = getParameterNames();
 		myHelper.callMergeAndValidateException(
 				getResourceTypeName(),
 				params,
 				InvalidRequestException.class,
-				"There are no target resource parameters provided, include either a 'target-resource', or a 'target-resource-identifier' parameter");
+				"There are no target resource parameters provided, include either a '" + paramNames.getTargetResourceParameterName() + "', or a '" + paramNames.getTargetIdentifiersParameterName() + "' parameter");
 	}
 
 	@Test
@@ -477,7 +500,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				getResourceTypeName(),
 				params,
 				UnprocessableEntityException.class,
-				"No resources found matching the identifier(s) specified in 'source-resource-identifier'");
+				"No resources found matching the identifier(s) specified in '" + getParameterNames().getSourceIdentifiersParameterName() + "'");
 	}
 
 	@Test
@@ -499,7 +522,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				getResourceTypeName(),
 				params,
 				UnprocessableEntityException.class,
-				"No resources found matching the identifier(s) specified in 'target-resource-identifier'");
+				"No resources found matching the identifier(s) specified in '" + getParameterNames().getTargetIdentifiersParameterName() + "'");
 	}
 
 	@Test
@@ -526,7 +549,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				getResourceTypeName(),
 				params,
 				UnprocessableEntityException.class,
-				"Multiple resources found matching the identifier(s) specified in 'target-resource-identifier'");
+				"Multiple resources found matching the identifier(s) specified in '" + getParameterNames().getTargetIdentifiersParameterName() + "'");
 	}
 
 	@Test
@@ -553,7 +576,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				getResourceTypeName(),
 				params,
 				UnprocessableEntityException.class,
-				"Multiple resources found matching the identifier(s) specified in 'source-resource-identifier'");
+				"Multiple resources found matching the identifier(s) specified in '" + getParameterNames().getSourceIdentifiersParameterName() + "'");
 	}
 
 	@Test
@@ -639,7 +662,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 				getResourceTypeName(),
 				params,
 				PreconditionFailedException.class,
-				"HAPI-2597: Number of resources with references to " + sourceId + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
+				"HAPI-2880: Number of resources with references to " + sourceId + " exceeds the resource-limit 5. Submit the request asynchronously by adding the HTTP Header 'Prefer: respond-async'.");
 	}
 
 	/**
@@ -667,7 +690,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 
 			// Execute async merge
 			Parameters outParams = myHelper.callMergeOperation(getResourceTypeName(), params, true);
-			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+			Task task = (Task) outParams.getParameter("task").getResource();
 			String jobId = myHelper.getJobIdFromTask(task);
 
 			// Wait for "query-ids" step to complete

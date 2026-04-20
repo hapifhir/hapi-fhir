@@ -6,7 +6,7 @@ There are two types of providers that can be registered against a HAPI FHIR Plai
 
 * Plain Providers are POJO classes that implement operations for multiple resource types, or for system-level operations.
  
-<a name="resource-providers"/>
+<a id="resource-providers"></a>
 
 # Resource Providers
 
@@ -32,7 +32,7 @@ HAPI provides a class called [RestfulServer](/hapi-fhir/apidocs/hapi-fhir-server
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ExampleRestfulServlet.java|servlet}}
 ``` 
 
-<a name="plain-providers"/>
+<a id="plain-providers"></a>
 
 # Plain Providers
 
@@ -113,7 +113,7 @@ if (theRequestDetails instanceof ServletRequestDetails) {
 }
 ```
 
-<a name="exceptions"/>
+<a id="exceptions"></a>
 
 # REST Exception/Error Handling
 

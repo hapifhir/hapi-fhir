@@ -29,7 +29,37 @@ This sort is useful for imposing tie-breaking sort order in an efficient way.
 
 Note that this is an internal feature that may change or be removed in the future. Use with caution.
 
-<a name="uplifted-refchains"/>
+<a id="compartment-last-updated"></a>
+
+### _compartmentLastUpdated
+
+The JPA server implements a non-standard search parameter called `_compartmentLastUpdated` that can be used on **Patient** searches to find patients whose compartment data has changed within a given date range.
+
+This parameter accepts a date range and returns Patient resources where either:
+
+* The Patient resource itself was created or updated within the specified date range, OR
+* Any resource in the Patient's compartment (e.g. Observation, Condition, Encounter) was created or updated within the specified date range.
+
+#### Examples
+
+Find all patients with compartment changes after a specific date:
+
+```url
+GET /Patient?_compartmentLastUpdated=ge2024-01-15
+```
+
+Find all patients with compartment changes within a date range:
+
+```url
+GET /Patient?_compartmentLastUpdated=ge2024-01-01&_compartmentLastUpdated=le2024-01-31
+```
+
+#### Limitations
+
+* This parameter is only supported for Patient searches. Using it on other resource types will result in an error.
+* Deleted compartment resources are not detected.
+
+<a id="uplifted-refchains"></a>
 
 # Uplifted Refchains and Chaining Performance
 
@@ -197,7 +227,7 @@ For example, to modify the _composition_ SearchParameter in order to support the
 ```
 
 
-<a name="chained-sorting"/>
+<a id="chained-sorting"></a>
 
 # Chained Sorting
 

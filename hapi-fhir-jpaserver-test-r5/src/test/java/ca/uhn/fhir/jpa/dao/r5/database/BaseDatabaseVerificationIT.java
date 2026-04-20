@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
@@ -30,11 +31,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Location;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.PractitionerRole;
 import org.hl7.fhir.r5.model.Reference;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -71,7 +74,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class, TestDaoSearch.Config.class})
-public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder {
+public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabaseVerificationIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
 	public static final String INIT_SCHEMA = "init_schema";
@@ -80,10 +83,10 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	IFhirResourceDaoPatient<Patient> myPatientDao;
 
 	@Autowired
-	private FhirContext myFhirContext;
+	protected FhirContext myFhirContext;
 
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected DaoRegistry myDaoRegistry;
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -96,6 +99,9 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
+
+	@Autowired
+	private ExpungeEverythingService myExpungeEverythingService;
 
 	SystemRequestDetails myRequestDetails = new SystemRequestDetails();
 
@@ -110,6 +116,19 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			s.setDefaultPrettyPrint(false);
 			s.setPagingProvider(myPagingProvider);
 		});
+
+	@BeforeEach
+	void beforeEach() {
+		myExpungeEverythingService.expungeEverything(new SystemRequestDetails());
+	}
+
+	@Override
+	public TuplePredicateSearchTest.Context getTuplePredicateSearchTestContext() {
+		return new TuplePredicateSearchTest.Context(
+			myStorageSettings,
+			myServer
+		);
+	}
 
 
 	@ParameterizedTest
@@ -194,7 +213,39 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		assertThat(actualIds).asList().containsExactly(prId.getValue(), pId.getValue());
 	}
 
+	@Test
+	void testSortNear() {
+		// Setup
+		IGenericClient client = myServer.getFhirClient();
 
+		// Mannheim
+		double latitude = 49.49;
+		double longitude = 8.46;
+
+		// Create 3 real locations around Mannheim
+		String heidelberg = createLocation(49.3988, 8.6724).toUnqualifiedVersionless().getValue(); // Heidelberg
+		String ludwigshafen = createLocation(49.4774, 8.4452).toUnqualifiedVersionless().getValue(); // Ludwigshafen
+		String mannheim = createLocation(latitude, longitude).toUnqualifiedVersionless().getValue();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		Bundle result = client
+			.search()
+			.byUrl("Location?near=49.49|8.46|5000|km&_sort=Location:near&_count=10&_offset=0")
+			.returnBundle(Bundle.class)
+			.execute();
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		List<String> ids = toUnqualifiedVersionlessIdValues(result);
+		assertThat(ids).as(ids.toString()).containsExactly(mannheim, ludwigshafen, heidelberg);
+	}
+
+	private IIdType createLocation(double lat, double lon) {
+		Location loc = new Location();
+		loc.setPosition(new Location.LocationPositionComponent().setLatitude(lat).setLongitude(lon));
+		return myServer.getFhirClient().create().resource(loc).execute().getId();
+	}
 	@ParameterizedTest
 	@MethodSource("ca.uhn.fhir.jpa.test.QueryTestCases#get")
 	void testSyntaxForVariousQueries(QueryTestCases theQueryTestCase) {
@@ -264,24 +315,6 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			return retVal;
 		}
 
-	}
-
-	public static class JpaDatabaseContextConfigParamObject {
-		final JpaEmbeddedDatabase myJpaEmbeddedDatabase;
-		final String myDialect;
-
-		public JpaDatabaseContextConfigParamObject(JpaEmbeddedDatabase theJpaEmbeddedDatabase, String theDialect) {
-			myJpaEmbeddedDatabase = theJpaEmbeddedDatabase;
-			myDialect = theDialect;
-		}
-
-		public JpaEmbeddedDatabase getJpaEmbeddedDatabase() {
-			return myJpaEmbeddedDatabase;
-		}
-
-		public String getDialect() {
-			return myDialect;
-		}
 	}
 
 	@SuppressWarnings("unchecked")

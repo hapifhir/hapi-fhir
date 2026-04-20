@@ -21,7 +21,12 @@ package ca.uhn.fhir.jpa.merge;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
+import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.GenericMergeOperationInputParameterNames;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
@@ -49,9 +54,6 @@ import java.util.List;
  * </pre>
  */
 public class MergeTestParameters {
-
-	private static final GenericMergeOperationInputParameterNames ourParameterNames =
-			new GenericMergeOperationInputParameterNames();
 
 	private Reference mySourceResource;
 	private List<Identifier> mySourceResourceIdentifiers;
@@ -151,18 +153,26 @@ public class MergeTestParameters {
 	}
 
 	/**
-	 * Convert this test parameters object to a FHIR Parameters resource
-	 * suitable for invoking the merge operation.
-	 *
-	 * @return A Parameters resource with all configured values
+	 * Convert this test parameters object to a FHIR Parameters resource using generic parameter names.
 	 */
 	public Parameters asParametersResource() {
+		return asParametersResource(new GenericMergeOperationInputParameterNames());
+	}
+
+	/**
+	 * Convert this test parameters object to a FHIR Parameters resource
+	 * using the given parameter names.
+	 *
+	 * @param theParameterNames the parameter names to use (generic or patient-specific)
+	 * @return A Parameters resource with all configured values
+	 */
+	public Parameters asParametersResource(@Nonnull AbstractMergeOperationInputParameterNames theParameterNames) {
 		Parameters params = new Parameters();
 
 		// Source resource
 		if (mySourceResource != null) {
 			params.addParameter()
-					.setName(ourParameterNames.getSourceResourceParameterName())
+					.setName(theParameterNames.getSourceResourceParameterName())
 					.setValue(mySourceResource);
 		}
 
@@ -170,7 +180,7 @@ public class MergeTestParameters {
 		if (mySourceResourceIdentifiers != null && !mySourceResourceIdentifiers.isEmpty()) {
 			for (Identifier identifier : mySourceResourceIdentifiers) {
 				params.addParameter()
-						.setName(ourParameterNames.getSourceIdentifiersParameterName())
+						.setName(theParameterNames.getSourceIdentifiersParameterName())
 						.setValue(identifier);
 			}
 		}
@@ -178,7 +188,7 @@ public class MergeTestParameters {
 		// Target resource
 		if (myTargetResource != null) {
 			params.addParameter()
-					.setName(ourParameterNames.getTargetResourceParameterName())
+					.setName(theParameterNames.getTargetResourceParameterName())
 					.setValue(myTargetResource);
 		}
 
@@ -186,7 +196,7 @@ public class MergeTestParameters {
 		if (myTargetResourceIdentifiers != null && !myTargetResourceIdentifiers.isEmpty()) {
 			for (Identifier identifier : myTargetResourceIdentifiers) {
 				params.addParameter()
-						.setName(ourParameterNames.getTargetIdentifiersParameterName())
+						.setName(theParameterNames.getTargetIdentifiersParameterName())
 						.setValue(identifier);
 			}
 		}
@@ -194,7 +204,7 @@ public class MergeTestParameters {
 		// Result resource
 		if (myResultResource != null) {
 			params.addParameter()
-					.setName(ourParameterNames.getResultResourceParameterName())
+					.setName(theParameterNames.getResultResourceParameterName())
 					.setResource((org.hl7.fhir.r4.model.Resource) myResultResource);
 		}
 
@@ -218,6 +228,23 @@ public class MergeTestParameters {
 		}
 
 		return params;
+	}
+
+	/**
+	 * Convert this test parameters object to a {@link MergeJobParameters} instance.
+	 *
+	 * @param theFhirContext the FHIR context for JSON serialization
+	 * @param theParameterNames the parameter names to use when serializing input parameters
+	 * @return a MergeJobParameters with source/target IDs and serialized original input parameters
+	 */
+	public MergeJobParameters asMergeJobParameters(
+			@Nonnull FhirContext theFhirContext, @Nonnull AbstractMergeOperationInputParameterNames theParameterNames) {
+		MergeJobParameters jobParams = new MergeJobParameters();
+		jobParams.setSourceId(new FhirIdJson(mySourceResource.getReferenceElement()));
+		jobParams.setTargetId(new FhirIdJson(myTargetResource.getReferenceElement()));
+		jobParams.setOriginalInputParameters(
+				theFhirContext.newJsonParser().encodeResourceToString(asParametersResource(theParameterNames)));
+		return jobParams;
 	}
 
 	// Getters for test validation

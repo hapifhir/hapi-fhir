@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.util.IResourceRepositoryCache;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -69,7 +70,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private DaoRegistry myDaoRegistry;
 
 	private SearchParameterMap mySearchParameterMap;
-	private final SystemRequestDetails mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
+	private final SystemRequestDetails mySystemRequestDetails;
 	private boolean myStopping;
 	private final Semaphore mySyncResourcesSemaphore = new Semaphore(1);
 	private final Object mySyncResourcesLock = new Object();
@@ -91,6 +92,10 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		myRequestPartitionId = theRequestPartitionId;
 		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 		myDaoRegistry = theDaoRegistry;
+
+		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
+		// bypass consent checks for reading Subscription resources since this is a system action
+		ConsentInterceptor.skipAllConsentForRequest(mySystemRequestDetails);
 	}
 
 	/**

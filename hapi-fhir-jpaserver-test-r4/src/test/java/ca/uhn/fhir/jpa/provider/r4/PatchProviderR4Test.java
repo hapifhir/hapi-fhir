@@ -23,6 +23,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Media;
@@ -956,5 +957,97 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
 		assertEquals("1", newPt.getIdElement().getVersionIdPart());
 		assertEquals(true, newPt.getActive());
+	}
+
+	/**
+	 * Reproduces GitHub issue #7578: JSON Patch "add" at {@code /member/0} on a Group
+	 * with no existing members, exercised via the REST PATCH endpoint.
+	 *
+	 * @author Claude Opus 4.6
+	 */
+	@Test
+	public void testJsonPatch_AddMemberToEmptyGroup_ViaEndpoint() throws IOException {
+		// Create the referenced Patient first (server validates references)
+		Patient patient = new Patient();
+		patient.setActive(true);
+		IIdType patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		// Create a Group with no members
+		Group group = new Group();
+		group.setType(Group.GroupType.PERSON);
+		group.setActual(true);
+		group.setActive(true);
+		IIdType groupId = myClient.create().resource(group).execute().getId().toUnqualifiedVersionless();
+
+		// JSON Patch: add a member at /member/0
+		String patchText = "[{\"op\":\"add\",\"path\":\"/member/0\",\"value\":{\"entity\":{\"reference\":\"" + patientId.getValue() + "\"},\"inactive\":false}}]";
+
+		HttpPatch patch = new HttpPatch(myServerBase + "/Group/" + groupId.getIdPart());
+		patch.setEntity(new StringEntity(patchText, ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
+		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		patch.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response:\n{}", responseString);
+			assertThat(responseString).contains("\"reference\":\"" + patientId.getValue() + "\"");
+		}
+
+		// Verify via a read
+		Group updated = myClient.read().resource(Group.class).withId(groupId.getIdPart()).execute();
+		assertThat(updated.getMember()).hasSize(1);
+		assertThat(updated.getMember().get(0).getEntity().getReference()).isEqualTo(patientId.getValue());
+	}
+
+	/**
+	 * Reproduces GitHub issue #7578: JSON Patch "add" at {@code /member/0} on a Group
+	 * with no existing members, exercised via a transaction Bundle.
+	 *
+	 * @author Claude Opus 4.6
+	 */
+	@Test
+	public void testJsonPatch_AddMemberToEmptyGroup_ViaTransactionBundle() throws IOException {
+		// Create the referenced Patient first (server validates references)
+		Patient patient = new Patient();
+		patient.setActive(true);
+		IIdType patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		// Create a Group with no members
+		Group group = new Group();
+		group.setType(Group.GroupType.PERSON);
+		group.setActual(true);
+		group.setActive(true);
+		IIdType groupId = myClient.create().resource(group).execute().getId().toUnqualifiedVersionless();
+
+		// JSON Patch body as a Binary resource in a transaction bundle
+		String patchText = "[{\"op\":\"add\",\"path\":\"/member/0\",\"value\":{\"entity\":{\"reference\":\"" + patientId.getValue() + "\"},\"inactive\":false}}]";
+		Binary patchBinary = new Binary();
+		patchBinary.setContentType(Constants.CT_JSON_PATCH);
+		patchBinary.setContent(patchText.getBytes(StandardCharsets.UTF_8));
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setFullUrl(groupId.getValue())
+			.setResource(patchBinary)
+			.getRequest().setUrl(groupId.getValue())
+			.setMethod(Bundle.HTTPVerb.PATCH);
+
+		HttpPost post = new HttpPost(myServerBase);
+		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		ourLog.info("Request:\n{}", encodedRequest);
+		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(Constants.CT_FHIR_JSON_NEW + Constants.CHARSET_UTF8_CTSUFFIX)));
+		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response:\n{}", responseString);
+			assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
+		}
+
+		// Verify via a read
+		Group updated = myClient.read().resource(Group.class).withId(groupId.getIdPart()).execute();
+		assertThat(updated.getMember()).hasSize(1);
+		assertThat(updated.getMember().get(0).getEntity().getReference()).isEqualTo(patientId.getValue());
 	}
 }

@@ -95,6 +95,13 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	public void postConstruct() {
 		myWorkerContextValidationSupportAdapter.setValidationSupport(this);
 
+		// When this chain is shared between application contexts, Spring may call @PostConstruct
+		// multiple times on the same instance as it's registered in different application contexts.
+		// Only add validators if the chain is empty.
+		if (!isChainEmpty()) {
+			return;
+		}
+
 		if (myJpaStorageSettings.isAllowDatabaseValidationOverride()) {
 			addValidationSupport(myJpaValidationSupport);
 			addValidationSupport(myDefaultProfileValidationSupport);

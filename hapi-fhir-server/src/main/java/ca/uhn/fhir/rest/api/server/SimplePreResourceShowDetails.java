@@ -26,7 +26,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -89,14 +88,15 @@ public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 	public List<IBaseResource> getAllResources() {
 		ArrayList<IBaseResource> retVal = new ArrayList<>(myResources.length);
 		Arrays.stream(myResources).filter(Objects::nonNull).forEach(retVal::add);
-		return Collections.unmodifiableList(retVal);
+		return retVal;
 	}
 
 	@Override
 	public Iterator<IBaseResource> iterator() {
-		return Arrays.asList(myResources).iterator();
+		return getAllResources().iterator();
 	}
 
+	@Deprecated
 	public List<IBaseResource> toList() {
 		return Lists.newArrayList(myResources);
 	}

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7725
+title: :"Add missing test scope for jena-shex in hapi-fhir-structures-r4
+  jena-shex is used as a test dependencies, but was missing the test scope.
+  Thanks to @Rene2000k for the contribution!"

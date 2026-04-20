@@ -76,7 +76,8 @@ public class TermConceptPropertyBinder implements PropertyBinder {
 					theDocument.addValue(CONCEPT_PROPERTY_PREFIX_NAME + next.getKey(), next.getValue());
 					ourLog.trace(
 							"Adding Prop: {}{} -- {}", CONCEPT_PROPERTY_PREFIX_NAME, next.getKey(), next.getValue());
-					if (next.getType() == TermConceptPropertyTypeEnum.CODING && isNotBlank(next.getDisplay())) {
+					if (next.getType() == org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.CODING
+							&& isNotBlank(next.getDisplay())) {
 						theDocument.addValue(CONCEPT_PROPERTY_PREFIX_NAME + next.getKey(), next.getDisplay());
 						ourLog.trace(
 								"Adding multivalue Prop: {}{} -- {}",

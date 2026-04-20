@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
@@ -33,8 +34,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -189,16 +188,9 @@ public class MemoryCacheService {
 		assert theCache.getKeyType().isAssignableFrom(theKey.getClass())
 				: "Key type " + theKey.getClass() + " doesn't match expected " + theCache.getKeyType() + " for cache "
 						+ theCache;
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					put(theCache, theKey, theValue);
-				}
-			});
-		} else {
-			put(theCache, theKey, theValue);
-		}
+
+		HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(
+				() -> put(theCache, theKey, theValue));
 	}
 
 	@SuppressWarnings("unchecked")

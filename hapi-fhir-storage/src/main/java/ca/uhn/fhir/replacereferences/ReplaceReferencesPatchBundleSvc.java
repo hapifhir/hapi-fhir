@@ -77,6 +77,21 @@ public class ReplaceReferencesPatchBundleSvc {
 		return result;
 	}
 
+	/**
+	 * Same as {@link #patchReferencingResources} but uses {@code transactionNested()} so it can
+	 * participate in an already-open outer transaction. Used by sync merge to keep everything atomic.
+	 */
+	public Bundle patchReferencingResourcesInNestedTransaction(
+			ReplaceReferencesRequest theReplaceReferencesRequest,
+			List<IdDt> theResourceIds,
+			RequestDetails theRequestDetails) {
+		Bundle patchBundle = buildPatchBundle(theReplaceReferencesRequest, theResourceIds, theRequestDetails);
+		IFhirSystemDao<Bundle, Meta> systemDao = myDaoRegistry.getSystemDao();
+		Bundle result = systemDao.transactionNested(theRequestDetails, patchBundle);
+		result.setId(UUID.randomUUID().toString());
+		return result;
+	}
+
 	private Bundle buildPatchBundle(
 			ReplaceReferencesRequest theReplaceReferencesRequest,
 			List<IdDt> theResourceIds,
@@ -97,15 +112,15 @@ public class ReplaceReferencesPatchBundleSvc {
 	}
 
 	private @Nonnull Parameters buildPatchParams(
-			ReplaceReferencesRequest theReplaceReferencesRequest, IBaseResource referencingResource) {
+			ReplaceReferencesRequest theReplaceReferencesRequest, IBaseResource theReferencingResource) {
 		Parameters params = new Parameters();
 
-		myFhirContext.newTerser().getAllResourceReferences(referencingResource).stream()
+		myFhirContext.newTerser().getAllResourceReferences(theReferencingResource).stream()
 				.filter(refInfo -> matches(
 						refInfo,
 						theReplaceReferencesRequest.sourceId)) // We only care about references to our source resource
 				.map(refInfo -> createReplaceReferencePatchOperation(
-						getFhirPathForPatch(referencingResource, refInfo),
+						getFhirPathForPatch(theReferencingResource, refInfo),
 						new Reference(theReplaceReferencesRequest.targetId.getValueAsString())))
 				.forEach(params::addParameter); // Add each operation to parameters
 		return params;

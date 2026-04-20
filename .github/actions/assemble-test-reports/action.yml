@@ -58,8 +58,8 @@ runs:
       with:
         name: junit-test-results
         path: |
-          ./**/TEST-*.xml
-          ./**/-reports/*.txt
+          './**/TEST-*.xml'
+          './**/*-reports/*.txt'
 
     - name: Publish code coverage report
       uses: actions/upload-artifact@v4

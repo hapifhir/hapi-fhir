@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;
@@ -91,10 +92,12 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 
 			IdDt sourceIdVersioned = params.getSourceId().asIdDt().withVersion(params.getSourceVersionForProvenance());
 
+			List<IIdType> changedResourceIds =
+					ReplaceReferencesProvenanceSvc.extractChangedResourceIds(myPatchOutputBundles);
 			myProvenanceSvc.createProvenance(
 					targetIdVersioned,
 					sourceIdVersioned,
-					myPatchOutputBundles,
+					changedResourceIds,
 					theStepExecutionDetails.getInstance().getStartTime(),
 					theRequestDetails,
 					ProvenanceAgentJson.toIProvenanceAgents(params.getProvenanceAgents(), myFhirContext),

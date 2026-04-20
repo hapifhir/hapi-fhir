@@ -37,8 +37,6 @@ import org.hl7.fhir.r4.model.Patient;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * Merge test scenario implementation for Patient resources.
  *
@@ -149,12 +147,5 @@ public class PatientMergeTestScenario extends AbstractMergeTestScenario<Patient>
 		} else {
 			return withReferences(List.of(ReferencingTestResourceType.of("Encounter", theCount)));
 		}
-	}
-
-	@Override
-	protected void assertActiveFieldIfSupported(@Nonnull Patient theResource, boolean theExpectedValue) {
-		assertThat(theResource.getActive())
-				.as("Patient active field should be " + theExpectedValue)
-				.isEqualTo(theExpectedValue);
 	}
 }
