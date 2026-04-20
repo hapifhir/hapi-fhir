@@ -1034,6 +1034,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 				if (compositeBroadcaster.hasHooks(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE)) {
 					CrossPartitionReferenceDetails referenceDetails = new CrossPartitionReferenceDetails(
+							theResource,
 							theRequestPartitionId,
 							theSourceResourceName,
 							thePathAndRef,

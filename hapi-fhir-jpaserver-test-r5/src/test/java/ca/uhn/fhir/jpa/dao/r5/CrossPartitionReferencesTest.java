@@ -286,7 +286,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 				.withRequest(theDetails.getRequestDetails())
 				.withTransactionDetails(theDetails.getTransactionDetails())
 				.withRequestPartitionId(referenceTargetPartition)
-				.execute(() -> myResourceLinkResolver.findTargetResource(null, referenceTargetPartition, theDetails.getSourceResourceName(), theDetails.getPathAndRef(), theDetails.getRequestDetails(), theDetails.getTransactionDetails()));
+				.execute(() -> myResourceLinkResolver.findTargetResource(theDetails.getSourceResource(), referenceTargetPartition, theDetails.getSourceResourceName(), theDetails.getPathAndRef(), theDetails.getRequestDetails(), theDetails.getTransactionDetails()));
 		});
 	}
 
