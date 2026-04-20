@@ -27,22 +27,28 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
+import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.NpmPackageUtils;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
+import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Base64;
 
 public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallationJobParameters, PackageContentsJson> {
 
 	private final IHapiPackageCacheManager myPackageCacheManager;
+	private final IPackageInstallerSvc myPackageInstallerSvc;
 
-	public FetchPackageStep(IHapiPackageCacheManager thePackageCacheManager) {
+	public FetchPackageStep(
+			IHapiPackageCacheManager thePackageCacheManager, IPackageInstallerSvc thePackageInstallerSvc) {
 		this.myPackageCacheManager = thePackageCacheManager;
+		this.myPackageInstallerSvc = thePackageInstallerSvc;
 	}
 
 	@Nonnull
@@ -53,8 +59,20 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 			throws JobExecutionFailedException {
 
 		try {
-			NpmPackage npmPackage = myPackageCacheManager.installPackage(
-					theStepExecutionDetails.getParameters().getInstallationSpec());
+			PackageInstallationSpec installationSpec =
+					theStepExecutionDetails.getParameters().getInstallationSpec();
+			NpmPackage npmPackage = myPackageCacheManager.installPackage(installationSpec);
+
+			if (theStepExecutionDetails.getParameters().isDependencyJob()) {
+				// Adjust the dependency package as needed to match the FHIR version of the server
+				npmPackage = myPackageInstallerSvc.substituteVersionSpecificPackageIfNeeded(
+						npmPackage, installationSpec.getName(), installationSpec.getVersion());
+			}
+
+			if (npmPackage == null) {
+				String message = formatErrorMessage(installationSpec);
+				throw new JobExecutionFailedException(Msg.code(2915) + message);
+			}
 
 			// We need to convert the package back to bytes so we can serialize it between steps
 			// Note that these are not the identical bytes that were found by the cache,
@@ -69,10 +87,27 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 			contents.setContents(Base64.getEncoder().encode(outputStream.toByteArray()));
 			contents.setReport(outcome);
 			theDataSink.accept(contents);
-		} catch (IOException e) {
-			// We're only concerned with the happy path for now - error handling is a separate MR
+		} catch (Exception e) {
+			throw new JobExecutionFailedException(Msg.code(2916) + "Error occurred while retrieving package", e);
 		}
 
 		return RunOutcome.SUCCESS;
+	}
+
+	@Nonnull
+	private static String formatErrorMessage(PackageInstallationSpec theInstallationSpec) {
+		String message;
+		if (StringUtils.isNotBlank(theInstallationSpec.getPackageUrl())) {
+			message = String.format("Unable to retrieve NPM package from URL %s.", theInstallationSpec.getPackageUrl());
+		} else if (theInstallationSpec.getPackageContents() != null) {
+			message = "Unable to install NPM package from contained bytes.";
+		} else if (StringUtils.isNoneBlank(theInstallationSpec.getName(), theInstallationSpec.getVersion())) {
+			message = String.format(
+					"Unable to retrieve NPM package %s#%s.",
+					theInstallationSpec.getName(), theInstallationSpec.getVersion());
+		} else {
+			message = "Unable to identify NPM package to install.";
+		}
+		return message;
 	}
 }

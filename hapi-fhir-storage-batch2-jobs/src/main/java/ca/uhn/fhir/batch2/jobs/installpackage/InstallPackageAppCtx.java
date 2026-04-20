@@ -54,7 +54,7 @@ public class InstallPackageAppCtx {
 						"fetch-package",
 						"Fetch the NPM Package",
 						PackageContentsJson.class,
-						fetchPackageStep(thePackageCacheManager))
+						fetchPackageStep(thePackageCacheManager, thePackageInstallerSvc))
 				.addIntermediateStep(
 						"initialize-dependencies",
 						"Spawn sub-jobs to process package dependencies",
@@ -75,8 +75,9 @@ public class InstallPackageAppCtx {
 	}
 
 	@Bean
-	public FetchPackageStep fetchPackageStep(IHapiPackageCacheManager thePackageCacheManager) {
-		return new FetchPackageStep(thePackageCacheManager);
+	public FetchPackageStep fetchPackageStep(
+			IHapiPackageCacheManager thePackageCacheManager, IPackageInstallerSvc thePackageInstallerSvc) {
+		return new FetchPackageStep(thePackageCacheManager, thePackageInstallerSvc);
 	}
 
 	@Bean

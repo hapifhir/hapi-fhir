@@ -56,6 +56,8 @@ public class ConsolidateDependenciesStepTest {
 	private IJobDataSink<PackageContentsJson> myJobDataSink;
 	@Captor
 	private ArgumentCaptor<PackageContentsJson> myPackageContentsCaptor;
+	@Captor
+	private ArgumentCaptor<String> myStringCaptor;
 	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
 
@@ -156,8 +158,16 @@ public class ConsolidateDependenciesStepTest {
 		packageWithDependencies.setReport(report);
 		packageWithDependencies.setDependencyJobIds(List.of(DEPENDENCY_JOB_ID, DEPENDENCY_JOB_2_ID));
 
-		JobInstance jobInstance1 = createJobInstance(DEPENDENCY_JOB_ID, List.of("SearchParameter", "SearchParameter", "StructureDefinition"));
-		JobInstance jobInstance2 = createJobInstance(DEPENDENCY_JOB_2_ID, List.of("SearchParameter", "CodeSystem", "ValueSet"));
+		JobInstance jobInstance1 = createJobInstance(
+			DEPENDENCY_JOB_ID,
+			params,
+			StatusEnum.COMPLETED,
+			List.of("SearchParameter", "SearchParameter", "StructureDefinition"));
+		JobInstance jobInstance2 = createJobInstance(
+			DEPENDENCY_JOB_2_ID,
+			params,
+			StatusEnum.COMPLETED,
+			List.of("SearchParameter", "CodeSystem", "ValueSet"));
 
 		when(myJobCoordinator.getInstance(anyString())).thenReturn(jobInstance1, jobInstance2);
 
@@ -187,11 +197,59 @@ public class ConsolidateDependenciesStepTest {
 		assertThat(packageContentsJson.getReport().getResourcesInstalled()).isEqualTo(expectedResources);
 	}
 
+	@Test
+	public void testRun_dependencyJobFailed_skipAndContinue() {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setName("hl7.fhir.us.core");
+		installationSpec.setVersion("8.0.1");
+		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		installationSpec.setFetchDependencies(true);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+
+		String fakePackageContents = "pass through data";
+		byte[] encodedBytes = Base64.getEncoder().encode(fakePackageContents.getBytes());
+
+		PackageInstallOutcomeJson report = new PackageInstallOutcomeJson();
+		report.getMessage().add("Main package message");
+
+		PackageWithDependenciesJson packageWithDependencies = new PackageWithDependenciesJson();
+		packageWithDependencies.setContents(encodedBytes);
+		packageWithDependencies.setReport(report);
+		packageWithDependencies.setDependencyJobIds(List.of(DEPENDENCY_JOB_ID));
+
+		JobInstance jobInstance1 = createJobInstance(
+			DEPENDENCY_JOB_ID,
+			params,
+			StatusEnum.FAILED,
+			List.of("SearchParameter", "SearchParameter", "StructureDefinition"));
+
+		when(myJobCoordinator.getInstance(anyString())).thenReturn(jobInstance1);
+
+		StepExecutionDetails<PackageInstallationJobParameters, PackageWithDependenciesJson> details =
+			new StepExecutionDetails<>(params, packageWithDependencies, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		// execute
+		RunOutcome outcome = myStep.run(details, myJobDataSink);
+
+		// validate
+		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+
+		verify(myJobCoordinator, times(1)).getInstance(anyString());
+
+		verify(myJobDataSink).recoveredError(myStringCaptor.capture());
+		assertThat(myStringCaptor.getValue())
+			.isEqualTo("Package installation job for hl7.fhir.us.core#8.0.1 terminated in status FAILED");
+	}
+
 	@Nonnull
-	private static JobInstance createJobInstance(String theInstanceId, List<String> theResourceTypes) {
+	private static JobInstance createJobInstance(String theInstanceId, PackageInstallationJobParameters theParameters, StatusEnum theStatus, List<String> theResourceTypes) {
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId(theInstanceId);
-		jobInstance.setStatus(StatusEnum.COMPLETED);
+		jobInstance.setParameters(JsonUtil.serialize(theParameters));
+		jobInstance.setStatus(theStatus);
 
 		PackageInstallOutcomeJson report = new PackageInstallOutcomeJson();
 		report.getMessage().add("Message from dependent job " + theInstanceId);

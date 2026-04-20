@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.jobs.installpackage;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -10,6 +11,7 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParame
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
+import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +27,7 @@ import java.io.InputStream;
 import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +41,8 @@ public class FetchPackageStepTest {
 
 	@Mock
 	private IHapiPackageCacheManager myPackageLoader;
+	@Mock
+	private IPackageInstallerSvc myPackageInstallerSvc;
 
 	private FetchPackageStep step;
 
@@ -50,7 +55,7 @@ public class FetchPackageStepTest {
 
 	@BeforeEach
 	public void beforeEach() {
-		step = new FetchPackageStep(myPackageLoader);
+		step = new FetchPackageStep(myPackageLoader, myPackageInstallerSvc);
 	}
 
 	@Test
@@ -94,5 +99,24 @@ public class FetchPackageStepTest {
 		for (String key : jobPackage.getFolders().keySet()) {
 			assertThat(jobPackage.list(key)).containsExactlyInAnyOrderElementsOf(npmPackage.list(key));
 		}
+	}
+
+	@Test
+	public void testRun_packageUnavailable_throws() throws Exception {
+		// set up
+		when(myPackageLoader.installPackage(any())).thenReturn(null);
+
+		PackageInstallationSpec theInstallationSpec = new PackageInstallationSpec();
+		theInstallationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		theInstallationSpec.setFetchDependencies(false);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(theInstallationSpec);
+
+		StepExecutionDetails<PackageInstallationJobParameters, VoidModel> details =
+			new StepExecutionDetails<>(params, null, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		// execute and validate
+		assertThatThrownBy(() -> step.run(details, myJobDataSink)).isInstanceOf(JobExecutionFailedException.class);
 	}
 }

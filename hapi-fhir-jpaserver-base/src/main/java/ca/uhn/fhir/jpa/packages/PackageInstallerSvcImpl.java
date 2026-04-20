@@ -201,20 +201,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (enabled) {
 			try {
 
-				boolean exists = myTxService
-						.withSystemRequest()
-						.withRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId())
-						.execute(() -> {
-							Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(
-									theInstallationSpec.getName(), theInstallationSpec.getVersion());
-							return existing.isPresent();
-						});
-				if (exists) {
-					ourLog.info(
-							"Package {}#{} is already installed",
-							theInstallationSpec.getName(),
-							theInstallationSpec.getVersion());
-				}
+				logIfPackageAlreadyInstalled(theInstallationSpec);
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
 				if (npmPackage == null) {
@@ -253,6 +240,23 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		return retVal;
+	}
+
+	private void logIfPackageAlreadyInstalled(PackageInstallationSpec theInstallationSpec) {
+		boolean exists = myTxService
+				.withSystemRequest()
+				.withRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId())
+				.execute(() -> {
+					Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(
+							theInstallationSpec.getName(), theInstallationSpec.getVersion());
+					return existing.isPresent();
+				});
+		if (exists) {
+			ourLog.info(
+					"Package {}#{} is already installed",
+					theInstallationSpec.getName(),
+					theInstallationSpec.getVersion());
+		}
 	}
 
 	/**
@@ -330,10 +334,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				}
 			}
 		}
-		ourLog.info(String.format("Finished installation of package %s#%s:", name, version));
+		ourLog.info("Finished installation of package {}#{}:", name, version);
 
-		for (int i = 0; i < count.length; i++) {
-			ourLog.info(String.format("-- Created or updated %s resources of type %s", count[i], installTypes.get(i)));
+		if (ourLog.isInfoEnabled()) {
+			for (int i = 0; i < count.length; i++) {
+				ourLog.info("-- Created or updated {} resources of type {}", count[i], installTypes.get(i));
+			}
 		}
 	}
 
@@ -344,6 +350,16 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 */
 	@Override
 	public String installAsynchronously(PackageInstallationSpec theInstallationSpec) {
+		if (!enabled) {
+			ourLog.info(
+					"Package installation is not supported for FHIR version {}",
+					myFhirContext.getVersion().getVersion());
+
+			return null;
+		}
+
+		logIfPackageAlreadyInstalled(theInstallationSpec);
+
 		PackageInstallationJobParameters parameters = new PackageInstallationJobParameters();
 		parameters.setInstallationSpec(theInstallationSpec);
 		JobInstanceStartRequest startRequest =
@@ -423,7 +439,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * @param theVersion the package version
 	 * @return the original package if compatible, or the version-specific variant if found
 	 */
-	private NpmPackage substituteVersionSpecificPackageIfNeeded(
+	@Override
+	public NpmPackage substituteVersionSpecificPackageIfNeeded(
 			NpmPackage theDependency, String theId, String theVersion) {
 		String dependencyFhirVersion = theDependency.fhirVersion();
 		String serverFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();

@@ -70,4 +70,19 @@ public interface IPackageInstallerSvc {
 	 * @return a JSON object containing the status report
 	 */
 	PackageInstallationStatusJson checkInstallationStatus(String theJobId);
+
+	/**
+	 * Checks if a dependency package's FHIR version is compatible with the server's FHIR version.
+	 * If incompatible, attempts to load a version-specific variant by appending a FHIR version
+	 * suffix (e.g., ".r4" for R4/R4B servers, ".r5" for R5, ".r3" for DSTU3).
+	 * <p>
+	 * This handles cross-version packages like {@code hl7.fhir.uv.extensions} which declare
+	 * FHIR version 5.0.0 but have R4-specific counterparts like {@code hl7.fhir.uv.extensions.r4}.
+	 *
+	 * @param theDependency the loaded dependency package
+	 * @param theId the package ID
+	 * @param theVersion the package version
+	 * @return the original package if compatible, or the version-specific variant if found
+	 */
+	NpmPackage substituteVersionSpecificPackageIfNeeded(NpmPackage theDependency, String theId, String theVersion);
 }

@@ -36,15 +36,18 @@ import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
 public class InitializeDependenciesStep
 		implements IJobStepWorker<PackageInstallationJobParameters, PackageContentsJson, PackageWithDependenciesJson> {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(InitializeDependenciesStep.class);
 
 	private final IJobCoordinator myJobCoordinator;
 
@@ -86,11 +89,15 @@ public class InitializeDependenciesStep
 			List<PackageUtils.DependentPackage> dependencies =
 					PackageUtils.extractDependentPackages(npmPackage, installationSpec, outcome);
 
-			List<String> jobIds = launchChildJobs(theStepExecutionDetails, dependencies);
+			List<String> jobIds = launchChildJobs(theStepExecutionDetails, dependencies, theDataSink);
 
 			result.setDependencyJobIds(jobIds);
-		} catch (IOException e) {
-			// error handling is in the scope of a later ticket
+		} catch (Exception e) {
+			String message = String.format(
+					"Failed to process dependencies for package %s#%s",
+					installationSpec.getName(), installationSpec.getVersion());
+			ourLog.warn(message, e);
+			theDataSink.recoveredError(message);
 		}
 
 		theDataSink.accept(result);
@@ -101,7 +108,8 @@ public class InitializeDependenciesStep
 	private List<String> launchChildJobs(
 			@Nonnull
 					StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> theStepExecutionDetails,
-			List<PackageUtils.DependentPackage> theDependencies) {
+			List<PackageUtils.DependentPackage> theDependencies,
+			@Nonnull IJobDataSink<PackageWithDependenciesJson> theDataSink) {
 		List<String> jobIds = new ArrayList<>();
 
 		PackageInstallationSpec installationSpec =
@@ -109,17 +117,27 @@ public class InitializeDependenciesStep
 		PackageInstallOutcomeJson outcome = theStepExecutionDetails.getData().getReport();
 
 		for (PackageUtils.DependentPackage nextDependency : theDependencies) {
-			if (installationSpec.isDryRun()) {
-				outcome.getMessage()
-						.add(String.format(
-								"Installation would install %s#%s", nextDependency.name(), nextDependency.version()));
-			} else {
-				// create a new installation spec, retaining all the control parameters, but targeting the dependency
-				// package
-				JobInstanceStartRequest startRequest = buildStartRequest(nextDependency, installationSpec);
-				Batch2JobStartResponse response =
-						myJobCoordinator.startInstance(theStepExecutionDetails.newSystemRequestDetails(), startRequest);
-				jobIds.add(response.getInstanceId());
+			try {
+				if (installationSpec.isDryRun()) {
+					outcome.getMessage()
+							.add(String.format(
+									"Installation would install %s#%s",
+									nextDependency.name(), nextDependency.version()));
+				} else {
+					// create a new installation spec, retaining all the control parameters, but targeting the
+					// dependency
+					// package
+					JobInstanceStartRequest startRequest = buildStartRequest(nextDependency, installationSpec);
+					Batch2JobStartResponse response = myJobCoordinator.startInstance(
+							theStepExecutionDetails.newSystemRequestDetails(), startRequest);
+					jobIds.add(response.getInstanceId());
+				}
+			} catch (Exception e) {
+				String message = String.format(
+						"Failed to launch child job for dependency package %s#%s. Skipping this dependency.",
+						nextDependency.name(), nextDependency.version());
+				ourLog.warn(message, e);
+				theDataSink.recoveredError(message);
 			}
 		}
 

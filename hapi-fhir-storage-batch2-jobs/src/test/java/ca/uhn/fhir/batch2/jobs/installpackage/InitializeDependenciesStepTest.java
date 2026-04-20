@@ -32,6 +32,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -54,6 +55,8 @@ public class InitializeDependenciesStepTest {
 	private IJobDataSink<PackageWithDependenciesJson> myJobDataSink;
 	@Captor
 	private ArgumentCaptor<PackageWithDependenciesJson> myPackageWithDependenciesCaptor;
+	@Captor
+	private ArgumentCaptor<String> myStringCaptor;
 	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Captor
@@ -243,6 +246,82 @@ public class InitializeDependenciesStepTest {
 				"Installation would install us.nlm.vsac#0.24.0");
 
 		verify(myJobCoordinator, never()).startInstance(any(), any());
+	}
+
+	@Test
+	public void testRun_badPackage_skipAndContinue() throws Exception {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setName("hl7.fhir.us.core");
+		installationSpec.setVersion("8.0.1");
+		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		installationSpec.setFetchDependencies(true);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+
+		byte[] encodedBytes = Base64.getEncoder().encode("This is not a valid NPM package".getBytes());
+		PackageContentsJson packageContentsJson = new PackageContentsJson();
+		packageContentsJson.setContents(encodedBytes);
+		packageContentsJson.setReport(new PackageInstallOutcomeJson());
+
+		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
+			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		// execute
+		RunOutcome outcome = myStep.run(details, myJobDataSink);
+
+		// validate
+		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+
+		verify(myJobDataSink).accept(myPackageWithDependenciesCaptor.capture());
+		PackageWithDependenciesJson outcomeJson = myPackageWithDependenciesCaptor.getValue();
+		assertThat(outcomeJson).isNotNull();
+		assertThat(outcomeJson.getContents()).isEqualTo(encodedBytes);
+		assertThat(outcomeJson.getDependencyJobIds()).isEmpty();
+
+		verify(myJobDataSink).recoveredError("Failed to process dependencies for package hl7.fhir.us.core#8.0.1");
+
+		verify(myJobCoordinator, never()).startInstance(any(), any());
+	}
+
+	@Test
+	public void testRun_cannotLaunchChildJobs_skipAndContinue() throws Exception {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		installationSpec.setFetchDependencies(true);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+
+		InputStream stream = InitializeDependenciesStepTest.class.getResourceAsStream("usCorePackage.tgz");
+		byte[] packageBytes = stream.readAllBytes();
+		byte[] encodedBytes = Base64.getEncoder().encode(packageBytes);
+		PackageContentsJson packageContentsJson = new PackageContentsJson();
+		packageContentsJson.setContents(encodedBytes);
+		packageContentsJson.setReport(new PackageInstallOutcomeJson());
+
+		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
+			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		when(myJobCoordinator.startInstance(any(), any())).thenThrow(new IllegalStateException());
+
+		// execute
+		RunOutcome outcome = myStep.run(details, myJobDataSink);
+
+		// validate
+		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+
+		verify(myJobDataSink).accept(myPackageWithDependenciesCaptor.capture());
+		PackageWithDependenciesJson outcomeJson = myPackageWithDependenciesCaptor.getValue();
+		assertThat(outcomeJson).isNotNull();
+		assertThat(outcomeJson.getContents()).isEqualTo(encodedBytes);
+		assertThat(outcomeJson.getDependencyJobIds()).isEmpty();
+
+		verify(myJobDataSink, atLeastOnce()).recoveredError(myStringCaptor.capture());
+		assertThat(myStringCaptor.getAllValues()).contains("Failed to launch child job for dependency package hl7.fhir.r4.core#4.0.1. Skipping this dependency.");
+
 	}
 
 	private static class JobIdIncrementor implements Answer<Batch2JobStartResponse> {

@@ -30,17 +30,23 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageWithDependenciesJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
+import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class ConsolidateDependenciesStep
 		implements IJobStepWorker<PackageInstallationJobParameters, PackageWithDependenciesJson, PackageContentsJson> {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ConsolidateDependenciesStep.class);
 
 	private final IJobCoordinator myJobCoordinator;
 
@@ -68,11 +74,24 @@ public class ConsolidateDependenciesStep
 			throw new RetryChunkLaterException(Msg.code(2907));
 		}
 
-		List<PackageInstallOutcomeJson> dependencyOutcomes = jobInstances.stream()
-				.map(JobInstance::getReport)
-				.filter(Objects::nonNull)
-				.map(t -> JsonUtil.deserialize(t, PackageInstallOutcomeJson.class))
-				.toList();
+		List<PackageInstallOutcomeJson> dependencyOutcomes = new ArrayList<>();
+		for (JobInstance jobInstance : jobInstances) {
+			if (jobInstance.getStatus() == StatusEnum.COMPLETED) {
+				if (jobInstance.getReport() != null) {
+					dependencyOutcomes.add(
+							JsonUtil.deserialize(jobInstance.getReport(), PackageInstallOutcomeJson.class));
+				}
+			} else {
+				PackageInstallationJobParameters parameters =
+						JsonUtil.deserialize(jobInstance.getParameters(), PackageInstallationJobParameters.class);
+				PackageInstallationSpec installationSpec = parameters.getInstallationSpec();
+				String message = String.format(
+						"Package installation job for %s#%s terminated in status %s",
+						installationSpec.getName(), installationSpec.getVersion(), jobInstance.getStatus());
+				ourLog.warn(message);
+				theDataSink.recoveredError(message);
+			}
+		}
 
 		// pass the bytes along unchanged
 		PackageContentsJson packageContentsJson = new PackageContentsJson();
