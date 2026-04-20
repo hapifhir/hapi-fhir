@@ -28,6 +28,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.api.model.PerformanceTracingLogger;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParamQuantity;
@@ -51,6 +53,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -127,6 +130,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	private Set<String> myIgnoredForSearchDatatypes;
 	private BaseRuntimeChildDefinition myQuantityValueValueChild;
 	private BaseRuntimeChildDefinition myQuantitySystemValueChild;
@@ -174,6 +180,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	// allow extraction of Resource-level search param values
 	private boolean myExtractResourceLevelParams = false;
+	private PerformanceTracingLogger myPerformanceTracingLogger;
 
 	/**
 	 * Constructor
@@ -189,15 +196,18 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			StorageSettings theStorageSettings,
 			PartitionSettings thePartitionSettings,
 			FhirContext theCtx,
-			ISearchParamRegistry theSearchParamRegistry) {
+			ISearchParamRegistry theSearchParamRegistry,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		Objects.requireNonNull(theStorageSettings);
 		Objects.requireNonNull(theCtx);
 		Objects.requireNonNull(theSearchParamRegistry);
+		Objects.requireNonNull(theInterceptorBroadcaster);
 
 		myStorageSettings = theStorageSettings;
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
 		myPartitionSettings = thePartitionSettings;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
 	@Override
@@ -449,27 +459,29 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(
-			String theResourceType, ResourceIndexedSearchParams theParams) {
+		RequestDetails theRequestDetails, String theResourceType, ResourceIndexedSearchParams theParams) {
 		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
 		List<RuntimeSearchParam> runtimeComboUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(
 				theResourceType, ComboSearchParamType.UNIQUE, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboUniqueParams) {
 			Set<ResourceIndexedComboStringUnique> comboUniqueParams =
-					createComboUniqueParam(theResourceType, theParams, runtimeParam);
+					createComboUniqueParam(theRequestDetails, theResourceType, theParams, runtimeParam);
 			retVal.addAll(comboUniqueParams);
 		}
 		return retVal;
 	}
 
 	private SearchParamSet<ResourceIndexedComboStringUnique> createComboUniqueParam(
-			String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
+		RequestDetails theRequestDetails,
+		String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
 		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
 
 		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
 				JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theRuntimeParam);
 
 		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(
+			theRequestDetails,
 				compositeComponents, theParams, theResourceType, theRuntimeParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
@@ -488,7 +500,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(
-			String theResourceType, ResourceIndexedSearchParams theParams) {
+		RequestDetails theRequestDetails, String theResourceType, ResourceIndexedSearchParams theParams) {
 		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
 		List<RuntimeSearchParam> runtimeComboNonUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(
 				theResourceType,
@@ -497,13 +509,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboNonUniqueParams) {
 			Set<ResourceIndexedComboTokenNonUnique> comboNonUniqueParams =
-					createComboNonUniqueParam(theResourceType, theParams, runtimeParam);
+					createComboNonUniqueParam(theRequestDetails, theResourceType, theParams, runtimeParam);
 			retVal.addAll(comboNonUniqueParams);
 		}
 		return retVal;
 	}
 
 	private SearchParamSet<ResourceIndexedComboTokenNonUnique> createComboNonUniqueParam(
+		RequestDetails theRequestDetails,
 			String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
 		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
 
@@ -522,7 +535,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 		}
 
-		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(
+		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(theRequestDetails,
 				compositeComponents, theParams, theResourceType, theRuntimeParam);
 
 		if (rangedDateChoices.isEmpty()) {
@@ -550,6 +563,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 */
 	@Nonnull
 	private Set<String> extractParameterCombinationsForComboParam(
+		RequestDetails theRequestDetails,
 			List<JpaParamUtil.ComponentAndCorrespondingParam> theCompositeComponents,
 			ResourceIndexedSearchParams theIndexes,
 			String theResourceType,
@@ -597,14 +611,22 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
 					IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
 
+					String value = nextParamAsClientParam.getValueAsQueryToken();
+
 					if (theParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE
 							&& nextParamAsClientParam instanceof DateParam date) {
-						if (date.getPrecision() != TemporalPrecisionEnum.DAY) {
+						if (date.getPrecision().ordinal() < TemporalPrecisionEnum.DAY.ordinal()) {
+							myPerformanceTracingLogger.firePerformanceInfo(theRequestDetails, "Not creating a non-unique combo index entry for index[" + theParam.getName() + "] because value for component " + next.getParamName() + " has precision < DAY");
 							continue;
 						}
+						if (date.getPrecision().ordinal() > TemporalPrecisionEnum.DAY.ordinal()) {
+							// Limit to date portion since that's what we index in the non-unique
+							// index column. Because the search wants greater than
+							// day precision, we'll also select on the date index table in
+							// order to provide the added precision.
+							value = value.substring(0, 10);
+						}
 					}
-
-					String value = nextParamAsClientParam.getValueAsQueryToken();
 
 					if (theParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE
 							&& paramType == RestSearchParameterTypeEnum.STRING) {
@@ -1881,6 +1903,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			myCodeableReferenceConcept = codeableReferenceDef.getChildByName("concept");
 			myCodeableReferenceReference = codeableReferenceDef.getChildByName("reference");
 		}
+
+		myPerformanceTracingLogger = new PerformanceTracingLogger(myInterceptorBroadcaster);
 	}
 
 	@FunctionalInterface

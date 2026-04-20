@@ -473,41 +473,47 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 
-	@Test
-	public void testStringAndDate_Create() {
-		createStringAndDateCombo_NameAndBirthdate();
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		2021-02-02              , 2021-02-02              , true
+		2021-02-02T11:22:33Z    , 2021-02-02T11:22:33Z    , true
+		""")
+	public void testStringAndDate_Create(String theObservationDate, String theSearchDate, boolean theExpectMatch) {
+		createStringAndDateCombo_ObservationValueAndEffective();
 
-		IIdType id1 = createPatient1(null);
-		assertNotNull(id1);
+		IIdType id1 = createObservation(
+			withObservationValueString("hello"),
+			withObservationEffectiveInstant(theObservationDate));
 
-		IIdType id2 = createPatient2(null);
-		assertNotNull(id2);
+		IIdType id2 = createObservation(
+			withObservationValueString("goodbye"),
+			withObservationEffectiveInstant(theObservationDate));
 
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {
 			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
 			indexedTokens.sort(Comparator.comparing(ResourceIndexedComboTokenNonUnique::getId));
 			assertEquals(2, indexedTokens.size());
-			String expected = "Patient?birthdate=2021-02-02&family=FAMILY1";
+			String expected = "Observation?date=2021-02-02&value-string=HELLO";
 			assertEquals(expected, indexedTokens.get(0).getIndexString());
-			assertEquals(7196518367857292879L, indexedTokens.get(0).getHashComplete().longValue());
+			assertEquals(-53995296465088005L, indexedTokens.get(0).getHashComplete().longValue());
 		});
 
 		myMessages.clear();
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
-		params.add("family", new StringParam("family1"));
-		params.add("birthdate", new DateParam("2021-02-02"));
+		params.add("value-string", new StringParam("hello"));
+		params.add("date", new DateParam(theSearchDate));
 		myCaptureQueriesListener.clear();
-		IBundleProvider results = myPatientDao.search(params, mySrd);
+		IBundleProvider results = myObservationDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
 
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '7196518367857292879') fetch first '10000' rows only";
+		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '-53995296465088005') fetch first '10000' rows only";
 		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("[INFO Using NON_UNIQUE index(es) for query for search: Patient?birthdate=2021-02-02&family=FAMILY1]");
+		assertThat(myMessages.toString()).contains("[INFO Using NON_UNIQUE index(es) for query for search: Observation?date=2021-02-02&value-string=HELLO]");
 		myMessages.clear();
 	}
 
@@ -824,36 +830,36 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myOrganizationDao.update(org, mySrd);
 	}
 
-	private void createStringAndDateCombo_NameAndBirthdate() {
+	private void createStringAndDateCombo_ObservationValueAndEffective() {
 		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-family");
+		sp.setId("SearchParameter/observation-value-string");
 		sp.setType(Enumerations.SearchParamType.STRING);
-		sp.setCode("family");
-		sp.setExpression("Patient.name.family");
+		sp.setCode("value-string");
+		sp.setExpression("Observation.value.ofType(string)");
 		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
+		sp.addBase("Observation");
 		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-birthdate");
+		sp.setId("SearchParameter/observation-date");
 		sp.setType(Enumerations.SearchParamType.DATE);
-		sp.setCode("birthdate");
-		sp.setExpression("Patient.birthDate");
+		sp.setCode("date");
+		sp.setExpression("Observation.effective");
 		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
+		sp.addBase("Observation");
 		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-names-and-birthdate");
+		sp.setId("SearchParameter/observation-value-string-and-date");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
+		sp.addBase("Observation");
 		sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-family");
+			.setExpression("Observation")
+			.setDefinition("SearchParameter/observation-value-string");
 		sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-birthdate");
+			.setExpression("Observation")
+			.setDefinition("SearchParameter/observation-date");
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(false));

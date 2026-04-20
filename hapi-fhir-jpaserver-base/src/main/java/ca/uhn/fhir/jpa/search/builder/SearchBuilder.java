@@ -73,6 +73,7 @@ import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CartesianProductUtil;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
+import ca.uhn.fhir.jpa.api.model.PerformanceTracingLogger;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
@@ -205,6 +206,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public static Integer myMaxPageSizeForTests = null;
 	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
 	protected final IResourceTagDao myResourceTagDao;
+	private final PerformanceTracingLogger myPerformanceTracingLogger;
 	private String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
 	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
@@ -289,6 +291,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myBatchResourceLoader = theBatchResourceLoader;
 
 		mySearchProperties = new SearchQueryProperties();
+		myPerformanceTracingLogger = new PerformanceTracingLogger(theInterceptorBroadcaster);
 	}
 
 	@VisibleForTesting
@@ -2102,7 +2105,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		String message =
 				"Search with _include=* can be inefficient when references using canonical URLs are detected. Use more specific _include values instead.";
-		firePerformanceWarning(theRequestDetails, message);
+		myPerformanceTracingLogger.firePerformanceWarning(theRequestDetails, message);
 
 		List<List<String>> canonicalUrlPartitions = ListUtils.partition(
 				List.copyOf(theCanonicalUrls), getMaximumPageSize() - canonicalUrlTargets.hashIdentityValues.size());
@@ -2526,7 +2529,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							DateParam dateParam = (DateParam) dateParamUntyped;
 							switch (getIfNull(dateParam.getPrefix(), EQUAL)) {
 								case APPROXIMATE, ENDS_BEFORE, STARTS_AFTER -> {
-									firePerformanceInfo(
+									myPerformanceTracingLogger.firePerformanceInfo(
 											theRequest,
 											"Can not use combo param to search for parameter "
 													+ nextComponent.getParamName() + " because the modifier "
@@ -2623,7 +2626,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			// Interceptor broadcast: JPA_PERFTRACE_INFO
 			String message =
 					"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations";
-			firePerformanceInfo(theRequest, message);
+			myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
 			return false;
 		}
 
@@ -2704,7 +2707,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		String indexStringForLog = indexStrings.size() > 1 ? indexStrings.toString() : indexStrings.get(0);
 		String perfMessage = "Using " + theComboParam.getComboSearchParamType() + " index(es) for query for search: "
 				+ indexStringForLog;
-		firePerformanceInfo(theRequest, perfMessage);
+		myPerformanceTracingLogger.firePerformanceInfo(theRequest, perfMessage);
 
 		// Add the predicate
 		switch (requireNonNull(theComboParam.getComboSearchParamType())) {
@@ -2737,11 +2740,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		for (IQueryParameterType nextOrValue : theValues) {
 			if (nextOrValue instanceof DateParam dateParam) {
-				if (dateParam.getPrecision() != TemporalPrecisionEnum.DAY) {
+				if (dateParam.getPrecision().ordinal() < TemporalPrecisionEnum.DAY.ordinal()) {
 					String message = "Search with params " + describeParams(theParams)
-							+ " is not a candidate for combo searching - Date search with non-DAY precision for parameter '"
+							+ " is not a candidate for combo searching - Date search with less than DAY precision for parameter '"
 							+ theComboComponent.getCombinedParamName() + "'";
-					firePerformanceInfo(theRequest, message);
+					myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
 					return false;
 				}
 			}
@@ -2756,7 +2759,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							+ theComboComponent.getCombinedParamName()
 							+ "' has prefix: '"
 							+ paramWithPrefix.getPrefix().getValue() + "'";
-					firePerformanceInfo(theRequest, message);
+					myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
 					return false;
 				}
 			}
@@ -2770,7 +2773,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					String message =
 							"Search is not a candidate for unique combo searching - Reference with no type specified for parameter '"
 									+ theComboComponent.getCombinedParamName() + "'";
-					firePerformanceInfo(theRequest, message);
+					myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
 					return false;
 				}
 			}
@@ -2781,7 +2784,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						+ " is not a candidate for combo searching - Parameter '"
 						+ theComboComponent.getCombinedParamName()
 						+ "' has modifier: '" + nextOrValue.getQueryParameterQualifier() + "'";
-				firePerformanceInfo(theRequest, message);
+				myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
 				return false;
 			}
 
@@ -3174,7 +3177,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					+ myPidSet.size() + "-" + mySkipCount
 					+ ". This indicates an inefficient query! Retrying with new max count of "
 					+ mySearchProperties.getMaxResultsRequested();
-			firePerformanceWarning(myRequest, msg);
+			myPerformanceTracingLogger.firePerformanceWarning(myRequest, msg);
 		}
 
 		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
@@ -3262,32 +3265,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private void firePerformanceInfo(RequestDetails theRequest, String theMessage) {
-		// Only log at debug level since these messages aren't considered important enough
-		// that we should be cluttering the system log, but they are important to the
-		// specific query being executed to we'll INFO level them there
-		ourLog.debug(theMessage);
-		firePerformanceMessage(theRequest, theMessage, Pointcut.JPA_PERFTRACE_INFO);
-	}
 
-	private void firePerformanceWarning(RequestDetails theRequest, String theMessage) {
-		ourLog.warn(theMessage);
-		firePerformanceMessage(theRequest, theMessage, Pointcut.JPA_PERFTRACE_WARNING);
-	}
-
-	private void firePerformanceMessage(RequestDetails theRequest, String theMessage, Pointcut thePointcut) {
-		IInterceptorBroadcaster compositeBroadcaster =
-				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
-		if (compositeBroadcaster.hasHooks(thePointcut)) {
-			StorageProcessingMessage message = new StorageProcessingMessage();
-			message.setMessage(theMessage);
-			HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
-					.add(StorageProcessingMessage.class, message);
-			compositeBroadcaster.callHooks(thePointcut, params);
-		}
-	}
 
 	public static int getMaximumPageSize() {
 		if (myMaxPageSizeForTests != null) {

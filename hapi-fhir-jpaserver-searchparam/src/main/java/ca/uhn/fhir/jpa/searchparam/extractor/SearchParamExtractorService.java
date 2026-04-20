@@ -1134,18 +1134,18 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 		return mySearchParamExtractor.extractParamValuesAsStrings(theActiveSearchParam, theResource);
 	}
 
-	public void extractSearchParamComboUnique(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
+	public void extractSearchParamComboUnique(RequestDetails theRequestDetails, ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
 		String resourceType = theEntity.getResourceType();
 		Set<ResourceIndexedComboStringUnique> comboUniques =
-				mySearchParamExtractor.extractSearchParamComboUnique(resourceType, theParams);
+				mySearchParamExtractor.extractSearchParamComboUnique(theRequestDetails, resourceType, theParams);
 		theParams.myComboStringUniques.addAll(comboUniques);
 		populateResourceTableForComboParams(theParams.myComboStringUniques, theEntity);
 	}
 
-	public void extractSearchParamComboNonUnique(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
+	public void extractSearchParamComboNonUnique(RequestDetails theRequestDetails, ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
 		String resourceType = theEntity.getResourceType();
 		Set<ResourceIndexedComboTokenNonUnique> comboNonUniques =
-				mySearchParamExtractor.extractSearchParamComboNonUnique(resourceType, theParams);
+				mySearchParamExtractor.extractSearchParamComboNonUnique(theRequestDetails, resourceType, theParams);
 		theParams.myComboTokenNonUnique.addAll(comboNonUniques);
 		populateResourceTableForComboParams(theParams.myComboTokenNonUnique, theEntity);
 	}
