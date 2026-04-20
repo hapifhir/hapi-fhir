@@ -1466,7 +1466,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myFhirValidator.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean(), anyList());
+		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), any(), anyString(), anyBoolean(), anyList());
 		verify(policyAdvisor, times(12)).policyForContained(any(), any(), any(), any(), any(), any(), any(), any(), any());
 	}
 

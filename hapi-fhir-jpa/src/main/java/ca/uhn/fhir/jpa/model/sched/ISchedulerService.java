@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.sched;
 import com.google.common.annotations.VisibleForTesting;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+import org.quartz.TriggerKey;
 
 import java.util.Set;
 
@@ -61,6 +62,18 @@ public interface ISchedulerService {
 	 * @param theJobDefinition  The Job to fire
 	 */
 	void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+
+	/**
+	 * Unschedules local job(s) by their TriggerKey
+	 * @param theKeys - the keys of the jobs to be unscheduled
+	 */
+	void unscheduleLocalJobs(TriggerKey... theKeys);
+
+	/**
+	 * Unschedules clustered job(s) by their TriggerKey
+	 * @param theKeys - the keys of the jobs to be unscheduled
+	 */
+	void unscheduleClusteredJobs(TriggerKey... theKeys);
 
 	/**
 	 * This task will execute locally (and on all nodes of the cluster, if there is a cluster).

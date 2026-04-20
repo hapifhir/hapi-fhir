@@ -33,6 +33,7 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -99,6 +100,16 @@ public class ParametersUtil {
 
 		List<IBase> namedParameters = getNamedParameters(theCtx, theParameters, theParameterName);
 		return collectChildrenByNameAndType(theCtx, namedParameters, "resource", IBaseResource.class).stream()
+				.findFirst();
+	}
+
+	/**
+	 * @since 8.10.0
+	 */
+	public static Optional<IBase> getNamedParameterValue(
+			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		List<IBase> namedParameters = getNamedParameters(theCtx, theParameters, theParameterName);
+		return collectChildrenByNameAndType(theCtx, namedParameters, "value[x]", IBase.class).stream()
 				.findFirst();
 	}
 
@@ -560,6 +571,14 @@ public class ParametersUtil {
 		return part;
 	}
 
+	public static void addPartPrimitive(
+			FhirContext theContext, IBase theParameter, String theName, String theType, String theValue) {
+		IPrimitiveType<?> value =
+				(IPrimitiveType<?>) theContext.getElementDefinition(theType).newInstance();
+		value.setValueAsString(theValue);
+		addPart(theContext, theParameter, theName, value);
+	}
+
 	public static IBase createPart(FhirContext theContext, IBase thePart, String theName) {
 		BaseRuntimeElementCompositeDefinition<?> def =
 				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(thePart.getClass());
@@ -705,5 +724,15 @@ public class ParametersUtil {
 			}
 		}
 		return retVal;
+	}
+
+	/**
+	 * Create a Parameters resource with a single return parameter
+	 */
+	public static <MT extends IBaseMetaType> IBaseResource createParametersWithSingleReturn(
+			FhirContext theContext, IBase theReturn) {
+		IBaseParameters parametersResponse = newInstance(theContext);
+		ParametersUtil.addParameterToParameters(theContext, parametersResponse, "return", theReturn);
+		return parametersResponse;
 	}
 }

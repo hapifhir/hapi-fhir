@@ -525,7 +525,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			return cachedPackage;
 		}
 
-		// otherwise we have to load it from packageloader
+		// otherwise we have to load it from myPackageLoaderSvc
 		NpmPackageData pkgData = myPackageLoaderSvc.fetchPackageFromPackageSpec(thePackageId, thePackageVersion);
 
 		try {
@@ -565,10 +565,17 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			sourceDescription = theInstallationSpec.getPackageUrl();
 		}
 
-		if (theInstallationSpec.isDryRun()
-				|| theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-			// non-storing of NPM paths
+		boolean isNonStoringMode = theInstallationSpec.isDryRun()
+				|| theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY;
+
+		// non-storing of NPM paths
+		if (isNonStoringMode && theInstallationSpec.getPackageContents() != null) {
 			return NpmPackage.fromPackage(new ByteArrayInputStream(theInstallationSpec.getPackageContents()));
+		}
+		if (isNonStoringMode) {
+			return newTxTemplate()
+					.execute(tx -> loadPackageFromCacheOnlyInner(
+							theInstallationSpec.getName(), theInstallationSpec.getVersion()));
 		}
 
 		if (theInstallationSpec.getPackageContents() != null) {
@@ -1054,5 +1061,19 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			}
 		}
 		return retVal;
+	}
+
+	@Override
+	public String getLatestVersion(String statedId, boolean milestonesOnly) {
+		// As of release 6.9.4 of org.hl7.fhir.core, this is only used internally by the supporting implementations for
+		// the Validator CLI (not InstanceValidator). It is not called except in that specific use case.
+		throw new UnsupportedOperationException(Msg.code(2892));
+	}
+
+	@Override
+	public String getLatestVersion(String statedId, String versionFilter) {
+		// As of release 6.9.4 of org.hl7.fhir.core, this is only used internally by the supporting implementations for
+		// the Validator CLI (not InstanceValidator). It is not called except in that specific use case.
+		throw new UnsupportedOperationException(Msg.code(2893));
 	}
 }

@@ -155,16 +155,16 @@ public class TermConceptProperty extends BasePartitionable implements Serializab
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "PROP_TYPE", nullable = false)
 	@JdbcTypeCode(SqlTypes.INTEGER)
-	private TermConceptPropertyTypeEnum myType;
+	private org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum myType;
 
 	/**
-	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
+	 * Relevant only for properties of type {@link org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum#CODING}
 	 */
 	@Column(name = "PROP_CODESYSTEM", length = MAX_LENGTH, nullable = true)
 	private String myCodeSystem;
 
 	/**
-	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
+	 * Relevant only for properties of type {@link org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum#CODING}
 	 */
 	@Column(name = "PROP_DISPLAY", length = MAX_LENGTH, nullable = true)
 	@GenericField(name = "myDisplayString", searchable = Searchable.YES)
@@ -178,14 +178,14 @@ public class TermConceptProperty extends BasePartitionable implements Serializab
 	}
 
 	/**
-	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
+	 * Relevant only for properties of type {@link org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum#CODING}
 	 */
 	public String getCodeSystem() {
 		return myCodeSystem;
 	}
 
 	/**
-	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
+	 * Relevant only for properties of type {@link org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum#CODING}
 	 */
 	public TermConceptProperty setCodeSystem(String theCodeSystem) {
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
@@ -197,14 +197,14 @@ public class TermConceptProperty extends BasePartitionable implements Serializab
 	}
 
 	/**
-	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
+	 * Relevant only for properties of type {@link org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum#CODING}
 	 */
 	public String getDisplay() {
 		return myDisplay;
 	}
 
 	/**
-	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
+	 * Relevant only for properties of type {@link org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum#CODING}
 	 */
 	public TermConceptProperty setDisplay(String theDisplay) {
 		myDisplay = left(theDisplay, MAX_LENGTH);
@@ -223,19 +223,20 @@ public class TermConceptProperty extends BasePartitionable implements Serializab
 		return this;
 	}
 
-	public TermConceptPropertyTypeEnum getType() {
+	public org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum getType() {
 		return myType;
 	}
 
-	public TermConceptProperty setType(@Nonnull TermConceptPropertyTypeEnum theType) {
+	public TermConceptProperty setType(
+			@Nonnull org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum theType) {
 		Validate.notNull(theType);
 		myType = theType;
 		return this;
 	}
 
 	/**
-	 * This will contain the value for a {@link TermConceptPropertyTypeEnum#STRING string}
-	 * property, and the code for a {@link TermConceptPropertyTypeEnum#CODING coding} property.
+	 * This will contain the value for a {@link org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum#STRING string}
+	 * property, and the code for a {@link org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum#CODING coding} property.
 	 */
 	public String getValue() {
 		if (hasValueBin()) {
@@ -245,8 +246,8 @@ public class TermConceptProperty extends BasePartitionable implements Serializab
 	}
 
 	/**
-	 * This will contain the value for a {@link TermConceptPropertyTypeEnum#STRING string}
-	 * property, and the code for a {@link TermConceptPropertyTypeEnum#CODING coding} property.
+	 * This will contain the value for a {@link org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum#STRING string}
+	 * property, and the code for a {@link org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum#CODING coding} property.
 	 */
 	public TermConceptProperty setValue(String theValue) {
 		if (theValue.length() > MAX_LENGTH) {
