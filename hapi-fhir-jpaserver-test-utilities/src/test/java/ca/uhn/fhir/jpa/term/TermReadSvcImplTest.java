@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -85,9 +86,11 @@ class TermReadSvcImplTest {
 			myRootValidationSupport = mock(IValidationSupport.class);
 			myValidationSupportContext = new ValidationSupportContext(myRootValidationSupport);
 
+			FhirContext fhirContext = FhirContext.forR4Cached();
 			ReflectionTestUtils.setField(mySpiedSvc, "myTransactionManager", myTxManager);
-			ReflectionTestUtils.setField(mySpiedSvc, "myContext", FhirContext.forR4Cached());
+			ReflectionTestUtils.setField(mySpiedSvc, "myContext", fhirContext);
 			ReflectionTestUtils.setField(mySpiedSvc, "myStorageSettings", new JpaStorageSettings());
+			ReflectionTestUtils.setField(mySpiedSvc, "myVersionCanonicalizer", new VersionCanonicalizer(fhirContext));
 
 			// Make TransactionTemplate just run the callback synchronously
 			TransactionStatus status = new SimpleTransactionStatus();

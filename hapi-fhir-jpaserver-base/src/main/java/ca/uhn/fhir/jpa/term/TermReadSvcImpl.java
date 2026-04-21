@@ -3019,8 +3019,38 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 		}
 
+		if (isCodeSystemContentNotPresent(theValidationSupportContext, theCodeSystemUrl)) {
+			// See GH-7796: a CodeSystem with content=not-present asserts only that the system
+			// exists — it does not enumerate codes. Returning a "code not found" error here
+			// short-circuits the ValidationSupportChain and prevents downstream algorithmic
+			// validators (e.g. UCUM, SNOMED via a remote terminology server) from being
+			// consulted. Returning null lets the chain continue to the next validator.
+			return null;
+		}
+
 		return createCodeNotFoundErrorForValidationResult(
 				theCodeSystemUrl, theCode, null, createMessageAppendForCodeNotFoundInCodeSystem(theCodeSystemUrl));
+	}
+
+	/**
+	 * Returns true if the backing {@link CodeSystem} resolved from the validation support
+	 * chain for {@code theCodeSystemUrl} declares {@code content = not-present}. A
+	 * not-present CodeSystem is a bare assertion that the system exists; it does not
+	 * enumerate its codes, so terminology-backed validators must not claim a code is
+	 * invalid just because it is not indexed.
+	 */
+	private boolean isCodeSystemContentNotPresent(
+			@Nonnull ValidationSupportContext theValidationSupportContext, String theCodeSystemUrl) {
+		if (isBlank(theCodeSystemUrl) || myVersionCanonicalizer == null) {
+			return false;
+		}
+		IBaseResource codeSystem =
+				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemUrl);
+		if (codeSystem == null) {
+			return false;
+		}
+		CodeSystem canonical = myVersionCanonicalizer.codeSystemToCanonical(codeSystem);
+		return canonical != null && canonical.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT;
 	}
 
 	IValidationSupport.CodeValidationResult validateCodeInValueSet(
