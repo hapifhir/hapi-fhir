@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.interceptor;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -45,13 +47,16 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.interceptor.InterceptorOrders;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.PreviousVersionReader;
+import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -98,11 +103,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Interceptor
 public class PatientIdPartitionInterceptor {
-	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdPartitionInterceptor.class);
-	private static final String PATIENT_STR = "Patient";
 	public static final String PATIENT_COMPARTMENT_NONE = "NONE";
 	public static final String PLACEHOLDER_TO_REFERENCE_KEY =
 			PatientIdPartitionInterceptor.class.getName() + "_placeholderToResource";
+	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdPartitionInterceptor.class);
+	private static final String PATIENT_STR = "Patient";
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -305,6 +310,82 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
+	 * This hook ensures that auto-created placeholders in the patient compartment are given
+	 * the same compartment membership as the source resource which resulted in the creation
+	 * of the placeholder.
+	 * <p>
+	 * For example, suppose you have an ExplanationOfBenefit with references to a
+	 * subject (ExplanationOfBenefit.patient = Patient/A) as well as a coverage
+	 * reference (ExplanationOfBenefit.insurance = Coverage/B). In this case, the
+	 * if the Coverage resource doesn't already exist it will be auto-created. Because
+	 * Coverage is in the patient compartment, the auto-created placeholder will be
+	 * given a reference to the same patient.
+	 * </p>
+	 *
+	 * @since 8.10.0
+	 */
+	@Hook(
+			value = Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE,
+			order = InterceptorOrders.AUTO_CREATE_PLACEHOLDER_MODIFY)
+	void autoCreatePlaceholderReference(AutoCreatePlaceholderReferenceTargetRequest theRequest) {
+		IBaseResource source = theRequest.getSourceResource();
+		IBaseResource target = theRequest.getTargetResourceToCreate();
+		assert source != null;
+		assert target != null;
+
+		RuntimeResourceDefinition targetDefinition = myFhirContext.getResourceDefinition(target.getClass());
+		if (targetDefinition.getName().equals(PATIENT_STR)) {
+			// Patient resources don't need any reference to the compartment owner added,
+			// since they are the compartment owner.
+			return;
+		}
+
+		// What patient compartment is the source resource in?
+		List<IIdType> sourceCompartments =
+				myFhirContext.newTerser().getCompartmentOwnersForResource(PATIENT_STR, source, Set.of());
+		Optional<IIdType> sourceCompartmentOpt = sourceCompartments.stream()
+				.filter(t -> t.getResourceType().equals(PATIENT_STR))
+				.filter(t -> isNotBlank(t.getIdPart()))
+				.findFirst();
+
+		// Given all the possible SPs that define the patient compartment for the newly
+		// created placeholder resource, find one whose path places a reference directly
+		// off the root of the resource, and use it to set the compartment reference.
+		List<RuntimeSearchParam> targetPatientCompartmentSPs =
+				targetDefinition.getSearchParamsForCompartmentName(PATIENT_STR);
+		if (sourceCompartmentOpt.isPresent() && !targetPatientCompartmentSPs.isEmpty()) {
+			for (RuntimeSearchParam targetCompartmentSP : targetPatientCompartmentSPs) {
+				String[] paths = SearchParameterUtil.splitSearchParameterExpressions(targetCompartmentSP.getPath());
+				for (String path : paths) {
+					int firstDotIdx = path.indexOf('.');
+					if (firstDotIdx > 0) {
+						String resourceName = path.substring(0, firstDotIdx);
+						if (resourceName.equals(targetDefinition.getName())) {
+							String restOfPath = path.substring(firstDotIdx + 1);
+							BaseRuntimeChildDefinition child = targetDefinition.getChildByName(restOfPath);
+							if (child != null) {
+
+								BaseRuntimeElementDefinition<?> targetDef = child.getChildByName(restOfPath);
+								if (targetDef != null && "Reference".equals(targetDef.getName())) {
+
+									IBaseReference patientReference = (IBaseReference) myFhirContext
+											.getElementDefinition("Reference")
+											.newInstance();
+									patientReference.setReference(
+											sourceCompartmentOpt.get().getValueAsString());
+
+									child.getMutator().addValue(target, patientReference);
+									return;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Validates that the {@link HapiExtensions#EXT_PATIENT_COMPARTMENT} extension can be honored
 	 * for the given resource. This extension allows explicitly specifying which Patient compartment
 	 * a resource belongs to for partition selection. The partition is then determined based on that
@@ -350,8 +431,8 @@ public class PatientIdPartitionInterceptor {
 	 * {@code Patient/<id>} membership check) is handled by
 	 * {@link #getPartitionFromCompartmentExtension}.</p>
 	 *
-	 * @param theResource the resource being created
-	 * @param thePolicy the compartment storage policy for this resource type
+	 * @param theResource                the resource being created
+	 * @param thePolicy                  the compartment storage policy for this resource type
 	 * @param theCompartmentSearchParams the patient compartment search params for this resource
 	 *                                   type (passed in to avoid recomputation)
 	 * @throws InvalidRequestException if the extension is present on a Patient or a
@@ -411,9 +492,9 @@ public class PatientIdPartitionInterceptor {
 	 * {@link #validateExtensionApplicability}.
 	 * </p>
 	 *
-	 * @param theResource the resource to check for the extension
-	 * @param theRequestDetails the request details
-	 * @param thePolicy the compartment storage policy for this resource type
+	 * @param theResource              the resource to check for the extension
+	 * @param theRequestDetails        the request details
+	 * @param thePolicy                the compartment storage policy for this resource type
 	 * @param theCompartmentIdentities the patient compartment IDs extracted from the resource
 	 * @return the override partition, or empty if the extension is absent
 	 * @throws InvalidRequestException if the extension is present but the value is invalid
