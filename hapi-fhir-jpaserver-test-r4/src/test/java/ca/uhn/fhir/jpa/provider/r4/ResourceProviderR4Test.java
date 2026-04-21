@@ -180,7 +180,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -310,7 +309,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.addBase("BodyStructure").addBase("Procedure");
+		searchParameter.addBase("Procedure");
 		searchParameter.setCode("focalAccess");
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
@@ -353,7 +352,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		searchParameter.setCode("myGender");
 		searchParameter.addBase("Patient").addBase("Person");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
-		searchParameter.setExpression("Patient.gender|Person.gender");
+		searchParameter.setExpression("Patient.gender | Person.gender");
 
 		MethodOutcome result = myClient.create().resource(searchParameter).execute();
 
@@ -363,7 +362,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidRootParam() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.addBase("BodyStructure").addBase("Procedure");
+		searchParameter.addBase("Procedure");
 		searchParameter.setCode("focalAccess");
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");

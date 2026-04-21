@@ -926,4 +926,93 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		details.setParameters(reqParams);
 		return details;
 	}
+
+	@Test
+	void deleteLastResource_withCrossPartitionGoldenResource_works() {
+		setupCrossPartitionGoldenResource();
+		try {
+			Patient jane = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+			assertLinkCount(1);
+
+			SystemRequestDetails reqDetails = new SystemRequestDetails();
+			reqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
+
+			myPatientDao.delete(jane.getIdElement(), reqDetails);
+
+			assertThat(myMdmLinkDao.count()).isEqualTo(0);
+
+			SearchParameterMap spMap = new SearchParameterMap();
+			spMap.setLoadSynchronous(true);
+			assertThat(myPatientDao.search(spMap, reqDetails).isEmpty()).isTrue();
+		} finally {
+			teardownCrossPartitionGoldenResource();
+		}
+	}
+
+	@Test
+	void deleteNonLastSource_withCrossPartitionGoldenResource_works() {
+		setupCrossPartitionGoldenResource();
+		try {
+			Patient jane1 = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+			createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+
+			// verify setup: two MDM MATCH links to the same golden resource
+			assertThat(myMdmLinkDao.findAll()).hasSize(2);
+
+			SystemRequestDetails reqDetails = new SystemRequestDetails();
+			reqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
+
+			myPatientDao.delete(jane1.getIdElement(), reqDetails);
+
+			// golden resource and jane2 remain; exactly one link survives
+			assertThat(myMdmLinkDao.count()).isEqualTo(1);
+
+			SearchParameterMap spMap = new SearchParameterMap();
+			spMap.setLoadSynchronous(true);
+			assertThat(myPatientDao.search(spMap, reqDetails).isEmpty()).isFalse();
+		} finally {
+			teardownCrossPartitionGoldenResource();
+		}
+	}
+
+	@Test
+	void deleteLastSource_withCrossPartitionGoldenResource_softDelete_works() {
+		setupCrossPartitionGoldenResource();
+		myMdmSettings.setAutoExpungeGoldenResources(false);
+		try {
+			Patient jane = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+			assertLinkCount(1);
+
+			SystemRequestDetails reqDetails = new SystemRequestDetails();
+			reqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
+
+			// Delete the last source resource with soft-delete enabled.
+			// The golden resource is in partition 3 ("PARTITION-GOLDEN") but
+			// the request has partition 1 context — deleteGoldenResource must
+			// use an all-partitions request so the soft-delete succeeds.
+			myPatientDao.delete(jane.getIdElement(), reqDetails);
+
+			assertThat(myMdmLinkDao.count()).isEqualTo(0);
+
+			// The golden resource should be soft-deleted — search should not find it
+			assertThat(getAllGoldenPatients()).isEmpty();
+		} finally {
+			myMdmSettings.setAutoExpungeGoldenResources(true);
+			teardownCrossPartitionGoldenResource();
+		}
+	}
+
+	private void setupCrossPartitionGoldenResource() {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setUnnamedPartitionMode(false);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(3).setName("PARTITION-GOLDEN"), null);
+		myMdmSettings.setGoldenResourcePartitionName("PARTITION-GOLDEN");
+		myMdmSettings.setSearchAllPartitionForMatch(true);
+	}
+
+	private void teardownCrossPartitionGoldenResource() {
+		myMdmSettings.setGoldenResourcePartitionName("");
+		myMdmSettings.setSearchAllPartitionForMatch(false);
+	}
 }
