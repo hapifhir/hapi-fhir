@@ -617,7 +617,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						if (date.getPrecision().ordinal() < TemporalPrecisionEnum.DAY.ordinal()) {
 							myPerformanceTracingLogger.firePerformanceInfo(
 									theRequestDetails,
-									"Not creating a " + theParam.getComboSearchParamType() + " combo index entry for index[" + theParam.getName()
+									"Not creating a " + theParam.getComboSearchParamType()
+											+ " combo index entry for index[" + theParam.getName()
 											+ "] because value for component " + next.getParamName()
 											+ " has precision < DAY");
 							continue;
