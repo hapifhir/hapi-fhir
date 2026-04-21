@@ -3034,7 +3034,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 
 		if (isNotBlank(theCodeSystemUrl)
-				&& isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theCodeSystemUrl)) {
+				&& Boolean.TRUE.equals(txTemplate.execute(tx ->
+						isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theCodeSystemUrl)))) {
 			return null;
 		}
 
