@@ -68,11 +68,6 @@ class TermReadSvcImplTest {
 		assertFalse(mySvc.applyFilter("clever jump startle", "lever jump star"));
 	}
 
-	/**
-	 * Tests for GH-7796: TermReadSvcImpl.validateCode must honour CodeSystem.content=not-present
-	 * and return null (fall-through) instead of a "code not found" error, so that downstream
-	 * algorithmic validators (e.g. UCUM) in the ValidationSupportChain can be consulted.
-	 */
 	static class ValidateCodeFixture {
 
 		final TermReadSvcImpl mySpiedSvc;
@@ -92,7 +87,6 @@ class TermReadSvcImplTest {
 			ReflectionTestUtils.setField(mySpiedSvc, "myStorageSettings", new JpaStorageSettings());
 			ReflectionTestUtils.setField(mySpiedSvc, "myVersionCanonicalizer", new VersionCanonicalizer(fhirContext));
 
-			// Make TransactionTemplate just run the callback synchronously
 			TransactionStatus status = new SimpleTransactionStatus();
 			lenient().when(myTxManager.getTransaction(any())).thenReturn(status);
 		}
@@ -105,8 +99,6 @@ class TermReadSvcImplTest {
 			CodeSystem cs = new CodeSystem();
 			cs.setUrl(UCUM_SYSTEM_URL);
 			cs.setContent(theContent);
-			// Lenient — master's validateCode() short-circuits before consulting the CodeSystem's
-			// content (that is the bug). After the fix this stub will be used.
 			lenient().when(myRootValidationSupport.fetchCodeSystem(UCUM_SYSTEM_URL)).thenReturn(cs);
 		}
 
@@ -121,10 +113,6 @@ class TermReadSvcImplTest {
 		}
 	}
 
-	/**
-	 * PRIMARY TDD Red: NOTPRESENT CodeSystem + findCode miss => must return null (fall-through).
-	 * On master this FAILS because the method returns a "code not found" error instead.
-	 */
 	@Test
 	void validateCode_withNotPresentCodeSystemAndMissingCode_returnsNullToAllowChainFallThrough() {
 		ValidateCodeFixture f = new ValidateCodeFixture();
@@ -138,10 +126,6 @@ class TermReadSvcImplTest {
 				.isNull();
 	}
 
-	/**
-	 * Adjacent regression guard: COMPLETE CodeSystem + findCode miss => must still return the
-	 * "code not found" error (unchanged behavior). Should PASS on master and continue to PASS after the fix.
-	 */
 	@Test
 	void validateCode_withCompleteCodeSystemAndMissingCode_returnsCodeNotFoundError() {
 		ValidateCodeFixture f = new ValidateCodeFixture();
