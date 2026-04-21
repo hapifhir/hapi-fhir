@@ -534,11 +534,7 @@ public class SearchParameterUtil {
 	 * @return the extracted resource type prefix (e.g. "Patient") if present, or {@code null}
 	 *         if no type-qualified prefix is found.
 	 */
-	public static String extractTypePrefix(String thePath) {
-		if (thePath == null) {
-			throw new IllegalArgumentException("thePath must not be null");
-		}
-
+	public static String extractTypePrefix(@Nonnull String thePath) {
 		int start = 0;
 		while (start < thePath.length() && (thePath.charAt(start) == '(' || thePath.charAt(start) == ' ')) {
 			start++;

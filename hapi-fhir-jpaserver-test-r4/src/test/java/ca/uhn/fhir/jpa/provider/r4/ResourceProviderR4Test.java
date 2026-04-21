@@ -352,7 +352,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		searchParameter.setCode("myGender");
 		searchParameter.addBase("Patient").addBase("Person");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
-		searchParameter.setExpression("Patient.gender|Person.gender");
+		searchParameter.setExpression("Patient.gender | Person.gender");
 
 		MethodOutcome result = myClient.create().resource(searchParameter).execute();
 
