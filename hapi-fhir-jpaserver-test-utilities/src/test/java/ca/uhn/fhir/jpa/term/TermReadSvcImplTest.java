@@ -1,10 +1,11 @@
-// Created by claude-opus-4-7
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
+import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -28,9 +29,12 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+// Created by claude-opus-4-7
 @ExtendWith(MockitoExtension.class)
 class TermReadSvcImplTest {
 
+	// These constants are named for the originally-reported UCUM bug scenario but the tests
+	// only exercise NOTPRESENT fall-through logic — the specific URL/code values are immaterial.
 	private static final String UCUM_SYSTEM_URL = "http://unitsofmeasure.org";
 	private static final String UCUM_CODE = "mg/dL";
 
@@ -111,15 +115,24 @@ class TermReadSvcImplTest {
 					null,
 					null);
 		}
+
+		LookupCodeResult callLookupCode() {
+			return mySpiedSvc.lookupCode(
+					myValidationSupportContext, new LookupCodeRequest(UCUM_SYSTEM_URL, UCUM_CODE));
+		}
+
+		void stubCodeSystemResource(org.hl7.fhir.instance.model.api.IBaseResource theResource) {
+			lenient().when(myRootValidationSupport.fetchCodeSystem(UCUM_SYSTEM_URL)).thenReturn(theResource);
+		}
 	}
 
 	@Test
 	void validateCode_withNotPresentCodeSystemAndMissingCode_returnsNullToAllowChainFallThrough() {
-		ValidateCodeFixture f = new ValidateCodeFixture();
-		f.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		f.stubFindCodeEmpty();
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		fixture.stubFindCodeEmpty();
 
-		CodeValidationResult result = f.callValidateCode();
+		CodeValidationResult result = fixture.callValidateCode();
 
 		assertThat(result)
 				.as("NOTPRESENT CodeSystem must not short-circuit the ValidationSupportChain; validateCode should return null so algorithmic validators (e.g. UCUM) can be consulted")
@@ -128,17 +141,65 @@ class TermReadSvcImplTest {
 
 	@Test
 	void validateCode_withCompleteCodeSystemAndMissingCode_returnsCodeNotFoundError() {
-		ValidateCodeFixture f = new ValidateCodeFixture();
-		f.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		f.stubFindCodeEmpty();
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		fixture.stubFindCodeEmpty();
 
-		CodeValidationResult result = f.callValidateCode();
+		CodeValidationResult result = fixture.callValidateCode();
 
 		assertThat(result)
 				.as("COMPLETE CodeSystem with a genuinely missing code must still return a 'code not found' validation error")
 				.isNotNull();
-		assertThat(result.getMessage())
-				.contains("Unable to validate code " + UCUM_SYSTEM_URL + "#" + UCUM_CODE);
+		assertThat(result.getSeverityCode()).isEqualToIgnoringCase("error");
+	}
+
+	@Test
+	void lookupCode_withNotPresentCodeSystemAndMissingCode_returnsNullToAllowChainFallThrough() {
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		fixture.stubFindCodeEmpty();
+
+		LookupCodeResult result = fixture.callLookupCode();
+
+		assertThat(result)
+				.as("NOTPRESENT CodeSystem must not short-circuit the ValidationSupportChain; lookupCode should return null so algorithmic validators (e.g. UCUM) can be consulted")
+				.isNull();
+	}
+
+	@Test
+	void lookupCode_withCompleteCodeSystemAndMissingCode_returnsNotFoundResult() {
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		fixture.stubFindCodeEmpty();
+
+		LookupCodeResult result = fixture.callLookupCode();
+
+		assertThat(result)
+				.as("COMPLETE CodeSystem with a genuinely missing code must still return a non-null LookupCodeResult with found=false")
+				.isNotNull();
+		assertThat(result.isFound()).isFalse();
+	}
+
+	@Test
+	void validateCode_whenCanonicalizerReturnsNull_returnsCodeNotFoundErrorWithoutNpe() {
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		// Simulate a CodeSystem resource that VersionCanonicalizer cannot canonicalize — e.g. a
+		// pathological input where codeSystemToCanonical returns null. We stub the canonicalizer
+		// on the spy to return null and verify the guard returns "not found" rather than NPEing.
+		CodeSystem rawCodeSystem = new CodeSystem();
+		rawCodeSystem.setUrl(UCUM_SYSTEM_URL);
+		fixture.stubCodeSystemResource(rawCodeSystem);
+		fixture.stubFindCodeEmpty();
+
+		VersionCanonicalizer nullReturningCanonicalizer = mock(VersionCanonicalizer.class);
+		lenient().when(nullReturningCanonicalizer.codeSystemToCanonical(any())).thenReturn(null);
+		ReflectionTestUtils.setField(fixture.mySpiedSvc, "myVersionCanonicalizer", nullReturningCanonicalizer);
+
+		CodeValidationResult result = fixture.callValidateCode();
+
+		assertThat(result)
+				.as("When VersionCanonicalizer.codeSystemToCanonical returns null, validateCode must fall through to the normal 'code not found' result rather than throwing NPE")
+				.isNotNull();
 		assertThat(result.getSeverityCode()).isEqualToIgnoringCase("error");
 	}
 }

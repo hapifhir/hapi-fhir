@@ -256,8 +256,11 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ParentWithNoChildrenA", null, null);
 		assertTrue(validation.isOk());
 
+		// The CodeSystem created by createCodeSystem() has content=not-present (see BaseTermR4Test#createCodeSystem).
+		// Per GH-7796, a miss against a not-present CodeSystem must return null rather than a
+		// "not found" error so the ValidationSupportChain can fall through to the next validator.
 		validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ZZZZZZZ", null, null);
-		assertFalse(validation.isOk());
+		assertNull(validation);
 	}
 
 	@Test

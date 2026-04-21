@@ -2294,6 +2294,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			append = " - " + unknownCodeMessage + ". " + preExpansionMessage;
 		}
 
+		if (isNotBlank(theSystem) && isCodeSystemContentNotPresent(theValidationSupportContext, theSystem)) {
+			// The included CodeSystem is content=not-present, so fall through to the next
+			// validator in the chain rather than short-circuiting with a non-null "not found".
+			return null;
+		}
+
 		return createCodeNotFoundErrorForValidationResult(theSystem, theCode, null, append);
 	}
 
@@ -2911,6 +2917,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				return result;
 
 			} else {
+				if (isCodeSystemContentNotPresent(theValidationSupportContext, theSystem)) {
+					// Fall through to the next validator in the chain (e.g. UCUM, remote
+					// terminology) rather than short-circuiting with a non-null "not found" result.
+					return null;
+				}
 				return new LookupCodeResult().setFound(false);
 			}
 		});
@@ -3020,8 +3031,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 
 		if (isCodeSystemContentNotPresent(theValidationSupportContext, theCodeSystemUrl)) {
-			// A not-present CodeSystem does not enumerate its codes, so fall through to the next
-			// validator in the chain (e.g. UCUM, remote terminology) rather than returning "not found".
 			return null;
 		}
 
@@ -3029,7 +3038,19 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				theCodeSystemUrl, theCode, null, createMessageAppendForCodeNotFoundInCodeSystem(theCodeSystemUrl));
 	}
 
-	private boolean isCodeSystemContentNotPresent(
+	/**
+	 * Returns <code>true</code> when the CodeSystem identified by the given URL is registered
+	 * in the validation support chain and declares <code>CodeSystem.content = not-present</code>.
+	 * A not-present CodeSystem does not enumerate its codes, so callers should fall through to
+	 * the next validator in the chain (e.g. UCUM, remote terminology) rather than returning
+	 * "not found" on a miss.
+	 * <p>
+	 * The helper operates on the R4 canonical form produced by {@link VersionCanonicalizer#codeSystemToCanonical(IBaseResource)}.
+	 * If the CodeSystem cannot be located or cannot be canonicalized, it returns <code>false</code>
+	 * so the caller preserves the existing "code not found" behavior.
+	 * </p>
+	 */
+	boolean isCodeSystemContentNotPresent(
 			@Nonnull ValidationSupportContext theValidationSupportContext, String theCodeSystemUrl) {
 		IBaseResource codeSystem =
 				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemUrl);
@@ -3037,6 +3058,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			return false;
 		}
 		CodeSystem canonical = myVersionCanonicalizer.codeSystemToCanonical(codeSystem);
+		if (canonical == null) {
+			return false;
+		}
 		return canonical.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT;
 	}
 
