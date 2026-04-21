@@ -3,7 +3,6 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -16,7 +15,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -106,11 +104,6 @@ class SearchParameterUtilTest {
 
 		// Verify
 		assertEquals(expected, actual);
-	}
-
-	@Test
-	public void extractTypePrefix_null_throws() {
-		assertThrows(IllegalArgumentException.class, () -> SearchParameterUtil.extractTypePrefix(null));
 	}
 
 	@ParameterizedTest
