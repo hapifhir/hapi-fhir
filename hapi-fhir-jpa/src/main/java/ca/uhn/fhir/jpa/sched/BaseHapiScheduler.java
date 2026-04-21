@@ -254,18 +254,18 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	public void scheduleCronJob(String theCronExpression, ScheduledJobDefinition theJobDefinition) {
 		Validate.isTrue(isNotBlank(theCronExpression));
 
-		scheduleJob(theCronExpression, null, theJobDefinition);
+		scheduleJob(null, theCronExpression, theJobDefinition);
 	}
 
 	@Override
 	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		Validate.isTrue(theIntervalMillis >= 100);
 
-		scheduleJob(null, theIntervalMillis, theJobDefinition);
+		scheduleJob(theIntervalMillis, null, theJobDefinition);
 	}
 
 	private void scheduleJob(
-			String theCronExpression, Long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+			Long theIntervalMillis, String theCronExpression, ScheduledJobDefinition theJobDefinition) {
 		Validate.isTrue(theIntervalMillis != null || isNotBlank(theCronExpression));
 		Objects.requireNonNull(theJobDefinition);
 		Objects.requireNonNull(theJobDefinition.getJobClass());
@@ -297,10 +297,10 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			if (!CronExpression.isValidExpression(theCronExpression)) {
 				String msg = String.format("Invalid cron expression: %s", theCronExpression);
 				ourLog.error(msg);
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(2923) + " " + msg);
 			}
 
-			ourLog.debug("Scheduling cron job");
+			ourLog.debug("Scheduling cron job with cron expression {}", theCronExpression);
 			CronScheduleBuilder cronSchedule = CronScheduleBuilder.cronSchedule(theCronExpression)
 					.withMisfireHandlingInstructionIgnoreMisfires(); // We ignore misfires in cases of multiple JVMs
 			// each
