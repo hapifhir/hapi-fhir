@@ -101,6 +101,10 @@ By default, when the last source resource in a `MATCH` relationship with a golde
 
 This behaviour can be changed from the default of hard deleting to soft deleting by setting [setAutoExpungeGoldenResources(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setAutoExpungeGoldenResources(boolean)) to false. Soft deleting the golden resource means the golden resource will continue to persist in the database, but the MDM link history for the affected link(s) will still be accessible, which may be useful for auditing.
 
+### Resource Deletion with Cross-Partition Golden Resources
+
+When MDM is configured with a dedicated golden resource partition (via [setGoldenResourcePartitionName(String)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setGoldenResourcePartitionName(java.lang.String)) and [setSearchAllPartitionForMatch(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setSearchAllPartitionForMatch(boolean))), source resources and their linked golden resources may reside in different partitions. When the last source resource linked to a cross-partition golden resource is deleted, HAPI MDM reads and cleans up the golden resource using an all-partitions request context, ensuring that the golden resource and all associated links are deleted regardless of the partition boundary.
+
 # HAPI MDM Technical Details
 
 When MDM is enabled, the HAPI FHIR JPA Server does the following things on startup:
