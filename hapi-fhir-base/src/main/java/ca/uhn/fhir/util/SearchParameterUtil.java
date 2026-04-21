@@ -43,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -150,6 +151,28 @@ public class SearchParameterUtil {
 			return theCompartmentName.substring("Base FHIR compartment definition for ".length());
 		}
 		return theCompartmentName;
+	}
+
+	// Created by Claude Opus 4.7
+	/**
+	 * Returns true if the given SearchParameter base value represents an abstract base type
+	 * ({@code Resource} or {@code DomainResource}), meaning the parameter applies to all resource types.
+	 */
+	public static boolean isAbstractResourceBase(String theBase) {
+		return "Resource".equalsIgnoreCase(theBase) || "DomainResource".equalsIgnoreCase(theBase);
+	}
+
+	// Created by Claude Opus 4.7
+	/**
+	 * Expands a SearchParameter base list: if any entry is an abstract base type ({@code Resource} or
+	 * {@code DomainResource}), returns all concrete resource types known to the context; otherwise returns
+	 * the original list unchanged.
+	 */
+	public static List<String> expandBaseAsStrings(FhirContext theContext, Collection<String> theBase) {
+		if (theBase.stream().anyMatch(SearchParameterUtil::isAbstractResourceBase)) {
+			return new ArrayList<>(theContext.getResourceTypes());
+		}
+		return new ArrayList<>(theBase);
 	}
 
 	public static List<String> getBaseAsStrings(FhirContext theContext, IBaseResource theResource) {
