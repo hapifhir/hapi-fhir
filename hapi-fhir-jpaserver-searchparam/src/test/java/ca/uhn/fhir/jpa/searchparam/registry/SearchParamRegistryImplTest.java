@@ -170,10 +170,10 @@ public class SearchParamRegistryImplTest {
 
 	// Created by Claude Opus 4.7
 	@Test
-	void handleInit_searchParameterWithDomainResourceBase_isRegisteredUnderEveryConcreteResourceType() {
+	void handleInit_searchParameterWithDomainResourceBase_isRegisteredUnderDomainResourceDerivedTypesOnly() {
 		// A client-defined SearchParameter with base=[DomainResource] must be expanded via
-		// SearchParameterUtil.expandBaseAsStrings so it is registered under every concrete
-		// resource type rather than only the literal "DomainResource" key.
+		// SearchParameterUtil.expandBaseWhenNeeded to every DomainResource-derived concrete type
+		// and *not* to types that extend Resource directly (Bundle, Binary, Parameters).
 		IdDt id = new IdDt("SearchParameter/abstract-base-sp");
 		SearchParameter abstractSp = new SearchParameter();
 		abstractSp.setCode("abstract-base-code");
@@ -185,9 +185,14 @@ public class SearchParamRegistryImplTest {
 
 		mySearchParamRegistry.handleInit(List.of(id));
 
+		// DomainResource-derived concrete types — SP should be registered.
 		assertNotNull(mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
 		assertNotNull(mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
 		assertNotNull(mySearchParamRegistry.getActiveSearchParams("Practitioner", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		// Types that extend Resource directly (not DomainResource) — SP should NOT be registered.
+		assertNull(mySearchParamRegistry.getActiveSearchParams("Bundle", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		assertNull(mySearchParamRegistry.getActiveSearchParams("Binary", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		assertNull(mySearchParamRegistry.getActiveSearchParams("Parameters", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
 	}
 
 	@Test

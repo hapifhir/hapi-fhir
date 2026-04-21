@@ -461,7 +461,7 @@ public class SearchParamRegistryImpl
 	}
 
 	private @Nonnull Set<String> expandBaseList(Collection<String> nextBase) {
-		return new HashSet<>(SearchParameterUtil.expandBaseAsStrings(myFhirContext, nextBase));
+		return new HashSet<>(SearchParameterUtil.expandBaseWhenNeeded(myFhirContext, nextBase));
 	}
 
 	@Override

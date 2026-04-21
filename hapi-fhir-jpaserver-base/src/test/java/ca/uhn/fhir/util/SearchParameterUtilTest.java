@@ -3,15 +3,12 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.rest.client.method.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -135,30 +132,29 @@ class SearchParameterUtilTest {
 	// Created by Claude Opus 4.7
 	@ParameterizedTest
 	@ValueSource(strings = {"Resource", "DomainResource", "resource", "DOMAINRESOURCE"})
-	void testExpandBaseAsStrings_withSingleAbstractBase_returnsAllConcreteTypes(String theAbstractBase) {
-		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of(theAbstractBase));
+	void testExpandBaseWhenNeeded_withSingleAbstractBase_returnsAllConcreteTypes(String theAbstractBase) {
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of(theAbstractBase));
 		assertThat(result).containsExactlyInAnyOrderElementsOf(myCtx.getResourceTypes());
 	}
 
 	// Created by Claude Opus 4.7
 	@Test
-	void testExpandBaseAsStrings_withMixedConcreteAndAbstractBase_expandsToAllConcreteTypes() {
-		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of("Patient", "DomainResource"));
+	void testExpandBaseWhenNeeded_withMixedConcreteAndAbstractBase_expandsToAllConcreteTypes() {
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("Patient", "DomainResource"));
 		assertThat(result).containsExactlyInAnyOrderElementsOf(myCtx.getResourceTypes());
 	}
 
 	// Created by Claude Opus 4.7
 	@Test
-	void testExpandBaseAsStrings_withOnlyConcreteBases_returnsInputUnchanged() {
-		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of("Patient", "Observation"));
+	void testExpandBaseWhenNeeded_withOnlyConcreteBases_returnsInputUnchanged() {
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("Patient", "Observation"));
 		assertThat(result).containsExactly("Patient", "Observation");
 	}
 
 	// Created by Claude Opus 4.7
 	@Test
-	void testExpandBaseAsStrings_withEmptyList_returnsEmpty() {
-		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of());
+	void testExpandBaseWhenNeeded_withEmptyList_returnsEmpty() {
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of());
 		assertThat(result).isEmpty();
 	}
-
 }

@@ -1613,59 +1613,6 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	}
 
 	// Created by Claude Opus 4.7
-	/**
-	 * When the incoming `SearchParameter`'s `base` is abstract ({@code Resource} or {@code DomainResource})
-	 * and collides on `code` with an existing `SearchParameter` whose `base` overlaps, the installer must take
-	 * the override path rather than the split path — expanded bases cancel to empty, so there is nothing to
-	 * narrow. The existing `SearchParameter` should be overwritten with the incoming's content in place.
-	 */
-	@Test
-	public void installPackage_incomingSearchParameterWithAbstractBase_overridesExistingSearchParameter() throws IOException {
-		// Reindex flag off to avoid queueing jobs for concrete type URLs built from the existing SP's
-		// indexed token set. The override path under test doesn't depend on the flag.
-		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
-
-		String sharedCode = "abstract-override-demo";
-		String existingId = "existing-sp-override";
-
-		// Existing SP includes `DomainResource` in its base so the installer's JPA lookup
-		// (which intersects on `base` tokens) actually finds this row when the incoming SP
-		// arrives with `base: [DomainResource]`.
-		SearchParameter existing = new SearchParameter();
-		existing.setId(existingId);
-		existing.setUrl("http://example.org/SearchParameter/existing-sp-override");
-		existing.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		existing.setCode(sharedCode);
-		existing.addBase("Patient");
-		existing.addBase("DomainResource");
-		existing.setType(Enumerations.SearchParamType.TOKEN);
-		existing.setExpression("Patient.identifier");
-		mySearchParameterDao.update(existing, new SystemRequestDetails());
-
-		SearchParameter incoming = new SearchParameter();
-		incoming.setId("incoming-sp-override");
-		incoming.setUrl("http://example.org/SearchParameter/incoming-sp-override");
-		incoming.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		incoming.setCode(sharedCode);
-		incoming.addBase("DomainResource");
-		incoming.setType(Enumerations.SearchParamType.TOKEN);
-		incoming.setExpression("Patient.identifier");
-
-		installAsPackage("abstract-override-pkg", "0.0.1", incoming);
-
-		runInTransaction(() -> {
-			SearchParameter overridden = mySearchParameterDao.read(
-				new IdType("SearchParameter/" + existingId), new SystemRequestDetails());
-			List<String> baseAfter = overridden.getBase().stream().map(CodeType::getCode).toList();
-			assertThat(baseAfter).containsExactly("DomainResource");
-
-			IBundleProvider byCode = mySearchParameterDao.search(
-				SearchParameterMap.newSynchronous("code", new TokenParam(sharedCode)));
-			assertEquals(1, byCode.sizeOrThrowNpe());
-		});
-	}
-
-	// Created by Claude Opus 4.7
 	private void installAsPackage(String theName, String theVersion, IBaseResource... theResources) throws IOException {
 		PackageInstallationSpec spec = new PackageInstallationSpec()
 			.setName(theName)

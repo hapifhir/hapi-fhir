@@ -35,7 +35,7 @@ public class ReadOnlySearchParamCacheTest {
 	@Test
 	void fromFhirContext_builtInAbstractBaseSearchParameter_isRegisteredUnderEveryConcreteResourceType() {
 		// The FHIR R4 core spec ships SearchParameters such as "_id" with base=[Resource].
-		// fromFhirContext must delegate to SearchParameterUtil.expandBaseAsStrings so the SP
+		// fromFhirContext must delegate to SearchParameterUtil.expandBaseWhenNeeded so the SP
 		// lands under every concrete resource type rather than under the literal "Resource" key.
 		FhirContext ctx = FhirContext.forR4Cached();
 		SearchParameterCanonicalizer canonicalizer = new SearchParameterCanonicalizer(ctx);
