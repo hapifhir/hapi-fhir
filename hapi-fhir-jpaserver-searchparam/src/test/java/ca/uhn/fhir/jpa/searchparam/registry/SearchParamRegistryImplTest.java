@@ -168,6 +168,28 @@ public class SearchParamRegistryImplTest {
 		assertEquals(32, mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).size());
 	}
 
+	// Created by Claude Opus 4.7
+	@Test
+	void handleInit_searchParameterWithDomainResourceBase_isRegisteredUnderEveryConcreteResourceType() {
+		// A client-defined SearchParameter with base=[DomainResource] must be expanded via
+		// SearchParameterUtil.expandBaseAsStrings so it is registered under every concrete
+		// resource type rather than only the literal "DomainResource" key.
+		IdDt id = new IdDt("SearchParameter/abstract-base-sp");
+		SearchParameter abstractSp = new SearchParameter();
+		abstractSp.setCode("abstract-base-code");
+		abstractSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		abstractSp.setType(Enumerations.SearchParamType.TOKEN);
+		abstractSp.setExpression("Patient.identifier");
+		abstractSp.addBase("DomainResource");
+		when(mySearchParamProvider.read(id)).thenReturn(abstractSp);
+
+		mySearchParamRegistry.handleInit(List.of(id));
+
+		assertNotNull(mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		assertNotNull(mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		assertNotNull(mySearchParamRegistry.getActiveSearchParams("Practitioner", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+	}
+
 	@Test
 	public void testRefreshAfterExpiry() {
 		mySearchParamRegistry.requestRefresh();

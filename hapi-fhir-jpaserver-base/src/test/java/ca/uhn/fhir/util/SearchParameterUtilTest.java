@@ -14,11 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -108,6 +110,55 @@ class SearchParameterUtilTest {
 
 		// Verify
 		assertEquals(expected, actual);
+	}
+
+	// Created by Claude Opus 4.7
+	@ParameterizedTest
+	@ValueSource(strings = {"Resource", "DomainResource", "resource", "RESOURCE", "domainresource", "DOMAINRESOURCE"})
+	void testIsAbstractResourceBase_returnsTrueForAbstractBases(String theBase) {
+		assertTrue(SearchParameterUtil.isAbstractResourceBase(theBase));
+	}
+
+	// Created by Claude Opus 4.7
+	@ParameterizedTest
+	@ValueSource(strings = {"Patient", "Observation", "Practitioner", "ValueSet", "StructureDefinition"})
+	void testIsAbstractResourceBase_returnsFalseForConcreteBases(String theBase) {
+		assertFalse(SearchParameterUtil.isAbstractResourceBase(theBase));
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testIsAbstractResourceBase_returnsFalseForEmptyString() {
+		assertFalse(SearchParameterUtil.isAbstractResourceBase(""));
+	}
+
+	// Created by Claude Opus 4.7
+	@ParameterizedTest
+	@ValueSource(strings = {"Resource", "DomainResource", "resource", "DOMAINRESOURCE"})
+	void testExpandBaseAsStrings_withSingleAbstractBase_returnsAllConcreteTypes(String theAbstractBase) {
+		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of(theAbstractBase));
+		assertThat(result).containsExactlyInAnyOrderElementsOf(myCtx.getResourceTypes());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testExpandBaseAsStrings_withMixedConcreteAndAbstractBase_expandsToAllConcreteTypes() {
+		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of("Patient", "DomainResource"));
+		assertThat(result).containsExactlyInAnyOrderElementsOf(myCtx.getResourceTypes());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testExpandBaseAsStrings_withOnlyConcreteBases_returnsInputUnchanged() {
+		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of("Patient", "Observation"));
+		assertThat(result).containsExactly("Patient", "Observation");
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testExpandBaseAsStrings_withEmptyList_returnsEmpty() {
+		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of());
+		assertThat(result).isEmpty();
 	}
 
 }

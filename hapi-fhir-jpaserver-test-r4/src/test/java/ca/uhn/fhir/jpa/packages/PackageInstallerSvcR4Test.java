@@ -41,8 +41,10 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.NamingSystem;
@@ -54,6 +56,7 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,7 +75,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -1554,6 +1559,140 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertEquals(Enumerations.PublicationStatus.ACTIVE, sp.getStatus());
 		assertEquals("2.2", sp.getVersion());
 
+	}
+
+	// Created by Claude Opus 4.7
+	/**
+	 * When an existing SearchParameter has an abstract base ({@code Resource} or
+	 * {@code DomainResource}) that overlaps the incoming SP's concrete base, the installer's
+	 * split path in {@code updateExistingSearchParameterBaseIfNecessary} must expand the
+	 * abstract base before subtracting. Pre-fix, raw string {@code removeAll} left the
+	 * abstract token in place and the existing SP was not narrowed.
+	 */
+	@Test
+	public void installPackage_existingSearchParameterHasAbstractBaseOverlappingIncoming_narrowsByExpansion() throws IOException {
+		// Perf-only override: the split rewrites the existing SP's base to every concrete
+		// type except the incoming's — the resulting reindex request spans ~150 URLs.
+		// Disabling the reindex flag avoids queueing that job while the split itself
+		// (the code under test) runs unchanged.
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
+
+		String sharedCode = "abstract-base-demo";
+		String existingId = "existing-sp";
+
+		SearchParameter existing = new SearchParameter();
+		existing.setId(existingId);
+		existing.setUrl("http://example.org/SearchParameter/existing-sp");
+		existing.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		existing.setCode(sharedCode);
+		existing.addBase("Patient");
+		existing.addBase("DomainResource");
+		existing.setType(Enumerations.SearchParamType.TOKEN);
+		existing.setExpression("Patient.identifier");
+		mySearchParameterDao.update(existing, new SystemRequestDetails());
+
+		SearchParameter incoming = new SearchParameter();
+		incoming.setId("incoming-sp");
+		incoming.setUrl("http://example.org/SearchParameter/incoming-sp");
+		incoming.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		incoming.setCode(sharedCode);
+		incoming.addBase("Patient");
+		incoming.setType(Enumerations.SearchParamType.TOKEN);
+		incoming.setExpression("Patient.identifier");
+
+		installAsPackage("abstract-base-pkg", "0.0.1", incoming);
+
+		runInTransaction(() -> {
+			SearchParameter narrowed = mySearchParameterDao.read(
+				new IdType("SearchParameter/" + existingId), new SystemRequestDetails());
+			List<String> baseAfter = narrowed.getBase().stream().map(CodeType::getCode).toList();
+			assertThat(baseAfter).doesNotContain("Patient");
+			assertThat(baseAfter).doesNotContain("DomainResource");
+			assertThat(baseAfter).contains("Observation");
+		});
+	}
+
+	// Created by Claude Opus 4.7
+	/**
+	 * When the incoming `SearchParameter`'s `base` is abstract ({@code Resource} or {@code DomainResource})
+	 * and collides on `code` with an existing `SearchParameter` whose `base` overlaps, the installer must take
+	 * the override path rather than the split path — expanded bases cancel to empty, so there is nothing to
+	 * narrow. The existing `SearchParameter` should be overwritten with the incoming's content in place.
+	 */
+	@Test
+	public void installPackage_incomingSearchParameterWithAbstractBase_overridesExistingSearchParameter() throws IOException {
+		// Reindex flag off to avoid queueing jobs for concrete type URLs built from the existing SP's
+		// indexed token set. The override path under test doesn't depend on the flag.
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
+
+		String sharedCode = "abstract-override-demo";
+		String existingId = "existing-sp-override";
+
+		// Existing SP includes `DomainResource` in its base so the installer's JPA lookup
+		// (which intersects on `base` tokens) actually finds this row when the incoming SP
+		// arrives with `base: [DomainResource]`.
+		SearchParameter existing = new SearchParameter();
+		existing.setId(existingId);
+		existing.setUrl("http://example.org/SearchParameter/existing-sp-override");
+		existing.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		existing.setCode(sharedCode);
+		existing.addBase("Patient");
+		existing.addBase("DomainResource");
+		existing.setType(Enumerations.SearchParamType.TOKEN);
+		existing.setExpression("Patient.identifier");
+		mySearchParameterDao.update(existing, new SystemRequestDetails());
+
+		SearchParameter incoming = new SearchParameter();
+		incoming.setId("incoming-sp-override");
+		incoming.setUrl("http://example.org/SearchParameter/incoming-sp-override");
+		incoming.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		incoming.setCode(sharedCode);
+		incoming.addBase("DomainResource");
+		incoming.setType(Enumerations.SearchParamType.TOKEN);
+		incoming.setExpression("Patient.identifier");
+
+		installAsPackage("abstract-override-pkg", "0.0.1", incoming);
+
+		runInTransaction(() -> {
+			SearchParameter overridden = mySearchParameterDao.read(
+				new IdType("SearchParameter/" + existingId), new SystemRequestDetails());
+			List<String> baseAfter = overridden.getBase().stream().map(CodeType::getCode).toList();
+			assertThat(baseAfter).containsExactly("DomainResource");
+
+			IBundleProvider byCode = mySearchParameterDao.search(
+				SearchParameterMap.newSynchronous("code", new TokenParam(sharedCode)));
+			assertEquals(1, byCode.sizeOrThrowNpe());
+		});
+	}
+
+	// Created by Claude Opus 4.7
+	private void installAsPackage(String theName, String theVersion, IBaseResource... theResources) throws IOException {
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName(theName)
+			.setVersion(theVersion)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setPackageContents(buildPackage(theName, theVersion, theResources));
+		myPackageInstallerSvc.install(spec);
+	}
+
+	// Created by Claude Opus 4.7
+	private byte[] buildPackage(String theName, String theVersion, IBaseResource... theResources) throws IOException {
+		PackageGenerator manifest = new PackageGenerator();
+		manifest.name(theName);
+		manifest.version(theVersion);
+		manifest.description("test package");
+		manifest.fhirVersions(List.of(FhirVersionEnum.R4.getFhirVersionString()));
+
+		NpmPackage pkg = NpmPackage.empty(manifest);
+		for (IBaseResource resource : theResources) {
+			String type = resource.getClass().getSimpleName();
+			String filename = type + "-" + resource.getIdElement().getIdPart() + ".json";
+			String json = myFhirContext.newJsonParser().encodeResourceToString(resource);
+			pkg.addFile("package", filename, json.getBytes(StandardCharsets.UTF_8), type);
+		}
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		pkg.save(out);
+		return out.toByteArray();
 	}
 
 
