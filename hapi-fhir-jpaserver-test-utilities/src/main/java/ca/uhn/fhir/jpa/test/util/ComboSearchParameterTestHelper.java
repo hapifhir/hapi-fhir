@@ -29,13 +29,15 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SearchParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class ComboSearchParameterTestHelper {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(ComboSearchParameterTestHelper.class);
 
 	private final IFhirResourceDao mySearchParameterDao;
 	private final VersionCanonicalizer myVersionCanonicalizer;
@@ -165,6 +167,10 @@ public class ComboSearchParameterTestHelper {
 	}
 
 	public IBaseResource createObservationSubjectCodeAndRangedEffective() {
+		return createObservationSubjectCodeEffective(false, true);
+	}
+
+	public IBaseResource createObservationSubjectCodeEffective(boolean theUnique, boolean theDateComponentRanged) {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/observation-subject");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
@@ -203,25 +209,31 @@ public class ComboSearchParameterTestHelper {
 		sp.addComponent()
 			.setExpression("Observation")
 			.setDefinition("SearchParameter/observation-code");
-		sp.addComponent()
+		SearchParameter.SearchParameterComponentComponent dateComponent = sp.addComponent()
 			.setExpression("Observation")
-			.setDefinition("SearchParameter/observation-date")
-			.addExtension()
-			.setUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED)
-			.setValue(new BooleanType(true));
+			.setDefinition("SearchParameter/observation-date");
+		if (theDateComponentRanged) {
+			dateComponent
+				.addExtension()
+				.setUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED)
+				.setValue(new BooleanType(true));
+		}
 
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
-			.setValue(new BooleanType(false));
+			.setValue(new BooleanType(theUnique));
 		IBaseResource retVal = storeSearchParameter(sp);
 
 		mySearchParamRegistry.forceRefresh();
-
 		return retVal;
 	}
 
 	private IBaseResource storeSearchParameter(SearchParameter theSearchParameter) {
 		assertTrue(theSearchParameter.getIdElement().hasIdPart());
+		ourLog.atInfo()
+			.setMessage("Storing SP:\n{}")
+			.addArgument(() -> FhirContext.forR5Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(theSearchParameter))
+			.log();
 		IBaseResource nonCanonicalResource = fromCanonoical(theSearchParameter);
 		mySearchParameterDao.update(nonCanonicalResource, new SystemRequestDetails());
 		return nonCanonicalResource;
@@ -231,8 +243,54 @@ public class ComboSearchParameterTestHelper {
 		return myVersionCanonicalizer.searchParameterFromCanonical(theSearchParameter);
 	}
 
+	public void createDocumentSubjectAndRangedDateSp() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("Bundle-composition-subject");
+		sp.setUrl("http://example.org/SearchParameter/Bundle-composition-subject");
+		sp.setName("composition.subject");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode("composition.subject");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.BUNDLE);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Bundle.where(type = 'document').entry[0].resource.as(Composition).subject");
+		storeSearchParameter(sp);
 
-    @FunctionalInterface
+		sp = new SearchParameter();
+		sp.setId("Bundle-composition-date");
+		sp.setUrl("http://example.org/SearchParameter/Bundle-composition-date");
+		sp.setName("composition.date");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode("composition.date");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.BUNDLE);
+		sp.setType(Enumerations.SearchParamType.DATE);
+		sp.setExpression("Bundle.where(type = 'document').entry[0].resource.as(Composition).date");
+		storeSearchParameter(sp);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/Bundle-composition-subject-and-date");
+		sp.addExtension().setUrl("http://hapifhir.io/fhir/StructureDefinition/sp-unique").setValue(new BooleanType(false));
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode("bundle-composition-subject-and-type");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.BUNDLE);
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setExpression("Bundle");
+		sp.addComponent()
+			.setDefinition("SearchParameter/Bundle-composition-subject")
+			.setExpression("Bundle");
+		sp.addComponent()
+			.setDefinition("SearchParameter/Bundle-composition-date")
+			.setExpression("Bundle")
+			.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED)
+			.setValue(new BooleanType(true));
+		storeSearchParameter(sp);
+
+		mySearchParamRegistry.forceRefresh();
+
+	}
+
+
+	@FunctionalInterface
 	public interface ISearchParamCustomizer {
 
 		void accept(SearchParameter theSearchParameter);

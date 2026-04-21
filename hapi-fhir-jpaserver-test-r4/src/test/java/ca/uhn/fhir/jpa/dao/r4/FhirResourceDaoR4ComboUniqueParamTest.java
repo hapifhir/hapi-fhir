@@ -10,7 +10,10 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -48,6 +51,7 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
@@ -61,6 +65,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -76,6 +81,8 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	@AfterEach
 	public void purgeUniqueIndexes() {
@@ -1335,22 +1342,56 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	}
 
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', textBlock = """
+		# Resource Date            | Search URL Date             | UseComboIdx | UseDateIdx
+		2011-01-01                 | 2011-01-01                  | true        | false
+		2011-01-01                 | 2011-01                     | false       | true
+		2011-01                    | 2011-01                     | false       | true
+		2011-01-01T12:11:22-04:00  | 2011-01-01                  | true        | false
+		2011-01-01T12:11:22-04:00  | 2011-01-01T12:11:22-04:00   | true        | true
+		""")
+	public void testUniqueValuesAreIndexed_DateRefAndToken(String theResourceDate, String theSearchDate, boolean theUseComboIndex, boolean theUseDateIndex) {
+		myComboSearchParameterTestHelper.createObservationSubjectCodeEffective(true, false);
 
-	@Test
-	public void testUniqueValuesAreIndexed_DateAndToken() {
-		createBirthdateAndGenderSps(true);
+		createPatient(withId("P1"));
 
-		Patient pt1 = new Patient();
-		pt1.setGender(Enumerations.AdministrativeGender.MALE);
-		pt1.setBirthDateElement(new DateType("2011-01-01"));
-		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
+		createObservation(
+			withId("O1"),
+			withSubject("Patient/P1"),
+			withObservationCode("http://foo", "bar"),
+			withObservationEffectiveInstant(theResourceDate)
+		);
 
 		runInTransaction(()->{
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedComboStringUniqueDao.findAll();
-			assertThat(uniques.size()).as(uniques.toString()).isEqualTo(1);
-			assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
-			assertEquals("Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale", uniques.get(0).getIndexString());
+			if (theResourceDate.length() >= 10) {
+				assertThat(uniques).hasSize(1);
+				assertEquals("Observation/O1", uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				assertEquals("Observation?code=http%3A%2F%2Ffoo%7Cbar&date=2011-01-01&subject=Patient%2FP1", uniques.get(0).getIndexString());
+			} else {
+				assertThat(uniques).isEmpty();
+			}
 		});
+
+		// Test
+		String search = "Observation?code=http://foo|bar&date=" + theSearchDate + "&subject=Patient/P1";
+		SearchParameterMap spMap = myMatchUrlService.getResourceSearch(search).getSearchParameterMap();
+		spMap.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myObservationDao.search(spMap, newSrd());
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(results);
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		assertThat(resultIds).containsExactly("Observation/O1");
+
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectSqlAtIndex(0).mightContain(theUseComboIndex, ResourceIndexedComboStringUnique.HFJ_IDX_CMP_STRING_UNIQ)
+				.selectSqlAtIndex(0).mightContain(theUseDateIndex, ResourceIndexedSearchParamDate.HFJ_SPIDX_DATE)
+		);
 	}
 
 	@Test
@@ -1762,50 +1803,6 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 			assertThat(e.getMessage())
 				.contains("new unique index created by SearchParameter/observation-date-code");
 		}
-	}
-
-	@Test
-	public void testUniqueComboSearchWithDateNotUsingUniqueIndex() {
-		createBirthdateAndGenderSps(true);
-
-		Patient pt1 = new Patient();
-		pt1.setGender(Enumerations.AdministrativeGender.MALE);
-		pt1.setBirthDateElement(new DateType("2011-01-01"));
-		String pId = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless().getValue();
-
-		myCaptureQueriesListener.clear();
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronousUpTo(100);
-		params.add("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male"));
-		params.add("birthdate", new DateParam("2011-01-01"));
-
-		IBundleProvider results = myPatientDao.search(params, mySrd);
-		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(pId);
-		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
-		String unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql).doesNotContain("HFJ_IDX_CMP_STRING_UNIQ");
-	}
-
-	@Test
-	public void testUniqueComboSearchWithDateTimeNotUsingUniqueIndex() {
-		createUniqueObservationDateCode();
-
-		Observation obs = new Observation();
-		obs.getCode().addCoding().setSystem("foo").setCode("bar");
-		obs.setEffective(new DateTimeType("2017-10-10T00:00:00"));
-		String obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless().getValue();
-
-		myCaptureQueriesListener.clear();
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronousUpTo(100);
-		params.add("code", new TokenParam("foo", "bar"));
-		params.add("date", new DateParam("2017-10-10T00:00:00"));
-
-		IBundleProvider results = myObservationDao.search(params, mySrd);
-		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(obsId);
-		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
-		String unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql).doesNotContain("HFJ_IDX_CMP_STRING_UNIQ");
 	}
 
 	@Test

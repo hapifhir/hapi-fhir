@@ -613,12 +613,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 					String value = nextParamAsClientParam.getValueAsQueryToken();
 
-					if (theParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE
-							&& nextParamAsClientParam instanceof DateParam date) {
+					if (nextParamAsClientParam instanceof DateParam date) {
 						if (date.getPrecision().ordinal() < TemporalPrecisionEnum.DAY.ordinal()) {
 							myPerformanceTracingLogger.firePerformanceInfo(
 									theRequestDetails,
-									"Not creating a non-unique combo index entry for index[" + theParam.getName()
+									"Not creating a " + theParam.getComboSearchParamType() + " combo index entry for index[" + theParam.getName()
 											+ "] because value for component " + next.getParamName()
 											+ " has precision < DAY");
 							continue;

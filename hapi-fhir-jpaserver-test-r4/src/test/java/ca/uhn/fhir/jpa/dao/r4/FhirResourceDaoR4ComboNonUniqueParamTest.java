@@ -479,6 +479,62 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 
 	@ParameterizedTest
+	@CsvSource(delimiter = '|', textBlock = """
+		# Use Date | Query
+		# Table    |
+		false      | Bundle?composition.date=2022-01-02&composition.subject=Patient/PAT-0
+		false      | Bundle?composition.date=ge2022-01-01&composition.subject=Patient/PAT-0
+		false      | Bundle?composition.date=gt2022-01-01&composition.subject=Patient/PAT-0
+		false      | Bundle?composition.date=lt2022-01-03&composition.subject=Patient/PAT-0
+		false      | Bundle?composition.date=le2022-01-03&composition.subject=Patient/PAT-0
+		
+		true       | Bundle?composition.date=ge2022-01-01T12:00:00Z&composition.subject=Patient/PAT-0
+		
+		false      | Bundle?composition.date=ge2022-01-01&composition.date=le2022-01-03&composition.subject=Patient/PAT-0
+		""")
+	void testRangedDate_Chained(boolean theExpectUseDateTable, String theSearch) {
+		// Setup
+		myComboSearchParameterTestHelper.createDocumentSubjectAndRangedDateSp();
+
+		createPatient(withId("PAT-0"), withActiveTrue());
+
+		Bundle document = new Bundle();
+		document.setId("DOC-0");
+		document.setType(Bundle.BundleType.DOCUMENT);
+		Composition composition = new Composition();
+		composition.getSubject().setReference("Patient/PAT-0");
+		composition.setDateElement(new DateTimeType("2022-01-02T03:44:55Z"));
+		document.addEntry().setResource(composition);
+		myBundleDao.update(document, mySrd);
+
+		boolean theExpectMatch = true;
+		boolean theExpectUseComboTable = true;
+
+		logAllNonUniqueIndexes();
+
+		// Test
+		SearchParameterMap spMap = myMatchUrlService.getResourceSearch(theSearch).getSearchParameterMap();
+		spMap.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myBundleDao.search(spMap, newSrd());
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(results);
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		assertThat(resultIds).containsExactly("Bundle/DOC-0");
+
+		assertThat(myCaptureQueriesListener).has(
+			// Make sure we searched the non-unique index table
+			onCurrentThread()
+				.selectSqlAtIndex(0).contains(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.selectSqlAtIndex(0).mightContain(theExpectUseDateTable, ResourceIndexedSearchParamDate.HFJ_SPIDX_DATE)
+		);
+
+	}
+
+
+	@ParameterizedTest
 	@CsvSource(textBlock = """
 		# Observation Date      , Search URL Date         , Expect Match , Expect Use Date Index Table
 		2021-02-02              , 2021-02-02              , true         , false

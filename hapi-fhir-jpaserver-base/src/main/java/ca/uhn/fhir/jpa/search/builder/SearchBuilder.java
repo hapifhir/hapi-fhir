@@ -169,6 +169,7 @@ import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.jpa.util.InClauseNormalizer.normalizeIdListForInClause;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
+import static ca.uhn.fhir.rest.param.ParameterUtil.coerceToDateParam;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
@@ -2527,7 +2528,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						List<DateParam> dateParamOrList = new ArrayList<>(sameNameParametersOrList.size());
 						for (IQueryParameterType dateParamUntyped : sameNameParametersOrList) {
-							DateParam dateParam = (DateParam) dateParamUntyped;
+							DateParam dateParam = coerceToDateParam(dateParamUntyped);
 							switch (getIfNull(dateParam.getPrefix(), EQUAL)) {
 								case APPROXIMATE, ENDS_BEFORE, STARTS_AFTER -> {
 									myPerformanceTracingLogger.firePerformanceInfo(
@@ -2571,7 +2572,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					} else {
 
 						if (!validateParamValuesAreValidForComboParam(
-								theRequest, theParams, theComboParam, nextComponent, sameNameParametersOrList)) {
+								theRequest, theParams, nextComponent, sameNameParametersOrList)) {
 							continue;
 						}
 
@@ -2624,8 +2625,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							if (!validateParamValuesAreValidForComboParam(
 									theRequest,
 									theParams,
-									theComboParam,
-									nextComponent,
+								nextComponent,
 									combinedNameParametersOrList)) {
 								continue;
 							}
@@ -2762,16 +2762,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private boolean validateParamValuesAreValidForComboParam(
 			RequestDetails theRequest,
 			@Nonnull SearchParameterMap theParams,
-			RuntimeSearchParam theComboParam,
 			JpaParamUtil.ComponentAndCorrespondingParam theComboComponent,
 			List<IQueryParameterType> theValues) {
 
 		for (IQueryParameterType nextOrValue : theValues) {
-			if (nextOrValue instanceof DateParam dateParam) {
+			if (theComboComponent.getComponentParameter().getParamType() == RestSearchParameterTypeEnum.DATE) {
+				DateParam dateParam = coerceToDateParam(nextOrValue);
 				if (dateParam.getPrecision().ordinal() < TemporalPrecisionEnum.DAY.ordinal()) {
 					String message = "Search with params " + describeParams(theParams)
-							+ " is not a candidate for combo searching - Date search with less than DAY precision for parameter '"
-							+ theComboComponent.getCombinedParamName() + "'";
+						+ " is not a candidate for combo searching - Date search with less than DAY precision for parameter '"
+						+ theComboComponent.getCombinedParamName() + "'";
 					myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
 					return false;
 				}
@@ -2816,18 +2816,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				return false;
 			}
 
-			// Date params are not eligible for using composite unique index
-			// as index could contain date with different precision (e.g. DAY, SECOND)
-			if (theComboParam.getComboSearchParamType() == ComboSearchParamType.UNIQUE) {
-				if (isDateSearchParameter(nextOrValue, theComboComponent)) {
-					ourLog.debug(
-							"Search with params {} is not a candidate for combo searching - "
-									+ "Unique combo search parameter '{}' has DATE type",
-							describeParams(theParams),
-							theComboComponent);
-					return false;
-				}
-			}
 		}
 
 		return true;
@@ -2848,23 +2836,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Returns true when the value is a DateParam, or when the component's registered
-	 * SP is a DATE type. The latter handles dotted SP codes (e.g.
-	 * "composition.medicationdispense.whenprepared") where the URL parser produces
-	 * a ReferenceParam instead of a DateParam.
-	 */
-	private boolean isDateSearchParameter(
-			IQueryParameterType theParam, JpaParamUtil.ComponentAndCorrespondingParam theComponent) {
-		if (theParam instanceof DateParam) {
-			return true;
-		}
-		String combinedName = theComponent.getCombinedParamName();
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam(
-				myResourceName, combinedName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
-		return sp != null && RestSearchParameterTypeEnum.DATE.equals(sp.getParamType());
 	}
 
 	@Override

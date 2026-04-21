@@ -364,6 +364,13 @@ public class ParameterUtil {
 				&& zeroIfNull(theDateParam.getMillis()) == 0);
 	}
 
+	public static DateParam coerceToDateParam(IQueryParameterType theParameter) {
+		if (theParameter instanceof DateParam dateParam) {
+			return dateParam;
+		}
+		return new DateParam(theParameter.getValueAsQueryToken());
+	}
+
 	private static int zeroIfNull(final Integer theInteger) {
 		return theInteger != null ? theInteger : 0;
 	}
