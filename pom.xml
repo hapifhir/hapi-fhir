@@ -980,6 +980,11 @@
 			<id>MadsSwensson</id>
 			<name>Mads Swensson</name>
 		</developer>
+		<developer>
+			<id>nathanloyer</id>
+			<name>Nathan Loyer</name>
+			<organization>Athena Health</organization>
+		</developer>
 	</developers>
 
 	<licenses>
