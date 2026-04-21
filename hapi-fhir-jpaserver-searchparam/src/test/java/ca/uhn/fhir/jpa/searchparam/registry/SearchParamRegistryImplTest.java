@@ -591,6 +591,39 @@ public class SearchParamRegistryImplTest {
 	}
 
 	@Test
+	void testNonDisableableBuiltInSearchParam_ActiveDbWithNonDisabledBaseNarrowed_preservesExistingCacheEntry() {
+		// Created by Claude Sonnet 4.6
+		// conformance-context's bases includes the non-disableable SearchParameter.
+		// A DB record narrowed to [CapabilityStatement] only — removing
+		// SearchParameter — should be ignored; the guard detects the missing non-disableable base
+		// and returns 0, preserving the full built-in cache entry.
+		SearchParameter narrowedConformanceContext = new SearchParameter();
+		narrowedConformanceContext.setId("SearchParameter/conformance-context");
+		narrowedConformanceContext.setUrl("http://hl7.org/fhir/SearchParameter/conformance-context");
+		narrowedConformanceContext.setCode("context");
+		narrowedConformanceContext.setName("context");
+		narrowedConformanceContext.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		narrowedConformanceContext.setType(Enumerations.SearchParamType.TOKEN);
+		narrowedConformanceContext.setExpression("CapabilityStatement.useContext");
+		narrowedConformanceContext.addBase("CapabilityStatement"); // SearchParameter (non-disableable) removed
+
+		ArrayList<ResourceTable> entities = new ArrayList<>(ourEntities);
+		entities.add(createEntity(++ourLastId, 1));
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any()))
+				.thenReturn(ResourceVersionMap.fromResourceTableEntities(entities));
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(narrowedConformanceContext));
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
+		assertDbCalled();
+
+		// Guard fired — SearchParameter:context is preserved from the built-in
+		RuntimeSearchParam conformanceContext = mySearchParamRegistry.getActiveSearchParam(
+				"SearchParameter", "context", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertNotNull(conformanceContext);
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, conformanceContext.getStatus());
+	}
+
+	@Test
 	void testMultiBaseSpWithNonDisableableBase_RetiredInDbKeepsAllBasesActiveInCache() {
 		// Created by Claude Sonnet 4.6
 		// Note: Basic is not a real base of clinical-patient in R4 (it is in R5+). The SP here is

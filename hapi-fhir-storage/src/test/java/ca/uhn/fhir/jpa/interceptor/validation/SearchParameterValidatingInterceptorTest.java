@@ -241,6 +241,15 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@ParameterizedTest
 	@MethodSource("nonDisableableBuiltInSearchParams")
+	void testBuiltInNonDisableableSp_whenCreatedAsRetired_throwsException(SearchParameter theSp) {
+		// Created by Claude Sonnet 4.6
+		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreCreate(theSp, myRequestDetails))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageContaining("2875");
+	}
+
+	@ParameterizedTest
+	@MethodSource("nonDisableableBuiltInSearchParams")
 	void testBuiltInNonDisableableSp_whenRetired_throwsException(SearchParameter theSp) {
 		// Created by Claude Sonnet 4.6
 		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, theSp, myRequestDetails))
@@ -310,6 +319,51 @@ public class SearchParameterValidatingInterceptorTest {
 		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(sp.getId()));
 
 		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails)).doesNotThrowAnyException();
+	}
+
+	@Test
+	void testBuiltInNonDisableableSp_whenBaseListNarrowedRemovingNonDisableableBase_throwsException() {
+		// Created by Claude Sonnet 4.6
+		// clinical-patient spans [Basic (non-disableable), Condition (disableable)].
+		// A PUT that keeps status=active but drops Basic must be blocked.
+		SearchParameter oldSp = buildClinicalPatientSp(Enumerations.PublicationStatus.ACTIVE, "Basic", "Condition");
+		SearchParameter newSp = buildClinicalPatientSp(Enumerations.PublicationStatus.ACTIVE, "Condition");
+
+		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(oldSp, newSp, myRequestDetails))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageContaining("2876");
+	}
+
+	@Test
+	void testBuiltInNonDisableableSp_whenBaseListNarrowedKeepingNonDisableableBase_isAllowed() {
+		// Created by Claude Sonnet 4.6
+		// clinical-patient spans [Basic (non-disableable), Condition (disableable)].
+		// A PUT that drops only Condition (disableable) while keeping Basic must be allowed.
+		when(myDaoRegistry.getResourceDao(SearchParamValidatingInterceptor.SEARCH_PARAM)).thenReturn(myIFhirResourceDao);
+
+		SearchParameter oldSp = buildClinicalPatientSp(Enumerations.PublicationStatus.ACTIVE, "Basic", "Condition");
+		SearchParameter newSp = buildClinicalPatientSp(Enumerations.PublicationStatus.ACTIVE, "Basic");
+
+		setPersistedSearchParameterIds(Collections.singletonList(newSp));
+		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(newSp.getId()));
+
+		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(oldSp, newSp, myRequestDetails)).doesNotThrowAnyException();
+	}
+
+	private SearchParameter buildClinicalPatientSp(Enumerations.PublicationStatus theStatus, String... theBases) {
+		// Created by Claude Sonnet 4.6
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/clinical-patient");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/clinical-patient");
+		sp.setCode("patient");
+		sp.setName("patient");
+		sp.setStatus(theStatus);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Basic.subject | Condition.subject");
+		for (String base : theBases) {
+			sp.addBase(base);
+		}
+		return sp;
 	}
 
 	private void setPersistedSearchParameterIds(List<SearchParameter> theSearchParams) {
