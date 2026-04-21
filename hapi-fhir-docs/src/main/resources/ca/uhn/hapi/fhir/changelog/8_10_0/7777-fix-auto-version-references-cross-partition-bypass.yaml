@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7777
+title: "Previously, when partitioning was enabled with CrossPartitionReferenceMode set to `NOT_ALLOWED`,
+  resources using the auto-version-references-at-path extension could be saved with references pointing
+  to resources in other partitions without any error. This also caused `_include` searches to return
+  resources from partitions they should not have access to. This has been fixed."

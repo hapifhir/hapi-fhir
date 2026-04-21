@@ -87,10 +87,8 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 					Msg.code(1301) + "Unable to locate package " + thePackageId + "#" + thePackageVersion);
 		}
 
-		NpmPackageData npmPackage = createNpmPackageDataFromData(
+		return createNpmPackageDataFromData(
 				thePackageId, thePackageVersion == null ? pkg.version : thePackageVersion, pkg.url, pkg.stream);
-
-		return npmPackage;
 	}
 
 	/**
@@ -156,8 +154,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:".length()));
 		} else if (thePackageUrl.startsWith("file:")) {
 			try {
-				byte[] bytes = Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
-				return bytes;
+				return Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
 			} catch (IOException | URISyntaxException e) {
 				throw new InternalErrorException(
 						Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());

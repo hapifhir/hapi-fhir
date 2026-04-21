@@ -25,6 +25,12 @@ PackageInstallationSpec spec = new PackageInstallationSpec()
 myPackageInstallerSvc.install(spec);
 ```
 
+HAPI FHIR also supports installing a package asynchronously using a batch process:
+
+```java
+myPackageInstallerSvc.installAsynchronously(spec);
+```
+
 # Fetching Transitive Dependencies
 
 When `setFetchDependencies(true)` is set on the `PackageInstallationSpec`, the installer recursively fetches and installs all transitive dependencies declared in each package's `package.json` file. Dependencies are resolved from the local package cache first, then fetched from the [packages.fhir.org](https://packages.fhir.org) registry if not found locally.

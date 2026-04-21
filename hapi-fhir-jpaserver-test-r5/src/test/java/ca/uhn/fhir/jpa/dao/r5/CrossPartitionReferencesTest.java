@@ -23,11 +23,8 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r5.model.Device;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Patient;
@@ -46,7 +43,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.util.List;
@@ -64,7 +61,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 	public static final RequestPartitionId PARTITION_PATIENT = RequestPartitionId.fromPartitionId(1);
 	public static final RequestPartitionId PARTITION_OBSERVATION = RequestPartitionId.fromPartitionId(2);
-	public static final RequestPartitionId PARTITION_DEVICE = RequestPartitionId.fromPartitionId(3);
+
 	@Autowired
 	private JpaHapiTransactionService myTransactionSvc;
 	@Autowired
@@ -73,7 +70,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 	private IHapiTransactionService myTransactionService;
 	@Autowired
 	private IResourceLinkResolver myResourceLinkResolver;
-	@SpyBean
+	@MockitoSpyBean
 	protected MemoryCacheService myMemoryCacheService;
 	@Mock
 	private ICrossPartitionReferenceDetectedHandler myCrossPartitionReferencesDetectedInterceptor;
@@ -178,9 +175,9 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		Patient p = new Patient();
 		p.setActive(true);
 		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-		ourLog.info("Patient ID: {}", patientId);
+		ourLog.info("CrossPartitionReference Patient ID: {}", patientId);
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(patientId.getIdPartAsLong()).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(patientId.getIdPartAsLong())).orElseThrow();
 			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -195,13 +192,13 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType observationId = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
 
 		// Verify
-		// 3 commits because we look up the xref twice for Patient/1 (once for subject, once for patient). This
+		// 3 commits because we look up the xref twice for Patient/1 (once for the subject, once for patient). This
 		// could probably be better optimized, but it's currrently needed for megascale to work
 		assertEquals(3, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(observationId.getIdPartAsLong()).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(observationId.getIdPartAsLong())).orElseThrow();
 			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -224,7 +221,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 		ourLog.info("Patient ID: {}", patientId);
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(patientId.getIdPartAsLong()).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(patientId.getIdPartAsLong())).orElseThrow();
 			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -244,7 +241,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(observationId.getIdPartAsLong()).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(observationId.getIdPartAsLong())).orElseThrow();
 			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -271,7 +268,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(observationId2.getIdPartAsLong()).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(observationId2.getIdPartAsLong())).orElseThrow();
 			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -385,13 +382,11 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 			IIdType targetId = theDetails.getPathAndRef().getRef().getReferenceElement();
 			RequestPartitionId referenceTargetPartition = myPartitionHelperSvc.determineReadPartitionForRequestForRead(theDetails.getRequestDetails(), targetId.getResourceType(), targetId);
 
-			IResourceLookup targetResource = myTransactionService
+			return myTransactionService
 				.withRequest(theDetails.getRequestDetails())
 				.withTransactionDetails(theDetails.getTransactionDetails())
 				.withRequestPartitionId(referenceTargetPartition)
-				.execute(() -> myResourceLinkResolver.findTargetResource(referenceTargetPartition, theDetails.getSourceResourceName(), theDetails.getPathAndRef(), theDetails.getRequestDetails(), theDetails.getTransactionDetails()));
-
-			return targetResource;
+				.execute(() -> myResourceLinkResolver.findTargetResource(theDetails.getSourceResource(), referenceTargetPartition, theDetails.getSourceResourceName(), theDetails.getPathAndRef(), theDetails.getRequestDetails(), theDetails.getTransactionDetails()));
 		});
 	}
 
