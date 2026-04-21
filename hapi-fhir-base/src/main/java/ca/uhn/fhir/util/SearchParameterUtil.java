@@ -520,4 +520,33 @@ public class SearchParameterUtil {
 
 		return true;
 	}
+
+	/**
+	 * Extracts the resource type prefix from a FHIRPath expression path segment.
+	 * <p>
+	 * This method strips any leading opening parentheses and spaces, then examines the
+	 * first path segment (the characters before the first dot). If that segment begins
+	 * with an upper-case letter it is treated as a resource type prefix and returned.
+	 * Otherwise, null is returned to indicate no type-qualified prefix is present.
+	 * </p>
+	 *
+	 * @param thePath the FHIRPath expression or path segment to inspect. Must not be null.
+	 * @return the extracted resource type prefix (e.g. "Patient") if present, or {@code null}
+	 *         if no type-qualified prefix is found.
+	 */
+	public static String extractTypePrefix(@Nonnull String thePath) {
+		int start = 0;
+		while (start < thePath.length() && (thePath.charAt(start) == '(' || thePath.charAt(start) == ' ')) {
+			start++;
+		}
+		String trimmed = thePath.substring(start);
+		int dotIndex = trimmed.indexOf('.');
+		if (dotIndex > 0) {
+			String candidate = trimmed.substring(0, dotIndex);
+			if (Character.isUpperCase(candidate.charAt(0))) {
+				return candidate;
+			}
+		}
+		return null;
+	}
 }

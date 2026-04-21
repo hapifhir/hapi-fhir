@@ -37,6 +37,14 @@ public class ChannelProducerSettings extends BaseChannelSettings {
 		myProducerSuffix = "";
 	}
 
+	public ChannelProducerSettings(ChannelProducerSettings theSettings) {
+		super();
+		myProducerSuffix = "";
+		setRetryConfiguration(theSettings.getRetryConfigurationParameters());
+		setQualifyChannelName(theSettings.isQualifyChannelName());
+		setConcurrentConsumers(theSettings.getConcurrentConsumers());
+	}
+
 	public Integer getConcurrentConsumers() {
 		return myConcurrentConsumers;
 	}
