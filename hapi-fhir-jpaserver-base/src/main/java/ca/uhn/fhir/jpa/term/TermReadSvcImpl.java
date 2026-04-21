@@ -2917,7 +2917,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				return result;
 
 			} else {
-				if (isCodeSystemContentNotPresent(theValidationSupportContext, theSystem)) {
+				if (isNotBlank(theSystem) && isCodeSystemContentNotPresent(theValidationSupportContext, theSystem)) {
 					// Fall through to the next validator in the chain (e.g. UCUM, remote
 					// terminology) rather than short-circuiting with a non-null "not found" result.
 					return null;
@@ -3030,7 +3030,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 		}
 
-		if (isCodeSystemContentNotPresent(theValidationSupportContext, theCodeSystemUrl)) {
+		if (isNotBlank(theCodeSystemUrl)
+				&& isCodeSystemContentNotPresent(theValidationSupportContext, theCodeSystemUrl)) {
 			return null;
 		}
 
