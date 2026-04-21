@@ -88,7 +88,7 @@ public class SearchParamRegistryImpl
 	 * </ul>
 	 */
 	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
-		Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*", "Basic:*"));
+			Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*", "Basic:*"));
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	public static final int MAX_MANAGED_PARAM_COUNT = 10000;
