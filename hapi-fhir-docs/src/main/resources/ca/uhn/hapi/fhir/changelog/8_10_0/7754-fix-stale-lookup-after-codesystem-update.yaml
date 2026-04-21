@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7754
+title: "Previously, `$lookup` could return stale results after a `CodeSystem` was updated.
+  This has been fixed by ensuring the terminology cache is invalidated after these
+  operations."
