@@ -227,13 +227,29 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		createPatient(withId("A"), withActiveTrue());
 		createPatient(withId("B"), withActiveTrue());
 
-		// Test / Verify
+		// Test
 		Provenance provenance = new Provenance();
 		provenance.addTarget().setReference("Patient/A");
 		provenance.addTarget().setReference("Patient/B");
-		assertThatThrownBy(()->myProvenanceDao.create(provenance, newSrd()))
-			.isInstanceOf(InvalidRequestException.class)
-			.hasMessageContaining("Policy does not allow resource of type \"Provenance\" to be created in multiple Patient compartments: Patient/A, Patient/B");
+		IIdType provenanceId = myProvenanceDao.create(provenance, newSrd()).getId();
+
+		// Verify - default policy for Provenance is NON_UNIQUE_COMPARTMENT_IN_DEFAULT,
+		// so multi-patient Provenance goes to default partition
+		assertResourceIsInPartition(ALTERNATE_DEFAULT_ID, provenanceId);
+	}
+
+	@Test
+	void testCreateProvenance_NoPatientCompartment() {
+		// Setup
+		createResource("Organization", withId("O"), withName("Test Org"));
+
+		// Test
+		Provenance provenance = new Provenance();
+		provenance.addTarget().setReference("Organization/O");
+		IIdType provenanceId = myProvenanceDao.create(provenance, newSrd()).getId();
+
+		// Verify - Provenance with no Patient targets goes to default partition
+		assertResourceIsInPartition(ALTERNATE_DEFAULT_ID, provenanceId);
 	}
 
 	@ParameterizedTest
