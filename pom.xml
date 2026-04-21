@@ -999,6 +999,11 @@
 		<developer>
 			<id>Rene2000k</id>
 		</developer>
+		<developer>
+			<id>nathanloyer</id>
+			<name>Nathan Loyer</name>
+			<organization>Athena Health</organization>
+		</developer>
 	</developers>
 
 	<licenses>
