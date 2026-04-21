@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 specification tests
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,9 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -38,6 +41,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 
 public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTestConstants {
 	Logger ourLog = LoggerFactory.getLogger(IInstanceStateTransitions.class);
@@ -50,7 +54,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		// when
 		IJobPersistence.CreateResult createResult =
 			getTestManager().newTxTemplate().execute(status->
-				getTestManager().getSvc().onCreateWithFirstChunk(jd, "{}"));
+				getTestManager().getSvc().onCreateWithFirstChunk(newSrd(), jd, "{}"));
 
 		// then
 		ourLog.info("job and chunk created {}", createResult);
@@ -72,7 +76,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		// given
 		JobDefinition<?> jd = getTestManager().withJobDefinition(false);
 		IJobPersistence.CreateResult createResult = getTestManager().newTxTemplate().execute(status->
-			getTestManager().getSvc().onCreateWithFirstChunk(jd, "{}"));
+			getTestManager().getSvc().onCreateWithFirstChunk(newSrd(), jd, "{}"));
 		assertNotNull(createResult);
 
 		// when
@@ -86,15 +90,17 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 	@ParameterizedTest
 	@EnumSource(StatusEnum.class)
 	default void cancelRequest_cancelsJob_whenNotFinalState(StatusEnum theState) {
+		//Mocks
+		IInterceptorService interceptorService = mock(IInterceptorService.class);
 		// given
 		JobInstance cancelledInstance = createInstance();
 		cancelledInstance.setStatus(theState);
-		String instanceId1 = getTestManager().getSvc().storeNewInstance(cancelledInstance);
+		String instanceId1 = getTestManager().getSvc().storeNewInstance(newSrd(), cancelledInstance);
 		getTestManager().getSvc().cancelInstance(instanceId1);
 
 		JobInstance normalInstance = createInstance();
 		normalInstance.setStatus(theState);
-		String instanceId2 = getTestManager().getSvc().storeNewInstance(normalInstance);
+		String instanceId2 = getTestManager().getSvc().storeNewInstance(newSrd(), normalInstance);
 
 		JobDefinitionRegistry jobDefinitionRegistry = new JobDefinitionRegistry();
 		jobDefinitionRegistry.addJobDefinitionIfNotRegistered(getTestManager().withJobDefinition(false));
@@ -107,7 +113,8 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 				instanceId1,
 				new JobChunkProgressAccumulator(),
 				null,
-				jobDefinitionRegistry
+				jobDefinitionRegistry,
+				interceptorService
 			).process();
 		});
 
@@ -122,5 +129,9 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		}
 		JobInstance freshInstance2 = getTestManager().getSvc().fetchInstance(instanceId2).orElseThrow();
 		assertEquals(theState, freshInstance2.getStatus(), "cancel request ignored - cancelled not set");
+	}
+
+	default RequestDetails newSrd() {
+		return new SystemRequestDetails();
 	}
 }

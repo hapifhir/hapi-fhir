@@ -1,20 +1,26 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleBuilder;
-import org.apache.commons.lang3.Range;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class FhirSystemDaoTransactionPartitionR5Test extends BaseJpaR5Test {
 
@@ -48,6 +54,48 @@ public class FhirSystemDaoTransactionPartitionR5Test extends BaseJpaR5Test {
 		assertEquals(201, responseParsed.getStorageOutcomes().get(0).getStatusCode());
 		assertEquals("Patient/PAT-0/_history/1", responseParsed.getStorageOutcomes().get(1).getTargetId().getValue());
 		assertEquals(201, responseParsed.getStorageOutcomes().get(0).getStatusCode());
+	}
+
+	@Test
+	public void testSplitBundle_SecondBundleFails_FirstShouldNotHaveRollbackItemsApplied() {
+		// Setup
+		BundleBuilder requestBuilder = new BundleBuilder(myFhirContext);
+		requestBuilder.addTransactionCreateEntry(buildPatient(withActiveTrue()));
+		requestBuilder.addTransactionCreateEntry(buildPatient(withActiveFalse()));
+		Bundle request = requestBuilder.getBundleTyped();
+
+		myInterceptor.setNextRanges(List.of(
+			List.of(0), List.of(1)
+		));
+
+		@Interceptor
+		class FailingInterceptor {
+
+			@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
+			public void preCreate(IBaseResource theResource) {
+				if (theResource instanceof Patient patient) {
+					// Only fail for the second Patient in the TX bundle
+					if (patient.getActiveElement().getValue().equals(false)) {
+						throw new InternalErrorException("Patient cannot be inactive");
+					}
+				}
+			}
+
+		}
+		registerInterceptor(new FailingInterceptor());
+
+		// Test
+		assertThatThrownBy(()->mySystemDao.transaction(newSrd(), request))
+			.isInstanceOf(InternalErrorException.class);
+
+		// Verify
+
+		// ID assignment should be rolled back on the second (failing) patient, but not
+		// on the first (succeeding) patient
+		Patient p0 = (Patient) request.getEntry().get(0).getResource();
+		assertThat(p0.getIdElement().getIdPart()).matches("[0-9]+");
+		Patient p1 = (Patient)request.getEntry().get(1).getResource();
+		assertNull(p1.getIdElement().getIdPart());
 	}
 
 

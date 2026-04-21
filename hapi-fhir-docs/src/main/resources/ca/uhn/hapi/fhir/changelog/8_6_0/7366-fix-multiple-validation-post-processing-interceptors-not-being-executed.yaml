@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7366
+title: "Previously, if multiple validation post-processing interceptors
+(`ValidationMessageSuppressingInterceptor`, `ValidationMessagePostProcessingInterceptor`, or `ValidationMessageUnknownCodeSystemPostProcessingInterceptor`) 
+were registered that modified a `ValidationResult`, only the first interceptor was executed. This has been fixed."

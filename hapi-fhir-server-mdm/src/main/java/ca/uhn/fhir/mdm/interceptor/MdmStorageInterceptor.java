@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -320,15 +320,20 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	 *  since they are no longer "real matches"
 	 *  Possible match resources are resubmitted for matching
 	 */
+	@SuppressWarnings("unchecked")
 	private void cleanUpPossibleMatches(
 			List<IMdmLink> possibleMatches,
 			IFhirResourceDao<?> theDao,
 			IResourcePersistentId theGoldenPid,
 			RequestDetails theRequestDetails) {
-		IAnyResource goldenResource = (IAnyResource) theDao.readByPid(theGoldenPid);
+		String resourceType = theDao.getResourceType().getSimpleName();
+		IIdType goldenId = myIdHelperSvc.resourceIdFromPidOrThrowException(theGoldenPid, resourceType);
+		IAnyResource goldenResource = (IAnyResource) theDao.read(goldenId, theRequestDetails);
 		for (IMdmLink possibleMatch : possibleMatches) {
 			if (possibleMatch.getGoldenResourcePersistenceId().equals(theGoldenPid)) {
-				IBaseResource sourceResource = theDao.readByPid(possibleMatch.getSourcePersistenceId());
+				IIdType sourceId = myIdHelperSvc.resourceIdFromPidOrThrowException(
+						possibleMatch.getSourcePersistenceId(), resourceType);
+				IBaseResource sourceResource = theDao.read(sourceId, theRequestDetails);
 				MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
 				params.setGoldenResource(goldenResource);
 				params.setSourceResource((IAnyResource) sourceResource);

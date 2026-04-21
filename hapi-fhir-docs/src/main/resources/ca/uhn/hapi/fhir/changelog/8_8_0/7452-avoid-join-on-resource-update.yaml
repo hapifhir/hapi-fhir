@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 7452
+title: "When updating existing resources containing references to other resources
+   in the JPA server, a potentially expensive JOIN has been refactored out."

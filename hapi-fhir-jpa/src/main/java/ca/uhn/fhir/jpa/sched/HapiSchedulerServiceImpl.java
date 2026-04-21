@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ public class HapiSchedulerServiceImpl extends BaseSchedulerServiceImpl {
 	public static final String THREAD_NAME_PREFIX = "hapi-fhir-jpa-scheduler";
 
 	@Override
-	protected IHapiScheduler getLocalHapiScheduler() {
+	protected IHapiScheduler createLocalHapiScheduler() {
 		return new LocalHapiScheduler(THREAD_NAME_PREFIX, mySchedulerJobFactory);
 	}
 
 	@Override
-	protected IHapiScheduler getClusteredScheduler() {
+	protected IHapiScheduler createClusteredScheduler() {
 		return new ClusteredHapiScheduler(THREAD_NAME_PREFIX, mySchedulerJobFactory);
 	}
 }

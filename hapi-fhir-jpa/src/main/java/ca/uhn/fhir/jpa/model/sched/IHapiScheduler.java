@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.sched;
 
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+import org.quartz.TriggerKey;
 
 import java.util.Set;
 
@@ -49,6 +50,13 @@ public interface IHapiScheduler {
 	void unpause();
 
 	void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+
+	/**
+	 * Unschedules job(s) by their trigger keys (usually group + id, but this is provided
+	 * by ScheduledJobDefinition).
+	 * @param theTriggerKeys - keys of jobs to unschedule
+	 */
+	void unscheduleJobs(TriggerKey... theTriggerKeys);
 
 	Set<JobKey> getJobKeysForUnitTest() throws SchedulerException;
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,5 +178,19 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 						Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
 			}
 		}
+	}
+
+	@Override
+	public String getLatestVersion(String statedId, boolean milestonesOnly) throws IOException {
+		// As of release 6.9.4 of org.hl7.fhir.core, this is only used internally by the supporting implementations for
+		// the Validator CLI (not InstanceValidator). It is not called except in that specific use case.
+		throw new UnsupportedOperationException(Msg.code(2890));
+	}
+
+	@Override
+	public String getLatestVersion(String statedId, String versionFilter) throws IOException {
+		// As of release 6.9.4 of org.hl7.fhir.core, this is only used internally by the supporting implementations for
+		// the Validator CLI (not InstanceValidator). It is not called except in that specific use case.
+		throw new UnsupportedOperationException(Msg.code(2891));
 	}
 }

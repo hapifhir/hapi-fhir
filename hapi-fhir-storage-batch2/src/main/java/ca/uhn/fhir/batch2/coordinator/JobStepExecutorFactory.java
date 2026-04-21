@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,27 +25,60 @@ import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
 
+import java.time.Duration;
+
 public class JobStepExecutorFactory {
+
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobStepExecutorSvc;
 	private final IJobMaintenanceService myJobMaintenanceService;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private final IInterceptorService myInterceptorService;
+	private final ISchedulerService myIHapiScheduler;
+
+	private Duration myAckTimeout;
 
 	public JobStepExecutorFactory(
 			@Nonnull IJobPersistence theJobPersistence,
 			@Nonnull BatchJobSender theBatchJobSender,
 			@Nonnull WorkChunkProcessor theExecutorSvc,
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
-			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
+			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+			@Nonnull IInterceptorService theInterceptorService,
+			ISchedulerService theScheduler) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myJobStepExecutorSvc = theExecutorSvc;
 		myJobMaintenanceService = theJobMaintenanceService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
+		myInterceptorService = theInterceptorService;
+		myIHapiScheduler = theScheduler;
+	}
+
+	public void setAckTimeout(Duration theAckTimeout) {
+		myAckTimeout = theAckTimeout;
+	}
+
+	/**
+	 * Time before message redelivery.
+	 *
+	 * If this isn't set by the broker (or the broker value is
+	 * extremely low), a default value of 1001ms will be
+	 * returned.
+	 * (the '1ms' is deliberate in hopes to return a value that is
+	 * hopefully not set by users in case we see it in logs)
+	 */
+	public @Nonnull Duration getAckTimeout() {
+		if (myAckTimeout == null || myAckTimeout.toMillis() < 500) {
+			myAckTimeout = Duration.ofMillis(1001);
+		}
+		return myAckTimeout;
 	}
 
 	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
@@ -60,6 +93,9 @@ public class JobStepExecutorFactory {
 				theCursor,
 				myJobStepExecutorSvc,
 				myJobMaintenanceService,
-				myJobDefinitionRegistry);
+				myJobDefinitionRegistry,
+				myInterceptorService,
+				myIHapiScheduler,
+				getAckTimeout());
 	}
 }

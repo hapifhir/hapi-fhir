@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,10 @@ public class LinkedBlockingBrokerClient implements IBrokerClient {
 		LinkedBlockingChannel springMessagingChannelReceiver =
 				myLinkedBlockingChannelFactory.getOrCreateReceiver(theChannelName, theChannelConsumerSettings);
 		SpringMessagingReceiverAdapter<T> retval = new SpringMessagingReceiverAdapter<>(
-				theMessageType, springMessagingChannelReceiver, theMessageListener);
+				theMessageType,
+				springMessagingChannelReceiver,
+				theMessageListener,
+				theChannelConsumerSettings.getAckTimeout());
 		MessageHandler handler = new SpringMessagingMessageHandlerAdapter<>(theMessageType, theMessageListener);
 		retval.subscribe(handler);
 		return retval;

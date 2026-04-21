@@ -1,0 +1,7 @@
+---
+type: fix
+jira: SMILE-11638
+issue: 7530
+title: "FHIR Patch replace operations using extension('url') or extension.where(url='url') syntax
+  in the path failed with HAPI-2761. This has been fixed so that both syntaxes now correctly
+  resolve the target extension element for replace operations."

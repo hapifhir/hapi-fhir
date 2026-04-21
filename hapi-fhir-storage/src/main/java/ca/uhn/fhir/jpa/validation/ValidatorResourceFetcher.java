@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupp
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.elementmodel.JsonParser;
 import org.hl7.fhir.r5.model.CanonicalResource;
@@ -132,6 +133,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 			Object o,
 			String s,
 			String s1,
+			IWorkerContext.VersionResolutionRules r,
 			String s2,
 			boolean isCanonical,
 			List<CanonicalType> targets) {
@@ -160,7 +162,8 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 	}
 
 	@Override
-	public Set<String> fetchCanonicalResourceVersions(IResourceValidator validator, Object appContext, String url) {
+	public Set<ResourceVersionInformation> fetchCanonicalResourceVersions(
+			IResourceValidator validator, Object appContext, String url) {
 		return Collections.emptySet();
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -251,6 +251,18 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 				myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(
 						cs, (ResourceTable) theEntity, theRequest);
+
+				String codeSystemUrl = cs != null ? cs.getUrl() : null;
+				if (isNotBlank(codeSystemUrl)) {
+					int invalidated = myTerminologySvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(
+							codeSystemUrl);
+					if (invalidated > 0) {
+						ourLog.info(
+								"Invalidated {} pre-calculated ValueSet expansion(s) due to update of CodeSystem: {}",
+								invalidated,
+								codeSystemUrl);
+					}
+				}
 			}
 
 			/*
@@ -408,7 +420,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			displayLanguage = theDisplayLanguage.getValue();
 		}
 
-		ourLog.info("Looking up {} / {}", system, code);
+		ourLog.debug("Looking up {} / {}", system, code);
 
 		Collection<String> propertyNames = CollectionUtils.emptyIfNull(thePropertyNames).stream()
 				.map(IPrimitiveType::getValueAsString)
@@ -416,7 +428,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 		if (theValidationSupport.isCodeSystemSupported(new ValidationSupportContext(theValidationSupport), system)) {
 
-			ourLog.info("Code system {} is supported", system);
+			ourLog.debug("Code system {} is supported", system);
 			IValidationSupport.LookupCodeResult retVal = theValidationSupport.lookupCode(
 					new ValidationSupportContext(theValidationSupport),
 					new LookupCodeRequest(system, code, displayLanguage, propertyNames));

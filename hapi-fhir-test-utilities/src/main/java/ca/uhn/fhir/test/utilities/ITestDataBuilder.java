@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -65,7 +64,7 @@ public interface ITestDataBuilder {
 		BaseRuntimeElementCompositeDefinition def = (BaseRuntimeElementCompositeDefinition) theFhirContext.getElementDefinition(theTarget.getClass());
 		BaseRuntimeChildDefinition activeChild = def.getChildByName(theElementName);
 
-		IPrimitiveType<?> booleanType = (IPrimitiveType<?>) activeChild.getChildByName(theElementName).newInstance();
+		IPrimitiveType<?> booleanType = (IPrimitiveType<?>) activeChild.getChildByName(theElementName).newInstance(activeChild.getInstanceConstructorArguments());
 		booleanType.setValueAsString(theValue);
 		activeChild.getMutator().addValue(theTarget, booleanType);
 	}
@@ -275,8 +274,20 @@ public interface ITestDataBuilder {
 		return buildResource("Patient", theModifiers);
 	}
 
+	default IBaseResource buildProvenance(ICreationArgument... theModifiers) {
+		return buildResource("Provenance", theModifiers);
+	}
+
+	default IIdType createDevice(ICreationArgument... theModifiers) {
+		return createResource("Device", theModifiers);
+	}
+
 	default IIdType createList(ICreationArgument... theModifiers) {
 		return createResource("List", theModifiers);
+	}
+
+	default IIdType createLocation(ICreationArgument... theModifiers) {
+		return createResource("Location", theModifiers);
 	}
 
 	default IIdType createPatient(ICreationArgument... theModifiers) {
@@ -299,7 +310,7 @@ public interface ITestDataBuilder {
 		return buildResource("Practitioner", theModifiers);
 	}
 
-	default void deleteResource(IIdType theIIdType){
+	default void deleteResource(IIdType theIIdType) {
 		doDeleteResource(theIIdType);
 	}
 
@@ -355,7 +366,15 @@ public interface ITestDataBuilder {
 	}
 
 	default ICreationArgument withPatient(@Nullable String theSubject) {
-		return withSubject(new IdType(theSubject));
+		return withReference("patient", theSubject);
+	}
+
+	default ICreationArgument withProvenanceTarget(@Nullable String theTarget) {
+		return withReference("target", theTarget);
+	}
+
+	default ICreationArgument withProvenanceTarget(@Nullable IIdType theTarget) {
+		return withReference("target", theTarget);
 	}
 
 	default ICreationArgument withGroupMember(@Nullable IIdType theMember) {
@@ -495,30 +514,45 @@ public interface ITestDataBuilder {
 	}
 
 	/**
-	 * Users of this API must implement this method
+	 * Optional method for cases where this is purely used for building resources.
+	 * Implement this method if you want to call it to store the new resource
+	 * @param theResource the resource to be created
 	 */
-	IIdType doCreateResource(IBaseResource theResource);
-
-	/**
-	 * Users of this API must implement this method
-	 */
-	IIdType doUpdateResource(IBaseResource theResource);
-
-	default void doDeleteResource(IIdType theIIdType){
+	default IIdType doCreateResource(IBaseResource theResource) {
 		throw new NotImplementedException("Not implemented");
 	}
 
 	/**
-	 * Users of this API must implement this method
+	 * Optional method for cases where this is purely used for building resources.
+	 * Implement this method if you want to call it to store the updated resource
+	 * @param theResource the resource to be updated
 	 */
-	FhirContext getFhirContext();
+	default IIdType doUpdateResource(IBaseResource theResource) {
+		throw new NotImplementedException("Not implemented");
+	}
+
+	/**
+	 * Optional method for cases where this is purely used for building resources.
+	 * Implement this method if you want to call it to delete a resource
+	 * @param theIIdType the id of the resource to be deleted
+	 */
+	default void doDeleteResource(IIdType theIIdType) {
+		throw new NotImplementedException("Not implemented");
+	}
+
+	/**
+	 * Optional method for cases where this is purely used for building resources.
+	 */
+	default FhirContext getFhirContext() {
+		throw new NotImplementedException("Not implemented");
+	}
 
 	default ICreationArgument[] asArray(ICreationArgument theIBaseResourceConsumer) {
 		return new ICreationArgument[]{theIBaseResourceConsumer};
 	}
 
 	interface Support {
-		void setRequestId(String theRequestId);
+		default void setRequestId(String theRequestId) {}
 
 		FhirContext getFhirContext();
 
@@ -573,14 +607,12 @@ public interface ITestDataBuilder {
 
 		@Override
 		public IIdType doCreateResource(IBaseResource theResource) {
-			Validate.isTrue(false, "Create not supported");
-			return null;
+			throw new UnsupportedOperationException("Create not supported");
 		}
 
 		@Override
 		public IIdType doUpdateResource(IBaseResource theResource) {
-			Validate.isTrue(false, "Update not supported");
-			return null;
+			throw new UnsupportedOperationException("Update not supported");
 		}
 	}
 

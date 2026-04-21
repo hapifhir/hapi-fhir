@@ -1427,6 +1427,56 @@ public class FhirTerserR4Test {
 	}
 
 	@Test
+	public void testVisitWithModelVisitor2_PrimitiveElementVisitsExtensions() {
+		IModelVisitor2 visitor = mock(IModelVisitor2.class);
+
+		ArgumentCaptor<IBase> element = ArgumentCaptor.forClass(IBase.class);
+		ArgumentCaptor<List<IBase>> containingElementPath = ArgumentCaptor.forClass(getListClass(IBase.class));
+		ArgumentCaptor<List<BaseRuntimeChildDefinition>> childDefinitionPath = ArgumentCaptor.forClass(getListClass(BaseRuntimeChildDefinition.class));
+		ArgumentCaptor<List<BaseRuntimeElementDefinition<?>>> elementDefinitionPath = ArgumentCaptor.forClass(getListClass2());
+		when(visitor.acceptElement(element.capture(), containingElementPath.capture(), childDefinitionPath.capture(), elementDefinitionPath.capture())).thenReturn(true);
+
+		StringType string = new StringType("foo");
+		string.addExtension().setUrl("http://ext0").setValue(new StringType("value0"));
+		string.addExtension().setUrl("http://ext1").setValue(new StringType("value1"));
+
+		myCtx.newTerser().visit(string, visitor);
+
+		assertThat(element.getAllValues()).hasSize(7);
+		assertThat(element.getAllValues().get(0)).isSameAs(string);
+		assertThat(element.getAllValues().get(1)).isSameAs(string.getExtension().get(0));
+		assertThat(element.getAllValues().get(2)).isSameAs(string.getExtension().get(0).getUrlElement());
+		assertThat(element.getAllValues().get(3)).isSameAs(string.getExtension().get(0).getValue());
+		assertThat(element.getAllValues().get(4)).isSameAs(string.getExtension().get(1));
+		assertThat(element.getAllValues().get(5)).isSameAs(string.getExtension().get(1).getUrlElement());
+		assertThat(element.getAllValues().get(6)).isSameAs(string.getExtension().get(1).getValue());
+	}
+
+	@Test
+	public void testVisitWithModelVisitor2_InvokeOnExtensionDirectly() {
+		IModelVisitor2 visitor = mock(IModelVisitor2.class);
+
+		ArgumentCaptor<IBase> element = ArgumentCaptor.forClass(IBase.class);
+		ArgumentCaptor<List<IBase>> containingElementPath = ArgumentCaptor.forClass(getListClass(IBase.class));
+		ArgumentCaptor<List<BaseRuntimeChildDefinition>> childDefinitionPath = ArgumentCaptor.forClass(getListClass(BaseRuntimeChildDefinition.class));
+		ArgumentCaptor<List<BaseRuntimeElementDefinition<?>>> elementDefinitionPath = ArgumentCaptor.forClass(getListClass2());
+		when(visitor.acceptElement(element.capture(), containingElementPath.capture(), childDefinitionPath.capture(), elementDefinitionPath.capture())).thenReturn(true);
+
+		Extension ext = new Extension();
+		ext.setUrl("http://ext0");
+		ext.addExtension().setUrl("http://ext1").setValue(new StringType("value1"));
+
+		myCtx.newTerser().visit(ext, visitor);
+
+		assertThat(element.getAllValues()).hasSize(5);
+		assertThat(element.getAllValues().get(0)).isSameAs(ext);
+		assertThat(element.getAllValues().get(1)).isSameAs(ext.getExtension().get(0));
+		assertThat(element.getAllValues().get(2)).isSameAs(ext.getExtension().get(0).getUrlElement());
+		assertThat(element.getAllValues().get(3)).isSameAs(ext.getExtension().get(0).getValue());
+		assertThat(element.getAllValues().get(4)).isSameAs(ext.getUrlElement());
+	}
+
+	@Test
 	public void testGetAllPopulatedChildElementsOfType() {
 
 		Patient p = new Patient();
@@ -1608,6 +1658,100 @@ public class FhirTerserR4Test {
 		final FhirTerser fhirTerser = myCtx.newTerser();
 		assertThat(fhirTerser.fieldExists("identifier", new Patient())).isTrue();
 		assertThat(fhirTerser.fieldExists("identifier", new Provenance())).isFalse();
+	}
+
+	/**
+	 * Reproduces SMILE-11238: Encoding a Parameters resource containing a parameter
+	 * whose value is a Reference with an inline resource (via setResource()) throws
+	 * UnsupportedOperationException. This is because Parameters extends Resource
+	 * (not DomainResource), so getContainedResourceList() returns Collections.emptyList()
+	 * which is immutable. When the encoder tries to add contained resources, it fails.
+	 *
+	 * The fix skips the containment loop for non-containable resources (Parameters, Bundle,
+	 * Binary). The inline resource data is not serialized because Parameters has no "contained"
+	 * field, but the encoding completes without error and the reference is preserved.
+	 */
+	@Test
+	void testEncodeParameters_withReferenceValueContainingInlineResource_shouldSucceed() {
+		// Setup
+		Parameters params = new Parameters();
+		Patient inlinePatient = new Patient();
+		inlinePatient.setActive(true);
+		inlinePatient.addName().setFamily("Smith");
+
+		Reference reference = new Reference();
+		reference.setResource(inlinePatient);
+
+		params.addParameter()
+			.setName("subject")
+			.setValue(reference);
+
+		// Test - this should encode without throwing UnsupportedOperationException
+		String encoded = myCtx.newJsonParser().encodeResourceToString(params);
+
+		// Verify - Parameters encodes successfully. Since Parameters extends Resource
+		// (not DomainResource), it has no "contained" field, so inline resources on
+		// references cannot be contained or serialized.
+		assertThat(encoded).contains("\"resourceType\":\"Parameters\"");
+		assertThat(encoded).contains("\"name\":\"subject\"");
+		assertThat(encoded).contains("valueReference");
+		// Inline resource data is NOT serialized because Parameters has no "contained" field
+		assertThat(encoded).doesNotContain("Smith");
+		assertThat(encoded).doesNotContain("contained");
+	}
+
+	/**
+	 * Adjacent test for SMILE-11238: Encoding a Parameters resource with an embedded
+	 * resource set directly on parameter.resource (not via Reference.setResource())
+	 * should work because this path does not trigger containment logic.
+	 */
+	@Test
+	void testEncodeParameters_withEmbeddedResource_shouldSucceed() {
+		// Setup
+		Parameters params = new Parameters();
+		Patient embeddedPatient = new Patient();
+		embeddedPatient.setActive(true);
+		embeddedPatient.addName().setFamily("Jones");
+
+		params.addParameter()
+			.setName("subject")
+			.setResource(embeddedPatient);
+
+		// Test - this should encode without issue since embedded resources
+		// are serialized directly without containment
+		String encoded = myCtx.newJsonParser().encodeResourceToString(params);
+
+		// Verify
+		assertThat(encoded).contains("\"resourceType\":\"Parameters\"");
+		assertThat(encoded).contains("\"name\":\"subject\"");
+		assertThat(encoded).contains("Jones");
+		assertThat(encoded).contains("\"resourceType\":\"Patient\"");
+	}
+
+	/**
+	 * Adjacent test for SMILE-11238: Encoding a DomainResource (Patient) with
+	 * a Reference containing an inline resource should work because Patient
+	 * extends DomainResource, so getContainedResourceList() returns a mutable list.
+	 */
+	@Test
+	void testEncodePatient_withReferenceContainingInlineResource_shouldSucceed() {
+		// Setup
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		Organization inlineOrg = new Organization();
+		inlineOrg.setName("Test Org");
+
+		patient.getManagingOrganization().setResource(inlineOrg);
+
+		// Test - DomainResource containment works correctly
+		String encoded = myCtx.newJsonParser().encodeResourceToString(patient);
+
+		// Verify - Patient is a DomainResource, so inline resources ARE properly contained
+		assertThat(encoded).contains("\"resourceType\":\"Patient\"");
+		assertThat(encoded).contains("Test Org");
+		assertThat(encoded).contains("\"contained\"");
+		assertThat(encoded).contains("\"reference\":\"#");
 	}
 
 	/**

@@ -3,10 +3,13 @@ package ca.uhn.fhir.jpa.partition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -40,12 +43,16 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 	static final int UNKNOWN_PARTITION_ID = 1_000_000;
 	static final String UNKNOWN_PARTITION_NAME = "UNKNOWN";
 
+	static final Integer DEFAULT_PARTITION_ID = null;
+
 	@Autowired
 	IPartitionDao myPartitionDao;
 	@Autowired
 	PartitionSettings myPartitionSettings;
 	@Autowired
 	RequestPartitionHelperSvc mySvc;
+	@Autowired
+	ISearchParamExtractor mySearchParamExtractor;
 
 	Patient myPatient;
 
@@ -77,6 +84,34 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		// verify
 		assertEquals(PARTITION_ID_1, result.getFirstPartitionIdOrNull());
 		assertEquals(PARTITION_NAME_1, result.getFirstPartitionNameOrNull());
+	}
+
+
+	@Test
+	public void testDetermineReadPartitionForServletRequest_whenResourceIsNonPartitionable() {
+		PartitionEntity partition1 = createPartition1();
+		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
+		servletRequestDetails.setTenantId(partition1.getName());
+
+		// execute
+		RequestPartitionId result = mySvc.determineReadPartitionForRequestForSearchType(servletRequestDetails, "Library");
+
+		// verify
+		assertThat(result.hasDefaultPartitionId(DEFAULT_PARTITION_ID)).isTrue();
+	}
+
+	@Test
+	public void testDetermineReadPartitionForSystemRequest_whenResourceIsNonPartitionable() {
+		PartitionEntity partitionEntity = createPartition1();
+		SystemRequestDetails srd = new SystemRequestDetails();
+		srd.setTenantId(partitionEntity.getName());
+		srd.setRequestPartitionId(RequestPartitionId.fromPartitionId(partitionEntity.getId()));
+
+		// execute
+		RequestPartitionId result = mySvc.determineReadPartitionForRequestForSearchType(srd, "Library");
+
+		// verify
+		assertThat(result.hasDefaultPartitionId(DEFAULT_PARTITION_ID)).isTrue();
 	}
 
 	@Test
@@ -223,6 +258,67 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 
 	private static Stream<Integer> withPartitionIds(){
 		return Stream.of(null, 1,2,3);
+	}
+
+	/**
+	 * A SystemRequestDetails with a blank tenant ID should not bypass the
+	 * interceptor chain. In unnamed partition mode, the blank tenant ID should
+	 * be treated as if no tenant was set, allowing the interceptors to correctly
+	 * resolve the partition.
+	 */
+	@Test
+	void testDetermineReadPartition_withBlankTenantId_shouldNotBypassInterceptors() {
+		// setup
+		myPartitionSettings.setUnnamedPartitionMode(true);
+		myPartitionSettings.setDefaultPartitionId(0);
+
+		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(
+				myFhirContext, mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+		myInterceptorRegistry.registerInterceptor(interceptor);
+		try {
+			// Create a SystemRequestDetails with ONLY a blank tenant ID (no explicit partition)
+			SystemRequestDetails srd = new SystemRequestDetails();
+			srd.setTenantId("");
+
+			// Act: determine partition for an Organization search (non-patient-compartment resource)
+			RequestPartitionId result = mySvc.determineReadPartitionForRequestForSearchType(srd, "Organization");
+
+			// Assert: should resolve to default partition (0), NOT throw "Partition IDs have not been set"
+			assertThat(result.hasPartitionIds()).isTrue();
+			assertThat(result.getFirstPartitionIdOrNull()).isEqualTo(0);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+			myPartitionSettings.setUnnamedPartitionMode(false);
+		}
+	}
+
+	/**
+	 * A SystemRequestDetails with a null tenant ID should use the interceptor
+	 * chain and correctly resolve the partition.
+	 */
+	@Test
+	void testDetermineReadPartition_withNullTenantId_shouldUseInterceptors() {
+		// setup
+		myPartitionSettings.setUnnamedPartitionMode(true);
+		myPartitionSettings.setDefaultPartitionId(0);
+
+		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(
+				myFhirContext, mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+		myInterceptorRegistry.registerInterceptor(interceptor);
+		try {
+			// Create a SystemRequestDetails with null tenant ID (the default)
+			SystemRequestDetails srd = new SystemRequestDetails();
+
+			// Act
+			RequestPartitionId result = mySvc.determineReadPartitionForRequestForSearchType(srd, "Organization");
+
+			// Assert
+			assertThat(result.hasPartitionIds()).isTrue();
+			assertThat(result.getFirstPartitionIdOrNull()).isEqualTo(0);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+			myPartitionSettings.setUnnamedPartitionMode(false);
+		}
 	}
 
 	private PartitionEntity createPartition1() {

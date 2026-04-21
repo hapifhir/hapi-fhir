@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7492
+title: "Previously, when multiple Subscriptions with different matching criteria and `channel.endpoint`s share the same 
+message delivery queue, some messages would match to the incorrect channel endpoint. This has now been fixed."

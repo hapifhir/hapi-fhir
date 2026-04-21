@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.util.ResourceLinkUtils;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -72,6 +73,8 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public static final int SRC_PATH_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
+	public static final String TABLE_NAME = "HFJ_RES_LINK";
+	public static final String SRC_RESOURCE_ID = "SRC_RESOURCE_ID";
 	public static final String TARGET_RES_PARTITION_ID = "TARGET_RES_PARTITION_ID";
 	public static final String TARGET_RESOURCE_ID = "TARGET_RESOURCE_ID";
 	public static final String FK_RESLINK_TARGET = "FK_RESLINK_TARGET";
@@ -114,7 +117,7 @@ public class ResourceLink extends BaseResourceIndex {
 	@FullTextField
 	private String mySourceResourceType;
 
-	@ManyToOne(optional = true, fetch = FetchType.EAGER)
+	@ManyToOne(optional = true, fetch = FetchType.LAZY)
 	@JoinColumns(
 			value = {
 				@JoinColumn(
@@ -458,6 +461,21 @@ public class ResourceLink extends BaseResourceIndex {
 	}
 
 	/**
+	 * Sets the target resource entity reference. This allows Hibernate's {@code InsertActionSorter}
+	 * to detect the FK dependency between the target {@code HFJ_RESOURCE} INSERT and this
+	 * {@code HFJ_RES_LINK} INSERT when JDBC batch mode is active, ensuring correct ordering.
+	 *
+	 * <p>Created by claude-sonnet-4-6.</p>
+	 *
+	 * @param theTargetResource the target resource entity (may be a Hibernate proxy from
+	 *                          {@code EntityManager.getReference()})
+	 * @see ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer
+	 */
+	public void setTargetResourceTable(ResourceTable theTargetResource) {
+		myTargetResource = theTargetResource;
+	}
+
+	/**
 	 * Creates a clone of this resourcelink which doesn't contain the internal PID
 	 * of the target resource.
 	 */
@@ -481,6 +499,14 @@ public class ResourceLink extends BaseResourceIndex {
 		retVal.myTargetResourceUrl = myTargetResourceUrl;
 		retVal.myTargetResourceVersion = myTargetResourceVersion;
 		return retVal;
+	}
+
+	@Nullable
+	public JpaPid getTargetResourcePk() {
+		if (myTargetResourcePid != null) {
+			return JpaPid.fromId(myTargetResourcePid, myTargetResourcePartitionId);
+		}
+		return null;
 	}
 
 	public static ResourceLink forAbsoluteReference(

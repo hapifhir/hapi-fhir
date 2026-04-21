@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ package ca.uhn.fhir.broker.api;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
+
+import java.time.Duration;
 
 /**
  * Receives messages from a Message Broker.
@@ -57,6 +59,15 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 * @return the {@link IMessageListener} this consumer is sending messages to (i.e. the one it was created with).
 	 */
 	IMessageListener<T> getMessageListener();
+
+	/**
+	 * This is the timeout setting of the broker.
+	 *
+	 * The mechanism is largely broker specific. But for general purposes,
+	 * this is the time, after which, a message will be redelivered if it
+	 * hasn't finished being processed.
+	 */
+	Duration getAckTimeout();
 
 	/**
 	 * Pause requesting new messages from the broker until resume() is called.

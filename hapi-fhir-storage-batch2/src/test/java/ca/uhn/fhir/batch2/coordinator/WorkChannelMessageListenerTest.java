@@ -2,13 +2,16 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.util.Logs;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -40,6 +43,12 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 	private IJobMaintenanceService myJobMaintenanceService;
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Mock
+	private IInterceptorService myInterceptorService;
+	@Mock
+	private ISchedulerService myIHapiScheduler;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 	private WorkChunkProcessor jobStepExecutorSvc;
 
@@ -50,7 +59,7 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 
 	@BeforeEach
 	public void beforeEach() {
-		jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService());
+		jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService(), myJobStepExecutionServices);
 	}
 
 	@Test
@@ -59,7 +68,7 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 		((Logger) Logs.getBatchTroubleshootingLog()).addAppender(myAppender);
 
 		// When
-		WorkChannelMessageListener listener = new WorkChannelMessageListener(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService, myInterceptorBroadcaster);
+		WorkChannelMessageListener listener = new WorkChannelMessageListener(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService, myInterceptorBroadcaster, myInterceptorService, myIHapiScheduler);
 		listener.handleMessage(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1)));
 
 		// Then

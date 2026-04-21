@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -267,7 +267,7 @@ public class SearchParameterDaoValidator {
 		} else if (hasAnyExtensionUniqueSetTo(theSearchParameter, false)
 				|| // combo non-unique search parameter
 				myStorageSettings.isAdvancedHSearchIndexing()) { // composite Search Parameter with HSearch indexing
-			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER);
+			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER, REFERENCE);
 		} else { // composite Search Parameter (JPA only)
 			return Set.of(STRING, TOKEN, DATE, QUANTITY);
 		}

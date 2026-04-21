@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 class ValidatorWrapper {
@@ -56,6 +57,7 @@ class ValidatorWrapper {
 	private Collection<? extends String> myExtensionDomains;
 	private IValidatorResourceFetcher myValidatorResourceFetcher;
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
+	private IHostApplicationServices hostApplicationServices;
 	private boolean myAllowExamples;
 
 	/**
@@ -124,17 +126,15 @@ class ValidatorWrapper {
 		return this;
 	}
 
+	public ValidatorWrapper setHostApplicationServices(IHostApplicationServices evaluationContext) {
+		this.hostApplicationServices = evaluationContext;
+		return this;
+	}
+
 	public List<ValidationMessage> validate(
 			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
-		InstanceValidator v;
-		IHostApplicationServices evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
-		XVerExtensionManager xverManager = new XVerExtensionManagerOld(theWorkerContext);
-		try {
-			v = new InstanceValidator(
-					theWorkerContext, evaluationCtx, xverManager, new ValidatorSession(), new ValidatorSettings());
-		} catch (Exception e) {
-			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
-		}
+
+		InstanceValidator v = buildInstanceValidator(theWorkerContext);
 
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
 		v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
@@ -219,21 +219,36 @@ class ValidatorWrapper {
 		messages = messages.stream()
 				.filter(m -> m.getMessageId() == null
 						|| !(m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE)
-								|| m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE2)
 								|| (m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_VALUESET_NOTFOUND)
 										&& m.getMessage().contains("http://hl7.org/fhir/ValueSet/mimetypes"))))
 				.collect(Collectors.toList());
 
-		if (myErrorForUnknownProfiles) {
-			messages.stream()
-					.filter(m -> m.getMessageId() != null
-							&& (m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN)
-									|| m.getMessageId()
-											.equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY)))
-					.filter(m -> m.getLevel() == ValidationMessage.IssueSeverity.WARNING)
-					.forEach(m -> m.setLevel(ValidationMessage.IssueSeverity.ERROR));
-		}
+		messages.stream()
+				.filter(m -> I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN.equals(m.getMessageId())
+						|| I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY.equals(m.getMessageId()))
+				.forEach(m -> m.setLevel(
+						myErrorForUnknownProfiles
+								? ValidationMessage.IssueSeverity.ERROR
+								: ValidationMessage.IssueSeverity.WARNING));
+
 		return messages;
+	}
+
+	private InstanceValidator buildInstanceValidator(IWorkerContext theWorkerContext) {
+
+		final IHostApplicationServices hostApplicationServices = Objects.requireNonNullElseGet(
+				this.hostApplicationServices, FhirInstanceValidator.NullEvaluationContext::new);
+		XVerExtensionManager xverManager = new XVerExtensionManagerOld(theWorkerContext);
+		try {
+			return new InstanceValidator(
+					theWorkerContext,
+					hostApplicationServices,
+					xverManager,
+					new ValidatorSession(),
+					new ValidatorSettings());
+		} catch (Exception e) {
+			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
+		}
 	}
 
 	private ReaderInputStream constructNewReaderInputStream(Reader theReader) {

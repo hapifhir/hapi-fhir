@@ -6,19 +6,28 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.compare;
+import static ca.uhn.fhir.repository.impl.MultiMapRepositoryRestQueryBuilder.contributorToMultimap;
 import static ca.uhn.fhir.rest.param.TokenParamModifier.TEXT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -223,6 +232,44 @@ class SearchParameterMapTest {
 
 	}
 
+	@Test
+	void testConversionToMultiMap() {
+	    // given
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("name", new StringParam("John"));
+		map.setSearchContainedMode(SearchContainedModeEnum.FALSE);
+		map.setCount(5);
+		map.setOffset(52);
+		map.setSort(new SortSpec("name"));
+		map.setSummaryMode(SummaryEnum.COUNT);
+		map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+		map.addInclude(new Include("Patient:general-practitioner"));
+		map.addInclude(new Include("Patient:organization", true));
+		map.addRevInclude(new Include("Observation:subject"));
 
+		// when
+		Multimap<String, List<IQueryParameterType>> multimap = contributorToMultimap(map);
 
+	    // then
+		Map<String, List<IQueryParameterType>> expected = Map.of(
+			"name", List.of(new StringParam("John")),
+			"_contained", List.of(new TokenParam("false")),
+			"_count", List.of(new NumberParam(5)),
+			"_offset", List.of(new NumberParam(52)),
+			"_sort", List.of(new TokenParam("name")),
+			"_summary", List.of(new TokenParam("count")),
+			"_total", List.of(new TokenParam("accurate")),
+			"_include", List.of(new TokenParam("Patient:general-practitioner")),
+			"_include:iterate", List.of(new TokenParam("Patient:organization")),
+			"_revinclude", List.of(new TokenParam("Observation:subject"))
+		);
+		assertEquals(asSetMultimap(Multimaps.forMap(expected)).toString(), asSetMultimap(multimap).toString());
+	}
+
+	@Nonnull
+	private static SetMultimap<String, List<IQueryParameterType>> asSetMultimap(Multimap<String, List<IQueryParameterType>> multimap) {
+		SetMultimap<String, List<IQueryParameterType>> result = MultimapBuilder.treeKeys().hashSetValues().build();
+		result.putAll(multimap);
+		return result;
+	}
 }

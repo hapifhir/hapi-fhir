@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public interface IBatch2WorkChunkRepository
 			+ "e.myId, e.mySequence, e.myJobDefinitionId, e.myJobDefinitionVersion, e.myInstanceId, e.myTargetStepId, e.myStatus,"
 			+ "e.myCreateTime, e.myStartTime, e.myUpdateTime, e.myEndTime,"
 			+ "e.myErrorMessage, e.myErrorCount, e.myRecordsProcessed, e.myWarningMessage,"
-			+ "e.myNextPollTime, e.myPollAttempts"
+			+ "e.myNextPollTime, e.myPollAttempts, e.myLastHeartbeat"
 			+ ") FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC, e.myId ASC")
 	List<Batch2WorkChunkEntity> fetchChunksNoData(Pageable thePageRequest, @Param("instanceId") String theInstanceId);
 
@@ -148,6 +148,10 @@ public interface IBatch2WorkChunkRepository
 			@Param("id") String theChunkId,
 			@Param("oldStatus") WorkChunkStatusEnum theOldStatus,
 			@Param("newStatus") WorkChunkStatusEnum theNewStatus);
+
+	@Modifying
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myLastHeartbeat = :now WHERE e.myId = :id")
+	int updateWorkChunkHeartbeat(@Param("id") String theWorkChunkId, @Param("now") Date theNow);
 
 	@Modifying
 	@Query(

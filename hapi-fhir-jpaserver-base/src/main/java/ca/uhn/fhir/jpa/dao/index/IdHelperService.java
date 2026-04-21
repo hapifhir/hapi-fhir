@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -232,8 +232,10 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			myTransactionService
 					.withSystemRequest()
 					.withRequestPartitionId(requestPartitionId)
-					.execute(() ->
-							resolveResourceIdentitiesForFhirIdsUsingDatabase(requestPartitionId, ids, idToLookup));
+					.executeWithoutResult(partition -> {
+						resolveResourceIdentitiesForFhirIdsUsingDatabase(partition, ids, idToLookup);
+						return null;
+					});
 		}
 
 		// Convert the multimap into a simple map
@@ -416,15 +418,13 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	/**
 	 * Return optional predicate for searching on forcedId
-	 * 1. If the partition mode is ALLOWED_UNQUALIFIED, the return optional predicate will be empty, so search is across all partitions.
+	 * 1. If the request partition is "all partitions", don't include a predicate.
 	 * 2. If it is default partition and default partition id is null, then return predicate for null partition.
 	 * 3. If the requested partition search is not all partition, return the request partition as predicate.
 	 */
 	private Optional<Predicate> getOptionalPartitionPredicate(
 			RequestPartitionId theRequestPartitionId, CriteriaBuilder cb, Root<ResourceTable> from) {
-		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
-			return Optional.empty();
-		} else if (theRequestPartitionId.isAllPartitions()) {
+		if (theRequestPartitionId.isAllPartitions()) {
 			return Optional.empty();
 		} else {
 			List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
@@ -669,6 +669,16 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		return JpaPid.fromId((Long) thePid, thePartitionId);
 	}
 
+	/**
+	 * Creates a new JpaPid from partition, PK, and resource name.
+	 * The PK is passed as a String here, but this must parse as a long.  Do not mistake this for the FHIR Id
+	 * - aka forced-id/client-assigned-id.
+	 *
+	 * @param thePartitionId The partition ID
+	 * @param thePid The persistent ID as a string
+	 * @param theResourceName The resource type name
+	 * @return A JpaPid with the associated resource ID populated
+	 */
 	@Override
 	public JpaPid newPidFromStringIdAndResourceName(Integer thePartitionId, String thePid, String theResourceName) {
 		JpaPid retVal = JpaPid.fromId(Long.parseLong(thePid), thePartitionId);

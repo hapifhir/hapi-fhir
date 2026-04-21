@@ -48,8 +48,6 @@ public class ReindexTestHelper {
 	private final IFhirResourceDao<Observation> myObservationDao;
 	private final IFhirResourceDao<Patient> myPatientDao;
 
-
-
 	public ReindexTestHelper(FhirContext theFhirContext, DaoRegistry theDaoRegistry, ISearchParamRegistry theSearchParamRegistry) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;

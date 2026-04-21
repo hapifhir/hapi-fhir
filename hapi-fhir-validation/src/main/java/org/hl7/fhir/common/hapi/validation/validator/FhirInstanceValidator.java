@@ -16,6 +16,7 @@ import org.hl7.fhir.r5.fhirpath.FHIRPathUtilityClasses.FunctionDetails;
 import org.hl7.fhir.r5.fhirpath.IHostApplicationServices;
 import org.hl7.fhir.r5.fhirpath.TypeDetails;
 import org.hl7.fhir.r5.model.Base;
+import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
@@ -44,6 +45,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private IValidatorResourceFetcher validatorResourceFetcher;
 	private IValidationPolicyAdvisor validatorPolicyAdvisor = new FhirDefaultPolicyAdvisor();
 	private boolean myAllowExamples;
+	private IHostApplicationServices hostApplicationServices;
 
 	/**
 	 * Constructor
@@ -255,6 +257,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				.setValidatorResourceFetcher(getValidatorResourceFetcher())
 				.setAssumeValidRestReferences(isAssumeValidRestReferences())
 				.setAllowExamples(isAllowExamples())
+				.setHostApplicationServices(getHostApplicationServices())
 				.validate(wrappedWorkerContext, theValidationCtx);
 	}
 
@@ -296,6 +299,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
 		this.assumeValidRestReferences = assumeValidRestReferences;
+	}
+
+	public IHostApplicationServices getHostApplicationServices() {
+		return hostApplicationServices;
+	}
+
+	public void setHostApplicationServices(IHostApplicationServices evaluationContext) {
+		this.hostApplicationServices = evaluationContext;
 	}
 
 	/**
@@ -371,8 +382,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		}
 
 		@Override
-		public Base resolveReference(FHIRPathEngine engine, Object appContext, String url, Base refContext)
+		public Base resolveReference(
+				FHIRPathEngine engine, Object appContext, String url, Identifier identifier, Base refContext)
 				throws FHIRException {
+			return null;
+		}
+
+		@Override
+		public Base findContainingResource(Object o, Base base) {
 			return null;
 		}
 

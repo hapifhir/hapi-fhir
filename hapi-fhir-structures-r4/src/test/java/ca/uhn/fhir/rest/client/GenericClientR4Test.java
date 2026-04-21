@@ -94,7 +94,7 @@ import java.util.Map;
 
 import static ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE_LC;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
-import static ca.uhn.fhir.rest.server.provider.BulkDataExportProvider.PARAM_EXPORT_POLL_STATUS_JOB_ID;
+import static ca.uhn.fhir.rest.server.provider.MockBulkDataExportProvider.PARAM_EXPORT_POLL_STATUS_JOB_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

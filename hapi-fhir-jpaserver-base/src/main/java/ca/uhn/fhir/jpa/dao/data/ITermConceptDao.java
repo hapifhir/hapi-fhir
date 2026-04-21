@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,10 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, TermConcept.
 	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myDesignations d "
 			+ "WHERE t.myCodeSystemVersionPid = :pid")
 	List<TermConcept> fetchConceptsAndDesignationsByVersionPid(@Param("pid") Long theCodeSystemVersionPid);
+
+	@Query("SELECT DISTINCT t FROM TermConcept t LEFT JOIN FETCH t.myProperties "
+			+ "WHERE t.myCodeSystemVersionPid = :pid")
+	List<TermConcept> fetchConceptsAndPropertiesByVersionPid(@Param("pid") Long theCodeSystemVersionPid);
 
 	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);

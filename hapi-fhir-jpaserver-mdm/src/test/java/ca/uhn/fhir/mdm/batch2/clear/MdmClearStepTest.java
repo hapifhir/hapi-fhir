@@ -127,7 +127,7 @@ class MdmClearStepTest extends BaseMdmR4Test {
 		String chunkid = UUID.randomUUID().toString();
 		MdmClearJobParameters parms = new MdmClearJobParameters();
 
-		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, theListWorkChunkJson, jobInstance, new WorkChunk().setId(chunkid));
+		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, theListWorkChunkJson, jobInstance, new WorkChunk().setId(chunkid), myJobStepExecutionServices);
 		return stepExecutionDetails;
 	}
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -774,6 +775,10 @@ public interface IValidationSupport {
 	// can support arbitrary types. We do not restrict against the types in the spec.
 	// Some of the types in the spec are not yet implemented as well.
 	// @see https://github.com/hapifhir/hapi-fhir/issues/5700
+	String TYPE_CODE = "code";
+	String TYPE_INTEGER = "integer";
+	String TYPE_DECIMAL = "decimal";
+	String TYPE_DATETIME = "dateTime";
 	String TYPE_STRING = "string";
 	String TYPE_BOOLEAN = "boolean";
 	String TYPE_CODING = "Coding";
@@ -799,6 +804,98 @@ public interface IValidationSupport {
 		@Override
 		public String getType() {
 			return TYPE_STRING;
+		}
+	}
+
+	class IntegerConceptProperty extends BaseConceptProperty {
+		private final Integer myValue;
+
+		/**
+		 * Constructor
+		 *
+		 * @param theName The name
+		 */
+		public IntegerConceptProperty(String theName, Integer theValue) {
+			super(theName);
+			myValue = theValue;
+		}
+
+		public Integer getValue() {
+			return myValue;
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_INTEGER;
+		}
+	}
+
+	class DecimalConceptProperty extends BaseConceptProperty {
+		private final BigDecimal myValue;
+
+		/**
+		 * Constructor
+		 *
+		 * @param theName The name
+		 */
+		public DecimalConceptProperty(String theName, BigDecimal theValue) {
+			super(theName);
+			myValue = theValue;
+		}
+
+		public BigDecimal getValue() {
+			return myValue;
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_DECIMAL;
+		}
+	}
+
+	class DateTimeConceptProperty extends BaseConceptProperty {
+		private final String myValue;
+
+		/**
+		 * Constructor
+		 *
+		 * @param theName The name
+		 */
+		public DateTimeConceptProperty(String theName, String theValue) {
+			super(theName);
+			myValue = theValue;
+		}
+
+		public String getValue() {
+			return myValue;
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_DATETIME;
+		}
+	}
+
+	class CodeConceptProperty extends BaseConceptProperty {
+		private final String myValue;
+
+		/**
+		 * Constructor
+		 *
+		 * @param theName The name
+		 */
+		public CodeConceptProperty(String theName, String theValue) {
+			super(theName);
+			myValue = theValue;
+		}
+
+		public String getValue() {
+			return myValue;
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_CODE;
 		}
 	}
 
@@ -1247,7 +1344,9 @@ public interface IValidationSupport {
 			if (isNotBlank(getCodeSystemVersion())) {
 				ParametersUtil.addParameterToParametersString(theContext, retVal, "version", getCodeSystemVersion());
 			}
-			ParametersUtil.addParameterToParametersString(theContext, retVal, "display", getCodeDisplay());
+			if (isNotBlank(getCodeDisplay())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, "display", getCodeDisplay());
+			}
 			ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "abstract", isCodeIsAbstract());
 
 			if (myProperties != null) {
@@ -1291,6 +1390,29 @@ public interface IValidationSupport {
 			ParametersUtil.addPartCode(theContext, theProperty, "code", theConceptProperty.getPropertyName());
 			String propertyType = theConceptProperty.getType();
 			switch (propertyType) {
+				case TYPE_DECIMAL:
+					DecimalConceptProperty decimalConceptProperty = (DecimalConceptProperty) theConceptProperty;
+					if (decimalConceptProperty.getValue() != null) {
+						ParametersUtil.addPartDecimal(
+								theContext,
+								theProperty,
+								"value",
+								decimalConceptProperty.getValue().doubleValue());
+					}
+					break;
+				case TYPE_DATETIME:
+					DateTimeConceptProperty dateTimeConceptProperty = (DateTimeConceptProperty) theConceptProperty;
+					ParametersUtil.addPartPrimitive(
+							theContext, theProperty, "value", "dateTime", dateTimeConceptProperty.getValue());
+					break;
+				case TYPE_INTEGER:
+					IntegerConceptProperty integerConceptProperty = (IntegerConceptProperty) theConceptProperty;
+					ParametersUtil.addPartInteger(theContext, theProperty, "value", integerConceptProperty.getValue());
+					break;
+				case TYPE_CODE:
+					CodeConceptProperty codeConceptProperty = (CodeConceptProperty) theConceptProperty;
+					ParametersUtil.addPartCode(theContext, theProperty, "value", codeConceptProperty.getValue());
+					break;
 				case TYPE_STRING:
 					StringConceptProperty stringConceptProperty = (StringConceptProperty) theConceptProperty;
 					ParametersUtil.addPartString(theContext, theProperty, "value", stringConceptProperty.getValue());
@@ -1395,7 +1517,7 @@ public interface IValidationSupport {
 			TranslateCodeRequest that = (TranslateCodeRequest) theO;
 
 			return new EqualsBuilder()
-					.append(myCodings, that.myCodings)
+					.append(CodingEqualsAdapter.fromList(myCodings), CodingEqualsAdapter.fromList(that.myCodings))
 					.append(myTargetSystemUrl, that.myTargetSystemUrl)
 					.append(myConceptMapUrl, that.myConceptMapUrl)
 					.append(myConceptMapVersion, that.myConceptMapVersion)
@@ -1409,7 +1531,7 @@ public interface IValidationSupport {
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37)
-					.append(myCodings)
+					.append(CodingEqualsAdapter.fromList(myCodings))
 					.append(myTargetSystemUrl)
 					.append(myConceptMapUrl)
 					.append(myConceptMapVersion)
@@ -1460,6 +1582,58 @@ public interface IValidationSupport {
 					.append("targetValueSetUrl", myTargetValueSetUrl)
 					.append("reverse", myReverse)
 					.toString();
+		}
+
+		/**
+		 * Adapter class that provides semantic equality comparison for {@link IBaseCoding} instances in the context
+		 * of TranslateCodeRequests.
+		 * <p>
+		 * This adapter is used to compare codings based on their semantic content (system, code, and version)
+		 * rather than object identity. This is essential for proper cache key comparison.
+		 * </p>
+		 * <p>
+		 * The display value is intentionally excluded from equality comparison as it is not semantically
+		 * significant for code translation operations.
+		 * </p>
+		 */
+		private static class CodingEqualsAdapter {
+			private final IBaseCoding myCoding;
+
+			CodingEqualsAdapter(IBaseCoding theCoding) {
+				myCoding = theCoding;
+			}
+
+			@Override
+			public int hashCode() {
+				return new HashCodeBuilder(17, 37)
+						.append(myCoding.getSystem())
+						.append(myCoding.getCode())
+						.append(myCoding.getVersion())
+						.toHashCode();
+			}
+
+			@Override
+			public boolean equals(Object theO) {
+
+				if (this == theO) {
+					return true;
+				}
+
+				if (theO == null || getClass() != theO.getClass()) {
+					return false;
+				}
+
+				CodingEqualsAdapter that = (CodingEqualsAdapter) theO;
+				return new EqualsBuilder()
+						.append(myCoding.getSystem(), that.myCoding.getSystem())
+						.append(myCoding.getCode(), that.myCoding.getCode())
+						.append(myCoding.getVersion(), that.myCoding.getVersion())
+						.isEquals();
+			}
+
+			static List<CodingEqualsAdapter> fromList(List<IBaseCoding> theList) {
+				return theList.stream().map(CodingEqualsAdapter::new).toList();
+			}
 		}
 	}
 

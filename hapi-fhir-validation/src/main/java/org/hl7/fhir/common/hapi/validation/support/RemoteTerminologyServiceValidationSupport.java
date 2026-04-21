@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleUtil;
@@ -33,6 +34,9 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -477,6 +481,22 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		String fhirType = theValue.fhirType();
 		switch (fhirType) {
+			case IValidationSupport.TYPE_CODE:
+				CodeType codeType = (CodeType) theValue;
+				conceptProperty = new CodeConceptProperty(theName, codeType.getValue());
+				break;
+			case IValidationSupport.TYPE_INTEGER:
+				IntegerType integerType = (IntegerType) theValue;
+				conceptProperty = new IntegerConceptProperty(theName, integerType.getValue());
+				break;
+			case IValidationSupport.TYPE_DECIMAL:
+				DecimalType decimalType = (DecimalType) theValue;
+				conceptProperty = new DecimalConceptProperty(theName, decimalType.getValue());
+				break;
+			case IValidationSupport.TYPE_DATETIME:
+				DateTimeType dateTimeType = (DateTimeType) theValue;
+				conceptProperty = new DateTimeConceptProperty(theName, dateTimeType.getValueAsString());
+				break;
 			case IValidationSupport.TYPE_STRING:
 				StringType stringType = (StringType) theValue;
 				conceptProperty = new StringConceptProperty(theName, stringType.getValue());
@@ -544,9 +564,16 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		Class<? extends IBaseBundle> bundleType =
 				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
 
-		IQuery<IBaseBundle> valueSetQuery = client.search()
-				.forResource("ValueSet")
-				.where(CodeSystem.URL.matches().value(theValueSetUrl));
+		IQuery<IBaseBundle> valueSetQuery = client.search().forResource("ValueSet");
+
+		int pipeIdx = theValueSetUrl.indexOf("|");
+		if (pipeIdx < 0) {
+			valueSetQuery.where(CodeSystem.URL.matches().value(theValueSetUrl));
+		} else {
+			valueSetQuery.where(CodeSystem.URL.matches().value(theValueSetUrl.substring(0, pipeIdx)));
+			valueSetQuery.where(
+					new StringClientParam("version").matches().value(theValueSetUrl.substring(pipeIdx + 1)));
+		}
 
 		if (theSummaryParam != null) {
 			valueSetQuery.summaryMode(theSummaryParam);
@@ -816,6 +843,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theCode);
 		if (isNotBlank(theCodeSystem)) {
 			ParametersUtil.addParameterToParametersUri(fhirContext, params, "system", theCodeSystem);
+		} else {
+			// system could not be determined locally — ask the remote server to infer it
+			ParametersUtil.addParameterToParametersBoolean(fhirContext, params, "inferSystem", true);
 		}
 		if (isNotBlank(theDisplay)) {
 			ParametersUtil.addParameterToParametersString(fhirContext, params, "display", theDisplay);

@@ -1,0 +1,14 @@
+---
+type: add
+issue: 7566
+title: "When parsing a resource containing a field of type `code` with a
+   **required** binding strength (e.g. `Patient.gender`, where only
+   a fixed set of FHIR-defined codes may be used). The parser will now 
+   be lenient in cases where a value is provided which differs from the 
+   allowed value only in case. For example, a `Patient.gender` value of
+   `Male` will now be parsed as `male` even though `male` is the correct
+   value for this element. An error will be passed to `IParserErrorHandler`
+   which can choose to reject elements with this issue, and the FHIR
+   validator will continue to do so.
+   
+   Thanks to Donald Wheeler for the contribution!"

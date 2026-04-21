@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7355
+title: "Previously, the `ValidationMessageSuppressingInterceptor` did not apply message suppression patterns 
+to the slice messages of a `ValidationResult`. This has been fixed."

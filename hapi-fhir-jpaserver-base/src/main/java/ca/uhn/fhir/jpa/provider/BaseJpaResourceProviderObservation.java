@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public abstract class BaseJpaResourceProviderObservation<T extends IBaseResource
 				 * has the "Observation" resource class defined. For this resource, the max parameter
 				 * is not supported and thus has to be removed before the use of "translateRawParameters".
 				 */
-				theAdditionalRawParams.remove("max");
+				if (theAdditionalRawParams != null) theAdditionalRawParams.remove("max");
 			}
 			if (theCount != null) {
 				paramMap.setCount(theCount.getValue());

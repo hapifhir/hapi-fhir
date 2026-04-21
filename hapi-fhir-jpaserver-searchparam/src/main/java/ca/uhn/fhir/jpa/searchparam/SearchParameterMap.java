@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.repository.IRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
@@ -39,6 +41,7 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -53,6 +56,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +70,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class SearchParameterMap implements Serializable {
+public class SearchParameterMap implements Serializable, IRepository.IRepositoryRestQueryContributor {
 	public static final Integer INTEGER_0 = 0;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMap.class);
 
@@ -79,6 +83,7 @@ public class SearchParameterMap implements Serializable {
 	private EverythingModeEnum myEverythingMode = null;
 	private Set<Include> myIncludes;
 	private DateRangeParam myLastUpdated;
+	private DateRangeParam myCompartmentLastUpdated;
 	private boolean myLoadSynchronous;
 	private Integer myLoadSynchronousUpTo;
 	private Set<Include> myRevIncludes;
@@ -125,6 +130,7 @@ public class SearchParameterMap implements Serializable {
 		map.setLastN(isLastN());
 		map.setLastNMax(getLastNMax());
 		map.setLastUpdated(getLastUpdated());
+		map.setCompartmentLastUpdated(getCompartmentLastUpdated());
 		map.setLoadSynchronous(isLoadSynchronous());
 		map.setNearDistanceParam(getNearDistanceParam());
 		map.setLoadSynchronousUpTo(getLoadSynchronousUpTo());
@@ -171,11 +177,19 @@ public class SearchParameterMap implements Serializable {
 		if (theAnd == null) {
 			return this;
 		}
-		if (!containsKey(theName)) {
-			put(theName, new ArrayList<>());
+
+		if (theAnd instanceof DateRangeParam dateRangeParam) {
+			if (dateRangeParam.getLowerBound() != null
+					&& !dateRangeParam.getLowerBound().isEmpty()
+					&& dateRangeParam.getUpperBound() != null
+					&& !dateRangeParam.isEmpty()
+					&& dateRangeParam.getLowerBound().equals(dateRangeParam.getUpperBound())) {
+				add(theName, dateRangeParam.getLowerBound());
+				return this;
+			}
 		}
 
-		List<List<IQueryParameterType>> paramList = get(theName);
+		List<List<IQueryParameterType>> paramList = getOrCreate(theName);
 		for (IQueryParameterOr<?> next : theAnd.getValuesAsQueryTokens()) {
 			if (next == null) {
 				continue;
@@ -186,16 +200,31 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
+	private List<List<IQueryParameterType>> getOrCreate(String theName) {
+		return mySearchParameterMap.computeIfAbsent(theName, k -> new ArrayList<>());
+	}
+
 	@SuppressWarnings("unchecked")
-	public SearchParameterMap add(String theName, IQueryParameterOr<?> theOr) {
-		if (theOr == null) {
+	@Nonnull
+	public SearchParameterMap add(@Nonnull String theName, @Nullable IQueryParameterOr<?> theOr) {
+		List<IQueryParameterType> orList =
+				theOr != null ? (List<IQueryParameterType>) theOr.getValuesAsQueryTokens() : null;
+		return addOrList(theName, orList);
+	}
+
+	/**
+	 * Adds a list of parameters to the map, treating them as OR predicates
+	 */
+	@SuppressWarnings("unchecked")
+	@Nonnull
+	public SearchParameterMap addOrList(
+			@Nonnull String theName, @Nullable List<? extends IQueryParameterType> theOrList) {
+		if (theOrList == null) {
 			return this;
 		}
-		if (!containsKey(theName)) {
-			put(theName, new ArrayList<>());
-		}
 
-		get(theName).add((List<IQueryParameterType>) theOr.getValuesAsQueryTokens());
+		getOrCreate(theName).add((List<IQueryParameterType>) theOrList);
+
 		return this;
 	}
 
@@ -209,12 +238,9 @@ public class SearchParameterMap implements Serializable {
 		if (theParam == null) {
 			return this;
 		}
-		if (!containsKey(theName)) {
-			put(theName, new ArrayList<>());
-		}
 		ArrayList<IQueryParameterType> list = new ArrayList<>();
 		list.add(theParam);
-		get(theName).add(list);
+		getOrCreate(theName).add(list);
 
 		return this;
 	}
@@ -228,6 +254,17 @@ public class SearchParameterMap implements Serializable {
 		if (theDateParam != null && isNotBlank(theDateParam.getValueAsString())) {
 			addUrlParamSeparator(theBuilder);
 			theBuilder.append(Constants.PARAM_LASTUPDATED);
+			theBuilder.append('=');
+			theBuilder.append(thePrefix.getValue());
+			theBuilder.append(theDateParam.getValueAsString());
+		}
+	}
+
+	private void addCompartmentLastUpdatedParam(
+			StringBuilder theBuilder, ParamPrefixEnum thePrefix, DateParam theDateParam) {
+		if (theDateParam != null && isNotBlank(theDateParam.getValueAsString())) {
+			addUrlParamSeparator(theBuilder);
+			theBuilder.append(Constants.PARAM_COMPARTMENT_LAST_UPDATED);
 			theBuilder.append('=');
 			theBuilder.append(thePrefix.getValue());
 			theBuilder.append(theDateParam.getValueAsString());
@@ -322,6 +359,20 @@ public class SearchParameterMap implements Serializable {
 
 	public void setLastUpdated(DateRangeParam theLastUpdated) {
 		myLastUpdated = theLastUpdated;
+	}
+
+	/**
+	 * Returns null if there is no compartment last updated value
+	 */
+	public DateRangeParam getCompartmentLastUpdated() {
+		if (myCompartmentLastUpdated == null || myCompartmentLastUpdated.isEmpty()) {
+			return null;
+		}
+		return myCompartmentLastUpdated;
+	}
+
+	public void setCompartmentLastUpdated(DateRangeParam theCompartmentLastUpdated) {
+		myCompartmentLastUpdated = theCompartmentLastUpdated;
 	}
 
 	/**
@@ -532,6 +583,19 @@ public class SearchParameterMap implements Serializable {
 			}
 		}
 
+		if (getCompartmentLastUpdated() != null) {
+			DateParam ccLb = getCompartmentLastUpdated().getLowerBound();
+			DateParam ccUb = getCompartmentLastUpdated().getUpperBound();
+
+			if (isNotEqualsComparator(ccLb, ccUb)) {
+				addCompartmentLastUpdatedParam(
+						b, NOT_EQUAL, getCompartmentLastUpdated().getLowerBound());
+			} else {
+				addCompartmentLastUpdatedParam(b, GREATERTHAN_OR_EQUALS, ccLb);
+				addCompartmentLastUpdatedParam(b, LESSTHAN_OR_EQUALS, ccUb);
+			}
+		}
+
 		if (getCount() != null) {
 			addUrlParamSeparator(b);
 			b.append(Constants.PARAM_COUNT);
@@ -586,6 +650,17 @@ public class SearchParameterMap implements Serializable {
 		return b.toString();
 	}
 
+	/**
+	 * Configure a query with the current settings.
+	 * This is an adaptor method to allow this class to be used in IRepository.search().
+	 * with repository implementations that don't use SearchParameterMap.
+	 * @param theBuilder the builder to configure with our settings
+	 */
+	@Override
+	public void contributeToQuery(IRepositoryRestQueryBuilder theBuilder) {
+		SearchParameterMapContributor.contributeToBuilder(this, theBuilder);
+	}
+
 	private boolean isNotEqualsComparator(DateParam theLowerBound, DateParam theUpperBound) {
 		return theLowerBound != null
 				&& theUpperBound != null
@@ -620,10 +695,17 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	public void clean() {
-		for (Map.Entry<String, List<List<IQueryParameterType>>> nextParamEntry : this.entrySet()) {
+		for (Iterator<Map.Entry<String, List<List<IQueryParameterType>>>> iterator =
+						this.entrySet().iterator();
+				iterator.hasNext(); ) {
+			Map.Entry<String, List<List<IQueryParameterType>>> nextParamEntry = iterator.next();
 			String nextParamName = nextParamEntry.getKey();
 			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
 			cleanParameter(nextParamName, andOrParams);
+
+			if (andOrParams.isEmpty()) {
+				iterator.remove();
+			}
 		}
 	}
 
@@ -929,6 +1011,7 @@ public class SearchParameterMap implements Serializable {
 				&& myEverythingMode == that.myEverythingMode
 				&& Objects.equals(myIncludes, that.myIncludes)
 				&& Objects.equals(myLastUpdated, that.myLastUpdated)
+				&& Objects.equals(myCompartmentLastUpdated, that.myCompartmentLastUpdated)
 				&& Objects.equals(myLoadSynchronousUpTo, that.myLoadSynchronousUpTo)
 				&& Objects.equals(myRevIncludes, that.myRevIncludes)
 				&& Objects.equals(mySort, that.mySort)
@@ -949,6 +1032,7 @@ public class SearchParameterMap implements Serializable {
 				myEverythingMode,
 				myIncludes,
 				myLastUpdated,
+				myCompartmentLastUpdated,
 				myLoadSynchronous,
 				myLoadSynchronousUpTo,
 				myRevIncludes,

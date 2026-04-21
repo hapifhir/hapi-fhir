@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -51,13 +53,16 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	private final Queue<ResourceChangeListenerCache> myListenerEntries = new ConcurrentLinkedQueue<>();
 	private final FhirContext myFhirContext;
 	private final ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
+	private final PartitionSettings myPartitionSettings;
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	public ResourceChangeListenerRegistryImpl(
 			FhirContext theFhirContext,
+			PartitionSettings thePartitionSettings,
 			ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory,
 			InMemoryResourceMatcher theInMemoryResourceMatcher) {
 		myFhirContext = theFhirContext;
+		myPartitionSettings = thePartitionSettings;
 		myResourceChangeListenerCacheFactory = theResourceChangeListenerCacheFactory;
 		myInMemoryResourceMatcher = theInMemoryResourceMatcher;
 	}
@@ -79,6 +84,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	@Override
 	public IResourceChangeListenerCache registerResourceResourceChangeListener(
 			String theResourceName,
+			RequestPartitionId theRequestPartitionId,
 			SearchParameterMap theSearchParameterMap,
 			IResourceChangeListener theResourceChangeListener,
 			long theRemoteRefreshIntervalMs) {
@@ -91,7 +97,18 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 					+ " cannot be evaluated in-memory: " + inMemoryMatchResult.getUnsupportedReason()
 					+ ".  Only search parameter maps that can be evaluated in-memory may be registered.");
 		}
-		return add(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
+
+		RequestPartitionId requestPartitionId = theRequestPartitionId;
+		if (requestPartitionId != null && requestPartitionId.isDefaultPartition()) {
+			requestPartitionId = RequestPartitionId.defaultPartition(myPartitionSettings);
+		}
+
+		return add(
+				theResourceName,
+				requestPartitionId,
+				theResourceChangeListener,
+				theSearchParameterMap,
+				theRemoteRefreshIntervalMs);
 	}
 
 	/**
@@ -111,11 +128,12 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 
 	private IResourceChangeListenerCache add(
 			String theResourceName,
+			RequestPartitionId theRequestPartitionId,
 			IResourceChangeListener theResourceChangeListener,
 			SearchParameterMap theMap,
 			long theRemoteRefreshIntervalMs) {
 		ResourceChangeListenerCache retval = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(
-				theResourceName, theMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
+				theResourceName, theRequestPartitionId, theMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
 		myListenerEntries.add(retval);
 		return retval;
 	}

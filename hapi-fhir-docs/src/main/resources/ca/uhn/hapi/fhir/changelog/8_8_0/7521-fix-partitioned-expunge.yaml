@@ -1,0 +1,6 @@
+---
+type: fix
+jira: SMILE-11574
+issue: 7521
+title: "Previously, the `$expunge` operation failed with partitioning enabled when the number of resources to expunge 
+exceeded the batch size. This has been fixed."

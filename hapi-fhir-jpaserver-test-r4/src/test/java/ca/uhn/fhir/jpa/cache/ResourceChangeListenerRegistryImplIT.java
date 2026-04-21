@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -72,6 +73,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 
 		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
 			"StructureDefinition",
+			RequestPartitionId.allPartitions(),
 			SearchParameterMap.newSynchronous(),
 			new IResourceChangeListener() {
 				@Override
@@ -125,7 +127,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	public void testRegisterListener() throws InterruptedException {
 		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 
-		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, SearchParameterMap.newSynchronous(), myMaleTestCallback, TEST_REFRESH_INTERVAL);
+		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, RequestPartitionId.allPartitions(), SearchParameterMap.newSynchronous(), myMaleTestCallback, TEST_REFRESH_INTERVAL);
 
 		Patient patient = createPatientWithInitLatch(null, myMaleTestCallback);
 		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
@@ -162,7 +164,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		try {
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLastUpdated(new DateRangeParam("1965", "1970"));
-			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, map, myMaleTestCallback, TEST_REFRESH_INTERVAL);
+			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, RequestPartitionId.allPartitions(), map, myMaleTestCallback, TEST_REFRESH_INTERVAL);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(482) + "SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: Parameter: <_lastUpdated> Reason: Standard parameters not supported.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
@@ -208,7 +210,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 
 	@Test
 	public void testRegisterPolling() throws InterruptedException {
-		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, SearchParameterMap.newSynchronous(), myMaleTestCallback, TEST_REFRESH_INTERVAL);
+		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, RequestPartitionId.allPartitions(), SearchParameterMap.newSynchronous(), myMaleTestCallback, TEST_REFRESH_INTERVAL);
 
 		Patient patient = createPatientWithInitLatch(null, myMaleTestCallback);
 		IdDt patientId = new IdDt(patient.getIdElement());
@@ -225,7 +227,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 
 	@Test
 	public void testRegisterInterceptorFor2Patients() throws InterruptedException {
-		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myMaleTestCallback, TEST_REFRESH_INTERVAL);
+		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, RequestPartitionId.allPartitions(), createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myMaleTestCallback, TEST_REFRESH_INTERVAL);
 
 		createPatientWithInitLatch(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
 
@@ -245,17 +247,17 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 
 	@Test
 	public void testRegister2InterceptorsFor2Patients() throws InterruptedException {
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myMaleTestCallback, TEST_REFRESH_INTERVAL);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, RequestPartitionId.allPartitions(), createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myMaleTestCallback, TEST_REFRESH_INTERVAL);
 		createPatientWithInitLatch(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
 		myMaleTestCallback.clear();
 
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.FEMALE), myFemaleTestCallback, TEST_REFRESH_INTERVAL);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, RequestPartitionId.allPartitions(), createSearchParameterMap(Enumerations.AdministrativeGender.FEMALE), myFemaleTestCallback, TEST_REFRESH_INTERVAL);
 		createPatientWithInitLatch(Enumerations.AdministrativeGender.FEMALE, myFemaleTestCallback);
 	}
 
 	@Test
 	public void testRegisterPollingFor2Patients() throws InterruptedException {
-		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myMaleTestCallback, TEST_REFRESH_INTERVAL);
+		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, RequestPartitionId.allPartitions(), createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myMaleTestCallback, TEST_REFRESH_INTERVAL);
 
 		Patient patientMale = createPatientWithInitLatch(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
 		IdDt patientIdMale = new IdDt(patientMale.getIdElement());
@@ -287,14 +289,14 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 
 		SearchParameterMap searchParameterMap = createSearchParameterMap(Enumerations.AdministrativeGender.MALE);
-		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, searchParameterMap, myMaleTestCallback, TEST_REFRESH_INTERVAL);
+		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, RequestPartitionId.allPartitions(), searchParameterMap, myMaleTestCallback, TEST_REFRESH_INTERVAL);
 		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 
 		createPatientWithInitLatch(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
 		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 
 		TestCallback otherTestCallback = new TestCallback("OTHER_MALE");
-		IResourceChangeListenerCache otherCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, searchParameterMap, otherTestCallback, TEST_REFRESH_INTERVAL);
+		IResourceChangeListenerCache otherCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, RequestPartitionId.allPartitions(), searchParameterMap, otherTestCallback, TEST_REFRESH_INTERVAL);
 
 		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 

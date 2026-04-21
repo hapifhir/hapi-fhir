@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.hl7.fhir.r5.fhirpath.TypeDetails;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -150,7 +151,12 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		}
 
 		@Override
-		public Base resolveReference(FHIRPathEngine engine, Object appContext, String theUrl, Base refContext) {
+		/* 	The identifier parameter introduced in org.hl7.fhir.core 6.8.2 is unused by tests in that project, and
+			omitted in most of its internal implementations. If tests are introduced in subsequent releases that rely on
+			it, its use may need to be included here. -dotasek
+		*/
+		public Base resolveReference(
+				FHIRPathEngine engine, Object appContext, String theUrl, Identifier identifier, Base refContext) {
 			Base retVal = (Base) BundleUtil.getReferenceInBundle(getContext(), theUrl, appContext);
 			if (retVal != null) {
 				return retVal;
@@ -195,6 +201,10 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 				}
 			}
 			return retVal;
+		}
+
+		public Base findContainingResource(Object o, Base base) {
+			return null;
 		}
 
 		@Override

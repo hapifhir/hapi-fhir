@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -57,11 +58,13 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IInstanceReindexService;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.PreventDanglingInterceptorsExtension;
@@ -151,6 +154,9 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR5Config.class, TestDaoSearch.Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
+
+	@Autowired
+	protected IJobStepExecutionServices myJobStepExecutionServices;
 	@Autowired
 	protected IResourceIdentifierCacheSvc myResourceIdentifierCacheSvc;
 	@Autowired
@@ -176,6 +182,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	protected ISearchParamPresentDao mySearchParamPresentDao;
+	@Autowired
+	protected ISearchParamExtractor mySearchParamExtractor;
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
 	@Autowired
@@ -226,6 +234,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
 	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
+	@Autowired
+	protected ITermLoaderSvc myTermLoaderSvc;
 	@Autowired
 	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 	@Autowired
@@ -496,6 +506,16 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@BeforeEach
 	public void beforeResetConfig() {
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+	}
+
+	protected void createOrUpdateSearchParameter(SearchParameter theSearchParameter) {
+		ourLog.info("Creating Search Param: {}", myFhirCtx.newJsonParser().encodeResourceToString(theSearchParameter));
+		if (theSearchParameter.getIdElement().isEmpty()) {
+			mySearchParameterDao.create(theSearchParameter, newSrd());
+		} else {
+			mySearchParameterDao.update(theSearchParameter, newSrd());
+		}
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	@Override

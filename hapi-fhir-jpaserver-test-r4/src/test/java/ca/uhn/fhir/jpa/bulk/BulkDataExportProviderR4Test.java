@@ -44,6 +44,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
@@ -147,8 +148,7 @@ public class BulkDataExportProviderR4Test {
 	private JobInstanceStartRequest verifyJobStart() {
 		ArgumentCaptor<JobInstanceStartRequest> startJobCaptor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
 		verify(myJobCoordinator).startInstance(isNotNull(), startJobCaptor.capture());
-		JobInstanceStartRequest sp = startJobCaptor.getValue();
-		return sp;
+		return startJobCaptor.getValue();
 	}
 
 	private BulkExportJobParameters verifyJobStartAndReturnParameters() {
@@ -208,7 +208,7 @@ public class BulkDataExportProviderR4Test {
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			String baseUrl;
 			if (baseUrlFixed) {
@@ -286,7 +286,7 @@ public class BulkDataExportProviderR4Test {
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		ourLog.info("Request: {}", url);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
@@ -316,7 +316,7 @@ public class BulkDataExportProviderR4Test {
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		ourLog.info("Request: {}", url);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
@@ -352,7 +352,7 @@ public class BulkDataExportProviderR4Test {
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
@@ -383,7 +383,7 @@ public class BulkDataExportProviderR4Test {
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			assertEquals(500, response.getStatusLine().getStatusCode());
 			assertEquals("Server Error", response.getStatusLine().getReasonPhrase());
@@ -391,6 +391,7 @@ public class BulkDataExportProviderR4Test {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
 			assertThat(responseContent).contains("\"diagnostics\": \"Some Error Message\"");
+			assertThat(responseContent).contains(OperationOutcome.IssueType.PROCESSING.toCode());
 		}
 	}
 
@@ -427,9 +428,6 @@ public class BulkDataExportProviderR4Test {
 		info.setReport(JsonUtil.serialize(results));
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		if (partitioningEnabled) {
-			parameters.setPartitionId(myRequestPartitionId);
-		}
 		info.setParameters(parameters);
 
 		// when
@@ -442,7 +440,7 @@ public class BulkDataExportProviderR4Test {
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			String myBaseUriForPoll;
 			if (baseUrlFixed) {
@@ -486,7 +484,7 @@ public class BulkDataExportProviderR4Test {
 		info.setEndTime(InstantType.now().getValue());
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setPartitionId(myRequestPartitionId);
+		parameters.setPartitionIdForSecurity(myRequestPartitionId);
 		info.setParameters(parameters);
 
 		ArrayList<String> ids = new ArrayList<>();
@@ -511,7 +509,7 @@ public class BulkDataExportProviderR4Test {
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			assertEquals(403, response.getStatusLine().getStatusCode());
 			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
@@ -548,7 +546,7 @@ public class BulkDataExportProviderR4Test {
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertEquals("OK", response.getStatusLine().getReasonPhrase());
@@ -574,7 +572,7 @@ public class BulkDataExportProviderR4Test {
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
 
@@ -620,7 +618,7 @@ public class BulkDataExportProviderR4Test {
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
@@ -660,7 +658,7 @@ public class BulkDataExportProviderR4Test {
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		ourLog.info("Request: {}", url);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
@@ -695,7 +693,7 @@ public class BulkDataExportProviderR4Test {
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(400, response.getStatusLine().getStatusCode());
 
 			String responseStr = new String(response.getEntity().getContent().readAllBytes(), StandardCharsets.UTF_8);
@@ -723,7 +721,7 @@ public class BulkDataExportProviderR4Test {
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		ourLog.info("Request: {}", url);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
@@ -838,7 +836,7 @@ public class BulkDataExportProviderR4Test {
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
@@ -868,7 +866,7 @@ public class BulkDataExportProviderR4Test {
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
@@ -901,6 +899,7 @@ public class BulkDataExportProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Immunization?vaccine-code=foo"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_PATIENT, new Reference("Patient/123"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_PATIENT, new StringType("Patient/456"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_MDM, true);
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
@@ -910,7 +909,7 @@ public class BulkDataExportProviderR4Test {
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
@@ -923,6 +922,34 @@ public class BulkDataExportProviderR4Test {
 		assertNotNull(bp.getUntil());
 		assertThat(bp.getFilters()).containsExactlyInAnyOrder("Immunization?vaccine-code=foo");
 		assertThat(bp.getPatientIds()).containsExactlyInAnyOrder("Patient/123", "Patient/456");
+		assertThat(bp.isExpandMdm()).isTrue();
+	}
+
+	@Test
+	public void testPatientLevelWithMdmExpandNoPatientReference() throws IOException {
+		// when
+		when(myJobCoordinator.startInstance(isNotNull(), any()))
+			.thenReturn(createJobStartResponse());
+
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_MDM, true);
+
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+		// call
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + ProviderConstants.OPERATION_EXPORT);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+		ourLog.info("Request: {}", post);
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response);
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+		}
+
+		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
+		assertThat(bp.isExpandMdm()).isFalse();
 	}
 
 	@Test
@@ -946,7 +973,7 @@ public class BulkDataExportProviderR4Test {
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
@@ -979,7 +1006,7 @@ public class BulkDataExportProviderR4Test {
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
@@ -1016,9 +1043,6 @@ public class BulkDataExportProviderR4Test {
 		// setup
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		if (partitioningEnabled) {
-			parameters.setPartitionId(myRequestPartitionId);
-		}
 
 		JobInstance info = new JobInstance();
 		info.setParameters(parameters);
@@ -1049,7 +1073,7 @@ public class BulkDataExportProviderR4Test {
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpDelete delete = new HttpDelete(url);
 		try (CloseableHttpResponse response = myClient.execute(delete)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
@@ -1081,7 +1105,7 @@ public class BulkDataExportProviderR4Test {
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpDelete delete = new HttpDelete(url);
 		try (CloseableHttpResponse response = myClient.execute(delete)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			assertEquals("Not Found", response.getStatusLine().getReasonPhrase());
@@ -1091,6 +1115,7 @@ public class BulkDataExportProviderR4Test {
 			// content would be blank, since the job is cancelled, so no
 			ourLog.info("Response content: {}", responseContent);
 			assertThat(responseContent).contains("was already cancelled or has completed.");
+			assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
 		}
 	}
 
@@ -1114,7 +1139,7 @@ public class BulkDataExportProviderR4Test {
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpDelete delete = new HttpDelete(url);
 		try (CloseableHttpResponse response = myClient.execute(delete)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			assertEquals("Not Found", response.getStatusLine().getReasonPhrase());
@@ -1122,6 +1147,7 @@ public class BulkDataExportProviderR4Test {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
 			assertThat(responseContent).contains("was cancelled.  No status to report.");
+			assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
 		}
 	}
 
@@ -1146,13 +1172,49 @@ public class BulkDataExportProviderR4Test {
 		// Execute
 		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
 			// Verify
-			ourLog.debug("Response: {}", response);
+			ourLog.debug("Response: {}", response.getEntity());
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_NOT_FOUND);
 			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Not Found");
+			assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
 			assertThat(responseContent).contains("was cancelled.  No status to report.");
 		}
 	}
+
+	@Test
+	public void testGetBulkExportByGroupId_urlParamNotEncoded_resultShouldBeFilteredByCriteria() throws IOException {
+		// Setup
+		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse(G_JOB_ID));
+
+		String url = myServer.getBaseUrl() + "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT
+			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + Constants.CT_FHIR_NDJSON
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=Patient,Observation"
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=Patient?gender=male"
+			+ "&" + JpaConstants.PARAM_EXPORT_MDM + "=true";
+
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		ourLog.info("Request: {}", url);
+
+		// Execute
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response);
+
+			// Verify
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_ACCEPTED);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue())
+				.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
+
+			BulkExportJobParameters params = verifyJobStartAndReturnParameters();
+			assertThat(params.getGroupId()).isEqualTo(GROUP_ID);
+			assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
+			assertThat(params.getResourceTypes()).containsExactlyInAnyOrder("Patient", "Observation");
+			assertThat(params.getFilters()).contains("Patient?gender=male");
+			assertThat(params.isExpandMdm()).isTrue();
+		}
+	}
+
 
 	@ParameterizedTest
 	@ValueSource(strings = {
@@ -1190,7 +1252,7 @@ public class BulkDataExportProviderR4Test {
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(202, response.getStatusLine().getStatusCode());
 		}
 
@@ -1211,7 +1273,7 @@ public class BulkDataExportProviderR4Test {
 		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
 		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myServer.getPort(), A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
@@ -1263,7 +1325,7 @@ public class BulkDataExportProviderR4Test {
 
 
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, response.getStatusLine().getStatusCode());
 		}
 	}
@@ -1278,9 +1340,6 @@ public class BulkDataExportProviderR4Test {
 		info.setEndTime(InstantType.now().getValue());
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		if (partititioningEnabled) {
-			parameters.setPartitionId(myRequestPartitionId);
-		}
 		info.setParameters(parameters);
 
 		// when
@@ -1306,7 +1365,7 @@ public class BulkDataExportProviderR4Test {
 		post.setEntity(new ResourceEntity(myCtx, input));
 
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(Constants.STATUS_HTTP_202_ACCEPTED, response.getStatusLine().getStatusCode());
 		}
 	}
@@ -1324,7 +1383,7 @@ public class BulkDataExportProviderR4Test {
 		post.setEntity(new ResourceEntity(myCtx, input));
 
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, response.getStatusLine().getStatusCode());
 		}
 	}
@@ -1337,7 +1396,7 @@ public class BulkDataExportProviderR4Test {
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + theExpectedJobId, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
@@ -1359,7 +1418,7 @@ public class BulkDataExportProviderR4Test {
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		ourLog.info("Request: {}", url);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(403, response.getStatusLine().getStatusCode());
 			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
 		}
@@ -1377,7 +1436,7 @@ public class BulkDataExportProviderR4Test {
 		info.setEndTime(new Date());
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setPartitionId(myRequestPartitionId);
+		parameters.setPartitionIdForSecurity(myRequestPartitionId);
 		info.setParameters(parameters);
 
 		// when
@@ -1390,7 +1449,7 @@ public class BulkDataExportProviderR4Test {
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+			ourLog.info("Response: {}", response);
 			assertEquals(403, response.getStatusLine().getStatusCode());
 			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
 		}

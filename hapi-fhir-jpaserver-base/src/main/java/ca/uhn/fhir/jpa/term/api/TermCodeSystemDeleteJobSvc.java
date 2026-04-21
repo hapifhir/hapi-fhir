@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,9 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 
 	@Autowired
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
+
+	@Autowired
+	private ITermReadSvc myTermReadSvc;
 
 	@Override
 	public Iterator<IdAndPartitionId> getAllCodeSystemVersionForCodeSystemPid(long thePid) {
@@ -140,6 +143,8 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 			myTermCodeSystemVersionDao.delete(theTermCodeSystemVersion);
 			ourLog.info("Code system version: {} deleted", theVersionPid);
 		});
+
+		myTermReadSvc.invalidateCaches();
 	}
 
 	@Override
@@ -156,6 +161,8 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 
 			ourLog.info("Code system {} deleted", thePid);
 		}
+
+		myTermReadSvc.invalidateCaches();
 	}
 
 	@Override

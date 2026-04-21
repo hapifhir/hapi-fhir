@@ -1,9 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
-import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -14,6 +10,7 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -60,6 +57,9 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test {
 
@@ -1549,5 +1549,35 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		}
 		IIdType oId = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
 		return oId;
+	}
+
+	@Test
+	void testEncounterEverythingOperation_shouldReturn404ForNonExistentEncounter() {
+		Patient patient = new Patient();
+		patient.addName().setFamily("Test").addGiven("Patient");
+		IIdType patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		Encounter encounter1 = new Encounter();
+		encounter1.setSubject(new Reference(patientId));
+		IIdType encounterId1 = myClient.create().resource(encounter1).execute().getId().toUnqualifiedVersionless();
+
+		// Create an Observation referencing the encounter and the patient
+		Observation observation = new Observation();
+		observation.setSubject(new Reference(patientId));
+		observation.setEncounter(new Reference(encounterId1));
+		myClient.create().resource(observation).execute();
+
+		// Call $everything on NON-EXISTENT Encounter
+		assertThatThrownBy(() -> {
+			myClient.operation()
+				.onInstance(new IdType("Encounter", "nonexistent-encounter-id"))
+				.named("$everything")
+				.withNoParameters(Parameters.class)
+				.returnResourceType(Bundle.class)
+				.execute();
+		})
+			.as("$everything for non-existent encounter should throw 404 Not Found per FHIR HTTP spec")
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("nonexistent-encounter-id");
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import org.hl7.fhir.r4.model.Task;
 import org.springframework.context.annotation.Bean;
@@ -84,18 +85,6 @@ public class MergeAppCtx {
 	public ReplaceReferenceUpdateStep<MergeJobParameters> mergeUpdateStep(
 			FhirContext theFhirContext, ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc) {
 		return new ReplaceReferenceUpdateStep<>(theFhirContext, theReplaceReferencesPatchBundleSvc);
-	}
-
-	@Bean
-	public MergeProvenanceSvc mergeProvenanceSvc(DaoRegistry theDaoRegistry) {
-		return new MergeProvenanceSvc(theDaoRegistry);
-	}
-
-	@Bean
-	public MergeResourceHelper mergeResourceHelper(
-			DaoRegistry theDaoRegistry, MergeProvenanceSvc theMergeProvenanceSvc) {
-
-		return new MergeResourceHelper(theDaoRegistry, theMergeProvenanceSvc);
 	}
 
 	@Bean

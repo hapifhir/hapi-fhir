@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +33,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -75,12 +77,27 @@ public class BundleBuilder {
 
 	/**
 	 * Constructor
+	 *
+	 * @param theContext The FHIR context appropriate for the Bundle type.
 	 */
-	public BundleBuilder(FhirContext theContext) {
+	public BundleBuilder(@Nonnull FhirContext theContext) {
+		this(theContext, (IBaseBundle)
+				theContext.getResourceDefinition("Bundle").newInstance());
+	}
+
+	/**
+	 * Constructor which accepts an existing Bundle. Any existing entries in the Bundle
+	 * will be preserved, new entries may be added.
+	 *
+	 * @param theContext The FHIR context appropriate for the Bundle type.
+	 * @param theBundle The Bundle to add to.
+	 * @since 8.6.0
+	 */
+	public BundleBuilder(@Nonnull FhirContext theContext, @Nonnull IBaseBundle theBundle) {
+		myBundle = theBundle;
 		myContext = theContext;
 
 		myBundleDef = myContext.getResourceDefinition("Bundle");
-		myBundle = (IBaseBundle) myBundleDef.newInstance();
 
 		myEntryChild = myBundleDef.getChildByName("entry");
 		myEntryDef = myEntryChild.getChildByName("entry");
@@ -320,6 +337,44 @@ public class BundleBuilder {
 		addRequestMethod(request, "POST");
 
 		return new CreateBuilder(request);
+	}
+
+	/**
+	 * Adds a transaction entry invoking the <code>$meta-add</code> operation on a resource instance
+	 *
+	 * @param theId The ID of the resource to add meta to
+	 * @param theMeta The meta to add
+	 * @since 8.10.0
+	 */
+	public void addTransactionMetaAddEntry(IIdType theId, IBaseMetaType theMeta) {
+		addTransactionMetaAddOrDelete(theId, theMeta, RestOperationTypeEnum.META_ADD);
+	}
+
+	/**
+	 * Adds a transaction entry invoking the <code>$meta-delete</code> operation on a resource instance
+	 *
+	 * @param theId The ID of the resource to add meta to
+	 * @param theMeta The meta to add
+	 * @since 8.10.0
+	 */
+	public void addTransactionMetaDeleteEntry(IIdType theId, IBaseMetaType theMeta) {
+		addTransactionMetaAddOrDelete(theId, theMeta, RestOperationTypeEnum.META_DELETE);
+	}
+
+	private void addTransactionMetaAddOrDelete(
+			IIdType theId, IBaseMetaType theMeta, RestOperationTypeEnum operationName) {
+		setBundleFieldIfNotAlreadySet("type", "transaction");
+
+		IBaseParameters requestResource = ParametersUtil.newInstance(myContext);
+		ParametersUtil.addParameterToParameters(myContext, requestResource, "meta", theMeta);
+
+		IBase request = addEntryAndReturnRequest(requestResource, null);
+
+		// Bundle.entry.request.url
+		addRequestUrl(request, theId.getResourceType() + "/" + theId.getIdPart() + "/" + operationName.getCode());
+
+		// Bundle.entry.request.method
+		addRequestMethod(request, "POST");
 	}
 
 	/**

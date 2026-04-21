@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,10 +60,10 @@ public class MdmConstants {
 	 * superset of the same functionality and only one should run if they are both registered for whatever
 	 * reason.
 	 */
-	public static final int ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR = 0;
+	public static final int STORAGE_PRESEARCH_PARTITION_SELECTED_MDM_READ_VIRTUALIZATION_INTERCEPTOR = 0;
 
 	/**
-	 * @see #ORDER_PRESEARCH_REGISTERED_MDM_READ_VIRTUALIZATION_INTERCEPTOR
+	 * @see #STORAGE_PRESEARCH_PARTITION_SELECTED_MDM_READ_VIRTUALIZATION_INTERCEPTOR
 	 */
-	public static final int ORDER_PRESEARCH_REGISTERED_MDM_SEARCH_EXPANDING_INTERCEPTOR = 1;
+	public static final int STORAGE_PRESEARCH_PARTITION_SELECTED_MDM_SEARCH_EXPANDING_INTERCEPTOR = 1;
 }

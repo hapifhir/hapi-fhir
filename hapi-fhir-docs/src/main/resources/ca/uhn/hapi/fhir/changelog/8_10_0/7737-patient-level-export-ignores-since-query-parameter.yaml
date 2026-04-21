@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7737
+title: "Previously, patient-level bulk export (Patient/$export) ignored the `_since` query parameter,
+  causing all matching resources to be returned regardless of their last-updated timestamp. This has been
+  fixed."

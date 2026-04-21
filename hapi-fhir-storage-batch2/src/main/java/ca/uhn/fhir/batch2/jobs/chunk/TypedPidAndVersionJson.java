@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,7 @@ public class TypedPidAndVersionJson extends TypedPidJson {
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
-		if (!(theO instanceof TypedPidAndVersionJson)) return false;
-		TypedPidAndVersionJson that = (TypedPidAndVersionJson) theO;
+		if (!(theO instanceof TypedPidAndVersionJson that)) return false;
 		return super.equals(theO) && Objects.equals(myVersionId, that.myVersionId);
 	}
 

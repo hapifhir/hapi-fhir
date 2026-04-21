@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7328
+jira: SMILE-11137
+title: "Specifying an allowed spec of resourcetype:search would allow
+      fetching the first page, but subsequent pages would fail.
+      This has now been fixed.
+"
