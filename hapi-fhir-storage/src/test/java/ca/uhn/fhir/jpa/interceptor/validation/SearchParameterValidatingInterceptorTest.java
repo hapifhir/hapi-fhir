@@ -331,7 +331,7 @@ public class SearchParameterValidatingInterceptorTest {
 
 		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(oldSp, newSp, myRequestDetails))
 				.isInstanceOf(UnprocessableEntityException.class)
-				.hasMessageContaining("2876");
+				.hasMessageContaining("2924");
 	}
 
 	@Test

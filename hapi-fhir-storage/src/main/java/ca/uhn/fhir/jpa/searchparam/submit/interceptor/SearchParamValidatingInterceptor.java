@@ -236,7 +236,7 @@ public class SearchParamValidatingInterceptor {
 			if (SearchParamRegistryImpl.isNonDisableableBuiltInSearchParam(
 							theNewParam.getUri(), nextBase, theNewParam.getName())
 					&& !theNewParam.getBase().contains(nextBase)) {
-				throw new UnprocessableEntityException(Msg.code(2876) + "Cannot remove base '" + nextBase
+				throw new UnprocessableEntityException(Msg.code(2924) + "Cannot remove base '" + nextBase
 						+ "' from built-in search parameter "
 						+ theNewParam.getName()
 						+ " (with URL " + theNewParam.getUri() + ")"
