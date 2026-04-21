@@ -2,4 +2,4 @@
 type: add
 issue: 6529
 jira: SMILE-9966
-title: "Added new rules for implicit profile validation in `RepositoryValidatingRuleBuilder`. The methods `impliedProfileIfNotExplicit()` and `impliedProfileAlways()` can now be used to force validation against a given profile regardless of the profile declaration in the resource. More information can be found in [the documentation](//insert-link-to-docs-here)"
+title: "Added new rules for implicit profile validation in `RepositoryValidatingRuleBuilder`. The methods `impliedProfileIfNotExplicit()` and `impliedProfileAlways()` can now be used to force validation against a given profile regardless of the profile declaration in the resource. More information can be found in [Implied Profile Validation](https://hapifhir.io/hapi-fhir/docs/validation/repository_validating_interceptor.html#rules-implied-profile-validation)"
