@@ -8,6 +8,8 @@ import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.Test;
@@ -78,21 +80,34 @@ class TermReadSvcImplTest {
 		final PlatformTransactionManager myTxManager;
 		final IValidationSupport myRootValidationSupport;
 		final ValidationSupportContext myValidationSupportContext;
+		final ITermCodeSystemDao myCodeSystemDao;
 
 		ValidateCodeFixture() {
 			mySpiedSvc = spy(new TermReadSvcImpl());
 			myTxManager = mock(PlatformTransactionManager.class);
 			myRootValidationSupport = mock(IValidationSupport.class);
 			myValidationSupportContext = new ValidationSupportContext(myRootValidationSupport);
+			myCodeSystemDao = mock(ITermCodeSystemDao.class);
 
 			FhirContext fhirContext = FhirContext.forR4Cached();
 			ReflectionTestUtils.setField(mySpiedSvc, "myTransactionManager", myTxManager);
 			ReflectionTestUtils.setField(mySpiedSvc, "myContext", fhirContext);
 			ReflectionTestUtils.setField(mySpiedSvc, "myStorageSettings", new JpaStorageSettings());
 			ReflectionTestUtils.setField(mySpiedSvc, "myVersionCanonicalizer", new VersionCanonicalizer(fhirContext));
+			ReflectionTestUtils.setField(mySpiedSvc, "myCodeSystemDao", myCodeSystemDao);
 
 			TransactionStatus status = new SimpleTransactionStatus();
 			lenient().when(myTxManager.getTransaction(any())).thenReturn(status);
+		}
+
+		/**
+		 * Simulate a local TermCodeSystem row for the URL. This mirrors loader-populated (LOINC),
+		 * delta-populated, and empty-delta-target NOTPRESENT CodeSystems, where the local DB is
+		 * authoritative even though content=not-present.
+		 */
+		void stubLocalTermCodeSystemExists() {
+			TermCodeSystem cs = new TermCodeSystem();
+			lenient().when(myCodeSystemDao.findByCodeSystemUri(UCUM_SYSTEM_URL)).thenReturn(cs);
 		}
 
 		void stubFindCodeEmpty() {
@@ -176,6 +191,39 @@ class TermReadSvcImplTest {
 
 		assertThat(result)
 				.as("COMPLETE CodeSystem with a genuinely missing code must still return a non-null LookupCodeResult with found=false")
+				.isNotNull();
+		assertThat(result.isFound()).isFalse();
+	}
+
+	@Test
+	void validateCode_withNotPresentCodeSystemBackedByLocalTermCodeSystem_returnsCodeNotFoundError() {
+		// Loader-populated (LOINC), delta-populated, and empty-delta-target CodeSystems keep
+		// content=NOT_PRESENT but the local term DB is authoritative. A missing code must surface
+		// "Unknown code", not fall through to the validation-support chain.
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		fixture.stubFindCodeEmpty();
+		fixture.stubLocalTermCodeSystemExists();
+
+		CodeValidationResult result = fixture.callValidateCode();
+
+		assertThat(result)
+				.as("NOTPRESENT CodeSystem backed by a local TermCodeSystem row must surface 'code not found' rather than short-circuit to null")
+				.isNotNull();
+		assertThat(result.getSeverityCode()).isEqualToIgnoringCase("error");
+	}
+
+	@Test
+	void lookupCode_withNotPresentCodeSystemBackedByLocalTermCodeSystem_returnsNotFoundResult() {
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		fixture.stubFindCodeEmpty();
+		fixture.stubLocalTermCodeSystemExists();
+
+		LookupCodeResult result = fixture.callLookupCode();
+
+		assertThat(result)
+				.as("NOTPRESENT CodeSystem backed by a local TermCodeSystem row must return a LookupCodeResult with found=false rather than null")
 				.isNotNull();
 		assertThat(result.isFound()).isFalse();
 	}
