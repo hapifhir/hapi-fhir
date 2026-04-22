@@ -868,6 +868,12 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		// Verify nothing was persisted — bypass consent via DAO directly.
 		assertThatThrownBy(() -> myPatientDao.read(new IdType("Patient/consent-reject-tx"), new SystemRequestDetails()))
 			.isInstanceOf(ResourceNotFoundException.class);
+
+		// Ensure nothing got written to the DB
+		runInTransaction(()->{
+			assertThat(myResourceTableDao.findAll()).isEmpty();
+			assertThat(myResourceHistoryTableDao.findAll()).isEmpty();
+		});
 	}
 
 	/**
@@ -896,6 +902,13 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		assertThatThrownBy(() -> myPatientDao.read(new IdType("Patient/consent-reject-batch"), new SystemRequestDetails()))
 			.isInstanceOf(ResourceNotFoundException.class);
+
+		// Ensure nothing got written to the DB
+		runInTransaction(()->{
+			assertThat(myResourceTableDao.findAll()).isEmpty();
+			assertThat(myResourceHistoryTableDao.findAll()).isEmpty();
+		});
+
 	}
 
 	/**
