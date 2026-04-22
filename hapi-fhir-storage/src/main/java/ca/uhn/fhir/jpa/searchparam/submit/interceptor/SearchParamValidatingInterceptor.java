@@ -78,7 +78,7 @@ public class SearchParamValidatingInterceptor {
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void resourcePreUpdate(
 			IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequestDetails) {
-		doValidateOnUpdate(theOldResource, theNewResource, theRequestDetails);
+		validateSearchParamOnUpdate(theOldResource, theNewResource, theRequestDetails);
 	}
 
 	public void validateSearchParamOnCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
@@ -148,32 +148,30 @@ public class SearchParamValidatingInterceptor {
 		}
 	}
 
+	public void validateSearchParamOnUpdate(IBaseResource theResource, RequestDetails theRequestDetails) {
+		validateSearchParamOnUpdate(null, theResource, theRequestDetails);
+	}
+
 	/**
 	 * Validates a SearchParameter resource on update/PUT, enforcing two constraints:
 	 * <ol>
 	 *   <li>Built-in non-disableable search parameters (see
 	 *       {@link ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl#NON_DISABLEABLE_SEARCH_PARAMS})
-	 *       may not have their status changed to anything other than {@code active}.</li>
+	 *       may not have their status changed to anything other than {@code active}. Or it is part of a
+	 *       multi-base SP, it cannot be removed from the base list.</li>
 	 *   <li>A new SearchParameter (PUT-as-create) may not overlap an existing one with the
 	 *       same base and code.</li>
 	 * </ol>
 	 *
-	 * <p>Note: the non-disableable base-list narrowing check is enforced in the
-	 * {@link #resourcePreUpdate} hook (which also has access to the old resource version)
-	 * and does not need to be repeated here.
-	 *
 	 * <p>Validation is skipped when {@link #SKIP_VALIDATION} is set in the request user-data
 	 * (used internally by the CDR seeder to bypass the non-disableable check).
 	 *
-	 * @param theResource       the SearchParameter resource being updated
+	 * @param theOldResource    the SearchParameter resource being updated
+	 * @param theResource       the new version of SearchParameter resource
 	 * @param theRequestDetails the current request context
 	 * @throws ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException if validation fails
 	 */
-	public void validateSearchParamOnUpdate(IBaseResource theResource, RequestDetails theRequestDetails) {
-		doValidateOnUpdate(null, theResource, theRequestDetails);
-	}
-
-	private void doValidateOnUpdate(
+	public void validateSearchParamOnUpdate(
 			@Nullable IBaseResource theOldResource, IBaseResource theResource, RequestDetails theRequestDetails) {
 		if (isNotSearchParameterResource(theResource)) {
 			return;
