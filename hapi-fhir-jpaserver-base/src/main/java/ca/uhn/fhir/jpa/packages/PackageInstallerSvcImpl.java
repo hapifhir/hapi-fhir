@@ -142,7 +142,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
 
-	@Autowired
 	private CommonCodeSystemsTerminologyService myCommonCodeSystemsTerminologyService;
 
 	@Autowired
@@ -157,6 +156,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@PostConstruct
 	public void initialize() {
+		myCommonCodeSystemsTerminologyService = new CommonCodeSystemsTerminologyService(myFhirContext);
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R5:
 			case R4B:
