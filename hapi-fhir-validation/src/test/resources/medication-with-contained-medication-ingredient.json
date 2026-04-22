@@ -1,0 +1,17 @@
+{
+    "resourceType": "Medication",
+    "contained": [ {
+      "resourceType": "Medication",
+      "id": "Contained1",
+      "ingredient": [ {
+        "itemCodeableConcept": {
+          "text": "Ingredient Text"
+        }
+      } ]
+    } ],
+    "ingredient": [ {
+      "itemReference": {
+        "reference": "#Contained1"
+      }
+    } ]
+  }
