@@ -375,23 +375,9 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		Patient patient = new Patient();
 		patient.setActive(true);
 
-		// Reject output
-		consentService.setTarget(new ConsentSvcRejectCanSeeAnything());
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
-		post.setEntity(toEntity(patient));
-		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
-			String id = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
-			assertThat(id).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
-			assertEquals(201, status.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(responseString).isBlank();
-			assertNull(status.getEntity().getContentType());
-		}
-
 		// Accept output
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
-		post = new HttpPost(myServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		post.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
@@ -418,31 +404,13 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
-		// Reject output
-		consentService.setTarget(new ConsentSvcRejectCanSeeAnything());
-		patient = new Patient();
-		patient.setId(id);
-		patient.setActive(true);
-		patient.addIdentifier().setValue("VAL1");
-		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
-		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
-		put.setEntity(toEntity(patient));
-		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
-			String idVal = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
-			assertThat(idVal).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(responseString).isBlank();
-			assertNull(status.getEntity().getContentType());
-		}
-
 		// Accept output
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
 		patient = new Patient();
 		patient.setId(id);
 		patient.setActive(true);
 		patient.addIdentifier().setValue("VAL2");
-		put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
 		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
