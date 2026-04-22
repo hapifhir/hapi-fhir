@@ -152,6 +152,20 @@ public class SearchParameterUtil {
 		return theCompartmentName;
 	}
 
+	// Created by Claude Opus 4.7
+	/**
+	 * Returns true if the given SearchParameter base value represents an abstract base type
+	 * ({@code Resource}, {@code DomainResource}, {@code CanonicalResource} (R5+), or
+	 * {@code MetadataResource} (R5+)), meaning the parameter applies to all resource types
+	 * that extend that abstract base.
+	 */
+	public static boolean isAbstractResourceBase(String theBase) {
+		return "Resource".equals(theBase)
+				|| "DomainResource".equals(theBase)
+				|| "CanonicalResource".equals(theBase)
+				|| "MetadataResource".equals(theBase);
+	}
+
 	public static List<String> getBaseAsStrings(FhirContext theContext, IBaseResource theResource) {
 		Validate.notNull(theContext, "theContext must not be null");
 		Validate.notNull(theResource, "theResource must not be null");

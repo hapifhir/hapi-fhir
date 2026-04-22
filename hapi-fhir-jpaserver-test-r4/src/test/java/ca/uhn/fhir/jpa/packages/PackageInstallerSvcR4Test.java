@@ -14,12 +14,12 @@ import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -54,6 +54,7 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,7 +73,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -143,6 +146,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	public void after() throws Exception {
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(new JpaStorageSettings().isMarkResourcesForReindexingUponSearchParameterChange());
+		myStorageSettings.setValidateResourceStatusForPackageUpload(new JpaStorageSettings().isValidateResourceStatusForPackageUpload());
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setUnnamedPartitionMode(false);
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
@@ -1068,7 +1073,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 	@Test
 	void testNumericIdsInstalled_replacesWithServerId() throws Exception {
-			myStorageSettings.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1 instead of "shorthand-code-system"
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.13.0.tgz");
@@ -1094,7 +1099,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	@ParameterizedTest
 	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
 	void testSearchParametersWithNumericIds_installedWithNpmPrefix(
-			PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws Exception {
+		PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws Exception {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1234 instead of "shorthand-code-system"
@@ -1554,6 +1559,76 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertEquals(Enumerations.PublicationStatus.ACTIVE, sp.getStatus());
 		assertEquals("2.2", sp.getVersion());
 
+	}
+
+	// Created by Claude Opus 4.7
+	/**
+	 * Persisting a SearchParameter with {@code base: ["DomainResource"]} must not crash during
+	 * reindex URL construction. Pre-fix, {@code BaseHapiFhirResourceDao.isCommonSearchParam}
+	 * only matched the literal {@code "resource"} string, so the reindex branch reached
+	 * {@code getResourceDefinition("DomainResource")} and threw {@code DataFormatException}
+	 * (HAPI-1684).
+	 */
+	@Test
+	public void installPackage_searchParameterWithDomainResourceBase_success() throws IOException {
+		myStorageSettings.setValidateResourceStatusForPackageUpload(false);
+		// Reindex must be enabled so the install path reaches requestReindexForRelatedResources.
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(true);
+
+		String url = "http://example.org/SearchParameter/domain-resource-sp";
+		String code = "domain-resource-code";
+		SearchParameter domainResourceSp = new SearchParameter()
+			.setUrl(url)
+			.setStatus(Enumerations.PublicationStatus.ACTIVE)
+			.setCode(code)
+			.addBase("DomainResource")
+			.setType(Enumerations.SearchParamType.TOKEN)
+			.setExpression("DomainResource.identifier");
+		domainResourceSp.setId("domain-resource-sp");
+
+		installAsPackage("domain-resource-pkg", "0.0.1", domainResourceSp);
+
+		runInTransaction(() -> {
+			// verify the SearchParameter was saved in the database, else this would throw
+			// InternalErrorException: HAPI-2223: HAPI-1684: Unknown resource name "DomainResource"
+			IBundleProvider search = mySearchParameterDao.search(
+				SearchParameterMap.newSynchronous("url", new UriParam(url)));
+			assertThat(search.size()).isEqualTo(1);
+			// verify the SearchParameter was added to the registry, else this would throw
+			// InvalidRequestException: HAPI-1223: Unknown search parameter
+			myPatientDao.search(
+				SearchParameterMap.newSynchronous(code, new TokenParam("patient-id")));
+		});
+	}
+
+	// Created by Claude Opus 4.7
+	private void installAsPackage(String theName, String theVersion, IBaseResource... theResources) throws IOException {
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName(theName)
+			.setVersion(theVersion)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setPackageContents(buildPackage(theName, theVersion, theResources));
+		myPackageInstallerSvc.install(spec);
+	}
+
+	// Created by Claude Opus 4.7
+	private byte[] buildPackage(String theName, String theVersion, IBaseResource... theResources) throws IOException {
+		PackageGenerator manifest = new PackageGenerator();
+		manifest.name(theName);
+		manifest.version(theVersion);
+		manifest.description("test package");
+		manifest.fhirVersions(List.of(FhirVersionEnum.R4.getFhirVersionString()));
+
+		NpmPackage pkg = NpmPackage.empty(manifest);
+		for (IBaseResource resource : theResources) {
+			String type = resource.getClass().getSimpleName();
+			String filename = type + "-" + resource.getIdElement().getIdPart() + ".json";
+			String json = myFhirContext.newJsonParser().encodeResourceToString(resource);
+			pkg.addFile("package", filename, json.getBytes(StandardCharsets.UTF_8), type);
+		}
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		pkg.save(out);
+		return out.toByteArray();
 	}
 
 
