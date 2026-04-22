@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -198,7 +199,6 @@ public class SearchParameterUtil {
 		return new ArrayList<>(result);
 	}
 
-	// Created by Claude Opus 4.7
 	/**
 	 * Returns the concrete resource types whose implementing class has an ancestor with the given
 	 * abstract-base name in its superclass chain. Used by {@link #expandBaseWhenNeeded} to perform
@@ -207,13 +207,12 @@ public class SearchParameterUtil {
 	private static List<String> getConcreteTypesExtending(FhirContext theContext, String theAbstractBase) {
 		List<String> result = new ArrayList<>();
 		for (String concreteType : theContext.getResourceTypes()) {
-			Class<?> cls = theContext.getResourceDefinition(concreteType).getImplementingClass();
-			while (cls != null && cls != Object.class) {
-				if (cls.getSimpleName().equals(theAbstractBase)) {
+			final Class<?> cls = theContext.getResourceDefinition(concreteType).getImplementingClass();
+			for (Class<?> superclass : ClassUtils.getAllSuperclasses(cls)) {
+				if (superclass.getSimpleName().equals(theAbstractBase)) {
 					result.add(concreteType);
 					break;
 				}
-				cls = cls.getSuperclass();
 			}
 		}
 		return result;
