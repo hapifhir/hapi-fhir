@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,28 +28,38 @@ import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.IMergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR4;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
+import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.merge.MergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeValidationService;
 import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
 import ca.uhn.fhir.jpa.provider.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.provider.merge.ResourceUndoMergeService;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.merge.ExtensionBasedLinkService;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.merge.MergeResourceHelper;
+import ca.uhn.fhir.merge.PatientNativeLinkService;
+import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
@@ -112,8 +122,13 @@ public class JpaR4Config {
 	}
 
 	@Bean
-	public MergeValidationService mergeValidationService(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
-		return new MergeValidationService(theFhirContext, theDaoRegistry);
+	public MergeValidationService mergeValidationService(
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			ResourceLinkServiceFactory theResourceLinkServiceFactory,
+			ISearchParamExtractor theSearchParamExtractor) {
+		return new MergeValidationService(
+				theFhirContext, theDaoRegistry, theResourceLinkServiceFactory, theSearchParamExtractor);
 	}
 
 	@Bean
@@ -122,27 +137,65 @@ public class JpaR4Config {
 	}
 
 	@Bean
+	public PatientNativeLinkService patientNativeLinkService() {
+		return new PatientNativeLinkService();
+	}
+
+	@Bean
+	public ExtensionBasedLinkService extensionBasedLinkService() {
+		return new ExtensionBasedLinkService();
+	}
+
+	@Bean
+	public ResourceLinkServiceFactory resourceLinkServiceFactory(
+			PatientNativeLinkService thePatientService, ExtensionBasedLinkService theExtensionService) {
+		return new ResourceLinkServiceFactory(thePatientService, theExtensionService);
+	}
+
+	@Bean
+	public MergeResourceHelper mergeResourceHelper(
+			DaoRegistry theDaoRegistry,
+			MergeProvenanceSvc theMergeProvenanceSvc,
+			ResourceLinkServiceFactory theResourceLinkServiceFactory) {
+		return new MergeResourceHelper(theDaoRegistry, theMergeProvenanceSvc, theResourceLinkServiceFactory);
+	}
+
+	@Bean
+	public CrossPartitionReplaceReferencesSvc crossPartitionReplaceReferencesSvc(
+			DaoRegistry theDaoRegistry,
+			IResourceLinkDao theResourceLinkDao,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new CrossPartitionReplaceReferencesSvc(theDaoRegistry, theResourceLinkDao, theRequestPartitionHelperSvc);
+	}
+
+	@Bean
 	public ResourceMergeService resourceMergeService(
 			DaoRegistry theDaoRegistry,
-			IReplaceReferencesSvc theReplaceReferencesSvc,
+			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
+			IResourceLinkDao theResourceLinkDao,
 			HapiTransactionService theHapiTransactionService,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			IJobCoordinator theJobCoordinator,
 			Batch2TaskHelper theBatch2TaskHelper,
 			JpaStorageSettings theStorageSettings,
 			MergeValidationService theMergeValidationService,
-			MergeProvenanceSvc theMergeProvenanceSvc) {
+			MergeResourceHelper theMergeResourceHelper,
+			CrossPartitionReplaceReferencesSvc theCrossPartitionReplaceReferencesSvc,
+			PartitionSettings thePartitionSettings) {
 
 		return new ResourceMergeService(
 				theStorageSettings,
 				theDaoRegistry,
-				theReplaceReferencesSvc,
+				theReplaceReferencesPatchBundleSvc,
+				theResourceLinkDao,
 				theHapiTransactionService,
 				theRequestPartitionHelperSvc,
 				theJobCoordinator,
 				theBatch2TaskHelper,
 				theMergeValidationService,
-				theMergeProvenanceSvc);
+				theMergeResourceHelper,
+				theCrossPartitionReplaceReferencesSvc,
+				thePartitionSettings);
 	}
 
 	@Bean
@@ -150,29 +203,33 @@ public class JpaR4Config {
 			DaoRegistry theDaoRegistry,
 			MergeProvenanceSvc theMergeProvenanceSvc,
 			PreviousResourceVersionRestorer theResourceVersionRestorer,
-			MergeValidationService theMergeValidationService,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+			MergeValidationService theMergeValidationService) {
 		return new ResourceUndoMergeService(
-				theDaoRegistry,
-				theMergeProvenanceSvc,
-				theResourceVersionRestorer,
-				theMergeValidationService,
-				theRequestPartitionHelperSvc);
+				theDaoRegistry, theMergeProvenanceSvc, theResourceVersionRestorer, theMergeValidationService);
+	}
+
+	@Bean
+	public IMergeOperationProviderSvc mergeOperationProviderSvc(
+			FhirContext theFhirContext,
+			ResourceMergeService theResourceMergeService,
+			ResourceUndoMergeService theResourceUndoMergeService,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			JpaStorageSettings theStorageSettings) {
+
+		return new MergeOperationProviderSvc(
+				theFhirContext,
+				theResourceMergeService,
+				theResourceUndoMergeService,
+				theInterceptorBroadcaster,
+				theStorageSettings);
 	}
 
 	@Bean
 	public PatientMergeProvider patientMergeProvider(
 			FhirContext theFhirContext,
 			DaoRegistry theDaoRegistry,
-			ResourceMergeService theResourceMergeService,
-			ResourceUndoMergeService theResourceUndoMergeService,
-			IInterceptorBroadcaster theInterceptorBroadcaster) {
+			IMergeOperationProviderSvc theMergeOperationProviderSvc) {
 
-		return new PatientMergeProvider(
-				theFhirContext,
-				theDaoRegistry,
-				theResourceMergeService,
-				theResourceUndoMergeService,
-				theInterceptorBroadcaster);
+		return new PatientMergeProvider(theFhirContext, theDaoRegistry, theMergeOperationProviderSvc);
 	}
 }

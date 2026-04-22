@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,6 +185,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			addConceptInHierarchy(csv, parentCodes, nextRootConcept, retVal, codeToConcept, 0);
 		}
 
+		myTerminologySvc.invalidateCodeSystemCaches();
+
 		return retVal;
 	}
 
@@ -226,6 +228,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		for (TermConcept code : allFoundTermConcepts) {
 			deleteEverythingRelatedToConcept(code, removeCounter);
 		}
+
+		myTerminologySvc.invalidateCodeSystemCaches();
 
 		return new UploadStatistics(removeCounter.get(), target);
 	}
@@ -314,7 +318,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 									theCodeSystem.getUrl(),
 									theCodeSystem.getUrl(),
 									theCodeSystem.getVersion(),
-									theResourceEntity);
+									theResourceEntity,
+									true);
 							return;
 						}
 					}
@@ -420,7 +425,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
 		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(
-				theSystemUri, theSystemName, theCodeSystemVersionId, theCodeSystemResourceTable);
+				theSystemUri, theSystemName, theCodeSystemVersionId, theCodeSystemResourceTable, false);
 
 		List<TermCodeSystemVersion> existing =
 				myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourceTable.getResourceId());
@@ -526,6 +531,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ourLog.debug("Done saving concepts, flushing to database");
 		if (!myDeferredStorageSvc.isStorageQueueEmpty(true)) {
 			ourLog.info("Note that some concept saving has been deferred");
+		}
+
+		if (isMakeVersionCurrent) {
+			myTerminologySvc.updateCodeSystemVersionCache(theSystemUri, codeSystemToStore);
 		}
 	}
 
@@ -739,7 +748,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			String theSystemUri,
 			String theSystemName,
 			String theSystemVersionId,
-			ResourceTable theCodeSystemResourceTable) {
+			ResourceTable theCodeSystemResourceTable,
+			boolean theAllowPlaceholderRepoint) {
 		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
 		if (codeSystem == null) {
 			codeSystem = myCodeSystemDao.findByResourcePid((theCodeSystemResourceTable.getId()));
@@ -748,7 +758,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			}
 		} else {
 			checkForCodeSystemVersionDuplicate(
-					codeSystem, theSystemUri, theSystemVersionId, theCodeSystemResourceTable);
+					codeSystem,
+					theSystemUri,
+					theSystemVersionId,
+					theCodeSystemResourceTable,
+					theAllowPlaceholderRepoint);
 		}
 
 		codeSystem.setResource(theCodeSystemResourceTable);
@@ -762,7 +776,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			TermCodeSystem theCodeSystem,
 			String theSystemUri,
 			String theSystemVersionId,
-			ResourceTable theCodeSystemResourceTable) {
+			ResourceTable theCodeSystemResourceTable,
+			boolean theAllowPlaceholderRepoint) {
 		TermCodeSystemVersion codeSystemVersionEntity;
 		String msg = null;
 		if (theSystemVersionId == null) {
@@ -803,7 +818,19 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Throw exception if the TermCodeSystemVersion is being duplicated.
 		if (codeSystemVersionEntity != null) {
 			if (!ObjectUtil.equals(codeSystemVersionEntity.getResource().getId(), theCodeSystemResourceTable.getId())) {
-				throw new UnprocessableEntityException(Msg.code(848) + msg);
+				if (theAllowPlaceholderRepoint
+						&& myConceptDao.countByCodeSystemVersion(codeSystemVersionEntity.getPid()) == 0) {
+					// The existing version is a 0-concept placeholder (e.g. from a NOTPRESENT
+					// pre-seed) and the caller is itself the NOTPRESENT early-return path in
+					// storeNewCodeSystemVersionIfNeeded. Re-point the placeholder to the new
+					// resource instead of rejecting. Non-NOTPRESENT callers (e.g. COMPLETE
+					// CodeSystem create/update) keep strict duplicate detection, since they
+					// must not silently replace a prior resource.
+					codeSystemVersionEntity.setResource(theCodeSystemResourceTable);
+					myCodeSystemVersionDao.save(codeSystemVersionEntity);
+				} else {
+					throw new UnprocessableEntityException(Msg.code(848) + msg);
+				}
 			}
 		}
 	}

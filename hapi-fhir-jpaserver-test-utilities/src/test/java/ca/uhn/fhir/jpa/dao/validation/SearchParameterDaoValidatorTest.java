@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.COMPOSITE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.DATE;
@@ -37,8 +38,12 @@ import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.REFERENCE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.STRING;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.TOKEN;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.URI;
+import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.DOMAINRESOURCE;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.OBSERVATION;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.PATIENT;
+import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.PRACTITIONERROLE;
+import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.RESOURCE;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -114,6 +119,9 @@ public class SearchParameterDaoValidatorTest {
         mySvc.validate(canonicalSp);
     }
 
+	/**
+	 * References are allowed in combo SPs but not in composite SPs.
+	 */
     @ParameterizedTest
     @MethodSource("extensionProvider")
     public void testMethodValidate_nonUniqueComboAndCompositeSearchParamWithComponentOfTypeReference_isNotAllowed(Extension theExtension) {
@@ -123,13 +131,14 @@ public class SearchParameterDaoValidatorTest {
         sp.addComponent(new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN));
         sp.addComponent(new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE));
 
-        try {
-            mySvc.validate(sp);
-			fail("");
-        } catch (UnprocessableEntityException ex) {
-					assertThat(ex.getMessage()).startsWith("HAPI-2347: ");
-					assertThat(ex.getMessage()).contains("Invalid component search parameter type: REFERENCE in component.definition: http://example.org/SearchParameter/observation-patient");
-        }
+		if (theExtension == null) {
+			assertThatThrownBy(()->mySvc.validate(sp))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageContaining("HAPI-2347")
+				.hasMessageContaining("Invalid component search parameter type: REFERENCE in component.definition");
+		} else {
+			assertDoesNotThrow(()->mySvc.validate(sp));
+		}
     }
 
     @Test
@@ -191,6 +200,158 @@ public class SearchParameterDaoValidatorTest {
 
         mySvc.validate(theSearchParameter);
     }
+
+    @Test
+    void testValidateExpressionAgainstBase_specificBase_expressionMatchesBase_succeeds() {
+        SearchParameter sp = new SearchParameter();
+        sp.setId("SearchParameter/practitionerrole-practitioner");
+        sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
+        sp.addBase(PRACTITIONERROLE);
+        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
+        sp.setExpression("PractitionerRole.practitioner");
+
+        mySvc.validate(sp);
+    }
+
+    @Test
+    void testValidateExpressionAgainstBase_specificBase_expressionDoesNotMatchBase_fails() {
+        SearchParameter sp = new SearchParameter();
+        sp.setId("SearchParameter/practitionerrole-practitioner");
+        sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
+        sp.addBase(PRACTITIONERROLE);
+        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
+        sp.setExpression("Person.practitioner");
+
+		assertThatThrownBy(() -> mySvc.validate(sp))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("HAPI-2911")
+			.hasMessageContaining("No path in expression")
+			.hasMessageContaining("PractitionerRole");
+    }
+
+    @Test
+    void testValidateExpressionAgainstBase_resourceBase_withSpecificExpressionPrefix_fails() {
+        SearchParameter sp = new SearchParameter();
+        sp.setId("SearchParameter/resource-person-practitioner");
+        sp.setUrl("http://example.org/SearchParameter/resource-person-practitioner");
+        sp.addBase(RESOURCE);
+        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
+        sp.setExpression("Person.practitioner");
+
+        assertThatThrownBy(() -> mySvc.validate(sp))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessageContaining("HAPI-2910")
+                .hasMessageContaining("Person")
+                .hasMessageContaining("Resource");
+    }
+
+    @Test
+    void testValidateExpressionAgainstBase_resourceBase_withResourceExpressionPrefix_succeeds() {
+        SearchParameter sp = new SearchParameter();
+        sp.setId("SearchParameter/resource-meta");
+        sp.setUrl("http://example.org/SearchParameter/resource-meta");
+        sp.addBase(RESOURCE);
+        sp.setCode("_lastUpdated").setType(DATE).setStatus(ACTIVE);
+        sp.setExpression("Resource.meta.lastUpdated");
+
+        mySvc.validate(sp);
+    }
+
+	@Test
+	void testValidateExpressionAgainstBase_resourceMixedWithSpecificBases_expressionMatchesSpecific_success() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/practitionerrole-practitioner");
+		sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
+		sp.addBase(RESOURCE).addBase(PRACTITIONERROLE);
+		sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
+		sp.setExpression("PractitionerRole.practitioner");
+		mySvc.validate(sp);
+	}
+
+    @Test
+    void testValidateExpressionAgainstBase_domainResourceBase_withSpecificExpressionPrefix_fails() {
+        SearchParameter sp = new SearchParameter();
+        sp.setId("SearchParameter/domainresource-person");
+        sp.setUrl("http://example.org/SearchParameter/domainresource-person");
+        sp.addBase(DOMAINRESOURCE);
+        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
+        sp.setExpression("Person.practitioner");
+
+        assertThatThrownBy(() -> mySvc.validate(sp))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessageContaining("HAPI-2910")
+                .hasMessageContaining("Person")
+                .hasMessageContaining("DomainResource");
+    }
+
+    @Test
+    void testValidateExpressionAgainstBase_multiPathExpression_atLeastOnePathMatchesBase_succeeds() {
+        SearchParameter sp = new SearchParameter();
+        sp.setId("SearchParameter/practitionerrole-practitioner");
+        sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
+        sp.addBase(PRACTITIONERROLE);
+        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
+        sp.setExpression("PractitionerRole.practitioner | Person.name");
+
+        mySvc.validate(sp);
+    }
+
+    @Test
+    void testValidateExpressionAgainstBase_multiPathExpression_noPathMatchesBase_fails() {
+        SearchParameter sp = new SearchParameter();
+        sp.setId("SearchParameter/practitionerrole-practitioner");
+        sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
+        sp.addBase(PRACTITIONERROLE);
+        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
+        sp.setExpression("Person.practitioner | Observation.name");
+
+        assertThatThrownBy(() -> mySvc.validate(sp))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessageContaining("HAPI-2911")
+                .hasMessageContaining("PractitionerRole");
+    }
+
+    @Test
+    void testValidateExpressionAgainstBase_multiBases_expressionMatchesAllBases_succeeds() {
+        SearchParameter sp = new SearchParameter();
+        sp.setId("SearchParameter/multi-base");
+        sp.setUrl("http://example.org/SearchParameter/multi-base");
+        sp.addBase(PRACTITIONERROLE).addBase(PATIENT);
+        sp.setCode("name").setType(REFERENCE).setStatus(ACTIVE);
+        sp.setExpression("PractitionerRole.practitioner | Patient.generalPractitioner");
+
+        mySvc.validate(sp);
+    }
+
+    @Test
+    void testValidateExpressionAgainstBase_multiBases_expressionMissingOneBase_fails() {
+        SearchParameter sp = new SearchParameter();
+        sp.setId("SearchParameter/multi-base");
+        sp.setUrl("http://example.org/SearchParameter/multi-base");
+        sp.addBase(PRACTITIONERROLE).addBase(PATIENT);
+        sp.setCode("name").setType(STRING).setStatus(ACTIVE);
+        sp.setExpression("PractitionerRole.practitioner");
+
+        assertThatThrownBy(() -> mySvc.validate(sp))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessageContaining("HAPI-2911")
+                .hasMessageContaining("Patient");
+    }
+
+	@Test
+	void testValidateExpressionAgainstBase_whereClauseWithInnerPipe_baseMismatch_shouldFail() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/practitionerrole-telecom-where");
+		sp.setUrl("http://example.org/SearchParameter/practitionerrole-telecom-where");
+		sp.addBase(PRACTITIONERROLE);
+		sp.setCode("telecom").setType(TOKEN).setStatus(ACTIVE);
+		sp.setExpression("Patient.telecom.where(system='mail' | system='phone')");
+
+		assertThatThrownBy(() -> mySvc.validate(sp))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("HAPI-2911")
+			.hasMessageContaining("PractitionerRole");
+	}
 
     private static SearchParameter createSearchParameter(Enumerations.SearchParamType theType, String theId, String theCodeValue, String theExpression) {
 

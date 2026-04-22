@@ -21,7 +21,7 @@ create sequence SEQ_NPM_PACKVERRES start 1 increment 50;
 create sequence SEQ_RES_REINDEX_JOB start 1 increment 50;
 create sequence SEQ_RESLINK_ID start 1 increment 50;
 create sequence SEQ_RESOURCE_HISTORY_ID start 1 increment 50;
-create sequence SEQ_RESOURCE_ID start 1 increment 50;
+create sequence SEQ_RESOURCE_ID start 100 increment 50;
 create sequence SEQ_RESPARMPRESENT_ID start 1 increment 50;
 create sequence SEQ_RESTAG_ID start 1 increment 50;
 create sequence SEQ_SEARCH start 1 increment 50;

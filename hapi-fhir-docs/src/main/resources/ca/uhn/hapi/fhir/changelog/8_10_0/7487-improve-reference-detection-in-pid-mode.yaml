@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7487
+title: "When using the PatientIdPartitionInterceptor, searches containing reference parameter with 
+  fully qualified resource IDs and/or versioned resource IDs are now correctly handled."

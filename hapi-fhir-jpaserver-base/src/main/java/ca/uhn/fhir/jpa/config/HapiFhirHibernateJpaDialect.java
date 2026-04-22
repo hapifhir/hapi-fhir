@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,16 +92,20 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 				constraintName = constraintName.toUpperCase();
 				if (constraintName.contains(ResourceHistoryTable.IDX_RESVER_ID_VER)) {
 					throw new ResourceVersionConflictException(
-							Msg.code(823) + makeErrorMessage(messageToPrepend, RESOURCE_VERSION_CONSTRAINT_FAILURE));
+							Msg.code(823) + makeErrorMessage(messageToPrepend, RESOURCE_VERSION_CONSTRAINT_FAILURE),
+							theException);
 				}
 				if (constraintName.contains(ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING)) {
-					throw new ResourceVersionConflictException(Msg.code(824)
-							+ makeErrorMessage(
-									messageToPrepend, "resourceIndexedCompositeStringUniqueConstraintFailure"));
+					throw new ResourceVersionConflictException(
+							Msg.code(824)
+									+ makeErrorMessage(
+											messageToPrepend, "resourceIndexedCompositeStringUniqueConstraintFailure"),
+							theException);
 				}
 				if (constraintName.contains(ResourceTable.IDX_RES_TYPE_FHIR_ID)) {
 					throw new ResourceVersionConflictException(
-							Msg.code(825) + makeErrorMessage(messageToPrepend, "forcedIdConstraintFailure"));
+							Msg.code(825) + makeErrorMessage(messageToPrepend, "forcedIdConstraintFailure"),
+							theException);
 				}
 				if (constraintName.contains(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME)) {
 					throw super.convertHibernateAccessException(theException);

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,6 +154,18 @@ public class MatchUrlService {
 						DateRangeParam p1 = new DateRangeParam();
 						p1.setValuesAsQueryTokens(myFhirContext, nextParamName, paramList);
 						paramMap.setLastUpdated(p1);
+					}
+				}
+			} else if (Constants.PARAM_COMPARTMENT_LAST_UPDATED.equals(nextParamName)) {
+				if (!paramList.isEmpty()) {
+					if (paramList.size() > 2) {
+						throw new InvalidRequestException(Msg.code(2877) + "Failed to parse match URL[" + theMatchUrl
+								+ "] - Can not have more than 2 " + Constants.PARAM_COMPARTMENT_LAST_UPDATED
+								+ " parameter repetitions");
+					} else {
+						DateRangeParam p1 = new DateRangeParam();
+						p1.setValuesAsQueryTokens(myFhirContext, nextParamName, paramList);
+						paramMap.setCompartmentLastUpdated(p1);
 					}
 				}
 			} else if (Constants.PARAM_HAS.equals(nextParamName)) {
@@ -359,5 +371,15 @@ public class MatchUrlService {
 	}
 
 	public record ResourceTypeAndSearchParameterMap(
-			RuntimeResourceDefinition resourceDefinition, SearchParameterMap searchParameterMap) {}
+			RuntimeResourceDefinition resourceDefinition, SearchParameterMap searchParameterMap) {
+
+		/**
+		 * Returns the resource type (e.g. "Patient") associated with the search
+		 *
+		 * @since 8.10.0
+		 */
+		public String resourceType() {
+			return resourceDefinition().getName();
+		}
+	}
 }

@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.dao.r5.bulkpatch;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyResourcesStep;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchJobParameters;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchModifyResourcesStep;
@@ -11,7 +10,6 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -29,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static ca.uhn.fhir.jpa.dao.r5.bulkpatch.BulkPatchJobR5Test.createPatchWithModifyPatientIdentifierSystem;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -57,10 +56,10 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		BulkPatchJobParameters jobParameters = new BulkPatchJobParameters();
 		jobParameters.setFhirPatch(myFhirContext, createPatchWithModifyPatientIdentifierSystem());
 
-		WorkChunk workChunk = new WorkChunk();
+		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
 		JobInstance jobInstance = new JobInstance();
 
-		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk);
+		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk, myJobStepExecutionServices);
 		myCaptureQueriesListener.clear();
 		mySvcNonRewrite.run(parameters, myDataSink);
 
@@ -86,11 +85,13 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		myStorageSettings.setUpdateWithHistoryRewriteEnabled(true);
 		TypedPidAndVersionListWorkChunkJson data = new TypedPidAndVersionListWorkChunkJson();
 		List<IIdType> ids = new ArrayList<>();
-		for (int resIdx = 0; resIdx < 10; resIdx++) {
+		int patientCount = 10;
+		int versionCount = 5;
+		for (int resIdx = 0; resIdx < patientCount; resIdx++) {
 			IIdType id = createPatient(withIdentifier("http://blah", "bar" + resIdx));
 			ids.add(id);
 			data.addTypedPidWithNullPartitionForUnitTest("Patient", id.getIdPartAsLong(), 1L);
-			for (long versionIdx = 2; versionIdx <= 5; versionIdx++) {
+			for (long versionIdx = 2; versionIdx <= versionCount; versionIdx++) {
 				createPatient(withId(id.getIdPart()), withIdentifier("http://blah", "bar" + resIdx + "v" + versionIdx));
 				data.addTypedPidWithNullPartitionForUnitTest("Patient", id.getIdPartAsLong(), versionIdx);
 			}
@@ -100,20 +101,23 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		BulkPatchRewriteJobParameters jobParameters = new BulkPatchRewriteJobParameters();
 		jobParameters.setFhirPatch(myFhirContext, createPatchWithModifyPatientIdentifierSystem());
 
-		WorkChunk workChunk = new WorkChunk();
+		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
 		JobInstance jobInstance = new JobInstance();
 
-		StepExecutionDetails<BulkPatchRewriteJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk);
+		StepExecutionDetails<BulkPatchRewriteJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk, myJobStepExecutionServices);
 		myCaptureQueriesListener.clear();
 		mySvcRewrite.run(parameters, myDataSink);
 
 		// Verify
 
-		// This could definitely be optimized more
-		assertEquals(82, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(70, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				// This could definitely be optimized more
+				.selectCount(92)
+				.updateCount(70)
+				.commitCount(1)
+				.noOtherCounts()
+		);
 
 		Patient actualPatient = myPatientDao.read(ids.get(0).withVersion("4"), newSrd());
 		assertEquals("4", actualPatient.getIdElement().getVersionIdPart());
@@ -155,10 +159,10 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		BulkPatchJobParameters jobParameters = new BulkPatchJobParameters();
 		jobParameters.setFhirPatch(myFhirContext, createPatchWithModifyPatientIdentifierSystem());
 
-		WorkChunk workChunk = new WorkChunk();
+		WorkChunk workChunk = new WorkChunk().setId("my-chunk-id");
 		JobInstance jobInstance = new JobInstance();
 
-		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk);
+		StepExecutionDetails<BulkPatchJobParameters, TypedPidAndVersionListWorkChunkJson> parameters = new StepExecutionDetails<>(jobParameters, data, jobInstance, workChunk, myJobStepExecutionServices);
 		myCaptureQueriesListener.clear();
 		mySvcNonRewrite.run(parameters, myDataSink);
 
@@ -191,10 +195,10 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		BulkModifyResourcesChunkOutcomeJson outcome = myDataCaptor.getValue();
 		assertEquals(2, outcome.getChunkRetryCount());
 		assertEquals(11, outcome.getResourceRetryCount());
-		assertThat(outcome.getChangedIds()).contains(succeedingId.withVersion("2").getValue());
+		assertThat(outcome.getChangedIds()).contains(succeedingId.withVersion("1").getValue());
 		assertThat(outcome.getUnchangedIds()).isEmpty();
 		if (theErrorCount == 2) {
-			assertThat(outcome.getChangedIds()).contains(failingId.withVersion("2").getValue());
+			assertThat(outcome.getChangedIds()).contains(failingId.withVersion("1").getValue());
 		} else {
 			assertThat(List.copyOf(outcome.getFailures().keySet())).contains(failingId.withVersion("1").getValue());
 		}

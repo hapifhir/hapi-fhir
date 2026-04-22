@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -245,7 +245,7 @@ public class SearchParameterUtil {
 		if (CollectionUtils.isEmpty(searchParams)) {
 			String errorMessage = String.format(
 					"Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter",
-					runtimeResourceDefinition.getId());
+					runtimeResourceDefinition.getName());
 			throw new IllegalArgumentException(Msg.code(2222) + errorMessage);
 		}
 		// deduplicate list of searchParams and get their names
@@ -519,5 +519,34 @@ public class SearchParameterUtil {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Extracts the resource type prefix from a FHIRPath expression path segment.
+	 * <p>
+	 * This method strips any leading opening parentheses and spaces, then examines the
+	 * first path segment (the characters before the first dot). If that segment begins
+	 * with an upper-case letter it is treated as a resource type prefix and returned.
+	 * Otherwise, null is returned to indicate no type-qualified prefix is present.
+	 * </p>
+	 *
+	 * @param thePath the FHIRPath expression or path segment to inspect. Must not be null.
+	 * @return the extracted resource type prefix (e.g. "Patient") if present, or {@code null}
+	 *         if no type-qualified prefix is found.
+	 */
+	public static String extractTypePrefix(@Nonnull String thePath) {
+		int start = 0;
+		while (start < thePath.length() && (thePath.charAt(start) == '(' || thePath.charAt(start) == ' ')) {
+			start++;
+		}
+		String trimmed = thePath.substring(start);
+		int dotIndex = trimmed.indexOf('.');
+		if (dotIndex > 0) {
+			String candidate = trimmed.substring(0, dotIndex);
+			if (Character.isUpperCase(candidate.charAt(0))) {
+				return candidate;
+			}
+		}
+		return null;
 	}
 }

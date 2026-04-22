@@ -628,7 +628,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			mySvc.getResources("0000-1111", 0, 10, null, null);
 			fail("");
 		} catch (ResourceGoneException e) {
-			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
+			assertThat(e.getMessage()).contains("Search ID \"0000-1111\" does not exist and may have expired");
 		}
 
 	}

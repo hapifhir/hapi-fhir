@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesAppCtx;
@@ -223,6 +224,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -243,6 +245,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_CODE_SYSTEM_2 = "http://example.com/my_code_system_2";
 
+	@Autowired
+	protected IJobStepExecutionServices myJobStepExecutionServices;
 	@Autowired
 	protected IPackageInstallerSvc myPackageInstallerSvc;
 	@Autowired
@@ -1105,7 +1109,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		@Override
 		public IValidationPolicyAdvisor getPolicyAdvisor() {
 		  if (Objects.isNull(policyAdvisor)) {
-			  return new BasePolicyAdvisorForFullValidation(getReferencePolicy());
+			  return new BasePolicyAdvisorForFullValidation(getReferencePolicy(), Set.of());
 		  }
 
 		  return policyAdvisor;
@@ -1119,7 +1123,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		@Override
 		public ReferenceValidationPolicy getReferencePolicy() {
 			return ReferenceValidationPolicy.IGNORE;
-		}
+		}@Override
+
+        public Set<String> getCheckReferencesTo() {
+            return Set.of();
+        }
 	}
 
 

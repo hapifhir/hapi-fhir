@@ -12,7 +12,7 @@ Many tables use an internal persistent ID as their primary key, allowing the fle
 
 The persistent ID column is generally called `PID` in the database schema, although there are exceptions.
 
-<a name="HFJ_RESOURCE"/>
+<a id="HFJ_RESOURCE"></a>
 
 # HFJ_RESOURCE: Resource Master Table
 
@@ -136,7 +136,7 @@ The HFJ_RESOURCE table indicates a single resource of any type in the database. 
 
 
 
-<a name="HFJ_RES_VER"/>
+<a id="HFJ_RES_VER"></a>
 
 # HFJ_RES_VER: Resource Versions and Contents
 
@@ -321,7 +321,7 @@ The complete raw contents of the resource is stored in either the `RES_TEXT` or 
     </tbody>
 </table>
 
-<a name="HFJ_RES_LINK"/>
+<a id="HFJ_RES_LINK"></a>
 
 # HFJ_RES_LINK: Search Links
 
@@ -423,13 +423,13 @@ When a resource is created or updated, it is indexed for searching. Any search p
     </tbody>
 </table>     
 
-<a name="search-indexes"/>
+<a id="search-indexes"></a>
 
 # Background: Search Indexes
 
 The HFJ_SPIDX (Search Parameter Index) tables are used to index resources for searching. When a resource is created or updated, a set of rows in these tables will be added. These are used for finding appropriate rows to return when performing FHIR searches. There are dedicated tables for supporting each of the non-reference [FHIR Search Datatypes](http://hl7.org/fhir/search.html): Date, Number, Quantity, String, Token, and URI. Note that Reference search parameters are implemented using the [HFJ_RES_LINK](#HFJ_RES_LINK) table above.
 
-<a name="search-hashes"/>
+<a id="search-hashes"></a>
 
 ## Search Hashes
 
@@ -443,7 +443,7 @@ In some configurations, the partition ID is also factored into the hashes.
 
 <img src="/hapi-fhir/docs/images/jpa_erd_search_indexes.svg" alt="Search Indexes" style="width: 100%; max-width: 900px;"/>
 
-<a name="HFJ_SPIDX_common"/>
+<a id="HFJ_SPIDX_common"></a>
 
 ## Common Search Index Columns
 
@@ -1043,7 +1043,7 @@ This table is used to index [Non-Unique Combo Search Parameters](https://smilecd
     </tbody>
 </table>
 
-<a name="HFJ_IDX_CMP_STRING_UNIQ"/>
+<a id="HFJ_IDX_CMP_STRING_UNIQ"></a>
 
 # HFJ_IDX_CMP_STRING_UNIQ: Combo Unique Search Param
 

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7529
+title: "Adding support for searching with MDM expansion (`Observation?subject:mdm=Patient/123`) when partitioning is 
+enabled and configured in patientID mode."

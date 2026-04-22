@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,6 @@ public interface IResourceHistoryTagDao extends JpaRepository<ResourceHistoryTag
 	void deleteByPid(@Param("historyPid") ResourceHistoryTablePk theResourceHistoryTablePid);
 
 	@Query(
-			"SELECT t FROM ResourceHistoryTag t INNER JOIN FETCH t.myTag WHERE t.myResourceHistory.myId IN (:historyPids)")
+			"SELECT t FROM ResourceHistoryTag t LEFT JOIN FETCH t.myTag WHERE t.myResourceHistory.myId IN (:historyPids)")
 	Collection<ResourceHistoryTag> findByVersionIds(@Param("historyPids") Collection<ResourceHistoryTablePk> theIdList);
 }

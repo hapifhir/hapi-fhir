@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7307
+jira: SMILE-11205
+title: "Populate the `code` field in `OperationOutcome` resources returned by Bulk Export endpoints to conform to 
+the FHIR specification."

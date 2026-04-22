@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,6 +207,12 @@ public class TermConceptParentChildLink implements Serializable {
 		if (myCodeSystemVersionPid == null) {
 			myCodeSystemVersionPid = myCodeSystem.getPid();
 			assert myCodeSystemVersionPid != null;
+		}
+
+		// TODO GGG/JA. Eventually, this class should extend base partitionable.
+		if (myPartitionIdValue == null && myParent != null) {
+			myPartitionIdValue = myParent.getPartitionId().getPartitionId();
+			getPid().myPartitionIdValue = myPartitionIdValue;
 		}
 	}
 

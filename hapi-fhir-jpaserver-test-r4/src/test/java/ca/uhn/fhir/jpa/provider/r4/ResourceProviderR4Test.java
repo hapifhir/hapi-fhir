@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -65,18 +64,15 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
 import ch.qos.logback.classic.Level;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.tuple.Pair;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -85,6 +81,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -159,7 +156,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -177,7 +173,6 @@ import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.intellij.lang.annotations.Language;
@@ -242,8 +237,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 	@Autowired
 	private ISearchDao mySearchEntityDao;
-	@Autowired
-	private RepositoryValidatingRuleBuilder myRuleBuilder;
 
 	@Override
 	@AfterEach
@@ -257,7 +250,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
+		myStorageSettings.setHibernateSearchIndexSearchParams(new JpaStorageSettings().isHibernateSearchIndexSearchParams());
 
 		myStorageSettings.setIndexOnContainedResources(new JpaStorageSettings().isIndexOnContainedResources());
 
@@ -316,7 +309,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.addBase("BodyStructure").addBase("Procedure");
+		searchParameter.addBase("Procedure");
 		searchParameter.setCode("focalAccess");
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
@@ -359,7 +352,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		searchParameter.setCode("myGender");
 		searchParameter.addBase("Patient").addBase("Person");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
-		searchParameter.setExpression("Patient.gender|Person.gender");
+		searchParameter.setExpression("Patient.gender | Person.gender");
 
 		MethodOutcome result = myClient.create().resource(searchParameter).execute();
 
@@ -369,7 +362,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidRootParam() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.addBase("BodyStructure").addBase("Procedure");
+		searchParameter.addBase("Procedure");
 		searchParameter.setCode("focalAccess");
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
@@ -837,6 +830,32 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		return totalNumberOfPatientsCreated;
 	}
 
+	/**
+	 * Ensure that a search for a specific date (which is transformed internally into a
+	 * date range with an identical lower and upper by PatientResourceProvider) doesn't
+	 * cause duplicate parameters.
+	 */
+	@Test
+	public void testSearchDate() {
+		// Setup
+		createPatient(withId("PAT-0"), withBirthdate("2020-01-01"));
+
+		// Test
+		myCaptureQueriesListener.clear();
+		Bundle actual = myClient
+			.search()
+			.forResource(Patient.class)
+			.where(Patient.BIRTHDATE.exactly().day("2020-01-01"))
+			.returnBundle(Bundle.class)
+			.execute();
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		assertThat(toUnqualifiedVersionlessIdValues(actual)).containsExactly("Patient/PAT-0");
+		assertThat(actual.getLink(Constants.LINK_SELF).getUrl()).endsWith("Patient?birthdate=2020-01-01");
+	}
+
+
 	@Test
 	public void testSearchWithDeepChain() throws IOException {
 
@@ -1115,8 +1134,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * See #484
-	 */
+     * See #484
+     */
 	@Test
 	public void saveAndRetrieveBasicResource() throws IOException {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/basic-stu3.xml"), StandardCharsets.UTF_8);
@@ -3581,6 +3600,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPreserveVersionsOnAuditEvent() {
+		// ehp: this test is riddled with logs to try to figure out why it fail intermittently
+		ourLog.info("AutoVersionReferenceAtPaths: {}", myStorageSettings.getAutoVersionReferenceAtPaths());
+		ourLog.info("DontStripVersionsFromReferencesAtPaths: {}", myFhirContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths());
+
 		Organization org = new Organization();
 		org.setName("ORG");
 		IIdType orgId = myClient.create().resource(org).execute().getId();
@@ -3593,18 +3616,33 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals("1", patientId.getVersionIdPart());
 
 		AuditEvent ae = new org.hl7.fhir.r4.model.AuditEvent();
-		ae.addEntity().getWhat().setReference(patientId.toUnqualified().getValue());
+		String unqualifiedReference = patientId.toUnqualified().getValue();
+		ourLog.info("patientId: {}", patientId.getValue());
+		ourLog.info("patientId.toUnqualified(): {}", patientId.toUnqualified().getValue());
+		ourLog.info("patientId.toVersionless(): {}", patientId.toVersionless().getValue());
+		ourLog.info("patientId.toUnqualifiedVersionless(): {}", patientId.toUnqualifiedVersionless().getValue());
+		ourLog.info("Setting reference to: {}", unqualifiedReference);
+		ae.addEntity().getWhat().setReference(unqualifiedReference);
+		ourLog.info("BEFORE CREATE - AuditEvent reference: {}", ae.getEntityFirstRep().getWhat().getReference());
 		IIdType aeId = myClient.create().resource(ae).execute().getId();
+		ourLog.info("AFTER CREATE - AuditEvent reference in returned resource: {}", ae.getEntityFirstRep().getWhat().getReference());
 		assertEquals("1", aeId.getVersionIdPart());
 
 		patient = myClient.read().resource(Patient.class).withId(patientId).execute();
 		assertTrue(patient.getManagingOrganization().getReferenceElement().hasIdPart());
 		assertFalse(patient.getManagingOrganization().getReferenceElement().hasVersionIdPart());
 
-		ae = myClient.read().resource(AuditEvent.class).withId(aeId).execute();
-		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasIdPart());
-		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasVersionIdPart());
+		ae = myClient.read().resource(AuditEvent.class).withId(aeId.toUnqualifiedVersionless()).execute();
 
+		String reference = ae.getEntityFirstRep().getWhat().getReference();
+		IIdType referenceElement = ae.getEntityFirstRep().getWhat().getReferenceElement();
+		ourLog.info("AuditEvent reference: {}", reference);
+		ourLog.info("Reference hasIdPart: {}", referenceElement.hasIdPart());
+		ourLog.info("Reference hasVersionIdPart: {}", referenceElement.hasVersionIdPart());
+		ourLog.info("Reference getVersionIdPart: {}", referenceElement.getVersionIdPart());
+
+		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasIdPart(), ae.getEntityFirstRep().getWhat().getReference());
+		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasVersionIdPart(), ae.getEntityFirstRep().getWhat().getReference());
 	}
 
 	/**
@@ -3695,6 +3733,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				myResourceHistoryTableDao.delete(version);
 			}
 		});
+
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
 		Bundle bundle = myClient
@@ -3703,7 +3742,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		ourLog.debug("Result: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-		assertEquals(2, bundle.getTotal());
+		assertEquals(1, bundle.getTotal());
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
@@ -6412,6 +6451,89 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	/**
+	 * When updating a resource with a non-numeric ETag (e.g. W/"A23"), the server should return
+	 * a 409 Conflict (version mismatch) rather than a 500 Internal Server Error from NumberFormatException.
+	 * See SMILE-8708.
+	 */
+	@Test
+	void testUpdateWithNonNumericETag_returnsConflict() throws Exception {
+		// Create a patient
+		Patient pt = new Patient();
+		pt.addName().setFamily("testUpdateWithNonNumericETag");
+		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		// Attempt to update with a non-numeric ETag
+		pt.addName().setFamily("FAM2");
+		pt.setId(id.toUnqualifiedVersionless());
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
+
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
+		put.addHeader(Constants.HEADER_IF_MATCH, "W/\"A23\"");
+		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		try (CloseableHttpResponse response = ourHttpClient.execute(put)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseString);
+			assertThat(response.getStatusLine().getStatusCode())
+				.as("Non-numeric ETag should produce a 409 Conflict, not a 500 error")
+				.isEqualTo(409);
+			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			assertThat(oo.getIssue().get(0).getDiagnostics())
+				.contains("Trying to update Patient/" + id.getIdPart());
+		}
+	}
+
+	/**
+	 * Verify that a numeric wrong ETag still returns 409 as before.
+	 * Adjacent test for SMILE-8708 — this should pass (existing behavior).
+	 */
+	@Test
+	void testUpdateWithWrongNumericETag_returnsConflict() throws Exception {
+		Patient pt = new Patient();
+		pt.addName().setFamily("testUpdateWithWrongNumericETag");
+		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		pt.addName().setFamily("FAM2");
+		pt.setId(id.toUnqualifiedVersionless());
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
+
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
+		put.addHeader(Constants.HEADER_IF_MATCH, "W/\"999\"");
+		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		try (CloseableHttpResponse response = ourHttpClient.execute(put)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseString);
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(409);
+			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			assertThat(oo.getIssue().get(0).getDiagnostics())
+				.contains("Trying to update Patient/" + id.getIdPart());
+		}
+	}
+
+	/**
+	 * Verify that update with the correct ETag succeeds.
+	 * Adjacent test for SMILE-8708 — this should pass (existing behavior).
+	 */
+	@Test
+	void testUpdateWithCorrectETag_succeeds() throws Exception {
+		Patient pt = new Patient();
+		pt.addName().setFamily("testUpdateWithCorrectETag");
+		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		pt.addName().setFamily("FAM2");
+		pt.setId(id.toUnqualifiedVersionless());
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
+
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
+		put.addHeader(Constants.HEADER_IF_MATCH, "W/\"1\"");
+		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		try (CloseableHttpResponse response = ourHttpClient.execute(put)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseString);
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+		}
+	}
+
 	@Test
 	public void testUpdateWrongIdInBody() throws Exception {
 		String methodName = "testUpdateWrongIdInBody";
@@ -7949,5 +8071,4 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.hasMessage("HTTP 400 Bad Request: HAPI-2498: Unsupported search modifier(s): \"[:identifier]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]");
 		}
 	}
-
 }

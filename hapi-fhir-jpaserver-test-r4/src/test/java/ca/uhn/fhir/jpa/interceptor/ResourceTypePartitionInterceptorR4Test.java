@@ -8,17 +8,19 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import static ca.uhn.fhir.jpa.test.Batch2JobHelper.getJobIdFromPollingLocation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceTypePartitionInterceptorR4Test extends BaseResourceProviderR4Test {
@@ -52,14 +54,15 @@ public class ResourceTypePartitionInterceptorR4Test extends BaseResourceProvider
 
 		Parameters input = new Parameters();
 		input.setParameter(ProviderConstants.OPERATION_REINDEX_PARAM_URL, theUrl);
-		Parameters response = myClient
+		MethodOutcome response = myClient
 				.operation()
 				.onServer()
 				.named(ProviderConstants.OPERATION_REINDEX)
 				.withParameters(input)
+				.returnMethodOutcome()
 				.execute();
 
-		String jobId = ((StringType)response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID)).getValue();
+		String jobId = getJobIdFromPollingLocation(response.getFirstResponseHeader(Constants.HEADER_CONTENT_LOCATION).orElseThrow());
 		myBatch2JobHelper.awaitJobHasStatus(jobId, StatusEnum.COMPLETED);
 		assertThat(myBatch2JobHelper.getCombinedRecordsProcessed(jobId)).isEqualTo(theExpectedIndexedResourceCount);
 	}

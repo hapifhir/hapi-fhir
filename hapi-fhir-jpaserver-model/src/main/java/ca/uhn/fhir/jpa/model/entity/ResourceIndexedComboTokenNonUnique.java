@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.hibernate.annotations.GenericGenerator;
 		name = ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU,
 		indexes = {
 			// TODO: The hash index was added in 7.4.0 - In 7.6.0 we should drop the string index
+			// As of 8.6.0 the string equivalent column is nullable
 			@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
 			@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE,RES_ID,PARTITION_ID", unique = false),
 			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
@@ -93,7 +94,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 	@Column(name = "HASH_COMPLETE", nullable = false)
 	private Long myHashComplete;
 
-	@Column(name = "IDX_STRING", nullable = false, length = ResourceIndexedComboStringUnique.MAX_STRING_LENGTH)
+	@Column(name = "IDX_STRING", nullable = true, length = ResourceIndexedComboStringUnique.MAX_STRING_LENGTH)
 	private String myIndexString;
 
 	@Transient

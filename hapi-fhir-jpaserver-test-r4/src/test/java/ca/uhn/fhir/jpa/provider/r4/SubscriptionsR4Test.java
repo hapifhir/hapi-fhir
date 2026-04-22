@@ -5,6 +5,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorR4;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -173,6 +174,38 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		myClient.update().resource(subs).execute();
 	}
 
+
+	// SMILE-10730: :missing on token param should not NPE during subscription creation
+	@Test
+	void testCreateSubscriptionWithMissingModifierOnTokenParam() {
+		MethodOutcome outcome = createSubscriptionWithCriteria("MessageHeader?event:missing=true");
+		assertThat(outcome.getId()).isNotNull();
+		assertThat(outcome.getId().getIdPart()).isNotBlank();
+	}
+
+	@Test
+	void testCreateSubscriptionWithNotModifierOnTokenParam() {
+		MethodOutcome outcome = createSubscriptionWithCriteria("Observation?code:not=FOO");
+		assertThat(outcome.getId()).isNotNull();
+		assertThat(outcome.getId().getIdPart()).isNotBlank();
+	}
+
+	@Test
+	void testCreateSubscriptionWithSourceMissingModifier() {
+		MethodOutcome outcome = createSubscriptionWithCriteria("Observation?_source:missing=true");
+		assertThat(outcome.getId()).isNotNull();
+		assertThat(outcome.getId().getIdPart()).isNotBlank();
+	}
+
+	private MethodOutcome createSubscriptionWithCriteria(String theCriteria) {
+		Subscription subscription = new Subscription();
+		subscription.setStatus(SubscriptionStatus.REQUESTED);
+		subscription.setCriteria(theCriteria);
+		subscription.getChannel().setType(SubscriptionChannelType.RESTHOOK);
+		subscription.getChannel().setPayload("application/fhir+json");
+		subscription.getChannel().setEndpoint("http://example.com/subscription");
+		return myClient.create().resource(subscription).execute();
+	}
 
 	public class BaseSocket {
 		protected String myError;

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7463
+title: "When using the PatientIdPartitionInterceptor, a failure occurred when submitting a transaction bundle containing a Patient resource being updated by ID, with other resources referring to this Patient using its placeholder UUID. This has been corrected."

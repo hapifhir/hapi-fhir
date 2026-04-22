@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,7 +213,9 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 							// there could be multiple of these, so we only delete the first
 							if (!theTransactionDetails.getDeletedResourceIds().contains(goldenPid)) {
 								IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
-								deleteGoldenResource(goldenPid, dao, theRequest);
+								RequestDetails allPartitionsRequest = new SystemRequestDetails()
+										.setRequestPartitionId(RequestPartitionId.allPartitions());
+								deleteGoldenResource(goldenPid, dao, allPartitionsRequest);
 								/*
 								 * We will add the removed id to the deleted list so that
 								 * the deletedResourceId list is accurate for what has been
@@ -268,7 +270,8 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 				IResourcePersistentId goldenPid = extractGoldenPid(theResource, matches.get(0));
 				if (!theTransactionDetails.getDeletedResourceIds().contains(goldenPid)) {
 					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
-					cleanUpPossibleMatches(possibleMatches, dao, goldenPid, theRequest);
+					RequestDetails allPartitionsRequest = SystemRequestDetails.forAllPartitions();
+					cleanUpPossibleMatches(possibleMatches, dao, goldenPid, allPartitionsRequest);
 					IAnyResource goldenResource = (IAnyResource) dao.readByPid(goldenPid);
 					myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(goldenResource);
 					/*
@@ -320,15 +323,20 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	 *  since they are no longer "real matches"
 	 *  Possible match resources are resubmitted for matching
 	 */
+	@SuppressWarnings("unchecked")
 	private void cleanUpPossibleMatches(
 			List<IMdmLink> possibleMatches,
 			IFhirResourceDao<?> theDao,
 			IResourcePersistentId theGoldenPid,
 			RequestDetails theRequestDetails) {
-		IAnyResource goldenResource = (IAnyResource) theDao.readByPid(theGoldenPid);
+		String resourceType = theDao.getResourceType().getSimpleName();
+		IIdType goldenId = myIdHelperSvc.resourceIdFromPidOrThrowException(theGoldenPid, resourceType);
+		IAnyResource goldenResource = (IAnyResource) theDao.read(goldenId, theRequestDetails);
 		for (IMdmLink possibleMatch : possibleMatches) {
 			if (possibleMatch.getGoldenResourcePersistenceId().equals(theGoldenPid)) {
-				IBaseResource sourceResource = theDao.readByPid(possibleMatch.getSourcePersistenceId());
+				IIdType sourceId = myIdHelperSvc.resourceIdFromPidOrThrowException(
+						possibleMatch.getSourcePersistenceId(), resourceType);
+				IBaseResource sourceResource = theDao.read(sourceId, theRequestDetails);
 				MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
 				params.setGoldenResource(goldenResource);
 				params.setSourceResource((IAnyResource) sourceResource);

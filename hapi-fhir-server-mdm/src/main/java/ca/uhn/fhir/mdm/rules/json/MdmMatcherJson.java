@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MdmMatcherJson implements IModelJson {
 	@JsonProperty(value = "algorithm", required = true)
-	MatchTypeEnum myAlgorithm;
+	String myAlgorithm;
 
 	@JsonProperty(value = "identifierSystem", required = false)
 	String myIdentifierSystem;
@@ -36,12 +36,22 @@ public class MdmMatcherJson implements IModelJson {
 	@JsonProperty(value = "exact")
 	boolean myExact;
 
-	public MatchTypeEnum getAlgorithm() {
+	public String getAlgorithm() {
 		return myAlgorithm;
 	}
 
-	public MdmMatcherJson setAlgorithm(MatchTypeEnum theAlgorithm) {
+	public MdmMatcherJson setAlgorithm(String theAlgorithm) {
 		myAlgorithm = theAlgorithm;
+		return this;
+	}
+
+	/**
+	 * Convenience overload for backward compatibility with code that passes a {@link MatchTypeEnum}.
+	 * @deprecated Use {@link #setAlgorithm(String)} instead.
+	 */
+	@Deprecated(since = "8.10.0", forRemoval = true)
+	public MdmMatcherJson setAlgorithm(MatchTypeEnum theAlgorithm) {
+		myAlgorithm = theAlgorithm.name();
 		return this;
 	}
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,6 +103,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 
 	@Override
 	public IResourceLookup findTargetResource(
+			IBaseResource theSourceResource,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theSourceResourceName,
 			PathAndRef thePathAndRef,
@@ -158,7 +159,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		} catch (ResourceNotFoundException e) {
 
 			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(
-					type, targetReference, idPart, theRequest, theTransactionDetails);
+					theSourceResource, type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
 				if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
@@ -279,6 +280,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	 * @param theIdToAssignToPlaceholder If specified, the placeholder resource created will be given a specific ID
 	 */
 	public <T extends IBaseResource> Optional<IBasePersistedResource> createPlaceholderTargetIfConfiguredToDoSo(
+			IBaseResource theSource,
 			Class<T> theType,
 			IBaseReference theReference,
 			@Nullable String theIdToAssignToPlaceholder,
@@ -329,7 +331,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 			if (interceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE)) {
 				AutoCreatePlaceholderReferenceTargetRequest request =
-						new AutoCreatePlaceholderReferenceTargetRequest(newResource);
+						new AutoCreatePlaceholderReferenceTargetRequest(theSource, newResource);
 				HookParams params = new HookParams()
 						.add(AutoCreatePlaceholderReferenceTargetRequest.class, request)
 						.add(RequestDetails.class, theRequest)
@@ -505,6 +507,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	 * @param theValue Part of the URL to extract identifiers from
 	 */
 	protected List<CanonicalIdentifier> extractIdentifierFromUrl(String theValue) {
+		if (theValue.contains("?")) {
+			theValue = theValue.substring(theValue.indexOf("?") + 1);
+		}
 		Map<String, String[]> parsedQuery = UrlUtil.parseQueryString(theValue);
 
 		ArrayList<CanonicalIdentifier> retVal = new ArrayList<>(2);

@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patch;
 
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base.BaseBulkModifyJobAppCtx;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyCommonJobAppCtx;
 import ca.uhn.fhir.context.FhirContext;
@@ -36,20 +37,25 @@ public abstract class BaseBulkPatchJobAppCtx extends BaseBulkModifyJobAppCtx<Bul
 	protected final IBatch2DaoSvc myBatch2DaoSvc;
 	private final FhirContext myFhirContext;
 	private final IDaoRegistry myDaoRegistry;
+	protected final IJobPartitionProvider myJobPartitionProvider;
 
 	/**
 	 * Constructor
 	 */
 	public BaseBulkPatchJobAppCtx(
-			IBatch2DaoSvc theBatch2DaoSvc, FhirContext theFhirContext, IDaoRegistry theDaoRegistry) {
+			IBatch2DaoSvc theBatch2DaoSvc,
+			FhirContext theFhirContext,
+			IDaoRegistry theDaoRegistry,
+			IJobPartitionProvider theJobPartitionProvider) {
 		myBatch2DaoSvc = theBatch2DaoSvc;
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
+		myJobPartitionProvider = theJobPartitionProvider;
 	}
 
 	@Override
 	protected BulkPatchJobParametersValidator<BulkPatchJobParameters> getJobParameterValidator() {
-		return new BulkPatchJobParametersValidator<>(myFhirContext, myDaoRegistry);
+		return new BulkPatchJobParametersValidator<>(myFhirContext, myDaoRegistry, myBatch2DaoSvc);
 	}
 
 	@Override

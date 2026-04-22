@@ -1,0 +1,35 @@
+{
+	"resourceType": "Parameters",
+	"parameter": [
+		{
+			"name": "system",
+			"valueUri": "http://www.nlm.nih.gov/research/umls/rxnorm_resource"
+		},
+		{
+			"name": "codeSystem",
+			"resource": {
+				"resourceType": "CodeSystem",
+				"concept": [
+					{
+						"code": "748856",
+						"display": "{24 (drospirenone 3 MG / ethinyl estradiol 0.02 MG Oral Tablet) / 4 (inert ingredients 1 MG Oral Tablet) } Pack [Yaz 28 Day]",
+						"property": [
+							{
+								"code": "STY",
+								"valueString": "STN:A1.3.1.1"
+							},
+							{
+								"code": "STY",
+								"valueString": "STY:Drug Delivery Device"
+							},
+							{
+								"code": "TTY",
+								"valueString": "BPCK"
+							}
+						]
+					}
+				]
+			}
+		}
+	]
+}

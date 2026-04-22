@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
+public class MdmProviderMergeGoldenResourcesR4Test extends BaseMdmProviderR4Test {
 
 	private Patient myFromGoldenPatient;
 	private StringType myFromGoldenPatientId;
@@ -75,10 +75,15 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 
 	@Test
 	public void testMerge() {
+		myCaptureQueriesListener.clear();
 		Patient mergedSourcePatient = (Patient) myMdmProvider.mergeGoldenResources(
 			myFromGoldenPatientId, // from
 			myToGoldenPatientId, // to
 			null, myRequestDetails);
+		myCaptureQueriesListener.logSelectQueries();
+		myCaptureQueriesListener.logUpdateQueries();
+		myCaptureQueriesListener.logDeleteQueries();
+		logAllResources();
 
 		// we do not check setActive anymore - as not all types support that
 		assertTrue(MdmResourceUtil.isGoldenRecord(mergedSourcePatient));

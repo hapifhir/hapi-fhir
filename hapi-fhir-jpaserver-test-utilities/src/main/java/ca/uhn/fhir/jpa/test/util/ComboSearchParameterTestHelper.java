@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,34 @@ public class ComboSearchParameterTestHelper {
 		assertEquals("SearchParameter", context.getResourceType(mySearchParameterDao.getResourceType()));
 	}
 
+
+	public void createPatientIdentifierUnique() {
+
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-identifier");
+		sp.setCode("identifier");
+		sp.setExpression("Patient.identifier");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
+		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-uniq-identifier");
+		sp.setCode("patient-uniq-identifier");
+		sp.setExpression("Patient");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.PATIENT);
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("/SearchParameter/patient-identifier");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
+		mySearchParameterDao.update(fromCanonoical(sp), new SystemRequestDetails());
+		mySearchParamRegistry.forceRefresh();
+	}
 
 	public void createBirthdateAndGenderSps(boolean theUnique, ISearchParamCustomizer... theSearchParamCustomizer) {
 		SearchParameter sp = new SearchParameter();

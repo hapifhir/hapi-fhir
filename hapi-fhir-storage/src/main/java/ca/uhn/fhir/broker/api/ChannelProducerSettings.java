@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,14 @@ public class ChannelProducerSettings extends BaseChannelSettings {
 	public ChannelProducerSettings() {
 		super();
 		myProducerSuffix = "";
+	}
+
+	public ChannelProducerSettings(ChannelProducerSettings theSettings) {
+		super();
+		myProducerSuffix = "";
+		setRetryConfiguration(theSettings.getRetryConfigurationParameters());
+		setQualifyChannelName(theSettings.isQualifyChannelName());
+		setConcurrentConsumers(theSettings.getConcurrentConsumers());
 	}
 
 	public Integer getConcurrentConsumers() {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -52,7 +53,7 @@ class ResourceChangeListenerCacheRefresherImplTest {
 	@Test
 	public void testNotifyListenersEmptyEmptyNotInitialized() {
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
-		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
+		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, RequestPartitionId.allPartitions(), ourMap, TEST_REFRESH_INTERVAL_MS);
 		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
 		assertFalse(cache.isInitialized());
 		myResourceChangeListenerCacheRefresher.notifyListener(cache, newResourceVersionMap);
@@ -63,7 +64,7 @@ class ResourceChangeListenerCacheRefresherImplTest {
 	@Test
 	public void testNotifyListenersEmptyEmptyInitialized() {
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
-		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
+		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, RequestPartitionId.allPartitions(), ourMap, TEST_REFRESH_INTERVAL_MS);
 		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
 		cache.setInitialized(true);
 		assertTrue(cache.isInitialized());
@@ -77,10 +78,10 @@ class ResourceChangeListenerCacheRefresherImplTest {
 		when(mySchedulerService.isStopping()).thenReturn(true);
 
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
-		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
+		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, RequestPartitionId.allPartitions(), ourMap, TEST_REFRESH_INTERVAL_MS);
 		myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(cache);
 
-		verify(myResourceVersionSvc, times(0)).getVersionMap(any(), any());
+		verify(myResourceVersionSvc, times(0)).getVersionMap(any(), any(), any());
 	}
 
 }

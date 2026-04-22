@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,6 +153,7 @@ public class CustomTerminologySet {
 			for (TermConcept termConcept : code2concept.values()) {
 				if (!theCode2property.isEmpty() && theCode2property.get(termConcept.getCode()) != null) {
 					theCode2property.get(termConcept.getCode()).forEach(property -> {
+						property.setConcept(termConcept);
 						termConcept.getProperties().add(property);
 					});
 				}

@@ -91,7 +91,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 
 		String payload = "application/fhir+json";
-		IdType id = createSubscription("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER", payload, null, "sub").getIdElement().toUnqualifiedVersionless();
+		IdType id = createOrUpdateSubscription("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER", payload, null, "sub").getIdElement().toUnqualifiedVersionless();
 		waitForActivatedSubscriptionCount(1);
 
 		Subscription subscription = mySubscriptionDao.read(id, mySrd);
@@ -102,7 +102,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForActivatedSubscriptionCount(0);
 
 		payload = "application/fhir+json";
-		id = createSubscription("Observation?", payload, null, "sub").getIdElement().toUnqualifiedVersionless();
+		id = createOrUpdateSubscription("Observation?", payload, null, "sub").getIdElement().toUnqualifiedVersionless();
 		waitForActivatedSubscriptionCount(1);
 
 		subscription = mySubscriptionDao.read(id, mySrd);

@@ -34,6 +34,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -372,6 +373,57 @@ public class BaseSubscriptionDeliveryListenerTest {
 		verify(myChannelProducer).send(captor.capture());
 		final List<ResourceModifiedJsonMessage> params = captor.getAllValues();
 		assertEquals(thePartitionId, params.get(0).getPayload().getPartitionId());
+	}
+
+	@Test
+	void testDeliveryMessage_withSharedDeliveryQueue_deliversMessageOnCorrectChannels() throws URISyntaxException {
+		// Given: Simulate a shared delivery channel that has multiple configured delivery endpoints
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), any())).thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
+		when(myBrokerClient.getOrCreateProducer(any(), any(), any())).thenAnswer(t -> myChannelProducer);
+
+		CanonicalSubscription subscriptionPat = generateSubscription();
+		subscriptionPat.setIdElement(new IdType("subs-pat"));
+		subscriptionPat.setCriteriaString("[Patient]");
+		subscriptionPat.setEndpointUrl("channel:my-pat-queue");
+
+		CanonicalSubscription subscriptionOrg = generateSubscription();
+		subscriptionOrg.setIdElement(new IdType("subs-org"));
+		subscriptionOrg.setCriteriaString("[Organization]");
+		subscriptionOrg.setEndpointUrl("channel:my-org-queue");
+
+		Patient patient = generatePatient();
+		Organization org = new Organization();
+		org.setName("TestOrg");
+
+		// When
+		ResourceDeliveryMessage payloadPat = new ResourceDeliveryMessage();
+		payloadPat.setSubscription(subscriptionPat);
+		payloadPat.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payloadPat.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+		mySubscriptionDeliveringMessageListener.handleMessage(payloadPat);
+
+		ResourceDeliveryMessage payloadOrg = new ResourceDeliveryMessage();
+		payloadOrg.setSubscription(subscriptionOrg);
+		payloadOrg.setPayload(myCtx, org, EncodingEnum.JSON);
+		payloadOrg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+		mySubscriptionDeliveringMessageListener.handleMessage(payloadOrg);
+
+		// Then
+		ArgumentCaptor<String> queueNameCaptor = ArgumentCaptor.forClass(String.class);
+		verify(myBrokerClient, times(2)).getOrCreateProducer(queueNameCaptor.capture(), any(), any());
+
+		// Delivered to different delivery endpoints, as configured in the Subscriptions
+		final List<String> queueNames = queueNameCaptor.getAllValues();
+		assertThat(queueNames.get(0)).isEqualTo("my-pat-queue");
+		assertThat(queueNames.get(1)).isEqualTo("my-org-queue");
+
+		ArgumentCaptor<ResourceModifiedJsonMessage> resourceCaptor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
+		verify(myChannelProducer, times(2)).send(resourceCaptor.capture());
+
+		final List<ResourceModifiedJsonMessage> deliveredResources = resourceCaptor.getAllValues();
+		assertThat(deliveredResources.get(0).getPayload().getNewResource(myCtx)).isInstanceOf(Patient.class);
+		assertThat(deliveredResources.get(1).getPayload().getNewResource(myCtx)).isInstanceOf(Organization.class);
 	}
 
 	@Test

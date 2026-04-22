@@ -50,7 +50,7 @@ This module acts as a simple terminology service that can validate codes against
 This module contains a series of HashMaps that store loaded conformance resources in memory. Typically this is initialized at startup in order to add custom conformance resources into the chain.
 
 
-<a name="npmpackagevalidationsupport"/>
+<a id="npmpackagevalidationsupport"></a>
 
 # NpmPackageValidationSupport
 
@@ -176,6 +176,38 @@ these generated issues, you can use the [ValidationMessageUnknownCodeSystemPostP
 
 This module is deprecated and no longer provides any functionality. Caching is provided by [ValidationSupportChain](#validationsupportchain).
 
+
+# JPA Server Validation Chain Configuration
+
+When using the JPA Server, the validation support chain is configured automatically. By default, the built-in FHIR definitions (from `DefaultProfileValidationSupport`) take precedence over user-defined terminology resources stored in the database (from `JpaPersistedResourceValidationSupport`).
+
+## Allowing Database Validation Override
+
+In some cases, you may want your database-stored CodeSystem and ValueSet resources to take precedence over the built-in HL7 definitions. This is useful when you need to override a built-in terminology resource with a different version of that resource.
+
+To enable this behavior, use the `allowDatabaseValidationOverride` setting:
+
+```java
+@Bean
+public JpaStorageSettings storageSettings() {
+   JpaStorageSettings retVal = new JpaStorageSettings();
+   // Allow database-stored validation resources to take precedence
+   retVal.setAllowDatabaseValidationOverride(true);
+   return retVal;
+}
+```
+
+When this setting is enabled (`true`), the JPA validation support (database-stored resources) is placed before the default profile validation support in the chain. When disabled (`false`, the default), the built-in definitions take precedence.
+
+<p class="doc_info_bubble">
+<b>Note:</b> Enabling this setting means that any CodeSystem or ValueSet you store in the database with the same URL as a built-in HL7 resource will override the built-in version during validation. Use this setting carefully as it can affect validation behavior for standard FHIR resources.
+</p>
+
+## CodeSystems With `CodeSystem.content` value `not-present`
+
+When the JPA terminology validator (`TermReadSvcImpl`) is asked to validate or look up a code against a CodeSystem whose `CodeSystem.content` value is `not-present`, it does not attempt to resolve the code against the (absent) enumerated concepts. Instead, it returns `null` so the `ValidationSupportChain` can fall through to the next validator in the chain that claims support for the CodeSystem URL. This allows algorithmic validators such as the UCUM validator exposed by [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice), or a configured [RemoteTerminologyServiceValidationSupport](#remoteterminologyservicevalidationsupport), to validate the code.
+
+This applies when a code is validated directly against a CodeSystem (`CodeSystem/$validate-code`), when it is validated through a ValueSet that expands to that CodeSystem (`ValueSet/$validate-code`, including JPA pre-expanded ValueSets), and when looked up via `CodeSystem/$lookup`. If no subsequent module in the chain can validate or look up the code, the normal "code not found" result is returned.
 
 # Recipes
 

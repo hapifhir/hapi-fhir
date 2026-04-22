@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,13 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SearchParameter;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -52,6 +54,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class SearchParameterDaoValidator {
 
 	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*([A-Z][a-zA-Z]+\\.)?[a-z].*");
+	private static final String RESOURCE = "Resource";
+	private static final String DOMAIN_RESOURCE = "DomainResource";
 
 	private final FhirContext myFhirContext;
 	private final JpaStorageSettings myStorageSettings;
@@ -189,6 +193,68 @@ public class SearchParameterDaoValidator {
 			throw new UnprocessableEntityException(Msg.code(1120) + "SearchParameter.expression value \"" + expression
 					+ "\" is invalid due to missing/incorrect path");
 		}
+
+		if (!isResourceOfTypeComposite && !isResourceOfTypeSpecial) {
+			validateExpressionAgainstBase(theSearchParameter);
+		}
+	}
+
+	/**
+	 * Validate expression prefixes against declared base(s):
+	 * - For generic bases (Resource or DomainResource), prefixes must be Resource or DomainResource.
+	 * - For a specific base (e.g. PractitionerRole), at least one path must start with that type.
+	 */
+	private void validateExpressionAgainstBase(SearchParameter theSearchParameter) {
+		String expression = getExpression(theSearchParameter);
+		if (isBlank(expression)) {
+			return;
+		}
+
+		List<String> bases = theSearchParameter.getBase().stream()
+				.map(IPrimitiveType::getValueAsString)
+				.filter(Objects::nonNull)
+				.toList();
+		if (bases.isEmpty()) {
+			return;
+		}
+
+		String[] paths = SearchParameterUtil.splitSearchParameterExpressions(expression);
+
+		boolean allBasesGeneric = bases.stream().allMatch(SearchParameterDaoValidator::isGenericBase);
+
+		if (allBasesGeneric) {
+			for (String path : paths) {
+				String prefix = SearchParameterUtil.extractTypePrefix(path.trim());
+				if (prefix != null && !isGenericBase(prefix)) {
+					throw new UnprocessableEntityException(Msg.code(2910) + "SearchParameter.expression '" + expression
+							+ "' uses type-specific prefix '" + prefix
+							+ "' but base is [" + String.join(", ", bases)
+							+ "]. Expression must use Resource or DomainResource prefix when base is generic.");
+				}
+			}
+			return;
+		}
+		for (String base : bases) {
+			if (isGenericBase(base)) {
+				continue;
+			}
+			boolean anyPathMatchesBase = false;
+			for (String path : paths) {
+				String prefix = SearchParameterUtil.extractTypePrefix(path.trim());
+				if (prefix == null || base.equals(prefix) || isGenericBase(prefix)) {
+					anyPathMatchesBase = true;
+					break;
+				}
+			}
+			if (!anyPathMatchesBase) {
+				throw new UnprocessableEntityException(
+						Msg.code(2911) + "No path in expression '" + expression + "' matches the base [" + base + "].");
+			}
+		}
+	}
+
+	private static boolean isGenericBase(String theBase) {
+		return RESOURCE.equals(theBase) || DOMAIN_RESOURCE.equals(theBase);
 	}
 
 	private void validateExpressionIsParsable(SearchParameter theSearchParameter) {
@@ -267,7 +333,7 @@ public class SearchParameterDaoValidator {
 		} else if (hasAnyExtensionUniqueSetTo(theSearchParameter, false)
 				|| // combo non-unique search parameter
 				myStorageSettings.isAdvancedHSearchIndexing()) { // composite Search Parameter with HSearch indexing
-			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER);
+			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER, REFERENCE);
 		} else { // composite Search Parameter (JPA only)
 			return Set.of(STRING, TOKEN, DATE, QUANTITY);
 		}

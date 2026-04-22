@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.bulk.export.model;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -27,6 +28,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -83,13 +85,18 @@ public class ExportPIDIteratorParameters {
 	 */
 	private RequestPartitionId myPartitionId;
 
+	private SystemRequestDetails myRequestDetails;
+
+	/**
+	 * Cached expanded patient ID strings for PATIENT export with MDM.
+	 */
+	private Set<String> myExpandedPatientIdsForPatientExport;
+
 	/**
 	 * The list of resource types to recurse on.
 	 * This should always have at least one resource in it (the resource being requested)!
 	 */
 	private List<String> myRequestedResourceTypes;
-
-	private boolean myIncludeHistory;
 
 	public String getChunkId() {
 		return myChunkId;
@@ -197,16 +204,41 @@ public class ExportPIDIteratorParameters {
 		myRequestedResourceTypes = theRequestedResourceTypes;
 	}
 
-	public boolean isIncludeHistory() {
-		return myIncludeHistory;
+	public Set<String> getExpandedPatientIdsForPatientExport() {
+		return myExpandedPatientIdsForPatientExport;
 	}
 
-	public void setIncludeHistory(boolean theIncludeHistory) {
-		myIncludeHistory = theIncludeHistory;
+	public void setExpandedPatientIdsForPatientExport(Set<String> theExpandedPatientIdsForPatientExport) {
+		myExpandedPatientIdsForPatientExport = theExpandedPatientIdsForPatientExport;
+	}
+
+	public boolean hasExpandedPatientIdsForPatientExport() {
+		return myExpandedPatientIdsForPatientExport != null && !myExpandedPatientIdsForPatientExport.isEmpty();
 	}
 
 	@Override
 	public String toString() {
-		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		return new ToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE)
+				.append("resourceType", myResourceType)
+				.append("startDate", myStartDate)
+				.append("endDate", myEndDate)
+				.append("filters", myFilters)
+				.append("instanceId", myInstanceId)
+				.append("chunkId", myChunkId)
+				.append("exportStyle", myExportStyle)
+				.append("groupId", myGroupId)
+				.append("expandMdm", myExpandMdm)
+				.append("patientIds", myPatientIds)
+				.append("partitionId", myPartitionId)
+				.append("requestedResourceTypes", myRequestedResourceTypes)
+				.toString();
+	}
+
+	public void setRequestDetails(SystemRequestDetails theRequestDetails) {
+		myRequestDetails = theRequestDetails;
+	}
+
+	public SystemRequestDetails getRequestDetails() {
+		return myRequestDetails;
 	}
 }

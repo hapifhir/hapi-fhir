@@ -2,7 +2,7 @@
  * #%L
  * HAPI-FHIR Storage Batch2 Jobs
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,17 +149,17 @@ public class BulkDataExportSupport {
 	Set<String> getPatientCompartmentResources(
 			FhirContext theFhirContext, BulkExportJobParameters.ExportStyle theExportStyle) {
 		if (myCompartmentResources == null) {
-			myCompartmentResources =
-					SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext).stream()
-							.filter(r -> {
-								if (theExportStyle == BulkExportJobParameters.ExportStyle.PATIENT) {
-									return !SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
-											.containsKey(r);
-								}
-								return true;
-							})
-							.collect(Collectors.toSet());
+			myCompartmentResources = SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(theFhirContext);
 		}
-		return myCompartmentResources;
+
+		return myCompartmentResources.stream()
+				.filter(r -> {
+					if (theExportStyle == BulkExportJobParameters.ExportStyle.PATIENT) {
+						return !SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.containsKey(
+								r);
+					}
+					return true;
+				})
+				.collect(Collectors.toSet());
 	}
 }

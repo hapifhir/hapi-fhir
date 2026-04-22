@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
+import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,9 @@ public class MdmLoader {
 	@Autowired
 	MdmSubscriptionLoader myMdmSubscriptionLoader;
 
+	@Autowired
+	MdmRuleValidator myMdmRuleValidator;
+
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	// This @Order is here to ensure that MatchingQueueSubscriberLoader has initialized before we initialize this.
 	// Otherwise the MDM subscriptions won't get loaded into the SubscriptionRegistry
@@ -52,6 +56,10 @@ public class MdmLoader {
 		if (!myMdmSettings.isEnabled()) {
 			return;
 		}
+
+		// Validate algorithm names after all @PostConstruct methods have run,
+		// so that custom algorithms registered via @PostConstruct are available.
+		myMdmRuleValidator.validateAlgorithmRegistrations(myMdmSettings.getMdmRules());
 
 		myMdmProviderLoader.loadPatientMatchProvider();
 

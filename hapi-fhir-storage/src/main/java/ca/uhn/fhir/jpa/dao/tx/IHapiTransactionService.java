@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +96,9 @@ public interface IHapiTransactionService {
 	 * <p>
 	 * This is an experimental API, subject to change in a future release.
 	 * </p>
+	 * <p>
+	 * This method should return the same result regardless of the order of the arguments.
+	 * </p>
 	 *
 	 * @since 7.4.0
 	 */
@@ -103,6 +106,15 @@ public interface IHapiTransactionService {
 	default boolean isCompatiblePartition(
 			RequestPartitionId theRequestPartitionId, RequestPartitionId theOtherRequestPartitionId) {
 		return true;
+	}
+
+	/**
+	 * Returns <code>true</code> if the partition contains multiple IDs which
+	 * are not compatible with each other, per {@link #isCompatiblePartition(RequestPartitionId, RequestPartitionId)}.
+	 */
+	@Beta
+	default boolean containsIncompatiblePartitions(RequestPartitionId theRequestPartitionId) {
+		return false;
 	}
 
 	interface IExecutionBuilder extends TransactionOperations {
@@ -132,7 +144,6 @@ public interface IHapiTransactionService {
 				return this;
 			}
 		}
-		;
 
 		/**
 		 * @deprecated Use {@link TransactionDetails#addRollbackUndoAction(Runnable)} instead
@@ -149,23 +160,29 @@ public interface IHapiTransactionService {
 		/**
 		 * Read query path.
 		 */
-		default <T> T read(Callable<T> theCallback) {
-			return execute(theCallback);
-		}
+		<T> T read(IExecutionCallable<T> theCallback);
 
 		/**
 		 * Search for open Stream.
 		 * The Stream may not be readable outside an outermost transaction.
 		 */
-		default <T> Stream<T> search(Callable<Stream<T>> theCallback) {
-			return execute(theCallback);
-		}
+		<T> Stream<T> search(IExecutionCallable<Stream<T>> theCallback);
 
 		/**
 		 * Search for concrete List.
 		 */
-		default <T> List<T> searchList(Callable<List<T>> theCallback) {
-			return execute(theCallback);
-		}
+		<T> List<T> searchList(IExecutionCallable<List<T>> theCallback);
+
+		/**
+		 * Execute a partition-specific action with no return result
+		 *
+		 * @since 8.10.0
+		 */
+		void executeWithoutResult(IExecutionCallable<Void> theCallback);
+	}
+
+	interface IExecutionCallable<T> {
+
+		T call(RequestPartitionId theRequestPartition);
 	}
 }

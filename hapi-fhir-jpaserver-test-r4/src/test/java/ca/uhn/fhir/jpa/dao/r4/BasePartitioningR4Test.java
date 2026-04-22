@@ -1,11 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
-import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionId;
-import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionIds;
-import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionNames;
-import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -37,9 +32,17 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionId;
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionIds;
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionNames;
+import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
@@ -63,7 +66,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	private boolean myRegisteredSearchParamValidatingInterceptor;
 
 	@AfterEach
-	public void after() {
+	protected void after() {
 		assertNoRemainingPartitionIds();
 
 		PartitionSettings defaultPartitionSettings = new PartitionSettings();
@@ -73,8 +76,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionSettings.setPartitioningEnabled(defaultPartitionSettings.isPartitioningEnabled());
 		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultPartitionSettings.getAllowReferencesAcrossPartitions());
 		myPartitionSettings.setDefaultPartitionId(defaultPartitionSettings.getDefaultPartitionId());
+		myPartitionSettings.setUnnamedPartitionMode(defaultPartitionSettings.isUnnamedPartitionMode());
 
-		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
+		unregisterPartitionInterceptor();
 
 		myStorageSettings.setIndexMissingFields(defaultStorageSettings.getIndexMissingFields());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaultStorageSettings.isAutoCreatePlaceholderReferenceTargets());
@@ -86,13 +90,17 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		}
 	}
 
+	protected void unregisterPartitionInterceptor() {
+		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
+	}
+
 	protected void assertNoRemainingPartitionIds() {
 		myPartitionInterceptor.assertNoRemainingIds();
 	}
 
 	@Override
 	@BeforeEach
-	public void before() throws Exception {
+	protected void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
@@ -141,6 +149,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Override
+	@AfterEach
 	public void afterPurgeDatabase() {
 		super.afterPurgeDatabase();
 
@@ -155,7 +164,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 	protected void createUniqueComboSp() {
 		addNextTargetPartitionForCreateWithIdDefaultPartition();
-		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-gender");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
@@ -166,7 +174,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		mySearchParameterDao.update(sp, mySrd);
 
 		addNextTargetPartitionForCreateWithIdDefaultPartition();
-		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-family");
 		sp.setType(Enumerations.SearchParamType.STRING);
@@ -200,7 +207,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 	protected void createNonUniqueComboSp() {
 		addNextTargetPartitionForCreateWithIdDefaultPartition();
-		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-family");
 		sp.setType(Enumerations.SearchParamType.STRING);
@@ -211,7 +217,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		mySearchParameterDao.update(sp, mySrd);
 
 		addNextTargetPartitionForCreateWithIdDefaultPartition();
-		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-managingorg");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
@@ -350,6 +355,11 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		addNextTargetPartitionForUpdate(fromPartitionId(thePartitionId));
 	}
 
+	protected RequestPartitionId withPartitionNames(String... thePartitionNames){
+		Validate.notNull(thePartitionNames);
+		Validate.isTrue(thePartitionNames.length > 0);
+		return fromPartitionNames(thePartitionNames);
+	}
 
 	protected void addNextTargetPartitionsForRead(Integer... thePartitionId) {
 		Validate.notNull(thePartitionId, "thePartitionId must not be null");
@@ -402,7 +412,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	@Interceptor
 	public static class MyReadWriteInterceptor extends MyWriteInterceptor {
 
-
 		private final List<RequestPartitionId> myReadRequestPartitionIds = new ArrayList<>();
 
 		public void addNextIterceptorReadResult(RequestPartitionId theRequestPartitionId) {
@@ -414,12 +423,20 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		public RequestPartitionId partitionIdentifyRead(ServletRequestDetails theRequestDetails,
 																		ReadPartitionIdRequestDetails theDetails) {
 
+			if (theDetails.getResourceType() != null) {
+				String resourceType = theDetails.getResourceType();
+				RequestPartitionId partitionIdForType = getRequestPartitionIdForResourceType(resourceType);
+				if (partitionIdForType != null) {
+					return partitionIdForType;
+				}
+			}
+
 			// Just to be nice, figure out the first line in the stack that isn't a part of the
 			// partitioning or interceptor infrastructure, just so it's obvious who is asking
 			// for a partition ID
 			String stack = getCallerStackLine();
 
-			assertThat(myReadRequestPartitionIds).describedAs("read partition ids").isNotEmpty();
+			assertThat(myReadRequestPartitionIds).describedAs("read partition ids for type[" + theDetails.getResourceType() + "]").isNotEmpty();
 			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);
 			ourLog.info("Returning partition {} for read at: {}", retVal, stack);
 			return retVal;
@@ -441,18 +458,15 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	@Nonnull
 	private static String getCallerStackLine() {
 		String stack;
-		try {
-			throw new Exception();
-		} catch (Exception e) {
-			stack = StackTraceHelper.getStackAsString(e);
-			stack = Arrays.stream(stack.split("\\n"))
-				.filter(t->t.contains("ca.uhn.fhir"))
-				.filter(t->!t.toLowerCase().contains("interceptor"))
-				.filter(t->!t.toLowerCase().contains("partitionhelper"))
-				.filter(t->!t.contains("Test"))
-				.findFirst()
-				.orElse("UNKNOWN");
-		}
+
+		stack = StackTraceHelper.getStackAsString(new Exception());
+		stack = Arrays.stream(stack.split("\\n"))
+			.filter(t -> t.contains("ca.uhn.fhir"))
+			.filter(t -> !t.toLowerCase().contains("interceptor"))
+			.filter(t -> !t.toLowerCase().contains("partitionhelper"))
+			.filter(t -> !t.contains("Test"))
+			.findFirst()
+			.orElse("UNKNOWN");
 		return stack;
 	}
 
@@ -460,19 +474,39 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	public static class MyWriteInterceptor {
 
 		private final List<RequestPartitionId> myCreateRequestPartitionIds = new ArrayList<>();
+		protected final Map<String, RequestPartitionId> myTypeToPartitionId = new HashMap<>();
 
 		public void addNextInterceptorCreateResult(RequestPartitionId theRequestPartitionId) {
 			myCreateRequestPartitionIds.add(theRequestPartitionId);
+		}
+
+		public void addTypeToPartitionId(String theType, RequestPartitionId thePartitionId) {
+			myTypeToPartitionId.put(theType, thePartitionId);
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 			assertNotNull(theResource);
 			String stack = getCallerStackLine();
+
+			String resourceType = FhirContext.forR4Cached().getResourceType(theResource);
+			RequestPartitionId partitionIdForType = getRequestPartitionIdForResourceType(resourceType);
+			if (partitionIdForType != null) {
+				return partitionIdForType;
+			}
+
 			assertThat(myCreateRequestPartitionIds).describedAs("create partitions").isNotEmpty();
 			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
 			ourLog.info("Returning partition [{}] for create of resource {} with date {}: {}", retVal, theResource, retVal.getPartitionDate(), stack);
 			return retVal;
+		}
+
+		protected RequestPartitionId getRequestPartitionIdForResourceType(String resourceType) {
+			RequestPartitionId partitionIdForType = myTypeToPartitionId.get(resourceType);
+			if (partitionIdForType == null) {
+				partitionIdForType = myTypeToPartitionId.get("*");
+			}
+			return partitionIdForType;
 		}
 
 		public void assertNoRemainingIds() {
@@ -481,6 +515,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 		public void clearPartitions() {
 			myCreateRequestPartitionIds.clear();
+			myTypeToPartitionId.clear();
 		}
 	}
 }

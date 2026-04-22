@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7616
+jira: SMILE-11433
+title: "Previously, terminology server validations would fail if the coding system was missing from the coding in the request.
+Now, we ask the server to attempt to infer the coding system if it is missing."

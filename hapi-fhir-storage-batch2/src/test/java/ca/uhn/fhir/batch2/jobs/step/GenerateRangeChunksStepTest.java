@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.step;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
@@ -14,6 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -21,6 +23,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,14 +32,18 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class GenerateRangeChunksStepTest {
 
-	private final GenerateRangeChunksStep<PartitionedUrlJobParameters> myStep = new GenerateRangeChunksStep<>();
+	private GenerateRangeChunksStep<PartitionedUrlJobParameters> myStep;
+
 	@Mock
 	private StepExecutionDetails<PartitionedUrlJobParameters, VoidModel> myStepExecutionDetails;
 	@Mock
 	private IJobDataSink<ChunkRangeJson> myJobDataSink;
+	@Mock
+	private IJobPartitionProvider myJobPartitionProvider;
 
 	@BeforeEach
 	void setUp() {
+		myStep = new GenerateRangeChunksStep<>(myJobPartitionProvider);
 	}
 
 	@AfterEach
@@ -63,6 +71,9 @@ public class GenerateRangeChunksStepTest {
 		PartitionedUrlJobParameters parameters = new PartitionedUrlJobParameters();
 		thePartitionedUrls.forEach(parameters::addPartitionedUrl);
 
+		if (!thePartitionedUrls.isEmpty()) {
+			when(myJobPartitionProvider.toChunkRanges(any(), any(), any())).thenCallRealMethod();
+		}
 		when(myStepExecutionDetails.getParameters()).thenReturn(parameters);
 		myStep.run(myStepExecutionDetails, myJobDataSink);
 
@@ -81,7 +92,11 @@ public class GenerateRangeChunksStepTest {
 				PartitionedUrl partitionedUrl = thePartitionedUrls.get(i);
 				ChunkRangeJson chunkRangeJson = captor.getAllValues().get(i);
 				assertThat(chunkRangeJson.getUrl()).isEqualTo(partitionedUrl.getUrl());
-				assertThat(chunkRangeJson.getPartitionId()).isEqualTo(partitionedUrl.getRequestPartitionId());
+				if (partitionedUrl.getRequestPartitionId() != null) {
+					assertEquals(partitionedUrl.getRequestPartitionId(), chunkRangeJson.getPartitionId());
+				} else {
+					assertEquals(RequestPartitionId.allPartitions(), chunkRangeJson.getPartitionId());
+				}
 			}
 		}
 	}

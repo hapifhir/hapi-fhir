@@ -53,7 +53,7 @@
 
     create sequence SEQ_RESOURCE_HISTORY_ID start with 1 increment by 50;
 
-    create sequence SEQ_RESOURCE_ID start with 1 increment by 50;
+    create sequence SEQ_RESOURCE_ID start with 100 increment by 50;
 
     create sequence SEQ_RESPARMPRESENT_ID start with 1 increment by 50;
 

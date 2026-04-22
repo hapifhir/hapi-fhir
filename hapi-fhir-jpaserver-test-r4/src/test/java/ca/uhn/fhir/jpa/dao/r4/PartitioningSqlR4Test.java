@@ -8,8 +8,10 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -34,6 +36,7 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -60,6 +63,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -73,6 +77,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
@@ -92,6 +97,8 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionId;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static ca.uhn.fhir.util.IoUtil.runTimes;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
@@ -137,9 +144,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {
+		addNextInterceptorCreateResult(defaultPartition());
+		addNextInterceptorCreateResult(defaultPartition()); // one for search param validation
 
-		addNextTargetPartitionForCreateDefaultPartition();
-		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -314,8 +321,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartitionWithDate() {
-		addNextTargetPartitionForCreateDefaultPartition(myPartitionDate);
-		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
+		addNextInterceptorCreateResult(fromPartitionId(null, myPartitionDate));
+		addNextInterceptorCreateResult(fromPartitionId(null, myPartitionDate)); // one for search param validation
 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
@@ -865,6 +872,49 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	}
 
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', textBlock = """
+		1         | rt1_0.PARTITION_ID='1'
+		NULL      | rt1_0.PARTITION_ID is null
+		NULL,1    | rt1_0.PARTITION_ID in ('1') or rt1_0.PARTITION_ID is null
+		""")
+	public void testMetaAdd(String thePartitionId, String theExpectedSelectSql) {
+		// Setup
+		myPartitionSettings.setPartitioningEnabled(true);
+
+		switch (thePartitionId) {
+			case "1" -> {
+				addNextTargetPartitionForCreate(myPartitionId);
+				addNextTargetPartitionsForRead(myPartitionId);
+			}
+			case "NULL" -> {
+				addNextTargetPartitionForCreateDefaultPartition();
+				addNextTargetPartitionForReadDefaultPartition();
+			}
+			case "NULL,1" -> {
+				addNextTargetPartitionForCreateDefaultPartition();
+				addNextTargetPartitionsForRead(null, myPartitionId);
+			}
+			default -> throw new IllegalArgumentException("Invalid partition ID: " + thePartitionId);
+		};
+
+		createPatient(withId("A"), withTag("http://foo", "bar0"));
+
+		// Test
+		Meta metaAdd = new Meta();
+		metaAdd.addTag("http://foo", "bar1", null);
+		myCaptureQueriesListener.clear();
+		myPatientDao.metaAddOperation(new IdType("Patient/A"), metaAdd, mySrd, new TransactionDetails());
+
+		// Verify
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectSqlContains(0, theExpectedSelectSql)
+		);
+	}
+
+
+
 	@Test
 	public void testRead_PidId_AllPartitions() {
 		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
@@ -954,7 +1004,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			assertNoRemainingPartitionIds();
-			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
+			addNextInterceptorReadResult(withPartitionNames(PARTITION_1, PARTITION_2));
 			IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
 
@@ -968,7 +1018,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Two partitions including default - Found
 		{
 			myCaptureQueriesListener.clear();
-			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, JpaConstants.DEFAULT_PARTITION_NAME));
+			addNextInterceptorReadResult(withPartitionNames(PARTITION_1, JpaConstants.DEFAULT_PARTITION_NAME));
+
 			IdType gotId1;
 			try {
 				gotId1 = myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
@@ -987,7 +1038,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Two partitions - Not Found
 		{
-			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
+			addNextInterceptorReadResult(withPartitionNames(PARTITION_1, PARTITION_2));
 			try {
 				myPatientDao.read(patientId3, mySrd);
 				fail();
@@ -995,7 +1046,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				// good
 			}
 
-			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
+			addNextInterceptorReadResult(withPartitionNames(PARTITION_1, PARTITION_2));
 			try {
 				myPatientDao.read(patientIdNull, mySrd);
 				fail();
@@ -1796,6 +1847,47 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertThat(sql).as(sql).contains("PARTITION_ID = '2'");
 		assertThat(sql).as(sql).contains("PARTITION_ID IS NULL");
 	}
+
+
+	@Test
+	public void testSearch_Partitioned_AllPartitionsWithPartitionIds() {
+		// Setup
+		myPartitionSettings.setUnnamedPartitionMode(true);
+
+		// Use a fixed interceptor that picks multiple partitions for read
+		@Interceptor
+		class PartitionInterceptor {
+			@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+			public RequestPartitionId readPartition() {
+				return RequestPartitionId.allPartitionsWithPartitionIds(1, 2, 3);
+			}
+			@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
+			public RequestPartitionId createPartition() {
+				return RequestPartitionId.fromPartitionIds(2);
+			}
+		}
+		unregisterPartitionInterceptor();
+		registerInterceptor(new PartitionInterceptor());
+
+		createPatient(withId("A"), withActiveTrue());
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Patient.SP_ACTIVE, new TokenParam().setValue("true"));
+		IBundleProvider result = myPatientDao.search(map, newSrd());
+
+		// Verify
+		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactly("Patient/A");
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
+		assertThat(searchSql).contains("t0.HASH_VALUE = '7943378963388545453'");
+		assertThat(searchSql).doesNotContainIgnoringCase("PARTITION_ID IN");
+		assertThat(searchSql).doesNotContainIgnoringCase("PARTITION_ID =");
+	}
+
 
 	@Test
 	public void testSearch_DateParam_SearchAllPartitions() {
@@ -2677,7 +2769,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ourLog.info("Search SQL:\n{}", searchSql);
 		assertThat(searchSql).doesNotContain("PARTITION_ID IN");
 		assertThat(searchSql).doesNotContain("PARTITION_ID =");
-		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?family=FAM&gender=male'");
+		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?family=FAM&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale'");
 	}
 
 
@@ -2701,7 +2793,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
 		assertThat(searchSql).containsOnlyOnce( "PARTITION_ID = '1'");
-		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?family=FAM&gender=male'");
+		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?family=FAM&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale'");
 
 		// Same query, different partition
 		addNextTargetPartitionsForRead(2);
@@ -3194,22 +3286,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids).containsExactly(id.withVersion("2").getValue(), id.withVersion("1").getValue());
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(3);
-
-		// Resolve resource
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("SQL:{}", searchSql);
-		assertThat(countMatches(searchSql, "PARTITION_ID=")).as(searchSql).isEqualTo(1);
-
-		// Fetch history resource
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
-		ourLog.info("SQL:{}", searchSql);
-		assertThat(countMatches(searchSql, "rht1_0.PARTITION_ID=")).as(searchSql).isEqualTo(1);
-
-		// Fetch history resource
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
-		ourLog.info("SQL:{}", searchSql);
-		assertThat(countMatches(searchSql, "rht1_0.PARTITION_ID=")).as(searchSql.replace(" ", "").toUpperCase()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(2)
+				.commitCount(3)
+				.selectSqlContains(0, "PARTITION_ID='1'")
+				.selectSqlContains(1, "PARTITION_ID='1'")
+		);
 	}
 
 	@Test
@@ -3260,22 +3343,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(2, size);
 		assertThat(ids).containsExactly(id.withVersion("2").getValue(), id.withVersion("1").getValue());
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(3);
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(2)
+				.commitCount(3)
+				.selectSqlContains(0, "PARTITION_ID is null")
+				.selectSqlContains(1, "PARTITION_ID is null")
+		);
 
-		// Fetch history resource
-		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("SQL:{}", sql);
-		assertEquals(0, countMatches(sql, "PARTITION_ID="));
-
-		// Fetch history resource
-		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
-		ourLog.info("SQL:{}", sql);
-		assertEquals(0, countMatches(sql, "PARTITION_ID="));
-
-		// Fetch history resource
-		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
-		ourLog.info("SQL:{}", sql);
-		assertEquals(0, countMatches(sql, "PARTITION_ID="));
 	}
 
 	@Test

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public abstract class BaseSubscriptionSettings {
 	public static final String DEFAULT_EMAIL_FROM_ADDRESS = "noreply@unknown.com";
 	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
 	public static final String DEFAULT_RESTHOOK_ENDPOINTURL_VALIDATION_REGEX =
-			"((((http?|https?)://))([-%()_.!~*';/?:@&=+$,A-Za-z0-9])+)";
+			"https?://[-%()_.!~*';/?:@&=+$,#A-Za-z0-9\\[\\]]+";
 	public static final long DEFAULT_SUBMISSION_INTERVAL_IN_MS = 5000;
 
 	private final Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();

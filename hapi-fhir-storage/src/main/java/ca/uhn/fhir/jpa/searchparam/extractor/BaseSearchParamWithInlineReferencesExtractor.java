@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,12 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				if (matches.isEmpty()) {
 					Optional<IBasePersistedResource> placeholderOpt =
 							myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(
-									matchResourceType, nextRef, null, theRequestDetails, theTransactionDetails);
+									theResource,
+									matchResourceType,
+									nextRef,
+									null,
+									theRequestDetails,
+									theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
 						match = (T) placeholderOpt.get().getPersistentId();
 						newId = myFhirContext.getVersion().newIdType();

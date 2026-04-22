@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.MessageHandler;
 
+import java.time.Duration;
+
 /**
  * Adapt a Spring Messaging (JMS) Queue to {@link IChannelConsumer}
  *
@@ -44,13 +46,17 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	private MessageHandler myMessageHandler;
 	private boolean myClosed;
 
+	protected final Duration myRedeliveryDelay;
+
 	public SpringMessagingReceiverAdapter(
 			Class<? extends IMessage<T>> theMessageType,
 			ISpringMessagingChannelReceiver theSpringMessagingChannelReceiver,
-			IMessageListener<T> theMessageListener) {
+			IMessageListener<T> theMessageListener,
+			Duration theRedeliveryDelay) {
 		myMessageType = theMessageType;
 		mySpringMessagingChannelReceiver = theSpringMessagingChannelReceiver;
 		myMessageListener = theMessageListener;
+		myRedeliveryDelay = theRedeliveryDelay;
 	}
 
 	public void subscribe(MessageHandler theMessageHandler) {
@@ -139,5 +145,10 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	public void resume() {
 		checkState();
 		mySpringMessagingChannelReceiver.resume();
+	}
+
+	@Override
+	public Duration getAckTimeout() {
+		return myRedeliveryDelay;
 	}
 }

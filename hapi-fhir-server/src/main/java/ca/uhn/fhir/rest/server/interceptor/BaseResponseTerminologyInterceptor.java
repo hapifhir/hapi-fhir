@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,10 @@ public abstract class BaseResponseTerminologyInterceptor {
 	@Nonnull
 	protected List<IBaseResource> toListForProcessing(RequestDetails theRequestDetails, IBaseResource theResource) {
 
+		if (theResource == null) {
+			return Collections.emptyList();
+		}
+
 		switch (theRequestDetails.getRestOperationType()) {
 				// Don't apply to these operations
 			case ADD_TAGS:
@@ -58,9 +62,6 @@ public abstract class BaseResponseTerminologyInterceptor {
 			case GET_TAGS:
 			case GET_PAGE:
 			case GRAPHQL_REQUEST:
-			case EXTENDED_OPERATION_SERVER:
-			case EXTENDED_OPERATION_TYPE:
-			case EXTENDED_OPERATION_INSTANCE:
 			case CREATE:
 			case DELETE:
 			case TRANSACTION:
@@ -75,6 +76,9 @@ public abstract class BaseResponseTerminologyInterceptor {
 				return Collections.emptyList();
 
 				// Do apply to these operations
+			case EXTENDED_OPERATION_SERVER:
+			case EXTENDED_OPERATION_TYPE:
+			case EXTENDED_OPERATION_INSTANCE:
 			case HISTORY_INSTANCE:
 			case HISTORY_SYSTEM:
 			case HISTORY_TYPE:

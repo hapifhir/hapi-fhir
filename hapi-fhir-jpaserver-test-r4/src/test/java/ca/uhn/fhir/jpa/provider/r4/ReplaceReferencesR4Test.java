@@ -194,7 +194,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			false,
 			SMALL_BATCH_SIZE))
 			.isInstanceOf(PreconditionFailedException.class)
-			.hasMessage("HTTP 412 Precondition Failed: HAPI-2597: Number of resources with references to " + myLargeTestData.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
+			.hasMessage("HTTP 412 Precondition Failed: HAPI-2597: Number of resources with references to " + myLargeTestData.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronously by adding the HTTP Header 'Prefer: respond-async'.");
 	}
 
 	@Test
@@ -447,7 +447,7 @@ public class ReplaceReferencesR4Test extends BaseResourceProviderR4Test {
 			awaitJobCompletion(task);
 		}
 
-		List<IBaseResource> provenances = myTestHelper.searchProvenance(targetPatientId.toString());
+		List<IBaseResource> provenances = myTestHelper.searchProvenance(targetPatientId);
 		assertThat(provenances).isEmpty();
 	}
 

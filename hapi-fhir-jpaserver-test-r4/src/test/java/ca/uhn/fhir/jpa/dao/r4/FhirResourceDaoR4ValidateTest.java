@@ -58,6 +58,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -68,6 +69,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -1577,6 +1579,45 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Unrecognized profile uri");
 	}
 
+
+	@Test
+	public void validateResource_AgainstUnknownTargetProfile_FailValidation_EvenWhenNotErrorForUnknownProfiles() {
+		// ARRANGE
+		// setup to not error on unknown profiles
+		FhirInstanceValidator instanceValidator = AopTestUtils.getTargetObject(myValidatorModule);
+		var previousSetting = instanceValidator.isErrorForUnknownProfiles();
+		instanceValidator.setErrorForUnknownProfiles(false);
+
+		// Valid Observation resource that conforms to base R4 profile
+		Observation observation = new Observation();
+		observation.setStatus(ObservationStatus.FINAL);
+		observation.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
+
+		// ACT
+		final String targetProfile = "http://example.com/fhir/StructureDefinition/vitalsigns-2";
+		MethodOutcome outcome = myObservationDao.validate(
+			/* theResource */ observation,
+			/* theId */ null,
+			/* theRawResource */ null,
+			/* theEncoding */ EncodingEnum.JSON,
+			/* theMode */ ValidationModeEnum.CREATE,
+			/* theProfile */ targetProfile,
+			/* theRequestDetails */ mySrd
+		);
+		instanceValidator.setErrorForUnknownProfiles(previousSetting);
+
+		// ASSERT
+		assertNotNull(outcome);
+		assertInstanceOf(OperationOutcome.class, outcome.getOperationOutcome());
+		List<OperationOutcome.OperationOutcomeIssueComponent> issues = ((OperationOutcome) outcome.getOperationOutcome()).getIssue();
+		assertThat(issues.stream())
+			.anyMatch(i -> i.getSeverity() == OperationOutcome.IssueSeverity.ERROR
+				&& i.getExtensionString("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN)
+				&& i.getDiagnostics().contains(targetProfile)
+			);
+
+	}
+
 	@Test
 	public void validateResource_withMetaProfileWithVersion_validatesAsExpected() {
 		// setup
@@ -2202,6 +2243,35 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 
+	// Created by Claude Sonnet 4.6
+	@Test
+	void testValidateQuestionnaireResponseWithVersionedCanonicalReference() {
+		Questionnaire q = new Questionnaire();
+		q.setId("q-versioned");
+		q.setUrl("http://foo/q");
+		q.setVersion("1.0");
+		q.addItem().setLinkId("link0").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		myQuestionnaireDao.update(q, mySrd);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>aaa</div>");
+		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaireElement().setValue("http://foo/q|1.0");
+		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
+
+		MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
+		OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
+		String encoded = encode(oo);
+		ourLog.info(encoded);
+
+		// Validator will have resolved the questionnaire and validated against it. I will, however
+		// report a structural error (missing required 'link0'), but NOT a "could not be resolved" warning.
+		assertHasErrors(oo);
+		assertThat(encoded).doesNotContain("could not be resolved");
+		assertEquals("No response answer found for required item 'link0'", oo.getIssueFirstRep().getDiagnostics());
+	}
+
 	@Test
 	void testValidateCodeInUnknownCodeSystemWithRequiredBinding() throws IOException {
 		Condition condition = loadResourceFromClasspath(Condition.class, "/r4/code-in-unknown-system-with-required-binding.xml");
@@ -2493,6 +2563,399 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		unregisterInterceptor(myValidationMessageUnknownCodeSystemProcessingInterceptor);
 		myValidationMessageUnknownCodeSystemProcessingInterceptor = new ValidationMessageUnknownCodeSystemPostProcessingInterceptor(theSeverity);
 		registerInterceptor(myValidationMessageUnknownCodeSystemProcessingInterceptor);
+	}
+
+	// Created by Claude Opus 4.6
+	@Nested
+	class BundleInternalReferenceProfileMatchTest {
+
+		private static final String CUSTOM_HEALTHCARE_SERVICE_PROFILE_URL =
+			"http://example.com/fhir/StructureDefinition/custom-healthcareservice";
+		private static final String CUSTOM_ORG_AFFILIATION_PROFILE_URL =
+			"http://example.com/fhir/StructureDefinition/custom-organizationaffiliation";
+
+		/**
+		 * Creates a custom HealthcareService profile that requires name (min=1).
+		 * A HealthcareService without name will NOT conform to this profile.
+		 */
+		private void createCustomHealthcareServiceProfile() {
+			StructureDefinition sd = new StructureDefinition();
+			sd.setId("custom-healthcareservice");
+			sd.setUrl(CUSTOM_HEALTHCARE_SERVICE_PROFILE_URL);
+			sd.setName("CustomHealthcareService");
+			sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			sd.setType("HealthcareService");
+			sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/HealthcareService");
+			sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+			sd.setAbstract(false);
+			ElementDefinition nameElement = sd.getDifferential().addElement();
+			nameElement.setId("HealthcareService.name");
+			nameElement.setPath("HealthcareService.name");
+			nameElement.setMin(1);
+			myStructureDefinitionDao.update(sd, mySrd);
+		}
+
+		/**
+		 * Creates a custom OrganizationAffiliation profile that constrains healthcareService
+		 * reference to target only the custom HealthcareService profile.
+		 */
+		private void createCustomOrgAffiliationProfile() {
+			StructureDefinition sd = new StructureDefinition();
+			sd.setId("custom-organizationaffiliation");
+			sd.setUrl(CUSTOM_ORG_AFFILIATION_PROFILE_URL);
+			sd.setName("CustomOrganizationAffiliation");
+			sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			sd.setType("OrganizationAffiliation");
+			sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/OrganizationAffiliation");
+			sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+			sd.setAbstract(false);
+			ElementDefinition healthcareServiceElement = sd.getDifferential().addElement();
+			healthcareServiceElement.setId("OrganizationAffiliation.healthcareService");
+			healthcareServiceElement.setPath("OrganizationAffiliation.healthcareService");
+			healthcareServiceElement.addType(new ElementDefinition.TypeRefComponent()
+				.setCode("Reference")
+				.addTargetProfile(CUSTOM_HEALTHCARE_SERVICE_PROFILE_URL));
+			myStructureDefinitionDao.update(sd, mySrd);
+		}
+
+		/**
+		 * Creates a valid HealthcareService that is active but does NOT have a name.
+		 * This means it will NOT conform to the custom profile (which requires name min=1),
+		 * but it IS a valid base HealthcareService.
+		 */
+		private HealthcareService createHealthcareServiceWithoutName() {
+			HealthcareService svc = new HealthcareService();
+			svc.setId("svc1");
+			svc.setActive(true);
+			svc.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+			svc.getText().setDivAsString("<div>Healthcare Service</div>");
+			return svc;
+		}
+
+		/**
+		 * Creates an OrganizationAffiliation with meta.profile set to the custom profile,
+		 * referencing the given HealthcareService.
+		 *
+		 * @param theHealthcareServiceRef the reference to the HealthcareService (e.g., "HealthcareService/svc1")
+		 * @param theIncludeSpecialty if true, adds a specialty coding (triggers additional validation paths)
+		 */
+		private OrganizationAffiliation createOrgAffiliationReferencingService(
+				String theHealthcareServiceRef, boolean theIncludeSpecialty) {
+			OrganizationAffiliation orgAff = new OrganizationAffiliation();
+			orgAff.setId("orgaff1");
+			orgAff.getMeta().addProfile(CUSTOM_ORG_AFFILIATION_PROFILE_URL);
+			orgAff.setActive(true);
+			orgAff.addHealthcareService(new Reference(theHealthcareServiceRef));
+			if (theIncludeSpecialty) {
+				orgAff.addSpecialty(new CodeableConcept()
+					.addCoding(new Coding()
+						.setSystem("http://snomed.info/sct")
+						.setCode("394802001")
+						.setDisplay("General medicine")));
+			}
+			orgAff.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+			orgAff.getText().setDivAsString("<div>Organization Affiliation</div>");
+			return orgAff;
+		}
+
+		/**
+		 * Builds a batch bundle containing a HealthcareService and an OrganizationAffiliation.
+		 */
+		private Bundle buildBatchBundle(HealthcareService theService, OrganizationAffiliation theOrgAff) {
+			Bundle bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.BATCH);
+			bundle.addEntry()
+				.setResource(theService)
+				.setFullUrl("http://example.com/HealthcareService/svc1")
+				.getRequest()
+				.setUrl("HealthcareService/svc1")
+				.setMethod(Bundle.HTTPVerb.PUT);
+			bundle.addEntry()
+				.setResource(theOrgAff)
+				.setFullUrl("http://example.com/OrganizationAffiliation/orgaff1")
+				.getRequest()
+				.setUrl("OrganizationAffiliation/orgaff1")
+				.setMethod(Bundle.HTTPVerb.PUT);
+			return bundle;
+		}
+
+		/**
+		 * Extracts "Unable to find a profile match" errors from a validation OperationOutcome.
+		 */
+		private List<OperationOutcome.OperationOutcomeIssueComponent> extractProfileMatchErrors(
+				OperationOutcome theOutcome) {
+			return theOutcome.getIssue().stream()
+				.filter(issue -> issue.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
+				.filter(issue -> issue.getDiagnostics() != null
+					&& issue.getDiagnostics().contains("Unable to find a profile match"))
+				.collect(Collectors.toList());
+		}
+
+		/**
+		 * Primary reproduction test for SMILE-11707.
+		 * <p>
+		 * A custom IG defines a HealthcareService profile with name required.
+		 * An OrganizationAffiliation profile constrains healthcareService reference
+		 * to target that custom profile. A batch bundle contains a HealthcareService
+		 * (without name, so it does NOT conform to the custom profile) and an
+		 * OrganizationAffiliation that references it. The OrganizationAffiliation has
+		 * specialty set.
+		 * <p>
+		 * With the default IGNORE policy, no profile-match error should be produced
+		 * for bundle-internal references.
+		 */
+		@Test
+		void testValidateBundleWithCrossReferences_CustomProfileConstrainedTargetRef_ShouldNotProduceProfileMatchError() {
+			// Setup: create custom IG profiles
+			createCustomHealthcareServiceProfile();
+			createCustomOrgAffiliationProfile();
+
+			// Create a HealthcareService without name (does not conform to custom profile)
+			HealthcareService svc = createHealthcareServiceWithoutName();
+
+			// Create an OrganizationAffiliation WITH specialty (triggers additional validation paths)
+			OrganizationAffiliation orgAff =
+				createOrgAffiliationReferencingService("HealthcareService/svc1", true);
+
+			// Build and validate the batch bundle
+			Bundle bundle = buildBatchBundle(svc, orgAff);
+			String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+			MethodOutcome outcome = myBundleDao.validate(
+				bundle, null, encoded, EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
+			OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+
+			ourLog.info("Validation result: {}", encode(oo));
+
+			// Assert: no "Unable to find a profile match" errors should be produced.
+			// With the default IGNORE policy, bundle-internal references should respect
+			// the policy advisor and not perform profile matching on the target resource.
+			List<OperationOutcome.OperationOutcomeIssueComponent> profileMatchErrors =
+				extractProfileMatchErrors(oo);
+
+			assertThat(profileMatchErrors)
+				.as("Bundle validation should not produce 'Unable to find a profile match' errors "
+					+ "for internal references when the policy advisor default is IGNORE. "
+					+ "Actual errors: " + encode(oo))
+				.isEmpty();
+		}
+
+		/**
+		 * Adjacent test: Same scenario but WITHOUT specialty on OrganizationAffiliation.
+		 * Removing specialty has been observed to change validation behavior in some cases.
+		 */
+		@Test
+		void testValidateBundleWithCrossReferences_WithoutSpecialty_ShouldNotProduceProfileMatchError() {
+			// Setup: create custom IG profiles
+			createCustomHealthcareServiceProfile();
+			createCustomOrgAffiliationProfile();
+
+			// Create a HealthcareService without name (does not conform to custom profile)
+			HealthcareService svc = createHealthcareServiceWithoutName();
+
+			// Create an OrganizationAffiliation WITHOUT specialty
+			OrganizationAffiliation orgAff =
+				createOrgAffiliationReferencingService("HealthcareService/svc1", false);
+
+			// Build and validate the batch bundle
+			Bundle bundle = buildBatchBundle(svc, orgAff);
+			String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+			MethodOutcome outcome = myBundleDao.validate(
+				bundle, null, encoded, EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
+			OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+
+			ourLog.info("Without-specialty validation result: {}", encode(oo));
+
+			List<OperationOutcome.OperationOutcomeIssueComponent> profileMatchErrors =
+				extractProfileMatchErrors(oo);
+
+			assertThat(profileMatchErrors)
+				.as("Bundle validation without specialty should not produce profile match errors. "
+					+ "Actual: " + encode(oo))
+				.isEmpty();
+		}
+
+		/**
+		 * Adjacent test: Individual resource validation (not in a bundle).
+		 * When an OrganizationAffiliation references a HealthcareService outside a bundle,
+		 * the reference is EXTERNAL, so the policy advisor IS consulted and returns IGNORE (default).
+		 * No profile match error should be produced. This should PASS.
+		 */
+		@Test
+		void testValidateIndividualOrgAffiliation_ExternalReference_ShouldNotProduceProfileMatchError() {
+			// Setup: create custom IG profiles
+			createCustomHealthcareServiceProfile();
+			createCustomOrgAffiliationProfile();
+
+			// Store a HealthcareService without name so the reference can be resolved
+			HealthcareService svc = createHealthcareServiceWithoutName();
+			IFhirResourceDao<HealthcareService> healthcareServiceDao =
+				(IFhirResourceDao<HealthcareService>) myDaoRegistry.getResourceDao("HealthcareService");
+			healthcareServiceDao.update(svc, mySrd);
+
+			// Create an OrganizationAffiliation referencing the stored HealthcareService (external reference)
+			OrganizationAffiliation orgAff =
+				createOrgAffiliationReferencingService("HealthcareService/svc1", true);
+			orgAff.setId((String) null);
+
+			// Validate the OrganizationAffiliation individually (not in a bundle)
+			OperationOutcome oo = validateAndReturnOutcome(orgAff);
+			ourLog.info("Individual validation result: {}", encode(oo));
+
+			// With the default IGNORE policy for references, no profile-match error should appear
+			List<OperationOutcome.OperationOutcomeIssueComponent> profileMatchErrors =
+				extractProfileMatchErrors(oo);
+
+			assertThat(profileMatchErrors)
+				.as("Individual resource validation with external reference should not produce "
+					+ "profile match errors. Actual: " + encode(oo))
+				.isEmpty();
+		}
+
+		/**
+		 * Adjacent test: Bundle without custom IG profiles.
+		 * When resources in a bundle reference each other using base FHIR profiles only
+		 * (no custom profile constraining the target), no profile-match error should occur.
+		 * This should PASS.
+		 */
+		@Test
+		void testValidateBundleWithCrossReferences_NoCustomProfiles_ShouldPass() {
+			// Do NOT create custom profiles -- use base FHIR types only
+
+			HealthcareService svc = createHealthcareServiceWithoutName();
+
+			// OrganizationAffiliation without a custom profile
+			OrganizationAffiliation orgAff = new OrganizationAffiliation();
+			orgAff.setId("orgaff1");
+			orgAff.setActive(true);
+			orgAff.addHealthcareService(new Reference("HealthcareService/svc1"));
+			orgAff.addSpecialty(new CodeableConcept()
+				.addCoding(new Coding()
+					.setSystem("http://snomed.info/sct")
+					.setCode("394802001")
+					.setDisplay("General medicine")));
+			orgAff.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+			orgAff.getText().setDivAsString("<div>Organization Affiliation</div>");
+
+			Bundle bundle = buildBatchBundle(svc, orgAff);
+
+			String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+			MethodOutcome outcome = myBundleDao.validate(
+				bundle, null, encoded, EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
+			OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+
+			ourLog.info("No-custom-profile bundle validation: {}", encode(oo));
+
+			List<OperationOutcome.OperationOutcomeIssueComponent> profileMatchErrors =
+				extractProfileMatchErrors(oo);
+
+			assertThat(profileMatchErrors)
+				.as("Bundle without custom profiles should not produce profile match errors. "
+					+ "Actual: " + encode(oo))
+				.isEmpty();
+		}
+
+		/**
+		 * Adjacent test: Bundle where the OrganizationAffiliation constrains healthcareService
+		 * to the base HealthcareService profile. Since every HealthcareService conforms to the
+		 * base HealthcareService StructureDefinition, this should PASS.
+		 */
+		@Test
+		void testValidateBundleWithCrossReferences_BaseProfileConstraint_ShouldPass() {
+			// Create an OrganizationAffiliation profile that constrains healthcareService
+			// to the BASE HealthcareService profile
+			StructureDefinition sd = new StructureDefinition();
+			sd.setId("base-ref-orgaff");
+			sd.setUrl("http://example.com/fhir/StructureDefinition/base-ref-orgaff");
+			sd.setName("BaseRefOrgAffiliation");
+			sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			sd.setType("OrganizationAffiliation");
+			sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/OrganizationAffiliation");
+			sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+			sd.setAbstract(false);
+			ElementDefinition healthcareServiceElement = sd.getDifferential().addElement();
+			healthcareServiceElement.setId("OrganizationAffiliation.healthcareService");
+			healthcareServiceElement.setPath("OrganizationAffiliation.healthcareService");
+			healthcareServiceElement.addType(new ElementDefinition.TypeRefComponent()
+				.setCode("Reference")
+				.addTargetProfile("http://hl7.org/fhir/StructureDefinition/HealthcareService"));
+			myStructureDefinitionDao.update(sd, mySrd);
+
+			HealthcareService svc = createHealthcareServiceWithoutName();
+
+			OrganizationAffiliation orgAff = new OrganizationAffiliation();
+			orgAff.setId("orgaff1");
+			orgAff.getMeta().addProfile("http://example.com/fhir/StructureDefinition/base-ref-orgaff");
+			orgAff.setActive(true);
+			orgAff.addHealthcareService(new Reference("HealthcareService/svc1"));
+			orgAff.addSpecialty(new CodeableConcept()
+				.addCoding(new Coding()
+					.setSystem("http://snomed.info/sct")
+					.setCode("394802001")
+					.setDisplay("General medicine")));
+			orgAff.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+			orgAff.getText().setDivAsString("<div>Organization Affiliation</div>");
+
+			Bundle bundle = buildBatchBundle(svc, orgAff);
+
+			String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+			MethodOutcome outcome = myBundleDao.validate(
+				bundle, null, encoded, EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
+			OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+
+			ourLog.info("Base-profile-constraint bundle validation: {}", encode(oo));
+
+			List<OperationOutcome.OperationOutcomeIssueComponent> profileMatchErrors =
+				extractProfileMatchErrors(oo);
+
+			assertThat(profileMatchErrors)
+				.as("Bundle with base profile constraint should not produce profile match errors. "
+					+ "Actual: " + encode(oo))
+				.isEmpty();
+		}
+
+		/**
+		 * Adjacent test: Bundle with CHECK_VALID policy explicitly set via ValidationSettings.
+		 * When the user explicitly opts into CHECK_VALID for local references, the validator
+		 * should correctly report profile-match errors for internal references where the
+		 * referenced resource does not conform to the constrained target profile.
+		 * This test should FAIL validation (i.e. validation SHOULD produce errors -- that's desired).
+		 */
+		@Test
+		void testValidateBundleWithCrossReferences_CheckValidPolicyExplicitlySet_ShouldProduceProfileMatchError() {
+			// Explicitly set CHECK_VALID for local references
+			myValidationSettings.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_VALID);
+
+			// Setup: create custom IG profiles
+			createCustomHealthcareServiceProfile();
+			createCustomOrgAffiliationProfile();
+
+			// Create a HealthcareService without name (does not conform to custom profile)
+			HealthcareService svc = createHealthcareServiceWithoutName();
+
+			// Create an OrganizationAffiliation with specialty (triggers the profile match check)
+			OrganizationAffiliation orgAff =
+				createOrgAffiliationReferencingService("HealthcareService/svc1", true);
+
+			// Build and validate the batch bundle
+			Bundle bundle = buildBatchBundle(svc, orgAff);
+			String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+			MethodOutcome outcome = myBundleDao.validate(
+				bundle, null, encoded, EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
+			OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+
+			ourLog.info("CHECK_VALID bundle validation: {}", encode(oo));
+
+			// With CHECK_VALID explicitly set, profile match errors SHOULD be produced
+			// because the HealthcareService doesn't conform to the custom profile (missing name)
+			List<OperationOutcome.OperationOutcomeIssueComponent> profileMatchErrors =
+				extractProfileMatchErrors(oo);
+
+			assertThat(profileMatchErrors)
+				.as("With CHECK_VALID policy, bundle validation SHOULD produce "
+					+ "'Unable to find a profile match' errors for internal references "
+					+ "where the target does not conform. Actual: " + encode(oo))
+				.isNotEmpty();
+		}
 	}
 
 }

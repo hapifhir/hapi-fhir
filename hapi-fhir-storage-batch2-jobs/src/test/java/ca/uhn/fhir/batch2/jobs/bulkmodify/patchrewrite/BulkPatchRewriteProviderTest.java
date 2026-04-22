@@ -1,23 +1,23 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.patchrewrite;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchProviderTest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchProviderTest.createTestPollForStatusParameters;
@@ -65,6 +64,8 @@ class BulkPatchRewriteProviderTest {
 	static HttpClientExtension ourHttpClient = new HttpClientExtension();
 	@Mock
 	private IJobCoordinator myJobCoordinator;
+	@Mock
+	private IJobPartitionProvider myJobPartitionProvider;
 	@Captor
 	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestCaptor;
 
@@ -72,6 +73,8 @@ class BulkPatchRewriteProviderTest {
 	void beforeEach() {
 		ourProvider.setContextForUnitTest(ourCtx);
 		ourProvider.setJobCoordinatorForUnitTest(myJobCoordinator);
+		ourProvider.setPartitionSettingsForUnitTest(new PartitionSettings());
+		ourProvider.setJobPartitionProviderForUnitTest(myJobPartitionProvider);
 	}
 
 	@Test
@@ -80,6 +83,7 @@ class BulkPatchRewriteProviderTest {
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 		startResponse.setInstanceId(MY_INSTANCE_ID);
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+		when(myJobPartitionProvider.getPartitionedUrls(any(), any())).thenCallRealMethod();
 
 		Parameters patch = new Parameters();
 		patch.setId("PATCH");

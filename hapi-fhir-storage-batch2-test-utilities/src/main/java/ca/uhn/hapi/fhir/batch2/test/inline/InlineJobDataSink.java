@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 specification tests
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@
 package ca.uhn.hapi.fhir.batch2.test.inline;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IWarningProcessor;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.model.api.IModelJson;
+
 import java.util.List;
 
 /**
@@ -44,11 +44,6 @@ class InlineJobDataSink<OT extends IModelJson> implements IJobDataSink<OT> {
 
     @Override
     public void recoveredError(String theMessage) {
-		// not implemented
-	}
-
-    @Override
-    public void setWarningProcessor(IWarningProcessor theWarningProcessor) {
 		// not implemented
 	}
 }

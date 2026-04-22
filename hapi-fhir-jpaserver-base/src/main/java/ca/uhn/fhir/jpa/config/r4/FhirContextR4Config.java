@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,14 @@ public class FhirContextR4Config {
 		return retVal;
 	}
 
-	public static FhirContext configureFhirContext(FhirContext theFhirContext) {
+	/**
+	 * Configures the default parser options for a FhirContext based on the FHIR version.
+	 * This method sets up the paths where version references should be preserved
+	 * (not stripped) during serialization.
+	 *
+	 * @param theFhirContext the FhirContext to configure
+	 */
+	public static void configureDefaultParserOptions(FhirContext theFhirContext) {
 		// Don't strip versions in some places
 		ParserOptions parserOptions = theFhirContext.getParserOptions();
 		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
@@ -57,6 +64,10 @@ public class FhirContextR4Config {
 		} else {
 			parserOptions.setDontStripVersionsFromReferencesAtPaths(DEFAULT_PRESERVE_VERSION_REFS_R4_AND_LATER);
 		}
+	}
+
+	public static FhirContext configureFhirContext(FhirContext theFhirContext) {
+		configureDefaultParserOptions(theFhirContext);
 
 		// We use this context to create subscription deliveries and that kind of thing. It doesn't
 		// make much sense to let the HTTP client pool be a blocker since we have delivery queue

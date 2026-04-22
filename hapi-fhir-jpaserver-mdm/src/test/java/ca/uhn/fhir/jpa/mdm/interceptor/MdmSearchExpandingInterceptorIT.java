@@ -17,8 +17,11 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -36,6 +39,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ContextConfiguration(classes = {MdmHelperConfig.class})
 public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
@@ -264,6 +268,33 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		map.add(Observation.SP_SUBJECT, new ReferenceParam("Patient/" + id).setMdmExpand(true));
 		IBundleProvider search = myObservationDao.search(map, mySrd);
 		assertEquals(1, search.size());
+	}
+
+	@Test
+	public void testMdmExpansionOnChainedReferenceSearch_throwException() throws InterruptedException {
+		// setup
+		myStorageSettings.setAllowMdmExpansion(true);
+
+		Patient patient = buildResource(("Patient"), withIdentifier("http://foo.bar/test", "abc"));
+		String pid = myMdmHelper.executeWithLatch(() -> myMdmHelper.doCreateResource(patient, true)).getId().getIdPart();
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		allergy.setPatient(new Reference("Patient/" + pid));
+		doCreateResource(allergy);
+
+		SearchParameterMap paramMap = new SearchParameterMap();
+		ReferenceParam param = new ReferenceParam("identifier", "http://foo.bar/test|abc");
+		param.setValueAsQueryToken(myFhirContext, "patient", ":Patient.identifier:mdm", "http://foo.bar/test|abc");
+		paramMap.add("patient", param);
+
+		// execute
+		InvalidRequestException ex = assertThrows(InvalidRequestException.class, () -> {
+			myAllergyIntoleranceDao.search(paramMap, mySrd);
+		});
+
+		// Verify
+		assertThat(ex).isNotNull();
+		assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.SC_BAD_REQUEST);
+		assertThat(ex.getMessage()).isEqualTo("HAPI-2822: MDM Expansion can not be applied to chained reference search.");
 	}
 
 	private Observation createObservationWithSubject(String thePatientId) {

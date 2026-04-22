@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -245,7 +245,7 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 
 	@Override
 	public JpaPid getGoldenResourcePersistenceId() {
-		return JpaPid.fromId(myGoldenResourcePid);
+		return JpaPid.fromId(myGoldenResourcePid, myGoldenResourcePartitionId);
 	}
 
 	@Override
@@ -260,7 +260,7 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 
 	@Override
 	public JpaPid getSourcePersistenceId() {
-		return JpaPid.fromId(mySourcePid);
+		return JpaPid.fromId(mySourcePid, mySourcePartitionId);
 	}
 
 	@Override
@@ -465,6 +465,8 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 				.append("myScore", myScore)
 				.append("myRuleCount", myRuleCount)
 				.append("myPartitionId", getPartitionId())
+				.append("mySourcePartitionId", mySourcePartitionId)
+				.append("myGoldenResourcePartitionId", myGoldenResourcePartitionId)
 				.toString();
 	}
 

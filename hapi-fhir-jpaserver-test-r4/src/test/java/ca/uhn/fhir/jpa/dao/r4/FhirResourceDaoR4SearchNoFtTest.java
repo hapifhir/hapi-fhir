@@ -61,6 +61,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -1460,7 +1461,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 				Class<ResourceLink> type = ResourceLink.class;
 				List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
 				ourLog.info(toStringMultiline(results));
@@ -2130,6 +2131,92 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactlyInAnyOrder(id1);
 			assertEquals(1, found.size().intValue());
 		}
+	}
+
+	@Test
+	void testSearchDate_TimingValueUsingPeriod_StartOnly_WithAutoCreatedEnd() {
+		// Create a ServiceRequest with occurrenceTiming having boundsPeriod with start only
+		ServiceRequest p1 = new ServiceRequest();
+		p1.setOccurrence(new Timing());
+		p1.getOccurrenceTiming().getRepeat().setBounds(new Period());
+		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getStartElement().setValueAsString("2018-01-01");
+		// Trigger auto-creation of the end element (creates DateTimeType with null value)
+		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getEndElement();
+		String id1 = myServiceRequestDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map = new SearchParameterMap()
+			.setLoadSynchronous(true)
+			.add(ServiceRequest.SP_OCCURRENCE, new DateParam("lt2019"));
+		IBundleProvider found = myServiceRequestDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactlyInAnyOrder(id1);
+	}
+
+	@Test
+	void testSearchDate_TimingValueUsingPeriod_EndOnly_WithAutoCreatedStart() {
+		// Symmetric case: end set, start auto-created with null value
+		ServiceRequest p1 = new ServiceRequest();
+		p1.setOccurrence(new Timing());
+		p1.getOccurrenceTiming().getRepeat().setBounds(new Period());
+		// Trigger auto-creation of the start element (creates DateTimeType with null value)
+		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getStartElement();
+		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getEndElement().setValueAsString("2019-12-31");
+		String id1 = myServiceRequestDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map = new SearchParameterMap()
+			.setLoadSynchronous(true)
+			.add(ServiceRequest.SP_OCCURRENCE, new DateParam("lt2020"));
+		IBundleProvider found = myServiceRequestDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactlyInAnyOrder(id1);
+	}
+
+	@Test
+	void testSearchDate_TimingValueUsingPeriod_StartOnly_CleanPeriod() {
+		// Create a ServiceRequest with occurrenceTiming having boundsPeriod with start only,
+		// without triggering auto-creation of the end element
+		ServiceRequest p1 = new ServiceRequest();
+		p1.setOccurrence(new Timing());
+		p1.getOccurrenceTiming().getRepeat().setBounds(new Period());
+		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getStartElement().setValueAsString("2018-01-01");
+		// Do NOT call getEndElement() - end field remains null
+		String id1 = myServiceRequestDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map = new SearchParameterMap()
+			.setLoadSynchronous(true)
+			.add(ServiceRequest.SP_OCCURRENCE, new DateParam("lt2019"));
+		IBundleProvider found = myServiceRequestDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactlyInAnyOrder(id1);
+	}
+
+	@Test
+	void testSearchDate_TimingValueUsingEventDatesOnly() {
+		// Create a ServiceRequest with occurrenceTiming having only event dates (no bounds)
+		ServiceRequest p1 = new ServiceRequest();
+		p1.setOccurrence(new Timing());
+		p1.getOccurrenceTiming().addEvent(new Date(1514764800000L)); // 2018-01-01
+		String id1 = myServiceRequestDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map = new SearchParameterMap()
+			.setLoadSynchronous(true)
+			.add(ServiceRequest.SP_OCCURRENCE, new DateParam("lt2019"));
+		IBundleProvider found = myServiceRequestDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactlyInAnyOrder(id1);
+	}
+
+	@Test
+	void testSearchDate_TimingValueUsingPeriod_EmptyBoundsPeriod() {
+		// Create a ServiceRequest with occurrenceTiming having empty boundsPeriod (no start, no end)
+		ServiceRequest p1 = new ServiceRequest();
+		p1.setOccurrence(new Timing());
+		p1.getOccurrenceTiming().getRepeat().setBounds(new Period());
+		// Neither start nor end set - both accessors return empty lists
+		myServiceRequestDao.create(p1);
+
+		// With no indexable dates, the resource should not match a date search
+		SearchParameterMap map = new SearchParameterMap()
+			.setLoadSynchronous(true)
+			.add(ServiceRequest.SP_OCCURRENCE, new DateParam("lt2019"));
+		IBundleProvider found = myServiceRequestDao.search(map);
+		assertThat(toUnqualifiedVersionlessIdValues(found)).isEmpty();
 	}
 
 	@Test
@@ -5570,8 +5657,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(1, outcome.sizeOrThrowNpe());
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertEquals(3, countMatches(searchSql, "JOIN"));
+		assertEquals(2, countMatches(searchSql, "JOIN"));
 		assertEquals(1, countMatches(searchSql, "SELECT"));
+		assertEquals(1, countMatches(searchSql, "HFJ_RES_LINK"), searchSql);
 
 	}
 

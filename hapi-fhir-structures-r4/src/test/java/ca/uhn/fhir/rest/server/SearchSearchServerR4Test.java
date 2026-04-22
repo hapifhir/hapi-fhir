@@ -124,6 +124,29 @@ public class SearchSearchServerR4Test {
 		assertThat(responseContent).contains("Search ID &quot;AAA&quot; does not exist and may have expired");
   }
 
+  /**
+   * Verify that POST /Patient/_search?_id=aaa correctly parses the query string
+   * parameters. Previously, query string params were only parsed for GET requests,
+   * so POST requests with query string params (no form body) had their params silently
+   * ignored.
+   */
+  @Test
+  void testSearchByPostWithParamsOnlyInQueryString() throws Exception {
+    HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search?_id=aaa");
+
+    CloseableHttpResponse status = ourClient.execute(httpPost);
+    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
+    IOUtils.closeQuietly(status.getEntity().getContent());
+    ourLog.info(responseContent);
+
+    assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+    assertThat(bundle.getEntry()).hasSize(1);
+
+    Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
+    assertThat(p.getNameFirstRep().getFamily()).isEqualTo("idaaa");
+  }
+
   @Test
   public void testOmitEmptyOptionalParam() throws Exception {
     HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=");

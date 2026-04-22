@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.ILastJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
@@ -80,6 +81,7 @@ public class WorkChunkProcessorTest {
 	private <OT extends IModelJson> JobDefinitionStep<TestJobParameters, StepInputData, OT> mockOutWorkCursor(
 		StepType theStepType,
 		JobWorkCursor<TestJobParameters, StepInputData, OT> theWorkCursor,
+		WorkChunk theWorkChunk,
 		boolean theMockOutTargetStep,
 		boolean mockFinalWorkCursor
 	) {
@@ -97,7 +99,7 @@ public class WorkChunkProcessorTest {
 		when(theWorkCursor.getCurrentStep())
 			.thenReturn(step);
 
-		myDataSink = spy(new TestDataSink<>(theWorkCursor));
+		myDataSink = spy(new TestDataSink<>(theWorkCursor, theWorkChunk));
 		if (theMockOutTargetStep) {
 			when(myDataSink.getTargetStep())
 				.thenReturn(step);
@@ -133,7 +135,7 @@ public class WorkChunkProcessorTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, chunk, true, false);
 
 		// when
 		when(myNonReductionStep.run(
@@ -178,7 +180,7 @@ public class WorkChunkProcessorTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, VoidModel> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, VoidModel> step = mockOutWorkCursor(StepType.FINAL, workCursor, true, true);
+		JobDefinitionStep<TestJobParameters, StepInputData, VoidModel> step = mockOutWorkCursor(StepType.FINAL, workCursor, chunk, true, true);
 
 		// when
 		when(workCursor.isFinalStep())
@@ -236,7 +238,7 @@ public class WorkChunkProcessorTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, chunk, true, false);
 
 		// when
 		when(myNonReductionStep.run(any(), any()))
@@ -294,7 +296,7 @@ public class WorkChunkProcessorTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, chunk, true, false);
 
 		// when
 		when(myNonReductionStep.run(any(), any()))
@@ -430,17 +432,18 @@ public class WorkChunkProcessorTest {
 	private class TestWorkChunkProcessor extends WorkChunkProcessor {
 
 		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender) {
-			super(thePersistence, theSender, new NonTransactionalHapiTransactionService());
+			super(thePersistence, theSender, new NonTransactionalHapiTransactionService(), mock(IJobStepExecutionServices.class));
 		}
 
 		@Override
 		protected <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> BaseDataSink<PT, IT, OT> getDataSink(
 			JobWorkCursor<PT, IT, OT> theCursor,
+			WorkChunk theWorkChunk,
 			JobDefinition<PT> theJobDefinition,
 			String theInstanceId
 		) {
 			// cause we don't want to test the actual DataSink class here!
-			myDataSink.setDataSink(super.getDataSink(theCursor, theJobDefinition, theInstanceId));
+			myDataSink.setDataSink(super.getDataSink(theCursor, theWorkChunk, theJobDefinition, theInstanceId));
 			return (BaseDataSink<PT, IT, OT>) myDataSink;
 		}
 	}
@@ -458,8 +461,9 @@ public class WorkChunkProcessorTest {
 
 		private BaseDataSink<?, ?, ?> myActualDataSink;
 
-		TestDataSink(JobWorkCursor<TestJobParameters, StepInputData, OT> theWorkCursor) {
+		TestDataSink(JobWorkCursor<TestJobParameters, StepInputData, OT> theWorkCursor, WorkChunk theWorkChunk) {
 			super(INSTANCE_ID,
+				theWorkChunk,
 				theWorkCursor);
 		}
 

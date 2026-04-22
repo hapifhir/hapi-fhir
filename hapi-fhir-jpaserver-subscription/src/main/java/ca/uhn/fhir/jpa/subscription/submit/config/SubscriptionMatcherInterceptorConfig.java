@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class SubscriptionMatcherInterceptorConfig {
 		return new SubscriptionMatcherInterceptor();
 	}
 
-	private boolean isSchedulingDisabledForTests() {
+	protected boolean isSchedulingDisabledForTests() {
 		String schedulingDisabled = myEnvironment.getProperty(SCHEDULING_DISABLED);
 		return "true".equals(schedulingDisabled);
 	}

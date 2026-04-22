@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryProvenancePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkForHasParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
@@ -91,6 +92,9 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class SearchQueryBuilder {
 
+	private static final String DEFAULT_ALIAS_PREFIX = DbSpec.DEFAULT_ALIAS_PREFIX;
+	private static final String CHILD_ALIAS_PREFIX = "s";
+
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryBuilder.class);
 	private final String myBindVariableSubstitutionBase;
 	private final ArrayList<Object> myBindVariableValues;
@@ -117,6 +121,7 @@ public class SearchQueryBuilder {
 	private int myNextNearnessColumnId = 0;
 	private DbColumn mySelectedResourceIdColumn;
 	private DbColumn mySelectedPartitionIdColumn;
+	private final TuplePredicateBuilder myTuplePredicateBuilder;
 
 	/**
 	 * Constructor
@@ -143,7 +148,8 @@ public class SearchQueryBuilder {
 				theCountQuery,
 				new ArrayList<>(),
 				thePartitionSettings.isPartitioningEnabled(),
-				theSelectResourceType);
+				theSelectResourceType,
+				DEFAULT_ALIAS_PREFIX);
 	}
 
 	/**
@@ -161,7 +167,8 @@ public class SearchQueryBuilder {
 			boolean theCountQuery,
 			ArrayList<Object> theBindVariableValues,
 			boolean theSelectPartitionId,
-			boolean theSelectResourceType) {
+			boolean theSelectResourceType,
+			String theAliasPrefix) {
 		myFhirContext = theFhirContext;
 		myStorageSettings = theStorageSettings;
 		myPartitionSettings = thePartitionSettings;
@@ -177,7 +184,7 @@ public class SearchQueryBuilder {
 			dialectIsMsSql = true;
 		}
 
-		mySpec = new DbSpec();
+		mySpec = new DbSpec(theAliasPrefix);
 		mySchema = mySpec.addDefaultSchema();
 		mySelect = new SelectQuery();
 
@@ -185,6 +192,11 @@ public class SearchQueryBuilder {
 		myBindVariableValues = theBindVariableValues;
 		mySelectPartitionId = theSelectPartitionId;
 		mySelectResourceType = theSelectResourceType;
+		myTuplePredicateBuilder = new TuplePredicateBuilder(this);
+	}
+
+	public TuplePredicateBuilder getTuplePredicateBuilder() {
+		return myTuplePredicateBuilder;
 	}
 
 	public FhirContext getFhirContext() {
@@ -322,16 +334,17 @@ public class SearchQueryBuilder {
 	 * Create a predicate builder for selecting on a REFERENCE search parameter
 	 */
 	public ResourceLinkPredicateBuilder createReferencePredicateBuilder(QueryStack theQueryStack) {
-		return mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
+		return mySqlBuilderFactory.resourceLinkIndexTable(theQueryStack, this);
 	}
 
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a resource link where the
 	 * source and target are reversed. This is used for _has queries.
 	 */
-	public ResourceLinkPredicateBuilder addReferencePredicateBuilderReversed(
+	public ResourceLinkPredicateBuilder addResourceLinkForHasParameterPredicateBuilderReversed(
 			QueryStack theQueryStack, DbColumn[] theSourceJoinColumn) {
-		ResourceLinkPredicateBuilder retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, true);
+		ResourceLinkForHasParameterPredicateBuilder retVal =
+				mySqlBuilderFactory.resourceLinkForHasParameterIndexTable(theQueryStack, this);
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
 	}
@@ -504,6 +517,21 @@ public class SearchQueryBuilder {
 		} else {
 			return new DbColumn[] {resourceIdColumn};
 		}
+	}
+
+	/**
+	 * Build a join {@link Condition} from two equal-length column arrays (as returned by {@link #toJoinColumns}).
+	 */
+	public static Condition toJoinCondition(DbColumn[] theFromColumns, DbColumn[] theToColumns) {
+		assert theFromColumns.length == theToColumns.length;
+		if (theFromColumns.length == 1) {
+			return BinaryCondition.equalTo(theFromColumns[0], theToColumns[0]);
+		}
+		Condition[] conditions = new Condition[theFromColumns.length];
+		for (int i = 0; i < theFromColumns.length; i++) {
+			conditions[i] = BinaryCondition.equalTo(theFromColumns[i], theToColumns[i]);
+		}
+		return ComboCondition.and(conditions);
 	}
 
 	public boolean isIncludePartitionIdInJoins() {
@@ -961,7 +989,8 @@ public class SearchQueryBuilder {
 				false,
 				myBindVariableValues,
 				theSelectPartitionId,
-				false);
+				false,
+				theSelectPartitionId ? CHILD_ALIAS_PREFIX : DEFAULT_ALIAS_PREFIX);
 	}
 
 	public SelectQuery getSelect() {
@@ -977,28 +1006,33 @@ public class SearchQueryBuilder {
 			double theLatitudeValue,
 			double theLongitudeValue,
 			boolean theAscending) {
-		FunctionCall absLatitude = new FunctionCall("ABS");
 		String latitudePlaceholder = generatePlaceholder(theLatitudeValue);
-		ComboExpression absLatitudeMiddle = new ComboExpression(
-				ComboExpression.Op.SUBTRACT, theCoordsBuilder.getColumnLatitude(), latitudePlaceholder);
-		absLatitude = absLatitude.addCustomParams(absLatitudeMiddle);
-
-		FunctionCall absLongitude = new FunctionCall("ABS");
 		String longitudePlaceholder = generatePlaceholder(theLongitudeValue);
-		ComboExpression absLongitudeMiddle = new ComboExpression(
+		ComboExpression latitudeDiff = new ComboExpression(
+				ComboExpression.Op.SUBTRACT, theCoordsBuilder.getColumnLatitude(), latitudePlaceholder);
+		ComboExpression longitudeDiff = new ComboExpression(
 				ComboExpression.Op.SUBTRACT, theCoordsBuilder.getColumnLongitude(), longitudePlaceholder);
-		absLongitude = absLongitude.addCustomParams(absLongitudeMiddle);
 
-		ComboExpression sum = new ComboExpression(ComboExpression.Op.ADD, absLatitude, absLongitude);
-		String ordering;
-		if (theAscending) {
-			ordering = "";
-		} else {
-			ordering = " DESC";
+		ComboExpression squaredLatitudeDiff =
+				new ComboExpression(ComboExpression.Op.MULTIPLY, latitudeDiff, latitudeDiff);
+		ComboExpression squaredLongitudeDiff =
+				new ComboExpression(ComboExpression.Op.MULTIPLY, longitudeDiff, longitudeDiff);
+		FunctionCall euclideanDistance = new FunctionCall("SQRT")
+				.addCustomParams(
+						new ComboExpression(ComboExpression.Op.ADD, squaredLatitudeDiff, squaredLongitudeDiff));
+
+		Object distanceExpression = euclideanDistance;
+		if (mySelect.toString().contains("GROUP BY")) {
+			// GROUP BY requires the distance expression to be aggregated.
+			// MIN(...) is semantically neutral here because each resource has only one distance.
+			FunctionCall aggregateDistance = FunctionCall.min();
+			aggregateDistance.addCustomParams(euclideanDistance);
+			distanceExpression = aggregateDistance;
 		}
 
-		String columnName = "MHD" + (myNextNearnessColumnId++);
-		mySelect.addAliasedColumn(sum, columnName);
+		String columnName = "EUC_DIST" + (myNextNearnessColumnId++);
+		mySelect.addAliasedColumn(distanceExpression, columnName);
+		String ordering = theAscending ? "" : " DESC";
 		mySelect.addCustomOrderings(columnName + ordering);
 	}
 

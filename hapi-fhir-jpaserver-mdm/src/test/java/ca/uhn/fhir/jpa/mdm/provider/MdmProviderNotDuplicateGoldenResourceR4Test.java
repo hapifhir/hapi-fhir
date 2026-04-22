@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4Test {
+public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseMdmProviderR4Test {
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
 	private Patient myGoldenPatient;

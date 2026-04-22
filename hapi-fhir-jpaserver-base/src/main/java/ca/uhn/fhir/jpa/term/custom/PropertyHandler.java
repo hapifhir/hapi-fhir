@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,29 @@
  */
 package ca.uhn.fhir.jpa.term.custom;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
-import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
+import org.hl7.fhir.r4.model.Coding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class PropertyHandler implements IZipContentsHandlerCsv {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(PropertyHandler.class);
 
 	public static final String CODE = "CODE";
 	public static final String KEY = "KEY";
@@ -50,25 +58,56 @@ public class PropertyHandler implements IZipContentsHandlerCsv {
 		String code = trim(theRecord.get(CODE));
 		String key = trim(theRecord.get(KEY));
 
-		if (isNotBlank(code) && isNotBlank(KEY)) {
+		if (isNotBlank(code) && isNotBlank(key)) {
 			String value = trim(theRecord.get(VALUE));
 			String type = trim(theRecord.get(TYPE));
 
 			List<TermConceptProperty> conceptProperties = myCode2Properties.get(code);
 			if (conceptProperties == null) conceptProperties = new ArrayList<>();
 
-			TermConceptProperty conceptProperty =
-					TermLoaderSvcImpl.getOrCreateConceptProperty(myCode2Properties, code, key);
-			ValidateUtil.isNotNullOrThrowUnprocessableEntity(
-					conceptProperty, "Concept property %s not found in file", conceptProperty);
+			if (isDuplicateConceptProperty(conceptProperties, key, value, type)) {
+				ourLog.info(
+						"Duplicate concept property found for code {}, key {}, value {}, type {}. Skipping entry.",
+						code,
+						key,
+						value,
+						type);
+				return;
+			}
 
+			TermConceptPropertyTypeEnum typeEnum = TermConceptPropertyTypeEnum.fromString(type);
+			Validate.notNull(typeEnum, "Invalid property type[%s] for key: %s", type, key);
+
+			TermConceptProperty conceptProperty = new TermConceptProperty();
 			conceptProperty.setKey(key);
-			conceptProperty.setValue(value);
-			// TODO: check this for different types, other types should be added once TermConceptPropertyTypeEnum
-			// contain different types
-			conceptProperty.setType(TermConceptPropertyTypeEnum.STRING);
+			conceptProperty.setType(typeEnum);
+
+			switch (typeEnum) {
+				case BOOLEAN, INTEGER, DECIMAL, DATETIME, CODE, STRING -> conceptProperty.setValue(value);
+				case CODING -> {
+					Coding coding = new Coding();
+					FhirContext.forR4Cached().newJsonParser().parseInto(value, coding);
+					conceptProperty.setCodeSystem(coding.getSystem());
+					conceptProperty.setValue(coding.getCode());
+					conceptProperty.setDisplay(coding.getDisplay());
+				}
+				default -> throw new IllegalArgumentException(
+						Msg.code(2886) + "Unable to handle property type: " + type);
+			}
+
 			conceptProperties.add(conceptProperty);
 			myCode2Properties.put(code, conceptProperties);
 		}
+	}
+
+	public boolean isDuplicateConceptProperty(
+			List<TermConceptProperty> conceptProperties, String key, String value, String typeString) {
+		if (CollectionUtils.isEmpty(conceptProperties)) {
+			return false;
+		}
+		return conceptProperties.stream()
+				.anyMatch(p -> Objects.equals(p.getKey(), key)
+						&& Objects.equals(p.getValue(), value)
+						&& Objects.equals(p.getType(), TermConceptPropertyTypeEnum.fromString(typeString)));
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,13 @@ public enum MdmSimilarityEnum {
 
 	MdmSimilarityEnum(IMdmFieldSimilarity theMdmFieldSimilarity) {
 		myMdmFieldSimilarity = theMdmFieldSimilarity;
+	}
+
+	/**
+	 * @return the underlying {@link IMdmFieldSimilarity} instance for this enum constant
+	 */
+	public IMdmFieldSimilarity getSimilarity() {
+		return myMdmFieldSimilarity;
 	}
 
 	public MdmMatchEvaluation match(

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ public class Batch2JobDefinitionConstants {
 
 	// Bulk Export job
 	public static final String BULK_EXPORT = "BULK_EXPORT";
+
+	// Install Package
+	public static final String INSTALL_PACKAGE = "INSTALL_PACKAGE";
 
 	private Batch2JobDefinitionConstants() {}
 }

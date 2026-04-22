@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import java.util.Map;
  * The IGenericClient API represents searches with OrLists, while the FhirRepository API uses nested
  * lists. This class (will eventually) convert between them
  */
+@Deprecated(since = "8.8.0", forRemoval = true)
 public class SearchConverter {
 	// hardcoded list from FHIR specs: https://www.hl7.org/fhir/search.html
 	private final List<String> mySearchResultParameters = Arrays.asList(
