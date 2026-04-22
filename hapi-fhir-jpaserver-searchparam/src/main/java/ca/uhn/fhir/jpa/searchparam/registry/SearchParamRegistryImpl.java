@@ -78,8 +78,7 @@ public class SearchParamRegistryImpl
 		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
 
 	/**
-	 * Search parameter patterns that must remain active regardless of enable/disable configuration,
-	 * because they are required for core system operation.
+	 * Search parameter patterns that must remain active because they are required for core system operation.
 	 * <ul>
 	 *   <li>{@code *:url} — used by the validator and terminology services</li>
 	 *   <li>{@code Subscription:*} — used by the Subscription module</li>
@@ -404,10 +403,7 @@ public class SearchParamRegistryImpl
 	}
 
 	/**
-	 * Returns {@code true} if the given search parameter is a built-in (HL7) search
-	 * parameter that must remain active regardless of enable/disable configuration.
-	 *
-	 * <p>A search parameter is considered non-disableable and built-in if:
+	 * A search parameter is considered non-disableable and built-in if:
 	 * <ol>
 	 *   <li>Its URI starts with {@link ca.uhn.fhir.rest.api.Constants#BUILT_IN_SEARCH_PARAM_URI_PREFIX}, AND</li>
 	 *   <li>It matches at least one pattern in {@link #NON_DISABLEABLE_SEARCH_PARAMS}.</li>
@@ -462,6 +458,17 @@ public class SearchParamRegistryImpl
 			return 0;
 		}
 
+		/*
+		 * If the candidate SP from the database is inactive, and the SP is built-in and
+		 * non-disableable, do not override the cache's ACTIVE version. It shouldn't be
+		 * possible to retire these non-disableable SPs in DB through normal API calls,
+		 * but this acts as a last-resort safety net at the cache layer.
+		 *
+		 * It is (currently) intentionally all-or-nothing (returns 0) since this class
+		 * manages cache initialization and doesn't modify bases directly. As a
+		 * consequence, a SP with a non-disableable and disableable base would be fully
+		 * preserved, including the disableable base.
+		 */
 		if (isRetiringNonDisableableSearchParam(newRuntimeSp)) {
 			return 0;
 		}
@@ -474,6 +481,11 @@ public class SearchParamRegistryImpl
 		String url = newRuntimeSp.getUri();
 		RuntimeSearchParam existingParam = theSearchParams.getByUrl(url);
 		if (existingParam != null) {
+			/*
+			 * It shouldn't be possible to do narrow out a non-disableable base to the DB through
+			 * normal API calls, but this is a last-resort, and we preserve the entire SP in cache
+			 * if true.
+			 */
 			if (isNarrowingNonDisableableSearchParamBase(existingParam, newRuntimeSp)) {
 				return 0;
 			}
@@ -508,22 +520,8 @@ public class SearchParamRegistryImpl
 	}
 
 	/**
-	 * If the SP from the database is not active and it is a built-in non-disableable
-	 * search parameter, do not override the built-in ACTIVE version in the cache with
-	 * the retired/inactive DB version. This protects critical system search parameters
-	 * (e.g. Basic:code needed by the R4 SubscriptionTopic registry) from being
-	 * effectively retired even when the DB record has been updated.
-	 *
-	 * <p>Non-disableable SPs should not be retirable via normal API calls or DB seeding
-	 * (those layers have their own guards), but this acts as a last-resort safety net
-	 * at the cache layer. It is (currently) intentionally all-or-nothing — since this
-	 * method manages cache initialization, not SP base narrowing, so returning 0 is
-	 * simpler and safer than base narrowing here. As a consequence, for SPs spanning
-	 * both non-disableable and disableable bases, the full built-in entry is preserved
-	 * in cache. For example, if clinical-patient (bases: Basic, Condition) is somehow
-	 * fully retired in the DB, Condition-based searches will still be active in cache
-	 * because Basic.patient is mandatory. Base narrowing is the responsibility of the
-	 * DB seeding layer.
+	 * Determines if a non-disableable, built-in SearchParameter would be retired/evicted from the
+	 * registry's cache.
 	 * @param theNewRuntimeSp the SP from DB to potentially load into cache
 	 * @return true if the SP is non-disableable, and would be retired (evicted) from cache.
 	 * 		   false otherwise.
@@ -543,11 +541,9 @@ public class SearchParamRegistryImpl
 	}
 
 	/**
-	 * If the DB record removes a non-disableable base that the existing cached entry
-	 * has, ignore the DB record and preserve the existing cache entry entirely.
-	 * This handles the case where status=active but the base list was narrowed to
-	 * exclude a mandatory base (the status != ACTIVE guard above handles the retired case
-	 * when the non-disableable base is still declared in the new record's base list).
+	 * Determines if the DB record removes a non-disableable base that the existing cached entry
+	 * has. This handles the case where status=active but the base list was narrowed to exclude
+	 * a mandatory base .
 	 * @param theExistingParam the SP that is currently in cache that may be overriden by DB
 	 * @param theNewRuntimeSp the SP from DB to potentially load into cache
 	 * @return true if the a non-disableable base would be removed from the cache.

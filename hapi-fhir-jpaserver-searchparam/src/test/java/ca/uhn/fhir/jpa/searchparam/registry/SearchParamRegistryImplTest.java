@@ -496,15 +496,7 @@ public class SearchParamRegistryImplTest {
 		basicCodeSp.setExpression("Basic.code");
 		basicCodeSp.addBase("Basic");
 
-		ArrayList<ResourceTable> newEntities = new ArrayList<>(ourEntities);
-		newEntities.add(createEntity(++ourLastId, 1));
-		ResourceVersionMap versionMap = ResourceVersionMap.fromResourceTableEntities(newEntities);
-		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenReturn(versionMap);
-		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(basicCodeSp));
-
-		mySearchParamRegistry.requestRefresh();
-		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
-		assertDbCalled();
+		addSpToRegistryAndRefresh(basicCodeSp);
 
 		// Verify: the built-in ACTIVE version should remain in the cache despite the RETIRED DB entry
 		RuntimeSearchParam basicCode = mySearchParamRegistry.getActiveSearchParam(
@@ -531,15 +523,7 @@ public class SearchParamRegistryImplTest {
 		basicCodeSp.setDescription("customised description");
 		basicCodeSp.addBase("Basic");
 
-		ArrayList<ResourceTable> newEntities = new ArrayList<>(ourEntities);
-		newEntities.add(createEntity(++ourLastId, 1));
-		when(myResourceVersionSvc.getVersionMap(any(), any(), any()))
-				.thenReturn(ResourceVersionMap.fromResourceTableEntities(newEntities));
-		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(basicCodeSp));
-
-		mySearchParamRegistry.requestRefresh();
-		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
-		assertDbCalled();
+		addSpToRegistryAndRefresh(basicCodeSp);
 
 		// Verify: the DB version replaced the built-in — the customised description is present
 		RuntimeSearchParam basicCode = mySearchParamRegistry.getActiveSearchParam(
@@ -563,15 +547,7 @@ public class SearchParamRegistryImplTest {
 		customSp.setExpression("Subscription.status");
 		customSp.addBase("Subscription");
 
-		ArrayList<ResourceTable> newEntities = new ArrayList<>(ourEntities);
-		newEntities.add(createEntity(++ourLastId, 1));
-		ResourceVersionMap versionMap = ResourceVersionMap.fromResourceTableEntities(newEntities);
-		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenReturn(versionMap);
-		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(customSp));
-		mySearchParamRegistry.requestRefresh();
-		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
-		assertDbCalled();
-
+		List<ResourceTable> newEntities = addSpToRegistryAndRefresh(customSp);
 		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
 				"Subscription", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
 
@@ -607,14 +583,7 @@ public class SearchParamRegistryImplTest {
 		narrowedConformanceContext.setExpression("CapabilityStatement.useContext");
 		narrowedConformanceContext.addBase("CapabilityStatement"); // SearchParameter (non-disableable) removed
 
-		ArrayList<ResourceTable> entities = new ArrayList<>(ourEntities);
-		entities.add(createEntity(++ourLastId, 1));
-		when(myResourceVersionSvc.getVersionMap(any(), any(), any()))
-				.thenReturn(ResourceVersionMap.fromResourceTableEntities(entities));
-		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(narrowedConformanceContext));
-		mySearchParamRegistry.requestRefresh();
-		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
-		assertDbCalled();
+		addSpToRegistryAndRefresh(narrowedConformanceContext);
 
 		// Guard fired — SearchParameter:context is preserved from the built-in
 		RuntimeSearchParam conformanceContext = mySearchParamRegistry.getActiveSearchParam(
@@ -626,39 +595,51 @@ public class SearchParamRegistryImplTest {
 	@Test
 	void testMultiBaseSpWithNonDisableableBase_RetiredInDbKeepsAllBasesActiveInCache() {
 		// Created by Claude Sonnet 4.6
-		// Note: Basic is not a real base of clinical-patient in R4 (it is in R5+). The SP here is
-		// synthetic — constructed to exercise the mixed-base guard logic without requiring R5.
-		// clinical-patient spans many bases including Basic (non-disableable) and Condition (disableable).
-		// When the DB entry is RETIRED, the L1 guard detects Basic is non-disableable and skips the
-		// override entirely — so ALL bases that exist in the built-in cache remain active,
-		// including the disableable Condition base.
-		SearchParameter sharedSp = new SearchParameter();
-		sharedSp.setId("SearchParameter/clinical-patient");
-		sharedSp.setUrl("http://hl7.org/fhir/SearchParameter/clinical-patient");
-		sharedSp.setCode("patient");
-		sharedSp.setName("patient");
-		sharedSp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		sharedSp.setType(Enumerations.SearchParamType.REFERENCE);
-		sharedSp.setExpression("Basic.subject.where(resolve() is Patient) | Condition.subject.where(resolve() is Patient)");
-		sharedSp.addBase("Basic");
-		sharedSp.addBase("Condition");
+		// conformance-context spans many bases including SearchParameter (non-disableable) and
+		// CodeSystem (disableable). When the DB entry is RETIRED (but still lists these bases),
+		// the L1 guard detects SearchParameter is non-disableable and skips the override entirely —
+		// so ALL bases that exist in the built-in cache remain active, including CodeSystem.
+		SearchParameter retiredConformanceContext = new SearchParameter();
+		retiredConformanceContext.setId("SearchParameter/conformance-context");
+		retiredConformanceContext.setUrl("http://hl7.org/fhir/SearchParameter/conformance-context");
+		retiredConformanceContext.setCode("context");
+		retiredConformanceContext.setName("context");
+		retiredConformanceContext.setStatus(Enumerations.PublicationStatus.RETIRED);
+		retiredConformanceContext.setType(Enumerations.SearchParamType.TOKEN);
+		retiredConformanceContext.setExpression("SearchParameter.useContext | CodeSystem.useContext");
+		retiredConformanceContext.addBase("SearchParameter");
+		retiredConformanceContext.addBase("CodeSystem");
 
-		ArrayList<ResourceTable> newEntities = new ArrayList<>(ourEntities);
+		addSpToRegistryAndRefresh(retiredConformanceContext);
+
+		// Both bases remain active — guard fires on SearchParameter (non-disableable) and returns 0
+		// immediately without modifying the cache, so the full built-in entry is kept intact
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
+				"SearchParameter", "context", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
+				"CodeSystem", "context", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+	}
+
+	/**
+	 * Simulates a new SP appearing in the DB, then drives a full refresh cycle.
+	 * Asserts that exactly one SP was added.
+	 *
+	 * @param theMockDbSpEntry the SP as it would be read from the database
+	 * @return the full entity list, so callers can perform follow-up operations
+	 *         (e.g. bumping the version to simulate an update)
+	 */
+	@Nonnull
+	private List<ResourceTable> addSpToRegistryAndRefresh(SearchParameter theMockDbSpEntry) {
+		// Created by Claude Sonnet 4.6
+		List<ResourceTable> newEntities = new ArrayList<>(ourEntities);
 		newEntities.add(createEntity(++ourLastId, 1));
-		ResourceVersionMap versionMap = ResourceVersionMap.fromResourceTableEntities(newEntities);
-		when(myResourceVersionSvc.getVersionMap(any(), any(), any())).thenReturn(versionMap);
-		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(sharedSp));
-
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any()))
+				.thenReturn(ResourceVersionMap.fromResourceTableEntities(newEntities));
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(theMockDbSpEntry));
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
 		assertDbCalled();
-
-		// Both bases remain active — guard fires on Basic (non-disableable) and returns 0
-		// immediately without modifying the cache, so the full built-in entry is kept intact
-		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
-				"Basic", "patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
-		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
-				"Condition", "patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+		return newEntities;
 	}
 
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
