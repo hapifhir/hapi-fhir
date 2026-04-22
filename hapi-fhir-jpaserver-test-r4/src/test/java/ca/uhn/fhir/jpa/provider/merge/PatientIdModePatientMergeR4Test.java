@@ -59,9 +59,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * patients that reside in different partitions (as determined by {@code PatientIdPartitionInterceptor}).
  */
 // Created by claude-opus-4-6
-public class CrossPartitionMergePatientIdModeR4Test extends BaseResourceProviderR4Test {
+public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(CrossPartitionMergePatientIdModeR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdModePatientMergeR4Test.class);
 
 	@Autowired
 	private Batch2JobHelper myBatch2JobHelper;
