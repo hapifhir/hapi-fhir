@@ -302,6 +302,10 @@ public interface ITestDataBuilder {
 		return createResource("Organization", theModifiers);
 	}
 
+	default IBaseResource buildOrganization(ICreationArgument... theModifiers) {
+		return buildResource("Organization", theModifiers);
+	}
+
 	default IIdType createPractitioner(ICreationArgument... theModifiers) {
 		return createResource("Practitioner", theModifiers);
 	}
@@ -504,13 +508,13 @@ public interface ITestDataBuilder {
 	/**
 	 * Sets the <code>managingOrganization</code> element on a Patient
 	 */
-	default ICreationArgument withOrganization(@Nullable String theHasMember) {
-		IIdType id = theHasMember != null ? getFhirContext().getVersion().newIdType(theHasMember) : null;
+	default ICreationArgument withOrganization(@Nullable String theOrganizationId) {
+		IIdType id = theOrganizationId != null ? getFhirContext().getVersion().newIdType(theOrganizationId) : null;
 		return withReference("managingOrganization", id);
 	}
 
-	default ICreationArgument withOrganization(@Nullable IIdType theHasMember) {
-		return withReference("managingOrganization", theHasMember);
+	default ICreationArgument withOrganization(@Nullable IIdType theOrganizationId) {
+		return withReference("managingOrganization", theOrganizationId);
 	}
 
 	/**

@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -51,7 +52,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED;
+import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -63,6 +68,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("unchecked")
 public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 	@Override
@@ -86,12 +92,12 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 			myPartitionSettings.setPartitioningEnabled(defaults.isPartitioningEnabled());
 		}
 
-		myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof FixedPartitionInterceptor);
+		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof FixedPartitionInterceptor);
 	}
 
 
 	/**
-	 * If an inline match URL is the same as a conditional create in the same transaction, make sure we
+	 * If an inline match URL is the same as a conditional-create in the same transaction, make sure we
 	 * don't issue a select for it
 	 */
 	@ParameterizedTest(name = "{index}: {0}")
@@ -731,7 +737,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		logAllResources();
 		logAllResourceVersions();
 
-		assertThrows(ResourceGoneException.class, ()->myPatientDao.read(resourceId.withVersion("2"), mySrd));
+		assertThrows(ResourceGoneException.class, () -> myPatientDao.read(resourceId.withVersion("2"), mySrd));
 		actual = myPatientDao.read(resourceId.withVersion("3"), mySrd);
 		assertEquals("3", actual.getIdElement().getVersionIdPart());
 		actual = myPatientDao.read(resourceId.toVersionless(), mySrd);
@@ -848,8 +854,6 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertFalse(actual.isDeleted());
 		assertFalse(actual.getActive());
 	}
-
-
 
 
 	/**
@@ -988,16 +992,18 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		createPatient(withId("A"), withFamily("HELLO"), withActiveTrue());
 
 		class MyInterceptor {
-			@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+			@Hook(STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 			public void onResourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
 				Patient patient = (Patient) theNewResource;
 				patient.getNameFirstRep().setFamily("HELLO");
 			}
+
 			@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 			public void onPreSearch(SearchParameterMap theSearchParameterMap) {
 				theSearchParameterMap.remove("family");
 				theSearchParameterMap.add("family", new StringParam("HELLO"));
 			}
+
 			@Hook(Pointcut.STORAGE_PREVERIFY_CONDITIONAL_MATCH_CRITERIA)
 			public void onPreVerifyConditionalUrl(PreVerifyConditionalMatchCriteriaRequest theRequest) {
 				theRequest.setConditionalUrl("Patient?family=HELLO");
@@ -1019,7 +1025,107 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("HELLO", actual.getNameFirstRep().getFamily());
 	}
 
+	/**
+	 * Given: A FHIR transaction which creates/updates an Organization, and a Patient with a reference to that
+	 * Organization.
+	 * <p>
+	 * Expect: An interceptor on the XXX_PRESTORAGE pointcuts should be able to look up the Organization by
+	 * reference from within the {@link TransactionDetails}.
+	 */
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# PatientAlreadyExists , PatientAction , OrgAction      , ExpectFound
+		true                   , COND_UPDATE   , CREATE         , true
+		true                   , COND_UPDATE   , UPDATE         , true
+		true                   , COND_UPDATE   , COND_CREATE    , true
+		true                   , COND_UPDATE   , COND_UPDATE    , true
+		false                  , COND_UPDATE   , COND_UPDATE    , true
+		# If the Patient has a POST verb, it will happen first because of the FHIR
+		# transaction processing rules, so we can't make the reference target resolvable at the time
+		# it is processed
+		true                   , CREATE        , COND_UPDATE    , false
+		false                  , CREATE        , COND_UPDATE    , false
+		true                   , COND_CREATE   , COND_UPDATE    , false
+		false                  , COND_CREATE   , COND_UPDATE    , false
+		""")
+	void testInterceptorCanResolveReferenceTargetWithinTransaction(boolean theReferenceSourceAlreadyExists, String thePatientAction, String theOrgAction, boolean theExpectFound) {
+		AtomicBoolean foundOrganization = new AtomicBoolean(false);
+		AtomicInteger interceptorCallCount = new AtomicInteger(0);
 
+		if (theReferenceSourceAlreadyExists) {
+			createPatient(withId("A"), withIdentifier("http://patients", "123"));
+		}
+
+
+		@Interceptor
+		class MyInterceptor {
+
+			@Hook(STORAGE_PRESTORAGE_RESOURCE_CREATED)
+			public void resourceCreated(IBaseResource resource, TransactionDetails transactionDetails) {
+				processResource(resource, transactionDetails);
+			}
+
+			@Hook(STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+			public void resourceUpdated(
+				IBaseResource oldResource,
+				IBaseResource newResource,
+				TransactionDetails transactionDetails) {
+				processResource(newResource, transactionDetails);
+			}
+
+			private void processResource(IBaseResource resource, TransactionDetails transactionDetails) {
+				if (resource instanceof Patient patient) {
+					interceptorCallCount.incrementAndGet();
+					Reference reference = patient.getManagingOrganization();
+					IBaseResource target = transactionDetails.getResolvedResource(reference.getReferenceElement());
+					if (target != null) {
+						foundOrganization.set(true);
+					}
+				}
+			}
+
+		}
+		registerInterceptor(new MyInterceptor());
+
+		String organizationUuid = IdType.newRandomUuid().getValue();
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		switch (theOrgAction) {
+			case "CREATE" ->
+				bb.addTransactionCreateEntry(buildOrganization(withId("O1"), withIdentifier("http://orgs", "123")), organizationUuid);
+			case "UPDATE" ->
+				bb.addTransactionUpdateEntry(buildOrganization(withId("O1"), withIdentifier("http://orgs", "123")), "Organization/O1", organizationUuid);
+			case "COND_CREATE" ->
+				bb.addTransactionCreateEntry(buildOrganization(withIdentifier("http://orgs", "123")), organizationUuid)
+					.conditional("Organization?identifier=http://orgs|123");
+			case "COND_UPDATE" ->
+				bb.addTransactionUpdateEntry(buildOrganization(withIdentifier("http://orgs", "123")), null, organizationUuid)
+					.conditional("Organization?identifier=http://orgs|123");
+			default -> throw new IllegalArgumentException("Unknown action: " + theOrgAction);
+		}
+
+		switch (thePatientAction) {
+			case "CREATE" ->
+				bb.addTransactionCreateEntry(buildPatient(withIdentifier("http://patients", "123"), withOrganization(organizationUuid)));
+			case "COND_CREATE" ->
+				bb.addTransactionCreateEntry(buildPatient(withIdentifier("http://patients", "123"), withOrganization(organizationUuid)))
+					.conditional("Patient?identifier=http://patients|123");
+			case "COND_UPDATE" ->
+				bb.addTransactionUpdateEntry(buildPatient(withIdentifier("http://patients", "123"), withOrganization(organizationUuid)))
+					.conditional("Patient?identifier=http://patients|123");
+			default -> throw new IllegalArgumentException("Unknown action: " + theOrgAction);
+		}
+		Bundle requestBundle = bb.getBundleTyped();
+
+		mySystemDao.transaction(newSrd(), requestBundle);
+
+		assertEquals(theExpectFound, foundOrganization.get());
+		if (theExpectFound) {
+			assertEquals(1, interceptorCallCount.get());
+		}
+	}
+
+
+	@SuppressWarnings("unchecked")
 	@Test
 	void testMetaAdd_Added() {
 		// Setup
@@ -1160,8 +1266,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 	@Nonnull
 	private static List<String> toMetaTagCodes(Patient actualA) {
-		List<String> metaTagCodes = actualA.getMeta().getTag().stream().map(Coding::getCode).toList();
-		return metaTagCodes;
+		return actualA.getMeta().getTag().stream().map(Coding::getCode).toList();
 	}
 
 
