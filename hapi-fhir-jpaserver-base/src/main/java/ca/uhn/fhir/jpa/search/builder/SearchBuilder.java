@@ -2537,12 +2537,19 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				String nextParamName = componentAndCorrespondingParam.getCombinedParamName();
 				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
 
-				// The only prefix accepted when combo searching is 'eq' (see validateParamValuesAreValidForComboParam).
-				// As a result, we strip the prefix if present.
-				String nextOrValue = stripStart(nextOr.getValueAsQueryToken(), EQUAL.getValue());
-
-				if (nextOr instanceof DateParam) {
-					nextOrValue = substring(nextOrValue, 0, 10);
+				String nextOrValue = nextOr.getValueAsQueryToken();
+				switch (componentAndCorrespondingParam.getComponentParameter().getParamType()) {
+					case NUMBER, QUANTITY ->
+					// Discard "eq" prefix since it is the same as not having a prefix
+					// on a number or quantity
+					nextOrValue = stripStart(nextOr.getValueAsQueryToken(), EQUAL.getValue());
+					case DATE -> {
+						// Discard "eq" prefix since it is the same as not having a prefix on a date
+						nextOrValue = stripStart(nextOr.getValueAsQueryToken(), EQUAL.getValue());
+						// Precision greater than DAY is handled by additionally joining on the
+						// date index table
+						nextOrValue = substring(nextOrValue, 0, 10);
+					}
 				}
 
 				RestSearchParameterTypeEnum paramType = JpaParamUtil.getParameterTypeForComposite(
