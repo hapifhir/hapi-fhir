@@ -36,8 +36,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,12 +67,24 @@ public class JpaPackageCacheLoadSequenceTest {
 	JpaPackageCache myJpaPackageCache;
 
 	@ParameterizedTest
-	@CsvSource({"true,false,false",
-		"false,true,false",
-		"false,false,true",
-		"false,false,false"})
+	@CsvSource({"true,false,false,true",
+		"false,true,false,true",
+		"false,false,true,true",
+		"false,false,false,true",
+		"true,true,false,true",
+		"true,false,true,true",
+		"false,true,true,true",
+		"true,true,true,true",
+		"true,false,false,false",
+		"false,true,false,false",
+		"false,false,true,false",
+		"false,false,false,false",
+		"true,true,false,false",
+		"true,false,true,false",
+		"false,true,true,false",
+		"true,true,true,false"})
 	public void testInstallPackage_specificationVariations(
-		boolean theIsPackageInCache, boolean theIsPackageEmbedded, boolean theIsPackageAtUrl)
+		boolean theIsPackageInCache, boolean theIsPackageEmbedded, boolean theIsPackageAtUrl, boolean theShouldUpdateCache)
 		throws Exception{
 
 		// set up
@@ -91,8 +106,13 @@ public class JpaPackageCacheLoadSequenceTest {
 		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
 		installationSpec.setName(packageName);
 		installationSpec.setVersion(packageVersion);
+		if (theShouldUpdateCache) {
+			installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		} else {
+			installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		}
 
-		when(myDaoRegistry.getResourceDao("Binary")).thenReturn(myBinaryDao);
+		lenient().when(myDaoRegistry.getResourceDao("Binary")).thenReturn(myBinaryDao);
 
 		// set up mocks
 		if (theIsPackageInCache) {
@@ -111,7 +131,7 @@ public class JpaPackageCacheLoadSequenceTest {
 			setUpMockDownloadFromRepository(packageName, packageVersion, descriptionPrefix);
 		}
 
-		if (!theIsPackageInCache) {
+		if (!theIsPackageInCache && theShouldUpdateCache) {
 			setUpMocksForCacheUpdate();
 		}
 
@@ -121,6 +141,16 @@ public class JpaPackageCacheLoadSequenceTest {
 		// validate
 		assertThat(actualPackage).isNotNull();
 		assertThat(actualPackage.getNpm().get("description").asString()).isEqualTo(expectedDescription);
+
+		// we don't need to update the cache if the data is already in the cache
+		if (theShouldUpdateCache && !theIsPackageInCache) {
+			// we may update the package more than once in the course of creating it
+			verify(myPackageDao, atLeastOnce()).save(any());
+			verify(myPackageVersionDao).save(any());
+		} else {
+			verify(myPackageDao, never()).save(any());
+			verify(myPackageVersionDao, never()).save(any());
+		}
 
 	}
 
@@ -138,7 +168,6 @@ public class JpaPackageCacheLoadSequenceTest {
 		NpmPackageEntity packageEntity = new NpmPackageEntity();
 		packageEntity.setPackageId(thePackageName);
 		packageEntity.setCurrentVersionId(thePackageVersion);
-		myPackageDao.save(packageEntity);
 
 		ResourceTable resourceTable = mock(ResourceTable.class);
 		when(resourceTable.getId()).thenReturn(pid);
