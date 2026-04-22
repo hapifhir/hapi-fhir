@@ -24,11 +24,13 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
+import org.quartz.CronExpression;
+import org.quartz.CronScheduleBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
@@ -47,7 +49,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -247,30 +251,68 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	}
 
 	@Override
+	public void scheduleCronJob(String theCronExpression, ScheduledJobDefinition theJobDefinition) {
+		Validate.isTrue(isNotBlank(theCronExpression));
+
+		scheduleJob(null, theCronExpression, theJobDefinition);
+	}
+
+	@Override
 	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		Validate.isTrue(theIntervalMillis >= 100);
 
-		Validate.notNull(theJobDefinition);
-		Validate.notNull(theJobDefinition.getJobClass());
+		scheduleJob(theIntervalMillis, null, theJobDefinition);
+	}
+
+	private void scheduleJob(
+			Long theIntervalMillis, String theCronExpression, ScheduledJobDefinition theJobDefinition) {
+		Validate.isTrue(theIntervalMillis != null || isNotBlank(theCronExpression));
+		Objects.requireNonNull(theJobDefinition);
+		Objects.requireNonNull(theJobDefinition.getJobClass());
 		Validate.notBlank(theJobDefinition.getId());
 
 		TriggerKey triggerKey = theJobDefinition.toTriggerKey();
 		JobDetailImpl jobDetail = buildJobDetail(theJobDefinition);
 
-		ScheduleBuilder<? extends Trigger> schedule = SimpleScheduleBuilder.simpleSchedule()
-				.withIntervalInMilliseconds(theIntervalMillis)
-				.withMisfireHandlingInstructionIgnoreMisfires() // We ignore misfires in cases of multiple JVMs each
-				// trying to fire.
-				.repeatForever();
+		Set<Trigger> triggers = new HashSet<>();
 
-		Trigger trigger = TriggerBuilder.newTrigger()
-				.forJob(jobDetail)
-				.withIdentity(triggerKey)
-				.startNow()
-				.withSchedule(schedule)
-				.build();
+		if (theIntervalMillis != null) {
+			ourLog.debug("Scheduling interval job");
+			ScheduleBuilder<? extends Trigger> schedule = SimpleScheduleBuilder.simpleSchedule()
+					.withIntervalInMilliseconds(theIntervalMillis)
+					// We ignore misfires in cases of multiple JVMs each
+					// trying to fire.
+					.withMisfireHandlingInstructionIgnoreMisfires()
+					.repeatForever();
 
-		Set<? extends Trigger> triggers = Sets.newHashSet(trigger);
+			Trigger trigger = TriggerBuilder.newTrigger()
+					.forJob(jobDetail)
+					.withIdentity(triggerKey)
+					.startNow()
+					.withSchedule(schedule)
+					.build();
+
+			triggers.add(trigger);
+		} else {
+			if (!CronExpression.isValidExpression(theCronExpression)) {
+				String msg = String.format("Invalid cron expression: %s", theCronExpression);
+				ourLog.error(msg);
+				throw new InvalidRequestException(Msg.code(2923) + " " + msg);
+			}
+
+			ourLog.debug("Scheduling cron job with cron expression {}", theCronExpression);
+			CronScheduleBuilder cronSchedule = CronScheduleBuilder.cronSchedule(theCronExpression)
+					.withMisfireHandlingInstructionIgnoreMisfires(); // We ignore misfires in cases of multiple JVMs
+			// each
+			Trigger trigger = TriggerBuilder.newTrigger()
+					.forJob(jobDetail)
+					.withIdentity(triggerKey)
+					.startNow()
+					.withSchedule(cronSchedule)
+					.build();
+			triggers.add(trigger);
+		}
+
 		try {
 			myScheduler.scheduleJob(jobDetail, triggers, true);
 		} catch (SchedulerException e) {
