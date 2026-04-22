@@ -144,7 +144,7 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 			ourLog.info("Code system version: {} deleted", theVersionPid);
 		});
 
-		myTermReadSvc.invalidateCaches();
+		myTermReadSvc.invalidateCodeSystemCaches();
 	}
 
 	@Override
@@ -162,7 +162,7 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 			ourLog.info("Code system {} deleted", thePid);
 		}
 
-		myTermReadSvc.invalidateCaches();
+		myTermReadSvc.invalidateCodeSystemCaches();
 	}
 
 	@Override

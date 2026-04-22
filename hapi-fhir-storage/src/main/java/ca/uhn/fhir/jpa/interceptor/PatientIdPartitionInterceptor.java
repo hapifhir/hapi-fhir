@@ -90,6 +90,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionFromUserDataIfPresent;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.alwaysUseDefaultPartition;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.mandatorySingleCompartment;
+import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.nonUniqueCompartmentInDefault;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -149,6 +150,9 @@ public class PatientIdPartitionInterceptor {
 	 * </li>
 	 * <li>
 	 * The <b>Group</b> and <b>List</b> resource: {@link ResourceCompartmentStoragePolicy#alwaysUseDefaultPartition()}
+	 * </li>
+	 * <li>
+	 * The <b>Provenance</b> resource: {@link ResourceCompartmentStoragePolicy#nonUniqueCompartmentInDefault()}
 	 * </li>
 	 * <li>
 	 * Any other resources in the
@@ -578,20 +582,35 @@ public class PatientIdPartitionInterceptor {
 	private ResourceCompartmentStoragePolicy getPolicyForResourceType(RuntimeResourceDefinition resourceDef) {
 		ResourceCompartmentStoragePolicy retVal = myResourceTypeToCompartmentPolicy.get(resourceDef.getName());
 		if (retVal == null) {
-			retVal = switch (resourceDef.getName()) {
-				case "Group", "List" -> alwaysUseDefaultPartition();
-				case "Patient" -> mandatorySingleCompartment();
-				default -> {
-					List<RuntimeSearchParam> compartmentSps =
-							ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
-					if (compartmentSps.isEmpty()) {
-						yield alwaysUseDefaultPartition();
-					} else {
-						yield mandatorySingleCompartment();
-					}
-				}};
+			retVal = getDefaultPolicyForResourceType(resourceDef);
 		}
 		return retVal;
+	}
+
+	/**
+	 * Returns the default {@link ResourceCompartmentStoragePolicy} for a given resource type
+	 * when no explicit policy has been set via {@link #setResourceTypePolicies(Map)}.
+	 *
+	 * <p>Subclasses may override this method to change the default policy for specific resource types.
+	 *
+	 * @see #setResourceTypePolicies(Map) for a description of the default policies
+	 */
+	@Nonnull
+	protected ResourceCompartmentStoragePolicy getDefaultPolicyForResourceType(RuntimeResourceDefinition resourceDef) {
+		return switch (resourceDef.getName()) {
+			case "Group", "List" -> alwaysUseDefaultPartition();
+			case "Patient" -> mandatorySingleCompartment();
+			case "Provenance" -> nonUniqueCompartmentInDefault();
+			default -> {
+				List<RuntimeSearchParam> compartmentSps =
+						ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+				if (compartmentSps.isEmpty()) {
+					yield alwaysUseDefaultPartition();
+				} else {
+					yield mandatorySingleCompartment();
+				}
+			}
+		};
 	}
 
 	/**
