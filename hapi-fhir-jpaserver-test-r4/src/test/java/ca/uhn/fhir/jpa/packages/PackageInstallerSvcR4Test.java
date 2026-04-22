@@ -1588,7 +1588,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		existing.addBase("Patient");
 		existing.addBase("DomainResource");
 		existing.setType(Enumerations.SearchParamType.TOKEN);
-		existing.setExpression("Patient.identifier");
+		existing.setExpression("DomainResource.text");
 		mySearchParameterDao.update(existing, new SystemRequestDetails());
 
 		SearchParameter incoming = new SearchParameter();
@@ -1598,7 +1598,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		incoming.setCode(sharedCode);
 		incoming.addBase("Patient");
 		incoming.setType(Enumerations.SearchParamType.TOKEN);
-		incoming.setExpression("Patient.identifier");
+		incoming.setExpression("Patient.text");
 
 		installAsPackage("abstract-base-pkg", "0.0.1", incoming);
 
@@ -1609,6 +1609,36 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			assertThat(baseAfter).doesNotContain("Patient");
 			assertThat(baseAfter).doesNotContain("DomainResource");
 			assertThat(baseAfter).contains("Observation");
+		});
+	}
+
+	// Created by Claude Opus 4.7
+	/**
+	 * Persisting a SearchParameter with {@code base: ["DomainResource"]} must not crash during
+	 * reindex URL construction. Pre-fix, {@code BaseHapiFhirResourceDao.isCommonSearchParam}
+	 * only matched the literal {@code "resource"} string, so the reindex branch reached
+	 * {@code getResourceDefinition("DomainResource")} and threw {@code DataFormatException}
+	 * (HAPI-1684).
+	 */
+	@Test
+	public void installPackage_searchParameterWithDomainResourceBase_doesNotCrashDuringReindex() throws IOException {
+		String url = "http://example.org/SearchParameter/domain-resource-sp";
+
+		SearchParameter domainResourceSp = new SearchParameter();
+		domainResourceSp.setId("domain-resource-sp");
+		domainResourceSp.setUrl(url);
+		domainResourceSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		domainResourceSp.setCode("domain-resource-code");
+		domainResourceSp.addBase("DomainResource");
+		domainResourceSp.setType(Enumerations.SearchParamType.TOKEN);
+		domainResourceSp.setExpression("Patient.identifier");
+
+		installAsPackage("domain-resource-pkg", "0.0.1", domainResourceSp);
+
+		runInTransaction(() -> {
+			IBundleProvider search = mySearchParameterDao.search(
+				SearchParameterMap.newSynchronous("url", new UriParam(url)));
+			assertEquals(1, search.sizeOrThrowNpe());
 		});
 	}
 

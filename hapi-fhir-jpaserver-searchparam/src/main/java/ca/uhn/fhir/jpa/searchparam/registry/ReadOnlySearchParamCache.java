@@ -127,7 +127,7 @@ public class ReadOnlySearchParamCache {
 						nextCanonical.getBase());
 
 				Collection<String> base = nextCanonical.getBase();
-				base = SearchParameterUtil.expandBaseAsStrings(theFhirContext, base);
+				base = SearchParameterUtil.expandBaseWhenNeeded(theFhirContext, base);
 
 				// Add it to our return value if permitted by the pattern parameters
 				for (String nextResourceName : base) {

@@ -183,7 +183,7 @@ public class SearchParameterUtil {
 	 *   <li>{@code MetadataResource} → only concrete types that extend {@code MetadataResource} (R5+)</li>
 	 * </ul>
 	 */
-	public static List<String> expandBaseAsStrings(FhirContext theContext, Collection<String> theBase) {
+	public static List<String> expandBaseWhenNeeded(FhirContext theContext, Collection<String> theBase) {
 		if (theBase.stream().noneMatch(SearchParameterUtil::isAbstractResourceBase)) {
 			return new ArrayList<>(theBase);
 		}
@@ -201,7 +201,7 @@ public class SearchParameterUtil {
 	// Created by Claude Opus 4.7
 	/**
 	 * Returns the concrete resource types whose implementing class has an ancestor with the given
-	 * abstract-base name in its superclass chain. Used by {@link #expandBaseAsStrings} to perform
+	 * abstract-base name in its superclass chain. Used by {@link #expandBaseWhenNeeded} to perform
 	 * per-abstract-type expansion rather than a blanket "all types".
 	 */
 	private static List<String> getConcreteTypesExtending(FhirContext theContext, String theAbstractBase) {

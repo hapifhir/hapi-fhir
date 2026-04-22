@@ -141,14 +141,14 @@ class SearchParameterUtilTest {
 	// Created by Claude Opus 4.7
 	@Test
 	void testExpandBaseAsStrings_withResourceBase_returnsEveryConcreteType() {
-		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of("Resource"));
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("Resource"));
 		assertThat(result).containsExactlyInAnyOrderElementsOf(myCtx.getResourceTypes());
 	}
 
 	// Created by Claude Opus 4.7
 	@Test
 	void testExpandBaseAsStrings_withDomainResourceBase_returnsOnlyDomainResourceDerivedTypes() {
-		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of("DomainResource"));
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("DomainResource"));
 		// DomainResource-derived (common examples)
 		assertThat(result).contains("Patient", "Observation", "Practitioner", "Encounter");
 		// Non-DomainResource types (extend Resource directly)
@@ -158,7 +158,7 @@ class SearchParameterUtilTest {
 	// Created by Claude Opus 4.7
 	@Test
 	void testExpandBaseAsStrings_withCanonicalResourceBase_returnsOnlyCanonicalResourceDerivedTypes() {
-		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of("CanonicalResource"));
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("CanonicalResource"));
 		// CanonicalResource-derived
 		assertThat(result).contains("StructureDefinition", "ValueSet", "CodeSystem", "SearchParameter");
 		// Not CanonicalResource-derived (plain DomainResource)
@@ -168,7 +168,7 @@ class SearchParameterUtilTest {
 	// Created by Claude Opus 4.7
 	@Test
 	void testExpandBaseAsStrings_withMetadataResourceBase_returnsOnlyMetadataResourceDerivedTypes() {
-		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of("MetadataResource"));
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("MetadataResource"));
 		// MetadataResource-derived
 		assertThat(result).contains("Library", "Measure", "PlanDefinition", "ActivityDefinition");
 		// CanonicalResource but not MetadataResource (no status/date metadata block)
@@ -180,7 +180,7 @@ class SearchParameterUtilTest {
 	// Created by Claude Opus 4.7
 	@Test
 	void testExpandBaseAsStrings_withMixedConcreteAndAbstractBase_unionsConcreteAndExpandedTypes() {
-		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of("Patient", "DomainResource"));
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("Patient", "DomainResource"));
 		// Patient is preserved, DomainResource expands to all DomainResource-derived concrete types
 		assertThat(result).contains("Patient", "Observation", "Practitioner");
 		assertThat(result).doesNotContain("Bundle", "Binary");
@@ -189,14 +189,14 @@ class SearchParameterUtilTest {
 	// Created by Claude Opus 4.7
 	@Test
 	void testExpandBaseAsStrings_withOnlyConcreteBases_returnsInputUnchanged() {
-		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of("Patient", "Observation"));
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("Patient", "Observation"));
 		assertThat(result).containsExactly("Patient", "Observation");
 	}
 
 	// Created by Claude Opus 4.7
 	@Test
 	void testExpandBaseAsStrings_withEmptyList_returnsEmpty() {
-		List<String> result = SearchParameterUtil.expandBaseAsStrings(myCtx, List.of());
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of());
 		assertThat(result).isEmpty();
 	}
 
