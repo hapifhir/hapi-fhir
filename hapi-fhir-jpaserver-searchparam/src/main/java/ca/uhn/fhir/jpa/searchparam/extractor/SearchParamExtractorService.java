@@ -588,6 +588,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 						theRequestPartitionId,
 						theExistingParams,
 						theNewParams,
+						theResource,
 						theEntity,
 						theTransactionDetails,
 						sourceResourceName,
@@ -605,6 +606,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 			RequestPartitionId theRequestPartitionId,
 			ResourceIndexedSearchParams theExistingParams,
 			ResourceIndexedSearchParams theNewParams,
+			IBaseResource theResource,
 			ResourceTable theEntity,
 			TransactionDetails theTransactionDetails,
 			String theSourceResourceName,
@@ -776,6 +778,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 						theRequestPartitionId,
 						theSourceResourceName,
 						thePathAndRef,
+						theResource,
 						theEntity,
 						transactionDate,
 						nextId,
@@ -988,6 +991,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 			RequestPartitionId theRequestPartitionId,
 			String theSourceResourceName,
 			PathAndRef thePathAndRef,
+			IBaseResource theResource,
 			ResourceTable theEntity,
 			Date theUpdateTime,
 			IIdType theNextId,
@@ -1032,6 +1036,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 				if (compositeBroadcaster.hasHooks(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE)) {
 					CrossPartitionReferenceDetails referenceDetails = new CrossPartitionReferenceDetails(
+							theResource,
 							theRequestPartitionId,
 							theSourceResourceName,
 							thePathAndRef,
@@ -1046,6 +1051,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 						requestPartitionId = RequestPartitionId.fromPartitionId(resolvedResourceId.getPartitionId());
 					}
 					targetResource = myResourceLinkResolver.findTargetResource(
+							theResource,
 							requestPartitionId,
 							theSourceResourceName,
 							thePathAndRef,
@@ -1055,11 +1061,21 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 
 			} else {
 				targetResource = myResourceLinkResolver.findTargetResource(
-						theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+						theResource,
+						theRequestPartitionId,
+						theSourceResourceName,
+						thePathAndRef,
+						theRequest,
+						theTransactionDetails);
 			}
 		} else {
 			targetResource = myResourceLinkResolver.findTargetResource(
-					theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+					theResource,
+					theRequestPartitionId,
+					theSourceResourceName,
+					thePathAndRef,
+					theRequest,
+					theTransactionDetails);
 		}
 
 		if (targetResource == null) {

@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTypeInterceptor;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirPatchBuilder;
 import ca.uhn.fhir.util.FhirTerser;
@@ -51,6 +52,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -80,6 +82,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Arrays;
@@ -224,13 +227,29 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		createPatient(withId("A"), withActiveTrue());
 		createPatient(withId("B"), withActiveTrue());
 
-		// Test / Verify
+		// Test
 		Provenance provenance = new Provenance();
 		provenance.addTarget().setReference("Patient/A");
 		provenance.addTarget().setReference("Patient/B");
-		assertThatThrownBy(()->myProvenanceDao.create(provenance, newSrd()))
-			.isInstanceOf(InvalidRequestException.class)
-			.hasMessageContaining("Policy does not allow resource of type \"Provenance\" to be created in multiple Patient compartments: Patient/A, Patient/B");
+		IIdType provenanceId = myProvenanceDao.create(provenance, newSrd()).getId();
+
+		// Verify - default policy for Provenance is NON_UNIQUE_COMPARTMENT_IN_DEFAULT,
+		// so multi-patient Provenance goes to default partition
+		assertResourceIsInPartition(ALTERNATE_DEFAULT_ID, provenanceId);
+	}
+
+	@Test
+	void testCreateProvenance_NoPatientCompartment() {
+		// Setup
+		createResource("Organization", withId("O"), withName("Test Org"));
+
+		// Test
+		Provenance provenance = new Provenance();
+		provenance.addTarget().setReference("Organization/O");
+		IIdType provenanceId = myProvenanceDao.create(provenance, newSrd()).getId();
+
+		// Verify - Provenance with no Patient targets goes to default partition
+		assertResourceIsInPartition(ALTERNATE_DEFAULT_ID, provenanceId);
 	}
 
 	@ParameterizedTest
@@ -328,6 +347,33 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			assertEquals("Encounter", observation.getResourceType());
 			assertEquals(65, observation.getPartitionId().getPartitionId());
 		});
+	}
+
+	/**
+	 * SMILE-11985
+	 */
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testCreateEob_AutoPlaceholderCreationOfOtherResourceInCompartment(boolean theRegisterOtherInterceptor) {
+		// Setup
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		if (theRegisterOtherInterceptor) {
+			AutoCreatePlaceholderReferenceEnabledByTypeInterceptor interceptor = new AutoCreatePlaceholderReferenceEnabledByTypeInterceptor("Patient", "Coverage");
+			registerInterceptor(interceptor);
+		}
+
+		// Test
+		ExplanationOfBenefit request = new ExplanationOfBenefit();
+		request.setId("A");
+		request.setPatient(new Reference("Patient/PAT1"));
+		request.addInsurance().setCoverage(new Reference("Coverage/COV1"));
+
+		myExplanationOfBenefitDao.update(request, newSrd());
+
+		 // Verify
+		Coverage actualCoverage = myCoverageDao.read(new IdType("Coverage/COV1"), newSrd());
+		List<IIdType> compartmentOwners = myFhirContext.newTerser().getCompartmentOwnersForResource("Patient", actualCoverage, Set.of());
+		assertThat(compartmentOwners).containsExactly(new IdType("Patient/PAT1"));
 	}
 
 	/**
