@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -586,51 +587,41 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 
 	@Test
-	void applyDeltaCodeSystemsAdd_lookupCode_returnsNewConcept() {
-		createNotPresentCodeSystem();
-
-		// Lookup primes the cache with "not found"
-		IValidationSupport.LookupCodeResult before = myTermSvc.lookupCode(
-			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
-		assertThat(before).isNotNull();
-		assertThat(before.isFound()).isFalse();
-
-		// Delta-add the concept
+	void deltaRemove_lookupCode_removedCodeNotFound() {
+		// Setup: create code system and add a concept
 		CustomTerminologySet delta = new CustomTerminologySet();
 		delta.addRootConcept("codeA", "displayA");
+		delta.addRootConcept("codeB", "displayB");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 
-		// Lookup should now find it
-		IValidationSupport.LookupCodeResult after = myTermSvc.lookupCode(
+		// Verify lookupCode succeeds for both codes
+		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
 			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
-		assertThat(after).isNotNull();
-		assertThat(after.isFound()).isTrue();
-		assertThat(after.getCodeDisplay()).isEqualTo("displayA");
-	}
+		assertThat(resultA).isNotNull();
+		assertThat(resultA.isFound()).isTrue();
+		assertThat(resultA.getCodeDisplay()).isEqualTo("displayA");
 
-	@Test
-	void applyDeltaCodeSystemsRemove_lookupCode_returnsNotFound() {
-		createNotPresentCodeSystem();
-		CustomTerminologySet delta = new CustomTerminologySet();
-		delta.addRootConcept("codeA", "displayA");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+		IValidationSupport.LookupCodeResult resultB = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
+		assertThat(resultB).isNotNull();
+		assertThat(resultB.isFound()).isTrue();
 
-		// Lookup primes the cache with "found"
-		IValidationSupport.LookupCodeResult before = myTermSvc.lookupCode(
-			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
-		assertThat(before).isNotNull();
-		assertThat(before.isFound()).isTrue();
-
-		// Delta-remove the concept
+		// Remove codeA
 		CustomTerminologySet removeDelta = new CustomTerminologySet();
 		removeDelta.addRootConcept("codeA");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", removeDelta);
 
-		// Lookup should no longer find it
-		IValidationSupport.LookupCodeResult after = myTermSvc.lookupCode(
+		// Verify lookupCode fails for removed code and succeeds for remaining code
+		IValidationSupport.LookupCodeResult afterRemoveA = myTermSvc.lookupCode(
 			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
-		assertThat(after).isNotNull();
-		assertThat(after.isFound()).isFalse();
+		assertThat(afterRemoveA).isNotNull();
+		assertThat(afterRemoveA.isFound()).isFalse();
+
+		IValidationSupport.LookupCodeResult afterRemoveB = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
+		assertThat(afterRemoveB).isNotNull();
+		assertThat(afterRemoveB.isFound()).isTrue();
+		assertThat(afterRemoveB.getCodeDisplay()).isEqualTo("displayB");
 	}
 
 	@Test
@@ -656,6 +647,102 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		return vs;
 	}
 
+	@Test
+	void deltaAdd_lookupCode_subsequentAddReflectsNewCode() {
+		// Add initial code and verify it is found
+		CustomTerminologySet delta = new CustomTerminologySet();
+		delta.addRootConcept("codeA", "displayA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+
+		IValidationSupport.LookupCodeResult resultA = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeA"));
+		assertThat(resultA).isNotNull();
+		assertThat(resultA.isFound()).isTrue();
+
+		// Lookup a not-yet-added code to prime the cache with the current code system version
+		IValidationSupport.LookupCodeResult resultBBefore = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
+		assertThat(resultBBefore).isNotNull();
+		assertThat(resultBBefore.isFound()).isFalse();
+
+		// Add codeB — the code system version cache must be invalidated so the new code is visible
+		CustomTerminologySet delta2 = new CustomTerminologySet();
+		delta2.addRootConcept("codeB", "displayB");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta2);
+
+		IValidationSupport.LookupCodeResult resultBAfter = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo/cs", "codeB"));
+		assertThat(resultBAfter).isNotNull();
+		assertThat(resultBAfter.isFound()).isTrue();
+		assertThat(resultBAfter.getCodeDisplay()).isEqualTo("displayB");
+	}
+
+	@Test
+	void deltaAdd_lookupCode_codeSystemCreatedAfterInitialMiss() {
+		// Lookup a code from a system that does not exist yet —
+		// the NO_CURRENT_VERSION sentinel is cached for "http://new/cs"
+		IValidationSupport.LookupCodeResult initialResult = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://new/cs", "codeA"));
+		assertThat(initialResult).isNotNull();
+		assertThat(initialResult.isFound()).isFalse();
+
+		// Create the code system — the sentinel must be evicted from the cache
+		CustomTerminologySet delta = new CustomTerminologySet();
+		delta.addRootConcept("codeA", "displayA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://new/cs", delta);
+
+		// Lookup must now succeed
+		IValidationSupport.LookupCodeResult afterCreate = myTermSvc.lookupCode(
+			new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://new/cs", "codeA"));
+		assertThat(afterCreate).isNotNull();
+		assertThat(afterCreate.isFound()).isTrue();
+		assertThat(afterCreate.getCodeDisplay()).isEqualTo("displayA");
+	}
+
+	@Test
+	void deltaAdd_validateCode_preExpandedValueSetReflectsNewCode() {
+		// Setup: NOTPRESENT CodeSystem + ValueSet that includes all its codes
+		createNotPresentCodeSystem();
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://foo/vs");
+		vs.getCompose().addInclude().setSystem("http://foo/cs");
+		myValueSetDao.create(vs, mySrd);
+
+		// Add initial code and pre-expand the ValueSet
+		CustomTerminologySet delta = new CustomTerminologySet();
+		delta.addRootConcept("codeA", "displayA");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Validate via the pre-expanded path — populates myValueSetCache
+		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+		IValidationSupport.CodeValidationResult resultA = myValidationSupport.validateCode(ctx, options, "http://foo/cs", "codeA", null, "http://foo/vs");
+		assertThat(resultA).isNotNull();
+		assertThat(resultA.isOk()).isTrue();
+
+		// codeB is not in the expansion yet
+		IValidationSupport.CodeValidationResult resultBBefore = myValidationSupport.validateCode(ctx, options, "http://foo/cs", "codeB", null, "http://foo/vs");
+		assertThat(resultBBefore).isNotNull();
+		assertThat(resultBBefore.isOk()).isFalse();
+
+		// Add codeB — triggers invalidateCaches() which clears myValueSetCache.
+		// Also explicitly invalidate the pre-calculated expansion so the VS is re-expanded
+		// with the updated CodeSystem content (delta add does not automatically re-queue VS expansion).
+		CustomTerminologySet delta2 = new CustomTerminologySet();
+		delta2.addRootConcept("codeB", "displayB");
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta2);
+		myTermSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem("http://foo/cs");
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// codeB must now validate successfully against the updated pre-expanded ValueSet
+		IValidationSupport.CodeValidationResult resultBAfter = myValidationSupport.validateCode(ctx, options, "http://foo/cs", "codeB", null, "http://foo/vs");
+		assertThat(resultBAfter).isNotNull();
+		assertThat(resultBAfter.isOk()).isTrue();
+	}
+
 	private void createNotPresentCodeSystem() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://foo/cs");
@@ -664,3 +751,4 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	}
 
 }
+

@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 7796
+title: "When validating a code against a CodeSystem whose content is set to not-present,
+   the JPA terminology service now falls through to downstream validators in the
+   ValidationSupportChain (such as the UCUM validator) instead of returning a
+   code-not-found error. This fixes a regression where loading an Implementation Guide
+   that depends on hl7.terminology.r4 (which ships a not-present UCUM stub) silently
+   broke UCUM code validation on JPA servers."

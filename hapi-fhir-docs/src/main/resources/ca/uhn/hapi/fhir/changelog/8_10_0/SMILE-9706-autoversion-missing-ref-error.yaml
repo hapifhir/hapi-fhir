@@ -1,0 +1,8 @@
+---
+type: fix
+jira: SMILE-9706
+title: "Previously, when autoVersionReferenceAtPaths was configured and a resource was stored
+  referencing a non-existent target, the server would return HTTP 404 with a cryptic
+  HAPI-0523 error instead of the expected HTTP 400 with a descriptive referential integrity
+  error (HAPI-1094). The auto-versioning logic now skips unresolvable references and allows
+  the downstream referential integrity check to produce the correct error response."
