@@ -250,9 +250,12 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@ParameterizedTest
 	@MethodSource("nonDisableableBuiltInSearchParams")
-	void testBuiltInNonDisableableSp_whenRetired_throwsException(SearchParameter theSp) {
+	void testBuiltInNonDisableableSp_whenUpdatedToRetired_throwsException(SearchParameter theSpRetired) {
+		SearchParameter spActive = theSpRetired.copy();
+		spActive.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
 		// Created by Claude Sonnet 4.6
-		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, theSp, myRequestDetails))
+		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(spActive, theSpRetired, myRequestDetails))
 				.isInstanceOf(UnprocessableEntityException.class)
 				.hasMessageContaining("2875");
 	}
@@ -265,17 +268,21 @@ public class SearchParameterValidatingInterceptorTest {
 
 		// Retiring a custom (non-built-in URL) SP on Subscription must NOT be blocked
 		// since custom SPs are not critical for internal system calls
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/custom-sub-foo");
-		sp.setUrl("http://example.com/fhir/SearchParameter/Subscription-foo");
-		sp.setCode("foo");
-		sp.setName("foo");
-		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		sp.setType(Enumerations.SearchParamType.TOKEN);
-		sp.setExpression("Subscription.status");
-		sp.addBase("Subscription");
+		SearchParameter spRetired = new SearchParameter();
+		spRetired.setId("SearchParameter/custom-sub-foo");
+		spRetired.setUrl("http://example.com/fhir/SearchParameter/Subscription-foo");
+		spRetired.setCode("foo");
+		spRetired.setName("foo");
+		spRetired.setStatus(Enumerations.PublicationStatus.RETIRED);
+		spRetired.setType(Enumerations.SearchParamType.TOKEN);
+		spRetired.setExpression("Subscription.status");
+		spRetired.addBase("Subscription");
 
-		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails)).doesNotThrowAnyException();
+		SearchParameter spActive = spRetired.copy();
+		spActive.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(spActive, spRetired, myRequestDetails)).doesNotThrowAnyException();
+		assertThatCode(() -> mySearchParamValidatingInterceptor.resourcePreCreate(spRetired, myRequestDetails)).doesNotThrowAnyException();
 	}
 
 	@Test
@@ -283,18 +290,12 @@ public class SearchParameterValidatingInterceptorTest {
 		// Created by Claude Sonnet 4.6
 		// clinical-patient spans [Basic (non-disableable), Condition (disableable)].
 		// Retiring the whole SP must be blocked because Basic:* is non-disableable.
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/clinical-patient");
-		sp.setUrl("http://hl7.org/fhir/SearchParameter/clinical-patient");
-		sp.setCode("patient");
-		sp.setName("patient");
-		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		sp.setType(Enumerations.SearchParamType.REFERENCE);
-		sp.setExpression("Basic.subject.where(resolve() is Patient) | Condition.subject.where(resolve() is Patient)");
-		sp.addBase("Basic");
-		sp.addBase("Condition");
+		SearchParameter spRetired = buildClinicalPatientSp(Enumerations.PublicationStatus.RETIRED, "Basic", "Condition");
 
-		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(null, sp, myRequestDetails))
+		SearchParameter spActive = spRetired.copy();
+		spActive.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(spActive, spRetired, myRequestDetails))
 				.isInstanceOf(UnprocessableEntityException.class)
 				.hasMessageContaining("2875");
 	}
@@ -359,7 +360,7 @@ public class SearchParameterValidatingInterceptorTest {
 		sp.setName("patient");
 		sp.setStatus(theStatus);
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
-		sp.setExpression("Basic.subject | Condition.subject");
+		sp.setExpression("Basic.subject.where(resolve() is Patient) | Condition.subject.where(resolve() is Patient)");
 		for (String base : theBases) {
 			sp.addBase(base);
 		}
