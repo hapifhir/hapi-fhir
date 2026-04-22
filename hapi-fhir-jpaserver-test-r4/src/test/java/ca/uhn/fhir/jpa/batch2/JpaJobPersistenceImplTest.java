@@ -656,8 +656,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Verify
 		runInTransaction(() -> {
 			// It should be cancelled
-			Batch2JobInstanceEntity storedInstance = myJobInstanceRepository.findById(id).orElse(null);
-			assertNull(storedInstance);
+			Optional<Batch2JobInstanceEntity> optionalInstance = myJobInstanceRepository.findById(id);
+			assertThat(optionalInstance).isEmpty();
 		});
 
 	}
