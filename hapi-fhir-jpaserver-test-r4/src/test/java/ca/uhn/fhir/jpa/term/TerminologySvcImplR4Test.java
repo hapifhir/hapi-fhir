@@ -256,6 +256,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ParentWithNoChildrenA", null, null);
 		assertTrue(validation.isOk());
 
+		// The CodeSystem created by createCodeSystem() has content=not-present BUT it is backed by a
+		// local TermCodeSystem row populated with concepts. In that case the local DB is authoritative
+		// for this CodeSystem, so a miss must surface as a "code not found" error — not a fall-through.
+		// See GH-7796 / TermReadSvcImpl#isCodeSystemNotPresentAndHasNoLocalContent.
 		validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ZZZZZZZ", null, null);
 		assertFalse(validation.isOk());
 	}

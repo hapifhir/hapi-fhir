@@ -2294,6 +2294,14 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			append = " - " + unknownCodeMessage + ". " + preExpansionMessage;
 		}
 
+		if (isNotBlank(theSystem)
+				&& isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theSystem)) {
+			// The included CodeSystem is content=not-present with no local concepts, so fall
+			// through to the next validator in the chain rather than short-circuiting with a
+			// non-null "not found".
+			return null;
+		}
+
 		return createCodeNotFoundErrorForValidationResult(theSystem, theCode, null, append);
 	}
 
@@ -2911,6 +2919,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				return result;
 
 			} else {
+				if (isNotBlank(theSystem)
+						&& isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theSystem)) {
+					// Fall through to the next validator in the chain (e.g. UCUM, remote
+					// terminology) rather than short-circuiting with a non-null "not found" result.
+					return null;
+				}
 				return new LookupCodeResult().setFound(false);
 			}
 		});
@@ -3019,8 +3033,67 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 		}
 
+		if (isNotBlank(theCodeSystemUrl)
+				&& Boolean.TRUE.equals(txTemplate.execute(tx ->
+						isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theCodeSystemUrl)))) {
+			return null;
+		}
+
 		return createCodeNotFoundErrorForValidationResult(
 				theCodeSystemUrl, theCode, null, createMessageAppendForCodeNotFoundInCodeSystem(theCodeSystemUrl));
+	}
+
+	/**
+	 * Returns <code>true</code> when the CodeSystem identified by the given URL is a purely
+	 * algorithmic (content=not-present) code system with <b>no</b> local {@link TermCodeSystem}
+	 * row — i.e. the local term DB does not back this CodeSystem at all. In that case callers
+	 * should fall through to the next validator in the chain (e.g. UCUM, remote terminology)
+	 * rather than returning "not found" on a miss.
+	 * <p>
+	 * Returns <code>false</code> when either:
+	 * <ul>
+	 *     <li>The CodeSystem does not declare <code>content=not-present</code>, or</li>
+	 *     <li>A {@link TermCodeSystem} row exists for this URL. In that case the local DB is
+	 *         authoritative even if its concept count is zero — e.g. LOINC loaded via
+	 *         {@code TermLoaderSvcImpl.loadLoinc(...)}, codes populated via
+	 *         <code>$apply-codesystem-delta-add</code>, or an empty container created up-front
+	 *         as a delta-add target. Missing codes in these cases must surface as
+	 *         "code not found".</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * The helper operates on the R4 canonical form produced by {@link VersionCanonicalizer#codeSystemToCanonical(IBaseResource)}.
+	 * If the CodeSystem cannot be located or cannot be canonicalized, it returns <code>false</code>
+	 * so the caller preserves the existing "code not found" behavior.
+	 * </p>
+	 */
+	boolean isCodeSystemNotPresentAndHasNoLocalContent(
+			@Nonnull ValidationSupportContext theValidationSupportContext, String theCodeSystemUrl) {
+		IBaseResource codeSystem =
+				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemUrl);
+		if (codeSystem == null) {
+			return false;
+		}
+		CodeSystem canonical = myVersionCanonicalizer.codeSystemToCanonical(codeSystem);
+		if (canonical == null) {
+			return false;
+		}
+		if (canonical.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+			return false;
+		}
+		return !hasLocalTermCodeSystem(theCodeSystemUrl);
+	}
+
+	/**
+	 * Checks whether a {@link TermCodeSystem} row exists in the local term DB for the given URL.
+	 * An existing row — even one whose current version has zero concepts — means the local DB is
+	 * the authoritative source for this CodeSystem (e.g. delta-add target, loader-populated).
+	 */
+	private boolean hasLocalTermCodeSystem(String theCodeSystemUrl) {
+		if (myCodeSystemDao == null) {
+			return false;
+		}
+		return myCodeSystemDao.findByCodeSystemUri(theCodeSystemUrl) != null;
 	}
 
 	IValidationSupport.CodeValidationResult validateCodeInValueSet(
