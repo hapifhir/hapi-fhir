@@ -462,33 +462,8 @@ public class SearchParamRegistryImpl
 			return 0;
 		}
 
-		/*
-		 * If the SP from the database is not active and it is a built-in non-disableable
-		 * search parameter, do not override the built-in ACTIVE version in the cache with
-		 * the retired/inactive DB version. This protects critical system search parameters
-		 * (e.g. Basic:code needed by the R4 SubscriptionTopic registry) from being
-		 * effectively retired even when the DB record has been updated.
-		 *
-		 * Non-disableable SPs should not be retirable via normal API calls or DB seeding
-		 * (those layers have their own guards), but this acts as a last-resort safety net
-		 * at the cache layer. It is (currently) intentionally all-or-nothing — since this
-		 * method manages cache initialization, not SP base narrowing, so returning 0 is
-		 * simpler and safer than base narrowing here. As a consequence, for SPs spanning
-		 * both non-disableable and disableable bases, the full built-in entry is preserved
-		 * in cache. For example, if clinical-patient (bases: Basic, Condition) is somehow
-		 * fully retired in the DB, Condition-based searches will still be active in cache
-		 * because Basic.patient is mandatory. Base narrowing is the responsibility of the
-		 * DB seeding layer.
-		 */
-		if (newRuntimeSp.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
-			for (String nextBase : newRuntimeSp.getBase()) {
-				if (isNonDisableableBuiltInSearchParam(newRuntimeSp.getUri(), nextBase, newRuntimeSp.getName())) {
-					ourLog.warn(
-							"Attempted to disable a non-disableable search parameter. {} will remain active in cache.",
-							newRuntimeSp.getUri());
-					return 0;
-				}
-			}
+		if (isRetiringNonDisableableSearchParam(newRuntimeSp)) {
+			return 0;
 		}
 
 		/*
@@ -499,24 +474,10 @@ public class SearchParamRegistryImpl
 		String url = newRuntimeSp.getUri();
 		RuntimeSearchParam existingParam = theSearchParams.getByUrl(url);
 		if (existingParam != null) {
-			/*
-			 * If the DB record removes a non-disableable base that the existing cached entry
-			 * has, ignore the DB record and preserve the existing cache entry entirely.
-			 * This handles the case where status=active but the base list was narrowed to
-			 * exclude a mandatory base (the status != ACTIVE guard above handles the retired case
-			 * when the non-disableable base is still declared in the new record's base list).
-			 */
-			for (String nextBase : existingParam.getBase()) {
-				if (isNonDisableableBuiltInSearchParam(newRuntimeSp.getUri(), nextBase, newRuntimeSp.getName())
-						&& !newRuntimeSp.getBase().contains(nextBase)) {
-					ourLog.warn(
-							"SearchParameter {} is missing required non-disableable base '{}' in the database record. "
-									+ "Ignoring the database record and preserving the existing cache entry.",
-							newRuntimeSp.getUri(),
-							nextBase);
-					return 0;
-				}
+			if (isNarrowingNonDisableableSearchParamBase(existingParam, newRuntimeSp)) {
+				return 0;
 			}
+
 			if (isNotBlank(existingParam.getName()) && !existingParam.getName().equals(newRuntimeSp.getName())) {
 				ourLog.warn(
 						"Existing SearchParameter with URL[{}] and name[{}] doesn't match name[{}] found on SearchParameter: {}",
@@ -544,6 +505,68 @@ public class SearchParamRegistryImpl
 			retval++;
 		}
 		return retval;
+	}
+
+	/**
+	 * If the SP from the database is not active and it is a built-in non-disableable
+	 * search parameter, do not override the built-in ACTIVE version in the cache with
+	 * the retired/inactive DB version. This protects critical system search parameters
+	 * (e.g. Basic:code needed by the R4 SubscriptionTopic registry) from being
+	 * effectively retired even when the DB record has been updated.
+	 *
+	 * <p>Non-disableable SPs should not be retirable via normal API calls or DB seeding
+	 * (those layers have their own guards), but this acts as a last-resort safety net
+	 * at the cache layer. It is (currently) intentionally all-or-nothing — since this
+	 * method manages cache initialization, not SP base narrowing, so returning 0 is
+	 * simpler and safer than base narrowing here. As a consequence, for SPs spanning
+	 * both non-disableable and disableable bases, the full built-in entry is preserved
+	 * in cache. For example, if clinical-patient (bases: Basic, Condition) is somehow
+	 * fully retired in the DB, Condition-based searches will still be active in cache
+	 * because Basic.patient is mandatory. Base narrowing is the responsibility of the
+	 * DB seeding layer.
+	 * @param theNewRuntimeSp the SP from DB to potentially load into cache
+	 * @return true if the SP is non-disableable, and would be retired (evicted) from cache.
+	 * 		   false otherwise.
+	 */
+	private boolean isRetiringNonDisableableSearchParam(RuntimeSearchParam theNewRuntimeSp) {
+		if (theNewRuntimeSp.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
+			for (String nextBase : theNewRuntimeSp.getBase()) {
+				if (isNonDisableableBuiltInSearchParam(theNewRuntimeSp.getUri(), nextBase, theNewRuntimeSp.getName())) {
+					ourLog.warn(
+							"Attempted to disable a non-disableable search parameter. {} will remain active in cache.",
+							theNewRuntimeSp.getUri());
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * If the DB record removes a non-disableable base that the existing cached entry
+	 * has, ignore the DB record and preserve the existing cache entry entirely.
+	 * This handles the case where status=active but the base list was narrowed to
+	 * exclude a mandatory base (the status != ACTIVE guard above handles the retired case
+	 * when the non-disableable base is still declared in the new record's base list).
+	 * @param theExistingParam the SP that is currently in cache that may be overriden by DB
+	 * @param theNewRuntimeSp the SP from DB to potentially load into cache
+	 * @return true if the a non-disableable base would be removed from the cache.
+	 *  	   false otherwise.
+	 */
+	private boolean isNarrowingNonDisableableSearchParamBase(
+			RuntimeSearchParam theExistingParam, RuntimeSearchParam theNewRuntimeSp) {
+		for (String nextBase : theExistingParam.getBase()) {
+			if (isNonDisableableBuiltInSearchParam(theNewRuntimeSp.getUri(), nextBase, theNewRuntimeSp.getName())
+					&& !theNewRuntimeSp.getBase().contains(nextBase)) {
+				ourLog.warn(
+						"SearchParameter {} is missing required non-disableable base '{}' in the database record. "
+								+ "Ignoring the database record and preserving the existing cache entry.",
+						theNewRuntimeSp.getUri(),
+						nextBase);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private @Nonnull Set<String> expandBaseList(Collection<String> nextBase) {
