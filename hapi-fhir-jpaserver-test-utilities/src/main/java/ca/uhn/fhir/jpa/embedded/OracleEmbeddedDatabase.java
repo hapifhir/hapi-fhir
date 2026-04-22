@@ -38,10 +38,6 @@ import java.util.Map;
 public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 	private JdbcDatabaseContainer<?> myContainer;
 
-	public OracleEmbeddedDatabase() {
-		this(new OracleContainer("gvenzl/oracle-xe:21-slim-faststart").withPrivilegedMode(true));
-	}
-
 	public OracleEmbeddedDatabase(JdbcDatabaseContainer<?> theContainer) {
 		myContainer = theContainer;
 		this.setInitializionSupplier(() -> {

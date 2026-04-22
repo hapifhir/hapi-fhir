@@ -1,0 +1,8 @@
+---
+type: add
+issue: 7487
+title: "When using the PatientIdPartitionInterceptor, optional resource type policies may now
+  be specified. These policies specify behaviour for resource types in the patient compartment, allowing
+  specific resource types to use specific defined partitions, and allowing resource types to be
+  created and searched even if they do not have a patient reference placing them in the
+  patient compartment."

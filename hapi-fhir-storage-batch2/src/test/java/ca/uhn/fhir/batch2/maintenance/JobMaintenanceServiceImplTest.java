@@ -44,6 +44,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,8 +54,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -577,6 +581,123 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		verify(myJobPersistence, times(2)).fetchInstances(anyInt(), eq(0));
 		assertTrue(result1.get());
 		assertTrue(result2.get());
+	}
+
+	/**
+	 * Verifies that runMaintenancePass() is a no-op while the expunge hold is active.
+	 *
+	 * <p>runMaintenancePass() uses tryAcquire() (non-blocking) on the semaphore, so it
+	 * silently skips when the semaphore is unavailable. After the hold is released,
+	 * maintenance should run normally.
+	 */
+	// Created by claude-opus-4-6
+	@Test
+	void holdMaintenanceForExpunge_whileHeld_maintenancePassSkips() throws Exception {
+		// Setup
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Collections.emptyList());
+
+		// Acquire the hold — this takes the semaphore
+		try (Closeable hold = mySvc.holdMaintenanceForExpunge()) {
+			// runMaintenancePass() tries tryAcquire(), fails, and returns immediately
+			mySvc.runMaintenancePass();
+			verify(myJobPersistence, never()).fetchInstances(anyInt(), anyInt());
+		}
+
+		// Hold released — semaphore is free, maintenance runs normally
+		mySvc.runMaintenancePass();
+		verify(myJobPersistence, times(1)).fetchInstances(anyInt(), eq(0));
+	}
+
+	/**
+	 * Verifies that holdMaintenanceForExpunge() blocks until an in-flight maintenance
+	 * pass completes, rather than failing or running concurrently.
+	 *
+	 * <p>Three threads participate:
+	 * <ol>
+	 *   <li><b>Test thread</b> (orchestrator) — coordinates the sequence via latches</li>
+	 *   <li><b>Thread B</b> (maintenanceExecutor) — runs a maintenance pass that parks
+	 *       inside fetchInstances(), holding the semaphore</li>
+	 *   <li><b>Thread C</b> (holdExecutor) — calls holdMaintenanceForExpunge(), which
+	 *       blocks on semaphore.tryAcquire() because Thread B holds it</li>
+	 * </ol>
+	 *
+	 * <p>Timeline:
+	 * <pre>
+	 * Thread B:  runMaintenancePass() → acquires semaphore → fetchInstances() → PARKS on maintenanceCanFinish
+	 * Test:      maintenanceStarted.await() returns → we know semaphore is held
+	 * Thread C:  holdMaintenanceForExpunge() → tryAcquire() → BLOCKS (semaphore held by B)
+	 * Test:      Awaitility confirms holdAcquired is still false (C is blocked)
+	 * Test:      maintenanceCanFinish.countDown() → unparks Thread B
+	 * Thread B:  fetchInstances() returns → maintenance completes → releases semaphore
+	 * Thread C:  tryAcquire() succeeds → sets holdAcquired=true → returns Closeable
+	 * Test:      holdFuture.get() returns → asserts holdAcquired is true → closes hold
+	 * </pre>
+	 */
+	// Created by claude-opus-4-6
+	@Test
+	void holdMaintenanceForExpunge_whileMaintenanceRunning_blocksUntilComplete() throws Exception {
+		CountDownLatch maintenanceStarted = new CountDownLatch(1);
+		CountDownLatch maintenanceCanFinish = new CountDownLatch(1);
+
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenAnswer(t -> {
+			maintenanceStarted.countDown();
+			maintenanceCanFinish.await();
+			return Collections.emptyList();
+		});
+
+		AtomicBoolean holdAcquired = new AtomicBoolean(false);
+		ExecutorService maintenanceExecutor = Executors.newSingleThreadExecutor();
+		ExecutorService holdExecutor = Executors.newSingleThreadExecutor();
+		try {
+			// Thread B: start maintenance — acquires semaphore, parks in fetchInstances()
+			Future<?> maintenanceFuture = maintenanceExecutor.submit(() -> mySvc.runMaintenancePass());
+			maintenanceStarted.await();
+
+			// Thread C: try to acquire hold — blocks because Thread B holds the semaphore
+			Future<Closeable> holdFuture = holdExecutor.submit(() -> {
+				Closeable hold = mySvc.holdMaintenanceForExpunge();
+				holdAcquired.set(true);
+				return hold;
+			});
+
+			// Assert Thread C is still blocked
+			await().during(200, TimeUnit.MILLISECONDS)
+					.atMost(500, TimeUnit.MILLISECONDS)
+					.untilAsserted(() -> assertThat(holdAcquired.get()).isFalse());
+
+			// Unpark Thread B — maintenance completes, semaphore released, Thread C unblocks
+			maintenanceCanFinish.countDown();
+			maintenanceFuture.get(5, TimeUnit.SECONDS);
+
+			// Thread C has acquired the hold
+			Closeable hold = holdFuture.get(5, TimeUnit.SECONDS);
+			assertThat(holdAcquired.get()).isTrue();
+			hold.close();
+		} finally {
+			maintenanceExecutor.shutdownNow();
+			holdExecutor.shutdownNow();
+		}
+	}
+
+	/**
+	 * Verifies that the Closeable returned by holdMaintenanceForExpunge() is idempotent:
+	 * calling close() multiple times does not double-release the semaphore.
+	 *
+	 * <p>If close() released the semaphore twice, a subsequent holdMaintenanceForExpunge()
+	 * call could acquire it while maintenance is already running, defeating the purpose.
+	 * After a double-close, maintenance should still run exactly once.
+	 */
+	// Created by claude-opus-4-6
+	@Test
+	void holdMaintenanceForExpunge_closeMultipleTimes_noError() throws Exception {
+		Closeable hold = mySvc.holdMaintenanceForExpunge();
+		hold.close();
+		hold.close(); // Must not double-release the semaphore
+
+		// Maintenance runs normally — proves the semaphore has exactly 1 permit
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Collections.emptyList());
+		mySvc.runMaintenancePass();
+		verify(myJobPersistence, times(1)).fetchInstances(anyInt(), eq(0));
 	}
 
 	private static Date parseTime(String theDate) {

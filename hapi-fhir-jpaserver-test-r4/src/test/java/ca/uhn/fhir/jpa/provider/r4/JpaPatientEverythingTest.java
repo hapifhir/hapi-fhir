@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -103,6 +104,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
@@ -1866,6 +1868,34 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
             }
         }
     }
+
+	@Test
+	void testEverythingOperation_shouldReturn404ForNonExistentPatient() {
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+
+		Patient patient1 = new Patient();
+		patient1.setId("patient1");
+		patient1.addName().setFamily("Smith").addGiven("John");
+		myPatientDao.update(patient1, mySrd);
+
+		Coverage coverage = new Coverage();
+		coverage.setBeneficiary(new Reference("Patient/patient1"));
+		coverage.setStatus(Coverage.CoverageStatus.ACTIVE);
+		myClient.create().resource(coverage).execute();
+
+		// Call $everything on NON-EXISTENT Patient/patient2
+		assertThatThrownBy(() -> {
+			myClient.operation()
+				.onInstance(new IdType("Patient", "patient2"))
+				.named(JpaConstants.OPERATION_EVERYTHING)
+				.withNoParameters(Parameters.class)
+				.returnResourceType(Bundle.class)
+				.execute();
+		})
+			.as("$everything for non-existent patient should throw 404 Not Found per FHIR HTTP spec")
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("patient2");
+	}
 
     private Set<String> getActualEverythingResultIds(String patientId) throws IOException {
         Bundle bundle;

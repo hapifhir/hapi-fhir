@@ -3,8 +3,8 @@ type: fix
 issue: 7430
 backport: 8.6.1
 title: "Previously, schema based initialisation on a MSSQL database created column `HFJ_RESOURCE.FHIR_ID` with 
-case-insensitive collation.  This fix ensures case-sensitive collation on the column for both schema based initialisation
-and schema migration."
+case-insensitive collation. This fix ensures case-sensitive collation on the column for both schema based initialisation
+and schema migration. Note that this may affect zero-downtime upgrades. See the upgrade notes for more details."
 
 
 

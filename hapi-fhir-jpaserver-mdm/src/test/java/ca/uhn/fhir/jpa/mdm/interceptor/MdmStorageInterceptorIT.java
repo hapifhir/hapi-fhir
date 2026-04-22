@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
@@ -24,6 +26,7 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -57,6 +60,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED;
@@ -446,6 +450,79 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		assertThat(resources).hasSize(2);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH);
+	}
+
+	/**
+	 * Verifies that the STORAGE_PRESHOW_RESOURCES interceptor is properly invoked for all related resources
+	 * when deleting a match patient that has a golden resource and a possible match.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/7541">Issue #7541</a>
+	 */
+	@Test
+	void testDeleteMatch_preShowResourcesCalledForAllRelatedResources() throws InterruptedException {
+		// setup: create match patient
+		Patient matchPatient = buildPaulPatient();
+		matchPatient.setActive(true);
+		myMdmHelper.createWithLatch(matchPatient);
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH);
+		Patient goldenPatient = getOnlyGoldenPatient();
+
+		// setup: create a possible match patient
+		Patient possibleMatchPatient = buildPaulPatient();
+		possibleMatchPatient.getNameFirstRep().setFamily(JANE_ID);
+		myMdmHelper.createWithLatch(possibleMatchPatient);
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+
+		// setup: register interceptor to capture STORAGE_PRESHOW_RESOURCES invocation per resource
+		CapturingPreShowResourcesInterceptor interceptor = new CapturingPreShowResourcesInterceptor();
+		myInterceptorService.registerInterceptor(interceptor);
+
+		// execute delete
+		try {
+			myPatientDao.delete(matchPatient.getIdElement(), new SystemRequestDetails());
+
+			// verify: total of 3 invocations
+			assertEquals(3, interceptor.getTotalInvocations());
+			// verify: STORAGE_PRESHOW_RESOURCES called for match Patient
+			String matchPatientId = matchPatient.getIdElement().toVersionless().getValue();
+			assertEquals(1, interceptor.getInvocationCountForResource(matchPatientId));
+
+			// verify: STORAGE_PRESHOW_RESOURCES called for golden resource Patient
+			String goldenPatientId = goldenPatient.getIdElement().toVersionless().getValue();
+			assertEquals(1, interceptor.getInvocationCountForResource(goldenPatientId));
+
+			// verify: STORAGE_PRESHOW_RESOURCES called for possible match Patient
+			String possibleMatchPatientId = possibleMatchPatient.getIdElement().toVersionless().getValue();
+			assertEquals(1, interceptor.getInvocationCountForResource(possibleMatchPatientId));
+		} finally {
+			myInterceptorService.unregisterInterceptor(interceptor);
+		}
+	}
+
+	private static class CapturingPreShowResourcesInterceptor {
+		private final Map<String, Integer> invocationCountByResourceId = new HashMap<>();
+
+		@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
+		public void onPreShow(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
+			if (theDetails == null) {
+				return;
+			}
+
+			for (IBaseResource resource : theDetails.getAllResources()) {
+				if (resource != null && resource.getIdElement() != null) {
+					String resourceId = resource.getIdElement().toVersionless().getValue();
+					invocationCountByResourceId.merge(resourceId, 1, Integer::sum);
+				}
+			}
+		}
+
+		public int getInvocationCountForResource(String resourceId) {
+			return invocationCountByResourceId.getOrDefault(resourceId, 0);
+		}
+
+		public int getTotalInvocations() {
+			return invocationCountByResourceId.size();
+		}
 	}
 
 	@Test
@@ -848,5 +925,94 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			new String[] { Constants.CASCADE_DELETE });
 		details.setParameters(reqParams);
 		return details;
+	}
+
+	@Test
+	void deleteLastResource_withCrossPartitionGoldenResource_works() {
+		setupCrossPartitionGoldenResource();
+		try {
+			Patient jane = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+			assertLinkCount(1);
+
+			SystemRequestDetails reqDetails = new SystemRequestDetails();
+			reqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
+
+			myPatientDao.delete(jane.getIdElement(), reqDetails);
+
+			assertThat(myMdmLinkDao.count()).isEqualTo(0);
+
+			SearchParameterMap spMap = new SearchParameterMap();
+			spMap.setLoadSynchronous(true);
+			assertThat(myPatientDao.search(spMap, reqDetails).isEmpty()).isTrue();
+		} finally {
+			teardownCrossPartitionGoldenResource();
+		}
+	}
+
+	@Test
+	void deleteNonLastSource_withCrossPartitionGoldenResource_works() {
+		setupCrossPartitionGoldenResource();
+		try {
+			Patient jane1 = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+			createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+
+			// verify setup: two MDM MATCH links to the same golden resource
+			assertThat(myMdmLinkDao.findAll()).hasSize(2);
+
+			SystemRequestDetails reqDetails = new SystemRequestDetails();
+			reqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
+
+			myPatientDao.delete(jane1.getIdElement(), reqDetails);
+
+			// golden resource and jane2 remain; exactly one link survives
+			assertThat(myMdmLinkDao.count()).isEqualTo(1);
+
+			SearchParameterMap spMap = new SearchParameterMap();
+			spMap.setLoadSynchronous(true);
+			assertThat(myPatientDao.search(spMap, reqDetails).isEmpty()).isFalse();
+		} finally {
+			teardownCrossPartitionGoldenResource();
+		}
+	}
+
+	@Test
+	void deleteLastSource_withCrossPartitionGoldenResource_softDelete_works() {
+		setupCrossPartitionGoldenResource();
+		myMdmSettings.setAutoExpungeGoldenResources(false);
+		try {
+			Patient jane = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+			assertLinkCount(1);
+
+			SystemRequestDetails reqDetails = new SystemRequestDetails();
+			reqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
+
+			// Delete the last source resource with soft-delete enabled.
+			// The golden resource is in partition 3 ("PARTITION-GOLDEN") but
+			// the request has partition 1 context — deleteGoldenResource must
+			// use an all-partitions request so the soft-delete succeeds.
+			myPatientDao.delete(jane.getIdElement(), reqDetails);
+
+			assertThat(myMdmLinkDao.count()).isEqualTo(0);
+
+			// The golden resource should be soft-deleted — search should not find it
+			assertThat(getAllGoldenPatients()).isEmpty();
+		} finally {
+			myMdmSettings.setAutoExpungeGoldenResources(true);
+			teardownCrossPartitionGoldenResource();
+		}
+	}
+
+	private void setupCrossPartitionGoldenResource() {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setUnnamedPartitionMode(false);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(3).setName("PARTITION-GOLDEN"), null);
+		myMdmSettings.setGoldenResourcePartitionName("PARTITION-GOLDEN");
+		myMdmSettings.setSearchAllPartitionForMatch(true);
+	}
+
+	private void teardownCrossPartitionGoldenResource() {
+		myMdmSettings.setGoldenResourcePartitionName("");
+		myMdmSettings.setSearchAllPartitionForMatch(false);
 	}
 }

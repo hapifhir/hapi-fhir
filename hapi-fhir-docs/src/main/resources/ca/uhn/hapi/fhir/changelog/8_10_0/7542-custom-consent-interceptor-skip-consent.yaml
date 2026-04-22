@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7542
+title: "Custom consent interceptors can now skip consent."

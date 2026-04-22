@@ -96,6 +96,7 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndexedCombo
 	private Long myId;
 
 	@ManyToOne(
+			fetch = jakarta.persistence.FetchType.LAZY,
 			optional = false,
 			cascade = {})
 	@JoinColumns(

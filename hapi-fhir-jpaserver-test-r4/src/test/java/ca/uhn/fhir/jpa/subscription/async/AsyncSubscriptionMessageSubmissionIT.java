@@ -234,7 +234,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		}
 
 		subscription.setChannel(channel);
-		postOrPutSubscription(subscription);
+		createOrUpdateSubscription(subscription);
 
 		myAsyncResourceModifiedSubmitterSvc.runDeliveryPass();
 

@@ -36,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.Date;
@@ -116,7 +115,7 @@ public class MergeResourceHelper {
 	public void createProvenance(
 			IBaseResource theSourceResource,
 			IBaseResource theTargetResource,
-			List<Bundle> thePatchResultBundles,
+			List<IIdType> theChangedResourceIds,
 			boolean theIsDeleteSource,
 			RequestDetails theRequestDetails,
 			Date theStartTime,
@@ -136,7 +135,7 @@ public class MergeResourceHelper {
 		myProvenanceSvc.createProvenance(
 				theTargetResource.getIdElement(),
 				sourceIdForProvenance,
-				thePatchResultBundles,
+				theChangedResourceIds,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
@@ -200,6 +199,8 @@ public class MergeResourceHelper {
 					myFhirTerser.getSingleValueOrNull(theSourceResource, "active", IPrimitiveType.class);
 			if (activePrimitive != null) {
 				activePrimitive.setValueAsString("false");
+			} else {
+				myFhirTerser.addElement(theSourceResource, "active", "false");
 			}
 		}
 

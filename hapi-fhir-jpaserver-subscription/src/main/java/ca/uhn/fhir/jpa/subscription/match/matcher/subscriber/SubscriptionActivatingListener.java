@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
@@ -142,14 +143,14 @@ public class SubscriptionActivatingListener implements IMessageListener<Resource
 	@SuppressWarnings("unchecked")
 	private boolean activateSubscription(final IBaseResource theSubscription) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
-		SystemRequestDetails srd = SystemRequestDetails.forAllPartitions();
-
 		IBaseResource subscription = null;
 		try {
 			// read can throw ResourceGoneException
 			// if this happens, we will treat this as a failure to activate
-			subscription =
-					subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
+
+			SystemRequestDetails srdForRead = SystemRequestDetails.forAllPartitions();
+			ConsentInterceptor.skipAllConsentForRequest(srdForRead);
+			subscription = subscriptionDao.read(theSubscription.getIdElement(), srdForRead);
 			subscription.setId(subscription.getIdElement().toVersionless());
 
 			ourLog.info(
@@ -161,14 +162,19 @@ public class SubscriptionActivatingListener implements IMessageListener<Resource
 
 			RequestPartitionId partitionId =
 					(RequestPartitionId) subscription.getUserData(Constants.RESOURCE_PARTITION_ID);
-			subscriptionDao.update(subscription, new SystemRequestDetails().setRequestPartitionId(partitionId));
+			SystemRequestDetails srdForUpdate = new SystemRequestDetails().setRequestPartitionId(partitionId);
+			ConsentInterceptor.skipAllConsentForRequest(srdForUpdate);
+			subscriptionDao.update(subscription, srdForUpdate);
 			return true;
 		} catch (final UnprocessableEntityException | ResourceGoneException e) {
 			subscription = subscription != null ? subscription : theSubscription;
-			ourLog.error("Failed to activate subscription " + subscription.getIdElement() + " : " + e.getMessage());
+			ourLog.error("Failed to activate subscription {} : {}", subscription.getIdElement(), e.getMessage());
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
 			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ERROR_STATUS);
 			SubscriptionUtil.setReason(myFhirContext, subscription, e.getMessage());
+
+			SystemRequestDetails srd = SystemRequestDetails.forAllPartitions();
+			ConsentInterceptor.skipAllConsentForRequest(srd);
 			subscriptionDao.update(subscription, srd);
 			return false;
 		}

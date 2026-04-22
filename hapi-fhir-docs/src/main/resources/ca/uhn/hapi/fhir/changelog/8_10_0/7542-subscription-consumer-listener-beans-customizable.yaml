@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7542
+title: "Subscription beans that perform DAO reads can now be extended."
+

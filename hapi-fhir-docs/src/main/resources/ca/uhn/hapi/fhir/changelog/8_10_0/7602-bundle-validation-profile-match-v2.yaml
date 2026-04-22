@@ -1,0 +1,12 @@
+---
+type: fix
+issue: 7602
+jira: SMILE-11707
+title: "Previously, validating a FHIR Bundle containing cross-referencing resources against a custom
+  Implementation Guide that constrains reference target profiles would produce false-positive
+  \"Unable to find a profile match\" errors. This occurred because the underlying InstanceValidator
+  hardcodes CHECK_VALID for bundle-internal references, bypassing the configured reference
+  validation policy. The ValidatorPolicyAdvisor and FhirDefaultPolicyAdvisor now suppress the
+  Reference_REF_CantMatchChoice message when the configured reference validation policy is not
+  CHECK_VALID, restoring the expected behaviour for servers not explicitly opting into strict
+  local reference validation."

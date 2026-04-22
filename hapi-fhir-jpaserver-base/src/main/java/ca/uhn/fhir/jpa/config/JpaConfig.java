@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchUrlJobMaintenanceSvc;
-import ca.uhn.fhir.jpa.api.svc.ITerminologyValidationSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
@@ -188,7 +187,6 @@ import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
-import ca.uhn.fhir.jpa.term.TerminologyValidationSvcImpl;
 import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulator;
 import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulatorFactory;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -231,7 +229,6 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -1018,14 +1015,6 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public ITerminologyValidationSvc terminologyValidationSvc(
-			FhirContext theFhirContext,
-			@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN) IValidationSupport theValidationSupportChain,
-			DaoRegistry theDaoRegistry) {
-		return new TerminologyValidationSvcImpl(theFhirContext, theValidationSupportChain, theDaoRegistry);
-	}
-
-	@Bean
 	public ValueSetConceptAccumulatorFactory valueSetConceptAccumulatorFactory() {
 		return new ValueSetConceptAccumulatorFactory();
 	}
@@ -1113,6 +1102,7 @@ public class JpaConfig {
 			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle,
 			Batch2TaskHelper theBatch2TaskHelper,
 			JpaStorageSettings theStorageSettings,
+			PartitionSettings thePartitionSettings,
 			ReplaceReferencesProvenanceSvc theProvenanceSvc) {
 		return new ReplaceReferencesSvcImpl(
 				theDaoRegistry,
@@ -1122,6 +1112,7 @@ public class JpaConfig {
 				theReplaceReferencesPatchBundle,
 				theBatch2TaskHelper,
 				theStorageSettings,
+				thePartitionSettings,
 				theProvenanceSvc);
 	}
 

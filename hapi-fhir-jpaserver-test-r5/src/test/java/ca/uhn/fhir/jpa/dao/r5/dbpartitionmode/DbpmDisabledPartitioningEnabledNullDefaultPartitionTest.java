@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Nested;
  * not configured otherwise) - Partition IDs are in use, but they aren't
  * included in primary keys or joins.
  */
-public class DbpmDisabledPartitioningEnabledNullDefaultPartitionTest extends BaseDbpmJpaR5Test {
+public class DbpmDisabledPartitioningEnabledNullDefaultPartitionTest extends BaseDbpmResourceProviderR5Test {
 
 	@Override
 	@BeforeEach

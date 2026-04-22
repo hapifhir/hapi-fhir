@@ -66,6 +66,18 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public static final Long DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES = 60L;
 	/**
+	 * Default value for {@link #setTerminologyLookupCacheExpireAfterWriteInMinutes}: 10 minutes
+	 *
+	 * @since 8.10.0
+	 */
+	public static final long DEFAULT_TERMINOLOGY_LOOKUP_CACHE_EXPIRE_AFTER_WRITE_IN_MINUTES = 10L;
+	/**
+	 * Default value for {@link #setTerminologyLookupCacheMaximumSize}: 1000 entries
+	 *
+	 * @since 8.10.0
+	 */
+	public static final int DEFAULT_TERMINOLOGY_LOOKUP_CACHE_MAXIMUM_SIZE = 1000;
+	/**
 	 * Default {@link #setBundleTypesAllowedForStorage(Set)} value:
 	 * <ul>
 	 * <li>collection</li>
@@ -146,6 +158,12 @@ public class JpaStorageSettings extends StorageSettings {
 	@Nonnull
 	private final Long myTranslationCachesExpireAfterWriteInMinutes =
 			DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
+
+	private long myTerminologyLookupCacheExpireAfterWriteInMinutes =
+			DEFAULT_TERMINOLOGY_LOOKUP_CACHE_EXPIRE_AFTER_WRITE_IN_MINUTES;
+
+	private int myTerminologyLookupCacheMaximumSize = DEFAULT_TERMINOLOGY_LOOKUP_CACHE_MAXIMUM_SIZE;
+
 	/**
 	 * @since 5.5.0
 	 */
@@ -166,7 +184,6 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myEnforceReferentialIntegrityOnDelete = true;
 	private Set<String> myEnforceReferentialIntegrityOnDeleteDisableForPaths = Collections.emptySet();
 	private boolean myUniqueIndexesEnabled = true;
-	private boolean myUniqueIndexesCheckedBeforeSave = true;
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
 	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
@@ -595,6 +612,42 @@ public class JpaStorageSettings extends StorageSettings {
 	@Nonnull
 	public Long getTranslationCachesExpireAfterWriteInMinutes() {
 		return myTranslationCachesExpireAfterWriteInMinutes;
+	}
+
+	/**
+	 * Specifies the duration in minutes for which CodeSystem version and ValueSet entity
+	 * lookups are retained in the terminology DB-access caches. Defaults to 10.
+	 *
+	 * @since 8.10.0
+	 */
+	public long getTerminologyLookupCacheExpireAfterWriteInMinutes() {
+		return myTerminologyLookupCacheExpireAfterWriteInMinutes;
+	}
+
+	/**
+	 * @see #getTerminologyLookupCacheExpireAfterWriteInMinutes()
+	 * @since 8.10.0
+	 */
+	public void setTerminologyLookupCacheExpireAfterWriteInMinutes(long theMinutes) {
+		myTerminologyLookupCacheExpireAfterWriteInMinutes = theMinutes;
+	}
+
+	/**
+	 * Specifies the maximum number of entries retained in the terminology DB-access caches
+	 * for CodeSystem version and ValueSet entity lookups. Defaults to 1000.
+	 *
+	 * @since 8.10.0
+	 */
+	public int getTerminologyLookupCacheMaximumSize() {
+		return myTerminologyLookupCacheMaximumSize;
+	}
+
+	/**
+	 * @see #getTerminologyLookupCacheMaximumSize()
+	 * @since 8.10.0
+	 */
+	public void setTerminologyLookupCacheMaximumSize(int theSize) {
+		myTerminologyLookupCacheMaximumSize = theSize;
 	}
 
 	/**
@@ -1650,33 +1703,21 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * When using {@link #setUniqueIndexesEnabled(boolean) unique indexes}, if this
-	 * setting is set to <code>true</code> (default is <code>true</code>) the system
-	 * will test for the existence of a particular unique index value prior to saving
-	 * a new one.
-	 * <p>
-	 * This causes friendlier error messages to be generated, but adds an
-	 * extra round-trip to the database for eavh save so it can cause
-	 * a small performance hit.
-	 * </p>
+	 * @deprecated As of 8.10.0, this setting is no longer used and the server
+	 * will always use optimized logic to determine whether to test unique indexes
 	 */
+	@Deprecated(since = "8.10.0", forRemoval = true)
 	public boolean isUniqueIndexesCheckedBeforeSave() {
-		return myUniqueIndexesCheckedBeforeSave;
+		return false;
 	}
 
 	/**
-	 * When using {@link #setUniqueIndexesEnabled(boolean) unique indexes}, if this
-	 * setting is set to <code>true</code> (default is <code>true</code>) the system
-	 * will test for the existence of a particular unique index value prior to saving
-	 * a new one.
-	 * <p>
-	 * This causes friendlier error messages to be generated, but adds an
-	 * extra round-trip to the database for each save so it can cause
-	 * a small performance hit.
-	 * </p>
+	 * @deprecated As of 8.10.0, this setting is no longer used and the server
+	 * will always use optimized logic to determine whether to test unique indexes
 	 */
+	@Deprecated(since = "8.10.0", forRemoval = true)
 	public void setUniqueIndexesCheckedBeforeSave(boolean theUniqueIndexesCheckedBeforeSave) {
-		myUniqueIndexesCheckedBeforeSave = theUniqueIndexesCheckedBeforeSave;
+		// nothing
 	}
 
 	/**

@@ -841,8 +841,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * implementation
 	 *
 	 * @param requestFullPath    the full request path
-	 * @param servletContextPath the servelet context path
-	 * @param servletPath        the servelet path
+	 * @param servletContextPath the servlet context path
+	 * @param servletPath        the servlet path
 	 * @return created resource path
 	 */
 	// NOTE: Don't make this a static method!! People want to override it
@@ -1081,7 +1081,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 							&& contentType.startsWith(Constants.CT_X_FORM_URLENCODED)) {
 						String requestBody = toUtf8String(requestDetails.loadRequestContents());
 						params = UrlUtil.parseQueryStrings(theRequest.getQueryString(), requestBody);
-					} else if (theRequestType == RequestTypeEnum.GET) {
+					} else if (theRequestType == RequestTypeEnum.GET || theRequestType == RequestTypeEnum.POST) {
 						params = UrlUtil.parseQueryString(theRequest.getQueryString());
 					}
 				}

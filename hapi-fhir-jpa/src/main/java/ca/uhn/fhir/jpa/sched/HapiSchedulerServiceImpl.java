@@ -25,12 +25,12 @@ public class HapiSchedulerServiceImpl extends BaseSchedulerServiceImpl {
 	public static final String THREAD_NAME_PREFIX = "hapi-fhir-jpa-scheduler";
 
 	@Override
-	protected IHapiScheduler getLocalHapiScheduler() {
+	protected IHapiScheduler createLocalHapiScheduler() {
 		return new LocalHapiScheduler(THREAD_NAME_PREFIX, mySchedulerJobFactory);
 	}
 
 	@Override
-	protected IHapiScheduler getClusteredScheduler() {
+	protected IHapiScheduler createClusteredScheduler() {
 		return new ClusteredHapiScheduler(THREAD_NAME_PREFIX, mySchedulerJobFactory);
 	}
 }

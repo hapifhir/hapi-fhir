@@ -2217,10 +2217,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 										.findFirst()
 										.orElse(null);
 
-						if (start != null) {
+						if (start != null && start.getValue() != null) {
 							dates.add(new DateStringWrapper(start.getValue(), start.getValueAsString()));
 						}
-						if (end != null) {
+						if (end != null && end.getValue() != null) {
 							dates.add(new DateStringWrapper(end.getValue(), end.getValueAsString()));
 						}
 					}

@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.dao.DaoFailureUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IExceptionAwareRollbackAction;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -58,6 +59,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionOperations;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -65,6 +67,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 /**
  * @see IHapiTransactionService for an explanation of this class
@@ -357,6 +361,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 					return doExecuteCallback(theExecutionBuilder, theCallback);
 
 				} catch (Exception e) {
+
 					int retriesRemaining = 0;
 					int maxRetries = 0;
 					boolean exceptionIsRetriable = isRetriable(e);
@@ -365,12 +370,17 @@ public class HapiTransactionService implements IHapiTransactionService {
 						retriesRemaining = maxRetries - i;
 					}
 
+					RuntimeException runtimeException = e instanceof RuntimeException re
+							? re
+							: new InternalErrorException(Msg.code(2884) + e.getMessage(), e);
+
 					// we roll back on all exceptions.
-					theExecutionBuilder.rollbackTransactionProcessingChanges(retriesRemaining > 0);
+					runtimeException = theExecutionBuilder.rollbackTransactionProcessingChanges(
+							runtimeException, retriesRemaining > 0);
 
 					if (!exceptionIsRetriable) {
-						ourLog.debug("Unexpected transaction exception. Will not be retried.", e);
-						throw e;
+						ourLog.debug("Unexpected transaction exception. Will not be retried.", runtimeException);
+						throw runtimeException;
 					} else {
 						// We have several exceptions that we consider retriable, call all of them "version conflicts"
 						ourLog.debug("Version conflict detected", e);
@@ -380,7 +390,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 							// We are retrying.
 							sleepForRetry(i);
 						} else {
-							throwResourceVersionConflictException(i, maxRetries, e);
+							throwResourceVersionConflictException(i, maxRetries, runtimeException);
 						}
 					}
 				}
@@ -582,6 +592,14 @@ public class HapiTransactionService implements IHapiTransactionService {
 			return execute(() -> theCallback.call(myRequestPartitionId));
 		}
 
+		@Override
+		public void executeWithoutResult(IExecutionCallable<Void> theCallback) {
+			execute(() -> {
+				theCallback.call(myRequestPartitionId);
+				return null;
+			});
+		}
+
 		@VisibleForTesting
 		public RequestPartitionId getRequestPartitionIdForTesting() {
 			return myRequestPartitionId;
@@ -619,7 +637,9 @@ public class HapiTransactionService implements IHapiTransactionService {
 		 * @param theWillRetry Should be <code>true</code> if the transaction is about to be automatically retried
 		 *                     by the transaction service.
 		 */
-		void rollbackTransactionProcessingChanges(boolean theWillRetry) {
+		RuntimeException rollbackTransactionProcessingChanges(RuntimeException theCause, boolean theWillRetry) {
+			RuntimeException cause = theCause;
+
 			if (myOnRollback != null) {
 				myOnRollback.run();
 			}
@@ -635,6 +655,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 				for (int i = rollbackUndoActions.size() - 1; i >= 0; i--) {
 					Runnable rollbackUndoAction = rollbackUndoActions.get(i);
 					rollbackUndoAction.run();
+
+					if (rollbackUndoAction instanceof IExceptionAwareRollbackAction exceptionConvertingRollbackAction) {
+						cause = exceptionConvertingRollbackAction.onRollback(theCause);
+						cause = getIfNull(cause, theCause);
+					}
 				}
 
 				/*
@@ -649,6 +674,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 				myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
 				myTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
 			}
+
+			return cause;
 		}
 	}
 
@@ -728,5 +755,23 @@ public class HapiTransactionService implements IHapiTransactionService {
 		Validate.isTrue(
 				TransactionSynchronizationManager.isActualTransactionActive(),
 				"Transaction required here but no active transaction found");
+	}
+
+	/**
+	 * Registers a {@link Runnable} to be executed after the current active transaction is successfully committed,
+	 * using the {@link TransactionSynchronization#afterCommit()} callback. If no transaction is active, the runnable
+	 * is executed immediately.
+	 */
+	public static void executeAfterCommitOrExecuteNowIfNoTransactionIsActive(Runnable theRunnable) {
+		if (TransactionSynchronizationManager.isActualTransactionActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					theRunnable.run();
+				}
+			});
+		} else {
+			theRunnable.run();
+		}
 	}
 }

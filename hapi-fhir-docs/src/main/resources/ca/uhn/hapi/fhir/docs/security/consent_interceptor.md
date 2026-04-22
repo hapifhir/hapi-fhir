@@ -32,7 +32,7 @@ This is slower than the normal path, and will prevent the reuse of the results f
 The `willSeeResource()` operation supports reusing cached search results, but removed resources may be 'visible' as holes in returned bundles.
 Disabling `canSeeResource()` by returning `false` from `processCanSeeResource()` will enable the search cache.
 
-<a name="pre-authorizing-requests"/>
+<a id="pre-authorizing-requests"></a>
 
 ## Pre-Authorizing Requests
 

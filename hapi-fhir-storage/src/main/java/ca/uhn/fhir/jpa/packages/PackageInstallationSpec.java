@@ -1,0 +1,343 @@
+/*-
+ * #%L
+ * HAPI FHIR Storage api
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.jpa.packages;
+
+import ca.uhn.fhir.model.api.annotation.ExampleSupplier;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
+
+@Schema(name = "PackageInstallationSpec", description = "Defines a set of instructions for package installation")
+@JsonPropertyOrder({
+	"name",
+	"version",
+	"packageUrl",
+	"installMode",
+	"installResourceTypes",
+	"validationMode",
+	"reloadExisting",
+	"additionalResourceFolders",
+	"versionPolicy",
+	"dryRun",
+	"overwriteContentNotPresentCodeSystems"
+})
+@ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(
+		creatorVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		setterVisibility = JsonAutoDetect.Visibility.NONE)
+public class PackageInstallationSpec {
+
+	@Schema(description = "The direct package URL")
+	@JsonProperty("packageUrl")
+	private String myPackageUrl;
+
+	@Schema(description = "The NPM package Name")
+	@JsonProperty("name")
+	private String myName;
+
+	@Schema(description = "The direct package version")
+	@JsonProperty("version")
+	private String myVersion;
+
+	@Schema(
+			description =
+					"Should resources from this package be extracted from the package and installed into the repository individually")
+	@JsonProperty("installMode")
+	private InstallModeEnum myInstallMode;
+
+	@Schema(
+			description =
+					"If resources are being installed individually, this is list provides the resource types to install. By default, all conformance resources will be installed.")
+	@JsonProperty("installResourceTypes")
+	private List<String> myInstallResourceTypes;
+
+	@Schema(description = "Should dependencies be automatically resolved, fetched and installed with the same settings")
+	@JsonProperty("fetchDependencies")
+	private boolean myFetchDependencies;
+
+	@Schema(
+			description =
+					"Should existing resources be reloaded. Defaults to true, but can be set to false to avoid re-index operations for existing search parameters")
+	@JsonProperty("reloadExisting")
+	private boolean myReloadExisting = true;
+
+	@Schema(
+			description =
+					"Any values provided here will be interpreted as a regex. Dependencies with an ID matching any regex will be skipped.")
+	private List<String> myDependencyExcludes;
+
+	@Schema(
+			description =
+					"List of folders in the package to extract additional resources from. Each folder listed will be scanned for resources which will be installed as part of package installation.")
+	@JsonProperty("additionalResourceFolders")
+	private Set<String> myAdditionalResourceFolders;
+
+	@Schema(
+			description =
+					"Controls whether multiple versions of installed resources can coexist in the repository during STORE_AND_INSTALL installation")
+	@JsonProperty("versionPolicy")
+	private VersionPolicyEnum myVersionPolicy = VersionPolicyEnum.MULTI_VERSION;
+
+	@Schema(
+			description =
+					"Boolean value to signify dry-run status or not. False is default. But if true is specified, nothing will be persisted and a report will be generated outlining changes that would result if set false.")
+	@JsonProperty("dryRun")
+	private boolean myDryRun = false;
+
+	@Schema(
+			description =
+					"When true, a `CodeSystem` with `content=not-present` will be overwritten by a `CodeSystem` from the package. "
+							+ "Defaults to false, which protects an externally loaded `CodeSystem` from being replaced by IG packages.")
+	@JsonProperty("overwriteContentNotPresentCodeSystems")
+	private boolean myOverwriteContentNotPresentCodeSystems = false;
+
+	@JsonIgnore
+	private byte[] myPackageContents;
+
+	public PackageInstallationSpec() {}
+
+	public PackageInstallationSpec(PackageInstallationSpec theOriginalSpec) {
+		myPackageUrl = theOriginalSpec.myPackageUrl;
+		myName = theOriginalSpec.myName;
+		myVersion = theOriginalSpec.myVersion;
+		myInstallMode = theOriginalSpec.myInstallMode;
+		myFetchDependencies = theOriginalSpec.myFetchDependencies;
+		myReloadExisting = theOriginalSpec.myReloadExisting;
+		myVersionPolicy = theOriginalSpec.myVersionPolicy;
+		myDryRun = theOriginalSpec.myDryRun;
+
+		if (theOriginalSpec.myInstallResourceTypes != null) {
+			myInstallResourceTypes = new ArrayList<>(theOriginalSpec.myInstallResourceTypes);
+		}
+		if (theOriginalSpec.myDependencyExcludes != null) {
+			myDependencyExcludes = new ArrayList<>(theOriginalSpec.myDependencyExcludes);
+		}
+		if (theOriginalSpec.myAdditionalResourceFolders != null) {
+			myAdditionalResourceFolders = new HashSet<>(theOriginalSpec.myAdditionalResourceFolders);
+		}
+
+		// we don't copy myPackageContents because it is transient anyway
+	}
+
+	public List<String> getDependencyExcludes() {
+		if (myDependencyExcludes == null) {
+			myDependencyExcludes = new ArrayList<>();
+		}
+		return myDependencyExcludes;
+	}
+
+	public void setDependencyExcludes(List<String> theDependencyExcludes) {
+		myDependencyExcludes = theDependencyExcludes;
+	}
+
+	public boolean isFetchDependencies() {
+		return myFetchDependencies;
+	}
+
+	public PackageInstallationSpec setFetchDependencies(boolean theFetchDependencies) {
+		myFetchDependencies = theFetchDependencies;
+		return this;
+	}
+
+	public String getPackageUrl() {
+		return myPackageUrl;
+	}
+
+	public PackageInstallationSpec setPackageUrl(String thePackageUrl) {
+		myPackageUrl = thePackageUrl;
+		return this;
+	}
+
+	public InstallModeEnum getInstallMode() {
+		return myInstallMode;
+	}
+
+	public PackageInstallationSpec setInstallMode(InstallModeEnum theInstallMode) {
+		myInstallMode = theInstallMode;
+		return this;
+	}
+
+	public List<String> getInstallResourceTypes() {
+		if (myInstallResourceTypes == null) {
+			myInstallResourceTypes = new ArrayList<>();
+		}
+		return myInstallResourceTypes;
+	}
+
+	public void setInstallResourceTypes(List<String> theInstallResourceTypes) {
+		myInstallResourceTypes = theInstallResourceTypes;
+	}
+
+	public String getName() {
+		return myName;
+	}
+
+	public PackageInstallationSpec setName(String theName) {
+		myName = theName;
+		return this;
+	}
+
+	public String getVersion() {
+		return myVersion;
+	}
+
+	public PackageInstallationSpec setVersion(String theVersion) {
+		myVersion = theVersion;
+		return this;
+	}
+
+	public byte[] getPackageContents() {
+		return myPackageContents;
+	}
+
+	public PackageInstallationSpec setPackageContents(byte[] thePackageContents) {
+		myPackageContents = thePackageContents;
+		return this;
+	}
+
+	public boolean isReloadExisting() {
+		return myReloadExisting;
+	}
+
+	public void setReloadExisting(boolean reloadExisting) {
+		this.myReloadExisting = reloadExisting;
+	}
+
+	public Set<String> getAdditionalResourceFolders() {
+		return myAdditionalResourceFolders;
+	}
+
+	public void setAdditionalResourceFolders(Set<String> additionalResourceFolders) {
+		this.myAdditionalResourceFolders = additionalResourceFolders;
+	}
+
+	public PackageInstallationSpec addDependencyExclude(String theExclude) {
+		getDependencyExcludes().add(theExclude);
+		return this;
+	}
+
+	public PackageInstallationSpec addInstallResourceTypes(String... theResourceTypes) {
+		for (String next : theResourceTypes) {
+			getInstallResourceTypes().add(next);
+		}
+		return this;
+	}
+
+	public VersionPolicyEnum getVersionPolicy() {
+		return myVersionPolicy;
+	}
+
+	public PackageInstallationSpec setVersionPolicy(VersionPolicyEnum theVersionPolicy) {
+		myVersionPolicy = theVersionPolicy;
+		return this;
+	}
+
+	public PackageInstallationSpec setDryRun(boolean theDryRun) {
+		myDryRun = theDryRun;
+		return this;
+	}
+
+	public boolean isDryRun() {
+		return myDryRun;
+	}
+
+	public boolean isOverwriteContentNotPresentCodeSystems() {
+		return myOverwriteContentNotPresentCodeSystems;
+	}
+
+	public PackageInstallationSpec setOverwriteContentNotPresentCodeSystems(boolean theOverwriteNotPresentCodeSystems) {
+		myOverwriteContentNotPresentCodeSystems = theOverwriteNotPresentCodeSystems;
+		return this;
+	}
+
+	public enum InstallModeEnum {
+		/**
+		 * Downloads the package from NPM, but doesn't persist any of the resources into the database.
+		 */
+		STORE_ONLY,
+		/**
+		 * Downloads the package from NPM, stores it locally, and persists the resources into the database.
+		 */
+		STORE_AND_INSTALL,
+		/**
+		 * Downloads the package from NPM and persists the resources into the database, but doesn't store the
+		 * package locally.
+		 */
+		INSTALL_ONLY
+	}
+
+	public enum ValidationModeEnum {
+		NOT_AVAILABLE,
+		AVAILABLE
+	}
+
+	public enum VersionPolicyEnum {
+		/**
+		 * Default. Uses server-assigned IDs for new resources. Existing resources matched
+		 * by canonical URL + version. Supports multiple versions of installed resources.
+		 */
+		MULTI_VERSION,
+
+		/**
+		 * Uses client-assigned IDs from package. Existing resources
+		 * matched by canonical URL only (ignoring version), so installing a new version
+		 * of the same resource will overwrite the existing one.
+		 */
+		SINGLE_VERSION
+	}
+
+	public static class ExampleSupplier implements Supplier<PackageInstallationSpec> {
+
+		@Override
+		public PackageInstallationSpec get() {
+			return new PackageInstallationSpec()
+					.setName("hl7.fhir.us.core")
+					.setVersion("3.1.0")
+					.setInstallMode(InstallModeEnum.STORE_ONLY)
+					.setFetchDependencies(true);
+		}
+	}
+
+	public static class ExampleSupplier2 implements Supplier<PackageInstallationSpec> {
+
+		@Override
+		public PackageInstallationSpec get() {
+			return new PackageInstallationSpec()
+					.setName("com.example.my-resources")
+					.setVersion("1.0")
+					.setPackageUrl("classpath:/my-resources.tgz")
+					.setInstallMode(InstallModeEnum.STORE_AND_INSTALL)
+					.addInstallResourceTypes("Organization", "Medication", "PlanDefinition", "SearchParameter");
+		}
+	}
+}

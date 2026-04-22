@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.packages.loader.NpmPackageData;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -301,7 +302,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				}
 				String msg = "Package version already exists in local storage, no action taken: " + packageId + "#"
 						+ packageVersionId;
-				getProcessingMessages(existingPackage).add(msg);
+				NpmPackageUtils.addProcessingMessage(existingPackage, msg);
 				ourLog.info(msg);
 				return existingPackage;
 			}
@@ -313,14 +314,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			String packageAuthor = truncateStorageString(npmPackage.getNpm().asString("author"));
 
 			if (currentVersion) {
-				getProcessingMessages(npmPackage)
-						.add("Marking package " + packageId + "#" + initialPackageVersionId + " as current version");
+				NpmPackageUtils.addProcessingMessage(
+						npmPackage,
+						"Marking package " + packageId + "#" + initialPackageVersionId + " as current version");
 				pkg.setCurrentVersionId(packageVersionId);
 				pkg.setDescription(packageDesc);
 				myPackageDao.save(pkg);
 			} else {
-				getProcessingMessages(npmPackage)
-						.add("Package " + packageId + "#" + initialPackageVersionId + " is not the newest version");
+				NpmPackageUtils.addProcessingMessage(
+						npmPackage,
+						"Package " + packageId + "#" + initialPackageVersionId + " is not the newest version");
 			}
 
 			packageVersion = new NpmPackageVersionEntity();
@@ -345,6 +348,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			} catch (IOException e) {
 				throw new InternalErrorException(Msg.code(2371) + e);
 			}
+			IParser jsonParser = packageContext.newJsonParser();
+
 			for (Map.Entry<String, List<String>> nextTypeToFiles : packageFolderTypes.entrySet()) {
 				String nextType = nextTypeToFiles.getKey();
 				for (String nextFile : nextTypeToFiles.getValue()) {
@@ -362,9 +367,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					if (nextFile.toLowerCase().endsWith(".xml")) {
 						resource = packageContext.newXmlParser().parseResource(contentsString);
 					} else if (nextFile.toLowerCase().endsWith(".json")) {
-						resource = packageContext.newJsonParser().parseResource(contentsString);
+						resource = jsonParser.parseResource(contentsString);
 					} else {
-						getProcessingMessages(npmPackage).add("Not indexing file: " + nextFile);
+						NpmPackageUtils.addProcessingMessage(npmPackage, "Not indexing file: " + nextFile);
 						continue;
 					}
 
@@ -375,10 +380,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					 */
 					String contentType = Constants.CT_FHIR_JSON_NEW;
 					ResourceUtil.removeNarrative(packageContext, resource);
-					byte[] minimizedContents = packageContext
-							.newJsonParser()
-							.encodeResourceToString(resource)
-							.getBytes(StandardCharsets.UTF_8);
+					byte[] minimizedContents =
+							jsonParser.encodeResourceToString(resource).getBytes(StandardCharsets.UTF_8);
 
 					IBaseBinary resourceBinary = createPackageResourceBinary(minimizedContents, contentType);
 					ResourceTable persistedResource = createResourceBinary(resourceBinary);
@@ -422,13 +425,17 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					String resType = packageContext.getResourceType(resource);
 					String msg = "Indexing " + resType + " Resource[" + dirName + '/' + nextFile + "] with URL: "
 							+ defaultString(url) + "|" + defaultString(version);
-					getProcessingMessages(npmPackage).add(msg);
+					NpmPackageUtils.addProcessingMessage(npmPackage, msg);
 					ourLog.info("{}: Package[{}#{}] ", msg, packageId, packageVersionId);
 				}
 			}
 
-			getProcessingMessages(npmPackage)
-					.add("Successfully added package " + npmPackage.id() + "#" + npmPackage.version() + " to registry");
+			NpmPackageUtils.addProcessingMessage(
+					npmPackage,
+					String.format(
+							NpmPackageUtils.SUCCESSFULLY_INSTALLED_MSG_TEMPLATE,
+							npmPackage.id(),
+							npmPackage.version()));
 
 			return npmPackage;
 		});
@@ -521,17 +528,15 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			return cachedPackage;
 		}
 
-		// otherwise we have to load it from packageloader
+		// otherwise we have to load it from myPackageLoaderSvc
 		NpmPackageData pkgData = myPackageLoaderSvc.fetchPackageFromPackageSpec(thePackageId, thePackageVersion);
 
 		try {
 			// and add it to the cache
 			NpmPackage retVal = addPackageToCacheInternal(pkgData);
-			getProcessingMessages(retVal)
-					.add(
-							0,
-							"Package fetched from server at: "
-									+ pkgData.getPackage().url());
+			NpmPackageUtils.addFirstProcessingMessage(
+					retVal,
+					"Package fetched from server at: " + pkgData.getPackage().url());
 			return retVal;
 		} finally {
 			pkgData.getInputStream().close();
@@ -559,6 +564,19 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			byte[] contents = myPackageLoaderSvc.loadPackageUrlContents(theInstallationSpec.getPackageUrl());
 			theInstallationSpec.setPackageContents(contents);
 			sourceDescription = theInstallationSpec.getPackageUrl();
+		}
+
+		boolean isNonStoringMode = theInstallationSpec.isDryRun()
+				|| theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY;
+
+		// non-storing of NPM paths
+		if (isNonStoringMode && theInstallationSpec.getPackageContents() != null) {
+			return NpmPackage.fromPackage(new ByteArrayInputStream(theInstallationSpec.getPackageContents()));
+		}
+		if (isNonStoringMode) {
+			return newTxTemplate()
+					.execute(tx -> loadPackageFromCacheOnlyInner(
+							theInstallationSpec.getName(), theInstallationSpec.getVersion()));
 		}
 
 		if (theInstallationSpec.getPackageContents() != null) {
@@ -1023,12 +1041,6 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		return predicates;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static List<String> getProcessingMessages(NpmPackage thePackage) {
-		return (List<String>)
-				thePackage.getUserData().computeIfAbsent("JpPackageCache_ProcessingMessages", t -> new ArrayList<>());
-	}
-
 	/**
 	 * Truncates a string to {@link NpmPackageVersionEntity#PACKAGE_DESC_LENGTH} which is
 	 * the maximum length used on several columns in {@link NpmPackageVersionEntity}. If the
@@ -1044,5 +1056,19 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			}
 		}
 		return retVal;
+	}
+
+	@Override
+	public String getLatestVersion(String statedId, boolean milestonesOnly) {
+		// As of release 6.9.4 of org.hl7.fhir.core, this is only used internally by the supporting implementations for
+		// the Validator CLI (not InstanceValidator). It is not called except in that specific use case.
+		throw new UnsupportedOperationException(Msg.code(2892));
+	}
+
+	@Override
+	public String getLatestVersion(String statedId, String versionFilter) {
+		// As of release 6.9.4 of org.hl7.fhir.core, this is only used internally by the supporting implementations for
+		// the Validator CLI (not InstanceValidator). It is not called except in that specific use case.
+		throw new UnsupportedOperationException(Msg.code(2893));
 	}
 }

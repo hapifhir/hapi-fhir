@@ -17,7 +17,6 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
@@ -28,7 +27,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -72,9 +70,6 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 		assertThat(value).hasSize(1);
 		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
 	}
-
-
-
 
 	@Test
 	public void testComponentCode() {

@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -28,10 +30,15 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory;
 import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -41,10 +48,12 @@ import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -1405,6 +1414,34 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		assertThat(termConceptDesignationFromDb.getValue())
 			.isEqualTo(stringWith8000Chars);
+	}
+
+	@Test
+	void testLookupCode_withCodeSystemContainingBooleanProperty() {
+		// Set up
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://example.com/test-cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addProperty().setCode("conductible").setType(CodeSystem.PropertyType.BOOLEAN);
+
+		CodeSystem.ConceptDefinitionComponent concept = cs.addConcept();
+		concept.setCode("TEST");
+		concept.setDisplay("Test Code");
+		concept.addProperty().setCode("conductible").setValue(new BooleanType(true));
+
+		myCodeSystemDao.create(cs, mySrd);
+
+		// Execute
+		IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(
+			new ValidationSupportContext(myValidationSupport),
+			new LookupCodeRequest("http://example.com/test-cs", "TEST")
+		);
+
+		// Verify
+		assertThat(result).isNotNull();
+		assertThat(result.isFound()).isTrue();
+		assertThat(result.getProperties()).hasSize(1);
 	}
 
 	private ArrayList<String> toCodesContains(List<ValueSetExpansionContainsComponent> theContains) {

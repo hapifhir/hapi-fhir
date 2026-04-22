@@ -1,0 +1,8 @@
+---
+type: add
+issue: 7743
+title: "Previously, installing an IG package could overwrite `CodeSystem` with `content=not-present`, replacing 
+externally loaded terminology with the IG's small subset of concepts. These `CodeSystem` resources are now protected 
+from overwrite by default. A new `overwriteContentNotPresentCodeSystems` property on `PackageInstallationSpec` 
+allows overriding this when needed."
+

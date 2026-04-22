@@ -51,6 +51,7 @@ runs:
     # the logical structure of the artifacts. This is done by sanitizing the name (Replace invalid characters (like '/')
     # with valid ones (like '_')
     - name: Sanitize Artifact Name
+      if: always()
       id: sanitize_name
       shell: bash
       run: |
@@ -59,6 +60,7 @@ runs:
         echo "sanitized_name=$sanitized_name" >> $GITHUB_ENV
 
     - name: Upload target Directory
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.sanitized_name }}

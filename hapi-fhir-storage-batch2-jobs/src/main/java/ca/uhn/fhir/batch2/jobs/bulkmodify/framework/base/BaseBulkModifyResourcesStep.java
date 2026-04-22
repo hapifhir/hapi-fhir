@@ -62,7 +62,7 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Bulk modification/rewrite jobs should subclass {@link BaseBulkModifyResourcesIndividuallyStep} if they want to make modifications
  * to individual resources one-at-a-time. If they want to make modifications to multiple resources in a batch, they should subclass
- * this class and implement {@link #processPidsInTransaction(StepExecutionDetails, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)}
+ * this class and implement {@link #processPidsInTransaction(StepExecutionDetails, State, List, TransactionDetails, IJobDataSink)}
  * </p>
  *
  * @param <PT> The job parameters type
@@ -197,12 +197,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 					.withTransactionDetails(transactionDetails)
 					.readOnly(theJobParameters.isDryRun())
 					.execute(() -> processPidsInTransaction(
-							theStepExecutionDetails,
-							theJobParameters,
-							theState,
-							thePids,
-							transactionDetails,
-							theDataSink));
+							theStepExecutionDetails, theState, thePids, transactionDetails, theDataSink));
 
 			// Storage transaction succeeded
 			theState.movePendingToSaved();
@@ -224,7 +219,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 	/**
 	 * For each group of PIDs, this method is called outside of any FHIR transaction, prior to
-	 * {@link #processPidsInTransaction(StepExecutionDetails, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)}
+	 * {@link #processPidsInTransaction(StepExecutionDetails, State, List, TransactionDetails, IJobDataSink)}
 	 * being called. It can handle any pre-processing that needs to happen outside of a DB transaction.
 	 *
 	 * @param theStepExecutionDetails The step execution details for this work chunk
@@ -233,7 +228,7 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * @param thePids               The PIDs to modify.
 	 * @param theTransactionDetails A TransactionDetails associated with the current DB transaction.
 	 * @param theDataSink           The sink that will ultimately be written to
-	 * @see #processPidsInTransaction(StepExecutionDetails, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)
+	 * @see #processPidsInTransaction(StepExecutionDetails, State, List, TransactionDetails, IJobDataSink)
 	 */
 	protected void processPidsOutsideTransaction(
 			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
@@ -257,16 +252,14 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * </p>
 	 *
 	 * @param theStepExecutionDetails The step execution details for this work chunk
-	 * @param theJobParameters      The job parameters for this job instance
-	 * @param theState              The modification state object, which must be updated for all PIDs
-	 * @param thePids               The PIDs to modify.
-	 * @param theTransactionDetails A TransactionDetails associated with the current DB transaction.
-	 * @param theDataSink           The sink that will ultimately be written to
+	 * @param theState                The modification state object, which must be updated for all PIDs
+	 * @param thePids                 The PIDs to modify.
+	 * @param theTransactionDetails   A TransactionDetails associated with the current DB transaction.
+	 * @param theDataSink             The sink that will ultimately be written to
 	 * @see #processPidsOutsideTransaction(StepExecutionDetails, BaseBulkModifyJobParameters, State, List, TransactionDetails, IJobDataSink)
 	 */
 	protected abstract void processPidsInTransaction(
 			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
-			PT theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
 			TransactionDetails theTransactionDetails,
@@ -277,7 +270,10 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * as a history rewrite
 	 */
 	@SuppressWarnings("unused")
-	protected boolean isRewriteHistory(C theState, IBaseResource theResource) {
+	protected boolean isRewriteHistory(
+			StepExecutionDetails<PT, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+			C theState,
+			IBaseResource theResource) {
 		return false;
 	}
 

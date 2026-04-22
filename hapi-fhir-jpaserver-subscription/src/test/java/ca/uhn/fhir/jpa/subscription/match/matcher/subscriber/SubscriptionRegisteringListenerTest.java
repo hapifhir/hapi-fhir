@@ -4,8 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
@@ -13,8 +13,10 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.codesystems.SubscriptionStatus;
@@ -30,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -44,6 +46,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
 public class SubscriptionRegisteringListenerTest {
 
+	public static final RequestPartitionId DEFAULT_PARTITION = RequestPartitionId.fromPartitionId(0);
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 	@Mock
@@ -78,7 +81,7 @@ public class SubscriptionRegisteringListenerTest {
 
 	@Test
 	public void testHandleMessageSubscriptionResourceGone(){
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE, DEFAULT_PARTITION);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 
 		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
@@ -92,8 +95,21 @@ public class SubscriptionRegisteringListenerTest {
 	}
 
 	@Test
+	public void testHandleMessageSubscriptionResourceDoesntExist(){
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE, DEFAULT_PARTITION);
+		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
+
+		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
+		when(mySubscriptionDao.read(any(), any(), eq(true))).thenThrow(new ResourceNotFoundException(new IdType("Subscription", "123")));
+
+		mySubscriptionRegisteringListener.handleMessage(message);
+		verify(mySubscriptionRegistry, times(1)).unregisterSubscriptionIfRegistered(any());
+		verify(mySubscriptionRegistry, never()).registerSubscriptionUnlessAlreadyRegistered(any());
+	}
+
+	@Test
 	public void testHandleMessageSubscriptionActiveStatus(){
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE, DEFAULT_PARTITION);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 
 		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
@@ -107,7 +123,7 @@ public class SubscriptionRegisteringListenerTest {
 
 	@Test
 	public void testHandleMessageSubscriptionErrorStatus(){
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE, DEFAULT_PARTITION);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 
 		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
@@ -121,12 +137,12 @@ public class SubscriptionRegisteringListenerTest {
 
 	@Test
 	public void testHandleMessagePartitionWithNullPartitionName(){
-		List<Integer> partitionIds = Arrays.asList((Integer)null);
-		List<String> partitionNames = Arrays.asList((String)null);
+		List<Integer> partitionIds = Collections.singletonList(null);
+		List<String> partitionNames = Collections.singletonList(null);
 		LocalDate localDate = null;
 
 		RequestPartitionId requestPartitionId = RequestPartitionId.forPartitionIdsAndNames(partitionNames, partitionIds, localDate);
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE, DEFAULT_PARTITION);
 		resourceModifiedMessage.setPartitionId(requestPartitionId);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 
@@ -147,7 +163,7 @@ public class SubscriptionRegisteringListenerTest {
 	@Test
 	public void testHandleMessageWithNullPartition(){
 		RequestPartitionId requestPartitionId = null;
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE, DEFAULT_PARTITION);
 		resourceModifiedMessage.setPartitionId(requestPartitionId);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 

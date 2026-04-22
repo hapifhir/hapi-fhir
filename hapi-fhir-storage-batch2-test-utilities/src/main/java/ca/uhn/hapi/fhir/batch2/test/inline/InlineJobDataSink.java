@@ -20,9 +20,9 @@
 package ca.uhn.hapi.fhir.batch2.test.inline;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IWarningProcessor;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.model.api.IModelJson;
+
 import java.util.List;
 
 /**
@@ -44,11 +44,6 @@ class InlineJobDataSink<OT extends IModelJson> implements IJobDataSink<OT> {
 
     @Override
     public void recoveredError(String theMessage) {
-		// not implemented
-	}
-
-    @Override
-    public void setWarningProcessor(IWarningProcessor theWarningProcessor) {
 		// not implemented
 	}
 }

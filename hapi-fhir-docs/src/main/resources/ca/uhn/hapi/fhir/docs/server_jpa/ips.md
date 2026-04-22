@@ -10,7 +10,7 @@ In FHIR, an IPS is expressed as a [FHIR Document](https://www.hl7.org/fhir/docum
 
 The IPS Generator uses FHIR resources stored in your repository as its input. The algorithm for determining which resources to include and how to construct the mandatory narrative is customizable and extensible, with a default algorithm included.
 
-<a name="generation-strategy"/>
+<a id="generation-strategy"></a>
 
 # Generation Strategy
 
@@ -27,7 +27,7 @@ The default generation strategy defines the sections that will be included in yo
 * Source Code: [DefaultJpaIpsGenerationStrategy.java](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/java/ca/uhn/fhir/jpa/ips/jpa/DefaultJpaIpsGenerationStrategy.java)
 
 
-<a name="narrative-templates"/>
+<a id="narrative-templates"></a>
 
 # Narrative Templates
 

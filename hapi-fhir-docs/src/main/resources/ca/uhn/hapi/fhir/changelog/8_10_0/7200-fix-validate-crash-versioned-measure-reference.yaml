@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7200
+title: "Previously, the $validate operation would crash when validating a MeasureReport whose
+  measure element contained a versioned canonical reference (e.g. http://example.org/Measure/MyMeasure|1.0.0).
+  This was caused by WorkerContextValidationSupportAdapter.fetchResourceVersions() being
+  unimplemented. The method now delegates to the existing fetchResource infrastructure to
+  resolve resources by their canonical URL."

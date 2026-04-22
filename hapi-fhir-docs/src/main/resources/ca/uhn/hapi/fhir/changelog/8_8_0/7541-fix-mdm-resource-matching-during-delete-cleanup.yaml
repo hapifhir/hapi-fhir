@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7541
+title: "Previously, when deleting a source resource with MDM links, interceptors would not be invoked 
+when reading the golden resource and possible match resources during link cleanup, preventing custom 
+interceptor logic from executing for these operations. This has been fixed."

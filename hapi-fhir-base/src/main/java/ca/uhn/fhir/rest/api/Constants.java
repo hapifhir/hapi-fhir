@@ -239,6 +239,7 @@ public class Constants {
 	public static final String PARAM_INCLUDE_QUALIFIER_ITERATE = ":iterate";
 	public static final String PARAM_INCLUDE_ITERATE = "_include" + PARAM_INCLUDE_QUALIFIER_ITERATE;
 	public static final String PARAM_LASTUPDATED = "_lastUpdated";
+	public static final String PARAM_COMPARTMENT_LAST_UPDATED = "_compartmentLastUpdated";
 	public static final String PARAM_NARRATIVE = "_narrative";
 	public static final String PARAM_PAGINGACTION = "_getpages";
 	public static final String PARAM_PAGINGOFFSET = "_getpagesoffset";

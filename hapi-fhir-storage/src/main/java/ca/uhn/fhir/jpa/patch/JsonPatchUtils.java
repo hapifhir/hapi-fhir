@@ -29,6 +29,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -54,6 +55,13 @@ public class JsonPatchUtils {
 
 			JsonNode originalJsonDocument =
 					mapper.readTree(theCtx.newJsonParser().encodeResourceToString(theResourceToUpdate));
+
+			// Pre-populate missing parent arrays for "add" operations targeting array elements.
+			// When a FHIR resource has an empty repeating field (e.g., Group with no members),
+			// the serialized JSON omits the key entirely. JSON Patch "add" at /field/0 requires
+			// the parent /field to exist, so we insert an empty array where needed.
+			ensureParentArraysExist(jsonPatchNode, originalJsonDocument);
+
 			JsonNode after = patch.apply(originalJsonDocument);
 
 			@SuppressWarnings("unchecked")
@@ -83,6 +91,48 @@ public class JsonPatchUtils {
 
 		} catch (IOException | JsonPatchException theE) {
 			throw new InvalidRequestException(Msg.code(1272) + theE.getMessage());
+		}
+	}
+
+	/**
+	 * For each "add" operation in the patch whose path targets an array element (e.g. {@code /member/0}),
+	 * ensures the parent field exists in the document as an empty array. This handles the case where
+	 * HAPI's JSON serializer omits empty repeating fields entirely.
+	 *
+	 * @author Claude Opus 4.6
+	 */
+	private static void ensureParentArraysExist(JsonNode thePatchNode, JsonNode theDocument) {
+		if (!thePatchNode.isArray() || !theDocument.isObject()) {
+			return;
+		}
+		ObjectNode documentObject = (ObjectNode) theDocument;
+		for (JsonNode operation : thePatchNode) {
+			JsonNode opNode = operation.get("op");
+			JsonNode pathNode = operation.get("path");
+			if (opNode == null || pathNode == null) {
+				continue;
+			}
+			if (!"add".equals(opNode.asText())) {
+				continue;
+			}
+			String path = pathNode.asText();
+			// Match paths like /field/index where index is a non-negative integer
+			int lastSlash = path.lastIndexOf('/');
+			if (lastSlash <= 0) {
+				continue;
+			}
+			String index = path.substring(lastSlash + 1);
+			if (!index.matches("\\d+") && !"-".equals(index)) {
+				continue;
+			}
+			String parentPath = path.substring(1, lastSlash); // strip leading '/'
+			if (parentPath.contains("/")) {
+				// Nested paths not handled — only top-level parent arrays
+				continue;
+			}
+			if (!documentObject.has(parentPath)) {
+				documentObject.putArray(parentPath);
+			}
 		}
 	}
 }

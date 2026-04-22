@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
@@ -57,6 +58,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -83,6 +85,9 @@ public class FhirPatch {
 	public static final String PARAMETER_TYPE = "type";
 	public static final String PARAMETER_VALUE = "value";
 	public static final String PARAMETER_ALLOW_MULTIPLE_MATCHES = FhirPatchBuilder.PARAMETER_ALLOW_MULTIPLE_MATCHES;
+
+	private static final Pattern EXTENSION_FUNCTION_PATTERN =
+			Pattern.compile("((?:modifier)?[Ee]xtension)\\('([^']+)'\\)");
 
 	private final FhirContext myContext;
 	private boolean myIncludePreviousValueInDiff;
@@ -300,6 +305,7 @@ public class FhirPatch {
 			@Nullable IBaseResource theResource, @Nullable IBase theParameters, PatchOutcome theOutcome) {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
+		path = normalizeExtensionFunctionSyntax(path);
 
 		// TODO
 		/*
@@ -496,16 +502,16 @@ public class FhirPatch {
 					FhirPathChildDefinition ct = findChildDefinitionAtEndOfPath(theTargetChildDefinition);
 					replaceSingleValue(theFhirPath, theParsedFhirPath, ct, theReplacementValue, theOutcome);
 				} else {
-					if (theTargetChildDefinition.getBaseRuntimeDefinition() != null
-							&& !theTargetChildDefinition
-									.getBaseRuntimeDefinition()
-									.isMultipleCardinality()) {
-						// basic primitive type assignment
+					BaseRuntimeChildDefinition runtimeDef = theTargetChildDefinition.getBaseRuntimeDefinition();
+					if (runtimeDef != null
+							&& !runtimeDef.isMultipleCardinality()
+							&& !(runtimeDef instanceof RuntimeChildChoiceDefinition)) {
+						// non-choice, single-cardinality: lenient string assignment
 						target.setValueAsString(source.getValueAsString());
 						return;
 					}
 
-					// the primitive can have multiple value types
+					// choice type - the primitive can have multiple value types
 					BaseRuntimeElementDefinition<?> parentEl =
 							theTargetChildDefinition.getParent().getElementDefinition();
 					String childFhirPath = theTargetChildDefinition.getFhirPath();
@@ -663,6 +669,10 @@ public class FhirPatch {
 		}
 	}
 
+	private static String normalizeExtensionFunctionSyntax(String thePath) {
+		return EXTENSION_FUNCTION_PATTERN.matcher(thePath).replaceAll("$1.where(url='$2')");
+	}
+
 	private void throwNoElementsError(String theFullReplacePath) {
 		String msg =
 				myContext.getLocalizer().getMessage(FhirPatch.class, "noMatchingElementForPath", theFullReplacePath);
@@ -743,7 +753,13 @@ public class FhirPatch {
 		definition.setFhirPath(head);
 
 		if (theParent.getElementDefinition() != null) {
-			definition.setBaseRuntimeDefinition(theParent.getElementDefinition().getChildByName(head));
+			BaseRuntimeChildDefinition runtimeChild =
+					theParent.getElementDefinition().getChildByName(head);
+			if (runtimeChild == null) {
+				// possibly a choice type (e.g. value[x] on Extension)
+				runtimeChild = theParent.getElementDefinition().getChildByName(head + "[x]");
+			}
+			definition.setBaseRuntimeDefinition(runtimeChild);
 		}
 
 		String rawPath = theParsedFhirPath.getRawPath();
@@ -787,9 +803,20 @@ public class FhirPatch {
 			ParsedFhirPath newPath = ParsedFhirPath.parse(nextPath);
 
 			if (newPath.getHead() instanceof ParsedFhirPath.FhirPathFunction fn && fn.hasContainedExp()) {
-				newPath = fn.getContainedExp();
-
-				childFilteringPath = newPath.getRawPath();
+				if (fn.isFilter()) {
+					// Filter function (e.g. where()) already applied in parent recursion - skip it
+					if (fn.hasNext()) {
+						String remainingPath =
+								newPath.getTopLevelPathFromTo(node -> node == fn.getNext(), node -> false);
+						newPath = ParsedFhirPath.parse(remainingPath);
+						childFilteringPath = remainingPath;
+					} else {
+						childFilteringPath = "";
+					}
+				} else {
+					newPath = fn.getContainedExp();
+					childFilteringPath = newPath.getRawPath();
+				}
 			}
 
 			// get all direct children
