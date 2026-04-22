@@ -486,17 +486,7 @@ public class SearchParamRegistryImplTest {
 	void testNonDisableableBuiltInSearchParam_RetiredInDbStaysActiveInCache() {
 		// Created by Claude Sonnet 4.6
 		// Setup: put a RETIRED version of Basic:code (built-in non-disableable URL) in the DB
-		SearchParameter basicCodeSp = new SearchParameter();
-		basicCodeSp.setId("SearchParameter/Basic-code");
-		basicCodeSp.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
-		basicCodeSp.setCode("code");
-		basicCodeSp.setName("code");
-		basicCodeSp.setStatus(Enumerations.PublicationStatus.RETIRED);
-		basicCodeSp.setType(Enumerations.SearchParamType.TOKEN);
-		basicCodeSp.setExpression("Basic.code");
-		basicCodeSp.addBase("Basic");
-
-		addSpToRegistryAndRefresh(basicCodeSp);
+		addSpToRegistryAndRefresh(buildBasicCodeSp(Enumerations.PublicationStatus.RETIRED));
 
 		// Verify: the built-in ACTIVE version should remain in the cache despite the RETIRED DB entry
 		RuntimeSearchParam basicCode = mySearchParamRegistry.getActiveSearchParam(
@@ -512,16 +502,8 @@ public class SearchParamRegistryImplTest {
 		// A non-disableable built-in SP that is ACTIVE in the DB should update the cache normally.
 		// The guard in overrideSearchParam() only fires when status != ACTIVE, so an ACTIVE
 		// DB version should replace the built-in entry.
-		SearchParameter basicCodeSp = new SearchParameter();
-		basicCodeSp.setId("SearchParameter/Basic-code");
-		basicCodeSp.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
-		basicCodeSp.setCode("code");
-		basicCodeSp.setName("code");
-		basicCodeSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		basicCodeSp.setType(Enumerations.SearchParamType.TOKEN);
-		basicCodeSp.setExpression("Basic.code");
+		SearchParameter basicCodeSp = buildBasicCodeSp(Enumerations.PublicationStatus.ACTIVE);
 		basicCodeSp.setDescription("customised description");
-		basicCodeSp.addBase("Basic");
 
 		addSpToRegistryAndRefresh(basicCodeSp);
 
@@ -573,17 +555,7 @@ public class SearchParamRegistryImplTest {
 		// A DB record narrowed to [CapabilityStatement] only — removing
 		// SearchParameter — should be ignored; the guard detects the missing non-disableable base
 		// and returns 0, preserving the full built-in cache entry.
-		SearchParameter narrowedConformanceContext = new SearchParameter();
-		narrowedConformanceContext.setId("SearchParameter/conformance-context");
-		narrowedConformanceContext.setUrl("http://hl7.org/fhir/SearchParameter/conformance-context");
-		narrowedConformanceContext.setCode("context");
-		narrowedConformanceContext.setName("context");
-		narrowedConformanceContext.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		narrowedConformanceContext.setType(Enumerations.SearchParamType.TOKEN);
-		narrowedConformanceContext.setExpression("CapabilityStatement.useContext");
-		narrowedConformanceContext.addBase("CapabilityStatement"); // SearchParameter (non-disableable) removed
-
-		addSpToRegistryAndRefresh(narrowedConformanceContext);
+		addSpToRegistryAndRefresh(buildConformanceContextSp(Enumerations.PublicationStatus.ACTIVE, "CapabilityStatement"));
 
 		// Guard fired — SearchParameter:context is preserved from the built-in
 		RuntimeSearchParam conformanceContext = mySearchParamRegistry.getActiveSearchParam(
@@ -599,18 +571,7 @@ public class SearchParamRegistryImplTest {
 		// CodeSystem (disableable). When the DB entry is RETIRED (but still lists these bases),
 		// the L1 guard detects SearchParameter is non-disableable and skips the override entirely —
 		// so ALL bases that exist in the built-in cache remain active, including CodeSystem.
-		SearchParameter retiredConformanceContext = new SearchParameter();
-		retiredConformanceContext.setId("SearchParameter/conformance-context");
-		retiredConformanceContext.setUrl("http://hl7.org/fhir/SearchParameter/conformance-context");
-		retiredConformanceContext.setCode("context");
-		retiredConformanceContext.setName("context");
-		retiredConformanceContext.setStatus(Enumerations.PublicationStatus.RETIRED);
-		retiredConformanceContext.setType(Enumerations.SearchParamType.TOKEN);
-		retiredConformanceContext.setExpression("SearchParameter.useContext | CodeSystem.useContext");
-		retiredConformanceContext.addBase("SearchParameter");
-		retiredConformanceContext.addBase("CodeSystem");
-
-		addSpToRegistryAndRefresh(retiredConformanceContext);
+		addSpToRegistryAndRefresh(buildConformanceContextSp(Enumerations.PublicationStatus.RETIRED, "SearchParameter", "CodeSystem"));
 
 		// Both bases remain active — guard fires on SearchParameter (non-disableable) and returns 0
 		// immediately without modifying the cache, so the full built-in entry is kept intact
@@ -656,6 +617,38 @@ public class SearchParamRegistryImplTest {
 
 		// When we ask for the new entity, return our foo search parameter
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(buildSearchParameter(theStatus)));
+	}
+
+	@Nonnull
+	private static SearchParameter buildBasicCodeSp(Enumerations.PublicationStatus theStatus) {
+		// Created by Claude Sonnet 4.6
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/Basic-code");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
+		sp.setCode("code");
+		sp.setName("code");
+		sp.setStatus(theStatus);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Basic.code");
+		sp.addBase("Basic");
+		return sp;
+	}
+
+	@Nonnull
+	private static SearchParameter buildConformanceContextSp(Enumerations.PublicationStatus theStatus, String... theBases) {
+		// Created by Claude Sonnet 4.6
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/conformance-context");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/conformance-context");
+		sp.setCode("context");
+		sp.setName("context");
+		sp.setStatus(theStatus);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("conformance.useContext");
+		for (String base : theBases) {
+			sp.addBase(base);
+		}
+		return sp;
 	}
 
 	@Nonnull
