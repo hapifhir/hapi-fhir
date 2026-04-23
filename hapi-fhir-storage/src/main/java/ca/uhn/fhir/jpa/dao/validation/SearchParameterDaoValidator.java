@@ -76,7 +76,7 @@ public class SearchParameterDaoValidator {
 		 * If overriding built-in SPs is disabled on this server, make sure we aren't
 		 * doing that
 		 */
-		if (myStorageSettings.isDefaultSearchParamsCanBeOverridden() == false) {
+		if (!myStorageSettings.isDefaultSearchParamsCanBeOverridden()) {
 			for (IPrimitiveType<?> nextBaseType : searchParameter.getBase()) {
 				String nextBase = nextBaseType.getValueAsString();
 				RuntimeSearchParam existingSearchParam = mySearchParamRegistry.getActiveSearchParam(
