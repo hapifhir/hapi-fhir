@@ -197,7 +197,6 @@ public class SearchParameterDaoValidator {
 					Msg.code(2919) + "SearchParameter must not have multiple components with extension: "
 							+ HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
 		}
-
 	}
 
 	private void maybeValidateComboSpForUniqueIndexing(SearchParameter theSearchParameter) {

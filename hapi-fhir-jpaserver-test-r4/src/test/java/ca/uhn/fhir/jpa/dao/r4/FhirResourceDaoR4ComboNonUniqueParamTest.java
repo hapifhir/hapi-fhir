@@ -362,7 +362,7 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 			withId("O0"),
 			withSubject("Patient/P0"),
 			withObservationCode("http://foo", "bar"),
-			withObservationEffectiveInstant("2022-01-02T03:44:55Z"));
+			withEffectiveInstant("2022-01-02T03:44:55Z"));
 
 		// Verify
 		runInTransaction(() -> {
@@ -452,7 +452,7 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 			withId("O0"),
 			withSubject("Patient/P0"),
 			withObservationCode("http://foo", "bar"),
-			withObservationEffectiveInstant(theObsEffectiveDate));
+			withEffectiveInstant(theObsEffectiveDate));
 
 		// Test
 		String queryUrl = "Observation?" + theDate + "&subject=Patient/P0&code=http://foo|bar";
@@ -530,6 +530,54 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 
 	}
 
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', textBlock = """
+		# Match | Obs Period Start           | Obs Period End             | Search Param
+		true    | 2021-01-01T12:00:00-04:00  | 2021-01-03T12:00:00-04:00  | date=gt2021-01-02
+		false   | 2021-01-01T12:00:00-04:00  | 2021-01-03T12:00:00-04:00  | date=lt2021-01-02
+		true    | 2021-01-01T12:00:00-04:00  |                            | date=lt2021-01-02
+		""")
+	void testRangedDate_Period(boolean theExpectMatch, String theObservationStart, String theObservationEnd, String theDate) {
+		// Setup
+		myComboSearchParameterTestHelper.createObservationSubjectCodeAndRangedEffective();
+
+		createPatient(withId("P0"), withActiveTrue());
+
+		createObservation(
+			withId("O0"),
+			withSubject("Patient/P0"),
+			withObservationCode("http://foo", "bar"),
+			withEffectivePeriod(theObservationStart, theObservationEnd));
+
+		logAllNonUniqueIndexes();
+
+		// Test
+		String queryUrl = "Observation?" + theDate + "&subject=Patient/P0&code=http://foo|bar";
+		SearchParameterMap spMap = myMatchUrlService.getResourceSearch(queryUrl).getSearchParameterMap();
+		spMap.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myObservationDao.search(spMap, newSrd());
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(results);
+
+		// Verify
+		if (theExpectMatch) {
+			assertThat(resultIds).containsExactly("Observation/O0");
+		} else {
+			assertThat(resultIds).isEmpty();
+		}
+
+		boolean theExpectUseComboTable = true;
+		boolean theExpectUseDateTable = false;
+		assertThat(myCaptureQueriesListener).has(
+			// Make sure we searched the non-unique index table
+			onCurrentThread()
+				.selectSqlAtIndex(0).countInstances(theExpectUseComboTable ? 1 : 0, ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.selectSqlAtIndex(0).mightContain(theExpectUseDateTable, ResourceIndexedSearchParamDate.HFJ_SPIDX_DATE)
+		);
+
+	}
+
+
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
@@ -543,11 +591,11 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 
 		IIdType id1 = createObservation(
 			withObservationValueString("hello"),
-			withObservationEffectiveInstant(theObservationDate));
+			withEffectiveInstant(theObservationDate));
 
 		IIdType id2 = createObservation(
 			withObservationValueString("goodbye"),
-			withObservationEffectiveInstant(theObservationDate));
+			withEffectiveInstant(theObservationDate));
 
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {

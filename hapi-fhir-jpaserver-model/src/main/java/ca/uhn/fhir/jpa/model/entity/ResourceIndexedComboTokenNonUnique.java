@@ -43,7 +43,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.GenericGenerator;
 
-import static org.apache.commons.lang3.ObjectUtils.getIfNull;
+import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
 @Table(
@@ -124,10 +124,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 
 	public Integer getDateOrdinal() {
 		return myDateOrdinal;
-	}
-
-	public void setDateOrdinal(Integer theDateOrdinal) {
-		myDateOrdinal = theDateOrdinal;
 	}
 
 	@Override
@@ -254,8 +250,16 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 				.toString();
 	}
 
-	public void applyRangedDate(@Nonnull ResourceIndexedSearchParamDate theDateParam) {
-		myDateOrdinal = getIfNull(theDateParam.getValueHighDateOrdinal(), theDateParam.getValueLowDateOrdinal());
+	public void applyRangedDate(
+			StorageSettings theStorageSettings, @Nonnull ResourceIndexedSearchParamDate theDateParam) {
+		String endOfTime = theStorageSettings.getPeriodIndexEndOfTime().getValueAsString();
+		String endOfTimeDate = left(endOfTime, 10);
+		int endOfTimeOrdinal = Integer.parseInt(endOfTimeDate.replace("-", ""));
+		if (endOfTimeOrdinal == theDateParam.getValueHighDateOrdinal()) {
+			myDateOrdinal = theDateParam.getValueLowDateOrdinal();
+		} else {
+			myDateOrdinal = theDateParam.getValueHighDateOrdinal();
+		}
 	}
 
 	public static long calculateHashComplete(

@@ -67,18 +67,19 @@ public enum JpaParamUtil {
 			RestSearchParameterTypeEnum paramType,
 			String theUnqualifiedParamName,
 			List<QualifiedParamList> theParameters) {
-		QueryParameterAndBinder binder = switch (paramType) {
-			case COMPOSITE -> throw new UnsupportedOperationException(Msg.code(496));
-			case DATE -> new QueryParameterAndBinder(DateAndListParam.class, Collections.emptyList());
-			case NUMBER -> new QueryParameterAndBinder(NumberAndListParam.class, Collections.emptyList());
-			case QUANTITY -> new QueryParameterAndBinder(QuantityAndListParam.class, Collections.emptyList());
-			case REFERENCE -> new QueryParameterAndBinder(ReferenceAndListParam.class, Collections.emptyList());
-			case STRING -> new QueryParameterAndBinder(StringAndListParam.class, Collections.emptyList());
-			case TOKEN -> new QueryParameterAndBinder(TokenAndListParam.class, Collections.emptyList());
-			case URI -> new QueryParameterAndBinder(UriAndListParam.class, Collections.emptyList());
-			case HAS -> new QueryParameterAndBinder(HasAndListParam.class, Collections.emptyList());
-			case SPECIAL -> new QueryParameterAndBinder(SpecialAndListParam.class, Collections.emptyList());
-		};
+		QueryParameterAndBinder binder =
+				switch (paramType) {
+					case COMPOSITE -> throw new UnsupportedOperationException(Msg.code(496));
+					case DATE -> new QueryParameterAndBinder(DateAndListParam.class, Collections.emptyList());
+					case NUMBER -> new QueryParameterAndBinder(NumberAndListParam.class, Collections.emptyList());
+					case QUANTITY -> new QueryParameterAndBinder(QuantityAndListParam.class, Collections.emptyList());
+					case REFERENCE -> new QueryParameterAndBinder(ReferenceAndListParam.class, Collections.emptyList());
+					case STRING -> new QueryParameterAndBinder(StringAndListParam.class, Collections.emptyList());
+					case TOKEN -> new QueryParameterAndBinder(TokenAndListParam.class, Collections.emptyList());
+					case URI -> new QueryParameterAndBinder(UriAndListParam.class, Collections.emptyList());
+					case HAS -> new QueryParameterAndBinder(HasAndListParam.class, Collections.emptyList());
+					case SPECIAL -> new QueryParameterAndBinder(SpecialAndListParam.class, Collections.emptyList());
+				};
 
 		return binder.parse(theContext, theUnqualifiedParamName, theParameters);
 	}
@@ -163,7 +164,7 @@ public enum JpaParamUtil {
 			case HAS -> HasParam.class;
 			case SPECIAL -> SpecialParam.class;
 			default -> throw new IllegalArgumentException(Msg.code(500) + "Parameter '" + theUnqualifiedParamName
-				+ "' has type " + paramType + " which is currently not supported.");
+					+ "' has type " + paramType + " which is currently not supported.");
 		};
 	}
 
@@ -207,8 +208,7 @@ public enum JpaParamUtil {
 		 * Constructor
 		 */
 		ComponentAndCorrespondingParam(
-				@Nonnull RuntimeSearchParam.Component theComponent,
-				@Nonnull RuntimeSearchParam theComponentParameter) {
+				@Nonnull RuntimeSearchParam.Component theComponent, @Nonnull RuntimeSearchParam theComponentParameter) {
 			this.myComponent = theComponent;
 			this.myComponentParameter = theComponentParameter;
 

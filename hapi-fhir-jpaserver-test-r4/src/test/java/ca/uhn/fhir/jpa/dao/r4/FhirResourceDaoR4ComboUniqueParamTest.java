@@ -1358,7 +1358,7 @@ class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 			withId("O1"),
 			withSubject("Patient/P1"),
 			withObservationCode("http://foo", "bar"),
-			withObservationEffectiveInstant(theResourceDate)
+			withEffectiveInstant(theResourceDate)
 		);
 
 		runInTransaction(()->{
