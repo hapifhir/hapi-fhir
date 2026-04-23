@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommon;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.QueryTestCases;
@@ -26,6 +27,8 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -77,6 +80,11 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabaseVerificationIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
 	public static final String INIT_SCHEMA = "init_schema";
+	public static final long HASH_SYS_AND_VALUE = 123456L;
+	public static final long SYSTEM_ID = 1L;
+	public static final String VALUE = "code-value";
+	public static final long HASH_IDENTITY = 100L;
+	public static final long HASH_VALUE = 200L;
 
 	@Autowired
 	IFhirResourceDaoPatient<Patient> myPatientDao;
@@ -101,6 +109,9 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
+
+	@PersistenceContext
+	private EntityManager myEntityManager;
 
 	SystemRequestDetails myRequestDetails = new SystemRequestDetails();
 
@@ -156,6 +167,42 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		assertThatExceptionOfType(ResourceGoneException.class).isThrownBy(() -> myPatientDao.read(id, new SystemRequestDetails()));
 	}
 
+	@Test
+	void testInsertTokenCommon_duplicateInsert_isIdempotent() {
+		// first insert
+		runInTransaction(() -> myEntityManager.persist(newToken()));
+		// validate that row inserted correctly
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamTokenCommon> results = findTokens(HASH_SYS_AND_VALUE);
+			assertThat(results).hasSize(1);
+			assertThat(results.get(0))
+				.extracting(
+					ResourceIndexedSearchParamTokenCommon::getHashSystemAndValue,
+					ResourceIndexedSearchParamTokenCommon::getSystemId,
+					ResourceIndexedSearchParamTokenCommon::getValue,
+					ResourceIndexedSearchParamTokenCommon::getHashIdentity,
+					ResourceIndexedSearchParamTokenCommon::getHashValue)
+				.containsExactly(HASH_SYS_AND_VALUE, SYSTEM_ID, VALUE, HASH_IDENTITY, HASH_VALUE);
+		});
+
+		// second insert with same PK should be silently ignored via DialectOverride
+		runInTransaction(() -> myEntityManager.persist(newToken()));
+		// verify only one row exists
+		assertThat(findTokens(HASH_SYS_AND_VALUE)).hasSize(1);
+	}
+
+	private ResourceIndexedSearchParamTokenCommon newToken() {
+		return new ResourceIndexedSearchParamTokenCommon(
+			123456L, 1L, "code-value", 100L, 200L);
+	}
+
+	private List<ResourceIndexedSearchParamTokenCommon> findTokens(long theHash) {
+		return myEntityManager.createQuery(
+				"SELECT t FROM ResourceIndexedSearchParamTokenCommon t WHERE t.myHashSystemAndValue = :hash",
+				ResourceIndexedSearchParamTokenCommon.class)
+			.setParameter("hash", theHash)
+			.getResultList();
+	}
 
 	@Test
 	public void testEverything() {
