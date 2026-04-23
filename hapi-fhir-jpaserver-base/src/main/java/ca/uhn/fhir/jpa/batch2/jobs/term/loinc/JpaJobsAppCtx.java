@@ -24,4 +24,10 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import({ImportLoincJobAppCtx.class})
-public class JpaJobsAppCtx {}
+public class JpaJobsAppCtx {
+
+	// TODO: This is a placeholder for the new job definition for LOINC import. It will be
+	// filled in in the next PR.
+
+
+}

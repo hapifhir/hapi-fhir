@@ -1313,8 +1313,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// Execute
 		BatchInstanceStatusDTO istatus = mySvc.fetchBatchInstanceStatus(instanceId);
-		assertEquals(instanceId, istatus.id);
-		assertEquals(StatusEnum.QUEUED, istatus.status);
+		assertEquals(instanceId, istatus.id());
+		assertEquals(StatusEnum.QUEUED, istatus.status());
 
 		List<BatchWorkChunkStatusDTO> result = mySvc.fetchWorkChunkStatusForInstance(instanceId);
 		assertThat(result).hasSize(2);

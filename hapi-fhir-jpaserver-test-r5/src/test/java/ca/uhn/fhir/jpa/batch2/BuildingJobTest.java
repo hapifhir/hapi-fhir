@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.mockjob.MockJobAppCtx;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
-import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,36 +40,24 @@ public class BuildingJobTest extends BaseJpaR5Test {
 		String instanceId = startResponse.getInstanceId();
 
 		// Job should be in BUILDING status
-		runInTransaction(()->{
-			Batch2JobInstanceEntity instance = myJobInstanceRepository.findById(instanceId).orElseThrow();
-			assertEquals(StatusEnum.BUILDING, instance.getStatus());
-		});
+		assertEquals(StatusEnum.BUILDING, myJobCoordinator.getBatchInstanceStatus(instanceId).status());
+
 
 		myJobMaintenanceService.forceMaintenancePass();
 		myJobMaintenanceService.forceMaintenancePass();
 		myJobMaintenanceService.forceMaintenancePass();
 
 		// Job should still be in building status
-		runInTransaction(()-> {
-				Batch2JobInstanceEntity instance = myJobInstanceRepository.findById(instanceId).orElseThrow();
-				assertEquals(StatusEnum.BUILDING, instance.getStatus());
-			});
+		assertEquals(StatusEnum.BUILDING, myJobCoordinator.getBatchInstanceStatus(instanceId).status());
 
 		// Move to queued
 		myJobCoordinator.enqueueBuildingJobForExecution(instanceId);
-		runInTransaction(()-> {
-				Batch2JobInstanceEntity instance = myJobInstanceRepository.findById(instanceId).orElseThrow();
-				assertEquals(StatusEnum.QUEUED, instance.getStatus());
-			});
+		assertEquals(StatusEnum.QUEUED, myJobCoordinator.getBatchInstanceStatus(instanceId).status());
 
 		myBatch2JobHelper.awaitJobCompletion(instanceId);
 
-		runInTransaction(()-> {
-				Batch2JobInstanceEntity instance = myJobInstanceRepository.findById(instanceId).orElseThrow();
-				assertEquals(StatusEnum.COMPLETED, instance.getStatus());
-			});
+		assertEquals(StatusEnum.COMPLETED, myJobCoordinator.getBatchInstanceStatus(instanceId).status());
 	}
-
 
 
 	@Test
@@ -83,15 +70,21 @@ public class BuildingJobTest extends BaseJpaR5Test {
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 		String instanceId = startResponse.getInstanceId();
 
+		assertEquals(StatusEnum.BUILDING, myJobCoordinator.getBatchInstanceStatus(instanceId).status());
+
 		myJobCoordinator.enqueueBuildingJobForExecution(instanceId);
-		assertThatThrownBy(()->myJobCoordinator.enqueueBuildingJobForExecution(instanceId))
+
+		assertEquals(StatusEnum.QUEUED, myJobCoordinator.getBatchInstanceStatus(instanceId).status());
+
+		assertThatThrownBy(() -> myJobCoordinator.enqueueBuildingJobForExecution(instanceId))
 			.isInstanceOf(InvalidRequestException.class)
-			.hasMessageContaining("Job instance is in BUILDING status and cannot be enqueued for execution");
+			.hasMessageContaining("Job instance is in QUEUED status and cannot be enqueued for execution");
+		assertEquals(StatusEnum.QUEUED, myJobCoordinator.getBatchInstanceStatus(instanceId).status());
 
 		myBatch2JobHelper.awaitJobCompletion(instanceId);
 
+		assertEquals(StatusEnum.COMPLETED, myJobCoordinator.getBatchInstanceStatus(instanceId).status());
 	}
-
 
 
 }

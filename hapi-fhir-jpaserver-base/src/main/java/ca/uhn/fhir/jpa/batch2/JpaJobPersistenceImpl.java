@@ -550,9 +550,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		ValidateUtil.isTrueOrThrowInvalidRequest(theRequest.getInputStream() != null, "No input stream provided");
 
 		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
-			JobInstance instance = fetchInstance(theInstanceId).orElseThrow(() -> {
-				throw new InvalidRequestException(Msg.code(2902) + "Unknown instance ID: " + theInstanceId);
-			});
+			JobInstance instance = fetchInstance(theInstanceId).orElseThrow(() -> new InvalidRequestException(Msg.code(2902) + "Unknown instance ID: " + theInstanceId));
 
 			if (instance.getStatus().isEnded()) {
 				throw new InvalidRequestException(Msg.code(2903) + "Can't add attachment to instance[" + theInstanceId
@@ -578,7 +576,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					attachment.setFilename(theRequest.getFilename());
 				}
 			} else {
-				ourLog.info("Storing new attachment with no for instance[{}]", theInstanceId);
+				ourLog.info("Storing new attachment with no filename for instance[{}]", theInstanceId);
 				attachment = new Batch2JobAttachmentEntity(theInstanceId);
 				attachment.setFilename(attachment.getId().getAttachmentId());
 			}
@@ -648,12 +646,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				filename = null;
 			}
 
-			myEntityManager.detach(attachment);
 
 			return AttachmentDetails.build()
 					.withContentType(attachment.getContentType())
 					.withFilename(filename)
-					.withContentType(attachment.getContentType())
 					.withInputStream(readerStream)
 					.build();
 		});

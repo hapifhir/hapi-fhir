@@ -127,7 +127,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		myJobParameterJsonValidator.validateJobParameters(theRequestDetails, theStartRequest, jobDefinition);
 
-		// we only create the first chunk amd job here
+		// we only create the first chunk and job here
 		// JobMaintenanceServiceImpl.doMaintenancePass will handle the rest
 		IJobPersistence.CreateResult instanceAndFirstChunk = myTransactionService
 				.withSystemRequestOnDefaultPartition()
@@ -197,7 +197,6 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	public void enqueueBuildingJobForExecution(String theInstanceId) {
 		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
 			JobInstance instance = getInstance(theInstanceId);
-			instance.setStatus(StatusEnum.BUILDING);
 			boolean changed = myJobPersistence.markInstanceAsStatusWhenStatusIn(
 					theInstanceId, StatusEnum.QUEUED, Set.of(StatusEnum.BUILDING));
 			if (changed) {
