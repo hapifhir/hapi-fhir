@@ -560,8 +560,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		Validate.notBlank(theInstallationSpec.getVersion(), "thePackageVersion must not be blank");
 
 		NpmPackage cachedPackage = newTxTemplate()
-			.execute(tx -> loadPackageFromCacheOnlyInner(
-				theInstallationSpec.getName(), theInstallationSpec.getVersion()));
+				.execute(tx ->
+						loadPackageFromCacheOnlyInner(theInstallationSpec.getName(), theInstallationSpec.getVersion()));
 
 		if (cachedPackage != null) {
 			return cachedPackage;
@@ -583,8 +583,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		}
 
 		if (isNonStoringMode) {
-			NpmPackageData pkgData = myPackageLoaderSvc.fetchPackageFromPackageSpec(theInstallationSpec.getName(),
-				theInstallationSpec.getVersion());
+			NpmPackageData pkgData = myPackageLoaderSvc.fetchPackageFromPackageSpec(
+					theInstallationSpec.getName(), theInstallationSpec.getVersion());
 			return pkgData.getPackage();
 		}
 

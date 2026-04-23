@@ -85,7 +85,7 @@ public class JpaPackageCacheLoadSequenceTest {
 		"true,true,true,false"})
 	public void testInstallPackage_specificationVariations(
 		boolean theIsPackageInCache, boolean theIsPackageEmbedded, boolean theIsPackageAtUrl, boolean theShouldUpdateCache)
-		throws Exception{
+		throws Exception {
 
 		// set up
 		String packageName = "test.package";
@@ -154,7 +154,8 @@ public class JpaPackageCacheLoadSequenceTest {
 
 	}
 
-	private void insertPackageIntoCache(String thePackageName, String thePackageVersion, String theDescriptionPrefix) throws IOException {
+	private void insertPackageIntoCache(
+		String thePackageName, String thePackageVersion, String theDescriptionPrefix) throws IOException {
 		ByteArrayOutputStream byteStream = createPackageBytes(thePackageName, thePackageVersion, theDescriptionPrefix + "1");
 
 		Binary binary = new Binary();
@@ -182,16 +183,25 @@ public class JpaPackageCacheLoadSequenceTest {
 		packageVersionEntity.setFhirVersionId(FhirVersionEnum.R4.getFhirVersionString());
 		packageVersionEntity.setSavedTime(new Date());
 
-		when(myPackageVersionDao.findByPackageIdAndVersion(thePackageName, thePackageVersion)).thenReturn(Optional.of(packageVersionEntity));
+		when(myPackageVersionDao.findByPackageIdAndVersion(thePackageName, thePackageVersion))
+			.thenReturn(Optional.of(packageVersionEntity));
 	}
 
-	private void embedPackageBytesInSpec(String thePackageName, String thePackageVersion, String theDescriptionPrefix, PackageInstallationSpec theInstallationSpec) throws IOException {
+	private void embedPackageBytesInSpec(
+		String thePackageName,
+		String thePackageVersion,
+		String theDescriptionPrefix,
+		PackageInstallationSpec theInstallationSpec) throws IOException {
 		ByteArrayOutputStream byteStream = createPackageBytes(thePackageName, thePackageVersion, theDescriptionPrefix + "2");
 
 		theInstallationSpec.setPackageContents(byteStream.toByteArray());
 	}
 
-	private void setUpMockDownloadFromUrl(String thePackageName, String thePackageVersion, String theDescriptionPrefix, PackageInstallationSpec theInstallationSpec) throws IOException {
+	private void setUpMockDownloadFromUrl(
+		String thePackageName,
+		String thePackageVersion,
+		String theDescriptionPrefix,
+		PackageInstallationSpec theInstallationSpec) throws IOException {
 		String testUrl = "http://test.org/testPackage";
 		ByteArrayOutputStream byteStream = createPackageBytes(thePackageName, thePackageVersion, theDescriptionPrefix + "3");
 
@@ -201,7 +211,8 @@ public class JpaPackageCacheLoadSequenceTest {
 		theInstallationSpec.setPackageUrl(testUrl);
 	}
 
-	private void setUpMockDownloadFromRepository(String thePackageName, String thePackageVersion, String theDescriptionPrefix) throws IOException {
+	private void setUpMockDownloadFromRepository(
+		String thePackageName, String thePackageVersion, String theDescriptionPrefix) throws IOException {
 		String description = theDescriptionPrefix + "4";
 		ByteArrayOutputStream outputStream = createPackageBytes(thePackageName, thePackageVersion, description);
 
@@ -217,10 +228,12 @@ public class JpaPackageCacheLoadSequenceTest {
 			npmPackage,
 			stream);
 
-		when(myPackageLoaderSvc.fetchPackageFromPackageSpec(thePackageName, thePackageVersion)).thenReturn(packageData);
+		when(myPackageLoaderSvc.fetchPackageFromPackageSpec(thePackageName, thePackageVersion))
+			.thenReturn(packageData);
 	}
 
-	private ByteArrayOutputStream createPackageBytes(String thePackageName, String thePackageVersion, String theDescription) throws IOException {
+	private ByteArrayOutputStream createPackageBytes(
+		String thePackageName, String thePackageVersion, String theDescription) throws IOException {
 		JsonObject npmObject = new JsonObject();
 		npmObject.set("name", thePackageName);
 		npmObject.set("version", thePackageVersion);
@@ -236,20 +249,21 @@ public class JpaPackageCacheLoadSequenceTest {
 
 	private void setUpMocksForCacheUpdate() throws IOException {
 		// not all cache update paths make this call
-		lenient().when(myPackageLoaderSvc.createNpmPackageDataFromData(any(), any(), any(), any())).then(invocation -> {
-			ByteArrayInputStream stream = invocation.getArgument(3, ByteArrayInputStream.class);
-			byte[] packageBytes = stream.readAllBytes();
-			stream.reset();
-			NpmPackage npmPackage = NpmPackage.fromPackage(stream);
-			stream.reset();
-			return new NpmPackageData(
-				invocation.getArgument(0, String.class),
-				invocation.getArgument(1, String.class),
-				invocation.getArgument(2, String.class),
-				packageBytes,
-				npmPackage,
-				stream);
-		});
+		lenient().when(myPackageLoaderSvc.createNpmPackageDataFromData(any(), any(), any(), any()))
+			.then(invocation -> {
+				ByteArrayInputStream stream = invocation.getArgument(3, ByteArrayInputStream.class);
+				byte[] packageBytes = stream.readAllBytes();
+				stream.reset();
+				NpmPackage npmPackage = NpmPackage.fromPackage(stream);
+				stream.reset();
+				return new NpmPackageData(
+					invocation.getArgument(0, String.class),
+					invocation.getArgument(1, String.class),
+					invocation.getArgument(2, String.class),
+					packageBytes,
+					npmPackage,
+					stream);
+			});
 		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(false);
 
 		DaoMethodOutcome createBinaryOutcome = new DaoMethodOutcome();
