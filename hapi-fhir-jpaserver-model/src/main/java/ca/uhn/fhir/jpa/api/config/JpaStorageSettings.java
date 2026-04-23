@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategyEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -2853,37 +2854,5 @@ public class JpaStorageSettings extends StorageSettings {
 		 * </p>
 		 */
 		ANY
-	}
-
-	/**
-	 * Routing strategy for token-index reads and writes between the legacy
-	 * {@code HFJ_SPIDX_TOKEN} table and the new compressed token index tables
-	 * ({@code HFJ_SPIDX2_TOKEN_COMMON}, {@code HFJ_SPIDX2_TOKEN_COMMON_RES},
-	 * {@code HFJ_SPIDX2_TOKEN_IDENTIFIER}).
-	 *
-	 * @see JpaStorageSettings#setTokenIndexStrategy(TokenIndexStrategyEnum)
-	 */
-	public enum TokenIndexStrategyEnum {
-		/**
-		 * Write to and query the legacy {@code HFJ_SPIDX_TOKEN} table only.
-		 */
-		WRITE_OLD_QUERY_OLD,
-
-		/**
-		 * Write to both the legacy and the new {@code HFJ_SPIDX2_TOKEN_*} tables, and query the legacy
-		 * {@code HFJ_SPIDX_TOKEN} table.
-		 */
-		WRITE_BOTH_QUERY_OLD,
-
-		/**
-		 * Write to both the legacy and the new {@code HFJ_SPIDX2_TOKEN_*} tables, and query the new
-		 * {@code HFJ_SPIDX2_TOKEN_*} tables.
-		 */
-		WRITE_BOTH_QUERY_NEW,
-
-		/**
-		 * Write to and query the new {@code HFJ_SPIDX2_TOKEN_*} tables only.
-		 */
-		WRITE_NEW_QUERY_NEW
 	}
 }
