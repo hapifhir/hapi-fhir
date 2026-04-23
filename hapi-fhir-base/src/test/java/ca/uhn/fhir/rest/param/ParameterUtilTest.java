@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ParameterUtilTest {
+class ParameterUtilTest {
 
 	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(ParameterUtilTest.class);
 	//Adding a static to make the test data a bit more readable.  Multiple escaped backslashes were getting confusing.
@@ -19,7 +19,7 @@ public class ParameterUtilTest {
 
 	@ParameterizedTest
 	@MethodSource("sourceRawVsEscaped")
-	public void expectedEscape(String raw, String escaped) {
+	void expectedEscape(String raw, String escaped) {
 		String actualOutput = ParameterUtil.escape(raw);
 		ourLog.info("expectedEscape(raw: \"{}\",  escaped: \"{}\") actualOutput: \"{}\"",raw, escaped,actualOutput);
 		assertEquals(escaped,actualOutput);
@@ -27,7 +27,7 @@ public class ParameterUtilTest {
 
 	@ParameterizedTest
 	@MethodSource({"sourceRawVsEscaped","illegalEscapedInputs"})
-	public void expectedUnescape(String raw, String escaped) {
+	void expectedUnescape(String raw, String escaped) {
 		String actualOutput = ParameterUtil.unescape(escaped);
 		ourLog.info("expectedUnescape(raw: \"{}\",  escaped: \"{}\") actualOutput: \"{}\"",raw, escaped,actualOutput);
 		assertEquals(raw,actualOutput);
@@ -35,7 +35,7 @@ public class ParameterUtilTest {
 
 	@ParameterizedTest
 	@MethodSource("sourceRawVsEscaped")
-	public void escapeThenUnescape(String raw, String escaped) {
+	void escapeThenUnescape(String raw, String escaped) {
 		String actualOutput = ParameterUtil.unescape(ParameterUtil.escape(raw));
 		ourLog.info("escapeThenUnescape(raw: \"{}\",  escaped: \"{}\") actualOutput: \"{}\"",raw, escaped,actualOutput);
 		assertEquals(raw,actualOutput);
@@ -43,7 +43,7 @@ public class ParameterUtilTest {
 
 	@ParameterizedTest
 	@MethodSource("sourceRawVsEscaped")
-	public void unescapeThenEscape(String raw, String escaped) {
+	void unescapeThenEscape(String raw, String escaped) {
 		String actualOutput = ParameterUtil.escape(ParameterUtil.unescape(escaped));
 		ourLog.info("unescapeThenEscape(raw: \"{}\",  escaped: \"{}\") actualOutput: \"{}\"",raw, escaped,actualOutput);
 		assertEquals(escaped,actualOutput);
@@ -115,7 +115,7 @@ public class ParameterUtilTest {
 
 	@ParameterizedTest
 	@MethodSource("sourceIsTimeAllZeros")
-	public void testIsTimeAllZeros(String theInput, boolean theExpected) {
+	void testIsTimeAllZeros(String theInput, boolean theExpected) {
 		DateParam dateParam = theInput != null ? new DateParam(theInput) : null;
 		assertThat(ParameterUtil.isTimeAllZeros(dateParam)).isEqualTo(theExpected);
 	}

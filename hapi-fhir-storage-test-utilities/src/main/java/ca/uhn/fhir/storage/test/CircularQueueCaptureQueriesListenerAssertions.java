@@ -30,7 +30,6 @@ import org.assertj.core.description.Description;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -46,6 +45,8 @@ import static java.util.Objects.requireNonNull;
 public class CircularQueueCaptureQueriesListenerAssertions {
 
 	private static final int NO_COUNT = -1;
+	public static final String LS = System.lineSeparator();
+	public static final String DOUBLE_LS = LS + LS;
 
 	/**
 	 * Constructor
@@ -164,9 +165,9 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 					String retVal = failingTests
 						.stream()
 						.map(t -> t.test(myListener).orElseThrow())
-						.collect(Collectors.joining("\n"));
+						.collect(Collectors.joining(LS));
 
-					retVal += "\n\n";
+					retVal += DOUBLE_LS;
 
 					retVal += failingTests
 						.stream()
@@ -175,7 +176,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							rendered += t.renderStatements(myListener);
 							return rendered;
 						})
-						.collect(Collectors.joining("\n\n"));
+						.collect(Collectors.joining(DOUBLE_LS));
 
 
 					return retVal;
@@ -232,7 +233,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			/**
 			 * Does the SQL match exactly?
 			 */
-			public Condition<? super CircularQueueCaptureQueriesListener> matches(String theExpectedSql) {
+			public QueryCondition matches(String theExpectedSql) {
 				myTests.add(new TestSelect(myIndex, myAllThreads, theExpectedSql, SqlMatchModeEnum.MATCHES));
 				return QueryCondition.this;
 			}
@@ -256,7 +257,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 				if (actualCount != myExpectCount) {
 					String name = getName();
-					String msg = String.format("\n  %-10s Expected[%d] Actual[%d]", name, myExpectCount, actualCount);
+					String msg = String.format(LS + "  %-10s Expected[%d] Actual[%d]", name, myExpectCount, actualCount);
 					return Optional.of(msg);
 				}
 			}
@@ -330,7 +331,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 					retVal = switch (requireNonNull(mySqlMatchMode)) {
 						case CONTAINS -> {
 							if (!renderedSql.contains(myExpectedSql)) {
-								yield Optional.of("\nExpected SQL: " + renderedSql + "\n" +
+								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
 														   "  to contain: " + myExpectedSql);
 							} else {
 								yield Optional.empty();
@@ -338,7 +339,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 						}
 						case DOES_NOT_CONTAIN -> {
 							if (renderedSql.contains(myExpectedSql)) {
-								yield Optional.of("\nExpected SQL  : " + renderedSql + "\n" +
+								yield Optional.of(LS + "Expected SQL  : " + renderedSql + LS +
 									"not to contain: " + myExpectedSql);
 							} else {
 								yield Optional.empty();
@@ -347,7 +348,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 						case COUNT_INSTANCES -> {
 							int matchCount = StringUtils.countMatches(renderedSql, myExpectedSql);
 							if (matchCount != myExpectedCount) {
-								yield Optional.of("\nExpected SQL: " + renderedSql + "\n" +
+								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
 									" to contain " + myExpectedCount + " but found " + matchCount + " instances of : " + myExpectedSql);
 							} else {
 								yield Optional.empty();
@@ -355,7 +356,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 						}
 						case MATCHES -> {
 							if (!renderedSql.equals(myExpectedSql)) {
-								yield Optional.of("\nExpected SQL  : " + renderedSql + "\n" +
+								yield Optional.of(LS + "Expected SQL  : " + renderedSql + LS +
 									"to match      : " + myExpectedSql);
 							} else {
 								yield Optional.empty();
@@ -363,7 +364,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 						}
 						case ENDS_WITH -> {
 							if (!renderedSql.endsWith(myExpectedSql)) {
-								yield Optional.of("\nExpected SQL: " + renderedSql + "\n" +
+								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
 														   " to end with: " + myExpectedSql);
 							} else {
 								yield Optional.empty();
@@ -550,7 +551,8 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		CONTAINS,
 		DOES_NOT_CONTAIN,
 		COUNT_INSTANCES,
-		MATCHES, ENDS_WITH
+		MATCHES,
+		ENDS_WITH
 
 	}
 

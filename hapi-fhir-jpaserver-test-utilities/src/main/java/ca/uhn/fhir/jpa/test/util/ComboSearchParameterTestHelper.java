@@ -234,12 +234,12 @@ public class ComboSearchParameterTestHelper {
 			.setMessage("Storing SP:\n{}")
 			.addArgument(() -> FhirContext.forR5Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(theSearchParameter))
 			.log();
-		IBaseResource nonCanonicalResource = fromCanonoical(theSearchParameter);
+		IBaseResource nonCanonicalResource = fromCanonical(theSearchParameter);
 		mySearchParameterDao.update(nonCanonicalResource, new SystemRequestDetails());
 		return nonCanonicalResource;
 	}
 
-	private IBaseResource fromCanonoical(SearchParameter theSearchParameter) {
+	private IBaseResource fromCanonical(SearchParameter theSearchParameter) {
 		return myVersionCanonicalizer.searchParameterFromCanonical(theSearchParameter);
 	}
 

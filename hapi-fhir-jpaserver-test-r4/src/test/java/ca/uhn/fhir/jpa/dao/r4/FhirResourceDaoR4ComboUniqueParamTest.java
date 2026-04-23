@@ -10,14 +10,12 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -75,7 +73,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
+class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ComboUniqueParamTest.class);
 
@@ -85,7 +83,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	private MatchUrlService myMatchUrlService;
 
 	@AfterEach
-	public void purgeUniqueIndexes() {
+	void purgeUniqueIndexes() {
 		myResourceIndexedComboStringUniqueDao.deleteAll();
 	}
 
@@ -354,7 +352,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testCreateUniqueSpWithNoComponent() {
+	void testCreateUniqueSpWithNoComponent() {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-uniq-identifier");
 		sp.setCode("patient-uniq-identifier");
@@ -375,7 +373,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testCreateUniqueSpWithNoComponentDefinition() {
+	void testCreateUniqueSpWithNoComponentDefinition() {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-uniq-identifier");
 		sp.setCode("patient-uniq-identifier");
@@ -397,7 +395,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testHashesCalculated() {
+	void testHashesCalculated() {
 		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
 
@@ -443,7 +441,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testDoubleMatchingOnAnd_Search_TwoAndValues() {
+	void testDoubleMatchingOnAnd_Search_TwoAndValues() {
 		Pair<String, String> ids = prepareDoubleMatchingSearchParameterAndPatient();
 		String id1 = ids.getLeft();
 
@@ -471,7 +469,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 
 	@Test
-	public void testDoubleMatchingOnAnd_Search_TwoOrValues() {
+	void testDoubleMatchingOnAnd_Search_TwoOrValues() {
 		Pair<String, String> ids = prepareDoubleMatchingSearchParameterAndPatient();
 		String id1 = ids.getLeft();
 
@@ -493,7 +491,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 
 	@Test
-	public void testDoubleMatchingOnAnd_Search_TwoAndOrValues() {
+	void testDoubleMatchingOnAnd_Search_TwoAndOrValues() {
 		myStorageSettings.setUniqueIndexesCheckedBeforeSave(false);
 
 		createUniqueGenderFamilyComboSp();
@@ -529,7 +527,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testDoubleMatchingOnAnd_Search_NonMatching() {
+	void testDoubleMatchingOnAnd_Search_NonMatching() {
 		Pair<String, String> ids = prepareDoubleMatchingSearchParameterAndPatient();
 		String id1 = ids.getLeft();
 		String id2 = ids.getRight();
@@ -578,7 +576,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testDoubleMatchingOnAnd_Search2() {
+	void testDoubleMatchingOnAnd_Search2() {
 		SearchParameter sp;
 
 		sp = new SearchParameter();
@@ -703,7 +701,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testDoubleMatchingOnOr_ConditionalCreate() {
+	void testDoubleMatchingOnOr_ConditionalCreate() {
 		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
 
 		Patient pt = new Patient();
@@ -748,7 +746,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testDoubleMatchingPut() {
+	void testDoubleMatchingPut() {
 		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
 
 		Patient pt = new Patient();
@@ -799,7 +797,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	 * as far as i can see, but who knows...
 	 */
 	@Test
-	public void testDuplicateUniqueValuesAreReIndexed() {
+	void testDuplicateUniqueValuesAreReIndexed() {
 		myStorageSettings.setSchedulingDisabled(true);
 		myStorageSettings.setReindexThreadCount(1);
 
@@ -873,7 +871,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	@SuppressWarnings("removal")
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
-	public void testDuplicateUniqueValuesAreRejectedWithChecking_TestingDisabled(boolean theDisabled) {
+	void testDuplicateUniqueValuesAreRejectedWithChecking_TestingDisabled(boolean theDisabled) {
 		myStorageSettings.setUniqueIndexesCheckedBeforeSave(theDisabled);
 		assertFalse(myStorageSettings.isUniqueIndexesCheckedBeforeSave());
 
@@ -890,7 +888,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testDuplicateUniqueValuesAreRejectedWithChecking_TestingEnabled() {
+	void testDuplicateUniqueValuesAreRejectedWithChecking_TestingEnabled() {
 		createBirthdateAndGenderSps(true);
 
 		Patient pt1 = new Patient();
@@ -907,7 +905,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testIndexFirstMatchOnly() {
+	void testIndexFirstMatchOnly() {
 		createUniqueIndexPatientIdentifierCount1();
 
 		Patient pt = new Patient();
@@ -941,7 +939,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testUpdateConditionalOverExistingUnique() {
+	void testUpdateConditionalOverExistingUnique() {
 		createUniqueIndexPatientIdentifierCount1();
 
 		Patient pt = new Patient();
@@ -976,7 +974,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testIndexTransactionWithMatchUrl() {
+	void testIndexTransactionWithMatchUrl() {
 		Patient pt2 = new Patient();
 		pt2.setGender(Enumerations.AdministrativeGender.MALE);
 		pt2.setBirthDateElement(new DateType("2011-01-02"));
@@ -1042,7 +1040,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 
 	@Test
-	public void testIndexTransactionWithMatchUrl2() {
+	void testIndexTransactionWithMatchUrl2() {
 		createUniqueIndexCoverageBeneficiary();
 
 		String input = """
@@ -1153,7 +1151,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testNonTransaction() {
+	void testNonTransaction() {
 		createBirthdateAndGenderSps(true);
 
 		Patient p = new Patient();
@@ -1180,7 +1178,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 
 	@Test
-	public void testObservationSubject() {
+	void testObservationSubject() {
 		createUniqueIndexObservationSubject();
 
 		Patient pt = new Patient();
@@ -1208,7 +1206,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testOrQuery() {
+	void testOrQuery() {
 		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		createUniqueGenderFamilyComboSp();
 
@@ -1247,7 +1245,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testSearchSynchronousUsingUniqueComposite() {
+	void testSearchSynchronousUsingUniqueComposite() {
 		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		createUniqueGenderFamilyComboSp();
 
@@ -1280,7 +1278,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 
 	@Test
-	public void testSearchUsingUniqueComposite() {
+	void testSearchUsingUniqueComposite() {
 		createUniqueGenderFamilyComboSp();
 
 		Patient pt1 = new Patient();
@@ -1351,7 +1349,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		2011-01-01T12:11:22-04:00  | 2011-01-01                  | true        | false
 		2011-01-01T12:11:22-04:00  | 2011-01-01T12:11:22-04:00   | true        | true
 		""")
-	public void testUniqueValuesAreIndexed_DateRefAndToken(String theResourceDate, String theSearchDate, boolean theUseComboIndex, boolean theUseDateIndex) {
+	void testUniqueValuesAreIndexed_DateRefAndToken(String theResourceDate, String theSearchDate, boolean theUseComboIndex, boolean theUseDateIndex) {
 		myComboSearchParameterTestHelper.createObservationSubjectCodeEffective(true, false);
 
 		createPatient(withId("P1"));
@@ -1395,7 +1393,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testUniqueValuesAreIndexed_RefAndDateAndToken() {
+	void testUniqueValuesAreIndexed_RefAndDateAndToken() {
 		createUniqueObservationSubjectDateCode();
 
 		runInTransaction(() -> {
@@ -1429,7 +1427,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testUniqueValuesAreIndexed_Reference_UsingModifierSyntax() {
+	void testUniqueValuesAreIndexed_Reference_UsingModifierSyntax() {
 		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		createUniqueNameAndManagingOrganizationSps();
 
@@ -1476,7 +1474,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testUniqueValuesAreIndexed_StringAndReference() {
+	void testUniqueValuesAreIndexed_StringAndReference() {
 		createUniqueNameAndManagingOrganizationSps();
 
 		Organization org = new Organization();
@@ -1510,7 +1508,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testUniqueValuesAreIndexed_StringAndReference_UsingConditional() {
+	void testUniqueValuesAreIndexed_StringAndReference_UsingConditional() {
 		createUniqueNameAndManagingOrganizationSps();
 
 		Organization org = new Organization();
@@ -1546,7 +1544,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testUniqueValuesAreIndexed_StringAndReference_UsingConditionalInTransaction() {
+	void testUniqueValuesAreIndexed_StringAndReference_UsingConditionalInTransaction() {
 		createUniqueNameAndManagingOrganizationSps();
 
 		Organization org = new Organization();
@@ -1628,7 +1626,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testUniqueValuesAreNotIndexedIfNotAllParamsAreFound_DateAndToken() {
+	void testUniqueValuesAreNotIndexedIfNotAllParamsAreFound_DateAndToken() {
 		createBirthdateAndGenderSps(true);
 
 		Patient pt;
@@ -1660,7 +1658,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testUniqueValuesAreNotIndexedIfNotAllParamsAreFound_StringAndReference() {
+	void testUniqueValuesAreNotIndexedIfNotAllParamsAreFound_StringAndReference() {
 		createUniqueNameAndManagingOrganizationSps();
 
 		Organization org = new Organization();
@@ -1700,7 +1698,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testUniqueValuesAreReIndexed() {
+	void testUniqueValuesAreReIndexed() {
 		createUniqueObservationSubjectDateCode();
 
 		Patient pt1 = new Patient();
@@ -1740,7 +1738,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 
 	@Test
-	public void testDetectUniqueSearchParams() {
+	void testDetectUniqueSearchParams() {
 		createBirthdateAndGenderSps(true);
 		List<RuntimeSearchParam> params = mySearchParamRegistry.getActiveComboSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 
@@ -1755,7 +1753,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testDuplicateUniqueValuesWithDateAreRejected() {
+	void testDuplicateUniqueValuesWithDateAreRejected() {
 		createBirthdateAndGenderSps(true);
 
 		Patient pt1 = new Patient();
@@ -1788,7 +1786,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testDuplicateUniqueValuesWithDateTimeAreRejected() {
+	void testDuplicateUniqueValuesWithDateTimeAreRejected() {
 		createUniqueObservationDateCode();
 
 		Observation obs = new Observation();
@@ -1806,7 +1804,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
-	public void testReplaceOneWithAnother() {
+	void testReplaceOneWithAnother() {
 		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		createUniqueGenderFamilyComboSp();
 

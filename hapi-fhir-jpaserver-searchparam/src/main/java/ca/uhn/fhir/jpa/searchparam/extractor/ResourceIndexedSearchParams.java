@@ -565,9 +565,9 @@ public final class ResourceIndexedSearchParams {
 	 * <p>
 	 * So this recursive algorithm calculates those
 	 * </p>
-	 *  @param theResourceType E.g. <code>Patient
 	 *
-	 * @param thePartsChoices      E.g. <code>[[gender=male], [name=SMITH, name=JOHN]]</code>
+	 * @param theResourceType E.g. <code>Patient
+	 * @param thePartsChoices E.g. <code>[[gender=male], [name=SMITH, name=JOHN]]</code>
 	 */
 	public static Set<String> extractCompositeStringUniquesValueChains(
 			String theResourceType, List<List<String>> thePartsChoices) {

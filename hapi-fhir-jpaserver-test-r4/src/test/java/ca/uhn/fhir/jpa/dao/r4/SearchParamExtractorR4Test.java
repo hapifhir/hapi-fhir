@@ -55,7 +55,7 @@ import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class SearchParamExtractorR4Test implements ITestDataBuilder {
+class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
@@ -64,7 +64,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	final StorageSettings myStorageSettings = new StorageSettings();
 
 	@Test
-	public void testParamWithOrInPath() {
+	void testParamWithOrInPath() {
 		Observation obs = new Observation();
 		obs.addCategory().addCoding().setSystem("SYSTEM").setCode("CODE");
 
@@ -78,7 +78,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testName() {
+	void testName() {
 		Patient patient = new Patient();
 		List<StringType> suffixStrings = Arrays.asList(new StringType("the Great"));
 		List<StringType> prefixStrings = Arrays.asList(new StringType("King"));
@@ -95,7 +95,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testTokenOnSearchParamContext() {
+	void testTokenOnSearchParamContext() {
 		SearchParameter sp = new SearchParameter();
 		sp.addUseContext().setCode(new Coding().setSystem("http://system").setCode("code"));
 
@@ -109,7 +109,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testTokenText_Enabled_Coding() {
+	void testTokenText_Enabled_Coding() {
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
 
@@ -133,7 +133,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testTokenText_DisabledInSearchParam_Coding() {
+	void testTokenText_DisabledInSearchParam_Coding() {
 		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.ALL).get("code");
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
 		codeSearchParam.addExtension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(true)));
@@ -159,7 +159,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testTokenText_DisabledInStorageSettings_Coding() {
+	void testTokenText_DisabledInStorageSettings_Coding() {
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setSuppressStringIndexingInTokens(true);
 
@@ -183,7 +183,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testTokenText_DisabledInStorageSettingsButForcedInSearchParam_Coding() {
+	void testTokenText_DisabledInStorageSettingsButForcedInSearchParam_Coding() {
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setSuppressStringIndexingInTokens(true);
 
@@ -216,7 +216,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 
 	@Test
-	public void testReferenceWithResolve() {
+	void testReferenceWithResolve() {
 		Encounter enc = new Encounter();
 		enc.addLocation().setLocation(new Reference("Location/123"));
 
@@ -231,7 +231,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testReferenceWithResolveMulti() {
+	void testReferenceWithResolveMulti() {
 		Consent consent = new Consent();
 		consent.setSource(new Reference().setReference("Consent/999"));
 
@@ -246,7 +246,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 
 	@Test
-	public void testExtractSearchParamTokenTest() {
+	void testExtractSearchParamTokenTest() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("sys").setValue("val");
 
@@ -263,7 +263,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 
 	@Test
-	public void testExtensionContainingReference() {
+	void testExtensionContainingReference() {
 		String path = "Patient.extension('http://patext').value.as(Reference)";
 
 		RuntimeSearchParam sp = new RuntimeSearchParam(null, null, "extpat", "Patient SP", path, RestSearchParameterTypeEnum.REFERENCE, new HashSet<>(), Sets.newHashSet("Patient"), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
@@ -279,7 +279,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testExtractComponentQuantities() {
+	void testExtractComponentQuantities() {
 		Observation o1 = new Observation();
 		o1.addComponent()
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
@@ -295,7 +295,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testExtractComponentQuantityWithNormalizedQuantitySearchSupported() {
+	void testExtractComponentQuantityWithNormalizedQuantitySearchSupported() {
 
 		StorageSettings storageSettings = new StorageSettings();
 
@@ -314,7 +314,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testExtractComponentQuantityValueWithNormalizedQuantitySearchSupported() {
+	void testExtractComponentQuantityValueWithNormalizedQuantitySearchSupported() {
 
 		StorageSettings storageSettings = new StorageSettings();
 
@@ -335,7 +335,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testExtractIdentifierOfType() {
+	void testExtractIdentifierOfType() {
 
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setIndexIdentifierOfType(true);
@@ -383,7 +383,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		 * @see ca.uhn.fhir.model.api.annotation.SearchParamDefinition#compositeOf
 		 */
 		@BeforeEach
-		public void setUp() {
+		void setUp() {
 			String spJson = """
 				{
 				  "resourceType": "SearchParameter",

@@ -112,10 +112,21 @@ public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchPar
 					 * ordinal. We'll be joining on the date index table as well, and it will
 					 * handle the additional specificity.
 					 */
-					if (prefix == ParamPrefixEnum.GREATERTHAN) {
-						prefix = ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
-					} else if (prefix == ParamPrefixEnum.LESSTHAN) {
-						prefix = ParamPrefixEnum.LESSTHAN_OR_EQUALS;
+					switch (prefix) {
+						case GREATERTHAN -> prefix = ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
+						case LESSTHAN -> prefix = ParamPrefixEnum.LESSTHAN_OR_EQUALS;
+						case NOT_EQUAL -> {
+							/*
+							 * If we're doing a not-equal at a precision greater than date, we really can't rely on
+							 * the ordinal comparison, since we might be looking for a value with a different date,
+							 * or we might be looking for a value with the same date but a different time. So let's
+							 * just look for anything other an day 0 (i.e everything). The subsequent comparison against
+							 * the standard date index will handle the negation. This is tested in
+							 * FhirResourceDaoR4ComboNonUniqueParamTest#testRangedDate_Search(...)
+							 */
+							ordinalLow = 0;
+							ordinalHigh = 0;
+						}
 					}
 				}
 			}

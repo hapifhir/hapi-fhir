@@ -44,17 +44,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
-import static oracle.jdbc.OracleTypeMetaData.ArrayStorage.withCode;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
+class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4ComboNonUniqueParamTest.class);
 	public static final String ORG_ID_UNQUALIFIED = "my-org";
 	public static final String ORG_ID_QUALIFIED = "Organization/" + ORG_ID_UNQUALIFIED;
@@ -69,12 +67,12 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	private boolean myInterceptorFound = false;
 
 	@BeforeEach
-	public void removeInterceptor() {
+	void removeInterceptor() {
 		myInterceptorFound = myInterceptorService.unregisterInterceptor(mySearchParamValidatingInterceptor);
 	}
 
 	@AfterEach
-	public void restoreInterceptor() {
+	void restoreInterceptor() {
 		myStorageSettings.setIndexMissingFields(new StorageSettings().getIndexMissingFields());
 
 		if (myInterceptorFound) {
@@ -83,7 +81,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testTokenFromCodeableConcept_Create() {
+	void testTokenFromCodeableConcept_Create() {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-family");
 		sp.setType(Enumerations.SearchParamType.STRING);
@@ -148,7 +146,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 
 	@Test
-	public void testStringAndToken_Create() {
+	void testStringAndToken_Create() {
 		createStringAndTokenCombo_NameAndGender();
 
 		IIdType id1 = createPatient1(null);
@@ -205,7 +203,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testEmptyParamLists() {
+	void testEmptyParamLists() {
 		createStringAndTokenCombo_NameAndGender();
 
 		IIdType id1 = createPatient1(null);
@@ -222,7 +220,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testStringAndToken_CreateAndUpdate() {
+	void testStringAndToken_CreateAndUpdate() {
 		createStringAndTokenCombo_NameAndGender();
 
 		initResourceTypeCacheFromConfig();
@@ -277,7 +275,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testStringAndToken_SearchWithExtraParameters() {
+	void testStringAndToken_SearchWithExtraParameters() {
 		createStringAndTokenCombo_NameAndGender();
 
 		IIdType id1 = createPatient1(null);
@@ -318,7 +316,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 
 	@Test
-	public void testStringAndToken_MultipleAnd() {
+	void testStringAndToken_MultipleAnd() {
 		createStringAndTokenCombo_NameAndGender();
 
 		Patient patient = new Patient();
@@ -352,7 +350,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testRangedDate_Create() {
+	void testRangedDate_Create() {
 		// Setup
 		IBaseResource comboSp = myComboSearchParameterTestHelper.createObservationSubjectCodeAndRangedEffective();
 		ourLog.info("Combo: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(comboSp));
@@ -435,13 +433,15 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		false    ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=gt2022-01-02T04:00:00Z
 		true     ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=lt2022-01-02T04:00:00Z
 		false    ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=lt2022-01-02T03:00:00Z
+		true     ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=ne2022-01-02T03:00:00Z
+		false    ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=ne2022-01-02T03:44:55Z
 		
 		# Other Qualifiers that aren't supported for combo param
 		true     ~ false ~ true  ~ 2022-01-02T03:44:55Z ~ date:missing=false
 		true     ~ false ~ true  ~ 2022-01-02T03:44:55Z ~ date=sa2021-01-02
 		true     ~ false ~ true  ~ 2022-01-02T03:44:55Z ~ date=eb2023-01-02
 		""")
-	public void testRangedDate_Search(boolean theExpectMatch, boolean theExpectUseComboTable, boolean theExpectUseDateTable, String theObsEffectiveDate, String theDate) {
+	void testRangedDate_Search(boolean theExpectMatch, boolean theExpectUseComboTable, boolean theExpectUseDateTable, String theObsEffectiveDate, String theDate) {
 		// Setup
 		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
 		myComboSearchParameterTestHelper.createObservationSubjectCodeAndRangedEffective();
@@ -507,9 +507,6 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		document.addEntry().setResource(composition);
 		myBundleDao.update(document, mySrd);
 
-		boolean theExpectMatch = true;
-		boolean theExpectUseComboTable = true;
-
 		logAllNonUniqueIndexes();
 
 		// Test
@@ -541,7 +538,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		2021-02-02T11:22:33Z    , 2021-02-02T11:22:33Z    , true         , true
 		2021-02-02T11:22:33Z    , 2021-02-02T11:22:01Z    , false        , true
 		""")
-	public void testStringAndDate_Create(String theObservationDate, String theSearchDate, boolean theExpectMatch, boolean theExpectUseDateIndexTable) {
+	void testStringAndDate_Create(String theObservationDate, String theSearchDate, boolean theExpectMatch, boolean theExpectUseDateIndexTable) {
 		createStringAndDateCombo_ObservationValueAndEffective();
 
 		IIdType id1 = createObservation(
@@ -594,7 +591,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testStringAndReference_Create() {
+	void testStringAndReference_Create() {
 		createStringAndReferenceCombo_FamilyAndOrganization();
 
 		createOrg();
@@ -625,7 +622,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testStringAndReference_SearchByUnqualifiedReference() {
+	void testStringAndReference_SearchByUnqualifiedReference() {
 		createStringAndReferenceCombo_FamilyAndOrganization();
 
 		createOrg();
@@ -659,7 +656,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	 * combo index twice.
 	 */
 	@Test
-	public void testMultipleAndCombinations_EqualNumbers() {
+	void testMultipleAndCombinations_EqualNumbers() {
 		createStringAndStringCombo_FamilyAndGiven();
 
 		createPatient(
@@ -694,7 +691,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	 * a pretty contrived use case.
 	 */
 	@Test
-	public void testMultipleAndCombinations_NonEqualNumbers() {
+	void testMultipleAndCombinations_NonEqualNumbers() {
 		createStringAndStringCombo_FamilyAndGiven();
 
 		createPatient(
@@ -726,7 +723,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	 * in a combo param.
 	 */
 	@Test
-	public void testIndexAndSearchDocument() {
+	void testIndexAndSearchDocument() {
 		createCompositionSubjectAndTypeComboSp();
 
 		createPatient(withId("PAT-0"), withActiveTrue());
@@ -778,7 +775,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	 * in a combo param, and <code>composition.date</code> added to the search URL as well
 	 */
 	@Test
-	public void testIndexAndSearchDocument_ComboPlusExtraSp() {
+	void testIndexAndSearchDocument_ComboPlusExtraSp() {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("Bundle-composition-date");
 		sp.setUrl("http://example.org/SearchParameter/Bundle-composition-date");
@@ -873,7 +870,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 
 	@Test
-	public void testOrQuery() {
+	void testOrQuery() {
 		createTokenAndReferenceCombo_FamilyAndOrganization();
 
 		createPatient(withId("PAT"), withActiveTrue());
@@ -1140,10 +1137,10 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	 * A few tests where the combo index should not be used
 	 */
 	@Nested
-	public class ShouldNotUseComboIndexTest {
+	class ShouldNotUseComboIndexTest {
 
 		@BeforeEach
-		public void before() {
+		void before() {
 			SearchParameter sp = new SearchParameter();
 			sp.setId("SearchParameter/Observation-date");
 			sp.setType(Enumerations.SearchParamType.DATE);
@@ -1184,7 +1181,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		}
 
 		@Test
-		public void testTooManyPermutations() {
+		void testTooManyPermutations() {
 			// Test
 			StringOrListParam noteTextParam = new StringOrListParam();
 			DateOrListParam dateParam = new DateOrListParam();
@@ -1222,7 +1219,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 			"2021-01                  , false",
 			"2021                     , false",
 		})
-		public void testPartialDateTime(String theDateValue, boolean theShouldUseComboIndex) {
+		void testPartialDateTime(String theDateValue, boolean theShouldUseComboIndex) {
 			IIdType id1 = createObservation(theDateValue);
 
 			logAllNonUniqueIndexes();
@@ -1255,7 +1252,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 		@ParameterizedTest
 		@ValueSource(booleans = {true, false})
-		public void testDateModifier(boolean theUseComparator) {
+		void testDateModifier(boolean theUseComparator) {
 			IIdType id1 = createObservation("2021-01-02");
 			createObservation("2023-01-02");
 
@@ -1287,7 +1284,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		@ValueSource(strings = {
 			"2025-01-01",
 			"eq2025-01-01"})
-		public void testSearchWithDateQueryString_whenModifierEqualIsPresent_willUseComboSearchIndexes(String theDateQueryParameter){
+		void testSearchWithDateQueryString_whenModifierEqualIsPresent_willUseComboSearchIndexes(String theDateQueryParameter){
 			// given
 			IIdType id1 = createObservation("2025-01-01");
 
@@ -1312,7 +1309,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 		@ParameterizedTest
 		@ValueSource(booleans = {true, false})
-		public void testStringModifier(boolean theUseExact) {
+		void testStringModifier(boolean theUseExact) {
 			IIdType id1 = createObservation("2021-01-02");
 			createObservation("2023-01-02");
 
@@ -1337,7 +1334,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 		@ParameterizedTest
 		@ValueSource(booleans = {true, false})
-		public void testMissing(boolean theUseMissing) {
+		void testMissing(boolean theUseMissing) {
 			myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
 
 			IIdType id1 = createObservation("2021-01-02");

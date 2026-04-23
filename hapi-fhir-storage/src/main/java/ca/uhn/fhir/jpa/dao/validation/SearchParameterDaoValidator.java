@@ -164,38 +164,40 @@ public class SearchParameterDaoValidator {
 	}
 
 	private void maybeValidateComboSpForNonUniqueIndexing(SearchParameter theSearchParameter) {
-		if (isComboSpForNonUniqueIndexing(theSearchParameter)) {
+		if (!isComboSpForNonUniqueIndexing(theSearchParameter)) {
+			return;
+		}
 
-			// Make sure we don't have multiple ranged date parameters
-			int rangedDateParams = 0;
-			for (SearchParameter.SearchParameterComponentComponent component : theSearchParameter.getComponent()) {
+		// Make sure we don't have multiple ranged date parameters
+		int rangedDateParams = 0;
+		for (SearchParameter.SearchParameterComponentComponent component : theSearchParameter.getComponent()) {
 
-				if (!component
-						.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED)
-						.isEmpty()) {
-					rangedDateParams++;
+			if (!component
+					.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED)
+					.isEmpty()) {
+				rangedDateParams++;
 
-					String definition = component.getDefinition();
-					RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParamByUrl(
-							definition, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
-					if (sp == null) {
-						throw new UnprocessableEntityException(
-								Msg.code(2922) + "SearchParameter component can not be found: " + definition);
-					}
-					if (sp.getParamType() != RestSearchParameterTypeEnum.DATE) {
-						throw new UnprocessableEntityException(Msg.code(2921)
-								+ "SearchParameter must not have component with extension[url="
-								+ HapiExtensions.EXT_SP_COMBO_DATE_RANGED + "] for non-date type search parameter");
-					}
+				String definition = component.getDefinition();
+				RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParamByUrl(
+						definition, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
+				if (sp == null) {
+					throw new UnprocessableEntityException(
+							Msg.code(2922) + "SearchParameter component can not be found: " + definition);
+				}
+				if (sp.getParamType() != RestSearchParameterTypeEnum.DATE) {
+					throw new UnprocessableEntityException(Msg.code(2921)
+							+ "SearchParameter must not have component with extension[url="
+							+ HapiExtensions.EXT_SP_COMBO_DATE_RANGED + "] for non-date type search parameter");
 				}
 			}
-
-			if (rangedDateParams > 1) {
-				throw new UnprocessableEntityException(
-						Msg.code(2919) + "SearchParameter must not have multiple components with extension: "
-								+ HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
-			}
 		}
+
+		if (rangedDateParams > 1) {
+			throw new UnprocessableEntityException(
+					Msg.code(2919) + "SearchParameter must not have multiple components with extension: "
+							+ HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
+		}
+
 	}
 
 	private void maybeValidateComboSpForUniqueIndexing(SearchParameter theSearchParameter) {

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.api.model;
+package ca.uhn.fhir.jpa.searchparam.util;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
