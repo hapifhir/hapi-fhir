@@ -195,7 +195,8 @@ public class JpaPackageCacheLoadSequenceTest {
 		String testUrl = "http://test.org/testPackage";
 		ByteArrayOutputStream byteStream = createPackageBytes(thePackageName, thePackageVersion, theDescriptionPrefix + "3");
 
-		when(myPackageLoaderSvc.loadPackageUrlContents(testUrl)).thenReturn(byteStream.toByteArray());
+		// Even if the url is configured, the algorithm may not get this far if we find the data elsewhere first
+		lenient().when(myPackageLoaderSvc.loadPackageUrlContents(testUrl)).thenReturn(byteStream.toByteArray());
 
 		theInstallationSpec.setPackageUrl(testUrl);
 	}
