@@ -203,8 +203,18 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	@Override
 	public void purgeAllScheduledJobsForUnitTest() throws SchedulerException {
+		/*
+		 * scheduling needs to be stopped before clearing or you
+		 * get unexpected results.
+		 *
+		 * We're only pausing which *should* do the trick
+		 * (because stopping and restarting is harder to do in this
+		 * framework).
+		 */
+		pause();
 		myLocalScheduler.clear();
 		myClusteredScheduler.clear();
+		unpause();
 	}
 
 	@Override
