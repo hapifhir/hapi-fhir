@@ -132,6 +132,31 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init840();
 		init860();
 		init880();
+		init8110();
+	}
+
+	private void init8110() {
+		Builder version = forVersion(VersionEnum.V8_11_0);
+		{
+			// https://github.com/hapifhir/hapi-fhir/issues/7708#issuecomment-4180253569
+			final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+
+			// First, drop the existing Index only if we are running with Heavyweight enabled
+			hfjResource
+					.dropIndex("20260424.01", "IDX_RES_DATE")
+					.runEvenDuringSchemaInitialization()
+					.heavyweightSkipByDefault();
+
+			// Now, add the Index back using the Same Name and 2 new Columns
+			// also only if we are running with Heavyweight enabled
+			hfjResource
+					.addIndex("20260424.02", "IDX_RES_DATE")
+					.unique(false)
+					.online(true)
+					.withColumns("RES_UPDATED", "RES_ID", "PARTITION_ID")
+					.runEvenDuringSchemaInitialization()
+					.heavyweightSkipByDefault();
+		}
 	}
 
 	protected void init880() {
