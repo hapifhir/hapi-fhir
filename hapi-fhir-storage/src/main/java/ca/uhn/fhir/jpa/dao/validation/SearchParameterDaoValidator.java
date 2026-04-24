@@ -112,10 +112,9 @@ public class SearchParameterDaoValidator {
 		if (isCompositeWithoutExpression(searchParameter)) {
 
 			// this is ok
-			ourLog
-				.atTrace()
-				.setMessage("Composite search parameter allowed without expression")
-				.log();
+			ourLog.atTrace()
+					.setMessage("Composite search parameter allowed without expression")
+					.log();
 
 		} else if (isBlank(searchParameter.getExpression())) {
 
@@ -130,11 +129,10 @@ public class SearchParameterDaoValidator {
 			if (fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
 
 				// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
-				ourLog
-					.atTrace()
-					.setMessage("Skipping validation of composite search parameter expression for FHIR version {}")
-					.addArgument(() -> fhirVersion)
-					.log();
+				ourLog.atTrace()
+						.setMessage("Skipping validation of composite search parameter expression for FHIR version {}")
+						.addArgument(() -> fhirVersion)
+						.log();
 
 			} else {
 
@@ -142,7 +140,6 @@ public class SearchParameterDaoValidator {
 				maybeValidateComboSpForNonUniqueIndexing(searchParameter);
 				maybeValidateSearchParameterExpressionsOnSave(searchParameter);
 				maybeValidateCompositeWithComponent(searchParameter);
-
 			}
 		}
 	}
