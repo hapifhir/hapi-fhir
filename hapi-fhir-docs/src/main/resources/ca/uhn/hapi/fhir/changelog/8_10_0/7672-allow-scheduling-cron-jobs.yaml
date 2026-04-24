@@ -1,0 +1,8 @@
+---
+type: add
+issue: 7682
+title: "Added the ability to schedule IHapiScheduler jobs
+      by providing a Quartz cron expression.
+      Schedulers will execute as scheduled until stopped.
+      Invalid cron expressions will result in an error on scheduling.
+"

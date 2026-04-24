@@ -7,7 +7,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -54,12 +53,16 @@ public class CrossPartitionReferencesNotAllowedTest extends BaseJpaR5Test {
 	/**
 	 * Bug 8610 — direct DAO path (BaseStorageDao.performAutoVersioning).
 	 *
-	 * Before the fix: performAutoVersioning() uses allPartitions() and finds the Patient across
-	 * partition boundaries; the subsequent indexing step then fails with a confusing
+	 * Before the #7778 fix: performAutoVersioning() uses allPartitions() and finds the Patient
+	 * across partition boundaries; the subsequent indexing step then fails with a confusing
 	 * InvalidRequestException from SearchParamExtractorService.
-	 * After the fix: performAutoVersioning() scopes the lookup to the Observation's write
-	 * partition (PARTITION_OBSERVATION), does not find the Patient, and throws
-	 * ResourceNotFoundException — the correct, clearly attributable error for NOT_ALLOWED.
+	 * After the #7778 fix: performAutoVersioning() scopes the lookup to the Observation's write
+	 * partition (PARTITION_OBSERVATION) and does not find the Patient. The SMILE-9706 fix then
+	 * skips auto-versioning for the unresolvable reference and lets DaoResourceLinkResolver's
+	 * referential integrity check reject it with InvalidRequestException / HAPI-1094 — the
+	 * canonical "resource not found, specified in path" error for referential integrity
+	 * violations. Both fixes preserve the security contract (cross-partition references are
+	 * rejected); they differ only in which exception surface reports it.
 	 */
 	@Test
 	void testDirectDaoCreate_withAutoVersionExtension_crossPartitionReference_isRejected() {
@@ -73,12 +76,14 @@ public class CrossPartitionReferencesNotAllowedTest extends BaseJpaR5Test {
 		obs.setStatus(Enumerations.ObservationStatus.FINAL);
 		obs.setSubject(new Reference(patientId.getValue()));
 
-		// Before the fix: throws InvalidRequestException (wrong exception, from wrong place).
-		// After the fix: throws ResourceNotFoundException from performAutoVersioning() when the
-		// scoped partition lookup fails to find the cross-partition Patient.
+		// Cross-partition reference must be rejected. After SMILE-9706, performAutoVersioning
+		// defers to DaoResourceLinkResolver which throws the canonical HAPI-1094 referential
+		// integrity error — matching the transaction-path sibling test below.
 		assertThatThrownBy(() -> myObservationDao.create(obs, mySrd))
-			.as("Creation must fail with ResourceNotFoundException — cross-partition ref is NOT_ALLOWED")
-			.isInstanceOf(ResourceNotFoundException.class);
+			.as("Creation must fail — cross-partition ref is NOT_ALLOWED")
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-1094")
+			.hasMessageContaining("Patient/" + patientId.getIdPart());
 	}
 
 	/**
