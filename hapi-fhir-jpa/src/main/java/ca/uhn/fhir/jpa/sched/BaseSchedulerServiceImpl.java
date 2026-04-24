@@ -31,6 +31,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,8 @@ import org.springframework.core.env.Environment;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class provides task scheduling for the entire module using the Quartz library.
@@ -63,6 +66,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	public static final String SCHEDULING_DISABLED = "scheduling_disabled";
 	public static final String SCHEDULING_DISABLED_EQUALS_TRUE = SCHEDULING_DISABLED + "=true";
+
+	private static final String LOCAL_SCHEDULER = "local";
+	private static final String CLUSTERED_SCHEDULER = "clustered";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSchedulerServiceImpl.class);
 	private IHapiScheduler myLocalScheduler;
@@ -127,10 +133,10 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		IHapiScheduler retval;
 		if (theClustered) {
 			ourLog.info("Creating Clustered Scheduler");
-			retval = getClusteredScheduler();
+			retval = createClusteredScheduler();
 		} else {
 			ourLog.info("Creating Local Scheduler");
-			retval = getLocalHapiScheduler();
+			retval = createLocalHapiScheduler();
 		}
 		retval.init();
 		return retval;
@@ -140,9 +146,15 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		return !isLocalSchedulingEnabled() || isSchedulingDisabledForUnitTests();
 	}
 
-	protected abstract IHapiScheduler getLocalHapiScheduler();
+	/**
+	 * Creates a new hapi scheduler.
+	 */
+	protected abstract IHapiScheduler createLocalHapiScheduler();
 
-	protected abstract IHapiScheduler getClusteredScheduler();
+	/**
+	 * Creates a new clustered scheduler
+	 */
+	protected abstract IHapiScheduler createClusteredScheduler();
 
 	@EventListener(ContextRefreshedEvent.class)
 	public void start() {
@@ -215,33 +227,70 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	@Override
 	public void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-		scheduleJob("local", myLocalScheduler, theIntervalMillis, theJobDefinition);
+		scheduleJob(LOCAL_SCHEDULER, myLocalScheduler, theIntervalMillis, null, theJobDefinition);
 	}
 
 	@Override
 	public void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-		scheduleJob("clustered", myClusteredScheduler, theIntervalMillis, theJobDefinition);
+		scheduleJob(CLUSTERED_SCHEDULER, myClusteredScheduler, theIntervalMillis, null, theJobDefinition);
+	}
+
+	@Override
+	public void scheduleLocalJob(String theCronExpression, ScheduledJobDefinition theJobDefinition) {
+		scheduleJob(LOCAL_SCHEDULER, myLocalScheduler, null, theCronExpression, theJobDefinition);
+	}
+
+	@Override
+	public void scheduleClusteredJob(String theCronExpression, ScheduledJobDefinition theJobDefinition) {
+		scheduleJob(CLUSTERED_SCHEDULER, myClusteredScheduler, null, theCronExpression, theJobDefinition);
 	}
 
 	private void scheduleJob(
 			String theInstanceName,
 			IHapiScheduler theScheduler,
-			long theIntervalMillis,
+			Long theIntervalMillis,
+			String theCronExpression,
 			ScheduledJobDefinition theJobDefinition) {
 		if (isSchedulingDisabled()) {
 			return;
 		}
-
 		assert theJobDefinition.getId() != null;
 		assert theJobDefinition.getJobClass() != null;
+		assert (theIntervalMillis != null || isNotBlank(theCronExpression));
 
-		ourLog.info(
-				"Scheduling {} job {} with interval {}",
-				theInstanceName,
-				theJobDefinition.getId(),
-				StopWatch.formatMillis(theIntervalMillis));
 		defaultGroup(theJobDefinition);
-		theScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
+		if (theIntervalMillis != null) {
+			ourLog.info(
+					"Scheduling {} job {} with interval {}",
+					theInstanceName,
+					theJobDefinition.getId(),
+					StopWatch.formatMillis(theIntervalMillis));
+			theScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
+		} else {
+			ourLog.info(
+					"Scheduling {} job {} with cron expression {}",
+					theInstanceName,
+					theJobDefinition.getId(),
+					theCronExpression);
+			theScheduler.scheduleCronJob(theCronExpression, theJobDefinition);
+		}
+	}
+
+	@Override
+	public void unscheduleLocalJobs(TriggerKey... theKeys) {
+		unscheduleJobs(myLocalScheduler, theKeys);
+	}
+
+	@Override
+	public void unscheduleClusteredJobs(TriggerKey... theKeys) {
+		unscheduleJobs(myClusteredScheduler, theKeys);
+	}
+
+	private void unscheduleJobs(IHapiScheduler theScheduler, TriggerKey... theKeys) {
+		if (isSchedulingDisabled()) {
+			return;
+		}
+		theScheduler.unscheduleJobs(theKeys);
 	}
 
 	@VisibleForTesting

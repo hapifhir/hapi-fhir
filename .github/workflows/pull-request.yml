@@ -2,9 +2,6 @@ name: Pull Request Pipeline
 
 on:
   pull_request:
-    branches:
-      - master
-      - rel_*
 
 jobs:
   load-config-and-run:

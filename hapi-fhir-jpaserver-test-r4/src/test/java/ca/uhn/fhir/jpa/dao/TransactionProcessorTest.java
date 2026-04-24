@@ -61,6 +61,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -100,11 +102,14 @@ public class TransactionProcessorTest {
 	public static final String PRACTITIONER_MATCH_URL_FOO_123 = "Practitioner?identifier=http://foo|123";
 	public static final long PRACTITIONER_MATCH_URL_FOO_123_HASH = 5166745101503280662L;
 	public static final String PRACTITIONER_MATCH_URL_FOO_456 = "Practitioner?identifier=http://foo|456";
+	private static final long PRACTITIONER_MATCH_URL_FOO_456_HASH = 9212997248395834704L;
+	private static final String PATIENT_MATCH_URL_FOO_123 = "Patient?identifier=http://foo|123";
+	private static final long PATIENT_MATCH_URL_FOO_123_HASH = -4132452001562191669L;
+
 	public static final SearchParameterMap PRACTITIONER_MATCH_URL_FOO_123_SP_MAP = new SearchParameterMap()
 		.add(Practitioner.SP_IDENTIFIER, new TokenParam("http://foo", "123"));
 	public static final SearchParameterMap PRACTITIONER_MATCH_URL_FOO_456_SP_MAP = new SearchParameterMap()
 		.add(Practitioner.SP_IDENTIFIER, new TokenParam("http://foo", "456"));
-	private static final long PRACTITIONER_MATCH_URL_FOO_456_HASH = 9212997248395834704L;
 
 	@RegisterExtension
 	private final LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(BaseTransactionProcessor.class);
@@ -219,7 +224,7 @@ public class TransactionProcessorTest {
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
-		bb.addTransactionDeleteEntry("Patient?identifier=http://foo|123");
+		bb.addTransactionDeleteEntry(PATIENT_MATCH_URL_FOO_123);
 		Bundle input = bb.getBundleTyped();
 
 		DeleteMethodOutcome value = new DeleteMethodOutcome();
@@ -243,7 +248,7 @@ public class TransactionProcessorTest {
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
-		bb.addTransactionFhirPatchEntry(new Parameters()).conditional("Patient?identifier=http://foo|123");
+		bb.addTransactionFhirPatchEntry(new Parameters()).conditional(PATIENT_MATCH_URL_FOO_123);
 		Bundle input = bb.getBundleTyped();
 
 		DaoMethodOutcome value = new DaoMethodOutcome();
@@ -338,7 +343,7 @@ public class TransactionProcessorTest {
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionCreateEntry(
 			new Patient().setActive(true)
-		).conditional("Patient?identifier=http://foo|123");
+		).conditional(PATIENT_MATCH_URL_FOO_123);
 		Bundle input = bb.getBundleTyped();
 
 		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(any())).thenReturn(InMemoryMatchResult.unsupportedFromReason("Foo"));
@@ -359,7 +364,7 @@ public class TransactionProcessorTest {
 		// Only 1 pre-fetch covering all 3 URLs
 		verify(myEntityManager, times(1)).createQuery(anyCriteriaQuery());
 		verify(myCriteriaBuilder, times(1)).equal(any(), myLongCaptor.capture());
-		assertEquals(-4132452001562191669L, myLongCaptor.getValue());
+		assertEquals(PATIENT_MATCH_URL_FOO_123_HASH, myLongCaptor.getValue());
 	}
 
 	@Test
@@ -372,7 +377,7 @@ public class TransactionProcessorTest {
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionUpdateEntry(
 			new Patient().setActive(true)
-		).conditional("Patient?identifier=http://foo|123");
+		).conditional(PATIENT_MATCH_URL_FOO_123);
 		Bundle input = bb.getBundleTyped();
 
 		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(any())).thenReturn(InMemoryMatchResult.unsupportedFromReason("Foo"));
@@ -393,7 +398,45 @@ public class TransactionProcessorTest {
 		// Only 1 pre-fetch covering all 3 URLs
 		verify(myEntityManager, times(1)).createQuery(anyCriteriaQuery());
 		verify(myCriteriaBuilder, times(1)).equal(any(), myLongCaptor.capture());
-		assertEquals(-4132452001562191669L, myLongCaptor.getValue());
+		assertEquals(PATIENT_MATCH_URL_FOO_123_HASH, myLongCaptor.getValue());
+	}
+
+	@ParameterizedTest
+	@CsvSource(value = {
+		"Patient?identifier=http://foo|123&name=Victim",
+		"Patient?identifier=http://foo|123&identifier=http://blah|456"
+	})
+	public void testPreFetch_ConditionalUpdate_multipleParams_IncludePayloadInPartitionRequest(String theUrl) {
+		// Setup
+		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
+		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(
+			new Patient().setActive(true)
+		).conditional(theUrl);
+		Bundle input = bb.getBundleTyped();
+
+		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(any())).thenReturn(InMemoryMatchResult.unsupportedFromReason("Foo"));
+
+		mockPreFetchHashCapture();
+		mockPatientDaoUpdate();
+
+		// Test
+
+		myTransactionProcessor.transaction(newSrd(), input, false);
+
+		// Verify
+		verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(any(), notNull(), eq("Patient"));
+		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequestForSearchType(any(), eq("Patient"), any(), notNull());
+		verify(myRequestPartitionHelperSvc, times(0)).isDefaultPartition(any());
+		verifyNoMoreInteractions(myRequestPartitionHelperSvc);
+
+		// Prefetch should not be done
+		verify(myEntityManager, times(0)).createQuery(anyCriteriaQuery());
+		verify(myCriteriaBuilder, times(0)).equal(any(), myLongCaptor.capture());
+		assertThat(myLongCaptor.getAllValues()).isEmpty();
 	}
 
 	@Test
