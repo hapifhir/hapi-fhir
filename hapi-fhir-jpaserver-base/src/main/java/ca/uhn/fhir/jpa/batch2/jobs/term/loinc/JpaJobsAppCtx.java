@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server - Batch2 Task Processor
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -17,8 +17,16 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.model;
+package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import java.util.Date;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
-public record BatchInstanceStatusDTO(String id, StatusEnum status, Date start, Date stop) {}
+@Configuration
+@Import({ImportLoincJobAppCtx.class})
+public class JpaJobsAppCtx {
+
+	// TODO: This is a placeholder for the new job definition for LOINC import. It will be
+	// filled in in the next PR.
+
+}

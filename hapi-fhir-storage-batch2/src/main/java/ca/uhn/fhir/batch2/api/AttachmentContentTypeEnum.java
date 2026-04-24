@@ -17,8 +17,23 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.model;
+package ca.uhn.fhir.batch2.api;
 
-import java.util.Date;
+public enum AttachmentContentTypeEnum {
+	/**
+	 * Do not re-order!
+	 */
+	GZIP(false),
+	PLAIN_TEXT(true),
+	CSV(true);
 
-public record BatchInstanceStatusDTO(String id, StatusEnum status, Date start, Date stop) {}
+	private final boolean mySupportsCompression;
+
+	AttachmentContentTypeEnum(boolean theSupportsCompression) {
+		mySupportsCompression = theSupportsCompression;
+	}
+
+	public boolean isSupportsCompression() {
+		return mySupportsCompression;
+	}
+}

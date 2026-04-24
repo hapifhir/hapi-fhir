@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +52,7 @@ import java.util.Set;
 public class JobInstanceProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
+	public static final long CANCEL_BUILDING_THRESHOLD = DateUtils.MILLIS_PER_HOUR;
 
 	// 10k; we want to get as many as we can
 	private static final int WORK_CHUNK_METADATA_BATCH_SIZE = 10000;
@@ -103,6 +105,11 @@ public class JobInstanceProcessor {
 			theInstance = myJobPersistence.fetchInstance(myInstanceId).orElseThrow();
 		}
 
+		if (theInstance.getStatus() == StatusEnum.BUILDING) {
+			autoCancelJobIfItHasBeenBuildingForTooLong(theInstance);
+			return;
+		}
+
 		JobDefinition<? extends IModelJson> jobDefinition =
 				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
 
@@ -136,6 +143,23 @@ public class JobInstanceProcessor {
 		enqueueReadyChunks(theInstance, jobDefinition);
 
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
+	}
+
+	private void autoCancelJobIfItHasBeenBuildingForTooLong(JobInstance theInstance) {
+		long cutoff = System.currentTimeMillis() - CANCEL_BUILDING_THRESHOLD;
+		long created = theInstance.getCreateTime().getTime();
+		boolean cancelled = created < cutoff;
+		if (cancelled) {
+			ourLog.info("Job {} has been BUILDING for too long, moving to CANCELLED", theInstance.getInstanceId());
+			myJobPersistence.updateInstance(theInstance.getInstanceId(), instance -> {
+				boolean changed = myJobInstanceStatusUpdater.updateInstanceStatus(instance, StatusEnum.CANCELLED);
+				if (changed) {
+					instance.setErrorMessage("Job has been BUILDING for too long, moving to CANCELLED state");
+					instance.setEndTime(new Date());
+				}
+				return changed;
+			});
+		}
 	}
 
 	private boolean handleCancellation(JobInstance theInstance) {
