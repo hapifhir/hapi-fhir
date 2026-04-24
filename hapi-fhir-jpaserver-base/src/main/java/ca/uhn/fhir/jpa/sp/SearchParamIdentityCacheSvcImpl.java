@@ -109,7 +109,7 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 		Collection<Object[]> spIdentities =
 				Objects.requireNonNull(myTxTemplate.execute(t -> mySearchParamIdentityDao.getAllHashIdentities()));
 		spIdentities.forEach(
-				i -> CacheUtils.putSearchParamIdentityToCache(myMemoryCacheService, (Long) i[0], (Integer) i[1]));
+				i -> CacheUtils.putSearchParamIdentityToCache(myMemoryCacheService, (Long) i[0], (Long) i[1]));
 	}
 
 	private void submitPersistSearchParameterIdentityTask(
@@ -152,7 +152,7 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 		}
 
 		// check if SearchParamIdentity is already in cache
-		Integer spIdentityId = CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, theHashIdentity);
+		Long spIdentityId = CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, theHashIdentity);
 
 		if (spIdentityId != null) {
 			return;
@@ -265,7 +265,7 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 
 		@Override
 		public Void call() throws Exception {
-			Integer spIdentityId;
+			Long spIdentityId;
 			int retry = 0;
 			while (retry++ < MAX_RETRY_COUNT) {
 				spIdentityId = CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, myHashIdentity);
@@ -299,7 +299,7 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 			return null;
 		}
 
-		private Integer findOrCreateIndexedSearchParamIdentity(
+		private Long findOrCreateIndexedSearchParamIdentity(
 				Long theHashIdentity, String theParamName, String theResourceType) {
 
 			return myTxTemplate.execute(tx -> {
@@ -335,14 +335,14 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 
 		private CacheUtils() {}
 
-		public static Integer getSearchParamIdentityFromCache(
+		public static Long getSearchParamIdentityFromCache(
 				MemoryCacheService memoryCacheService, Long hashIdentity) {
 			return memoryCacheService.getIfPresent(
 					MemoryCacheService.CacheEnum.HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY, hashIdentity);
 		}
 
 		public static void putSearchParamIdentityToCache(
-				MemoryCacheService memoryCacheService, Long theHashIdentity, Integer theSpIdentityId) {
+				MemoryCacheService memoryCacheService, Long theHashIdentity, Long theSpIdentityId) {
 			memoryCacheService.put(
 					MemoryCacheService.CacheEnum.HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY,
 					theHashIdentity,
