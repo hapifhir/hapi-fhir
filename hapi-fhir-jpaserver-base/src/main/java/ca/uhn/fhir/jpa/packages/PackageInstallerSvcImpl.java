@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -33,12 +37,14 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
+import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
@@ -55,6 +61,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -62,6 +69,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -69,7 +77,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
@@ -94,7 +101,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageInstallerSvcImpl.class);
 	private static final String OUR_PIPE_CHARACTER = "|";
 
-	boolean enabled = true;
+	private boolean myEnabled = true;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -135,6 +142,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
 
+	private CommonCodeSystemsTerminologyService myCommonCodeSystemsTerminologyService;
+
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
+
 	/**
 	 * Constructor
 	 */
@@ -144,6 +156,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@PostConstruct
 	public void initialize() {
+		myCommonCodeSystemsTerminologyService = new CommonCodeSystemsTerminologyService(myFhirContext);
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R5:
 			case R4B:
@@ -158,7 +171,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				ourLog.info(
 						"IG installation not supported for version: {}",
 						myFhirContext.getVersion().getVersion());
-				enabled = false;
+				myEnabled = false;
 			}
 		}
 	}
@@ -189,30 +202,17 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	public PackageInstallOutcomeJson install(PackageInstallationSpec theInstallationSpec)
 			throws ImplementationGuideInstallationException {
 		PackageInstallOutcomeJson retVal = new PackageInstallOutcomeJson();
-		if (enabled) {
+		if (myEnabled) {
 			try {
 
-				boolean exists = myTxService
-						.withSystemRequest()
-						.withRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId())
-						.execute(() -> {
-							Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(
-									theInstallationSpec.getName(), theInstallationSpec.getVersion());
-							return existing.isPresent();
-						});
-				if (exists) {
-					ourLog.info(
-							"Package {}#{} is already installed",
-							theInstallationSpec.getName(),
-							theInstallationSpec.getVersion());
-				}
+				logIfPackageAlreadyInstalled(theInstallationSpec);
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
 				if (npmPackage == null) {
 					throw new IOException(Msg.code(1284) + "Package not found");
 				}
 
-				retVal.getMessage().addAll(JpaPackageCache.getProcessingMessages(npmPackage));
+				retVal.getMessage().addAll(NpmPackageUtils.getProcessingMessages(npmPackage));
 
 				if (theInstallationSpec.isFetchDependencies()) {
 					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal);
@@ -221,7 +221,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL
 						|| theInstallationSpec.getInstallMode()
 								== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-					install(npmPackage, theInstallationSpec, retVal);
+					installPackage(npmPackage, theInstallationSpec, retVal);
 
 					if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
 						retVal.getMessage()
@@ -246,6 +246,23 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return retVal;
 	}
 
+	private void logIfPackageAlreadyInstalled(PackageInstallationSpec theInstallationSpec) {
+		boolean exists = myTxService
+				.withSystemRequest()
+				.withRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId())
+				.execute(() -> {
+					Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(
+							theInstallationSpec.getName(), theInstallationSpec.getVersion());
+					return existing.isPresent();
+				});
+		if (exists) {
+			ourLog.info(
+					"Package {}#{} is already installed",
+					theInstallationSpec.getName(),
+					theInstallationSpec.getVersion());
+		}
+	}
+
 	/**
 	 * Installs a package and its dependencies.
 	 * <p>
@@ -253,7 +270,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 *
 	 * @throws ImplementationGuideInstallationException if installation fails
 	 */
-	private void install(
+	@Override
+	public void installPackage(
 			NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome)
 			throws ImplementationGuideInstallationException {
 		String name = npmPackage.getNpm().get("name").asJsonString().getValue();
@@ -320,66 +338,94 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				}
 			}
 		}
-		ourLog.info(String.format("Finished installation of package %s#%s:", name, version));
+		ourLog.info("Finished installation of package {}#{}:", name, version);
 
-		for (int i = 0; i < count.length; i++) {
-			ourLog.info(String.format("-- Created or updated %s resources of type %s", count[i], installTypes.get(i)));
+		if (ourLog.isInfoEnabled()) {
+			for (int i = 0; i < count.length; i++) {
+				ourLog.info("-- Created or updated {} resources of type {}", count[i], installTypes.get(i));
+			}
 		}
+	}
+
+	/**
+	 * Starts an asynchronous batch job to install a package asynchronously as a background process
+	 * @param theInstallationSpec the specification defining the package to install
+	 * @return the instance id of the job, needed for polling for updates
+	 */
+	@Override
+	public String installAsynchronously(PackageInstallationSpec theInstallationSpec) {
+		if (!myEnabled) {
+			ourLog.info(
+					"Package installation is not supported for FHIR version {}",
+					myFhirContext.getVersion().getVersion());
+
+			return null;
+		}
+
+		logIfPackageAlreadyInstalled(theInstallationSpec);
+
+		PackageInstallationJobParameters parameters = new PackageInstallationJobParameters();
+		parameters.setInstallationSpec(theInstallationSpec);
+		JobInstanceStartRequest startRequest =
+				new JobInstanceStartRequest(Batch2JobDefinitionConstants.INSTALL_PACKAGE, parameters);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(createRequestDetails(), startRequest);
+		return response.getInstanceId();
+	}
+
+	@Override
+	public PackageInstallationStatusJson checkInstallationStatus(String theJobId) {
+		JobInstance jobInstance = myJobCoordinator.getInstance(theJobId);
+
+		PackageInstallationStatusJson status = new PackageInstallationStatusJson();
+		status.setJobId(theJobId);
+		status.setStatus(jobInstance.getStatus().name());
+		status.setProgress(jobInstance.getProgress());
+		status.setCurrentStep(jobInstance.getCurrentGatedStepId());
+		status.setStartTime(jobInstance.getStartTime());
+		status.setOutcome(jobInstance.getReport());
+
+		return status;
 	}
 
 	private void fetchAndInstallDependencies(
 			NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome)
 			throws ImplementationGuideInstallationException {
-		if (npmPackage.getNpm().has("dependencies")) {
-			JsonObject dependenciesElement =
-					npmPackage.getNpm().get("dependencies").asJsonObject();
-			for (String id : dependenciesElement.getNames()) {
-				String ver = dependenciesElement.getJsonString(id).asString();
-				try {
+		List<PackageUtils.DependentPackage> dependentPackages =
+				PackageUtils.extractDependentPackages(npmPackage, theInstallationSpec, theOutcome);
+
+		for (PackageUtils.DependentPackage nextPackage : dependentPackages) {
+			try {
+				if (theInstallationSpec.isDryRun()) {
 					theOutcome
 							.getMessage()
-							.add("Package " + npmPackage.id() + "#" + npmPackage.version() + " depends on package " + id
-									+ "#" + ver);
+							.add(String.format(
+									"Installation would install %s:%s", nextPackage.name(), nextPackage.version()));
+				} else {
 
-					boolean skip = false;
-					for (String next : theInstallationSpec.getDependencyExcludes()) {
-						if (id.matches(next)) {
-							theOutcome
-									.getMessage()
-									.add("Not installing dependency " + id + " because it matches exclude criteria: "
-											+ next);
-							skip = true;
-							break;
-						}
+					// resolve in local cache or on packages.fhir.org
+					NpmPackage dependency =
+							myPackageCacheManager.loadPackage(nextPackage.name(), nextPackage.version());
+
+					// If the dependency's FHIR version is incompatible with the server,
+					// attempt to load a version-specific variant (e.g., {id}.r4 for R4 servers)
+					dependency = substituteVersionSpecificPackageIfNeeded(
+							dependency, nextPackage.name(), nextPackage.version());
+
+					// recursive call to install dependencies of a package before
+					// installing the package
+					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
+
+					if (theInstallationSpec.getInstallMode()
+							== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
+						installPackage(dependency, theInstallationSpec, theOutcome);
 					}
-					if (skip) {
-						continue;
-					}
-
-					if (theInstallationSpec.isDryRun()) {
-						theOutcome.getMessage().add(String.format("Installation would install %s:%s", id, ver));
-					} else {
-
-						// resolve in local cache or on packages.fhir.org
-						NpmPackage dependency = myPackageCacheManager.loadPackage(id, ver);
-
-						// If the dependency's FHIR version is incompatible with the server,
-						// attempt to load a version-specific variant (e.g., {id}.r4 for R4 servers)
-						dependency = substituteVersionSpecificPackageIfNeeded(dependency, id, ver);
-
-						// recursive call to install dependencies of a package before
-						// installing the package
-						fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
-
-						if (theInstallationSpec.getInstallMode()
-								== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
-							install(dependency, theInstallationSpec, theOutcome);
-						}
-					}
-				} catch (IOException e) {
-					throw new ImplementationGuideInstallationException(
-							Msg.code(1287) + String.format("Cannot resolve dependency %s#%s", id, ver), e);
 				}
+			} catch (IOException e) {
+				throw new ImplementationGuideInstallationException(
+						Msg.code(1287)
+								+ String.format(
+										"Cannot resolve dependency %s#%s", nextPackage.name(), nextPackage.version()),
+						e);
 			}
 		}
 	}
@@ -397,7 +443,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * @param theVersion the package version
 	 * @return the original package if compatible, or the version-specific variant if found
 	 */
-	private NpmPackage substituteVersionSpecificPackageIfNeeded(
+	@Override
+	public NpmPackage substituteVersionSpecificPackageIfNeeded(
 			NpmPackage theDependency, String theId, String theVersion) {
 		String dependencyFhirVersion = theDependency.fhirVersion();
 		String serverFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();
@@ -845,6 +892,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return false;
 		}
 
+		if ("CodeSystem".equals(resourceType) && isEmbeddedCodeSystem(theResource)) {
+			return false;
+		}
+
+		if ("ValueSet".equals(resourceType) && isEmbeddedValueSet(theResource)) {
+			return false;
+		}
+
 		if (!isValidResourceStatusForPackageUpload(theResource)) {
 			ourLog.warn(
 					"Failed to validate resource of type {} with ID {} - Error: Resource status not accepted value.",
@@ -854,6 +909,19 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		return true;
+	}
+
+	private boolean isEmbeddedValueSet(IBaseResource theResource) {
+		org.hl7.fhir.r4.model.ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
+		if (!valueSet.hasUrl()) return false;
+		return myCommonCodeSystemsTerminologyService.isValueSetSupported(null, valueSet.getUrl());
+	}
+
+	private boolean isEmbeddedCodeSystem(IBaseResource theResource) {
+
+		org.hl7.fhir.r4.model.CodeSystem codeSystem = myVersionCanonicalizer.codeSystemToCanonical(theResource);
+		if (!codeSystem.hasUrl()) return false;
+		return myCommonCodeSystemsTerminologyService.isCodeSystemSupported(null, codeSystem.getUrl());
 	}
 
 	private boolean isValidSearchParameter(IBaseResource theResource) {

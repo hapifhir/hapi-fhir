@@ -859,7 +859,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			if (values.size() == 1) {
 				List<List<IQueryParameterType>> andList = values.iterator().next();
-				if (andList.size() == 1 || andList.get(0).size() == 1) {
+				if (andList.size() == 1 && andList.get(0).size() == 1) {
 					IQueryParameterType param = andList.get(0).get(0);
 
 					if (param instanceof TokenParam tokenParam) {

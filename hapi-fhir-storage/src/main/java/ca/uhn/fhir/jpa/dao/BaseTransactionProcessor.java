@@ -338,7 +338,8 @@ public abstract class BaseTransactionProcessor {
 			IBase theNewEntry,
 			String theResourceType,
 			IBaseResource theRes,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails) {
 		IIdType newId = theOutcome.getId().toUnqualified();
 		IIdType resourceId =
 				isPlaceholder(theNextResourceId) ? theNextResourceId : theNextResourceId.toUnqualifiedVersionless();
@@ -347,6 +348,8 @@ public abstract class BaseTransactionProcessor {
 				theIdSubstitutions.put(resourceId, newId);
 			}
 			if (isPlaceholder(resourceId)) {
+				theTransactionDetails.addResolvedResource(resourceId, theRes);
+
 				/*
 				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.
 				 */
@@ -1459,7 +1462,8 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									requestDetailsForEntry);
+									requestDetailsForEntry,
+									theTransactionDetails);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						theTransactionDetails.addResolvedResource(outcome.getId(), outcome::getResource);
@@ -1500,9 +1504,6 @@ public abstract class BaseTransactionProcessor {
 								deletedResources.add(deleted.getIdDt()
 										.toUnqualifiedVersionless()
 										.getValueAsString());
-							}
-							if (allDeleted.isEmpty()) {
-								status = Constants.STATUS_HTTP_204_NO_CONTENT;
 							}
 
 							myVersionAdapter.setResponseOutcome(nextRespEntry, deleteOutcome.getOperationOutcome());
@@ -1566,7 +1567,8 @@ public abstract class BaseTransactionProcessor {
 								nextRespEntry,
 								resourceType,
 								res,
-								requestDetailsForEntry);
+								requestDetailsForEntry,
+								theTransactionDetails);
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						break;
 					}
@@ -1651,7 +1653,8 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									requestDetailsForEntry);
+									requestDetailsForEntry,
+									theTransactionDetails);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 
@@ -2171,14 +2174,32 @@ public abstract class BaseTransactionProcessor {
 								+ " found in element named '" + nextRef.getName() + "' within resource of type: "
 								+ theResource.getIdElement().getResourceType());
 			} else {
-				// get a map of
-				// existing ids -> PID (for resources that exist in the DB)
-				// should this be allPartitions?
+				// get a map of existing ids -> PID (for resources that exist in the DB)
 				ResourcePersistentIdMap resourceVersionMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(
 						RequestPartitionId.allPartitions(),
 						theReferencesToAutoVersion.stream()
 								.map(IBaseReference::getReferenceElement)
 								.collect(Collectors.toList()));
+
+				// When cross-partition references are not allowed, determine the write partition
+				// of the source resource so we can reject auto-versioned references that point to
+				// resources in a different partition.
+				RequestPartitionId writePartition = null;
+				if (myPartitionSettings.isPartitioningEnabled()
+						&& myPartitionSettings.getAllowReferencesAcrossPartitions()
+								== PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED) {
+					String resourceType = myContext.getResourceType(theResource);
+					String resourceCacheKey = theResource.getIdElement().hasIdPart()
+							? resourceType + "/" + theResource.getIdElement().getIdPart()
+							: null;
+					writePartition = resourceCacheKey != null
+							? theTransactionDetails.getResolvedPartition(resourceCacheKey)
+							: null;
+					if (writePartition == null) {
+						writePartition = myRequestPartitionHelperService.determineCreatePartitionForRequest(
+								theRequest, theResource, resourceType);
+					}
+				}
 
 				for (IBaseReference baseRef : theReferencesToAutoVersion) {
 					IIdType id = baseRef.getReferenceElement();
@@ -2193,8 +2214,16 @@ public abstract class BaseTransactionProcessor {
 						// we will add the looked up info to the transaction
 						// for later
 						if (resourceVersionMap.containsKey(id)) {
-							theTransactionDetails.addResolvedResourceId(
-									id, resourceVersionMap.getResourcePersistentId(id));
+							IResourcePersistentId pid = resourceVersionMap.getResourcePersistentId(id);
+							if (writePartition != null && !writePartition.hasPartitionId(pid.getPartitionId())) {
+								// The referenced resource exists but in a different partition.
+								// Reject it: auto-versioning must not produce cross-partition links.
+								throw new InvalidRequestException(Msg.code(2918) + "Resource "
+										+ id.toUnqualifiedVersionless().getValue()
+										+ " is referenced by auto-version-references-at-path but exists in a"
+										+ " different partition. Cross-partition references are not allowed.");
+							}
+							theTransactionDetails.addResolvedResourceId(id, pid);
 						}
 					}
 				}

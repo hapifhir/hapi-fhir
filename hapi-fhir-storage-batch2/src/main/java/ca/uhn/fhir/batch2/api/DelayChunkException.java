@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -17,26 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.packages.util;
+package ca.uhn.fhir.batch2.api;
 
-import com.google.common.collect.Lists;
-
-import java.util.Collections;
-import java.util.List;
-
-public class PackageUtils {
-
-	public static final String LOADER_WITH_CACHE = "loaderWithCache";
-
-	/**
-	 * Default install types
-	 */
-	public static List<String> DEFAULT_INSTALL_TYPES = Collections.unmodifiableList(Lists.newArrayList(
-			"NamingSystem",
-			"CodeSystem",
-			"ValueSet",
-			"StructureDefinition",
-			"ConceptMap",
-			"SearchParameter",
-			"Subscription"));
+/**
+ * If a slow worker is detected, this exception will be thrown to prevent
+ * duplicate work chunk processing.
+ */
+public class DelayChunkException extends RuntimeException {
+	public DelayChunkException(String message) {
+		super(message);
+	}
 }

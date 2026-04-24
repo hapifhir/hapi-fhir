@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.packages;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -7,6 +10,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
@@ -24,6 +28,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -34,6 +39,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.junit.jupiter.api.Nested;
@@ -59,6 +65,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -114,6 +121,9 @@ public class PackageInstallerSvcImplTest {
 	@Mock
 	private SearchParameterDaoValidator mySearchParameterDaoValidatorMock;
 
+	@Mock
+	private IJobCoordinator myJobCoordinatorMock;
+
 	@Spy
 	private FhirContext myCtx = FhirContext.forR4Cached();
 	@Spy
@@ -122,7 +132,8 @@ public class PackageInstallerSvcImplTest {
 	private PackageResourceParsingSvc myPackageResourceParsingSvc = new PackageResourceParsingSvc(myCtx);
 	@Spy
 	private PartitionSettings myPartitionSettings = new PartitionSettings();
-
+	@Spy
+	private CommonCodeSystemsTerminologyService myCommonCodeSystemsTerminologyService = new CommonCodeSystemsTerminologyService(myCtx);
 
 	@InjectMocks
 	private PackageInstallerSvcImpl mySvc;
@@ -135,6 +146,8 @@ public class PackageInstallerSvcImplTest {
 	private ArgumentCaptor<SearchParameter> mySearchParameterCaptor;
 	@Captor
 	private ArgumentCaptor<RequestDetails> myRequestDetailsCaptor;
+	@Captor
+	private ArgumentCaptor<JobInstanceStartRequest> myJobInstanceStartRequestCaptor;
 
 	@Test
 	public void testPackageCompatibility() {
@@ -170,7 +183,12 @@ public class PackageInstallerSvcImplTest {
 					arguments(createDocumentReference(null), false),
 					arguments(createCommunication(Communication.CommunicationStatus.NOTDONE), true),
 					arguments(createCommunication(Communication.CommunicationStatus.NULL), false),
-					arguments(createCommunication(null), false));
+					arguments(createCommunication(null), false),
+					arguments(createValueSet("http://test/VS"),true),
+					arguments(createCodeSystem("http://test/CS"),true),
+					arguments(createValueSet(CommonCodeSystemsTerminologyService.LANGUAGES_VALUESET_URL),false),
+					arguments(createCodeSystem(CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL),false)
+				);
 		}
 
 		@ParameterizedTest
@@ -179,20 +197,38 @@ public class PackageInstallerSvcImplTest {
 																				 		  boolean theExpectedResultForStatusValidation) {
 			if (theResource.fhirType().equals("SearchParameter")) {
 				setupSearchParameterValidationMocksForSuccess();
+				when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
 			}
-			when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
+			else if (theResource.fhirType().equals("CodeSystem")) {
+				when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn((CodeSystem) theResource);
+			}
+			else if (theResource.fhirType().equals("ValueSet")) {
+				when(myVersionCanonicalizerMock.valueSetToCanonical(any())).thenReturn((ValueSet) theResource);
+			}
+			else
+				when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
+
 			assertEquals(theExpectedResultForStatusValidation, mySvc.validForUpload(theResource));
 		}
 
 		@ParameterizedTest
 		@MethodSource(value = "parametersIsValidForUpload")
-		public void testValidForUpload_WhenStatusValidationSettingIsDisabled_DoesNotValidateResourceStatus(IBaseResource theResource) {
+		public void testValidForUpload_WhenStatusValidationSettingIsDisabled_DoesNotValidateResourceStatus(IBaseResource theResource, boolean theExpectedResultForStatusValidation) {
 			if (theResource.fhirType().equals("SearchParameter")) {
 				setupSearchParameterValidationMocksForSuccess();
+				when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(false);
+				assertTrue(mySvc.validForUpload(theResource));
 			}
-			when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(false);
-			//all resources should pass status validation in this case, so expect true always
-			assertTrue(mySvc.validForUpload(theResource));
+			else if (theResource.fhirType().equals("CodeSystem")) {
+				when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn((CodeSystem) theResource);
+				assertEquals(theExpectedResultForStatusValidation, mySvc.validForUpload(theResource));
+			}
+			else if (theResource.fhirType().equals("ValueSet")) {
+				when(myVersionCanonicalizerMock.valueSetToCanonical(any())).thenReturn((ValueSet) theResource);
+				assertEquals(theExpectedResultForStatusValidation, mySvc.validForUpload(theResource));
+			}
+			else
+				assertTrue(mySvc.validForUpload(theResource));
 		}
 
 		@Test
@@ -258,6 +294,8 @@ public class PackageInstallerSvcImplTest {
 
 		PackageInstallationSpec spec = setupResourceInPackage(null, newCodeSystem, myCodeSystemDao);
 
+		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(newCodeSystem);
+
 		mySvc.install(spec);
 
 		verify(myCodeSystemDao).create(any(CodeSystem.class), myRequestDetailsCaptor.capture());
@@ -266,6 +304,26 @@ public class PackageInstallerSvcImplTest {
 		assertInstanceOf(SystemRequestDetails.class, requestDetails);
 		SystemRequestDetails systemRequestDetails = (SystemRequestDetails) requestDetails;
 		assertEquals(RequestPartitionId.fromPartitionId(7), systemRequestDetails.getRequestPartitionId());
+	}
+
+	@Test
+	public void testInstallAsynchronously() {
+		PackageInstallationSpec spec = new PackageInstallationSpec();
+		spec.setName("test spec");
+
+		String expectedJobId = UUID.randomUUID().toString();
+		Batch2JobStartResponse response = new Batch2JobStartResponse();
+		response.setInstanceId(expectedJobId);
+
+		when(myJobCoordinatorMock.startInstance(any(RequestDetails.class), myJobInstanceStartRequestCaptor.capture()))
+			.thenReturn(response);
+
+		String actualJobId = mySvc.installAsynchronously(spec);
+
+		assertThat(actualJobId).isEqualTo(expectedJobId);
+		assertThat(myJobInstanceStartRequestCaptor.getValue().getParameters(PackageInstallationJobParameters.class)
+			.getInstallationSpec().getName())
+			.isEqualTo("test spec");
 	}
 
 	@Test
@@ -287,6 +345,9 @@ public class PackageInstallerSvcImplTest {
 
 		PackageInstallationSpec spec = setupResourceInPackage(existingCs, cs, myCodeSystemDao);
 
+		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(cs);
+
+		when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
 		// Test
 		mySvc.install(spec);
 
@@ -317,6 +378,8 @@ public class PackageInstallerSvcImplTest {
 
 		PackageInstallationSpec spec = setupResourceInPackage(existingCs, igCs, myCodeSystemDao);
 
+		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(igCs);
+
 		// Test
 		mySvc.install(spec);
 
@@ -345,6 +408,8 @@ public class PackageInstallerSvcImplTest {
 
 		PackageInstallationSpec spec = setupResourceInPackage(existingCs, igCs, myCodeSystemDao)
 			.setOverwriteContentNotPresentCodeSystems(true);
+
+		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(igCs);
 
 		// Test
 		mySvc.install(spec);
@@ -685,5 +750,14 @@ public class PackageInstallerSvcImplTest {
 			return NpmPackage.empty(manifest);
 		}
 	}
+
+	private static CodeSystem createCodeSystem(String canonicalUrl) {
+		return new CodeSystem().setUrl(canonicalUrl).setStatus(Enumerations.PublicationStatus.ACTIVE);
+	}
+
+	private static ValueSet createValueSet(String canonicalUrl) {
+		return new ValueSet().setUrl(canonicalUrl).setStatus(Enumerations.PublicationStatus.ACTIVE);
+	}
+
 
 }

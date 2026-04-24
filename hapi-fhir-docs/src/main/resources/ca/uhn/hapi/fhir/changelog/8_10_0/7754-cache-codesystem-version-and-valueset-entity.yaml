@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7754
+title: "`CodeSystem` version resolution and pre-expanded `ValueSet` entity lookups are now
+  cached, reducing redundant database queries during `$lookup` and `$validate-code`.
+  Note that individual concept lookups are not yet cached at this layer."
