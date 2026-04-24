@@ -242,7 +242,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	@Override
 	public void scheduleClusteredJob(String theCronExpression, ScheduledJobDefinition theJobDefinition) {
-		scheduleJob(CLUSTERED_SCHEDULER, myLocalScheduler, null, theCronExpression, theJobDefinition);
+		scheduleJob(CLUSTERED_SCHEDULER, myClusteredScheduler, null, theCronExpression, theJobDefinition);
 	}
 
 	private void scheduleJob(
