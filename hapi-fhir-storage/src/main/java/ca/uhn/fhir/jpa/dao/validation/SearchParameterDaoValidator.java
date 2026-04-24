@@ -34,8 +34,11 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.SearchParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -51,7 +54,7 @@ import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.URI;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParameterDaoValidator {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchParameterDaoValidator.class);
 	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*([A-Z][a-zA-Z]+\\.)?[a-z].*");
 
 	private final FhirContext myFhirContext;
@@ -105,10 +108,14 @@ public class SearchParameterDaoValidator {
 			throw new UnprocessableEntityException(Msg.code(1113) + "SearchParameter.base is missing");
 		}
 
-		// Do we have a valid expression
+		// Do we have a valid expression?
 		if (isCompositeWithoutExpression(searchParameter)) {
 
 			// this is ok
+			ourLog
+				.atTrace()
+				.setMessage("Composite search parameter allowed without expression")
+				.log();
 
 		} else if (isBlank(searchParameter.getExpression())) {
 
@@ -121,12 +128,21 @@ public class SearchParameterDaoValidator {
 
 			FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 			if (fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
+
 				// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
+				ourLog
+					.atTrace()
+					.setMessage("Skipping validation of composite search parameter expression for FHIR version {}")
+					.addArgument(() -> fhirVersion)
+					.log();
+
 			} else {
+
 				maybeValidateComboSpForUniqueIndexing(searchParameter);
 				maybeValidateComboSpForNonUniqueIndexing(searchParameter);
 				maybeValidateSearchParameterExpressionsOnSave(searchParameter);
 				maybeValidateCompositeWithComponent(searchParameter);
+
 			}
 		}
 	}
