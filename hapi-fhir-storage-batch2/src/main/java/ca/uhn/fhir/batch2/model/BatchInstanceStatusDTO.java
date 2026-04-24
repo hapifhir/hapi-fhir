@@ -21,5 +21,4 @@ package ca.uhn.fhir.batch2.model;
 
 import java.util.Date;
 
-public record BatchInstanceStatusDTO(String id, StatusEnum status, Date start, Date stop) {
-}
+public record BatchInstanceStatusDTO(String id, StatusEnum status, Date start, Date stop) {}
