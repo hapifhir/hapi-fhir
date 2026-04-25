@@ -2858,11 +2858,20 @@ public class QueryStack {
 		mySqlBuilder.addPredicate(predicate);
 	}
 
-	public void addPredicateCompositeNonUnique(List<String> theIndexStrings, RequestPartitionId theRequestPartitionId) {
+	public void addPredicateCompositeNonUnique(
+			List<String> theIndexStrings,
+			List<List<DateParam>> theDateParams,
+			RequestPartitionId theRequestPartitionId) {
 		ComboNonUniqueSearchParameterPredicateBuilder predicateBuilder =
 				mySqlBuilder.addComboNonUniquePredicateBuilder();
-		Condition predicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theIndexStrings);
-		mySqlBuilder.addPredicate(predicate);
+
+		Condition hashPredicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theIndexStrings);
+		mySqlBuilder.addPredicate(hashPredicate);
+
+		if (!theDateParams.isEmpty()) {
+			Condition datePredicate = predicateBuilder.createPredicateDateParams(theDateParams);
+			mySqlBuilder.addPredicate(datePredicate);
+		}
 	}
 
 	// expand out the pids

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -42,14 +43,17 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.GenericGenerator;
 
+import static org.apache.commons.lang3.StringUtils.left;
+
 @Entity
 @Table(
 		name = ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU,
 		indexes = {
-			// TODO: The hash index was added in 7.4.0 - In 7.6.0 we should drop the string index
-			// As of 8.6.0 the string equivalent column is nullable
-			@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
 			@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE,RES_ID,PARTITION_ID", unique = false),
+			@Index(
+					name = "IDX_IDXCMBTOKNU_HD",
+					columnList = "HASH_COMPLETE,DATE_ORDINAL,RES_ID,PARTITION_ID",
+					unique = false),
 			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 		})
 @IdClass(IdAndPartitionId.class)
@@ -94,6 +98,9 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 	@Column(name = "HASH_COMPLETE", nullable = false)
 	private Long myHashComplete;
 
+	@Column(name = "DATE_ORDINAL", nullable = true)
+	private Integer myDateOrdinal;
+
 	@Column(name = "IDX_STRING", nullable = true, length = ResourceIndexedComboStringUnique.MAX_STRING_LENGTH)
 	private String myIndexString;
 
@@ -113,6 +120,10 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		myResource = theEntity;
 		myIndexString = theQueryString;
 		calculateHashes();
+	}
+
+	public Integer getDateOrdinal() {
+		return myDateOrdinal;
 	}
 
 	@Override
@@ -139,6 +150,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		ResourceIndexedComboTokenNonUnique that = (ResourceIndexedComboTokenNonUnique) theO;
 
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getDateOrdinal(), that.getDateOrdinal());
 		b.append(getHashComplete(), that.getHashComplete());
 		return b.isEquals();
 	}
@@ -188,6 +200,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		calculateHashes();
 
 		HashCodeBuilder builder = new HashCodeBuilder(17, 37);
+		builder.append(getDateOrdinal());
 		builder.append(getHashComplete());
 		return builder.toHashCode();
 	}
@@ -221,6 +234,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 	@Override
 	public int compareTo(ResourceIndexedComboTokenNonUnique theO) {
 		CompareToBuilder b = new CompareToBuilder();
+		b.append(myDateOrdinal, theO.getDateOrdinal());
 		b.append(myHashComplete, theO.getHashComplete());
 		return b.toComparison();
 	}
@@ -230,9 +244,22 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		return new ToStringBuilder(this)
 				.append("id", myId)
 				.append("resourceId", myResourceId)
+				.append("dateOrdinal", myDateOrdinal)
 				.append("hashComplete", myHashComplete)
 				.append("indexString", myIndexString)
 				.toString();
+	}
+
+	public void applyRangedDate(
+			StorageSettings theStorageSettings, @Nonnull ResourceIndexedSearchParamDate theDateParam) {
+		String endOfTime = theStorageSettings.getPeriodIndexEndOfTime().getValueAsString();
+		String endOfTimeDate = left(endOfTime, 10);
+		int endOfTimeOrdinal = Integer.parseInt(endOfTimeDate.replace("-", ""));
+		if (endOfTimeOrdinal == theDateParam.getValueHighDateOrdinal()) {
+			myDateOrdinal = theDateParam.getValueLowDateOrdinal();
+		} else {
+			myDateOrdinal = theDateParam.getValueHighDateOrdinal();
+		}
 	}
 
 	public static long calculateHashComplete(
