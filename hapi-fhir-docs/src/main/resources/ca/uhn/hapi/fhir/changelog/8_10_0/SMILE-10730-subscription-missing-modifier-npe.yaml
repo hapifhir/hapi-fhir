@@ -1,0 +1,10 @@
+---
+type: fix
+jira: SMILE-10730
+title: "Previously, a subscription whose criteria included a token search parameter with the
+  :missing modifier (e.g. Observation?code:missing=true) would throw a NullPointerException
+  in InMemoryResourceMatcher when evaluating whether the criteria could be matched in-memory.
+  This was caused by the :missing modifier not being a member of the TokenParamModifier enum,
+  resulting in a null return from getModifier() that was passed directly to a switch statement.
+  The in-memory matcher now correctly treats a null modifier as unsupported, causing
+  the subscription to fall back to DATABASE matching strategy instead of throwing an exception."

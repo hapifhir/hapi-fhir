@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
+import ca.uhn.fhir.batch2.api.AttachmentDetails;
+import ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor;
 import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
@@ -21,13 +24,17 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentEntity;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.testjob.TestJobDefinitionUtils;
 import ca.uhn.fhir.testjob.models.FirstStepOutput;
 import ca.uhn.fhir.util.JsonUtil;
@@ -37,6 +44,8 @@ import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
@@ -46,6 +55,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
@@ -54,6 +64,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -69,7 +82,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.apache.commons.lang3.StringUtils.rightPad;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -105,6 +122,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
 	@Autowired
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
+	@Autowired
+	private IBatch2AttachmentRepository myJobAttachmentRepository;
 
 	@Autowired
 	public Batch2JobHelper myBatch2JobHelper;
@@ -134,6 +153,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		for (int i = 0; i < 10; i++) {
 			storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, i, JsonUtil.serialize(new NdJsonFileJson().setNdJsonText("{}")), false);
 		}
+		AttachmentDetails request = new AttachmentDetails.Builder()
+			.withInputStream(new ByteArrayInputStream(new byte[]{1, 2, 3, 4}))
+			.withContentType(AttachmentContentTypeEnum.GZIP)
+			.build();
+		mySvc.storeNewAttachment(instanceId, request);
 
 		// Execute
 
@@ -590,6 +614,56 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void autoCancelJobInBuildingStateAfterTimeout() {
+		// Create a job in building state
+		String id = mySvc.storeNewInstance(newSrd(), createInstance(true, false));
+		assertThat(id).isNotEmpty();
+
+		runInTransaction(()->{
+			Batch2JobInstanceEntity storedInstance = myJobInstanceRepository.findById(id).orElseThrow();
+			storedInstance.setStatus(StatusEnum.BUILDING);
+			myJobInstanceRepository.save(storedInstance);
+		});
+
+		// An initial maintenance pass shouldn't modify the job since it's new
+		myBatch2JobHelper.runMaintenancePass();
+
+		// Now let's set the job so that it appears to have been created over an hour ago
+		runInTransaction(()->{
+			Batch2JobInstanceEntity storedInstance = myJobInstanceRepository.findById(id).orElseThrow();
+			storedInstance.setCreateTime(DateUtils.addMilliseconds(new Date(), (int) (-1 - JobInstanceProcessor.CANCEL_BUILDING_THRESHOLD)));
+			myJobInstanceRepository.save(storedInstance);
+		});
+
+		// The maintenance pass should now cancel the job since it's been building for too long
+		myBatch2JobHelper.runMaintenancePass();
+
+		// Verify
+		runInTransaction(() -> {
+			// It should be cancelled
+			Batch2JobInstanceEntity storedInstance = myJobInstanceRepository.findById(id).orElseThrow();
+			assertEquals(StatusEnum.CANCELLED, storedInstance.getStatus());
+			assertNotNull(storedInstance.getEndTime());
+
+			// Now let's set the end time far enough back that it will be purged
+			storedInstance.setEndTime(DateUtils.addMilliseconds(new Date(), (int) (-1 - JobInstanceProcessor.PURGE_THRESHOLD)));
+			myJobInstanceRepository.save(storedInstance);
+		});
+
+		// The maintenance pass should now cancel the job since it's been building for too long
+		myBatch2JobHelper.runMaintenancePass();
+
+		// Verify
+		runInTransaction(() -> {
+			// It should be cancelled
+			Optional<Batch2JobInstanceEntity> optionalInstance = myJobInstanceRepository.findById(id);
+			assertThat(optionalInstance).isEmpty();
+		});
+
+	}
+
+
+	@Test
 	public void advanceJobStepAndUpdateChunkStatus_whenAlreadyInTargetStep_DoesNotUpdateStepOrChunks() {
 		// setup
 		boolean isGatedExecution = true;
@@ -782,6 +856,172 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertEquals(0, workChunk2.getErrorCount());
 		}
 	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		BUILDING     , true
+		QUEUED       , true
+		IN_PROGRESS  , true
+		FINALIZE     , true
+		ERRORED      , true
+		CANCELLED    , false
+		COMPLETED    , false
+		FAILED       , false
+		""")
+	public void testStoreAttachment(StatusEnum theJobStatus, boolean theAllowed) {
+		JobInstance instance = createInstance(true, false);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		runInTransaction(()->{
+			boolean updated = mySvc.markInstanceAsStatusWhenStatusIn(instanceId, theJobStatus, Set.of(StatusEnum.QUEUED));
+			assertTrue(updated);
+		});
+
+		// Test
+		byte[] bytes = leftPad("", 1000).getBytes(StandardCharsets.UTF_8);
+		AttachmentDetails request = new AttachmentDetails.Builder()
+			.withFilename(null) // Test that this can be null
+			.withInputStream(new ByteArrayInputStream(bytes))
+			.withContentType(AttachmentContentTypeEnum.PLAIN_TEXT)
+			.build();
+
+		if (theAllowed) {
+			String attachmentId = mySvc.storeNewAttachment(instanceId, request);
+			runInTransaction(()->{
+				Batch2JobAttachmentEntity attachment = myJobAttachmentRepository.findById(instanceId, attachmentId).orElseThrow();
+				assertEquals(Batch2JobAttachmentEntity.CompressionEnum.GZIP, attachment.getCompressedStatus());
+				assertEquals(1000, attachment.getAttachmentLengthUncompressed());
+				assertEquals(29, attachment.getAttachmentLengthCompressed());
+				assertEquals(attachment.getId().getAttachmentId(), attachment.getFilename());
+			});
+
+			// Verify
+			AttachmentDetails outcome = mySvc.fetchAttachmentById(instanceId, attachmentId);
+			assertNull(outcome.getFilename());
+
+		} else {
+			assertThatThrownBy(()->mySvc.storeNewAttachment(instanceId, request))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("Can't add attachment to instance[" + instanceId + "] in status: " + theJobStatus);
+		}
+
+
+	}
+
+	@Test
+	void testStoreAttachment_ReplaceSameFilename() {
+		// Setup
+		JobInstance instance = createInstance(true, false);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Test
+		AttachmentDetails request0 = new AttachmentDetails.Builder()
+			.withFilename("hello.txt")
+			.withInputStream(new ByteArrayInputStream("version 0".getBytes(StandardCharsets.UTF_8)))
+			.withContentType(AttachmentContentTypeEnum.GZIP)
+			.build();
+		String attachmentId0 = mySvc.storeNewAttachment(instanceId, request0);
+
+		AttachmentDetails request1 = new AttachmentDetails.Builder()
+			.withFilename("hello.txt")
+			.withInputStream(new ByteArrayInputStream("version 1".getBytes(StandardCharsets.UTF_8)))
+			.withContentType(AttachmentContentTypeEnum.GZIP)
+			.build();
+		String attachmentId1 = mySvc.storeNewAttachment(instanceId, request1);
+
+		// Verify
+		assertEquals(attachmentId0, attachmentId1);
+		runInTransaction(()->{
+			assertEquals(1, myJobAttachmentRepository.count());
+			Batch2JobAttachmentEntity entity = myJobAttachmentRepository.findAll().get(0);
+			assertEquals("version 1", new String(entity.getData(), StandardCharsets.UTF_8));
+		});
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testFetchAttachmentById(boolean theCompress) throws IOException {
+		// Setup
+		AttachmentContentTypeEnum contentType = theCompress ? AttachmentContentTypeEnum.PLAIN_TEXT : AttachmentContentTypeEnum.GZIP;
+
+		String matchingString = rightPad("this is the text of the attachment", 1000);
+		byte[] bytes = matchingString.getBytes(StandardCharsets.UTF_8);
+
+		JobInstance instance = createInstance(true, false);
+
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+		myCaptureQueriesListener.clear();
+		AttachmentDetails request = new AttachmentDetails.Builder()
+			.withFilename("hello.txt")
+			.withInputStream(new ByteArrayInputStream(bytes))
+			.withContentType(contentType)
+			.build();
+		String attachmentId = mySvc.storeNewAttachment(instanceId, request);
+
+		// Test
+		AttachmentDetails fetchedBytes = mySvc.fetchAttachmentById(instanceId, attachmentId);
+		myCaptureQueriesListener.logInsertQueries();
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		String data = IOUtils.toString(fetchedBytes.getInputStream(), StandardCharsets.UTF_8);
+		assertEquals(matchingString, data);
+		assertEquals(contentType, fetchedBytes.getContentType());
+		assertEquals("hello.txt", fetchedBytes.getFilename());
+	}
+
+	@Test
+	void testFetchAttachmentByFilename() throws IOException {
+		JobInstance instance = createInstance(true, false);
+		String matchingString = "This is a string";
+
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Create 1 attachment
+		AttachmentDetails request = new AttachmentDetails.Builder()
+			.withFilename("1.txt")
+			.withInputStream(new ByteArrayInputStream(matchingString.getBytes(StandardCharsets.UTF_8)))
+			.withContentType(AttachmentContentTypeEnum.PLAIN_TEXT)
+			.build();
+		mySvc.storeNewAttachment(instanceId, request);
+
+		// Create a second attachment
+		request = new AttachmentDetails.Builder()
+			.withFilename("2.txt")
+			.withInputStream(new ByteArrayInputStream(new byte[]{5,6,7,8}))
+			.withContentType(AttachmentContentTypeEnum.GZIP)
+			.build();
+		mySvc.storeNewAttachment(instanceId, request);
+
+		// Test
+		AttachmentDetails fetched = mySvc.fetchAttachmentByFilename(instanceId, "1.txt");
+
+		// Verify
+		String data = IOUtils.toString(fetched.getInputStream(), StandardCharsets.UTF_8);
+		assertEquals(matchingString, data);
+		assertEquals(AttachmentContentTypeEnum.PLAIN_TEXT, fetched.getContentType());
+		assertEquals("1.txt", fetched.getFilename());
+
+	}
+
+
+	@Test
+	void testFetchAttachment_UnknownId() {
+		JobInstance instance = createInstance(true, false);
+		assertThatThrownBy(()->mySvc.fetchAttachmentById(instance.getInstanceId(), "FOO"))
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("Attachment not found");
+	}
+
+	@Test
+	void testFetchAttachment_UnknownFilename() {
+		JobInstance instance = createInstance(true, false);
+		assertThatThrownBy(()->mySvc.fetchAttachmentByFilename(instance.getInstanceId(), "FOO"))
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("Attachment not found");
+	}
+
 
 	@ParameterizedTest
 	@CsvSource({
@@ -1073,8 +1313,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// Execute
 		BatchInstanceStatusDTO istatus = mySvc.fetchBatchInstanceStatus(instanceId);
-		assertEquals(instanceId, istatus.id);
-		assertEquals(StatusEnum.QUEUED, istatus.status);
+		assertEquals(instanceId, istatus.id());
+		assertEquals(StatusEnum.QUEUED, istatus.status());
 
 		List<BatchWorkChunkStatusDTO> result = mySvc.fetchWorkChunkStatusForInstance(instanceId);
 		assertThat(result).hasSize(2);
