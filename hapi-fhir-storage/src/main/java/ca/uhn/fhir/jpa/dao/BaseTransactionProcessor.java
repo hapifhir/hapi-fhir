@@ -338,7 +338,8 @@ public abstract class BaseTransactionProcessor {
 			IBase theNewEntry,
 			String theResourceType,
 			IBaseResource theRes,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails) {
 		IIdType newId = theOutcome.getId().toUnqualified();
 		IIdType resourceId =
 				isPlaceholder(theNextResourceId) ? theNextResourceId : theNextResourceId.toUnqualifiedVersionless();
@@ -347,6 +348,8 @@ public abstract class BaseTransactionProcessor {
 				theIdSubstitutions.put(resourceId, newId);
 			}
 			if (isPlaceholder(resourceId)) {
+				theTransactionDetails.addResolvedResource(resourceId, theRes);
+
 				/*
 				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.
 				 */
@@ -1459,7 +1462,8 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									requestDetailsForEntry);
+									requestDetailsForEntry,
+									theTransactionDetails);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						theTransactionDetails.addResolvedResource(outcome.getId(), outcome::getResource);
@@ -1500,9 +1504,6 @@ public abstract class BaseTransactionProcessor {
 								deletedResources.add(deleted.getIdDt()
 										.toUnqualifiedVersionless()
 										.getValueAsString());
-							}
-							if (allDeleted.isEmpty()) {
-								status = Constants.STATUS_HTTP_204_NO_CONTENT;
 							}
 
 							myVersionAdapter.setResponseOutcome(nextRespEntry, deleteOutcome.getOperationOutcome());
@@ -1566,7 +1567,8 @@ public abstract class BaseTransactionProcessor {
 								nextRespEntry,
 								resourceType,
 								res,
-								requestDetailsForEntry);
+								requestDetailsForEntry,
+								theTransactionDetails);
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						break;
 					}
@@ -1651,7 +1653,8 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									requestDetailsForEntry);
+									requestDetailsForEntry,
+									theTransactionDetails);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 

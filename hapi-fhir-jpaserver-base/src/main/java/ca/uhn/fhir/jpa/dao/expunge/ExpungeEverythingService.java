@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentEntity;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
@@ -445,6 +446,8 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 					deleted = 0;
 					deleted += expungeEverythingByTypeWithoutPurging(
 							theRequest, Batch2WorkChunkEntity.class, theRequestPartitionId);
+					deleted += expungeEverythingByTypeWithoutPurging(
+							theRequest, Batch2JobAttachmentEntity.class, theRequestPartitionId);
 					deleted += expungeEverythingByTypeWithoutPurging(
 							theRequest, Batch2JobInstanceEntity.class, theRequestPartitionId);
 				} catch (ResourceVersionConflictException e) {
