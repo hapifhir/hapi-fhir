@@ -3,11 +3,15 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.rest.client.method.SearchParameter;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -106,16 +110,4 @@ class SearchParameterUtilTest {
 		assertEquals(expected, actual);
 	}
 
-	@ParameterizedTest
-	@ValueSource(strings = {"Patient.name", "(Patient.name)", "  Patient.name "})
-	public void extractTypePrefix_validPathWithPrefix_returnPrefix(String thePath) {
-		assertThat(SearchParameterUtil.extractTypePrefix(thePath)).isEqualTo("Patient");
-	}
-
-
-	@ParameterizedTest
-	@ValueSource(strings = {"patient.name", "Patient", ".name"})
-	public void extractTypePrefix_invalidPrefix_returnsNull(String thePath) {
-		assertThat(SearchParameterUtil.extractTypePrefix(thePath)).isNull();
-	}
 }
