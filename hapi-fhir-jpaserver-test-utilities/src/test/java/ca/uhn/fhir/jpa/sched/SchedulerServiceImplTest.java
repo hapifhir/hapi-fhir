@@ -15,6 +15,7 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +32,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 
 import java.time.Instant;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -211,6 +214,13 @@ public class SchedulerServiceImplTest {
 		assertEquals(1, elapsedTime, "actual time is " + elapsedTime);
 
 		assertEquals(2, CronJob.ourCount.get());
+
+		// verify correct scheduler
+		Set<JobKey> keys = theUseClustered ? mySvc.getClusteredJobKeysForUnitTest()
+			: mySvc.getLocalJobKeysForUnitTest();
+		assertFalse(keys.isEmpty());
+		assertTrue(keys.stream()
+			.anyMatch(key -> key.getName().equals(methodName)));
 	}
 
 	@Test

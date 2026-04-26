@@ -203,8 +203,18 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	@Override
 	public void purgeAllScheduledJobsForUnitTest() throws SchedulerException {
+		/*
+		 * scheduling needs to be stopped before clearing or you
+		 * get unexpected results.
+		 *
+		 * We're only pausing which *should* do the trick
+		 * (because stopping and restarting is harder to do in this
+		 * framework).
+		 */
+		pause();
 		myLocalScheduler.clear();
 		myClusteredScheduler.clear();
+		unpause();
 	}
 
 	@Override
@@ -242,7 +252,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	@Override
 	public void scheduleClusteredJob(String theCronExpression, ScheduledJobDefinition theJobDefinition) {
-		scheduleJob(CLUSTERED_SCHEDULER, myLocalScheduler, null, theCronExpression, theJobDefinition);
+		scheduleJob(CLUSTERED_SCHEDULER, myClusteredScheduler, null, theCronExpression, theJobDefinition);
 	}
 
 	private void scheduleJob(

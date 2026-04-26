@@ -360,8 +360,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired(required = false)
 	protected ISearchDao mySearchEntityDao;
 	@Autowired
-	protected IResourceReindexJobDao myResourceReindexJobDao;
-	@Autowired
 	@Qualifier("mySearchParameterDaoR5")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
 	@Autowired
