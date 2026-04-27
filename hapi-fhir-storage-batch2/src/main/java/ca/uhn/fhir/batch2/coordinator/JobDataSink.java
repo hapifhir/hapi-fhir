@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
@@ -60,8 +61,9 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 			@Nonnull JobDefinition<?> theDefinition,
 			@Nonnull String theInstanceId,
 			@Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor,
+			@Nonnull WorkChunk theWorkChunk,
 			IHapiTransactionService theHapiTransactionService) {
-		super(theInstanceId, theJobWorkCursor);
+		super(theInstanceId, theWorkChunk, theJobWorkCursor);
 		myBatchJobSender = theBatchJobSender;
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionId = theDefinition.getJobDefinitionId();

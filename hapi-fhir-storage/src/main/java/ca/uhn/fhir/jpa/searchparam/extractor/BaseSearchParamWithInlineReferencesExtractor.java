@@ -144,7 +144,12 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 							// FIXME-EHP:
 							//  extract from DaoResourceLinkResolver
 							myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(
-									matchResourceType, nextRef, null, theRequestDetails, theTransactionDetails);
+									theResource,
+									matchResourceType,
+									nextRef,
+									null,
+									theRequestDetails,
+									theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
 						match = (T) placeholderOpt.get().getPersistentId();
 						newId = myFhirContext.getVersion().newIdType();

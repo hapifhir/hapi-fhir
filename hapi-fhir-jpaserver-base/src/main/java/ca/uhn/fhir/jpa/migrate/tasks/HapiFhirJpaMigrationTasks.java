@@ -132,6 +132,31 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init840();
 		init860();
 		init880();
+		init_8_10_0();
+	}
+
+	protected void init_8_10_0() {
+		Builder version = forVersion(VersionEnum.V8_10_0);
+
+		Builder.BuilderAddTableByColumns attachment =
+				version.addTableByColumns("20260407.10", "BT2_JOB_ATTACHMENT", "JOB_INSTANCE_ID", "ATTACHMENT_ID");
+		attachment.addColumn("JOB_INSTANCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachment.addColumn("ATTACHMENT_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachment.addColumn("FILENAME").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachment.addColumn("CONTENT_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 50);
+		attachment.addColumn("CMP_STATUS").nonNullable().type(ColumnTypeEnum.STRING, 50);
+		attachment.addColumn("ATTACHMENT_DATA").nonNullable().type(ColumnTypeEnum.BINARY);
+		attachment.addColumn("ATTACHMENT_LENGTH_CMP").nonNullable().type(ColumnTypeEnum.LONG);
+		attachment.addColumn("ATTACHMENT_LENGTH_UC").nonNullable().type(ColumnTypeEnum.LONG);
+		attachment.addIndex("20260407.11", "IDX_BT2JA_INST_ID").unique(false).withColumns("JOB_INSTANCE_ID");
+		attachment
+				.addIndex("20260407.12", "IDX_BT2JA_INST_ID_AND_FN")
+				.unique(true)
+				.withColumns("JOB_INSTANCE_ID", "FILENAME");
+		attachment
+				.addForeignKey("20260607.13", "FK_BT2JA_INSTANCE")
+				.toColumn("JOB_INSTANCE_ID")
+				.references("BT2_JOB_INSTANCE", "JOB_INSTANCE_ID");
 	}
 
 	protected void init880() {
@@ -193,6 +218,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.runEvenDuringSchemaInitialization()
 					// note that we do not apply the onlyIf() here since we have now fixed the column.
 					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+		}
+
+		// slow running batch jobs
+		{
+			Builder.BuilderWithTableName resource = version.onTable("BT2_WORK_CHUNK");
+			resource.addColumn("20260407.60", "LAST_HEARTBEAT").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 		}
 	}
 

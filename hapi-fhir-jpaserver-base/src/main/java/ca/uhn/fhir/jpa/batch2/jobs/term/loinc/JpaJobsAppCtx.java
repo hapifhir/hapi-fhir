@@ -17,26 +17,16 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.packages.util;
+package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import com.google.common.collect.Lists;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
-import java.util.Collections;
-import java.util.List;
+@Configuration
+@Import({ImportLoincJobAppCtx.class})
+public class JpaJobsAppCtx {
 
-public class PackageUtils {
+	// TODO: This is a placeholder for the new job definition for LOINC import. It will be
+	// filled in in the next PR.
 
-	public static final String LOADER_WITH_CACHE = "loaderWithCache";
-
-	/**
-	 * Default install types
-	 */
-	public static List<String> DEFAULT_INSTALL_TYPES = Collections.unmodifiableList(Lists.newArrayList(
-			"NamingSystem",
-			"CodeSystem",
-			"ValueSet",
-			"StructureDefinition",
-			"ConceptMap",
-			"SearchParameter",
-			"Subscription"));
 }
