@@ -215,13 +215,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			if (theRequestPartitionId != null) {
 				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
-
-				// FIXME-TG:
-				createPlaceHolders(
-						theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
-				// now that we have prefetched and created placeholders, resolve(replache) the inlineMatchUrls
-				resolveInlineMatchUrls(
-						theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
 			}
 
 			return super.doTransactionWriteOperations(

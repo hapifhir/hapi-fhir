@@ -87,7 +87,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
-import ca.uhn.fhir.storage.PatientInlineMatchUrlPreCreationService;
+import ca.uhn.fhir.storage.InlineMatchUrlBundleSyntaxTransformerService;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
@@ -267,11 +267,14 @@ public abstract class BaseTransactionProcessor {
 		// - the execution of conditionalCreatePatientsForInlineMatchUrls needs to either be wrapped in a clause
 		// evaluating myStorageSettings.isAutoCreatePlaceholderReferenceTargets() or have the evaluation done within the
 		// invocation.
-		// - modify the service in order to have it create entries for all inlineMatchUrls, not only the one referring a Patient
+		// - modify the service in order to have it create entries for all inlineMatchUrls, not only the one referring a
+		// Patient
 		// resource, do it for all resources
-		PatientInlineMatchUrlPreCreationService patientInlineMatchUrlPreCreationService =
-				new PatientInlineMatchUrlPreCreationService(myContext, myMatchUrlService);
-		patientInlineMatchUrlPreCreationService.addConditionalCreateEntriesForInlineMatchUrls(theRequest);
+		// FIXME-TG: ask: what is the reason that we need to do it for all resources? If we just want to create the
+		//  placeholder resource so that we can get the right partition, isn't patient enough?
+		InlineMatchUrlBundleSyntaxTransformerService inlineMatchUrlBundleSyntaxTransformerService =
+				new InlineMatchUrlBundleSyntaxTransformerService(myContext, myMatchUrlService);
+		inlineMatchUrlBundleSyntaxTransformerService.transform(theRequest);
 		// POST, ifNoneExit=Patient?identifier=system|123
 
 		// Interceptor call: STORAGE_TRANSACTION_PROCESSING
@@ -680,10 +683,14 @@ public abstract class BaseTransactionProcessor {
 		List<IBase> getEntries = new ArrayList<>();
 
 		// FIXME-TG:
-		// pay very close attention to how and were 'originalRequestOrder' is used.  each entry in the bundle will be processed
-		// and produce an outcome.  many clients will checks the outcome of a resource processing through direct access (outcome[x])
-		// as opposed of in a loop.  if we add conditional creates as placeholders for inlineMatchUrls (see patientInlineMatchUrlPreCreationService.addConditionalCreateEntriesForInlineMatchUrls),
-		// the original order will be skewed.  we have to find a way to track/detect added conditional creates and remove them when we're done
+		// pay very close attention to how and were 'originalRequestOrder' is used.  each entry in the bundle will be
+		// processed
+		// and produce an outcome.  many clients will checks the outcome of a resource processing through direct access
+		// (outcome[x])
+		// as opposed of in a loop.  if we add conditional creates as placeholders for inlineMatchUrls (see
+		// patientInlineMatchUrlPreCreationService.addConditionalCreateEntriesForInlineMatchUrls),
+		// the original order will be skewed.  we have to find a way to track/detect added conditional creates and
+		// remove them when we're done
 		// processing the bundle
 		final IdentityHashMap<IBase, Integer> originalRequestOrder = new IdentityHashMap<>();
 		for (int i = 0; i < requestEntries.size(); i++) {
@@ -1111,7 +1118,7 @@ public abstract class BaseTransactionProcessor {
 
 							if (StringUtils.equals(resourceIdSpecifiedInIfNoneExist, resourceIdFromEntryResource)) {
 								nextWriteEntryRequestPartitionId =
-									// FIXME-TG, this will fail a test and that is correct, good catch
+										// FIXME-TG, this will fail a test and that is correct, good catch
 										myRequestPartitionHelperService.determineCreatePartitionForRequest(
 												requestDetailsForEntry, resource, resourceType);
 

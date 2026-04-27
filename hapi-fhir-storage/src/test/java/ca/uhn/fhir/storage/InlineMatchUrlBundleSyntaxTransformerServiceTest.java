@@ -13,26 +13,250 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 // Created by claude-opus-4-6
-class PatientInlineMatchUrlPreCreationServiceTest {
+class InlineMatchUrlBundleSyntaxTransformerServiceTest {
 
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 
-	private PatientInlineMatchUrlPreCreationService mySvc;
+	private InlineMatchUrlBundleSyntaxTransformerService mySvc;
 
 	@BeforeEach
 	void setUp() {
 		FhirContextSearchParamRegistry searchParamRegistry = new FhirContextSearchParamRegistry(ourFhirContext);
 		MatchUrlService matchUrlService = new MatchUrlService(ourFhirContext, searchParamRegistry);
-		mySvc = new PatientInlineMatchUrlPreCreationService(ourFhirContext, matchUrlService);
+		mySvc = new InlineMatchUrlBundleSyntaxTransformerService(ourFhirContext, matchUrlService);
+	}
+
+	static List<Arguments> referenceScenarioSupplier() {
+		return List.of(
+			Arguments.of(
+				"unconditional create Observation | subject referencing a patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ],
+									"subject" : {
+										"reference": "Patient?identifier=system|value"
+										}
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				bundleAssert(2, theBundle -> {
+					List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();
+					Bundle.BundleEntryComponent entry1 = entries.get(0);
+					Bundle.BundleEntryComponent entry2 = entries.get(1);
+
+					// order check
+					assertThat(entry1.getResource().getResourceType()).isEqualTo(ResourceType.Patient);
+					assertThat(entry2.getResource().getResourceType()).isEqualTo(ResourceType.Observation);
+
+					// placeholder id check
+					String replacedReference = ((Observation) entry2.getResource()).getSubject().getReference();
+					assertEquals(entry1.getFullUrl(), replacedReference);
+				})
+			),
+			Arguments.of(
+				"create Observation | local reference to existing patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "Patient/pat1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"create Observation | placeholder reference to unconditional new patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				bundleAssert(2)
+			),
+			Arguments.of(
+				"create Observation | placeholder reference to unconditional new patient | reverse order",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}, {
+							    "fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient"}
+							}
+						]
+					}
+					""",
+				bundleAssert(2)
+			),
+			Arguments.of(
+				"create Observation | placeholder reference to conditional-create of existing patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+							    "fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|ident1"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				bundleAssert(2)
+			),
+			Arguments.of(
+				"create Observation with logical reference to existing patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"conditional-update Observation with logical reference to existing patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|ident1"}
+								},
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obs1"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
+				"Observation with logical reference to patient in bundle with redundant conditional create",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|ident1"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+								},
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obs1"}
+							}
+						]
+					}
+					""",
+				bundleAssert(2)
+			)
+		);
+	}
+
+
+	@ParameterizedTest
+	@MethodSource("referenceScenarioSupplier()")
+	void testTransaction_allReferenceScenarios(String theComment, String theBundle, Consumer<Bundle> theAssertions) {
+		// fixed setup
+		Bundle requestBundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+
+		// then
+		mySvc.transform(requestBundle);
+
+		// expectations
+		assertNotNull(requestBundle);
+		assertNotNull(theAssertions);
+		theAssertions.accept(requestBundle);
+	}
+
+	@SafeVarargs
+	static Consumer<Bundle> bundleAssert(int theExpectedSize, Consumer<Bundle>... theOtherAssertions) {
+		return theBundle -> {
+			assertThat(theBundle.getEntry()).size().isEqualTo(theExpectedSize);
+			for (Consumer<Bundle> theAssertion : theOtherAssertions) {
+				theAssertion.accept(theBundle);
+			}
+		};
 	}
 
 	@Test
@@ -46,7 +270,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
+		mySvc.transform(bundle);
 
 		// Verify
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
@@ -82,15 +306,15 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
+		mySvc.transform(bundle);
 
 		// Verify - only 1 Patient entry added (deduplication)
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
 		assertThat(entries).hasSize(3);
 
 		long patientEntries = entries.stream()
-				.filter(e -> "Patient".equals(ourFhirContext.getResourceType(e.getResource())))
-				.count();
+			.filter(e -> "Patient".equals(ourFhirContext.getResourceType(e.getResource())))
+			.count();
 		assertThat(patientEntries).isEqualTo(1);
 	}
 
@@ -109,7 +333,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
+		mySvc.transform(bundle);
 
 		// Verify - 2 Patient entries added
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
@@ -133,7 +357,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
+		mySvc.transform(bundle);
 
 		// Verify - no entries added
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
@@ -152,7 +376,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
+		mySvc.transform(bundle);
 
 		// Verify - no entries added
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
@@ -166,7 +390,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 
 		// Execute
-		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
+		mySvc.transform(bundle);
 
 		// Verify
 		assertThat(bundle.getEntry()).isEmpty();
@@ -183,9 +407,9 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute & Verify
-		assertThatThrownBy(() -> mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle))
-				.isInstanceOf(PreconditionFailedException.class)
-				.hasMessageContaining("must have both a system and a value");
+		assertThatThrownBy(() -> mySvc.transform(bundle))
+			.isInstanceOf(PreconditionFailedException.class)
+			.hasMessageContaining("must have both a system and a value");
 	}
 
 	@Test
@@ -199,9 +423,9 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute & Verify
-		assertThatThrownBy(() -> mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle))
-				.isInstanceOf(PreconditionFailedException.class)
-				.hasMessageContaining("must have both a system and a value");
+		assertThatThrownBy(() -> mySvc.transform(bundle))
+			.isInstanceOf(PreconditionFailedException.class)
+			.hasMessageContaining("must have both a system and a value");
 	}
 
 	@Test
@@ -215,9 +439,9 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute & Verify
-		assertThatThrownBy(() -> mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle))
-				.isInstanceOf(PreconditionFailedException.class)
-				.hasMessageContaining("Can not include multiple parameters");
+		assertThatThrownBy(() -> mySvc.transform(bundle))
+			.isInstanceOf(PreconditionFailedException.class)
+			.hasMessageContaining("Can not include multiple parameters");
 	}
 
 	@Test
@@ -234,7 +458,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
+		mySvc.transform(bundle);
 
 		// Verify - no Patient entry added because focus is not a patient compartment reference
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
@@ -256,15 +480,15 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
+		mySvc.transform(bundle);
 
 		// Verify - only 1 Patient entry added for the inline match URL
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
 		assertThat(entries).hasSize(3);
 
 		long patientEntries = entries.stream()
-				.filter(e -> "Patient".equals(ourFhirContext.getResourceType(e.getResource())))
-				.count();
+			.filter(e -> "Patient".equals(ourFhirContext.getResourceType(e.getResource())))
+			.count();
 		assertThat(patientEntries).isEqualTo(1);
 	}
 
@@ -279,7 +503,7 @@ class PatientInlineMatchUrlPreCreationServiceTest {
 		IBaseBundle bundle = bundleBuilder.getBundle();
 
 		// Execute
-		mySvc.addConditionalCreateEntriesForInlineMatchUrls(bundle);
+		mySvc.transform(bundle);
 
 		// Verify the Patient entry is a POST with ifNoneExist
 		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ourFhirContext, bundle);
