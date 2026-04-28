@@ -31,6 +31,7 @@ import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -1756,6 +1757,61 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(errors).isEmpty();
+	}
+
+	/**
+	 * Verify that validating an ExplanationOfBenefit with a priority coding does not produce a false
+	 * "Found a reference to a CodeSystem where a ValueSet belongs" error.
+	 *
+	 * The profiles-resources.xml for R4 mistakenly uses the CodeSystem URL
+	 * (http://terminology.hl7.org/CodeSystem/processpriority) instead of the ValueSet URL
+	 * (http://hl7.org/fhir/ValueSet/process-priority) in the binding for ExplanationOfBenefit.priority.
+	 *
+	 * See GL-7637 / https://github.com/hapifhir/hapi-fhir/issues/XXXX
+	 */
+	@Test
+	void testExplanationOfBenefitPriorityValidationDoesNotReportCodeSystemError() {
+		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
+		eob.getPriority()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/processpriority")
+			.setCode("normal");
+
+		ValidationResult output = myFhirValidator.validateWithResult(eob);
+		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
+
+		List<String> codeSystemErrors = messages.stream()
+			.map(SingleValidationMessage::getMessage)
+			.filter(msg -> msg.contains("CodeSystem") && msg.contains("ValueSet"))
+			.collect(Collectors.toList());
+
+		assertThat(codeSystemErrors)
+			.as("Validation of ExplanationOfBenefit.priority should not produce a 'CodeSystem where ValueSet belongs' error, but got: " + codeSystemErrors)
+			.isEmpty();
+	}
+
+	/**
+	 * Baseline: validating an ExplanationOfBenefit WITHOUT a priority field should not
+	 * produce a CodeSystem/ValueSet error. This test should pass both before and after the fix.
+	 */
+	@Test
+	void testExplanationOfBenefitWithoutPriorityValidatesCleanly() {
+		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
+		// priority intentionally not set
+
+		ValidationResult output = myFhirValidator.validateWithResult(eob);
+		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
+
+		List<String> codeSystemErrors = messages.stream()
+			.map(SingleValidationMessage::getMessage)
+			.filter(msg -> msg.contains("CodeSystem") && msg.contains("ValueSet"))
+			.collect(Collectors.toList());
+
+		assertThat(codeSystemErrors)
+			.as("Validation of ExplanationOfBenefit without priority should not produce a 'CodeSystem where ValueSet belongs' error, but got: " + codeSystemErrors)
+			.isEmpty();
 	}
 
 	private Bundle buildBundle(int theSize, boolean theValidBundle) throws IOException {
