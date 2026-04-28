@@ -85,17 +85,17 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCascade_WithReferentialIntegrityDisabled_Success() {
-		// Setup — disable RI so the early-return bug is triggered
+		// Setup
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
 
 		IIdType patientId = createPatient(withActiveTrue());
 		IIdType observationId = createObservation(withSubject(patientId));
 
-		// Validate precondition
+		// validate precondition
 		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
-		// Execute — same pattern as testCascade_MultiLevel_Success
+		// execute
 		String url = "Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true";
 		when(mySrd.getParameters()).thenReturn(Map.of(
 			Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE},
@@ -106,7 +106,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		String jobId = jobExecutionIdFromOutcome(outcome);
 		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
 
-		// Validate — both the Patient and its referencing Observation must be gone
+		// Validate
 		assertEquals(2, job.getCombinedRecordsProcessed());
 		assertDoesntExist(patientId);
 		assertDoesntExist(observationId);
