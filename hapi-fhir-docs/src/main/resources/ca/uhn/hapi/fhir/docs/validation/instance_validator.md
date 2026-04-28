@@ -108,6 +108,25 @@ and register it with the interceptor service.
 ```
 
 
+<a name="r4-profile-corrections"></a>
+
+# R4 Built-In Profile Corrections
+
+The `hapi-fhir-validation-resources-r4` module ships with a copy of the official HL7 R4 StructureDefinitions (derived from `profiles-resources.xml`). In some cases, the upstream HL7 specification contained errors that caused the HAPI FHIR instance validator to produce false-positive validation errors. The corrections below are included in the bundled profile definitions.
+
+## ExplanationOfBenefit.priority Binding URL
+
+The R4 StructureDefinition for `ExplanationOfBenefit` incorrectly referenced a CodeSystem URL instead of a ValueSet URL in the binding for the `priority` element:
+
+| Field | Incorrect value (upstream) | Correct value |
+|-------|---------------------------|---------------|
+| `ExplanationOfBenefit.priority` binding `valueSet` | `http://terminology.hl7.org/CodeSystem/processpriority` | `http://hl7.org/fhir/ValueSet/process-priority` |
+
+This error caused the validator to emit a false `"Found a reference to a CodeSystem where a ValueSet belongs"` warning when validating any `ExplanationOfBenefit` resource that populated the `priority` field. The bundled `profiles-resources.xml` has been corrected to use the proper ValueSet URL (`http://hl7.org/fhir/ValueSet/process-priority`), eliminating the spurious warning.
+
+No application code changes are required; upgrading to the corrected version of `hapi-fhir-validation-resources-r4` is sufficient.
+
+
 <a id="migrating-to-5x"></a>
 
 # Migrating to HAPI FHIR 5.x
