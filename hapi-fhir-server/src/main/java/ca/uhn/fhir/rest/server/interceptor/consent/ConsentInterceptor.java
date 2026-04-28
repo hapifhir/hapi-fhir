@@ -266,7 +266,7 @@ public class ConsentInterceptor {
 						alreadySeenResources.put(nextResource, ConsentOperationStatusEnum.REJECT);
 						if (isWriteOperation(theRequestDetails)) {
 							throw new ForbiddenOperationException(
-									Msg.code(2919) + "Consent REJECT: write of resource rejected by consent policy");
+									Msg.code(2924) + "Consent REJECT: write of resource rejected by consent policy");
 						}
 						thePreResourceAccessDetails.setDontReturnResourceAtIndex(resourceIdx);
 						skipSubsequentServices = true;

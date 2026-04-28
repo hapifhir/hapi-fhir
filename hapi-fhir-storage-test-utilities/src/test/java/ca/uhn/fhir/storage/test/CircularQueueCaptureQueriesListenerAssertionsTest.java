@@ -66,13 +66,34 @@ class CircularQueueCaptureQueriesListenerAssertionsTest {
 		assertThatThrownBy(()-> {
 			// Test
 			assertThat(myListener).has(
-				onCurrentThread().selectSqlContains(0, "hello")
+				onCurrentThread().selectSqlAtIndex(0).contains("hello")
 			);
 		})
 			// Verify
 			.isInstanceOf(AssertionError.class)
 			.hasMessageContaining("Expected SQL: SELECT")
-			.hasMessageContaining("To contain: hello");
+			.hasMessageContaining("to contain: hello");
+
+	}
+
+	@Test
+	void testFailingCountMatches() {
+		// Setup
+		when(myExecutionInfo.getElapsedTime()).thenReturn(100L);
+		when(myQueryInfo.getQuery()).thenReturn("SELECT foo FROM bar");
+		when(myQueryInfo.getParametersList()).thenReturn(List.of(List.of()));
+		myListener.execute(myExecutionInfo, List.of(myQueryInfo));
+
+		assertThatThrownBy(()-> {
+			// Test
+			assertThat(myListener).has(
+				onCurrentThread().selectSqlAtIndex(0).countInstances(2, "foo")
+			);
+		})
+			// Verify
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("Expected SQL: SELECT foo FROM bar")
+			.hasMessageContaining("to contain 2 but found 1 instances of : foo");
 
 	}
 
