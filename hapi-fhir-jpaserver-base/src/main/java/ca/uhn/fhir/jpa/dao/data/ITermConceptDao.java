@@ -53,7 +53,7 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, TermConcept.
 
 	@Query("FROM TermConcept WHERE myCodeSystemVersionPid = :csv_pid AND myCode in (:codeList)")
 	List<TermConcept> findByCodeSystemAndCodeList(
-			@Param("csv_pid") Long theCodeSystem, @Param("codeList") List<String> theCodeList);
+			@Param("csv_pid") Long theCodeSystemVersionPid, @Param("codeList") List<String> theCodeList);
 
 	@Modifying
 	@Query("DELETE FROM TermConcept WHERE myCodeSystem.myId = :cs_pid")

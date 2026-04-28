@@ -73,6 +73,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -81,8 +82,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.sl.cache.Cache;
-import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -119,7 +118,6 @@ import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
@@ -133,11 +131,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -208,18 +203,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private static final int SECONDS_IN_MINUTE = 60;
 	private static final int INDEXED_ROOTS_LOGGING_COUNT = 50_000;
 	private static Runnable myInvokeOnNextCallForUnitTest;
-
-	/**
-	 * Maps code system URL (or URL|version) to its current {@link TermCodeSystemVersionDetails}.
-	 * Used to resolve the active code system version when looking up or validating codes.
-	 */
-	private Cache<String, Optional<TermCodeSystemVersionDetails>> myCodeSystemVersionCache;
-
-	/**
-	 * Maps ValueSet canonical URL to its pre-expanded {@link TermValueSet} entity.
-	 * Used to serve ValueSet expansions and code validations from pre-calculated data.
-	 */
-	private Cache<String, Optional<TermValueSet>> myValueSetCache;
 
 	@Autowired
 	private JpaStorageSettings myJpaStorageSettings;
@@ -307,6 +290,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+
+	@Autowired
+	private MemoryCacheService myMemoryCache;
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
@@ -2180,10 +2166,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 		String version = theValueSet.getVersion();
 		String cacheKey = isNotBlank(version) ? url + "|" + version : url;
-		if (myValueSetCache == null) {
-			return fetchValueSetEntity(cacheKey);
-		}
-		return myValueSetCache.get(cacheKey, this::fetchValueSetEntity);
+		return myMemoryCache.get(
+				MemoryCacheService.CacheEnum.VALUSSET_URL_TO_VALUESET, cacheKey, this::fetchValueSetEntity);
 	}
 
 	private Optional<TermValueSet> fetchValueSetEntity(String theCacheKey) {
@@ -2376,7 +2360,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		if (csv == null) {
 			return Optional.empty();
 		}
-		return myConceptDao.findByCodeSystemAndCode(csv.myPid, theCode);
+		return myConceptDao.findByCodeSystemAndCode(csv.pid(), theCode);
 	}
 
 	@Override
@@ -2388,16 +2372,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			return Collections.emptyList();
 		}
 
-		return myConceptDao.findByCodeSystemAndCodeList(csv.myPid, theCodeList);
+		return myConceptDao.findByCodeSystemAndCodeList(csv.pid(), theCodeList);
 	}
 
 	@Nullable
 	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
-		if (myCodeSystemVersionCache == null) {
-			return fetchCurrentCodeSystemVersion(theCodeSystemIdentifier);
-		}
-		return myCodeSystemVersionCache
-				.get(theCodeSystemIdentifier, key -> Optional.ofNullable(fetchCurrentCodeSystemVersion(key)))
+		return myMemoryCache
+				.get(
+						MemoryCacheService.CacheEnum.CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS,
+						theCodeSystemIdentifier,
+						key -> Optional.ofNullable(fetchCurrentCodeSystemVersion(key)))
 				.orElse(null);
 	}
 
@@ -2523,17 +2507,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		RuleBasedTransactionAttribute rules = new RuleBasedTransactionAttribute();
 		rules.getRollbackRules().add(new NoRollbackRuleAttribute(ExpansionTooCostlyException.class));
 		myTxTemplate = new TransactionTemplate(myTransactionManager, rules);
-
-		long cacheTimeoutMs =
-				TimeUnit.MINUTES.toMillis(myJpaStorageSettings.getTerminologyLookupCacheExpireAfterWriteInMinutes());
-		long cacheSize = myJpaStorageSettings.getTerminologyLookupCacheMaximumSize();
-		if (cacheTimeoutMs <= 0 || cacheSize <= 0) {
-			myCodeSystemVersionCache = null;
-			myValueSetCache = null;
-		} else {
-			myCodeSystemVersionCache = CacheFactory.build(cacheTimeoutMs, cacheSize);
-			myValueSetCache = CacheFactory.build(cacheTimeoutMs, cacheSize);
-		}
 	}
 
 	@Override
@@ -2641,26 +2614,20 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Override
 	public void invalidateCodeSystemCaches() {
-		if (myCodeSystemVersionCache != null) {
-			myCodeSystemVersionCache.invalidateAll();
-		}
+		myMemoryCache.invalidateCaches(MemoryCacheService.CacheEnum.CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS);
 	}
 
 	@Override
 	public void invalidateValueSetCaches() {
-		if (myValueSetCache != null) {
-			myValueSetCache.invalidateAll();
-		}
+		myMemoryCache.invalidateCaches(MemoryCacheService.CacheEnum.VALUSSET_URL_TO_VALUESET);
 	}
 
 	@Override
 	public void updateCodeSystemVersionCache(String theCodeSystemUrl, TermCodeSystemVersion theVersion) {
-		if (myCodeSystemVersionCache != null) {
-			myCodeSystemVersionCache.put(
-					theCodeSystemUrl,
-					Optional.of(new TermCodeSystemVersionDetails(
-							theVersion.getPid(), theVersion.getCodeSystemVersionId())));
-		}
+		myMemoryCache.put(
+				MemoryCacheService.CacheEnum.CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS,
+				theCodeSystemUrl,
+				new TermCodeSystemVersionDetails(theVersion.getPid(), theVersion.getCodeSystemVersionId()));
 	}
 
 	private synchronized boolean isPreExpandingValueSets() {
@@ -3009,7 +2976,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		Optional<FhirVersionIndependentConcept> codeOpt =
 				txTemplate.execute(tx -> findCode(theCodeSystemUrl, theCode).map(c -> {
 					TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystemUrl);
-					String codeSystemVersionId = csv != null ? csv.myCodeSystemVersionId : null;
+					String codeSystemVersionId = csv != null ? csv.codeSystemVersionId() : null;
 					return new FhirVersionIndependentConcept(
 							theCodeSystemUrl, c.getCode(), c.getDisplay(), codeSystemVersionId);
 				}));
@@ -3496,17 +3463,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return isValueSetPreExpandedForCodeValidation(valueSetR4);
 	}
 
-	private static class TermCodeSystemVersionDetails {
-
-		private final long myPid;
-		private final String myCodeSystemVersionId;
-
-		public TermCodeSystemVersionDetails(long thePid, String theCodeSystemVersionId) {
-			myPid = thePid;
-			myCodeSystemVersionId = theCodeSystemVersionId;
-		}
-	}
-
 	public static class Job implements HapiJob {
 		@Autowired
 		private ITermReadSvc myTerminologySvc;
@@ -3647,35 +3603,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			property.setConcept(termConcept);
 			property.setCodeSystemVersion(theCodeSystemVersion);
 
-			if (next.getValue() instanceof CodeType) {
-				property.setType(TermConceptPropertyTypeEnum.CODE);
-				property.setValue(((CodeType) next.getValue()).getValueAsString());
-			} else if (next.getValue() instanceof StringType) {
-				property.setType(TermConceptPropertyTypeEnum.STRING);
-				property.setValue(next.getValueStringType().getValue());
-			} else if (next.getValue() instanceof BooleanType) {
-				property.setType(TermConceptPropertyTypeEnum.BOOLEAN);
-				property.setValue(((BooleanType) next.getValue()).getValueAsString());
-			} else if (next.getValue() instanceof IntegerType) {
-				property.setType(TermConceptPropertyTypeEnum.INTEGER);
-				property.setValue(((IntegerType) next.getValue()).getValueAsString());
-			} else if (next.getValue() instanceof DecimalType) {
-				property.setType(TermConceptPropertyTypeEnum.DECIMAL);
-				property.setValue(((DecimalType) next.getValue()).getValueAsString());
-			} else if (next.getValue() instanceof DateTimeType) {
-				property.setType(TermConceptPropertyTypeEnum.DATETIME);
-				property.setValue(((DateTimeType) next.getValue()).getValueAsString());
-			} else if (next.getValue() instanceof Coding) {
-				Coding nextCoding = next.getValueCoding();
-				property.setType(TermConceptPropertyTypeEnum.CODING);
-				property.setCodeSystem(nextCoding.getSystem());
-				property.setValue(nextCoding.getCode());
-				property.setDisplay(nextCoding.getDisplay());
-			} else if (next.getValue() != null) {
-				ourLog.warn("Don't know how to handle properties of type: "
-						+ next.getValue().getClass());
-				continue;
-			}
+			TermWriteSvcImpl.populateTermConceptPropertyValue(next, property);
 
 			termConcept.getProperties().add(property);
 		}

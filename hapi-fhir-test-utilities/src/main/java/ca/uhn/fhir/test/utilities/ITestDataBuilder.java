@@ -294,6 +294,10 @@ public interface ITestDataBuilder {
 		return createResource("Patient", theModifiers);
 	}
 
+	default IIdType createCodeSystem(ICreationArgument... theModifiers) {
+		return createResource("CodeSystem", theModifiers);
+	}
+
 	default IIdType createCoverage(ICreationArgument... theModifiers) {
 		return createResource("Coverage", theModifiers);
 	}
@@ -516,6 +520,21 @@ public interface ITestDataBuilder {
 	default ICreationArgument withOrganization(@Nullable IIdType theOrganizationId) {
 		return withReference("managingOrganization", theOrganizationId);
 	}
+
+	/**
+	 * Set the "url" property on a canonical resource such as a CodeSystem
+	 */
+	default ICreationArgument withUrl(String theUrl) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "url", "uri", theUrl);
+	}
+
+	/**
+	 * Set the "version" property on a canonical resource such as a CodeSystem
+	 */
+	default ICreationArgument withVersion(String theVersion) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "version", "uri", theVersion);
+	}
+
 
 	/**
 	 * Optional method for cases where this is purely used for building resources.

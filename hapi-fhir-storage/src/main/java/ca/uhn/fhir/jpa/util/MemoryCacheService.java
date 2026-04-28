@@ -40,6 +40,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -80,6 +81,18 @@ public class MemoryCacheService {
 					break;
 				case RESOURCE_IDENTIFIER_SYSTEM_TO_PID:
 					nextCache = CacheFactory.buildEternal(250, 1_000);
+					break;
+				case CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS:
+				case VALUSSET_URL_TO_VALUESET:
+					long cacheTimeoutMs = TimeUnit.MINUTES.toMillis(
+							myStorageSettings.getTerminologyLookupCacheExpireAfterWriteInMinutes());
+					long cacheSize = myStorageSettings.getTerminologyLookupCacheMaximumSize();
+					if (cacheTimeoutMs == 0 || cacheSize == 0) {
+						cacheTimeoutMs = 0;
+						cacheSize = 0;
+					}
+
+					nextCache = CacheFactory.build(cacheTimeoutMs, cacheSize);
 					break;
 				case PATIENT_IDENTIFIER_TO_FHIR_ID:
 				case NAME_TO_PARTITION:
@@ -242,7 +255,9 @@ public class MemoryCacheService {
 		HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY(Long.class),
 		RES_TYPE_TO_RES_TYPE_ID(String.class),
 		RESOURCE_IDENTIFIER_SYSTEM_TO_PID(String.class),
-		PATIENT_IDENTIFIER_TO_FHIR_ID(IdentifierKey.class);
+		PATIENT_IDENTIFIER_TO_FHIR_ID(IdentifierKey.class),
+		CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS(String.class),
+		VALUSSET_URL_TO_VALUESET(String.class);
 
 		private final Class<?> myKeyType;
 

@@ -46,30 +46,35 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Table(
-		name = "TRM_CODESYSTEM_VER",
-		// Note, we used to have a constraint named IDX_CSV_RESOURCEPID_AND_VER (don't reuse this)
-		uniqueConstraints = {
-			@UniqueConstraint(
-					name = TermCodeSystemVersion.IDX_CODESYSTEM_AND_VER,
-					columnNames = {"PARTITION_ID", "CODESYSTEM_PID", "CS_VERSION_ID"})
-		},
-		indexes = {
-			@Index(name = "FK_CODESYSVER_RES_ID", columnList = "RES_ID"),
-			@Index(name = "FK_CODESYSVER_CS_ID", columnList = "CODESYSTEM_PID")
-		})
+	name = TermCodeSystemVersion.TRM_CODESYSTEM_VER,
+	// Note, we used to have a constraint named IDX_CSV_RESOURCEPID_AND_VER (don't reuse this)
+	uniqueConstraints = {
+		@UniqueConstraint(
+			name = TermCodeSystemVersion.IDX_CODESYSTEM_AND_VER,
+			columnNames = {"PARTITION_ID", "CODESYSTEM_PID", "CS_VERSION_ID"})
+	},
+	indexes = {
+		@Index(name = "FK_CODESYSVER_RES_ID", columnList = "RES_ID"),
+		@Index(name = "FK_CODESYSVER_CS_ID", columnList = "CODESYSTEM_PID")
+	})
 @Entity()
 @IdClass(IdAndPartitionId.class)
 public class TermCodeSystemVersion extends BasePartitionable implements Serializable {
 	public static final String IDX_CODESYSTEM_AND_VER = "IDX_CODESYSTEM_AND_VER";
 	public static final int MAX_VERSION_LENGTH = 200;
+
+	@Serial
 	private static final long serialVersionUID = 1L;
+	public static final String TRM_CODESYSTEM_VER = "TRM_CODESYSTEM_VER";
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCodeSystem")
 	private Collection<TermConcept> myConcepts;
@@ -82,21 +87,21 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(
-			value = {
-				@JoinColumn(
-						name = "RES_ID",
-						referencedColumnName = "RES_ID",
-						nullable = false,
-						insertable = false,
-						updatable = false),
-				@JoinColumn(
-						name = "PARTITION_ID",
-						referencedColumnName = "PARTITION_ID",
-						nullable = false,
-						insertable = false,
-						updatable = false)
-			},
-			foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
+		value = {
+			@JoinColumn(
+				name = "RES_ID",
+				referencedColumnName = "RES_ID",
+				nullable = false,
+				insertable = false,
+				updatable = false),
+			@JoinColumn(
+				name = "PARTITION_ID",
+				referencedColumnName = "PARTITION_ID",
+				nullable = false,
+				insertable = false,
+				updatable = false)
+		},
+		foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", nullable = false)
@@ -105,32 +110,33 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 	@Column(name = "CS_VERSION_ID", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemVersionId;
 
+	@Column(name = "CS_INTENDED_VERSION_ID", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
+	private String myCodeSystemIntendedVersionId;
+
 	/**
 	 * This was added in HAPI FHIR 3.3.0 and is nullable just to avoid migration
 	 * issued. It should be made non-nullable at some point.
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(
-			value = {
-				@JoinColumn(
-						name = "CODESYSTEM_PID",
-						referencedColumnName = "PID",
-						insertable = false,
-						updatable = false,
-						nullable = true),
-				@JoinColumn(
-						name = "PARTITION_ID",
-						referencedColumnName = "PARTITION_ID",
-						insertable = false,
-						nullable = true,
-						updatable = false)
-			},
-			foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
+		value = {
+			@JoinColumn(
+				name = "CODESYSTEM_PID",
+				referencedColumnName = "PID",
+				insertable = false,
+				updatable = false,
+				nullable = true),
+			@JoinColumn(
+				name = "PARTITION_ID",
+				referencedColumnName = "PARTITION_ID",
+				insertable = false,
+				nullable = true,
+				updatable = false)
+		},
+		foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;
-
 	@Column(name = "CODESYSTEM_PID", insertable = true, updatable = true, nullable = true)
 	private Long myCodeSystemPid;
-
 	@Column(name = "CS_DISPLAY", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemDisplayName;
 
@@ -139,6 +145,30 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 	 */
 	public TermCodeSystemVersion() {
 		super();
+	}
+
+	/**
+	 * If this is a CodeSystem version that is currently being staged for publishing (meaning
+	 * we are currently in the process of writing concepts to it), this is the URL that is
+	 * intended to eventually be placed in {@link #myCodeSystemVersionId} once published.
+	 *
+	 * @since 8.12.0
+	 * @see ca.uhn.fhir.jpa.term.api.ITermWriteSvc#startStagingCodeSystemVersion(String, String)
+	 */
+	public String getCodeSystemIntendedVersionId() {
+		return myCodeSystemIntendedVersionId;
+	}
+
+	/**
+	 * If this is a CodeSystem version that is currently being staged for publishing (meaning
+	 * we are currently in the process of writing concepts to it), this is the URL that is
+	 * intended to eventually be placed in {@link #myCodeSystemVersionId} once published.
+	 *
+	 * @since 8.12.0
+	 * @see ca.uhn.fhir.jpa.term.api.ITermWriteSvc#startStagingCodeSystemVersion(String, String)
+	 */
+	public void setCodeSystemIntendedVersionId(String theCodeSystemIntendedVersionId) {
+		myCodeSystemIntendedVersionId = theCodeSystemIntendedVersionId;
 	}
 
 	public TermCodeSystem getCodeSystem() {
@@ -158,9 +188,9 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 
 	public TermCodeSystemVersion setCodeSystemVersionId(String theCodeSystemVersionId) {
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theCodeSystemVersionId,
-				MAX_VERSION_LENGTH,
-				"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemVersionId));
+			theCodeSystemVersionId,
+			MAX_VERSION_LENGTH,
+			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemVersionId));
 		myCodeSystemVersionId = theCodeSystemVersionId;
 		return this;
 	}
@@ -182,6 +212,11 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		return IdAndPartitionId.forId(myId, this);
 	}
 
+	public TermCodeSystemVersion setId(Long theId) {
+		myId = theId;
+		return this;
+	}
+
 	public ResourceTable getResource() {
 		return myResource;
 	}
@@ -190,11 +225,6 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		myResource = theResource;
 		myResourcePid = theResource.getId().getId();
 		setPartitionId(theResource.getPartitionId());
-		return this;
-	}
-
-	public TermCodeSystemVersion setId(Long theId) {
-		myId = theId;
 		return this;
 	}
 
@@ -211,9 +241,9 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		TermCodeSystemVersion that = (TermCodeSystemVersion) theO;
 
 		return new EqualsBuilder()
-				.append(myCodeSystemVersionId, that.myCodeSystemVersionId)
-				.append(myCodeSystemPid, that.myCodeSystemPid)
-				.isEquals();
+			.append(myCodeSystemVersionId, that.myCodeSystemVersionId)
+			.append(myCodeSystemPid, that.myCodeSystemPid)
+			.isEquals();
 	}
 
 	@Override
@@ -230,9 +260,9 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 
 	public void setCodeSystemDisplayName(String theCodeSystemDisplayName) {
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theCodeSystemDisplayName,
-				MAX_VERSION_LENGTH,
-				"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemDisplayName));
+			theCodeSystemDisplayName,
+			MAX_VERSION_LENGTH,
+			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemDisplayName));
 		myCodeSystemDisplayName = theCodeSystemDisplayName;
 	}
 
@@ -257,5 +287,12 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 	TermCodeSystemVersion setCodeSystemPidForUnitTest(long theCodeSystemPid) {
 		myCodeSystemPid = theCodeSystemPid;
 		return this;
+	}
+
+	public Optional<TermConcept> getConcept(String theCode) {
+		return getConcepts()
+			.stream()
+			.filter(t -> t.getCode().equals(theCode))
+			.findFirst();
 	}
 }

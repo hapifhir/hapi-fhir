@@ -79,6 +79,7 @@ import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.r4.model.Coding;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -112,6 +113,7 @@ public class TermConcept implements Serializable {
 	public static final int MAX_DESC_LENGTH = 400;
 	public static final int MAX_DISP_LENGTH = 500;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@OneToMany(
@@ -253,6 +255,7 @@ public class TermConcept implements Serializable {
 	public TermConceptParentChildLink addChild(TermConcept theChild, RelationshipTypeEnum theRelationshipType) {
 		Validate.notNull(theRelationshipType, "theRelationshipType must not be null");
 		TermConceptParentChildLink link = new TermConceptParentChildLink();
+		link.setCodeSystem(myCodeSystem);
 		link.setParent(this);
 		link.setChild(theChild);
 		link.setRelationshipType(theRelationshipType);
