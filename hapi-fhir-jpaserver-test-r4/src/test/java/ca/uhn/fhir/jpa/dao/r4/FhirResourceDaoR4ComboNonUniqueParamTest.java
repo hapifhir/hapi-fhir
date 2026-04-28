@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -18,6 +20,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -30,7 +33,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r5.model.Extension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -38,16 +40,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Comparator;
 import java.util.List;
 
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
+class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4ComboNonUniqueParamTest.class);
 	public static final String ORG_ID_UNQUALIFIED = "my-org";
 	public static final String ORG_ID_QUALIFIED = "Organization/" + ORG_ID_UNQUALIFIED;
 
@@ -55,15 +61,18 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 	@Autowired
 	IInterceptorService myInterceptorService;
+	@Autowired
+	MatchUrlService myMatchUrlService;
+
 	private boolean myInterceptorFound = false;
 
 	@BeforeEach
-	public void removeInterceptor() {
+	void removeInterceptor() {
 		myInterceptorFound = myInterceptorService.unregisterInterceptor(mySearchParamValidatingInterceptor);
 	}
 
 	@AfterEach
-	public void restoreInterceptor() {
+	void restoreInterceptor() {
 		myStorageSettings.setIndexMissingFields(new StorageSettings().getIndexMissingFields());
 
 		if (myInterceptorFound) {
@@ -72,7 +81,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testTokenFromCodeableConcept_Create() {
+	void testTokenFromCodeableConcept_Create() {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-family");
 		sp.setType(Enumerations.SearchParamType.STRING);
@@ -137,7 +146,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 
 	@Test
-	public void testStringAndToken_Create() {
+	void testStringAndToken_Create() {
 		createStringAndTokenCombo_NameAndGender();
 
 		IIdType id1 = createPatient1(null);
@@ -194,7 +203,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testEmptyParamLists() {
+	void testEmptyParamLists() {
 		createStringAndTokenCombo_NameAndGender();
 
 		IIdType id1 = createPatient1(null);
@@ -211,7 +220,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testStringAndToken_CreateAndUpdate() {
+	void testStringAndToken_CreateAndUpdate() {
 		createStringAndTokenCombo_NameAndGender();
 
 		initResourceTypeCacheFromConfig();
@@ -266,7 +275,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testStringAndToken_SearchWithExtraParameters() {
+	void testStringAndToken_SearchWithExtraParameters() {
 		createStringAndTokenCombo_NameAndGender();
 
 		IIdType id1 = createPatient1(null);
@@ -307,7 +316,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 
 	@Test
-	public void testStringAndToken_MultipleAnd() {
+	void testStringAndToken_MultipleAnd() {
 		createStringAndTokenCombo_NameAndGender();
 
 		Patient patient = new Patient();
@@ -340,47 +349,297 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 	}
 
-
 	@Test
-	public void testStringAndDate_Create() {
-		createStringAndDateCombo_NameAndBirthdate();
+	void testRangedDate_Create() {
+		// Setup
+		IBaseResource comboSp = myComboSearchParameterTestHelper.createObservationSubjectCodeAndRangedEffective();
+		ourLog.info("Combo: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(comboSp));
 
-		IIdType id1 = createPatient1(null);
-		assertNotNull(id1);
+		createPatient(withId("P0"), withActiveTrue());
 
-		IIdType id2 = createPatient2(null);
-		assertNotNull(id2);
+		// Test
+		createObservation(
+			withId("O0"),
+			withSubject("Patient/P0"),
+			withObservationCode("http://foo", "bar"),
+			withEffectiveInstant("2022-01-02T03:44:55Z"));
+
+		// Verify
+		runInTransaction(() -> {
+			List<ResourceIndexedComboTokenNonUnique> indexes = myResourceIndexedComboTokensNonUniqueDao.findAll();
+			assertEquals(1, indexes.size());
+
+			assertEquals("Observation?code=http%3A%2F%2Ffoo%7Cbar&subject=Patient%2FP0", indexes.get(0).getIndexString());
+			assertEquals(20220102, indexes.get(0).getDateOrdinal());
+		});
+	}
+
+	@ParameterizedTest
+	@CsvSource(delimiter = '~', textBlock = """
+		# Expect ~ Use   ~ Use   ~ Observation          ~ Date
+		# Match  ~ Combo ~ Date  ~ Date
+		#        ~ Table ~ Table ~
+		
+		# YEAR Precision
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=2022
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=2023
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=ne2022
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=eq2022
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2021
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2022
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=ge2022
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=le2022
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=le2023
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=le2021
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=lt2022
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=lt2023
+		
+		# MONTH Precision
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=2022-01
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=2022-02
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=ne2022-01
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=eq2022-01
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2022-01
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2022-02
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2021-12
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=ge2022-01
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=le2022-01
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=lt2022-01
+		
+		# DAY Precision
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=2022-01-02
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=2022-01-03
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=ne2022-01-02
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=eq2022-01-02
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2022-01-02
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=ge2022-01-02
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=le2022-01-02
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=lt2022-01-02
+		
+		# Range
+		true     ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2021&date=lt2023
+		false    ~ true  ~ false ~ 2022-01-02T03:44:55Z ~ date=gt2020&date=lt2021
+		
+		# Better than DAY Precision with zero time (doesn't need to use standard date index table)
+		true     ~ true  ~ false ~ 2022-01-01T03:44:55Z ~ date=gt2022-01-01T00:00Z
+		true     ~ true  ~ false ~ 2022-01-01T03:44:55Z ~ date=gt2022-01-01T00:00:00Z
+		true     ~ true  ~ false ~ 2022-01-01T03:44:55Z ~ date=gt2022-01-01T00:00:00.000Z
+		true     ~ true  ~ false ~ 2022-01-01T03:44:55Z ~ date=gt2022-01-01T00:00:00-04:00
+		true     ~ true  ~ false ~ 2022-01-01T03:44:55Z ~ date=ge2022-01-01T00:00:00Z
+		
+		# Better than DAY Precision (should also use standard date index table)
+		true     ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=2022-01-02T03:44:55Z
+		true     ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=gt2022-01-02T03:00:00Z
+		false    ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=gt2022-01-02T04:00:00Z
+		true     ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=lt2022-01-02T04:00:00Z
+		false    ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=lt2022-01-02T03:00:00Z
+		true     ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=ne2022-01-02T03:00:00Z
+		false    ~ true  ~ true  ~ 2022-01-02T03:44:55Z ~ date=ne2022-01-02T03:44:55Z
+		
+		# Other Qualifiers that aren't supported for combo param
+		true     ~ false ~ true  ~ 2022-01-02T03:44:55Z ~ date:missing=false
+		true     ~ false ~ true  ~ 2022-01-02T03:44:55Z ~ date=sa2021-01-02
+		true     ~ false ~ true  ~ 2022-01-02T03:44:55Z ~ date=eb2023-01-02
+		""")
+	void testRangedDate_Search(boolean theExpectMatch, boolean theExpectUseComboTable, boolean theExpectUseDateTable, String theObsEffectiveDate, String theDate) {
+		// Setup
+		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
+		myComboSearchParameterTestHelper.createObservationSubjectCodeAndRangedEffective();
+
+		createPatient(withId("P0"), withActiveTrue());
+
+		createObservation(
+			withId("O0"),
+			withSubject("Patient/P0"),
+			withObservationCode("http://foo", "bar"),
+			withEffectiveInstant(theObsEffectiveDate));
+
+		// Test
+		String queryUrl = "Observation?" + theDate + "&subject=Patient/P0&code=http://foo|bar";
+		SearchParameterMap spMap = myMatchUrlService.getResourceSearch(queryUrl).getSearchParameterMap();
+		spMap.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myObservationDao.search(spMap, newSrd());
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(results);
+
+		// Verify
+		if (theExpectMatch) {
+			assertThat(resultIds).containsExactly("Observation/O0");
+		} else {
+			assertThat(resultIds).isEmpty();
+		}
+
+		assertThat(myCaptureQueriesListener).has(
+			// Make sure we searched the non-unique index table
+			onCurrentThread()
+				.selectSqlAtIndex(0).countInstances(theExpectUseComboTable ? 1 : 0, ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.selectSqlAtIndex(0).mightContain(theExpectUseDateTable, ResourceIndexedSearchParamDate.HFJ_SPIDX_DATE)
+		);
+	}
+
+
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', textBlock = """
+		# Use Date | Query
+		# Table    |
+		false      | Bundle?composition.date=2022-01-02&composition.subject=Patient/PAT-0
+		false      | Bundle?composition.date=ge2022-01-01&composition.subject=Patient/PAT-0
+		false      | Bundle?composition.date=gt2022-01-01&composition.subject=Patient/PAT-0
+		false      | Bundle?composition.date=lt2022-01-03&composition.subject=Patient/PAT-0
+		false      | Bundle?composition.date=le2022-01-03&composition.subject=Patient/PAT-0
+		
+		true       | Bundle?composition.date=ge2022-01-01T12:00:00Z&composition.subject=Patient/PAT-0
+		
+		false      | Bundle?composition.date=ge2022-01-01&composition.date=le2022-01-03&composition.subject=Patient/PAT-0
+		""")
+	void testRangedDate_Chained(boolean theExpectUseDateTable, String theSearch) {
+		// Setup
+		myComboSearchParameterTestHelper.createDocumentSubjectAndRangedDateSp();
+
+		createPatient(withId("PAT-0"), withActiveTrue());
+
+		Bundle document = new Bundle();
+		document.setId("DOC-0");
+		document.setType(Bundle.BundleType.DOCUMENT);
+		Composition composition = new Composition();
+		composition.getSubject().setReference("Patient/PAT-0");
+		composition.setDateElement(new DateTimeType("2022-01-02T03:44:55Z"));
+		document.addEntry().setResource(composition);
+		myBundleDao.update(document, mySrd);
+
+		logAllNonUniqueIndexes();
+
+		// Test
+		SearchParameterMap spMap = myMatchUrlService.getResourceSearch(theSearch).getSearchParameterMap();
+		spMap.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myBundleDao.search(spMap, newSrd());
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(results);
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		assertThat(resultIds).containsExactly("Bundle/DOC-0");
+
+		assertThat(myCaptureQueriesListener).has(
+			// Make sure we searched the non-unique index table
+			onCurrentThread()
+				.selectSqlAtIndex(0).contains(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.selectSqlAtIndex(0).mightContain(theExpectUseDateTable, ResourceIndexedSearchParamDate.HFJ_SPIDX_DATE)
+		);
+
+	}
+
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', textBlock = """
+		# Match | Obs Period Start           | Obs Period End             | Search Param
+		true    | 2021-01-01T12:00:00-04:00  | 2021-01-03T12:00:00-04:00  | date=gt2021-01-02
+		false   | 2021-01-01T12:00:00-04:00  | 2021-01-03T12:00:00-04:00  | date=lt2021-01-02
+		true    | 2021-01-01T12:00:00-04:00  |                            | date=lt2021-01-02
+		""")
+	void testRangedDate_Period(boolean theExpectMatch, String theObservationStart, String theObservationEnd, String theDate) {
+		// Setup
+		myComboSearchParameterTestHelper.createObservationSubjectCodeAndRangedEffective();
+
+		createPatient(withId("P0"), withActiveTrue());
+
+		createObservation(
+			withId("O0"),
+			withSubject("Patient/P0"),
+			withObservationCode("http://foo", "bar"),
+			withEffectivePeriod(theObservationStart, theObservationEnd));
+
+		logAllNonUniqueIndexes();
+
+		// Test
+		String queryUrl = "Observation?" + theDate + "&subject=Patient/P0&code=http://foo|bar";
+		SearchParameterMap spMap = myMatchUrlService.getResourceSearch(queryUrl).getSearchParameterMap();
+		spMap.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myObservationDao.search(spMap, newSrd());
+		List<String> resultIds = toUnqualifiedVersionlessIdValues(results);
+
+		// Verify
+		if (theExpectMatch) {
+			assertThat(resultIds).containsExactly("Observation/O0");
+		} else {
+			assertThat(resultIds).isEmpty();
+		}
+
+		boolean theExpectUseComboTable = true;
+		boolean theExpectUseDateTable = false;
+		assertThat(myCaptureQueriesListener).has(
+			// Make sure we searched the non-unique index table
+			onCurrentThread()
+				.selectSqlAtIndex(0).countInstances(theExpectUseComboTable ? 1 : 0, ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.selectSqlAtIndex(0).mightContain(theExpectUseDateTable, ResourceIndexedSearchParamDate.HFJ_SPIDX_DATE)
+		);
+
+	}
+
+
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# Observation Date      , Search URL Date         , Expect Match , Expect Use Date Index Table
+		2021-02-02              , 2021-02-02              , true         , false
+		2021-02-02T11:22:33Z    , 2021-02-02T11:22:33Z    , true         , true
+		2021-02-02T11:22:33Z    , 2021-02-02T11:22:01Z    , false        , true
+		""")
+	void testStringAndDate_Create(String theObservationDate, String theSearchDate, boolean theExpectMatch, boolean theExpectUseDateIndexTable) {
+		createStringAndDateCombo_ObservationValueAndEffective();
+
+		IIdType id1 = createObservation(
+			withObservationValueString("hello"),
+			withEffectiveInstant(theObservationDate));
+
+		IIdType id2 = createObservation(
+			withObservationValueString("goodbye"),
+			withEffectiveInstant(theObservationDate));
 
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {
 			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
 			indexedTokens.sort(Comparator.comparing(ResourceIndexedComboTokenNonUnique::getId));
 			assertEquals(2, indexedTokens.size());
-			String expected = "Patient?birthdate=2021-02-02&family=FAMILY1";
+			String expected = "Observation?date=2021-02-02&value-string=HELLO";
 			assertEquals(expected, indexedTokens.get(0).getIndexString());
-			assertEquals(7196518367857292879L, indexedTokens.get(0).getHashComplete().longValue());
+			assertEquals(-53995296465088005L, indexedTokens.get(0).getHashComplete().longValue());
 		});
 
 		myMessages.clear();
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
-		params.add("family", new StringParam("family1"));
-		params.add("birthdate", new DateParam("2021-02-02"));
+		params.add("value-string", new StringParam("hello"));
+		params.add("date", new DateParam(theSearchDate));
 		myCaptureQueriesListener.clear();
-		IBundleProvider results = myPatientDao.search(params, mySrd);
+		IBundleProvider results = myObservationDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
+		if (theExpectMatch) {
+			assertThat(actual).contains(id1.toUnqualifiedVersionless().getValue());
+		} else {
+			assertThat(actual).isEmpty();
+		}
 
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '7196518367857292879') fetch first '10000' rows only";
-		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
+		if (theExpectUseDateIndexTable) {
+			String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 INNER JOIN HFJ_SPIDX_DATE";
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread().selectSqlAtIndex(0).contains(expected)
+			);
+		} else {
+			String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '-53995296465088005') fetch first '10000' rows only";
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread().selectSqlAtIndex(0).matches(expected)
+			);
+		}
 
 		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("[INFO Using NON_UNIQUE index(es) for query for search: Patient?birthdate=2021-02-02&family=FAMILY1]");
+		assertThat(myMessages.toString()).contains("INFO Using NON_UNIQUE index(es) for query for search: Observation?date=2021-02-02&value-string=HELLO");
 		myMessages.clear();
 	}
 
 	@Test
-	public void testStringAndReference_Create() {
+	void testStringAndReference_Create() {
 		createStringAndReferenceCombo_FamilyAndOrganization();
 
 		createOrg();
@@ -411,7 +670,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testStringAndReference_SearchByUnqualifiedReference() {
+	void testStringAndReference_SearchByUnqualifiedReference() {
 		createStringAndReferenceCombo_FamilyAndOrganization();
 
 		createOrg();
@@ -445,7 +704,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	 * combo index twice.
 	 */
 	@Test
-	public void testMultipleAndCombinations_EqualNumbers() {
+	void testMultipleAndCombinations_EqualNumbers() {
 		createStringAndStringCombo_FamilyAndGiven();
 
 		createPatient(
@@ -480,7 +739,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	 * a pretty contrived use case.
 	 */
 	@Test
-	public void testMultipleAndCombinations_NonEqualNumbers() {
+	void testMultipleAndCombinations_NonEqualNumbers() {
 		createStringAndStringCombo_FamilyAndGiven();
 
 		createPatient(
@@ -512,7 +771,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	 * in a combo param.
 	 */
 	@Test
-	public void testIndexAndSearchDocument() {
+	void testIndexAndSearchDocument() {
 		createCompositionSubjectAndTypeComboSp();
 
 		createPatient(withId("PAT-0"), withActiveTrue());
@@ -564,7 +823,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	 * in a combo param, and <code>composition.date</code> added to the search URL as well
 	 */
 	@Test
-	public void testIndexAndSearchDocument_ComboPlusExtraSp() {
+	void testIndexAndSearchDocument_ComboPlusExtraSp() {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("Bundle-composition-date");
 		sp.setUrl("http://example.org/SearchParameter/Bundle-composition-date");
@@ -659,7 +918,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 
 	@Test
-	public void testOrQuery() {
+	void testOrQuery() {
 		createTokenAndReferenceCombo_FamilyAndOrganization();
 
 		createPatient(withId("PAT"), withActiveTrue());
@@ -692,36 +951,36 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myOrganizationDao.update(org, mySrd);
 	}
 
-	private void createStringAndDateCombo_NameAndBirthdate() {
+	private void createStringAndDateCombo_ObservationValueAndEffective() {
 		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-family");
+		sp.setId("SearchParameter/observation-value-string");
 		sp.setType(Enumerations.SearchParamType.STRING);
-		sp.setCode("family");
-		sp.setExpression("Patient.name.family");
+		sp.setCode("value-string");
+		sp.setExpression("Observation.value.ofType(string)");
 		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
+		sp.addBase("Observation");
 		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-birthdate");
+		sp.setId("SearchParameter/observation-date");
 		sp.setType(Enumerations.SearchParamType.DATE);
-		sp.setCode("birthdate");
-		sp.setExpression("Patient.birthDate");
+		sp.setCode("date");
+		sp.setExpression("Observation.effective");
 		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
+		sp.addBase("Observation");
 		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-names-and-birthdate");
+		sp.setId("SearchParameter/observation-value-string-and-date");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
+		sp.addBase("Observation");
 		sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-family");
+			.setExpression("Observation")
+			.setDefinition("SearchParameter/observation-value-string");
 		sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-birthdate");
+			.setExpression("Observation")
+			.setDefinition("SearchParameter/observation-date");
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(false));
@@ -926,10 +1185,10 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	 * A few tests where the combo index should not be used
 	 */
 	@Nested
-	public class ShouldNotUseComboIndexTest {
+	class ShouldNotUseComboIndexTest {
 
 		@BeforeEach
-		public void before() {
+		void before() {
 			SearchParameter sp = new SearchParameter();
 			sp.setId("SearchParameter/Observation-date");
 			sp.setType(Enumerations.SearchParamType.DATE);
@@ -970,7 +1229,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		}
 
 		@Test
-		public void testTooManyPermutations() {
+		void testTooManyPermutations() {
 			// Test
 			StringOrListParam noteTextParam = new StringOrListParam();
 			DateOrListParam dateParam = new DateOrListParam();
@@ -1002,13 +1261,13 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		 */
 		@ParameterizedTest
 		@CsvSource(value = {
-			"2021-01-02T12:00:01.000Z , false",
-			"2021-01-02T12:00:01Z     , false",
+			"2021-01-02T12:00:01.000Z , true",
+			"2021-01-02T12:00:01Z     , true",
 			"2021-01-02               , true", // <-- DAY precision
 			"2021-01                  , false",
 			"2021                     , false",
 		})
-		public void testPartialDateTime(String theDateValue, boolean theShouldUseComboIndex) {
+		void testPartialDateTime(String theDateValue, boolean theShouldUseComboIndex) {
 			IIdType id1 = createObservation(theDateValue);
 
 			logAllNonUniqueIndexes();
@@ -1035,13 +1294,13 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 				assertComboIndexUsed();
 			} else {
 				assertComboIndexNotUsed();
-				assertThat(myMessages.toString()).contains("INFO Search with params [date, note-text] is not a candidate for combo searching - Date search with non-DAY precision for parameter 'date'");
+				assertThat(myMessages.toString()).contains("INFO Search with params [date, note-text] is not a candidate for combo searching - Date search with less than DAY precision for parameter 'date'");
 			}
 		}
 
 		@ParameterizedTest
 		@ValueSource(booleans = {true, false})
-		public void testDateModifier(boolean theUseComparator) {
+		void testDateModifier(boolean theUseComparator) {
 			IIdType id1 = createObservation("2021-01-02");
 			createObservation("2023-01-02");
 
@@ -1073,7 +1332,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		@ValueSource(strings = {
 			"2025-01-01",
 			"eq2025-01-01"})
-		public void testSearchWithDateQueryString_whenModifierEqualIsPresent_willUseComboSearchIndexes(String theDateQueryParameter){
+		void testSearchWithDateQueryString_whenModifierEqualIsPresent_willUseComboSearchIndexes(String theDateQueryParameter){
 			// given
 			IIdType id1 = createObservation("2025-01-01");
 
@@ -1098,7 +1357,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 		@ParameterizedTest
 		@ValueSource(booleans = {true, false})
-		public void testStringModifier(boolean theUseExact) {
+		void testStringModifier(boolean theUseExact) {
 			IIdType id1 = createObservation("2021-01-02");
 			createObservation("2023-01-02");
 
@@ -1123,7 +1382,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 		@ParameterizedTest
 		@ValueSource(booleans = {true, false})
-		public void testMissing(boolean theUseMissing) {
+		void testMissing(boolean theUseMissing) {
 			myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
 
 			IIdType id1 = createObservation("2021-01-02");

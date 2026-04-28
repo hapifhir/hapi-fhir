@@ -68,7 +68,16 @@ public class HapiNullScheduler implements IHapiScheduler {
 
 	@Override
 	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-		ourLog.debug("Skipping scheduling job {} since scheduling is disabled", theJobDefinition.getId());
+		scheduleJob(theJobDefinition.getId());
+	}
+
+	@Override
+	public void scheduleCronJob(String theCronExpression, ScheduledJobDefinition theJobDefinition) {
+		scheduleJob(theJobDefinition.getId());
+	}
+
+	private void scheduleJob(String theJobId) {
+		ourLog.debug("Skipping scheduling job {} since scheduling is disabled", theJobId);
 	}
 
 	@Override

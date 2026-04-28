@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -112,10 +113,10 @@ public interface ISearchParamExtractor {
 			IBaseResource theResource, ISearchParamFilter theSearchParamFilter);
 
 	SearchParamSet<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(
-			String theResourceType, ResourceIndexedSearchParams theParams);
+			RequestDetails theRequestDetails, String theResourceType, ResourceIndexedSearchParams theParams);
 
 	SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(
-			String theResourceType, ResourceIndexedSearchParams theParams);
+			RequestDetails theRequestDetails, String theResourceType, ResourceIndexedSearchParams theParams);
 
 	default SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
 		return extractSearchParamUri(theResource, ALL_PARAMS);

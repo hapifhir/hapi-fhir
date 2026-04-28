@@ -147,10 +147,29 @@ public interface ITestDataBuilder {
 	}
 
 	/**
+	 * Set Observation.effectiveInstant
+	 */
+	default ICreationArgument withEffectiveInstant(@Nullable String theInstant) {
+		return withInstantAt("effectiveInstant", theInstant);
+	}
+
+	/**
+	 * Set Observation.effectivePeriod
+	 */
+	default ICreationArgument withEffectivePeriod(@Nullable String theStart, @Nullable String theEnd) {
+		return withPeriodAt("effectivePeriod", theStart, theEnd);
+	}
+
+
+	/**
 	 * Set Observation.effectiveDate
 	 */
 	default ICreationArgument withDateTimeAt(String thePath, String theDate) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "dateTime", theDate);
+	}
+
+	default ICreationArgument withInstantAt(String thePath, String theDate) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "instant", theDate);
 	}
 
 	/**
@@ -302,6 +321,10 @@ public interface ITestDataBuilder {
 		return createResource("Organization", theModifiers);
 	}
 
+	default IBaseResource buildOrganization(ICreationArgument... theModifiers) {
+		return buildResource("Organization", theModifiers);
+	}
+
 	default IIdType createPractitioner(ICreationArgument... theModifiers) {
 		return createResource("Practitioner", theModifiers);
 	}
@@ -415,7 +438,9 @@ public interface ITestDataBuilder {
 	default Consumer<IBase> withPrimitiveAttribute(String thePath, Object theValue) {
 		return t -> {
 			FhirTerser terser = getFhirContext().newTerser();
-			terser.addElement(t, thePath, "" + theValue);
+			if (theValue != null) {
+				terser.addElement(t, thePath, "" + theValue);
+			}
 		};
 	}
 
@@ -493,6 +518,13 @@ public interface ITestDataBuilder {
 		);
 	}
 
+	default <T extends IBase> ICreationArgument withPeriodAt(String thePath, @Nullable String theStart, @Nullable String theEnd) {
+		return withElementAt(thePath,
+			withPrimitiveAttribute("start", theStart),
+			withPrimitiveAttribute("end", theEnd)
+		);
+	}
+
 	default ICreationArgument withObservationComponent(ICreationArgument... theModifiers) {
 		return withElementAt("component", theModifiers);
 	}
@@ -504,13 +536,13 @@ public interface ITestDataBuilder {
 	/**
 	 * Sets the <code>managingOrganization</code> element on a Patient
 	 */
-	default ICreationArgument withOrganization(@Nullable String theHasMember) {
-		IIdType id = theHasMember != null ? getFhirContext().getVersion().newIdType(theHasMember) : null;
+	default ICreationArgument withOrganization(@Nullable String theOrganizationId) {
+		IIdType id = theOrganizationId != null ? getFhirContext().getVersion().newIdType(theOrganizationId) : null;
 		return withReference("managingOrganization", id);
 	}
 
-	default ICreationArgument withOrganization(@Nullable IIdType theHasMember) {
-		return withReference("managingOrganization", theHasMember);
+	default ICreationArgument withOrganization(@Nullable IIdType theOrganizationId) {
+		return withReference("managingOrganization", theOrganizationId);
 	}
 
 	/**

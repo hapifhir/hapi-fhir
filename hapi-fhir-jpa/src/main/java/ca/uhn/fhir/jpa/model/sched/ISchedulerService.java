@@ -48,7 +48,8 @@ public interface ISchedulerService {
 	void unpause();
 
 	/**
-	 * This task will execute locally (and should execute on all nodes of the cluster if there is a cluster)
+	 * This task will execute locally (and should execute on all nodes of the cluster if there is a cluster).
+	 * This job will fire immediately and repeat at theIntervalMillis forever.
 	 * @param theIntervalMillis How many milliseconds between passes should this job run
 	 * @param theJobDefinition  The Job to fire
 	 */
@@ -56,6 +57,7 @@ public interface ISchedulerService {
 
 	/**
 	 * Only one instance of this task will fire across the whole cluster (when running in a clustered environment).
+	 * This job will fire immediately and repeat at theIntervalMillis forever.
 	 * @param theIntervalMillis How many milliseconds between passes should this job run
 	 * @param theJobDefinition  The Job to fire
 	 */
@@ -72,6 +74,22 @@ public interface ISchedulerService {
 	 * @param theKeys - the keys of the jobs to be unscheduled
 	 */
 	void unscheduleClusteredJobs(TriggerKey... theKeys);
+
+	/**
+	 * This task will execute locally (and on all nodes of the cluster, if there is a cluster).
+	 * This job will *not* fire immediately, but only whenever the cron expression matches.
+	 * @param theCronExpression The Quartz cron expression (see <a href="https://www.quartz-scheduler.net/documentation/quartz-2.x/tutorial/crontriggers.html">Quartz documentation</a>) to use for scheduling
+	 * @param theJobDefinition The job to fire
+	 */
+	void scheduleLocalJob(String theCronExpression, ScheduledJobDefinition theJobDefinition);
+
+	/**
+	 * This task will fire across the whole cluster (in a clustered environment).
+	 * This job will *not* fire immediately, but only whenever the cron expression matches.
+	 * @param theCronExpression The Quartz cron expression (see <a href="https://www.quartz-scheduler.net/documentation/quartz-2.x/tutorial/crontriggers.html">Quartz documentation</a>) to use for scheduling.
+	 * @param theJobDefinition The job to fire
+	 */
+	void scheduleClusteredJob(String theCronExpression, ScheduledJobDefinition theJobDefinition);
 
 	@VisibleForTesting
 	Set<JobKey> getLocalJobKeysForUnitTest() throws SchedulerException;
