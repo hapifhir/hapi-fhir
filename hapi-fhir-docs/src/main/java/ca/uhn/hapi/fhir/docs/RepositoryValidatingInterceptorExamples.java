@@ -175,7 +175,6 @@ public class RepositoryValidatingInterceptorExamples {
 		ruleBuilder
 				.forResourcesOfType("Patient")
 				.impliedProfileAlways("http://www.hl7.org/fhir/us/core/StructureDefinition-us-core-patient.html");
-		// Ignores profiles declared in resource
 		// END SNIPPET: impliedProfileAlways
 	}
 }
