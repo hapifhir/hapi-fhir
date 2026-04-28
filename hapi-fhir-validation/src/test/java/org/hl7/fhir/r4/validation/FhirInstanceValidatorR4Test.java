@@ -31,7 +31,6 @@ import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -42,6 +41,7 @@ import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Media;
@@ -442,6 +442,13 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		}
 
 		return retVal;
+	}
+
+	private List<String> filterCodeSystemVsValueSetMessages(List<SingleValidationMessage> theMessages) {
+		return theMessages.stream()
+			.map(SingleValidationMessage::getMessage)
+			.filter(msg -> msg.contains("CodeSystem") && msg.contains("ValueSet"))
+			.collect(Collectors.toList());
 	}
 
 	@Test
@@ -1767,7 +1774,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	 * (http://terminology.hl7.org/CodeSystem/processpriority) instead of the ValueSet URL
 	 * (http://hl7.org/fhir/ValueSet/process-priority) in the binding for ExplanationOfBenefit.priority.
 	 *
-	 * See GL-7637 / https://github.com/hapifhir/hapi-fhir/issues/XXXX
+	 * See GL-7637
 	 */
 	@Test
 	void testExplanationOfBenefitPriorityValidationDoesNotReportCodeSystemError() {
@@ -1779,12 +1786,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			.setCode("normal");
 
 		ValidationResult output = myFhirValidator.validateWithResult(eob);
-		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
-
-		List<String> codeSystemErrors = messages.stream()
-			.map(SingleValidationMessage::getMessage)
-			.filter(msg -> msg.contains("CodeSystem") && msg.contains("ValueSet"))
-			.collect(Collectors.toList());
+		List<String> codeSystemErrors = filterCodeSystemVsValueSetMessages(logResultsAndReturnAll(output));
 
 		assertThat(codeSystemErrors)
 			.as("Validation of ExplanationOfBenefit.priority should not produce a 'CodeSystem where ValueSet belongs' error, but got: " + codeSystemErrors)
@@ -1799,15 +1801,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	void testExplanationOfBenefitWithoutPriorityValidatesCleanly() {
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
-		// priority intentionally not set
 
 		ValidationResult output = myFhirValidator.validateWithResult(eob);
-		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
-
-		List<String> codeSystemErrors = messages.stream()
-			.map(SingleValidationMessage::getMessage)
-			.filter(msg -> msg.contains("CodeSystem") && msg.contains("ValueSet"))
-			.collect(Collectors.toList());
+		List<String> codeSystemErrors = filterCodeSystemVsValueSetMessages(logResultsAndReturnAll(output));
 
 		assertThat(codeSystemErrors)
 			.as("Validation of ExplanationOfBenefit without priority should not produce a 'CodeSystem where ValueSet belongs' error, but got: " + codeSystemErrors)
