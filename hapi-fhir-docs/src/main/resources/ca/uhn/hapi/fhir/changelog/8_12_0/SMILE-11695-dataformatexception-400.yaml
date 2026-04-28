@@ -1,9 +1,5 @@
 ---
 type: fix
 jira: SMILE-11695
-title: "Previously, when 'Suppress Error Details' was enabled on the FHIR endpoint, a request with
-  invalid client input (e.g. a malformed date such as `?date=2026-01-32`) would be reported as HTTP 500
-  Internal Server Error instead of the expected HTTP 400 Bad Request. The cause was that
-  DataFormatException did not extend BaseServerResponseException, so status-aware exception
-  interceptors had no status code to read and fell back to 500. DataFormatException now extends
-  InvalidRequestException, preserving the 400 status code through the suppression interceptor chain."
+title: "DataFormatException now inherits from InvalidRequestException, allowing code that catches
+  BaseServerResponseException to catch it and handle it however they like."
