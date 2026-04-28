@@ -22,6 +22,7 @@ package ca.uhn.fhir.mdm.api.params;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import jakarta.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,11 +88,12 @@ public class GenerateMdmMetricsParameters {
 		getLinkSourceFilters().add(theLinkSource);
 	}
 
+	@Nullable
 	public RequestPartitionId getRequestPartitionId() {
 		return myRequestPartitionId;
 	}
 
-	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+	public void setRequestPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
