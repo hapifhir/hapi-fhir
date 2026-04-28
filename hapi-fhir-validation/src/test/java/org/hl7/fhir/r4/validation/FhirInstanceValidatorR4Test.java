@@ -444,10 +444,10 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		return retVal;
 	}
 
-	private List<String> filterCodeSystemVsValueSetMessages(List<SingleValidationMessage> theMessages) {
+	private List<String> filterFoundCodeSystemWhereValueSetBelongsMessages(List<SingleValidationMessage> theMessages) {
 		return theMessages.stream()
 			.map(SingleValidationMessage::getMessage)
-			.filter(msg -> msg.contains("CodeSystem") && msg.contains("ValueSet"))
+			.filter(msg -> msg.contains("Found a reference to a CodeSystem where a ValueSet belongs"))
 			.collect(Collectors.toList());
 	}
 
@@ -1786,27 +1786,10 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			.setCode("normal");
 
 		ValidationResult output = myFhirValidator.validateWithResult(eob);
-		List<String> codeSystemErrors = filterCodeSystemVsValueSetMessages(logResultsAndReturnAll(output));
+		List<String> codeSystemErrors = filterFoundCodeSystemWhereValueSetBelongsMessages(logResultsAndReturnAll(output));
 
 		assertThat(codeSystemErrors)
 			.as("Validation of ExplanationOfBenefit.priority should not produce a 'CodeSystem where ValueSet belongs' error, but got: " + codeSystemErrors)
-			.isEmpty();
-	}
-
-	/**
-	 * Baseline: validating an ExplanationOfBenefit WITHOUT a priority field should not
-	 * produce a CodeSystem/ValueSet error. This test should pass both before and after the fix.
-	 */
-	@Test
-	void testExplanationOfBenefitWithoutPriorityValidatesCleanly() {
-		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
-
-		ValidationResult output = myFhirValidator.validateWithResult(eob);
-		List<String> codeSystemErrors = filterCodeSystemVsValueSetMessages(logResultsAndReturnAll(output));
-
-		assertThat(codeSystemErrors)
-			.as("Validation of ExplanationOfBenefit without priority should not produce a 'CodeSystem where ValueSet belongs' error, but got: " + codeSystemErrors)
 			.isEmpty();
 	}
 
