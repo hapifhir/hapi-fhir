@@ -87,8 +87,9 @@ public class DeleteExpungeSqlBuilder {
 	}
 
 	public void validateOkToDeleteAndExpunge(Set<JpaPid> thePids, boolean theCascade, Integer theCascadeMaxRounds) {
-		if (!myStorageSettings.isEnforceReferentialIntegrityOnDelete()) {
-			ourLog.info("Referential integrity on delete disabled.  Skipping referential integrity check.");
+		if (!myStorageSettings.isEnforceReferentialIntegrityOnDelete() && !theCascade) {
+			ourLog.info(
+					"Referential integrity on delete disabled and cascade not requested.  Skipping referential integrity check.");
 			return;
 		}
 
