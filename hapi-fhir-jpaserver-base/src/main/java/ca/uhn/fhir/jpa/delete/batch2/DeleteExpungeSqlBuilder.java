@@ -89,7 +89,7 @@ public class DeleteExpungeSqlBuilder {
 	public void validateOkToDeleteAndExpunge(Set<JpaPid> thePids, boolean theCascade, Integer theCascadeMaxRounds) {
 		if (!myStorageSettings.isEnforceReferentialIntegrityOnDelete() && !theCascade) {
 			ourLog.info(
-					"Referential integrity on delete disabled and cascade not requested.  Skipping referential integrity check.");
+					"Referential integrity on delete disabled and cascade not requested. Skipping referential integrity check.");
 			return;
 		}
 
@@ -139,6 +139,10 @@ public class DeleteExpungeSqlBuilder {
 			if (conflictResourceLinks.stream().anyMatch(link -> pathsToIgnore.contains(link.getSourcePath()))) {
 				return;
 			}
+		}
+
+		if (!myStorageSettings.isEnforceReferentialIntegrityOnDelete()) {
+			return;
 		}
 
 		ResourceLink firstConflict = conflictResourceLinks.get(0);

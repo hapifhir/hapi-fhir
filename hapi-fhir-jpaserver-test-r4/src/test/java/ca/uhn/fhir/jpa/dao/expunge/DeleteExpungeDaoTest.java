@@ -84,7 +84,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCascade_WithReferentialIntegrityDisabled_Success() {
+	void testCascade_WithReferentialIntegrityDisabled_Success() {
 		// Setup
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
 
