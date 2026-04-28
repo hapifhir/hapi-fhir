@@ -150,6 +150,18 @@ An interceptor called `CascadingDeleteInterceptor` may be registered against the
 * The request may include the following parameter: `_cascade=delete`
 * The request may include the following header: `X-Cascade: delete`
 
+## Combining Cascade Delete with Expunge
+
+Cascade delete can be combined with the `_expunge=true` parameter to both delete and immediately expunge the target resource and all resources that reference it:
+
+```http
+DELETE /Patient/pat1?_expunge=true&_cascade=delete
+```
+
+This submits an asynchronous batch job that collects all resources referencing the target (transitively, up to the configured maximum cascade rounds) and expunges them from the database.
+
+**Note:** Cascade delete with expunge works correctly regardless of the `enforce_referential_integrity_on_delete` setting. When referential integrity on delete is disabled, the cascade collection still runs as normal — all referencing resources are included in the expunge batch — but no conflict validation error is thrown.
+
 <a id="retry-on-version-conflict"></a>
 
 # Version Conflicts
