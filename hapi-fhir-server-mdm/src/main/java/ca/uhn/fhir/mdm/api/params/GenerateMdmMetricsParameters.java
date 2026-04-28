@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.mdm.api.params;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 
@@ -45,6 +46,16 @@ public class GenerateMdmMetricsParameters {
 	 * If none are specified, all are included.
 	 */
 	private List<MdmLinkSourceEnum> myLinkSourceFilters;
+
+	/**
+	 * The partition context to use when generating metrics. When {@code null}, the
+	 * metric service will use a default {@link ca.uhn.fhir.rest.api.server.SystemRequestDetails}
+	 * which scopes DAO queries to the default partition only. Callers that need to
+	 * aggregate metrics across partitions should set this to
+	 * {@link RequestPartitionId#allPartitions()} (or to a specific list of partition
+	 * ids) so the underlying DAO searches see the desired partitions.
+	 */
+	private RequestPartitionId myRequestPartitionId;
 
 	public GenerateMdmMetricsParameters(String theResourceType) {
 		myResourceType = theResourceType;
@@ -74,6 +85,14 @@ public class GenerateMdmMetricsParameters {
 
 	public void addLinkSource(MdmLinkSourceEnum theLinkSource) {
 		getLinkSourceFilters().add(theLinkSource);
+	}
+
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
+	}
+
+	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+		myRequestPartitionId = theRequestPartitionId;
 	}
 
 	//	public GenerateMdmLinkMetricParameters toLinkMetricParams() {
