@@ -202,11 +202,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			resource.addColumn("20260407.60", "LAST_HEARTBEAT").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 		}
 
-		// seed resource table
+		// seed resource table to avoid seeding problems during cluster speedup.
 		String quotedTypesJoinedByCommas = ResourceTypeUtil.generateResourceTypes().stream()
 				.map(type -> "'" + type + "'")
 				.reduce((a, b) -> a + "," + b)
 				.orElseThrow();
+		// fixme add sql for sql server, and Oracle.
 		version.executeRawSql(
 				"20260415.10",
 				Map.of(
@@ -227,12 +228,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				"""));
 		getTaskWithVersion("8_8_0.20260415.10").addFlag(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION);
 
+		// convert the pk to Long so we can use distributed sequences in Limitless/Citus.
 		version.onTable("HFJ_SPIDX_IDENTITY")
 				.modifyColumn("20260415.20", "SP_IDENTITY_ID")
 				.nonNullable()
-				.withType(ColumnTypeEnum.LONG)
-			// fixme mb remove after ddl rebuild
-			.runEvenDuringSchemaInitialization();
+				.withType(ColumnTypeEnum.LONG);
 	}
 
 	protected void init860() {

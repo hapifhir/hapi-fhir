@@ -335,8 +335,7 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 
 		private CacheUtils() {}
 
-		public static Long getSearchParamIdentityFromCache(
-				MemoryCacheService memoryCacheService, Long hashIdentity) {
+		public static Long getSearchParamIdentityFromCache(MemoryCacheService memoryCacheService, Long hashIdentity) {
 			return memoryCacheService.getIfPresent(
 					MemoryCacheService.CacheEnum.HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY, hashIdentity);
 		}
