@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
@@ -66,6 +67,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		registerExceptionType(ResourceVersionConflictException.STATUS_CODE, ResourceVersionConflictException.class);
 		registerExceptionType(UnprocessableEntityException.STATUS_CODE, UnprocessableEntityException.class);
 		registerExceptionType(ForbiddenOperationException.STATUS_CODE, ForbiddenOperationException.class);
+		registerExceptionType(DataFormatException.STATUS_CODE, DataFormatException.class);
 	}
 
 	private List<String> myAdditionalMessages = null;

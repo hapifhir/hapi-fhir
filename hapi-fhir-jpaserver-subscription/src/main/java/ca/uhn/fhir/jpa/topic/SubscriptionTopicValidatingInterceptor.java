@@ -130,7 +130,7 @@ public class SubscriptionTopicValidatingInterceptor {
 				ourLog.warn(
 						"Warning: Query Criteria '{}' in {} cannot be evaluated in-memory", theCriteria, theFieldName);
 			}
-		} catch (InvalidRequestException | DataFormatException e) {
+		} catch (InvalidRequestException e) {
 			throw new UnprocessableEntityException(Msg.code(2339) + "Invalid SubscriptionTopic criteria '" + theCriteria
 					+ "' in " + theFieldName + ": " + e.getMessage());
 		}

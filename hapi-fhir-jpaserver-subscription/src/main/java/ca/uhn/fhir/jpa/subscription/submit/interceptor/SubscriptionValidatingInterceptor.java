@@ -180,7 +180,7 @@ public class SubscriptionValidatingInterceptor {
 									+ "This server is configured to only allow in-memory subscriptions. This subscription's criteria cannot be evaluated in-memory.");
 				}
 				mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, strategy);
-			} catch (InvalidRequestException | DataFormatException e) {
+			} catch (InvalidRequestException e) {
 				throw new UnprocessableEntityException(Msg.code(9) + "Invalid subscription criteria submitted: "
 						+ subscription.getCriteriaString() + " " + e.getMessage());
 			}
