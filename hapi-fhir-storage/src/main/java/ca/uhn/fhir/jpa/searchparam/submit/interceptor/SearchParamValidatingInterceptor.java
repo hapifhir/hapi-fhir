@@ -206,6 +206,7 @@ public class SearchParamValidatingInterceptor {
 	}
 
 	private void validateNonDisableableSpNotRetired(RuntimeSearchParam theNewParam) {
+		// Created by Claude Sonnet 4.6
 		if (theNewParam.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
 			return;
 		}
@@ -223,6 +224,7 @@ public class SearchParamValidatingInterceptor {
 
 	private void validateNonDisableableBasesNotRemoved(
 			@Nullable IBaseResource theOldResource, RuntimeSearchParam theNewParam) {
+		// Created by Claude Sonnet 4.6
 		if (theOldResource == null) {
 			return;
 		}
