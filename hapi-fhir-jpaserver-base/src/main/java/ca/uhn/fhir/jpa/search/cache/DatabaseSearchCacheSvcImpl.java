@@ -101,7 +101,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 	@Override
 	public Search save(Search theSearch, RequestPartitionId theRequestPartitionId) {
-	// fixme work back through callers and rationalize tx boundary
+		// fixme work back through callers and rationalize tx boundary
 		return myTransactionService
 				.withSystemRequestOnPartition(theRequestPartitionId)
 				.withPropagation(Propagation.REQUIRES_NEW)
