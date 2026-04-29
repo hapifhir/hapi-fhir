@@ -1767,8 +1767,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	 * (http://terminology.hl7.org/CodeSystem/processpriority) instead of the ValueSet URL
 	 * (http://hl7.org/fhir/ValueSet/process-priority) in the binding for ExplanationOfBenefit.priority.
 	 *
-	 * See <a href="https://github.com/hapifhir/hapi-fhir/issues/7830">HAPI-FHIR issue</a> or
-	 * <a href="https://jira.hl7.org/browse/FHIR-27949">FHIR spec issue</a> for more information.
+	 * See <a href="https://github.com/hapifhir/hapi-fhir/issues/7830">the HAPI-FHIR issue</a> or
+	 * <a href="https://jira.hl7.org/browse/FHIR-27949">the FHIR spec issue</a> for more information.
 	 */
 	@Test
 	void testExplanationOfBenefitPriorityValidationDoesNotReportCodeSystemError() {
