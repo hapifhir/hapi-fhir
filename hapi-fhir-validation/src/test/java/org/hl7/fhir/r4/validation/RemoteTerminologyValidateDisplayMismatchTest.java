@@ -437,6 +437,29 @@ public class RemoteTerminologyValidateDisplayMismatchTest {
 				.isEqualTo(IValidationSupport.IssueSeverity.FATAL);
 	}
 
+	// =============== Malformed issue (missing severity / code) ===============
+
+	@Test
+	void malformedIssue_missingSeverityAndCode_doesNotNpeAndDefaultsSeverityToError() {
+		mySvc.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.WARNING);
+		// FHIR requires severity and code on every issue, but a non-conformant remote could omit them.
+		// We must not NPE; instead default severity to ERROR and leave issue type code null.
+		OperationOutcome.OperationOutcomeIssueComponent malformed =
+				new OperationOutcome.OperationOutcomeIssueComponent();
+		malformed.setDiagnostics(INVALID_CODE_DIAGNOSTICS);
+		malformed.getDetails().setText(INVALID_CODE_DIAGNOSTICS);
+		myCodeSystemProvider.addTerminologyResponse(
+				"$validate-code", CS_URL, CODE, buildOOResponse(malformed));
+
+		IValidationSupport.CodeValidationResult outcome = invokeValidate();
+
+		assertThat(outcome.getIssues()).hasSize(1);
+		assertThat(outcome.getIssues().get(0).getSeverity())
+				.as("missing severity → defaults to ERROR")
+				.isEqualTo(IValidationSupport.IssueSeverity.ERROR);
+		assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.ERROR);
+	}
+
 	// =============== helpers ===============
 
 	private IValidationSupport.CodeValidationResult invokeValidate() {

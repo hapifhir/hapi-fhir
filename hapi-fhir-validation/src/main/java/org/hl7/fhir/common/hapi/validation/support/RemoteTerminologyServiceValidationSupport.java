@@ -883,13 +883,20 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		List<CodingPair> codings = details.getCoding().stream()
 				.map(c -> new CodingPair(c.getSystem(), c.getCode()))
 				.collect(Collectors.toList());
+		List<? extends IBaseExtension<?, ?>> diagnosticsExtensions = theIssue.hasDiagnosticsElement()
+				? theIssue.getDiagnosticsElement().getExtension()
+				: null;
+		// FHIR requires severity and code, but servers can misbehave
+		String severityCode = theIssue.getSeverity() != null ? theIssue.getSeverity().toCode() : null;
+		IssueSeverity severity = severityCode != null ? IssueSeverity.fromCode(severityCode) : IssueSeverity.ERROR;
+		String issueTypeCode = theIssue.getCode() != null ? theIssue.getCode().toCode() : null;
 		return new IssueData(
 				theIssue.getDiagnostics(),
-				IssueSeverity.fromCode(theIssue.getSeverity().toCode()),
-				theIssue.getCode().toCode(),
+				severity,
+				issueTypeCode,
 				details.getText(),
 				codings,
-				isDisplayMismatchIssueR4(theIssue));
+				isDisplayMismatchIssue(theIssue.getExtension(), diagnosticsExtensions));
 	}
 
 	private static IssueData extractIssueDataDstu3(OperationOutcomeIssueComponent theIssue) {
@@ -897,13 +904,20 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		List<CodingPair> codings = details.getCoding().stream()
 				.map(c -> new CodingPair(c.getSystem(), c.getCode()))
 				.collect(Collectors.toList());
+		List<? extends IBaseExtension<?, ?>> diagnosticsExtensions = theIssue.hasDiagnosticsElement()
+				? theIssue.getDiagnosticsElement().getExtension()
+				: null;
+		// FHIR requires severity and code, but servers can misbehave
+		String severityCode = theIssue.getSeverity() != null ? theIssue.getSeverity().toCode() : null;
+		IssueSeverity severity = severityCode != null ? IssueSeverity.fromCode(severityCode) : IssueSeverity.ERROR;
+		String issueTypeCode = theIssue.getCode() != null ? theIssue.getCode().toCode() : null;
 		return new IssueData(
 				theIssue.getDiagnostics(),
-				IssueSeverity.fromCode(theIssue.getSeverity().toCode()),
-				theIssue.getCode().toCode(),
+				severity,
+				issueTypeCode,
 				details.getText(),
 				codings,
-				isDisplayMismatchIssueDstu3(theIssue));
+				isDisplayMismatchIssue(theIssue.getExtension(), diagnosticsExtensions));
 	}
 
 	private static Collection<CodeValidationIssue> buildCodeValidationIssues(
@@ -947,31 +961,19 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			"http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id";
 
 	/**
-	 * R4 per-issue detector for display-mismatch signals. Returns true if the issue itself, or its
-	 * {@code diagnostics} primitive element, carries an extension whose URL is either
-	 * {@link #DISPLAY_MISMATCH_EXTENSION_URL}, or {@link #MESSAGE_ID_EXTENSION_URL} with a primitive
-	 * value containing "display" (case-insensitive).
+	 * Per-issue detector for display-mismatch signals. Returns true if either of the supplied
+	 * extension lists carries an extension whose URL is {@link #DISPLAY_MISMATCH_EXTENSION_URL},
+	 * or {@link #MESSAGE_ID_EXTENSION_URL} with a primitive value containing "display"
+	 * (case-insensitive).
 	 * <p>
-	 * Callers must additionally check the response-level gate before treating a positive result as
-	 * a display mismatch.
+	 * Pass the issue's own extensions and the {@code diagnostics} primitive element's extensions —
+	 * both are valid carriers per the FHIR spec. Callers must additionally check the response-level
+	 * gate before treating a positive result as a display mismatch.
 	 */
-	private static boolean isDisplayMismatchIssueR4(OperationOutcome.OperationOutcomeIssueComponent theIssue) {
-		if (hasDisplayMismatchSignal(theIssue.getExtension())) {
-			return true;
-		}
-		return theIssue.hasDiagnosticsElement()
-				&& hasDisplayMismatchSignal(theIssue.getDiagnosticsElement().getExtension());
-	}
-
-	/**
-	 * DSTU3 sibling of {@link #isDisplayMismatchIssueR4}. Same contract; see that method for details.
-	 */
-	private static boolean isDisplayMismatchIssueDstu3(OperationOutcomeIssueComponent theIssue) {
-		if (hasDisplayMismatchSignal(theIssue.getExtension())) {
-			return true;
-		}
-		return theIssue.hasDiagnosticsElement()
-				&& hasDisplayMismatchSignal(theIssue.getDiagnosticsElement().getExtension());
+	private static boolean isDisplayMismatchIssue(
+			List<? extends IBaseExtension<?, ?>> theIssueExtensions,
+			List<? extends IBaseExtension<?, ?>> theDiagnosticsExtensions) {
+		return hasDisplayMismatchSignal(theIssueExtensions) || hasDisplayMismatchSignal(theDiagnosticsExtensions);
 	}
 
 	private static boolean containsDisplayWord(String theText) {
