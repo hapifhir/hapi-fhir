@@ -22,6 +22,7 @@ import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -29,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -844,14 +846,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					String diagnostics = issueComponent.getDiagnostics();
 					IssueSeverity serverSeverity =
 							IssueSeverity.fromCode(issueComponent.getSeverity().toCode());
-					// Per-issue display-mismatch check: signal (b) diagnostics text contains "display",
-					// or signal (a) DISPLAY_MISMATCH_EXTENSION_URL extension on the issue or its
-					// diagnostics primitive element.
 					boolean isDisplayIssue = theIsDisplayMismatch
-							&& (containsDisplayWord(issueComponent.getDiagnostics())
-									|| hasDisplayMismatchExtension(issueComponent.getExtension())
+							&& (hasDisplayMismatchSignal(issueComponent.getExtension())
 									|| (issueComponent.hasDiagnosticsElement()
-											&& hasDisplayMismatchExtension(issueComponent
+											&& hasDisplayMismatchSignal(issueComponent
 													.getDiagnosticsElement()
 													.getExtension())));
 					if (isDisplayIssue) {
@@ -880,14 +878,16 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	/**
 	 * Display-mismatch-aware variant of {@link #createCodeValidationIssues(IBaseOperationOutcome, FhirVersionEnum)}.
-	 * When {@code theIsDisplayMismatch} is true, an issue qualifies for severity override if either
+	 * When {@code theIsDisplayMismatch} is true (response-level gate fired), an issue qualifies for severity
+	 * override if the issue itself, or its {@code diagnostics} primitive element, carries an extension whose URL is
+	 * either
 	 * <ul>
-	 *   <li>(a) the issue itself, or its {@code diagnostics} primitive element, carries an extension whose URL is
-	 *       exactly {@link #DISPLAY_MISMATCH_EXTENSION_URL}; or</li>
-	 *   <li>(b) the issue's {@code diagnostics} text contains the substring "display" (case-insensitive).</li>
+	 *   <li>exactly {@link #DISPLAY_MISMATCH_EXTENSION_URL}; or</li>
+	 *   <li>{@link #MESSAGE_ID_EXTENSION_URL} with a primitive value containing the substring "display"
+	 *       (case-insensitive).</li>
 	 * </ul>
 	 * Qualifying issues get their severity replaced with {@code theDisplaySeverity}, and
-	 * {@code theDisplayMatchSeen} is flipped to true. Issues without either signal keep their server-reported
+	 * {@code theDisplayMatchSeen} is flipped to true. Issues without any qualifying signal keep their server-reported
 	 * severity. Supported for R4 and DSTU3.
 	 */
 	public static Optional<Collection<CodeValidationIssue>> createCodeValidationIssues(
@@ -946,33 +946,54 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			"http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-displayMismatched";
 
 	/**
-	 * R4 per-issue display-mismatch detector. Returns true if either:
-	 * (b) the issue's diagnostics text contains the substring "display" (case-insensitive); or
-	 * (a) the issue itself, or its diagnostics primitive element, carries the
-	 *     {@link #DISPLAY_MISMATCH_EXTENSION_URL} extension.
+	 * Standard FHIR extension URL that carries the i18n message identifier for an OperationOutcome
+	 * issue. When the message-id value contains the substring "display" (case-insensitive — e.g. an
+	 * i18n key like {@code Display_Name_for__should_be_one_of__instead_of}) it is treated as a
+	 * display-mismatch signal (provided the response-level gate has fired).
+	 */
+	public static final String MESSAGE_ID_EXTENSION_URL =
+			"http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id";
+
+	/**
+	 * R4 per-issue detector for display-mismatch signals. Returns true if the issue itself, or its
+	 * {@code diagnostics} primitive element, carries an extension whose URL is either
+	 * {@link #DISPLAY_MISMATCH_EXTENSION_URL}, or {@link #MESSAGE_ID_EXTENSION_URL} with a primitive
+	 * value containing "display" (case-insensitive).
+	 * <p>
+	 * Callers must additionally check the response-level gate before treating a positive result as
+	 * a display mismatch.
 	 */
 	private static boolean isDisplayMismatchIssueR4(OperationOutcome.OperationOutcomeIssueComponent theIssue) {
-		if (containsDisplayWord(theIssue.getDiagnostics())) {
-			return true;
-		}
-		if (hasDisplayMismatchExtension(theIssue.getExtension())) {
+		if (hasDisplayMismatchSignal(theIssue.getExtension())) {
 			return true;
 		}
 		return theIssue.hasDiagnosticsElement()
-				&& hasDisplayMismatchExtension(theIssue.getDiagnosticsElement().getExtension());
+				&& hasDisplayMismatchSignal(theIssue.getDiagnosticsElement().getExtension());
 	}
 
 	private static boolean containsDisplayWord(String theText) {
-		return theText != null && StringUtils.containsIgnoreCase(theText, "display");
+		return theText != null && Strings.CI.contains(theText, "display");
 	}
 
-	private static boolean hasDisplayMismatchExtension(List<? extends IBaseExtension<?, ?>> theExtensions) {
+	/**
+	 * Returns true if any of the supplied extensions matches the per-issue display-mismatch contract:
+	 * URL equals {@link #DISPLAY_MISMATCH_EXTENSION_URL}, or URL equals {@link #MESSAGE_ID_EXTENSION_URL}
+	 * with a primitive value whose string form contains "display" (case-insensitive).
+	 */
+	private static boolean hasDisplayMismatchSignal(List<? extends IBaseExtension<?, ?>> theExtensions) {
 		if (theExtensions == null || theExtensions.isEmpty()) {
 			return false;
 		}
 		for (IBaseExtension<?, ?> ext : theExtensions) {
 			if (DISPLAY_MISMATCH_EXTENSION_URL.equals(ext.getUrl())) {
 				return true;
+			}
+			if (MESSAGE_ID_EXTENSION_URL.equals(ext.getUrl())) {
+				Object value = ext.getValue();
+				if (value instanceof IPrimitiveType
+						&& containsDisplayWord(((IPrimitiveType<?>) value).getValueAsString())) {
+					return true;
+				}
 			}
 		}
 		return false;

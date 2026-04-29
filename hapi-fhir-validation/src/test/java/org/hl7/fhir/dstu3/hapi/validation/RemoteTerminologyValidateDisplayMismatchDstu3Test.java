@@ -54,20 +54,40 @@ public class RemoteTerminologyValidateDisplayMismatchDstu3Test {
 	}
 
 	@Test
-	void displaysDiffer_diagnosticsContainsDisplay_severityIsConfigured() {
+	void displaysDiffer_messageIdExtensionWithDisplayKey_severityIsConfigured() {
 		mySvc.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.WARNING);
-		myCodeSystemProvider.addTerminologyResponse(
-				"$validate-code",
-				CS_URL,
-				CODE,
-				buildOOResponse(issue(DISPLAY_MISMATCH_DIAGNOSTICS, /*addExtension*/ false)));
+		OperationOutcome.OperationOutcomeIssueComponent issueComponent = issue(NEUTRAL_DIAGNOSTICS, /*addExtension*/ false);
+		issueComponent
+				.addExtension()
+				.setUrl(RemoteTerminologyServiceValidationSupport.MESSAGE_ID_EXTENSION_URL)
+				.setValue(new StringType("Display_Name_for__should_be_one_of__instead_of"));
+		myCodeSystemProvider.addTerminologyResponse("$validate-code", CS_URL, CODE, buildOOResponse(issueComponent));
 
 		IValidationSupport.CodeValidationResult outcome = invokeValidate();
 
 		assertThat(outcome.getIssues()).hasSize(1);
 		assertThat(outcome.getIssues().get(0).getSeverity())
-				.as("DSTU3 signal (b): diagnostics contains 'display' → severity overridden")
+				.as("DSTU3 signal (b): message-id extension whose value contains 'display' → severity overridden")
 				.isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+	}
+
+	@Test
+	void displaysDiffer_messageIdExtensionWithoutDisplayKey_noAdjustment() {
+		mySvc.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.WARNING);
+		OperationOutcome.OperationOutcomeIssueComponent issueComponent =
+				issue(INVALID_CODE_DIAGNOSTICS, /*addExtension*/ false);
+		issueComponent
+				.addExtension()
+				.setUrl(RemoteTerminologyServiceValidationSupport.MESSAGE_ID_EXTENSION_URL)
+				.setValue(new StringType("Unknown_Code_in_System"));
+		myCodeSystemProvider.addTerminologyResponse("$validate-code", CS_URL, CODE, buildOOResponse(issueComponent));
+
+		IValidationSupport.CodeValidationResult outcome = invokeValidate();
+
+		assertThat(outcome.getIssues()).hasSize(1);
+		assertThat(outcome.getIssues().get(0).getSeverity())
+				.as("DSTU3: message-id value lacking 'display' must not qualify")
+				.isEqualTo(IValidationSupport.IssueSeverity.ERROR);
 	}
 
 	@Test

@@ -23,16 +23,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Verifies that {@code display_mismatch_policy} is applied per-issue to Remote Terminology
  * {@code $validate-code} responses.
  * <p>
- * Contract:
+ * Contract — the response-level gate (<i>gate</i> = request {@code display} ≠ response {@code display})
+ * must fire for any per-issue severity override to apply. When the gate fires, an issue qualifies if the
+ * issue itself, or its {@code diagnostics} primitive element, carries an extension whose URL is either
  * <ul>
- *   <li><b>Gate</b>: request {@code display} ≠ response {@code display}. If they match, no adjustment.</li>
- *   <li><b>Per-issue identification</b>: when the gate fires, an issue qualifies for severity override if either
- *     <ul>
- *       <li>(a) the issue (or its diagnostics primitive element) carries the
- *           {@value RemoteTerminologyServiceValidationSupport#DISPLAY_MISMATCH_EXTENSION_URL} extension; or</li>
- *       <li>(b) its diagnostics text contains the substring "display" (case-insensitive).</li>
- *     </ul>
- *   </li>
+ *   <li>(a) {@value RemoteTerminologyServiceValidationSupport#DISPLAY_MISMATCH_EXTENSION_URL}; or</li>
+ *   <li>(b) {@value RemoteTerminologyServiceValidationSupport#MESSAGE_ID_EXTENSION_URL} with a primitive value
+ *       containing the substring "display" (case-insensitive) — e.g. an i18n key like
+ *       {@code Display_Name_for__should_be_one_of__instead_of}.</li>
+ * </ul>
+ * Additional behaviour:
+ * <ul>
  *   <li><b>No-OO fallback</b>: when the server returns only a free-text {@code message} (no structured
  *       {@code issues} OperationOutcome), the synthesized issue gets the configured severity if (and only if)
  *       displays differ AND the message text contains "display"; otherwise it stays at ERROR.</li>
@@ -70,32 +71,13 @@ public class RemoteTerminologyValidateDisplayMismatchTest {
 				ourCtx, "http://localhost:" + ourServer.getPort());
 	}
 
-	// =============== Signal (b): diagnostics text contains "display" ===============
+	// =============== Signal (a): displayMismatched extension on the issue ===============
 
 	@ParameterizedTest
 	@CsvSource({"INFORMATION", "WARNING", "ERROR"})
-	void displaysDiffer_diagnosticsContainsDisplay_severityIsConfigured(
+	void displaysDiffer_issueHasDisplayMismatchExtension_severityIsConfigured(
 			IValidationSupport.IssueSeverity theConfiguredSeverity) {
 		mySvc.setIssueSeverityForCodeDisplayMismatch(theConfiguredSeverity);
-		myCodeSystemProvider.addTerminologyResponse(
-				"$validate-code",
-				CS_URL,
-				CODE,
-				buildOOResponse(issue(DISPLAY_MISMATCH_DIAGNOSTICS, /*addExtension*/ false)));
-
-		IValidationSupport.CodeValidationResult outcome = invokeValidate();
-
-		assertThat(outcome.getIssues()).hasSize(1);
-		assertThat(outcome.getIssues().get(0).getSeverity())
-				.as("signal (b): diagnostics text contains 'display' → severity overridden")
-				.isEqualTo(theConfiguredSeverity);
-	}
-
-	// =============== Signal (a): displayMismatched extension on the issue ===============
-
-	@Test
-	void displaysDiffer_issueHasDisplayMismatchExtension_severityIsConfigured() {
-		mySvc.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.WARNING);
 		myCodeSystemProvider.addTerminologyResponse(
 				"$validate-code",
 				CS_URL,
@@ -107,7 +89,7 @@ public class RemoteTerminologyValidateDisplayMismatchTest {
 		assertThat(outcome.getIssues()).hasSize(1);
 		assertThat(outcome.getIssues().get(0).getSeverity())
 				.as("signal (a): displayMismatched extension on issue → severity overridden")
-				.isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+				.isEqualTo(theConfiguredSeverity);
 	}
 
 	@Test
@@ -126,6 +108,45 @@ public class RemoteTerminologyValidateDisplayMismatchTest {
 		assertThat(outcome.getIssues().get(0).getSeverity())
 				.as("signal (a) variant: extension on diagnostics primitive element → severity overridden")
 				.isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+	}
+
+	// =============== Signal (b): message-id extension with a "display"-bearing i18n key ===============
+
+	@Test
+	void displaysDiffer_messageIdExtensionWithDisplayKey_severityIsConfigured() {
+		mySvc.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.WARNING);
+		OperationOutcome.OperationOutcomeIssueComponent issueComponent = issue(NEUTRAL_DIAGNOSTICS, /*addExtension*/ false);
+		issueComponent
+				.addExtension()
+				.setUrl(RemoteTerminologyServiceValidationSupport.MESSAGE_ID_EXTENSION_URL)
+				.setValue(new StringType("Display_Name_for__should_be_one_of__instead_of"));
+		myCodeSystemProvider.addTerminologyResponse("$validate-code", CS_URL, CODE, buildOOResponse(issueComponent));
+
+		IValidationSupport.CodeValidationResult outcome = invokeValidate();
+
+		assertThat(outcome.getIssues()).hasSize(1);
+		assertThat(outcome.getIssues().get(0).getSeverity())
+				.as("signal (b): message-id extension whose value contains 'display' → severity overridden")
+				.isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+	}
+
+	@Test
+	void displaysDiffer_messageIdExtensionWithoutDisplayKey_noAdjustment() {
+		mySvc.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.WARNING);
+		OperationOutcome.OperationOutcomeIssueComponent issueComponent =
+				issue(INVALID_CODE_DIAGNOSTICS, /*addExtension*/ false);
+		issueComponent
+				.addExtension()
+				.setUrl(RemoteTerminologyServiceValidationSupport.MESSAGE_ID_EXTENSION_URL)
+				.setValue(new StringType("Unknown_Code_in_System"));
+		myCodeSystemProvider.addTerminologyResponse("$validate-code", CS_URL, CODE, buildOOResponse(issueComponent));
+
+		IValidationSupport.CodeValidationResult outcome = invokeValidate();
+
+		assertThat(outcome.getIssues()).hasSize(1);
+		assertThat(outcome.getIssues().get(0).getSeverity())
+				.as("message-id extension whose value lacks 'display' must not qualify")
+				.isEqualTo(IValidationSupport.IssueSeverity.ERROR);
 	}
 
 	// =============== Negative cases for the per-issue rule ===============
@@ -157,7 +178,7 @@ public class RemoteTerminologyValidateDisplayMismatchTest {
 				CODE,
 				buildOOResponse(
 						issue(INVALID_CODE_DIAGNOSTICS, /*addExtension*/ false),
-						issue(DISPLAY_MISMATCH_DIAGNOSTICS, /*addExtension*/ false)));
+						issue(DISPLAY_MISMATCH_DIAGNOSTICS, /*addExtension*/ true)));
 
 		IValidationSupport.CodeValidationResult outcome = invokeValidate();
 
@@ -265,12 +286,13 @@ public class RemoteTerminologyValidateDisplayMismatchTest {
 	@Test
 	void displaysDiffer_issueHasBothSignals_severityAdjustedOnce() {
 		mySvc.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.WARNING);
-		// Issue carries BOTH signal (a) (displayMismatched extension) AND signal (b) (diagnostics text).
-		myCodeSystemProvider.addTerminologyResponse(
-				"$validate-code",
-				CS_URL,
-				CODE,
-				buildOOResponse(issue(DISPLAY_MISMATCH_DIAGNOSTICS, /*addExtension*/ true)));
+		// Issue carries BOTH signal (a) (displayMismatched extension) AND signal (b) (message-id with display key).
+		OperationOutcome.OperationOutcomeIssueComponent issueComponent = issue(NEUTRAL_DIAGNOSTICS, /*addExtension*/ true);
+		issueComponent
+				.addExtension()
+				.setUrl(RemoteTerminologyServiceValidationSupport.MESSAGE_ID_EXTENSION_URL)
+				.setValue(new StringType("Display_Name_for__should_be_one_of__instead_of"));
+		myCodeSystemProvider.addTerminologyResponse("$validate-code", CS_URL, CODE, buildOOResponse(issueComponent));
 
 		IValidationSupport.CodeValidationResult outcome = invokeValidate();
 
@@ -396,7 +418,7 @@ public class RemoteTerminologyValidateDisplayMismatchTest {
 				"$validate-code",
 				CS_URL,
 				CODE,
-				buildOOResponse(issue(DISPLAY_MISMATCH_DIAGNOSTICS, /*addExtension*/ false)));
+				buildOOResponse(issue(NEUTRAL_DIAGNOSTICS, /*addExtension*/ true)));
 
 		IValidationSupport.CodeValidationResult outcome = invokeValidate();
 
@@ -439,7 +461,7 @@ public class RemoteTerminologyValidateDisplayMismatchTest {
 				"$validate-code",
 				CS_URL,
 				CODE,
-				buildOOResponse(fatalIssue, issue(DISPLAY_MISMATCH_DIAGNOSTICS, /*addExtension*/ false)));
+				buildOOResponse(fatalIssue, issue(NEUTRAL_DIAGNOSTICS, /*addExtension*/ true)));
 
 		IValidationSupport.CodeValidationResult outcome = invokeValidate();
 
