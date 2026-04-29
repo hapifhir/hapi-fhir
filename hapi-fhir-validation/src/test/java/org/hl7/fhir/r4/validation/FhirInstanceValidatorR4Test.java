@@ -444,13 +444,6 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		return retVal;
 	}
 
-	private List<String> filterFoundCodeSystemWhereValueSetBelongsMessages(List<SingleValidationMessage> theMessages) {
-		return theMessages.stream()
-			.map(SingleValidationMessage::getMessage)
-			.filter(msg -> msg.contains("Found a reference to a CodeSystem where a ValueSet belongs"))
-			.collect(Collectors.toList());
-	}
-
 	@Test
 	public void testBase64Invalid() {
 		Base64BinaryType value = new Base64BinaryType(new byte[]{2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1});
@@ -1774,7 +1767,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	 * (http://terminology.hl7.org/CodeSystem/processpriority) instead of the ValueSet URL
 	 * (http://hl7.org/fhir/ValueSet/process-priority) in the binding for ExplanationOfBenefit.priority.
 	 *
-	 * See GL-7637
+	 * See https://github.com/hapifhir/hapi-fhir/issues/7830
+	 * See https://jira.hl7.org/browse/FHIR-27949
 	 */
 	@Test
 	void testExplanationOfBenefitPriorityValidationDoesNotReportCodeSystemError() {
@@ -1786,7 +1780,10 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			.setCode("normal");
 
 		ValidationResult output = myFhirValidator.validateWithResult(eob);
-		List<String> codeSystemErrors = filterFoundCodeSystemWhereValueSetBelongsMessages(logResultsAndReturnAll(output));
+		List<String> codeSystemErrors = logResultsAndReturnAll(output).stream()
+			.map(SingleValidationMessage::getMessage)
+			.filter(msg -> msg.contains("Found a reference to a CodeSystem where a ValueSet belongs"))
+			.collect(Collectors.toList());
 
 		assertThat(codeSystemErrors)
 			.as("Validation of ExplanationOfBenefit.priority should not produce a 'CodeSystem where ValueSet belongs' error, but got: " + codeSystemErrors)
