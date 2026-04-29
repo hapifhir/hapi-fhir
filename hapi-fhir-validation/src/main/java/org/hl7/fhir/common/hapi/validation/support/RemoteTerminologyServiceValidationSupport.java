@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.ParametersUtil.getNamedParameterResource;
@@ -749,19 +748,15 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		IssueSeverity displaySeverity = getIssueSeverityForCodeDisplayMismatch();
 		List<CodeValidationIssue> issues = new ArrayList<>();
-		boolean anyDisplayIssueAdjusted = false;
 		Optional<IBaseResource> issuesValue = getNamedParameterResource(fhirContext, theOutput, "issues");
 		if (issuesValue.isPresent()) {
-			AtomicBoolean displayMatchSeen = new AtomicBoolean(false);
 			// it seems to be safe to cast to IBaseOperationOutcome as any other type would not reach this point
 			createCodeValidationIssues(
 							(IBaseOperationOutcome) issuesValue.get(),
 							fhirContext.getVersion().getVersion(),
 							isDisplayMismatch,
-							displaySeverity,
-							displayMatchSeen)
+							displaySeverity)
 					.ifPresent(issues::addAll);
-			anyDisplayIssueAdjusted = displayMatchSeen.get();
 		} else {
 			// Synthesized-from-message workaround for FHIR Validator library limitation
 			// @see https://github.com/hapifhir/org.hl7.fhir.core/issues/1766
@@ -770,13 +765,6 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			boolean messageQualifies = isDisplayMismatch && containsDisplayWord(messageValue.orElse(null));
 			IssueSeverity synthesizedSeverity = messageQualifies ? displaySeverity : IssueSeverity.ERROR;
 			issues.add(createCodeValidationIssue(result.getMessage(), synthesizedSeverity));
-			anyDisplayIssueAdjusted = messageQualifies;
-		}
-
-		// The code is recognized when at least one issue was a display mismatch — surface it on
-		// the result so callers can use it (mirrors the success-path setCode).
-		if (anyDisplayIssueAdjusted) {
-			result.setCode(theCode);
 		}
 
 		issues.forEach(result::addIssue);
@@ -833,19 +821,17 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	public static Optional<Collection<CodeValidationIssue>> createCodeValidationIssues(
 			IBaseOperationOutcome theOperationOutcome, FhirVersionEnum theFhirVersion) {
 		// Backward-compat overload — delegates to the display-mismatch-aware method with no-op flags.
-		return createCodeValidationIssues(
-				theOperationOutcome, theFhirVersion, false, IssueSeverity.ERROR, new AtomicBoolean());
+		return createCodeValidationIssues(theOperationOutcome, theFhirVersion, false, IssueSeverity.ERROR);
 	}
 
 	private static Collection<CodeValidationIssue> createCodeValidationIssuesDstu3(
 			org.hl7.fhir.dstu3.model.OperationOutcome theOperationOutcome,
 			boolean theIsDisplayMismatch,
-			IssueSeverity theDisplaySeverity,
-			AtomicBoolean theDisplayMatchSeen) {
+			IssueSeverity theDisplaySeverity) {
 		List<IssueData> data = theOperationOutcome.getIssue().stream()
 				.map(RemoteTerminologyServiceValidationSupport::extractIssueDataDstu3)
 				.collect(Collectors.toList());
-		return buildCodeValidationIssues(data, theIsDisplayMismatch, theDisplaySeverity, theDisplayMatchSeen);
+		return buildCodeValidationIssues(data, theIsDisplayMismatch, theDisplaySeverity);
 	}
 
 	private static CodeValidationIssue createCodeValidationIssue(String theMessage, IssueSeverity theSeverity) {
@@ -863,42 +849,33 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	 *   <li>{@link #MESSAGE_ID_EXTENSION_URL} with a primitive value containing the substring "display"
 	 *       (case-insensitive).</li>
 	 * </ul>
-	 * Qualifying issues get their severity replaced with {@code theDisplaySeverity}, and
-	 * {@code theDisplayMatchSeen} is flipped to true. Issues without any qualifying signal keep their server-reported
-	 * severity. Supported for R4 and DSTU3.
+	 * Qualifying issues get their severity replaced with {@code theDisplaySeverity}. Issues without any
+	 * qualifying signal keep their server-reported severity. Supported for R4 and DSTU3.
 	 */
 	public static Optional<Collection<CodeValidationIssue>> createCodeValidationIssues(
 			IBaseOperationOutcome theOperationOutcome,
 			FhirVersionEnum theFhirVersion,
 			boolean theIsDisplayMismatch,
-			IssueSeverity theDisplaySeverity,
-			AtomicBoolean theDisplayMatchSeen) {
+			IssueSeverity theDisplaySeverity) {
 		if (theFhirVersion == FhirVersionEnum.R4) {
 			return Optional.of(createCodeValidationIssuesR4(
-					(OperationOutcome) theOperationOutcome,
-					theIsDisplayMismatch,
-					theDisplaySeverity,
-					theDisplayMatchSeen));
+					(OperationOutcome) theOperationOutcome, theIsDisplayMismatch, theDisplaySeverity));
 		}
 		if (theFhirVersion == FhirVersionEnum.DSTU3) {
 			return Optional.of(createCodeValidationIssuesDstu3(
 					(org.hl7.fhir.dstu3.model.OperationOutcome) theOperationOutcome,
 					theIsDisplayMismatch,
-					theDisplaySeverity,
-					theDisplayMatchSeen));
+					theDisplaySeverity));
 		}
 		return Optional.empty();
 	}
 
 	private static Collection<CodeValidationIssue> createCodeValidationIssuesR4(
-			OperationOutcome theOperationOutcome,
-			boolean theIsDisplayMismatch,
-			IssueSeverity theDisplaySeverity,
-			AtomicBoolean theDisplayMatchSeen) {
+			OperationOutcome theOperationOutcome, boolean theIsDisplayMismatch, IssueSeverity theDisplaySeverity) {
 		List<IssueData> data = theOperationOutcome.getIssue().stream()
 				.map(RemoteTerminologyServiceValidationSupport::extractIssueDataR4)
 				.collect(Collectors.toList());
-		return buildCodeValidationIssues(data, theIsDisplayMismatch, theDisplaySeverity, theDisplayMatchSeen);
+		return buildCodeValidationIssues(data, theIsDisplayMismatch, theDisplaySeverity);
 	}
 
 	private static IssueData extractIssueDataR4(OperationOutcome.OperationOutcomeIssueComponent theIssue) {
@@ -930,25 +907,18 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private static Collection<CodeValidationIssue> buildCodeValidationIssues(
-			List<IssueData> theIssues,
-			boolean theIsDisplayMismatch,
-			IssueSeverity theDisplaySeverity,
-			AtomicBoolean theDisplayMatchSeen) {
-		return theIssues.stream()
-				.map(data -> {
-					boolean isDisplayIssue = theIsDisplayMismatch && data.isDisplaySignal();
-					if (isDisplayIssue) {
-						theDisplayMatchSeen.set(true);
-					}
-					IssueSeverity severity = isDisplayIssue ? theDisplaySeverity : data.serverSeverity();
-					CodeValidationIssue issue =
-							new CodeValidationIssue(data.diagnostics(), severity, data.issueTypeCode());
-					CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(data.detailsText());
-					data.codings().forEach(c -> issueDetails.addCoding(c.system(), c.code()));
-					issue.setDetails(issueDetails);
-					return issue;
-				})
-				.collect(Collectors.toList());
+			List<IssueData> theIssues, boolean theIsDisplayMismatch, IssueSeverity theDisplaySeverity) {
+		List<CodeValidationIssue> out = new ArrayList<>(theIssues.size());
+		for (IssueData data : theIssues) {
+			boolean isDisplayIssue = theIsDisplayMismatch && data.isDisplaySignal();
+			IssueSeverity severity = isDisplayIssue ? theDisplaySeverity : data.serverSeverity();
+			CodeValidationIssue issue = new CodeValidationIssue(data.diagnostics(), severity, data.issueTypeCode());
+			CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(data.detailsText());
+			data.codings().forEach(c -> issueDetails.addCoding(c.system(), c.code()));
+			issue.setDetails(issueDetails);
+			out.add(issue);
+		}
+		return out;
 	}
 
 	private record IssueData(

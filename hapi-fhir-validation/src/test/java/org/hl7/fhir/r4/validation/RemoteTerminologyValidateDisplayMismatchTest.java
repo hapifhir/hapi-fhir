@@ -409,40 +409,6 @@ public class RemoteTerminologyValidateDisplayMismatchTest {
 				.isEqualTo(IValidationSupport.IssueSeverity.ERROR);
 	}
 
-	// =============== Result.code side effect ===============
-
-	@Test
-	void displaysDiffer_displayIssueAdjusted_resultCodeIsSet() {
-		mySvc.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.WARNING);
-		myCodeSystemProvider.addTerminologyResponse(
-				"$validate-code",
-				CS_URL,
-				CODE,
-				buildOOResponse(issue(NEUTRAL_DIAGNOSTICS, /*addExtension*/ true)));
-
-		IValidationSupport.CodeValidationResult outcome = invokeValidate();
-
-		assertThat(outcome.getCode())
-				.as("display-mismatch detected → code is recognized and surfaced on the result")
-				.isEqualTo(CODE);
-	}
-
-	@Test
-	void displaysDiffer_noDisplayIssue_resultCodeNotSet() {
-		mySvc.setIssueSeverityForCodeDisplayMismatch(IValidationSupport.IssueSeverity.WARNING);
-		myCodeSystemProvider.addTerminologyResponse(
-				"$validate-code",
-				CS_URL,
-				CODE,
-				buildOOResponse(issue(INVALID_CODE_DIAGNOSTICS, /*addExtension*/ false)));
-
-		IValidationSupport.CodeValidationResult outcome = invokeValidate();
-
-		assertThat(outcome.getCode())
-				.as("no display-mismatch → code stays unset on the failure result")
-				.isNull();
-	}
-
 	// =============== Severity aggregation precedence ===============
 
 	@Test
