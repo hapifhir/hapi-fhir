@@ -535,6 +535,12 @@ public interface ITestDataBuilder {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "version", "uri", theVersion);
 	}
 
+	/**
+	 * CodeSystem.content
+	 */
+	default ICreationArgument withCodeSystemContent(String theContent) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "content", "code", theContent);
+	}
 
 	/**
 	 * Optional method for cases where this is purely used for building resources.

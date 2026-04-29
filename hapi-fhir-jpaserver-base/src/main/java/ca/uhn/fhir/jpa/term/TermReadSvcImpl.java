@@ -3603,7 +3603,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			property.setConcept(termConcept);
 			property.setCodeSystemVersion(theCodeSystemVersion);
 
-			TermWriteSvcImpl.populateTermConceptPropertyValue(next, property);
+			TermCodeSystemStorageSvcImpl.populateTermConceptPropertyValue(next, property);
 
 			termConcept.getProperties().add(property);
 		}

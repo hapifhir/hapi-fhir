@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -86,12 +87,12 @@ public interface ITermCodeSystemStorageSvc {
 			List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
 
 	void storeNewCodeSystemVersionIfNeeded(
-			CodeSystem theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails);
+			IBaseResource theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails);
 
 	/**
 	 * Default implementation supports previous signature of method which was added RequestDetails parameter
 	 */
-	default void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity) {
+	default void storeNewCodeSystemVersionIfNeeded(IBaseResource theCodeSystem, ResourceTable theResourceEntity) {
 		storeNewCodeSystemVersionIfNeeded(theCodeSystem, theResourceEntity, null);
 	}
 
@@ -100,4 +101,22 @@ public interface ITermCodeSystemStorageSvc {
 	UploadStatistics applyDeltaCodeSystemsRemove(String theSystem, CustomTerminologySet theRemovals);
 
 	int saveConcept(TermConcept theNextConcept);
+
+	/**
+	 * Prepares a code system version for staging, meaning that it is ready to begin acceping
+	 * new codes, properties, relationships, etc. This method will create the new version
+	 * if one does not already exist but will leave the existing one untouched if it does.
+	 * <p>
+	 * The new version will not be activated if it is not already active.
+	 * </p>
+	 */
+	StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(String theCodeSystemUrl, String theVersionId);
+
+	/**
+	 * @param stagingVersionId A temporary ID associated with the version that is being staged
+	 */
+	record StartStagingCodeSystemVersionResponse(String stagingVersionId) {}
+
+	UploadStatistics uploadCodeSystemConcepts(IBaseResource theCodeSystem);
+
 }

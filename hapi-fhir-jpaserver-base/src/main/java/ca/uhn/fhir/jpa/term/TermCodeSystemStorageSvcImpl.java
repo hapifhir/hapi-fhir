@@ -33,6 +33,8 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -47,6 +49,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -55,19 +58,28 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -98,6 +110,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
+
+	@Autowired
+	private IHapiTransactionService myTxService;
+
+	@Autowired
+	private VersionCanonicalizer myVersionCanonicalizer;
 
 	@Autowired
 	protected ITermCodeSystemDao myCodeSystemDao;
@@ -162,31 +180,49 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
-		Validate.notNull(csv);
+		Validate.notNull(csv, "No current version for code system: %s", theSystem);
 
-		CodeSystem codeSystem = myTerminologySvc.fetchCanonicalCodeSystemFromCompleteContext(theSystem);
+		return addConceptsToCodeSystemVersion(csv, theAdditions);
+	}
+
+	@Nonnull
+	private UploadStatistics addConceptsToCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion, CustomTerminologySet theAdditions) {
+		HapiTransactionService.requireTransaction();
+
+		TermCodeSystem cs = theCodeSystemVersion.getCodeSystem();
+		Validate.notNull(cs, "No code system found for code system version: %s", theCodeSystemVersion);
+		Validate.notNull(cs.getPid(), "No pid found for code system: %s", cs);
+
+		String codeSystemUrl = cs.getCodeSystemUri();
+		CodeSystem codeSystem = myTerminologySvc.fetchCanonicalCodeSystemFromCompleteContext(codeSystemUrl);
 		if (codeSystem != null && codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 			throw new InvalidRequestException(
-					Msg.code(844) + "CodeSystem with url[" + Constants.codeSystemWithDefaultDescription(theSystem)
+					Msg.code(844) + "CodeSystem with url[" + Constants.codeSystemWithDefaultDescription(codeSystemUrl)
 							+ "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
 		}
-
-		Validate.notNull(cs);
-		Validate.notNull(cs.getPid());
 
 		IIdType codeSystemId = cs.getResource().getIdDt();
 
 		UploadStatistics retVal = new UploadStatistics(codeSystemId);
-		HashMap<String, TermConcept> codeToConcept = new HashMap<>();
+		Map<String, TermConcept> codeToConcept = new HashMap<>();
+
+		// Fetch any existing concepts matching codes to be added
+		Set<String> codes = findAllCodes(theAdditions);
+		QueryChunker.chunk(codes, codesSubList -> {
+			List<TermConcept> conceptsSubList = myConceptDao.findByCodeSystemAndCodeList(theCodeSystemVersion.getPid(), codesSubList);
+			for (TermConcept concept : conceptsSubList) {
+				codeToConcept.put(concept.getCode(), concept);
+			}
+		});
+		// FIXME: prefetch properties and designations if we have any to write
 
 		// Add root concepts
 		for (TermConcept nextRootConcept : theAdditions.getRootConcepts()) {
 			List<String> parentCodes = Collections.emptyList();
-			addConceptInHierarchy(csv, parentCodes, nextRootConcept, retVal, codeToConcept, 0);
+			addConceptInHierarchy(theCodeSystemVersion, parentCodes, nextRootConcept, retVal, codeToConcept, 0, null);
 		}
 
 		myTerminologySvc.invalidateCodeSystemCaches();
-
 		return retVal;
 	}
 
@@ -287,20 +323,23 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.MANDATORY)
 	public void storeNewCodeSystemVersionIfNeeded(
-			CodeSystem theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails) {
-		if (theCodeSystem != null && isNotBlank(theCodeSystem.getUrl())) {
-			String codeSystemUrl = theCodeSystem.getUrl();
-			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE
-					|| theCodeSystem.getContent() == null
-					|| theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+		IBaseResource theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails) {
+		HapiTransactionService.requireTransaction();
+
+		CodeSystem codeSystem = myVersionCanonicalizer.codeSystemToCanonical(theCodeSystem);
+
+		if (codeSystem != null && isNotBlank(codeSystem.getUrl())) {
+			String codeSystemUrl = codeSystem.getUrl();
+			if (codeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE
+					|| codeSystem.getContent() == null
+					|| codeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 				ourLog.info(
 						"CodeSystem {} has a status of {}, going to store concepts in terminology tables",
 						theResourceEntity.getIdDt().getValue(),
-						theCodeSystem.getContentElement().getValueAsString());
+						codeSystem.getContentElement().getValueAsString());
 
-				detectDuplicatesInCodeSystem(theCodeSystem);
+				detectDuplicatesInCodeSystem(codeSystem);
 
 				/*
 				 * If this is a not-present codesystem and codesystem version already exists, we don't want to
@@ -308,16 +347,16 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				 * or update the TermCodeSystem table though, since that allows the DB to reject changes that would
 				 * result in duplicate CodeSystem.url values.
 				 */
-				if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-					TermCodeSystem termCodeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystem.getUrl());
+				if (codeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+					TermCodeSystem termCodeSystem = myCodeSystemDao.findByCodeSystemUri(codeSystem.getUrl());
 					if (termCodeSystem != null) {
 						TermCodeSystemVersion codeSystemVersion =
-								getExistingTermCodeSystemVersion(termCodeSystem.getPid(), theCodeSystem.getVersion());
+								getExistingTermCodeSystemVersion(termCodeSystem.getPid(), codeSystem.getVersion());
 						if (codeSystemVersion != null) {
 							getOrCreateDistinctTermCodeSystem(
-									theCodeSystem.getUrl(),
-									theCodeSystem.getUrl(),
-									theCodeSystem.getVersion(),
+									codeSystem.getUrl(),
+									codeSystem.getUrl(),
+									codeSystem.getVersion(),
 									theResourceEntity,
 									true);
 							return;
@@ -326,15 +365,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				}
 
 				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
-				populateCodeSystemVersionProperties(persCs, theCodeSystem, theResourceEntity);
+				populateCodeSystemVersionProperties(persCs, codeSystem, theResourceEntity);
 				myEntityManager.persist(persCs);
 
-				persCs.getConcepts().addAll(TermReadSvcImpl.toPersistedConcepts(theCodeSystem.getConcept(), persCs));
+				persCs.getConcepts().addAll(TermReadSvcImpl.toPersistedConcepts(codeSystem.getConcept(), persCs));
 				ourLog.debug("Code system has {} concepts", persCs.getConcepts().size());
 				storeNewCodeSystemVersion(
 						codeSystemUrl,
-						theCodeSystem.getName(),
-						theCodeSystem.getVersion(),
+						codeSystem.getName(),
+						codeSystem.getVersion(),
 						persCs,
 						theResourceEntity,
 						theRequestDetails);
@@ -558,38 +597,152 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	private void addConceptInHierarchy(
-			TermCodeSystemVersion theCsv,
-			Collection<String> theParentCodes,
-			TermConcept theConceptToAdd,
-			UploadStatistics theStatisticsTracker,
-			Map<String, TermConcept> theCodeToConcept,
-			int theSequence) {
-		TermConcept conceptToAdd = theConceptToAdd;
-		List<TermConceptParentChildLink> childrenToAdd = theConceptToAdd.getChildren();
+		TermCodeSystemVersion theCsv,
+		Collection<String> theParentCodes,
+		TermConcept theSourceConcept,
+		UploadStatistics theStatisticsTracker,
+		Map<String, TermConcept> theCodeToConcept,
+		int theSequence,
+		TermConcept theParentConcept) {
 
-		String nextCodeToAdd = conceptToAdd.getCode();
-		String parentDescription = "(root concept)";
+		String parentDescription = "(root concept)"; // FIXME: make accurate
 
 		ourLog.info(
-				"Saving concept {} with parent {}", theStatisticsTracker.getUpdatedConceptCount(), parentDescription);
+				"Saving concept[{}] count {} at index {} with parent {}", theSourceConcept.getCode(), theStatisticsTracker.getUpdatedConceptCount(), theSequence, parentDescription);
 
-		Optional<TermConcept> existingCodeOpt = myConceptDao.findByCodeSystemAndCode(theCsv.getPid(), nextCodeToAdd);
+		TermConcept targetConcept = theCodeToConcept.get(theSourceConcept.getCode());
 		List<TermConceptParentChildLink> existingParentLinks;
-		if (existingCodeOpt.isPresent()) {
-			TermConcept existingCode = existingCodeOpt.get();
-			existingCode.setIndexStatus(null);
-			existingCode.setDisplay(conceptToAdd.getDisplay());
-			conceptToAdd = existingCode;
-			existingParentLinks = conceptToAdd.getParents();
+		if (targetConcept != null) {
+			targetConcept.setIndexStatus(null);
+			existingParentLinks = targetConcept.getParents();
+			theStatisticsTracker.incrementUpdatedConceptCount();
 		} else {
+			targetConcept = new TermConcept();
+			targetConcept.setCode(theSourceConcept.getCode());
+			targetConcept.setCodeSystemVersion(theCsv);
 			existingParentLinks = Collections.emptyList();
+
+			theCodeToConcept.put(theSourceConcept.getCode(), targetConcept);
+			theStatisticsTracker.incrementConceptsAddedCount();
 		}
 
-		Set<TermConcept> parentConceptsWeShouldLinkTo = new HashSet<>();
+		// Display
+		if (isNotBlank(theSourceConcept.getDisplay())) {
+			targetConcept.setDisplay(theSourceConcept.getDisplay());
+		}
+
+		// Sequence
+		if (targetConcept.getSequence() == null) {
+			targetConcept.setSequence(theSequence);
+		}
+
+		// FIXME: remove?
+//		Set<TermConcept> parentConceptsWeShouldLinkTo = new HashSet<>();
+//		for (String nextParentCode : theParentCodes) {
+//
+//			// Don't add parent links that already exist for the code
+//			if (existingParentLinks.stream()
+//					.anyMatch(t -> t.getParent().getCode().equals(nextParentCode))) {
+//				continue;
+//			}
+//
+//			TermConcept nextParentOpt = theCodeToConcept.get(nextParentCode);
+//			if (nextParentOpt == null) {
+//				nextParentOpt = myConceptDao
+//						.findByCodeSystemAndCode(theCsv.getPid(), nextParentCode)
+//						.orElse(null);
+//			}
+//			if (nextParentOpt == null) {
+//				throw new InvalidRequestException(Msg.code(846) + "Unable to add code \"" + theSourceConcept.getCode()
+//						+ "\" to unknown parent: " + nextParentCode);
+//			}
+//			parentConceptsWeShouldLinkTo.add(nextParentOpt);
+//		}
+//
+		// Null out the hierarchy PIDs for this concept always. We do this because we're going to
+		// force a reindex, and it'll be regenerated then
+		targetConcept.setParentPids(null);
+
+		// Properties
+		if (theSourceConcept.hasProperties()) {
+			Map<String, TermConceptProperty> existingProperties = new HashMap<>();
+			for (TermConceptProperty existingProperty : targetConcept.getProperties()) {
+				existingProperties.put(existingProperty.getKey(), existingProperty);
+			}
+
+			for (TermConceptProperty sourceProperty : theSourceConcept.getProperties()) {
+				TermConceptProperty targetProperty = existingProperties.get(sourceProperty.getKey());
+				if (targetProperty == null) {
+					targetProperty = new TermConceptProperty();
+					targetConcept.getProperties().add(targetProperty);
+					targetProperty.setConcept(targetConcept);
+					targetProperty.setCodeSystemVersion(theCsv);
+					targetProperty.setPartitionId(targetConcept.getPartitionId());
+					targetProperty.setKey(sourceProperty.getKey());
+				}
+
+				targetProperty.setType(sourceProperty.getType());
+				targetProperty.setValue(sourceProperty.getValue());
+				targetProperty.setCodeSystem(sourceProperty.getCodeSystem());
+				targetProperty.setDisplay(sourceProperty.getDisplay());
+
+				if (targetProperty.getId() == null) {
+					theStatisticsTracker.incrementPropertiesAddedCount();
+// FIXME: remove?
+					//					myEntityManager.persist(targetProperty);
+				} else {
+//					myEntityManager.merge(targetProperty);
+				}
+			}
+		}
+
+		// Designations
+		if (theSourceConcept.hasDesignations()) {
+			Map<DesignationKey, TermConceptDesignation> existingDesignations = new HashMap<>();
+			for (TermConceptDesignation existingDesignation : targetConcept.getDesignations()) {
+				DesignationKey key = new DesignationKey(existingDesignation);
+				existingDesignations.put(key, existingDesignation);
+			}
+
+			for (TermConceptDesignation sourceDesignation : theSourceConcept.getDesignations()) {
+				DesignationKey key = new DesignationKey(sourceDesignation);
+				TermConceptDesignation targetDesignation = existingDesignations.get(key);
+				if (targetDesignation == null) {
+					targetDesignation = new TermConceptDesignation();
+					targetConcept.getDesignations().add(targetDesignation);
+					targetDesignation.setConcept(targetConcept);
+					targetDesignation.setCodeSystemVersion(theCsv);
+					targetDesignation.setPartitionId(targetConcept.getPartitionId());
+				}
+
+				targetDesignation.setLanguage(sourceDesignation.getLanguage());
+				targetDesignation.setUseSystem(sourceDesignation.getUseSystem());
+				targetDesignation.setUseCode(sourceDesignation.getUseCode());
+				targetDesignation.setValue(sourceDesignation.getValue());
+
+				if (targetDesignation.getId() == null) {
+					theStatisticsTracker.incrementDesignationsAddedCount();
+					// FIXME: remove?
+//					myEntityManager.persist(targetDesignation);
+				} else {
+//					myEntityManager.merge(targetDesignation);
+				}
+			}
+		}
+
+		if (theStatisticsTracker.getAddedConceptCount() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
+			saveConcept(targetConcept);
+			Long nextConceptPid = targetConcept.getId();
+			Objects.requireNonNull(nextConceptPid);
+		} else {
+			myDeferredStorageSvc.addConceptToStorageQueue(targetConcept);
+		}
+
+		// Links to parents
 		for (String nextParentCode : theParentCodes) {
 
 			// Don't add parent links that already exist for the code
-			if (existingParentLinks.stream()
+			if (targetConcept.getParents().stream()
 					.anyMatch(t -> t.getParent().getCode().equals(nextParentCode))) {
 				continue;
 			}
@@ -601,90 +754,47 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						.orElse(null);
 			}
 			if (nextParentOpt == null) {
-				throw new InvalidRequestException(Msg.code(846) + "Unable to add code \"" + nextCodeToAdd
+				throw new InvalidRequestException(Msg.code(846) + "Unable to add code \"" + theSourceConcept.getCode()
 						+ "\" to unknown parent: " + nextParentCode);
 			}
-			parentConceptsWeShouldLinkTo.add(nextParentOpt);
+
+			TermConceptParentChildLink parentChildLink = nextParentOpt.addChild(targetConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+			myEntityManager.persist(parentChildLink);
+			theStatisticsTracker.incrementConceptLinksAddedCount();
 		}
 
-		if (conceptToAdd.getSequence() == null) {
-			conceptToAdd.setSequence(theSequence);
-		}
-
-		// Null out the hierarchy PIDs for this concept always. We do this because we're going to
-		// force a reindex, and it'll be regenerated then
-		conceptToAdd.setParentPids(null);
-		conceptToAdd.setCodeSystemVersion(theCsv);
-
-		if (conceptToAdd.getProperties() != null)
-			conceptToAdd.getProperties().forEach(termConceptProperty -> {
-				termConceptProperty.setConcept(theConceptToAdd);
-				termConceptProperty.setCodeSystemVersion(theCsv);
-			});
-		if (theStatisticsTracker.getUpdatedConceptCount() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
-			saveConcept(conceptToAdd);
-			Long nextConceptPid = conceptToAdd.getId();
-			Objects.requireNonNull(nextConceptPid);
-		} else {
-			myDeferredStorageSvc.addConceptToStorageQueue(conceptToAdd);
-		}
-
-		theCodeToConcept.put(conceptToAdd.getCode(), conceptToAdd);
-
-		theStatisticsTracker.incrementUpdatedConceptCount();
 
 		// Add link to new child to the parent
-		for (TermConcept nextParentConcept : parentConceptsWeShouldLinkTo) {
-			TermConceptParentChildLink parentLink = new TermConceptParentChildLink();
-			parentLink.setParent(nextParentConcept);
-			parentLink.setChild(conceptToAdd);
-			parentLink.setCodeSystem(theCsv);
-			parentLink.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
-			nextParentConcept.getChildren().add(parentLink);
-			conceptToAdd.getParents().add(parentLink);
-			ourLog.info(
-					"Saving parent/child link - Parent[{}] Child[{}]",
-					parentLink.getParent().getCode(),
-					parentLink.getChild().getCode());
-
-			if (theStatisticsTracker.getUpdatedConceptCount()
-					<= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
-				myConceptParentChildLinkDao.save(parentLink);
-			} else {
-				myDeferredStorageSvc.addConceptLinkToStorageQueue(parentLink);
-			}
-		}
+		// FIXME: remove?
+//		for (TermConcept nextParentConcept : parentConceptsWeShouldLinkTo) {
+//			TermConceptParentChildLink parentLink = new TermConceptParentChildLink();
+//			parentLink.setParent(nextParentConcept);
+//			parentLink.setChild(targetConcept);
+//			parentLink.setCodeSystem(theCsv);
+//			parentLink.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+//			nextParentConcept.getChildren().add(parentLink);
+//
+//			ourLog.info(
+//					"Saving parent/child link - Parent[{}] Child[{}]",
+//					parentLink.getParent().getCode(),
+//					parentLink.getChild().getCode());
+//
+//			if (theStatisticsTracker.getUpdatedConceptCount()
+//					<= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
+//				myConceptParentChildLinkDao.save(parentLink);
+//			} else {
+//				myDeferredStorageSvc.addConceptLinkToStorageQueue(parentLink);
+//			}
+//		}
 
 		ourLog.trace("About to save parent-child links");
 
 		// Save children recursively
 		int childIndex = 0;
-		for (TermConceptParentChildLink nextChildConceptLink : new ArrayList<>(childrenToAdd)) {
-
+		for (TermConceptParentChildLink nextChildConceptLink : theSourceConcept.getChildren()) {
 			TermConcept nextChild = nextChildConceptLink.getChild();
 
-			for (int i = 0; i < nextChild.getParents().size(); i++) {
-				if (nextChild.getParents().get(i).getId() == null) {
-					String parentCode =
-							nextChild.getParents().get(i).getParent().getCode();
-					TermConcept parentConcept = theCodeToConcept.get(parentCode);
-					if (parentConcept == null) {
-						parentConcept = myConceptDao
-								.findByCodeSystemAndCode(theCsv.getPid(), parentCode)
-								.orElse(null);
-					}
-					if (parentConcept == null) {
-						throw new IllegalArgumentException(Msg.code(847) + "Unknown parent code: " + parentCode);
-					}
-
-					nextChild.getParents().get(i).setParent(parentConcept);
-				}
-			}
-
-			Collection<String> parentCodes = nextChild.getParents().stream()
-					.map(t -> t.getParent().getCode())
-					.collect(Collectors.toList());
-			addConceptInHierarchy(theCsv, parentCodes, nextChild, theStatisticsTracker, theCodeToConcept, childIndex);
+			addConceptInHierarchy(theCsv, Set.of(theSourceConcept.getCode()), nextChild, theStatisticsTracker, theCodeToConcept, childIndex, targetConcept);
 
 			childIndex++;
 		}
@@ -879,4 +989,148 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		return retVal;
 	}
+
+	@Override
+	public StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(String theCodeSystemUrl, String theVersionId) {
+		Validate.notBlank(theCodeSystemUrl, "theCodeSystemUrl must not be blank");
+		Validate.isTrue(!theCodeSystemUrl.contains("|"), "theCodeSystemUrl must not be versioned: %s", theCodeSystemUrl);
+
+		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystemUrl);
+			Validate.notNull(codeSystem, "CodeSystem not found: %s", theCodeSystemUrl);
+
+			TermCodeSystemVersion version = new TermCodeSystemVersion();
+			version.setResource(codeSystem.getResource());
+			version.setCodeSystemVersionId(UUID.randomUUID().toString());
+			version.setCodeSystemIntendedVersionId(theVersionId);
+			version.setCodeSystem(codeSystem);
+			version = myCodeSystemVersionDao.saveAndFlush(version);
+			ourLog.info("Created new CodeSystemVersion[url={}, version={}] for writing with PID: {}", theVersionId, theCodeSystemUrl, version.getId());
+
+			return new StartStagingCodeSystemVersionResponse(version.getCodeSystemVersionId());
+		});
+	}
+
+	@Override
+	public UploadStatistics uploadCodeSystemConcepts(IBaseResource theCodeSystem) {
+		CodeSystem codeSystem = myVersionCanonicalizer.codeSystemToCanonical(theCodeSystem);
+
+		String systemUrl = codeSystem.getUrl();
+		String systemVersionId = codeSystem.getVersion();
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(systemUrl, "CodeSystem must have a URL");
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(systemVersionId, "CodeSystem version must not be blank");
+
+		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+
+			TermCodeSystemVersion codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemUriAndVersion(systemUrl, systemVersionId);
+			ValidateUtil.isTrueOrThrowInvalidRequest(codeSystemVersionEntity != null, "CodeSystemVersion not found: [url=%s, versionId=%s]", systemUrl, systemVersionId);
+
+			CustomTerminologySet additions = new CustomTerminologySet();
+			for (CodeSystem.ConceptDefinitionComponent sourceConcept : codeSystem.getConcept()) {
+				TermConcept concept = uploadCodeSystemConceptAndChildren(sourceConcept, null);
+				additions.addRootConcept(concept);
+			}
+
+			return addConceptsToCodeSystemVersion(codeSystemVersionEntity, additions);
+		});
+
+	}
+
+	private TermConcept uploadCodeSystemConceptAndChildren(CodeSystem.ConceptDefinitionComponent theSourceConcept, TermConcept theParentConcept) {
+		TermConcept targetConcept = new TermConcept();
+		targetConcept.setCode(theSourceConcept.getCode());
+		targetConcept.setDisplay(theSourceConcept.getDisplay());
+
+		// Populate designations
+		for (CodeSystem.ConceptDefinitionDesignationComponent sourceDesignation : theSourceConcept.getDesignation()) {
+			TermConceptDesignation targetDesignation = new TermConceptDesignation();
+			targetConcept.getDesignations().add(targetDesignation);
+			targetDesignation.setConcept(targetConcept);
+			targetDesignation.setLanguage(sourceDesignation.getLanguage());
+			if (sourceDesignation.hasUse()) {
+				targetDesignation.setUseSystem(sourceDesignation.getUse().getSystem());
+				targetDesignation.setUseCode(sourceDesignation.getUse().getCode());
+			}
+			targetDesignation.setValue(sourceDesignation.getValue());
+		}
+
+		// Populate properties
+		for (CodeSystem.ConceptPropertyComponent sourceProperty : theSourceConcept.getProperty()) {
+			TermConceptProperty targetProperty = new TermConceptProperty();
+			targetConcept.getProperties().add(targetProperty);
+			targetProperty.setConcept(targetConcept);
+			targetProperty.setPartitionId(targetConcept.getPartitionId());
+			targetProperty.setKey(sourceProperty.getCode());
+
+			populateTermConceptPropertyValue(sourceProperty, targetProperty);
+		}
+
+		// Parent Concept
+		if (theParentConcept != null) {
+			theParentConcept.addChild(targetConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+		}
+
+		// Child Concepts
+		for (CodeSystem.ConceptDefinitionComponent child : theSourceConcept.getConcept()) {
+			uploadCodeSystemConceptAndChildren(child, targetConcept);
+		}
+
+		return targetConcept;
+	}
+
+	private Set<String> findAllCodes(CustomTerminologySet theCodeSystem) {
+		Set<String> codes = new HashSet<>();
+		findAllCodes(codes, theCodeSystem.getRootConcepts());
+		return codes;
+	}
+
+	private void findAllCodes(Set<String> theCodesToPopulate, List<TermConcept> theConcepts) {
+		for (TermConcept next : theConcepts) {
+			theCodesToPopulate.add(next.getCode());
+			findAllCodes(theCodesToPopulate, next.getChildCodes());
+		}
+	}
+
+	public static void populateTermConceptPropertyValue(CodeSystem.ConceptPropertyComponent theConceptPropertyComponent, TermConceptProperty theStorageProperty) {
+		if (theConceptPropertyComponent.getValue() instanceof CodeType) {
+			theStorageProperty.setType(TermConceptPropertyTypeEnum.CODE);
+			theStorageProperty.setValue(((CodeType) theConceptPropertyComponent.getValue()).getValueAsString());
+		} else if (theConceptPropertyComponent.getValue() instanceof StringType) {
+			theStorageProperty.setType(TermConceptPropertyTypeEnum.STRING);
+			theStorageProperty.setValue(theConceptPropertyComponent.getValueStringType().getValue());
+		} else if (theConceptPropertyComponent.getValue() instanceof BooleanType) {
+			theStorageProperty.setType(TermConceptPropertyTypeEnum.BOOLEAN);
+			theStorageProperty.setValue(((BooleanType) theConceptPropertyComponent.getValue()).getValueAsString());
+		} else if (theConceptPropertyComponent.getValue() instanceof IntegerType) {
+			theStorageProperty.setType(TermConceptPropertyTypeEnum.INTEGER);
+			theStorageProperty.setValue(((IntegerType) theConceptPropertyComponent.getValue()).getValueAsString());
+		} else if (theConceptPropertyComponent.getValue() instanceof DecimalType) {
+			theStorageProperty.setType(TermConceptPropertyTypeEnum.DECIMAL);
+			theStorageProperty.setValue(((DecimalType) theConceptPropertyComponent.getValue()).getValueAsString());
+		} else if (theConceptPropertyComponent.getValue() instanceof DateTimeType) {
+			theStorageProperty.setType(TermConceptPropertyTypeEnum.DATETIME);
+			theStorageProperty.setValue(((DateTimeType) theConceptPropertyComponent.getValue()).getValueAsString());
+		} else if (theConceptPropertyComponent.getValue() instanceof Coding) {
+			Coding nextCoding = theConceptPropertyComponent.getValueCoding();
+			theStorageProperty.setType(TermConceptPropertyTypeEnum.CODING);
+			theStorageProperty.setCodeSystem(nextCoding.getSystem());
+			theStorageProperty.setValue(nextCoding.getCode());
+			theStorageProperty.setDisplay(nextCoding.getDisplay());
+		} else if (theConceptPropertyComponent.getValue() != null) {
+			// FIXME: add code
+			throw new InvalidRequestException("Don't know how to handle concept properties of type: " + theConceptPropertyComponent.getValue().getClass());
+		}
+	}
+
+	private record DesignationKey(String language, String useSystem, String useCode) {
+		public DesignationKey(TermConceptDesignation theDesignation) {
+			this(theDesignation.getLanguage(), theDesignation.getUseSystem(), theDesignation.getUseCode());
+		}
+
+		public DesignationKey(CodeSystem.ConceptDefinitionDesignationComponent theDesignation) {
+			this(theDesignation.getLanguage(), theDesignation.hasUse() ? theDesignation.getUse().getSystem() : null, theDesignation.hasUse() ? theDesignation.getUse().getCode() : null);
+		}
+
+	}
+
 }

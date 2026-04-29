@@ -153,7 +153,7 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 	 * intended to eventually be placed in {@link #myCodeSystemVersionId} once published.
 	 *
 	 * @since 8.12.0
-	 * @see ca.uhn.fhir.jpa.term.api.ITermWriteSvc#startStagingCodeSystemVersion(String, String)
+	 * @see ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc#startStagingCodeSystemVersion(String, String)
 	 */
 	public String getCodeSystemIntendedVersionId() {
 		return myCodeSystemIntendedVersionId;
@@ -165,7 +165,7 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 	 * intended to eventually be placed in {@link #myCodeSystemVersionId} once published.
 	 *
 	 * @since 8.12.0
-	 * @see ca.uhn.fhir.jpa.term.api.ITermWriteSvc#startStagingCodeSystemVersion(String, String)
+	 * @see ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc#startStagingCodeSystemVersion(String, String)
 	 */
 	public void setCodeSystemIntendedVersionId(String theCodeSystemIntendedVersionId) {
 		myCodeSystemIntendedVersionId = theCodeSystemIntendedVersionId;

@@ -255,7 +255,9 @@ public class TermConcept implements Serializable {
 	public TermConceptParentChildLink addChild(TermConcept theChild, RelationshipTypeEnum theRelationshipType) {
 		Validate.notNull(theRelationshipType, "theRelationshipType must not be null");
 		TermConceptParentChildLink link = new TermConceptParentChildLink();
-		link.setCodeSystem(myCodeSystem);
+		if (myCodeSystem != null) {
+			link.setCodeSystem(myCodeSystem);
+		}
 		link.setParent(this);
 		link.setChild(theChild);
 		link.setRelationshipType(theRelationshipType);
@@ -385,6 +387,10 @@ public class TermConcept implements Serializable {
 		return retVal;
 	}
 
+	public boolean hasDesignations() {
+		return myDesignations != null && !myDesignations.isEmpty();
+	}
+
 	public Collection<TermConceptDesignation> getDesignations() {
 		if (myDesignations == null) {
 			myDesignations = new ArrayList<>();
@@ -435,6 +441,10 @@ public class TermConcept implements Serializable {
 			myParents = new ArrayList<>();
 		}
 		return myParents;
+	}
+
+	public boolean hasProperties() {
+		return myProperties != null && !myProperties.isEmpty();
 	}
 
 	public Collection<TermConceptProperty> getProperties() {
@@ -600,6 +610,7 @@ public class TermConcept implements Serializable {
 	public PartitionablePartitionId getPartitionId() {
 		return PartitionablePartitionId.with(myPartitionIdValue, null);
 	}
+
 
 	public static class TermConceptPkValueBridge implements ValueBridge<TermConceptPk, Long> {
 		@Override
