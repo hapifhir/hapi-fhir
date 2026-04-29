@@ -160,9 +160,7 @@ DELETE /Patient/pat1?_expunge=true&_cascade=delete
 
 This submits an asynchronous batch job that collects all resources referencing the target (transitively, up to the configured maximum cascade rounds) and expunges them from the database.
 
-**Note:** Cascade delete with expunge works correctly regardless of the `enforce_referential_integrity_on_delete` setting. When referential integrity on delete is disabled, the cascade collection still runs as normal — all referencing resources are included in the expunge batch — but no conflict validation error is thrown.
-
-**Caveat — referential integrity disabled:** When `enforce_referential_integrity_on_delete` is disabled, the operation does not raise an error if cascade rounds are exhausted before the reference graph is fully drained. In that case only the resources collected within the round budget are expunged and deeper descendants remain in the database. For deep reference graphs, raise the `_cascade_max_rounds` request parameter — or the `MaximumDeleteConflictQueryCount` setting in `JpaStorageSettings`, which caps it — accordingly, and verify by inspecting the batch job's record count.
+**Note:** Cascade delete with expunge works correctly regardless of the `enforce_referential_integrity_on_delete` setting. When referential integrity on delete is disabled, the cascade collection includes all referencing resources in the expunge batch. In the case when cascade rounds are exhausted before the reference graph is fully drained, only the resources collected within the round budget are expunged and deeper descendants remain in the database.
 
 <a id="retry-on-version-conflict"></a>
 
