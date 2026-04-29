@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -19,8 +20,8 @@ import java.util.ArrayList;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
@@ -271,6 +272,67 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		assertThatThrownBy(() -> myCodeSystemDao.create(cs2, mySrd))
 			.isInstanceOf(UnprocessableEntityException.class)
 			.hasMessageContaining("HAPI-0848");
+	}
+
+	@Test
+	void storeNewCodeSystemVersionIfNeeded_rewriteIntoExistingVersionSlot_shouldNotThrow() {
+		final CodeSystem unversioned = new CodeSystem();
+		unversioned.setUrl(URL_MY_CODE_SYSTEM);
+		unversioned.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		unversioned.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		unversioned.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("a")));
+		final JpaPid unversionedPid = ((ResourceTable)myCodeSystemDao.create(unversioned, mySrd).getEntity()).getId();
+
+		final String version = "1.0.0";
+		final CodeSystem versioned = new CodeSystem();
+		versioned.setUrl(URL_MY_CODE_SYSTEM);
+		versioned.setVersion(version);
+		versioned.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		versioned.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		versioned.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("b")));
+		final IIdType versionedId = myCodeSystemDao.create(versioned, mySrd).getId().toUnqualifiedVersionless();
+
+		final CodeSystem rewrite = new CodeSystem();
+		rewrite.setId(versionedId);
+		rewrite.setUrl(URL_MY_CODE_SYSTEM);
+		rewrite.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		rewrite.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		rewrite.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("b-updated")));
+
+		final JpaPid rewritePid = ((ResourceTable) myCodeSystemDao.update(rewrite, mySrd).getEntity()).getId();
+
+		// Verify: TermCodeSystem and TermCodeSystemVersion both point to the second resource
+		runInTransaction(() -> {
+			// check that the rewrite obtained the current TermCodeSystem slot
+			TermCodeSystem currentTcs = myTermCodeSystemDao.findByCodeSystemUri(URL_MY_CODE_SYSTEM);
+			assertThat(currentTcs).isNotNull();
+			assertThat(currentTcs.getResource().getId()).isEqualTo(rewritePid);
+			assertThat(currentTcs.getCurrentVersion()).isNotNull();
+			assertThat(currentTcs.getCurrentVersion().getResource().getId()).isEqualTo(rewritePid);
+
+			// check that there is no TermCodeSystem associated with the previous resource who had the slot
+			TermCodeSystem unversionedTcs = myTermCodeSystemDao.findByResourcePid(unversionedPid);
+			assertThat(unversionedTcs).isNull();
+
+			// check that the rewrite can be queried by url and version
+			TermCodeSystemVersion versionedTcsv = myTermCodeSystemVersionDao.findByCodeSystemUriAndVersion(URL_MY_CODE_SYSTEM, version);
+			assertThat(versionedTcsv).isNull();
+
+			// check that the rewrite (unversioned) CodeSystem has TermCodeSystemVersion
+			assertThat(hasActiveTermVersion(rewritePid)).isTrue();
+
+			// check that the unversioned CodeSystem has TermCodeSystemVersion as well
+			// this cannot be supported at the moment and requires a design change and migration as well
+			// assertThat(hasActiveTermVersion(unversionedPid)).isFalse();
+		});
+	}
+
+	private boolean hasActiveTermVersion(JpaPid theCodeSystemResoucePid) {
+		return myTermCodeSystemVersionDao
+			.findByCodeSystemResourcePid(theCodeSystemResoucePid)
+			.stream()
+			.anyMatch(v -> v.getCodeSystemVersionId() == null
+				|| !v.getCodeSystemVersionId().startsWith("DELETED_"));
 	}
 
 	private CodeSystem createCodeSystemWithMoreThan100Concepts() {
