@@ -46,7 +46,7 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
  * external term service API)
  */
 @SuppressWarnings("EnhancedSwitchMigration")
-public class InMemoryTerminologyServerValidationSupport extends BaseValidationSupport {
+public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyServerValidationSupport {
 	private static final String OUR_PIPE_CHARACTER = "|";
 	private VersionCanonicalizer myVersionCanonicalizer;
 

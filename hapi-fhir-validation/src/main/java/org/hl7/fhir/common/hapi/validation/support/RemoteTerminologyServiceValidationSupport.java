@@ -67,7 +67,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * <a href="http://hl7.org/fhir/valueset-operation-validate-code.html">ValueSet/$validate-code</a>
  * operation in order to validate codes.
  */
-public class RemoteTerminologyServiceValidationSupport extends BaseValidationSupport implements IValidationSupport {
+public class RemoteTerminologyServiceValidationSupport extends BaseTerminologyServerValidationSupport {
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 
 	public static final String ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM = "unknownCodeInSystem";
@@ -887,7 +887,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				? theIssue.getDiagnosticsElement().getExtension()
 				: null;
 		// FHIR requires severity and code, but servers can misbehave
-		String severityCode = theIssue.getSeverity() != null ? theIssue.getSeverity().toCode() : null;
+		String severityCode =
+				theIssue.getSeverity() != null ? theIssue.getSeverity().toCode() : null;
 		IssueSeverity severity = severityCode != null ? IssueSeverity.fromCode(severityCode) : IssueSeverity.ERROR;
 		String issueTypeCode = theIssue.getCode() != null ? theIssue.getCode().toCode() : null;
 		return new IssueData(
@@ -908,7 +909,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				? theIssue.getDiagnosticsElement().getExtension()
 				: null;
 		// FHIR requires severity and code, but servers can misbehave
-		String severityCode = theIssue.getSeverity() != null ? theIssue.getSeverity().toCode() : null;
+		String severityCode =
+				theIssue.getSeverity() != null ? theIssue.getSeverity().toCode() : null;
 		IssueSeverity severity = severityCode != null ? IssueSeverity.fromCode(severityCode) : IssueSeverity.ERROR;
 		String issueTypeCode = theIssue.getCode() != null ? theIssue.getCode().toCode() : null;
 		return new IssueData(
