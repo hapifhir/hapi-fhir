@@ -26,6 +26,13 @@ class ResourceCompartmentStoragePolicyTest {
 	}
 
 	@Test
+	void testParse_alwaysUsePartitionId_storesParsedPartitionId() {
+		ResourceCompartmentStoragePolicy policy = ResourceCompartmentStoragePolicy.parse("ALWAYS_USE_PARTITION_ID/7");
+		assertThat(policy.getAlwaysUsePartition()).isNotNull();
+		assertThat(policy.getAlwaysUsePartition().getFirstPartitionIdOrNull()).isEqualTo(7);
+	}
+
+	@Test
 	void testParse_alwaysUsePartitionIdWithNonNumericId_throwsIllegalArgumentException() {
 		assertThatThrownBy(() -> ResourceCompartmentStoragePolicy.parse("ALWAYS_USE_PARTITION_ID/abc"))
 			.isInstanceOf(IllegalArgumentException.class)

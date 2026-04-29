@@ -41,7 +41,6 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -59,6 +58,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Strings;
@@ -196,17 +196,13 @@ public class PatientIdPartitionInterceptor {
 								resourceType));
 			}
 
-			RuntimeResourceDefinition resourceDef;
-			try {
-				resourceDef = myFhirContext.getResourceDefinition(resourceType);
-			} catch (DataFormatException e) {
-				throw new ConfigurationException(
-						Msg.code(2866)
-								+ String.format(
-										"Resource type '%s' is not a valid resource type, can not apply resource type policy",
-										resourceType),
-						e);
+			if (!myFhirContext.isKnownResourceType(resourceType)) {
+				throw new ConfigurationException(Msg.code(2866)
+						+ String.format(
+								"Resource type '%s' is not a valid resource type, can not apply resource type policy",
+								resourceType));
 			}
+			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resourceType);
 
 			ResourceCompartmentStoragePolicy strictnessMode = entry.getValue();
 			if (strictnessMode == null) {
@@ -571,6 +567,7 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * @see #setResourceTypePolicies(Map) for a description of the default policies
 	 */
+	@VisibleForTesting
 	@Nonnull
 	public ResourceCompartmentStoragePolicy getPolicyForResourceType(ReadPartitionIdRequestDetails theReadDetails) {
 		String resourceType = theReadDetails.getResourceType();
