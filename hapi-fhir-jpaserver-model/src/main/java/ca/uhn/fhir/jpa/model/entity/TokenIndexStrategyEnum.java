@@ -57,4 +57,29 @@ public enum TokenIndexStrategyEnum {
 			default -> false;
 		};
 	}
+
+	/**
+	 * Returns {@code true} if token search predicates should target the legacy
+	 * {@code HFJ_SPIDX_TOKEN} table under this strategy.
+	 * The {@code WRITE_*_QUERY_OLD} strategies read from legacy.
+	 */
+	public boolean readFromLegacyTokenTable() {
+		return switch (this) {
+			case WRITE_OLD_QUERY_OLD, WRITE_BOTH_QUERY_OLD -> true;
+			default -> false;
+		};
+	}
+
+	/**
+	 * Returns {@code true} if token search predicates should target the compressed token
+	 * tables ({@code HFJ_SPIDX2_TOKEN_COMMON}, {@code HFJ_SPIDX2_TOKEN_COMMON_RES},
+	 * {@code HFJ_SPIDX2_TOKEN_IDENTIFIER}) under this strategy.
+	 * The {@code WRITE_*_QUERY_NEW} strategies read from the new tables.
+	 */
+	public boolean readFromCompressedTokenTables() {
+		return switch (this) {
+			case WRITE_BOTH_QUERY_NEW, WRITE_NEW_QUERY_NEW -> true;
+			default -> false;
+		};
+	}
 }
