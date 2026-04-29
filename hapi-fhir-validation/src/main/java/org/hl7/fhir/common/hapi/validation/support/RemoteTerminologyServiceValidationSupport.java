@@ -24,6 +24,7 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.dstu3.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -841,34 +842,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			boolean theIsDisplayMismatch,
 			IssueSeverity theDisplaySeverity,
 			AtomicBoolean theDisplayMatchSeen) {
-		return theOperationOutcome.getIssue().stream()
-				.map(issueComponent -> {
-					String diagnostics = issueComponent.getDiagnostics();
-					IssueSeverity serverSeverity =
-							IssueSeverity.fromCode(issueComponent.getSeverity().toCode());
-					boolean isDisplayIssue = theIsDisplayMismatch
-							&& (hasDisplayMismatchSignal(issueComponent.getExtension())
-									|| (issueComponent.hasDiagnosticsElement()
-											&& hasDisplayMismatchSignal(issueComponent
-													.getDiagnosticsElement()
-													.getExtension())));
-					if (isDisplayIssue) {
-						theDisplayMatchSeen.set(true);
-					}
-					IssueSeverity issueSeverity = isDisplayIssue ? theDisplaySeverity : serverSeverity;
-					String issueTypeCode = issueComponent.getCode().toCode();
-					org.hl7.fhir.dstu3.model.CodeableConcept details = issueComponent.getDetails();
-					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueTypeCode);
-					CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(details.getText());
-					details.getCoding().forEach(coding -> issueDetails.addCoding(coding.getSystem(), coding.getCode()));
-					issue.setDetails(issueDetails);
-					return issue;
-				})
+		List<IssueData> data = theOperationOutcome.getIssue().stream()
+				.map(RemoteTerminologyServiceValidationSupport::extractIssueDataDstu3)
 				.collect(Collectors.toList());
-	}
-
-	private static CodeValidationIssue createCodeValidationIssue(String theMessage) {
-		return createCodeValidationIssue(theMessage, IssueSeverity.ERROR);
+		return buildCodeValidationIssues(data, theIsDisplayMismatch, theDisplaySeverity, theDisplayMatchSeen);
 	}
 
 	private static CodeValidationIssue createCodeValidationIssue(String theMessage, IssueSeverity theSeverity) {
@@ -918,26 +895,71 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			boolean theIsDisplayMismatch,
 			IssueSeverity theDisplaySeverity,
 			AtomicBoolean theDisplayMatchSeen) {
-		return theOperationOutcome.getIssue().stream()
-				.map(issueComponent -> {
-					String diagnostics = issueComponent.getDiagnostics();
-					IssueSeverity serverSeverity =
-							IssueSeverity.fromCode(issueComponent.getSeverity().toCode());
-					boolean isDisplayIssue = theIsDisplayMismatch && isDisplayMismatchIssueR4(issueComponent);
+		List<IssueData> data = theOperationOutcome.getIssue().stream()
+				.map(RemoteTerminologyServiceValidationSupport::extractIssueDataR4)
+				.collect(Collectors.toList());
+		return buildCodeValidationIssues(data, theIsDisplayMismatch, theDisplaySeverity, theDisplayMatchSeen);
+	}
+
+	private static IssueData extractIssueDataR4(OperationOutcome.OperationOutcomeIssueComponent theIssue) {
+		CodeableConcept details = theIssue.getDetails();
+		List<CodingPair> codings = details.getCoding().stream()
+				.map(c -> new CodingPair(c.getSystem(), c.getCode()))
+				.collect(Collectors.toList());
+		return new IssueData(
+				theIssue.getDiagnostics(),
+				IssueSeverity.fromCode(theIssue.getSeverity().toCode()),
+				theIssue.getCode().toCode(),
+				details.getText(),
+				codings,
+				isDisplayMismatchIssueR4(theIssue));
+	}
+
+	private static IssueData extractIssueDataDstu3(OperationOutcomeIssueComponent theIssue) {
+		var details = theIssue.getDetails();
+		List<CodingPair> codings = details.getCoding().stream()
+				.map(c -> new CodingPair(c.getSystem(), c.getCode()))
+				.collect(Collectors.toList());
+		return new IssueData(
+				theIssue.getDiagnostics(),
+				IssueSeverity.fromCode(theIssue.getSeverity().toCode()),
+				theIssue.getCode().toCode(),
+				details.getText(),
+				codings,
+				isDisplayMismatchIssueDstu3(theIssue));
+	}
+
+	private static Collection<CodeValidationIssue> buildCodeValidationIssues(
+			List<IssueData> theIssues,
+			boolean theIsDisplayMismatch,
+			IssueSeverity theDisplaySeverity,
+			AtomicBoolean theDisplayMatchSeen) {
+		return theIssues.stream()
+				.map(data -> {
+					boolean isDisplayIssue = theIsDisplayMismatch && data.isDisplaySignal();
 					if (isDisplayIssue) {
 						theDisplayMatchSeen.set(true);
 					}
-					IssueSeverity issueSeverity = isDisplayIssue ? theDisplaySeverity : serverSeverity;
-					String issueTypeCode = issueComponent.getCode().toCode();
-					CodeableConcept details = issueComponent.getDetails();
-					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueTypeCode);
-					CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(details.getText());
-					details.getCoding().forEach(coding -> issueDetails.addCoding(coding.getSystem(), coding.getCode()));
+					IssueSeverity severity = isDisplayIssue ? theDisplaySeverity : data.serverSeverity();
+					CodeValidationIssue issue =
+							new CodeValidationIssue(data.diagnostics(), severity, data.issueTypeCode());
+					CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(data.detailsText());
+					data.codings().forEach(c -> issueDetails.addCoding(c.system(), c.code()));
 					issue.setDetails(issueDetails);
 					return issue;
 				})
 				.collect(Collectors.toList());
 	}
+
+	private record IssueData(
+			String diagnostics,
+			IssueSeverity serverSeverity,
+			String issueTypeCode,
+			String detailsText,
+			List<CodingPair> codings,
+			boolean isDisplaySignal) {}
+
+	private record CodingPair(String system, String code) {}
 
 	/**
 	 * Extension URL that indicates an OperationOutcome issue represents a display mismatch.
@@ -964,6 +986,17 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	 * a display mismatch.
 	 */
 	private static boolean isDisplayMismatchIssueR4(OperationOutcome.OperationOutcomeIssueComponent theIssue) {
+		if (hasDisplayMismatchSignal(theIssue.getExtension())) {
+			return true;
+		}
+		return theIssue.hasDiagnosticsElement()
+				&& hasDisplayMismatchSignal(theIssue.getDiagnosticsElement().getExtension());
+	}
+
+	/**
+	 * DSTU3 sibling of {@link #isDisplayMismatchIssueR4}. Same contract; see that method for details.
+	 */
+	private static boolean isDisplayMismatchIssueDstu3(OperationOutcomeIssueComponent theIssue) {
 		if (hasDisplayMismatchSignal(theIssue.getExtension())) {
 			return true;
 		}
