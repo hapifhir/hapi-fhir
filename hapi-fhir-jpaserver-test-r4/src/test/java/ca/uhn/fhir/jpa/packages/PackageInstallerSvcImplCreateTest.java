@@ -19,6 +19,7 @@ import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -411,6 +412,42 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		valueSetFromFirstIg.setCopyright(theCopyright);
 
 		return valueSetFromFirstIg;
+	}
+
+	// Created by claude-opus-4-6
+	@Test
+	void install_withNoUrlAndIdentifier_matchesByIdentifierOnReinstall() throws IOException {
+		String identifierSystem = "http://example.com/devices";
+		String identifierValue = "device-abc";
+
+		// Create the resource directly via DAO
+		Device existing = new Device();
+		existing.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		existing.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+		existing.addDeviceName().setName("Test Device").setType(Device.DeviceNameType.USERFRIENDLYNAME);
+		myDeviceDao.create(existing, REQUEST_DETAILS);
+
+		SearchParameterMap identifierSearch = SearchParameterMap.newSynchronous()
+			.add(Device.SP_IDENTIFIER, new TokenParam(identifierSystem, identifierValue));
+		IBundleProvider firstResult = myDeviceDao.search(identifierSearch, REQUEST_DETAILS);
+		assertThat(firstResult.sizeOrThrowNpe()).isEqualTo(1);
+		String firstId = firstResult.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue();
+
+		// Install via package installer — should match the existing resource by identifier
+		Device updated = new Device();
+		updated.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		updated.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+		updated.addDeviceName().setName("Updated Device").setType(Device.DeviceNameType.USERFRIENDLYNAME);
+
+		mySvc.install(updated, createInstallationSpec(packageToBytes()), new PackageInstallOutcomeJson());
+
+		IBundleProvider secondResult = myDeviceDao.search(identifierSearch, REQUEST_DETAILS);
+		assertThat(secondResult.sizeOrThrowNpe()).as("Should not create a duplicate").isEqualTo(1);
+		Device installedDevice = (Device) secondResult.getResources(0, 1).get(0);
+		assertThat(installedDevice.getIdElement().toUnqualifiedVersionless().getValue())
+			.as("Should update the same resource").isEqualTo(firstId);
+		assertThat(installedDevice.getDeviceName().get(0).getName())
+			.as("Should have updated content").isEqualTo("Updated Device");
 	}
 
 	private void install(IBaseResource theResource) throws IOException {
