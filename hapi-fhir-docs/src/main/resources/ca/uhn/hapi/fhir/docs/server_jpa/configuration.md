@@ -155,7 +155,7 @@ An interceptor called `CascadingDeleteInterceptor` may be registered against the
 Cascade delete can be combined with the `_expunge=true` parameter to both delete and immediately expunge the target resource and all resources that reference it:
 
 ```http
-DELETE /Patient/pat1?_expunge=true&_cascade=delete
+DELETE Patient?_id=P-1&_expunge=true&_cascade=delete
 ```
 
 This submits an asynchronous batch job that collects all resources referencing the target (transitively, up to the configured maximum cascade rounds) and expunges them from the database.

@@ -92,12 +92,11 @@ public class DeleteExpungeSqlBuilder {
 	 *
 	 * <p>If {@link JpaStorageSettings#isEnforceReferentialIntegrityOnDelete()} is enforced, throws
 	 * when a reference cannot be resolved. If RI is disabled, the method returns silently in all
-	 * cases &mdash; including when cascade rounds are exhausted, which can yield a partial expunge.
+	 * cases - including when cascade rounds are exhausted, which can yield a partial expunge.
 	 *
 	 * @param thePids targeted PIDs; mutated in place when {@code theCascade} is {@code true}
 	 * @param theCascade {@code true} to collect referencing resources; {@code false} to validate only
-	 * @param theCascadeMaxRounds max cascade rounds, or {@code null} for unbounded (further capped by
-	 *                            {@link JpaStorageSettings#getMaximumDeleteConflictQueryCount()})
+	 * @param theCascadeMaxRounds max cascade rounds, or {@code null} for unbounded
 	 * @throws InvalidRequestException Msg.code(822) if RI is enforced and a reference is unresolved
 	 */
 	public void validateOkToDeleteAndExpunge(Set<JpaPid> thePids, boolean theCascade, Integer theCascadeMaxRounds) {
