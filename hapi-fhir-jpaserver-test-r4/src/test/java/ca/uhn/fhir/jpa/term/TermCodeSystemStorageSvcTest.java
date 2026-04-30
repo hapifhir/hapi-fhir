@@ -32,7 +32,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 
 	@Test
-	public void testStoreNewCodeSystemVersionForExistingCodeSystemNoVersionId() {
+	public void storeNewCodeSystemVersionForExistingCodeSystem_withoutVersion() {
 		CodeSystem firstUpload = createCodeSystemWithMoreThan100Concepts();
 		CodeSystem duplicateUpload = createCodeSystemWithMoreThan100Concepts();
 
@@ -51,7 +51,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 
 	@Test
-	public void testStoreNewCodeSystemVersionForExistingCodeSystemVersionId() {
+	public void storeNewCodeSystemVersionForExistingCodeSystem_withVersion() {
 		CodeSystem firstUpload = createCodeSystemWithMoreThan100Concepts();
 		firstUpload.setVersion("1");
 
@@ -276,29 +276,13 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 	@Test
 	void storeNewCodeSystemVersionIfNeeded_rewriteIntoExistingVersionSlot_shouldNotThrow() {
-		final CodeSystem unversioned = new CodeSystem();
-		unversioned.setUrl(URL_MY_CODE_SYSTEM);
-		unversioned.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		unversioned.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		unversioned.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("a")));
-		final JpaPid unversionedPid = ((ResourceTable)myCodeSystemDao.create(unversioned, mySrd).getEntity()).getId();
+		final JpaPid unversionedPid = createCs(makeCompleteCs(null, "a"));
 
 		final String version = "1.0.0";
-		final CodeSystem versioned = new CodeSystem();
-		versioned.setUrl(URL_MY_CODE_SYSTEM);
-		versioned.setVersion(version);
-		versioned.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		versioned.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		versioned.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("b")));
-		final IIdType versionedId = myCodeSystemDao.create(versioned, mySrd).getId().toUnqualifiedVersionless();
+		final IIdType versionedId = myCodeSystemDao.create(makeCompleteCs(version, "b"), mySrd).getId().toUnqualifiedVersionless();
 
-		final CodeSystem rewrite = new CodeSystem();
+		final CodeSystem rewrite = makeCompleteCs(null, "b-updated");
 		rewrite.setId(versionedId);
-		rewrite.setUrl(URL_MY_CODE_SYSTEM);
-		rewrite.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		rewrite.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		rewrite.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("b-updated")));
-
 		final JpaPid rewritePid = ((ResourceTable) myCodeSystemDao.update(rewrite, mySrd).getEntity()).getId();
 
 		// Verify: TermCodeSystem and TermCodeSystemVersion both point to the second resource
@@ -322,9 +306,54 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 			assertThat(hasActiveTermVersion(rewritePid)).isTrue();
 
 			// check that the unversioned CodeSystem has TermCodeSystemVersion as well
-			// this cannot be supported at the moment and requires a design change and migration as well
-			// assertThat(hasActiveTermVersion(unversionedPid)).isFalse();
+			assertThat(hasActiveTermVersion(unversionedPid)).isFalse();
 		});
+	}
+
+	/**
+	 * DAO mirror of {@code install_singleVersionPackageUpdatesResourceConflictingWithOlderVersionSlot_succeeds}.
+	 * Resource A owns slot ("1"), B owns ("2"). Updating B to claim "1" exercises the
+	 * {@code isUpdate} branch of {@code tryReleaseConflictingVersionRow} — A's slot is released.
+	 */
+	// Created by claude-sonnet-4-6
+	@Test
+	void storeNewCodeSystemVersionIfNeeded_updateClaimsSlotOwnedByOtherResource_releasesSlot() {
+		final String version1 = "1";
+		final String version2 = "2";
+
+		final JpaPid pidA = createCs(makeCompleteCs(version1, "a"));
+		final IIdType bId = myCodeSystemDao.create(makeCompleteCs(version2, "b"), mySrd).getId().toUnqualifiedVersionless();
+
+		final CodeSystem rewrite = makeCompleteCs(version1, "b-updated");
+		rewrite.setId(bId);
+		final JpaPid pidB = ((ResourceTable) myCodeSystemDao.update(rewrite, mySrd).getEntity()).getId();
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri(URL_MY_CODE_SYSTEM);
+			assertThat(tcs).isNotNull();
+			TermCodeSystemVersion slot = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(tcs.getPid(), version1);
+			assertThat(slot).isNotNull();
+			assertThat(slot.getResource().getId()).isEqualTo(pidB);
+			assertThat(hasActiveTermVersion(pidA)).isFalse();
+		});
+	}
+
+	// Created by claude-sonnet-4-6
+	private CodeSystem makeCompleteCs(String theVersion, String theConceptCode) {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		if (theVersion != null) {
+			cs.setVersion(theVersion);
+		}
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType(theConceptCode)));
+		return cs;
+	}
+
+	// Created by claude-sonnet-4-6
+	private JpaPid createCs(CodeSystem theCs) {
+		return ((ResourceTable) myCodeSystemDao.create(theCs, mySrd).getEntity()).getId();
 	}
 
 	private boolean hasActiveTermVersion(JpaPid theCodeSystemResoucePid) {
