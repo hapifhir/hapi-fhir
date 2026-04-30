@@ -2,4 +2,4 @@
 type: add
 issue: 7694
 title: "The TransactionDetails object now holds the current FHIR transaction
-   request Bundle, if any. Thanks to Eliott Lavy for contributing!"
+   request Bundle, if any. Thanks to Elliott Lavy for contributing!"
