@@ -112,11 +112,23 @@ public interface ITermCodeSystemStorageSvc {
 	 */
 	StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(String theCodeSystemUrl, String theVersionId);
 
+	UploadStatistics uploadCodeSystemConcepts(IBaseResource theCodeSystem);
+
+	/**
+	 * Takes a CodeSystemVersion that is being staged (see {@link #startStagingCodeSystemVersion(String, String)})
+	 * and activates it so that it can be used for code validation.
+	 *
+	 * @param theCodeSystemUrl The code system URL
+	 * @param theStagingVersionId The staging version ID
+	 * @param theMakeCurrent Should the given version be made the current version?
+	 * @since 8.12.0
+	 */
+	void activateStagingCodeSystemVersion(String theCodeSystemUrl, String theStagingVersionId, boolean theMakeCurrent);
+
+
 	/**
 	 * @param stagingVersionId A temporary ID associated with the version that is being staged
 	 */
 	record StartStagingCodeSystemVersionResponse(String stagingVersionId) {}
-
-	UploadStatistics uploadCodeSystemConcepts(IBaseResource theCodeSystem);
 
 }

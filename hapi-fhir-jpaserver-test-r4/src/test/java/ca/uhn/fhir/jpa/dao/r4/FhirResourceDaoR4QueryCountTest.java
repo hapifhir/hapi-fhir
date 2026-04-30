@@ -150,7 +150,6 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.in;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -287,11 +286,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
-		# AlreadyExisting , ExpectSelectCount , ExpectInsertCount
-		true              , 8                 , 10
-		false             , 5                 , 25
+		# AlreadyExisting , ExpectSelectCount , ExpectInsertCount , ExpectUpdateCount
+		true              , 8                 , 0                 , 10
+		false             , 5                 , 25                , 0
 		""")
-	void testCodeSystem(boolean theAlreadyExisting, int theExpectSelectCount, int theExpectInsertCount) {
+	void testCodeSystem(boolean theAlreadyExisting, int theExpectSelectCount, int theExpectInsertCount, int theExpectUpdateCount) {
 		// Setup
 		createCodeSystem(withUrl("http://foo"), withCodeSystemContent("not-present"));
 
@@ -333,6 +332,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			onCurrentThread()
 				.selectCount(theExpectSelectCount)
 				.insertCount(theExpectInsertCount)
+				.updateCount(theExpectUpdateCount)
 				.commitCount(1)
 				.noOtherCounts()
 		);
