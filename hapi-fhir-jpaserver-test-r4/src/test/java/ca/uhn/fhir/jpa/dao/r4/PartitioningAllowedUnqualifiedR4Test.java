@@ -199,14 +199,15 @@ public class PartitioningAllowedUnqualifiedR4Test extends BasePartitioningR4Test
 		addNextTargetPartitionForReadAllPartitions();
 		addNextTargetPartitionForReadAllPartitions();
 
-		// Test / Verify
+		// Test - unqualified reference should succeed by falling back to
+		// the search parameter's declared target types for partition resolution
+		// (GL-8588: previously threw HAPI-2870)
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(AuditEvent.SP_ENTITY, new ReferenceParam("A"));
 
-		assertThatThrownBy(()->myAuditEventDao.search(map, mySrd))
-			.isInstanceOf(InvalidRequestException.class)
-			.hasMessageContaining("Parameter \"entity\" must be in the format [resourceType]/[id]");
+		IBundleProvider results = myAuditEventDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(results)).isEmpty();
 	}
 
 
