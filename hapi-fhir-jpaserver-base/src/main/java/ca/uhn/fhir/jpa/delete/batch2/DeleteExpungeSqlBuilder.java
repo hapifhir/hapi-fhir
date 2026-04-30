@@ -155,6 +155,10 @@ public class DeleteExpungeSqlBuilder {
 		}
 
 		if (!myStorageSettings.isEnforceReferentialIntegrityOnDelete()) {
+			ourLog.warn(
+					"Cascade rounds exhausted ({}) with referential integrity on delete disabled. "
+							+ "Some referencing resources were not included in the expunge batch.",
+					theCascadeMaxRounds);
 			return;
 		}
 
