@@ -1,0 +1,7 @@
+---
+type: add
+issue: 7974
+title: "GenerateMdmMetricsParameters now accepts an optional RequestPartitionId, allowing
+  MDM metric generation to be scoped to specific partitions. When a partition ID is provided,
+  the underlying DAO searches are restricted to that partition. When no partition ID is
+  provided, behavior is unchanged."
