@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.packages.loader;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.packages.FakeNpmServlet;
 import ca.uhn.fhir.jpa.packages.util.PackageUtils;
@@ -22,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -30,9 +29,9 @@ public class PackageLoaderSvcIT {
 
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
-	private FakeNpmServlet myFakeNpmServlet = new FakeNpmServlet();
-	private PackageLoaderSvc myPackageLoaderSvc = new PackageLoaderSvc();
-	private PackageResourceParsingSvc myResourceParsingSvc = new PackageResourceParsingSvc(myFhirContext);
+	private final FakeNpmServlet myFakeNpmServlet = new FakeNpmServlet();
+	private final PackageLoaderSvc myPackageLoaderSvc = new PackageLoaderSvc();
+	private final PackageResourceParsingSvc myResourceParsingSvc = new PackageResourceParsingSvc(myFhirContext);
 
 	@RegisterExtension
 	public HttpServletExtension myServer = new HttpServletExtension()
