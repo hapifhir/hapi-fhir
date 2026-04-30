@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 7830
+jira: SMILE-10634
+title: "Previously, validating an `ExplanationOfBenefit` resource would produce a false-positive
+  error \"Found a reference to a `CodeSystem` where a `ValueSet` belongs\" on the `priority` field.
+  This occurred because the R4 validation resources contained an incorrect binding URL pointing
+  to a `CodeSystem` instead of the correct `ValueSet` for `ExplanationOfBenefit.priority`
+  (https://jira.hl7.org/browse/FHIR-27949). The binding URL has been corrected to use the
+  proper `ValueSet` URL, eliminating the spurious validation error."
