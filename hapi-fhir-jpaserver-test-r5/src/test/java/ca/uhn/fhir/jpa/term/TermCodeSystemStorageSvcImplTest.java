@@ -18,6 +18,7 @@ import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
@@ -48,9 +50,43 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 	@Autowired
 	private ITermCodeSystemVersionDao myCodeSystemVersionDao;
 
+	@CsvSource(textBlock = """
+		# VersionToStage , MakeCurrent
+		A                , true
+		A                , false
+		B                , true
+		B                , false
+		""")
+	void activateStagingCodeSystemVersion(String theVersionToStage) {
+		createCodeSystem(withUrl("http://foo"), withVersion("A"), withCodeSystemContent("not-present"));
+		runInTransaction(()->{
+			TermCodeSystemVersion csv = myCodeSystemVersionDao.findByCodeSystemUriAndVersion("http://foo", "A");
+			assertNotNull(csv);
+			assertSame(csv, csv.getCodeSystem().getCurrentVersion());
+		});
+
+		String stagingVersionId = mySvc.startStagingCodeSystemVersion("http://foo", theVersionToStage).stagingVersionId();
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://foo");
+		codeSystem.setVersion(stagingVersionId);
+		codeSystem.addConcept().setCode("CODE-A").setDisplay("Display-A");
+		mySvc.uploadCodeSystemConcepts(codeSystem);
+
+		// Test
+		mySvc.activateStagingCodeSystemVersion("http://foo", stagingVersionId, true);
+
+		// Verify
+		runInTransaction(()->{
+			TermCodeSystemVersion csv = myCodeSystemVersionDao.findByCodeSystemUriAndVersion("http://foo", "B");
+			assertNotNull(csv);
+			assertThat(csv.getConcepts()).hasSize(1);
+			assertSame(csv, csv.getCodeSystem().getCurrentVersion());
+		});
+	}
+
 
 	@Test
-	public void testStoreNewCodeSystemVersionForExistingCodeSystemNoVersionId() {
+	void testStoreNewCodeSystemVersionForExistingCodeSystemNoVersionId() {
 		CodeSystem firstUpload = createCodeSystemWithMoreThan100Concepts();
 		CodeSystem duplicateUpload = createCodeSystemWithMoreThan100Concepts();
 
@@ -69,7 +105,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 
 
 	@Test
-	public void testStoreNewCodeSystemVersionForExistingCodeSystemVersionId() {
+	void testStoreNewCodeSystemVersionForExistingCodeSystemVersionId() {
 		CodeSystem firstUpload = createCodeSystemWithMoreThan100Concepts();
 		firstUpload.setVersion("1");
 

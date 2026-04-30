@@ -505,9 +505,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				 * multiple CodeSystem resources with CodeSystem.version set differently (as opposed to
 				 * multiple versions of the same CodeSystem, where CodeSystem.meta.versionId is different)
 				 */
-				next.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
-				myCodeSystemVersionDao.saveAndFlush(next);
-				myDeferredStorageSvc.deleteCodeSystemVersion(next);
+				deleteCodeSystemVersion(next);
 			}
 		}
 
@@ -585,6 +583,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		if (isMakeVersionCurrent) {
 			myTerminologySvc.updateCodeSystemVersionCache(theSystemUri, codeSystemToStore);
 		}
+	}
+
+	private void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+		HapiTransactionService.requireTransaction();
+
+		theCodeSystemVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
+		myCodeSystemVersionDao.saveAndFlush(theCodeSystemVersion);
+		myDeferredStorageSvc.deleteCodeSystemVersion(theCodeSystemVersion);
 	}
 
 	private TermCodeSystemVersion getExistingTermCodeSystemVersion(
@@ -990,6 +996,42 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			return addConceptsToCodeSystemVersion(codeSystemVersionEntity, additions);
 		});
 
+	}
+
+	@Override
+	public void activateStagingCodeSystemVersion(String theCodeSystemUrl, String theStagingVersionId, boolean theMakeCurrent) {
+		Validate.notBlank(theCodeSystemUrl, "theCodeSystemUrl must not be blank");
+		Validate.notBlank(theStagingVersionId, "theStagingVersionId must not be blank");
+
+		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			TermCodeSystemVersion stagingCodeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theCodeSystemUrl, theStagingVersionId);
+			Validate.notNull(stagingCodeSystemVersionEntity, "CodeSystemVersion not found: [url=%s, versionId=%s]", theCodeSystemUrl, theStagingVersionId);
+
+			ourLog.info("Activating staging CodeSystemVersion[url={}, versionId={}] with staging version: {}", theCodeSystemUrl, stagingCodeSystemVersionEntity.getCodeSystemIntendedVersionId(), theStagingVersionId);
+
+			String intendedVersion = stagingCodeSystemVersionEntity.getCodeSystemIntendedVersionId();
+			if (isBlank(intendedVersion)) {
+				// FIXME: add code
+				throw new PreconditionFailedException(Msg.code(1) + "CodeSystem[url=%s, versionId=%s] is not currently being staged. Can not activate.");
+			}
+
+			TermCodeSystemVersion existingCodeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theCodeSystemUrl, intendedVersion);
+			boolean deleteExistingVersion = existingCodeSystemVersionEntity != null;
+			if (deleteExistingVersion) {
+				ourLog.info("Deleting existing CodeSystemVersion[url={}, versionId={}] with PID[{}] in order to activate staging version: {}", intendedVersion, theCodeSystemUrl, existingCodeSystemVersionEntity.getId(), theStagingVersionId);
+				deleteCodeSystemVersion(existingCodeSystemVersionEntity);
+			}
+
+			stagingCodeSystemVersionEntity.setCodeSystemVersionId(stagingCodeSystemVersionEntity.getCodeSystemIntendedVersionId());
+			stagingCodeSystemVersionEntity.setCodeSystemIntendedVersionId(null);
+			stagingCodeSystemVersionEntity = myEntityManager.merge(stagingCodeSystemVersionEntity);
+
+			if (theMakeCurrent) {
+				TermCodeSystem codeSystem = stagingCodeSystemVersionEntity.getCodeSystem();
+				codeSystem.setCurrentVersion(stagingCodeSystemVersionEntity);
+				myEntityManager.merge(codeSystem);
+			}
+		});
 	}
 
 	private TermConcept uploadCodeSystemConceptAndChildren(CodeSystem.ConceptDefinitionComponent theSourceConcept, TermConcept theParentConcept) {
