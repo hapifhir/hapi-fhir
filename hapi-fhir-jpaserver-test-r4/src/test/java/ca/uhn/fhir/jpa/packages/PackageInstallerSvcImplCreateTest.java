@@ -416,7 +416,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 	// Created by claude-opus-4-6
 	@Test
-	void install_withNoUrlAndIdentifier_matchesByIdentifierOnReinstall() throws IOException {
+	void install_withNoUrlAndIdentifier_matchesByIdentifier() throws IOException {
 		String identifierSystem = "http://example.com/devices";
 		String identifierValue = "device-abc";
 
