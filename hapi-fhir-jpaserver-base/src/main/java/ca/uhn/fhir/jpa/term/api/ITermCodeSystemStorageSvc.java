@@ -102,15 +102,28 @@ public interface ITermCodeSystemStorageSvc {
 	int saveConcept(TermConcept theNextConcept);
 
 	/**
-	 * Prepares a code system version for staging, meaning that it is ready to begin acceping
+	 * Prepares a code system version for staging, meaning that it is ready to begin accepting
 	 * new codes, properties, relationships, etc. This method will create the new version
 	 * if one does not already exist but will leave the existing one untouched if it does.
 	 * <p>
-	 * The new version will not be activated if it is not already active.
+	 * The new version will not be activated if it is not already active, meaning that you can
+	 * add codes through one or more calls to {@link #uploadCodeSystemConcepts(IBaseResource)}
+	 * without those new codes being available for validation. Once all codes have been staged,
+	 * you can activate the new version by calling {@link #activateStagingCodeSystemVersion(String, String, boolean)}.
 	 * </p>
+	 *
+	 * @since 8.12.0
 	 */
 	StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(String theCodeSystemUrl, String theVersionId);
 
+	/**
+	 * Uploads concepts from a CodeSystem resource to the database. This method uses a CodeSystem
+	 * resource as the transport container for the concepts, but does not actually store the
+	 * actual CodeSystem resource, it just adds the concepts to the terminology database. The
+	 * {@literal CodeSystem.url} and {@literal CodeSystem.version} properties must be populated.
+	 *
+	 * @since 8.12.0
+	 */
 	UploadStatistics uploadCodeSystemConcepts(IBaseResource theCodeSystem);
 
 	/**
