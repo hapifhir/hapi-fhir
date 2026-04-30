@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -125,10 +124,8 @@ public interface ITermCodeSystemStorageSvc {
 	 */
 	void activateStagingCodeSystemVersion(String theCodeSystemUrl, String theStagingVersionId, boolean theMakeCurrent);
 
-
 	/**
 	 * @param stagingVersionId A temporary ID associated with the version that is being staged
 	 */
 	record StartStagingCodeSystemVersionResponse(String stagingVersionId) {}
-
 }

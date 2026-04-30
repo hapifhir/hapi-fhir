@@ -140,12 +140,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init_8_12_0() {
 		Builder version = forVersion(VersionEnum.V8_12_0);
 
-		version
-			.onTable(TermCodeSystemVersion.TRM_CODESYSTEM_VER)
-			.addColumn("20260427.10", "CS_INTENDED_VERSION_ID")
-			.nullable()
-			.type(ColumnTypeEnum.STRING, 200);
-
+		version.onTable(TermCodeSystemVersion.TRM_CODESYSTEM_VER)
+				.addColumn("20260427.10", "CS_INTENDED_VERSION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 200);
 	}
 
 	protected void init_8_10_0() {

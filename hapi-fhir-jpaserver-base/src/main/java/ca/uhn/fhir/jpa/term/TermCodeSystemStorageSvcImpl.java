@@ -55,7 +55,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -186,7 +185,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Nonnull
-	private UploadStatistics addConceptsToCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion, CustomTerminologySet theAdditions) {
+	private UploadStatistics addConceptsToCodeSystemVersion(
+			TermCodeSystemVersion theCodeSystemVersion, CustomTerminologySet theAdditions) {
 		HapiTransactionService.requireTransaction();
 
 		TermCodeSystem cs = theCodeSystemVersion.getCodeSystem();
@@ -210,9 +210,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Set<String> codes = findAllCodes(theAdditions);
 		if (!codes.isEmpty()) {
 			QueryChunker.chunk(codes, codesSubList -> {
-				List<TermConcept> conceptsSubList = myConceptDao.findByCodeSystemAndCodeList(theCodeSystemVersion.getPid(), codesSubList);
+				List<TermConcept> conceptsSubList =
+						myConceptDao.findByCodeSystemAndCodeList(theCodeSystemVersion.getPid(), codesSubList);
 
-				List<TermConcept.TermConceptPk> conceptIds = conceptsSubList.stream().map(TermConcept::getPid).toList();
+				List<TermConcept.TermConceptPk> conceptIds =
+						conceptsSubList.stream().map(TermConcept::getPid).toList();
 				if (!conceptIds.isEmpty()) {
 					myConceptDao.fetchConceptsAndDesignationsByConceptPids(conceptIds);
 					myConceptDao.fetchConceptsAndPropertiesByConceptPids(conceptIds);
@@ -334,7 +336,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	public void storeNewCodeSystemVersionIfNeeded(
-		IBaseResource theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails) {
+			IBaseResource theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails) {
 		HapiTransactionService.requireTransaction();
 
 		CodeSystem codeSystem = myVersionCanonicalizer.codeSystemToCanonical(theCodeSystem);
@@ -613,18 +615,22 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	private void addConceptInHierarchy(
-		TermCodeSystemVersion theCsv,
-		Collection<String> theParentCodes,
-		TermConcept theSourceConcept,
-		UploadStatistics theStatisticsTracker,
-		Map<String, TermConcept> theCodeToConcept,
-		int theSequence,
-		TermConcept theParentConcept) {
+			TermCodeSystemVersion theCsv,
+			Collection<String> theParentCodes,
+			TermConcept theSourceConcept,
+			UploadStatistics theStatisticsTracker,
+			Map<String, TermConcept> theCodeToConcept,
+			int theSequence,
+			TermConcept theParentConcept) {
 
 		String parentDescription = "(root concept)"; // FIXME: make accurate
 
 		ourLog.info(
-				"Saving concept[{}] count {} at index {} with parent {}", theSourceConcept.getCode(), theStatisticsTracker.getUpdatedConceptCount(), theSequence, parentDescription);
+				"Saving concept[{}] count {} at index {} with parent {}",
+				theSourceConcept.getCode(),
+				theStatisticsTracker.getUpdatedConceptCount(),
+				theSequence,
+				parentDescription);
 
 		TermConcept targetConcept = theCodeToConcept.get(theSourceConcept.getCode());
 		List<TermConceptParentChildLink> existingParentLinks;
@@ -743,11 +749,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						+ "\" to unknown parent: " + nextParentCode);
 			}
 
-			TermConceptParentChildLink parentChildLink = nextParentOpt.addChild(targetConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+			TermConceptParentChildLink parentChildLink =
+					nextParentOpt.addChild(targetConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
 			myEntityManager.persist(parentChildLink);
 			theStatisticsTracker.incrementConceptLinksAddedCount();
 		}
-
 
 		ourLog.trace("About to save parent-child links");
 
@@ -756,7 +762,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		for (TermConceptParentChildLink nextChildConceptLink : theSourceConcept.getChildren()) {
 			TermConcept nextChild = nextChildConceptLink.getChild();
 
-			addConceptInHierarchy(theCsv, Set.of(theSourceConcept.getCode()), nextChild, theStatisticsTracker, theCodeToConcept, childIndex, targetConcept);
+			addConceptInHierarchy(
+					theCsv,
+					Set.of(theSourceConcept.getCode()),
+					nextChild,
+					theStatisticsTracker,
+					theCodeToConcept,
+					childIndex,
+					targetConcept);
 
 			childIndex++;
 		}
@@ -953,9 +966,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Override
-	public StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(String theCodeSystemUrl, String theVersionId) {
+	public StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(
+			String theCodeSystemUrl, String theVersionId) {
 		Validate.notBlank(theCodeSystemUrl, "theCodeSystemUrl must not be blank");
-		Validate.isTrue(!theCodeSystemUrl.contains("|"), "theCodeSystemUrl must not be versioned: %s", theCodeSystemUrl);
+		Validate.isTrue(
+				!theCodeSystemUrl.contains("|"), "theCodeSystemUrl must not be versioned: %s", theCodeSystemUrl);
 
 		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
 			TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystemUrl);
@@ -967,7 +982,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			version.setCodeSystemIntendedVersionId(theVersionId);
 			version.setCodeSystem(codeSystem);
 			version = myCodeSystemVersionDao.saveAndFlush(version);
-			ourLog.info("Created new CodeSystemVersion[url={}, version={}] for writing with PID: {}", theVersionId, theCodeSystemUrl, version.getId());
+			ourLog.info(
+					"Created new CodeSystemVersion[url={}, version={}] for writing with PID: {}",
+					theVersionId,
+					theCodeSystemUrl,
+					version.getId());
 
 			return new StartStagingCodeSystemVersionResponse(version.getCodeSystemVersionId());
 		});
@@ -983,9 +1002,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(systemVersionId, "CodeSystem version must not be blank");
 
 		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
-
-			TermCodeSystemVersion codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemUriAndVersion(systemUrl, systemVersionId);
-			ValidateUtil.isTrueOrThrowInvalidRequest(codeSystemVersionEntity != null, "CodeSystemVersion not found: [url=%s, versionId=%s]", systemUrl, systemVersionId);
+			TermCodeSystemVersion codeSystemVersionEntity =
+					myCodeSystemVersionDao.findByCodeSystemUriAndVersion(systemUrl, systemVersionId);
+			ValidateUtil.isTrueOrThrowInvalidRequest(
+					codeSystemVersionEntity != null,
+					"CodeSystemVersion not found: [url=%s, versionId=%s]",
+					systemUrl,
+					systemVersionId);
 
 			CustomTerminologySet additions = new CustomTerminologySet();
 			for (CodeSystem.ConceptDefinitionComponent sourceConcept : codeSystem.getConcept()) {
@@ -995,34 +1018,51 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			return addConceptsToCodeSystemVersion(codeSystemVersionEntity, additions);
 		});
-
 	}
 
 	@Override
-	public void activateStagingCodeSystemVersion(String theCodeSystemUrl, String theStagingVersionId, boolean theMakeCurrent) {
+	public void activateStagingCodeSystemVersion(
+			String theCodeSystemUrl, String theStagingVersionId, boolean theMakeCurrent) {
 		Validate.notBlank(theCodeSystemUrl, "theCodeSystemUrl must not be blank");
 		Validate.notBlank(theStagingVersionId, "theStagingVersionId must not be blank");
 
 		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
-			TermCodeSystemVersion stagingCodeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theCodeSystemUrl, theStagingVersionId);
-			Validate.notNull(stagingCodeSystemVersionEntity, "CodeSystemVersion not found: [url=%s, versionId=%s]", theCodeSystemUrl, theStagingVersionId);
+			TermCodeSystemVersion stagingCodeSystemVersionEntity =
+					myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theCodeSystemUrl, theStagingVersionId);
+			Validate.notNull(
+					stagingCodeSystemVersionEntity,
+					"CodeSystemVersion not found: [url=%s, versionId=%s]",
+					theCodeSystemUrl,
+					theStagingVersionId);
 
-			ourLog.info("Activating staging CodeSystemVersion[url={}, versionId={}] with staging version: {}", theCodeSystemUrl, stagingCodeSystemVersionEntity.getCodeSystemIntendedVersionId(), theStagingVersionId);
+			ourLog.info(
+					"Activating staging CodeSystemVersion[url={}, versionId={}] with staging version: {}",
+					theCodeSystemUrl,
+					stagingCodeSystemVersionEntity.getCodeSystemIntendedVersionId(),
+					theStagingVersionId);
 
 			String intendedVersion = stagingCodeSystemVersionEntity.getCodeSystemIntendedVersionId();
 			if (isBlank(intendedVersion)) {
 				// FIXME: add code
-				throw new PreconditionFailedException(Msg.code(1) + "CodeSystem[url=%s, versionId=%s] is not currently being staged. Can not activate.");
+				throw new PreconditionFailedException(Msg.code(1)
+						+ "CodeSystem[url=%s, versionId=%s] is not currently being staged. Can not activate.");
 			}
 
-			TermCodeSystemVersion existingCodeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theCodeSystemUrl, intendedVersion);
+			TermCodeSystemVersion existingCodeSystemVersionEntity =
+					myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theCodeSystemUrl, intendedVersion);
 			boolean deleteExistingVersion = existingCodeSystemVersionEntity != null;
 			if (deleteExistingVersion) {
-				ourLog.info("Deleting existing CodeSystemVersion[url={}, versionId={}] with PID[{}] in order to activate staging version: {}", intendedVersion, theCodeSystemUrl, existingCodeSystemVersionEntity.getId(), theStagingVersionId);
+				ourLog.info(
+						"Deleting existing CodeSystemVersion[url={}, versionId={}] with PID[{}] in order to activate staging version: {}",
+						intendedVersion,
+						theCodeSystemUrl,
+						existingCodeSystemVersionEntity.getId(),
+						theStagingVersionId);
 				deleteCodeSystemVersion(existingCodeSystemVersionEntity);
 			}
 
-			stagingCodeSystemVersionEntity.setCodeSystemVersionId(stagingCodeSystemVersionEntity.getCodeSystemIntendedVersionId());
+			stagingCodeSystemVersionEntity.setCodeSystemVersionId(
+					stagingCodeSystemVersionEntity.getCodeSystemIntendedVersionId());
 			stagingCodeSystemVersionEntity.setCodeSystemIntendedVersionId(null);
 			stagingCodeSystemVersionEntity = myEntityManager.merge(stagingCodeSystemVersionEntity);
 
@@ -1034,7 +1074,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		});
 	}
 
-	private TermConcept uploadCodeSystemConceptAndChildren(CodeSystem.ConceptDefinitionComponent theSourceConcept, TermConcept theParentConcept) {
+	private TermConcept uploadCodeSystemConceptAndChildren(
+			CodeSystem.ConceptDefinitionComponent theSourceConcept, TermConcept theParentConcept) {
 		TermConcept targetConcept = new TermConcept();
 		targetConcept.setCode(theSourceConcept.getCode());
 		targetConcept.setDisplay(theSourceConcept.getDisplay());
@@ -1092,13 +1133,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 	}
 
-	public static void populateTermConceptPropertyValue(CodeSystem.ConceptPropertyComponent theConceptPropertyComponent, TermConceptProperty theStorageProperty) {
+	public static void populateTermConceptPropertyValue(
+			CodeSystem.ConceptPropertyComponent theConceptPropertyComponent, TermConceptProperty theStorageProperty) {
 		if (theConceptPropertyComponent.getValue() instanceof CodeType) {
 			theStorageProperty.setType(TermConceptPropertyTypeEnum.CODE);
 			theStorageProperty.setValue(((CodeType) theConceptPropertyComponent.getValue()).getValueAsString());
 		} else if (theConceptPropertyComponent.getValue() instanceof StringType) {
 			theStorageProperty.setType(TermConceptPropertyTypeEnum.STRING);
-			theStorageProperty.setValue(theConceptPropertyComponent.getValueStringType().getValue());
+			theStorageProperty.setValue(
+					theConceptPropertyComponent.getValueStringType().getValue());
 		} else if (theConceptPropertyComponent.getValue() instanceof BooleanType) {
 			theStorageProperty.setType(TermConceptPropertyTypeEnum.BOOLEAN);
 			theStorageProperty.setValue(((BooleanType) theConceptPropertyComponent.getValue()).getValueAsString());
@@ -1119,7 +1162,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			theStorageProperty.setDisplay(nextCoding.getDisplay());
 		} else if (theConceptPropertyComponent.getValue() != null) {
 			// FIXME: add code
-			throw new InvalidRequestException("Don't know how to handle concept properties of type: " + theConceptPropertyComponent.getValue().getClass());
+			throw new InvalidRequestException("Don't know how to handle concept properties of type: "
+					+ theConceptPropertyComponent.getValue().getClass());
 		}
 	}
 
@@ -1129,9 +1173,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		public DesignationKey(CodeSystem.ConceptDefinitionDesignationComponent theDesignation) {
-			this(theDesignation.getLanguage(), theDesignation.hasUse() ? theDesignation.getUse().getSystem() : null, theDesignation.hasUse() ? theDesignation.getUse().getCode() : null);
+			this(
+					theDesignation.getLanguage(),
+					theDesignation.hasUse() ? theDesignation.getUse().getSystem() : null,
+					theDesignation.hasUse() ? theDesignation.getUse().getCode() : null);
 		}
-
 	}
-
 }

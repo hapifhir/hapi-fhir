@@ -113,6 +113,7 @@ public class TermConcept implements Serializable {
 	public static final int MAX_DESC_LENGTH = 400;
 	public static final int MAX_DISP_LENGTH = 500;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
+
 	@Serial
 	private static final long serialVersionUID = 1L;
 
@@ -610,7 +611,6 @@ public class TermConcept implements Serializable {
 	public PartitionablePartitionId getPartitionId() {
 		return PartitionablePartitionId.with(myPartitionIdValue, null);
 	}
-
 
 	public static class TermConceptPkValueBridge implements ValueBridge<TermConceptPk, Long> {
 		@Override

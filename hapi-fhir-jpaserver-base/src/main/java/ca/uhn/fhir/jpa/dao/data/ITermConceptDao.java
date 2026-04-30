@@ -45,25 +45,21 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, TermConcept.
 			+ "WHERE t.myCodeSystemVersionPid = :pid")
 	List<TermConcept> fetchConceptsAndPropertiesByVersionPid(@Param("pid") Long theCodeSystemVersionPid);
 
-	@Query("SELECT t FROM TermConcept t " +
-		"LEFT JOIN FETCH t.myDesignations d " +
-		"WHERE t.myId IN (:pids)")
-	List<TermConcept> fetchConceptsAndDesignationsByConceptPids(@Param("pids") Collection<TermConcept.TermConceptPk> theConceptPids);
+	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myDesignations d " + "WHERE t.myId IN (:pids)")
+	List<TermConcept> fetchConceptsAndDesignationsByConceptPids(
+			@Param("pids") Collection<TermConcept.TermConceptPk> theConceptPids);
 
-	@Query("SELECT t FROM TermConcept t " +
-		"LEFT JOIN FETCH t.myProperties d " +
-		"WHERE t.myId IN (:pids)")
-	List<TermConcept> fetchConceptsAndPropertiesByConceptPids(@Param("pids") Collection<TermConcept.TermConceptPk> theConceptPids);
+	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myProperties d " + "WHERE t.myId IN (:pids)")
+	List<TermConcept> fetchConceptsAndPropertiesByConceptPids(
+			@Param("pids") Collection<TermConcept.TermConceptPk> theConceptPids);
 
-	@Query("SELECT t FROM TermConcept t " +
-		"LEFT JOIN FETCH t.myParents d " +
-		"WHERE t.myId IN (:pids)")
-	List<TermConcept> fetchConceptsAndParentLinksByConceptPids(@Param("pids") Collection<TermConcept.TermConceptPk> theConceptPids);
+	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myParents d " + "WHERE t.myId IN (:pids)")
+	List<TermConcept> fetchConceptsAndParentLinksByConceptPids(
+			@Param("pids") Collection<TermConcept.TermConceptPk> theConceptPids);
 
-	@Query("SELECT t FROM TermConcept t " +
-		"LEFT JOIN FETCH t.myChildren d " +
-		"WHERE t.myId IN (:pids)")
-	List<TermConcept> fetchConceptsAndChildLinksByConceptPids(@Param("pids") Collection<TermConcept.TermConceptPk> theConceptPids);
+	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myChildren d " + "WHERE t.myId IN (:pids)")
+	List<TermConcept> fetchConceptsAndChildLinksByConceptPids(
+			@Param("pids") Collection<TermConcept.TermConceptPk> theConceptPids);
 
 	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
