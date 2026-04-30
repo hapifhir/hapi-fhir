@@ -208,13 +208,23 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		// Fetch any existing concepts matching codes to be added
 		Set<String> codes = findAllCodes(theAdditions);
-		QueryChunker.chunk(codes, codesSubList -> {
-			List<TermConcept> conceptsSubList = myConceptDao.findByCodeSystemAndCodeList(theCodeSystemVersion.getPid(), codesSubList);
-			for (TermConcept concept : conceptsSubList) {
-				codeToConcept.put(concept.getCode(), concept);
-			}
-		});
-		// FIXME: prefetch properties and designations if we have any to write
+		if (!codes.isEmpty()) {
+			QueryChunker.chunk(codes, codesSubList -> {
+				List<TermConcept> conceptsSubList = myConceptDao.findByCodeSystemAndCodeList(theCodeSystemVersion.getPid(), codesSubList);
+
+				List<TermConcept.TermConceptPk> conceptIds = conceptsSubList.stream().map(TermConcept::getPid).toList();
+				if (!conceptIds.isEmpty()) {
+					myConceptDao.fetchConceptsAndDesignationsByConceptPids(conceptIds);
+					myConceptDao.fetchConceptsAndPropertiesByConceptPids(conceptIds);
+					myConceptDao.fetchConceptsAndParentLinksByConceptPids(conceptIds);
+					myConceptDao.fetchConceptsAndChildLinksByConceptPids(conceptIds);
+
+					for (TermConcept concept : conceptsSubList) {
+						codeToConcept.put(concept.getCode(), concept);
+					}
+				}
+			});
+		}
 
 		// Add root concepts
 		for (TermConcept nextRootConcept : theAdditions.getRootConcepts()) {
@@ -636,29 +646,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			targetConcept.setSequence(theSequence);
 		}
 
-		// FIXME: remove?
-//		Set<TermConcept> parentConceptsWeShouldLinkTo = new HashSet<>();
-//		for (String nextParentCode : theParentCodes) {
-//
-//			// Don't add parent links that already exist for the code
-//			if (existingParentLinks.stream()
-//					.anyMatch(t -> t.getParent().getCode().equals(nextParentCode))) {
-//				continue;
-//			}
-//
-//			TermConcept nextParentOpt = theCodeToConcept.get(nextParentCode);
-//			if (nextParentOpt == null) {
-//				nextParentOpt = myConceptDao
-//						.findByCodeSystemAndCode(theCsv.getPid(), nextParentCode)
-//						.orElse(null);
-//			}
-//			if (nextParentOpt == null) {
-//				throw new InvalidRequestException(Msg.code(846) + "Unable to add code \"" + theSourceConcept.getCode()
-//						+ "\" to unknown parent: " + nextParentCode);
-//			}
-//			parentConceptsWeShouldLinkTo.add(nextParentOpt);
-//		}
-//
 		// Null out the hierarchy PIDs for this concept always. We do this because we're going to
 		// force a reindex, and it'll be regenerated then
 		targetConcept.setParentPids(null);
@@ -688,10 +675,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 				if (targetProperty.getId() == null) {
 					theStatisticsTracker.incrementPropertiesAddedCount();
-// FIXME: remove?
-					//					myEntityManager.persist(targetProperty);
-				} else {
-//					myEntityManager.merge(targetProperty);
 				}
 			}
 		}
@@ -722,10 +705,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 				if (targetDesignation.getId() == null) {
 					theStatisticsTracker.incrementDesignationsAddedCount();
-					// FIXME: remove?
-//					myEntityManager.persist(targetDesignation);
-				} else {
-//					myEntityManager.merge(targetDesignation);
 				}
 			}
 		}
@@ -763,29 +742,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			theStatisticsTracker.incrementConceptLinksAddedCount();
 		}
 
-
-		// Add link to new child to the parent
-		// FIXME: remove?
-//		for (TermConcept nextParentConcept : parentConceptsWeShouldLinkTo) {
-//			TermConceptParentChildLink parentLink = new TermConceptParentChildLink();
-//			parentLink.setParent(nextParentConcept);
-//			parentLink.setChild(targetConcept);
-//			parentLink.setCodeSystem(theCsv);
-//			parentLink.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
-//			nextParentConcept.getChildren().add(parentLink);
-//
-//			ourLog.info(
-//					"Saving parent/child link - Parent[{}] Child[{}]",
-//					parentLink.getParent().getCode(),
-//					parentLink.getChild().getCode());
-//
-//			if (theStatisticsTracker.getUpdatedConceptCount()
-//					<= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
-//				myConceptParentChildLinkDao.save(parentLink);
-//			} else {
-//				myDeferredStorageSvc.addConceptLinkToStorageQueue(parentLink);
-//			}
-//		}
 
 		ourLog.trace("About to save parent-child links");
 
@@ -927,7 +883,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 		// Throw exception if the TermCodeSystemVersion is being duplicated.
 		if (codeSystemVersionEntity != null) {
-			if (!ObjectUtil.equals(codeSystemVersionEntity.getResource().getId(), theCodeSystemResourceTable.getId())) {
+			if (!Objects.equals(codeSystemVersionEntity.getResource().getId(), theCodeSystemResourceTable.getId())) {
 				if (theAllowPlaceholderRepoint
 						&& myConceptDao.countByCodeSystemVersion(codeSystemVersionEntity.getPid()) == 0) {
 					// The existing version is a 0-concept placeholder (e.g. from a NOTPRESENT
@@ -1088,6 +1044,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		for (TermConcept next : theConcepts) {
 			theCodesToPopulate.add(next.getCode());
 			findAllCodes(theCodesToPopulate, next.getChildCodes());
+			for (TermConceptParentChildLink parentLink : next.getParents()) {
+				theCodesToPopulate.add(parentLink.getParent().getCode());
+			}
 		}
 	}
 

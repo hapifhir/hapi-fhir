@@ -150,6 +150,7 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.in;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -283,6 +284,60 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// reset
 		mySubscriptionLoader.setMaxRetries(null);
 	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# AlreadyExisting , ExpectSelectCount , ExpectInsertCount
+		true              , 8                 , 10
+		false             , 5                 , 25
+		""")
+	void testCodeSystem(boolean theAlreadyExisting, int theExpectSelectCount, int theExpectInsertCount) {
+		// Setup
+		createCodeSystem(withUrl("http://foo"), withCodeSystemContent("not-present"));
+
+		String stagingVersion = myTermCodeSystemStorageSvc.startStagingCodeSystemVersion("http://foo", "123").stagingVersionId();
+
+		Supplier<CodeSystem> inputSupplier = ()->{
+			CodeSystem input = new CodeSystem();
+			input.setUrl("http://foo");
+			input.setVersion(stagingVersion);
+			for (int i = 0; i < 5; i++) {
+				CodeSystem.ConceptDefinitionComponent parent = input.addConcept()
+					.setCode("PARENT" + i)
+					.setDisplay("Parent" + i);
+				parent.addConcept()
+					.setCode("CHILD" + i)
+					.setDisplay("Child" + i)
+					.addDesignation(
+						new CodeSystem.ConceptDefinitionDesignationComponent()
+							.setLanguage("en_CA")
+							.setValue("Child Desigation" + i)
+					).addProperty(new CodeSystem.ConceptPropertyComponent()
+						.setCode("property" + i)
+						.setValue(new StringType("property value" + i))
+					);
+			}
+			return input;
+		};
+
+		if (theAlreadyExisting) {
+			myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(inputSupplier.get());
+		}
+
+		// Test
+		myCaptureQueriesListener.clear();
+		myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(inputSupplier.get());
+
+		// Verify
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectCount(theExpectSelectCount)
+				.insertCount(theExpectInsertCount)
+				.commitCount(1)
+				.noOtherCounts()
+		);
+	}
+
 
 	/**
 	 * See the class javadoc before changing the counts in this test!
