@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -221,6 +222,18 @@ class PatientIdPartitionInterceptorTest {
 		} else {
 			assertDoesNotThrow(() -> interceptor.setResourceTypePolicies(policies));
 		}
+	}
+
+	@Test
+	void testSetResourceTypePolicies_UnknownResourceType_ThrowsConfigurationException() {
+		Map<String, ResourceCompartmentStoragePolicy> policies = Map.of(
+				"NotARealResourceType", ResourceCompartmentStoragePolicy.alwaysUseDefaultPartition());
+
+		assertThatThrownBy(() -> mySvc.setResourceTypePolicies(policies))
+				.isInstanceOf(ConfigurationException.class)
+				.hasMessageContaining(Msg.code(2866))
+				.hasMessageContaining("NotARealResourceType")
+				.hasMessageContaining("is not a valid resource type");
 	}
 
 	@Nested
