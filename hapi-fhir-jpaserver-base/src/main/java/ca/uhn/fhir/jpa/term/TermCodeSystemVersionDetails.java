@@ -19,4 +19,15 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
+
+/**
+ * This class is a cache value for the MemoryCache
+ * {@link MemoryCacheService.CacheEnum#CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS}
+ * cache key. Values in the cache will be of type
+ * {@literal Optional<TermCodeSystemVersionDetails>}.
+ *
+ * @param pid                 The primary key of the {@link TermCodeSystemVersionDetails} entity in the database
+ * @param codeSystemVersionId The version ID associated with the code system version
+ */
 public record TermCodeSystemVersionDetails(long pid, String codeSystemVersionId) {}

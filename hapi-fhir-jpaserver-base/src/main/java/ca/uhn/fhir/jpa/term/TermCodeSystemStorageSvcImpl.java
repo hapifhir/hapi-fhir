@@ -1027,6 +1027,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Validate.notBlank(theStagingVersionId, "theStagingVersionId must not be blank");
 
 		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			boolean makeCurrent = theMakeCurrent;
 			TermCodeSystemVersion stagingCodeSystemVersionEntity =
 					myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theCodeSystemUrl, theStagingVersionId);
 			Validate.notNull(
@@ -1059,6 +1060,16 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						existingCodeSystemVersionEntity.getId(),
 						theStagingVersionId);
 				deleteCodeSystemVersion(existingCodeSystemVersionEntity);
+
+				if (Objects.equals(
+						existingCodeSystemVersionEntity,
+						existingCodeSystemVersionEntity.getCodeSystem().getCurrentVersion())) {
+					ourLog.info(
+							"Forcing staging version of CodeSystem[url={}, versionId={}] to be the current version, as the existing current version is being deleted",
+							intendedVersion,
+							theCodeSystemUrl);
+					makeCurrent = true;
+				}
 			}
 
 			stagingCodeSystemVersionEntity.setCodeSystemVersionId(
@@ -1066,7 +1077,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			stagingCodeSystemVersionEntity.setCodeSystemIntendedVersionId(null);
 			stagingCodeSystemVersionEntity = myEntityManager.merge(stagingCodeSystemVersionEntity);
 
-			if (theMakeCurrent) {
+			if (makeCurrent) {
 				TermCodeSystem codeSystem = stagingCodeSystemVersionEntity.getCodeSystem();
 				codeSystem.setCurrentVersion(stagingCodeSystemVersionEntity);
 				myEntityManager.merge(codeSystem);

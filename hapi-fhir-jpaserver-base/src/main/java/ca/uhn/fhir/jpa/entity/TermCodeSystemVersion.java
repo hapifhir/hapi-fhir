@@ -152,7 +152,7 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 
 	/**
 	 * If this is a CodeSystem version that is currently being staged for publishing (meaning
-	 * we are currently in the process of writing concepts to it), this is the URL that is
+	 * we are currently in the process of writing concepts to it), this is the version ID
 	 * intended to eventually be placed in {@link #myCodeSystemVersionId} once published.
 	 *
 	 * @since 8.12.0
@@ -164,7 +164,7 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 
 	/**
 	 * If this is a CodeSystem version that is currently being staged for publishing (meaning
-	 * we are currently in the process of writing concepts to it), this is the URL that is
+	 * we are currently in the process of writing concepts to it), this is the version ID
 	 * intended to eventually be placed in {@link #myCodeSystemVersionId} once published.
 	 *
 	 * @since 8.12.0

@@ -45,18 +45,34 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, TermConcept.
 			+ "WHERE t.myCodeSystemVersionPid = :pid")
 	List<TermConcept> fetchConceptsAndPropertiesByVersionPid(@Param("pid") Long theCodeSystemVersionPid);
 
+	/**
+	 * This method is really intended to allow pre-fetching of concept designations into the
+	 * hibernate L2 cache in batches, instead of loading each collection one-by-one.
+	 */
 	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myDesignations d " + "WHERE t.myId IN (:pids)")
 	List<TermConcept> fetchConceptsAndDesignationsByConceptPids(
 			@Param("pids") Collection<TermConcept.TermConceptPk> theConceptPids);
 
+	/**
+	 * This method is really intended to allow pre-fetching of concept properties into the
+	 * hibernate L2 cache in batches, instead of loading each collection one-by-one.
+	 */
 	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myProperties d " + "WHERE t.myId IN (:pids)")
 	List<TermConcept> fetchConceptsAndPropertiesByConceptPids(
 			@Param("pids") Collection<TermConcept.TermConceptPk> theConceptPids);
 
+	/**
+	 * This method is really intended to allow pre-fetching of concept parent links into the
+	 * hibernate L2 cache in batches, instead of loading each collection one-by-one.
+	 */
 	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myParents d " + "WHERE t.myId IN (:pids)")
 	List<TermConcept> fetchConceptsAndParentLinksByConceptPids(
 			@Param("pids") Collection<TermConcept.TermConceptPk> theConceptPids);
 
+	/**
+	 * This method is really intended to allow pre-fetching of concept child links into the
+	 * hibernate L2 cache in batches, instead of loading each collection one-by-one.
+	 */
 	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myChildren d " + "WHERE t.myId IN (:pids)")
 	List<TermConcept> fetchConceptsAndChildLinksByConceptPids(
 			@Param("pids") Collection<TermConcept.TermConceptPk> theConceptPids);

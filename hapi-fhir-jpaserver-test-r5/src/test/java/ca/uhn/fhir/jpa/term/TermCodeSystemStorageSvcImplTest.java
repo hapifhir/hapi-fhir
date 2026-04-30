@@ -57,7 +57,8 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		B                , true
 		B                , false
 		""")
-	void activateStagingCodeSystemVersion(String theVersionToStage) {
+	@ParameterizedTest
+	void testActivateStagingCodeSystemVersion(String theVersionToStage, boolean theMakeCurrent) {
 		createCodeSystem(withUrl("http://foo"), withVersion("A"), withCodeSystemContent("not-present"));
 		runInTransaction(()->{
 			TermCodeSystemVersion csv = myCodeSystemVersionDao.findByCodeSystemUriAndVersion("http://foo", "A");
@@ -73,14 +74,18 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		mySvc.uploadCodeSystemConcepts(codeSystem);
 
 		// Test
-		mySvc.activateStagingCodeSystemVersion("http://foo", stagingVersionId, true);
+		mySvc.activateStagingCodeSystemVersion("http://foo", stagingVersionId, theMakeCurrent);
 
 		// Verify
 		runInTransaction(()->{
-			TermCodeSystemVersion csv = myCodeSystemVersionDao.findByCodeSystemUriAndVersion("http://foo", "B");
+			TermCodeSystemVersion csv = myCodeSystemVersionDao.findByCodeSystemUriAndVersion("http://foo", theVersionToStage);
 			assertNotNull(csv);
 			assertThat(csv.getConcepts()).hasSize(1);
-			assertSame(csv, csv.getCodeSystem().getCurrentVersion());
+			if (theVersionToStage.equals("A") || theMakeCurrent) {
+				assertSame(csv, csv.getCodeSystem().getCurrentVersion());
+			} else {
+				assertNotSame(csv, csv.getCodeSystem().getCurrentVersion());
+			}
 		});
 	}
 
