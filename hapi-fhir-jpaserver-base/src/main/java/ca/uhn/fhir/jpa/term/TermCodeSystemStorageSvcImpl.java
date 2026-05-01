@@ -723,14 +723,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			}
 		}
 
-		if (theStatisticsTracker.getAddedConceptCount() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
-			saveConcept(targetConcept);
-			Long nextConceptPid = targetConcept.getId();
-			Objects.requireNonNull(nextConceptPid);
-		} else {
-			myDeferredStorageSvc.addConceptToStorageQueue(targetConcept);
-		}
-
 		// Links to parents
 		for (String nextParentCode : theParentCodes) {
 
@@ -751,10 +743,16 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						+ "\" to unknown parent: " + nextParentCode);
 			}
 
-			TermConceptParentChildLink parentChildLink =
-					nextParentOpt.addChild(targetConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
-			myEntityManager.persist(parentChildLink);
+			nextParentOpt.addChild(targetConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
 			theStatisticsTracker.incrementConceptLinksAddedCount();
+		}
+
+		if (theStatisticsTracker.getAddedConceptCount() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
+			saveConcept(targetConcept);
+			Long nextConceptPid = targetConcept.getId();
+			Objects.requireNonNull(nextConceptPid);
+		} else {
+			myDeferredStorageSvc.addConceptToStorageQueue(targetConcept);
 		}
 
 		ourLog.trace("About to save parent-child links");
