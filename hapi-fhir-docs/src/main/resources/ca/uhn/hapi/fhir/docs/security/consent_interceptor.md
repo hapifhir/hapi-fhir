@@ -32,6 +32,28 @@ This is slower than the normal path, and will prevent the reuse of the results f
 The `willSeeResource()` operation supports reusing cached search results, but removed resources may be 'visible' as holes in returned bundles.
 Disabling `canSeeResource()` by returning `false` from `processCanSeeResource()` will enable the search cache.
 
+## Write Operation Responses
+
+`willSeeResource()` is invoked for every resource that is about to be returned to the client, including the resource
+body that is echoed back from a successful write operation (`POST`/`PUT`/`PATCH`) when the client has requested the
+`Prefer: return=representation` behaviour (the FHIR default). This lets the consent service mask, redact, or fully
+suppress the resource that the server echoes back after a write, using the same logic that protects read and search
+responses.
+
+The behaviour for a write response follows the same rules as a read response:
+
+* `PROCEED` / `AUTHORIZED`: The (possibly modified) resource is returned in the response body and the original
+  success status (`200 OK` or `201 Created`) is preserved.
+* `REJECT` *with* a replacement `OperationOutcome` on the `ConsentOutcome`: The `OperationOutcome` is returned in
+  the response body in place of the written resource. The original success status is preserved.
+* `REJECT` *without* a replacement resource: The response body is suppressed and the status code is changed to
+  `204 No Content`. The write itself is **not** rolled back &mdash; the resource is still persisted on the server,
+  the consent service has only suppressed the echoed response body.
+
+If your consent service needs to prevent the *write itself* (rather than just hide its response from the caller),
+use `startOperation()` to reject the request before storage takes place, or pair the `ConsentInterceptor` with an
+`AuthorizationInterceptor` that denies the write.
+
 <a id="pre-authorizing-requests"></a>
 
 ## Pre-Authorizing Requests
