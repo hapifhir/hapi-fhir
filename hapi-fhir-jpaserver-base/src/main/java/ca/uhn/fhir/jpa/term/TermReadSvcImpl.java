@@ -2627,7 +2627,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		myMemoryCache.put(
 				MemoryCacheService.CacheEnum.CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS,
 				theCodeSystemUrl,
-				new TermCodeSystemVersionDetails(theVersion.getPid(), theVersion.getCodeSystemVersionId()));
+				Optional.of(
+						new TermCodeSystemVersionDetails(theVersion.getPid(), theVersion.getCodeSystemVersionId())));
 	}
 
 	private synchronized boolean isPreExpandingValueSets() {

@@ -231,7 +231,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Add root concepts
 		for (TermConcept nextRootConcept : theAdditions.getRootConcepts()) {
 			List<String> parentCodes = Collections.emptyList();
-			addConceptInHierarchy(theCodeSystemVersion, parentCodes, nextRootConcept, retVal, codeToConcept, 0, null);
+			addConceptInHierarchy(theCodeSystemVersion, parentCodes, nextRootConcept, retVal, codeToConcept, 0);
 		}
 
 		myTerminologySvc.invalidateCodeSystemCaches();
@@ -620,10 +620,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			TermConcept theSourceConcept,
 			UploadStatistics theStatisticsTracker,
 			Map<String, TermConcept> theCodeToConcept,
-			int theSequence,
-			TermConcept theParentConcept) {
+			int theSequence) {
 
-		String parentDescription = "(root concept)"; // FIXME: make accurate
+		String parentDescription = "(root concept)";
+		if (!theParentCodes.isEmpty()) {
+			parentDescription = theParentCodes.toString();
+		}
 
 		ourLog.info(
 				"Saving concept[{}] count {} at index {} with parent {}",
@@ -768,8 +770,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 					nextChild,
 					theStatisticsTracker,
 					theCodeToConcept,
-					childIndex,
-					targetConcept);
+					childIndex);
 
 			childIndex++;
 		}
@@ -1044,8 +1045,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			String intendedVersion = stagingCodeSystemVersionEntity.getCodeSystemIntendedVersionId();
 			if (isBlank(intendedVersion)) {
-				// FIXME: add code
-				throw new PreconditionFailedException(Msg.code(1)
+				throw new PreconditionFailedException(Msg.code(2926)
 						+ "CodeSystem[url=%s, versionId=%s] is not currently being staged. Can not activate.");
 			}
 
@@ -1172,8 +1172,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			theStorageProperty.setValue(nextCoding.getCode());
 			theStorageProperty.setDisplay(nextCoding.getDisplay());
 		} else if (theConceptPropertyComponent.getValue() != null) {
-			// FIXME: add code
-			throw new InvalidRequestException("Don't know how to handle concept properties of type: "
+			throw new InvalidRequestException(Msg.code(2927) + "Don't know how to handle concept properties of type: "
 					+ theConceptPropertyComponent.getValue().getClass());
 		}
 	}
