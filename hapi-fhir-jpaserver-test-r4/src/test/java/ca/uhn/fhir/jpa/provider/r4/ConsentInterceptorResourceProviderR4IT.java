@@ -425,6 +425,119 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 	}
 
+	/**
+	 * GL-8676: When willSeeResource returns REJECT on the response of a successful POST,
+	 * the wire response must be 204 No Content with an empty body. The customer reports
+	 * that the resource body is still streamed with the original 201 status.
+	 */
+	@Test
+	public void testCreate_WillSeeResourceReject_Returns204AndEmptyBody() throws IOException {
+		ConsentSvcWillSeeRejectAll consentService = new ConsentSvcWillSeeRejectAll();
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		post.setEntity(toEntity(patient));
+		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
+			String responseString = status.getEntity() == null ? "" : IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response status={}, body={}", status.getStatusLine().getStatusCode(), responseString);
+
+			assertEquals(204, status.getStatusLine().getStatusCode(), "Expected 204 No Content when willSeeResource REJECTs the write response");
+			assertThat(responseString).as("Response body should be empty when willSeeResource REJECTs").isBlank();
+		}
+	}
+
+	/**
+	 * GL-8676 adjacent: PUT/update with willSeeResource REJECT must also return 204 + empty body.
+	 */
+	@Test
+	public void testUpdate_WillSeeResourceReject_Returns204AndEmptyBody() throws IOException {
+		// Create a patient first using a no-op interceptor so we have an ID to update
+		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED), IConsentContextServices.NULL_IMPL);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		IIdType id = myClient.create().resource(patient).prefer(PreferReturnEnum.REPRESENTATION).execute().getId().toUnqualifiedVersionless();
+
+		// Swap in the reject-willSeeResource interceptor for the update
+		myServer.getRestfulServer().getInterceptorService().unregisterInterceptor(myConsentInterceptor);
+		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcWillSeeRejectAll(), IConsentContextServices.NULL_IMPL);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		patient = new Patient();
+		patient.setId(id);
+		patient.setActive(true);
+		patient.addIdentifier().setValue("VAL2");
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
+		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		put.setEntity(toEntity(patient));
+		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
+			String responseString = status.getEntity() == null ? "" : IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response status={}, body={}", status.getStatusLine().getStatusCode(), responseString);
+
+			assertEquals(204, status.getStatusLine().getStatusCode(), "Expected 204 No Content when willSeeResource REJECTs the update response");
+			assertThat(responseString).as("Response body should be empty when willSeeResource REJECTs").isBlank();
+		}
+	}
+
+	/**
+	 * GL-8676 adjacent: PROCEED on willSeeResource must NOT mutate the response — body returned with 201.
+	 */
+	@Test
+	public void testCreate_WillSeeResourceProceed_Returns201AndBody() throws IOException {
+		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED), IConsentContextServices.NULL_IMPL);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		post.setEntity(toEntity(patient));
+		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
+			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response status={}, body={}", status.getStatusLine().getStatusCode(), responseString);
+
+			assertEquals(201, status.getStatusLine().getStatusCode());
+			assertThat(responseString).isNotBlank();
+			assertThat(responseString).contains("\"resourceType\":\"Patient\"");
+		}
+	}
+
+	/**
+	 * GL-8676 adjacent: willSeeResource REJECT with an attached OperationOutcome must short-circuit
+	 * to OO body (not 204).
+	 */
+	@Test
+	public void testCreate_WillSeeResourceReject_OperationOutcome_Returns200AndOOBody() throws IOException {
+		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcWillSeeRejectWithOperationOutcome(), IConsentContextServices.NULL_IMPL);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		post.setEntity(toEntity(patient));
+		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
+			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response status={}, body={}", status.getStatusLine().getStatusCode(), responseString);
+
+			// OperationOutcome short-circuit: response body becomes the OO; status should not be 204.
+			assertThat(status.getStatusLine().getStatusCode()).isNotEqualTo(204);
+			assertThat(responseString).isNotBlank();
+			assertThat(responseString).contains("\"resourceType\":\"OperationOutcome\"");
+			assertThat(responseString).contains("blocked-by-consent");
+			// The original Patient body must NOT leak through.
+			assertThat(responseString).doesNotContain("\"resourceType\":\"Patient\"");
+		}
+	}
+
 	@Test
 	public void testRejectWillSeeResource() throws IOException {
 		create50Observations();
@@ -1260,6 +1373,76 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		}
 
 
+	}
+
+	/**
+	 * GL-8676 helper. Mirrors the post-#7804 contract: canSeeResource PROCEEDs unconditionally
+	 * (no canSeeResource REJECT on writes), willSeeResource REJECTs every resource. Used to
+	 * exercise the willSeeResource-REJECT path on POST/PUT response bodies.
+	 */
+	private static class ConsentSvcWillSeeRejectAll implements IConsentService {
+
+		@Override
+		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			return ConsentOutcome.PROCEED;
+		}
+
+		@Override
+		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			return ConsentOutcome.PROCEED;
+		}
+
+		@Override
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			return ConsentOutcome.REJECT;
+		}
+
+		@Override
+		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			// nothing
+		}
+
+		@Override
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+			// nothing
+		}
+	}
+
+	/**
+	 * GL-8676 helper. willSeeResource returns REJECT with an attached OperationOutcome.
+	 * Verifies the OO short-circuit path takes precedence over the 204 path.
+	 */
+	private static class ConsentSvcWillSeeRejectWithOperationOutcome implements IConsentService {
+
+		@Override
+		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			return ConsentOutcome.PROCEED;
+		}
+
+		@Override
+		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			return ConsentOutcome.PROCEED;
+		}
+
+		@Override
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			OperationOutcome oo = new OperationOutcome();
+			oo.addIssue()
+				.setSeverity(OperationOutcome.IssueSeverity.INFORMATION)
+				.setCode(OperationOutcome.IssueType.SUPPRESSED)
+				.setDiagnostics("blocked-by-consent");
+			return new ConsentOutcome(ConsentOperationStatusEnum.REJECT, oo);
+		}
+
+		@Override
+		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			// nothing
+		}
+
+		@Override
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+			// nothing
+		}
 	}
 
 	private static class ConsentSvcWillSeeProceedsBundlesRejectsOthers implements IConsentService {
