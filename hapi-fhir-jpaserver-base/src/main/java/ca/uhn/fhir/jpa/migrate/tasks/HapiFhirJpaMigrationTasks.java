@@ -150,6 +150,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.unique(false)
 				.online(true)
 				.withColumns("HASH_COMPLETE", "DATE_ORDINAL", "RES_ID", "PARTITION_ID");
+
+		// Add index on CREATED_TIME to support ordered polling of subscription messages
+		{
+			version.onTable("HFJ_RESOURCE_MODIFIED")
+					.addIndex("20260424.1", "IDX_RES_MOD_CREATED")
+					.unique(false)
+					.online(true)
+					.withColumns("CREATED_TIME");
+		}
 	}
 
 	protected void init880() {
@@ -217,15 +226,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		{
 			Builder.BuilderWithTableName resource = version.onTable("BT2_WORK_CHUNK");
 			resource.addColumn("20260407.60", "LAST_HEARTBEAT").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
-		}
-
-		// Add index on CREATED_TIME to support ordered polling of subscription messages
-		{
-			version.onTable("HFJ_RESOURCE_MODIFIED")
-					.addIndex("20260424.1", "IDX_RES_MOD_CREATED")
-					.unique(false)
-					.online(true)
-					.withColumns("CREATED_TIME");
 		}
 	}
 
