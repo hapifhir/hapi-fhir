@@ -1719,7 +1719,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testInstallR4PackageCircularDependency() throws Exception {
+	public void testInstallR4PackageCircularDependencyBetweenStructureDefinitions() throws Exception {
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test.circular.snapshot-0.0.1.tgz");
 		myFakeNpmServlet.addResponse("/test.circular.snapshot/0.0.1", bytes);
@@ -1901,5 +1901,4 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(result.sizeOrThrowNpe()).isEqualTo(1);
 		return (CodeSystem) result.getResources(0, 1).get(0);
 	}
-
 }
