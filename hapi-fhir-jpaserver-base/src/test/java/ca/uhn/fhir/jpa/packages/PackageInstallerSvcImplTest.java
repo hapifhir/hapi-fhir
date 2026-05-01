@@ -12,18 +12,15 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
-import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
-import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -128,9 +125,7 @@ public class PackageInstallerSvcImplTest {
 	@Mock
 	private IJobCoordinator myJobCoordinatorMock;
 	@Mock
-	private ITermCodeSystemDao myTermCodeSystemDao;
-	@Mock
-	private ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
+	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
 	@Spy
 	private FhirContext myCtx = FhirContext.forR4Cached();
@@ -790,7 +785,8 @@ public class PackageInstallerSvcImplTest {
 
 			PackageInstallationSpec spec = setupResourceInPackage(null, packagedCs, myCodeSystemDao);
 			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(packagedCs);
-			setupTermLayerLookup(CODE_SYSTEM_URL, VERSION, 100L);
+			when(myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(CODE_SYSTEM_URL, VERSION))
+					.thenReturn(Optional.of(100L));
 			when(myCodeSystemDao.readByPid(any())).thenReturn(existingCs);
 
 			mySvc.install(spec);
@@ -809,12 +805,28 @@ public class PackageInstallerSvcImplTest {
 
 			PackageInstallationSpec spec = setupResourceInPackage(null, packagedCs, myCodeSystemDao);
 			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(packagedCs);
-			when(myTermCodeSystemVersionDao.findByCodeSystemUriAndVersion(CODE_SYSTEM_URL, VERSION)).thenReturn(null);
+			when(myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(CODE_SYSTEM_URL, VERSION))
+					.thenReturn(Optional.empty());
 
 			mySvc.install(spec);
 
 			verify(myCodeSystemDao, times(1)).create(any(CodeSystem.class), any(RequestDetails.class));
 			verify(myCodeSystemDao, never()).update(any(), any(RequestDetails.class));
+		}
+
+		@Test
+		void install_codeSystemWithNoUrl_routesToCreate() throws IOException {
+			CodeSystem packagedCs = new CodeSystem();
+			packagedCs.setVersion(VERSION);
+			packagedCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+			PackageInstallationSpec spec = setupResourceInPackage(null, packagedCs, myCodeSystemDao);
+			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(packagedCs);
+
+			mySvc.install(spec);
+
+			verify(myCodeSystemDao, times(1)).create(any(CodeSystem.class), any(RequestDetails.class));
+			verify(myTermCodeSystemStorageSvc, never()).findExistingCodeSystemResourcePid(any(), any());
 		}
 
 		@SuppressWarnings("unchecked")
@@ -831,18 +843,7 @@ public class PackageInstallerSvcImplTest {
 			mySvc.install(spec);
 
 			verify(vsDao, times(1)).create(any(ValueSet.class), any(RequestDetails.class));
-			verify(myTermCodeSystemVersionDao, never()).findByCodeSystemUriAndVersion(any(), any());
-			verify(myTermCodeSystemDao, never()).findByCodeSystemUri(any());
-		}
-
-		private void setupTermLayerLookup(String theUrl, String theVersion, Long theResourcePid) {
-			ResourceTable resourceTable = new ResourceTable();
-			resourceTable.setIdForUnitTest(theResourcePid);
-
-			TermCodeSystemVersion csv = new TermCodeSystemVersion();
-			csv.setResource(resourceTable);
-
-			when(myTermCodeSystemVersionDao.findByCodeSystemUriAndVersion(theUrl, theVersion)).thenReturn(csv);
+			verify(myTermCodeSystemStorageSvc, never()).findExistingCodeSystemResourcePid(any(), any());
 		}
 	}
 }
