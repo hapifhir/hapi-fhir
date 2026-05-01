@@ -869,7 +869,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testReindex_Everything() {
+	public void testReindex_noUrl_reindexesAll() {
 		// setup
 
 		for (int i = 0; i < 50; ++i) {
