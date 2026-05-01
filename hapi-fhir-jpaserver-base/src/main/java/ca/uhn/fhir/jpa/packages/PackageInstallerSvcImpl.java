@@ -619,6 +619,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					resource.getIdElement().toUnqualifiedVersionless()));
 			return fromTermLayer;
 		}
+		// TODO: a dedicated (resourceType, url, version) -> PID registry (like TRM_CODESYSTEM_VER for CodeSystem)
+		//  would let us fall back for all canonical resource types, not just CodeSystem
 		return Optional.empty();
 	}
 
