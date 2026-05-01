@@ -1,0 +1,7 @@
+---
+type: fix
+title: "ConsentInterceptor now correctly suppresses the response body when consentWillSeeResource
+  returns REJECT on a write operation (POST/PUT/PATCH). Previously, the interceptor returned
+  the original status code (201 or 200) with the full resource body. It now returns 204 No
+  Content with an empty body, consistent with the behavior of an explicit REJECT on read
+  operations."
