@@ -456,9 +456,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				 * multiple CodeSystem resources with CodeSystem.version set differently (as opposed to
 				 * multiple versions of the same CodeSystem, where CodeSystem.meta.versionId is different)
 				 */
-				next.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
-				myCodeSystemVersionDao.saveAndFlush(next);
-				myDeferredStorageSvc.deleteCodeSystemVersion(next);
+				markCodeSystemVersionForDeletion(next);
 			}
 		}
 
@@ -815,24 +813,59 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 										.getValue());
 			}
 		}
-		// Throw exception if the TermCodeSystemVersion is being duplicated.
-		if (codeSystemVersionEntity != null) {
-			if (!ObjectUtil.equals(codeSystemVersionEntity.getResource().getId(), theCodeSystemResourceTable.getId())) {
-				if (theAllowPlaceholderRepoint
-						&& myConceptDao.countByCodeSystemVersion(codeSystemVersionEntity.getPid()) == 0) {
-					// The existing version is a 0-concept placeholder (e.g. from a NOTPRESENT
-					// pre-seed) and the caller is itself the NOTPRESENT early-return path in
-					// storeNewCodeSystemVersionIfNeeded. Re-point the placeholder to the new
-					// resource instead of rejecting. Non-NOTPRESENT callers (e.g. COMPLETE
-					// CodeSystem create/update) keep strict duplicate detection, since they
-					// must not silently replace a prior resource.
-					codeSystemVersionEntity.setResource(theCodeSystemResourceTable);
-					myCodeSystemVersionDao.save(codeSystemVersionEntity);
-				} else {
-					throw new UnprocessableEntityException(Msg.code(848) + msg);
-				}
-			}
+		// Future: re-keying TermCodeSystemVersion on (resource-pid, version) instead of
+		// (codesystem-pid, version) would remove the whole conflict-release helper, at the
+		// cost of a schema migration and a wide findByCodeSystemPid* refactor.
+		if (codeSystemVersionEntity != null
+				&& !tryReleaseConflictingVersionRow(
+						codeSystemVersionEntity, theCodeSystemResourceTable, theAllowPlaceholderRepoint)) {
+			throw new UnprocessableEntityException(Msg.code(848) + msg);
 		}
+	}
+
+	// Created by Claude Opus 4.7
+	/**
+	 * Try to release a {@code (codesystem-pid, version)} slot owned by a different resource.
+	 * Repoint a 0-concept NOTPRESENT placeholder; otherwise mark the orphan deleted if the
+	 * caller is updating an existing resource (so a create-create duplicate still throws).
+	 *
+	 * @return {@code true} if the slot is available; {@code false} for a genuine duplicate.
+	 */
+	private boolean tryReleaseConflictingVersionRow(
+			TermCodeSystemVersion theExistingRow,
+			ResourceTable theCurrentResource,
+			boolean theAllowPlaceholderRepoint) {
+		if (ObjectUtil.equals(theExistingRow.getResource().getId(), theCurrentResource.getId())) {
+			return true;
+		}
+
+		boolean isPlaceholder =
+				theAllowPlaceholderRepoint && myConceptDao.countByCodeSystemVersion(theExistingRow.getPid()) == 0;
+		boolean isUpdate = isUpdateOfExistingResource(theCurrentResource);
+
+		if (!isPlaceholder && !isUpdate) {
+			return false;
+		}
+
+		if (isPlaceholder) {
+			theExistingRow.setResource(theCurrentResource);
+			myCodeSystemVersionDao.save(theExistingRow);
+		} else {
+			markCodeSystemVersionForDeletion(theExistingRow);
+		}
+		return true;
+	}
+
+	/** {@code meta.versionId} is incremented by {@code super.updateEntity} before we run, so create=1, update&ge;2. */
+	private boolean isUpdateOfExistingResource(ResourceTable theResource) {
+		return theResource.getVersion() > 1L;
+	}
+
+	/** Renames the version row out of its unique slot and queues it for deletion. */
+	private void markCodeSystemVersionForDeletion(TermCodeSystemVersion theVersion) {
+		theVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
+		myCodeSystemVersionDao.saveAndFlush(theVersion);
+		myDeferredStorageSvc.deleteCodeSystemVersion(theVersion);
 	}
 
 	private void populateCodeSystemVersionProperties(
