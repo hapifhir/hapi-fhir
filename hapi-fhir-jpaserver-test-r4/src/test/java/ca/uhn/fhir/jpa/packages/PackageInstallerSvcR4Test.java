@@ -1894,6 +1894,84 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(lookupIgY.isFound()).isTrue();
 	}
 
+	@Test
+	public void testInstallR4Package_sharedDependencyWithAncestor_installsDependencyOnce() throws Exception {
+		// set up
+		byte[] packageABytes = new NpmPackageBuilder("test.package.a", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withDependency("test.package.b", "1.0")
+			.withDependency("test.package.c", "1.0")
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.a/1.0", packageABytes);
+
+		byte[] packageBBytes = new NpmPackageBuilder("test.package.b", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withDependency("test.package.c", "1.0")
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.b/1.0", packageBBytes);
+
+		byte[] packageCBytes = new NpmPackageBuilder("test.package.c", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.c/1.0", packageCBytes);
+
+		// execute
+		myPackageInstallerSvc.install(new PackageInstallationSpec()
+			.setName("test.package.a")
+			.setVersion("1.0")
+			// INSTALL_ONLY to ensure we don't cache the packages
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY)
+			.setFetchDependencies(true)
+		);
+
+		// validate
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.a/1.0")).isEqualTo(1);
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.b/1.0")).isEqualTo(1);
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.c/1.0")).isEqualTo(1);
+	}
+
+	@Test
+	public void testInstallR4Package_sharedDependencyWithSibling_installsDependencyOnce() throws Exception {
+		// set up
+		byte[] packageABytes = new NpmPackageBuilder("test.package.a", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withDependency("test.package.b", "1.0")
+			.withDependency("test.package.c", "1.0")
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.a/1.0", packageABytes);
+
+		byte[] packageBBytes = new NpmPackageBuilder("test.package.b", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withDependency("test.package.d", "1.0")
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.b/1.0", packageBBytes);
+
+		byte[] packageCBytes = new NpmPackageBuilder("test.package.c", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withDependency("test.package.d", "1.0")
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.c/1.0", packageCBytes);
+
+		byte[] packageDBytes = new NpmPackageBuilder("test.package.d", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.d/1.0", packageDBytes);
+
+		// execute
+		myPackageInstallerSvc.install(new PackageInstallationSpec()
+			.setName("test.package.a")
+			.setVersion("1.0")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setFetchDependencies(true)
+		);
+
+		// validate
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.a/1.0")).isEqualTo(1);
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.b/1.0")).isEqualTo(1);
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.c/1.0")).isEqualTo(1);
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.d/1.0")).isEqualTo(1);
+	}
+
 	private CodeSystem fetchCodeSystemByUrl(String theUrl) {
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(CodeSystem.SP_URL, new UriParam(theUrl));
