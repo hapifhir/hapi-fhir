@@ -52,8 +52,23 @@ class RequireValidationRule extends BaseTypedRule {
 	private ResultSeverityEnum myRejectOnSeverity = ResultSeverityEnum.ERROR;
 	private List<TagOnSeverity> myTagOnSeverity = Collections.emptyList();
 
+	/**
+	 * Controls when validation against an implied profile is applied to a resource,
+	 * relative to the profiles already declared in {@code Resource.meta.profile}.
+	 */
 	public enum ImpliedProfileMode {
+		/**
+		 * Apply the implied profile validation only when the resource does not already
+		 * declare any profile in {@code Resource.meta.profile}. If the resource
+		 * explicitly declares one or more profiles, the implied profile is ignored.
+		 */
 		IF_NOT_EXPLICIT,
+
+		/**
+		 * Always apply the implied profile validation, regardless of any profiles
+		 * already declared in {@code Resource.meta.profile}. This effectively mandates
+		 * compliance with the implied profile across all resources of the configured type.
+		 */
 		ALWAYS
 	}
 
@@ -141,6 +156,8 @@ class RequireValidationRule extends BaseTypedRule {
 		return RuleEvaluation.forSuccess(this);
 	}
 
+	// Clones the resource before adding the implied profile to it for validation purposes; the implied profile is never
+	// added to the persisted resource.
 	private IBaseResource handleImpliedProfileValidation(IBaseResource theResource) {
 		List<String> declaredProfiles = theResource.getMeta().getProfile().stream()
 				.map(IPrimitiveType::getValueAsString)
