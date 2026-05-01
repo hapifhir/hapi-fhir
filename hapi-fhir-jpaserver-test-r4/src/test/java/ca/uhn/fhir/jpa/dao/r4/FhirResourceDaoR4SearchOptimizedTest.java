@@ -1036,7 +1036,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		searchParameter1.addBase("BodyStructure").addBase("Procedure");
 		searchParameter1.setCode("focalAccess");
 		searchParameter1.setType(Enumerations.SearchParamType.REFERENCE);
-		searchParameter1.setExpression("Procedure.extension('Procedure#focalAccess') | BodyStructure.extension('BodyStructure#focalAccess')");
+		searchParameter1.setExpression("Procedure.extension('Procedure#focalAccess')");
 		searchParameter1.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		searchParameter1.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		IIdType sp1Id = mySearchParameterDao.create(searchParameter1).getId().toUnqualifiedVersionless();

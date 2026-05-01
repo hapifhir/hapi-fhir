@@ -58,6 +58,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Strings;
@@ -195,13 +196,13 @@ public class PatientIdPartitionInterceptor {
 								resourceType));
 			}
 
-			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resourceType);
-			if (resourceDef == null) {
+			if (!myFhirContext.isKnownResourceType(resourceType)) {
 				throw new ConfigurationException(Msg.code(2866)
 						+ String.format(
 								"Resource type '%s' is not a valid resource type, can not apply resource type policy",
 								resourceType));
 			}
+			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resourceType);
 
 			ResourceCompartmentStoragePolicy strictnessMode = entry.getValue();
 			if (strictnessMode == null) {
@@ -566,8 +567,9 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * @see #setResourceTypePolicies(Map) for a description of the default policies
 	 */
+	@VisibleForTesting
 	@Nonnull
-	protected ResourceCompartmentStoragePolicy getPolicyForResourceType(ReadPartitionIdRequestDetails theReadDetails) {
+	public ResourceCompartmentStoragePolicy getPolicyForResourceType(ReadPartitionIdRequestDetails theReadDetails) {
 		String resourceType = theReadDetails.getResourceType();
 		if (isBlank(resourceType)) {
 			return ResourceCompartmentStoragePolicy.alwaysUseDefaultPartition();

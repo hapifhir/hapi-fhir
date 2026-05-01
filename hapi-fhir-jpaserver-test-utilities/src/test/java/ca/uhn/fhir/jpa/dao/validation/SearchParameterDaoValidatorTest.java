@@ -38,11 +38,8 @@ import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.REFERENCE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.STRING;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.TOKEN;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.URI;
-import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.DOMAINRESOURCE;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.OBSERVATION;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.PATIENT;
-import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.PRACTITIONERROLE;
-import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.RESOURCE;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,6 +53,7 @@ public class SearchParameterDaoValidatorTest {
     private static final String SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE = "SearchParameter/observation-patient";
     private static final String SP_COMPONENT_DEFINITION_OF_TYPE_STRING = "SearchParameter/observation-markdown";
     private static final String SP_COMPONENT_DEFINITION_OF_TYPE_DATE = "SearchParameter/observation-date";
+    private static final String SP_COMPONENT_DEFINITION_OF_TYPE_DATE_2 = "SearchParameter/observation-date2";
     private static final String SP_COMPONENT_DEFINITION_OF_TYPE_QUANTITY = "SearchParameter/observation-code";
     private static final String SP_COMPONENT_DEFINITION_OF_TYPE_URI = "SearchParameter/component-value-canonical";
     private static final String SP_COMPONENT_DEFINITION_OF_TYPE_NUMBER = "SearchParameter/component-value-number";
@@ -74,7 +72,8 @@ public class SearchParameterDaoValidatorTest {
     public void before() {
         createAndMockSearchParameter(TOKEN, SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN, "observation-code", "Observation.code");
         createAndMockSearchParameter(REFERENCE, SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE, "observation-patient", "Observation.subject.where(resolve() is Patient");
-        createAndMockSearchParameter(STRING, SP_COMPONENT_DEFINITION_OF_TYPE_DATE, "observation-category", "Observation.value.ofType(markdown)");
+        createAndMockSearchParameter(DATE, SP_COMPONENT_DEFINITION_OF_TYPE_DATE, "observation-date", "Observation.value.ofType(date)");
+        createAndMockSearchParameter(DATE, SP_COMPONENT_DEFINITION_OF_TYPE_DATE_2, "observation-date-2", "Observation.value.ofType(date)");
         createAndMockSearchParameter(DATE, SP_COMPONENT_DEFINITION_OF_TYPE_STRING, "observation-date", "Observation.value.ofType(dateTime)");
         createAndMockSearchParameter(QUANTITY, SP_COMPONENT_DEFINITION_OF_TYPE_QUANTITY, "observation-quantity", "Observation.value.ofType(Quantity)");
         createAndMockSearchParameter(URI, SP_COMPONENT_DEFINITION_OF_TYPE_URI, "observation-component-value-canonical", "Observation.component.value.ofType(canonical)");
@@ -181,6 +180,67 @@ public class SearchParameterDaoValidatorTest {
         }
     }
 
+	@Test
+	void testMethodValidate_ComboSearchParam_WithRangedDate_Unique() {
+		SearchParameter sp = createSearchParameter(COMPOSITE, "SearchParameter/component-value-uri-number", "component-value-uri-number", "Observation");
+		sp.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(true)));
+		sp.addComponent()
+			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_DATE)
+			.addExtension(new Extension(HapiExtensions.EXT_SP_COMBO_DATE_RANGED, new BooleanType(true)));
+		sp.addComponent()
+			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_NUMBER);
+
+		assertThatThrownBy(() -> mySvc.validate(sp))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("Unique Combo SearchParameter instances may not use extension: http://hapifhir.io/fhir/StructureDefinition/sp-combo-date-ranged");
+	}
+
+	@Test
+	void testMethodValidate_ComboSearchParam_WithRangedDate_NonUnique_MultipleRangedInstances() {
+		SearchParameter sp = createSearchParameter(COMPOSITE, "SearchParameter/component-value-uri-number", "component-value-uri-number", "Observation");
+		sp.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false)));
+		sp.addComponent()
+			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_DATE)
+			.addExtension(new Extension(HapiExtensions.EXT_SP_COMBO_DATE_RANGED, new BooleanType(true)));
+		sp.addComponent()
+			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_DATE_2)
+			.addExtension(new Extension(HapiExtensions.EXT_SP_COMBO_DATE_RANGED, new BooleanType(true)));
+
+		assertThatThrownBy(() -> mySvc.validate(sp))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("SearchParameter must not have multiple components with extension: http://hapifhir.io/fhir/StructureDefinition/sp-combo-date-ranged");
+	}
+
+	@Test
+	void testMethodValidate_ComboSearchParam_WithRangedDate_NonUnique_NonDateTypeRanged() {
+		SearchParameter sp = createSearchParameter(COMPOSITE, "SearchParameter/component-value-uri-number", "component-value-uri-number", "Observation");
+		sp.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false)));
+		sp.addComponent()
+			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN)
+			.addExtension(new Extension(HapiExtensions.EXT_SP_COMBO_DATE_RANGED, new BooleanType(true)));
+		sp.addComponent()
+			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE);
+
+		assertThatThrownBy(() -> mySvc.validate(sp))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("SearchParameter must not have component with extension[url=http://hapifhir.io/fhir/StructureDefinition/sp-combo-date-ranged] for non-date type search parameter");
+	}
+
+	@Test
+	void testMethodValidate_ComboSearchParam_WithRangedDate_NonUnique_UnknownRangedComponent() {
+		SearchParameter sp = createSearchParameter(COMPOSITE, "SearchParameter/component-value-uri-number", "component-value-uri-number", "Observation");
+		sp.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false)));
+		sp.addComponent()
+			.setDefinition("SearchParameter/unknown-code")
+			.addExtension(new Extension(HapiExtensions.EXT_SP_COMBO_DATE_RANGED, new BooleanType(true)));
+		sp.addComponent()
+			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE);
+
+		assertThatThrownBy(() -> mySvc.validate(sp))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("SearchParameter component can not be found: SearchParameter/unknown-code");
+	}
+
     @ParameterizedTest
     @MethodSource("compositeSpProvider")
     // we're testing for:
@@ -200,158 +260,6 @@ public class SearchParameterDaoValidatorTest {
 
         mySvc.validate(theSearchParameter);
     }
-
-    @Test
-    void testValidateExpressionAgainstBase_specificBase_expressionMatchesBase_succeeds() {
-        SearchParameter sp = new SearchParameter();
-        sp.setId("SearchParameter/practitionerrole-practitioner");
-        sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
-        sp.addBase(PRACTITIONERROLE);
-        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
-        sp.setExpression("PractitionerRole.practitioner");
-
-        mySvc.validate(sp);
-    }
-
-    @Test
-    void testValidateExpressionAgainstBase_specificBase_expressionDoesNotMatchBase_fails() {
-        SearchParameter sp = new SearchParameter();
-        sp.setId("SearchParameter/practitionerrole-practitioner");
-        sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
-        sp.addBase(PRACTITIONERROLE);
-        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
-        sp.setExpression("Person.practitioner");
-
-		assertThatThrownBy(() -> mySvc.validate(sp))
-			.isInstanceOf(UnprocessableEntityException.class)
-			.hasMessageContaining("HAPI-2911")
-			.hasMessageContaining("No path in expression")
-			.hasMessageContaining("PractitionerRole");
-    }
-
-    @Test
-    void testValidateExpressionAgainstBase_resourceBase_withSpecificExpressionPrefix_fails() {
-        SearchParameter sp = new SearchParameter();
-        sp.setId("SearchParameter/resource-person-practitioner");
-        sp.setUrl("http://example.org/SearchParameter/resource-person-practitioner");
-        sp.addBase(RESOURCE);
-        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
-        sp.setExpression("Person.practitioner");
-
-        assertThatThrownBy(() -> mySvc.validate(sp))
-                .isInstanceOf(UnprocessableEntityException.class)
-                .hasMessageContaining("HAPI-2910")
-                .hasMessageContaining("Person")
-                .hasMessageContaining("Resource");
-    }
-
-    @Test
-    void testValidateExpressionAgainstBase_resourceBase_withResourceExpressionPrefix_succeeds() {
-        SearchParameter sp = new SearchParameter();
-        sp.setId("SearchParameter/resource-meta");
-        sp.setUrl("http://example.org/SearchParameter/resource-meta");
-        sp.addBase(RESOURCE);
-        sp.setCode("_lastUpdated").setType(DATE).setStatus(ACTIVE);
-        sp.setExpression("Resource.meta.lastUpdated");
-
-        mySvc.validate(sp);
-    }
-
-	@Test
-	void testValidateExpressionAgainstBase_resourceMixedWithSpecificBases_expressionMatchesSpecific_success() {
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/practitionerrole-practitioner");
-		sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
-		sp.addBase(RESOURCE).addBase(PRACTITIONERROLE);
-		sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
-		sp.setExpression("PractitionerRole.practitioner");
-		mySvc.validate(sp);
-	}
-
-    @Test
-    void testValidateExpressionAgainstBase_domainResourceBase_withSpecificExpressionPrefix_fails() {
-        SearchParameter sp = new SearchParameter();
-        sp.setId("SearchParameter/domainresource-person");
-        sp.setUrl("http://example.org/SearchParameter/domainresource-person");
-        sp.addBase(DOMAINRESOURCE);
-        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
-        sp.setExpression("Person.practitioner");
-
-        assertThatThrownBy(() -> mySvc.validate(sp))
-                .isInstanceOf(UnprocessableEntityException.class)
-                .hasMessageContaining("HAPI-2910")
-                .hasMessageContaining("Person")
-                .hasMessageContaining("DomainResource");
-    }
-
-    @Test
-    void testValidateExpressionAgainstBase_multiPathExpression_atLeastOnePathMatchesBase_succeeds() {
-        SearchParameter sp = new SearchParameter();
-        sp.setId("SearchParameter/practitionerrole-practitioner");
-        sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
-        sp.addBase(PRACTITIONERROLE);
-        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
-        sp.setExpression("PractitionerRole.practitioner | Person.name");
-
-        mySvc.validate(sp);
-    }
-
-    @Test
-    void testValidateExpressionAgainstBase_multiPathExpression_noPathMatchesBase_fails() {
-        SearchParameter sp = new SearchParameter();
-        sp.setId("SearchParameter/practitionerrole-practitioner");
-        sp.setUrl("http://example.org/SearchParameter/practitionerrole-practitioner");
-        sp.addBase(PRACTITIONERROLE);
-        sp.setCode("practitioner").setType(REFERENCE).setStatus(ACTIVE);
-        sp.setExpression("Person.practitioner | Observation.name");
-
-        assertThatThrownBy(() -> mySvc.validate(sp))
-                .isInstanceOf(UnprocessableEntityException.class)
-                .hasMessageContaining("HAPI-2911")
-                .hasMessageContaining("PractitionerRole");
-    }
-
-    @Test
-    void testValidateExpressionAgainstBase_multiBases_expressionMatchesAllBases_succeeds() {
-        SearchParameter sp = new SearchParameter();
-        sp.setId("SearchParameter/multi-base");
-        sp.setUrl("http://example.org/SearchParameter/multi-base");
-        sp.addBase(PRACTITIONERROLE).addBase(PATIENT);
-        sp.setCode("name").setType(REFERENCE).setStatus(ACTIVE);
-        sp.setExpression("PractitionerRole.practitioner | Patient.generalPractitioner");
-
-        mySvc.validate(sp);
-    }
-
-    @Test
-    void testValidateExpressionAgainstBase_multiBases_expressionMissingOneBase_fails() {
-        SearchParameter sp = new SearchParameter();
-        sp.setId("SearchParameter/multi-base");
-        sp.setUrl("http://example.org/SearchParameter/multi-base");
-        sp.addBase(PRACTITIONERROLE).addBase(PATIENT);
-        sp.setCode("name").setType(STRING).setStatus(ACTIVE);
-        sp.setExpression("PractitionerRole.practitioner");
-
-        assertThatThrownBy(() -> mySvc.validate(sp))
-                .isInstanceOf(UnprocessableEntityException.class)
-                .hasMessageContaining("HAPI-2911")
-                .hasMessageContaining("Patient");
-    }
-
-	@Test
-	void testValidateExpressionAgainstBase_whereClauseWithInnerPipe_baseMismatch_shouldFail() {
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/practitionerrole-telecom-where");
-		sp.setUrl("http://example.org/SearchParameter/practitionerrole-telecom-where");
-		sp.addBase(PRACTITIONERROLE);
-		sp.setCode("telecom").setType(TOKEN).setStatus(ACTIVE);
-		sp.setExpression("Patient.telecom.where(system='mail' | system='phone')");
-
-		assertThatThrownBy(() -> mySvc.validate(sp))
-			.isInstanceOf(UnprocessableEntityException.class)
-			.hasMessageContaining("HAPI-2911")
-			.hasMessageContaining("PractitionerRole");
-	}
 
     private static SearchParameter createSearchParameter(Enumerations.SearchParamType theType, String theId, String theCodeValue, String theExpression) {
 
