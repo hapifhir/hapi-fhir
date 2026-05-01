@@ -218,8 +218,13 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 			switch (returnEnum) {
 				case REPRESENTATION:
 					if (theMethodOutcome != null) {
-						outcome = theMethodOutcome.getResource();
+						// GL-8676: Fire view callbacks BEFORE capturing the outcome resource so that any
+						// STORAGE_PRESHOW_RESOURCES interceptor mutation (e.g. consent willSeeResource
+						// returning REJECT or replacing the resource with an OperationOutcome) is reflected
+						// in the response. Previously the resource was snapshotted before the callbacks ran,
+						// so PRESHOW mutations on write responses were silently discarded.
 						theMethodOutcome.fireResourceViewCallbacks();
+						outcome = theMethodOutcome.getResource();
 					} else {
 						outcome = null;
 					}

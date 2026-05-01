@@ -728,7 +728,10 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		// create bundle
 		Bundle bundle = createDocumentBundle();
 		MethodOutcome createOutcome = myClient.create().resource(bundle).execute();
-		IIdType bundleId = createOutcome.getResource().getIdElement();
+		// GL-8676: When willSeeResource REJECTs the write response, the response body is now
+		// empty (and the status is 204), so the ID must be sourced from the MethodOutcome's
+		// id field (populated from the Location header) rather than from the response body.
+		IIdType bundleId = createOutcome.getId();
 
 		// read the created bundle back
 		ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,

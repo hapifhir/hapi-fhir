@@ -82,6 +82,14 @@ public class ConsentInterceptor {
 			ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_COMPLETED";
 	private final String myRequestSeenResourcesKey =
 			ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_SEENRESOURCES";
+	/**
+	 * GL-8676: Marker placed on the request when {@link #interceptPreShow} REJECTs a resource on a write
+	 * operation (POST/PUT/PATCH) without supplying a replacement OperationOutcome. {@link #interceptOutgoingResponse}
+	 * uses this marker to convert the response to {@code 204 No Content} when the response resource has been
+	 * suppressed.
+	 */
+	private final String myRequestWriteRejectedNoOutcomeKey =
+			ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_WRITE_REJECTED_NO_OUTCOME";
 
 	private static final String USER_DATA_SHOULD_SKIP_CONSENT_FOR_SYSTEM_OPERATIONS =
 			"request_details_user_data_should_skip_consent";
@@ -371,6 +379,14 @@ public class ConsentInterceptor {
 							thePreResourceShowDetails.setResource(i, newOperationOutcome);
 							alreadySeenResources.put(newOperationOutcome, ConsentOperationStatusEnum.PROCEED);
 						} else {
+							// GL-8676: If this PRESHOW fires for a write operation (POST/PUT/PATCH), the
+							// stripped response resource needs to be paired with a 204 status. Record a
+							// marker so that interceptOutgoingResponse can update the status code even
+							// though the response resource is now null and the SERVER_OUTGOING_RESPONSE
+							// hook would otherwise short-circuit on a null resource.
+							if (isWriteOperation(theRequestDetails)) {
+								theRequestDetails.getUserData().put(myRequestWriteRejectedNoOutcomeKey, Boolean.TRUE);
+							}
 							resource = null;
 							thePreResourceShowDetails.setResource(i, null);
 						}
@@ -383,6 +399,12 @@ public class ConsentInterceptor {
 	@Hook(value = Pointcut.SERVER_OUTGOING_RESPONSE)
 	public void interceptOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails) {
 		if (theResponseDetails.getResponseResource() == null) {
+			// GL-8676: If a previous interceptPreShow REJECTed the write resource without supplying an
+			// OperationOutcome, the response body is empty and the wire status should be 204 No Content
+			// (consistent with the explicit REJECT branch below).
+			if (Boolean.TRUE.equals(theRequestDetails.getUserData().get(myRequestWriteRejectedNoOutcomeKey))) {
+				theResponseDetails.setResponseCode(Constants.STATUS_HTTP_204_NO_CONTENT);
+			}
 			return;
 		}
 		if (isRequestAuthorized(theRequestDetails)) {
