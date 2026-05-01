@@ -559,8 +559,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		Validate.notBlank(theInstallationSpec.getName(), "thePackageId must not be blank");
 		Validate.notBlank(theInstallationSpec.getVersion(), "thePackageVersion must not be blank");
 
+		NpmPackage cachedPackage = newTxTemplate()
+				.execute(tx ->
+						loadPackageFromCacheOnlyInner(theInstallationSpec.getName(), theInstallationSpec.getVersion()));
+
+		if (cachedPackage != null) {
+			return cachedPackage;
+		}
+
 		String sourceDescription = "Embedded content";
-		if (isNotBlank(theInstallationSpec.getPackageUrl())) {
+		if (theInstallationSpec.getPackageContents() == null && isNotBlank(theInstallationSpec.getPackageUrl())) {
 			byte[] contents = myPackageLoaderSvc.loadPackageUrlContents(theInstallationSpec.getPackageUrl());
 			theInstallationSpec.setPackageContents(contents);
 			sourceDescription = theInstallationSpec.getPackageUrl();
@@ -573,10 +581,11 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		if (isNonStoringMode && theInstallationSpec.getPackageContents() != null) {
 			return NpmPackage.fromPackage(new ByteArrayInputStream(theInstallationSpec.getPackageContents()));
 		}
+
 		if (isNonStoringMode) {
-			return newTxTemplate()
-					.execute(tx -> loadPackageFromCacheOnlyInner(
-							theInstallationSpec.getName(), theInstallationSpec.getVersion()));
+			NpmPackageData pkgData = myPackageLoaderSvc.fetchPackageFromPackageSpec(
+					theInstallationSpec.getName(), theInstallationSpec.getVersion());
+			return pkgData.getPackage();
 		}
 
 		if (theInstallationSpec.getPackageContents() != null) {
