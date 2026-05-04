@@ -3,15 +3,12 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.rest.client.method.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -19,6 +16,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -110,4 +108,29 @@ class SearchParameterUtilTest {
 		assertEquals(expected, actual);
 	}
 
+	// Created by Claude Opus 4.7
+	@ParameterizedTest
+	@ValueSource(strings = {"Resource", "DomainResource", "CanonicalResource", "MetadataResource"})
+	void testIsAbstractResourceBase_forAbstractBases_returnsTrue(String theBase) {
+		assertTrue(SearchParameterUtil.isAbstractResourceBase(theBase));
+	}
+
+	// Created by Claude Opus 4.7
+	// FHIR resource type codes are case-sensitive per the ResourceType valueset; wrong-case
+	// variants must not match.
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"Patient", "Observation", "Practitioner", "ValueSet", "StructureDefinition",
+		"resource", "RESOURCE", "domainresource", "DOMAINRESOURCE",
+		"canonicalresource", "CANONICALRESOURCE", "metadataresource", "METADATARESOURCE"
+	})
+	void testIsAbstractResourceBase_forConcreteOrMiscasedBases_returnsFalse(String theBase) {
+		assertFalse(SearchParameterUtil.isAbstractResourceBase(theBase));
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testIsAbstractResourceBase_forEmptyString_returnsFalse() {
+		assertFalse(SearchParameterUtil.isAbstractResourceBase(""));
+	}
 }
