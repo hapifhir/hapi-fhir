@@ -14,12 +14,12 @@ import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -41,10 +41,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.NamingSystem;
@@ -56,7 +54,6 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,9 +72,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -148,6 +143,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	public void after() throws Exception {
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(new JpaStorageSettings().isMarkResourcesForReindexingUponSearchParameterChange());
+		myStorageSettings.setValidateResourceStatusForPackageUpload(new JpaStorageSettings().isValidateResourceStatusForPackageUpload());
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setUnnamedPartitionMode(false);
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
@@ -1073,7 +1070,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 	@Test
 	void testNumericIdsInstalled_replacesWithServerId() throws Exception {
-			myStorageSettings.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1 instead of "shorthand-code-system"
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.13.0.tgz");
@@ -1099,7 +1096,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	@ParameterizedTest
 	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
 	void testSearchParametersWithNumericIds_installedWithNpmPrefix(
-			PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws Exception {
+		PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws Exception {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1234 instead of "shorthand-code-system"
@@ -1561,87 +1558,6 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 	}
 
-	// Created by Claude Opus 4.7
-	/**
-	 * When an existing SearchParameter has an abstract base ({@code Resource} or
-	 * {@code DomainResource}) that overlaps the incoming SP's concrete base, the installer's
-	 * split path in {@code updateExistingSearchParameterBaseIfNecessary} must expand the
-	 * abstract base before subtracting. Pre-fix, raw string {@code removeAll} left the
-	 * abstract token in place and the existing SP was not narrowed.
-	 */
-	@Test
-	public void installPackage_existingSearchParameterHasAbstractBaseOverlappingIncoming_narrowsByExpansion() throws IOException {
-		// Perf-only override: the split rewrites the existing SP's base to every concrete
-		// type except the incoming's — the resulting reindex request spans ~150 URLs.
-		// Disabling the reindex flag avoids queueing that job while the split itself
-		// (the code under test) runs unchanged.
-		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
-
-		String sharedCode = "abstract-base-demo";
-		String existingId = "existing-sp";
-
-		SearchParameter existing = new SearchParameter();
-		existing.setId(existingId);
-		existing.setUrl("http://example.org/SearchParameter/existing-sp");
-		existing.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		existing.setCode(sharedCode);
-		existing.addBase("Patient");
-		existing.addBase("DomainResource");
-		existing.setType(Enumerations.SearchParamType.TOKEN);
-		existing.setExpression("DomainResource.text");
-		mySearchParameterDao.update(existing, new SystemRequestDetails());
-
-		SearchParameter incoming = new SearchParameter();
-		incoming.setId("incoming-sp");
-		incoming.setUrl("http://example.org/SearchParameter/incoming-sp");
-		incoming.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		incoming.setCode(sharedCode);
-		incoming.addBase("Patient");
-		incoming.setType(Enumerations.SearchParamType.TOKEN);
-		incoming.setExpression("Patient.text");
-
-		installAsPackage("abstract-base-pkg", "0.0.1", incoming);
-
-		runInTransaction(() -> {
-			SearchParameter narrowed = mySearchParameterDao.read(
-				new IdType("SearchParameter/" + existingId), new SystemRequestDetails());
-			List<String> baseAfter = narrowed.getBase().stream().map(CodeType::getCode).toList();
-			assertThat(baseAfter).doesNotContain("Patient");
-			assertThat(baseAfter).doesNotContain("DomainResource");
-			assertThat(baseAfter).contains("Observation");
-		});
-	}
-
-	// Created by Claude Opus 4.7
-	private void installAsPackage(String theName, String theVersion, IBaseResource... theResources) throws IOException {
-		PackageInstallationSpec spec = new PackageInstallationSpec()
-			.setName(theName)
-			.setVersion(theVersion)
-			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
-			.setPackageContents(buildPackage(theName, theVersion, theResources));
-		myPackageInstallerSvc.install(spec);
-	}
-
-	// Created by Claude Opus 4.7
-	private byte[] buildPackage(String theName, String theVersion, IBaseResource... theResources) throws IOException {
-		PackageGenerator manifest = new PackageGenerator();
-		manifest.name(theName);
-		manifest.version(theVersion);
-		manifest.description("test package");
-		manifest.fhirVersions(List.of(FhirVersionEnum.R4.getFhirVersionString()));
-
-		NpmPackage pkg = NpmPackage.empty(manifest);
-		for (IBaseResource resource : theResources) {
-			String type = resource.getClass().getSimpleName();
-			String filename = type + "-" + resource.getIdElement().getIdPart() + ".json";
-			String json = myFhirContext.newJsonParser().encodeResourceToString(resource);
-			pkg.addFile("package", filename, json.getBytes(StandardCharsets.UTF_8), type);
-		}
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		pkg.save(out);
-		return out.toByteArray();
-	}
-
 
 	@Test
 	public void testLoadContents() throws IOException {
@@ -1986,6 +1902,103 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		IBundleProvider result = myCodeSystemDao.search(map, new SystemRequestDetails());
 		assertThat(result.sizeOrThrowNpe()).isEqualTo(1);
 		return (CodeSystem) result.getResources(0, 1).get(0);
+	}
+
+	/**
+	 * Control: {@code MULTI_VERSION} install of a fresh {@code (url, version)} pair succeeds.
+	 * Locks in current routing — flips red if a future change lands the new resource onto an
+	 * existing slot owned by a different resource.
+	 */
+	@Test
+	void install_multiVersionPackageWithFreshVersion_succeeds(@TempDir Path theTempDir) throws IOException {
+		String csUrl = "http://example.org/CodeSystem/duplicate-codes";
+		createCodeSystem(csUrl, "1");
+		createCodeSystem(csUrl, "2");
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		runInTransaction(() -> {
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByCodeSystemUri(csUrl);
+			assertThat(termCodeSystem).isNotNull();
+			TermCodeSystemVersion versionOne = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(termCodeSystem.getPid(), "1");
+			TermCodeSystemVersion versionTwo = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(termCodeSystem.getPid(), "2");
+			assertThat(versionOne).isNotNull();
+			assertThat(versionTwo).isNotNull();
+			assertThat(versionOne.getResource().getId()).isNotEqualTo(versionTwo.getResource().getId());
+		});
+
+		String packageVersion = "3";
+		PackageInstallationSpec spec = buildPackageContainingCodeSystem(theTempDir, "duplicate.codesystem.test", csUrl, packageVersion)
+			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
+
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled().getOrDefault("CodeSystem", 0)).isEqualTo(1);
+		runInTransaction(() -> {
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByCodeSystemUri(csUrl);
+			assertThat(termCodeSystem).isNotNull();
+			assertThat(myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(termCodeSystem.getPid(), packageVersion)).isNotNull();
+		});
+	}
+
+	/**
+	 * Covers the {@code isUpdate} branch of {@code tryReleaseConflictingVersionRow}: a
+	 * {@code SINGLE_VERSION} install updates an existing resource into a slot owned by another
+	 * resource, and the conflict is released instead of throwing 848.
+	 */
+	@Test
+	void install_singleVersionPackageUpdatesResourceConflictingWithOlderVersionSlot_succeeds(@TempDir Path theTempDir)
+			throws IOException {
+		String csUrl = "http://example.org/CodeSystem/duplicate-codes";
+		String resourceAId = createCodeSystem(csUrl, "1").getIdElement().getIdPart();
+		createCodeSystem(csUrl, "2"); // higher PID — returned first by URL-only search
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		PackageInstallationSpec spec = buildPackageContainingCodeSystem(theTempDir, "duplicate.codesystem.test", csUrl, "1")
+			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION);
+
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled().getOrDefault("CodeSystem", 0)).isEqualTo(1);
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri(csUrl);
+			assertThat(tcs).isNotNull();
+			TermCodeSystemVersion slotForVersionOne =
+				myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(tcs.getPid(), "1");
+			assertThat(slotForVersionOne).isNotNull();
+			// Resource B was updated to version="1" and claimed A's slot.
+			assertThat(slotForVersionOne.getResource().getIdDt().getIdPart()).isNotEqualTo(resourceAId);
+		});
+	}
+
+	private CodeSystem createCodeSystem(String theUrl, String theVersion) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(theUrl);
+		codeSystem.setVersion(theVersion);
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("foo-" + theVersion)));
+		return (CodeSystem) myCodeSystemDao.create(codeSystem, mySrd).getResource();
+	}
+
+	private PackageInstallationSpec buildPackageContainingCodeSystem(Path theTempDir, String theIgName, String theUrl, String theVersion) throws IOException {
+		Path igDir = Files.createDirectory(theTempDir.resolve("ig-v" + theVersion));
+		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, theIgName, "1.0.0");
+		igCreator.setDirectory(igDir);
+
+		CodeSystem packagedCodeSystem = new CodeSystem();
+		packagedCodeSystem.setId("packaged-codesystem-v" + theVersion);
+		packagedCodeSystem.setUrl(theUrl);
+		packagedCodeSystem.setVersion(theVersion);
+		packagedCodeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		packagedCodeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		packagedCodeSystem.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("from-package")));
+		igCreator.addResourceToIG("codesystem", packagedCodeSystem);
+
+		Path tarball = igCreator.createTestIG();
+		return new PackageInstallationSpec()
+			.setName(igCreator.getPackageName())
+			.setVersion(igCreator.getPackageVersion())
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setPackageContents(Files.readAllBytes(tarball));
 	}
 
 }

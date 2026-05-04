@@ -59,6 +59,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
@@ -453,11 +454,12 @@ class BaseHapiFhirResourceDaoTest {
 		}
 	}
 
-	@Test
-	public void requestReindexForRelatedResources_withSpecialBaseResource_doesNotIncludeUrlsInJobParameters() {
+	@ParameterizedTest
+	@ValueSource(strings = {"Resource", "DomainResource", "CanonicalResource", "MetadataResource"})
+	void requestReindexForRelatedResources_withAbstractBaseResource_doesNotIncludeUrlsInJobParameters(String theBase) {
 		when(myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange()).thenReturn(true);
 
-		List<String> base = Lists.newArrayList("Resource");
+		List<String> base = Lists.newArrayList(theBase);
 
 		mySvc.requestReindexForRelatedResources(false, base, new ServletRequestDetails());
 

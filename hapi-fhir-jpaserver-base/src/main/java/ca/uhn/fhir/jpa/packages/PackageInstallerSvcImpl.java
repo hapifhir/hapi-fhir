@@ -1019,7 +1019,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return SearchParameterMap.newSynchronous().add("_id", new TokenParam(id));
 		} else if ("SearchParameter".equals(resourceType)) {
 			return buildSearchParameterMapForSearchParameter(theResource);
-		} else if (resourceHasUrlElement(theResource)) {
+		} else if (resourceHasPopulatedUrl(theResource)) {
 			SearchParameterMap retVal = SearchParameterMap.newSynchronous();
 			retVal.add("url", new UriParam(extractSimpleValueIfPresent(theResource, "url")));
 			// If multiple versions are allowed, include version in search to avoid overwriting
@@ -1059,7 +1059,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return spmFromCanonicalized.get();
 		}
 
-		if (resourceHasUrlElement(theResource)) {
+		if (resourceHasPopulatedUrl(theResource)) {
 			String url = extractSimpleValue(theResource, "url");
 			return SearchParameterMap.newSynchronous().add("url", new UriParam(url));
 		} else {
@@ -1105,8 +1105,13 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				: "";
 	}
 
-	private boolean resourceHasUrlElement(IBaseResource theResource) {
-		return resourceHasElementNamed(theResource, "url");
+	private boolean resourceHasPopulatedUrl(IBaseResource theResource) {
+		final String urlElementName = "url";
+		if (!resourceHasElementNamed(theResource, urlElementName)) {
+			return false;
+		}
+		String url = extractSimpleValue(theResource, urlElementName);
+		return url != null && !url.isBlank();
 	}
 
 	private boolean resourceHasElementNamed(IBaseResource theResource, String theElementName) {

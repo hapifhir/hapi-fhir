@@ -33,6 +33,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Communication;
+import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -80,6 +81,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -672,6 +674,56 @@ public class PackageInstallerSvcImplTest {
 		Communication communication = new Communication();
 		communication.setStatus(theCommunicationStatus);
 		return communication;
+	}
+
+	static Stream<Arguments> resourcesWithExpectedSearchKey() {
+		CodeSystem csWithUrl = new CodeSystem();
+		csWithUrl.setUrl("http://example.com/cs");
+		csWithUrl.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		csWithUrl.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		Device deviceWithUrlNotPopulated = new Device();
+		deviceWithUrlNotPopulated.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		deviceWithUrlNotPopulated.addIdentifier().setSystem("urn:sys").setValue("device-no-url");
+
+		Patient ptWithIdentifier = new Patient();
+		ptWithIdentifier.addIdentifier().setSystem("urn:sys").setValue("pt-id");
+
+		Device deviceWithUrl = new Device();
+		deviceWithUrl.setUrl("http://10.0.0.1/fhir");
+		deviceWithUrl.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		deviceWithUrl.addIdentifier().setSystem("urn:sys").setValue("device-with-url");
+
+		return Stream.of(
+			arguments(csWithUrl, "url", "?url=http%3A//example.com/cs"),
+			arguments(deviceWithUrlNotPopulated, "identifier", "?identifier=urn%3Asys%7Cdevice-no-url"),
+			arguments(ptWithIdentifier, "identifier", "?identifier=urn%3Asys%7Cpt-id"),
+			arguments(deviceWithUrl, "url", "?url=http%3A//10.0.0.1/fhir")
+		);
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@ParameterizedTest
+	@MethodSource("resourcesWithExpectedSearchKey")
+	void testInstall_searchesByExpectedKey(IBaseResource theResource, String theExpectedSearchKey,
+										   String theExpectedQueryString) throws IOException {
+		IFhirResourceDao dao = mock(IFhirResourceDao.class);
+		if (theResource instanceof CodeSystem cs) {
+			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(cs);
+		} else if (theResource instanceof ValueSet vs) {
+			when(myVersionCanonicalizerMock.valueSetToCanonical(any())).thenReturn(vs);
+		}
+		when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
+
+		PackageInstallationSpec spec = setupResourceInPackage(null, theResource, dao);
+		spec.addInstallResourceTypes(theResource.fhirType());
+
+		mySvc.install(spec);
+
+		verify(dao).search(mySearchParameterMapCaptor.capture(), any());
+		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
+		assertThat(map.keySet()).contains(theExpectedSearchKey);
+		assertThat(map.toNormalizedQueryString()).startsWith(theExpectedQueryString);
 	}
 
 	@Nested
