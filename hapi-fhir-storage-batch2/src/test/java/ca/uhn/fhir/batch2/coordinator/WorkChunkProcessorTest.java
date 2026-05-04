@@ -69,6 +69,8 @@ public class WorkChunkProcessorTest {
 	private IJobPersistence myJobPersistence;
 	@Mock
 	private BatchJobSender myJobSender;
+	@Mock
+	private JobDefinitionRegistry myJobDefinitionRegistry;
 
 	// general mocks
 	private TestWorkChunkProcessor myExecutorSvc;
@@ -432,7 +434,7 @@ public class WorkChunkProcessorTest {
 	private class TestWorkChunkProcessor extends WorkChunkProcessor {
 
 		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender) {
-			super(thePersistence, theSender, new NonTransactionalHapiTransactionService(), mock(IJobStepExecutionServices.class));
+			super(myJobDefinitionRegistry, thePersistence, theSender, new NonTransactionalHapiTransactionService(), mock(IJobStepExecutionServices.class));
 		}
 
 		@Override

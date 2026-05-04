@@ -713,17 +713,19 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				((LoincPartHandler) handler).getPartTypeAndPartNameToPartNumber();
 
 		// LOINC string properties
+		// **CONVERTED**
 		handler = new LoincHandler(
 				codeSystemVersion, code2concept, propertyNamesToTypes, partTypeAndPartNameToPartNumber);
 		iterateOverZipFileCsv(
 				theDescriptors,
-				theUploadProperties.getProperty(LOINC_FILE.getCode(), LOINC_FILE_DEFAULT.getCode()),
+					theUploadProperties.getProperty(LOINC_FILE.getCode(), LOINC_FILE_DEFAULT.getCode()),
 				handler,
 				',',
 				QuoteMode.NON_NUMERIC,
 				false);
 
 		// LOINC hierarchy
+		// **CONVERTED**
 		handler = new LoincHierarchyHandler(codeSystemVersion, code2concept);
 		iterateOverZipFileCsv(
 				theDescriptors,
@@ -734,6 +736,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Answer lists (ValueSets of potential answers/values for LOINC "questions")
+		// **CONVERTED**
 		handler = new LoincAnswerListHandler(
 				codeSystemVersion, code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(

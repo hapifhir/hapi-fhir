@@ -42,30 +42,26 @@ public class ZipCollectionBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ZipCollectionBuilder.class);
 	private final ArrayList<ITermLoaderSvc.FileDescriptor> myFiles;
+	private final ByteArrayOutputStream mySingleZipBytes;
+	private final ZipOutputStream mySingleZipStream;
 
 	/**
 	 * Constructor
 	 */
 	public ZipCollectionBuilder() {
-		myFiles = new ArrayList<>();
+		this(false);
 	}
 
-	/**
-	 * Add file as a raw file
-	 */
-	public void addFilePlain(String theClasspathPrefix, String theClasspathFileName) throws IOException {
-		byte[] file = readFile(theClasspathPrefix, theClasspathFileName);
-		myFiles.add(new ITermLoaderSvc.FileDescriptor() {
-			@Override
-			public String getFilename() {
-				return theClasspathFileName;
-			}
-
-			@Override
-			public InputStream getInputStream() {
-				return new ByteArrayInputStream(file);
-			}
-		});
+	public ZipCollectionBuilder(boolean theSingleZipFile) {
+		if (theSingleZipFile) {
+			myFiles = null;
+			mySingleZipBytes = new ByteArrayOutputStream();
+			mySingleZipStream = new ZipOutputStream(mySingleZipBytes);
+		} else {
+			myFiles = new ArrayList<>();
+			mySingleZipBytes = null;
+			mySingleZipStream = null;
+		}
 	}
 
 	/**
@@ -77,50 +73,42 @@ public class ZipCollectionBuilder {
 
 	public void addFileZip(String theClasspathPrefix, String theClasspathFileName, String theOutputFilename)
 			throws IOException {
-		ByteArrayOutputStream bos;
-		bos = new ByteArrayOutputStream();
-		ZipOutputStream zos = new ZipOutputStream(bos);
-		ourLog.info("Adding {} to test zip", theClasspathFileName);
-		zos.putNextEntry(new ZipEntry(ZIP_ENTRY_PREFIX + theOutputFilename));
-		zos.write(readFile(theClasspathPrefix, theClasspathFileName));
-		zos.closeEntry();
-		zos.close();
-		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
-		myFiles.add(new ITermLoaderSvc.FileDescriptor() {
-			@Override
-			public String getFilename() {
-				return "AAA.zip";
-			}
-
-			@Override
-			public InputStream getInputStream() {
-				return new ByteArrayInputStream(bos.toByteArray());
-			}
-		});
+		byte[] bytes = readFile(theClasspathPrefix, theClasspathFileName);
+		addBytes(theClasspathFileName, theOutputFilename, bytes);
 	}
 
 	public void addPropertiesZip(Properties properties, String theOutputFilename) throws IOException {
+		byte[] bytes = getPropertiesBytes(properties);
+		addBytes(theOutputFilename, theOutputFilename, bytes);
+	}
 
-		ByteArrayOutputStream bos;
-		bos = new ByteArrayOutputStream();
-		ZipOutputStream zos = new ZipOutputStream(bos);
-		ourLog.info("Adding properties to test zip");
-		zos.putNextEntry(new ZipEntry(ZIP_ENTRY_PREFIX + theOutputFilename));
-		zos.write(getPropertiesBytes(properties));
-		zos.closeEntry();
-		zos.close();
-		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
-		myFiles.add(new ITermLoaderSvc.FileDescriptor() {
-			@Override
-			public String getFilename() {
-				return "AAA.zip";
-			}
+	private void addBytes(String theClasspathFileName, String theOutputFilename, byte[] bytes) throws IOException {
+		if (mySingleZipStream != null) {
+			mySingleZipStream.putNextEntry(new ZipEntry(ZIP_ENTRY_PREFIX + theOutputFilename));
+			mySingleZipStream.write(bytes);
+			mySingleZipStream.closeEntry();
+		} else {
+			ByteArrayOutputStream bos;
+			bos = new ByteArrayOutputStream();
+			ZipOutputStream zos = new ZipOutputStream(bos);
+			ourLog.info("Adding {} to test zip", theClasspathFileName);
+			zos.putNextEntry(new ZipEntry(ZIP_ENTRY_PREFIX + theOutputFilename));
+			zos.write(bytes);
+			zos.closeEntry();
+			zos.close();
+			ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
+			myFiles.add(new ITermLoaderSvc.FileDescriptor() {
+				@Override
+				public String getFilename() {
+					return "AAA.zip";
+				}
 
-			@Override
-			public InputStream getInputStream() {
-				return new ByteArrayInputStream(bos.toByteArray());
-			}
-		});
+				@Override
+				public InputStream getInputStream() {
+					return new ByteArrayInputStream(bos.toByteArray());
+				}
+			});
+		}
 	}
 
 	private byte[] getPropertiesBytes(Properties theProperties) throws IOException {
@@ -154,5 +142,12 @@ public class ZipCollectionBuilder {
 				return new ByteArrayInputStream(theText.getBytes(Charsets.UTF_8));
 			}
 		});
+	}
+
+	public byte[] getZipBytes() {
+		assert mySingleZipBytes != null;
+		IOUtils.closeQuietly(mySingleZipStream);
+		IOUtils.closeQuietly(mySingleZipBytes);
+		return mySingleZipBytes.toByteArray();
 	}
 }

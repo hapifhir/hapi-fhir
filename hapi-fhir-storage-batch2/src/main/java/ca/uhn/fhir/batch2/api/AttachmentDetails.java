@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.api;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 public class AttachmentDetails {
@@ -56,6 +57,10 @@ public class AttachmentDetails {
 		public Builder withInputStream(InputStream theInputStream) {
 			myInputStream = theInputStream;
 			return this;
+		}
+
+		public Builder withBytes(byte[] theBytes) {
+			return withInputStream(new ByteArrayInputStream(theBytes));
 		}
 
 		public Builder withContentType(AttachmentContentTypeEnum theContentType) {

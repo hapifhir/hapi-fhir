@@ -19,28 +19,65 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.model.StatusEnum;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ImportLoincJobAppCtx {
 
-	// TODO: This is a placeholder for the new job definition for LOINC import. It will be
-	// filled in in the next PR.
+	public static final String IMPORT_TERM_LOINC = "IMPORT_TERM_LOINC";
+	public static final String DISTRIBUTION_FILE_ATTACHMENT_FILENAME = "loinc.zip";
+
+	@Bean
+	public JobDefinition<LoincJobImportParameters> importLoincJobDefinition() {
+		return JobDefinition.newBuilder()
+			.setInitialStatus(StatusEnum.BUILDING)
+			.setJobDefinitionId(IMPORT_TERM_LOINC)
+			.setJobDescription("Import Terminology - LOINC")
+			.setJobDefinitionVersion(1)
+			.gatedExecution()
+			.setParametersType(LoincJobImportParameters.class)
+			.addFirstStep("expand-zip", "Expand LOINC distribution", ImportLoincFileSetJson.class, importLoincStep1ExpandDistributionIntoFiles())
+			.addIntermediateStep("import-concepts", "Import LOINC concepts", ImportLoincFileSetJson.class, importLoincStep2Concepts())
+			.addIntermediateStep("import-hierarchy", "Import LOINC hierarchy", ImportLoincFileSetJson.class, importLoincStep3HandleHierarchy())
+			.addIntermediateStep("import-answer-lists", "Import LOINC answer lists", ImportLoincFileSetJson.class, importLoincStep4AnswerLists())
+//				.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
+			.build();
+	}
+
 
 	/**
-	 * Pre-HAPI FHIR 8.2.0 definition
+	 * Step 1: Expand LOINC distribution ZIP into files
 	 */
-	//	@Bean
-	//	public JobDefinition<BulkImportJobParameters> bulkImport2JobDefinition() {
-	//		return JobDefinition.newBuilder()
-	//			.setInitialStatus(StatusEnum.QUEUED)
-	//			.setJobDefinitionId("IMPORT_TERM_LOINC")
-	//			.setJobDescription("Import Terminology - LOINC")
-	//			.setJobDefinitionVersion(1)
-	//			.setParametersType(BulkImportJobParameters.class)
-	//			.addFirstStep("fetch-files", "Fetch files for import", NdJsonFileJson.class, bulkImport2FetchFiles())
-	//			.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
-	//			.build();
-	//	}
+	@Bean
+	public ImportLoincStep1ExpandDistributionIntoFilesStep importLoincStep1ExpandDistributionIntoFiles() {
+		return new ImportLoincStep1ExpandDistributionIntoFilesStep();
+	}
+
+	/**
+	 * Step 2: Import LOINC concepts
+	 */
+	@Bean
+	public ImportLoincStep2HandleConcepts importLoincStep2Concepts() {
+		return new ImportLoincStep2HandleConcepts();
+	}
+
+	/**
+	 * Step 3: Import LOINC hierarchy
+	 */
+	@Bean
+	public ImportLoincStep3HandleHierarchy importLoincStep3HandleHierarchy() {
+		return new ImportLoincStep3HandleHierarchy();
+	}
+
+	/**
+	 * Step 4: Import LOINC answer lists
+	 */
+	@Bean
+	public ImportLoincStep4HandleAnswerLists importLoincStep4AnswerLists() {
+		return new ImportLoincStep4HandleAnswerLists();
+	}
 
 }

@@ -17,8 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
+package ca.uhn.fhir.jpa.batch2.jobs.term;
 
+import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -26,7 +27,6 @@ import org.springframework.context.annotation.Import;
 @Import({ImportLoincJobAppCtx.class})
 public class JpaJobsAppCtx {
 
-	// TODO: This is a placeholder for the new job definition for LOINC import. It will be
-	// filled in in the next PR.
+	// This is just a container for the @Import statements
 
 }

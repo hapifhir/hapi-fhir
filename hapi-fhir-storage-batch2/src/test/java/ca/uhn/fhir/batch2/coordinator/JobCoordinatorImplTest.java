@@ -34,10 +34,7 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
-import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
-import ca.uhn.fhir.jpa.sched.LocalHapiScheduler;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -131,7 +128,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
-		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService(), myJobStepExecutionServices);
+		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobDefinitionRegistry, myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService(), myJobStepExecutionServices);
 		WorkChannelMessageListener workChannelMessageListener = new WorkChannelMessageListener(myJobInstancePersister,
 			myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService,myInterceptorBroadcaster, myInterceptorService, myIHapiScheduler);
 
