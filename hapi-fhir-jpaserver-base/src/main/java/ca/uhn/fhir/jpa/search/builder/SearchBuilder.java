@@ -933,8 +933,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						Msg.code(2841) + "Resource " + myParams.get(IAnyResource.SP_RES_ID) + " is not known.");
 			}
 
-			// add the target pids to our executors as the first
-			// results iterator to go through
 			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(new ArrayList<>(targetPids)));
 		} else {
 			// For Everything queries, we make the query root by the ResourceLink table, since this query
@@ -2829,6 +2827,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 				if (myCurrentIterator == null) {
 					Set<Include> includes = new HashSet<>();
+					List<String> typeNames = new ArrayList<>();
 					if (myParams.containsKey(Constants.PARAM_TYPE)) {
 						for (List<IQueryParameterType> typeList : myParams.get(Constants.PARAM_TYPE)) {
 							for (IQueryParameterType type : typeList) {
@@ -2837,6 +2836,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									String rt = resourceType.trim();
 									if (isNotBlank(rt)) {
 										includes.add(new Include(rt + ":*", true));
+										typeNames.add(rt);
 									}
 								}
 							}
@@ -2845,16 +2845,21 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					if (includes.isEmpty()) {
 						includes.add(new Include("*", true));
 					}
-					Set<JpaPid> newPids = loadIncludes(
-							myContext,
-							myEntityManager,
-							myCurrentPids,
-							includes,
-							false,
-							getParams().getLastUpdated(),
-							mySearchUuid,
-							myRequest,
-							null);
+					SearchBuilderLoadIncludesParameters<JpaPid> loadParams =
+							new SearchBuilderLoadIncludesParameters<>();
+					loadParams.setFhirContext(myContext);
+					loadParams.setEntityManager(myEntityManager);
+					loadParams.setMatches(myCurrentPids);
+					loadParams.setIncludeFilters(includes);
+					loadParams.setReverseMode(false);
+					loadParams.setLastUpdated(getParams().getLastUpdated());
+					loadParams.setSearchIdOrDescription(mySearchUuid);
+					loadParams.setRequestDetails(myRequest);
+					loadParams.setMaxCount(null);
+					if (!typeNames.isEmpty()) {
+						loadParams.setDesiredResourceTypes(typeNames);
+					}
+					Set<JpaPid> newPids = loadIncludes(loadParams);
 					myCurrentIterator = newPids.iterator();
 				}
 
