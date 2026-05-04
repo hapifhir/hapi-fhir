@@ -3,7 +3,6 @@ type: fix
 issue: 7801
 title: "Previously, installing an IG package whose `SearchParameter` shared a `code` with an
   existing `SearchParameter` on an abstract `base` (`Resource`, `DomainResource`,
-  `CanonicalResource`, or `MetadataResource`) did not narrow the existing parameter. FHIR
-  searches using that `code` could then return results governed by the older parameter's
-  indexing, making the newly-installed `SearchParameter` fail to take effect as intended.
-  This has been fixed."
+  `CanonicalResource`, or `MetadataResource`) did not update the existing `SearchParameter.base` which means 
+  the `SearchParameter` was still operating on the old `base`. This has been fixed."
+
