@@ -118,7 +118,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					List<IPrimitiveType<String>> theTypes,
 			@Description(
 							shortDefinition =
-									"Filter the resources to return only resources matching the given _type filter. When _type is specified, only resources of the listed types are returned; the patient anchor resource itself is also subject to this filter and is omitted unless Patient is included in _type.")
+									"If set to true, expands the patient set to include all patients linked via MDM before returning results. Requires MDM to be enabled on the server.")
 					@OperationParam(name = Constants.PARAM_MDM, min = 0, max = 1, typeName = "boolean")
 					IPrimitiveType<Boolean> theMdmExpand,
 			@Sort SortSpec theSortSpec,
@@ -214,7 +214,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					List<IIdType> theId,
 			@Description(
 							shortDefinition =
-									"Filter the resources to return only resources matching the given _type filter. When _type is specified, only resources of the listed types are returned; the patient anchor resource itself is also subject to this filter and is omitted unless Patient is included in _type.")
+									"If set to true, expands the patient set to include all patients linked via MDM before returning results. Requires MDM to be enabled on the server.")
 					@OperationParam(name = Constants.PARAM_MDM, min = 0, max = 1, typeName = "boolean")
 					IPrimitiveType<Boolean> theMdmExpand,
 			@Sort SortSpec theSortSpec,
