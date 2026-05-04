@@ -14,8 +14,7 @@ import java.util.List;
  */
 public class NpmPackageBuilder {
 
-	private record Dependency(String theName, String theVersion) {
-	}
+	private record Dependency(String theName, String theVersion) {}
 
 	private final String myName;
 	private final String myVersion;

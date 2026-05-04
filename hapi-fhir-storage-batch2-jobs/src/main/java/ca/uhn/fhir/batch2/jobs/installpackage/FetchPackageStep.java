@@ -70,7 +70,10 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 			if (theStepExecutionDetails.getParameters().isDependencyJob()) {
 				// Adjust the dependency package as needed to match the FHIR version of the server
 				npmPackage = myPackageInstallerSvc.substituteVersionSpecificPackageIfNeeded(
-						npmPackage, installationSpec.getName(), installationSpec.getVersion());
+						npmPackage,
+						installationSpec.getName(),
+						installationSpec.getVersion(),
+						shouldUpdateCache(installationSpec));
 			}
 
 			if (npmPackage == null) {
@@ -96,6 +99,12 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 		}
 
 		return RunOutcome.SUCCESS;
+	}
+
+	private static boolean shouldUpdateCache(PackageInstallationSpec installationSpec) {
+		return !installationSpec.isDryRun()
+				&& (installationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL
+						|| installationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 	}
 
 	@Nonnull

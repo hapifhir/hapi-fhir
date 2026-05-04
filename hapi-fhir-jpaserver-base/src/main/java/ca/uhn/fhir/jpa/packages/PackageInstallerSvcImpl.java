@@ -401,15 +401,19 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 							.add(String.format(
 									"Installation would install %s:%s", nextPackage.name(), nextPackage.version()));
 				} else {
+					boolean updateCache = theInstallationSpec.getInstallMode()
+									== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL
+							|| theInstallationSpec.getInstallMode()
+									== PackageInstallationSpec.InstallModeEnum.STORE_ONLY;
 
 					// resolve in local cache or on packages.fhir.org
 					NpmPackage dependency =
-							myPackageCacheManager.loadPackage(nextPackage.name(), nextPackage.version());
+							myPackageCacheManager.loadPackage(nextPackage.name(), nextPackage.version(), updateCache);
 
 					// If the dependency's FHIR version is incompatible with the server,
 					// attempt to load a version-specific variant (e.g., {id}.r4 for R4 servers)
 					dependency = substituteVersionSpecificPackageIfNeeded(
-							dependency, nextPackage.name(), nextPackage.version());
+							dependency, nextPackage.name(), nextPackage.version(), updateCache);
 
 					// recursive call to install dependencies of a package before
 					// installing the package
@@ -445,7 +449,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 */
 	@Override
 	public NpmPackage substituteVersionSpecificPackageIfNeeded(
-			NpmPackage theDependency, String theId, String theVersion) {
+			NpmPackage theDependency, String theId, String theVersion, boolean theShouldUpdateCache) {
 		String dependencyFhirVersion = theDependency.fhirVersion();
 		String serverFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();
 
@@ -475,7 +479,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				theVersion);
 
 		try {
-			NpmPackage variant = myPackageCacheManager.loadPackage(variantId, theVersion);
+			NpmPackage variant = myPackageCacheManager.loadPackage(variantId, theVersion, theShouldUpdateCache);
 			ourLog.info(
 					"Successfully substituted {}#{} with version-specific variant {}#{}",
 					theId,
