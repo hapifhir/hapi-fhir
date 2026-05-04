@@ -88,7 +88,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
 import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
@@ -215,7 +217,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				retVal.getMessage().addAll(NpmPackageUtils.getProcessingMessages(npmPackage));
 
 				if (theInstallationSpec.isFetchDependencies()) {
-					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal);
+					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal, new DependencyRegister());
 				}
 
 				if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL
@@ -388,12 +390,21 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private void fetchAndInstallDependencies(
-			NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome)
+			NpmPackage npmPackage,
+			PackageInstallationSpec theInstallationSpec,
+			PackageInstallOutcomeJson theOutcome,
+			DependencyRegister theDependencyRegister)
 			throws ImplementationGuideInstallationException {
 		List<PackageUtils.DependentPackage> dependentPackages =
 				PackageUtils.extractDependentPackages(npmPackage, theInstallationSpec, theOutcome);
 
 		for (PackageUtils.DependentPackage nextPackage : dependentPackages) {
+			if (theDependencyRegister.containsDependency(nextPackage.name(), nextPackage.version())) {
+				continue;
+			}
+
+			theDependencyRegister.addDependency(nextPackage.name(), nextPackage.version());
+
 			try {
 				if (theInstallationSpec.isDryRun()) {
 					theOutcome
@@ -417,7 +428,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 					// recursive call to install dependencies of a package before
 					// installing the package
-					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
+					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome, theDependencyRegister);
 
 					if (theInstallationSpec.getInstallMode()
 							== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
@@ -1125,5 +1136,22 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@VisibleForTesting
 	void setFhirContextForUnitTest(FhirContext theCtx) {
 		myFhirContext = theCtx;
+	}
+
+	private static class DependencyRegister {
+		private final Set<String> dependencies = new HashSet<>();
+
+		public void addDependency(String thePackageName, String theVersion) {
+			dependencies.add(buildKey(thePackageName, theVersion));
+		}
+
+		public boolean containsDependency(String thePackageName, String theVersion) {
+			return dependencies.contains(buildKey(thePackageName, theVersion));
+		}
+
+		@Nonnull
+		private static String buildKey(String thePackageName, String theVersion) {
+			return thePackageName + "#" + Objects.requireNonNullElse(theVersion, "current");
+		}
 	}
 }
