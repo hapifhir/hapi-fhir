@@ -2,7 +2,7 @@
 type: fix
 issue: 7847
 title: "Fixed a bug where the Patient $everything operation with a _type parameter would return
-  linked resources of types not specified in _type. Forward-include expansion now respects
-  the _type filter, so only resources matching the requested types are included in the
-  response bundle. Additionally, when _type is specified and Patient is not among the listed
-  types, the Patient anchor resource is no longer unconditionally included in the response."
+  linked resources of types not specified in _type. Forward-include expansion in
+  IncludesIterator now respects the _type filter, so only resources matching the requested
+  types are included in the response bundle. The Patient anchor resource is always returned
+  regardless of the _type filter, as per the operation's documented contract."
