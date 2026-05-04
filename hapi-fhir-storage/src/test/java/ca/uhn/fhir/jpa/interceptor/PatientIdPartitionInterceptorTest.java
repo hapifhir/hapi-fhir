@@ -236,6 +236,32 @@ class PatientIdPartitionInterceptorTest {
 				.hasMessageContaining("is not a valid resource type");
 	}
 
+	/**
+	 * GL-8604 / SMILE-11955: Chained search params on subject/patient (e.g. subject.gender=female)
+	 * should be tolerated in patient compartment mode. The partition is determined by the base
+	 * reference; the chained param does not contribute to partition selection and must be skipped.
+	 * Before the fix, Guard 1 in getResourceIdsForSearchParam throws HAPI-1322 unconditionally.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', textBlock = """
+		Encounter?subject=Patient/abc                          | 6354
+		Encounter?subject=Patient/abc&subject.gender=female    | 6354
+		Encounter?subject=Patient/abc&subject.gender=male      | 6354
+		Observation?patient=Patient/123&patient.gender=female  | 3690
+		Observation?patient.gender=female&patient=Patient/123  | 3690
+		""")
+	void testSearch_ChainedParamOnCompartmentParam_ShouldReturnPartitionAndNotThrow(String theValue, @ConvertWith(StringToIntegerListArgumentConverter.class) List<Integer> theExpectedPartitionId) {
+		MatchUrlService.ResourceTypeAndSearchParameterMap parsedMatchUrl = myMatchUrlSvc.parseAndTranslateMatchUrl(theValue);
+		SearchParameterMap params = parsedMatchUrl.searchParameterMap();
+		String resourceType = parsedMatchUrl.resourceType();
+		ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forSearchType(resourceType, params, null);
+
+		RequestPartitionId actual = mySvc.identifyForRead(readDetails, new ServletRequestDetails());
+
+		assertFalse(actual.isAllPartitions());
+		assertThat(actual.getPartitionIds()).containsExactly(theExpectedPartitionId.toArray(Integer[]::new));
+	}
+
 	@Nested
 	class PatientCompartmentExtension {
 
