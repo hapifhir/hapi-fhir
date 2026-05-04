@@ -927,6 +927,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theSearchQueryProperties.getMaxResultsRequested());
 
+		// When _type is specified and does not include the anchor type, omit the anchor from results
+		boolean typeFilterExcludesAnchor = myParams.get(Constants.PARAM_TYPE) != null
+				&& !extractTypeSourceResourcesFromParams().contains(myResourceName);
+
 		Set<JpaPid> targetPids = new HashSet<>();
 		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 
@@ -939,9 +943,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						Msg.code(2841) + "Resource " + myParams.get(IAnyResource.SP_RES_ID) + " is not known.");
 			}
 
-			// When _type is specified and does not include the anchor type, omit the anchor from results
-			boolean typeFilterExcludesAnchor = myParams.get(Constants.PARAM_TYPE) != null
-					&& !extractTypeSourceResourcesFromParams().contains(myResourceName);
 			if (!typeFilterExcludesAnchor) {
 				theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(new ArrayList<>(targetPids)));
 			}
@@ -969,7 +970,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					jdbcTemplate.query(sql, new JpaPidRowMapper(myPartitionSettings.isPartitioningEnabled()), args);
 
 			// we add a search executor to fetch unlinked patients first
-			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
+			if (!typeFilterExcludesAnchor) {
+				theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
+			}
 		}
 
 		List<String> typeSourceResources = new ArrayList<>();
