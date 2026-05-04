@@ -841,19 +841,16 @@ public class PatientIdPartitionInterceptor {
 		List<String> idParts = new ArrayList<>();
 		for (List<IQueryParameterType> iQueryParameterTypes : paramAndListForParamName) {
 			for (IQueryParameterType aParam : iQueryParameterTypes) {
+				if (aParam instanceof ReferenceParam && ((ReferenceParam) aParam).getChain() != null) {
+					// Chained params (e.g. subject.gender=female) refine results but do not identify
+					// the patient partition — skip them and let the FHIR search engine apply them.
+					continue;
+				}
 				String qualifier = aParam.getQueryParameterQualifier();
 				if (isNotBlank(qualifier) && !Constants.PARAMQUALIFIER_MDM.equals(qualifier)) {
 					throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName + qualifier
 							+ " is not supported in patient compartment mode");
 				}
-				if (aParam instanceof ReferenceParam) {
-					String chain = ((ReferenceParam) aParam).getChain();
-					if (chain != null) {
-						throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
-								+ chain + " is not supported in patient compartment mode");
-					}
-				}
-
 				String valueAsQueryToken = aParam.getValueAsQueryToken();
 				if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")
 						|| Strings.CS.contains(valueAsQueryToken, "/Patient/")) {

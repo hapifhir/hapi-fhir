@@ -250,7 +250,7 @@ class PatientIdPartitionInterceptorTest {
 		Observation?patient=Patient/123&patient.gender=female  | 3690
 		Observation?patient.gender=female&patient=Patient/123  | 3690
 		""")
-	void testSearch_ChainedParamOnCompartmentParam_ShouldReturnPartitionAndNotThrow(String theValue, @ConvertWith(StringToIntegerListArgumentConverter.class) List<Integer> theExpectedPartitionId) {
+	void testSearch_ChainedParamAlongsideDirect_ReturnsPartitionFromDirectRef(String theValue, @ConvertWith(StringToIntegerListArgumentConverter.class) List<Integer> theExpectedPartitionId) {
 		MatchUrlService.ResourceTypeAndSearchParameterMap parsedMatchUrl = myMatchUrlSvc.parseAndTranslateMatchUrl(theValue);
 		SearchParameterMap params = parsedMatchUrl.searchParameterMap();
 		String resourceType = parsedMatchUrl.resourceType();
@@ -260,6 +260,21 @@ class PatientIdPartitionInterceptorTest {
 
 		assertFalse(actual.isAllPartitions());
 		assertThat(actual.getPartitionIds()).containsExactly(theExpectedPartitionId.toArray(Integer[]::new));
+	}
+
+	@Test
+	void testSearch_ChainOnlyNoDirectRef_ReturnsAllPartitions() {
+		// A chain-only search (e.g. subject.gender=female) has no direct Patient reference,
+		// so the interceptor cannot determine a partition — it must fall through to all-partitions
+		// (cross-partition scatter) rather than throwing HAPI-1322/HAPI-1323.
+		MatchUrlService.ResourceTypeAndSearchParameterMap parsedMatchUrl = myMatchUrlSvc.parseAndTranslateMatchUrl("Encounter?subject.gender=female");
+		SearchParameterMap params = parsedMatchUrl.searchParameterMap();
+		String resourceType = parsedMatchUrl.resourceType();
+		ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forSearchType(resourceType, params, null);
+
+		RequestPartitionId actual = mySvc.identifyForRead(readDetails, new ServletRequestDetails());
+
+		assertThat(actual.isAllPartitions()).isTrue();
 	}
 
 	@Nested

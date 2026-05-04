@@ -1,0 +1,7 @@
+---
+type: fix
+title: "Previously, in MegaScale patient-id partition mode (PatientIdPartitionInterceptor), combining
+  a chained search parameter such as subject.gender=female with a direct patient reference parameter
+  such as subject=Patient/abc would fail with HTTP 405 error HAPI-1322 stating that the chained
+  parameter is not supported in patient compartment mode. Chained reference parameters are now
+  correctly skipped during partition selection and the search executes successfully."
