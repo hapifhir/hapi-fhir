@@ -1870,6 +1870,47 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
     }
 
 	@Test
+	void patientEverythingWithTypeFilter_shouldOnlyReturnResourcesOfRequestedType() {
+		// Create Patient
+		Patient patient = new Patient();
+		String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		Reference referenceToPatient = new Reference(patientId);
+
+		// Create Encounter referencing the Patient
+		Encounter encounter = new Encounter();
+		encounter.setSubject(referenceToPatient);
+		String encounterId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
+		Reference referenceToEncounter = new Reference(encounterId);
+
+		// Create Observation referencing both Patient (subject) and Encounter (encounter field)
+		Observation observation = new Observation();
+		observation.setSubject(referenceToPatient);
+		observation.setEncounter(referenceToEncounter);
+		String observationId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
+
+		// Call $everything?_type=Observation on the Patient
+		Parameters parameters = new Parameters();
+		parameters.addParameter(Constants.PARAM_TYPE, "Observation");
+		Bundle response = myClient.operation()
+			.onInstance(patientId)
+			.named(JpaConstants.OPERATION_EVERYTHING)
+			.withParameters(parameters)
+			.returnResourceType(Bundle.class)
+			.execute();
+
+		Set<String> resultIds = new HashSet<>();
+		for (Bundle.BundleEntryComponent entry : response.getEntry()) {
+			resultIds.add(entry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+
+		// The Observation should be present
+		assertThat(resultIds).contains(observationId);
+		// The Encounter should NOT be in the result — it is not of the requested type
+		// This assertion FAILS on master because the bug causes Encounter to be leaked
+		assertThat(resultIds).doesNotContain(encounterId);
+	}
+
+	@Test
 	void testEverythingOperation_shouldReturn404ForNonExistentPatient() {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
