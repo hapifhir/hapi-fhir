@@ -939,7 +939,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						Msg.code(2841) + "Resource " + myParams.get(IAnyResource.SP_RES_ID) + " is not known.");
 			}
 
-			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(new ArrayList<>(targetPids)));
+			// When _type is specified and does not include the anchor type, omit the anchor from results
+			boolean typeFilterExcludesAnchor = myParams.get(Constants.PARAM_TYPE) != null
+					&& !extractTypeSourceResourcesFromParams().contains(myResourceName);
+			if (!typeFilterExcludesAnchor) {
+				theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(new ArrayList<>(targetPids)));
+			}
 		} else {
 			// For Everything queries, we make the query root by the ResourceLink table, since this query
 			// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)

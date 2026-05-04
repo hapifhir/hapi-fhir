@@ -36,7 +36,7 @@ The following parameters are supported:
 
 # Filtering by Resource Type
 
-The `_type` parameter narrows the linked resources returned by the operation to only those whose resource type appears in the comma-separated list. The Patient resource itself is always included regardless of the `_type` value.
+The `_type` parameter narrows the returned resources to only those whose resource type appears in the comma-separated list. This filter applies to all returned resources, including the Patient anchor resource itself. If `Patient` is not listed in `_type`, the Patient anchor is omitted from the response. To include the Patient resource when using `_type`, add `Patient` to the type list explicitly.
 
 Example — return only Observations linked to Patient/123:
 

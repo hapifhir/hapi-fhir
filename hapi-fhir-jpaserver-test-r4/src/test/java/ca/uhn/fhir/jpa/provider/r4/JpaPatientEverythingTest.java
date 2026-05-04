@@ -1903,9 +1903,9 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
             resultIds.add(entry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
         }
 
-        assertThat(resultIds).contains(observationId);   // requested type is returned
-        assertThat(resultIds).contains(patientId);        // anchor always returned
-        // _type filter must exclude resources of other types even when they are linked via compartment
+        assertThat(resultIds).contains(observationId);       // requested type is returned
+        // _type filter applies to all resources including the anchor; Patient not in _type list
+        assertThat(resultIds).doesNotContain(patientId);
         assertThat(resultIds).doesNotContain(encounterId);
     }
 
@@ -1987,7 +1987,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
         assertThat(resultIds).contains(observationId);       // requested type, directly refs Patient
         assertThat(resultIds).contains(conditionId);         // requested type, directly refs Patient
-        assertThat(resultIds).contains(patientId);           // anchor always returned
+        // _type filter applies to all resources including the anchor; Patient not in _type list
+        assertThat(resultIds).doesNotContain(patientId);
         assertThat(resultIds).doesNotContain(encounterId);   // not in _type list even though Observation references it
     }
 
