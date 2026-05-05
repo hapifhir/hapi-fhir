@@ -43,6 +43,8 @@ public class ImportLoincJobAppCtx {
 			.addIntermediateStep("import-concepts", "Import LOINC concepts", ImportLoincFileSetJson.class, importLoincStep2Concepts())
 			.addIntermediateStep("import-hierarchy", "Import LOINC hierarchy", ImportLoincFileSetJson.class, importLoincStep3HandleHierarchy())
 			.addIntermediateStep("import-answer-lists", "Import LOINC answer lists", ImportLoincFileSetJson.class, importLoincStep4AnswerLists())
+			.addIntermediateStep("import-answer-list-links", "Import LOINC answer list links", ImportLoincFileSetJson.class, importLoincStep5AnswerListLinks())
+			.addIntermediateStep("import-rsna-playbook", "Import LOINC RSNA playbook", ImportLoincFileSetJson.class, importLoincStep6RsnaPlaybook())
 //				.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
 			.build();
 	}
@@ -78,6 +80,23 @@ public class ImportLoincJobAppCtx {
 	@Bean
 	public ImportLoincStep4HandleAnswerLists importLoincStep4AnswerLists() {
 		return new ImportLoincStep4HandleAnswerLists();
+	}
+
+	/**
+	 * Step 5: Import LOINC answer list links
+	 */
+	@Bean
+	public ImportLoincStep5HandleAnswerListLinks importLoincStep5AnswerListLinks() {
+		return new ImportLoincStep5HandleAnswerListLinks();
+	}
+
+
+	/**
+	 * Step 6: Import RSNA Playbook
+	 */
+	@Bean
+	public ImportLoincStep6HandleRsnaPlaybook importLoincStep6RsnaPlaybook() {
+		return new ImportLoincStep6HandleRsnaPlaybook();
 	}
 
 }

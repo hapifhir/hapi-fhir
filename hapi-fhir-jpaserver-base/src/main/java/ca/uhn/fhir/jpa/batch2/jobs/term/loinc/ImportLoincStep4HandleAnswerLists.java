@@ -34,11 +34,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 // FIXME: make sure we don't expand ValueSets until status = active
-public class ImportLoincStep4HandleAnswerLists extends BaseImportLoincStep<ImportLoincStep4HandleAnswerLists.MyContext> {
+public class ImportLoincStep4HandleAnswerLists extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep4HandleAnswerLists.MyContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep4HandleAnswerLists.class);
-
-	@Autowired
-	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 
 	@Override
 	protected MyContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
@@ -80,24 +77,18 @@ public class ImportLoincStep4HandleAnswerLists extends BaseImportLoincStep<Impor
 		 */
 
 		// Answer list code
-		if (!theContext.answerListCodes().contains(answerListId)) {
+		if (!theContext.getAnswerListCodes().contains(answerListId)) {
 			theCodeSystemToPopulate
 				.addConcept()
 				.setCode(answerListId)
 				.setDisplay(answerListName);
-			theContext.answerListCodes().add(answerListId);
+			theContext.getAnswerListCodes().add(answerListId);
 		}
 
 		// Answer list ValueSet
-		String valueSetId;
 		String codeSystemVersionId = theData.getLoincCodeSystem().getVersion();
-		if (codeSystemVersionId != null) {
-			valueSetId = answerListId + "-" + codeSystemVersionId;
-		} else {
-			valueSetId = answerListId;
-		}
 		ValueSet vs = getValueSet(theJobParameters, theData, theContext,
-			valueSetId, "http://loinc.org/vs/" + answerListId, answerListName, LOINC_ANSWERLIST_VERSION.getCode());
+			answerListId, "http://loinc.org/vs/" + answerListId, answerListName, LOINC_ANSWERLIST_VERSION.getCode());
 		if (vs.getIdentifier().isEmpty()) {
 			vs.addIdentifier().setSystem("urn:ietf:rfc:3986").setValue("urn:oid:" + answerListOid);
 		}
@@ -105,8 +96,8 @@ public class ImportLoincStep4HandleAnswerLists extends BaseImportLoincStep<Impor
 		if (isNotBlank(answerString)) {
 
 			// Answer code
-			if (!theContext.answerListCodes().contains(answerString)) {
-				theContext.answerListCodes().add(answerString);
+			if (!theContext.getAnswerListCodes().contains(answerString)) {
+				theContext.getAnswerListCodes().add(answerString);
 
 				theCodeSystemToPopulate
 					.addConcept()
@@ -126,96 +117,11 @@ public class ImportLoincStep4HandleAnswerLists extends BaseImportLoincStep<Impor
 	}
 
 
-	ValueSet getValueSet(
-		LoincJobImportParameters theJobParameters, ImportLoincFileSetJson theData, MyContext theContext, String theValueSetId, String theValueSetUri, String theValueSetName, String theVersionPropertyName) {
+	protected static class MyContext extends BaseContext {
+		private final Set<String> myAnswerListCodes = new HashSet<>();
 
-		String version;
-		String codeSystemVersion = theData.getLoincCodeSystem().getVersion();
-		if (isNotBlank(theVersionPropertyName) && theJobParameters.getProperties().getProperty(theVersionPropertyName) != null) {
-			if (codeSystemVersion != null) {
-				version = theJobParameters.getProperties().getProperty(theVersionPropertyName) + "-" + codeSystemVersion;
-			} else {
-				version = theJobParameters.getProperties().getProperty(theVersionPropertyName);
-			}
-		} else {
-			version = codeSystemVersion;
-		}
-
-		ValueSet vs;
-		if (!theContext.idToValueSet().containsKey(theValueSetId)) {
-			vs = new ValueSet();
-			vs.setUrl(theValueSetUri);
-			vs.setId(theValueSetId);
-			vs.setVersion(version);
-			vs.setStatus(Enumerations.PublicationStatus.DRAFT);
-			vs.setPublisher(REGENSTRIEF_INSTITUTE_INC);
-			vs.addContact()
-				.setName(REGENSTRIEF_INSTITUTE_INC)
-				.addTelecom()
-				.setSystem(ContactPoint.ContactPointSystem.URL)
-				.setValue(LOINC_WEBSITE_URL);
-			vs.setCopyright(theData.getLoincCodeSystem().getCopyright());
-			theContext.idToValueSet().put(theValueSetId, vs);
-			theData.addResourceToActivate("ValueSet/" + theValueSetId);
-		} else {
-			vs = theContext.idToValueSet().get(theValueSetId);
-		}
-
-		if (isBlank(vs.getName()) && isNotBlank(theValueSetName)) {
-			vs.setName(theValueSetName);
-		}
-
-		return vs;
-	}
-
-	@Override
-	protected void afterCsvProcessingComplete(MyContext theCodeExtractionContext, CodeSystem theCodeSystemToPopulate, StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		super.afterCsvProcessingComplete(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
-
-		for (ValueSet valueSet : theCodeExtractionContext.idToValueSet.values()) {
-
-			try {
-				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-				IdType existingId = new IdType(valueSet.getIdElement().getIdPart());
-				ValueSet existing = myValueSetDao.read(existingId, requestDetails);
-
-				int addedCodes = 0;
-				Set<String> existingCodes = existing.getCompose().getIncludeFirstRep().getConcept().stream().map(t -> t.getCode()).collect(Collectors.toSet());
-				for (ValueSet.ConceptReferenceComponent toAdd : valueSet.getCompose().getIncludeFirstRep().getConcept()) {
-					if (!existingCodes.contains(toAdd.getCode())) {
-						existing.getCompose().getIncludeFirstRep().addConcept(toAdd);
-						addedCodes++;
-					}
-				}
-
-				ourLog
-					.atInfo()
-					.setMessage("Updating existing LOINC ValueSet {} to add {} codes")
-					.addArgument(valueSet.getId())
-					.addArgument(addedCodes)
-					.log();
-				requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-				myValueSetDao.update(existing, requestDetails);
-
-			} catch (ResourceNotFoundException | ResourceGoneException e) {
-				ourLog
-					.atInfo()
-					.setMessage("Creating new LOINC ValueSet {}")
-					.addArgument(valueSet.getId())
-					.log();
-				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-				myValueSetDao.update(valueSet, requestDetails);
-			}
-
-		}
-
-		ourLog.info("Processed {} LOINC Answer List codes in {} ValueSets", theCodeExtractionContext.answerListCodes().size(), theCodeExtractionContext.idToValueSet().size());
-	}
-
-
-	protected record MyContext(Set<String> answerListCodes, Map<String, ValueSet> idToValueSet) {
-		public MyContext() {
-			this(new HashSet<>(), new HashMap<>());
+		public Set<String> getAnswerListCodes() {
+			return myAnswerListCodes;
 		}
 	}
 

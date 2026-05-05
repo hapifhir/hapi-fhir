@@ -15,6 +15,8 @@ import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -27,6 +29,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFi
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseImportLoincStep<CT> implements ITerminologyImportFileHandlerStep<LoincJobImportParameters, ImportLoincFileSetJson, ImportLoincFileSetJson> {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportLoincStep.class);
 
 	@Autowired
 	private IJobPersistence myJobPersistence;
@@ -72,7 +75,17 @@ public abstract class BaseImportLoincStep<CT> implements ITerminologyImportFileH
 
 			afterCsvProcessingComplete(codeExtractionContext, codeSystemToPopulate, theStepExecutionDetails);
 
+			/*
+			 * Store Concepts
+			 */
 			if (codeSystemToPopulate.hasConcept()) {
+
+				int conceptCount = codeSystemToPopulate.getConcept().size();
+				ourLog.atInfo()
+					.setMessage("Added LOINC Answer List links to {} concepts")
+					.addArgument(conceptCount)
+					.log();
+
 				myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulate);
 			}
 

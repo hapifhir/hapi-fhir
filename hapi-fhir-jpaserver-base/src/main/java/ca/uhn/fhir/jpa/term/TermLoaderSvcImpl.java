@@ -749,6 +749,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Answer list links (connects LOINC observation codes to answer list codes)
+		// **CONVERTED**
 		handler = new LoincAnswerListLinkHandler(code2concept);
 		iterateOverZipFileCsv(
 				theDescriptors,
@@ -759,6 +760,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				QuoteMode.NON_NUMERIC,
 				false);
 
+		// **CONVERTED**
 		// RSNA playbook
 		// Note that this should come before the "Part Related Code Mapping"
 		// file because there are some duplicate mappings between these

@@ -80,23 +80,23 @@ class BaseExpandDistributionIntoFilesStepTest {
 		mockJobPersistenceFetchDistributionFile();
 		mockHandlerStep1();
 		mockHandlerStep2();
-		mockJobPersistenceStoreNewAttachment();
+		AtomicInteger attachmentCounter = mockJobPersistenceStoreNewAttachment();
 
 		// Test
 		StepExecutionDetails<LoincJobImportParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
 		myStep.run(stepExecutionDetails, myDataSink);
 
 		// Verify
-		verify(myDataSink, times(5)).accept(myTerminologyFileSetCaptor.capture());
+		verify(myDataSink, times(4)).accept(myTerminologyFileSetCaptor.capture());
 
 		TerminologyFileSetJson fileSet = myTerminologyFileSetCaptor.getAllValues().get(0);
 		assertNull(fileSet.getChunkAttachmentIdForCurrentStepId());
 		assertThat(fileSet.getAndRemoveFutureChunkAttachmentIdsForStepId("step-1")).isEmpty();
-		assertThat(fileSet.getAndRemoveFutureChunkAttachmentIdsForStepId("step-2")).containsExactly("ATT-5", "ATT-6");
+		assertThat(fileSet.getAndRemoveFutureChunkAttachmentIdsForStepId("step-2")).containsExactly("ATT-4", "ATT-5");
 		assertEquals("ATT-1", myTerminologyFileSetCaptor.getAllValues().get(1).getChunkAttachmentIdForCurrentStepId());
 		assertEquals("ATT-2", myTerminologyFileSetCaptor.getAllValues().get(2).getChunkAttachmentIdForCurrentStepId());
 		assertEquals("ATT-3", myTerminologyFileSetCaptor.getAllValues().get(3).getChunkAttachmentIdForCurrentStepId());
-		assertEquals("ATT-4", myTerminologyFileSetCaptor.getAllValues().get(4).getChunkAttachmentIdForCurrentStepId());
+		assertEquals(5, attachmentCounter.get());
 
 	}
 
@@ -169,9 +169,10 @@ class BaseExpandDistributionIntoFilesStepTest {
 		});
 	}
 
-	private void mockJobPersistenceStoreNewAttachment() {
+	private AtomicInteger mockJobPersistenceStoreNewAttachment() {
 		AtomicInteger counter = new AtomicInteger(0);
 		when(myJobPersistence.storeNewAttachment(any(), any())).thenAnswer(t -> "ATT-" + counter.incrementAndGet());
+		return counter;
 	}
 
 	@Nonnull

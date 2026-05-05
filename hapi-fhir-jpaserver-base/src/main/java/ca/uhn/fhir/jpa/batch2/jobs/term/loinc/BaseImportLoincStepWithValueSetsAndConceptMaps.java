@@ -1,0 +1,478 @@
+package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
+
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.term.loinc.BaseLoincHandler;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.SetMultimap;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static ca.uhn.fhir.jpa.term.loinc.BaseLoincHandler.LOINC_WEBSITE_URL;
+import static ca.uhn.fhir.jpa.term.loinc.BaseLoincHandler.REGENSTRIEF_INSTITUTE_INC;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends BaseImportLoincStepWithValueSetsAndConceptMaps.BaseContext> extends BaseImportLoincStep<CT> {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportLoincStepWithValueSetsAndConceptMaps.class);
+
+	@Autowired
+	private IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
+	@Autowired
+	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+
+	@Nonnull
+	protected CodeSystem.ConceptDefinitionComponent getOrAddConcept(CT theContext, CodeSystem theCodeSystemToPopulate, String theCode) {
+		CodeSystem.ConceptDefinitionComponent loincCode;
+		loincCode = theContext.getCodeToConcept().get(theCode);
+		if (loincCode == null) {
+			loincCode = theCodeSystemToPopulate.addConcept();
+			loincCode.setCode(theCode);
+			theContext.getCodeToConcept().put(theCode, loincCode);
+		}
+		return loincCode;
+	}
+
+	// FIXME: rename
+	protected void addConceptMapEntry(ImportLoincFileSetJson theData, CT theContext, ConceptMapping theMapping) {
+		if (isBlank(theMapping.getSourceCode())) {
+			return;
+		}
+		if (isBlank(theMapping.getTargetCode())) {
+			return;
+		}
+
+		theContext.getIdToConceptMapings().put(theMapping.getConceptMapId(), theMapping);
+	}
+
+	// FIXME: rename
+	protected ValueSet getValueSet(
+		LoincJobImportParameters theJobParameters, ImportLoincFileSetJson theData, CT theContext, String theValueSetId, String theValueSetUri, String theValueSetName, String theVersionPropertyName) {
+
+		String version;
+		String codeSystemVersion = theData.getLoincCodeSystem().getVersion();
+		if (isNotBlank(theVersionPropertyName) && theJobParameters.getProperties().getProperty(theVersionPropertyName) != null) {
+			if (codeSystemVersion != null) {
+				version = theJobParameters.getProperties().getProperty(theVersionPropertyName) + "-" + codeSystemVersion;
+			} else {
+				version = theJobParameters.getProperties().getProperty(theVersionPropertyName);
+			}
+		} else {
+			version = codeSystemVersion;
+		}
+
+		ValueSet vs;
+		String valueSetId = theValueSetId;
+		if (isNotBlank(codeSystemVersion)) {
+			valueSetId = theValueSetId + "-" + codeSystemVersion;
+		}
+
+		if (!theContext.getIdToValueSet().containsKey(valueSetId)) {
+			vs = new ValueSet();
+			vs.setUrl(theValueSetUri);
+			vs.setId(valueSetId);
+			vs.setVersion(version);
+			vs.setStatus(Enumerations.PublicationStatus.DRAFT);
+			vs.setPublisher(REGENSTRIEF_INSTITUTE_INC);
+			vs.addContact()
+				.setName(REGENSTRIEF_INSTITUTE_INC)
+				.addTelecom()
+				.setSystem(ContactPoint.ContactPointSystem.URL)
+				.setValue(LOINC_WEBSITE_URL);
+			vs.setCopyright(theData.getLoincCodeSystem().getCopyright());
+			theContext.getIdToValueSet().put(valueSetId, vs);
+			theData.addResourceToActivate("ValueSet/" + valueSetId);
+		} else {
+			vs = theContext.getIdToValueSet().get(valueSetId);
+		}
+
+		if (isBlank(vs.getName()) && isNotBlank(theValueSetName)) {
+			vs.setName(theValueSetName);
+		}
+
+		return vs;
+	}
+
+	@Override
+	protected void afterCsvProcessingComplete(CT theCodeExtractionContext, CodeSystem theCodeSystemToPopulate, StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		super.afterCsvProcessingComplete(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
+
+		String codeSystemVersion = theStepExecutionDetails.getData().getLoincCodeSystem().getVersion();
+
+		// FIXME: extract sub-methods in this method
+
+		/*
+		 * Store ConceptMaps
+		 */
+		for (Map.Entry<String, Collection<ConceptMapping>> entry : theCodeExtractionContext.getIdToConceptMapings().asMap().entrySet()) {
+
+			String conceptMapId = entry.getKey();
+			ourLog.info("Checking for existence of ConceptMap: {}", conceptMapId);
+
+			ConceptMap conceptMap;
+			try {
+				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+				IdType existingId = new IdType(conceptMapId);
+				conceptMap = myConceptMapDao.read(existingId, requestDetails);
+				assert conceptMap != null : "Reading ConceptMap " + conceptMapId + " returned null";
+
+			} catch (ResourceNotFoundException | ResourceGoneException e) {
+				ConceptMapping firstMapping = entry.getValue().iterator().next();
+
+				conceptMap = new ConceptMap();
+				conceptMap.setId(conceptMapId);
+				conceptMap.setUrl(firstMapping.getConceptMapUri());
+				conceptMap.setName(firstMapping.getConceptMapName());
+				conceptMap.setVersion(firstMapping.getConceptMapVersion());
+				conceptMap.setPublisher(REGENSTRIEF_INSTITUTE_INC);
+				conceptMap
+					.addContact()
+					.setName(REGENSTRIEF_INSTITUTE_INC)
+					.addTelecom()
+					.setSystem(ContactPoint.ContactPointSystem.URL)
+					.setValue(LOINC_WEBSITE_URL);
+
+				String copyright = firstMapping.getCopyright();
+				if (!copyright.contains("LOINC")) {
+					String loincCopyrightStatement = theStepExecutionDetails.getData().getLoincCodeSystem().getCopyright();
+					copyright =
+						loincCopyrightStatement + (loincCopyrightStatement.endsWith(".") ? " " : ". ") + copyright;
+				}
+				conceptMap.setCopyright(copyright);
+
+			}
+
+			int addedMappings = 0;
+			for (ConceptMapping nextMapping : entry.getValue()) {
+
+				ConceptMap.SourceElementComponent source = null;
+				ConceptMap.ConceptMapGroupComponent group = null;
+
+				for (ConceptMap.ConceptMapGroupComponent next : conceptMap.getGroup()) {
+					if (next.getSource().equals(nextMapping.getSourceCodeSystem())) {
+						if (next.getTarget().equals(nextMapping.getTargetCodeSystem())) {
+							if (!defaultString(nextMapping.getTargetCodeSystemVersion())
+								.equals(defaultString(next.getTargetVersion()))) {
+								continue;
+							}
+							group = next;
+							break;
+						}
+					}
+				}
+				if (group == null) {
+					group = conceptMap.addGroup();
+					group.setSource(nextMapping.getSourceCodeSystem());
+					group.setSourceVersion(nextMapping.getSourceCodeSystemVersion());
+					group.setTarget(nextMapping.getTargetCodeSystem());
+					group.setTargetVersion(defaultIfBlank(nextMapping.getTargetCodeSystemVersion(), null));
+				}
+
+				for (ConceptMap.SourceElementComponent next : group.getElement()) {
+					if (next.getCode().equals(nextMapping.getSourceCode())) {
+						source = next;
+					}
+				}
+				if (source == null) {
+					source = group.addElement();
+					source.setCode(nextMapping.getSourceCode());
+					source.setDisplay(nextMapping.getSourceDisplay());
+				}
+
+				boolean found = false;
+				for (ConceptMap.TargetElementComponent next : source.getTarget()) {
+					if (next.getCode().equals(nextMapping.getTargetCode())) {
+						found = true;
+					}
+				}
+				if (!found) {
+					source.addTarget()
+						.setCode(nextMapping.getTargetCode())
+						.setDisplay(nextMapping.getTargetDisplay())
+						.setEquivalence(nextMapping.getEquivalence());
+					addedMappings++;
+				} else {
+					ourLog
+						.atDebug()
+						.setMessage("Not going to add a mapping from [{}/{}] to [{}/{}] because one already exists")
+						.addArgument(nextMapping.getSourceCodeSystem())
+						.addArgument(nextMapping.getSourceCode())
+						.addArgument(nextMapping.getTargetCodeSystem())
+						.addArgument(nextMapping.getTargetCode())
+						.log();
+				}
+
+			}
+
+			if (addedMappings > 0) {
+				ourLog
+					.atInfo()
+					.setMessage("Adding {} mappings to LOINC ConceptMap {}")
+					.addArgument(addedMappings)
+					.addArgument(conceptMap.getId())
+					.log();
+
+				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+				myConceptMapDao.update(conceptMap, requestDetails);
+			}
+		}
+
+		/*
+		 * Store ValueSets
+		 */
+		for (ValueSet valueSet : theCodeExtractionContext.getIdToValueSet().values()) {
+
+			try {
+				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+				IdType existingId = new IdType(valueSet.getIdElement().getIdPart());
+				ValueSet existing = myValueSetDao.read(existingId, requestDetails);
+				assert existing != null : "Reading ValueSet " + valueSet.getId() + " returned null";
+
+				int addedCodes = 0;
+				Set<String> existingCodes = existing.getCompose().getIncludeFirstRep().getConcept().stream().map(t -> t.getCode()).collect(Collectors.toSet());
+				for (ValueSet.ConceptReferenceComponent toAdd : valueSet.getCompose().getIncludeFirstRep().getConcept()) {
+					if (!existingCodes.contains(toAdd.getCode())) {
+						existing.getCompose().getIncludeFirstRep().addConcept(toAdd);
+						addedCodes++;
+					}
+				}
+
+				ourLog
+					.atInfo()
+					.setMessage("Updating existing LOINC ValueSet {} to add {} codes")
+					.addArgument(valueSet.getId())
+					.addArgument(addedCodes)
+					.log();
+				requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+				myValueSetDao.update(existing, requestDetails);
+
+			} catch (ResourceNotFoundException | ResourceGoneException e) {
+				long codeCount = valueSet.getCompose().getIncludeFirstRep().getConcept().stream().count();
+				ourLog
+					.atInfo()
+					.setMessage("Creating new LOINC ValueSet {} with {} code inclusions")
+					.addArgument(valueSet.getId())
+					.addArgument(codeCount)
+					.log();
+				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+				myValueSetDao.update(valueSet, requestDetails);
+			}
+
+		}
+
+	}
+
+
+	protected abstract static class BaseContext {
+
+		private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
+		private final SetMultimap<String, ConceptMapping> myIdToConceptMapings = MultimapBuilder.hashKeys().linkedHashSetValues().build();
+		private final Map<String, CodeSystem.ConceptDefinitionComponent> myCodeToConcept = new HashMap<>();
+
+		public Map<String, CodeSystem.ConceptDefinitionComponent> getCodeToConcept() {
+			return myCodeToConcept;
+		}
+
+		public SetMultimap<String, ConceptMapping> getIdToConceptMapings() {
+			return myIdToConceptMapings;
+		}
+
+		public Map<String, ValueSet> getIdToValueSet() {
+			return myIdToValueSet;
+		}
+
+	}
+
+	protected static class ConceptMapping {
+
+		private String myCopyright;
+		private String myConceptMapId;
+		private String myConceptMapUri;
+		private String myConceptMapVersion;
+		private String myConceptMapName;
+		private String mySourceCodeSystem;
+		private String mySourceCodeSystemVersion;
+		private String mySourceCode;
+		private String mySourceDisplay;
+		private String myTargetCodeSystem;
+		private String myTargetCode;
+		private String myTargetDisplay;
+		private Enumerations.ConceptMapEquivalence myEquivalence;
+		private String myTargetCodeSystemVersion;
+
+		String getConceptMapId() {
+			return myConceptMapId;
+		}
+
+		ConceptMapping setConceptMapId(String theConceptMapId) {
+			myConceptMapId = theConceptMapId;
+			return this;
+		}
+
+		String getConceptMapName() {
+			return myConceptMapName;
+		}
+
+		ConceptMapping setConceptMapName(String theConceptMapName) {
+			myConceptMapName = theConceptMapName;
+			return this;
+		}
+
+		String getConceptMapUri() {
+			return myConceptMapUri;
+		}
+
+		ConceptMapping setConceptMapUri(String theConceptMapUri) {
+			myConceptMapUri = theConceptMapUri;
+			return this;
+		}
+
+		String getConceptMapVersion() {
+			return myConceptMapVersion;
+		}
+
+		ConceptMapping setConceptMapVersion(String theConceptMapVersion) {
+			myConceptMapVersion = theConceptMapVersion;
+			return this;
+		}
+
+		String getCopyright() {
+			return myCopyright;
+		}
+
+		ConceptMapping setCopyright(String theCopyright) {
+			myCopyright = theCopyright;
+			return this;
+		}
+
+		Enumerations.ConceptMapEquivalence getEquivalence() {
+			return myEquivalence;
+		}
+
+		ConceptMapping setEquivalence(Enumerations.ConceptMapEquivalence theEquivalence) {
+			myEquivalence = theEquivalence;
+			return this;
+		}
+
+		String getSourceCode() {
+			return mySourceCode;
+		}
+
+		ConceptMapping setSourceCode(String theSourceCode) {
+			mySourceCode = theSourceCode;
+			return this;
+		}
+
+		String getSourceCodeSystem() {
+			return mySourceCodeSystem;
+		}
+
+		ConceptMapping setSourceCodeSystem(String theSourceCodeSystem) {
+			mySourceCodeSystem = theSourceCodeSystem;
+			return this;
+		}
+
+		String getSourceCodeSystemVersion() {
+			return mySourceCodeSystemVersion;
+		}
+
+		ConceptMapping setSourceCodeSystemVersion(String theSourceCodeSystemVersion) {
+			mySourceCodeSystemVersion = theSourceCodeSystemVersion;
+			return this;
+		}
+
+		String getSourceDisplay() {
+			return mySourceDisplay;
+		}
+
+		ConceptMapping setSourceDisplay(String theSourceDisplay) {
+			mySourceDisplay = theSourceDisplay;
+			return this;
+		}
+
+		String getTargetCode() {
+			return myTargetCode;
+		}
+
+		ConceptMapping setTargetCode(String theTargetCode) {
+			myTargetCode = theTargetCode;
+			return this;
+		}
+
+		String getTargetCodeSystem() {
+			return myTargetCodeSystem;
+		}
+
+		ConceptMapping setTargetCodeSystem(String theTargetCodeSystem) {
+			myTargetCodeSystem = theTargetCodeSystem;
+			return this;
+		}
+
+		String getTargetCodeSystemVersion() {
+			return myTargetCodeSystemVersion;
+		}
+
+		ConceptMapping setTargetCodeSystemVersion(String theTargetCodeSystemVersion) {
+			myTargetCodeSystemVersion = theTargetCodeSystemVersion;
+			return this;
+		}
+
+		String getTargetDisplay() {
+			return myTargetDisplay;
+		}
+
+		ConceptMapping setTargetDisplay(String theTargetDisplay) {
+			myTargetDisplay = theTargetDisplay;
+			return this;
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (!(theO instanceof ConceptMapping that)) {
+				return false;
+			}
+			return Objects.equals(myCopyright, that.myCopyright) &&
+				Objects.equals(myConceptMapId, that.myConceptMapId) &&
+				Objects.equals(myConceptMapUri, that.myConceptMapUri) &&
+				Objects.equals(myConceptMapVersion, that.myConceptMapVersion) &&
+				Objects.equals(myConceptMapName, that.myConceptMapName) &&
+				Objects.equals(mySourceCodeSystem, that.mySourceCodeSystem) &&
+				Objects.equals(mySourceCodeSystemVersion, that.mySourceCodeSystemVersion) &&
+				Objects.equals(mySourceCode, that.mySourceCode) &&
+				Objects.equals(mySourceDisplay, that.mySourceDisplay) &&
+				Objects.equals(myTargetCodeSystem, that.myTargetCodeSystem) &&
+				Objects.equals(myTargetCode, that.myTargetCode) &&
+				Objects.equals(myTargetDisplay, that.myTargetDisplay) &&
+				myEquivalence == that.myEquivalence &&
+				Objects.equals(myTargetCodeSystemVersion, that.myTargetCodeSystemVersion);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myCopyright, myConceptMapId, myConceptMapUri, myConceptMapVersion, myConceptMapName, mySourceCodeSystem, mySourceCodeSystemVersion, mySourceCode, mySourceDisplay, myTargetCodeSystem, myTargetCode, myTargetDisplay, myEquivalence, myTargetCodeSystemVersion);
+		}
+	}
+	
+}
