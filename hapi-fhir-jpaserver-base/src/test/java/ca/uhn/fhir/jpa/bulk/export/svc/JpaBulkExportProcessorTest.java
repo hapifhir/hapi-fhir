@@ -452,6 +452,62 @@ public class JpaBulkExportProcessorTest {
 		validatePartitionId(thePartitioned, resourceDaoServletRequestDetailsCaptor.getValue().getRequestPartitionId());
 	}
 
+	/**
+	 * Reproduction for GL-8681 / SMILE-12021 (Kaiser Permanente).
+	 *
+	 * <p>When a customer runs {@code Patient/$export} on a CDR persistence module that does NOT have
+	 * {@code auto_create_placeholder_reference_targets.enabled=true} (the default), and a Patient-compartment
+	 * search param such as {@code Patient._id} is not registered as ACTIVE for SEARCH lookups, the bulk export
+	 * job fails with {@code HAPI-2817: Resource type [Patient] is not eligible for this type of export, as it
+	 * contains no active search parameters.}
+	 *
+	 * <p>The bug is in {@link JpaBulkExportProcessor#getPatientActiveSearchParamsForResourceType(String)}: it
+	 * filters all candidate patient-compartment search params through {@code hasActiveSearchParam} and throws
+	 * if the filtered set is empty. For the {@code Patient} resource type itself, this filter is too strict —
+	 * the resource IS the patient, so it should always be eligible for {@code Patient/$export} regardless of
+	 * whether its compartment search params register as active.
+	 *
+	 * <p>The DESIRED behaviour asserted here is that the call returns a non-null iterator and does not throw
+	 * {@code IllegalArgumentException} containing the {@code HAPI-2817} marker.
+	 */
+	@Test
+	void getResourcePidIterator_patientExportWhenResourceTypeIsPatientWithNoActiveSearchParams_doesNotThrowHapi2817() {
+		// setup — mirror customer's _type=Patient,Encounter (this test exercises the Patient leg)
+		ExportPIDIteratorParameters theParameters = createExportParameters(BulkExportJobParameters.ExportStyle.PATIENT);
+		theParameters.setResourceType("Patient");
+		theParameters.setPartitionId(getPartitionIdFromParams(false));
+
+		SearchParameterMap map = new SearchParameterMap();
+		List<SearchParameterMap> maps = new ArrayList<>();
+		maps.add(map);
+
+		JpaPid pid = JpaPid.fromId(123L);
+		ListResultIterator resultIterator = new ListResultIterator(Collections.singletonList(pid));
+
+		ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
+
+		// THE BUG TRIGGER: customer's persistence module reports the Patient-compartment search param as
+		// inactive for SEARCH lookups (this is what happens when
+		// auto_create_placeholder_reference_targets.enabled=false and the param has not been promoted).
+		when(mySearchParamRegistry.hasActiveSearchParam(anyString(), anyString(), any()))
+			.thenReturn(false);
+
+		// downstream mocks — these will only be reached if the bug is fixed and the eligibility check passes
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(theParameters), eq(true)))
+			.thenReturn(maps);
+		when(mySearchBuilderFactory.newSearchBuilder(eq(theParameters.getResourceType()), any()))
+			.thenReturn(searchBuilder);
+		when(searchBuilder.createQuery(any(), any(), any(), any()))
+			.thenReturn(resultIterator);
+
+		// DESIRED behaviour: Patient/$export must succeed even when the Patient-compartment search param
+		// is reported inactive. The export should not blow up with HAPI-2817 just because the resource
+		// being exported is itself the patient compartment root.
+		assertThat(myProcessor.getResourcePidIterator(theParameters))
+			.as("Patient/$export should succeed even when no Patient-compartment search params are reported active")
+			.isNotNull();
+	}
+
 	@Test
 	void testGetPatientSetForPatientExport_withoutMdm_returnsOriginalPatients() {
 		// Given - Parameters with MDM disabled
