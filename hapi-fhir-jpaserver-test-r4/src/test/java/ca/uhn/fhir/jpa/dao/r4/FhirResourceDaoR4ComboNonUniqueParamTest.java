@@ -32,7 +32,9 @@ import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.Timing;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -1427,6 +1429,47 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 			pt1.setEffective(new DateTimeType(theDateValue));
 			IIdType id1 = myObservationDao.create(pt1, mySrd).getId().toUnqualified();
 			return id1;
+		}
+
+		/**
+		 * GL-8702: When Observation.effective is a Timing with only boundsPeriod (no events),
+		 * the indexed ResourceIndexedSearchParamDate has myOriginalValue == null. During combo
+		 * non-unique extraction, toQueryParameterType().getValueAsQueryToken() returns "" while
+		 * the resulting DateParam reports default precision SECOND (> DAY). The current code at
+		 * BaseSearchParamExtractor#extractParameterCombinationsForComboParamComponent calls
+		 * substring(0, 10) on the empty string and throws StringIndexOutOfBoundsException, which
+		 * surfaces as HTTP 500 to the client. The desired behavior is for the create to succeed
+		 * (the combo entry should simply be skipped for the degenerate value).
+		 */
+		@Test
+		void testCreateObservation_TimingWithOnlyBoundsPeriod_ShouldSucceed() {
+			Observation pt1 = new Observation();
+			pt1.addNote().setText("Hello");
+			Timing timing = new Timing();
+			timing.getRepeat().setBounds(new Period().setStartElement(new DateTimeType("2021-01-02")));
+			pt1.setEffective(timing);
+
+			IIdType id1 = myObservationDao.create(pt1, mySrd).getId().toUnqualified();
+			assertThat(id1).isNotNull();
+			assertThat(id1.getIdPart()).isNotBlank();
+		}
+
+		/**
+		 * GL-8702 adjacent: well-formed Timing with an event datetime should succeed. The event
+		 * date populates myOriginalValue so getValueAsQueryToken() returns a 19-char ISO string
+		 * and substring(0, 10) succeeds.
+		 */
+		@Test
+		void testCreateObservation_TimingWithEvent_ShouldSucceed() {
+			Observation pt1 = new Observation();
+			pt1.addNote().setText("Hello");
+			Timing timing = new Timing();
+			timing.addEvent(new DateTimeType("2021-01-02T12:00:01Z").getValue());
+			pt1.setEffective(timing);
+
+			IIdType id1 = myObservationDao.create(pt1, mySrd).getId().toUnqualified();
+			assertThat(id1).isNotNull();
+			assertThat(id1.getIdPart()).isNotBlank();
 		}
 
 	}
