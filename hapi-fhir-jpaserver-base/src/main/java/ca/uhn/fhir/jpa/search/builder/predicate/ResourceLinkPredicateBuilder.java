@@ -53,6 +53,7 @@ import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -382,7 +383,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 				 * type. If the reference doesn't declare any target types, we'll just
 				 * assume it's a Reference(All) and target all partitions.
 				 */
-				if (!theParam.getTargets().isEmpty()) {
+				if(ResourceCompartmentUtil.PATIENT_COMPARTMENT_SP_SUBJECT.equals(paramName) || ResourceCompartmentUtil.PATIENT_COMPARTMENT_SP_PATIENT.equals(paramName)){
+					// SP subject and patient have a cardinality of 0..1 so if we already have resolved a partition,
+					// we reuse it.
+					if(theRequestPartitionId.hasPartitionIds()){
+						predicateTargetPartitionId = theRequestPartitionId;
+					}
+				}
+				else if (!theParam.getTargets().isEmpty()) {
 					String chain = refParam.getChain();
 					chain = StringUtils.substringBefore(chain, '.');
 

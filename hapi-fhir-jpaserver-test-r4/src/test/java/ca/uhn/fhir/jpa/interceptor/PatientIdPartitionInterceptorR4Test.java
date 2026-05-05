@@ -658,7 +658,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		myTestDaoSearch.assertSearchFinds("find by identifier for group observation", "Observation?identifier=groupObsIdentifier", g1ObsId);
 	}
 
-
 	@Test
 	public void testSearchObservation_ChainedSubjectParameter() {
 		createPatientA();
@@ -667,9 +666,9 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		// Multiple ANDs
 		assertThatThrownBy(() -> myObservationDao.search(SearchParameterMap
 				.newSynchronous()
-				.add("subject", new ReferenceParam("identifier", "http://patient|1")), mySrd))
+				.add("performer", new ReferenceParam("identifier", "http://patient|1")), mySrd))
 			.isInstanceOf(MethodNotAllowedException.class)
-			.hasMessageContaining(Msg.code(1322) + "The parameter subject.identifier is not supported in patient compartment mode");
+			.hasMessageContaining(Msg.code(1323) + "The parameter performer.identifier is not supported in patient compartment mode");
 	}
 
 	@Test
@@ -708,7 +707,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		try {
 			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("identifier", "http://foo|123")), mySrd);
 		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(1322) + "The parameter subject.identifier is not supported in patient compartment mode", e.getMessage());
+			assertEquals("HAPI-2928: Could not resolve chained parameter(s) [identifier] on parameter subject. Consider adding a direct Patient reference to your search (?subject=Patient/abc&subject.identifier=...)", e.getMessage());
 		}
 
 	}

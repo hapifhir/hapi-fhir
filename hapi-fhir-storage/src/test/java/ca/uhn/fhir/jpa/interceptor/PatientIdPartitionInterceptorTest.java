@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -237,10 +238,9 @@ class PatientIdPartitionInterceptorTest {
 	}
 
 	/**
-	 * GL-8604 / SMILE-11955: Chained search params on subject/patient (e.g. subject.gender=female)
+	 * Chained search params on subject/patient (e.g. subject.gender=female)
 	 * should be tolerated in patient compartment mode. The partition is determined by the base
 	 * reference; the chained param does not contribute to partition selection and must be skipped.
-	 * Before the fix, Guard 1 in getResourceIdsForSearchParam throws HAPI-1322 unconditionally.
 	 */
 	@ParameterizedTest
 	@CsvSource(delimiter = '|', textBlock = """
@@ -262,19 +262,21 @@ class PatientIdPartitionInterceptorTest {
 		assertThat(actual.getPartitionIds()).containsExactly(theExpectedPartitionId.toArray(Integer[]::new));
 	}
 
-	@Test
-	void testSearch_ChainOnlyNoDirectRef_ReturnsAllPartitions() {
-		// A chain-only search (e.g. subject.gender=female) has no direct Patient reference,
-		// so the interceptor cannot determine a partition — it must fall through to all-partitions
-		// (cross-partition scatter) rather than throwing HAPI-1322/HAPI-1323.
-		MatchUrlService.ResourceTypeAndSearchParameterMap parsedMatchUrl = myMatchUrlSvc.parseAndTranslateMatchUrl("Encounter?subject.gender=female");
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		Encounter?subject.identifier=http://patient|1
+		Encounter?subject.identifier=http://patient|1&subject.gender=female
+		Encounter?subject.gender=male&subject.identifier=http://patient|1
+		""")
+	void testSearch_ChainedParamWithNonResolvedParameter_throwsException(String theValue) {
+		MatchUrlService.ResourceTypeAndSearchParameterMap parsedMatchUrl = myMatchUrlSvc.parseAndTranslateMatchUrl(theValue);
 		SearchParameterMap params = parsedMatchUrl.searchParameterMap();
 		String resourceType = parsedMatchUrl.resourceType();
 		ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forSearchType(resourceType, params, null);
 
-		RequestPartitionId actual = mySvc.identifyForRead(readDetails, new ServletRequestDetails());
-
-		assertThat(actual.isAllPartitions()).isTrue();
+		assertThatThrownBy(() -> mySvc.identifyForRead(readDetails, new ServletRequestDetails()))
+			.isInstanceOf(MethodNotAllowedException.class)
+			.hasMessageContaining(Msg.code(2928));
 	}
 
 	@Nested

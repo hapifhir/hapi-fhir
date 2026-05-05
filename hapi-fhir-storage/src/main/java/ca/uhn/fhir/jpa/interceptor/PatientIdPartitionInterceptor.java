@@ -80,6 +80,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -92,6 +93,9 @@ import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionFromU
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.alwaysUseDefaultPartition;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.mandatorySingleCompartment;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.nonUniqueCompartmentInDefault;
+import static ca.uhn.fhir.jpa.util.ResourceCompartmentUtil.PATIENT_COMPARTMENT_SP_PATIENT;
+import static ca.uhn.fhir.jpa.util.ResourceCompartmentUtil.PATIENT_COMPARTMENT_SP_SUBJECT;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -833,6 +837,8 @@ public class PatientIdPartitionInterceptor {
 
 	@SuppressWarnings("SameParameterValue")
 	private List<String> getResourceIdsForSearchParam(SearchParameterMap theParams, String theParamName) {
+		Set<String> needingAtLeastOneSpToResolveSet = new LinkedHashSet<>();
+
 		List<List<IQueryParameterType>> paramAndListForParamName = theParams.get(theParamName);
 		if (paramAndListForParamName == null) {
 			return Collections.emptyList();
@@ -841,11 +847,26 @@ public class PatientIdPartitionInterceptor {
 		List<String> idParts = new ArrayList<>();
 		for (List<IQueryParameterType> iQueryParameterTypes : paramAndListForParamName) {
 			for (IQueryParameterType aParam : iQueryParameterTypes) {
-				if (aParam instanceof ReferenceParam && ((ReferenceParam) aParam).getChain() != null) {
-					// Chained params (e.g. subject.gender=female) refine results but do not identify
-					// the patient partition — skip them and let the FHIR search engine apply them.
-					continue;
+
+				if (aParam instanceof ReferenceParam referenceParam) {
+					String chain = referenceParam.getChain();
+					if (nonNull(chain)) {
+						if(PATIENT_COMPARTMENT_SP_PATIENT.equals(theParamName) || PATIENT_COMPARTMENT_SP_SUBJECT.equals(theParamName)){
+							// 'patient' and 'subject' SP have a 0..1 cardinality and will always refer to a Patient resource.
+							// on their own, they can't be resolved and don't need to as they are used as additional 'filters'
+							// to another SP that resolves to a direct reference (Patient/abc).  Essentially, if we have one SP
+							// that resolves directly, we don't need to resolve other SP pointing to the same
+							// resource
+							needingAtLeastOneSpToResolveSet.add(chain);
+							continue;
+						}
+						else {
+							throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
+								+ chain + " is not supported in patient compartment mode");
+						}
+					}
 				}
+
 				String qualifier = aParam.getQueryParameterQualifier();
 				if (isNotBlank(qualifier) && !Constants.PARAMQUALIFIER_MDM.equals(qualifier)) {
 					throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName + qualifier
@@ -867,7 +888,27 @@ public class PatientIdPartitionInterceptor {
 			}
 		}
 
+		if(idParts.isEmpty() && !needingAtLeastOneSpToResolveSet.isEmpty()){
+			String errorMsgString = buildErrorMsgForChainedParameters(theParamName, needingAtLeastOneSpToResolveSet);
+			throw new MethodNotAllowedException(Msg.code(2928) + errorMsgString);
+		}
+
 		return idParts;
+	}
+
+	private String buildErrorMsgForChainedParameters(String theParamName, @Nonnull Set<String> theChainedParameterSet) {
+		return new StringBuilder("Could not resolve chained parameter(s) ")
+			.append(theChainedParameterSet)
+			.append(" on parameter ")
+			.append(theParamName)
+			.append(". Consider adding a direct Patient reference to your search (?")
+			.append(theParamName)
+			.append("=Patient/abc&")
+			.append(theParamName)
+			.append(".")
+			.append(theChainedParameterSet.iterator().next())
+			.append("=...)")
+			.toString();
 	}
 
 	/**
