@@ -64,6 +64,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -480,6 +481,56 @@ public class JpaBulkExportProcessorTest {
 		assertThat(myProcessor.getResourcePidIterator(theParameters))
 			.as("Patient/$export should succeed even when no Patient-compartment search params are reported active")
 			.isNotNull();
+	}
+
+	@ParameterizedTest(name = "Patient/$export succeeds when patient compartment search params active = {0}")
+	@ValueSource(booleans = {true, false})
+	@SuppressWarnings("unchecked")
+	void getResourcePidIterator_patientExportForPatientResource_succeedsRegardlessOfPatientSearchParamActiveState(boolean thePatientSearchParamsActive) {
+		// Setup - Patient/$export over the Patient resource type itself
+		ExportPIDIteratorParameters parameters = createExportParameters(BulkExportJobParameters.ExportStyle.PATIENT);
+		parameters.setResourceType("Patient");
+		parameters.setPartitionId(getPartitionIdFromParams(false));
+
+		SearchParameterMap map = new SearchParameterMap();
+		List<SearchParameterMap> maps = Collections.singletonList(map);
+
+		JpaPid pid1 = JpaPid.fromId(123L);
+		JpaPid pid2 = JpaPid.fromId(456L);
+		ListResultIterator resultIterator = new ListResultIterator(Arrays.asList(pid1, pid2));
+
+		ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
+
+		// The key behaviour under test: with the fix in place, the Patient branch of
+		// getResourcePidIterator no longer consults getPatientActiveSearchParamsForResourceType,
+		// so the export must complete in both states. lenient() because the stubbed value is
+		// expected to be ignored when resourceType is Patient.
+		lenient().when(mySearchParamRegistry.hasActiveSearchParam(anyString(), anyString(), any()))
+			.thenReturn(thePatientSearchParamsActive);
+
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters), eq(true)))
+			.thenReturn(maps);
+		when(mySearchBuilderFactory.newSearchBuilder(eq("Patient"), any()))
+			.thenReturn(searchBuilder);
+		when(searchBuilder.createQuery(any(), any(), any(), any()))
+			.thenReturn(resultIterator);
+
+		// Test
+		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
+
+		// Verify - HAPI-2817 must not be thrown and the search must execute exactly once
+		// (no per-search-param fan-out for the Patient compartment root).
+		assertThat(pidIterator)
+			.as("Patient/$export should succeed regardless of patient search param active state (was: %s)", thePatientSearchParamsActive)
+			.isNotNull()
+			.toIterable()
+			.containsExactly(pid1, pid2);
+
+		verify(searchBuilder, times(1)).createQuery(
+			eq(map),
+			any(SearchRuntimeDetails.class),
+			nullable(RequestDetails.class),
+			eq(getPartitionIdFromParams(false)));
 	}
 
 	@Test
