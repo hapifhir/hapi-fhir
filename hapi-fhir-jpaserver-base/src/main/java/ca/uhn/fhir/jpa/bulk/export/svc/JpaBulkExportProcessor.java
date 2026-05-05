@@ -158,26 +158,46 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
 
 		Set<String> expandedPatientIds = getPatientSetForPatientExport(theParams);
-		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, true);
+		List<SearchParameterMap> maps =
+				myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, true);
 
 		if (resourceType.equalsIgnoreCase("Patient")) {
-			//If we are in a patient-style export, and finding PIDs of patients, we don't need to bother with checking compartment membership, we can simply perform the searches.
+			// If we are in a patient-style export, and finding PIDs of patients, we don't need to bother with checking
+			// compartment membership, we can simply perform the searches.
 			for (SearchParameterMap map : maps) {
-				validateAndEvaluateSearch(theParams, resourceType, theJobId, theChunkId, null, map, expandedPatientIds, pids);
+				validateAndEvaluateSearch(
+						theParams, resourceType, theJobId, theChunkId, null, map, expandedPatientIds, pids);
 			}
 		} else {
 			Set<String> patientSearchParams = getPatientActiveSearchParamsForResourceType(theParams.getResourceType());
 			for (String patientSearchParam : patientSearchParams) {
 				for (SearchParameterMap map : maps) {
-					validateAndEvaluateSearch(theParams, resourceType, theJobId, theChunkId, patientSearchParam, map, expandedPatientIds, pids);
+					validateAndEvaluateSearch(
+							theParams,
+							resourceType,
+							theJobId,
+							theChunkId,
+							patientSearchParam,
+							map,
+							expandedPatientIds,
+							pids);
 				}
 			}
 		}
 		return pids;
 	}
 
-	//TODO GGG: fix up the API of this method for 8.12.0
-	private void validateAndEvaluateSearch(ExportPIDIteratorParameters theParams, String resourceType, String theJobId, String theChunkId, String patientSearchParam, SearchParameterMap map, Set<String> expandedPatientIds, LinkedHashSet<JpaPid> pids) throws IOException {
+	// TODO GGG: fix up the API of this method for 8.12.0
+	private void validateAndEvaluateSearch(
+			ExportPIDIteratorParameters theParams,
+			String resourceType,
+			String theJobId,
+			String theChunkId,
+			String patientSearchParam,
+			SearchParameterMap map,
+			Set<String> expandedPatientIds,
+			LinkedHashSet<JpaPid> pids)
+			throws IOException {
 		// Ensure users did not monkey with the patient compartment search parameter.
 		validateSearchParametersForPatient(map, theParams);
 
@@ -197,7 +217,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				.log();
 
 		try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
-			map, searchRuntime, new SystemRequestDetails(), theParams.getPartitionIdOrAllPartitions())) {
+				map, searchRuntime, new SystemRequestDetails(), theParams.getPartitionIdOrAllPartitions())) {
 			int pidCount = 0;
 			while (resultIterator.hasNext()) {
 				if (pidCount % 10000 == 0) {
