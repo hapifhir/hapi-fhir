@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.input.BOMInputStream;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,7 @@ public abstract class BaseImportLoincStep<CT> implements ITerminologyImportFileH
 
 			AttachmentDetails attachment = myJobPersistence.fetchAttachmentById(jobInstanceId, attachmentId);
 			try (InputStream inputStream = attachment.getInputStream()) {
-				InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+				InputStreamReader reader = new InputStreamReader(BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
 				CSVParser csvReader = newLoincCsvParser(reader);
 				for (CSVRecord record : csvReader.getRecords()) {
 					handleRecord(jobParameters, codeExtractionContext, record, codeSystemToPopulate, data);

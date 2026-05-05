@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +46,7 @@ public class ImportLoincJobAppCtx {
 			.addIntermediateStep("import-answer-lists", "Import LOINC answer lists", ImportLoincFileSetJson.class, importLoincStep4AnswerLists())
 			.addIntermediateStep("import-answer-list-links", "Import LOINC answer list links", ImportLoincFileSetJson.class, importLoincStep5AnswerListLinks())
 			.addIntermediateStep("import-rsna-playbook", "Import LOINC RSNA playbook", ImportLoincFileSetJson.class, importLoincStep6RsnaPlaybook())
+			.addIntermediateStep("import-part-related-code-mapping", "Import LOINC Part Related Code Mappings", ImportLoincFileSetJson.class, importLoincStep7PartRelatedCodeMapping())
 //				.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
 			.build();
 	}
@@ -97,6 +99,14 @@ public class ImportLoincJobAppCtx {
 	@Bean
 	public ImportLoincStep6HandleRsnaPlaybook importLoincStep6RsnaPlaybook() {
 		return new ImportLoincStep6HandleRsnaPlaybook();
+	}
+
+	/**
+	 * Step 7: Import Part-Related Code Mappings
+	 */
+	@Bean
+	public ImportLoincStep7HandlePartRelatedCodeMapping importLoincStep7PartRelatedCodeMapping() {
+		return new ImportLoincStep7HandlePartRelatedCodeMapping();
 	}
 
 }

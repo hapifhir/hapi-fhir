@@ -777,6 +777,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Part related code mapping
+		// **CONVERTED**
 		handler = new LoincPartRelatedCodeMappingHandler(
 				code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(
