@@ -1432,14 +1432,9 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		}
 
 		/**
-		 * GL-8702: When Observation.effective is a Timing with only boundsPeriod (no events),
-		 * the indexed ResourceIndexedSearchParamDate has myOriginalValue == null. During combo
-		 * non-unique extraction, toQueryParameterType().getValueAsQueryToken() returns "" while
-		 * the resulting DateParam reports default precision SECOND (> DAY). The current code at
-		 * BaseSearchParamExtractor#extractParameterCombinationsForComboParamComponent calls
-		 * substring(0, 10) on the empty string and throws StringIndexOutOfBoundsException, which
-		 * surfaces as HTTP 500 to the client. The desired behavior is for the create to succeed
-		 * (the combo entry should simply be skipped for the degenerate value).
+		 * Creating an Observation whose effective is a Timing with only boundsPeriod (no events)
+		 * must succeed. The indexed date has no usable date portion, so the combo non-unique
+		 * extractor should skip that entry rather than fail the write.
 		 */
 		@Test
 		void testCreateObservation_TimingWithOnlyBoundsPeriod_ShouldSucceed() {
@@ -1455,9 +1450,8 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		}
 
 		/**
-		 * GL-8702 adjacent: well-formed Timing with an event datetime should succeed. The event
-		 * date populates myOriginalValue so getValueAsQueryToken() returns a 19-char ISO string
-		 * and substring(0, 10) succeeds.
+		 * Creating an Observation whose effective is a Timing with a well-formed event datetime
+		 * must succeed — the date portion is well-defined and the combo non-unique entry is indexed.
 		 */
 		@Test
 		void testCreateObservation_TimingWithEvent_ShouldSucceed() {
