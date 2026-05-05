@@ -267,6 +267,27 @@ public class PackageInstallerSvcImplTest {
 			Exception actualExceptionThrown = assertThrows(Exception.class, () -> mySvc.validForUpload(spR4));
 			assertEquals(notAnUnprocessableEntityException, actualExceptionThrown);
 		}
+
+		// Created by claude-sonnet-4-6
+		// Regression test for HAPI-0521: resources with IDs > 64 chars must be rejected before status validation,
+		// so they are skipped even when validateResourceStatusForPackageUpload is disabled.
+		public static Stream<Arguments> parametersIdLengthValidation() {
+			return Stream.of(
+				arguments("a".repeat(65), false),   // over limit → rejected
+				arguments("a".repeat(64), true),    // exactly at limit → accepted
+				arguments(null, true)               // no ID → accepted
+			);
+		}
+
+		@ParameterizedTest
+		@MethodSource("parametersIdLengthValidation")
+		void testValidForUpload_idLengthCheck(String theId, boolean theExpected) {
+			Patient patient = new Patient();
+			if (theId != null) {
+				patient.setId(theId);
+			}
+			assertEquals(theExpected, mySvc.validForUpload(patient));
+		}
 	}
 
 
@@ -694,11 +715,19 @@ public class PackageInstallerSvcImplTest {
 		deviceWithUrl.setStatus(Device.FHIRDeviceStatus.ACTIVE);
 		deviceWithUrl.addIdentifier().setSystem("urn:sys").setValue("device-with-url");
 
+		// A device with a url element present but blank — resourceHasPopulatedUrl must return false,
+		// falling through to identifier-based matching.
+		Device deviceWithBlankUrl = new Device();
+		deviceWithBlankUrl.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		deviceWithBlankUrl.addIdentifier().setSystem("urn:sys").setValue("device-blank-url");
+		deviceWithBlankUrl.setUrl("");
+
 		return Stream.of(
 			arguments(csWithUrl, "url", "?url=http%3A//example.com/cs"),
 			arguments(deviceWithUrlNotPopulated, "identifier", "?identifier=urn%3Asys%7Cdevice-no-url"),
 			arguments(ptWithIdentifier, "identifier", "?identifier=urn%3Asys%7Cpt-id"),
-			arguments(deviceWithUrl, "url", "?url=http%3A//10.0.0.1/fhir")
+			arguments(deviceWithUrl, "url", "?url=http%3A//10.0.0.1/fhir"),
+			arguments(deviceWithBlankUrl, "identifier", "?identifier=urn%3Asys%7Cdevice-blank-url")
 		);
 	}
 
