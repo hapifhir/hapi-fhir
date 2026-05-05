@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7861
+title: "Fixed `listPartitions` method on the partition lookup service, which could return wrong empty results in some cases."

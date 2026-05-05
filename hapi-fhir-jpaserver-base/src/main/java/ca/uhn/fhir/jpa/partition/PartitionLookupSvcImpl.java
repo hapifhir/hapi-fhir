@@ -214,8 +214,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 	@Override
 	public List<PartitionEntity> listPartitions() {
-		List<PartitionEntity> allPartitions = myPartitionDao.findAll();
-		return allPartitions;
+		return executeInTransaction(() -> myPartitionDao.findAll());
 	}
 
 	private void validatePartitionNameDoesntAlreadyExist(String theName) {
