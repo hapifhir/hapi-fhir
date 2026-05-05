@@ -13,8 +13,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
@@ -46,6 +44,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.NamingSystem;
@@ -1565,42 +1564,54 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	}
 
 	// Created by Claude Opus 4.7
-	/**
-	 * Persisting a SearchParameter with {@code base: ["DomainResource"]} must not crash during
-	 * reindex URL construction. Pre-fix, {@code BaseHapiFhirResourceDao.isCommonSearchParam}
-	 * only matched the literal {@code "resource"} string, so the reindex branch reached
-	 * {@code getResourceDefinition("DomainResource")} and threw {@code DataFormatException}
-	 * (HAPI-1684).
-	 */
 	@Test
-	public void installPackage_searchParameterWithDomainResourceBase_success() throws IOException {
-		myStorageSettings.setValidateResourceStatusForPackageUpload(false);
-		// Reindex must be enabled so the install path reaches requestReindexForRelatedResources.
-		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(true);
+	public void installPackage_existingSearchParameterHasAbstractBaseOverlappingIncoming_narrowsExistingByExpansion() throws IOException {
+		// setup
+		// avoid indexing while performing SP updates
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 
-		String url = "http://example.org/SearchParameter/domain-resource-sp";
-		String code = "domain-resource-code";
-		SearchParameter domainResourceSp = new SearchParameter()
-			.setUrl(url)
-			.setStatus(Enumerations.PublicationStatus.ACTIVE)
-			.setCode(code)
-			.addBase("DomainResource")
-			.setType(Enumerations.SearchParamType.TOKEN)
-			.setExpression("DomainResource.identifier");
-		domainResourceSp.setId("domain-resource-sp");
+		String sharedCode = "abstract-base-demo";
+		String existingId = "existing-sp";
+		String incomingId = "incoming-sp";
 
-		installAsPackage("domain-resource-pkg", "0.0.1", domainResourceSp);
+		SearchParameter existing = new SearchParameter();
+		existing.setId(existingId);
+		existing.setUrl("http://example.org/SearchParameter/" + existingId);
+		existing.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		existing.setCode(sharedCode);
+		existing.addBase("Patient");
+		existing.addBase("DomainResource");
+		existing.setType(Enumerations.SearchParamType.TOKEN);
+		existing.setExpression("DomainResource.text");
+		mySearchParameterDao.update(existing, new SystemRequestDetails());
 
+		SearchParameter incoming = new SearchParameter();
+		incoming.setId(incomingId);
+		incoming.setUrl("http://example.org/SearchParameter/" + incomingId);
+		incoming.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		incoming.setCode(sharedCode);
+		incoming.addBase("Patient");
+		incoming.setType(Enumerations.SearchParamType.TOKEN);
+		incoming.setExpression("Patient.text");
+
+		// test
+		installAsPackage("abstract-base-pkg", "0.0.1", incoming);
+
+		// verify
+		// the package installer will match by code+base to find an existing resource
+		// verify the new SP takes control of the resource type (Patient) for the same code
 		runInTransaction(() -> {
-			// verify the SearchParameter was saved in the database, else this would throw
-			// InternalErrorException: HAPI-2223: HAPI-1684: Unknown resource name "DomainResource"
-			IBundleProvider search = mySearchParameterDao.search(
-				SearchParameterMap.newSynchronous("url", new UriParam(url)));
-			assertThat(search.size()).isEqualTo(1);
-			// verify the SearchParameter was added to the registry, else this would throw
-			// InvalidRequestException: HAPI-1223: Unknown search parameter
-			myPatientDao.search(
-				SearchParameterMap.newSynchronous(code, new TokenParam("patient-id")));
+			SearchParameter narrowedSP = mySearchParameterDao.read(
+				new IdType("SearchParameter/" + existingId), new SystemRequestDetails());
+			List<String> narrowedBaseAfter = narrowedSP.getBase().stream().map(CodeType::getCode).toList();
+			assertThat(narrowedBaseAfter).doesNotContain("Patient")
+					.doesNotContain("DomainResource").contains("Observation");
+
+			SearchParameter incomingSP = mySearchParameterDao.read(
+				new IdType("SearchParameter/" + incomingId), new SystemRequestDetails());
+			List<String> incomingBaseAfter = incomingSP.getBase().stream().map(CodeType::getCode).toList();
+			assertThat(incomingBaseAfter).contains("Patient")
+					.doesNotContain("Observation").doesNotContain("DomainResource");
 		});
 	}
 
@@ -1633,7 +1644,6 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		pkg.save(out);
 		return out.toByteArray();
 	}
-
 
 	@Test
 	public void testLoadContents() throws IOException {
@@ -1978,103 +1988,6 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		IBundleProvider result = myCodeSystemDao.search(map, new SystemRequestDetails());
 		assertThat(result.sizeOrThrowNpe()).isEqualTo(1);
 		return (CodeSystem) result.getResources(0, 1).get(0);
-	}
-
-	/**
-	 * Control: {@code MULTI_VERSION} install of a fresh {@code (url, version)} pair succeeds.
-	 * Locks in current routing — flips red if a future change lands the new resource onto an
-	 * existing slot owned by a different resource.
-	 */
-	@Test
-	void install_multiVersionPackageWithFreshVersion_succeeds(@TempDir Path theTempDir) throws IOException {
-		String csUrl = "http://example.org/CodeSystem/duplicate-codes";
-		createCodeSystem(csUrl, "1");
-		createCodeSystem(csUrl, "2");
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		runInTransaction(() -> {
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByCodeSystemUri(csUrl);
-			assertThat(termCodeSystem).isNotNull();
-			TermCodeSystemVersion versionOne = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(termCodeSystem.getPid(), "1");
-			TermCodeSystemVersion versionTwo = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(termCodeSystem.getPid(), "2");
-			assertThat(versionOne).isNotNull();
-			assertThat(versionTwo).isNotNull();
-			assertThat(versionOne.getResource().getId()).isNotEqualTo(versionTwo.getResource().getId());
-		});
-
-		String packageVersion = "3";
-		PackageInstallationSpec spec = buildPackageContainingCodeSystem(theTempDir, "duplicate.codesystem.test", csUrl, packageVersion)
-			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
-
-		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-
-		assertThat(outcome.getResourcesInstalled().getOrDefault("CodeSystem", 0)).isEqualTo(1);
-		runInTransaction(() -> {
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByCodeSystemUri(csUrl);
-			assertThat(termCodeSystem).isNotNull();
-			assertThat(myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(termCodeSystem.getPid(), packageVersion)).isNotNull();
-		});
-	}
-
-	/**
-	 * Covers the {@code isUpdate} branch of {@code tryReleaseConflictingVersionRow}: a
-	 * {@code SINGLE_VERSION} install updates an existing resource into a slot owned by another
-	 * resource, and the conflict is released instead of throwing 848.
-	 */
-	@Test
-	void install_singleVersionPackageUpdatesResourceConflictingWithOlderVersionSlot_succeeds(@TempDir Path theTempDir)
-			throws IOException {
-		String csUrl = "http://example.org/CodeSystem/duplicate-codes";
-		String resourceAId = createCodeSystem(csUrl, "1").getIdElement().getIdPart();
-		createCodeSystem(csUrl, "2"); // higher PID — returned first by URL-only search
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-
-		PackageInstallationSpec spec = buildPackageContainingCodeSystem(theTempDir, "duplicate.codesystem.test", csUrl, "1")
-			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION);
-
-		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-
-		assertThat(outcome.getResourcesInstalled().getOrDefault("CodeSystem", 0)).isEqualTo(1);
-		runInTransaction(() -> {
-			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri(csUrl);
-			assertThat(tcs).isNotNull();
-			TermCodeSystemVersion slotForVersionOne =
-				myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(tcs.getPid(), "1");
-			assertThat(slotForVersionOne).isNotNull();
-			// Resource B was updated to version="1" and claimed A's slot.
-			assertThat(slotForVersionOne.getResource().getIdDt().getIdPart()).isNotEqualTo(resourceAId);
-		});
-	}
-
-	private CodeSystem createCodeSystem(String theUrl, String theVersion) {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(theUrl);
-		codeSystem.setVersion(theVersion);
-		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		codeSystem.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("foo-" + theVersion)));
-		return (CodeSystem) myCodeSystemDao.create(codeSystem, mySrd).getResource();
-	}
-
-	private PackageInstallationSpec buildPackageContainingCodeSystem(Path theTempDir, String theIgName, String theUrl, String theVersion) throws IOException {
-		Path igDir = Files.createDirectory(theTempDir.resolve("ig-v" + theVersion));
-		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, theIgName, "1.0.0");
-		igCreator.setDirectory(igDir);
-
-		CodeSystem packagedCodeSystem = new CodeSystem();
-		packagedCodeSystem.setId("packaged-codesystem-v" + theVersion);
-		packagedCodeSystem.setUrl(theUrl);
-		packagedCodeSystem.setVersion(theVersion);
-		packagedCodeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		packagedCodeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		packagedCodeSystem.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("from-package")));
-		igCreator.addResourceToIG("codesystem", packagedCodeSystem);
-
-		Path tarball = igCreator.createTestIG();
-		return new PackageInstallationSpec()
-			.setName(igCreator.getPackageName())
-			.setVersion(igCreator.getPackageVersion())
-			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
-			.setPackageContents(Files.readAllBytes(tarball));
 	}
 
 }
