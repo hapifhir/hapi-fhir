@@ -201,7 +201,8 @@ public class JpaBulkExportProcessorTest {
 		ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
 
 		// when
-		when(mySearchParamRegistry.hasActiveSearchParam(anyString(), anyString(), any()))
+		// lenient: the Patient branch of getResourcePidIterator no longer consults hasActiveSearchParam.
+		lenient().when(mySearchParamRegistry.hasActiveSearchParam(anyString(), anyString(), any()))
 			.thenReturn(true);
 		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters), eq(true)))
 			.thenReturn(maps);
@@ -468,7 +469,9 @@ public class JpaBulkExportProcessorTest {
 
 		ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
 
-		when(mySearchParamRegistry.hasActiveSearchParam(anyString(), anyString(), any()))
+		// lenient: the Patient branch of getResourcePidIterator no longer consults hasActiveSearchParam — that
+		// is exactly the regression this test pins. The stub is left in place to make the test's intent explicit.
+		lenient().when(mySearchParamRegistry.hasActiveSearchParam(anyString(), anyString(), any()))
 			.thenReturn(false);
 
 		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(theParameters), eq(true)))

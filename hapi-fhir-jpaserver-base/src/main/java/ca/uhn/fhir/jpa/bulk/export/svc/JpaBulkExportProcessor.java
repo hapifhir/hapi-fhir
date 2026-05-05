@@ -158,12 +158,12 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
 
 		Set<String> expandedPatientIds = getPatientSetForPatientExport(theParams);
-		List<SearchParameterMap> maps =
-				myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, true);
 
 		if (resourceType.equalsIgnoreCase("Patient")) {
 			// If we are in a patient-style export, and finding PIDs of patients, we don't need to bother with checking
 			// compartment membership, we can simply perform the searches.
+			List<SearchParameterMap> maps =
+					myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, true);
 			for (SearchParameterMap map : maps) {
 				validateAndEvaluateSearch(
 						theParams, resourceType, theJobId, theChunkId, null, map, expandedPatientIds, pids);
@@ -171,6 +171,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		} else {
 			Set<String> patientSearchParams = getPatientActiveSearchParamsForResourceType(theParams.getResourceType());
 			for (String patientSearchParam : patientSearchParams) {
+				// Rebuild maps per iteration: validateAndEvaluateSearch mutates each map by adding the patient
+				// compartment search param, and reusing a mutated map on the next iteration trips HAPI-0796.
+				List<SearchParameterMap> maps =
+						myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, true);
 				for (SearchParameterMap map : maps) {
 					validateAndEvaluateSearch(
 							theParams,
