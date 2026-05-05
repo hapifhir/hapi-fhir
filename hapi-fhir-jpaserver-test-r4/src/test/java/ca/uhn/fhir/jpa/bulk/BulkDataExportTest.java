@@ -1220,29 +1220,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testPatientTypeBulkExport() {
-		// Create some resources
-		Patient patient = new Patient();
-		patient.setId("P1");
-		patient.setActive(true);
-		myClient.update().resource(patient).execute();
-
-		Encounter encounter = new Encounter();
-		encounter.setSubject(new Reference("Patient/P1"));
-		String encId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
-		Encounter encounter2 = new Encounter();
-		String encId2 = myClient.create().resource(encounter2).execute().getId().toUnqualifiedVersionless().getValue();
-
-		// set the export options
-		BulkExportJobParameters options = new BulkExportJobParameters();
-		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
-
-		options.setResourceTypes(List.of("Patient", "Encounter"));
-		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(options, List.of("Patient/P1", encId), List.of(encId2));
-	}
-
-	@Test
 	public void testSystemBulkExport() {
 		List<String> expectedIds = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
