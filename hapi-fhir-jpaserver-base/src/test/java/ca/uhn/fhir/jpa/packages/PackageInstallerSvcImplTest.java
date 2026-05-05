@@ -485,6 +485,128 @@ public class PackageInstallerSvcImplTest {
 		assertEquals(theInstallBase, capturedSP.getBase().stream().map(CodeType::getCode).toList());
 	}
 
+	// Created by Claude Opus 4.7
+	@Nested
+	class SearchParameterInstallTest {
+
+		// Created by Claude Opus 4.7
+		@Test
+		void testInstall_existingSearchParamHasDomainResourceBase_splitsBaseForIncomingConcreteType() throws IOException {
+			// Existing SP covers all resources via DomainResource; incoming SP targets only Patient.
+			// Expected: existing SP is narrowed to all types except Patient, new SP created for Patient.
+			SearchParameter existingSP = createSearchParameter("existing-sp", List.of("DomainResource"));
+			SearchParameter installSP = createSearchParameter(null, List.of("Patient"));
+			PackageInstallationSpec spec = setupResourceInPackage(existingSP, installSP, mySearchParameterDao);
+
+			mySvc.install(spec);
+
+			verify(mySearchParameterDao, times(1)).update(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+			verify(mySearchParameterDao, times(1)).create(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+
+			Iterator<SearchParameter> iterator = mySearchParameterCaptor.getAllValues().iterator();
+			SearchParameter updatedExisting = iterator.next();
+			assertEquals("existing-sp", updatedExisting.getIdPart());
+			List<String> updatedBase = updatedExisting.getBase().stream().map(CodeType::getCode).toList();
+			assertThat(updatedBase).doesNotContain("Patient");
+			assertThat(updatedBase).doesNotContain("DomainResource");
+			assertThat(updatedBase).contains("Observation");
+
+			SearchParameter createdIncoming = iterator.next();
+			assertEquals(List.of("Patient"), createdIncoming.getBase().stream().map(CodeType::getCode).toList());
+		}
+
+		// Created by Claude Opus 4.7
+		@Test
+		void testInstall_incomingSearchParamHasDomainResourceBase_overridesConcreteTypedExisting() throws IOException {
+			// Incoming SP covers all resources via DomainResource; existing SP targets [Patient, Observation].
+			// Expected: incoming SP completely overrides existing SP (no split).
+			SearchParameter existingSP = createSearchParameter("individual-given", List.of("Patient", "Observation"));
+			SearchParameter installSP = createSearchParameter("us-core-all-given", List.of("DomainResource"));
+			PackageInstallationSpec spec = setupResourceInPackage(existingSP, installSP, mySearchParameterDao);
+
+			mySvc.install(spec);
+
+			verify(mySearchParameterDao, times(1)).update(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+			verify(mySearchParameterDao, never()).create(any(SearchParameter.class), any(RequestDetails.class));
+
+			SearchParameter capturedSP = mySearchParameterCaptor.getValue();
+			assertEquals("individual-given", capturedSP.getIdPart());
+			assertEquals(List.of("DomainResource"), capturedSP.getBase().stream().map(CodeType::getCode).toList());
+		}
+
+		// Created by Claude Opus 4.7
+		@Test
+		void testInstall_existingSearchParamHasResourceBase_splitsBaseForIncomingConcreteType() throws IOException {
+			// "Resource" keyword behaves identically to "DomainResource" — should expand to all concrete types.
+			SearchParameter existingSP = createSearchParameter("existing-sp", List.of("Resource"));
+			SearchParameter installSP = createSearchParameter(null, List.of("Patient"));
+			PackageInstallationSpec spec = setupResourceInPackage(existingSP, installSP, mySearchParameterDao);
+
+			mySvc.install(spec);
+
+			verify(mySearchParameterDao, times(1)).update(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+			verify(mySearchParameterDao, times(1)).create(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+
+			Iterator<SearchParameter> iterator = mySearchParameterCaptor.getAllValues().iterator();
+			SearchParameter updatedExisting = iterator.next();
+			assertEquals("existing-sp", updatedExisting.getIdPart());
+			List<String> updatedBase = updatedExisting.getBase().stream().map(CodeType::getCode).toList();
+			assertThat(updatedBase)
+				.doesNotContain("Patient")
+				.doesNotContain("Resource")
+				.contains("Observation");
+			SearchParameter createdIncoming = iterator.next();
+			assertEquals(List.of("Patient"), createdIncoming.getBase().stream().map(CodeType::getCode).toList());
+		}
+
+		// Created by Claude Opus 4.7
+		@Test
+		void testInstall_incomingSearchParamHasResourceBase_overridesConcreteTypedExisting() throws IOException {
+			// Incoming SP with "Resource" base covers all resources — should override existing without a split.
+			SearchParameter existingSP = createSearchParameter("individual-given", List.of("Patient", "Observation"));
+			SearchParameter installSP = createSearchParameter("us-core-all-given", List.of("Resource"));
+			PackageInstallationSpec spec = setupResourceInPackage(existingSP, installSP, mySearchParameterDao);
+
+			mySvc.install(spec);
+
+			verify(mySearchParameterDao, times(1)).update(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+			verify(mySearchParameterDao, never()).create(any(SearchParameter.class), any(RequestDetails.class));
+
+			SearchParameter capturedSP = mySearchParameterCaptor.getValue();
+			assertEquals("individual-given", capturedSP.getIdPart());
+			assertEquals(List.of("Resource"), capturedSP.getBase().stream().map(CodeType::getCode).toList());
+		}
+
+		// Created by Claude Opus 4.7
+		@Test
+		void testInstall_bothSearchParamsHaveDomainResourceBase_overridesExistingWithoutSplit() throws IOException {
+			// Both SPs cover all resources via DomainResource — no types remain after subtraction, so no split.
+			SearchParameter existingSP = createSearchParameter("existing-sp", List.of("DomainResource"));
+			SearchParameter installSP = createSearchParameter("incoming-sp", List.of("DomainResource"));
+			PackageInstallationSpec spec = setupResourceInPackage(existingSP, installSP, mySearchParameterDao);
+
+			mySvc.install(spec);
+
+			verify(mySearchParameterDao, times(1)).update(mySearchParameterCaptor.capture(), myRequestDetailsCaptor.capture());
+			verify(mySearchParameterDao, never()).create(any(SearchParameter.class), any(RequestDetails.class));
+
+			SearchParameter capturedSP = mySearchParameterCaptor.getValue();
+			assertEquals("existing-sp", capturedSP.getIdPart());
+			assertEquals(List.of("DomainResource"), capturedSP.getBase().stream().map(CodeType::getCode).toList());
+		}
+	}
+
+	private static SearchParameter createSearchParameter(String theId, Collection<String> theBase) {
+		SearchParameter searchParameter = new SearchParameter();
+		if (theId != null) {
+			searchParameter.setId(new IdType("SearchParameter", theId));
+		}
+		searchParameter.setCode("someCode");
+		theBase.forEach(base -> searchParameter.getBase().add(new CodeType(base)));
+		searchParameter.setExpression("someExpression");
+		return searchParameter;
+	}
+
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private PackageInstallationSpec setupResourceInPackage(IBaseResource theExistingResource, IBaseResource theInstallResource,
 	                                                       IFhirResourceDao theFhirResourceDao) throws IOException {
@@ -528,17 +650,6 @@ public class PackageInstallerSvcImplTest {
 	private void setupSearchParameterValidationMocksForSuccess() {
 		when(myVersionCanonicalizerMock.searchParameterToCanonical(any())).thenReturn(new org.hl7.fhir.r5.model.SearchParameter());
 		doNothing().when(mySearchParameterDaoValidatorMock).validate(any());
-	}
-
-	private static SearchParameter createSearchParameter(String theId, Collection<String> theBase) {
-		SearchParameter searchParameter = new SearchParameter();
-		if (theId != null) {
-			searchParameter.setId(new IdType("SearchParameter", theId));
-		}
-		searchParameter.setCode("someCode");
-		theBase.forEach(base -> searchParameter.getBase().add(new CodeType(base)));
-		searchParameter.setExpression("someExpression");
-		return searchParameter;
 	}
 
 	private static Subscription createSubscription(Subscription.SubscriptionStatus theSubscriptionStatus) {
