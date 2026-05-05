@@ -825,8 +825,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				.equals(theResource.getIdElement().getIdPart())) {
 			return false;
 		}
-		Collection<String> remainingBaseList = new HashSet<>(getBaseAsStrings(myFhirContext, theExistingResource));
-		remainingBaseList.removeAll(getBaseAsStrings(myFhirContext, theResource));
+		Collection<String> remainingBaseList = new HashSet<>(SearchParameterUtil.expandBaseWhenNeeded(
+				myFhirContext, getBaseAsStrings(myFhirContext, theExistingResource)));
+		remainingBaseList.removeAll(
+				SearchParameterUtil.expandBaseWhenNeeded(myFhirContext, getBaseAsStrings(myFhirContext, theResource)));
 		if (remainingBaseList.isEmpty()) {
 			return false;
 		}
