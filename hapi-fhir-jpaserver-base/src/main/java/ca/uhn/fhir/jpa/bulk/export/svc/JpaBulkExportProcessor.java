@@ -174,10 +174,11 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, theJobId);
 
 				Logs.getBatchTroubleshootingLog()
-						.atDebug()
-						.setMessage("Executing query for bulk export job[{}] chunk[{}]: {}")
+						.atInfo()
+						.setMessage("Executing query for bulk export job[{}] chunk[{}]: {}{}")
 						.addArgument(theJobId)
 						.addArgument(theChunkId)
+						.addArgument(resourceType)
 						.addArgument(map.toNormalizedQueryString())
 						.log();
 
@@ -694,7 +695,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				.collect(Collectors.toSet());
 		if (patientSearchParams.isEmpty()) {
 			String errorMessage = String.format(
-					"Resource type [%s] is not eligible for this type of export, as it contains no active search parameters.",
+					"Resource type [%s] is not eligible for this type of export, as it contains no active patient compartment search parameters.",
 					theResourceType);
 			throw new IllegalArgumentException(Msg.code(2817) + errorMessage);
 		}

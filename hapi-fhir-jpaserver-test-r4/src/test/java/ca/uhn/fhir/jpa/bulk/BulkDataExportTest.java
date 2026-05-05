@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -15,6 +16,8 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
+import ca.uhn.fhir.jpa.searchparam.registry.RuntimeSearchParamCache;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -24,6 +27,7 @@ import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
@@ -1213,6 +1217,29 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		}
 
 		verifyBulkExportResults(options, expectedContainedIds, Collections.emptyList());
+	}
+
+	@Test
+	public void testPatientTypeBulkExport() {
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Encounter encounter = new Encounter();
+		encounter.setSubject(new Reference("Patient/P1"));
+		String encId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
+		Encounter encounter2 = new Encounter();
+		String encId2 = myClient.create().resource(encounter2).execute().getId().toUnqualifiedVersionless().getValue();
+
+		// set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+
+		options.setResourceTypes(List.of("Patient", "Encounter"));
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		verifyBulkExportResults(options, List.of("Patient/P1", encId), List.of(encId2));
 	}
 
 	@Test

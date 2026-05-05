@@ -190,6 +190,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 					ourLog.info("Purging batch 2 bulk export binary: {}", binaryId);
 					IIdType id = myBulkExportHelperSvc.toId(binaryId);
 					getBinaryDao().delete(id, new SystemRequestDetails());
+					//Archive this instead.
 				}
 			}
 		} // else we can't know what the binary IDs are, so delete this job and move on
