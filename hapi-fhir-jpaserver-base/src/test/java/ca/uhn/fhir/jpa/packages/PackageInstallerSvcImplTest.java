@@ -819,6 +819,7 @@ public class PackageInstallerSvcImplTest {
 			CodeSystem packagedCs = new CodeSystem();
 			packagedCs.setVersion(VERSION);
 			packagedCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			packagedCs.addIdentifier().setSystem("http://example.org/CodeSystem/identifier").setValue("someValue");
 
 			PackageInstallationSpec spec = setupResourceInPackage(null, packagedCs, myCodeSystemDao);
 			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(packagedCs);
