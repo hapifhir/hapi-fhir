@@ -383,14 +383,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 				 * type. If the reference doesn't declare any target types, we'll just
 				 * assume it's a Reference(All) and target all partitions.
 				 */
-				if(ResourceCompartmentUtil.PATIENT_COMPARTMENT_SP_SUBJECT.equals(paramName) || ResourceCompartmentUtil.PATIENT_COMPARTMENT_SP_PATIENT.equals(paramName)){
-					// SP subject and patient have a cardinality of 0..1 so if we already have resolved a partition,
-					// we reuse it.
-					if(theRequestPartitionId.hasPartitionIds()){
-						predicateTargetPartitionId = theRequestPartitionId;
-					}
-				}
-				else if (!theParam.getTargets().isEmpty()) {
+				if (!theParam.getTargets().isEmpty()) {
 					String chain = refParam.getChain();
 					chain = StringUtils.substringBefore(chain, '.');
 
@@ -411,7 +404,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 								RequestPartitionId nextPartitionId =
 										myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-												theRequest, targetType, targetParamMap);
+												theRequest, targetType, targetParamMap, theRequestPartitionId);
 								predicateTargetPartitionId = nextPartitionId.mergeIds(predicateTargetPartitionId);
 							}
 						}

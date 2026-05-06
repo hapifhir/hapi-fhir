@@ -113,6 +113,29 @@ public interface IRequestPartitionHelperSvc {
 	}
 
 	/**
+	 * Determine partition to use when performing a database search, carrying a pre-resolved
+	 * {@link RequestPartitionId} hint that interceptors (e.g. {@code PatientIdPartitionInterceptor})
+	 * may merge with their own partition derivation instead of resolving from scratch.
+	 *
+	 * @param theRequest            the request details from the context of the call
+	 * @param theResourceType       the resource type
+	 * @param theParams             the search parameters
+	 * @param theRequestPartitionId a pre-resolved partition hint to propagate to interceptors
+	 * @return the partition id which should be used for the database search
+	 */
+	@Nonnull
+	default RequestPartitionId determineReadPartitionForRequestForSearchType(
+		@Nullable RequestDetails theRequest,
+		@Nonnull String theResourceType,
+		@Nonnull SearchParameterMap theParams,
+		@Nonnull RequestPartitionId theRequestPartitionId) {
+		ReadPartitionIdRequestDetails details =
+			ReadPartitionIdRequestDetails.forSearchType(theResourceType, theParams, null);
+		details.setRequestPartitionId(theRequestPartitionId);
+		return determineReadPartitionForRequest(theRequest, details);
+	}
+
+	/**
 	 * Determine partition to use when performing a database search based on a resource type, search parameters and a conditional target resource (if available).
 	 * @param theRequest the request details from the context of the call
 	 * @param theResourceType the resource type

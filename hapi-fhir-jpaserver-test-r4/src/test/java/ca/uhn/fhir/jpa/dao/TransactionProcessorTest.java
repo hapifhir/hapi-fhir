@@ -48,6 +48,7 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationKnowledge;
@@ -245,7 +246,7 @@ public class TransactionProcessorTest {
 		// Setup
 		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(100));
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionFhirPatchEntry(new Parameters()).conditional(PATIENT_MATCH_URL_FOO_123);
@@ -338,7 +339,7 @@ public class TransactionProcessorTest {
 		// Setup
 		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(100));
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionCreateEntry(
@@ -357,7 +358,7 @@ public class TransactionProcessorTest {
 
 		// Verify
 		verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(any(), notNull(), eq("Patient"));
-		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequestForSearchType(any(), eq("Patient"), any(), notNull());
+		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequestForSearchType(any(), eq("Patient"), any(), notNull(IBaseResource.class));
 		verify(myRequestPartitionHelperSvc, atLeastOnce()).isDefaultPartition(any());
 		verifyNoMoreInteractions(myRequestPartitionHelperSvc);
 
@@ -372,7 +373,7 @@ public class TransactionProcessorTest {
 		// Setup
 		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(100));
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionUpdateEntry(
@@ -391,7 +392,7 @@ public class TransactionProcessorTest {
 
 		// Verify
 		verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(any(), notNull(), eq("Patient"));
-		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequestForSearchType(any(), eq("Patient"), any(), notNull());
+		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequestForSearchType(any(), eq("Patient"), any(), notNull(IBaseResource.class));
 		verify(myRequestPartitionHelperSvc, atLeastOnce()).isDefaultPartition(any());
 		verifyNoMoreInteractions(myRequestPartitionHelperSvc);
 
@@ -410,7 +411,7 @@ public class TransactionProcessorTest {
 		// Setup
 		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(100));
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionUpdateEntry(
@@ -429,7 +430,7 @@ public class TransactionProcessorTest {
 
 		// Verify
 		verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(any(), notNull(), eq("Patient"));
-		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequestForSearchType(any(), eq("Patient"), any(), notNull());
+		verify(myRequestPartitionHelperSvc, times(1)).determineReadPartitionForRequestForSearchType(any(), eq("Patient"), any(), notNull(IBaseResource.class));
 		verify(myRequestPartitionHelperSvc, times(0)).isDefaultPartition(any());
 		verifyNoMoreInteractions(myRequestPartitionHelperSvc);
 
@@ -452,8 +453,8 @@ public class TransactionProcessorTest {
 		Bundle input = bb.getBundleTyped();
 
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), eq("Patient"))).thenReturn(RequestPartitionId.fromPartitionId(100));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP), any())).thenReturn(RequestPartitionId.fromPartitionId(123));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP), any())).thenReturn(RequestPartitionId.fromPartitionId(456));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(123));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(456));
 
 		mockPreFetchHashCapture();
 		mockPatientDaoCreate();
@@ -488,8 +489,8 @@ public class TransactionProcessorTest {
 		Bundle input = bb.getBundleTyped();
 
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), eq("Patient"))).thenReturn(RequestPartitionId.fromPartitionId(100));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP), any())).thenReturn(RequestPartitionId.fromPartitionId(123));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP), any())).thenReturn(RequestPartitionId.fromPartitionId(456));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(123));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(456));
 
 		myHapiTransactionService.addNonCompatiblePartition(RequestPartitionId.fromPartitionId(123), RequestPartitionId.fromPartitionId(456));
 

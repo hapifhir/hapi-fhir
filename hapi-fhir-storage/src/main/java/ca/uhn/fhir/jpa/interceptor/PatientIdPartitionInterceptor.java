@@ -690,8 +690,20 @@ public class PatientIdPartitionInterceptor {
 				if (theReadDetails.getSearchParams() != null) {
 					SearchParameterMap params = theReadDetails.getSearchParams();
 					if (PATIENT_STR.equals(theReadDetails.getResourceType())) {
+						RequestPartitionId readRequestPartitionId = theReadDetails.getRequestPartitionId();
+
 						List<String> idParts = getResourceIdsForSearchParam(params, "_id");
-						return provideMultipleCompartmentPartition(theRequestDetails, idParts);
+						RequestPartitionId multiCompartmentRequestPartitionId = provideMultipleCompartmentPartition(theRequestDetails, idParts);
+
+						if (nonNull(readRequestPartitionId) && readRequestPartitionId.hasPartitionIds()) {
+							if (multiCompartmentRequestPartitionId.hasPartitionIds()) {
+								readRequestPartitionId = readRequestPartitionId.mergeIds(multiCompartmentRequestPartitionId);
+							}
+						} else {
+							readRequestPartitionId = multiCompartmentRequestPartitionId;
+						}
+
+						return readRequestPartitionId;
 					} else if (isNotBlank(theReadDetails.getResourceType())) {
 						RuntimeResourceDefinition resourceDef =
 								myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
