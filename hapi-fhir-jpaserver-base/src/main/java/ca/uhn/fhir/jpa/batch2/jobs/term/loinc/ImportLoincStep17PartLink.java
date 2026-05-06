@@ -1,0 +1,100 @@
+package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
+
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
+import org.apache.commons.csv.CSVRecord;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.StringType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Optional;
+
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_PRIMARY;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_PRIMARY_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_SUPPLEMENTARY;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT;
+import static org.apache.commons.lang3.StringUtils.trim;
+
+public class ImportLoincStep17PartLink extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep17PartLink.MyContext> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep17PartLink.class);
+
+	@Override
+	protected MyContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		return new MyContext(theStepExecutionDetails.getData());
+	}
+
+	@Nonnull
+	@Override
+	protected List<PropertyNameAndDefault> getFilesToProcess() {
+		return List.of(
+			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE, LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_DEFAULT),
+			new PropertyNameAndDefault(LOINC_PART_LINK_FILE_PRIMARY, LOINC_PART_LINK_FILE_PRIMARY_DEFAULT),
+			new PropertyNameAndDefault(LOINC_PART_LINK_FILE_SUPPLEMENTARY, LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT)
+		);
+	}
+
+	@Override
+	protected void handleRecord(LoincJobImportParameters theJobParameters, MyContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {
+
+		String loincNumber = trim(theRecord.get("LoincNumber"));
+		String property = trim(theRecord.get("Property"));
+		String partName = trim(theRecord.get("PartName"));
+		String partNumber = trim(theRecord.get("PartNumber"));
+
+		/*
+		 * Property has the form http://loinc.org/property/COMPONENT
+		 * but we want just the COMPONENT part
+		 */
+		int lastSlashIdx = property.lastIndexOf("/");
+		String propertyPart = property.substring(lastSlashIdx + 1);
+
+		CodeSystem.PropertyType propertyType = theContext.getPropertyNameToType().get(propertyPart);
+		if (propertyType == null) {
+			return;
+		}
+
+		String expectedValue;
+		if (propertyType == CodeSystem.PropertyType.STRING) {
+			expectedValue = partName;
+		} else if (propertyType == CodeSystem.PropertyType.CODING) {
+			expectedValue = partNumber;
+		} else {
+			throw new InternalErrorException(
+				Msg.code(914) + "Don't know how to handle property of type: " + propertyType);
+		}
+
+		CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+
+		// Filter duplicates
+		Optional<CodeSystem.ConceptPropertyComponent> existingProperty = concept.getProperty().stream()
+			.filter(t -> t.getCode().equals(propertyPart))
+			.findFirst();
+		if (existingProperty.isPresent()) {
+			return;
+		}
+
+		ourLog.debug("Adding new property {} = {}", propertyPart, partNumber);
+		CodeSystem.ConceptPropertyComponent newProperty = concept.addProperty();
+		newProperty.setCode(propertyPart);
+		if (propertyType == CodeSystem.PropertyType.STRING) {
+			newProperty.setValue(new StringType(partName));
+		} else {
+			newProperty.setValue(new Coding(ITermLoaderSvc.LOINC_URI, partNumber, partName));
+		}
+	}
+
+	protected static class MyContext extends BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext {
+
+		public MyContext(ImportLoincFileSetJson theData) {
+			super(theData);
+		}
+	}
+
+}

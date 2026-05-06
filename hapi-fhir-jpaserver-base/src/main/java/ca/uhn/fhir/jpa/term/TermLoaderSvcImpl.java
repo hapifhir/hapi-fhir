@@ -901,6 +901,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Parent group
+		// **CONVERTED**
 		handler = new LoincParentGroupFileHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
 		iterateOverZipFileCsv(
 				theDescriptors,
@@ -912,6 +913,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Part link
+		// **CONVERTED**
 		handler = new LoincPartLinkHandler(codeSystemVersion, code2concept, propertyNamesToTypes);
 		iterateOverZipFileCsvOptional(
 				theDescriptors,
@@ -939,6 +941,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Consumer Name
+		// **CONVERTED**
 		handler = new LoincConsumerNameHandler(code2concept);
 		iterateOverZipFileCsvOptional(
 				theDescriptors,

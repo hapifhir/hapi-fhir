@@ -55,6 +55,9 @@ public class ImportLoincJobAppCtx {
 			.addIntermediateStep("import-group-file", "Import LOINC Group File", ImportLoincFileSetJson.class, importLoincStep14GroupFile())
 			.addIntermediateStep("import-group-terms-file", "Import LOINC Group Terms File", ImportLoincFileSetJson.class, importLoincStep15GroupTermsFile())
 			.addIntermediateStep("import-parent-group-file", "Import LOINC Parent Group File", ImportLoincFileSetJson.class, importLoincStep16ParentGroupFile())
+			.addIntermediateStep("import-part-link", "Import LOINC Part Link File", ImportLoincFileSetJson.class, importLoincStep17PartLink())
+			.addIntermediateStep("import-consumer-name", "Import LOINC Consumer Names", ImportLoincFileSetJson.class, importLoincStep18ConsumerName())
+			.addIntermediateStep("import-coding-properties", "Import LOINC Coding Properties", ImportLoincFileSetJson.class, importLoincStep19CodingProperties())
 //				.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
 			.build();
 	}
@@ -187,6 +190,30 @@ public class ImportLoincJobAppCtx {
 	@Bean
 	public ImportLoincStep16ParentGroupFile importLoincStep16ParentGroupFile() {
 		return new ImportLoincStep16ParentGroupFile();
+	}
+
+	/**
+	 * Step 17: Part Link
+	 */
+	@Bean
+	public ImportLoincStep17PartLink importLoincStep17PartLink() {
+		return new ImportLoincStep17PartLink();
+	}
+
+	/**
+	 * Step 18: Consumer Name
+	 */
+	@Bean
+	public ImportLoincStep18ConsumerName importLoincStep18ConsumerName() {
+		return new ImportLoincStep18ConsumerName();
+	}
+
+	/**
+	 * Step 19: Coding Properties
+	 */
+	@Bean
+	public ImportLoincStep19CodingProperties importLoincStep19CodingProperties() {
+		return new ImportLoincStep19CodingProperties();
 	}
 
 }

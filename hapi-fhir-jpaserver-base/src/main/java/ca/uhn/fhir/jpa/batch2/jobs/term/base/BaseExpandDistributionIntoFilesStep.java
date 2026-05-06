@@ -16,6 +16,8 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
 import ca.uhn.fhir.jpa.util.CsvUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -25,6 +27,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +42,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTerminologyImportParameters, OT extends TerminologyFileSetJson> implements IJobStepWorker<PT, VoidModel, OT> {
 
@@ -78,13 +80,26 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 						byte[] bytes = IOUtils.toByteArray(fis);
 
 						// Asynchronous processing (prepare work chunks based on input file)
-						Optional<StepIdAndFileHandlingInstructions> processor = getStepIdAndFileHandlingInstructionsForFileName(jobParameters, theStepExecutionDetails.getJobDefinition(), nextFileName);
-						if (processor.isPresent()) {
+						List<StepIdAndFileHandlingInstructions> processors = getStepIdAndFileHandlingInstructionsForFileName(jobParameters, theStepExecutionDetails.getJobDefinition(), nextFileName);
 
-							switch (processor.get().fileHandlingInstructions().fileHandlingType()) {
-								case CSV_SPLIT_WITH_REPEAT_HEADER ->
-									csvSplitWithRepeatHeader(instanceId, bytes, fileSet, loincFileAttachment.getFilename(), nextFileName, processor.get().stepId());
+						ListMultimap<ITerminologyImportFileHandlerStep.FileHandlingType, String> fileHandlingTypeToAttachmentIds = MultimapBuilder.hashKeys().arrayListValues().build();
+
+						for (StepIdAndFileHandlingInstructions processor : processors) {
+							ITerminologyImportFileHandlerStep.FileHandlingType fileHandlingType = processor.fileHandlingInstructions().fileHandlingType();
+
+							if (fileHandlingTypeToAttachmentIds.containsKey(fileHandlingType)) {
+								List<String> attachmentIds = fileHandlingTypeToAttachmentIds.get(fileHandlingType);
+								for (String attachmentId : attachmentIds) {
+									fileSet.addChunk(processor.stepId(), attachmentId);
+								}
+								continue;
 							}
+
+							List<String> attachmentIds = switch (fileHandlingType) {
+								case CSV_SPLIT_WITH_REPEAT_HEADER ->
+									csvSplitWithRepeatHeader(instanceId, bytes, fileSet, loincFileAttachment.getFilename(), nextFileName, processor.stepId());
+							};
+							fileHandlingTypeToAttachmentIds.putAll(fileHandlingType, attachmentIds);
 						}
 
 						// Synchronous processing (anything that is small enough to just handle it here)
@@ -115,7 +130,12 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 	 */
 	protected abstract OT newTerminologyFileSetJson();
 
-	private void csvSplitWithRepeatHeader(String theJobInstanceId, byte[] theBytes, TerminologyFileSetJson theFileSet, String theZipOuterFilename, String theZipInnerFilename, String theStepId) {
+	/**
+	 * @return A list of attachment IDs for the work chunks that were created.
+	 */
+	private List<String> csvSplitWithRepeatHeader(String theJobInstanceId, byte[] theBytes, TerminologyFileSetJson theFileSet, String theZipOuterFilename, String theZipInnerFilename, String theStepId) {
+		List<String> attachmentIds = new ArrayList<>();
+
 		ByteArrayInputStream bis = new ByteArrayInputStream(theBytes);
 		InputStreamReader reader = new InputStreamReader(bis, StandardCharsets.UTF_8);
 		try (CSVParser parser = newLoincCsvParser(reader)) {
@@ -132,6 +152,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 					String attachmentId = writeChunk(theJobInstanceId, headers, recordsBuffer);
 					theFileSet.addChunk(theStepId, attachmentId);
 					recordsBuffer.clear();
+					attachmentIds.add(attachmentId);
 				}
 
 			}
@@ -141,6 +162,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 			throw new JobExecutionFailedException(Msg.code(1) + "Failed to parse " + theZipInnerFilename + " in zip file: " + theZipOuterFilename + ": " + e, e);
 		}
 
+		return attachmentIds;
 	}
 
 	private String writeChunk(String theJobInstanceId, List<String> theHeaders, List<CSVRecord> theRecordsBuffer) {
@@ -163,16 +185,18 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		return "LOINC";
 	}
 
-	private Optional<StepIdAndFileHandlingInstructions> getStepIdAndFileHandlingInstructionsForFileName(PT theJobParameters, JobDefinition<PT> theJobDefinition, String theStepId) {
+	private List<StepIdAndFileHandlingInstructions> getStepIdAndFileHandlingInstructionsForFileName(PT theJobParameters, JobDefinition<PT> theJobDefinition, String theStepId) {
+		List<StepIdAndFileHandlingInstructions> stepProcessingInstructions = new ArrayList<>();
+
 		for (JobDefinitionStep<PT, ?, ?> step : theJobDefinition.getSteps()) {
 			if (step.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep<PT, ?, ?> fileHandler) {
-				Optional<ITerminologyImportFileHandlerStep.FileHandlingInstructions> fileHandlingInstructions = fileHandler.canHandleFile(theJobParameters, theStepId);
-				if (fileHandlingInstructions.isPresent()) {
-					return Optional.of(new StepIdAndFileHandlingInstructions(step.getStepId(), fileHandlingInstructions.get()));
-				}
+				fileHandler
+					.canHandleFile(theJobParameters, theStepId)
+					.ifPresent(instructions -> stepProcessingInstructions.add(new StepIdAndFileHandlingInstructions(step.getStepId(), instructions)));
 			}
 		}
-		return Optional.empty();
+
+		return stepProcessingInstructions;
 	}
 
 	public static <OT extends TerminologyFileSetJson> void submitChunksForNextStep(@Nonnull StepExecutionDetails<?, ?> theStepExecutionDetails, @Nonnull IJobDataSink<OT> theDataSink, OT theFileSet) {

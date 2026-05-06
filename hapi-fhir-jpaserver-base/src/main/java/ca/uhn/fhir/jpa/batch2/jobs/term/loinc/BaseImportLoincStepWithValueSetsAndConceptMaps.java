@@ -347,9 +347,9 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends 
 		ConceptSetComponentIdentity toFind = new ConceptSetComponentIdentity(theSetToFind);
 		for (ValueSet.ConceptSetComponent next : theTargetList) {
 			ConceptSetComponentIdentity nextIdentity = new ConceptSetComponentIdentity(next);
-				if (toFind.equals(nextIdentity)) {
-					return next;
-				}
+			if (toFind.equals(nextIdentity)) {
+				return next;
+			}
 		}
 
 		// Not found
@@ -378,6 +378,26 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends 
 		private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 		private final SetMultimap<String, ConceptMapping> myIdToConceptMappings = MultimapBuilder.hashKeys().linkedHashSetValues().build();
 		private final Map<String, CodeSystem.ConceptDefinitionComponent> myCodeToConcept = new HashMap<>();
+		private final Map<String, CodeSystem.PropertyType> myPropertyNameToType = new HashMap<>();
+		private final ImportLoincFileSetJson myData;
+
+		public MyBaseContext(ImportLoincFileSetJson theData) {
+			myData = theData;
+		}
+
+		public Map<String, CodeSystem.PropertyType> getPropertyNameToType() {
+			if (myPropertyNameToType.isEmpty()) {
+				for (CodeSystem.PropertyComponent nextProperty : myData.getLoincCodeSystem().getProperty()) {
+					String nextPropertyCode = nextProperty.getCode();
+					CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
+					if (isNotBlank(nextPropertyCode)) {
+						myPropertyNameToType.put(nextPropertyCode, nextPropertyType);
+					}
+				}
+
+			}
+			return myPropertyNameToType;
+		}
 
 		public Map<String, CodeSystem.ConceptDefinitionComponent> getCodeToConcept() {
 			return myCodeToConcept;
@@ -562,5 +582,5 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends 
 			return Objects.hash(myCopyright, myConceptMapId, myConceptMapUri, myConceptMapVersion, myConceptMapName, mySourceCodeSystem, mySourceCodeSystemVersion, mySourceCode, mySourceDisplay, myTargetCodeSystem, myTargetCode, myTargetDisplay, myEquivalence, myTargetCodeSystemVersion);
 		}
 	}
-	
+
 }

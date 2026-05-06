@@ -101,6 +101,41 @@ class BaseExpandDistributionIntoFilesStepTest {
 	}
 
 	@Test
+	void testRun_TwoStepsUseSameFile() throws IOException {
+		mockJobPersistenceFetchDistributionFile();
+		mockHandlerStep1();
+		mockHandlerStep2_SameFileAsStep1();
+		AtomicInteger attachmentCounter = mockJobPersistenceStoreNewAttachment();
+
+		// Test
+		StepExecutionDetails<LoincJobImportParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		myStep.run(stepExecutionDetails, myDataSink);
+
+		// Verify
+		verify(myDataSink, times(4)).accept(myTerminologyFileSetCaptor.capture());
+
+		TerminologyFileSetJson fileSet = myTerminologyFileSetCaptor.getAllValues().get(0);
+		assertNull(fileSet.getChunkAttachmentIdForCurrentStepId());
+		assertThat(fileSet.getAndRemoveFutureChunkAttachmentIdsForStepId("step-1")).isEmpty();
+		assertThat(fileSet.getAndRemoveFutureChunkAttachmentIdsForStepId("step-2")).containsExactly("ATT-1", "ATT-2", "ATT-3");
+		assertEquals("ATT-1", myTerminologyFileSetCaptor.getAllValues().get(1).getChunkAttachmentIdForCurrentStepId());
+		assertEquals("ATT-2", myTerminologyFileSetCaptor.getAllValues().get(2).getChunkAttachmentIdForCurrentStepId());
+		assertEquals("ATT-3", myTerminologyFileSetCaptor.getAllValues().get(3).getChunkAttachmentIdForCurrentStepId());
+		assertEquals(3, attachmentCounter.get());
+
+	}
+
+	private void mockHandlerStep2_SameFileAsStep1() {
+		when(myHandlerStep2.canHandleFile(any(), any())).thenAnswer(t -> {
+			String fileName = t.getArgument(1, String.class);
+			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT.getCode())) {
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
+			}
+			return Optional.empty();
+		});
+	}
+
+	@Test
 	void testRun_NoChunksForStep1() throws IOException {
 		mockJobPersistenceFetchDistributionFile();
 		when(myHandlerStep1.canHandleFile(any(), any())).thenAnswer(t -> Optional.empty());
