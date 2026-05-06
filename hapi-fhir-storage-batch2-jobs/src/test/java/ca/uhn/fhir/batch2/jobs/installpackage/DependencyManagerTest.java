@@ -46,6 +46,8 @@ public class DependencyManagerTest {
 	@BeforeEach
 	public void beforeEach() {
 		myDependencyManager = new DependencyManager(myFhirContext, myDaoRegistry, myPartitionSettings);
+
+		when(myDaoRegistry.getResourceDao(Basic.class)).thenReturn(myBasicResourceDao);
 	}
 
 	@Test
@@ -55,7 +57,6 @@ public class DependencyManagerTest {
 		IdDt theId = new IdDt("Basic/1/_history/1");
 		outcome.setId(theId);
 
-		when(myDaoRegistry.getResourceDao(any(Basic.class))).thenReturn(myBasicResourceDao);
 		when(myBasicResourceDao.create(any(Basic.class), any(RequestDetails.class))).thenReturn(outcome);
 
 		// execute
@@ -76,7 +77,6 @@ public class DependencyManagerTest {
 		Basic basicResource = new Basic();
 		basicResource.setId(id);
 
-		when(myDaoRegistry.getResourceDao(Basic.class)).thenReturn(myBasicResourceDao);
 		when(myBasicResourceDao.read(any(IIdType.class), any(RequestDetails.class))).thenReturn(basicResource);
 
 		// execute
@@ -125,7 +125,6 @@ public class DependencyManagerTest {
 		basicResource.addExtension(createDependencyExtension("hl7.fhir.us.core", "6.1.0"));
 		basicResource.addExtension(createDependencyExtension("hl7.fhir.terminology", "5.0.1"));
 
-		when(myDaoRegistry.getResourceDao(Basic.class)).thenReturn(myBasicResourceDao);
 		when(myBasicResourceDao.read(any(IIdType.class), any(RequestDetails.class))).thenReturn(basicResource);
 
 		// execute
@@ -173,7 +172,6 @@ public class DependencyManagerTest {
 
 		basicResource.addExtension(createDependencyExtension("hl7.fhir.us.core", "5.0.1"));
 
-		when(myDaoRegistry.getResourceDao(Basic.class)).thenReturn(myBasicResourceDao);
 		when(myBasicResourceDao.read(any(IIdType.class), any(RequestDetails.class))).thenReturn(basicResource);
 
 		// execute
@@ -191,8 +189,6 @@ public class DependencyManagerTest {
 	public void testDeleteDependencyResource() {
 		// set up
 		String id = "Basic/1";
-
-		when(myDaoRegistry.getResourceDao(Basic.class)).thenReturn(myBasicResourceDao);
 
 		// execute
 		myDependencyManager.deleteDependencyResource(id);

@@ -40,17 +40,14 @@ public class DependencyManager {
 	public String createDependencyResource() {
 		IBaseResource basic = TerserUtil.newResource(myFhirContext, RESOURCE_TYPE);
 
-		DaoMethodOutcome outcome = myDaoRegistry.getResourceDao(basic).create(basic, createRequestDetails());
+		DaoMethodOutcome outcome = getBasicDao().create(basic, createRequestDetails());
 		return outcome.getId().toUnqualifiedVersionless().getValueAsString();
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T extends IBaseResource> boolean shouldProcessDependency(
 			String theId, String thePackageName, String thePackageVersion) {
 		IIdType idType = TerserUtil.newElement(myFhirContext, "id", theId);
-		Class<T> implementingClass =
-				(Class<T>) myFhirContext.getResourceDefinition(RESOURCE_TYPE).getImplementingClass();
-		IFhirResourceDao<T> basicDao = myDaoRegistry.getResourceDao(implementingClass);
+		IFhirResourceDao<T> basicDao = getBasicDao();
 
 		T resource = basicDao.read(idType, createRequestDetails());
 
@@ -66,9 +63,15 @@ public class DependencyManager {
 
 	public void deleteDependencyResource(String theId) {
 		IIdType idType = TerserUtil.newElement(myFhirContext, "id", theId);
-		Class<? extends IBaseResource> implementingClass =
-				myFhirContext.getResourceDefinition(RESOURCE_TYPE).getImplementingClass();
-		myDaoRegistry.getResourceDao(implementingClass).delete(idType, createRequestDetails());
+
+		getBasicDao().delete(idType, createRequestDetails());
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends IBaseResource> IFhirResourceDao<T> getBasicDao() {
+		Class<T> implementingClass =
+				(Class<T>) myFhirContext.getResourceDefinition(RESOURCE_TYPE).getImplementingClass();
+		return myDaoRegistry.getResourceDao(implementingClass);
 	}
 
 	private RequestDetails createRequestDetails() {
