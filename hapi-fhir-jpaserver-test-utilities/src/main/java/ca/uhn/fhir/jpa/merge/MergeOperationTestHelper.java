@@ -460,11 +460,20 @@ public class MergeOperationTestHelper {
 	 */
 	public void assertResourcesAreEqualIgnoringVersionAndLastUpdated(
 			@Nonnull IBaseResource theBefore, @Nonnull IBaseResource theAfter) {
+		assertResourcesAreEqualIgnoringVersionAndLastUpdated(myFhirContext, theBefore, theAfter);
+	}
+
+	/**
+	 * Static variant for callers that do not have a configured {@link MergeOperationTestHelper}
+	 * instance available (e.g. App-IT tests that only have an HTTP client).
+	 */
+	public static void assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+			@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theBefore, @Nonnull IBaseResource theAfter) {
 
 		assertThat(theBefore.getIdElement().toVersionless())
 				.isEqualTo(theAfter.getIdElement().toVersionless());
 
-		FhirTerser terser = myFhirContext.newTerser();
+		FhirTerser terser = theFhirContext.newTerser();
 		// Create a copy of the before resource since we will modify some of its meta data to match the after resource
 		IBaseResource copyOfTheBefore = terser.clone(theBefore);
 
@@ -474,10 +483,10 @@ public class MergeOperationTestHelper {
 
 		// Copy meta.source from after to before
 		MetaUtil.setSource(
-				myFhirContext, copyOfTheBefore, terser.getSinglePrimitiveValueOrNull(theAfter, "meta.source"));
+				theFhirContext, copyOfTheBefore, terser.getSinglePrimitiveValueOrNull(theAfter, "meta.source"));
 
-		String before = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(copyOfTheBefore);
-		String after = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theAfter);
+		String before = theFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(copyOfTheBefore);
+		String after = theFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theAfter);
 		assertThat(after).isEqualTo(before);
 	}
 

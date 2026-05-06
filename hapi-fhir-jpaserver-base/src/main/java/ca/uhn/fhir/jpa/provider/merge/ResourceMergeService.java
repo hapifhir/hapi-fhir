@@ -253,78 +253,77 @@ public class ResourceMergeService {
 
 		validateResourceLimit(theMergeOperationParameters, theSourceResource, theRequestDetails, crossPartition);
 
-		myHapiTransactionService
-				.withRequest(theRequestDetails)
-				.withRequestPartitionId(partitionId)
-				.execute(() -> {
-					// 1. Replace references (nested transactions inside)
-					List<IIdType> changedResourceIds;
-					List<IIdType> copiedResourceOriginalIds = List.of();
-					List<IIdType> resourcesToDeleteIds = new ArrayList<>();
+		// Outer tx is intentionally not pinned to a partition: per-operation partition resolution
+		// handles writes (per-bundle-entry resolution in transactionNested) and link discovery
+		// fans out to all shards explicitly inside CrossPartitionReplaceReferencesSvc.
+		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
+			// 1. Replace references (nested transactions inside)
+			List<IIdType> changedResourceIds;
+			List<IIdType> copiedResourceOriginalIds = List.of();
+			List<IIdType> resourcesToDeleteIds = new ArrayList<>();
 
-					if (crossPartition) {
-						CrossPartitionReplaceReferencesResult copyResult =
-								myCrossPartitionReplaceReferencesSvc.copyCompartmentResourcesAndReplaceReferences(
-										theSourceResource, theTargetResource, theRequestDetails);
-						changedResourceIds = new ArrayList<>(copyResult.getChangedResourceIds());
-						copiedResourceOriginalIds = copyResult.getCopiedResourceOriginalIds();
-						resourcesToDeleteIds.addAll(copiedResourceOriginalIds);
-					} else {
-						List<Bundle> responseBundles = replaceReferencesInNestedTransaction(
-								theSourceResource,
-								theTargetResource,
-								theMergeOperationParameters.getResourceLimit(),
-								partitionId,
-								theRequestDetails);
-						changedResourceIds = ReplaceReferencesProvenanceSvc.extractChangedResourceIds(responseBundles);
-					}
+			if (crossPartition) {
+				CrossPartitionReplaceReferencesResult copyResult =
+						myCrossPartitionReplaceReferencesSvc.copyCompartmentResourcesAndReplaceReferences(
+								theSourceResource, theTargetResource, theRequestDetails);
+				changedResourceIds = new ArrayList<>(copyResult.getChangedResourceIds());
+				copiedResourceOriginalIds = copyResult.getCopiedResourceOriginalIds();
+				resourcesToDeleteIds.addAll(copiedResourceOriginalIds);
+			} else {
+				List<Bundle> responseBundles = replaceReferencesInNestedTransaction(
+						theSourceResource,
+						theTargetResource,
+						theMergeOperationParameters.getResourceLimit(),
+						partitionId,
+						theRequestDetails);
+				changedResourceIds = ReplaceReferencesProvenanceSvc.extractChangedResourceIds(responseBundles);
+			}
 
-					// 2. Update source/target
-					DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
-							theSourceResource,
-							theTargetResource,
-							theMergeOperationParameters.getResultResource(),
-							theMergeOperationParameters.getDeleteSource(),
-							theRequestDetails);
+			// 2. Update source/target
+			DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
+					theSourceResource,
+					theTargetResource,
+					theMergeOperationParameters.getResultResource(),
+					theMergeOperationParameters.getDeleteSource(),
+					theRequestDetails);
 
-					IBaseResource updatedTargetResource = outcome.getResource();
-					theMergeOutcome.setUpdatedTargetResource(updatedTargetResource);
+			IBaseResource updatedTargetResource = outcome.getResource();
+			theMergeOutcome.setUpdatedTargetResource(updatedTargetResource);
 
-					// 3. Add source patient to resourcesToDeleteIds (unified for both paths)
-					if (theMergeOperationParameters.getDeleteSource()) {
-						resourcesToDeleteIds.add(theSourceResource.getIdElement());
-					}
+			// 3. Add source patient to resourcesToDeleteIds (unified for both paths)
+			if (theMergeOperationParameters.getDeleteSource()) {
+				resourcesToDeleteIds.add(theSourceResource.getIdElement());
+			}
 
-					// 4. Create provenance (if requested)
-					if (theMergeOperationParameters.getCreateProvenance()) {
-						// we store the original input parameters and the operation outcome of updating target as
-						// contained resources in the provenance. undo-merge service uses these to contained resources.
-						List<IBaseResource> containedResources = List.of(
-								theMergeOperationParameters.getOriginalInputParameters(),
-								outcome.getOperationOutcome());
+			// 4. Create provenance (if requested)
+			if (theMergeOperationParameters.getCreateProvenance()) {
+				// we store the original input parameters and the operation outcome of updating target as
+				// contained resources in the provenance. undo-merge service uses these to contained resources.
+				List<IBaseResource> containedResources = List.of(
+						theMergeOperationParameters.getOriginalInputParameters(), outcome.getOperationOutcome());
 
-						// Add tombstone IDs for copied resource originals (version+1).
-						// Source patient tombstone is handled separately inside createProvenance.
-						for (IIdType id : copiedResourceOriginalIds) {
-							changedResourceIds.add(id.withVersion(String.valueOf(id.getVersionIdPartAsLong() + 1)));
-						}
+				// Add tombstone IDs for copied resource originals (version+1).
+				// Source patient tombstone is handled separately inside createProvenance.
+				for (IIdType id : copiedResourceOriginalIds) {
+					changedResourceIds.add(id.withVersion(String.valueOf(id.getVersionIdPartAsLong() + 1)));
+				}
 
-						myMergeResourceHelper.createProvenance(
-								theSourceResource,
-								updatedTargetResource,
-								changedResourceIds,
-								theMergeOperationParameters.getDeleteSource(),
-								theRequestDetails,
-								startTime,
-								theMergeOperationParameters.getProvenanceAgents(),
-								containedResources);
-					}
+				myMergeResourceHelper.createProvenance(
+						theSourceResource,
+						updatedTargetResource,
+						changedResourceIds,
+						theMergeOperationParameters.getDeleteSource(),
+						theRequestDetails,
+						startTime,
+						theMergeOperationParameters.getProvenanceAgents(),
+						containedResources);
+			}
 
-					// 5. Unified delete (AFTER provenance)
-					if (!resourcesToDeleteIds.isEmpty()) {
-						deleteResources(resourcesToDeleteIds, theRequestDetails);
-					}
-				});
+			// 5. Unified delete (AFTER provenance)
+			if (!resourcesToDeleteIds.isEmpty()) {
+				deleteResources(resourcesToDeleteIds, theRequestDetails);
+			}
+		});
 
 		String detailsText = "Merge operation completed successfully.";
 		addInfoToOperationOutcome(myFhirContext, theMergeOutcome.getOperationOutcome(), null, detailsText);

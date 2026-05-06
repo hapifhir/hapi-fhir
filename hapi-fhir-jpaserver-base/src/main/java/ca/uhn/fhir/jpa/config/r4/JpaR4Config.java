@@ -164,8 +164,10 @@ public class JpaR4Config {
 	public CrossPartitionReplaceReferencesSvc crossPartitionReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			IResourceLinkDao theResourceLinkDao,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		return new CrossPartitionReplaceReferencesSvc(theDaoRegistry, theResourceLinkDao, theRequestPartitionHelperSvc);
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			HapiTransactionService theHapiTransactionService) {
+		return new CrossPartitionReplaceReferencesSvc(
+				theDaoRegistry, theResourceLinkDao, theRequestPartitionHelperSvc, theHapiTransactionService);
 	}
 
 	@Bean

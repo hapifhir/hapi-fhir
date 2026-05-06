@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
@@ -40,6 +41,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * Discovers resources referencing a source resource, copies them to the target resource's
@@ -63,15 +64,18 @@ public class CrossPartitionReplaceReferencesSvc {
 	private final DaoRegistry myDaoRegistry;
 	private final IResourceLinkDao myResourceLinkDao;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private final IHapiTransactionService myHapiTransactionService;
 	private final FhirContext myFhirContext;
 
 	public CrossPartitionReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			IResourceLinkDao theResourceLinkDao,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			IHapiTransactionService theHapiTransactionService) {
 		myDaoRegistry = theDaoRegistry;
 		myResourceLinkDao = theResourceLinkDao;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+		myHapiTransactionService = theHapiTransactionService;
 		myFhirContext = theDaoRegistry.getFhirContext();
 	}
 
@@ -164,12 +168,26 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * then loads and returns those resources.
 	 */
 	private List<IBaseResource> discoverReferencingResources(IIdType theSourceId, RequestDetails theRequestDetails) {
-		List<IdDt> ids;
-		try (Stream<IdDt> stream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
-				theSourceId.getResourceType(), theSourceId.getIdPart())) {
-			ids = stream.toList(); // never null — returns empty list if no results
-		}
+		List<IdDt> ids = findReferencingResourceIds(theSourceId, theRequestDetails);
 		return loadResources(ids, theRequestDetails);
+	}
+
+	/**
+	 * Returns the IDs of all resources that have a reference link pointing to {@code theTargetId}.
+	 * <p>
+	 * Fans out to every shard — HFJ_RES_LINK rows are partitioned by source resource, so on
+	 * MegaScale a single-DB query only sees outgoing refs from that shard. REQUIRES_NEW is
+	 * mandatory: with the default REQUIRED propagation the per-shard thunks would join the
+	 * outer tx and skip the fan-out entirely. On non-MegaScale HAPI this is a single query.
+	 */
+	private List<IdDt> findReferencingResourceIds(IIdType theTargetId, RequestDetails theRequestDetails) {
+		return myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(RequestPartitionId.allPartitions())
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.searchList(partition -> myResourceLinkDao
+						.streamSourceIdsForTargetFhirId(theTargetId.getResourceType(), theTargetId.getIdPart())
+						.toList());
 	}
 
 	/**
@@ -197,13 +215,11 @@ public class CrossPartitionReplaceReferencesSvc {
 		List<IdDt> additionalIds = new ArrayList<>();
 		for (IBaseResource resource : theCopyList) {
 			IIdType oldId = resource.getIdElement();
-			try (Stream<IdDt> stream =
-					myResourceLinkDao.streamSourceIdsForTargetFhirId(oldId.getResourceType(), oldId.getIdPart())) {
-				stream.forEach(id -> {
-					if (alreadyDiscoveredIds.add(id.toUnqualifiedVersionless().getValue())) {
-						additionalIds.add(id);
-					}
-				});
+			List<IdDt> referrers = findReferencingResourceIds(oldId, theRequestDetails);
+			for (IdDt id : referrers) {
+				if (alreadyDiscoveredIds.add(id.toUnqualifiedVersionless().getValue())) {
+					additionalIds.add(id);
+				}
 			}
 		}
 
