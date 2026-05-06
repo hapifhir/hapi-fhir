@@ -1,9 +1,15 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.batch2.api.*;
+import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
+import ca.uhn.fhir.batch2.api.AttachmentDetails;
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -11,8 +17,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
@@ -26,17 +31,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Comparator;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincStep3HandleHierarchyTest.renderHierarchy;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincStep4HandleAnswerListsTest.renderValueSetCompose;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep4HandleAnswerListsTest {
+class ImportLoincStep14GroupFileTest {
 
 	@Mock
 	private IJobPersistence myJobPersistence;
@@ -50,9 +57,11 @@ class ImportLoincStep4HandleAnswerListsTest {
 	private JobDefinition<LoincJobImportParameters> myJobDefinition;
 	@Mock
 	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+	@Mock
+	private IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
 
 	@InjectMocks
-	private ImportLoincStep4HandleAnswerLists mySvc;
+	private ImportLoincStep14GroupFile mySvc;
 
 	@Captor
 	private ArgumentCaptor<IBaseResource> myCodeSystemCaptor;
@@ -60,12 +69,14 @@ class ImportLoincStep4HandleAnswerListsTest {
 	private ArgumentCaptor<ImportLoincFileSetJson> myFileSetCaptor;
 	@Captor
 	private ArgumentCaptor<ValueSet> myValueSetCaptor;
+	@Captor
+	private ArgumentCaptor<ConceptMap> myConceptMapCaptor;
 
 
 	@Test
 	void testProcess() {
 		// Setup
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/AnswerFile/AnswerList.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 
 		// Test
@@ -82,62 +93,59 @@ class ImportLoincStep4HandleAnswerListsTest {
 		mySvc.run(stepExecutionDetails, myDataSink);
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
-		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
-		String hierarchy = renderHierarchy(cs);
-		String expected = """
-			-LL1000-0
-			-LA13825-7
-			-LA13838-0
-			-LA13892-7
-			-LL1001-8
-			-LA6270-8
-			-LA13836-4
-			-LA13834-9
-			-LA13853-9
-			-LA13860-4
-			-LA13827-3
-			-LA4389-8
-			-LL1892-0
-			""";
-		assertEquals(expected, hierarchy);
+		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
 
 		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
 		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/LL1892-0-1.234", "ValueSet/LL1001-8-1.234", "ValueSet/LL1000-0-1.234"
+			"ValueSet/LG100-4-1.234", "ValueSet/LG1695-8-1.234"
 		);
 
-		verify(myValueSetDao, times(3)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		verify(myValueSetDao, times(2)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);
-		assertEquals("LL1000-0-1.234", vs.getIdElement().getIdPart());
-		assertEquals("http://loinc.org/vs/LL1000-0", vs.getUrl());
+		assertEquals("LG100-4-1.234", vs.getIdElement().getIdPart());
+		assertEquals("http://loinc.org/vs/LG100-4", vs.getUrl());
 		assertEquals("1.234", vs.getVersion());
 
 		String valueSetCompose = renderValueSetCompose(vs);
-		expected = """
-			http://loinc.org
-			  LA13825-7
-			  LA13838-0
-			  LA13892-7
+		String expected = """
+			INCLUDE:
+			ValueSet: http://loinc.org/vs/LG1695-8
 			""";
 		assertEquals(expected, valueSetCompose);
+
+		vs = allValueSets.get(1);
+		assertEquals("LG1695-8-1.234", vs.getIdElement().getIdPart());
+		assertEquals("http://loinc.org/vs/LG1695-8", vs.getUrl());
+		assertEquals("1.234", vs.getVersion());
+
+		valueSetCompose = renderValueSetCompose(vs);
+		expected = """
+			INCLUDE:
+			""";
+		assertEquals(expected, valueSetCompose);
+
 	}
 
 	@Test
-	void testProcessValueSetAlreadyExists() {
+	void testProcess_ValueSetAlreadyExists_WithOtherCodes() {
 		// Setup
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/AnswerFile/AnswerList.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
 		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
+		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myValueSetDao.read(eq(new IdType("LG1695-8-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 
-		ValueSet existing = new ValueSet();
-		existing.setId("ValueSet/LL1000-0-1.234/_history/1");
-		existing.getMeta().setVersionId("1");
-		existing.getCompose().addInclude().setSystem("http://loinc.org").addConcept().setCode("EXISTING-1");
-		when(myValueSetDao.read(eq(new IdType("LL1000-0-1.234")), any(RequestDetails.class))).thenReturn(existing);
-		when(myValueSetDao.read(eq(new IdType("LL1001-8-1.234")), any(RequestDetails.class))).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1001-8-1.234")));
-		when(myValueSetDao.read(eq(new IdType("LL1892-0-1.234")), any(RequestDetails.class))).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1001-8-1.234")));
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId("LG100-4-1.234");
+		valueSet.setUrl("http://loinc.org/vs/LG100-4");
+		valueSet.setVersion("1.234");
+		valueSet
+			.getCompose()
+			.addInclude()
+			.setSystem("http://foo")
+			.addConcept(new ValueSet.ConceptReferenceComponent().setCode("A0"))
+			.addConcept(new ValueSet.ConceptReferenceComponent().setCode("A1"));
+		when(myValueSetDao.read(eq(new IdType("LG100-4-1.234")), any())).thenReturn(valueSet);
 
 		// Test
 		JobInstance instance = new JobInstance();
@@ -153,48 +161,27 @@ class ImportLoincStep4HandleAnswerListsTest {
 		mySvc.run(stepExecutionDetails, myDataSink);
 
 		// Verify
+		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+
 		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
 		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/LL1892-0-1.234", "ValueSet/LL1001-8-1.234", "ValueSet/LL1000-0-1.234"
+			"ValueSet/LG100-4-1.234", "ValueSet/LG1695-8-1.234"
 		);
 
-		verify(myValueSetDao, times(3)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		verify(myValueSetDao, times(2)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);
-		assertEquals("LL1000-0-1.234", vs.getIdElement().getIdPart());
-		assertEquals("1", vs.getIdElement().getVersionIdPart());
-		assertEquals("1", vs.getMeta().getVersionId());
+		assertEquals("LG100-4-1.234", vs.getIdElement().getIdPart());
+		assertEquals("http://loinc.org/vs/LG100-4", vs.getUrl());
+		assertEquals("1.234", vs.getVersion());
 
 		String valueSetCompose = renderValueSetCompose(vs);
 		String expected = """
-			http://loinc.org
-			  EXISTING-1
-			  LA13825-7
-			  LA13838-0
-			  LA13892-7
+			INCLUDE:
+			ValueSet: http://loinc.org/vs/LG1695-8
 			""";
 		assertEquals(expected, valueSetCompose);
-	}
-
-	public static String renderValueSetCompose(ValueSet theVs) {
-		StringBuilder builder = new StringBuilder();
-
-		List<ValueSet.ConceptSetComponent> include = theVs.getCompose().getInclude();
-		for (ValueSet.ConceptSetComponent next : include) {
-			builder.append("INCLUDE:\n");
-			for (CanonicalType valueSet : next.getValueSet()) {
-				builder.append("ValueSet: ").append(valueSet.getValue()).append("\n");
-			}
-			if (isNotBlank(next.getSystem())) {
-				builder.append(next.getSystem()).append("\n");
-				for (ValueSet.ConceptReferenceComponent concept : next.getConcept()) {
-					builder.append("  ").append(concept.getCode()).append("\n");
-				}
-			}
-		}
-
-		return builder.toString();
 	}
 
 

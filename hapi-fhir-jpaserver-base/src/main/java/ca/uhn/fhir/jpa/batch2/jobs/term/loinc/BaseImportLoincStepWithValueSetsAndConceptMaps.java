@@ -3,13 +3,13 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.term.loinc.BaseLoincHandler;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -34,7 +34,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends BaseImportLoincStepWithValueSetsAndConceptMaps.BaseContext> extends BaseImportLoincStep<CT> {
+public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> extends BaseImportLoincStep<CT> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportLoincStepWithValueSetsAndConceptMaps.class);
 
@@ -64,7 +64,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends 
 			return;
 		}
 
-		theContext.getIdToConceptMapings().put(theMapping.getConceptMapId(), theMapping);
+		theContext.getIdToConceptMappings().put(theMapping.getConceptMapId(), theMapping);
 	}
 
 	// FIXME: rename
@@ -115,6 +115,33 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends 
 		return vs;
 	}
 
+	void addCodeAsIncludeToValueSet(ValueSet theVs, String theCodeSystemUrl, String theCode, String theDisplayName) {
+		ValueSet.ConceptSetComponent include = null;
+		for (ValueSet.ConceptSetComponent next : theVs.getCompose().getInclude()) {
+			if (next.getSystem().equals(theCodeSystemUrl)) {
+				include = next;
+				break;
+			}
+		}
+		if (include == null) {
+			include = theVs.getCompose().addInclude();
+			include.setSystem(theCodeSystemUrl);
+			if (StringUtils.isNotBlank(theVs.getVersion())) {
+				include.setVersion(theVs.getVersion());
+			}
+		}
+
+		boolean found = false;
+		for (ValueSet.ConceptReferenceComponent next : include.getConcept()) {
+			if (next.getCode().equals(theCode)) {
+				found = true;
+			}
+		}
+		if (!found) {
+			include.addConcept().setCode(theCode).setDisplay(theDisplayName);
+		}
+	}
+
 	@Override
 	protected void afterCsvProcessingComplete(CT theCodeExtractionContext, CodeSystem theCodeSystemToPopulate, StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		super.afterCsvProcessingComplete(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
@@ -126,7 +153,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends 
 		/*
 		 * Store ConceptMaps
 		 */
-		for (Map.Entry<String, Collection<ConceptMapping>> entry : theCodeExtractionContext.getIdToConceptMapings().asMap().entrySet()) {
+		for (Map.Entry<String, Collection<ConceptMapping>> entry : theCodeExtractionContext.getIdToConceptMappings().asMap().entrySet()) {
 
 			String conceptMapId = entry.getKey();
 			ourLog.info("Checking for existence of ConceptMap: {}", conceptMapId);
@@ -285,18 +312,18 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends 
 	}
 
 
-	protected abstract static class BaseContext {
+	protected static class MyBaseContext {
 
 		private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
-		private final SetMultimap<String, ConceptMapping> myIdToConceptMapings = MultimapBuilder.hashKeys().linkedHashSetValues().build();
+		private final SetMultimap<String, ConceptMapping> myIdToConceptMappings = MultimapBuilder.hashKeys().linkedHashSetValues().build();
 		private final Map<String, CodeSystem.ConceptDefinitionComponent> myCodeToConcept = new HashMap<>();
 
 		public Map<String, CodeSystem.ConceptDefinitionComponent> getCodeToConcept() {
 			return myCodeToConcept;
 		}
 
-		public SetMultimap<String, ConceptMapping> getIdToConceptMapings() {
-			return myIdToConceptMapings;
+		public SetMultimap<String, ConceptMapping> getIdToConceptMappings() {
+			return myIdToConceptMappings;
 		}
 
 		public Map<String, ValueSet> getIdToValueSet() {

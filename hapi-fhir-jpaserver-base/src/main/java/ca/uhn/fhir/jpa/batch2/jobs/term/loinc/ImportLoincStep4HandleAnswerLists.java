@@ -1,35 +1,21 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.term.loinc.BaseLoincHandler.LOINC_WEBSITE_URL;
-import static ca.uhn.fhir.jpa.term.loinc.BaseLoincHandler.REGENSTRIEF_INSTITUTE_INC;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_VERSION;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -117,7 +103,7 @@ public class ImportLoincStep4HandleAnswerLists extends BaseImportLoincStepWithVa
 	}
 
 
-	protected static class MyContext extends BaseContext {
+	protected static class MyContext extends MyBaseContext {
 		private final Set<String> myAnswerListCodes = new HashSet<>();
 
 		public Set<String> getAnswerListCodes() {

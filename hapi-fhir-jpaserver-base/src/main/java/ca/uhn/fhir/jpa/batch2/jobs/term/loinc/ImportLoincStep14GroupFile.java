@@ -1,0 +1,57 @@
+package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
+
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
+import jakarta.annotation.Nonnull;
+import org.apache.commons.csv.CSVRecord;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ValueSet;
+
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_FILE;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT;
+import static org.apache.commons.lang3.StringUtils.trim;
+
+public class ImportLoincStep14GroupFile extends BaseImportLoincStepWithValueSetsAndConceptMaps<BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+	public static final String VS_URI_PREFIX = "http://loinc.org/vs/";
+
+	@Override
+	protected MyBaseContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		return new MyBaseContext();
+	}
+
+	@Nonnull
+	@Override
+	protected LoincUploadPropertiesEnum provideFileNameDefault() {
+		return LOINC_GROUP_FILE_DEFAULT;
+	}
+
+	@Nonnull
+	@Override
+	protected LoincUploadPropertiesEnum provideFileNamePropertyFileKey() {
+		return LOINC_GROUP_FILE;
+	}
+
+	@Override
+	protected void handleRecord(LoincJobImportParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {
+		String parentGroupId = trim(theRecord.get("ParentGroupId"));
+		String groupId = trim(theRecord.get("GroupId"));
+		String groupName = trim(theRecord.get("Group"));
+
+		String parentGroupValueSetId;
+		String groupValueSetId;
+			parentGroupValueSetId = parentGroupId;
+			groupValueSetId = groupId;
+
+		ValueSet parentValueSet = getValueSet(theJobParameters, theData, theContext, parentGroupValueSetId, VS_URI_PREFIX + parentGroupId, null, null);
+		parentValueSet.getCompose().getIncludeFirstRep().addValueSet(VS_URI_PREFIX + groupId);
+
+		// Create group to set its name (terms are added in a different
+		// handler)
+		getValueSet(theJobParameters, theData, theContext, groupValueSetId, VS_URI_PREFIX + groupId, groupName, null);
+	}
+
+}

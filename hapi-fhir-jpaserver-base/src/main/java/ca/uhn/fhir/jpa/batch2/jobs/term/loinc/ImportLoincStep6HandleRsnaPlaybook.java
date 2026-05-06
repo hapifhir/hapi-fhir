@@ -2,9 +2,7 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.loinc.BaseLoincHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -26,7 +24,6 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.RPID_CS_URI;
 import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.RSNA_CODES_VS_ID;
 import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.RSNA_CODES_VS_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.RSNA_CODES_VS_URI;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT;
@@ -178,7 +175,7 @@ public class ImportLoincStep6HandleRsnaPlaybook extends BaseImportLoincStepWithV
 	}
 
 
-	protected static class MyContext extends BaseContext {
+	protected static class MyContext extends MyBaseContext {
 
 		private final Set<String> myCodesInRsnaPlaybookValueSet = new HashSet<>();
 

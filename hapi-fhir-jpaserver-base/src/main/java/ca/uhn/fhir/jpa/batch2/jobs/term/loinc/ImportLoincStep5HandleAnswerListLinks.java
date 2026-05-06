@@ -74,7 +74,7 @@ public class ImportLoincStep5HandleAnswerListLinks extends BaseImportLoincStepWi
 	}
 
 
-	protected static class MyContext extends BaseContext {
+	protected static class MyContext extends MyBaseContext {
 		// nothing
 	}
 

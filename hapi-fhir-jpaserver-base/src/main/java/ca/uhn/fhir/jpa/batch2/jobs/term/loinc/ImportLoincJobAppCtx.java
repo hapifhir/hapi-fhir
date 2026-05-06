@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +31,7 @@ public class ImportLoincJobAppCtx {
 	public static final String DISTRIBUTION_FILE_ATTACHMENT_FILENAME = "loinc.zip";
 
 	@Bean
-	public JobDefinition<LoincJobImportParameters> importLoincJobDefinition() {
+	public JobDefinition<LoincJobImportParameters> importLoincJobDefinition(ImportLoincStep13ImagingDocumentCode importLoincStep13ImagingDocumentCode) {
 		return JobDefinition.newBuilder()
 			.setInitialStatus(StatusEnum.BUILDING)
 			.setJobDefinitionId(IMPORT_TERM_LOINC)
@@ -47,6 +46,13 @@ public class ImportLoincJobAppCtx {
 			.addIntermediateStep("import-answer-list-links", "Import LOINC answer list links", ImportLoincFileSetJson.class, importLoincStep5AnswerListLinks())
 			.addIntermediateStep("import-rsna-playbook", "Import LOINC RSNA playbook", ImportLoincFileSetJson.class, importLoincStep6RsnaPlaybook())
 			.addIntermediateStep("import-part-related-code-mapping", "Import LOINC Part Related Code Mappings", ImportLoincFileSetJson.class, importLoincStep7PartRelatedCodeMapping())
+			.addIntermediateStep("import-document-ontology", "Import LOINC Document Ontology", ImportLoincFileSetJson.class, importLoincStep8HandleDocumentOntology())
+			.addIntermediateStep("import-top-2000-codes-us", "Import LOINC Top 2000 Codes - US", ImportLoincFileSetJson.class, importLoincStep9HandleTop2000CodesUs())
+			.addIntermediateStep("import-top-2000-codes-si", "Import LOINC Top 2000 Codes - SI", ImportLoincFileSetJson.class, importLoincStep10HandleTop2000CodesSi())
+			.addIntermediateStep("import-univeral-lab-orderset", "Import LOINC Lab Order Set", ImportLoincFileSetJson.class, importLoincStep11HandleUniversalLabOrderSet())
+			.addIntermediateStep("import-ieee-medical-device-code", "Import LOINC IEEE Medical Device Codes", ImportLoincFileSetJson.class, importLoincStep12HandleIeeeMedicalDeviceCode())
+			.addIntermediateStep("import-imaging-document-code", "Import LOINC Imaging Document Codes", ImportLoincFileSetJson.class, importLoincStep13ImagingDocumentCode())
+			.addIntermediateStep("import-group-file", "Import LOINC Group File", ImportLoincFileSetJson.class, importLoincStep14GroupFile())
 //				.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
 			.build();
 	}
@@ -107,6 +113,62 @@ public class ImportLoincJobAppCtx {
 	@Bean
 	public ImportLoincStep7HandlePartRelatedCodeMapping importLoincStep7PartRelatedCodeMapping() {
 		return new ImportLoincStep7HandlePartRelatedCodeMapping();
+	}
+
+	/**
+	 * Step 8: Import Document Ontology
+	 */
+	@Bean
+	public ImportLoincStep8HandleDocumentOntology importLoincStep8HandleDocumentOntology() {
+		return new ImportLoincStep8HandleDocumentOntology();
+	}
+
+	/**
+	 * Step 9: Top 2000 Codes (US)
+	 */
+	@Bean
+	public ImportLoincStep9HandleTop2000CodesUs importLoincStep9HandleTop2000CodesUs() {
+		return new ImportLoincStep9HandleTop2000CodesUs();
+	}
+
+	/**
+	 * Step 10: Top 2000 Codes (SI)
+	 */
+	@Bean
+	public ImportLoincStep10HandleTop2000CodesSi importLoincStep10HandleTop2000CodesSi() {
+		return new ImportLoincStep10HandleTop2000CodesSi();
+	}
+
+	/**
+	 * Step 11: Universal Lab Order Set
+	 */
+	@Bean
+	public ImportLoincStep11HandleUniversalLabOrderSet importLoincStep11HandleUniversalLabOrderSet() {
+		return new ImportLoincStep11HandleUniversalLabOrderSet();
+	}
+
+	/**
+	 * Step 12: IEEE Medical Device Code
+	 */
+	@Bean
+	public ImportLoincStep12HandleIeeeMedicalDeviceCode importLoincStep12HandleIeeeMedicalDeviceCode() {
+		return new ImportLoincStep12HandleIeeeMedicalDeviceCode();
+	}
+
+	/**
+	 * Step 13: Imaging Document Code
+	 */
+	@Bean
+	public ImportLoincStep13ImagingDocumentCode importLoincStep13ImagingDocumentCode() {
+		return new ImportLoincStep13ImagingDocumentCode();
+	}
+
+	/**
+	 * Step 14: Group File
+	 */
+	@Bean
+	public ImportLoincStep14GroupFile importLoincStep14GroupFile() {
+		return new ImportLoincStep14GroupFile();
 	}
 
 }

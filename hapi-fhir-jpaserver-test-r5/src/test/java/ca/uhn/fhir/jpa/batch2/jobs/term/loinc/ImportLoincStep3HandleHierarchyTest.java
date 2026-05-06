@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -90,19 +91,26 @@ class ImportLoincStep3HandleHierarchyTest {
 	}
 
 	public static String renderHierarchy(CodeSystem theCs) {
+		return renderHierarchy(theCs, false);
+	}
+	public static String renderHierarchy(CodeSystem theCs, boolean theIncludeProperties) {
 		StringBuilder target = new StringBuilder();
-		appendToHierarchy(theCs.getConcept(), 0, target);
+		appendToHierarchy(theCs.getConcept(), 0, target, theIncludeProperties);
 		return target.toString();
 	}
 
-	private static void appendToHierarchy(List<CodeSystem.ConceptDefinitionComponent> theConceptList, int theDepth, StringBuilder theTarget) {
+	private static void appendToHierarchy(List<CodeSystem.ConceptDefinitionComponent> theConceptList, int theDepth, StringBuilder theTarget, boolean theIncludeProperties) {
 		for (CodeSystem.ConceptDefinitionComponent next : theConceptList) {
-			for (int i = 0; i < theDepth; i++) {
-				theTarget.append("  ");
-			}
+			theTarget.append("  ".repeat(theDepth));
 			theTarget.append("-");
 			theTarget.append(next.getCode()).append("\n");
-			appendToHierarchy(next.getConcept(), theDepth + 1, theTarget);
+			if (theIncludeProperties) {
+				for (CodeSystem.ConceptPropertyComponent property : next.getProperty()) {
+					theTarget.append("  ".repeat(theDepth));
+					theTarget.append("  -Property[").append(property.getCode()).append(": ").append(FhirContext.forR4Cached().newJsonParser().encodeToString(property.getValue())).append("\n");
+				}
+			}
+			appendToHierarchy(next.getConcept(), theDepth + 1, theTarget, theIncludeProperties);
 		}
 	}
 

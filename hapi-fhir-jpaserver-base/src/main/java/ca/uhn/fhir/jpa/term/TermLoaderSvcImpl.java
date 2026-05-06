@@ -791,6 +791,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Document ontology
+		// **CONVERTED**
 		handler = new LoincDocumentOntologyHandler(
 				code2concept,
 				propertyNamesToTypes,
@@ -808,6 +809,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Top 2000 codes - US
+		// **CONVERTED**
 		handler = new LoincTop2000LabResultsUsHandler(
 				code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsvOptional(
@@ -821,6 +823,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Top 2000 codes - SI
+		// **CONVERTED**
 		handler = new LoincTop2000LabResultsSiHandler(
 				code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsvOptional(
@@ -834,6 +837,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Universal lab order ValueSet
+		// **CONVERTED**
 		handler = new LoincUniversalOrderSetHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
 		iterateOverZipFileCsv(
 				theDescriptors,
@@ -846,6 +850,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// IEEE medical device codes
+		// **CONVERTED**
 		handler = new LoincIeeeMedicalDeviceCodeHandler(
 				code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(
@@ -859,6 +864,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Imaging document codes
+		// **CONVERTED**
 		handler = new LoincImagingDocumentCodeHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
 		iterateOverZipFileCsv(
 				theDescriptors,

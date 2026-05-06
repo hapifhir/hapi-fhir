@@ -147,7 +147,7 @@ public class ImportLoincStep7HandlePartRelatedCodeMapping extends BaseImportLoin
 	}
 
 
-	protected static class MyContext extends BaseContext {
+	protected static class MyContext extends MyBaseContext {
 
 	}
 
