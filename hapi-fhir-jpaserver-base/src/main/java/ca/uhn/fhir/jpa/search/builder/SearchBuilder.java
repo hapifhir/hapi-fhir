@@ -927,7 +927,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theSearchQueryProperties.getMaxResultsRequested());
 
-		// When _type is specified and does not include the anchor type, omit the anchor from results
+		// Per the $everything spec, _type filters "return resources" with no special exemption for the anchor.
+		// We intentionally exclude the anchor when its type is not listed in _type
 		boolean typeFilterExcludesAnchor = myParams.get(Constants.PARAM_TYPE) != null
 				&& !extractTypeSourceResourcesFromParams().contains(myResourceName);
 
