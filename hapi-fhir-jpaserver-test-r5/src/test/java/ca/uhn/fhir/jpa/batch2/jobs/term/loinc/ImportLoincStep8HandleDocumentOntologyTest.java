@@ -120,6 +120,7 @@ class ImportLoincStep8HandleDocumentOntologyTest {
 
 		String valueSetCompose = renderValueSetCompose(vs);
 		expected = """
+			INCLUDE:
 			http://loinc.org
 			  11488-4
 			  11490-0

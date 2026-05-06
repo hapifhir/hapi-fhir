@@ -13,6 +13,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 import static ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_ID;
 import static ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_URI;
@@ -26,18 +28,14 @@ public class ImportLoincStep8HandleDocumentOntology extends BaseImportLoincStepW
 	protected MyContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyContext();
 	}
-
 	@Nonnull
 	@Override
-	protected LoincUploadPropertiesEnum provideFileNameDefault() {
-		return LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT;
+	protected List<PropertyNameAndDefault> getFilesToProcess() {
+		return List.of(
+			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE, LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT)
+		);
 	}
 
-	@Nonnull
-	@Override
-	protected LoincUploadPropertiesEnum provideFileNamePropertyFileKey() {
-		return LOINC_DOCUMENT_ONTOLOGY_FILE;
-	}
 
 	@Override
 	protected void handleRecord(LoincJobImportParameters theJobParameters, MyContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {

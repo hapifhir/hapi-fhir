@@ -111,6 +111,7 @@ class ImportLoincStep10HandleTop2000CodesSiTest {
 
 		String valueSetCompose = renderValueSetCompose(vs);
 		String expected = """
+			INCLUDE:
 			http://loinc.org
 			  14682-9
 			  718-7

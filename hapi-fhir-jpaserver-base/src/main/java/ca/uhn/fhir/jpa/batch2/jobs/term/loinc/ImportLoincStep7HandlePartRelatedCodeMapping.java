@@ -10,6 +10,8 @@ import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 
+import java.util.List;
+
 import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID;
 import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI;
@@ -37,18 +39,14 @@ public class ImportLoincStep7HandlePartRelatedCodeMapping extends BaseImportLoin
 	protected MyContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyContext();
 	}
-
 	@Nonnull
 	@Override
-	protected LoincUploadPropertiesEnum provideFileNameDefault() {
-		return LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT;
+	protected List<PropertyNameAndDefault> getFilesToProcess() {
+		return List.of(
+			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE, LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT)
+		);
 	}
 
-	@Nonnull
-	@Override
-	protected LoincUploadPropertiesEnum provideFileNamePropertyFileKey() {
-		return LOINC_PART_RELATED_CODE_MAPPING_FILE;
-	}
 
 	@Override
 	protected void handleRecord(LoincJobImportParameters theJobParameters, MyContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {

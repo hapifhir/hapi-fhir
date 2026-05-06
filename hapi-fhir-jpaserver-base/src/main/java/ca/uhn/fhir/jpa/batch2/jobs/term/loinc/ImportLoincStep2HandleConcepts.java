@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,14 +30,10 @@ public class ImportLoincStep2HandleConcepts extends BaseImportLoincStep<ImportLo
 
 	@Nonnull
 	@Override
-	protected LoincUploadPropertiesEnum provideFileNameDefault() {
-		return LOINC_FILE_DEFAULT;
-	}
-
-	@Nonnull
-	@Override
-	protected LoincUploadPropertiesEnum provideFileNamePropertyFileKey() {
-		return LOINC_FILE;
+	protected List<PropertyNameAndDefault> getFilesToProcess() {
+		return List.of(
+			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_FILE, LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT)
+		);
 	}
 
 	@Override

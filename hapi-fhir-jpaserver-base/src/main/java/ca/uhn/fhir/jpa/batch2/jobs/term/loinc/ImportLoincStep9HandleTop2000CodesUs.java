@@ -10,6 +10,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 import static ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_ID;
 import static ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_URI;
@@ -51,15 +53,12 @@ public class ImportLoincStep9HandleTop2000CodesUs extends BaseImportLoincStepWit
 
 	@Nonnull
 	@Override
-	protected LoincUploadPropertiesEnum provideFileNameDefault() {
-		return LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT;
+	protected List<PropertyNameAndDefault> getFilesToProcess() {
+		return List.of(
+			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE, LoincUploadPropertiesEnum.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT)
+		);
 	}
 
-	@Nonnull
-	@Override
-	protected LoincUploadPropertiesEnum provideFileNamePropertyFileKey() {
-		return LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE;
-	}
 
 	@Override
 	protected void handleRecord(LoincJobImportParameters theJobParameters, MyContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {

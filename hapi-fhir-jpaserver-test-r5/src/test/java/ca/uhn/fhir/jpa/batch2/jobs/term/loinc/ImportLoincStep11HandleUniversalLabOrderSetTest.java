@@ -100,6 +100,7 @@ class ImportLoincStep11HandleUniversalLabOrderSetTest {
 
 		String valueSetCompose = renderValueSetCompose(vs);
 		String expected = """
+			INCLUDE:
 			http://loinc.org
 			  42176-8
 			  53835-5

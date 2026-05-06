@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,14 +29,10 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 
 	@Nonnull
 	@Override
-	protected LoincUploadPropertiesEnum provideFileNameDefault() {
-		return LOINC_HIERARCHY_FILE_DEFAULT;
-	}
-
-	@Nonnull
-	@Override
-	protected LoincUploadPropertiesEnum provideFileNamePropertyFileKey() {
-		return LOINC_HIERARCHY_FILE;
+	protected List<PropertyNameAndDefault> getFilesToProcess() {
+		return List.of(
+			new PropertyNameAndDefault(LOINC_HIERARCHY_FILE, LOINC_HIERARCHY_FILE_DEFAULT)
+		);
 	}
 
 	@Override

@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep13ImagingDocumentCodeTest {
+class ImportLoincStep16ParentGroupFileTest {
 
 	@Mock
 	private IJobPersistence myJobPersistence;
@@ -60,7 +60,7 @@ class ImportLoincStep13ImagingDocumentCodeTest {
 	private IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
 
 	@InjectMocks
-	private ImportLoincStep13ImagingDocumentCode mySvc;
+	private ImportLoincStep16ParentGroupFile mySvc;
 
 	@Captor
 	private ArgumentCaptor<IBaseResource> myCodeSystemCaptor;
@@ -75,7 +75,7 @@ class ImportLoincStep13ImagingDocumentCodeTest {
 	@Test
 	void testProcess() {
 		// Setup
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/ImagingDocuments/ImagingDocumentCodes.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/GroupFile/ParentGroup.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 
 		// Test
@@ -96,34 +96,75 @@ class ImportLoincStep13ImagingDocumentCodeTest {
 
 		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
 		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/loinc-imaging-document-codes-1.234"
+			"ValueSet/LG100-4-1.234"
 		);
 
 		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);
-		assertEquals("loinc-imaging-document-codes-1.234", vs.getIdElement().getIdPart());
-		assertEquals("http://loinc.org/vs/loinc-imaging-document-codes", vs.getUrl());
+		assertEquals("LG100-4-1.234", vs.getIdElement().getIdPart());
+		assertEquals("http://loinc.org/vs/LG100-4", vs.getUrl());
 		assertEquals("1.234", vs.getVersion());
+		assertEquals("Chem_DrugTox_Chal_Sero_Allergy<SAME:Comp|Prop|Tm|Syst (except intravascular and urine)><ANYBldSerPlas,ANYUrineUrineSed><ROLLUP:Method>", vs.getName());
 
 		String valueSetCompose = renderValueSetCompose(vs);
 		String expected = """
-			INCLUDE:
-			http://loinc.org
-			  11525-3
-			  17787-3
-			  18744-3
-			  18746-8
-			  18748-4
-			  18751-8
-			  18753-4
-			  24531-6
-			  24532-4
 			""";
 		assertEquals(expected, valueSetCompose);
 
 	}
+
+	@Test
+	void testProcess_AlreadyExists() {
+		// Setup
+		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/GroupFile/ParentGroup.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+
+		// This step adds names to valueset, so populate everything except the name
+		ValueSet existing = new ValueSet();
+		existing.setId("LG100-4-1.234");
+		existing.setUrl("http://loinc.org/vs/LG100-4");
+		existing.setVersion("1.234");
+
+		when(myValueSetDao.read(any(), any())).thenReturn(existing);
+
+		// Test
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("my-instance-id");
+
+		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
+		importLoincFileSetJson.setChunkAttachmentIdForCurrentStepId("my-chunk-attachment-id");
+		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
+		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
+
+		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+
+		mySvc.run(stepExecutionDetails, myDataSink);
+
+		// Verify
+		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+
+		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
+		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
+			"ValueSet/LG100-4-1.234"
+		);
+
+		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
+		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
+		ValueSet vs = allValueSets.get(0);
+		assertEquals("LG100-4-1.234", vs.getIdElement().getIdPart());
+		assertEquals("http://loinc.org/vs/LG100-4", vs.getUrl());
+		assertEquals("1.234", vs.getVersion());
+		assertEquals("Chem_DrugTox_Chal_Sero_Allergy<SAME:Comp|Prop|Tm|Syst (except intravascular and urine)><ANYBldSerPlas,ANYUrineUrineSed><ROLLUP:Method>", vs.getName());
+
+		String valueSetCompose = renderValueSetCompose(vs);
+		String expected = """
+			""";
+		assertEquals(expected, valueSetCompose);
+
+	}
+
 
 
 

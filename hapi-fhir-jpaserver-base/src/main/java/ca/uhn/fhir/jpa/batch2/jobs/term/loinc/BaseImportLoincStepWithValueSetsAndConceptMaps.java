@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -277,13 +279,33 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends 
 				ValueSet existing = myValueSetDao.read(existingId, requestDetails);
 				assert existing != null : "Reading ValueSet " + valueSet.getId() + " returned null";
 
+				/*
+				 * A ValueSet already exists with the given ID, so we'll merge the contents
+				 * of our ValueSet into it and save it.
+				 */
+
 				int addedCodes = 0;
-				Set<String> existingCodes = existing.getCompose().getIncludeFirstRep().getConcept().stream().map(t -> t.getCode()).collect(Collectors.toSet());
-				for (ValueSet.ConceptReferenceComponent toAdd : valueSet.getCompose().getIncludeFirstRep().getConcept()) {
-					if (!existingCodes.contains(toAdd.getCode())) {
-						existing.getCompose().getIncludeFirstRep().addConcept(toAdd);
-						addedCodes++;
+
+				for (ValueSet.ConceptSetComponent sourceInclude : valueSet.getCompose().getInclude()) {
+					ValueSet.ConceptSetComponent targetInclude = findOrAddMatchingConceptSetComponent(existing.getCompose().getInclude(), sourceInclude);
+
+					// Add codes
+					Set<String> existingCodes = targetInclude
+						.getConcept()
+						.stream()
+						.map(ValueSet.ConceptReferenceComponent::getCode)
+						.collect(Collectors.toSet());
+					for (ValueSet.ConceptReferenceComponent toAdd : sourceInclude.getConcept()) {
+						if (!existingCodes.contains(toAdd.getCode())) {
+							existing.getCompose().getIncludeFirstRep().addConcept(toAdd);
+							addedCodes++;
+						}
 					}
+
+				}
+
+				if (isNotBlank(valueSet.getName())) {
+					existing.setName(valueSet.getName());
 				}
 
 				ourLog
@@ -296,7 +318,17 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends 
 				myValueSetDao.update(existing, requestDetails);
 
 			} catch (ResourceNotFoundException | ResourceGoneException e) {
-				long codeCount = valueSet.getCompose().getIncludeFirstRep().getConcept().stream().count();
+
+				/*
+				 * Ok, we didn't find an existing ValueSet with the given ID, so we'll
+				 * store the ValueSet as a new one.
+				 */
+
+				long codeCount = 0;
+				if (valueSet.hasCompose() && valueSet.getCompose().hasInclude() && valueSet.getCompose().getIncludeFirstRep().hasConcept()) {
+					codeCount = valueSet.getCompose().getIncludeFirstRep().getConcept().stream().count();
+				}
+
 				ourLog
 					.atInfo()
 					.setMessage("Creating new LOINC ValueSet {} with {} code inclusions")
@@ -311,6 +343,35 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<CT extends 
 
 	}
 
+	private ValueSet.ConceptSetComponent findOrAddMatchingConceptSetComponent(List<ValueSet.ConceptSetComponent> theTargetList, ValueSet.ConceptSetComponent theSetToFind) {
+		ConceptSetComponentIdentity toFind = new ConceptSetComponentIdentity(theSetToFind);
+		for (ValueSet.ConceptSetComponent next : theTargetList) {
+			ConceptSetComponentIdentity nextIdentity = new ConceptSetComponentIdentity(next);
+				if (toFind.equals(nextIdentity)) {
+					return next;
+				}
+		}
+
+		// Not found
+		ValueSet.ConceptSetComponent newSet = new ValueSet.ConceptSetComponent();
+		theTargetList.add(newSet);
+
+		newSet.setSystem(theSetToFind.getSystem());
+		newSet.setValueSet(theSetToFind.getValueSet());
+		return newSet;
+	}
+
+	private record ConceptSetComponentIdentity(String system, Set<String> valueSets) {
+		public ConceptSetComponentIdentity(ValueSet.ConceptSetComponent theSetToFind) {
+			this(theSetToFind.getSystem(), theSetToFind
+				.getValueSet()
+				.stream()
+				.map(PrimitiveType::getValue)
+				.filter(StringUtils::isNotBlank)
+				.collect(Collectors.toSet()));
+
+		}
+	}
 
 	protected static class MyBaseContext {
 

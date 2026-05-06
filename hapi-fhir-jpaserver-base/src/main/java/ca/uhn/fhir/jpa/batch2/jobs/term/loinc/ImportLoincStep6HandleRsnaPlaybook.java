@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.CM_COPYRIGHT;
@@ -41,14 +42,10 @@ public class ImportLoincStep6HandleRsnaPlaybook extends BaseImportLoincStepWithV
 
 	@Nonnull
 	@Override
-	protected LoincUploadPropertiesEnum provideFileNameDefault() {
-		return LOINC_RSNA_PLAYBOOK_FILE_DEFAULT;
-	}
-
-	@Nonnull
-	@Override
-	protected LoincUploadPropertiesEnum provideFileNamePropertyFileKey() {
-		return LOINC_RSNA_PLAYBOOK_FILE;
+	protected List<PropertyNameAndDefault> getFilesToProcess() {
+		return List.of(
+			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE, LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT)
+		);
 	}
 
 	@Override

@@ -8,6 +8,8 @@ import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 
+import java.util.List;
+
 import static ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID;
 import static ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_URI;
@@ -26,14 +28,10 @@ public class ImportLoincStep12HandleIeeeMedicalDeviceCode extends BaseImportLoin
 
 	@Nonnull
 	@Override
-	protected LoincUploadPropertiesEnum provideFileNameDefault() {
-		return LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT;
-	}
-
-	@Nonnull
-	@Override
-	protected LoincUploadPropertiesEnum provideFileNamePropertyFileKey() {
-		return LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE;
+	protected List<PropertyNameAndDefault> getFilesToProcess() {
+		return List.of(
+			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE, LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT)
+		);
 	}
 
 	@Override

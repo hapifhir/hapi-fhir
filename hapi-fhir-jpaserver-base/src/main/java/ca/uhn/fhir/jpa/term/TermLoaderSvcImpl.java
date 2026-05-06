@@ -877,6 +877,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Group
+		// **CONVERTED**
 		handler = new LoincGroupFileHandler(
 				code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(
@@ -888,6 +889,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				false);
 
 		// Group terms
+		// **CONVERTED**
 		handler = new LoincGroupTermsFileHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
 		iterateOverZipFileCsv(
 				theDescriptors,

@@ -117,6 +117,7 @@ class ImportLoincStep4HandleAnswerListsTest {
 
 		String valueSetCompose = renderValueSetCompose(vs);
 		expected = """
+			INCLUDE:
 			http://loinc.org
 			  LA13825-7
 			  LA13838-0
@@ -168,6 +169,7 @@ class ImportLoincStep4HandleAnswerListsTest {
 
 		String valueSetCompose = renderValueSetCompose(vs);
 		String expected = """
+			INCLUDE:
 			http://loinc.org
 			  EXISTING-1
 			  LA13825-7

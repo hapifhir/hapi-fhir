@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newLoincCsvParser;
@@ -41,10 +42,15 @@ public abstract class BaseImportLoincStep<CT> implements ITerminologyImportFileH
 	@Nonnull
 	@Override
 	public Optional<FileHandlingInstructions> canHandleFile(LoincJobImportParameters theJobParameters, String theFileName) {
-		String loincFileName = theJobParameters.getProperties().getProperty(provideFileNamePropertyFileKey().getCode(), provideFileNameDefault().getCode());
-		if (theFileName.endsWith(loincFileName)) {
-			return Optional.of(new FileHandlingInstructions(provideFileNamePropertyFileKey().getCode(), FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
+		for (PropertyNameAndDefault propertyNameAndDefault : getFilesToProcess()) {
+			String propertyName = propertyNameAndDefault.propertyName().getCode();
+			String defaultFileName = propertyNameAndDefault.defaultValue().getCode();
+			String fileName = theJobParameters.getProperties().getProperty(propertyName, defaultFileName);
+			if (theFileName.endsWith(fileName)) {
+				return Optional.of(new FileHandlingInstructions(propertyName, FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
+			}
 		}
+
 		return Optional.empty();
 	}
 
@@ -106,12 +112,12 @@ public abstract class BaseImportLoincStep<CT> implements ITerminologyImportFileH
 
 	protected abstract CT newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails);
 
-
 	@Nonnull
-	protected abstract LoincUploadPropertiesEnum provideFileNameDefault();
-
-	@Nonnull
-	protected abstract LoincUploadPropertiesEnum provideFileNamePropertyFileKey();
+	protected abstract List<PropertyNameAndDefault> getFilesToProcess();
 
 	protected abstract void handleRecord(LoincJobImportParameters theJobParameters, CT theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData);
+
+	protected record PropertyNameAndDefault(LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum defaultValue) {
+	}
+
 }

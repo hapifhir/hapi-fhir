@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE;
@@ -30,14 +31,10 @@ public class ImportLoincStep4HandleAnswerLists extends BaseImportLoincStepWithVa
 
 	@Nonnull
 	@Override
-	protected LoincUploadPropertiesEnum provideFileNameDefault() {
-		return LOINC_ANSWERLIST_FILE_DEFAULT;
-	}
-
-	@Nonnull
-	@Override
-	protected LoincUploadPropertiesEnum provideFileNamePropertyFileKey() {
-		return LOINC_ANSWERLIST_FILE;
+	protected List<PropertyNameAndDefault> getFilesToProcess() {
+		return List.of(
+			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE, LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT)
+		);
 	}
 
 	@Override

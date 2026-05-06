@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -42,7 +43,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep13ImagingDocumentCodeTest {
+class ImportLoincStep15GroupTermsFileTest {
 
 	@Mock
 	private IJobPersistence myJobPersistence;
@@ -60,7 +61,7 @@ class ImportLoincStep13ImagingDocumentCodeTest {
 	private IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
 
 	@InjectMocks
-	private ImportLoincStep13ImagingDocumentCode mySvc;
+	private ImportLoincStep15GroupTermsFile mySvc;
 
 	@Captor
 	private ArgumentCaptor<IBaseResource> myCodeSystemCaptor;
@@ -75,7 +76,7 @@ class ImportLoincStep13ImagingDocumentCodeTest {
 	@Test
 	void testProcess() {
 		// Setup
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/ImagingDocuments/ImagingDocumentCodes.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/GroupFile/GroupLoincTerms.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 
 		// Test
@@ -96,34 +97,28 @@ class ImportLoincStep13ImagingDocumentCodeTest {
 
 		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
 		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/loinc-imaging-document-codes-1.234"
+			"ValueSet/LG1695-8-1.234"
 		);
 
 		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);
-		assertEquals("loinc-imaging-document-codes-1.234", vs.getIdElement().getIdPart());
-		assertEquals("http://loinc.org/vs/loinc-imaging-document-codes", vs.getUrl());
+		assertEquals("LG1695-8-1.234", vs.getIdElement().getIdPart());
+		assertEquals("http://loinc.org/vs/LG1695-8", vs.getUrl());
 		assertEquals("1.234", vs.getVersion());
 
 		String valueSetCompose = renderValueSetCompose(vs);
 		String expected = """
 			INCLUDE:
 			http://loinc.org
-			  11525-3
-			  17787-3
-			  18744-3
-			  18746-8
-			  18748-4
-			  18751-8
-			  18753-4
-			  24531-6
-			  24532-4
+			  17424-3
+			  13006-2
 			""";
 		assertEquals(expected, valueSetCompose);
 
 	}
+
 
 
 

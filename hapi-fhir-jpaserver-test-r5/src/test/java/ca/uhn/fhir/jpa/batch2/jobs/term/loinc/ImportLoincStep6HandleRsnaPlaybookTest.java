@@ -116,6 +116,7 @@ class ImportLoincStep6HandleRsnaPlaybookTest {
 
 		String valueSetCompose = renderValueSetCompose(vs);
 		expected = """
+			INCLUDE:
 			http://loinc.org
 			  17787-3
 			  24531-6

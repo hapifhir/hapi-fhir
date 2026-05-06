@@ -7,6 +7,8 @@ import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StringType;
 
+import java.util.List;
+
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -22,14 +24,10 @@ public class ImportLoincStep5HandleAnswerListLinks extends BaseImportLoincStepWi
 
 	@Nonnull
 	@Override
-	protected LoincUploadPropertiesEnum provideFileNameDefault() {
-		return LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
-	}
-
-	@Nonnull
-	@Override
-	protected LoincUploadPropertiesEnum provideFileNamePropertyFileKey() {
-		return LOINC_ANSWERLIST_LINK_FILE;
+	protected List<PropertyNameAndDefault> getFilesToProcess() {
+		return List.of(
+			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE, LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT)
+		);
 	}
 
 	@Override

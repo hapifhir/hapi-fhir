@@ -31,7 +31,7 @@ public class ImportLoincJobAppCtx {
 	public static final String DISTRIBUTION_FILE_ATTACHMENT_FILENAME = "loinc.zip";
 
 	@Bean
-	public JobDefinition<LoincJobImportParameters> importLoincJobDefinition(ImportLoincStep13ImagingDocumentCode importLoincStep13ImagingDocumentCode) {
+	public JobDefinition<LoincJobImportParameters> importLoincJobDefinition() {
 		return JobDefinition.newBuilder()
 			.setInitialStatus(StatusEnum.BUILDING)
 			.setJobDefinitionId(IMPORT_TERM_LOINC)
@@ -53,6 +53,8 @@ public class ImportLoincJobAppCtx {
 			.addIntermediateStep("import-ieee-medical-device-code", "Import LOINC IEEE Medical Device Codes", ImportLoincFileSetJson.class, importLoincStep12HandleIeeeMedicalDeviceCode())
 			.addIntermediateStep("import-imaging-document-code", "Import LOINC Imaging Document Codes", ImportLoincFileSetJson.class, importLoincStep13ImagingDocumentCode())
 			.addIntermediateStep("import-group-file", "Import LOINC Group File", ImportLoincFileSetJson.class, importLoincStep14GroupFile())
+			.addIntermediateStep("import-group-terms-file", "Import LOINC Group Terms File", ImportLoincFileSetJson.class, importLoincStep15GroupTermsFile())
+			.addIntermediateStep("import-parent-group-file", "Import LOINC Parent Group File", ImportLoincFileSetJson.class, importLoincStep16ParentGroupFile())
 //				.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
 			.build();
 	}
@@ -169,6 +171,22 @@ public class ImportLoincJobAppCtx {
 	@Bean
 	public ImportLoincStep14GroupFile importLoincStep14GroupFile() {
 		return new ImportLoincStep14GroupFile();
+	}
+
+	/**
+	 * Step 15: Group Terms File
+	 */
+	@Bean
+	public ImportLoincStep15GroupTermsFile importLoincStep15GroupTermsFile() {
+		return new ImportLoincStep15GroupTermsFile();
+	}
+
+	/**
+	 * Step 16: Parent Group File
+	 */
+	@Bean
+	public ImportLoincStep16ParentGroupFile importLoincStep16ParentGroupFile() {
+		return new ImportLoincStep16ParentGroupFile();
 	}
 
 }
