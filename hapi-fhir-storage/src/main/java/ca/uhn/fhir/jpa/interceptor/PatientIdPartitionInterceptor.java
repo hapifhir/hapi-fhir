@@ -693,11 +693,13 @@ public class PatientIdPartitionInterceptor {
 						RequestPartitionId readRequestPartitionId = theReadDetails.getRequestPartitionId();
 
 						List<String> idParts = getResourceIdsForSearchParam(params, "_id");
-						RequestPartitionId multiCompartmentRequestPartitionId = provideMultipleCompartmentPartition(theRequestDetails, idParts);
+						RequestPartitionId multiCompartmentRequestPartitionId =
+								provideMultipleCompartmentPartition(theRequestDetails, idParts);
 
 						if (nonNull(readRequestPartitionId) && readRequestPartitionId.hasPartitionIds()) {
 							if (multiCompartmentRequestPartitionId.hasPartitionIds()) {
-								readRequestPartitionId = readRequestPartitionId.mergeIds(multiCompartmentRequestPartitionId);
+								readRequestPartitionId =
+										readRequestPartitionId.mergeIds(multiCompartmentRequestPartitionId);
 							}
 						} else {
 							readRequestPartitionId = multiCompartmentRequestPartitionId;
@@ -863,18 +865,21 @@ public class PatientIdPartitionInterceptor {
 				if (aParam instanceof ReferenceParam referenceParam) {
 					String chain = referenceParam.getChain();
 					if (nonNull(chain)) {
-						if(PATIENT_COMPARTMENT_SP_PATIENT.equals(theParamName) || PATIENT_COMPARTMENT_SP_SUBJECT.equals(theParamName)){
-							// 'patient' and 'subject' SP have a 0..1 cardinality and will always refer to a Patient resource.
-							// on their own, they can't be resolved and don't need to as they are used as additional 'filters'
-							// to another SP that resolves to a direct reference (Patient/abc).  Essentially, if we have one SP
+						if (PATIENT_COMPARTMENT_SP_PATIENT.equals(theParamName)
+								|| PATIENT_COMPARTMENT_SP_SUBJECT.equals(theParamName)) {
+							// 'patient' and 'subject' SP have a 0..1 cardinality and will always refer to a Patient
+							// resource.
+							// on their own, they can't be resolved and don't need to as they are used as additional
+							// 'filters'
+							// to another SP that resolves to a direct reference (Patient/abc).  Essentially, if we have
+							// one SP
 							// that resolves directly, we don't need to resolve other SP pointing to the same
 							// resource
 							needingAtLeastOneSpToResolveSet.add(chain);
 							continue;
-						}
-						else {
+						} else {
 							throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
-								+ chain + " is not supported in patient compartment mode");
+									+ chain + " is not supported in patient compartment mode");
 						}
 					}
 				}
@@ -900,7 +905,7 @@ public class PatientIdPartitionInterceptor {
 			}
 		}
 
-		if(idParts.isEmpty() && !needingAtLeastOneSpToResolveSet.isEmpty()){
+		if (idParts.isEmpty() && !needingAtLeastOneSpToResolveSet.isEmpty()) {
 			String errorMsgString = buildErrorMsgForChainedParameters(theParamName, needingAtLeastOneSpToResolveSet);
 			throw new MethodNotAllowedException(Msg.code(2928) + errorMsgString);
 		}
@@ -910,17 +915,17 @@ public class PatientIdPartitionInterceptor {
 
 	private String buildErrorMsgForChainedParameters(String theParamName, @Nonnull Set<String> theChainedParameterSet) {
 		return new StringBuilder("Could not resolve chained parameter(s) ")
-			.append(theChainedParameterSet)
-			.append(" on parameter ")
-			.append(theParamName)
-			.append(". Consider adding a direct Patient reference to your search (?")
-			.append(theParamName)
-			.append("=Patient/abc&")
-			.append(theParamName)
-			.append(".")
-			.append(theChainedParameterSet.iterator().next())
-			.append("=...)")
-			.toString();
+				.append(theChainedParameterSet)
+				.append(" on parameter ")
+				.append(theParamName)
+				.append(". Consider adding a direct Patient reference to your search (?")
+				.append(theParamName)
+				.append("=Patient/abc&")
+				.append(theParamName)
+				.append(".")
+				.append(theChainedParameterSet.iterator().next())
+				.append("=...)")
+				.toString();
 	}
 
 	/**

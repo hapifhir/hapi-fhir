@@ -125,12 +125,12 @@ public interface IRequestPartitionHelperSvc {
 	 */
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForSearchType(
-		@Nullable RequestDetails theRequest,
-		@Nonnull String theResourceType,
-		@Nonnull SearchParameterMap theParams,
-		@Nonnull RequestPartitionId theRequestPartitionId) {
+			@Nullable RequestDetails theRequest,
+			@Nonnull String theResourceType,
+			@Nonnull SearchParameterMap theParams,
+			@Nonnull RequestPartitionId theRequestPartitionId) {
 		ReadPartitionIdRequestDetails details =
-			ReadPartitionIdRequestDetails.forSearchType(theResourceType, theParams, null);
+				ReadPartitionIdRequestDetails.forSearchType(theResourceType, theParams, null);
 		details.setRequestPartitionId(theRequestPartitionId);
 		return determineReadPartitionForRequest(theRequest, details);
 	}
