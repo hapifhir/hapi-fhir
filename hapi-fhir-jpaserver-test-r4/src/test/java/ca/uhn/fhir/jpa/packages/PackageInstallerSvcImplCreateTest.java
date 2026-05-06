@@ -76,6 +76,11 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	@Autowired
 	private PackageInstallerSvcImpl mySvc;
 
+	@AfterEach
+	void resetStorageSettings() {
+		myStorageSettings.setValidateResourceStatusForPackageUpload(new JpaStorageSettings().isValidateResourceStatusForPackageUpload());
+	}
+
 	@Test
 	void createNamingSystem() throws IOException {
 		final NamingSystem namingSystem = new NamingSystem();
@@ -450,11 +455,6 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 			.as("Should update the same resource").isEqualTo(firstId);
 		assertThat(installedDevice.getDeviceName().get(0).getName())
 			.as("Should have updated content").isEqualTo("Updated Device");
-	}
-
-	@AfterEach
-	void resetStorageSettings() {
-		myStorageSettings.setValidateResourceStatusForPackageUpload(new JpaStorageSettings().isValidateResourceStatusForPackageUpload());
 	}
 
 	// Created by claude-sonnet-4-6

@@ -902,7 +902,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return false;
 		}
 
-		if (hasInvalidId(theResource)) {
+		if (!hasValidId(theResource)) {
 			ourLog.warn(
 					"Skipping resource with ID {} longer than 64 characters, which makes an invalid FHIR ID.",
 					theResource.getIdElement().getIdPart());
@@ -920,9 +920,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return true;
 	}
 
-	private boolean hasInvalidId(IBaseResource theResource) {
+	private boolean hasValidId(IBaseResource theResource) {
 		IIdType resourceId = theResource.getIdElement();
-		return resourceId.hasIdPart() && resourceId.getIdPart().length() > 64;
+		return !resourceId.hasIdPart() || resourceId.isIdPartValid();
 	}
 
 	private boolean isEmbeddedValueSet(IBaseResource theResource) {
