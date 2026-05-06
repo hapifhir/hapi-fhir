@@ -16,6 +16,9 @@ import org.hl7.fhir.r5.context.ExpansionOptions;
 import org.hl7.fhir.r5.context.IOIDServices;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.context.IWorkerContextManager;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.CanonicalResource;
+import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.CodeableConcept;
@@ -27,22 +30,34 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.TerminologyCapabilities;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.profilemodel.PEBuilder;
+import org.hl7.fhir.r5.terminologies.client.ITerminologyClient;
+import org.hl7.fhir.r5.terminologies.client.TerminologyClientManager;
 import org.hl7.fhir.r5.terminologies.expansion.ValueSetExpansionOutcome;
 import org.hl7.fhir.r5.terminologies.utilities.CodingValidationRequest;
 import org.hl7.fhir.r5.terminologies.utilities.ValidationResult;
+import org.hl7.fhir.r5.utils.client.ResourceFormat;
+import org.hl7.fhir.r5.utils.client.network.ClientHeaders;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
+import org.hl7.fhir.utilities.FhirPublication;
+import org.hl7.fhir.utilities.ITerminologyRequestIdProvider;
 import org.hl7.fhir.utilities.TimeTracker;
+import org.hl7.fhir.utilities.ToolingClientLogger;
+import org.hl7.fhir.utilities.http.HTTPHeader;
 import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -52,7 +67,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	private final Cache<String, Resource> myFetchedResourceCache;
 	private final IValidationSupport myValidationSupport;
 	private Parameters myExpansionProfile;
-	private String myOverrideVersionNs;
 
 	public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
 		Validate.notNull(theCtx, "theCtx must not be null");
@@ -468,6 +482,216 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public TimeTracker clock() {
 		return null;
+	}
+
+	@Override
+	public TerminologyClientManager getTerminologyClientManager() {
+		return new TerminologyClientManager(null, null, null) {
+			@Override
+			public ITerminologyClient getMasterClient() {
+				return new ITerminologyClient() {
+					@Override
+					public EnumSet<FhirPublication> supportableVersions() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void setAllowedVersions(EnumSet<FhirPublication> versions) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public EnumSet<FhirPublication> getAllowedVersions() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public FhirPublication getActualVersion() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getId() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getAddress() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getServerVersion() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public TerminologyCapabilities getTerminologyCapabilities() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ValueSet expandValueset(ValueSet vs, Parameters p) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Parameters validateCS(Parameters pin) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Parameters validateVS(Parameters pin) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Parameters batchValidateCS(Parameters pin) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Parameters batchValidateVS(Parameters pin) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Parameters subsumes(Parameters pin) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Parameters getValueSetRelationship(ValueSet vsThis, ValueSet vsOther) throws IOException {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ITerminologyClient setTimeoutFactor(int i) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ToolingClientLogger getLogger() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ITerminologyClient setLogger(ToolingClientLogger txLog) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public int getRetryCount() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ITerminologyClient setRetryCount(int retryCount) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ITerminologyClient setFormat(ResourceFormat fmt) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ITerminologyClient setRequestIdProvider(ITerminologyRequestIdProvider provider) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public CapabilityStatement getCapabilitiesStatement() {
+						return new CapabilityStatement();
+					}
+
+					@Override
+					public CapabilityStatement getCapabilitiesStatementQuick() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Parameters lookupCode(Map<String, String> params) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Parameters lookupCode(Parameters params) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Parameters translate(Parameters params) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Parameters doRelated(Parameters params) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Bundle batch(Bundle batch) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public CanonicalResource read(String type, String id) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Iterable<HTTPHeader> getClientHeaders() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ITerminologyClient setClientHeaders(ClientHeaders clientHeaders) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ITerminologyClient setUserAgent(String userAgent) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ITerminologyClient setAcceptLanguage(String lang) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ITerminologyClient setContentLanguage(String lang) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getUserAgent() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public int getUseCount() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Bundle search(String type, String criteria) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void setConversionLogger(ITerminologyConversionLogger logger) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public OperationOutcome validateResource(Resource vs) {
+						throw new UnsupportedOperationException();
+					}
+				};
+			}
+		};
 	}
 
 	@Override
