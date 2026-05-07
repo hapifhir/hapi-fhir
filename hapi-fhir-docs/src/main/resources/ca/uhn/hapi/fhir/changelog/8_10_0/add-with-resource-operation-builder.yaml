@@ -1,0 +1,5 @@
+---
+type: add
+title: "Added a withResource method to the fluent generic client operation builder. This allows
+  callers to send a raw resource as the POST body of an operation (such as $validate) without
+  first wrapping it in a Parameters resource. The method cannot be combined with useHttpGet."
