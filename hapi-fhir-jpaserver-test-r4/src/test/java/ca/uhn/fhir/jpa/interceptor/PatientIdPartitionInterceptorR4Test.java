@@ -659,7 +659,31 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@Test
-	public void testSearchObservation_ChainedSubjectParameter() {
+	public void testSearchWithChainedAndResolvedReference() {
+		createPatientA();
+		IIdType patAObsId = createObservation(withSubject("Patient/A"), withStatus("final"));
+
+		myTestDaoSearch.assertSearchFinds("find patient Observation", "Observation?subject=Patient/A&subject.active=true", patAObsId);
+		myTestDaoSearch.assertSearchFinds("find patient Observation", "Observation?subject.active=true&subject=Patient/A", patAObsId);
+	}
+
+	@Test
+	public void testSearchChainedValue_noResolvedReference_fails() {
+		createPatientA();
+		createObservationB();
+
+		// Chain
+		try {
+			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("identifier", "http://foo|123")), mySrd);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-2928: Could not resolve chained parameter(s) [identifier] on parameter subject. Consider adding a direct Patient reference to your search (?subject=Patient/abc&subject.identifier=...)", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void testSearchObservation_ChainedSubjectParameterNoDirectReference() {
 		createPatientA();
 		createObservationB();
 
@@ -683,6 +707,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					.add("subject", new ReferenceParam("Patient/A"))
 					.add("subject", new ReferenceParam("Patient/B"))
 				, mySrd);
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(1324) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
 		}
@@ -693,23 +718,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				.add(
 					"subject", new ReferenceOrListParam().add(new ReferenceParam("Patient/A")).add(new ReferenceParam("Patient/B"))
 				), mySrd);
+			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(1324) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
 		}
-	}
-
-	@Test
-	public void testSearchObservation_ChainedValue() {
-		createPatientA();
-		createObservationB();
-
-		// Chain
-		try {
-			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("identifier", "http://foo|123")), mySrd);
-		} catch (MethodNotAllowedException e) {
-			assertEquals("HAPI-2928: Could not resolve chained parameter(s) [identifier] on parameter subject. Consider adding a direct Patient reference to your search (?subject=Patient/abc&subject.identifier=...)", e.getMessage());
-		}
-
 	}
 
 	@Test

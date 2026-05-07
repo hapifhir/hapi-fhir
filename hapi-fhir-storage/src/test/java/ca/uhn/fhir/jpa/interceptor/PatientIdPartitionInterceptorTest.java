@@ -279,6 +279,23 @@ class PatientIdPartitionInterceptorTest {
 			.hasMessageContaining(Msg.code(2928));
 	}
 
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		Patient?_id:text=foo
+		Patient?_id:exact=123
+		Patient?_id:contains=partial
+		""")
+	void testSearch_UnsupportedModifierOnIdParam_throwsMethodNotAllowed(String theValue) {
+		MatchUrlService.ResourceTypeAndSearchParameterMap parsedMatchUrl = myMatchUrlSvc.parseAndTranslateMatchUrl(theValue);
+		SearchParameterMap params = parsedMatchUrl.searchParameterMap();
+		String resourceType = parsedMatchUrl.resourceType();
+		ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forSearchType(resourceType, params, null);
+
+		assertThatThrownBy(() -> mySvc.identifyForRead(readDetails, new ServletRequestDetails()))
+			.isInstanceOf(MethodNotAllowedException.class)
+			.hasMessageContaining(Msg.code(1322));
+	}
+
 	@Nested
 	class PatientCompartmentExtension {
 

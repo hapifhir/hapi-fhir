@@ -851,7 +851,7 @@ public class PatientIdPartitionInterceptor {
 
 	@SuppressWarnings("SameParameterValue")
 	private List<String> getResourceIdsForSearchParam(SearchParameterMap theParams, String theParamName) {
-		Set<String> needingAtLeastOneSpToResolveSet = new LinkedHashSet<>();
+		Set<String> needingAtLeastOneChainedSpToResolveSet = new LinkedHashSet<>();
 
 		List<List<IQueryParameterType>> paramAndListForParamName = theParams.get(theParamName);
 		if (paramAndListForParamName == null) {
@@ -868,14 +868,11 @@ public class PatientIdPartitionInterceptor {
 						if (PATIENT_COMPARTMENT_SP_PATIENT.equals(theParamName)
 								|| PATIENT_COMPARTMENT_SP_SUBJECT.equals(theParamName)) {
 							// 'patient' and 'subject' SP have a 0..1 cardinality and will always refer to a Patient
-							// resource.
-							// on their own, they can't be resolved and don't need to as they are used as additional
-							// 'filters'
-							// to another SP that resolves to a direct reference (Patient/abc).  Essentially, if we have
-							// one SP
-							// that resolves directly, we don't need to resolve other SP pointing to the same
-							// resource
-							needingAtLeastOneSpToResolveSet.add(chain);
+							// resource. on their own, they can't be resolved and don't need to as they are used as
+							// additional 'filters' to another SP that resolves to a direct reference (Patient/abc).
+							// Essentially, if we have one SP that resolves directly, we don't need to resolve other SP
+							// pointing to the same resource.
+							needingAtLeastOneChainedSpToResolveSet.add(chain);
 							continue;
 						} else {
 							throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
@@ -905,8 +902,8 @@ public class PatientIdPartitionInterceptor {
 			}
 		}
 
-		if (idParts.isEmpty() && !needingAtLeastOneSpToResolveSet.isEmpty()) {
-			String errorMsgString = buildErrorMsgForChainedParameters(theParamName, needingAtLeastOneSpToResolveSet);
+		if (idParts.isEmpty() && !needingAtLeastOneChainedSpToResolveSet.isEmpty()) {
+			String errorMsgString = buildErrorMsgForChainedParameters(theParamName, needingAtLeastOneChainedSpToResolveSet);
 			throw new MethodNotAllowedException(Msg.code(2928) + errorMsgString);
 		}
 
