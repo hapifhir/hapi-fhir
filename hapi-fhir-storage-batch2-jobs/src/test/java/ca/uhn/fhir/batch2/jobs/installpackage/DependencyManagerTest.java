@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -184,6 +186,49 @@ public class DependencyManagerTest {
 		assertThat(extensions).hasSize(1);
 		verify(myBasicResourceDao, never()).update(any(Basic.class), any(RequestDetails.class));
 	}
+
+	@Test
+	public void testShouldProcessDependency_resourceNotFound_proceedWithInstall() {
+		// set up
+		String packageName = "hl7.fhir.us.core";
+		String packageVersion = "5.0.1";
+
+		String id = "Basic/1";
+
+		when(myBasicResourceDao.read(any(IIdType.class), any(RequestDetails.class)))
+			.thenThrow(new ResourceNotFoundException("Resource Basic/1 not found"));
+
+		// execute
+		boolean outcome = myDependencyManager.shouldProcessDependency(id, packageName, packageVersion);
+
+		// verify
+		assertThat(outcome).isTrue();
+
+		verify(myBasicResourceDao, never()).update(any(Basic.class), any(RequestDetails.class));
+	}
+
+	@Test
+	public void testShouldProcessDependency_resourceDeleted_proceedWithInstall() {
+		// set up
+		String packageName = "hl7.fhir.us.core";
+		String packageVersion = "5.0.1";
+
+		String id = "Basic/1";
+
+		when(myBasicResourceDao.read(any(IIdType.class), any(RequestDetails.class)))
+			.thenThrow(new ResourceGoneException("Resource Basic/1 was deleted"));
+
+		// execute
+		boolean outcome = myDependencyManager.shouldProcessDependency(id, packageName, packageVersion);
+
+		// verify
+		assertThat(outcome).isTrue();
+
+		verify(myBasicResourceDao, never()).update(any(Basic.class), any(RequestDetails.class));
+	}
+
+	// TO-DO - handle failure modes - read throws ResourceNotFoundException and ResourceGoneException
+	//                              - update throws ResourceVersionConflictException
 
 	@Test
 	public void testDeleteDependencyResource() {

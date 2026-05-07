@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.TerserUtil;
 import org.apache.commons.lang3.Strings;
@@ -14,10 +16,14 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class DependencyManager {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(DependencyManager.class);
 
 	public static final String RESOURCE_TYPE = "Basic";
 
@@ -49,14 +55,23 @@ public class DependencyManager {
 		IIdType idType = TerserUtil.newElement(myFhirContext, "id", theId);
 		IFhirResourceDao<T> basicDao = getBasicDao();
 
-		T resource = basicDao.read(idType, createRequestDetails());
+		try {
+			T resource = basicDao.read(idType, createRequestDetails());
 
-		if (resourceContainsDependency(resource, thePackageName, thePackageVersion)) {
-			return false;
+			if (resourceContainsDependency(resource, thePackageName, thePackageVersion)) {
+				return false;
+			}
+
+			addDependencyToResource(resource, thePackageName, thePackageVersion);
+			basicDao.update(resource, createRequestDetails());
+		} catch (ResourceNotFoundException | ResourceGoneException e) {
+			// This should never happen
+			// The lifespan of the resource is controlled by the root job.
+			// A dependency job should never find that the resource hasn't been created yet
+			//   or has already been destroyed.
+			// However, if it does happen, we should carry on to install the dependency anyway.
+			ourLog.error("Failed to process dependency resource", e);
 		}
-
-		addDependencyToResource(resource, thePackageName, thePackageVersion);
-		basicDao.update(resource, createRequestDetails());
 
 		return true;
 	}
