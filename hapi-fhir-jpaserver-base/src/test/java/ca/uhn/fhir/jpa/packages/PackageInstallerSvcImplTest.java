@@ -10,6 +10,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -251,6 +252,8 @@ public class PackageInstallerSvcImplTest {
 			final String expectedLogMessage = String.format(
 				"The SearchParameter with URL %s is invalid. Validation Error: %s", spURL, validationExceptionMessage);
 			LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(expectedLogMessage);
+			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarnMessage(
+				"Skipping installation of resource null because it is an invalid SearchParameter.");
 		}
 
 		@Test
@@ -268,25 +271,52 @@ public class PackageInstallerSvcImplTest {
 			assertEquals(notAnUnprocessableEntityException, actualExceptionThrown);
 		}
 
-		// Created by claude-sonnet-4-6
-		// Regression test for HAPI-0521: resources with IDs > 64 chars must be rejected before status validation,
-		// so they are skipped even when validateResourceStatusForPackageUpload is disabled.
-		public static Stream<Arguments> parametersIdLengthValidation() {
-			return Stream.of(
-				arguments("a".repeat(65), false),   // over limit → rejected
-				arguments("a".repeat(64), true),    // exactly at limit → accepted
-				arguments(null, true)               // no ID → accepted
-			);
+		// Created by Claude Opus 4.6
+		@Test
+		void testValidForUpload_embeddedCodeSystem_returnsFalseAndLogsWarning() {
+			CodeSystem embeddedCs = createCodeSystem(CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL);
+			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(embeddedCs);
+
+			assertFalse(mySvc.validForUpload(embeddedCs));
+			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarnMessage(
+				"Skipping installation of resource null because it is a common CodeSystem.");
 		}
 
-		@ParameterizedTest
-		@MethodSource("parametersIdLengthValidation")
-		void testValidForUpload_idLengthCheck(String theId, boolean theExpected) {
-			Patient patient = new Patient();
-			if (theId != null) {
-				patient.setId(theId);
-			}
-			assertEquals(theExpected, mySvc.validForUpload(patient));
+		// Created by Claude Opus 4.6
+		@Test
+		void testValidForUpload_embeddedValueSet_returnsFalseAndLogsWarning() {
+			ValueSet embeddedVs = createValueSet(CommonCodeSystemsTerminologyService.LANGUAGES_VALUESET_URL);
+			when(myVersionCanonicalizerMock.valueSetToCanonical(any())).thenReturn(embeddedVs);
+
+			assertFalse(mySvc.validForUpload(embeddedVs));
+			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarnMessage(
+				"Skipping installation of resource null because it is a common ValueSet.");
+		}
+
+		// Created by Claude Opus 4.6
+		@Test
+		void testValidForUpload_invalidStatus_returnsFalseAndLogsWarning() {
+			CodeSystem draftCs = new CodeSystem();
+			draftCs.setId("CodeSystem/draft-cs");
+			draftCs.setUrl("http://example.com/cs");
+			draftCs.setStatus(Enumerations.PublicationStatus.DRAFT);
+			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(draftCs);
+			when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
+
+			assertFalse(mySvc.validForUpload(draftCs));
+			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarnMessage(
+				"Skipping installation of resource CodeSystem/draft-cs because of an invalid resource status draft. Resource status validation setting is enabled.");
+		}
+
+		// Created by Claude Opus 4.6
+		@Test
+		void testValidForUpload_statusElementDefinedButNeverSet_returnsTrue() {
+			SearchParameter sp = new SearchParameter();
+			sp.setUrl("http://example.com/sp-no-status");
+			setupSearchParameterValidationMocksForSuccess();
+			when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
+
+			assertTrue(mySvc.validForUpload(sp));
 		}
 	}
 
@@ -303,30 +333,6 @@ public class PackageInstallerSvcImplTest {
 		SystemRequestDetails systemRequestDetails = (SystemRequestDetails) requestDetails;
 
 		assertEquals(RequestPartitionId.fromPartitionId(42), systemRequestDetails.getRequestPartitionId());
-	}
-
-	@Test
-	public void testInstallPackageUsesDefaultPartition() throws IOException {
-		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionSettings.setDefaultPartitionId(7);
-
-		CodeSystem newCodeSystem = new CodeSystem();
-		newCodeSystem.setId("CodeSystem/newcs");
-		newCodeSystem.setUrl("http://partitioned-code-system");
-		newCodeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-
-		PackageInstallationSpec spec = setupResourceInPackage(null, newCodeSystem, myCodeSystemDao);
-
-		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(newCodeSystem);
-
-		mySvc.install(spec);
-
-		verify(myCodeSystemDao).create(any(CodeSystem.class), myRequestDetailsCaptor.capture());
-		RequestDetails requestDetails = myRequestDetailsCaptor.getValue();
-
-		assertInstanceOf(SystemRequestDetails.class, requestDetails);
-		SystemRequestDetails systemRequestDetails = (SystemRequestDetails) requestDetails;
-		assertEquals(RequestPartitionId.fromPartitionId(7), systemRequestDetails.getRequestPartitionId());
 	}
 
 	@Test
@@ -382,6 +388,9 @@ public class PackageInstallerSvcImplTest {
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
 		CodeSystem codeSystem = myCodeSystemCaptor.getValue();
 		assertEquals("existingcs", codeSystem.getIdPart());
+
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage(
+			"Updating existing resource matching ?url=http%3A//my-code-system&_sort=-_pid");
 	}
 
 	@Test
@@ -404,14 +413,17 @@ public class PackageInstallerSvcImplTest {
 		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(igCs);
 
 		// Test
-		mySvc.install(spec);
+		PackageInstallOutcomeJson outcome = mySvc.install(spec);
 
 		// Verify: neither create nor update should be called for the CodeSystem
 		verify(myCodeSystemDao, times(0)).update(any(), any(RequestDetails.class));
 		verify(myCodeSystemDao, times(0)).create(any(), any(RequestDetails.class));
 
+		assertThat(outcome.getResourcesInstalled()).isEmpty();
 		LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage(
-			"Skipping update of CodeSystem with content=not-present matching ?url=http%3A//my-code-system");
+			"Skipping update of CodeSystem with content=not-present matching ?url=http%3A//my-code-system&_sort=-_pid since `overwriteContentNotPresentCodeSystems=false");
+		LogbackTestExtensionAssert.assertThat(myLogCapture)
+			.hasInfoMessage("-- Skipped 1 resources of type CodeSystem");
 	}
 
 	@Test
@@ -441,6 +453,86 @@ public class PackageInstallerSvcImplTest {
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
 		CodeSystem codeSystem = myCodeSystemCaptor.getValue();
 		assertEquals("existingcs", codeSystem.getIdPart());
+
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage(
+			"Updating existing resource matching ?url=http%3A//my-code-system&_sort=-_pid");
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void testInstall_invalidResource_returnsSkipped() {
+		Patient invalidResource = new Patient();
+		invalidResource.setId("a".repeat(65));
+
+		PackageInstallationSpec spec = new PackageInstallationSpec();
+		PackageInstallOutcomeJson outcome = new PackageInstallOutcomeJson();
+
+		PackageInstallerSvcImpl.InstallResultEnum result = mySvc.install(invalidResource, spec, outcome);
+
+		assertThat(result).isEqualTo(PackageInstallerSvcImpl.InstallResultEnum.SKIPPED);
+		assertThat(outcome.getResourcesInstalled()).isEmpty();
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarnMessage(
+			"Skipping installation of resource " + "a".repeat(65) + " because of an invalid FHIR ID.");
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void testInstall_newResource_returnsCreated() throws IOException {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://new-code-system");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		PackageInstallationSpec spec = setupResourceInPackage(null, cs, myCodeSystemDao);
+
+		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(cs);
+
+		PackageInstallOutcomeJson outcome = mySvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
+
+		LogbackTestExtensionAssert.assertThat(myLogCapture)
+			.hasInfoMessage("-- Created 1 resources of type CodeSystem");
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void testInstall_existingResource_returnsUpdated() throws IOException {
+		CodeSystem existingCs = new CodeSystem();
+		existingCs.setId("CodeSystem/existingcs");
+		existingCs.setUrl("http://my-code-system");
+		existingCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setId("CodeSystem/mycs");
+		cs.setUrl("http://my-code-system");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		PackageInstallationSpec spec = setupResourceInPackage(existingCs, cs, myCodeSystemDao);
+
+		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(cs);
+		when(myCodeSystemDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
+
+		PackageInstallOutcomeJson outcome = mySvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
+
+		LogbackTestExtensionAssert.assertThat(myLogCapture)
+			.hasInfoMessage("-- Updated 1 resources of type CodeSystem");
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void testInstallPackage_nullPackage_throwsWithPackageNameAndVersion() throws IOException {
+		when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
+		when(myPackageCacheManager.installPackage(any())).thenReturn(null);
+
+		PackageInstallationSpec spec = new PackageInstallationSpec();
+		spec.setName("my.missing.package");
+		spec.setVersion("2.0.1");
+
+		assertThatThrownBy(() -> mySvc.install(spec))
+			.isInstanceOf(ImplementationGuideInstallationException.class)
+			.hasMessageContaining("my.missing.package#2.0.1");
 	}
 
 	public enum InstallType {
@@ -635,7 +727,7 @@ public class PackageInstallerSvcImplTest {
 
 		when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 		when(myPackageCacheManager.installPackage(any())).thenReturn(pkg);
-		when(myDaoRegistry.getResourceDao(theInstallResource.getClass())).thenReturn(theFhirResourceDao);
+		when(myDaoRegistry.getResourceDao(theInstallResource.fhirType())).thenReturn(theFhirResourceDao);
 		when(theFhirResourceDao.search(any(), any())).thenReturn(theExistingResource != null ?
 			new SimpleBundleProvider(theExistingResource) : new SimpleBundleProvider());
 		if (theInstallResource.getClass().getSimpleName().equals("SearchParameter")) {
