@@ -314,7 +314,8 @@ public class SearchParameterCanonicalizer {
 							.getReferenceElement()
 							.toUnqualifiedVersionless()
 							.getValue(),
-					null));
+					null,
+					false));
 		}
 
 		return new RuntimeSearchParam(
@@ -431,6 +432,7 @@ public class SearchParameterCanonicalizer {
 			}
 
 			String comboUpliftChain = null;
+			boolean ranged = false;
 			List<? extends IBaseExtension<?, ?>> componentExtensions = ((IBaseHasExtensions) next).getExtension();
 			for (IBaseExtension<?, ?> nextComponentExtension : componentExtensions) {
 				if (HapiExtensions.EXT_SP_COMBO_UPLIFT_CHAIN.equals(nextComponentExtension.getUrl())
@@ -438,10 +440,13 @@ public class SearchParameterCanonicalizer {
 					IPrimitiveType<String> upliftChainValue =
 							(IPrimitiveType<String>) nextComponentExtension.getValue();
 					comboUpliftChain = upliftChainValue.getValueAsString();
+				} else if (HapiExtensions.EXT_SP_COMBO_DATE_RANGED.equals(nextComponentExtension.getUrl())) {
+					IPrimitiveType<Boolean> rangedValue = (IPrimitiveType<Boolean>) nextComponentExtension.getValue();
+					ranged = rangedValue.getValue();
 				}
 			}
 
-			components.add(new RuntimeSearchParam.Component(expression, definition, comboUpliftChain));
+			components.add(new RuntimeSearchParam.Component(expression, definition, comboUpliftChain, ranged));
 		}
 
 		return new RuntimeSearchParam(

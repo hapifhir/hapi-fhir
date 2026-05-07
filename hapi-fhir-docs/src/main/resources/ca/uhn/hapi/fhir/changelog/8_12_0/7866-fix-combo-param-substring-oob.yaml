@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7866
+title: "Fixed a regression introduced in 8.12.0 where FHIR resource writes would fail with an
+  HTTP 500 / StringIndexOutOfBoundsException when a composite search parameter included a date
+  component whose value produced an empty query token (e.g. a Timing resource with only
+  repeat.bounds.boundsPeriod set). The degenerate date value is now skipped during combo index
+  extraction, consistent with the existing behaviour for sub-day precision dates."

@@ -480,7 +480,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				.selectCount(1)
 				.commitCount(1)
 				.noOtherCounts()
-				.selectSqlContains(0, "PARTITION_ID='65'")
+				.selectSqlAtIndex(0).contains("PARTITION_ID='65'")
 		);
 	}
 
@@ -789,7 +789,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				.selectCount(1)
 				.commitCount(2)
 				.noOtherCounts()
-				.selectSqlContains(0, "PARTITION_ID='-1'")
+				.selectSqlAtIndex(0).contains("PARTITION_ID='-1'")
 		);
 	}
 

@@ -1,0 +1,7 @@
+type: fix
+issue: 7808
+title: "The order in which the package loader service queries data sources has been regularized.
+Data sources will now be queried in the following order: 1) the local cache by package name and version;
+2) package bytes embedded in the specification object; 3) a remote data source by URL; 
+4) the central HL7 NPM repository by package name and version. This sequence will apply
+to store, no-store and dry run modes."

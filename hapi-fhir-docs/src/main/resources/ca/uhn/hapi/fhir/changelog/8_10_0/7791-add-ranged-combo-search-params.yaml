@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7791
+title: "When using Non-unique Combo Search Parameters, a single component
+  with a date parameter can now be marked as a 'ranged date', meaning it will
+  now support searching by date range and not just by a point in time."

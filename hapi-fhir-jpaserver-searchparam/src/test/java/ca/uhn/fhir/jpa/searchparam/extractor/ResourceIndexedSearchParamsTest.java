@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import com.google.common.collect.Lists;
-import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ResourceIndexedSearchParamsTest {
+class ResourceIndexedSearchParamsTest {
 
 	public static final String STRING_ID = "StringId";
 	public static final String LONG_ID = "123";
@@ -29,7 +28,7 @@ public class ResourceIndexedSearchParamsTest {
 	private StorageSettings myStorageSettings = new StorageSettings();
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		mySource = new ResourceTable();
 		mySource.setResourceType("Patient");
 
@@ -37,7 +36,7 @@ public class ResourceIndexedSearchParamsTest {
 	}
 
 	@Test
-	public void matchResourceLinksStringCompareToLong() {
+	void matchResourceLinksStringCompareToLong() {
 		ResourceLink link = getResourceLinkForLocalReference(LONG_ID);
 		myParams.getResourceLinks().add(link);
 
@@ -47,7 +46,7 @@ public class ResourceIndexedSearchParamsTest {
 	}
 
 	@Test
-	public void matchResourceLinksStringCompareToString() {
+	void matchResourceLinksStringCompareToString() {
 		ResourceLink link = getResourceLinkForLocalReference(STRING_ID);
 		myParams.getResourceLinks().add(link);
 
@@ -57,7 +56,7 @@ public class ResourceIndexedSearchParamsTest {
 	}
 
 	@Test
-	public void matchResourceLinksLongCompareToString() {
+	void matchResourceLinksLongCompareToString() {
 		ResourceLink link = getResourceLinkForLocalReference(STRING_ID);
 		myParams.getResourceLinks().add(link);
 
@@ -67,7 +66,7 @@ public class ResourceIndexedSearchParamsTest {
 	}
 
 	@Test
-	public void matchResourceLinksLongCompareToLong() {
+	void matchResourceLinksLongCompareToLong() {
 		ResourceLink link = getResourceLinkForLocalReference(LONG_ID);
 		myParams.getResourceLinks().add(link);
 
@@ -98,7 +97,7 @@ public class ResourceIndexedSearchParamsTest {
 	}
 
 	@Test
-	public void match_withLogicalReference_works() {
+	void match_withLogicalReference_works() {
 		ResourceTable table = new ResourceTable();
 		table.setResourceType("QuestionnaireResponse");
 		ResourceIndexedSearchParams matcher = ResourceIndexedSearchParams
@@ -126,7 +125,7 @@ public class ResourceIndexedSearchParamsTest {
 	}
 
 	@Test
-	public void testExtractCompositeStringUniquesValueChains() {
+	void testExtractCompositeStringUniquesValueChains() {
 		List<List<String>> partsChoices;
 		Set<String> values;
 
@@ -162,7 +161,7 @@ public class ResourceIndexedSearchParamsTest {
 		"    ,  param, -1575415002568401616, true,  false",
 		"name,  param, -1575415002568401616, true,  false",
 	})
-	public void testIsMatchSearchParams_matchesByParamNameOrHashIdentity(String theParamName,
+	void testIsMatchSearchParams_matchesByParamNameOrHashIdentity(String theParamName,
 																		 String theExpectedParamName,
 																		 Long theHashIdentity,
 																		 boolean theIndexStorageOptimized,
