@@ -188,7 +188,7 @@ public class PatientIdPartitionInterceptor {
 			String resourceType = entry.getKey();
 			ResourceCompartmentStoragePolicy policy = entry.getValue();
 
-			if ("Patient".equals(resourceType)) {
+			if (PATIENT_STR.equals(resourceType)) {
 				throw new ConfigurationException(
 						Msg.code(2864) + "Can not provide a resource type policy for resource type 'Patient'");
 			}
@@ -868,10 +868,14 @@ public class PatientIdPartitionInterceptor {
 						if (PATIENT_COMPARTMENT_SP_PATIENT.equals(theParamName)
 								|| PATIENT_COMPARTMENT_SP_SUBJECT.equals(theParamName)) {
 							// 'patient' and 'subject' SP have a 0..1 cardinality and will always refer to a Patient
-							// resource. on their own, they can't be resolved and don't need to as they are used as
-							// additional 'filters' to another SP that resolves to a direct reference (Patient/abc).
+							// resource. Chained SP on subject or patient can't be resolved on their own but if combined
+							// with another SP resolving directly to a patient (?subject=Patient/abc), it is safe to
+							// assume that the chained SP points to the same object.
 							// Essentially, if we have one SP that resolves directly, we don't need to resolve other SP
 							// pointing to the same resource.
+							//
+							// we keep track of the chained SP names needing direct resolution to support SP interchangeability:
+							// ?subject=Patient/abc&subject.active=true == ?subject.active=true&subject=Patient/abc
 							needingAtLeastOneChainedSpToResolveSet.add(chain);
 							continue;
 						} else {

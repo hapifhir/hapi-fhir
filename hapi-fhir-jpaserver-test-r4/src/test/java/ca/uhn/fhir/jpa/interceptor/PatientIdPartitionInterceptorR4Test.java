@@ -660,10 +660,11 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 	@Test
 	public void testSearchWithChainedAndResolvedReference() {
-		createPatientA();
+		createPatientA();  // active=true
 		IIdType patAObsId = createObservation(withSubject("Patient/A"), withStatus("final"));
 
 		myTestDaoSearch.assertSearchFinds("find patient Observation", "Observation?subject=Patient/A&subject.active=true", patAObsId);
+		myTestDaoSearch.assertSearchNotFound("find patient Observation", "Observation?subject=Patient/A&subject.active=false", patAObsId);
 		myTestDaoSearch.assertSearchFinds("find patient Observation", "Observation?subject.active=true&subject=Patient/A", patAObsId);
 	}
 
