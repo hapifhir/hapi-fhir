@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -346,5 +347,31 @@ public class ParameterUtil {
 			}
 		}
 		return true;
+	}
+
+	public static boolean isTimeAllZeros(final DateParam theDateParam) {
+		if (theDateParam == null || theDateParam.isEmpty()) {
+			return false;
+		}
+
+		if (theDateParam.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
+			return true;
+		}
+
+		return (zeroIfNull(theDateParam.getHour()) == 0
+				&& zeroIfNull(theDateParam.getMinute()) == 0
+				&& zeroIfNull(theDateParam.getSecond()) == 0
+				&& zeroIfNull(theDateParam.getMillis()) == 0);
+	}
+
+	public static DateParam coerceToDateParam(IQueryParameterType theParameter) {
+		if (theParameter instanceof DateParam dateParam) {
+			return dateParam;
+		}
+		return new DateParam(theParameter.getValueAsQueryToken());
+	}
+
+	private static int zeroIfNull(final Integer theInteger) {
+		return theInteger != null ? theInteger : 0;
 	}
 }
