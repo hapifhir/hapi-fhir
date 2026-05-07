@@ -33,6 +33,11 @@ public class DependencyManager {
 	static final String SUBEXTENSION_NAME_URL = "name";
 	static final String SUBEXTENSION_VERSION_URL = "version";
 
+	public static final String FIELD_ID = "id";
+	public static final String FIELD_EXTENSION = "extension";
+	public static final String FIELD_URL = "url";
+	public static final String FIELD_VALUE = "valueString";
+
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
 	private final PartitionSettings myPartitionSettings;
@@ -52,7 +57,7 @@ public class DependencyManager {
 
 	public <T extends IBaseResource> boolean shouldProcessDependency(
 			String theId, String thePackageName, String thePackageVersion) {
-		IIdType idType = TerserUtil.newElement(myFhirContext, "id", theId);
+		IIdType idType = TerserUtil.newElement(myFhirContext, FIELD_ID, theId);
 		IFhirResourceDao<T> basicDao = getBasicDao();
 
 		try {
@@ -77,7 +82,7 @@ public class DependencyManager {
 	}
 
 	public void deleteDependencyResource(String theId) {
-		IIdType idType = TerserUtil.newElement(myFhirContext, "id", theId);
+		IIdType idType = TerserUtil.newElement(myFhirContext, FIELD_ID, theId);
 
 		getBasicDao().delete(idType, createRequestDetails());
 	}
@@ -99,7 +104,7 @@ public class DependencyManager {
 
 	private boolean resourceContainsDependency(
 			IBaseResource theResource, String thePackageName, String thePackageVersion) {
-		List<IBase> extensions = TerserUtil.getValues(myFhirContext, theResource, "extension");
+		List<IBase> extensions = TerserUtil.getValues(myFhirContext, theResource, FIELD_EXTENSION);
 
 		if (extensions == null) {
 			return false;
@@ -111,12 +116,12 @@ public class DependencyManager {
 	@SuppressWarnings("unchecked")
 	private boolean isExtensionMatches(IBase theExtension, String thePackageName, String thePackageVersion) {
 		IPrimitiveType<String> url =
-				(IPrimitiveType<String>) TerserUtil.getFirstFieldByFhirPath(myFhirContext, "url", theExtension);
+				(IPrimitiveType<String>) TerserUtil.getFirstFieldByFhirPath(myFhirContext, FIELD_URL, theExtension);
 		if (url == null || !Strings.CS.equals(EXTENSION_URL, url.getValue())) {
 			return false;
 		}
 
-		List<IBase> subExtensions = TerserUtil.getFieldByFhirPath(myFhirContext, "extension", theExtension);
+		List<IBase> subExtensions = TerserUtil.getFieldByFhirPath(myFhirContext, FIELD_EXTENSION, theExtension);
 		if (subExtensions == null || subExtensions.size() != 2) {
 			return false;
 		}
@@ -124,9 +129,9 @@ public class DependencyManager {
 		boolean match = true;
 		for (IBase subExtension : subExtensions) {
 			IPrimitiveType<String> subUrl =
-					(IPrimitiveType<String>) TerserUtil.getFirstFieldByFhirPath(myFhirContext, "url", subExtension);
+					(IPrimitiveType<String>) TerserUtil.getFirstFieldByFhirPath(myFhirContext, FIELD_URL, subExtension);
 			IPrimitiveType<String> subValue = (IPrimitiveType<String>)
-					TerserUtil.getFirstFieldByFhirPath(myFhirContext, "valueString", subExtension);
+					TerserUtil.getFirstFieldByFhirPath(myFhirContext, FIELD_VALUE, subExtension);
 			match &= (subUrl != null && subValue != null)
 					&& ((Strings.CS.equals(subUrl.getValue(), SUBEXTENSION_NAME_URL)
 									&& Strings.CS.equals(subValue.getValue(), thePackageName))
@@ -140,15 +145,15 @@ public class DependencyManager {
 	private void addDependencyToResource(IBaseResource theResource, String thePackageName, String thePackageVersion) {
 		FhirTerser terser = myFhirContext.newTerser();
 
-		IBase newExtension = terser.addElement(theResource, "extension");
-		terser.addElement(newExtension, "url", EXTENSION_URL);
+		IBase newExtension = terser.addElement(theResource, FIELD_EXTENSION);
+		terser.addElement(newExtension, FIELD_URL, EXTENSION_URL);
 
-		IBase packageNameExtension = terser.addElement(newExtension, "extension");
-		terser.addElement(packageNameExtension, "url", SUBEXTENSION_NAME_URL);
-		terser.addElement(packageNameExtension, "valueString", thePackageName);
+		IBase packageNameExtension = terser.addElement(newExtension, FIELD_EXTENSION);
+		terser.addElement(packageNameExtension, FIELD_URL, SUBEXTENSION_NAME_URL);
+		terser.addElement(packageNameExtension, FIELD_VALUE, thePackageName);
 
-		IBase packageVersionExtension = terser.addElement(newExtension, "extension");
-		terser.addElement(packageVersionExtension, "url", SUBEXTENSION_VERSION_URL);
-		terser.addElement(packageVersionExtension, "valueString", thePackageVersion);
+		IBase packageVersionExtension = terser.addElement(newExtension, FIELD_EXTENSION);
+		terser.addElement(packageVersionExtension, FIELD_URL, SUBEXTENSION_VERSION_URL);
+		terser.addElement(packageVersionExtension, FIELD_VALUE, thePackageVersion);
 	}
 }
