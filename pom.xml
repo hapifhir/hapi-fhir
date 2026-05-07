@@ -1004,6 +1004,10 @@
 			<name>Nathan Loyer</name>
 			<organization>Athena Health</organization>
 		</developer>
+		<developer>
+			<id>tisoft</id>
+			<name>Markus Heberling</name>
+		</developer>
 	</developers>
 
 	<licenses>
