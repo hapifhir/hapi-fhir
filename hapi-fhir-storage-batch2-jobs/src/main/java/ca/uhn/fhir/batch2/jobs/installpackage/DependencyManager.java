@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.TerserUtil;
 import org.apache.commons.lang3.Strings;
@@ -60,25 +61,38 @@ public class DependencyManager {
 		IIdType idType = TerserUtil.newElement(myFhirContext, FIELD_ID, theId);
 		IFhirResourceDao<T> basicDao = getBasicDao();
 
-		try {
-			T resource = basicDao.read(idType, createRequestDetails());
+		RequestDetails srd = createRequestDetails();
+		while (true) {
+			try {
+				T resource = basicDao.read(idType, srd);
 
-			if (resourceContainsDependency(resource, thePackageName, thePackageVersion)) {
-				return false;
+				if (resourceContainsDependency(resource, thePackageName, thePackageVersion)) {
+					return false;
+				}
+
+				addDependencyToResource(resource, thePackageName, thePackageVersion);
+				basicDao.update(resource, srd);
+
+				return true;
+			} catch (ResourceNotFoundException | ResourceGoneException e) {
+				// This should never happen
+				// The lifespan of the resource is controlled by the root job.
+				// A dependency job should never find that the resource hasn't been created yet
+				//   or has already been destroyed.
+				// However, if it does happen, we should carry on to install the dependency anyway.
+				ourLog.warn(
+						"Unable to determine whether the package dependency {}#{} has been processed.",
+						thePackageName,
+						thePackageVersion,
+						e);
+				return true;
+			} catch (ResourceVersionConflictException e) {
+				ourLog.info(
+						"Concurrent update detected while checking package dependency {}#{}.",
+						thePackageName,
+						thePackageVersion);
 			}
-
-			addDependencyToResource(resource, thePackageName, thePackageVersion);
-			basicDao.update(resource, createRequestDetails());
-		} catch (ResourceNotFoundException | ResourceGoneException e) {
-			// This should never happen
-			// The lifespan of the resource is controlled by the root job.
-			// A dependency job should never find that the resource hasn't been created yet
-			//   or has already been destroyed.
-			// However, if it does happen, we should carry on to install the dependency anyway.
-			ourLog.error("Failed to process dependency resource", e);
 		}
-
-		return true;
 	}
 
 	public void deleteDependencyResource(String theId) {

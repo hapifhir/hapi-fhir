@@ -9,7 +9,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Basic;
@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -227,8 +228,91 @@ public class DependencyManagerTest {
 		verify(myBasicResourceDao, never()).update(any(Basic.class), any(RequestDetails.class));
 	}
 
-	// TO-DO - handle failure modes - read throws ResourceNotFoundException and ResourceGoneException
-	//                              - update throws ResourceVersionConflictException
+	@Test
+	public void testShouldProcessDependency_versionConflictOnUpdate_noConflicts() {
+		// set up
+		String packageName = "hl7.fhir.us.core";
+		String packageVersion = "5.0.1";
+
+		String id = "Basic/1";
+
+		Basic basicResource1 = new Basic();
+		basicResource1.setId(id);
+		basicResource1.getMeta().setVersionId("1");
+
+		basicResource1.addExtension(createDependencyExtension("hl7.fhir.us.core", "6.1.0"));
+		basicResource1.addExtension(createDependencyExtension("hl7.fhir.terminology", "5.0.1"));
+
+		Basic basicResource2 = new Basic();
+		basicResource2.setId(id);
+		basicResource2.getMeta().setVersionId("2");
+
+		basicResource2.addExtension(createDependencyExtension("hl7.fhir.us.core", "6.1.0"));
+		basicResource2.addExtension(createDependencyExtension("hl7.fhir.terminology", "5.0.1"));
+		basicResource2.addExtension(createDependencyExtension("hl7.fhir.core", "4.0.0"));
+
+		when(myBasicResourceDao.read(any(IIdType.class), any(RequestDetails.class))).thenReturn(basicResource1, basicResource2);
+		when(myBasicResourceDao.update(any(Basic.class), any(RequestDetails.class))).then(invocation -> {
+			Basic resource = invocation.getArgument(0, Basic.class);
+			if (resource.getMeta().getVersionId().equals("1")) {
+				throw new ResourceVersionConflictException("Conflicting version IDs found");
+			} else {
+				return new DaoMethodOutcome();
+			}
+		});
+
+		// execute
+		boolean outcome = myDependencyManager.shouldProcessDependency(id, packageName, packageVersion);
+
+		// verify
+		assertThat(outcome).isTrue();
+
+		verify(myBasicResourceDao, times(2)).read(any(IIdType.class), any(RequestDetails.class));
+		verify(myBasicResourceDao, times(2)).update(any(Basic.class), any(RequestDetails.class));
+	}
+
+	@Test
+	public void testShouldProcessDependency_versionConflictOnUpdate_withConflicts() {
+		// set up
+		String packageName = "hl7.fhir.us.core";
+		String packageVersion = "5.0.1";
+
+		String id = "Basic/1";
+
+		Basic basicResource1 = new Basic();
+		basicResource1.setId(id);
+		basicResource1.getMeta().setVersionId("1");
+
+		basicResource1.addExtension(createDependencyExtension("hl7.fhir.us.core", "6.1.0"));
+		basicResource1.addExtension(createDependencyExtension("hl7.fhir.terminology", "5.0.1"));
+
+		Basic basicResource2 = new Basic();
+		basicResource2.setId(id);
+		basicResource2.getMeta().setVersionId("2");
+
+		basicResource2.addExtension(createDependencyExtension("hl7.fhir.us.core", "6.1.0"));
+		basicResource2.addExtension(createDependencyExtension("hl7.fhir.terminology", "5.0.1"));
+		basicResource2.addExtension(createDependencyExtension("hl7.fhir.us.core", "5.0.1"));
+
+		when(myBasicResourceDao.read(any(IIdType.class), any(RequestDetails.class))).thenReturn(basicResource1, basicResource2);
+		when(myBasicResourceDao.update(any(Basic.class), any(RequestDetails.class))).then(invocation -> {
+			Basic resource = invocation.getArgument(0, Basic.class);
+			if (resource.getMeta().getVersionId().equals("1")) {
+				throw new ResourceVersionConflictException("Conflicting version IDs found");
+			} else {
+				return new DaoMethodOutcome();
+			}
+		});
+
+		// execute
+		boolean outcome = myDependencyManager.shouldProcessDependency(id, packageName, packageVersion);
+
+		// verify
+		assertThat(outcome).isFalse();
+
+		verify(myBasicResourceDao, times(2)).read(any(IIdType.class), any(RequestDetails.class));
+		verify(myBasicResourceDao).update(any(Basic.class), any(RequestDetails.class));
+	}
 
 	@Test
 	public void testDeleteDependencyResource() {
