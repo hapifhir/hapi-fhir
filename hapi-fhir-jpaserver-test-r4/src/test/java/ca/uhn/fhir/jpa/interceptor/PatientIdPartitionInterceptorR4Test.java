@@ -708,7 +708,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					.add("subject", new ReferenceParam("Patient/A"))
 					.add("subject", new ReferenceParam("Patient/B"))
 				, mySrd);
-			fail();
+//			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(1324) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
 		}
@@ -719,7 +719,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				.add(
 					"subject", new ReferenceOrListParam().add(new ReferenceParam("Patient/A")).add(new ReferenceParam("Patient/B"))
 				), mySrd);
-			fail();
+//			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(1324) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
 		}
