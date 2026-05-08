@@ -1153,7 +1153,8 @@ public class JpaConfig {
 			HibernatePropertiesProvider theHibernatePropertiesProvider,
 			PlatformTransactionManager theTxManager,
 			DialectSvc theDialectSvc) {
-		return new PartitionedIdModeVerificationSvc(thePartitionSettings, theHibernatePropertiesProvider, theTxManager, theDialectSvc);
+		return new PartitionedIdModeVerificationSvc(
+				thePartitionSettings, theHibernatePropertiesProvider, theTxManager, theDialectSvc);
 	}
 
 	@Bean

@@ -49,7 +49,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -112,12 +111,10 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.Multimaps;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
@@ -133,7 +130,6 @@ import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -1476,12 +1472,18 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (myPartitionSettings.isDatabasePartitionMode() && myDialectSvc.isMssql()) {
 			resourceSearchViewList = loadCurrentResourceVersionsForMsSqlDbpm(theResourcePids);
 		} else {
-			resourceSearchViewList = myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(theResourcePids);
+			resourceSearchViewList =
+					myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(theResourcePids);
 		}
 		return resourceSearchViewList;
 	}
 
-	// FIXME: document why
+	/**
+	 * In Database Partition Mode, when loading resource bodies for most databases we issue
+	 * SQL like <code>WHERE (PARITION_ID,RES_ID) IN (1,2), (1,3)</code> but this syntax is
+	 * not supported by MSSQL / SQL Server. So for that specific platform, we rework the
+	 * call to issue SQL like <code>WHERE PARTITION = 1 AND RES_ID IN (2, 3)</code>
+	 */
 	@VisibleForTesting
 	public List<ResourceHistoryTable> loadCurrentResourceVersionsForMsSqlDbpm(List<JpaPid> theResourcePids) {
 		Validate.isTrue(myPartitionSettings.isDatabasePartitionMode(), "This method should only be called in DBPM");
@@ -1489,7 +1491,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// Split the resource PIDs into partitions for efficient querying. We use a tree
 		// for the partition IDs to make the SQL consistent for tests.
-		Multimap<Integer, Long> partitionIdToPid = MultimapBuilder.treeKeys().arrayListValues().build();
+		Multimap<Integer, Long> partitionIdToPid =
+				MultimapBuilder.treeKeys().arrayListValues().build();
 		for (JpaPid pid : theResourcePids) {
 			// The SearchBuilder pads the list with entries that will never match
 			// a real resource in order to create predictable numbers of parameters,
@@ -1504,8 +1507,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Root<ResourceHistoryTable> from = cq.from(ResourceHistoryTable.class);
 
 		Join<?, ?> resourceTable = (Join<?, ?>) from.fetch("myResourceTable", JoinType.LEFT);
-		List<Predicate> partitionAndPidPredicates = new ArrayList<>(partitionIdToPid.keySet().size());
-		for (Map.Entry<Integer, Collection<Long>> entry : partitionIdToPid.asMap().entrySet()) {
+		List<Predicate> partitionAndPidPredicates =
+				new ArrayList<>(partitionIdToPid.keySet().size());
+		for (Map.Entry<Integer, Collection<Long>> entry :
+				partitionIdToPid.asMap().entrySet()) {
 			Integer partitionId = entry.getKey();
 			Collection<Long> pids = entry.getValue();
 

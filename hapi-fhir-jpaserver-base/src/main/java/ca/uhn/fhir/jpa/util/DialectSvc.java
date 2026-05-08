@@ -13,8 +13,10 @@ import java.util.Optional;
 
 public class DialectSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(DialectSvc.class);
+
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private static boolean ourForceMsSqlMode = false;
+
 	private final Optional<DriverTypeEnum> myDriverType;
 
 	public DialectSvc(HibernatePropertiesProvider theHibernatePropertiesProvider) {
@@ -25,7 +27,6 @@ public class DialectSvc {
 		} else {
 			myDriverType = Optional.of(((IHapiFhirDialect) dialect).getDriverType());
 		}
-
 	}
 
 	/**
