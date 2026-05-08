@@ -2077,6 +2077,14 @@
 				<artifactId>log4j-to-slf4j</artifactId>
 				<version>${log4j_to_slf4j_version}</version>
 			</dependency>
+			<!-- Pinned for CVE-2026-41607, CVE-2026-41606, CVE-2026-41605, CVE-2026-41604, CVE-2026-41603, CVE-2026-41636,
+				  CVE-2026-41602, CVE-2025-48431, this is transitive via jena-arq 5.5.0 -->
+			<dependency>
+				<groupId>org.apache.thrift</groupId>
+				<artifactId>libthrift</artifactId>
+				<!-- TODO bump this as soon as 0.23.0 comes out -->
+				<version>0.22.0</version>
+			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
 				<artifactId>hibernate-search-mapper-orm</artifactId>
