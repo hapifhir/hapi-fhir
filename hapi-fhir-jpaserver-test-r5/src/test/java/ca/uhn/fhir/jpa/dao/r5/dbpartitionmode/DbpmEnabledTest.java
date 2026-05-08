@@ -7,21 +7,31 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.util.DialectSvc;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
+import net.sourceforge.plantuml.klimt.creole.Sea;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.UriType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.List;
+import java.util.Locale;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
@@ -47,6 +57,13 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 
 		registerPartitionInterceptorAndCreatePartitions();
 		initResourceTypeCacheFromConfig();
+	}
+
+	@AfterEach
+	@Override
+	public void after() throws Exception {
+		DialectSvc.setForceMsSqlMode(false);
+		super.after();
 	}
 
 	@Test
@@ -82,6 +99,48 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 		runInTransaction(() -> assertThatThrownBy(() -> myIdHelperService.resolveResourceIdentityPid(RequestPartitionId.fromPartitionId(2), "Patient", "A", ResolveIdentityMode.includeDeleted().cacheOk())))
 			.isInstanceOf(ResourceNotFoundException.class);
 	}
+
+
+	/**
+	 * @see ca.uhn.fhir.jpa.search.builder.SearchBuilder#loadCurrentResourceVersionsForMsSqlDbpm(List)
+	 */
+	@Test
+	void testSearch_MsSqlResourceLoading() {
+		DialectSvc.setForceMsSqlMode(true);
+
+		myPartitionSelectorInterceptor.setNextPartition(RequestPartitionId.fromPartitionId(1));
+		createPatient(withId("A1"), withFamily("A1"));
+		createPatient(withId("B1"), withFamily("B1"));
+		createPatient(withId("C1"), withFamily("C1"));
+		myPartitionSelectorInterceptor.setNextPartition(RequestPartitionId.fromPartitionId(2));
+		createPatient(withId("A2"), withFamily("A2"));
+		createPatient(withId("B2"), withFamily("B2"));
+		createPatient(withId("C2"), withFamily("C2"));
+
+		logAllResources();
+
+		// Test
+		myPartitionSelectorInterceptor.setNextPartition(RequestPartitionId.fromPartitionIds(1, 2));
+		myCaptureQueriesListener.clear();
+		List<String> actual = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), newSrd()));
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(actual).containsExactlyInAnyOrder("Patient/A1", "Patient/B1", "Patient/C1", "Patient/A2", "Patient/B2", "Patient/C2");
+		String fetchByPidSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
+		assertThat(fetchByPidSql).contains(
+				" from HFJ_RES_VER rht1_0 ",
+				" left join HFJ_RESOURCE mrt1_0 ",
+				// The HFJ_RESOURCE table is identified as mrt1_0 so make sure that's the table
+				// we're selecting on, and not the HFJ_RES_VER one
+				" where mrt1_0.RES_VER=rht1_0.RES_VER and (mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?) or mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?))"
+			);
+		assertEquals(1, StringUtils.countMatches(fetchByPidSql.toUpperCase(Locale.US), "JOIN"));
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+
+	}
+
+
 
 
 	@Nested

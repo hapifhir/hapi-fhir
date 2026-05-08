@@ -49,6 +49,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -74,6 +75,7 @@ import ca.uhn.fhir.jpa.searchparam.util.PerformanceTracingLogger;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CartesianProductUtil;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
@@ -110,9 +112,12 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Multimaps;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
@@ -128,6 +133,9 @@ import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Fetch;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
@@ -163,6 +171,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.dao.index.IdHelperService.EMPTY_PREDICATE_ARRAY;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
@@ -209,6 +218,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
 	protected final IResourceTagDao myResourceTagDao;
 	private final PerformanceTracingLogger myPerformanceTracingLogger;
+	private final DialectSvc myDialectSvc;
 	private String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
 	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
@@ -274,7 +284,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			IIdHelperService theIdHelperService,
 			IResourceHistoryTableDao theResourceHistoryTagDao,
 			BatchResourceLoader theBatchResourceLoader,
-			Class<? extends IBaseResource> theResourceType) {
+			Class<? extends IBaseResource> theResourceType,
+			DialectSvc theDialectSvc) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
 		myStorageSettings = theStorageSettings;
@@ -291,6 +302,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myIdHelperService = theIdHelperService;
 		myResourceHistoryTableDao = theResourceHistoryTagDao;
 		myBatchResourceLoader = theBatchResourceLoader;
+		myDialectSvc = theDialectSvc;
 
 		mySearchProperties = new SearchQueryProperties();
 		myPerformanceTracingLogger = new PerformanceTracingLogger(theInterceptorBroadcaster);
@@ -1377,8 +1389,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// Load the resource bodies
-		List<ResourceHistoryTable> resourceSearchViewList =
-				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(versionlessPids);
+		List<ResourceHistoryTable> resourceSearchViewList = loadCurrentResourceVersions(versionlessPids);
 
 		/*
 		 * If we have specific versions to load, replace the history entries with the
@@ -1457,6 +1468,59 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 			theResourceListToPopulate.set(index, next.resource());
 		}
+	}
+
+	private List<ResourceHistoryTable> loadCurrentResourceVersions(List<JpaPid> theResourcePids) {
+		List<ResourceHistoryTable> resourceSearchViewList;
+
+		if (myPartitionSettings.isDatabasePartitionMode() && myDialectSvc.isMssql()) {
+			resourceSearchViewList = loadCurrentResourceVersionsForMsSqlDbpm(theResourcePids);
+		} else {
+			resourceSearchViewList = myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(theResourcePids);
+		}
+		return resourceSearchViewList;
+	}
+
+	// FIXME: document why
+	@VisibleForTesting
+	public List<ResourceHistoryTable> loadCurrentResourceVersionsForMsSqlDbpm(List<JpaPid> theResourcePids) {
+		Validate.isTrue(myPartitionSettings.isDatabasePartitionMode(), "This method should only be called in DBPM");
+		List<ResourceHistoryTable> resourceSearchViewList;
+
+		// Split the resource PIDs into partitions for efficient querying. We use a tree
+		// for the partition IDs to make the SQL consistent for tests.
+		Multimap<Integer, Long> partitionIdToPid = MultimapBuilder.treeKeys().arrayListValues().build();
+		for (JpaPid pid : theResourcePids) {
+			// The SearchBuilder pads the list with entries that will never match
+			// a real resource in order to create predictable numbers of parameters,
+			// but there is no reason to do that here
+			if (!JpaConstants.NO_MORE.equals(pid)) {
+				partitionIdToPid.put(pid.getPartitionId(), pid.getId());
+			}
+		}
+
+		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ResourceHistoryTable> cq = cb.createQuery(ResourceHistoryTable.class);
+		Root<ResourceHistoryTable> from = cq.from(ResourceHistoryTable.class);
+
+		Join<?, ?> resourceTable = (Join<?, ?>) from.fetch("myResourceTable", JoinType.LEFT);
+		List<Predicate> partitionAndPidPredicates = new ArrayList<>(partitionIdToPid.keySet().size());
+		for (Map.Entry<Integer, Collection<Long>> entry : partitionIdToPid.asMap().entrySet()) {
+			Integer partitionId = entry.getKey();
+			Collection<Long> pids = entry.getValue();
+
+			Predicate partitionIdPredicate = cb.equal(resourceTable.get("myPartitionIdValue"), partitionId);
+			Predicate pidPredicate = resourceTable.get("myResourceId").in(pids);
+			partitionAndPidPredicates.add(cb.and(partitionIdPredicate, pidPredicate));
+		}
+
+		Predicate currentVersionPredicate = cb.equal(resourceTable.get("myVersion"), from.get("myResourceVersion"));
+
+		cq.where(currentVersionPredicate, cb.or(partitionAndPidPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
+
+		TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(cq);
+		resourceSearchViewList = query.getResultList();
+		return resourceSearchViewList;
 	}
 
 	@SuppressWarnings("OptionalIsPresent")
