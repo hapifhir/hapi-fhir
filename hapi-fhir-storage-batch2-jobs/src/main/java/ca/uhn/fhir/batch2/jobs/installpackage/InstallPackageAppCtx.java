@@ -68,7 +68,7 @@ public class InstallPackageAppCtx {
 						"initialize-dependencies",
 						"Spawn sub-jobs to process package dependencies",
 						PackageWithDependenciesJson.class,
-						initializeDependenciesStep(theJobCoordinator))
+						initializeDependenciesStep(theJobCoordinator, dependencyManager))
 				.addIntermediateStep(
 						"consolidate-dependencies",
 						"Wait for sub-jobs to complete",
@@ -101,8 +101,9 @@ public class InstallPackageAppCtx {
 	}
 
 	@Bean
-	public InitializeDependenciesStep initializeDependenciesStep(IJobCoordinator theJobCoordinator) {
-		return new InitializeDependenciesStep(theJobCoordinator);
+	public InitializeDependenciesStep initializeDependenciesStep(
+			IJobCoordinator theJobCoordinator, DependencyManager theDependencyManager) {
+		return new InitializeDependenciesStep(theJobCoordinator, theDependencyManager);
 	}
 
 	@Bean

@@ -55,9 +55,11 @@ public class InitializeDependenciesStep
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeDependenciesStep.class);
 
 	private final IJobCoordinator myJobCoordinator;
+	private final DependencyManager myDependencyManager;
 
-	public InitializeDependenciesStep(IJobCoordinator myJobCoordinator) {
+	public InitializeDependenciesStep(IJobCoordinator myJobCoordinator, DependencyManager myDependencyManager) {
 		this.myJobCoordinator = myJobCoordinator;
+		this.myDependencyManager = myDependencyManager;
 	}
 
 	@Nonnull
@@ -128,7 +130,10 @@ public class InitializeDependenciesStep
 							.add(String.format(
 									"Installation would install %s#%s",
 									nextDependency.name(), nextDependency.version()));
-				} else {
+				} else if (myDependencyManager.shouldProcessDependency(
+						theStepExecutionDetails.getParameters().getDependencyTrackerId(),
+						nextDependency.name(),
+						nextDependency.version())) {
 					// create a new installation spec, retaining all the control parameters, but targeting the
 					// dependency
 					// package

@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.util.JsonUtil;
+import org.apache.commons.lang3.Strings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +49,8 @@ public class InitializeDependenciesStepTest {
 
 	@Mock
 	private IJobCoordinator myJobCoordinator;
+	@Mock
+	DependencyManager myDependencyManager;
 
 	private InitializeDependenciesStep myStep;
 
@@ -64,7 +67,7 @@ public class InitializeDependenciesStepTest {
 
 	@BeforeEach
 	public void beforeEach() {
-		myStep = new InitializeDependenciesStep(myJobCoordinator);
+		myStep = new InitializeDependenciesStep(myJobCoordinator, myDependencyManager);
 	}
 
 	@Test
@@ -88,6 +91,7 @@ public class InitializeDependenciesStepTest {
 			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
 
 		when(myJobCoordinator.startInstance(any(), any())).then(new JobIdIncrementor());
+		when(myDependencyManager.shouldProcessDependency(any(), any(), any())).thenReturn(true);
 
 		// execute
 		RunOutcome outcome = myStep.run(details, myJobDataSink);
@@ -306,6 +310,7 @@ public class InitializeDependenciesStepTest {
 			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
 
 		when(myJobCoordinator.startInstance(any(), any())).thenThrow(new IllegalStateException());
+		when(myDependencyManager.shouldProcessDependency(any(), any(), any())).thenReturn(true);
 
 		// execute
 		RunOutcome outcome = myStep.run(details, myJobDataSink);
@@ -322,6 +327,64 @@ public class InitializeDependenciesStepTest {
 		verify(myJobDataSink, atLeastOnce()).recoveredError(myStringCaptor.capture());
 		assertThat(myStringCaptor.getAllValues()).contains("Failed to launch child job for dependency package hl7.fhir.r4.core#4.0.1. Skipping this dependency.");
 
+	}
+
+	@Test
+	public void testRun_succeeds_withDependencyManagement() throws Exception {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		installationSpec.setFetchDependencies(true);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+		params.setDependencyTrackerId("Basic/1");
+
+		InputStream stream = InitializeDependenciesStepTest.class.getResourceAsStream("usCorePackage.tgz");
+		byte[] packageBytes = stream.readAllBytes();
+		byte[] encodedBytes = Base64.getEncoder().encode(packageBytes);
+		PackageContentsJson packageContentsJson = new PackageContentsJson();
+		packageContentsJson.setContents(encodedBytes);
+		packageContentsJson.setReport(new PackageInstallOutcomeJson());
+
+		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> details =
+			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		when(myJobCoordinator.startInstance(any(), any())).then(new JobIdIncrementor());
+		when(myDependencyManager.shouldProcessDependency(any(), any(), any())).then(invocation -> {
+			String packageName = invocation.getArgument(1);
+			if (Strings.CS.equalsAny(packageName, "hl7.fhir.r4.core", "hl7.fhir.uv.extensions.r4")) {
+				return false;
+			}
+			return true;
+		});
+
+		// execute
+		RunOutcome outcome = myStep.run(details, myJobDataSink);
+
+		// validate
+		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+
+		verify(myJobCoordinator, times(5)).startInstance(any(), myStartRequestCaptor.capture());
+		List<JobInstanceStartRequest> startRequests = myStartRequestCaptor.getAllValues();
+		List<PackageUtils.DependentPackage> dependencyNames = startRequests.stream()
+			.map(JobInstanceStartRequest::getParameters)
+			.map(t -> JsonUtil.deserialize(t, PackageInstallationJobParameters.class))
+			.map(PackageInstallationJobParameters::getInstallationSpec)
+			.map(t -> new PackageUtils.DependentPackage(t.getName(),t.getVersion()))
+			.toList();
+		assertThat(dependencyNames).containsExactlyInAnyOrder(
+			new PackageUtils.DependentPackage("hl7.terminology.r4", "7.0.0"),
+			new PackageUtils.DependentPackage("hl7.fhir.uv.smart-app-launch", "2.2.0"),
+			new PackageUtils.DependentPackage("hl7.fhir.uv.sdc", "3.0.0"),
+			new PackageUtils.DependentPackage("us.cdc.phinvads", "0.12.0"),
+			new PackageUtils.DependentPackage("us.nlm.vsac", "0.24.0"));
+
+		startRequests.stream()
+			.map(JobInstanceStartRequest::getParameters)
+			.map(t -> JsonUtil.deserialize(t, PackageInstallationJobParameters.class))
+			.map(PackageInstallationJobParameters::isDependencyJob)
+			.forEach(t -> assertThat(t).isTrue());
 	}
 
 	private static class JobIdIncrementor implements Answer<Batch2JobStartResponse> {
