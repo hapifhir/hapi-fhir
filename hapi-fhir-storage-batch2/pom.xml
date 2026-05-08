@@ -63,6 +63,11 @@
 			<artifactId>hibernate-validator</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-el</artifactId>
+		</dependency>
+
 		<!-- OpenTelemetry -->
 		<dependency>
 			<groupId>io.opentelemetry</groupId>
