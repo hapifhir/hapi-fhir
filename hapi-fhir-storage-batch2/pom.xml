@@ -63,11 +63,6 @@
 			<artifactId>hibernate-validator</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>jakarta.el</artifactId>
-		</dependency>
-
 		<!-- OpenTelemetry -->
 		<dependency>
 			<groupId>io.opentelemetry</groupId>
