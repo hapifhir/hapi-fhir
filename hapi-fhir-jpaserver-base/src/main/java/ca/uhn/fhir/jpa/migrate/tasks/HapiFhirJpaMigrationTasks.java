@@ -132,11 +132,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init840();
 		init860();
 		init880();
-		init8110();
+		init8120();
 	}
 
-	private void init8110() {
-		Builder version = forVersion(VersionEnum.V8_11_0);
+	private void init8120() {
+		Builder version = forVersion(VersionEnum.V8_12_0);
 		{
 			// https://github.com/hapifhir/hapi-fhir/issues/7708#issuecomment-4180253569
 			final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");

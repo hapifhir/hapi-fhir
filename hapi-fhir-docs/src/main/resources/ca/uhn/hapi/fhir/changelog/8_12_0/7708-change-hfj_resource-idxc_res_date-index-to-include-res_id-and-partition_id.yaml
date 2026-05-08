@@ -1,0 +1,4 @@
+---
+type: change
+issue: 7708
+title: "Change the HFJ_RESOURCE.IDX_RES_DATE Index to include RES_ID and PARTITION_ID instead of only containing RES_UPDATED."
