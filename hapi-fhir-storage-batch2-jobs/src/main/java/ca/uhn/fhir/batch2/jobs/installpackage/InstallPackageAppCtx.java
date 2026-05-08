@@ -24,7 +24,10 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageWithDependenciesJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
@@ -39,11 +42,17 @@ public class InstallPackageAppCtx {
 
 	@Bean("installPackageJobDefinition")
 	public JobDefinition<PackageInstallationJobParameters> installPackageJobDefinition(
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			PartitionSettings thePartitionSettings,
 			IHapiPackageCacheManager thePackageCacheManager,
 			IPackageInstallerSvc thePackageInstallerSvc,
 			ISearchParamRegistryController theSearchParamRegistryController,
 			IValidationSupport theValidationSupport,
 			IJobCoordinator theJobCoordinator) {
+		DependencyManager dependencyManager =
+				fetchDependencyManager(theFhirContext, theDaoRegistry, thePartitionSettings);
+
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(INSTALL_PACKAGE)
 				.setJobDescription("Install NPM Package")
@@ -54,7 +63,7 @@ public class InstallPackageAppCtx {
 						"fetch-package",
 						"Fetch the NPM Package",
 						PackageContentsJson.class,
-						fetchPackageStep(thePackageCacheManager, thePackageInstallerSvc))
+						fetchPackageStep(thePackageCacheManager, thePackageInstallerSvc, dependencyManager))
 				.addIntermediateStep(
 						"initialize-dependencies",
 						"Spawn sub-jobs to process package dependencies",
@@ -75,9 +84,17 @@ public class InstallPackageAppCtx {
 	}
 
 	@Bean
+	public DependencyManager fetchDependencyManager(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry, PartitionSettings thePartitionSettings) {
+		return new DependencyManager(theFhirContext, theDaoRegistry, thePartitionSettings);
+	}
+
+	@Bean
 	public FetchPackageStep fetchPackageStep(
-			IHapiPackageCacheManager thePackageCacheManager, IPackageInstallerSvc thePackageInstallerSvc) {
-		return new FetchPackageStep(thePackageCacheManager, thePackageInstallerSvc);
+			IHapiPackageCacheManager thePackageCacheManager,
+			IPackageInstallerSvc thePackageInstallerSvc,
+			DependencyManager theDependencyManager) {
+		return new FetchPackageStep(thePackageCacheManager, thePackageInstallerSvc, theDependencyManager);
 	}
 
 	@Bean
