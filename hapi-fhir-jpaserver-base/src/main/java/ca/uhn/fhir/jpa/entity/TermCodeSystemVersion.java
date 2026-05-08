@@ -152,6 +152,15 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		return this;
 	}
 
+	/**
+	 * Sets only the FK column value without touching the {@code @ManyToOne} entity reference.
+	 * Use this on managed entities to avoid Hibernate HHH000502 warnings caused by dirtying
+	 * the {@link #myCodeSystem} field whose {@code @JoinColumn} is {@code updatable = false}.
+	 */
+	public void setCodeSystemPid(long theCodeSystemPid) {
+		myCodeSystemPid = theCodeSystemPid;
+	}
+
 	public String getCodeSystemVersionId() {
 		return myCodeSystemVersionId;
 	}
@@ -191,6 +200,16 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		myResourcePid = theResource.getId().getId();
 		setPartitionId(theResource.getPartitionId());
 		return this;
+	}
+
+	/**
+	 * Sets only the FK column value and partition without touching the {@code @ManyToOne} entity reference.
+	 * Use this on managed entities to avoid Hibernate HHH000502 warnings caused by dirtying
+	 * the {@link #myResource} field whose {@code @JoinColumn} is {@code updatable = false}.
+	 */
+	public void setResourcePid(ResourceTable theResource) {
+		myResourcePid = theResource.getId().getId();
+		setPartitionId(theResource.getPartitionId());
 	}
 
 	public TermCodeSystemVersion setId(Long theId) {

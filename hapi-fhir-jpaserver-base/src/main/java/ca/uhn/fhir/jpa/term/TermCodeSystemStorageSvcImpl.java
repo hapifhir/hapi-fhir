@@ -466,7 +466,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		 * Do the upload
 		 */
 
-		codeSystemToStore.setCodeSystem(codeSystem);
+		if (codeSystemToStore.getPid() == null) {
+			codeSystemToStore.setCodeSystem(codeSystem);
+		} else {
+			// Entity is already managed — set only the FK column to avoid Hibernate HHH000502
+			// warnings from dirtying the @JoinColumn(updatable=false) entity reference.
+			codeSystemToStore.setCodeSystemPid(codeSystem.getPid());
+		}
 		codeSystemToStore.setCodeSystemDisplayName(theSystemName);
 		codeSystemToStore.setCodeSystemVersionId(theCodeSystemVersionId);
 
@@ -511,7 +517,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		boolean isMakeVersionCurrent = ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequestDetails);
 		if (isMakeVersionCurrent) {
-			codeSystem.setCurrentVersion(codeSystemToStore);
+			// Set only the FK columns to avoid Hibernate HHH000502 warnings — codeSystem
+			// is always a managed entity here, and myCurrentVersion's @JoinColumn is updatable=false.
+			codeSystem.setCurrentVersionPid(
+					codeSystemToStore.getPid(),
+					codeSystemToStore.getPartitionId() != null
+							? codeSystemToStore.getPartitionId().getPartitionId()
+							: null);
 			if (codeSystem.getPid() == null) {
 				codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
 			}
@@ -765,7 +777,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 					theAllowPlaceholderRepoint);
 		}
 
-		codeSystem.setResource(theCodeSystemResourceTable);
+		if (codeSystem.getPid() == null) {
+			codeSystem.setResource(theCodeSystemResourceTable);
+		} else {
+			codeSystem.setResourcePid(theCodeSystemResourceTable);
+		}
 		codeSystem.setCodeSystemUri(theSystemUri);
 		codeSystem.setName(theSystemName);
 		codeSystem = myCodeSystemDao.save(codeSystem);
@@ -826,7 +842,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 					// resource instead of rejecting. Non-NOTPRESENT callers (e.g. COMPLETE
 					// CodeSystem create/update) keep strict duplicate detection, since they
 					// must not silently replace a prior resource.
-					codeSystemVersionEntity.setResource(theCodeSystemResourceTable);
+					codeSystemVersionEntity.setResourcePid(theCodeSystemResourceTable);
 					myCodeSystemVersionDao.save(codeSystemVersionEntity);
 				} else {
 					throw new UnprocessableEntityException(Msg.code(848) + msg);
@@ -839,7 +855,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			TermCodeSystemVersion theCodeSystemVersion,
 			CodeSystem theCodeSystemResource,
 			ResourceTable theResourceTable) {
-		theCodeSystemVersion.setResource(theResourceTable);
+		theCodeSystemVersion.setResourcePid(theResourceTable);
 		theCodeSystemVersion.setCodeSystemDisplayName(theCodeSystemResource.getName());
 		theCodeSystemVersion.setCodeSystemVersionId(theCodeSystemResource.getVersion());
 	}

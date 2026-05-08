@@ -204,6 +204,16 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 		return this;
 	}
 
+	/**
+	 * Sets only the FK column values without touching the {@code @ManyToOne} entity reference.
+	 * Use this on managed entities to avoid Hibernate HHH000502 warnings caused by dirtying
+	 * the {@link #myCurrentVersion} field whose {@code @JoinColumn} is {@code updatable = false}.
+	 */
+	public void setCurrentVersionPid(long thePid, @jakarta.annotation.Nullable Integer thePartitionId) {
+		myCurrentVersionPid = thePid;
+		myCurrentVersionPartitionId = thePartitionId;
+	}
+
 	public Long getPid() {
 		return myId;
 	}
@@ -221,6 +231,16 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 		myResourcePid = theResource.getId().getId();
 		setPartitionId(theResource.getPartitionId());
 		return this;
+	}
+
+	/**
+	 * Sets only the FK column value and partition without touching the {@code @ManyToOne} entity reference.
+	 * Use this on managed entities to avoid Hibernate HHH000502 warnings caused by dirtying
+	 * the {@link #myResource} field whose {@code @JoinColumn} is {@code updatable = false}.
+	 */
+	public void setResourcePid(ResourceTable theResource) {
+		myResourcePid = theResource.getId().getId();
+		setPartitionId(theResource.getPartitionId());
 	}
 
 	@Override

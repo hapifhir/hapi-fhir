@@ -8,10 +8,14 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -19,12 +23,18 @@ import java.util.ArrayList;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
+
+	private static final String HHH000502 = "HHH000502";
+
+	@RegisterExtension
+	LogbackTestExtension myHibernateLogCapture = new LogbackTestExtension(
+		"org.hibernate.persister.entity.AbstractEntityPersister", Level.WARN);
 
 	@Autowired
 	private Batch2JobHelper myBatchJobHelper;
@@ -271,6 +281,66 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		assertThatThrownBy(() -> myCodeSystemDao.create(cs2, mySrd))
 			.isInstanceOf(UnprocessableEntityException.class)
 			.hasMessageContaining("HAPI-0848");
+	}
+
+	// Created by claude-opus-4-6
+	@Test
+	void storeNewCodeSystemVersionIfNeeded_createAndUpdate_noHibernateImmutablePropertyWarnings() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("code1")));
+
+		IIdType csId = myCodeSystemDao.create(cs, mySrd).getId().toUnqualifiedVersionless();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myHibernateLogCapture.clearEvents();
+
+		cs.setId(csId);
+		cs.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("code2")));
+		myCodeSystemDao.update(cs, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+
+		assertThat(myHibernateLogCapture.getLogMessages().stream()
+			.filter(msg -> msg.contains(HHH000502))
+			.toList())
+			.as("No HHH000502 immutable-property warnings should be emitted")
+			.isEmpty();
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri(URL_MY_CODE_SYSTEM);
+			assertThat(tcs).isNotNull();
+			assertThat(tcs.getCurrentVersion()).isNotNull();
+			assertThat(tcs.getCurrentVersion().getCodeSystem()).isNotNull();
+			assertThat(tcs.getCurrentVersion().getCodeSystem().getCodeSystemUri()).isEqualTo(URL_MY_CODE_SYSTEM);
+		});
+	}
+
+	// Created by claude-opus-4-6
+	@Test
+	void storeNewCodeSystemVersionIfNeeded_notPresentCreateAndRecreate_noHibernateImmutablePropertyWarnings() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		myCodeSystemDao.create(cs, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myHibernateLogCapture.clearEvents();
+
+		CodeSystem cs2 = new CodeSystem();
+		cs2.setUrl(URL_MY_CODE_SYSTEM);
+		cs2.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		cs2.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myCodeSystemDao.create(cs2, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		assertThat(myHibernateLogCapture.getLogMessages().stream()
+			.filter(msg -> msg.contains(HHH000502))
+			.toList())
+			.as("No HHH000502 immutable-property warnings should be emitted")
+			.isEmpty();
 	}
 
 	private CodeSystem createCodeSystemWithMoreThan100Concepts() {
