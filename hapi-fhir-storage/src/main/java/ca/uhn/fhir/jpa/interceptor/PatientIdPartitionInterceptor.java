@@ -689,6 +689,11 @@ public class PatientIdPartitionInterceptor {
 			case SEARCH_TYPE:
 				if (theReadDetails.getSearchParams() != null) {
 					SearchParameterMap params = theReadDetails.getSearchParams();
+					// When searching Patient resources directly, a pre-resolved partition hint may have been
+					// passed down from ResourceLinkPredicateBuilder (via ReadPartitionIdRequestDetails) to
+					// handle chained searches (e.g. subject=Patient/abc&subject.gender=female). We merge that
+					// hint with the partition derived from any _id values present in the search, so both
+					// the direct patient ref and any chained params target the correct partition.
 					if (PATIENT_STR.equals(theReadDetails.getResourceType())) {
 						RequestPartitionId readRequestPartitionId = theReadDetails.getRequestPartitionId();
 
