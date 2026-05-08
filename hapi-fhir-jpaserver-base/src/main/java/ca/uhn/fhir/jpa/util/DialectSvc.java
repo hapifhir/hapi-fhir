@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.model.dialect.IHapiFhirDialect;
-import graphql.VisibleForTesting;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.hibernate.dialect.Dialect;
 import org.slf4j.Logger;
@@ -14,9 +14,9 @@ import java.util.Optional;
 public class DialectSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(DialectSvc.class);
 
-	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private static boolean ourForceMsSqlMode = false;
 
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private final Optional<DriverTypeEnum> myDriverType;
 
 	public DialectSvc(HibernatePropertiesProvider theHibernatePropertiesProvider) {

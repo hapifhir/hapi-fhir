@@ -105,6 +105,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.parser.IParser;
@@ -487,6 +488,8 @@ public abstract class BaseJpaTest extends BaseTest {
 
 		PartitionSettings defaultPartConfig = new PartitionSettings();
 		BeanUtils.copyProperties(defaultPartConfig, myPartitionSettings);
+
+		DialectSvc.setForceMsSqlMode(false);
 	}
 
 	@AfterEach

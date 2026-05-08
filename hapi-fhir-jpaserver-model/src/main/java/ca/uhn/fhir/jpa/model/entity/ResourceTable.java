@@ -161,7 +161,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	@SuppressWarnings("unused")
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "RES_ID", nullable = false, insertable = false, updatable = false)
-	private Integer myResourceId;
+	private Long myResourceId;
 
 	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
 	private Integer myPartitionIdValue;

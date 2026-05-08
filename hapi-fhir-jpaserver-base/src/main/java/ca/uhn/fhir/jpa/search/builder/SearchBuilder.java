@@ -1496,8 +1496,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		for (JpaPid pid : theResourcePids) {
 			// The SearchBuilder pads the list with entries that will never match
 			// a real resource in order to create predictable numbers of parameters,
-			// but there is no reason to do that here
-			if (!JpaConstants.NO_MORE.equals(pid)) {
+			// so we'll put appropriate values here for that too
+			if (JpaConstants.NO_MORE.equals(pid)) {
+				partitionIdToPid.put(-1, -1L);
+			} else {
 				partitionIdToPid.put(pid.getPartitionId(), pid.getId());
 			}
 		}
@@ -1506,7 +1508,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		CriteriaQuery<ResourceHistoryTable> cq = cb.createQuery(ResourceHistoryTable.class);
 		Root<ResourceHistoryTable> from = cq.from(ResourceHistoryTable.class);
 
-		Join<?, ?> resourceTable = (Join<?, ?>) from.fetch("myResourceTable", JoinType.LEFT);
+		Join<?, ?> resourceTable = (Join<?, ?>) from.fetch("myResourceTable", JoinType.INNER);
 		List<Predicate> partitionAndPidPredicates =
 				new ArrayList<>(partitionIdToPid.keySet().size());
 		for (Map.Entry<Integer, Collection<Long>> entry :
