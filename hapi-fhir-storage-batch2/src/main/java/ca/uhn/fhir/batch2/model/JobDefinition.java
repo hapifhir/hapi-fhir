@@ -36,12 +36,15 @@ import org.slf4j.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class JobDefinition<PT extends IModelJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int ID_MAX_LENGTH = 100;
+	public static final Set<StatusEnum> VALID_INITIAL_STATUSES = Set.of(StatusEnum.BUILDING, StatusEnum.QUEUED);
 
+	private final StatusEnum myInitialStatus;
 	private final String myJobDefinitionId;
 	private final int myJobDefinitionVersion;
 	private final Class<PT> myParametersType;
@@ -57,6 +60,7 @@ public class JobDefinition<PT extends IModelJson> {
 	 * Constructor
 	 */
 	private JobDefinition(
+			StatusEnum theInitialStatus,
 			String theJobDefinitionId,
 			int theJobDefinitionVersion,
 			String theJobDescription,
@@ -66,11 +70,13 @@ public class JobDefinition<PT extends IModelJson> {
 			boolean theGatedExecution,
 			IJobCompletionHandler<PT> theCompletionHandler,
 			IJobCompletionHandler<PT> theErrorHandler) {
+		Validate.isTrue(VALID_INITIAL_STATUSES.contains(theInitialStatus), "Initial status is invalid");
 		Validate.isTrue(theJobDefinitionId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
 		Validate.notBlank(theJobDefinitionId, "No job definition ID supplied");
 		Validate.notBlank(theJobDescription, "No job description supplied");
 		Validate.isTrue(theJobDefinitionVersion >= 1, "No job definition version supplied (must be >= 1)");
 		Validate.isTrue(theSteps.size() >= 2, "At least 2 steps must be supplied");
+		myInitialStatus = theInitialStatus;
 		myJobDefinitionId = theJobDefinitionId;
 		myJobDefinitionVersion = theJobDefinitionVersion;
 		myJobDescription = theJobDescription;
@@ -81,6 +87,11 @@ public class JobDefinition<PT extends IModelJson> {
 		myGatedExecution = theGatedExecution;
 		myCompletionHandler = theCompletionHandler;
 		myErrorHandler = theErrorHandler;
+	}
+
+	@Nonnull
+	public StatusEnum getInitialStatus() {
+		return myInitialStatus;
 	}
 
 	@Nullable
@@ -165,6 +176,7 @@ public class JobDefinition<PT extends IModelJson> {
 
 	public static class Builder<PT extends IModelJson, NIT extends IModelJson> {
 
+		private StatusEnum myInitialStatus = StatusEnum.QUEUED;
 		private final List<JobDefinitionStep<PT, ?, ?>> mySteps;
 		private String myJobDefinitionId;
 		private int myJobDefinitionVersion;
@@ -184,6 +196,7 @@ public class JobDefinition<PT extends IModelJson> {
 		}
 
 		Builder(
+				StatusEnum theInitialStatus,
 				List<JobDefinitionStep<PT, ?, ?>> theSteps,
 				String theJobDefinitionId,
 				int theJobDefinitionVersion,
@@ -194,6 +207,7 @@ public class JobDefinition<PT extends IModelJson> {
 				boolean theGatedExecution,
 				IJobCompletionHandler<PT> theCompletionHandler,
 				IJobCompletionHandler<PT> theErrorHandler) {
+			myInitialStatus = theInitialStatus;
 			mySteps = theSteps;
 			myJobDefinitionId = theJobDefinitionId;
 			myJobDefinitionVersion = theJobDefinitionVersion;
@@ -240,6 +254,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps.add(new JobDefinitionStep<>(
 					theStepId, theStepDescription, theStepWorker, VoidModel.class, theOutputType));
 			return new Builder<>(
+					myInitialStatus,
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
@@ -269,6 +284,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps.add(new JobDefinitionStep<>(
 					theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
 			return new Builder<>(
+					myInitialStatus,
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
@@ -295,6 +311,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps.add(new JobDefinitionStep<>(
 					theStepId, theStepDescription, theStepWorker, myNextInputType, VoidModel.class));
 			return new Builder<>(
+					myInitialStatus,
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
@@ -319,6 +336,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps.add(new JobDefinitionReductionStep<>(
 					theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
 			return new Builder<>(
+					myInitialStatus,
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
@@ -334,6 +352,7 @@ public class JobDefinition<PT extends IModelJson> {
 		public JobDefinition<PT> build() {
 			Validate.notNull(myJobParametersType, "No job parameters type was supplied");
 			return new JobDefinition<>(
+					myInitialStatus,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
 					myJobDescription,
@@ -446,6 +465,12 @@ public class JobDefinition<PT extends IModelJson> {
 		public Builder<PT, NIT> errorHandler(IJobCompletionHandler<PT> theErrorHandler) {
 			Validate.isTrue(myErrorHandler == null, "Can not supply multiple error handlers");
 			myErrorHandler = theErrorHandler;
+			return this;
+		}
+
+		public Builder<PT, NIT> setInitialStatus(StatusEnum theInitialStatus) {
+			Validate.isTrue(VALID_INITIAL_STATUSES.contains(theInitialStatus), "Initial status is invalid");
+			myInitialStatus = theInitialStatus;
 			return this;
 		}
 	}

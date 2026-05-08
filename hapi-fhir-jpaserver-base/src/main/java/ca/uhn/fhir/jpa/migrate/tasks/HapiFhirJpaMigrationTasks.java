@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -132,11 +133,33 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init840();
 		init860();
 		init880();
-		init8120();
+		init8_10_0();
+		init8_12_0();
 	}
 
-	private void init8120() {
+	protected void init8_12_0() {
 		Builder version = forVersion(VersionEnum.V8_12_0);
+
+		Builder.BuilderAddTableByColumns attachment =
+				version.addTableByColumns("20260407.10", "BT2_JOB_ATTACHMENT", "JOB_INSTANCE_ID", "ATTACHMENT_ID");
+		attachment.addColumn("JOB_INSTANCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachment.addColumn("ATTACHMENT_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachment.addColumn("FILENAME").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachment.addColumn("CONTENT_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 50);
+		attachment.addColumn("CMP_STATUS").nonNullable().type(ColumnTypeEnum.STRING, 50);
+		attachment.addColumn("ATTACHMENT_DATA").nonNullable().type(ColumnTypeEnum.BINARY);
+		attachment.addColumn("ATTACHMENT_LENGTH_CMP").nonNullable().type(ColumnTypeEnum.LONG);
+		attachment.addColumn("ATTACHMENT_LENGTH_UC").nonNullable().type(ColumnTypeEnum.LONG);
+		attachment.addIndex("20260407.11", "IDX_BT2JA_INST_ID").unique(false).withColumns("JOB_INSTANCE_ID");
+		attachment
+				.addIndex("20260407.12", "IDX_BT2JA_INST_ID_AND_FN")
+				.unique(true)
+				.withColumns("JOB_INSTANCE_ID", "FILENAME");
+		attachment
+				.addForeignKey("20260607.13", "FK_BT2JA_INSTANCE")
+				.toColumn("JOB_INSTANCE_ID")
+				.references("BT2_JOB_INSTANCE", "JOB_INSTANCE_ID");
+
 		{
 			// https://github.com/hapifhir/hapi-fhir/issues/7708#issuecomment-4180253569
 			final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
@@ -153,6 +176,22 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.withColumns("RES_UPDATED", "RES_ID", "PARTITION_ID")
 					.heavyweightSkipByDefault();
 		}
+	}
+
+	protected void init8_10_0() {
+		Builder version = forVersion(VersionEnum.V8_10_0);
+
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.dropIndex("20260410.10", "IDX_IDXCMBTOKNU_STR");
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.addColumn("20260410.20", "DATE_ORDINAL")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.addIndex("20260410.30", "IDX_IDXCMBTOKNU_HD")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_COMPLETE", "DATE_ORDINAL", "RES_ID", "PARTITION_ID");
 	}
 
 	protected void init880() {
