@@ -571,7 +571,7 @@ public class SearchTask implements Callable<Void> {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void doSearch() {
 		/*
-		 * If the user has explicitly requested a _count, perform a
+		 * If the user has explicitly only requested a _count, perform a
 		 *
 		 * SELECT COUNT(*) ....
 		 *
@@ -582,66 +582,75 @@ public class SearchTask implements Callable<Void> {
 				? isWantCount(myParams)
 				: SearchParameterMapCalculator.isWantCount(myStorageSettings.getDefaultTotalMode());
 
-		if (myParamWantOnlyCount || myParamOrDefaultWantCount) {
-			doCountOnlyQuery(myParamWantOnlyCount);
-			if (myParamWantOnlyCount) {
-				return;
-			}
+		if (myParamWantOnlyCount) {
+			doCountOnlyQuery();
+			ourLog.trace("Done count");
+			return;
 		}
 
-		ourLog.trace("Done count");
 		ISearchBuilder sb = newSearchBuilder();
 
 		/*
-		 * Figure out how many results we're actually going to fetch from the
-		 * database in this pass. This calculation takes into consideration the
-		 * "pre-fetch thresholds" specified in StorageSettings#getSearchPreFetchThresholds()
-		 * as well as the value of the _count parameter.
+		 * If _total=accurate is requested, we need to fetch all results to provide
+		 * a consistent count. This avoids race conditions where a separate COUNT(*)
+		 * query could return a different value than the actual result set if records
+		 * are being added during the search.
 		 */
-		int currentlyLoaded = defaultIfNull(mySearch.getNumFound(), 0);
-		int minWanted = 0;
+		if (myParamOrDefaultWantCount) {
+			sb.setMaxResultsToFetch(null);
+			sb.setDeduplicateInDatabase(true);
+		} else {
+			/*
+			 * Figure out how many results we're actually going to fetch from the
+			 * database in this pass. This calculation takes into consideration the
+			 * "pre-fetch thresholds" specified in StorageSettings#getSearchPreFetchThresholds()
+			 * as well as the value of the _count parameter.
+			 */
+			int currentlyLoaded = defaultIfNull(mySearch.getNumFound(), 0);
+			int minWanted = 0;
 
-		// if no count is provided,
-		// we only use the values in SearchPreFetchThresholds
-		// but if there is a count...
-		if (myParams.getCount() != null) {
-			minWanted = Math.min(myParams.getCount(), myPagingProvider.getMaximumPageSize());
-			minWanted += currentlyLoaded;
-		}
-
-		// iterate through the search thresholds
-		for (Iterator<Integer> iter =
-						myStorageSettings.getSearchPreFetchThresholds().iterator();
-				iter.hasNext(); ) {
-			int next = iter.next();
-			if (next != -1 && next <= currentlyLoaded) {
-				continue;
+			// if no count is provided,
+			// we only use the values in SearchPreFetchThresholds
+			// but if there is a count...
+			if (myParams.getCount() != null) {
+				minWanted = Math.min(myParams.getCount(), myPagingProvider.getMaximumPageSize());
+				minWanted += currentlyLoaded;
 			}
 
-			if (next == -1) {
-				sb.setMaxResultsToFetch(null);
-				/*
-				 * If we're past the last prefetch threshold then
-				 * we're potentially fetching unlimited amounts of data.
-				 * We'll move responsibility for deduplication to the database in this case
-				 * so that we don't run the risk of blowing out the memory
-				 * in the app server
-				 */
-				sb.setDeduplicateInDatabase(true);
-			} else {
-				// we want at least 1 more than our requested amount
-				// so we know that there are other results
-				// (in case we get the exact amount back)
-				myMaxResultsToFetch = Math.max(next, minWanted) + 1;
-				sb.setMaxResultsToFetch(myMaxResultsToFetch);
-			}
+			// iterate through the search thresholds
+			for (Iterator<Integer> iter =
+							myStorageSettings.getSearchPreFetchThresholds().iterator();
+					iter.hasNext(); ) {
+				int next = iter.next();
+				if (next != -1 && next <= currentlyLoaded) {
+					continue;
+				}
 
-			if (iter.hasNext()) {
-				myAdditionalPrefetchThresholdsRemaining = true;
-			}
+				if (next == -1) {
+					sb.setMaxResultsToFetch(null);
+					/*
+					 * If we're past the last prefetch threshold then
+					 * we're potentially fetching unlimited amounts of data.
+					 * We'll move responsibility for deduplication to the database in this case
+					 * so that we don't run the risk of blowing out the memory
+					 * in the app server
+					 */
+					sb.setDeduplicateInDatabase(true);
+				} else {
+					// we want at least 1 more than our requested amount
+					// so we know that there are other results
+					// (in case we get the exact amount back)
+					myMaxResultsToFetch = Math.max(next, minWanted) + 1;
+					sb.setMaxResultsToFetch(myMaxResultsToFetch);
+				}
 
-			// If we get here's we've found an appropriate threshold
-			break;
+				if (iter.hasNext()) {
+					myAdditionalPrefetchThresholdsRemaining = true;
+				}
+
+				// If we get here's we've found an appropriate threshold
+				break;
+			}
 		}
 
 		/*
@@ -683,11 +692,12 @@ public class SearchTask implements Callable<Void> {
 			 * matching the search off of the disk and into memory. After
 			 * every X results, we commit to the HFJ_SEARCH table.
 			 */
-			int syncSize = mySyncSize;
+			int totalCount = 0;
 			while (resultIterator.hasNext()) {
 				myUnsyncedPids.add(resultIterator.next());
+				totalCount++;
 
-				boolean shouldSync = myUnsyncedPids.size() >= syncSize;
+				boolean shouldSync = myUnsyncedPids.size() >= mySyncSize;
 
 				if (myStorageSettings.getCountSearchResultsUpTo() != null
 						&& myStorageSettings.getCountSearchResultsUpTo() > 0
@@ -716,6 +726,10 @@ public class SearchTask implements Callable<Void> {
 
 			saveUnsynced(resultIterator);
 
+			if (myParamOrDefaultWantCount) {
+				mySearch.setTotalCount(totalCount);
+			}
+
 		} catch (IOException e) {
 			ourLog.error("IO failure during database access", e);
 			throw new InternalErrorException(Msg.code(1166) + e);
@@ -724,9 +738,8 @@ public class SearchTask implements Callable<Void> {
 
 	/**
 	 * Does the query but only for the count.
-	 * @param theParamWantOnlyCount - if count query is wanted only
 	 */
-	private void doCountOnlyQuery(boolean theParamWantOnlyCount) {
+	private void doCountOnlyQuery() {
 		ourLog.trace("Performing count");
 		@SuppressWarnings("rawtypes")
 		ISearchBuilder sb = newSearchBuilder();
@@ -749,9 +762,7 @@ public class SearchTask implements Callable<Void> {
 				.withRequestPartitionId(myRequestPartitionId)
 				.execute(() -> {
 					mySearch.setTotalCount(count.intValue());
-					if (theParamWantOnlyCount) {
-						mySearch.setStatus(SearchStatusEnum.FINISHED);
-					}
+					mySearch.setStatus(SearchStatusEnum.FINISHED);
 					doSaveSearch();
 				});
 	}
