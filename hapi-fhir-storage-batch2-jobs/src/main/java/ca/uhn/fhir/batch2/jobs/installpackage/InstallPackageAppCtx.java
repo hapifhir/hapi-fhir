@@ -79,7 +79,10 @@ public class InstallPackageAppCtx {
 						"Install the contents of the NPM package",
 						PackageInstallOutcomeJson.class,
 						processPackageStep(
-								thePackageInstallerSvc, theSearchParamRegistryController, theValidationSupport))
+								thePackageInstallerSvc,
+								theSearchParamRegistryController,
+								theValidationSupport,
+								dependencyManager))
 				.build();
 	}
 
@@ -111,7 +114,9 @@ public class InstallPackageAppCtx {
 	public ProcessPackageStep processPackageStep(
 			IPackageInstallerSvc thePackageInstallerSvc,
 			ISearchParamRegistryController theSearchParamRegistryController,
-			IValidationSupport theValidationSupport) {
-		return new ProcessPackageStep(thePackageInstallerSvc, theSearchParamRegistryController, theValidationSupport);
+			IValidationSupport theValidationSupport,
+			DependencyManager theDependencyManager) {
+		return new ProcessPackageStep(
+				thePackageInstallerSvc, theSearchParamRegistryController, theValidationSupport, theDependencyManager);
 	}
 }
