@@ -851,20 +851,18 @@ public class PatientIdPartitionInterceptor {
 
 	@SuppressWarnings("SameParameterValue")
 	private List<String> getResourceIdsForSearchParam(SearchParameterMap theParams, String theParamName) {
-		Set<String> needingAtLeastOneChainedSpToResolveSet = new LinkedHashSet<>();
-
 		List<List<IQueryParameterType>> paramAndListForParamName = theParams.get(theParamName);
 		if (paramAndListForParamName == null) {
 			return Collections.emptyList();
 		}
 
+		Set<String> needingAtLeastOneChainedSpToResolveSet = new LinkedHashSet<>();
 		List<String> idParts = new ArrayList<>();
-		for (List<IQueryParameterType> iQueryParameterTypes : paramAndListForParamName) {
-			for (IQueryParameterType aParam : iQueryParameterTypes) {
 
-				if (aParam instanceof ReferenceParam referenceParam) {
-					String chain = referenceParam.getChain();
-					if (nonNull(chain)) {
+		paramAndListForParamName.stream()
+				.flatMap(Collection::stream)
+				.forEach(aParam -> {
+					if (aParam instanceof ReferenceParam referenceParam && nonNull(referenceParam.getChain())) {
 						if (PATIENT_COMPARTMENT_SP_PATIENT.equals(theParamName)
 								|| PATIENT_COMPARTMENT_SP_SUBJECT.equals(theParamName)) {
 							// 'patient' and 'subject' SP have a 0..1 cardinality and will always refer to a Patient
@@ -876,39 +874,36 @@ public class PatientIdPartitionInterceptor {
 							//
 							// we keep track of the chained SP names needing direct resolution to support SP interchangeability:
 							// ?subject=Patient/abc&subject.active=true == ?subject.active=true&subject=Patient/abc
-							needingAtLeastOneChainedSpToResolveSet.add(chain);
-							continue;
-						} else {
-							throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
-									+ chain + " is not supported in patient compartment mode");
+							needingAtLeastOneChainedSpToResolveSet.add(referenceParam.getChain());
+							return; // exits the forEach lambda, not the method
+						}
+						throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
+								+ referenceParam.getChain() + " is not supported in patient compartment mode");
+					}
+
+					String qualifier = aParam.getQueryParameterQualifier();
+					if (isNotBlank(qualifier) && !Constants.PARAMQUALIFIER_MDM.equals(qualifier)) {
+						throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName + qualifier
+								+ " is not supported in patient compartment mode");
+					}
+					String valueAsQueryToken = aParam.getValueAsQueryToken();
+					if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")
+							|| Strings.CS.contains(valueAsQueryToken, "/Patient/")) {
+						IdType id = new IdType(valueAsQueryToken);
+						if (id.getResourceType().equals(PATIENT_STR)) {
+							idParts.add(id.getIdPart());
+						}
+					} else if (valueAsQueryToken.indexOf('/') == -1) {
+						IdType id = new IdType(valueAsQueryToken);
+						if (id.isIdPartValid()) {
+							idParts.add(valueAsQueryToken);
 						}
 					}
-				}
-
-				String qualifier = aParam.getQueryParameterQualifier();
-				if (isNotBlank(qualifier) && !Constants.PARAMQUALIFIER_MDM.equals(qualifier)) {
-					throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName + qualifier
-							+ " is not supported in patient compartment mode");
-				}
-				String valueAsQueryToken = aParam.getValueAsQueryToken();
-				if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")
-						|| Strings.CS.contains(valueAsQueryToken, "/Patient/")) {
-					IdType id = new IdType(valueAsQueryToken);
-					if (id.getResourceType().equals(PATIENT_STR)) {
-						idParts.add(id.getIdPart());
-					}
-				} else if (valueAsQueryToken.indexOf('/') == -1) {
-					IdType id = new IdType(valueAsQueryToken);
-					if (id.isIdPartValid()) {
-						idParts.add(valueAsQueryToken);
-					}
-				}
-			}
-		}
+				});
 
 		if (idParts.isEmpty() && !needingAtLeastOneChainedSpToResolveSet.isEmpty()) {
-			String errorMsgString = buildErrorMsgForChainedParameters(theParamName, needingAtLeastOneChainedSpToResolveSet);
-			throw new MethodNotAllowedException(Msg.code(2928) + errorMsgString);
+			throw new MethodNotAllowedException(
+					Msg.code(2928) + buildErrorMsgForChainedParameters(theParamName, needingAtLeastOneChainedSpToResolveSet));
 		}
 
 		return idParts;
