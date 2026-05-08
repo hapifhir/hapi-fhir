@@ -864,51 +864,49 @@ public class PatientIdPartitionInterceptor {
 		Set<String> needingAtLeastOneChainedSpToResolveSet = new LinkedHashSet<>();
 		List<String> idParts = new ArrayList<>();
 
-		paramAndListForParamName.stream()
-				.flatMap(Collection::stream)
-				.forEach(aParam -> {
-					if (aParam instanceof ReferenceParam referenceParam && nonNull(referenceParam.getChain())) {
-						if (PATIENT_COMPARTMENT_SP_PATIENT.equals(theParamName)
-								|| PATIENT_COMPARTMENT_SP_SUBJECT.equals(theParamName)) {
-							// 'patient' and 'subject' SP have a 0..1 cardinality and will always refer to a Patient
-							// resource. Chained SP on subject or patient can't be resolved on their own but if combined
-							// with another SP resolving directly to a patient (?subject=Patient/abc), it is safe to
-							// assume that the chained SP points to the same object.
-							// Essentially, if we have one SP that resolves directly, we don't need to resolve other SP
-							// pointing to the same resource.
-							//
-							// we keep track of the chained SP names needing direct resolution to support SP interchangeability:
-							// ?subject=Patient/abc&subject.active=true == ?subject.active=true&subject=Patient/abc
-							needingAtLeastOneChainedSpToResolveSet.add(referenceParam.getChain());
-							return; // exits the forEach lambda, not the method
-						}
-						throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
-								+ referenceParam.getChain() + " is not supported in patient compartment mode");
-					}
+		paramAndListForParamName.stream().flatMap(Collection::stream).forEach(aParam -> {
+			if (aParam instanceof ReferenceParam referenceParam && nonNull(referenceParam.getChain())) {
+				if (PATIENT_COMPARTMENT_SP_PATIENT.equals(theParamName)
+						|| PATIENT_COMPARTMENT_SP_SUBJECT.equals(theParamName)) {
+					// 'patient' and 'subject' SP have a 0..1 cardinality and will always refer to a Patient
+					// resource. Chained SP on subject or patient can't be resolved on their own but if combined
+					// with another SP resolving directly to a patient (?subject=Patient/abc), it is safe to
+					// assume that the chained SP points to the same object.
+					// Essentially, if we have one SP that resolves directly, we don't need to resolve other SP
+					// pointing to the same resource.
+					//
+					// we keep track of the chained SP names needing direct resolution to support SP interchangeability:
+					// ?subject=Patient/abc&subject.active=true == ?subject.active=true&subject=Patient/abc
+					needingAtLeastOneChainedSpToResolveSet.add(referenceParam.getChain());
+					return; // exits the forEach lambda, not the method
+				}
+				throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
+						+ referenceParam.getChain() + " is not supported in patient compartment mode");
+			}
 
-					String qualifier = aParam.getQueryParameterQualifier();
-					if (isNotBlank(qualifier) && !Constants.PARAMQUALIFIER_MDM.equals(qualifier)) {
-						throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName + qualifier
-								+ " is not supported in patient compartment mode");
-					}
-					String valueAsQueryToken = aParam.getValueAsQueryToken();
-					if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")
-							|| Strings.CS.contains(valueAsQueryToken, "/Patient/")) {
-						IdType id = new IdType(valueAsQueryToken);
-						if (id.getResourceType().equals(PATIENT_STR)) {
-							idParts.add(id.getIdPart());
-						}
-					} else if (valueAsQueryToken.indexOf('/') == -1) {
-						IdType id = new IdType(valueAsQueryToken);
-						if (id.isIdPartValid()) {
-							idParts.add(valueAsQueryToken);
-						}
-					}
-				});
+			String qualifier = aParam.getQueryParameterQualifier();
+			if (isNotBlank(qualifier) && !Constants.PARAMQUALIFIER_MDM.equals(qualifier)) {
+				throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName + qualifier
+						+ " is not supported in patient compartment mode");
+			}
+			String valueAsQueryToken = aParam.getValueAsQueryToken();
+			if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")
+					|| Strings.CS.contains(valueAsQueryToken, "/Patient/")) {
+				IdType id = new IdType(valueAsQueryToken);
+				if (id.getResourceType().equals(PATIENT_STR)) {
+					idParts.add(id.getIdPart());
+				}
+			} else if (valueAsQueryToken.indexOf('/') == -1) {
+				IdType id = new IdType(valueAsQueryToken);
+				if (id.isIdPartValid()) {
+					idParts.add(valueAsQueryToken);
+				}
+			}
+		});
 
 		if (idParts.isEmpty() && !needingAtLeastOneChainedSpToResolveSet.isEmpty()) {
-			throw new MethodNotAllowedException(
-					Msg.code(2928) + buildErrorMsgForChainedParameters(theParamName, needingAtLeastOneChainedSpToResolveSet));
+			throw new MethodNotAllowedException(Msg.code(2928)
+					+ buildErrorMsgForChainedParameters(theParamName, needingAtLeastOneChainedSpToResolveSet));
 		}
 
 		return idParts;
