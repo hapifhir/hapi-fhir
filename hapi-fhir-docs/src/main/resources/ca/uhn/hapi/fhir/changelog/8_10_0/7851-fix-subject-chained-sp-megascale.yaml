@@ -2,8 +2,9 @@
 type: fix
 jira: SMILE-11955
 title: "Previously, when operating in patient-id partition mode, the use of chained SP in searches would error out
-(HAPI-1322) even if the target of the chain is provided with the search (`Observation?subject=Patient/abc&subject.gender=female`).    
-    
-Because `patient` and `subject` search parameters can only reference a single `Patient` and patient-id partitioning mode 
-requires a direct patient reference to be included in searches,  we have allowed chaining on `patient` and `subject` SPs
-since the partition for any chained sub-query on these two can always be resolved from the context."
+(HAPI-1322) even if the target of the chain is provided with the search (`Observation?subject=Patient/abc&subject.gender=female`).
+
+Because the `patient` and `subject` search parameters have 0..1 cardinality and always reference a single Patient
+resource, chaining on these two SPs is now allowed when a direct patient reference is present on the same SP — the
+partition is unambiguously derived from the direct reference, making the chained qualifier safe to apply. A
+chain-only query with no direct reference (e.g. `Observation?subject.gender=female`) will still result in an error."
