@@ -855,7 +855,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			TermCodeSystemVersion theCodeSystemVersion,
 			CodeSystem theCodeSystemResource,
 			ResourceTable theResourceTable) {
-		theCodeSystemVersion.setResourcePid(theResourceTable);
+		theCodeSystemVersion.setResource(theResourceTable);
 		theCodeSystemVersion.setCodeSystemDisplayName(theCodeSystemResource.getName());
 		theCodeSystemVersion.setCodeSystemVersionId(theCodeSystemResource.getVersion());
 	}
