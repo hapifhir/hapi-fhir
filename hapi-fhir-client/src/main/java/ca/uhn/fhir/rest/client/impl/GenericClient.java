@@ -132,6 +132,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -2303,7 +2304,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 						myContext, myResourceName, params, resourceId, myCompartmentName, mySearchStyle);
 			}
 
-			return (OUTPUT) invoke(params, binding, invocation);
+			OUTPUT invoke = (OUTPUT) invoke(params, binding, invocation);
+
+			if (invoke instanceof IBaseBundle) {
+				BundleUtil.setSearchModeMetadata(myContext, (IBaseBundle) invoke);
+			}
+
+			return invoke;
 		}
 
 		@Override
