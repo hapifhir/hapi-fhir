@@ -1,6 +1,0 @@
----
-type: fix
-issue: 7889
-title: "When uploading a non-English edition of SNOMED CT, concept hierarchy
-   relationships were not always stored due to a language issue in the loader.
-   Thanks to Joel Bach for the contribution!"
