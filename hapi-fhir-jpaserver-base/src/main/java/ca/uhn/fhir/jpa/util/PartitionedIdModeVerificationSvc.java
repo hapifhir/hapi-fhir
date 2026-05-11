@@ -25,10 +25,8 @@ import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.dialect.IHapiFhirDialect;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.collections4.SetUtils;
-import org.hibernate.dialect.Dialect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -37,6 +35,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.sql.DataSource;
@@ -54,6 +53,7 @@ public class PartitionedIdModeVerificationSvc {
 	private final PartitionSettings myPartitionSettings;
 	private final HibernatePropertiesProvider myHibernatePropertiesProvider;
 	private final PlatformTransactionManager myTxManager;
+	private final DialectSvc myDialectSvc;
 
 	/**
 	 * Constructor
@@ -61,10 +61,12 @@ public class PartitionedIdModeVerificationSvc {
 	public PartitionedIdModeVerificationSvc(
 			PartitionSettings thePartitionSettings,
 			HibernatePropertiesProvider theHibernatePropertiesProvider,
-			PlatformTransactionManager theTxManager) {
+			PlatformTransactionManager theTxManager,
+			DialectSvc theDialectSvc) {
 		myPartitionSettings = thePartitionSettings;
 		myHibernatePropertiesProvider = theHibernatePropertiesProvider;
 		myTxManager = theTxManager;
+		myDialectSvc = theDialectSvc;
 	}
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
@@ -73,16 +75,15 @@ public class PartitionedIdModeVerificationSvc {
 		DataSource dataSource = myHibernatePropertiesProvider.getDataSource();
 		boolean expectDatabasePartitionMode = myPartitionSettings.isDatabasePartitionMode();
 
-		Dialect dialect = myHibernatePropertiesProvider.getDialect();
-		if (!(dialect instanceof IHapiFhirDialect)) {
-			ourLog.warn("Dialect is not a HAPI FHIR dialect: {}", dialect);
+		Optional<DriverTypeEnum> driverType = myDialectSvc.getDriverType();
+		if (driverType.isEmpty()) {
+			ourLog.warn("Database schema check skipped because dialect is not a HAPI FHIR dialect");
 			return;
 		}
 
-		DriverTypeEnum driverType = ((IHapiFhirDialect) dialect).getDriverType();
 		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
 		DriverTypeEnum.ConnectionProperties cp =
-				new DriverTypeEnum.ConnectionProperties(dataSource, transactionTemplate, driverType);
+				new DriverTypeEnum.ConnectionProperties(dataSource, transactionTemplate, driverType.orElseThrow());
 		verifySchemaIsAppropriateForDatabasePartitionMode(cp, expectDatabasePartitionMode);
 	}
 

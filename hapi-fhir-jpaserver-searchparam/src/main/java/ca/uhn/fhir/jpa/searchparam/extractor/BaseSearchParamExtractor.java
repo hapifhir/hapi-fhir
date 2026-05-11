@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParamQuantity;
@@ -45,12 +46,14 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
+import ca.uhn.fhir.jpa.searchparam.util.PerformanceTracingLogger;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -61,7 +64,6 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -127,6 +129,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	private Set<String> myIgnoredForSearchDatatypes;
 	private BaseRuntimeChildDefinition myQuantityValueValueChild;
 	private BaseRuntimeChildDefinition myQuantitySystemValueChild;
@@ -174,6 +179,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	// allow extraction of Resource-level search param values
 	private boolean myExtractResourceLevelParams = false;
+	private PerformanceTracingLogger myPerformanceTracingLogger;
 
 	/**
 	 * Constructor
@@ -308,165 +314,33 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return new CompositeExtractor(theResource);
 	}
 
-	/**
-	 * Extractor for composite SPs.
-	 * Extracts elements, and then recurses and applies extractors for each component SP using the element as the new root.
-	 */
-	public class CompositeExtractor implements IExtractor<ResourceIndexedSearchParamComposite> {
-		final IBaseResource myResource;
-		final String myResourceType;
-
-		public CompositeExtractor(IBaseResource theResource) {
-			myResource = theResource;
-			myResourceType = toRootTypeName(theResource);
-		}
-
-		/**
-		 * Extract the subcomponent index data for each component of a composite SP from an IBase element.
-		 *
-		 * @param theParams               will add 1 or 0 ResourceIndexedSearchParamComposite instances for theValue
-		 * @param theCompositeSearchParam the composite SP
-		 * @param theValue                the focus element for the subcomponent extraction
-		 * @param thePath                 unused api param
-		 * @param theWantLocalReferences  passed down to reference extraction
-		 */
-		@Override
-		public void extract(
-				SearchParamSet<ResourceIndexedSearchParamComposite> theParams,
-				RuntimeSearchParam theCompositeSearchParam,
-				IBase theValue,
-				String thePath,
-				boolean theWantLocalReferences) {
-
-			// skip broken SPs
-			if (!isExtractableComposite(theCompositeSearchParam)) {
-				ourLog.info(
-						"CompositeExtractor - skipping unsupported search parameter {}",
-						theCompositeSearchParam.getName());
-				return;
-			}
-
-			String compositeSpName = theCompositeSearchParam.getName();
-			ourLog.trace("CompositeExtractor - extracting {} {}", compositeSpName, theValue);
-			ResourceIndexedSearchParamComposite e = new ResourceIndexedSearchParamComposite(compositeSpName, thePath);
-
-			// extract the index data for each component.
-			for (RuntimeSearchParam.Component component : theCompositeSearchParam.getComponents()) {
-				String componentSpRef = component.getReference();
-				String expression = component.getExpression();
-
-				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(
-						componentSpRef, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
-				Validate.notNull(
-						componentSp,
-						"Misconfigured SP %s - failed to load component %s",
-						compositeSpName,
-						componentSpRef);
-
-				SearchParamSet<BaseResourceIndexedSearchParam> componentIndexedSearchParams =
-						extractCompositeComponentIndexData(
-								theValue, componentSp, expression, theWantLocalReferences, theCompositeSearchParam);
-				if (componentIndexedSearchParams.isEmpty()) {
-					// If any of the components are empty, no search can ever match.  Short circuit, and bail out.
-					return;
-				} else {
-					e.addComponentIndexedSearchParams(componentSp, componentIndexedSearchParams);
-				}
-			}
-
-			// every component has data.  Add it for indexing.
-			theParams.add(e);
-		}
-
-		/**
-		 * Extract the subcomponent index data for a single component of a composite SP.
-		 *
-		 * @param theFocusElement         the element to use as the root for sub-extraction
-		 * @param theComponentSearchParam the active subcomponent SP for extraction
-		 * @param theSubPathExpression    the sub-expression to extract values from theFocusElement
-		 * @param theWantLocalReferences  flag for URI processing
-		 * @param theCompositeSearchParam the parent composite SP
-		 * @return the extracted index beans for theFocusElement
-		 */
-		@Nonnull
-		private SearchParamSet<BaseResourceIndexedSearchParam> extractCompositeComponentIndexData(
-				IBase theFocusElement,
-				RuntimeSearchParam theComponentSearchParam,
-				String theSubPathExpression,
-				boolean theWantLocalReferences,
-				RuntimeSearchParam theCompositeSearchParam) {
-			IExtractor componentExtractor = createExtractor(theComponentSearchParam, myResource);
-			SearchParamSet<BaseResourceIndexedSearchParam> componentIndexData = new SearchParamSet<>();
-
-			extractSearchParam(
-					theComponentSearchParam,
-					theSubPathExpression,
-					theFocusElement,
-					componentExtractor,
-					componentIndexData,
-					theWantLocalReferences);
-			ourLog.trace(
-					"CompositeExtractor - extracted {} index values for {}",
-					componentIndexData.size(),
-					theComponentSearchParam.getName());
-
-			return componentIndexData;
-		}
-
-		/**
-		 * Is this an extractable composite SP?
-		 *
-		 * @param theSearchParam of type composite
-		 * @return can we extract useful index data from this?
-		 */
-		private boolean isExtractableComposite(RuntimeSearchParam theSearchParam) {
-			// this is a composite SP
-			return RestSearchParameterTypeEnum.COMPOSITE.equals(theSearchParam.getParamType())
-					&& theSearchParam.getComponents().stream().noneMatch(this::isNotExtractableCompositeComponent);
-		}
-
-		private boolean isNotExtractableCompositeComponent(RuntimeSearchParam.Component c) {
-			RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParamByUrl(
-					c.getReference(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
-			return // Does the sub-param link work?
-			componentSearchParam == null
-					||
-					// Is this the right type?
-					RestSearchParameterTypeEnum.COMPOSITE.equals(componentSearchParam.getParamType())
-					||
-
-					// Bug workaround: the component expressions are null in the FhirContextSearchParamRegistry. We
-					// can't do anything with them.
-					c.getExpression() == null
-					||
-
-					// TODO mb Bug workaround: we don't support the %resource variable, but standard SPs on
-					// MolecularSequence use it.
-					// Skip them for now.
-					c.getExpression().contains("%resource");
-		}
-	}
-
 	@Override
 	public SearchParamSet<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(
-			String theResourceType, ResourceIndexedSearchParams theParams) {
+			RequestDetails theRequestDetails, String theResourceType, ResourceIndexedSearchParams theParams) {
 		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
 		List<RuntimeSearchParam> runtimeComboUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(
 				theResourceType, ComboSearchParamType.UNIQUE, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboUniqueParams) {
 			Set<ResourceIndexedComboStringUnique> comboUniqueParams =
-					createComboUniqueParam(theResourceType, theParams, runtimeParam);
+					createComboUniqueParam(theRequestDetails, theResourceType, theParams, runtimeParam);
 			retVal.addAll(comboUniqueParams);
 		}
 		return retVal;
 	}
 
 	private SearchParamSet<ResourceIndexedComboStringUnique> createComboUniqueParam(
-			String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
+			RequestDetails theRequestDetails,
+			String theResourceType,
+			ResourceIndexedSearchParams theParams,
+			RuntimeSearchParam theRuntimeParam) {
 		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
-		Set<String> queryStringsToPopulate =
-				extractParameterCombinationsForComboParam(theParams, theResourceType, theRuntimeParam);
+
+		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
+				JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theRuntimeParam);
+
+		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParamExcludingRangedDates(
+				theRequestDetails, compositeComponents, theParams, theResourceType, theRuntimeParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
 			ourLog.trace(
@@ -484,7 +358,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(
-			String theResourceType, ResourceIndexedSearchParams theParams) {
+			RequestDetails theRequestDetails, String theResourceType, ResourceIndexedSearchParams theParams) {
 		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
 		List<RuntimeSearchParam> runtimeComboNonUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(
 				theResourceType,
@@ -492,129 +366,222 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboNonUniqueParams) {
-			Set<ResourceIndexedComboTokenNonUnique> comboNonUniqueParams =
-					createComboNonUniqueParam(theResourceType, theParams, runtimeParam);
+			Set<ResourceIndexedComboTokenNonUnique> comboNonUniqueParams = extractSearchParamComboNonUniqueForParam(
+					theRequestDetails, theResourceType, theParams, runtimeParam);
 			retVal.addAll(comboNonUniqueParams);
 		}
 		return retVal;
 	}
 
-	private SearchParamSet<ResourceIndexedComboTokenNonUnique> createComboNonUniqueParam(
-			String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
-		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
-		Set<String> queryStringsToPopulate =
-				extractParameterCombinationsForComboParam(theParams, theResourceType, theRuntimeParam);
+	/**
+	 * Extracts all the indexes for a given Non-Unique Combo SearchParameter for a given resource, using the already extracted
+	 * normal search parameter values for that resource as inputs.
+	 *
+	 * @param theRequestDetails The RequestDetails associated with the request
+	 * @param theResourceType The resource type of the resource being indexed
+	 * @param theParams The standard search parameter values extracted from the resource
+	 * @param theRuntimeParam The runtime search parameter to extract indexes for
+	 * @return A set of ResourceIndexedComboTokenNonUnique search parameter indexes
+	 */
+	private SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUniqueForParam(
+			RequestDetails theRequestDetails,
+			String theResourceType,
+			ResourceIndexedSearchParams theParams,
+			RuntimeSearchParam theRuntimeParam) {
 
-		for (String nextQueryString : queryStringsToPopulate) {
+		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
+				JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theRuntimeParam);
+
+		// Extract any ranged date values (these are point-in-time dates)
+		List<ResourceIndexedSearchParamDate> rangedDateChoices =
+				extractSearchParamComboNonUniqueForParamRangedDateValues(theParams, compositeComponents);
+
+		// Extract the rest of the values as strings
+		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParamExcludingRangedDates(
+				theRequestDetails, compositeComponents, theParams, theResourceType, theRuntimeParam);
+
+		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
+
+		if (rangedDateChoices.isEmpty()) {
+			List<ResourceIndexedComboTokenNonUnique> values =
+					convertQueryStringsToNonUniqueIndexEntities(theRuntimeParam, queryStringsToPopulate, null);
+			retVal.addAll(values);
+		} else {
+			// If we have one or more ranged date values, we want to create a cartesian product of the ranged date
+			// values
+			// and the strings containing the parameter values for the rest of the components
+			for (ResourceIndexedSearchParamDate nextRangedDateChoice : rangedDateChoices) {
+				List<ResourceIndexedComboTokenNonUnique> values = convertQueryStringsToNonUniqueIndexEntities(
+						theRuntimeParam, queryStringsToPopulate, nextRangedDateChoice);
+				retVal.addAll(values);
+			}
+		}
+
+		return retVal;
+	}
+
+	@Nonnull
+	private List<ResourceIndexedComboTokenNonUnique> convertQueryStringsToNonUniqueIndexEntities(
+			RuntimeSearchParam theRuntimeParam,
+			Set<String> theQueryStrings,
+			ResourceIndexedSearchParamDate theRangedDateValue) {
+		List<ResourceIndexedComboTokenNonUnique> values = new ArrayList<>();
+		for (String nextQueryString : theQueryStrings) {
 			ourLog.trace("Adding composite unique SP: {}", nextQueryString);
 			ResourceIndexedComboTokenNonUnique nonUniqueParam = new ResourceIndexedComboTokenNonUnique();
 			nonUniqueParam.setPartitionSettings(myPartitionSettings);
 			nonUniqueParam.setIndexString(nextQueryString);
 			nonUniqueParam.setSearchParameterId(theRuntimeParam.getId());
-			retVal.add(nonUniqueParam);
+			if (theRangedDateValue != null) {
+				nonUniqueParam.applyRangedDate(myStorageSettings, theRangedDateValue);
+			}
+			values.add(nonUniqueParam);
 		}
-		return retVal;
+		return values;
 	}
 
 	@Nonnull
-	private Set<String> extractParameterCombinationsForComboParam(
-			ResourceIndexedSearchParams theIndexes, String theResourceType, RuntimeSearchParam theParam) {
+	private List<ResourceIndexedSearchParamDate> extractSearchParamComboNonUniqueForParamRangedDateValues(
+			ResourceIndexedSearchParams theParams,
+			List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents) {
+		Optional<JpaParamUtil.ComponentAndCorrespondingParam> rangedDateParam = compositeComponents.stream()
+				.filter(JpaParamUtil.ComponentAndCorrespondingParam::isComboRangedDate)
+				.findFirst();
+		List<ResourceIndexedSearchParamDate> rangedDateChoices = new ArrayList<>();
+		if (rangedDateParam.isPresent()) {
+
+			Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart =
+					findParameterIndexes(theParams, rangedDateParam.get());
+			for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
+				rangedDateChoices.add((ResourceIndexedSearchParamDate) nextParam);
+			}
+		}
+		return rangedDateChoices;
+	}
+
+	/**
+	 * For a given combo search parameter, return a list of all possible search strings (e.g. "birthDate=2000-01-01&name=SMITH").
+	 * Excludes ranged date values.
+	 *
+	 * @param theRequestDetails The RequestDetails associated with the request
+	 * @param theIndexes      The extracted search indexes to pull from
+	 * @param theResourceType The resource type being indexed
+	 * @param theComboParam   The combo search parameter
+	 * @return If there are multiple values for any of the components, all possible combinations will be returned. E.g. you might get
+	 * 	"birthDate=2000-01-01&name=SMITH" and "birthDate=2000-01-01&name=JOHN".
+	 */
+	@Nonnull
+	private Set<String> extractParameterCombinationsForComboParamExcludingRangedDates(
+			RequestDetails theRequestDetails,
+			List<JpaParamUtil.ComponentAndCorrespondingParam> theCompositeComponents,
+			ResourceIndexedSearchParams theIndexes,
+			String theResourceType,
+			RuntimeSearchParam theComboParam) {
 		List<List<String>> partsChoices = new ArrayList<>();
 
-		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
-				JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theParam);
-		for (JpaParamUtil.ComponentAndCorrespondingParam next : compositeComponents) {
-			RuntimeSearchParam nextComponentParameter = next.getComponentParameter();
-			Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart =
-					findParameterIndexes(theIndexes, next);
-
-			Collection<ResourceLink> linksForCompositePart = null;
-			RestSearchParameterTypeEnum paramType =
-					JpaParamUtil.getParameterTypeForComposite(mySearchParamRegistry, next);
-
-			switch (paramType) {
-				case REFERENCE:
-					linksForCompositePart = theIndexes.myLinks;
-					break;
-				case NUMBER:
-				case DATE:
-				case STRING:
-				case TOKEN:
-				case QUANTITY:
-				case URI:
-				case SPECIAL:
-				case COMPOSITE:
-				case HAS:
-					break;
+		for (JpaParamUtil.ComponentAndCorrespondingParam next : theCompositeComponents) {
+			if (next.isComboRangedDate()) {
+				continue;
 			}
 
-			Collection<String> linksForCompositePartWantPaths = null;
-			switch (paramType) {
-				case REFERENCE:
-					linksForCompositePartWantPaths = new HashSet<>(nextComponentParameter.getPathsSplit());
-					break;
-				case NUMBER:
-				case DATE:
-				case STRING:
-				case TOKEN:
-				case QUANTITY:
-				case URI:
-				case SPECIAL:
-				case COMPOSITE:
-				case HAS:
-					break;
-			}
-
-			ArrayList<String> nextChoicesList = new ArrayList<>();
-			partsChoices.add(nextChoicesList);
-
-			String paramName = next.getCombinedParamName();
-			String key = UrlUtil.escapeUrlParam(paramName);
-			if (paramsListForCompositePart != null) {
-				for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
-					IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
-
-					if (theParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE
-							&& nextParamAsClientParam instanceof DateParam) {
-						DateParam date = (DateParam) nextParamAsClientParam;
-						if (date.getPrecision() != TemporalPrecisionEnum.DAY) {
-							continue;
-						}
-					}
-
-					String value = nextParamAsClientParam.getValueAsQueryToken();
-
-					if (theParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE
-							&& paramType == RestSearchParameterTypeEnum.STRING) {
-						value = StringUtil.normalizeStringForSearchIndexing(value);
-					}
-
-					if (isNotBlank(value)) {
-						value = UrlUtil.escapeUrlParam(value);
-						nextChoicesList.add(key + "=" + value);
-					}
-				}
-			}
-
-			if (linksForCompositePart != null) {
-				for (ResourceLink nextLink : linksForCompositePart) {
-					if (linksForCompositePartWantPaths.contains(nextLink.getSourcePath())) {
-						assert isNotBlank(nextLink.getTargetResourceType());
-						assert isNotBlank(nextLink.getTargetResourceId());
-						String value = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
-						if (isNotBlank(value)) {
-							value = UrlUtil.escapeUrlParam(value);
-							nextChoicesList.add(key + "=" + value);
-						}
-					}
-				}
-			}
+			List<String> parameterCombinationsForComponent = extractParameterCombinationsForComboParamComponent(
+					theRequestDetails, theIndexes, theComboParam, next);
+			partsChoices.add(parameterCombinationsForComponent);
 		}
 
 		return ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains(theResourceType, partsChoices);
 	}
 
-	@Nullable
+	/**
+	 * For a given combo param component, find the relevant parameter values from the originally extracted values in {@literal theIndexes},
+	 * and return a list of parameter values.
+	 *
+	 * @param theRequestDetails The RequestDetails associated with the request
+	 * @param theIndexes        The indexes to pull values from
+	 * @param theComboParam     The combo parameter
+	 * @param theParamComponent The component within the combo parameter (this method will be called once for each component)
+	 * @return A list of possible parameter value strings (e.g. "name=SMITH" or "code=http://foo|123")
+	 */
+	private List<String> extractParameterCombinationsForComboParamComponent(
+			RequestDetails theRequestDetails,
+			ResourceIndexedSearchParams theIndexes,
+			RuntimeSearchParam theComboParam,
+			JpaParamUtil.ComponentAndCorrespondingParam theParamComponent) {
+		RuntimeSearchParam nextComponentParameter = theParamComponent.getComponentParameter();
+		Collection<? extends BaseResourceIndexedSearchParam> paramValuesForComponent =
+				findParameterIndexes(theIndexes, theParamComponent);
+
+		Collection<ResourceLink> linksForCompositePart = null;
+		Collection<String> linksForCompositePartWantPaths = null;
+		RestSearchParameterTypeEnum paramType =
+				JpaParamUtil.getParameterTypeForComposite(mySearchParamRegistry, theParamComponent);
+		Validate.notNull(
+				paramType,
+				"Can't determine type for Combo param[%s] component %s",
+				theParamComponent.getParamName(),
+				theParamComponent.getComponentParameter().getName());
+
+		if (paramType == REFERENCE) {
+			linksForCompositePart = theIndexes.myLinks;
+			linksForCompositePartWantPaths = new HashSet<>(nextComponentParameter.getPathsSplit());
+		}
+
+		List<String> retVal = new ArrayList<>();
+
+		String paramName = UrlUtil.escapeUrlParam(theParamComponent.getCombinedParamName());
+
+		for (BaseResourceIndexedSearchParam paramValue : paramValuesForComponent) {
+			IQueryParameterType paramValueAsQueryParameterType = paramValue.toQueryParameterType();
+			String paramValueAsString = paramValueAsQueryParameterType.getValueAsQueryToken();
+
+			if (paramValueAsQueryParameterType instanceof DateParam date) {
+				if (date.getPrecision().ordinal() < TemporalPrecisionEnum.DAY.ordinal()) {
+					myPerformanceTracingLogger.firePerformanceInfo(
+							theRequestDetails,
+							"Not creating a " + theComboParam.getComboSearchParamType()
+									+ " combo index entry for index[" + theComboParam.getName()
+									+ "] because value for component " + theParamComponent.getParamName()
+									+ " has precision < DAY");
+					continue;
+				}
+				if (date.getPrecision().ordinal() > TemporalPrecisionEnum.DAY.ordinal()) {
+					// Limit to date portion since that's what we index in the non-unique
+					// index column. Because the search wants greater than
+					// day precision, we'll also select on the date index table in
+					// order to provide the added precision.
+					paramValueAsString = paramValueAsString.substring(0, 10);
+				}
+			}
+
+			if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE
+					&& paramType == RestSearchParameterTypeEnum.STRING) {
+				paramValueAsString = StringUtil.normalizeStringForSearchIndexing(paramValueAsString);
+			}
+
+			if (isNotBlank(paramValueAsString)) {
+				paramValueAsString = UrlUtil.escapeUrlParam(paramValueAsString);
+				retVal.add(paramName + "=" + paramValueAsString);
+			}
+		}
+
+		if (linksForCompositePart != null) {
+			for (ResourceLink nextLink : linksForCompositePart) {
+				if (linksForCompositePartWantPaths.contains(nextLink.getSourcePath())) {
+					assert isNotBlank(nextLink.getTargetResourceType());
+					assert isNotBlank(nextLink.getTargetResourceId());
+					String value = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
+					if (isNotBlank(value)) {
+						value = UrlUtil.escapeUrlParam(value);
+						retVal.add(paramName + "=" + value);
+					}
+				}
+			}
+		}
+
+		return retVal;
+	}
+
+	@Nonnull
 	private Collection<? extends BaseResourceIndexedSearchParam> findParameterIndexes(
 			ResourceIndexedSearchParams theParams, JpaParamUtil.ComponentAndCorrespondingParam theComponentAndParam) {
 
@@ -642,6 +609,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				paramsListForCompositePart = theParams.myUriParams;
 				break;
 			case REFERENCE:
+				// These are handled elsewhere
+				paramsListForCompositePart = List.of();
+				break;
 			case SPECIAL:
 			case COMPOSITE:
 			case HAS:
@@ -653,6 +623,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					.filter(t -> t.getParamName().equals(paramName))
 					.collect(Collectors.toList());
 		}
+
+		Validate.notNull(
+				paramsListForCompositePart,
+				"Combo param[%s] component has illegal type: %s",
+				theComponentAndParam.getParamName(),
+				paramType);
+
 		return paramsListForCompositePart;
 	}
 
@@ -1859,6 +1836,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			myCodeableReferenceConcept = codeableReferenceDef.getChildByName("concept");
 			myCodeableReferenceReference = codeableReferenceDef.getChildByName("reference");
 		}
+
+		myPerformanceTracingLogger = new PerformanceTracingLogger(myInterceptorBroadcaster);
+	}
+
+	public void setExtractResourceLevelParams(boolean theExtractResourceLevelParams) {
+		myExtractResourceLevelParams = theExtractResourceLevelParams;
 	}
 
 	@FunctionalInterface
@@ -1964,6 +1947,172 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			return theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
 		}
 		return null;
+	}
+
+	/**
+	 * Extractor that delegates to two other extractors.
+	 *
+	 * @param <T> the type (currently only used for Numeric)
+	 */
+	private static class MultiplexExtractor<T> implements IExtractor<T> {
+
+		private final IExtractor<T> myExtractor0;
+		private final IExtractor<T> myExtractor1;
+
+		private MultiplexExtractor(IExtractor<T> theExtractor0, IExtractor<T> theExtractor1) {
+			myExtractor0 = theExtractor0;
+			myExtractor1 = theExtractor1;
+		}
+
+		@Override
+		public void extract(
+				SearchParamSet<T> theParams,
+				RuntimeSearchParam theSearchParam,
+				IBase theValue,
+				String thePath,
+				boolean theWantLocalReferences) {
+			myExtractor0.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
+			myExtractor1.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
+		}
+	}
+
+	/**
+	 * Extractor for composite SPs.
+	 * Extracts elements, and then recurses and applies extractors for each component SP using the element as the new root.
+	 */
+	public class CompositeExtractor implements IExtractor<ResourceIndexedSearchParamComposite> {
+		final IBaseResource myResource;
+		final String myResourceType;
+
+		public CompositeExtractor(IBaseResource theResource) {
+			myResource = theResource;
+			myResourceType = toRootTypeName(theResource);
+		}
+
+		/**
+		 * Extract the subcomponent index data for each component of a composite SP from an IBase element.
+		 *
+		 * @param theParams               will add 1 or 0 ResourceIndexedSearchParamComposite instances for theValue
+		 * @param theCompositeSearchParam the composite SP
+		 * @param theValue                the focus element for the subcomponent extraction
+		 * @param thePath                 unused api param
+		 * @param theWantLocalReferences  passed down to reference extraction
+		 */
+		@Override
+		public void extract(
+				SearchParamSet<ResourceIndexedSearchParamComposite> theParams,
+				RuntimeSearchParam theCompositeSearchParam,
+				IBase theValue,
+				String thePath,
+				boolean theWantLocalReferences) {
+
+			// skip broken SPs
+			if (!isExtractableComposite(theCompositeSearchParam)) {
+				ourLog.info(
+						"CompositeExtractor - skipping unsupported search parameter {}",
+						theCompositeSearchParam.getName());
+				return;
+			}
+
+			String compositeSpName = theCompositeSearchParam.getName();
+			ourLog.trace("CompositeExtractor - extracting {} {}", compositeSpName, theValue);
+			ResourceIndexedSearchParamComposite e = new ResourceIndexedSearchParamComposite(compositeSpName, thePath);
+
+			// extract the index data for each component.
+			for (RuntimeSearchParam.Component component : theCompositeSearchParam.getComponents()) {
+				String componentSpRef = component.getReference();
+				String expression = component.getExpression();
+
+				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(
+						componentSpRef, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+				Validate.notNull(
+						componentSp,
+						"Misconfigured SP %s - failed to load component %s",
+						compositeSpName,
+						componentSpRef);
+
+				SearchParamSet<BaseResourceIndexedSearchParam> componentIndexedSearchParams =
+						extractCompositeComponentIndexData(
+								theValue, componentSp, expression, theWantLocalReferences, theCompositeSearchParam);
+				if (componentIndexedSearchParams.isEmpty()) {
+					// If any of the components are empty, no search can ever match.  Short circuit, and bail out.
+					return;
+				} else {
+					e.addComponentIndexedSearchParams(componentSp, componentIndexedSearchParams);
+				}
+			}
+
+			// every component has data.  Add it for indexing.
+			theParams.add(e);
+		}
+
+		/**
+		 * Extract the subcomponent index data for a single component of a composite SP.
+		 *
+		 * @param theFocusElement         the element to use as the root for sub-extraction
+		 * @param theComponentSearchParam the active subcomponent SP for extraction
+		 * @param theSubPathExpression    the sub-expression to extract values from theFocusElement
+		 * @param theWantLocalReferences  flag for URI processing
+		 * @param theCompositeSearchParam the parent composite SP
+		 * @return the extracted index beans for theFocusElement
+		 */
+		@Nonnull
+		private SearchParamSet<BaseResourceIndexedSearchParam> extractCompositeComponentIndexData(
+				IBase theFocusElement,
+				RuntimeSearchParam theComponentSearchParam,
+				String theSubPathExpression,
+				boolean theWantLocalReferences,
+				RuntimeSearchParam theCompositeSearchParam) {
+			IExtractor componentExtractor = createExtractor(theComponentSearchParam, myResource);
+			SearchParamSet<BaseResourceIndexedSearchParam> componentIndexData = new SearchParamSet<>();
+
+			extractSearchParam(
+					theComponentSearchParam,
+					theSubPathExpression,
+					theFocusElement,
+					componentExtractor,
+					componentIndexData,
+					theWantLocalReferences);
+			ourLog.trace(
+					"CompositeExtractor - extracted {} index values for {}",
+					componentIndexData.size(),
+					theComponentSearchParam.getName());
+
+			return componentIndexData;
+		}
+
+		/**
+		 * Is this an extractable composite SP?
+		 *
+		 * @param theSearchParam of type composite
+		 * @return can we extract useful index data from this?
+		 */
+		private boolean isExtractableComposite(RuntimeSearchParam theSearchParam) {
+			// this is a composite SP
+			return RestSearchParameterTypeEnum.COMPOSITE.equals(theSearchParam.getParamType())
+					&& theSearchParam.getComponents().stream().noneMatch(this::isNotExtractableCompositeComponent);
+		}
+
+		private boolean isNotExtractableCompositeComponent(RuntimeSearchParam.Component c) {
+			RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParamByUrl(
+					c.getReference(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+			return // Does the sub-param link work?
+			componentSearchParam == null
+					||
+					// Is this the right type?
+					RestSearchParameterTypeEnum.COMPOSITE.equals(componentSearchParam.getParamType())
+					||
+
+					// Bug workaround: the component expressions are null in the FhirContextSearchParamRegistry. We
+					// can't do anything with them.
+					c.getExpression() == null
+					||
+
+					// TODO mb Bug workaround: we don't support the %resource variable, but standard SPs on
+					// MolecularSequence use it.
+					// Skip them for now.
+					c.getExpression().contains("%resource");
+		}
 	}
 
 	private class ResourceLinkExtractor implements IExtractor<PathAndRef> {
@@ -2201,6 +2350,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				}
 			}
 
+			DateStringWrapper periodEnd = null;
+			boolean isPeriod = false;
 			Optional<IBase> repeat = myTimingRepeatValueChild.getAccessor().getFirstValueOrNull(theValue);
 			if (repeat.isPresent()) {
 				Optional<IBase> bounds =
@@ -2208,6 +2359,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				if (bounds.isPresent()) {
 					String boundsType = toRootTypeName(bounds.get());
 					if ("Period".equals(boundsType)) {
+						isPeriod = true;
 						IPrimitiveType<Date> start =
 								extractValuesAsFhirDates(myPeriodStartValueChild, bounds.get()).stream()
 										.findFirst()
@@ -2221,40 +2373,27 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 							dates.add(new DateStringWrapper(start.getValue(), start.getValueAsString()));
 						}
 						if (end != null && end.getValue() != null) {
-							dates.add(new DateStringWrapper(end.getValue(), end.getValueAsString()));
+							periodEnd = new DateStringWrapper(end.getValue(), end.getValueAsString());
+							dates.add(periodEnd);
 						}
 					}
 				}
 			}
 
 			if (!dates.isEmpty()) {
+				DateStringWrapper high = isPeriod ? periodEnd : dates.last();
+				String highString = high != null ? high.getDateValueAsString() : null;
+
 				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(
 						myPartitionSettings,
 						theResourceType,
 						theSearchParam.getName(),
 						dates.first(),
 						dates.first().getDateValueAsString(),
-						dates.last(),
-						dates.last().getDateValueAsString(),
+						high,
+						highString,
 						firstValue);
 				theParams.add(myIndexedSearchParamDate);
-			}
-		}
-
-		/**
-		 * Wrapper class to store the DateTimeType String representation of the Date
-		 * This allows us to use the Date implementation of Comparable for TreeSet sorting
-		 */
-		private class DateStringWrapper extends Date {
-			String myDateString;
-
-			public DateStringWrapper(Date theDate, String theDateString) {
-				super(theDate.getTime());
-				myDateString = theDateString;
-			}
-
-			public String getDateValueAsString() {
-				return myDateString;
 			}
 		}
 
@@ -2288,6 +2427,23 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					thePath,
 					theWantLocalReferences);
 			return myIndexedSearchParamDate;
+		}
+
+		/**
+		 * Wrapper class to store the DateTimeType String representation of the Date
+		 * This allows us to use the Date implementation of Comparable for TreeSet sorting
+		 */
+		private class DateStringWrapper extends Date {
+			String myDateString;
+
+			public DateStringWrapper(Date theDate, String theDateString) {
+				super(theDate.getTime());
+				myDateString = theDateString;
+			}
+
+			public String getDateValueAsString() {
+				return myDateString;
+			}
 		}
 	}
 
@@ -2401,36 +2557,5 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					break;
 			}
 		}
-	}
-
-	/**
-	 * Extractor that delegates to two other extractors.
-	 *
-	 * @param <T> the type (currently only used for Numeric)
-	 */
-	private static class MultiplexExtractor<T> implements IExtractor<T> {
-
-		private final IExtractor<T> myExtractor0;
-		private final IExtractor<T> myExtractor1;
-
-		private MultiplexExtractor(IExtractor<T> theExtractor0, IExtractor<T> theExtractor1) {
-			myExtractor0 = theExtractor0;
-			myExtractor1 = theExtractor1;
-		}
-
-		@Override
-		public void extract(
-				SearchParamSet<T> theParams,
-				RuntimeSearchParam theSearchParam,
-				IBase theValue,
-				String thePath,
-				boolean theWantLocalReferences) {
-			myExtractor0.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
-			myExtractor1.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
-		}
-	}
-
-	public void setExtractResourceLevelParams(boolean theExtractResourceLevelParams) {
-		myExtractResourceLevelParams = theExtractResourceLevelParams;
 	}
 }

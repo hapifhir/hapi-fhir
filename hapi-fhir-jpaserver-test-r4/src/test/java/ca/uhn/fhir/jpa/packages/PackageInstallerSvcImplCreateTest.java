@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.implementationguide.ImplementationGuideCreator;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
@@ -14,16 +15,19 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -71,6 +75,11 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 	@Autowired
 	private PackageInstallerSvcImpl mySvc;
+
+	@AfterEach
+	void resetStorageSettings() {
+		myStorageSettings.setValidateResourceStatusForPackageUpload(new JpaStorageSettings().isValidateResourceStatusForPackageUpload());
+	}
 
 	@Test
 	void createNamingSystem() throws IOException {
@@ -412,6 +421,113 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		return valueSetFromFirstIg;
 	}
 
+	// Created by claude-opus-4-6
+	@Test
+	void install_withNoUrlAndIdentifier_matchesByIdentifier() throws IOException {
+		String identifierSystem = "http://example.com/devices";
+		String identifierValue = "device-abc";
+
+		// Create the resource directly via DAO
+		Device existing = new Device();
+		existing.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		existing.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+		existing.addDeviceName().setName("Test Device").setType(Device.DeviceNameType.USERFRIENDLYNAME);
+		myDeviceDao.create(existing, REQUEST_DETAILS);
+
+		SearchParameterMap identifierSearch = SearchParameterMap.newSynchronous()
+			.add(Device.SP_IDENTIFIER, new TokenParam(identifierSystem, identifierValue));
+		IBundleProvider firstResult = myDeviceDao.search(identifierSearch, REQUEST_DETAILS);
+		assertThat(firstResult.sizeOrThrowNpe()).isEqualTo(1);
+		String firstId = firstResult.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue();
+
+		// Install via package installer — should match the existing resource by identifier
+		Device updated = new Device();
+		updated.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		updated.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+		updated.addDeviceName().setName("Updated Device").setType(Device.DeviceNameType.USERFRIENDLYNAME);
+
+		mySvc.install(updated, createInstallationSpec(packageToBytes()), new PackageInstallOutcomeJson());
+
+		IBundleProvider secondResult = myDeviceDao.search(identifierSearch, REQUEST_DETAILS);
+		assertThat(secondResult.sizeOrThrowNpe()).as("Should not create a duplicate").isEqualTo(1);
+		Device installedDevice = (Device) secondResult.getResources(0, 1).get(0);
+		assertThat(installedDevice.getIdElement().toUnqualifiedVersionless().getValue())
+			.as("Should update the same resource").isEqualTo(firstId);
+		assertThat(installedDevice.getDeviceName().get(0).getName())
+			.as("Should have updated content").isEqualTo("Updated Device");
+	}
+
+	// Created by claude-sonnet-4-6
+	// Regression for HAPI-0521: resources with IDs > 64 chars must be skipped during install
+	// (even when status validation is disabled) to prevent HAPI-0521 on DB insert.
+	// Boundary: exactly 64-char IDs are valid and must be installed normally.
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void install_resourceWithIdOver64Chars_isSkippedDoesNotThrowHapi0521(boolean theStatusValidationEnabled) throws IOException {
+		myStorageSettings.setValidateResourceStatusForPackageUpload(theStatusValidationEnabled);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("ValueSet/" + "a".repeat(65));
+		vs.setUrl("http://example.org/vs-long-id");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		install(vs);
+
+		IBundleProvider results = myValueSetDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS);
+		assertThat(results.getAllResources()).isEmpty();
+	}
+
+	// Created by claude-sonnet-4-6
+	@Test
+	void install_resourceWithIdExactly64Chars_isInstalled() throws IOException {
+		// Boundary: exactly 64-char ID is valid per FHIR spec and must not be rejected.
+		ValueSet vs = new ValueSet();
+		vs.setId("ValueSet/" + "a".repeat(64));
+		vs.setUrl("http://example.org/vs-exact-id");
+		vs.setVersion("1.0");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		install(vs);
+
+		// Verify the resource was created (server may assign a different ID depending on version policy)
+		IBundleProvider results = myValueSetDao.search(
+			SearchParameterMap.newSynchronous().add(ValueSet.SP_URL, new UriParam("http://example.org/vs-exact-id")),
+			REQUEST_DETAILS);
+		assertThat(results.getAllResources()).hasSize(1);
+	}
+
+	// Created by claude-sonnet-4-6
+	@Test
+	void install_deviceWithBlankUrl_matchesByIdentifier() throws IOException {
+		// A resource whose url element is present but blank must use identifier-based matching,
+		// not URL-based matching. Previously resourceHasUrlElement only checked element existence,
+		// so a blank URL would have been used in a search, potentially matching wrong resources.
+		String identifierSystem = "urn:sys";
+		String identifierValue = "device-blank-url";
+
+		Device existing = new Device();
+		existing.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		existing.setUrl("");
+		existing.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+		existing.addDeviceName().setName("Original Device").setType(Device.DeviceNameType.USERFRIENDLYNAME);
+		myDeviceDao.create(existing, REQUEST_DETAILS);
+
+		Device updated = new Device();
+		updated.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		updated.setUrl("");
+		updated.addIdentifier().setSystem(identifierSystem).setValue(identifierValue);
+		updated.addDeviceName().setName("Updated Device").setType(Device.DeviceNameType.USERFRIENDLYNAME);
+
+		install(updated);
+
+		SearchParameterMap identifierSearch = SearchParameterMap.newSynchronous()
+			.add(Device.SP_IDENTIFIER, new TokenParam(identifierSystem, identifierValue));
+		IBundleProvider results = myDeviceDao.search(identifierSearch, REQUEST_DETAILS);
+		assertThat(results.sizeOrThrowNpe()).as("Should update existing, not create duplicate").isEqualTo(1);
+		Device installedDevice = (Device) results.getResources(0, 1).get(0);
+		assertThat(installedDevice.getDeviceName().get(0).getName()).isEqualTo("Updated Device");
+	}
+
 	private void install(IBaseResource theResource) throws IOException {
 		mySvc.install(theResource, createInstallationSpec(packageToBytes()), new PackageInstallOutcomeJson());
 	}
@@ -482,19 +598,20 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	}
 
 	// Generated by claude-sonnet-4-6
-	@Test
-	void install_installOnly_withNameAndVersionOnly_packageNotInCache_throwsMeaningfulException() {
-		// when INSTALL_ONLY is used with name/version only and the package has never been stored,
+	@ParameterizedTest
+	@EnumSource(PackageInstallationSpec.InstallModeEnum.class)
+	void install_withNameAndVersionOnly_packageNotInCache_throwsMeaningfulException(
+		PackageInstallationSpec.InstallModeEnum theInstallMode) {
 		// the caller should receive a clear "Could not load" error, not a NullPointerException
 
 		PackageInstallationSpec installOnlySpec = new PackageInstallationSpec()
 			.setName("non.existent.package")
 			.setVersion("9.9.9")
-			.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+			.setInstallMode(theInstallMode);
 
 		assertThatThrownBy(() -> mySvc.install(installOnlySpec))
-			.isInstanceOf(ImplementationGuideInstallationException.class)
-			.hasMessageContaining("Could not load NPM package non.existent.package#9.9.9");
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("Unable to locate package non.existent.package#9.9.9");
 	}
 
 	@Nonnull

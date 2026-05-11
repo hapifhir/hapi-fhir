@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -132,6 +133,32 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init840();
 		init860();
 		init880();
+		init8_10_0();
+	}
+
+	protected void init8_10_0() {
+		Builder version = forVersion(VersionEnum.V8_10_0);
+
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.dropIndex("20260410.10", "IDX_IDXCMBTOKNU_STR");
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.addColumn("20260410.20", "DATE_ORDINAL")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.addIndex("20260410.30", "IDX_IDXCMBTOKNU_HD")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_COMPLETE", "DATE_ORDINAL", "RES_ID", "PARTITION_ID");
+
+		// Add index on CREATED_TIME to support ordered polling of subscription messages
+		{
+			version.onTable("HFJ_RESOURCE_MODIFIED")
+					.addIndex("20260424.1", "IDX_RES_MOD_CREATED")
+					.unique(false)
+					.online(true)
+					.withColumns("CREATED_TIME");
+		}
 	}
 
 	protected void init880() {

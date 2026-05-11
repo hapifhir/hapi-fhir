@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7811
+title: "The configured display-mismatch policy is now applied to remote terminology code validation.
+Previously the policy was honoured only by in-memory code validation; a display mismatch detected
+against a remote terminology server was always reported as an error regardless of the configured
+severity."

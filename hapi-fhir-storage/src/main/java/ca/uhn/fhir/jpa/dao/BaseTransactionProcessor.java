@@ -243,7 +243,7 @@ public abstract class BaseTransactionProcessor {
 			RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
 		String actionName = "Transaction";
 
-		TransactionDetails transactionDetails = new TransactionDetails();
+		TransactionDetails transactionDetails = new TransactionDetails(theRequest);
 
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
@@ -461,7 +461,11 @@ public abstract class BaseTransactionProcessor {
 				if (i < totalAttempts && transactionSemantics.isTryBatchAsTransactionFirst()) {
 					BundleUtil.setBundleType(myContext, theRequest, "transaction");
 					response = processTransaction(
-							theRequestDetails, new TransactionDetails(), theRequest, "Transaction", theNestedMode);
+							theRequestDetails,
+							new TransactionDetails(theRequest),
+							theRequest,
+							"Transaction",
+							theNestedMode);
 				} else {
 					BundleUtil.setBundleType(myContext, theRequest, "batch");
 					response = processBatch(theRequestDetails, theRequest, theNestedMode);
@@ -2783,7 +2787,7 @@ public abstract class BaseTransactionProcessor {
 			IInterceptorBroadcaster compositeBroadcaster =
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequestDetails);
 
-			TransactionDetails transactionDetails = new TransactionDetails();
+			TransactionDetails transactionDetails = new TransactionDetails(subRequestBundle);
 
 			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {

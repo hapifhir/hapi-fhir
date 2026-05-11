@@ -186,9 +186,10 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			 * and that kind of thing, but there is other state in there that shouldn't be
 			 * preserved, such as tag definitions and rollback items
 			 *
-			 * DO, however, copy user data from the parent transaction details
+			 * DO, however, copy user data from the parent transaction details and the Bundle
+			 * so that it can be used by interceptors
 			 */
-			TransactionDetails transactionDetails = new TransactionDetails();
+			TransactionDetails transactionDetails = new TransactionDetails(myTransactionDetails.getTransactionBundle());
 			myTransactionDetails.getUserData().forEach(transactionDetails::putUserData);
 
 			// Apply any placeholder ID substitutions from previous partition executions

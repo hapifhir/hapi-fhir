@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -54,10 +55,12 @@ import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
@@ -84,9 +87,11 @@ import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -113,6 +118,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -165,6 +171,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	@Autowired
 	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
+	private IFhirResourceDao<SearchParameter> mySearchParameterDao;
+	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
@@ -188,11 +196,15 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	private DeleteExpungeStep myDeleteExpungeStep;
 	@Autowired
 	private IJobStepExecutionServices myJobStepExecutionServices;
+	@Autowired
+	private ISearchParamRegistry mySearchParameterRegistry;
 
 	@Mock
 	private IJobDataSink<VoidModel> myVoidSink;
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
+
+	private ComboSearchParameterTestHelper myComboSearchParameterTestHelper;
 
 	public TestDefinitions(@Nonnull BaseDbpmResourceProviderR5Test theParentTest, @Nonnull TestPartitionSelectorInterceptor thePartitionSelectorInterceptor, boolean theIncludePartitionIdsInSql, boolean theIncludePartitionIdsInPks) {
 		myParentTest = theParentTest;
@@ -200,6 +212,12 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		myIncludePartitionIdsInSql = theIncludePartitionIdsInSql;
 		myIncludePartitionIdsInPks = theIncludePartitionIdsInPks;
 		assert myIncludePartitionIdsInSql && myIncludePartitionIdsInPks || myIncludePartitionIdsInSql || !myIncludePartitionIdsInPks;
+
+	}
+
+	@BeforeEach
+	void before() {
+		myComboSearchParameterTestHelper = new ComboSearchParameterTestHelper(mySearchParameterDao, mySearchParameterRegistry);
 	}
 
 	@AfterEach
@@ -254,6 +272,95 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getDeleteSql(0)).isEqualTo("DELETE FROM HFJ_HISTORY_TAG WHERE RES_ID IN (" + pid + ")");
 		}
 	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testComboParam_UpdateExisting(boolean theUnique) {
+		// Setup
+		myPartitionSelectorInterceptor.setPartitionIdForResourceType("Patient", PARTITION_1);
+		myComboSearchParameterTestHelper.createFamilyAndGenderSps(theUnique);
+
+		IIdType id = createPatient(withFamily("FAMILY-0"), withGender("male"));
+
+		// Test
+		myCaptureQueriesListener.clear();
+		createPatient(withId(id.getIdPart()), withFamily("FAMILY-1"), withGender("male"));
+
+		// Verify
+		if (theUnique) {
+			if (myIncludePartitionIdsInPks) {
+				Assertions.assertThat(myCaptureQueriesListener).has(
+					onAllThreads()
+						.selectSqlAtIndex(4).contains("from HFJ_IDX_CMP_STRING_UNIQ mpcsu1_0 where (mpcsu1_0.RES_ID,mpcsu1_0.PARTITION_ID) in (('" + id.getIdPart() + "','1'))")
+				);
+			} else {
+				Assertions.assertThat(myCaptureQueriesListener).has(
+					onAllThreads()
+						.selectSqlAtIndex(4).contains("from HFJ_IDX_CMP_STRING_UNIQ mpcsu1_0 where mpcsu1_0.RES_ID='" + id.getIdPart() + "'")
+				);
+			}
+		} else {
+			if (myIncludePartitionIdsInPks) {
+				Assertions.assertThat(myCaptureQueriesListener).has(
+					onAllThreads()
+						.selectSqlAtIndex(4).contains("from HFJ_IDX_CMB_TOK_NU mpctnu1_0 where (mpctnu1_0.RES_ID,mpctnu1_0.PARTITION_ID) in (('" + id.getIdPart() + "','1'))")
+				);
+			} else {
+				Assertions.assertThat(myCaptureQueriesListener).has(
+					onAllThreads()
+						.selectSqlAtIndex(4).endsWith("from HFJ_IDX_CMB_TOK_NU mpctnu1_0 where mpctnu1_0.RES_ID='" + id.getIdPart() + "'")
+				);
+			}
+		}
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testComboParam_Search(boolean theUnique) {
+		// Setup
+		myPartitionSelectorInterceptor.setPartitionIdForResourceType("Patient", PARTITION_1);
+		myComboSearchParameterTestHelper.createFamilyAndGenderSps(theUnique);
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.add(Patient.SP_FAMILY, new StringParam("FAMILY-0"))
+			.add(Patient.SP_GENDER, new TokenParam("male"));
+		myPatientDao.search(map, newSrd());
+
+		// Verify
+		if (theUnique) {
+			// Unique combo indexes are not partitioned
+			Assertions.assertThat(myCaptureQueriesListener).has(
+				onAllThreads()
+					.selectCount(1)
+					.commitCount(1)
+					.noOtherCounts()
+					.selectSqlAtIndex(0).doesNotContain("PARTITION_ID=")
+			);
+		} else {
+			if (myIncludePartitionIdsInSql) {
+				Assertions.assertThat(myCaptureQueriesListener).has(
+					onAllThreads()
+						.selectCount(1)
+						.commitCount(1)
+						.noOtherCounts()
+						.selectSqlAtIndex(0).contains("FROM HFJ_IDX_CMB_TOK_NU t0 WHERE ((t0.PARTITION_ID = '1') AND (t0.HASH_COMPLETE = '1333096643304058524')) fetch")
+				);
+			} else {
+				Assertions.assertThat(myCaptureQueriesListener).has(
+					onAllThreads()
+						.selectCount(1)
+						.commitCount(1)
+						.noOtherCounts()
+						.selectSqlAtIndex(0).contains("FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '1333096643304058524') fetch")
+				);
+			}
+		}
+
+	}
+
 
 	@Test
 	public void testCreate_Conditional() throws JSQLParserException {
@@ -1088,7 +1195,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		myCaptureQueriesListener.logSelectQueries();
 		if (myIncludePartitionIdsInPks) {
 			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') )) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first '10000' rows only", getSelectSql(0));
-			assertThat(getSelectSql(1)).contains(" where (mrt1_0.RES_ID,mrt1_0.PARTITION_ID) in (('" + id0.getIdPartAsLong() + "','1'),('" + id1.getIdPartAsLong() + "','2'),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL),('-1',NULL)) and mrt1_0.RES_VER=rht1_0.RES_VER");
+			assertThat(getSelectSql(1)).contains(" where (mrt1_0.RES_ID,mrt1_0.PARTITION_ID) in (('" + id0.getIdPartAsLong() + "','1'),('" + id1.getIdPartAsLong() + "','2'),('-1','-1'),('-1','-1'),('-1','-1'),('-1','-1'),('-1','-1'),('-1','-1'),('-1','-1'),('-1','-1')) and mrt1_0.RES_VER=rht1_0.RES_VER");
 		} else if (myIncludePartitionIdsInSql) {
 			assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 LEFT OUTER JOIN HFJ_SPIDX_STRING t1 ON ((t0.RES_ID = t1.RES_ID) AND (t1.HASH_IDENTITY = '-9208284524139093953')) WHERE (((t0.RES_TYPE = 'Patient') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID IN ('1','2') )) ORDER BY t1.SP_VALUE_NORMALIZED ASC NULLS LAST fetch first '10000' rows only", getSelectSql(0));
 			assertThat(getSelectSql(1)).contains(" where (mrt1_0.RES_ID) in ('" + id0.getIdPartAsLong() + "','" + id1.getIdPartAsLong() + "','-1','-1','-1','-1','-1','-1','-1','-1') and mrt1_0.RES_VER=rht1_0.RES_VER");

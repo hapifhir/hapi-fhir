@@ -461,16 +461,7 @@ public class SearchParamRegistryImpl
 	}
 
 	private @Nonnull Set<String> expandBaseList(Collection<String> nextBase) {
-		Set<String> expandedBases = new HashSet<>();
-		for (String base : nextBase) {
-			if ("Resource".equals(base) || "DomainResource".equals(base)) {
-				expandedBases.addAll(myFhirContext.getResourceTypes());
-				break;
-			} else {
-				expandedBases.add(base);
-			}
-		}
-		return expandedBases;
+		return new HashSet<>(SearchParameterUtil.expandBaseWhenNeeded(myFhirContext, nextBase));
 	}
 
 	@Override

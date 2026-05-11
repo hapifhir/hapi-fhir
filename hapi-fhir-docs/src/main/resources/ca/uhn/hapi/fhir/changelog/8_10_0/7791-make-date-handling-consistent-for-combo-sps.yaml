@@ -1,0 +1,13 @@
+---
+type: add
+issue: 7791
+title: "Combo Search Parameters (Unique and Non-unique) now both handle dates
+consistently:
+<ul>
+<li>Indexes are only created if the resource has a precision 
+    of at least DAY</li>
+<li>If the resource has a precision above DAY (e.g. MINUTE), only the
+    date component is stored in the combo index</li>
+<li>If searches use a precision above DAY, the combo index is used but the
+    corresponding date index is also used to handle the additional precision.</li>
+</ul>"

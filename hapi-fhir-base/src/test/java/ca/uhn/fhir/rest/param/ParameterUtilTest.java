@@ -8,9 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ParameterUtilTest {
+class ParameterUtilTest {
 
 	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(ParameterUtilTest.class);
 	//Adding a static to make the test data a bit more readable.  Multiple escaped backslashes were getting confusing.
@@ -18,7 +19,7 @@ public class ParameterUtilTest {
 
 	@ParameterizedTest
 	@MethodSource("sourceRawVsEscaped")
-	public void expectedEscape(String raw, String escaped) {
+	void expectedEscape(String raw, String escaped) {
 		String actualOutput = ParameterUtil.escape(raw);
 		ourLog.info("expectedEscape(raw: \"{}\",  escaped: \"{}\") actualOutput: \"{}\"",raw, escaped,actualOutput);
 		assertEquals(escaped,actualOutput);
@@ -26,7 +27,7 @@ public class ParameterUtilTest {
 
 	@ParameterizedTest
 	@MethodSource({"sourceRawVsEscaped","illegalEscapedInputs"})
-	public void expectedUnescape(String raw, String escaped) {
+	void expectedUnescape(String raw, String escaped) {
 		String actualOutput = ParameterUtil.unescape(escaped);
 		ourLog.info("expectedUnescape(raw: \"{}\",  escaped: \"{}\") actualOutput: \"{}\"",raw, escaped,actualOutput);
 		assertEquals(raw,actualOutput);
@@ -34,7 +35,7 @@ public class ParameterUtilTest {
 
 	@ParameterizedTest
 	@MethodSource("sourceRawVsEscaped")
-	public void escapeThenUnescape(String raw, String escaped) {
+	void escapeThenUnescape(String raw, String escaped) {
 		String actualOutput = ParameterUtil.unescape(ParameterUtil.escape(raw));
 		ourLog.info("escapeThenUnescape(raw: \"{}\",  escaped: \"{}\") actualOutput: \"{}\"",raw, escaped,actualOutput);
 		assertEquals(raw,actualOutput);
@@ -42,7 +43,7 @@ public class ParameterUtilTest {
 
 	@ParameterizedTest
 	@MethodSource("sourceRawVsEscaped")
-	public void unescapeThenEscape(String raw, String escaped) {
+	void unescapeThenEscape(String raw, String escaped) {
 		String actualOutput = ParameterUtil.escape(ParameterUtil.unescape(escaped));
 		ourLog.info("unescapeThenEscape(raw: \"{}\",  escaped: \"{}\") actualOutput: \"{}\"",raw, escaped,actualOutput);
 		assertEquals(escaped,actualOutput);
@@ -112,4 +113,38 @@ public class ParameterUtilTest {
 		);
 	}
 
+	@ParameterizedTest
+	@MethodSource("sourceIsTimeAllZeros")
+	void testIsTimeAllZeros(String theInput, boolean theExpected) {
+		DateParam dateParam = theInput != null ? new DateParam(theInput) : null;
+		assertThat(ParameterUtil.isTimeAllZeros(dateParam)).isEqualTo(theExpected);
+	}
+
+	private static Stream<Arguments> sourceIsTimeAllZeros() {
+		return Stream.of(
+			// Day precision
+			Arguments.of("2021-01-01", true),
+			// Year precision
+			Arguments.of("2021", true),
+			// Month precision
+			Arguments.of("2021-01", true),
+			// Second precision, all zeros
+			Arguments.of("2021-01-01T00:00:00", true),
+			// Milli precision, all zeros
+			Arguments.of("2021-01-01T00:00:00.000", true),
+			// Minute precision, all zeros
+			Arguments.of("2021-01-01T00:00", true),
+			// Not all zeros
+			Arguments.of("2021-01-01T00:00:01", false),
+			Arguments.of("2021-01-01T00:01:00", false),
+			Arguments.of("2021-01-01T01:00:00", false),
+			Arguments.of("2021-01-01T00:00:00.001", false),
+			// With timezone, all zeros in that timezone
+			Arguments.of("2021-01-01T00:00:00Z", true),
+			Arguments.of("2021-01-01T00:00:00+05:00", true),
+			// Null or empty
+			Arguments.of(null, false),
+			Arguments.of("", false)
+		);
+	}
 }

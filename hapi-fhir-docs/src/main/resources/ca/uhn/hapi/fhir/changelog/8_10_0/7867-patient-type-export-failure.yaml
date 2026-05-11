@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7867
+jira: SMILE-12021
+title: "A regression was introduced temporarily which caused Patient Type-level exports to fail if the implementing system had disabled Patient Search Parameters. This has been corrected."

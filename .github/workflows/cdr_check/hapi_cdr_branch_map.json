@@ -1,0 +1,7 @@
+{
+  "comment": "Maps HAPI release branches to their corresponding CDR release branch. Add an entry whenever a new HAPI rel_* branch is cut.",
+  "branches": {
+    "rel_8_8": "rel_pub_2026_02",
+    "rel_8_10": "rel_pub_2026_05"
+  }
+}

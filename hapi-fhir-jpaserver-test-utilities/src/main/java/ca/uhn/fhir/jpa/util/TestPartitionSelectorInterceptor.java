@@ -99,7 +99,7 @@ public class TestPartitionSelectorInterceptor {
 			}
 		}
 
-		assert myNextPartition != null;
+		assert myNextPartition != null : "No partition selected for resource of type: " + theResourceType;
 		return myNextPartition;
 	}
 
