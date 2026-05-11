@@ -103,10 +103,12 @@ class SubscriptionTopicPartitionR5IT extends BaseSubscriptionsR5Test {
 		patient.setActive(true);
 		createResource(patient, false);
 
-		// Hold the assertion window open long enough for any in-flight delivery to land,
-		// so the test body (not teardown) reports the failure if the partition guard is broken.
-		await().during(300, TimeUnit.MILLISECONDS)
-				.atMost(500, TimeUnit.MILLISECONDS)
+		// Hold the assertion window open long enough for any in-flight delivery to land on a
+		// slow/busy CI runner. If the partition guard regresses, the count will increment within
+		// the atMost budget and the assertion will still fail — the wider window only removes
+		// timing-induced false failures.
+		await().during(1, TimeUnit.SECONDS)
+				.atMost(5, TimeUnit.SECONDS)
 				.untilAsserted(() -> assertThat(getSystemProviderCount())
 						.as("Topic subscription in PART-2 must not fire when a Patient is created in PART-1")
 						.isZero());

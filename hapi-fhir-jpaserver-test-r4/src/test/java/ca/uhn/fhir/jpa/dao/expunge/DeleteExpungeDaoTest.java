@@ -46,6 +46,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		myStorageSettings.setExpungeEnabled(defaultStorageSettings.isExpungeEnabled());
 		myStorageSettings.setDeleteExpungeEnabled(defaultStorageSettings.isDeleteExpungeEnabled());
 		myStorageSettings.setExpungeBatchSize(defaultStorageSettings.getExpungeBatchSize());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(defaultStorageSettings.isEnforceReferentialIntegrityOnDelete());
 	}
 
 	@Test
@@ -80,6 +81,35 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		assertDoesntExist(o1);
 		assertDoesntExist(o1b);
 		assertDoesntExist(o1c);
+	}
+
+	@Test
+	void testCascade_WithReferentialIntegrityDisabled_Success() {
+		// Setup
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
+
+		IIdType patientId = createPatient(withActiveTrue());
+		IIdType observationId = createObservation(withSubject(patientId));
+
+		// validate precondition
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+
+		// execute
+		String url = "Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true";
+		when(mySrd.getParameters()).thenReturn(Map.of(
+			Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE},
+			JpaConstants.PARAM_DELETE_EXPUNGE, new String[]{"true"},
+			Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS, new String[]{"10"}
+		));
+		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl(url, mySrd);
+		String jobId = jobExecutionIdFromOutcome(outcome);
+		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
+
+		// Validate
+		assertEquals(2, job.getCombinedRecordsProcessed());
+		assertDoesntExist(patientId);
+		assertDoesntExist(observationId);
 	}
 
 	@Test

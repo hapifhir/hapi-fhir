@@ -41,8 +41,10 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.NamingSystem;
@@ -54,6 +56,7 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,7 +75,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -143,6 +148,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	public void after() throws Exception {
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(new JpaStorageSettings().isMarkResourcesForReindexingUponSearchParameterChange());
+		myStorageSettings.setValidateResourceStatusForPackageUpload(new JpaStorageSettings().isValidateResourceStatusForPackageUpload());
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setUnnamedPartitionMode(false);
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
@@ -1068,7 +1075,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 	@Test
 	void testNumericIdsInstalled_replacesWithServerId() throws Exception {
-			myStorageSettings.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1 instead of "shorthand-code-system"
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.13.0.tgz");
@@ -1094,7 +1101,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	@ParameterizedTest
 	@EnumSource(PackageInstallationSpec.VersionPolicyEnum.class)
 	void testSearchParametersWithNumericIds_installedWithNpmPrefix(
-			PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws Exception {
+		PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws Exception {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1234 instead of "shorthand-code-system"
@@ -1556,6 +1563,87 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 	}
 
+	// Created by Claude Opus 4.7
+	@Test
+	public void installPackage_existingSearchParameterHasAbstractBaseOverlappingIncoming_narrowsExistingByExpansion() throws IOException {
+		// setup
+		// avoid indexing while performing SP updates
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
+
+		String sharedCode = "abstract-base-demo";
+		String existingId = "existing-sp";
+		String incomingId = "incoming-sp";
+
+		SearchParameter existing = new SearchParameter();
+		existing.setId(existingId);
+		existing.setUrl("http://example.org/SearchParameter/" + existingId);
+		existing.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		existing.setCode(sharedCode);
+		existing.addBase("Patient");
+		existing.addBase("DomainResource");
+		existing.setType(Enumerations.SearchParamType.TOKEN);
+		existing.setExpression("DomainResource.text");
+		mySearchParameterDao.update(existing, new SystemRequestDetails());
+
+		SearchParameter incoming = new SearchParameter();
+		incoming.setId(incomingId);
+		incoming.setUrl("http://example.org/SearchParameter/" + incomingId);
+		incoming.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		incoming.setCode(sharedCode);
+		incoming.addBase("Patient");
+		incoming.setType(Enumerations.SearchParamType.TOKEN);
+		incoming.setExpression("Patient.text");
+
+		// test
+		installAsPackage("abstract-base-pkg", "0.0.1", incoming);
+
+		// verify
+		// the package installer will match by code+base to find an existing resource
+		// verify the new SP takes control of the resource type (Patient) for the same code
+		runInTransaction(() -> {
+			SearchParameter narrowedSP = mySearchParameterDao.read(
+				new IdType("SearchParameter/" + existingId), new SystemRequestDetails());
+			List<String> narrowedBaseAfter = narrowedSP.getBase().stream().map(CodeType::getCode).toList();
+			assertThat(narrowedBaseAfter).doesNotContain("Patient")
+					.doesNotContain("DomainResource").contains("Observation");
+
+			SearchParameter incomingSP = mySearchParameterDao.read(
+				new IdType("SearchParameter/" + incomingId), new SystemRequestDetails());
+			List<String> incomingBaseAfter = incomingSP.getBase().stream().map(CodeType::getCode).toList();
+			assertThat(incomingBaseAfter).contains("Patient")
+					.doesNotContain("Observation").doesNotContain("DomainResource");
+		});
+	}
+
+	// Created by Claude Opus 4.7
+	private void installAsPackage(String theName, String theVersion, IBaseResource... theResources) throws IOException {
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName(theName)
+			.setVersion(theVersion)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setPackageContents(buildPackage(theName, theVersion, theResources));
+		myPackageInstallerSvc.install(spec);
+	}
+
+	// Created by Claude Opus 4.7
+	private byte[] buildPackage(String theName, String theVersion, IBaseResource... theResources) throws IOException {
+		PackageGenerator manifest = new PackageGenerator();
+		manifest.name(theName);
+		manifest.version(theVersion);
+		manifest.description("test package");
+		manifest.fhirVersions(List.of(FhirVersionEnum.R4.getFhirVersionString()));
+
+		NpmPackage pkg = NpmPackage.empty(manifest);
+		for (IBaseResource resource : theResources) {
+			String type = resource.getClass().getSimpleName();
+			String filename = type + "-" + resource.getIdElement().getIdPart() + ".json";
+			String json = myFhirContext.newJsonParser().encodeResourceToString(resource);
+			pkg.addFile("package", filename, json.getBytes(StandardCharsets.UTF_8), type);
+		}
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		pkg.save(out);
+		return out.toByteArray();
+	}
 
 	@Test
 	public void testLoadContents() throws IOException {
