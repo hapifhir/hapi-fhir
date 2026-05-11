@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -29,21 +30,26 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Timing;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -54,6 +60,7 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class SearchParamExtractorR4Test implements ITestDataBuilder {
 
@@ -526,6 +533,91 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 			assertEquals("component-code", tokenDisplayIdx0.getParamName());
 			assertEquals("Observation", tokenDisplayIdx0.getResourceType());
 			assertEquals("display value", tokenDisplayIdx0.getValueExact());
+		}
+	}
+
+	@Nested
+	class TimingOccurrenceDateExtraction {
+
+		private SearchParamExtractorR4 myExtractor;
+
+		@BeforeEach
+		void setUp() {
+			myExtractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		}
+
+		private ResourceIndexedSearchParamDate extractOccurrenceParam(ServiceRequest theServiceRequest) {
+			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = myExtractor.extractSearchParamDates(theServiceRequest);
+			return dates.stream()
+					.filter(p -> "occurrence".equals(p.getParamName()))
+					.findFirst()
+					.orElse(null);
+		}
+
+		@Test
+		void testBoundsPeriodStartOnlyProducesNullHighValue() {
+			// FHIR spec: absent period.end means open-ended — sp_value_high must be null, not a copy of start
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing()
+					.addEvent(null)
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setStartElement(new DateTimeType("2025-09-17T02:25:28-04:00")))));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertNotNull(result);
+			assertNotNull(result.getValueLow());
+			assertNull(result.getValueHigh(), "Open-ended period must not populate sp_value_high");
+		}
+
+		@Test
+		void testBoundsPeriodWithStartAndEndPopulatesBothValues() {
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing()
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period()
+									.setStartElement(new DateTimeType("2025-09-17T00:00:00-04:00"))
+									.setEndElement(new DateTimeType("2025-12-31T00:00:00-05:00")))));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertNotNull(result);
+			assertNotNull(result.getValueLow());
+			assertNotNull(result.getValueHigh());
+			assertThat(result.getValueHigh()).isAfter(result.getValueLow());
+		}
+
+		@Test
+		void testTimingEventsOnlyUseFirstAndLastEventDates() {
+			List<DateTimeType> eventList = new ArrayList<>();
+			eventList.add(new DateTimeType("2025-01-01T00:00:00Z"));
+			eventList.add(new DateTimeType("2025-06-01T00:00:00Z"));
+			eventList.add(new DateTimeType("2025-12-01T00:00:00Z"));
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing().setEvent(eventList));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertNotNull(result);
+			assertNotNull(result.getValueLow());
+			assertNotNull(result.getValueHigh());
+			assertThat(result.getValueHigh()).isAfter(result.getValueLow());
+		}
+
+		@Test
+		void testSingleTimingEventProducesSameLowAndHighValue() {
+			// A single point-in-time event is unambiguous: low == high is correct
+			List<DateTimeType> eventList = new ArrayList<>();
+			eventList.add(new DateTimeType("2025-09-17T02:25:28Z"));
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing().setEvent(eventList));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertNotNull(result);
+			assertNotNull(result.getValueLow());
+			assertNotNull(result.getValueHigh());
+			assertEquals(result.getValueLow(), result.getValueHigh());
 		}
 	}
 

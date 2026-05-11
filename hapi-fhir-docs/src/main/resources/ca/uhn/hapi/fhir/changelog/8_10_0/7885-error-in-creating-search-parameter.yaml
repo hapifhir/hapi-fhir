@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7885
+jira: SMILE-11050
+title: "Previously, when indexing a Timing search parameter whose boundsPeriod
+  contained only a start date, the date extractor would incorrectly set the
+  upper bound to the start date instead of leaving it open-ended. This has been fixed."
