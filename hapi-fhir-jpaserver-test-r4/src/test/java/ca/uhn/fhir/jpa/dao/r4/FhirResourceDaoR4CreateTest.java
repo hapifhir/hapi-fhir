@@ -24,6 +24,8 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -47,12 +49,9 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -78,10 +77,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -89,7 +86,6 @@ import java.util.concurrent.Future;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -838,6 +834,33 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			assertEquals(Msg.code(1111) + "Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server", e.getMessage());
 		}
 
+	}
+
+	@Test
+	public void createSearchParameter_withDomainResourceBase_success() {
+		String url = "http://example.org/SearchParameter/domain-resource-sp";
+		String code = "domain-resource-code";
+		SearchParameter domainResourceSp = new SearchParameter()
+			.setUrl(url)
+			.setStatus(Enumerations.PublicationStatus.ACTIVE)
+			.setCode(code)
+			.addBase("DomainResource")
+			.setType(Enumerations.SearchParamType.TOKEN)
+			.setExpression("DomainResource.identifier");
+		domainResourceSp.setId("domain-resource-sp");
+
+		IBaseResource resource = mySearchParameterDao.create(domainResourceSp, new SystemRequestDetails()).getResource();
+		assertNotNull(resource);
+
+		// verify the SearchParameter was saved in the database, else this would throw
+		// InternalErrorException: HAPI-2223: HAPI-1684: Unknown resource name "DomainResource"
+		IBundleProvider search = mySearchParameterDao.search(
+			SearchParameterMap.newSynchronous("url", new UriParam(url)));
+		assertThat(search.size()).isEqualTo(1);
+		// verify the SearchParameter was added to the registry, else this would throw
+		// InvalidRequestException: HAPI-1223: Unknown search parameter
+		myPatientDao.search(
+			SearchParameterMap.newSynchronous(code, new TokenParam("patient-id")));
 	}
 
 	@Test

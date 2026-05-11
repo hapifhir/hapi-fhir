@@ -168,6 +168,33 @@ public class SearchParamRegistryImplTest {
 		assertEquals(32, mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).size());
 	}
 
+	// Created by Claude Opus 4.7
+	@Test
+	void handleInit_searchParameterWithDomainResourceBase_isRegisteredUnderDomainResourceDerivedTypesOnly() {
+		// A client-defined SearchParameter with base=[DomainResource] must be expanded via
+		// SearchParameterUtil.expandBaseAsStrings to every DomainResource-derived concrete type
+		// and *not* to types that extend Resource directly (Bundle, Binary, Parameters).
+		IdDt id = new IdDt("SearchParameter/abstract-base-sp");
+		SearchParameter abstractSp = new SearchParameter();
+		abstractSp.setCode("abstract-base-code");
+		abstractSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		abstractSp.setType(Enumerations.SearchParamType.TOKEN);
+		abstractSp.setExpression("Patient.identifier");
+		abstractSp.addBase("DomainResource");
+		when(mySearchParamProvider.read(id)).thenReturn(abstractSp);
+
+		mySearchParamRegistry.handleInit(List.of(id));
+
+		// DomainResource-derived concrete types — SP should be registered.
+		assertNotNull(mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		assertNotNull(mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		assertNotNull(mySearchParamRegistry.getActiveSearchParams("Practitioner", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		// Types that extend Resource directly (not DomainResource) — SP should NOT be registered.
+		assertNull(mySearchParamRegistry.getActiveSearchParams("Bundle", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		assertNull(mySearchParamRegistry.getActiveSearchParams("Binary", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		assertNull(mySearchParamRegistry.getActiveSearchParams("Parameters", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+	}
+
 	@Test
 	public void testRefreshAfterExpiry() {
 		mySearchParamRegistry.requestRefresh();
