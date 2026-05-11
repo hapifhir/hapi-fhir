@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7889
+title: "Previously, SNOMED hierarchy relationships were only imported when using an English edition.
+  For other languages, the relationships were dropped when the display language of the is-a relationship type id was not English
+  or it was missing entirely.
+  Now, only the correct type id is used to determine the relationship, making the approach more robust across languages.
+  Thanks to Joel Bach for the contribution!"

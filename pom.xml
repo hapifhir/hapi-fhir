@@ -310,10 +310,6 @@
 			<name>Adam Carbone</name>
 		</developer>
 		<developer>
-			<id>joelsch</id>
-			<name>Joel Schneider</name>
-		</developer>
-		<developer>
 			<id>euvitudo</id>
 			<name>Phillip Warner</name>
 		</developer>
@@ -1003,6 +999,14 @@
 			<id>nathanloyer</id>
 			<name>Nathan Loyer</name>
 			<organization>Athena Health</organization>
+		</developer>
+		<developer>
+			<id>tisoft</id>
+			<name>Markus Heberling</name>
+		</developer>
+		<developer>
+			<id>joel-bach</id>
+			<name>Joel Bach</name>
 		</developer>
 	</developers>
 
