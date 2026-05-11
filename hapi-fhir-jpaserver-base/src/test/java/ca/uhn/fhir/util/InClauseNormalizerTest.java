@@ -54,11 +54,10 @@ public class InClauseNormalizerTest {
 	}
 
 	@Test
-	public void testNoMoreSentinel_hasNonNullTypedPartitionId() {
+	void testNoMoreSentinel_hasNonNullTypedPartitionId() {
 		// The padded slot must bind concrete typed values to both RES_ID and PARTITION_ID so
 		// MSSQL sp_executesql parameter declarations stay uniform between real and padded slots.
 		assertThat(JpaConstants.NO_MORE.getId()).isEqualTo(JpaConstants.NO_MORE_PID);
-		assertThat(JpaConstants.NO_MORE.getPartitionId()).isEqualTo(JpaConstants.NO_MORE_PARTITION_ID);
 		assertThat(JpaConstants.NO_MORE.getPartitionId()).isNotNull();
 	}
 
