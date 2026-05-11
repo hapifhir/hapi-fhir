@@ -420,7 +420,6 @@ public class SearchParamRegistryImpl
 	 */
 	public static boolean isNonDisableableBuiltInSearchParam(
 			String theUri, @Nonnull String theResourceBase, @Nonnull String theParamName) {
-		// Created by Claude Sonnet 4.6
 		if (theUri == null || !theUri.startsWith(Constants.BUILT_IN_SEARCH_PARAM_URI_PREFIX)) {
 			return false;
 		}
@@ -531,7 +530,7 @@ public class SearchParamRegistryImpl
 			for (String nextBase : theNewRuntimeSp.getBase()) {
 				if (isNonDisableableBuiltInSearchParam(theNewRuntimeSp.getUri(), nextBase, theNewRuntimeSp.getName())) {
 					ourLog.warn(
-							"Attempted to disable a non-disableable search parameter. {} will remain active in cache.",
+							"SearchParameter {} has non-active status in the database but is required for system operation; preserving the active entry in the cache.",
 							theNewRuntimeSp.getUri());
 					return true;
 				}

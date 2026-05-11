@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -194,49 +195,26 @@ public class SearchParameterValidatingInterceptorTest {
 	}
 
 	static Stream<SearchParameter> nonDisableableBuiltInSearchParams() {
-		// Created by Claude Sonnet 4.6
-		// One representative SP per non-disableable pattern: Basic:*, Subscription:*, SearchParameter:*, *:url
-		SearchParameter basicCode = new SearchParameter();
-		basicCode.setId("SearchParameter/Basic-code");
-		basicCode.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
-		basicCode.setCode("code");
-		basicCode.setName("code");
-		basicCode.setStatus(Enumerations.PublicationStatus.RETIRED);
-		basicCode.setType(Enumerations.SearchParamType.TOKEN);
-		basicCode.setExpression("Basic.code");
-		basicCode.addBase("Basic");
+		return Stream.of(
+			buildBuiltInSp("Basic-code",          "code",   "Basic.code",           "Basic",           Enumerations.SearchParamType.TOKEN),
+			buildBuiltInSp("Subscription-status", "status", "Subscription.status",  "Subscription",    Enumerations.SearchParamType.TOKEN),
+			buildBuiltInSp("SearchParameter-url", "url",    "SearchParameter.url",  "SearchParameter", Enumerations.SearchParamType.URI),
+			buildBuiltInSp("conformance-url",     "url",    "ValueSet.url",         "ValueSet",        Enumerations.SearchParamType.URI));
+	}
 
-		SearchParameter subscriptionStatus = new SearchParameter();
-		subscriptionStatus.setId("SearchParameter/Subscription-status");
-		subscriptionStatus.setUrl("http://hl7.org/fhir/SearchParameter/Subscription-status");
-		subscriptionStatus.setCode("status");
-		subscriptionStatus.setName("status");
-		subscriptionStatus.setStatus(Enumerations.PublicationStatus.RETIRED);
-		subscriptionStatus.setType(Enumerations.SearchParamType.TOKEN);
-		subscriptionStatus.setExpression("Subscription.status");
-		subscriptionStatus.addBase("Subscription");
-
-		SearchParameter searchParameterUrl = new SearchParameter();
-		searchParameterUrl.setId("SearchParameter/SearchParameter-url");
-		searchParameterUrl.setUrl("http://hl7.org/fhir/SearchParameter/SearchParameter-url");
-		searchParameterUrl.setCode("url");
-		searchParameterUrl.setName("url");
-		searchParameterUrl.setStatus(Enumerations.PublicationStatus.RETIRED);
-		searchParameterUrl.setType(Enumerations.SearchParamType.URI);
-		searchParameterUrl.setExpression("SearchParameter.url");
-		searchParameterUrl.addBase("SearchParameter");
-
-		SearchParameter conformanceUrl = new SearchParameter();
-		conformanceUrl.setId("SearchParameter/conformance-url");
-		conformanceUrl.setUrl("http://hl7.org/fhir/SearchParameter/conformance-url");
-		conformanceUrl.setCode("url");
-		conformanceUrl.setName("url");
-		conformanceUrl.setStatus(Enumerations.PublicationStatus.RETIRED);
-		conformanceUrl.setType(Enumerations.SearchParamType.URI);
-		conformanceUrl.setExpression("ValueSet.url");
-		conformanceUrl.addBase("ValueSet");
-
-		return Stream.of(basicCode, subscriptionStatus, searchParameterUrl, conformanceUrl);
+	private static SearchParameter buildBuiltInSp(
+		String theIdSuffix, String theCode, String theExpression,
+		String theBase, Enumerations.SearchParamType theType) {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/" + theIdSuffix);
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/" + theIdSuffix);
+		sp.setCode(theCode);
+		sp.setName(theCode);
+		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		sp.setType(theType);
+		sp.setExpression(theExpression);
+		sp.addBase(theBase);
+		return sp;
 	}
 
 	@ParameterizedTest
@@ -245,7 +223,7 @@ public class SearchParameterValidatingInterceptorTest {
 		// Created by Claude Sonnet 4.6
 		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreCreate(theSp, myRequestDetails))
 				.isInstanceOf(UnprocessableEntityException.class)
-				.hasMessageContaining("2875");
+				.hasMessageContaining(Msg.code(2875));
 	}
 
 	@ParameterizedTest

@@ -484,7 +484,6 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	void testNonDisableableBuiltInSearchParam_RetiredInDbStaysActiveInCache() {
-		// Created by Claude Sonnet 4.6
 		// Setup: put a RETIRED version of Basic:code (built-in non-disableable URL) in the DB
 		addSpToRegistryAndRefresh(buildBasicCodeSp(Enumerations.PublicationStatus.RETIRED));
 
@@ -498,7 +497,6 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	void testNonDisableableBuiltInSearchParam_ActiveInDbUpdatesCache() {
-		// Created by Claude Sonnet 4.6
 		// A non-disableable built-in SP that is ACTIVE in the DB should update the cache normally.
 		// The guard in overrideSearchParam() only fires when status != ACTIVE, so an ACTIVE
 		// DB version should replace the built-in entry.
@@ -517,7 +515,6 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	void testCustomSpOnNonDisableableResourceType_RetiredInDbIsRemovedFromCache() {
-		// Created by Claude Sonnet 4.6
 		// Setup: add a custom (non-built-in URL) SP on Subscription
 		SearchParameter customSp = new SearchParameter();
 		customSp.setId("SearchParameter/custom-subscription-foo");
@@ -550,7 +547,6 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	void testNonDisableableBuiltInSearchParam_ActiveDbWithNonDisabledBaseNarrowed_preservesExistingCacheEntry() {
-		// Created by Claude Sonnet 4.6
 		// conformance-context's bases includes the non-disableable SearchParameter.
 		// A DB record narrowed to [CapabilityStatement] only — removing
 		// SearchParameter — should be ignored; the guard detects the missing non-disableable base
@@ -566,7 +562,6 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	void testMultiBaseSpWithNonDisableableBase_RetiredInDbKeepsAllBasesActiveInCache() {
-		// Created by Claude Sonnet 4.6
 		// conformance-context spans many bases including SearchParameter (non-disableable) and
 		// CodeSystem (disableable). When the DB entry is RETIRED (but still lists these bases),
 		// the L1 guard detects SearchParameter is non-disableable and skips the override entirely —
@@ -591,7 +586,6 @@ public class SearchParamRegistryImplTest {
 	 */
 	@Nonnull
 	private List<ResourceTable> addSpToRegistryAndRefresh(SearchParameter theMockDbSpEntry) {
-		// Created by Claude Sonnet 4.6
 		List<ResourceTable> newEntities = new ArrayList<>(ourEntities);
 		newEntities.add(createEntity(++ourLastId, 1));
 		when(myResourceVersionSvc.getVersionMap(any(), any(), any()))
