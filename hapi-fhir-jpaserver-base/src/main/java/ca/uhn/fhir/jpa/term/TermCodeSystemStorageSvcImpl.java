@@ -52,7 +52,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
@@ -320,7 +319,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 									theCodeSystem.getVersion(),
 									theResourceEntity,
 									true);
-							return;
+							if (getExistingTermCodeSystemVersion(termCodeSystem.getPid(), theCodeSystem.getVersion())
+									!= null) {
+								return;
+							}
 						}
 					}
 				}
@@ -466,7 +468,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		 * Do the upload
 		 */
 
-		codeSystemToStore.setCodeSystem(codeSystem);
+		if (codeSystemToStore.getPid() == null) {
+			codeSystemToStore.setCodeSystem(codeSystem);
+		} else {
+			// Entity is already managed — set only the FK column to avoid Hibernate HHH000502
+			// warnings from dirtying the @JoinColumn(updatable=false) entity reference.
+			codeSystemToStore.setCodeSystemPid(codeSystem.getPid());
+		}
 		codeSystemToStore.setCodeSystemDisplayName(theSystemName);
 		codeSystemToStore.setCodeSystemVersionId(theCodeSystemVersionId);
 
@@ -765,7 +773,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 					theAllowPlaceholderRepoint);
 		}
 
-		codeSystem.setResource(theCodeSystemResourceTable);
+		if (codeSystem.getPid() == null) {
+			codeSystem.setResource(theCodeSystemResourceTable);
+		} else {
+			codeSystem.setResourcePid(theCodeSystemResourceTable);
+		}
 		codeSystem.setCodeSystemUri(theSystemUri);
 		codeSystem.setName(theSystemName);
 		codeSystem = myCodeSystemDao.save(codeSystem);
@@ -779,60 +791,55 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			ResourceTable theCodeSystemResourceTable,
 			boolean theAllowPlaceholderRepoint) {
 		TermCodeSystemVersion codeSystemVersionEntity;
-		String msg = null;
 		if (theSystemVersionId == null) {
-			// Check if a non-versioned TermCodeSystemVersion entity already exists for this TermCodeSystem.
 			codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(theCodeSystem.getPid());
-			if (codeSystemVersionEntity != null) {
-				msg = myContext
-						.getLocalizer()
-						.getMessage(
-								TermReadSvcImpl.class,
-								"cannotCreateDuplicateCodeSystemUrl",
-								theSystemUri,
-								codeSystemVersionEntity
-										.getResource()
-										.getIdDt()
-										.toUnqualifiedVersionless()
-										.getValue());
-			}
 		} else {
-			// Check if a TermCodeSystemVersion entity already exists for this TermCodeSystem and version.
 			codeSystemVersionEntity =
 					myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCodeSystem.getPid(), theSystemVersionId);
-			if (codeSystemVersionEntity != null) {
-				msg = myContext
-						.getLocalizer()
-						.getMessage(
-								TermReadSvcImpl.class,
-								"cannotCreateDuplicateCodeSystemUrlAndVersion",
-								theSystemUri,
-								theSystemVersionId,
-								codeSystemVersionEntity
-										.getResource()
-										.getIdDt()
-										.toUnqualifiedVersionless()
-										.getValue());
-			}
 		}
-		// Throw exception if the TermCodeSystemVersion is being duplicated.
-		if (codeSystemVersionEntity != null) {
-			if (!ObjectUtil.equals(codeSystemVersionEntity.getResource().getId(), theCodeSystemResourceTable.getId())) {
-				if (theAllowPlaceholderRepoint
-						&& myConceptDao.countByCodeSystemVersion(codeSystemVersionEntity.getPid()) == 0) {
-					// The existing version is a 0-concept placeholder (e.g. from a NOTPRESENT
-					// pre-seed) and the caller is itself the NOTPRESENT early-return path in
-					// storeNewCodeSystemVersionIfNeeded. Re-point the placeholder to the new
-					// resource instead of rejecting. Non-NOTPRESENT callers (e.g. COMPLETE
-					// CodeSystem create/update) keep strict duplicate detection, since they
-					// must not silently replace a prior resource.
-					codeSystemVersionEntity.setResource(theCodeSystemResourceTable);
-					myCodeSystemVersionDao.save(codeSystemVersionEntity);
-				} else {
-					throw new UnprocessableEntityException(Msg.code(848) + msg);
-				}
-			}
+
+		if (codeSystemVersionEntity == null) {
+			return;
 		}
+
+		if (Objects.equals(
+				codeSystemVersionEntity.getResourcePidValue(),
+				theCodeSystemResourceTable.getId().getId())) {
+			return;
+		}
+
+		if (theAllowPlaceholderRepoint
+				&& myConceptDao.countByCodeSystemVersion(codeSystemVersionEntity.getPid()) == 0) {
+			// The existing version is a 0-concept placeholder (e.g. from a NOTPRESENT
+			// pre-seed) and the caller is itself the NOTPRESENT early-return path in
+			// storeNewCodeSystemVersionIfNeeded. Re-point the placeholder to the new
+			// resource instead of rejecting. Non-NOTPRESENT callers (e.g. COMPLETE
+			// CodeSystem create/update) keep strict duplicate detection, since they
+			// must not silently replace a prior resource.
+			codeSystemVersionEntity.setResourcePid(theCodeSystemResourceTable);
+			myCodeSystemVersionDao.save(codeSystemVersionEntity);
+			return;
+		}
+
+		throw new UnprocessableEntityException(Msg.code(848)
+				+ buildDuplicateCodeSystemMessage(codeSystemVersionEntity, theSystemUri, theSystemVersionId));
+	}
+
+	// Created by claude-opus-4-6
+	private String buildDuplicateCodeSystemMessage(
+			TermCodeSystemVersion theVersionEntity, String theSystemUri, String theSystemVersionId) {
+		String resourceRef = theVersionEntity
+				.getResource()
+				.getIdDt()
+				.toUnqualifiedVersionless()
+				.getValue();
+		boolean hasVersion = theSystemVersionId != null;
+		String messageKey =
+				hasVersion ? "cannotCreateDuplicateCodeSystemUrlAndVersion" : "cannotCreateDuplicateCodeSystemUrl";
+		Object[] args = hasVersion
+				? new Object[] {theSystemUri, theSystemVersionId, resourceRef}
+				: new Object[] {theSystemUri, resourceRef};
+		return myContext.getLocalizer().getMessage(TermReadSvcImpl.class, messageKey, args);
 	}
 
 	private void populateCodeSystemVersionProperties(
@@ -862,7 +869,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theConceptsStack.add(theConcept.getCode());
 
 		int retVal = 0;
-		if (theAllConcepts.put(theConcept, theAllConcepts) == null) {
+		if (theAllConcepts.put(theConcept, PLACEHOLDER_OBJECT) == null) {
 			if (theAllConcepts.size() % 1000 == 0) {
 				ourLog.info("Have validated {} concepts", theAllConcepts.size());
 			}

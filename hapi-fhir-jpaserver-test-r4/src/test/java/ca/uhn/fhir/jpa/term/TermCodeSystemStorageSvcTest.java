@@ -8,10 +8,13 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -19,12 +22,18 @@ import java.util.ArrayList;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
+
+	private static final String HHH000502 = "HHH000502";
+
+	@RegisterExtension
+	LogbackTestExtension myHibernateLogCapture = new LogbackTestExtension(
+		"org.hibernate.persister.entity.AbstractEntityPersister", Level.WARN);
 
 	@Autowired
 	private Batch2JobHelper myBatchJobHelper;
@@ -46,6 +55,12 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 			assertEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion.getPid());
 			assertEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion.getResource().getId());
 		});
+
+		assertThat(myHibernateLogCapture.getLogMessages().stream()
+			.filter(msg -> msg.contains(HHH000502))
+			.toList())
+			.as("No HHH000502 immutable-property warnings should be emitted")
+			.isEmpty();
 	}
 
 
@@ -122,6 +137,8 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 			assertThat(conceptCount).isEqualTo(0);
 		});
 
+		myHibernateLogCapture.clearEvents();
+
 		// Step 2: Create a second NOTPRESENT CodeSystem with the same URL.
 		// This simulates the scenario where a new FHIR resource is created for the same
 		// CodeSystem URL (e.g. a subsequent pre-seed run when the conditional search fails
@@ -135,6 +152,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		// from the first pre-seed. It should be updated to point to the new resource.
 		// Previously threw UnprocessableEntityException (Msg.code(848)) — fixed by SMILE-7421.
 		JpaPid secondResourcePid = ((ResourceTable) myCodeSystemDao.create(cs2, mySrd).getEntity()).getId();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		// Verify: TermCodeSystem and TermCodeSystemVersion both point to the second resource
 		runInTransaction(() -> {
@@ -144,6 +162,12 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 			assertThat(tcs.getCurrentVersion()).isNotNull();
 			assertThat(tcs.getCurrentVersion().getResource().getId()).isEqualTo(secondResourcePid);
 		});
+
+		assertThat(myHibernateLogCapture.getLogMessages().stream()
+			.filter(msg -> msg.contains(HHH000502))
+			.toList())
+			.as("No HHH000502 immutable-property warnings should be emitted")
+			.isEmpty();
 	}
 
 	// Created by claude-opus-4-6
@@ -271,6 +295,43 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		assertThatThrownBy(() -> myCodeSystemDao.create(cs2, mySrd))
 			.isInstanceOf(UnprocessableEntityException.class)
 			.hasMessageContaining("HAPI-0848");
+	}
+
+	// Created by claude-opus-4-6
+	@Test
+	void storeNewCodeSystemVersionIfNeeded_notPresentSameUrlSameResource_shouldKeepExistingVersion() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		JpaPid firstResourcePid = ((ResourceTable) myCodeSystemDao.create(cs, mySrd).getEntity()).getId();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myHibernateLogCapture.clearEvents();
+
+		// Second NOTPRESENT with same URL — conditional create returns the same FHIR resource,
+		// so the existing TermCodeSystemVersion should be kept as-is (same resource PID).
+		CodeSystem cs2 = new CodeSystem();
+		cs2.setUrl(URL_MY_CODE_SYSTEM);
+		cs2.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		cs2.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myCodeSystemDao.create(cs2, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemDao.count()).isEqualTo(1);
+			assertThat(myTermCodeSystemVersionDao.count()).isEqualTo(1);
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri(URL_MY_CODE_SYSTEM);
+			assertThat(tcs).isNotNull();
+			assertThat(tcs.getCurrentVersion()).isNotNull();
+			assertThat(tcs.getCurrentVersion().getResource().getId()).isEqualTo(firstResourcePid);
+		});
+
+		assertThat(myHibernateLogCapture.getLogMessages().stream()
+			.filter(msg -> msg.contains(HHH000502))
+			.toList())
+			.as("No HHH000502 immutable-property warnings should be emitted")
+			.isEmpty();
 	}
 
 	private CodeSystem createCodeSystemWithMoreThan100Concepts() {
