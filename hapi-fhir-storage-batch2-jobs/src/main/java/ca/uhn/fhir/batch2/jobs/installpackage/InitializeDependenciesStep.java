@@ -136,7 +136,8 @@ public class InitializeDependenciesStep
 						nextDependency.version())) {
 					// create a new installation spec, retaining all the control parameters, but targeting the
 					// dependency package
-					JobInstanceStartRequest startRequest = buildStartRequest(nextDependency, theStepExecutionDetails.getParameters());
+					JobInstanceStartRequest startRequest =
+							buildStartRequest(nextDependency, theStepExecutionDetails.getParameters());
 					Batch2JobStartResponse response = myJobCoordinator.startInstance(
 							theStepExecutionDetails.newSystemRequestDetails(), startRequest);
 					jobIds.add(response.getInstanceId());
@@ -155,8 +156,9 @@ public class InitializeDependenciesStep
 
 	@Nonnull
 	private static JobInstanceStartRequest buildStartRequest(
-		PackageUtils.DependentPackage theDependency, PackageInstallationJobParameters theParentJobParameters) {
-		PackageInstallationSpec dependencySpec = new PackageInstallationSpec(theParentJobParameters.getInstallationSpec());
+			PackageUtils.DependentPackage theDependency, PackageInstallationJobParameters theParentJobParameters) {
+		PackageInstallationSpec dependencySpec =
+				new PackageInstallationSpec(theParentJobParameters.getInstallationSpec());
 		dependencySpec.setName(theDependency.name());
 		dependencySpec.setVersion(theDependency.version());
 		dependencySpec.setPackageUrl(null);

@@ -79,7 +79,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -534,9 +533,9 @@ public class PackageInstallerSvcImplTest {
 			SearchParameter updatedExisting = iterator.next();
 			assertEquals("existing-sp", updatedExisting.getIdPart());
 			List<String> updatedBase = updatedExisting.getBase().stream().map(CodeType::getCode).toList();
-			assertThat(updatedBase).doesNotContain("Patient");
-			assertThat(updatedBase).doesNotContain("DomainResource");
-			assertThat(updatedBase).contains("Observation");
+			assertThat(updatedBase).doesNotContain("Patient")
+				.doesNotContain("DomainResource")
+				.contains("Observation");
 
 			SearchParameter createdIncoming = iterator.next();
 			assertEquals(List.of("Patient"), createdIncoming.getBase().stream().map(CodeType::getCode).toList());
@@ -799,9 +798,9 @@ public class PackageInstallerSvcImplTest {
 			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
 			// When the installer loads the cross-version dep, return the R5 package
-			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+			when(myPackageCacheManager.loadPackage(CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION, true))
 				.thenReturn(crossVersionDep);
-			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_R4_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+			when(myPackageCacheManager.loadPackage(CROSS_VERSION_R4_PKG_ID, CROSS_VERSION_PKG_VERSION, true))
 				.thenReturn(r4Variant);
 
 			PackageInstallationSpec spec = new PackageInstallationSpec();
@@ -881,7 +880,7 @@ public class PackageInstallerSvcImplTest {
 
 			// Verify: installation completed and the dep was never loaded
 			assertThat(outcome).isNotNull();
-			verify(myPackageCacheManager, never()).loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION));
+			verify(myPackageCacheManager, never()).loadPackage(CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
 		}
 
 		/**
@@ -903,9 +902,9 @@ public class PackageInstallerSvcImplTest {
 
 			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
-			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+			when(myPackageCacheManager.loadPackage(CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION, true))
 				.thenReturn(crossVersionDep);
-			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_R4_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+			when(myPackageCacheManager.loadPackage(CROSS_VERSION_R4_PKG_ID, CROSS_VERSION_PKG_VERSION, true))
 				.thenThrow(new IOException("Package not found: " + CROSS_VERSION_R4_PKG_ID));
 
 			PackageInstallationSpec spec = new PackageInstallationSpec();

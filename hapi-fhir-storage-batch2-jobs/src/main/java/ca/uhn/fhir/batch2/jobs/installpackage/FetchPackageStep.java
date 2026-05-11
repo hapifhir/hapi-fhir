@@ -50,8 +50,7 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 	private final IPackageInstallerSvc myPackageInstallerSvc;
 
 	public FetchPackageStep(
-			IHapiPackageCacheManager thePackageCacheManager,
-			IPackageInstallerSvc thePackageInstallerSvc) {
+			IHapiPackageCacheManager thePackageCacheManager, IPackageInstallerSvc thePackageInstallerSvc) {
 		this.myPackageCacheManager = thePackageCacheManager;
 		this.myPackageInstallerSvc = thePackageInstallerSvc;
 	}
