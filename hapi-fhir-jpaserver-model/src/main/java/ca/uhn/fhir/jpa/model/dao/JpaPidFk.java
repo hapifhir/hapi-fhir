@@ -23,6 +23,8 @@ import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.List;
@@ -37,10 +39,12 @@ import java.util.stream.Collectors;
 public class JpaPidFk implements Serializable {
 
 	@Column(name = "RES_ID", nullable = false)
+	@JdbcTypeCode(SqlTypes.BIGINT)
 	private Long myId;
 
 	@PartitionedIdProperty
 	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
+	@JdbcTypeCode(SqlTypes.INTEGER)
 	private Integer myPartitionIdValue;
 
 	/**
