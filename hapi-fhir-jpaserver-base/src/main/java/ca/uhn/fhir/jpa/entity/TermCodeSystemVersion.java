@@ -157,6 +157,7 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 	 * Use this on managed entities to avoid Hibernate HHH000502 warnings caused by dirtying
 	 * the {@link #myCodeSystem} field whose {@code @JoinColumn} is {@code updatable = false}.
 	 */
+	// Created by Claude Opus 4.6
 	public void setCodeSystemPid(long theCodeSystemPid) {
 		myCodeSystemPid = theCodeSystemPid;
 	}
@@ -195,6 +196,11 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		return myResource;
 	}
 
+	// Created by Claude Opus 4.6
+	public Long getResourcePidValue() {
+		return myResourcePid;
+	}
+
 	public TermCodeSystemVersion setResource(ResourceTable theResource) {
 		myResource = theResource;
 		myResourcePid = theResource.getId().getId();
@@ -207,6 +213,7 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 	 * Use this on managed entities to avoid Hibernate HHH000502 warnings caused by dirtying
 	 * the {@link #myResource} field whose {@code @JoinColumn} is {@code updatable = false}.
 	 */
+	// Created by Claude Opus 4.6
 	public void setResourcePid(ResourceTable theResource) {
 		myResourcePid = theResource.getId().getId();
 		setPartitionId(theResource.getPartitionId());

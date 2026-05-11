@@ -71,34 +71,22 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 	@Column(name = "CODE_SYSTEM_URI", nullable = false, length = MAX_URL_LENGTH)
 	private String myCodeSystemUri;
 
-	/**
-	 * Note that this uses a separate partition_id column because it needs
-	 * to be nullable, unlike the PK one which has to be non-nullable
-	 * when we're including partition IDs in PKs.
-	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(
 			value = {
-				@JoinColumn(
-						name = "CURRENT_VERSION_PID",
-						referencedColumnName = "PID",
-						insertable = false,
-						updatable = false,
-						nullable = true),
+				@JoinColumn(name = "CURRENT_VERSION_PID", referencedColumnName = "PID", nullable = true),
 				@JoinColumn(
 						name = "CURRENT_VERSION_PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
-						insertable = false,
-						updatable = false,
 						nullable = true)
 			},
 			foreignKey = @ForeignKey(name = FK_TRMCODESYSTEM_CURVER))
 	private TermCodeSystemVersion myCurrentVersion;
 
-	@Column(name = "CURRENT_VERSION_PID", nullable = true, insertable = true, updatable = true)
+	@Column(name = "CURRENT_VERSION_PID", nullable = true, insertable = false, updatable = false)
 	private Long myCurrentVersionPid;
 
-	@Column(name = "CURRENT_VERSION_PARTITION_ID", nullable = true, insertable = true, updatable = true)
+	@Column(name = "CURRENT_VERSION_PARTITION_ID", nullable = true, insertable = false, updatable = false)
 	private Integer myCurrentVersionPartitionId;
 
 	@Id()
@@ -191,27 +179,8 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 	}
 
 	public TermCodeSystem setCurrentVersion(TermCodeSystemVersion theCurrentVersion) {
-		if (theCurrentVersion == null) {
-			myCurrentVersion = null;
-			myCurrentVersionPid = null;
-			myCurrentVersionPartitionId = null;
-		} else {
-			myCurrentVersion = theCurrentVersion;
-			myCurrentVersionPid = theCurrentVersion.getPid();
-			assert myCurrentVersionPid != null;
-			myCurrentVersionPartitionId = theCurrentVersion.getPartitionId().getPartitionId();
-		}
+		myCurrentVersion = theCurrentVersion;
 		return this;
-	}
-
-	/**
-	 * Sets only the FK column values without touching the {@code @ManyToOne} entity reference.
-	 * Use this on managed entities to avoid Hibernate HHH000502 warnings caused by dirtying
-	 * the {@link #myCurrentVersion} field whose {@code @JoinColumn} is {@code updatable = false}.
-	 */
-	public void setCurrentVersionPid(long thePid, @jakarta.annotation.Nullable Integer thePartitionId) {
-		myCurrentVersionPid = thePid;
-		myCurrentVersionPartitionId = thePartitionId;
 	}
 
 	public Long getPid() {
@@ -238,6 +207,7 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 	 * Use this on managed entities to avoid Hibernate HHH000502 warnings caused by dirtying
 	 * the {@link #myResource} field whose {@code @JoinColumn} is {@code updatable = false}.
 	 */
+	// Created by Claude Opus 4.6
 	public void setResourcePid(ResourceTable theResource) {
 		myResourcePid = theResource.getId().getId();
 		setPartitionId(theResource.getPartitionId());
