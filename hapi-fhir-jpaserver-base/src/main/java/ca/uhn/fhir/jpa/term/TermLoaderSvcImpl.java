@@ -1075,7 +1075,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		ourLog.info("Got {} concepts, cloning map", code2concept.size());
 		final HashMap<String, TermConcept> rootConcepts = new HashMap<>(code2concept);
 
-		handler = new SctHandlerRelationship(codeSystemVersion, rootConcepts, code2concept);
+		handler = new SctHandlerRelationship(codeSystemVersion, code2concept);
 		iterateOverZipFileCsv(theDescriptors, SCT_FILE_RELATIONSHIP, handler, '\t', null, true);
 
 		IOUtils.closeQuietly(theDescriptors);

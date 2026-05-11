@@ -2,12 +2,14 @@
 #
 # HOW TO USE:
 # 1. Update the branch name below to the current release branch
-# 2. Enable this pipeline in Azure DevOps UI
-# 3. When the release is done, disable this pipeline in Azure DevOps UI
+# 2. In Azure DevOps UI enable this pipeline
+# 3. In Azure DevOps UI
+# 4. When the release is done, disable this pipeline in Azure DevOps UI
 #
 schedules:
   - cron: "0 2 * * *"           # 2 AM UTC (offset from master's midnight)
     displayName: Nightly Release Branch SNAPSHOT Publish
+    timeoutInMinutes: 90
     branches:
       include:
         - rel_8_10               # <-- UPDATE THIS EACH CYCLE

@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -195,7 +194,7 @@ public class ReindexTaskV2 implements TransactionCallback<ReindexResults> {
 				outcome.getWarnings().forEach(myDataSink::recoveredError);
 				reindexResults.addResourceTypeToCompletionStatus(nextResourceType, outcome.isHasPendingWork());
 
-			} catch (BaseServerResponseException | DataFormatException e) {
+			} catch (BaseServerResponseException e) {
 				String resourceForcedId = myIdHelperService
 						.translatePidIdToForcedIdWithCache(resourcePersistentId)
 						.orElse(resourcePersistentId.toString());
