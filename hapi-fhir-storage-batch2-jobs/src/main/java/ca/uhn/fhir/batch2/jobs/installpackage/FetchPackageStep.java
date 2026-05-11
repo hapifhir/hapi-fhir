@@ -48,15 +48,12 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 
 	private final IHapiPackageCacheManager myPackageCacheManager;
 	private final IPackageInstallerSvc myPackageInstallerSvc;
-	private final DependencyManager myDependencyManager;
 
 	public FetchPackageStep(
 			IHapiPackageCacheManager thePackageCacheManager,
-			IPackageInstallerSvc thePackageInstallerSvc,
-			DependencyManager theDependencyManager) {
+			IPackageInstallerSvc thePackageInstallerSvc) {
 		this.myPackageCacheManager = thePackageCacheManager;
 		this.myPackageInstallerSvc = thePackageInstallerSvc;
-		this.myDependencyManager = theDependencyManager;
 	}
 
 	@Nonnull
@@ -78,11 +75,6 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 						installationSpec.getName(),
 						installationSpec.getVersion(),
 						shouldUpdateCache(installationSpec));
-			} else {
-				// since this is the root job, we want to set up the dependency management resource that
-				// will be shared with all the child jobs
-				String resourceId = myDependencyManager.createDependencyResource();
-				jobParameters.setDependencyTrackerId(resourceId);
 			}
 
 			if (npmPackage == null) {

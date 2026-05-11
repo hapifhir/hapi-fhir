@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.installpackage.DependencyManager;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
@@ -123,6 +124,8 @@ public class PackageInstallerSvcImplTest {
 
 	@Mock
 	private IJobCoordinator myJobCoordinatorMock;
+	@Mock
+	private DependencyManager myDependencyManagerMock;
 
 	@Spy
 	private FhirContext myCtx = FhirContext.forR4Cached();
@@ -312,18 +315,21 @@ public class PackageInstallerSvcImplTest {
 		spec.setName("test spec");
 
 		String expectedJobId = UUID.randomUUID().toString();
+		String expectedTrackerResourceId = "Basic/1";
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(expectedJobId);
 
 		when(myJobCoordinatorMock.startInstance(any(RequestDetails.class), myJobInstanceStartRequestCaptor.capture()))
 			.thenReturn(response);
+		when(myDependencyManagerMock.createDependencyResource()).thenReturn(expectedTrackerResourceId);
 
 		String actualJobId = mySvc.installAsynchronously(spec);
 
 		assertThat(actualJobId).isEqualTo(expectedJobId);
-		assertThat(myJobInstanceStartRequestCaptor.getValue().getParameters(PackageInstallationJobParameters.class)
-			.getInstallationSpec().getName())
-			.isEqualTo("test spec");
+
+		PackageInstallationJobParameters actualParameters = myJobInstanceStartRequestCaptor.getValue().getParameters(PackageInstallationJobParameters.class);
+		assertThat(actualParameters.getInstallationSpec().getName()).isEqualTo("test spec");
+		assertThat(actualParameters.getDependencyTrackerId()).isEqualTo(expectedTrackerResourceId);
 	}
 
 	@Test

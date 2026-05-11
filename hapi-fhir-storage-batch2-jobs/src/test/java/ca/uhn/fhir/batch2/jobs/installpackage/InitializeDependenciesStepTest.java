@@ -385,6 +385,13 @@ public class InitializeDependenciesStepTest {
 			.map(t -> JsonUtil.deserialize(t, PackageInstallationJobParameters.class))
 			.map(PackageInstallationJobParameters::isDependencyJob)
 			.forEach(t -> assertThat(t).isTrue());
+
+		startRequests.stream()
+			.map(JobInstanceStartRequest::getParameters)
+			.map(t -> JsonUtil.deserialize(t, PackageInstallationJobParameters.class))
+			.map(PackageInstallationJobParameters::getDependencyTrackerId)
+			.forEach(t -> assertThat(t).isEqualTo("Basic/1"));
+
 	}
 
 	private static class JobIdIncrementor implements Answer<Batch2JobStartResponse> {

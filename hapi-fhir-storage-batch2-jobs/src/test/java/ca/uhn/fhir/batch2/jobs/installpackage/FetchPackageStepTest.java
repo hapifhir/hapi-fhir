@@ -29,9 +29,7 @@ import java.util.Base64;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,8 +43,6 @@ public class FetchPackageStepTest {
 	private IHapiPackageCacheManager myPackageLoader;
 	@Mock
 	private IPackageInstallerSvc myPackageInstallerSvc;
-	@Mock
-	private DependencyManager myDependencyManager;
 
 	private FetchPackageStep step;
 
@@ -59,7 +55,7 @@ public class FetchPackageStepTest {
 
 	@BeforeEach
 	public void beforeEach() {
-		step = new FetchPackageStep(myPackageLoader, myPackageInstallerSvc, myDependencyManager);
+		step = new FetchPackageStep(myPackageLoader, myPackageInstallerSvc);
 	}
 
 	@Test
@@ -122,63 +118,5 @@ public class FetchPackageStepTest {
 
 		// execute and validate
 		assertThatThrownBy(() -> step.run(details, myJobDataSink)).isInstanceOf(JobExecutionFailedException.class);
-	}
-
-	@Test
-	public void testRun_rootJobInitializesDependencyResource() throws Exception {
-		// set up
-		InputStream stream = FetchPackageStepTest.class.getResourceAsStream("usCorePackage.tgz");
-		byte[] packageBytes = stream.readAllBytes();
-		NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(packageBytes));
-		when(myPackageLoader.installPackage(any())).thenReturn(npmPackage);
-
-		PackageInstallationSpec theInstallationSpec = new PackageInstallationSpec();
-		theInstallationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
-		theInstallationSpec.setFetchDependencies(false);
-
-		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
-		params.setInstallationSpec(theInstallationSpec);
-
-		when(myDependencyManager.createDependencyResource()).thenReturn("Basic/1");
-
-		StepExecutionDetails<PackageInstallationJobParameters, VoidModel> details =
-			new StepExecutionDetails<>(params, null, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
-
-		// execute
-		step.run(details, myJobDataSink);
-
-		// validate
-		verify(myDependencyManager).createDependencyResource();
-		assertThat(params.getDependencyTrackerId()).isEqualTo("Basic/1");
-	}
-
-	@Test
-	public void testRun_childJobLeavesDependencyResourceAlone() throws Exception {
-		// set up
-		InputStream stream = FetchPackageStepTest.class.getResourceAsStream("usCorePackage.tgz");
-		byte[] packageBytes = stream.readAllBytes();
-		NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(packageBytes));
-		when(myPackageLoader.installPackage(any())).thenReturn(npmPackage);
-		when(myPackageInstallerSvc.substituteVersionSpecificPackageIfNeeded(any(), any(), any(), anyBoolean()))
-			.thenReturn(npmPackage);
-
-		PackageInstallationSpec theInstallationSpec = new PackageInstallationSpec();
-		theInstallationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
-		theInstallationSpec.setFetchDependencies(false);
-
-		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
-		params.setInstallationSpec(theInstallationSpec);
-		params.setDependencyJob(true);
-		params.setDependencyTrackerId("Basic/1");
-
-		StepExecutionDetails<PackageInstallationJobParameters, VoidModel> details =
-			new StepExecutionDetails<>(params, null, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
-
-		// execute
-		step.run(details, myJobDataSink);
-
-		// validate
-		verifyNoInteractions(myDependencyManager);
-		assertThat(params.getDependencyTrackerId()).isEqualTo("Basic/1");
 	}
 }

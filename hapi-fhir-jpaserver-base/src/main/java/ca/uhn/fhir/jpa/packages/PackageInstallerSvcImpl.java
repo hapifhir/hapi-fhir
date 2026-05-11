@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.installpackage.DependencyManager;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -148,6 +149,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	private DependencyManager myDependencyManager;
 
 	/**
 	 * Constructor
@@ -366,8 +370,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		logIfPackageAlreadyInstalled(theInstallationSpec);
 
+		String dependencyResourceId = myDependencyManager.createDependencyResource();
+
 		PackageInstallationJobParameters parameters = new PackageInstallationJobParameters();
 		parameters.setInstallationSpec(theInstallationSpec);
+		parameters.setDependencyTrackerId(dependencyResourceId);
 		JobInstanceStartRequest startRequest =
 				new JobInstanceStartRequest(Batch2JobDefinitionConstants.INSTALL_PACKAGE, parameters);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(createRequestDetails(), startRequest);
