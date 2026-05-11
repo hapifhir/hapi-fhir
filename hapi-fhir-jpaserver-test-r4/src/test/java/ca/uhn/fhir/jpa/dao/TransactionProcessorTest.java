@@ -90,6 +90,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -246,7 +247,7 @@ public class TransactionProcessorTest {
 		// Setup
 		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any())).thenReturn(RequestPartitionId.fromPartitionId(100));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(100));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), nullable(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(100));
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionFhirPatchEntry(new Parameters()).conditional(PATIENT_MATCH_URL_FOO_123);
@@ -453,8 +454,8 @@ public class TransactionProcessorTest {
 		Bundle input = bb.getBundleTyped();
 
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), eq("Patient"))).thenReturn(RequestPartitionId.fromPartitionId(100));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(123));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(456));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP), nullable(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(123));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP), nullable(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(456));
 
 		mockPreFetchHashCapture();
 		mockPatientDaoCreate();
@@ -489,8 +490,8 @@ public class TransactionProcessorTest {
 		Bundle input = bb.getBundleTyped();
 
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), eq("Patient"))).thenReturn(RequestPartitionId.fromPartitionId(100));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(123));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP), any(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(456));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_123_SP_MAP), nullable(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(123));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), eq("Practitioner"), eq(PRACTITIONER_MATCH_URL_FOO_456_SP_MAP), nullable(IBaseResource.class))).thenReturn(RequestPartitionId.fromPartitionId(456));
 
 		myHapiTransactionService.addNonCompatiblePartition(RequestPartitionId.fromPartitionId(123), RequestPartitionId.fromPartitionId(456));
 

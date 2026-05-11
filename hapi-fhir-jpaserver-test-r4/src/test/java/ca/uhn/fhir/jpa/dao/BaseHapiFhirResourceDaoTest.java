@@ -18,13 +18,11 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -63,17 +61,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
@@ -97,6 +91,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -223,8 +218,8 @@ class BaseHapiFhirResourceDaoTest {
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(eq(requestDetails), eq("Patient"), eq(versionedId)))
 			.thenReturn(RequestPartitionId.allPartitions());
 
-		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
-		mySvc.setTransactionService(myTransactionService);
+		MockHapiTransactionService transactionService = new MockHapiTransactionService();
+		mySvc.setTransactionService(transactionService);
 		setup(Patient.class);
 
 		IResourceLookup<JpaPid> mockDeletedResourceLookup = mock(IResourceLookup.class);
@@ -246,8 +241,8 @@ class BaseHapiFhirResourceDaoTest {
 		SearchParameterMap map = new SearchParameterMap();
 		RequestDetails requestDetails = new SystemRequestDetails();
 
-		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
-		mySvc.setTransactionService(myTransactionService);
+		MockHapiTransactionService transactionService = new MockHapiTransactionService();
+		mySvc.setTransactionService(transactionService);
 		setup(Patient.class);
 		List<Patient> resourceList = new ArrayList<>();
 		resourceList.add(null);
@@ -479,10 +474,10 @@ class BaseHapiFhirResourceDaoTest {
 	@MethodSource("searchParameterMapProvider")
 	public void testMethodSearchForIds_withNullSPMapLoadSynchronousUpTo_defaultsToInternalSynchronousSearchSize(SearchParameterMap theSearchParameterMap, int expectedSearchSize) {
 		// setup
-		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
-		mySvc.setTransactionService(myTransactionService);
+		MockHapiTransactionService transactionService = new MockHapiTransactionService();
+		mySvc.setTransactionService(transactionService);
 
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any(IBaseResource.class))).thenReturn(mock(RequestPartitionId.class));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), nullable(IBaseResource.class))).thenReturn(mock(RequestPartitionId.class));
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(myISearchBuilder);
 		when(myISearchBuilder.createQuery(any(), any(), any(), any())).thenReturn(mock(IResultIterator.class));
 
