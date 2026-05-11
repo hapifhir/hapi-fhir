@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8712
+jira: SMILE-11050
+title: "Previously, when indexing a Timing search parameter whose boundsPeriod contained only a start
+  date, the date extractor would incorrectly populate sp_value_high with the start date instead
+  of null, violating the FHIR specification for open-ended periods. This has been fixed."
