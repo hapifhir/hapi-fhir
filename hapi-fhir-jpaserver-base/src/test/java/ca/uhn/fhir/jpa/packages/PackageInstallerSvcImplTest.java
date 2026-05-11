@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.Subscription;
@@ -718,19 +719,23 @@ public class PackageInstallerSvcImplTest {
 		deviceWithUrl.setStatus(Device.FHIRDeviceStatus.ACTIVE);
 		deviceWithUrl.addIdentifier().setSystem("urn:sys").setValue("device-with-url");
 
-		// A device with a url element present but blank — resourceHasPopulatedUrl must return false,
+		// A device with a url element present but blank — hasUrl must return false,
 		// falling through to identifier-based matching.
 		Device deviceWithBlankUrl = new Device();
 		deviceWithBlankUrl.setStatus(Device.FHIRDeviceStatus.ACTIVE);
 		deviceWithBlankUrl.addIdentifier().setSystem("urn:sys").setValue("device-blank-url");
 		deviceWithBlankUrl.setUrl("");
 
+		Subscription subscription = createSubscription(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setId("sub-123");
+
 		return Stream.of(
 			arguments(csWithUrl, "url", "?url=http%3A//example.com/cs"),
 			arguments(deviceWithUrlNotPopulated, "identifier", "?identifier=urn%3Asys%7Cdevice-no-url"),
 			arguments(ptWithIdentifier, "identifier", "?identifier=urn%3Asys%7Cpt-id"),
 			arguments(deviceWithUrl, "url", "?url=http%3A//10.0.0.1/fhir"),
-			arguments(deviceWithBlankUrl, "identifier", "?identifier=urn%3Asys%7Cdevice-blank-url")
+			arguments(deviceWithBlankUrl, "identifier", "?identifier=urn%3Asys%7Cdevice-blank-url"),
+			arguments(subscription, "_id", "?_id=sub-123")
 		);
 	}
 
@@ -756,6 +761,55 @@ public class PackageInstallerSvcImplTest {
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
 		assertThat(map.keySet()).contains(theExpectedSearchKey);
 		assertThat(map.toNormalizedQueryString()).startsWith(theExpectedQueryString);
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@Test
+	void testInstall_subscriptionWithNoId_throws() throws IOException {
+		Subscription subscription = createSubscription(Subscription.SubscriptionStatus.REQUESTED);
+		NpmPackage pkg = createPackage(subscription, "Subscription");
+		IFhirResourceDao dao = mock(IFhirResourceDao.class);
+		when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
+		when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
+		when(myPackageCacheManager.installPackage(any())).thenReturn(pkg);
+		when(myDaoRegistry.getResourceDao(Subscription.class)).thenReturn(dao);
+
+		PackageInstallationSpec spec = new PackageInstallationSpec();
+		spec.setName(PACKAGE_ID_1);
+		spec.setVersion(PACKAGE_VERSION);
+		spec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		spec.addInstallResourceTypes("Subscription");
+
+		assertThatThrownBy(() -> mySvc.install(spec))
+			.isInstanceOf(ImplementationGuideInstallationException.class)
+			.hasRootCauseInstanceOf(UnsupportedOperationException.class)
+			.hasRootCauseMessage("%s", "HAPI-2929: Subscription resources in a package must have an id to be loaded by the package installer.");
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@Test
+	void testInstall_namingSystemWithNoUniqueId_throws() throws IOException {
+		NamingSystem namingSystem = new NamingSystem();
+		namingSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		namingSystem.setKind(NamingSystem.NamingSystemType.CODESYSTEM);
+		namingSystem.setName("TestNamingSystem");
+
+		NpmPackage pkg = createPackage(namingSystem, "NamingSystem");
+		IFhirResourceDao dao = mock(IFhirResourceDao.class);
+		when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
+		when(myPackageCacheManager.installPackage(any())).thenReturn(pkg);
+		when(myDaoRegistry.getResourceDao(NamingSystem.class)).thenReturn(dao);
+
+		PackageInstallationSpec spec = new PackageInstallationSpec();
+		spec.setName(PACKAGE_ID_1);
+		spec.setVersion(PACKAGE_VERSION);
+		spec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		spec.addInstallResourceTypes("NamingSystem");
+
+		assertThatThrownBy(() -> mySvc.install(spec))
+			.isInstanceOf(ImplementationGuideInstallationException.class)
+			.hasMessageContaining("HAPI-1291")
+			.hasMessageContaining("NamingSystem does not have uniqueId component");
 	}
 
 	@Nested

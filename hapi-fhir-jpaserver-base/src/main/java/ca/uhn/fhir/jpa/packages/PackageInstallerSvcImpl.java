@@ -23,9 +23,6 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -67,12 +64,12 @@ import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -91,6 +88,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
 import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
@@ -628,16 +626,15 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	// Fallback lookup via term tables when the FHIR search index is stale/misconfigured (avoids HAPI-0848)
 	private Optional<IBaseResource> findExistingCodeSystemViaTermLayer(
 			IFhirResourceDao<?> theDao, IBaseResource theResource) {
-		String url = extractSimpleValueIfPresent(theResource, "url");
+		String url = extractStringValueOrEmpty(theResource, "url");
 		if (url.isEmpty()) {
 			return Optional.empty();
 		}
-		String version = extractSimpleValueIfPresent(theResource, "version");
+		String version = extractStringValueOrEmpty(theResource, "version", () -> null);
 		return myTxService
 				.withSystemRequest()
 				.withRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId())
-				.execute(() -> myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(
-						url, version.isEmpty() ? null : version))
+				.execute(() -> myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(url, version))
 				.map(pid -> theDao.readByPid(JpaPid.fromId(pid)));
 	}
 
@@ -1065,20 +1062,20 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private SearchParameterMap createSearchParameterMapFor(IBaseResource theResource, PackageInstallationSpec theSpec) {
 		String resourceType = theResource.getClass().getSimpleName();
 		if ("NamingSystem".equals(resourceType)) {
-			String uniqueId = extractUniqeIdFromNamingSystem(theResource);
+			String uniqueId = extractUniqueIdFromNamingSystem(theResource);
 			return SearchParameterMap.newSynchronous().add("value", new StringParam(uniqueId).setExact(true));
 		} else if ("Subscription".equals(resourceType)) {
-			String id = extractSimpleValue(theResource, "id");
+			String id = extractId(theResource);
 			return SearchParameterMap.newSynchronous().add("_id", new TokenParam(id));
 		} else if ("SearchParameter".equals(resourceType)) {
 			return buildSearchParameterMapForSearchParameter(theResource);
-		} else if (resourceHasPopulatedUrl(theResource)) {
+		} else if (hasUrl(theResource)) {
 			SearchParameterMap retVal = SearchParameterMap.newSynchronous();
-			retVal.add("url", new UriParam(extractSimpleValueIfPresent(theResource, "url")));
+			retVal.add("url", new UriParam(extractStringValueOrEmpty(theResource, "url")));
 			// If multiple versions are allowed, include version in search to avoid overwriting
 			PackageInstallationSpec.VersionPolicyEnum versionPolicy = theSpec.getVersionPolicy();
 			if (allowMultipleVersionsForResource(theResource, versionPolicy)) {
-				String version = extractSimpleValueIfPresent(theResource, "version");
+				String version = extractStringValueOrEmpty(theResource, "version");
 				if (!version.isEmpty()) {
 					retVal.add("version", new TokenParam(version));
 				}
@@ -1093,7 +1090,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			retVal.setSort(new SortSpec(Constants.PARAM_PID, SortOrderEnum.DESC));
 			return retVal;
 		} else {
-			TokenParam identifierToken = extractIdentifierFromOtherResourceTypes(theResource);
+			TokenParam identifierToken = extractIdentifier(theResource);
 			return SearchParameterMap.newSynchronous().add("identifier", identifierToken);
 		}
 	}
@@ -1112,70 +1109,67 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return spmFromCanonicalized.get();
 		}
 
-		if (resourceHasPopulatedUrl(theResource)) {
-			String url = extractSimpleValue(theResource, "url");
+		if (hasUrl(theResource)) {
+			String url = extractStringValueOrEmpty(theResource, "url");
 			return SearchParameterMap.newSynchronous().add("url", new UriParam(url));
 		} else {
-			TokenParam identifierToken = extractIdentifierFromOtherResourceTypes(theResource);
+			TokenParam identifierToken = extractIdentifier(theResource);
 			return SearchParameterMap.newSynchronous().add("identifier", identifierToken);
 		}
 	}
 
-	private String extractUniqeIdFromNamingSystem(IBaseResource theResource) {
-		IBase uniqueIdComponent = (IBase) extractValue(theResource, "uniqueId");
-		if (uniqueIdComponent == null) {
-			throw new ImplementationGuideInstallationException(
-					Msg.code(1291) + "NamingSystem does not have uniqueId component.");
+	private String extractId(IBaseResource theResource) {
+		return extractStringValueOrThrow(
+				theResource,
+				"id",
+				() -> new UnsupportedOperationException(Msg.code(2929) + theResource.fhirType()
+						+ " resources in a package must have an id to be loaded by the package installer."));
+	}
+
+	private String extractUniqueIdFromNamingSystem(IBaseResource theResource) {
+		return extractStringValueOrThrow(
+				theResource,
+				"uniqueId.value",
+				() -> new ImplementationGuideInstallationException(
+						Msg.code(1291) + "NamingSystem does not have uniqueId component."));
+	}
+
+	private TokenParam extractIdentifier(IBaseResource theResource) {
+		Identifier identifier = myFhirContext
+				.newTerser()
+				.getSingleValue(theResource, "identifier", Identifier.class)
+				.orElseThrow(
+						() -> new ImplementationGuideInstallationException(
+								Msg.code(1292)
+										+ "Resources in a package must have a url or identifier to be loaded by the package installer."));
+		return new TokenParam(identifier.getSystem(), identifier.getValue());
+	}
+
+	private <X extends RuntimeException> String extractStringValueOrThrow(
+			IBaseResource theResource, String thePath, Supplier<X> theExceptionSupplier) {
+		return myFhirContext
+				.newTerser()
+				.getSinglePrimitiveValue(theResource, thePath)
+				.orElseThrow(theExceptionSupplier);
+	}
+
+	private boolean hasUrl(IBaseResource theResource) {
+		return TerserUtil.hasValues(myFhirContext, theResource, "url");
+	}
+
+	private String extractStringValueOrEmpty(IBaseResource theResource, String theElementName) {
+		return extractStringValueOrEmpty(theResource, theElementName, () -> "");
+	}
+
+	private String extractStringValueOrEmpty(
+			IBaseResource theResource, String theElementName, Supplier<String> theDefaultSupplier) {
+		if (!TerserUtil.hasValues(myFhirContext, theResource, theElementName)) {
+			return theDefaultSupplier.get();
 		}
-		return extractSimpleValue(uniqueIdComponent, "value");
-	}
-
-	private TokenParam extractIdentifierFromOtherResourceTypes(IBaseResource theResource) {
-		Identifier identifier = (Identifier) extractValue(theResource, "identifier");
-		if (identifier != null) {
-			return new TokenParam(identifier.getSystem(), identifier.getValue());
-		} else {
-			throw new UnsupportedOperationException(Msg.code(1292)
-					+ "Resources in a package must have a url or identifier to be loaded by the package installer.");
-		}
-	}
-
-	private Object extractValue(IBase theResource, String thePath) {
-		return myFhirContext.newTerser().getSingleValueOrNull(theResource, thePath);
-	}
-
-	private String extractSimpleValue(IBase theResource, String thePath) {
-		IPrimitiveType<?> asPrimitiveType = (IPrimitiveType<?>) extractValue(theResource, thePath);
-		if (asPrimitiveType == null) {
-			return "";
-		}
-		return (String) asPrimitiveType.getValue();
-	}
-
-	private String extractSimpleValueIfPresent(IBaseResource theResource, String theElementName) {
-		return resourceHasElementNamed(theResource, theElementName)
-				? extractSimpleValue(theResource, theElementName)
-				: "";
-	}
-
-	private boolean resourceHasPopulatedUrl(IBaseResource theResource) {
-		final String urlElementName = "url";
-		if (!resourceHasElementNamed(theResource, urlElementName)) {
-			return false;
-		}
-		String url = extractSimpleValue(theResource, urlElementName);
-		return url != null && !url.isBlank();
-	}
-
-	private boolean resourceHasElementNamed(IBaseResource theResource, String theElementName) {
-		BaseRuntimeElementDefinition<?> def = myFhirContext.getElementDefinition(theResource.getClass());
-		if (!(def instanceof BaseRuntimeElementCompositeDefinition)) {
-			throw new IllegalArgumentException(Msg.code(1293) + "Resource is not a composite type: "
-					+ theResource.getClass().getName());
-		}
-		BaseRuntimeElementCompositeDefinition<?> currentDef = (BaseRuntimeElementCompositeDefinition<?>) def;
-		BaseRuntimeChildDefinition nextDef = currentDef.getChildByName(theElementName);
-		return nextDef != null;
+		return myFhirContext
+				.newTerser()
+				.getSinglePrimitiveValue(theResource, theElementName)
+				.orElseGet(theDefaultSupplier);
 	}
 
 	@VisibleForTesting

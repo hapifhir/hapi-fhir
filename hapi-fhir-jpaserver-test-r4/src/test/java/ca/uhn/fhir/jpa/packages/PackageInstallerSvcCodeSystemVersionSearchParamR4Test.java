@@ -28,11 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@code HAPI-0848} — even though the same {@code (url, version)} pair already exists.
  *
  * <p>Both tests assert the desired contract: the installer should detect the existing
- * resource via the term layer's mapping and route the install to update it. Both currently
- * fail; they document the desired fix.
+ * resource via the term layer's mapping and route the install to update it.
  */
 // Created by claude-sonnet-4-6
-public class PackageInstallerSvcCodeSystemVersionSearchParamR4Test extends BaseJpaR4Test {
+class PackageInstallerSvcCodeSystemVersionSearchParamR4Test extends BaseJpaR4Test {
 
 	private static final String CODE_SYSTEM_URL = "http://example.org/CodeSystem/version-search-param";
 	private static final String VERSION_ONE = "1";
