@@ -2095,8 +2095,7 @@
 			<dependency>
 				<groupId>org.apache.thrift</groupId>
 				<artifactId>libthrift</artifactId>
-				<!-- TODO bump this as soon as 0.23.0 comes out -->
-				<version>0.22.0</version>
+				<version>0.23.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
