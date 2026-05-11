@@ -828,7 +828,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	// Created by claude-opus-4-6
 	private String buildDuplicateCodeSystemMessage(
 			TermCodeSystemVersion theVersionEntity, String theSystemUri, String theSystemVersionId) {
-		String resourceRef = theVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue();
+		String resourceRef = theVersionEntity
+				.getResource()
+				.getIdDt()
+				.toUnqualifiedVersionless()
+				.getValue();
 		boolean hasVersion = theSystemVersionId != null;
 		String messageKey =
 				hasVersion ? "cannotCreateDuplicateCodeSystemUrlAndVersion" : "cannotCreateDuplicateCodeSystemUrl";
