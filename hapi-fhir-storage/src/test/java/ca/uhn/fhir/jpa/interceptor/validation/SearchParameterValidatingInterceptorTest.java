@@ -220,7 +220,6 @@ public class SearchParameterValidatingInterceptorTest {
 	@ParameterizedTest
 	@MethodSource("nonDisableableBuiltInSearchParams")
 	void testBuiltInNonDisableableSp_whenCreatedAsRetired_throwsException(SearchParameter theSp) {
-		// Created by Claude Sonnet 4.6
 		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreCreate(theSp, myRequestDetails))
 				.isInstanceOf(UnprocessableEntityException.class)
 				.hasMessageContaining(Msg.code(2875));
@@ -232,7 +231,6 @@ public class SearchParameterValidatingInterceptorTest {
 		SearchParameter spActive = theSpRetired.copy();
 		spActive.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		// Created by Claude Sonnet 4.6
 		assertThatThrownBy(() -> mySearchParamValidatingInterceptor.resourcePreUpdate(spActive, theSpRetired, myRequestDetails))
 				.isInstanceOf(UnprocessableEntityException.class)
 				.hasMessageContaining("2875");
@@ -240,7 +238,6 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@Test
 	void testCustomSpOnNonDisableableResource_whenRetired_isAllowed() {
-		// Created by Claude Sonnet 4.6
 		when(myDaoRegistry.getResourceDao(SearchParamValidatingInterceptor.SEARCH_PARAM)).thenReturn(myIFhirResourceDao);
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(List.of());
 
@@ -265,7 +262,6 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@Test
 	void testMultiBaseSpWithNonDisableableBase_whenRetired_throwsException() {
-		// Created by Claude Sonnet 4.6
 		// clinical-patient spans [Basic (non-disableable), Condition (disableable)].
 		// Retiring the whole SP must be blocked because Basic:* is non-disableable.
 		SearchParameter spRetired = buildClinicalPatientSp(Enumerations.PublicationStatus.RETIRED, "Basic", "Condition");
@@ -280,7 +276,6 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@Test
 	void testBuiltInNonDisableableSp_whenUpdatedKeepingActive_isAllowed() {
-		// Created by Claude Sonnet 4.6
 		when(myDaoRegistry.getResourceDao(SearchParamValidatingInterceptor.SEARCH_PARAM)).thenReturn(myIFhirResourceDao);
 
 		SearchParameter sp = new SearchParameter();
@@ -302,7 +297,6 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@Test
 	void testBuiltInNonDisableableSp_whenBaseListNarrowedRemovingNonDisableableBase_throwsException() {
-		// Created by Claude Sonnet 4.6
 		// clinical-patient spans [Basic (non-disableable), Condition (disableable)].
 		// A PUT that keeps status=active but drops Basic must be blocked.
 		SearchParameter oldSp = buildClinicalPatientSp(Enumerations.PublicationStatus.ACTIVE, "Basic", "Condition");
@@ -315,7 +309,6 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@Test
 	void testBuiltInNonDisableableSp_whenBaseListNarrowedKeepingNonDisableableBase_isAllowed() {
-		// Created by Claude Sonnet 4.6
 		// clinical-patient spans [Basic (non-disableable), Condition (disableable)].
 		// A PUT that drops only Condition (disableable) while keeping Basic must be allowed.
 		when(myDaoRegistry.getResourceDao(SearchParamValidatingInterceptor.SEARCH_PARAM)).thenReturn(myIFhirResourceDao);
@@ -330,7 +323,6 @@ public class SearchParameterValidatingInterceptorTest {
 	}
 
 	private SearchParameter buildClinicalPatientSp(Enumerations.PublicationStatus theStatus, String... theBases) {
-		// Created by Claude Sonnet 4.6
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/clinical-patient");
 		sp.setUrl("http://hl7.org/fhir/SearchParameter/clinical-patient");
