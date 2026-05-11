@@ -52,7 +52,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
@@ -803,7 +802,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			return;
 		}
 
-		if (ObjectUtil.equals(
+		if (Objects.equals(
 				codeSystemVersionEntity.getResourcePidValue(),
 				theCodeSystemResourceTable.getId().getId())) {
 			return;
@@ -826,13 +825,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				+ buildDuplicateCodeSystemMessage(codeSystemVersionEntity, theSystemUri, theSystemVersionId));
 	}
 
+	// Created by claude-opus-4-6
 	private String buildDuplicateCodeSystemMessage(
 			TermCodeSystemVersion theVersionEntity, String theSystemUri, String theSystemVersionId) {
-		String resourceRef = theVersionEntity
-				.getResource()
-				.getIdDt()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String resourceRef = theVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue();
 		boolean hasVersion = theSystemVersionId != null;
 		String messageKey =
 				hasVersion ? "cannotCreateDuplicateCodeSystemUrlAndVersion" : "cannotCreateDuplicateCodeSystemUrl";
@@ -869,7 +865,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theConceptsStack.add(theConcept.getCode());
 
 		int retVal = 0;
-		if (theAllConcepts.put(theConcept, theAllConcepts) == null) {
+		if (theAllConcepts.put(theConcept, PLACEHOLDER_OBJECT) == null) {
 			if (theAllConcepts.size() % 1000 == 0) {
 				ourLog.info("Have validated {} concepts", theAllConcepts.size());
 			}
