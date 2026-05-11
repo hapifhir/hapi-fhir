@@ -4,7 +4,6 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.searchparam.extractor.StringTrimmingTrimmerMatcher;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import jakarta.annotation.Nonnull;
@@ -16,9 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE_DEFAULT;
@@ -46,7 +43,7 @@ public class ImportLoincStep19CodingProperties extends BaseImportLoincStepWithVa
 
 	@Override
 	protected MyBaseContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		return new MyBaseContext(theStepExecutionDetails.getData());
+		return new MyBaseContext(theStepExecutionDetails);
 	}
 
 	@Nonnull
@@ -118,7 +115,7 @@ public class ImportLoincStep19CodingProperties extends BaseImportLoincStepWithVa
 			theConceptToPopulate
 				.addProperty()
 				.setCode(thePropertyName)
-				.setValue(new Coding(ITermLoaderSvc.LOINC_URI, propertyCodeValue, lookupResponse.getCodeDisplay());
+				.setValue(new Coding(ITermLoaderSvc.LOINC_URI, propertyCodeValue, lookupResponse.getCodeDisplay()));
 		}
 	}
 

@@ -9,29 +9,34 @@ import org.hl7.fhir.r4.model.StringType;
 
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep5HandleAnswerListLinks extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep5HandleAnswerListLinks.MyContext> {
+public class ImportLoincStep5HandleAnswerListLinks
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
 
 	@Override
-	protected MyContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		return new MyContext();
+	protected MyBaseContext newContextObject(
+			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		return new MyBaseContext(theStepExecutionDetails);
 	}
 
 	@Nonnull
 	@Override
 	protected List<PropertyNameAndDefault> getFilesToProcess() {
-		return List.of(
-			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE, LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT)
-		);
+		return List.of(new PropertyNameAndDefault(
+				LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE,
+				LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT));
 	}
 
 	@Override
-	protected void handleRecord(LoincJobImportParameters theJobParameters, MyContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {
+	protected void handleRecord(
+			LoincJobImportParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			ImportLoincFileSetJson theData) {
 		String applicableContext = trim(theRecord.get("ApplicableContext"));
 
 		/*
@@ -58,23 +63,13 @@ public class ImportLoincStep5HandleAnswerListLinks extends BaseImportLoincStepWi
 			return;
 		}
 
-		CodeSystem.ConceptDefinitionComponent loincCode = getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
-		loincCode
-			.addProperty()
-			.setCode("answer-list")
-			.setValue(new StringType(answerListId));
+		CodeSystem.ConceptDefinitionComponent loincCode =
+				getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+		loincCode.addProperty().setCode("answer-list").setValue(new StringType(answerListId));
 
-		CodeSystem.ConceptDefinitionComponent answerListCode = getOrAddConcept(theContext, theCodeSystemToPopulate, answerListId);
-		answerListCode
-			.addProperty()
-			.setCode("answers-for")
-			.setValue(new StringType(loincNumber));
+		CodeSystem.ConceptDefinitionComponent answerListCode =
+				getOrAddConcept(theContext, theCodeSystemToPopulate, answerListId);
+		answerListCode.addProperty().setCode("answers-for").setValue(new StringType(loincNumber));
 	}
-
-
-	protected static class MyContext extends MyBaseContext {
-		// nothing
-	}
-
 
 }

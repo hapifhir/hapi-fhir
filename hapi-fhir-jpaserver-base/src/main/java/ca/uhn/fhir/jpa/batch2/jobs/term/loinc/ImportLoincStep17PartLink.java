@@ -22,26 +22,35 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LI
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep17PartLink extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep17PartLink.MyContext> {
+public class ImportLoincStep17PartLink
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep17PartLink.MyBaseContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep17PartLink.class);
 
 	@Override
-	protected MyContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		return new MyContext(theStepExecutionDetails.getData());
+	protected MyBaseContext newContextObject(
+			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		return new MyBaseContext(theStepExecutionDetails);
 	}
 
 	@Nonnull
 	@Override
 	protected List<PropertyNameAndDefault> getFilesToProcess() {
 		return List.of(
-			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE, LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_DEFAULT),
-			new PropertyNameAndDefault(LOINC_PART_LINK_FILE_PRIMARY, LOINC_PART_LINK_FILE_PRIMARY_DEFAULT),
-			new PropertyNameAndDefault(LOINC_PART_LINK_FILE_SUPPLEMENTARY, LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT)
-		);
+				new PropertyNameAndDefault(
+						LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE,
+						LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_DEFAULT),
+				new PropertyNameAndDefault(LOINC_PART_LINK_FILE_PRIMARY, LOINC_PART_LINK_FILE_PRIMARY_DEFAULT),
+				new PropertyNameAndDefault(
+						LOINC_PART_LINK_FILE_SUPPLEMENTARY, LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT));
 	}
 
 	@Override
-	protected void handleRecord(LoincJobImportParameters theJobParameters, MyContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {
+	protected void handleRecord(
+			LoincJobImportParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			ImportLoincFileSetJson theData) {
 
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		String property = trim(theRecord.get("Property"));
@@ -55,27 +64,19 @@ public class ImportLoincStep17PartLink extends BaseImportLoincStepWithValueSetsA
 		int lastSlashIdx = property.lastIndexOf("/");
 		String propertyPart = property.substring(lastSlashIdx + 1);
 
-		CodeSystem.PropertyType propertyType = theContext.getPropertyNameToType().get(propertyPart);
+		CodeSystem.PropertyType propertyType =
+				theContext.getPropertyNameToType().get(propertyPart);
 		if (propertyType == null) {
 			return;
 		}
 
-		String expectedValue;
-		if (propertyType == CodeSystem.PropertyType.STRING) {
-			expectedValue = partName;
-		} else if (propertyType == CodeSystem.PropertyType.CODING) {
-			expectedValue = partNumber;
-		} else {
-			throw new InternalErrorException(
-				Msg.code(914) + "Don't know how to handle property of type: " + propertyType);
-		}
-
-		CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+		CodeSystem.ConceptDefinitionComponent concept =
+				getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
 
 		// Filter duplicates
 		Optional<CodeSystem.ConceptPropertyComponent> existingProperty = concept.getProperty().stream()
-			.filter(t -> t.getCode().equals(propertyPart))
-			.findFirst();
+				.filter(t -> t.getCode().equals(propertyPart))
+				.findFirst();
 		if (existingProperty.isPresent()) {
 			return;
 		}
@@ -85,15 +86,11 @@ public class ImportLoincStep17PartLink extends BaseImportLoincStepWithValueSetsA
 		newProperty.setCode(propertyPart);
 		if (propertyType == CodeSystem.PropertyType.STRING) {
 			newProperty.setValue(new StringType(partName));
-		} else {
+		} else if (propertyType == CodeSystem.PropertyType.CODING) {
 			newProperty.setValue(new Coding(ITermLoaderSvc.LOINC_URI, partNumber, partName));
-		}
-	}
-
-	protected static class MyContext extends BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext {
-
-		public MyContext(ImportLoincFileSetJson theData) {
-			super(theData);
+		} else {
+			throw new InternalErrorException(
+				Msg.code(914) + "Don't know how to handle property of type: " + propertyType);
 		}
 	}
 

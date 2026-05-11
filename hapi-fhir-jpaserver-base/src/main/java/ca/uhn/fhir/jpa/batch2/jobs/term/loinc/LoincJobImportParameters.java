@@ -36,5 +36,4 @@ public class LoincJobImportParameters extends BaseTerminologyImportParameters {
 
 	@JsonProperty("properties")
 	private String myProperties;
-
 }

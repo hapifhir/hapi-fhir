@@ -310,7 +310,12 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 						myJobDefinitionRegistry,
 						myInterceptorService);
 				StepExecutionDetails<PT, IT> chunkDetails = StepExecutionDetails.createReductionStepDetails(
-					theJobWorkCursor.getJobDefinition(), theJobWorkCursor.getCurrentStepId(), parameters, null, instance, myJobStepExecutionServices);
+						theJobWorkCursor.getJobDefinition(),
+						theJobWorkCursor.getCurrentStepId(),
+						parameters,
+						null,
+						instance,
+						myJobStepExecutionServices);
 
 				if (response.isSuccessful()) {
 					try {

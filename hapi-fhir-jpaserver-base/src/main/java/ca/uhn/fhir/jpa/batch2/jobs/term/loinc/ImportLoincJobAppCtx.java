@@ -33,35 +33,110 @@ public class ImportLoincJobAppCtx {
 	@Bean
 	public JobDefinition<LoincJobImportParameters> importLoincJobDefinition() {
 		return JobDefinition.newBuilder()
-			.setInitialStatus(StatusEnum.BUILDING)
-			.setJobDefinitionId(IMPORT_TERM_LOINC)
-			.setJobDescription("Import Terminology - LOINC")
-			.setJobDefinitionVersion(1)
-			.gatedExecution()
-			.setParametersType(LoincJobImportParameters.class)
-			.addFirstStep("expand-zip", "Expand LOINC distribution", ImportLoincFileSetJson.class, importLoincStep1ExpandDistributionIntoFiles())
-			.addIntermediateStep("import-concepts", "Import LOINC concepts", ImportLoincFileSetJson.class, importLoincStep2Concepts())
-			.addIntermediateStep("import-hierarchy", "Import LOINC hierarchy", ImportLoincFileSetJson.class, importLoincStep3HandleHierarchy())
-			.addIntermediateStep("import-answer-lists", "Import LOINC answer lists", ImportLoincFileSetJson.class, importLoincStep4AnswerLists())
-			.addIntermediateStep("import-answer-list-links", "Import LOINC answer list links", ImportLoincFileSetJson.class, importLoincStep5AnswerListLinks())
-			.addIntermediateStep("import-rsna-playbook", "Import LOINC RSNA playbook", ImportLoincFileSetJson.class, importLoincStep6RsnaPlaybook())
-			.addIntermediateStep("import-part-related-code-mapping", "Import LOINC Part Related Code Mappings", ImportLoincFileSetJson.class, importLoincStep7PartRelatedCodeMapping())
-			.addIntermediateStep("import-document-ontology", "Import LOINC Document Ontology", ImportLoincFileSetJson.class, importLoincStep8HandleDocumentOntology())
-			.addIntermediateStep("import-top-2000-codes-us", "Import LOINC Top 2000 Codes - US", ImportLoincFileSetJson.class, importLoincStep9HandleTop2000CodesUs())
-			.addIntermediateStep("import-top-2000-codes-si", "Import LOINC Top 2000 Codes - SI", ImportLoincFileSetJson.class, importLoincStep10HandleTop2000CodesSi())
-			.addIntermediateStep("import-univeral-lab-orderset", "Import LOINC Lab Order Set", ImportLoincFileSetJson.class, importLoincStep11HandleUniversalLabOrderSet())
-			.addIntermediateStep("import-ieee-medical-device-code", "Import LOINC IEEE Medical Device Codes", ImportLoincFileSetJson.class, importLoincStep12HandleIeeeMedicalDeviceCode())
-			.addIntermediateStep("import-imaging-document-code", "Import LOINC Imaging Document Codes", ImportLoincFileSetJson.class, importLoincStep13ImagingDocumentCode())
-			.addIntermediateStep("import-group-file", "Import LOINC Group File", ImportLoincFileSetJson.class, importLoincStep14GroupFile())
-			.addIntermediateStep("import-group-terms-file", "Import LOINC Group Terms File", ImportLoincFileSetJson.class, importLoincStep15GroupTermsFile())
-			.addIntermediateStep("import-parent-group-file", "Import LOINC Parent Group File", ImportLoincFileSetJson.class, importLoincStep16ParentGroupFile())
-			.addIntermediateStep("import-part-link", "Import LOINC Part Link File", ImportLoincFileSetJson.class, importLoincStep17PartLink())
-			.addIntermediateStep("import-consumer-name", "Import LOINC Consumer Names", ImportLoincFileSetJson.class, importLoincStep18ConsumerName())
-			.addIntermediateStep("import-coding-properties", "Import LOINC Coding Properties", ImportLoincFileSetJson.class, importLoincStep19CodingProperties())
-//				.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
-			.build();
+				.setInitialStatus(StatusEnum.BUILDING)
+				.setJobDefinitionId(IMPORT_TERM_LOINC)
+				.setJobDescription("Import Terminology - LOINC")
+				.setJobDefinitionVersion(1)
+				.gatedExecution()
+				.setParametersType(LoincJobImportParameters.class)
+				.addFirstStep(
+						"expand-zip",
+						"Expand LOINC distribution",
+						ImportLoincFileSetJson.class,
+						importLoincStep1ExpandDistributionIntoFiles())
+				.addIntermediateStep(
+						"import-concepts",
+						"Import LOINC concepts",
+						ImportLoincFileSetJson.class,
+						importLoincStep2Concepts())
+				.addIntermediateStep(
+						"import-hierarchy",
+						"Import LOINC hierarchy",
+						ImportLoincFileSetJson.class,
+						importLoincStep3HandleHierarchy())
+				.addIntermediateStep(
+						"import-answer-lists",
+						"Import LOINC answer lists",
+						ImportLoincFileSetJson.class,
+						importLoincStep4AnswerLists())
+				.addIntermediateStep(
+						"import-answer-list-links",
+						"Import LOINC answer list links",
+						ImportLoincFileSetJson.class,
+						importLoincStep5AnswerListLinks())
+				.addIntermediateStep(
+						"import-rsna-playbook",
+						"Import LOINC RSNA playbook",
+						ImportLoincFileSetJson.class,
+						importLoincStep6RsnaPlaybook())
+				.addIntermediateStep(
+						"import-part-related-code-mapping",
+						"Import LOINC Part Related Code Mappings",
+						ImportLoincFileSetJson.class,
+						importLoincStep7PartRelatedCodeMapping())
+				.addIntermediateStep(
+						"import-document-ontology",
+						"Import LOINC Document Ontology",
+						ImportLoincFileSetJson.class,
+						importLoincStep8HandleDocumentOntology())
+				.addIntermediateStep(
+						"import-top-2000-codes-us",
+						"Import LOINC Top 2000 Codes - US",
+						ImportLoincFileSetJson.class,
+						importLoincStep9HandleTop2000CodesUs())
+				.addIntermediateStep(
+						"import-top-2000-codes-si",
+						"Import LOINC Top 2000 Codes - SI",
+						ImportLoincFileSetJson.class,
+						importLoincStep10HandleTop2000CodesSi())
+				.addIntermediateStep(
+						"import-univeral-lab-orderset",
+						"Import LOINC Lab Order Set",
+						ImportLoincFileSetJson.class,
+						importLoincStep11HandleUniversalLabOrderSet())
+				.addIntermediateStep(
+						"import-ieee-medical-device-code",
+						"Import LOINC IEEE Medical Device Codes",
+						ImportLoincFileSetJson.class,
+						importLoincStep12HandleIeeeMedicalDeviceCode())
+				.addIntermediateStep(
+						"import-imaging-document-code",
+						"Import LOINC Imaging Document Codes",
+						ImportLoincFileSetJson.class,
+						importLoincStep13ImagingDocumentCode())
+				.addIntermediateStep(
+						"import-group-file",
+						"Import LOINC Group File",
+						ImportLoincFileSetJson.class,
+						importLoincStep14GroupFile())
+				.addIntermediateStep(
+						"import-group-terms-file",
+						"Import LOINC Group Terms File",
+						ImportLoincFileSetJson.class,
+						importLoincStep15GroupTermsFile())
+				.addIntermediateStep(
+						"import-parent-group-file",
+						"Import LOINC Parent Group File",
+						ImportLoincFileSetJson.class,
+						importLoincStep16ParentGroupFile())
+				.addIntermediateStep(
+						"import-part-link",
+						"Import LOINC Part Link File",
+						ImportLoincFileSetJson.class,
+						importLoincStep17PartLink())
+				.addIntermediateStep(
+						"import-consumer-name",
+						"Import LOINC Consumer Names",
+						ImportLoincFileSetJson.class,
+						importLoincStep18ConsumerName())
+				.addIntermediateStep(
+						"import-coding-properties",
+						"Import LOINC Coding Properties",
+						ImportLoincFileSetJson.class,
+						importLoincStep19CodingProperties())
+				//				.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
+				.build();
 	}
-
 
 	/**
 	 * Step 1: Expand LOINC distribution ZIP into files
@@ -102,7 +177,6 @@ public class ImportLoincJobAppCtx {
 	public ImportLoincStep5HandleAnswerListLinks importLoincStep5AnswerListLinks() {
 		return new ImportLoincStep5HandleAnswerListLinks();
 	}
-
 
 	/**
 	 * Step 6: Import RSNA Playbook
@@ -215,5 +289,4 @@ public class ImportLoincJobAppCtx {
 	public ImportLoincStep19CodingProperties importLoincStep19CodingProperties() {
 		return new ImportLoincStep19CodingProperties();
 	}
-
 }

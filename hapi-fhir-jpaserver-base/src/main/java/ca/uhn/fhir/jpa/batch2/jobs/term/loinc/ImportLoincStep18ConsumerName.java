@@ -13,23 +13,29 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUME
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep18ConsumerName extends BaseImportLoincStepWithValueSetsAndConceptMaps<BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+public class ImportLoincStep18ConsumerName
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
+				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
 
 	@Override
-	protected MyBaseContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		return new MyBaseContext();
+	protected MyBaseContext newContextObject(
+			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		return new MyBaseContext(theStepExecutionDetails);
 	}
 
 	@Nonnull
 	@Override
 	protected List<PropertyNameAndDefault> getFilesToProcess() {
-		return List.of(
-			new PropertyNameAndDefault(LOINC_CONSUMER_NAME_FILE, LOINC_CONSUMER_NAME_FILE_DEFAULT)
-		);
+		return List.of(new PropertyNameAndDefault(LOINC_CONSUMER_NAME_FILE, LOINC_CONSUMER_NAME_FILE_DEFAULT));
 	}
 
 	@Override
-	protected void handleRecord(LoincJobImportParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {
+	protected void handleRecord(
+			LoincJobImportParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			ImportLoincFileSetJson theData) {
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		if (isBlank(loincNumber)) {
 			return;
@@ -40,8 +46,11 @@ public class ImportLoincStep18ConsumerName extends BaseImportLoincStepWithValueS
 			return;
 		}
 
-		CodeSystem.ConceptDefinitionComponent loincCode = getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
-		loincCode.addDesignation().setUse(new Coding(null, null, "ConsumerName")).setValue(consumerName);
+		CodeSystem.ConceptDefinitionComponent loincCode =
+				getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+		loincCode
+				.addDesignation()
+				.setUse(new Coding(null, null, "ConsumerName"))
+				.setValue(consumerName);
 	}
-
 }

@@ -94,7 +94,16 @@ class ImportLoincStep2HandleConceptsTest {
 			.containsExactly("CLASSTYPE=2",
 				"VersionLastChanged=2.48",
 				"STATUS=ACTIVE",
-				"ORDER_OBS=Observation");
+				"CHNG_TYPE=MIN",
+				"ORDER_OBS=Observation",
+				"COMMON_TEST_RANK=0",
+				"SHORTNAME=R' wave Amp L-I",
+				"LONG_COMMON_NAME=R' wave amplitude in lead I",
+				"COMMON_ORDER_RANK=0",
+				"UNITSREQUIRED=Y",
+				"RELATEDNAMES2=Cardiac; ECG; EKG.MEASUREMENTS; Electrical potential; Electrocardiogram; Electrocardiograph; Hrt; Painter's colic; PB; Plumbism; Point in time; QNT; Quan; Quant; Quantitative; R prime; R' wave Amp L-I; R wave Amp L-I; Random; Right; Voltage",
+				"EXAMPLE_UNITS=mV",
+				"EXAMPLE_UCUM_UNITS=mV");
 
 		verify(myDataSink, never()).accept(any(ImportLoincFileSetJson.class));
 	}

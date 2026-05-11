@@ -47,7 +47,7 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	 */
 	public static <P1 extends IModelJson, I1 extends IModelJson>
 			StepExecutionDetails<P1, I1> createReductionStepDetails(
-				JobDefinition<P1> theJobDefinition,
+					JobDefinition<P1> theJobDefinition,
 					String theStepId,
 					P1 theParameters,
 					I1 theIntermediateParams,
@@ -56,7 +56,14 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 		WorkChunk reductionChunk = new WorkChunk().setId(REDUCTION_STEP_CHUNK_ID_PLACEHOLDER);
 
 		return new StepExecutionDetails<>(
-				theParameters, theIntermediateParams, theInstance, reductionChunk, theJobStepExecutionServices, theJobDefinition, theStepId, null);
+				theParameters,
+				theIntermediateParams,
+				theInstance,
+				reductionChunk,
+				theJobStepExecutionServices,
+				theJobDefinition,
+				theStepId,
+				null);
 	}
 
 	/**

@@ -14,31 +14,36 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_VERSION;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 // FIXME: make sure we don't expand ValueSets until status = active
-public class ImportLoincStep4HandleAnswerLists extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep4HandleAnswerLists.MyContext> {
+public class ImportLoincStep4HandleAnswerLists
+	extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep4HandleAnswerLists.MyContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep4HandleAnswerLists.class);
 
 	@Override
-	protected MyContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		return new MyContext();
+	protected MyContext newContextObject(
+		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		return new MyContext(theStepExecutionDetails);
 	}
 
 	@Nonnull
 	@Override
 	protected List<PropertyNameAndDefault> getFilesToProcess() {
-		return List.of(
-			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE, LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT)
-		);
+		return List.of(new PropertyNameAndDefault(
+			LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE,
+			LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT));
 	}
 
 	@Override
-	protected void handleRecord(LoincJobImportParameters theJobParameters, MyContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {
+	protected void handleRecord(
+		LoincJobImportParameters theJobParameters,
+		MyContext theContext,
+		CSVRecord theRecord,
+		CodeSystem theCodeSystemToPopulate,
+		ImportLoincFileSetJson theData) {
 		// this is the code for the list (will repeat)
 		String answerListId = trim(theRecord.get("AnswerListId"));
 		String answerListName = trim(theRecord.get("AnswerListName"));
@@ -48,7 +53,7 @@ public class ImportLoincStep4HandleAnswerLists extends BaseImportLoincStepWithVa
 		String displayText = trim(theRecord.get("DisplayText"));
 
 		/*
-		 These are not yet used
+		These are not yet used
 		String externallyDefined = trim(theRecord.get("ExtDefinedYN"));
 		String extenrallyDefinedCs = trim(theRecord.get("ExtDefinedAnswerListCodeSystem"));
 		String externallyDefinedLink = trim(theRecord.get("ExtDefinedAnswerListLink"));
@@ -61,17 +66,20 @@ public class ImportLoincStep4HandleAnswerLists extends BaseImportLoincStepWithVa
 
 		// Answer list code
 		if (!theContext.getAnswerListCodes().contains(answerListId)) {
-			theCodeSystemToPopulate
-				.addConcept()
-				.setCode(answerListId)
-				.setDisplay(answerListName);
+			theCodeSystemToPopulate.addConcept().setCode(answerListId).setDisplay(answerListName);
 			theContext.getAnswerListCodes().add(answerListId);
 		}
 
 		// Answer list ValueSet
 		String codeSystemVersionId = theData.getLoincCodeSystem().getVersion();
-		ValueSet vs = getValueSet(theJobParameters, theData, theContext,
-			answerListId, "http://loinc.org/vs/" + answerListId, answerListName, LOINC_ANSWERLIST_VERSION.getCode());
+		ValueSet vs = getValueSet(
+			theJobParameters,
+			theData,
+			theContext,
+			answerListId,
+			"http://loinc.org/vs/" + answerListId,
+			answerListName,
+			LOINC_ANSWERLIST_VERSION.getCode());
 		if (vs.getIdentifier().isEmpty()) {
 			vs.addIdentifier().setSystem("urn:ietf:rfc:3986").setValue("urn:oid:" + answerListOid);
 		}
@@ -82,10 +90,7 @@ public class ImportLoincStep4HandleAnswerLists extends BaseImportLoincStepWithVa
 			if (!theContext.getAnswerListCodes().contains(answerString)) {
 				theContext.getAnswerListCodes().add(answerString);
 
-				theCodeSystemToPopulate
-					.addConcept()
-					.setCode(answerString)
-					.setDisplay(displayText);
+				theCodeSystemToPopulate.addConcept().setCode(answerString).setDisplay(displayText);
 			}
 
 			vs.getCompose()
@@ -96,16 +101,17 @@ public class ImportLoincStep4HandleAnswerLists extends BaseImportLoincStepWithVa
 				.setCode(answerString)
 				.setDisplay(displayText);
 		}
-
 	}
-
 
 	protected static class MyContext extends MyBaseContext {
 		private final Set<String> myAnswerListCodes = new HashSet<>();
+
+		public MyContext(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theData) {
+			super(theData);
+		}
 
 		public Set<String> getAnswerListCodes() {
 			return myAnswerListCodes;
 		}
 	}
-
 }

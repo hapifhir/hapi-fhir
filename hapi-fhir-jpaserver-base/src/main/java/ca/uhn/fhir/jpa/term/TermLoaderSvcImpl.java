@@ -718,7 +718,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				codeSystemVersion, code2concept, propertyNamesToTypes, partTypeAndPartNameToPartNumber);
 		iterateOverZipFileCsv(
 				theDescriptors,
-					theUploadProperties.getProperty(LOINC_FILE.getCode(), LOINC_FILE_DEFAULT.getCode()),
+				theUploadProperties.getProperty(LOINC_FILE.getCode(), LOINC_FILE_DEFAULT.getCode()),
 				handler,
 				',',
 				QuoteMode.NON_NUMERIC,

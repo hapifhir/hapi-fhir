@@ -136,6 +136,8 @@ public enum LoincUploadPropertiesEnum {
 	LOINC_LINGUISTIC_VARIANTS_PATH("loinc.linguistic.variants.path"),
 	LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT("AccessoryFiles/LinguisticVariants/"),
 
+	LOINC_LINGUISTIC_VARIANT_FILE_SUFFIX("LinguisticVariant.csv"),
+
 	/*
 	 * DUPLICATES
 	 */

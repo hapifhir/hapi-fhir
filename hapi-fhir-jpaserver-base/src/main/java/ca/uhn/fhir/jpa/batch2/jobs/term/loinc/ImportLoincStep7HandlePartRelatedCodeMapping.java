@@ -26,30 +26,35 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOIN
 import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_SCT_PART_MAP_URI;
 import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.CM_COPYRIGHT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep7HandlePartRelatedCodeMapping extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep7HandlePartRelatedCodeMapping.MyContext> {
+public class ImportLoincStep7HandlePartRelatedCodeMapping
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
 
 	@Override
-	protected MyContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		return new MyContext();
+	protected MyBaseContext newContextObject(
+			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		return new MyBaseContext(theStepExecutionDetails);
 	}
+
 	@Nonnull
 	@Override
 	protected List<PropertyNameAndDefault> getFilesToProcess() {
-		return List.of(
-			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE, LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT)
-		);
+		return List.of(new PropertyNameAndDefault(
+				LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE,
+				LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT));
 	}
 
-
 	@Override
-	protected void handleRecord(LoincJobImportParameters theJobParameters, MyContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {
+	protected void handleRecord(
+			LoincJobImportParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			ImportLoincFileSetJson theData) {
 		String partNumber = trim(theRecord.get("PartNumber"));
 		String partName = trim(theRecord.get("PartName"));
 		String extCodeId = trim(theRecord.get("ExtCodeId"));
@@ -67,22 +72,23 @@ public class ImportLoincStep7HandlePartRelatedCodeMapping extends BaseImportLoin
 		// ConceptMap version from properties files
 		String loincPartMapVersion;
 		if (codeSystemVersionId != null) {
-			loincPartMapVersion =
-				theJobParameters.getProperties().getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-" + codeSystemVersionId;
+			loincPartMapVersion = theJobParameters.getProperties().getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-"
+					+ codeSystemVersionId;
 		} else {
 			loincPartMapVersion = theJobParameters.getProperties().getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 		}
 
-		Enumerations.ConceptMapEquivalence equivalence = switch (trim(defaultString(mapType))) {
-			case "", "equivalent" ->
-				// 'equal' is more exact than 'equivalent' in the equivalence codes
-				Enumerations.ConceptMapEquivalence.EQUAL;
-			case "narrower" -> Enumerations.ConceptMapEquivalence.NARROWER;
-			case "wider" -> Enumerations.ConceptMapEquivalence.WIDER;
-			case "relatedto" -> Enumerations.ConceptMapEquivalence.RELATEDTO;
-			default -> throw new InternalErrorException(
-				Msg.code(916) + "Unknown equivalence '" + mapType + "' for PartNumber: " + partNumber);
-		};
+		Enumerations.ConceptMapEquivalence equivalence =
+				switch (trim(defaultString(mapType))) {
+					case "", "equivalent" ->
+					// 'equal' is more exact than 'equivalent' in the equivalence codes
+					Enumerations.ConceptMapEquivalence.EQUAL;
+					case "narrower" -> Enumerations.ConceptMapEquivalence.NARROWER;
+					case "wider" -> Enumerations.ConceptMapEquivalence.WIDER;
+					case "relatedto" -> Enumerations.ConceptMapEquivalence.RELATEDTO;
+					default -> throw new InternalErrorException(
+							Msg.code(916) + "Unknown equivalence '" + mapType + "' for PartNumber: " + partNumber);
+				};
 
 		String loincPartMapId;
 		String loincPartMapUri;
@@ -125,28 +131,23 @@ public class ImportLoincStep7HandlePartRelatedCodeMapping extends BaseImportLoin
 		}
 
 		addConceptMapEntry(
-			theData,
-			theContext,
-			new ConceptMapping()
-				.setConceptMapId(loincPartMapId)
-				.setConceptMapUri(loincPartMapUri)
-				.setConceptMapVersion(loincPartMapVersion)
-				.setConceptMapName(loincPartMapName)
-				.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
-				.setSourceCodeSystemVersion(codeSystemVersionId)
-				.setSourceCode(partNumber)
-				.setSourceDisplay(partName)
-				.setTargetCodeSystem(extCodeSystem)
-				.setTargetCode(extCodeId)
-				.setTargetDisplay(extCodeDisplayName)
-				.setTargetCodeSystemVersion(extCodeSystemVersion)
-				.setEquivalence(equivalence)
-				.setCopyright(extCodeSystemCopyrightNotice));
-	}
-
-
-	protected static class MyContext extends MyBaseContext {
-
+				theData,
+				theContext,
+				new ConceptMapping()
+						.setConceptMapId(loincPartMapId)
+						.setConceptMapUri(loincPartMapUri)
+						.setConceptMapVersion(loincPartMapVersion)
+						.setConceptMapName(loincPartMapName)
+						.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
+						.setSourceCodeSystemVersion(codeSystemVersionId)
+						.setSourceCode(partNumber)
+						.setSourceDisplay(partName)
+						.setTargetCodeSystem(extCodeSystem)
+						.setTargetCode(extCodeId)
+						.setTargetDisplay(extCodeDisplayName)
+						.setTargetCodeSystemVersion(extCodeSystemVersion)
+						.setEquivalence(equivalence)
+						.setCopyright(extCodeSystemCopyrightNotice));
 	}
 
 }

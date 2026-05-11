@@ -18,27 +18,33 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_ID;
 import static ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_URI;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep8HandleDocumentOntology extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep8HandleDocumentOntology.MyContext> {
+public class ImportLoincStep8HandleDocumentOntology
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep8HandleDocumentOntology.MyBaseContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep8HandleDocumentOntology.class);
 
 	@Override
-	protected MyContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		return new MyContext();
+	protected MyBaseContext newContextObject(
+			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		return new MyBaseContext(theStepExecutionDetails);
 	}
+
 	@Nonnull
 	@Override
 	protected List<PropertyNameAndDefault> getFilesToProcess() {
-		return List.of(
-			new PropertyNameAndDefault(LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE, LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT)
-		);
+		return List.of(new PropertyNameAndDefault(
+				LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE,
+				LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT));
 	}
 
-
 	@Override
-	protected void handleRecord(LoincJobImportParameters theJobParameters, MyContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {
+	protected void handleRecord(
+			LoincJobImportParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			ImportLoincFileSetJson theData) {
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		String partNumber = trim(theRecord.get("PartNumber"));
 		String partTypeName = trim(theRecord.get("PartTypeName"));
@@ -46,29 +52,35 @@ public class ImportLoincStep8HandleDocumentOntology extends BaseImportLoincStepW
 		String partName = trim(theRecord.get("PartName"));
 
 		// Document Ontology Codes VS
-		ValueSet vs = getValueSet(theJobParameters, theData, theContext, DOCUMENT_ONTOLOGY_CODES_VS_ID, DOCUMENT_ONTOLOGY_CODES_VS_URI, DOCUMENT_ONTOLOGY_CODES_VS_NAME, null);
+		ValueSet vs = getValueSet(
+				theJobParameters,
+				theData,
+				theContext,
+				DOCUMENT_ONTOLOGY_CODES_VS_ID,
+				DOCUMENT_ONTOLOGY_CODES_VS_URI,
+				DOCUMENT_ONTOLOGY_CODES_VS_NAME,
+				null);
 		addCodeAsIncludeToValueSet(vs, ITermLoaderSvc.LOINC_URI, loincNumber, null);
 
 		// Part Properties
-		String loincCodePropName = switch (partTypeName) {
-			case "Document.Kind" -> "document-kind";
-			case "Document.Role" -> "document-role";
-			case "Document.Setting" -> "document-setting";
-			case "Document.SubjectMatterDomain" -> "document-subject-matter-domain";
-			case "Document.TypeOfService" -> "document-type-of-service";
-			default -> throw new InternalErrorException(Msg.code(917) + "Unknown PartTypeName: " + partTypeName);
-		};
+		String loincCodePropName =
+				switch (partTypeName) {
+					case "Document.Kind" -> "document-kind";
+					case "Document.Role" -> "document-role";
+					case "Document.Setting" -> "document-setting";
+					case "Document.SubjectMatterDomain" -> "document-subject-matter-domain";
+					case "Document.TypeOfService" -> "document-type-of-service";
+					default -> throw new InternalErrorException(
+							Msg.code(917) + "Unknown PartTypeName: " + partTypeName);
+				};
 
 		ourLog.debug("Adding coding property: {} to concept.code {}", loincCodePropName, partNumber);
 
-		CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+		CodeSystem.ConceptDefinitionComponent concept =
+				getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
 		concept.addProperty()
-			.setCode(loincCodePropName)
-			.setValue(new Coding(ITermLoaderSvc.LOINC_URI, partNumber, partName));
-	}
-
-	protected static class MyContext extends MyBaseContext {
-		// nothing
+				.setCode(loincCodePropName)
+				.setValue(new Coding(ITermLoaderSvc.LOINC_URI, partNumber, partName));
 	}
 
 }

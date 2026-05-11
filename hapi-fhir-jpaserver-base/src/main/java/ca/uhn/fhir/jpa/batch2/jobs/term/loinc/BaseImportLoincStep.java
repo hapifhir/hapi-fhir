@@ -30,24 +30,28 @@ import java.util.Optional;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newLoincCsvParser;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public abstract class BaseImportLoincStep<CT> implements ITerminologyImportFileHandlerStep<LoincJobImportParameters, ImportLoincFileSetJson, ImportLoincFileSetJson> {
+public abstract class BaseImportLoincStep<CT>
+		implements ITerminologyImportFileHandlerStep<
+				LoincJobImportParameters, ImportLoincFileSetJson, ImportLoincFileSetJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportLoincStep.class);
 
 	@Autowired
 	private IJobPersistence myJobPersistence;
+
 	@Autowired
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
-
 	@Nonnull
 	@Override
-	public Optional<FileHandlingInstructions> canHandleFile(LoincJobImportParameters theJobParameters, String theFileName) {
+	public Optional<FileHandlingInstructions> canHandleFile(
+			LoincJobImportParameters theJobParameters, String theFileName) {
 		for (PropertyNameAndDefault propertyNameAndDefault : getFilesToProcess()) {
 			String propertyName = propertyNameAndDefault.propertyName().getCode();
 			String defaultFileName = propertyNameAndDefault.defaultValue().getCode();
 			String fileName = theJobParameters.getProperties().getProperty(propertyName, defaultFileName);
 			if (theFileName.endsWith(fileName)) {
-				return Optional.of(new FileHandlingInstructions(propertyName, FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
+				return Optional.of(
+						new FileHandlingInstructions(propertyName, FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
 			}
 		}
 
@@ -56,7 +60,10 @@ public abstract class BaseImportLoincStep<CT> implements ITerminologyImportFileH
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<ImportLoincFileSetJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<ImportLoincFileSetJson> theDataSink)
+			throws JobExecutionFailedException {
 		ImportLoincFileSetJson data = theStepExecutionDetails.getData();
 		String jobInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		LoincJobImportParameters jobParameters = theStepExecutionDetails.getParameters();
@@ -69,7 +76,8 @@ public abstract class BaseImportLoincStep<CT> implements ITerminologyImportFileH
 
 			AttachmentDetails attachment = myJobPersistence.fetchAttachmentById(jobInstanceId, attachmentId);
 			try (InputStream inputStream = attachment.getInputStream()) {
-				InputStreamReader reader = new InputStreamReader(BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
+				InputStreamReader reader = new InputStreamReader(
+						BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
 				CSVParser csvReader = newLoincCsvParser(reader);
 				for (CSVRecord record : csvReader.getRecords()) {
 					handleRecord(jobParameters, codeExtractionContext, record, codeSystemToPopulate, data);
@@ -77,7 +85,8 @@ public abstract class BaseImportLoincStep<CT> implements ITerminologyImportFileH
 
 			} catch (IOException e) {
 				// FIXME: add code
-				throw new JobExecutionFailedException(Msg.code(1) + "Failed to read file attachment: " + e.getMessage(), e);
+				throw new JobExecutionFailedException(
+						Msg.code(1) + "Failed to read file attachment: " + e.getMessage(), e);
 			}
 
 			afterCsvProcessingComplete(codeExtractionContext, codeSystemToPopulate, theStepExecutionDetails);
@@ -89,13 +98,12 @@ public abstract class BaseImportLoincStep<CT> implements ITerminologyImportFileH
 
 				int conceptCount = codeSystemToPopulate.getConcept().size();
 				ourLog.atInfo()
-					.setMessage("Added LOINC Answer List links to {} concepts")
-					.addArgument(conceptCount)
-					.log();
+						.setMessage("Added LOINC Answer List links to {} concepts")
+						.addArgument(conceptCount)
+						.log();
 
 				myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulate);
 			}
-
 		}
 
 		BaseExpandDistributionIntoFilesStep.submitChunksForNextStep(theStepExecutionDetails, theDataSink, data);
@@ -106,18 +114,26 @@ public abstract class BaseImportLoincStep<CT> implements ITerminologyImportFileH
 	/**
 	 * Invoked after all CSV rows have been processed but before the CodeSystem is submitted for storage
 	 */
-	protected void afterCsvProcessingComplete(CT theCodeExtractionContext, CodeSystem theCodeSystemToPopulate, StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+	protected void afterCsvProcessingComplete(
+			CT theCodeExtractionContext,
+			CodeSystem theCodeSystemToPopulate,
+			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		// nothing
 	}
 
-	protected abstract CT newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails);
+	protected abstract CT newContextObject(
+			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails);
 
 	@Nonnull
 	protected abstract List<PropertyNameAndDefault> getFilesToProcess();
 
-	protected abstract void handleRecord(LoincJobImportParameters theJobParameters, CT theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData);
+	protected abstract void handleRecord(
+			LoincJobImportParameters theJobParameters,
+			CT theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			ImportLoincFileSetJson theData);
 
-	protected record PropertyNameAndDefault(LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum defaultValue) {
-	}
-
+	protected record PropertyNameAndDefault(
+			LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum defaultValue) {}
 }
