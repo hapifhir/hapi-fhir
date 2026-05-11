@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -153,6 +154,14 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 			projectable = Projectable.YES,
 			valueBridge = @ValueBridgeRef(type = JpaPidValueBridge.class))
 	private JpaPid myPid;
+
+	/**
+	 * This is only here to support SearchBuilder#loadCurrentResourceVersionsForMsSqlDbpm
+	 */
+	@SuppressWarnings("unused")
+	@Basic(fetch = FetchType.LAZY)
+	@Column(name = "RES_ID", nullable = false, insertable = false, updatable = false)
+	private Long myResourceId;
 
 	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
 	private Integer myPartitionIdValue;
