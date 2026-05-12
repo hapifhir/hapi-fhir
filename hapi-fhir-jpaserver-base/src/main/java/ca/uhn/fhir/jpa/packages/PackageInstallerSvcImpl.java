@@ -250,14 +250,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private void logIfPackageAlreadyInstalled(PackageInstallationSpec theInstallationSpec) {
-		boolean exists = myTxService
-				.withSystemRequest()
-				.withRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId())
-				.execute(() -> {
-					Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(
-							theInstallationSpec.getName(), theInstallationSpec.getVersion());
-					return existing.isPresent();
-				});
+		boolean exists = myTxService.withRequest(createRequestDetails()).execute(() -> {
+			Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(
+					theInstallationSpec.getName(), theInstallationSpec.getVersion());
+			return existing.isPresent();
+		});
 		if (exists) {
 			ourLog.info(
 					"Package {}#{} is already installed",
@@ -632,8 +629,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 		String version = extractStringValueOrEmpty(theResource, "version", () -> null);
 		return myTxService
-				.withSystemRequest()
-				.withRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId())
+				.withRequest(createRequestDetails())
 				.execute(() -> myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(url, version))
 				.map(pid -> theDao.readByPid(JpaPid.fromId(pid)));
 	}
