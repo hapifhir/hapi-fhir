@@ -82,7 +82,7 @@ public class SearchParameterDaoValidator {
 						nextBase, searchParameter.getCode(), ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 				if (existingSearchParam != null) {
 					boolean isBuiltIn = existingSearchParam.getId() == null;
-					isBuiltIn |= existingSearchParam.getUri().startsWith("http://hl7.org/fhir/SearchParameter/");
+					isBuiltIn |= existingSearchParam.getUri().startsWith(Constants.BUILT_IN_SEARCH_PARAM_URI_PREFIX);
 					if (isBuiltIn) {
 						throw new UnprocessableEntityException(
 								Msg.code(1111) + "Can not override built-in search parameter " + nextBase + ":"

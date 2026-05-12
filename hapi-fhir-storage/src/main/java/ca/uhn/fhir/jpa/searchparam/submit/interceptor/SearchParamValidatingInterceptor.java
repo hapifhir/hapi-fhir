@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -77,7 +78,7 @@ public class SearchParamValidatingInterceptor {
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void resourcePreUpdate(
 			IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequestDetails) {
-		validateSearchParamOnUpdate(theNewResource, theRequestDetails);
+		validateSearchParamOnUpdate(theOldResource, theNewResource, theRequestDetails);
 	}
 
 	public void validateSearchParamOnCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
@@ -96,6 +97,11 @@ public class SearchParamValidatingInterceptor {
 		if (runtimeSearchParam == null) {
 			return;
 		}
+
+		// Only check for retiring a non-disableable SP, no check for narrowing a non-disableable base
+		// because we don't have a reference for whether a non-disableable was removed
+		// This should be ok since we also handle non-disableable SPs at the SearchParamRegistryImpl cache level
+		validateNonDisableableSpNotRetired(runtimeSearchParam);
 
 		validateSearchParamOnCreateAndUpdate(runtimeSearchParam);
 
@@ -143,6 +149,30 @@ public class SearchParamValidatingInterceptor {
 	}
 
 	public void validateSearchParamOnUpdate(IBaseResource theResource, RequestDetails theRequestDetails) {
+		validateSearchParamOnUpdate(null, theResource, theRequestDetails);
+	}
+
+	/**
+	 * Validates a SearchParameter resource on update/PUT, enforcing two constraints:
+	 * <ol>
+	 *   <li>Built-in non-disableable search parameters (see
+	 *       {@link ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl#NON_DISABLEABLE_SEARCH_PARAMS})
+	 *       may not have their status changed to anything other than {@code active}. Or it is part of a
+	 *       multi-base SP, it cannot be removed from the base list.</li>
+	 *   <li>A new SearchParameter (PUT-as-create) may not overlap an existing one with the
+	 *       same base and code.</li>
+	 * </ol>
+	 *
+	 * <p>Validation is skipped when {@link #SKIP_VALIDATION} is set in the request user-data
+	 * (used internally by the CDR seeder to bypass the non-disableable check).
+	 *
+	 * @param theOldResource    the SearchParameter resource being updated
+	 * @param theResource       the new version of SearchParameter resource
+	 * @param theRequestDetails the current request context
+	 * @throws ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException if validation fails
+	 */
+	public void validateSearchParamOnUpdate(
+			@Nullable IBaseResource theOldResource, IBaseResource theResource, RequestDetails theRequestDetails) {
 		if (isNotSearchParameterResource(theResource)) {
 			return;
 		}
@@ -164,11 +194,54 @@ public class SearchParamValidatingInterceptor {
 			return;
 		}
 
+		validateNonDisableableSpNotRetired(runtimeSearchParam);
+		validateNonDisableableBasesNotRemoved(theOldResource, runtimeSearchParam);
+
 		validateSearchParamOnCreateAndUpdate(runtimeSearchParam);
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
 		if (searchParameterMap != null) {
 			validateStandardSpOnUpdate(theRequestDetails, runtimeSearchParam, searchParameterMap);
+		}
+	}
+
+	private void validateNonDisableableSpNotRetired(RuntimeSearchParam theNewParam) {
+		// Created by Claude Sonnet 4.6
+		if (theNewParam.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
+			return;
+		}
+		for (String nextBase : theNewParam.getBase()) {
+			if (SearchParamRegistryImpl.isNonDisableableBuiltInSearchParam(
+					theNewParam.getUri(), nextBase, theNewParam.getName())) {
+				throw new UnprocessableEntityException(
+						Msg.code(2875) + "Cannot change the status of built-in search parameter "
+								+ nextBase + ":" + theNewParam.getName()
+								+ " (with URL " + theNewParam.getUri() + ")"
+								+ " because it is required for system operation. This parameter should be kept active.");
+			}
+		}
+	}
+
+	private void validateNonDisableableBasesNotRemoved(
+			@Nullable IBaseResource theOldResource, RuntimeSearchParam theNewParam) {
+		// Created by Claude Sonnet 4.6
+		if (theOldResource == null) {
+			return;
+		}
+		RuntimeSearchParam oldParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theOldResource);
+		if (oldParam == null) {
+			return;
+		}
+		for (String nextBase : oldParam.getBase()) {
+			if (SearchParamRegistryImpl.isNonDisableableBuiltInSearchParam(
+							theNewParam.getUri(), nextBase, theNewParam.getName())
+					&& !theNewParam.getBase().contains(nextBase)) {
+				throw new UnprocessableEntityException(Msg.code(2925) + "Cannot remove base '" + nextBase
+						+ "' from built-in search parameter "
+						+ theNewParam.getName()
+						+ " (with URL " + theNewParam.getUri() + ")"
+						+ " because it is required for system operation.");
+			}
 		}
 	}
 
