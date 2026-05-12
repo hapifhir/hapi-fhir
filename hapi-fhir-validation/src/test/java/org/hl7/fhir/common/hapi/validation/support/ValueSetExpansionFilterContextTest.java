@@ -1,6 +1,7 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Enumerations.FilterOperator;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -234,15 +235,15 @@ class ValueSetExpansionFilterContextTest {
 	}
 
 	@Test
-	void unsupportedPropertyYieldsEmpty() {
+	void testUnknownPropertyPassesThrough() {
 		CodeSystem cs = flatCodeSystem(false, "A", "B");
 		ValueSet.ConceptSetFilterComponent f = new ValueSet.ConceptSetFilterComponent()
-			.setProperty("severity")   // not code/display
+			.setProperty("severity")   // not code/display/any known standard property
 			.setOp(FilterOperator.EQUAL)
 			.setValue("A");
 		boolean filtered = new ValueSetExpansionFilterContext(cs, List.of(f))
 			.isFiltered(new FhirVersionIndependentConcept(cs.getUrl(), "A"));
-		assertThat(filtered).isTrue();  // always filtered out
+		assertThat(filtered).isFalse();  // passes through rather than silently emptying the ValueSet
 	}
 
 
@@ -567,6 +568,88 @@ class ValueSetExpansionFilterContextTest {
 			.as("DESCENDENT-LEAF[%s] on code '%s' (caseSensitive=%b)",
 				filterValue, testCode, caseSensitive)
 			.isEqualTo(expectedIsFiltered);
+	}
+
+	@ParameterizedTest(name = "[child-exists] wantExists={0}, code={1} ⇒ filtered={2}")
+	@CsvSource(
+		delimiter = '|',
+		value = {
+			// wantExists | code | expectedIsFiltered
+			"false | P  | true",   // P has children → child exists → filtered when wantExists=false
+			"false | C1 | true",   // C1 has child C2 → filtered
+			"false | C2 | false",  // C2 is a leaf → child does not exist → not filtered
+			"false | C3 | false",  // C3 is a leaf → not filtered
+			"true  | P  | false",  // P has children → not filtered when wantExists=true
+			"true  | C1 | false",  // C1 has children → not filtered
+			"true  | C2 | true",   // C2 is leaf → filtered when wantExists=true
+			"true  | C3 | true",   // C3 is leaf → filtered
+		})
+	void testChildPropertyExistsFilter(boolean wantExists, String code, boolean expectedIsFiltered) {
+		CodeSystem cs = hierarchicalCS(false);
+		boolean actual = isFilteredWithProperty(
+			cs, "child", FilterOperator.EXISTS, Boolean.toString(wantExists),
+			new FhirVersionIndependentConcept(cs.getUrl(), code));
+		assertThat(actual)
+			.as("child exists %s on code '%s'", wantExists, code)
+			.isEqualTo(expectedIsFiltered);
+	}
+
+	@ParameterizedTest(name = "[parent-exists] wantExists={0}, code={1} ⇒ filtered={2}")
+	@CsvSource(
+		delimiter = '|',
+		value = {
+			// wantExists | code | expectedIsFiltered
+			"false | P  | false",  // P is root, has no parent → not filtered
+			"false | C1 | true",   // C1 has parent P → filtered
+			"false | C2 | true",   // C2 has parent C1 → filtered
+			"false | C3 | true",   // C3 has parent P → filtered
+			"true  | P  | true",   // P is root → filtered when wantExists=true
+			"true  | C1 | false",  // C1 has a parent → not filtered
+			"true  | C2 | false",
+			"true  | C3 | false",
+		})
+	void testParentPropertyExistsFilter(boolean wantExists, String code, boolean expectedIsFiltered) {
+		CodeSystem cs = hierarchicalCS(false);
+		boolean actual = isFilteredWithProperty(
+			cs, "parent", FilterOperator.EXISTS, Boolean.toString(wantExists),
+			new FhirVersionIndependentConcept(cs.getUrl(), code));
+		assertThat(actual)
+			.as("parent exists %s on code '%s'", wantExists, code)
+			.isEqualTo(expectedIsFiltered);
+	}
+
+	@Test
+	void testInactivePropertyExistsFilter() {
+		CodeSystem cs = new CodeSystem().setUrl("http://example.org/cs").setCaseSensitive(true);
+		cs.addConcept().setCode("ACTIVE");
+		cs.addConcept().setCode("INACTIVE")
+			.addProperty().setCode("inactive").setValue(new BooleanType(true));
+
+		assertThat(isFilteredWithProperty(cs, "inactive", FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "INACTIVE"))).isFalse();
+		assertThat(isFilteredWithProperty(cs, "inactive", FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "ACTIVE"))).isTrue();
+		assertThat(isFilteredWithProperty(cs, "inactive", FilterOperator.EXISTS, "false",
+			new FhirVersionIndependentConcept(cs.getUrl(), "ACTIVE"))).isFalse();
+		assertThat(isFilteredWithProperty(cs, "inactive", FilterOperator.EXISTS, "false",
+			new FhirVersionIndependentConcept(cs.getUrl(), "INACTIVE"))).isTrue();
+	}
+
+	@Test
+	void testNotSelectablePropertyExistsFilter() {
+		CodeSystem cs = new CodeSystem().setUrl("http://example.org/cs").setCaseSensitive(true);
+		cs.addConcept().setCode("SELECTABLE");
+		cs.addConcept().setCode("NOT_SELECTABLE")
+			.addProperty().setCode("notSelectable").setValue(new BooleanType(true));
+
+		assertThat(isFilteredWithProperty(cs, "notSelectable", FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "NOT_SELECTABLE"))).isFalse();
+		assertThat(isFilteredWithProperty(cs, "notSelectable", FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "SELECTABLE"))).isTrue();
+		assertThat(isFilteredWithProperty(cs, "notSelectable", FilterOperator.EXISTS, "false",
+			new FhirVersionIndependentConcept(cs.getUrl(), "SELECTABLE"))).isFalse();
+		assertThat(isFilteredWithProperty(cs, "notSelectable", FilterOperator.EXISTS, "false",
+			new FhirVersionIndependentConcept(cs.getUrl(), "NOT_SELECTABLE"))).isTrue();
 	}
 
 	@ParameterizedTest(name = "[exists] cs={0}, property={1}, want={2}, code={3} ⇒ filtered={4}")
