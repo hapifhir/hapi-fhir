@@ -48,9 +48,9 @@ public class ImportLoincStep19CodingProperties extends BaseImportLoincStepWithVa
 
 	@Nonnull
 	@Override
-	protected List<PropertyNameAndDefault> getFilesToProcess() {
+	protected List<LoincFileNameSpecification> getFilesToProcess() {
 		return List.of(
-			new PropertyNameAndDefault(LOINC_CONSUMER_NAME_FILE, LOINC_CONSUMER_NAME_FILE_DEFAULT)
+			new LoincFileNameSpecification(LOINC_CONSUMER_NAME_FILE, LOINC_CONSUMER_NAME_FILE_DEFAULT)
 		);
 	}
 

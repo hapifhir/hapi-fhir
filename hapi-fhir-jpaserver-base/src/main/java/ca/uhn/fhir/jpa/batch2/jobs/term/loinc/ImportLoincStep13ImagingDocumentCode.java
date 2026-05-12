@@ -28,8 +28,8 @@ public class ImportLoincStep13ImagingDocumentCode
 
 	@Nonnull
 	@Override
-	protected List<PropertyNameAndDefault> getFilesToProcess() {
-		return List.of(new PropertyNameAndDefault(
+	protected List<LoincFileNameSpecification> getFilesToProcess() {
+		return List.of(new LoincFileNameSpecification(
 				LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE,
 				LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT));
 	}

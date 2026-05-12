@@ -31,8 +31,8 @@ public class ImportLoincStep4HandleAnswerLists
 
 	@Nonnull
 	@Override
-	protected List<PropertyNameAndDefault> getFilesToProcess() {
-		return List.of(new PropertyNameAndDefault(
+	protected List<LoincFileNameSpecification> getFilesToProcess() {
+		return List.of(new LoincFileNameSpecification(
 			LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE,
 			LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT));
 	}

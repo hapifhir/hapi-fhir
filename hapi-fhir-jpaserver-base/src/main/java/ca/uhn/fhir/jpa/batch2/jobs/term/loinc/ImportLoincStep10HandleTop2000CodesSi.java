@@ -20,8 +20,8 @@ public class ImportLoincStep10HandleTop2000CodesSi extends ImportLoincStep9Handl
 
 	@Nonnull
 	@Override
-	protected List<PropertyNameAndDefault> getFilesToProcess() {
-		return List.of(new PropertyNameAndDefault(
+	protected List<LoincFileNameSpecification> getFilesToProcess() {
+		return List.of(new LoincFileNameSpecification(
 				LoincUploadPropertiesEnum.LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE,
 				LoincUploadPropertiesEnum.LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT));
 	}

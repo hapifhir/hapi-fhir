@@ -28,8 +28,8 @@ public class ImportLoincStep12HandleIeeeMedicalDeviceCode
 
 	@Nonnull
 	@Override
-	protected List<PropertyNameAndDefault> getFilesToProcess() {
-		return List.of(new PropertyNameAndDefault(
+	protected List<LoincFileNameSpecification> getFilesToProcess() {
+		return List.of(new LoincFileNameSpecification(
 				LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE,
 				LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT));
 	}

@@ -29,8 +29,8 @@ public class ImportLoincStep2HandleConcepts
 
 	@Nonnull
 	@Override
-	protected List<PropertyNameAndDefault> getFilesToProcess() {
-		return List.of(new PropertyNameAndDefault(
+	protected List<LoincFileNameSpecification> getFilesToProcess() {
+		return List.of(new LoincFileNameSpecification(
 				LoincUploadPropertiesEnum.LOINC_FILE, LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT));
 	}
 

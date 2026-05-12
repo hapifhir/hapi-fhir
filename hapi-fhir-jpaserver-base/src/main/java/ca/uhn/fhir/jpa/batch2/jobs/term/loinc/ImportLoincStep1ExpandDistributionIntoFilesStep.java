@@ -7,7 +7,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
-import ca.uhn.fhir.jpa.term.loinc.LoincLinguisticVariantsHandler;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -25,7 +24,6 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUIS
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANT_FILE_SUFFIX;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -61,8 +59,6 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 			handleLoincXml(theStepExecutionDetails, theBytes, theJobParameters, theFileSet);
 		} else if (theFileName.endsWith(linguisticVariantsFilename)) {
 			handleLoincLinguisticVariants(theStepExecutionDetails, theBytes, theJobParameters, theFileSet);
-		} else if (theFileName.endsWith(LOINC_LINGUISTIC_VARIANT_FILE_SUFFIX.getCode())) {
-			handleLoincLinguisticVariant(theStepExecutionDetails, theBytes, theJobParameters, theFileSet);
 		}
 
 	}
@@ -90,10 +86,6 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 			throw new JobExecutionFailedException(Msg.code(1) + e.getMessage(), e);
 		}
 
-	}
-
-	private void handleLoincLinguisticVariant(StepExecutionDetails<LoincJobImportParameters, VoidModel> theStepExecutionDetails, byte[] theBytes, LoincJobImportParameters theJobParameters, ImportLoincFileSetJson theFileSet) {
-		
 	}
 
 	private void handleLoincXml(StepExecutionDetails<LoincJobImportParameters, VoidModel> theStepExecutionDetails, byte[] theBytes, LoincJobImportParameters theJobParameters, ImportLoincFileSetJson theFileSet) {

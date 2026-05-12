@@ -24,8 +24,8 @@ public class ImportLoincStep5HandleAnswerListLinks
 
 	@Nonnull
 	@Override
-	protected List<PropertyNameAndDefault> getFilesToProcess() {
-		return List.of(new PropertyNameAndDefault(
+	protected List<LoincFileNameSpecification> getFilesToProcess() {
+		return List.of(new LoincFileNameSpecification(
 				LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE,
 				LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT));
 	}

@@ -29,8 +29,8 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 
 	@Nonnull
 	@Override
-	protected List<PropertyNameAndDefault> getFilesToProcess() {
-		return List.of(new PropertyNameAndDefault(LOINC_HIERARCHY_FILE, LOINC_HIERARCHY_FILE_DEFAULT));
+	protected List<LoincFileNameSpecification> getFilesToProcess() {
+		return List.of(new LoincFileNameSpecification(LOINC_HIERARCHY_FILE, LOINC_HIERARCHY_FILE_DEFAULT));
 	}
 
 	@Override

@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newLoincCsvParser;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -45,13 +46,21 @@ public abstract class BaseImportLoincStep<CT>
 	@Override
 	public Optional<FileHandlingInstructions> canHandleFile(
 			LoincJobImportParameters theJobParameters, String theFileName) {
-		for (PropertyNameAndDefault propertyNameAndDefault : getFilesToProcess()) {
-			String propertyName = propertyNameAndDefault.propertyName().getCode();
-			String defaultFileName = propertyNameAndDefault.defaultValue().getCode();
-			String fileName = theJobParameters.getProperties().getProperty(propertyName, defaultFileName);
-			if (theFileName.endsWith(fileName)) {
+		for (LoincFileNameSpecification loincFileNameSpecification : getFilesToProcess()) {
+			boolean matches = false;
+
+			if (loincFileNameSpecification.propertyName() != null) {
+				String propertyName = loincFileNameSpecification.propertyName().getCode();
+				String defaultFileName = loincFileNameSpecification.defaultValue().getCode();
+				String fileName = theJobParameters.getProperties().getProperty(propertyName, defaultFileName);
+				matches = theFileName.endsWith(fileName);
+			} else if (loincFileNameSpecification.fileNamePattern() != null) {
+				matches = loincFileNameSpecification.fileNamePattern().matcher(theFileName).matches();
+			}
+
+			if (matches) {
 				return Optional.of(
-						new FileHandlingInstructions(propertyName, FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
+						new FileHandlingInstructions(theFileName, FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
 			}
 		}
 
@@ -125,7 +134,7 @@ public abstract class BaseImportLoincStep<CT>
 			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails);
 
 	@Nonnull
-	protected abstract List<PropertyNameAndDefault> getFilesToProcess();
+	protected abstract List<LoincFileNameSpecification> getFilesToProcess();
 
 	protected abstract void handleRecord(
 			LoincJobImportParameters theJobParameters,
@@ -134,6 +143,15 @@ public abstract class BaseImportLoincStep<CT>
 			CodeSystem theCodeSystemToPopulate,
 			ImportLoincFileSetJson theData);
 
-	protected record PropertyNameAndDefault(
-			LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum defaultValue) {}
+	protected record LoincFileNameSpecification(
+			LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum defaultValue, Pattern fileNamePattern) {
+
+		protected LoincFileNameSpecification(LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum defaultValue) {
+			this(propertyName, defaultValue, null);
+		}
+
+		protected LoincFileNameSpecification(Pattern fileNamePattern) {
+			this(null, null, fileNamePattern);
+		}
+	}
 }

@@ -71,8 +71,13 @@ public class ImportLoincFileSetJson extends TerminologyFileSetJson {
 		retVal.setLoincCodeSystemXml(getLoincCodeSystemXml());
 		retVal.setCodeSystemStagingVersionId(getCodeSystemStagingVersionId());
 		retVal.setResourcesToActivate(getResourcesToActivate());
+		retVal.setLinguisticVariants(getLinguisticVariants());
 
 		return (OT) retVal;
+	}
+
+	private void setLinguisticVariants(List<LinguisticVariantJson> theLinguisticVariants) {
+		myLinguisticVariants = theLinguisticVariants;
 	}
 
 	public static class LinguisticVariantJson implements IModelJson {

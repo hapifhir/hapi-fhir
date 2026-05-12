@@ -34,13 +34,13 @@ public class ImportLoincStep17PartLink
 
 	@Nonnull
 	@Override
-	protected List<PropertyNameAndDefault> getFilesToProcess() {
+	protected List<LoincFileNameSpecification> getFilesToProcess() {
 		return List.of(
-				new PropertyNameAndDefault(
+				new LoincFileNameSpecification(
 						LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE,
 						LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_DEFAULT),
-				new PropertyNameAndDefault(LOINC_PART_LINK_FILE_PRIMARY, LOINC_PART_LINK_FILE_PRIMARY_DEFAULT),
-				new PropertyNameAndDefault(
+				new LoincFileNameSpecification(LOINC_PART_LINK_FILE_PRIMARY, LOINC_PART_LINK_FILE_PRIMARY_DEFAULT),
+				new LoincFileNameSpecification(
 						LOINC_PART_LINK_FILE_SUPPLEMENTARY, LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT));
 	}
 

@@ -18,7 +18,6 @@ public class TerminologyFileSetJson implements IModelJson {
 
 	@JsonProperty("stepIdToChunkAttachmentIds")
 	private Map<String, List<String>> myStepIdToFutureChunks;
-
 	@JsonProperty("chunkAttachmentIdForCurrentStepId")
 	private String myChunkAttachmentIdForCurrentStepId;
 	@JsonProperty("resourcesToActivate")
