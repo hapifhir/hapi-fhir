@@ -46,7 +46,7 @@ public class TokenPredicateBuilderTest {
 
 	@BeforeEach
 	public void beforeEach() {
-		myLogger = (Logger) LoggerFactory.getLogger(TokenPredicateBuilder.class);
+		myLogger = (Logger) LoggerFactory.getLogger(BaseTokenPredicateBuilder.class);
 		myListAppender = new ListAppender<>();
 		myListAppender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
 		myLogger.setLevel(Level.ALL);
@@ -63,7 +63,7 @@ public class TokenPredicateBuilderTest {
 	}
 
 	@AfterEach
-	public void afterEach(){
+	public void afterEach() {
 		myListAppender.stop();
 		myLogger.detachAppender(myListAppender);
 	}

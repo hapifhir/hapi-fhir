@@ -156,6 +156,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.TokenCompressedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
@@ -847,6 +848,13 @@ public class JpaConfig {
 	@Scope("prototype")
 	public TokenPredicateBuilder newTokenPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
 		return new TokenPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public TokenCompressedPredicateBuilder newTokenCompressedPredicateBuilder(
+			SearchQueryBuilder theSearchBuilder, TokenCompressedPredicateBuilder.Mode theMode) {
+		return new TokenCompressedPredicateBuilder(theSearchBuilder, theMode);
 	}
 
 	@Bean

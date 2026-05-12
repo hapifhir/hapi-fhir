@@ -20,14 +20,17 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.BaseTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
@@ -44,6 +47,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.TokenCompressedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
@@ -104,7 +108,7 @@ public class SearchQueryBuilder {
 	private final PartitionSettings myPartitionSettings;
 	private final RequestPartitionId myRequestPartitionId;
 	private final String myResourceType;
-	private final StorageSettings myStorageSettings;
+	private final JpaStorageSettings myStorageSettings;
 	private final FhirContext myFhirContext;
 	private final SqlObjectFactory mySqlBuilderFactory;
 	private final boolean myCountQuery;
@@ -128,7 +132,7 @@ public class SearchQueryBuilder {
 	 */
 	public SearchQueryBuilder(
 			FhirContext theFhirContext,
-			StorageSettings theStorageSettings,
+			JpaStorageSettings theStorageSettings,
 			PartitionSettings thePartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
@@ -157,7 +161,7 @@ public class SearchQueryBuilder {
 	 */
 	private SearchQueryBuilder(
 			FhirContext theFhirContext,
-			StorageSettings theStorageSettings,
+			JpaStorageSettings theStorageSettings,
 			PartitionSettings thePartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
@@ -381,6 +385,24 @@ public class SearchQueryBuilder {
 		TokenPredicateBuilder retVal = createTokenPredicateBuilder();
 		addTable(retVal, theSourceJoinColumn);
 		return retVal;
+	}
+
+	/**
+	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a TOKEN search parameter
+	 */
+	public BaseTokenPredicateBuilder addNewTokenPredicateBuilder(
+			@Nullable DbColumn[] theSourceJoinColumn, RuntimeSearchParam theSearchParam) {
+		if (myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
+			TokenCompressedPredicateBuilder.Mode mode = TokenCompressedPredicateBuilder.Mode.resolve(
+					theSearchParam, theSearchParam.getName(), myStorageSettings);
+			TokenCompressedPredicateBuilder retVal = mySqlBuilderFactory.compressedTokenIndexTable(this, mode);
+			addTable(retVal, theSourceJoinColumn);
+			return retVal;
+		} else {
+			TokenPredicateBuilder retVal = createTokenPredicateBuilder();
+			addTable(retVal, theSourceJoinColumn);
+			return retVal;
+		}
 	}
 
 	/**

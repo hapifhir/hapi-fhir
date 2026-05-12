@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -215,6 +216,7 @@ public class JpaStorageSettings extends StorageSettings {
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation =
 			StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
 	private TokenIndexStrategyEnum myTokenIndexStrategy = TokenIndexStrategyEnum.WRITE_OLD_QUERY_OLD;
+	private Set<String> myIdentifierTokenSearchParams = new HashSet<>(Set.of("identifier"));
 	private HistoryCountModeEnum myHistoryCountMode = DEFAULT_HISTORY_COUNT_MODE;
 	private int myInternalSynchronousSearchSize = DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE;
 	/**
@@ -1855,6 +1857,30 @@ public class JpaStorageSettings extends StorageSettings {
 	public void setTokenIndexStrategy(TokenIndexStrategyEnum theTokenIndexStrategy) {
 		Validate.notNull(theTokenIndexStrategy, "theTokenIndexStrategy must not be null");
 		myTokenIndexStrategy = theTokenIndexStrategy;
+	}
+
+	/**
+	 * Returns the set of token search parameter names that should be routed to the
+	 * {@code HFJ_SPIDX2_TOKEN_IDENTIFIER} table when compressed token indexing is active.
+	 * All other token search parameters use {@code HFJ_SPIDX2_TOKEN_COMMON_RES}.
+	 *
+	 * <p>Default: {@code {"identifier"}}.
+	 *
+	 * @see TokenIndexStrategyEnum#readFromCompressedTokenTables()
+	 */
+	public Set<String> getIdentifierTokenSearchParams() {
+		return myIdentifierTokenSearchParams;
+	}
+
+	/**
+	 * Sets the token search parameter names that should be routed to the
+	 * {@code HFJ_SPIDX2_TOKEN_IDENTIFIER} table when compressed token indexing is active.
+	 *
+	 * @see #getIdentifierTokenSearchParams()
+	 */
+	public void setIdentifierTokenSearchParams(Set<String> theIdentifierTokenSearchParams) {
+		Validate.notNull(theIdentifierTokenSearchParams, "theIdentifierTokenSearchParams must not be null");
+		myIdentifierTokenSearchParams = theIdentifierTokenSearchParams;
 	}
 
 	/**

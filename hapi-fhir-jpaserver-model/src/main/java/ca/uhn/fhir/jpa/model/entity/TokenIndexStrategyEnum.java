@@ -1,14 +1,12 @@
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-
 /**
  * Routing strategy for token-index reads and writes between the legacy
  * {@code HFJ_SPIDX_TOKEN} table and the new compressed token index tables
  * ({@code HFJ_SPIDX2_TOKEN_COMMON}, {@code HFJ_SPIDX2_TOKEN_COMMON_RES},
  * {@code HFJ_SPIDX2_TOKEN_IDENTIFIER}).
  *
- * @see JpaStorageSettings#setTokenIndexStrategy(TokenIndexStrategyEnum)
+ * @see ca.uhn.fhir.jpa.api.config.JpaStorageSettings#setTokenIndexStrategy(TokenIndexStrategyEnum)
  */
 public enum TokenIndexStrategyEnum {
 	/**

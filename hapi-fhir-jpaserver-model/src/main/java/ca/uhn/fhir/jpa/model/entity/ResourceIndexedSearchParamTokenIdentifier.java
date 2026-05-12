@@ -23,15 +23,21 @@ import ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(
@@ -62,7 +68,7 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	@Id
 	@PartitionedIdProperty
 	@Column(name = "PARTITION_ID", nullable = true)
-	private Integer myPartitionId;
+	private Integer myPartitionIdValue;
 
 	@Column(name = "RES_ID", nullable = false)
 	private long myResourceId;
@@ -70,8 +76,8 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	@Column(name = "HASH_IDENTITY", nullable = false)
 	private long myHashIdentity;
 
-	@Column(name = "SP_SYSTEM_URL_ID", nullable = false)
-	private long mySystemUrlId;
+	@Column(name = "SP_SYSTEM_URL_ID", nullable = true)
+	private Long mySystemUrlId;
 
 	@Column(name = "SP_VALUE", length = MAX_LENGTH, nullable = false)
 	private String myValue;
@@ -82,5 +88,108 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	@Column(name = "TYPE_HASH_SYS_AND_VALUE", nullable = true)
 	private Long myTypeHashSystemAndValue;
 
+	// Required for Hibernate to insert HFJ_RESOURCE rows before HFJ_SPIDX2_TOKEN_COMMON_RES rows
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_SP2_TOKEN_IDENTIFIER_RES"))
+	private ResourceTable myResource;
+
 	public ResourceIndexedSearchParamTokenIdentifier() {}
+
+	public ResourceIndexedSearchParamTokenIdentifier(
+			Integer thePartitionId,
+			long theResourceId,
+			long theHashIdentity,
+			Long theSystemUrlId,
+			String theValue,
+			long theHashValue,
+			Long theTypeHashSystemAndValue) {
+		myPartitionIdValue = thePartitionId;
+		myResourceId = theResourceId;
+		myHashIdentity = theHashIdentity;
+		mySystemUrlId = theSystemUrlId;
+		myValue = theValue;
+		myHashValue = theHashValue;
+		myTypeHashSystemAndValue = theTypeHashSystemAndValue;
+	}
+
+	public ResourceIndexedSearchParamTokenIdentifier setResource(ResourceTable theResource) {
+		myResource = theResource;
+		return this;
+	}
+
+	public Long getId() {
+		return myId;
+	}
+
+	public Integer getPartitionId() {
+		return myPartitionIdValue;
+	}
+
+	public long getResourceId() {
+		return myResourceId;
+	}
+
+	public long getHashIdentity() {
+		return myHashIdentity;
+	}
+
+	public Long getSystemUrlId() {
+		return mySystemUrlId;
+	}
+
+	public String getValue() {
+		return myValue;
+	}
+
+	public long getHashValue() {
+		return myHashValue;
+	}
+
+	public Long getTypeHashSystemAndValue() {
+		return myTypeHashSystemAndValue;
+	}
+
+	/**
+	 * Content-based equality, excluding the generated {@code SP_ID}. Used by the synchronizer's
+	 * set-subtract diff to detect stale rows on resource update.
+	 */
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (!(theO instanceof ResourceIndexedSearchParamTokenIdentifier that)) return false;
+		return myResourceId == that.myResourceId
+				&& myHashIdentity == that.myHashIdentity
+				&& myHashValue == that.myHashValue
+				&& Objects.equals(mySystemUrlId, that.mySystemUrlId)
+				&& Objects.equals(myPartitionIdValue, that.myPartitionIdValue)
+				&& Objects.equals(myValue, that.myValue)
+				&& Objects.equals(myTypeHashSystemAndValue, that.myTypeHashSystemAndValue);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(
+				myResourceId,
+				myPartitionIdValue,
+				myHashIdentity,
+				mySystemUrlId,
+				myValue,
+				myHashValue,
+				myTypeHashSystemAndValue);
+	}
 }

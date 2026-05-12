@@ -192,8 +192,12 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	}
 
 	private ResourceIndexedSearchParamTokenCommon newToken() {
-		return new ResourceIndexedSearchParamTokenCommon(
-			123456L, 1L, "code-value", 100L, 200L);
+		return new ResourceIndexedSearchParamTokenCommon()
+			.setHashSystemAndValue(HASH_SYS_AND_VALUE)
+			.setSystemId(SYSTEM_ID)
+			.setValue(VALUE)
+			.setHashIdentity(HASH_IDENTITY)
+			.setHashValue(HASH_VALUE);
 	}
 
 	private List<ResourceIndexedSearchParamTokenCommon> findTokens(long theHash) {

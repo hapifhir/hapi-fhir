@@ -22,12 +22,18 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(
@@ -52,4 +58,64 @@ public class ResourceIndexedSearchParamTokenCommonRes implements Serializable {
 	@PartitionedIdProperty
 	@Column(name = "PARTITION_ID", nullable = true)
 	private Integer myPartitionId;
+
+	// Required for Hibernate to insert HFJ_RESOURCE rows before HFJ_SPIDX2_TOKEN_COMMON_RES rows
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_SP2_TOKEN_COMMON_RES"))
+	private ResourceTable myResource;
+
+	public ResourceIndexedSearchParamTokenCommonRes() {}
+
+	public ResourceIndexedSearchParamTokenCommonRes(
+			Long theResourceId, Integer thePartitionId, long theHashSystemAndValue) {
+		myResourceId = theResourceId;
+		myPartitionId = thePartitionId;
+		myHashSystemAndValue = theHashSystemAndValue;
+	}
+
+	public ResourceIndexedSearchParamTokenCommonRes setResource(ResourceTable theResource) {
+		myResource = theResource;
+		return this;
+	}
+
+	public Long getResourceId() {
+		return myResourceId;
+	}
+
+	public Integer getPartitionId() {
+		return myPartitionId;
+	}
+
+	public long getHashSystemAndValue() {
+		return myHashSystemAndValue;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (!(theO instanceof ResourceIndexedSearchParamTokenCommonRes that)) return false;
+		return myHashSystemAndValue == that.myHashSystemAndValue
+				&& Objects.equals(myResourceId, that.myResourceId)
+				&& Objects.equals(myPartitionId, that.myPartitionId);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(myResourceId, myPartitionId, myHashSystemAndValue);
+	}
 }

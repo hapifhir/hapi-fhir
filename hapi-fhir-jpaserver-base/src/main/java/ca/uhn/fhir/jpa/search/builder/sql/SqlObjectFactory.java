@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.TokenCompressedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
@@ -115,6 +116,11 @@ public class SqlObjectFactory {
 
 	public TokenPredicateBuilder tokenIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(TokenPredicateBuilder.class, theSearchSqlBuilder);
+	}
+
+	public TokenCompressedPredicateBuilder compressedTokenIndexTable(
+			SearchQueryBuilder theSearchSqlBuilder, TokenCompressedPredicateBuilder.Mode theMode) {
+		return myApplicationContext.getBean(TokenCompressedPredicateBuilder.class, theSearchSqlBuilder, theMode);
 	}
 
 	public UriPredicateBuilder uriIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
