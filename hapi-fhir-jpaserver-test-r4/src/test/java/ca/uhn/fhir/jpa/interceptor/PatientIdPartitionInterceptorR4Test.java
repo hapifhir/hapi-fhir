@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTypeInterceptor;
@@ -82,15 +81,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
@@ -659,8 +658,19 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@Test
+	public void testSearchWithChainedNonCompartmentResources() {
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+		createPatient(withId("A"), withActiveTrue());
+		IIdType orgId = createOrganization(withId("org1"), withName("orgName"), withActiveTrue());
+		IIdType encounterId = createEncounter(withSubject("Patient/A"), withReference("serviceProvider", orgId));
+
+		myTestDaoSearch.assertSearchFinds("find Encounter", "Encounter?service-provider.name=orgName&service-provider.active=true", encounterId);
+	}
+
+	@Test
 	public void testSearchWithChainedAndResolvedReference() {
-		createPatientA();  // active=true
+		createPatient(withId("A"), withActiveTrue());
 		IIdType patAObsId = createObservation(withSubject("Patient/A"), withStatus("final"));
 
 		myTestDaoSearch.assertSearchFinds("find patient Observation", "Observation?subject=Patient/A&subject.active=true", patAObsId);
