@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.term.custom;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -51,7 +50,7 @@ public class ConceptHandler implements IZipContentsHandlerCsv {
 
 			Validate.isTrue(!myCode2Concept.containsKey(code), "The code %s has appeared more than once", code);
 
-			TermConcept concept = TermLoaderSvcImpl.getOrCreateConcept(myCode2Concept, code);
+			TermConcept concept = myCode2Concept.computeIfAbsent(code, c -> new TermConcept());
 			concept.setCode(code);
 			concept.setDisplay(display);
 

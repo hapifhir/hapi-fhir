@@ -315,6 +315,10 @@ public class TermConcept implements Serializable {
 				thePropertyValue);
 	}
 
+	public TermConceptProperty addPropertyCode(@Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
+		return addProperty(TermConceptPropertyTypeEnum.CODE, thePropertyName, thePropertyValue);
+	}
+
 	@Override
 	public boolean equals(Object theObj) {
 		if (!(theObj instanceof TermConcept)) {

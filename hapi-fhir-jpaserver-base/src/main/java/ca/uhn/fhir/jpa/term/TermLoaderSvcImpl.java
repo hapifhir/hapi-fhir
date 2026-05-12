@@ -24,7 +24,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -155,6 +154,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
+import static ca.uhn.fhir.jpa.term.snomedct.SctHandlerDescription.SNOMED_CONCEPT_SYNONYM;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
@@ -1043,7 +1043,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	private UploadStatistics processSnomedCtFiles(
 			LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {
 		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
-		final Map<String, TermConcept> id2concept = new HashMap<>();
 		final Map<String, TermConcept> code2concept = new HashMap<>();
 		final Set<String> validConceptIds = new HashSet<>();
 
@@ -1052,8 +1051,20 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		ourLog.info("Have {} valid concept IDs", validConceptIds.size());
 
-		handler = new SctHandlerDescription(validConceptIds, code2concept, id2concept, codeSystemVersion);
+		handler = new SctHandlerDescription(validConceptIds, code2concept, codeSystemVersion);
 		iterateOverZipFileCsv(theDescriptors, SCT_FILE_DESCRIPTION, handler, '\t', null, true);
+		code2concept.values().forEach(concept -> {
+			// SctHandlerDescription tries to use English for the display text,
+			// but if there is none for a certain code,
+			// (e.g. because it is in a country-specific extension and has not been translated to English)
+			// it should use any available language instead.
+			if (concept.getDisplay() == null) {
+				concept.getDesignations().stream()
+						.filter(designation -> SNOMED_CONCEPT_SYNONYM.equals(designation.getUseCode()))
+						.findFirst()
+						.ifPresent(designation -> concept.setDisplay(designation.getValue()));
+			}
+		});
 
 		ourLog.info("Got {} concepts, cloning map", code2concept.size());
 		final HashMap<String, TermConcept> rootConcepts = new HashMap<>(code2concept);
@@ -1228,24 +1239,5 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			}
 		}
 		return retVal;
-	}
-
-	public static TermConcept getOrCreateConcept(Map<String, TermConcept> id2concept, String id) {
-		TermConcept concept = id2concept.get(id);
-		if (concept == null) {
-			concept = new TermConcept();
-			id2concept.put(id, concept);
-		}
-		return concept;
-	}
-
-	public static TermConceptProperty getOrCreateConceptProperty(
-			Map<String, List<TermConceptProperty>> code2Properties, String code, String key) {
-		List<TermConceptProperty> termConceptProperties = code2Properties.get(code);
-		if (termConceptProperties == null) return new TermConceptProperty();
-		Optional<TermConceptProperty> termConceptProperty = termConceptProperties.stream()
-				.filter(property -> key.equals(property.getKey()))
-				.findFirst();
-		return termConceptProperty.orElseGet(TermConceptProperty::new);
 	}
 }
