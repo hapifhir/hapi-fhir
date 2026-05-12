@@ -182,6 +182,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.unique(false)
 				.online(true)
 				.withColumns("HASH_COMPLETE", "DATE_ORDINAL", "RES_ID", "PARTITION_ID");
+
+		// Add index on CREATED_TIME to support ordered polling of subscription messages
+		{
+			version.onTable("HFJ_RESOURCE_MODIFIED")
+					.addIndex("20260424.1", "IDX_RES_MOD_CREATED")
+					.unique(false)
+					.online(true)
+					.withColumns("CREATED_TIME");
+		}
 	}
 
 	protected void init880() {
