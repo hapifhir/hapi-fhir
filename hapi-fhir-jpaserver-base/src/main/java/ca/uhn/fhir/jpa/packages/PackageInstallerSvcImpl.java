@@ -1032,13 +1032,13 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (!myStorageSettings.isValidateResourceStatusForPackageUpload()) {
 			return true;
 		}
-		// TODO: there may be a bug here, since the following two conditions overlap
 		List<IPrimitiveType> statusTypes =
 				myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
 		// Resource does not have a status field
 		if (statusTypes.isEmpty()) {
 			return true;
 		}
+		// TODO: there is a bug here - see testValidForUpload_statusElementDefinedButNeverSet_returnsTrue
 		// Resource has no status field, or an explicitly null one
 		if (!statusTypes.get(0).hasValue() || statusTypes.get(0).getValue() == null) {
 			return false;
@@ -1135,10 +1135,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private String extractId(IBaseResource theResource) {
-		return extractStringValueOrThrow(
-				theResource,
-				"id",
-				() -> new UnsupportedOperationException(Msg.code(2929) + theResource.fhirType()
+		return myFhirContext
+				.newTerser()
+				.getSinglePrimitiveValue(theResource, "id")
+				.orElseThrow(() -> new UnsupportedOperationException(Msg.code(2929) + theResource.fhirType()
 						+ " resources in a package must have an id to be loaded by the package installer."));
 	}
 
@@ -1164,14 +1164,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private Object extractValue(IBase theResource, String thePath) {
 		return myFhirContext.newTerser().getSingleValueOrNull(theResource, thePath);
-	}
-
-	private <X extends RuntimeException> String extractStringValueOrThrow(
-			IBaseResource theResource, String thePath, Supplier<X> theExceptionSupplier) {
-		return myFhirContext
-				.newTerser()
-				.getSinglePrimitiveValue(theResource, thePath)
-				.orElseThrow(theExceptionSupplier);
 	}
 
 	private String extractStringValueOrEmpty(IBase theResource, String theElementName) {

@@ -315,18 +315,16 @@ public class PackageInstallerSvcImplTest {
 
 		// Created by Claude Opus 4.6
 		@Test
-		@Disabled("This is probably a bug, as the assertion looks incorrect")
+		@Disabled("This is a bug, the assertion was incorrect do disabling the test with the correct assertion")
 		void testValidForUpload_statusElementDefinedButNeverSet_returnsTrue() {
 			SearchParameter sp = new SearchParameter();
 			sp.setUrl("http://example.com/sp-no-status");
 			setupSearchParameterValidationMocksForSuccess();
 			when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
 
-			assertTrue(mySvc.validForUpload(sp));
+			assertFalse(mySvc.validForUpload(sp));
 		}
 	}
-
-
 
 
 	@Test
