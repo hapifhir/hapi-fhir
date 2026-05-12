@@ -55,6 +55,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -1084,7 +1085,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						theCodeSystemUrl,
 						existingCodeSystemVersionEntity.getId(),
 						theStagingVersionId);
-				deleteCodeSystemVersion(existingCodeSystemVersionEntity);
+				markCodeSystemVersionForDeletion(existingCodeSystemVersionEntity);
 
 				if (Objects.equals(
 						existingCodeSystemVersionEntity,

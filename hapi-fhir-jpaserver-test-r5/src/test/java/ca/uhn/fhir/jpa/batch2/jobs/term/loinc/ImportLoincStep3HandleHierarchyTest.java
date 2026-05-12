@@ -112,7 +112,10 @@ class ImportLoincStep3HandleHierarchyTest {
 				}
 				for (CodeSystem.ConceptDefinitionDesignationComponent designation : next.getDesignation()) {
 					theTarget.append("  ".repeat(theDepth));
-					theTarget.append("  -Designation[").append(FhirContext.forR4Cached().newJsonParser().encodeToString(designation.getUse())).append(": ").append(designation.getValue()).append("\n");
+					theTarget.append("  -Designation[lang=");
+					theTarget.append(designation.getLanguage()).append(", use=");
+					theTarget.append(FhirContext.forR4Cached().newJsonParser().encodeToString(designation.getUse()));
+					theTarget.append("]: ").append(designation.getValue()).append("\n");
 				}
 			}
 			appendToHierarchy(next.getConcept(), theDepth + 1, theTarget, theIncludeProperties);

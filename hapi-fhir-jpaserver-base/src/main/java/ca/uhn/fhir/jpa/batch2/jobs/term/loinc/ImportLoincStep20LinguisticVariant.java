@@ -2,12 +2,12 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Coding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +21,6 @@ import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStepWithValueSetsAndConceptMaps<BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep20LinguisticVariant.class);
-
-	private static final String ASK_AT_ORDER_ENTRY_PROP_NAME = "AskAtOrderEntry";
-	private static final String ASSOCIATED_OBSERVATIONS_PROP_NAME = "AssociatedObservations";
-	private static final String LOINC_NUM = "LOINC_NUM";
 	public static final Pattern LINGUISTIC_VARIANT_FILENAME_PATTERN = Pattern.compile(".*LinguisticVariants/[a-zA-Z0-9]+LinguisticVariant.csv");
 
 	@Autowired
@@ -53,9 +48,14 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStepWithV
 
 		// loinc-ver/v269/AccessoryFiles/LinguisticVariants/deAT24LinguisticVariant.csv
 
+		// FIXME: extract pattern as constant
 		Pattern pattern = Pattern.compile(".*LinguisticVariants/([a-z]{2})([A-Z]{2})([0-9]+)LinguisticVariant.csv");
 		Matcher matcher = pattern.matcher(theSourceFilename);
 		Validate.isTrue(matcher.matches(), "Unexpected filename: %s", theSourceFilename);
+
+		String language = matcher.group(1);
+		String country = matcher.group(2);
+		String languageCode = language + "-" + country;
 
 		CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
 
@@ -79,31 +79,26 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStepWithV
 		// skip if COMPONENT, PROPERTY, TIME_ASPCT, SYSTEM, SCALE_TYP and METHOD_TYP are all empty
 		if (!fullySpecifiedNameStr.equals(":::::")) {
 			concept.addDesignation()
-				.setLanguage(myLanguageCode)
-				.setUseSystem(ITermLoaderSvc.LOINC_URI)
-				.setUseCode("FullySpecifiedName")
-				.setUseDisplay("FullySpecifiedName")
+				.setLanguage(languageCode)
+				.setUse(new Coding(ITermLoaderSvc.LOINC_URI, "FullySpecifiedName", "FullySpecifiedName"))
 				.setValue(fullySpecifiedNameStr);
 		}
 
 		// -- other designations
-		addDesignation(theRecord, concept, "SHORTNAME");
-		addDesignation(theRecord, concept, "LONG_COMMON_NAME");
-		addDesignation(theRecord, concept, "LinguisticVariantDisplayName");
+		addDesignation(theRecord, languageCode, concept, "SHORTNAME");
+		addDesignation(theRecord, languageCode, concept, "LONG_COMMON_NAME");
+		addDesignation(theRecord, languageCode, concept, "LinguisticVariantDisplayName");
 	}
 
-	private void addDesignation(CSVRecord theRecord, TermConcept concept, String fieldName) {
-
-		String field = trim(theRecord.get(fieldName));
+	private void addDesignation(CSVRecord theRecord, String theLanguageCode, CodeSystem.ConceptDefinitionComponent theConcept, String theFieldName) {
+		String field = trim(theRecord.get(theFieldName));
 		if (isBlank(field)) {
 			return;
 		}
 
-		concept.addDesignation()
-			.setLanguage(myLanguageCode)
-			.setUseSystem(ITermLoaderSvc.LOINC_URI)
-			.setUseCode(fieldName)
-			.setUseDisplay(fieldName)
+		theConcept.addDesignation()
+			.setLanguage(theLanguageCode)
+			.setUse(new Coding(ITermLoaderSvc.LOINC_URI, theFieldName, theFieldName))
 			.setValue(field);
 	}
 

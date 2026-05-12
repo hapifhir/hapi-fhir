@@ -65,16 +65,6 @@ class ImportLoincStep20LinguisticVariantTest {
 		// Setup
 		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
 
-		AtomicInteger responseCounter = new AtomicInteger();
-		when(myValidationSupport.lookupCode(any(), any(LookupCodeRequest.class))).thenAnswer(t->{
-			LookupCodeRequest request = t.getArgument(1, LookupCodeRequest.class);
-			assertEquals("http://loinc.org|my-staging-version-id", request.getSystem());
-			IValidationSupport.LookupCodeResult result = new IValidationSupport.LookupCodeResult();
-			result.setFound(true);
-			result.setCodeDisplay("DISPLAY-" + responseCounter.incrementAndGet());
-			return result;
-		});
-
 		// Test
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
@@ -95,13 +85,56 @@ class ImportLoincStep20LinguisticVariantTest {
 		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
 		String result = renderHierarchy(cs, true);
 		String expected = """
+			-61438-8
+			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Cellules de Purkinje cytoplasmique type 2 , IgG:Titre:Temps ponctuel:Sérum:Quantitatif:Immunofluorescence
+			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"LONG_COMMON_NAME","display":"LONG_COMMON_NAME"}]: (example long french common name)
+			-11704-4
+			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Gliale nucléaire de type 1 , IgG:Titre:Temps ponctuel:LCR:Quantitatif:Immunofluorescence
 			-17787-3
-			  -Property[AssociatedObservations: {"system":"http://loinc.org","code":"81220-6","display":"DISPLAY-1"}
-			  -Property[AssociatedObservations: {"system":"http://loinc.org","code":"72230-6","display":"DISPLAY-2"}
-			-11488-4
-			  -Property[AssociatedObservations: {"system":"http://loinc.org","code":"81222-2","display":"DISPLAY-3"}
-			  -Property[AssociatedObservations: {"system":"http://loinc.org","code":"72231-4","display":"DISPLAY-4"}
-			  -Property[AssociatedObservations: {"system":"http://loinc.org","code":"81243-8","display":"DISPLAY-5"}
+			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Virus respiratoire syncytial bovin:Présence-Seuil:Temps ponctuel:XXX:Ordinal:Culture spécifique à un microorganisme
+			-17788-1
+			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Cellules de Purkinje cytoplasmique type 2 , IgG:Titre:Temps ponctuel:Sérum:Quantitatif:
+			""";
+		assertEquals(expected, result);
+
+		verify(myDataSink, never()).accept(any(ImportLoincFileSetJson.class));
+	}
+
+	@Test
+	void testProcess_FileNotListedInLinguisticVariantFile() {
+		// Setup
+		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+
+		// Test
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("my-instance-id");
+
+		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
+		importLoincFileSetJson.setCodeSystemStagingVersionId("my-staging-version-id");
+		// The following filename doesn't line up with anything we put into the LinguisticVariants
+		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("loinc-ver/v269/AccessoryFiles/LinguisticVariants/zzZZ8LinguisticVariant.csv", "my-chunk-attachment-id"));
+		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
+		ImportLoincFileSetJson.LinguisticVariantJson linguisticVariant = new ImportLoincFileSetJson.LinguisticVariantJson("8", "fr", "CA", "French (CANADA)");
+		importLoincFileSetJson.getLinguisticVariants().add(linguisticVariant);
+
+		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+
+		mySvc.run(stepExecutionDetails, myDataSink);
+
+		// Verify
+		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
+		String result = renderHierarchy(cs, true);
+		String expected = """
+			-61438-8
+			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Cellules de Purkinje cytoplasmique type 2 , IgG:Titre:Temps ponctuel:Sérum:Quantitatif:Immunofluorescence
+			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"LONG_COMMON_NAME","display":"LONG_COMMON_NAME"}]: (example long french common name)
+			-11704-4
+			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Gliale nucléaire de type 1 , IgG:Titre:Temps ponctuel:LCR:Quantitatif:Immunofluorescence
+			-17787-3
+			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Virus respiratoire syncytial bovin:Présence-Seuil:Temps ponctuel:XXX:Ordinal:Culture spécifique à un microorganisme
+			-17788-1
+			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Cellules de Purkinje cytoplasmique type 2 , IgG:Titre:Temps ponctuel:Sérum:Quantitatif:
 			""";
 		assertEquals(expected, result);
 

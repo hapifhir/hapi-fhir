@@ -12,10 +12,12 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -31,6 +33,10 @@ import static ca.uhn.fhir.test.utilities.UuidUtils.UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
@@ -423,8 +429,8 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			cs.setVersion(theVersion);
 		}
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		cs.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType(theConceptCode)));
+		cs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
+		cs.addConcept(new CodeSystem.ConceptDefinitionComponent(theConceptCode));
 		return cs;
 	}
 
