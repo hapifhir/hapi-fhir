@@ -115,6 +115,27 @@ class PackageInstallerSvcCodeSystemVersionSearchParamR4Test extends BaseJpaR4Tes
 		return created;
 	}
 
+	/**
+	 * Same scenario as {@link #install_multiVersionPackageWhenVersionSearchParamMisconfigured_succeeds}
+	 * but with partitioning enabled. Verifies the term-layer fallback works correctly when partition
+	 * context is propagated through {@code createRequestDetails()}.
+	 */
+	@Test
+	void install_multiVersionPackageWhenVersionSearchParamMisconfigured_withPartitioningEnabled_succeeds(@TempDir Path theTempDir) throws IOException {
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
+		myPartitionSettings.setPartitioningEnabled(true);
+
+		overrideCodeSystemVersionSearchParam("CodeSystem.title");
+
+		createCodeSystem(VERSION_ONE);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		PackageInstallationSpec spec = buildPackageContainingCodeSystem(theTempDir, VERSION_ONE)
+			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
+
+		assertInstallProducesValidSlot(spec, VERSION_ONE);
+	}
+
 	// Asserts the install completes without throwing and the (url, version) slot is intact in the term layer.
 	private void assertInstallProducesValidSlot(PackageInstallationSpec theSpec, String theVersion) {
 		myPackageInstallerSvc.install(theSpec);

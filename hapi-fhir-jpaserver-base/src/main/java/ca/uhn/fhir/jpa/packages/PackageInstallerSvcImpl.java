@@ -823,7 +823,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return false;
 		}
 		String content = extractStringValueOrEmpty(theResource, "content");
-		return !content.isEmpty() && "not-present".equals(content);
+		return "not-present".equals(content);
 	}
 
 	private boolean allowMultipleVersionsForResource(
