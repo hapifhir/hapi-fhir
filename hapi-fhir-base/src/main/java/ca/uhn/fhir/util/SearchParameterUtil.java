@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -43,9 +44,11 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -150,6 +153,69 @@ public class SearchParameterUtil {
 			return theCompartmentName.substring("Base FHIR compartment definition for ".length());
 		}
 		return theCompartmentName;
+	}
+
+	// Created by Claude Opus 4.7
+	/**
+	 * Returns true if the given SearchParameter base value represents an abstract base type
+	 * ({@code Resource}, {@code DomainResource}, {@code CanonicalResource} (R5+), or
+	 * {@code MetadataResource} (R5+)), meaning the parameter applies to all resource types
+	 * that extend that abstract base.
+	 */
+	public static boolean isAbstractResourceBase(String theBase) {
+		return "Resource".equals(theBase)
+				|| "DomainResource".equals(theBase)
+				|| "CanonicalResource".equals(theBase)
+				|| "MetadataResource".equals(theBase);
+	}
+
+	// Created by Claude Opus 4.7
+	/**
+	 * Expands a SearchParameter base list. Each entry that is an abstract base type
+	 * ({@code Resource}, {@code DomainResource}, {@code CanonicalResource}, {@code MetadataResource})
+	 * is replaced with the set of concrete resource types that extend that abstract class; concrete
+	 * entries are preserved as-is. If no entry is abstract, the original list is returned unchanged.
+	 * <p>
+	 * Abstract types expand narrowly:
+	 * <ul>
+	 *   <li>{@code Resource} → every concrete type (root of the hierarchy)</li>
+	 *   <li>{@code DomainResource} → only concrete types that extend {@code DomainResource}</li>
+	 *   <li>{@code CanonicalResource} → only concrete types that extend {@code CanonicalResource} (R5+)</li>
+	 *   <li>{@code MetadataResource} → only concrete types that extend {@code MetadataResource} (R5+)</li>
+	 * </ul>
+	 */
+	public static List<String> expandBaseWhenNeeded(FhirContext theContext, Collection<String> theBase) {
+		if (theBase.stream().noneMatch(SearchParameterUtil::isAbstractResourceBase)) {
+			return new ArrayList<>(theBase);
+		}
+		Set<String> result = new LinkedHashSet<>();
+		for (String baseEntry : theBase) {
+			if (isAbstractResourceBase(baseEntry)) {
+				result.addAll(getConcreteTypesExtending(theContext, baseEntry));
+			} else {
+				result.add(baseEntry);
+			}
+		}
+		return new ArrayList<>(result);
+	}
+
+	/**
+	 * Returns the concrete resource types whose implementing class has an ancestor with the given
+	 * abstract-base name in its superclass chain. Used by {@link #expandBaseWhenNeeded} to perform
+	 * per-abstract-type expansion rather than a blanket "all types".
+	 */
+	private static List<String> getConcreteTypesExtending(FhirContext theContext, String theAbstractBase) {
+		List<String> result = new ArrayList<>();
+		for (String concreteType : theContext.getResourceTypes()) {
+			final Class<?> cls = theContext.getResourceDefinition(concreteType).getImplementingClass();
+			for (Class<?> superclass : ClassUtils.getAllSuperclasses(cls)) {
+				if (superclass.getSimpleName().equals(theAbstractBase)) {
+					result.add(concreteType);
+					break;
+				}
+			}
+		}
+		return result;
 	}
 
 	public static List<String> getBaseAsStrings(FhirContext theContext, IBaseResource theResource) {
