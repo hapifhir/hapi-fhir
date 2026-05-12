@@ -27,7 +27,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +89,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 							if (fileHandlingTypeToAttachmentIds.containsKey(fileHandlingType)) {
 								List<String> attachmentIds = fileHandlingTypeToAttachmentIds.get(fileHandlingType);
 								for (String attachmentId : attachmentIds) {
-									fileSet.addChunk(processor.stepId(), attachmentId);
+									fileSet.addChunk(processor.stepId(), nextFileName, attachmentId);
 								}
 								continue;
 							}
@@ -150,7 +149,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 				if (recordsBuffer.size() == myChunkLineSize || !recordIterator.hasNext()) {
 					String attachmentId = writeChunk(theJobInstanceId, headers, recordsBuffer);
-					theFileSet.addChunk(theStepId, attachmentId);
+					theFileSet.addChunk(theStepId, theZipInnerFilename, attachmentId);
 					recordsBuffer.clear();
 					attachmentIds.add(attachmentId);
 				}
@@ -208,16 +207,16 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		 * step that includes all the data for subsequent steps so that it can be relayed onward, but then
 		 * all other work chunks should only hold a single attachment ID for actual processing.
 		 */
-		List<String> attachmentIdsForNextStep = theFileSet.getAndRemoveFutureChunkAttachmentIdsForStepId(nextStepId);
-		theFileSet.setChunkAttachmentIdForCurrentStepId(null);
+		List<TerminologyFileSetJson.Chunk> attachmentIdsForNextStep = theFileSet.getAndRemoveFutureChunksForStepId(nextStepId);
+		theFileSet.setChunkForCurrentStep(null);
 		if (!theFileSet.isEmpty()) {
 			theDataSink.accept(theFileSet);
 		}
 
 		// Subsequent steps
-		for (String attachmentId : attachmentIdsForNextStep) {
+		for (TerminologyFileSetJson.Chunk chunk : attachmentIdsForNextStep) {
 			OT fileSetToSend = theFileSet.cloneWithOnlyFutureChunks();
-			fileSetToSend.setChunkAttachmentIdForCurrentStepId(attachmentId);
+			fileSetToSend.setChunkForCurrentStep(chunk);
 			theDataSink.accept(fileSetToSend);
 		}
 	}

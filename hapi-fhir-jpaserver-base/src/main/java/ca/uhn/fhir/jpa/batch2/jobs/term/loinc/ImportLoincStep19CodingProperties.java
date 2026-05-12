@@ -55,7 +55,7 @@ public class ImportLoincStep19CodingProperties extends BaseImportLoincStepWithVa
 	}
 
 	@Override
-	protected void handleRecord(LoincJobImportParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {
+	protected void handleRecord(LoincJobImportParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData, String theSourceFilename) {
 		if (!anyValidProperty(theContext)) {
 			return;
 		}

@@ -4,20 +4,18 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
@@ -33,11 +31,6 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStepWithV
 	@Autowired
 	private IValidationSupport myValidationSupport;
 
-	// FIXME: drop
-	private Map<String, TermConcept> myCode2Concept;
-	// FIXME: drop
-	private String myLanguageCode;
-
 	@Override
 	protected MyBaseContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
@@ -52,16 +45,19 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStepWithV
 	}
 
 	@Override
-	protected void handleRecord(LoincJobImportParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData) {
+	protected void handleRecord(LoincJobImportParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData, String theSourceFilename) {
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		if (isBlank(loincNumber)) {
 			return;
 		}
 
-		TermConcept concept = myCode2Concept.get(loincNumber);
-		if (concept == null) {
-			return;
-		}
+		// loinc-ver/v269/AccessoryFiles/LinguisticVariants/deAT24LinguisticVariant.csv
+
+		Pattern pattern = Pattern.compile(".*LinguisticVariants/([a-z]{2})([A-Z]{2})([0-9]+)LinguisticVariant.csv");
+		Matcher matcher = pattern.matcher(theSourceFilename);
+		Validate.isTrue(matcher.matches(), "Unexpected filename: %s", theSourceFilename);
+
+		CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
 
 		// The following should be created as designations for each term:
 		// COMPONENT:PROPERTY:TIME_ASPCT:SYSTEM:SCALE_TYP:METHOD_TYP (as colon-separated concatenation - FormalName)

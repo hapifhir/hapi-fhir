@@ -107,12 +107,18 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		verify(myDataSink, times(4)).accept(myTerminologyFileSetCaptor.capture());
 
 		TerminologyFileSetJson fileSet = myTerminologyFileSetCaptor.getAllValues().get(0);
-		assertNull(fileSet.getChunkAttachmentIdForCurrentStepId());
-		assertThat(fileSet.getAndRemoveFutureChunkAttachmentIdsForStepId("step-1")).isEmpty();
-		assertThat(fileSet.getAndRemoveFutureChunkAttachmentIdsForStepId("step-2")).containsExactly("ATT-4", "ATT-5");
-		assertEquals("ATT-1", myTerminologyFileSetCaptor.getAllValues().get(1).getChunkAttachmentIdForCurrentStepId());
-		assertEquals("ATT-2", myTerminologyFileSetCaptor.getAllValues().get(2).getChunkAttachmentIdForCurrentStepId());
-		assertEquals("ATT-3", myTerminologyFileSetCaptor.getAllValues().get(3).getChunkAttachmentIdForCurrentStepId());
+		assertNull(fileSet.getChunkForCurrentStep());
+		assertThat(fileSet.getAndRemoveFutureChunksForStepId("step-1")).isEmpty();
+		assertThat(fileSet.getAndRemoveFutureChunksForStepId("step-2")).containsExactly(
+			new TerminologyFileSetJson.Chunk("SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv", "ATT-4"),
+			new TerminologyFileSetJson.Chunk("SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv", "ATT-5")
+		);
+		assertEquals("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", myTerminologyFileSetCaptor.getAllValues().get(1).getChunkForCurrentStep().getSourceFilename());
+		assertEquals("ATT-1", myTerminologyFileSetCaptor.getAllValues().get(1).getChunkForCurrentStep().getAttachmentId());
+		assertEquals("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", myTerminologyFileSetCaptor.getAllValues().get(2).getChunkForCurrentStep().getSourceFilename());
+		assertEquals("ATT-2", myTerminologyFileSetCaptor.getAllValues().get(2).getChunkForCurrentStep().getAttachmentId());
+		assertEquals("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", myTerminologyFileSetCaptor.getAllValues().get(3).getChunkForCurrentStep().getSourceFilename());
+		assertEquals("ATT-3", myTerminologyFileSetCaptor.getAllValues().get(3).getChunkForCurrentStep().getAttachmentId());
 		assertEquals(5, attachmentCounter.get());
 
 	}
@@ -184,7 +190,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	}
 
 	@Test
-	void testProcess_ExtractLinguisticVariants() throws IOException {
+	void testProcess_ExtractLinguisticVariants() {
 		mockCodeSystemStorageStartStaging();
 		mockJobPersistenceFetchDistributionFile_WithLinguisticVariants();
 		mockHandlerStep1();
@@ -206,7 +212,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	}
 
 	@Test
-	void testProcess_TwoStepsUseSameFile() throws IOException {
+	void testProcess_TwoStepsUseSameFile() {
 		mockCodeSystemStorageStartStaging();
 		mockJobPersistenceFetchDistributionFile();
 		mockHandlerStep1();
@@ -221,18 +227,25 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		verify(myDataSink, times(4)).accept(myTerminologyFileSetCaptor.capture());
 
 		TerminologyFileSetJson fileSet = myTerminologyFileSetCaptor.getAllValues().get(0);
-		assertNull(fileSet.getChunkAttachmentIdForCurrentStepId());
-		assertThat(fileSet.getAndRemoveFutureChunkAttachmentIdsForStepId("step-1")).isEmpty();
-		assertThat(fileSet.getAndRemoveFutureChunkAttachmentIdsForStepId("step-2")).containsExactly("ATT-1", "ATT-2", "ATT-3");
-		assertEquals("ATT-1", myTerminologyFileSetCaptor.getAllValues().get(1).getChunkAttachmentIdForCurrentStepId());
-		assertEquals("ATT-2", myTerminologyFileSetCaptor.getAllValues().get(2).getChunkAttachmentIdForCurrentStepId());
-		assertEquals("ATT-3", myTerminologyFileSetCaptor.getAllValues().get(3).getChunkAttachmentIdForCurrentStepId());
+		assertNull(fileSet.getChunkForCurrentStep());
+		assertThat(fileSet.getAndRemoveFutureChunksForStepId("step-1")).isEmpty();
+		assertThat(fileSet.getAndRemoveFutureChunksForStepId("step-2")).containsExactly(
+			new TerminologyFileSetJson.Chunk("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", "ATT-1"),
+			new TerminologyFileSetJson.Chunk("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv",  "ATT-2"),
+			new TerminologyFileSetJson.Chunk("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", "ATT-3")
+		);
+		assertEquals("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", myTerminologyFileSetCaptor.getAllValues().get(1).getChunkForCurrentStep().getSourceFilename());
+		assertEquals("ATT-1", myTerminologyFileSetCaptor.getAllValues().get(1).getChunkForCurrentStep().getAttachmentId());
+		assertEquals("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", myTerminologyFileSetCaptor.getAllValues().get(2).getChunkForCurrentStep().getSourceFilename());
+		assertEquals("ATT-2", myTerminologyFileSetCaptor.getAllValues().get(2).getChunkForCurrentStep().getAttachmentId());
+		assertEquals("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", myTerminologyFileSetCaptor.getAllValues().get(3).getChunkForCurrentStep().getSourceFilename());
+		assertEquals("ATT-3", myTerminologyFileSetCaptor.getAllValues().get(3).getChunkForCurrentStep().getAttachmentId());
 		assertEquals(3, attachmentCounter.get());
 
 	}
 
 	@Test
-	void testProcess_NoChunksForStep1() throws IOException {
+	void testProcess_NoChunksForStep1() {
 		mockCodeSystemStorageStartStaging();
 		mockJobPersistenceFetchDistributionFile();
 		when(myHandlerStep1.canHandleFile(any(), any())).thenAnswer(t -> Optional.empty());
@@ -247,9 +260,11 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		verify(myDataSink, times(1)).accept(myTerminologyFileSetCaptor.capture());
 
 		TerminologyFileSetJson fileSet = myTerminologyFileSetCaptor.getAllValues().get(0);
-		assertNull(fileSet.getChunkAttachmentIdForCurrentStepId());
-		assertThat(fileSet.getAndRemoveFutureChunkAttachmentIdsForStepId("step-1")).isEmpty();
-		assertThat(fileSet.getAndRemoveFutureChunkAttachmentIdsForStepId("step-2")).containsExactly("ATT-1", "ATT-2");
+		assertNull(fileSet.getChunkForCurrentStep());
+		assertThat(fileSet.getAndRemoveFutureChunksForStepId("step-1")).isEmpty();
+		assertThat(fileSet.getAndRemoveFutureChunksForStepId("step-2")).containsExactly(
+			new TerminologyFileSetJson.Chunk("SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv", "ATT-1"),
+			new TerminologyFileSetJson.Chunk("SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv", "ATT-2"));
 	}
 
 	@Test

@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -63,7 +64,7 @@ class ImportLoincStep5HandleAnswerListLinksTest {
 		instance.setInstanceId("my-instance-id");
 
 		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
-		importLoincFileSetJson.setChunkAttachmentIdForCurrentStepId("my-chunk-attachment-id");
+		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("file.csv", "my-chunk-attachment-id"));
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 
 		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
@@ -94,7 +95,7 @@ class ImportLoincStep5HandleAnswerListLinksTest {
 			"10568-4",
 			"LL2427-4"
 		);
-		assertThat(cs.getConcept().get(0).getProperty().stream().map(t->t.getCode() + "=" + t.getValue().toString()))
+		assertThat(cs.getConcept().get(0).getProperty().stream().map(t -> t.getCode() + "=" + t.getValue().toString()))
 			.containsExactly("answer-list=LL1000-0");
 
 		verify(myDataSink, never()).accept(any(ImportLoincFileSetJson.class));
@@ -107,10 +108,10 @@ class ImportLoincStep5HandleAnswerListLinksTest {
 		instance.setInstanceId("my-instance-id");
 
 		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
-		importLoincFileSetJson.addChunk("step-2", "step-2-chunk-1");
-		importLoincFileSetJson.addChunk("step-2", "step-2-chunk-2");
-		importLoincFileSetJson.addChunk("step-3", "step-3-chunk-1");
-		importLoincFileSetJson.addChunk("step-3", "step-3-chunk-2");
+		importLoincFileSetJson.addChunk("step-2", "filename2.txt", "step-2-chunk-1");
+		importLoincFileSetJson.addChunk("step-2", "filename2.txt", "step-2-chunk-2");
+		importLoincFileSetJson.addChunk("step-3", "filename3.txt", "step-3-chunk-1");
+		importLoincFileSetJson.addChunk("step-3", "filename3.txt", "step-3-chunk-2");
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 
 		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
@@ -122,17 +123,20 @@ class ImportLoincStep5HandleAnswerListLinksTest {
 		verify(myDataSink, times(3)).accept(myFileSetCaptor.capture());
 
 		ImportLoincFileSetJson capturedFileSet0 = myFileSetCaptor.getAllValues().get(0);
-		assertNull(capturedFileSet0.getChunkAttachmentIdForCurrentStepId());
-		assertThat(capturedFileSet0.getAndRemoveFutureChunkAttachmentIdsForStepId("step-3"))
-			.containsExactly("step-3-chunk-1", "step-3-chunk-2");
+		assertNull(capturedFileSet0.getChunkForCurrentStep());
+		assertThat(capturedFileSet0.getAndRemoveFutureChunksForStepId("step-3"))
+			.containsExactly(
+				new TerminologyFileSetJson.Chunk("filename3.txt", "step-3-chunk-1"),
+				new TerminologyFileSetJson.Chunk("filename3.txt", "step-3-chunk-2")
+			);
 
 		ImportLoincFileSetJson capturedFileSet1 = myFileSetCaptor.getAllValues().get(1);
-		assertThat(capturedFileSet1.getChunkAttachmentIdForCurrentStepId()).isEqualTo("step-2-chunk-1");
-		assertThat(capturedFileSet1.getAndRemoveFutureChunkAttachmentIdsForStepId("step-3")).isEmpty();
+		assertThat(capturedFileSet1.getChunkForCurrentStep().getAttachmentId()).isEqualTo("step-2-chunk-1");
+		assertThat(capturedFileSet1.getAndRemoveFutureChunksForStepId("step-3")).isEmpty();
 
 		ImportLoincFileSetJson capturedFileSet2 = myFileSetCaptor.getAllValues().get(2);
-		assertThat(capturedFileSet2.getChunkAttachmentIdForCurrentStepId()).isEqualTo("step-2-chunk-2");
-		assertThat(capturedFileSet2.getAndRemoveFutureChunkAttachmentIdsForStepId("step-3")).isEmpty();
+		assertThat(capturedFileSet2.getChunkForCurrentStep().getAttachmentId()).isEqualTo("step-2-chunk-2");
+		assertThat(capturedFileSet2.getAndRemoveFutureChunksForStepId("step-3")).isEmpty();
 	}
 
 	@Test
@@ -155,7 +159,7 @@ class ImportLoincStep5HandleAnswerListLinksTest {
 		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
 
 		ImportLoincFileSetJson capturedFileSet0 = myFileSetCaptor.getAllValues().get(0);
-		assertNull(capturedFileSet0.getChunkAttachmentIdForCurrentStepId());
+		assertNull(capturedFileSet0.getChunkForCurrentStep());
 		assertThat(capturedFileSet0.getResourcesToActivate()).containsExactly("CodeSystem/A", "CodeSystem/B");
 	}
 }

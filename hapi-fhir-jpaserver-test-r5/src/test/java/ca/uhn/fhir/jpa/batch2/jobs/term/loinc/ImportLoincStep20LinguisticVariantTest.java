@@ -9,7 +9,8 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -23,8 +24,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincStep3HandleHierarchyTest.renderHierarchy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -34,8 +36,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep3HandleHierarchyTest {
+class ImportLoincStep20LinguisticVariantTest {
 
+	@Mock
+	private IValidationSupport myValidationSupport;
 	@Mock
 	private IJobPersistence myJobPersistence;
 	@Mock
@@ -48,24 +52,39 @@ class ImportLoincStep3HandleHierarchyTest {
 	private JobDefinition<LoincJobImportParameters> myJobDefinition;
 
 	@InjectMocks
-	private ImportLoincStep3HandleHierarchy mySvc;
+	private ImportLoincStep20LinguisticVariant mySvc;
 
+	@Captor
+	private ArgumentCaptor<ImportLoincFileSetJson> myFileSetCaptor;
 	@Captor
 	private ArgumentCaptor<IBaseResource> myCodeSystemCaptor;
 
 
 	@Test
-	void run_LoadCodes() {
+	void testProcess() {
 		// Setup
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+
+		AtomicInteger responseCounter = new AtomicInteger();
+		when(myValidationSupport.lookupCode(any(), any(LookupCodeRequest.class))).thenAnswer(t->{
+			LookupCodeRequest request = t.getArgument(1, LookupCodeRequest.class);
+			assertEquals("http://loinc.org|my-staging-version-id", request.getSystem());
+			IValidationSupport.LookupCodeResult result = new IValidationSupport.LookupCodeResult();
+			result.setFound(true);
+			result.setCodeDisplay("DISPLAY-" + responseCounter.incrementAndGet());
+			return result;
+		});
 
 		// Test
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 
 		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
-		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("file.csv", "my-chunk-attachment-id"));
+		importLoincFileSetJson.setCodeSystemStagingVersionId("my-staging-version-id");
+		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv", "my-chunk-attachment-id"));
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
+		ImportLoincFileSetJson.LinguisticVariantJson linguisticVariant = new ImportLoincFileSetJson.LinguisticVariantJson("8", "fr", "CA", "French (CANADA)");
+		importLoincFileSetJson.getLinguisticVariants().add(linguisticVariant);
 
 		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
@@ -74,49 +93,19 @@ class ImportLoincStep3HandleHierarchyTest {
 		// Verify
 		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
 		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
-		String hierarchy = renderHierarchy(cs);
+		String result = renderHierarchy(cs, true);
 		String expected = """
-			-LP31755-9
-			  -LP14559-6
-			    -LP98185-9
-			      -LP14082-9
-			        -LP52258-8
-			          -41599-2
-			        -LP52260-4
-			          -41602-4
-			        -LP52960-9
+			-17787-3
+			  -Property[AssociatedObservations: {"system":"http://loinc.org","code":"81220-6","display":"DISPLAY-1"}
+			  -Property[AssociatedObservations: {"system":"http://loinc.org","code":"72230-6","display":"DISPLAY-2"}
+			-11488-4
+			  -Property[AssociatedObservations: {"system":"http://loinc.org","code":"81222-2","display":"DISPLAY-3"}
+			  -Property[AssociatedObservations: {"system":"http://loinc.org","code":"72231-4","display":"DISPLAY-4"}
+			  -Property[AssociatedObservations: {"system":"http://loinc.org","code":"81243-8","display":"DISPLAY-5"}
 			""";
-		assertEquals(expected, hierarchy);
+		assertEquals(expected, result);
 
 		verify(myDataSink, never()).accept(any(ImportLoincFileSetJson.class));
-	}
-
-	public static String renderHierarchy(CodeSystem theCs) {
-		return renderHierarchy(theCs, false);
-	}
-	public static String renderHierarchy(CodeSystem theCs, boolean theIncludeProperties) {
-		StringBuilder target = new StringBuilder();
-		appendToHierarchy(theCs.getConcept(), 0, target, theIncludeProperties);
-		return target.toString();
-	}
-
-	private static void appendToHierarchy(List<CodeSystem.ConceptDefinitionComponent> theConceptList, int theDepth, StringBuilder theTarget, boolean theIncludeProperties) {
-		for (CodeSystem.ConceptDefinitionComponent next : theConceptList) {
-			theTarget.append("  ".repeat(theDepth));
-			theTarget.append("-");
-			theTarget.append(next.getCode()).append("\n");
-			if (theIncludeProperties) {
-				for (CodeSystem.ConceptPropertyComponent property : next.getProperty()) {
-					theTarget.append("  ".repeat(theDepth));
-					theTarget.append("  -Property[").append(property.getCode()).append(": ").append(FhirContext.forR4Cached().newJsonParser().encodeToString(property.getValue())).append("\n");
-				}
-				for (CodeSystem.ConceptDefinitionDesignationComponent designation : next.getDesignation()) {
-					theTarget.append("  ".repeat(theDepth));
-					theTarget.append("  -Designation[").append(FhirContext.forR4Cached().newJsonParser().encodeToString(designation.getUse())).append(": ").append(designation.getValue()).append("\n");
-				}
-			}
-			appendToHierarchy(next.getConcept(), theDepth + 1, theTarget, theIncludeProperties);
-		}
 	}
 
 }

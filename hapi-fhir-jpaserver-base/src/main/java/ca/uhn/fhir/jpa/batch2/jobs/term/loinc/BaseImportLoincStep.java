@@ -80,7 +80,12 @@ public abstract class BaseImportLoincStep<CT>
 		CT codeExtractionContext = newContextObject(theStepExecutionDetails);
 		CodeSystem codeSystemToPopulate = new CodeSystem();
 
-		String attachmentId = data.getChunkAttachmentIdForCurrentStepId();
+		String attachmentId = null;
+		String sourceFilename = null;
+		if (data.getChunkForCurrentStep() != null) {
+			attachmentId = data.getChunkForCurrentStep().getAttachmentId();
+			sourceFilename = data.getChunkForCurrentStep().getSourceFilename();
+		}
 		if (isNotBlank(attachmentId)) {
 
 			AttachmentDetails attachment = myJobPersistence.fetchAttachmentById(jobInstanceId, attachmentId);
@@ -89,7 +94,7 @@ public abstract class BaseImportLoincStep<CT>
 						BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
 				CSVParser csvReader = newLoincCsvParser(reader);
 				for (CSVRecord record : csvReader.getRecords()) {
-					handleRecord(jobParameters, codeExtractionContext, record, codeSystemToPopulate, data);
+					handleRecord(jobParameters, codeExtractionContext, record, codeSystemToPopulate, data, sourceFilename);
 				}
 
 			} catch (IOException e) {
@@ -137,11 +142,11 @@ public abstract class BaseImportLoincStep<CT>
 	protected abstract List<LoincFileNameSpecification> getFilesToProcess();
 
 	protected abstract void handleRecord(
-			LoincJobImportParameters theJobParameters,
-			CT theContext,
-			CSVRecord theRecord,
-			CodeSystem theCodeSystemToPopulate,
-			ImportLoincFileSetJson theData);
+		LoincJobImportParameters theJobParameters,
+		CT theContext,
+		CSVRecord theRecord,
+		CodeSystem theCodeSystemToPopulate,
+		ImportLoincFileSetJson theData, String theSourceFilename);
 
 	protected record LoincFileNameSpecification(
 			LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum defaultValue, Pattern fileNamePattern) {

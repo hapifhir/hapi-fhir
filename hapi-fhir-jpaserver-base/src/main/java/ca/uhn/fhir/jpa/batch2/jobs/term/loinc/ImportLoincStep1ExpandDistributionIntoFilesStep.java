@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANT_FILE_SUFFIX;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -58,12 +57,12 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 			// FIXME: add test to ensure we fail if the ZIP has no loinc.xml
 			handleLoincXml(theStepExecutionDetails, theBytes, theJobParameters, theFileSet);
 		} else if (theFileName.endsWith(linguisticVariantsFilename)) {
-			handleLoincLinguisticVariants(theStepExecutionDetails, theBytes, theJobParameters, theFileSet);
+			handleLoincLinguisticVariants(theBytes, theFileSet);
 		}
 
 	}
 
-	private void handleLoincLinguisticVariants(StepExecutionDetails<LoincJobImportParameters, VoidModel> theStepExecutionDetails, byte[] theBytes, LoincJobImportParameters theJobParameters, ImportLoincFileSetJson theFileSet) {
+	private void handleLoincLinguisticVariants(byte[] theBytes, ImportLoincFileSetJson theFileSet) {
 		ourLog.info("Processing 'LinguisticVariants.csv' file");
 
 		String csvString = new String(theBytes, StandardCharsets.UTF_8);
