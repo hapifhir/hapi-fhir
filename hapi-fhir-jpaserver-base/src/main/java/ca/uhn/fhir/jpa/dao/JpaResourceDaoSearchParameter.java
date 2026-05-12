@@ -81,7 +81,7 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 				myVersionCanonicalizer.searchParameterToCanonical(theResource);
 		List<String> base = theResource != null
 				? searchParameter.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList())
-				: null;
+				: List.of();
 		requestReindexForRelatedResources(reindex, base, theRequestDetails);
 	}
 

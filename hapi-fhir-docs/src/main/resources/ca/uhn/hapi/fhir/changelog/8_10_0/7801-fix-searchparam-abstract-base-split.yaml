@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7801
+title: "Previously, installing an IG package whose `SearchParameter` shared a `code` with an
+  existing `SearchParameter` on an abstract `base` (`Resource`, `DomainResource`,
+  `CanonicalResource`, or `MetadataResource`) did not update the existing `SearchParameter.base` which means 
+  the `SearchParameter` was still operating on the old `base`. This has been fixed."
+

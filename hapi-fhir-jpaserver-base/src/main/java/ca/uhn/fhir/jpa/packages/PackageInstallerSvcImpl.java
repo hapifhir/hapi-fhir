@@ -825,8 +825,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				.equals(theResource.getIdElement().getIdPart())) {
 			return false;
 		}
-		Collection<String> remainingBaseList = new HashSet<>(getBaseAsStrings(myFhirContext, theExistingResource));
-		remainingBaseList.removeAll(getBaseAsStrings(myFhirContext, theResource));
+		Collection<String> remainingBaseList = new HashSet<>(SearchParameterUtil.expandBaseWhenNeeded(
+				myFhirContext, getBaseAsStrings(myFhirContext, theExistingResource)));
+		remainingBaseList.removeAll(
+				SearchParameterUtil.expandBaseWhenNeeded(myFhirContext, getBaseAsStrings(myFhirContext, theResource)));
 		if (remainingBaseList.isEmpty()) {
 			return false;
 		}
@@ -900,6 +902,13 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return false;
 		}
 
+		if (!hasValidId(theResource)) {
+			ourLog.warn(
+					"Skipping resource with ID {} longer than 64 characters, which makes an invalid FHIR ID.",
+					theResource.getIdElement().getIdPart());
+			return false;
+		}
+
 		if (!isValidResourceStatusForPackageUpload(theResource)) {
 			ourLog.warn(
 					"Failed to validate resource of type {} with ID {} - Error: Resource status not accepted value.",
@@ -909,6 +918,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		return true;
+	}
+
+	private boolean hasValidId(IBaseResource theResource) {
+		IIdType resourceId = theResource.getIdElement();
+		return !resourceId.hasIdPart() || resourceId.isIdPartValid();
 	}
 
 	private boolean isEmbeddedValueSet(IBaseResource theResource) {

@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl.isNonDisableableBuiltInSearchParam;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -166,6 +167,33 @@ public class SearchParamRegistryImplTest {
 		idList.add(idGood);
 		mySearchParamRegistry.handleInit(idList);
 		assertEquals(32, mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).size());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void handleInit_searchParameterWithDomainResourceBase_isRegisteredUnderDomainResourceDerivedTypesOnly() {
+		// A client-defined SearchParameter with base=[DomainResource] must be expanded via
+		// SearchParameterUtil.expandBaseAsStrings to every DomainResource-derived concrete type
+		// and *not* to types that extend Resource directly (Bundle, Binary, Parameters).
+		IdDt id = new IdDt("SearchParameter/abstract-base-sp");
+		SearchParameter abstractSp = new SearchParameter();
+		abstractSp.setCode("abstract-base-code");
+		abstractSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		abstractSp.setType(Enumerations.SearchParamType.TOKEN);
+		abstractSp.setExpression("Patient.identifier");
+		abstractSp.addBase("DomainResource");
+		when(mySearchParamProvider.read(id)).thenReturn(abstractSp);
+
+		mySearchParamRegistry.handleInit(List.of(id));
+
+		// DomainResource-derived concrete types — SP should be registered.
+		assertNotNull(mySearchParamRegistry.getActiveSearchParams("Patient", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		assertNotNull(mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		assertNotNull(mySearchParamRegistry.getActiveSearchParams("Practitioner", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		// Types that extend Resource directly (not DomainResource) — SP should NOT be registered.
+		assertNull(mySearchParamRegistry.getActiveSearchParams("Bundle", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		assertNull(mySearchParamRegistry.getActiveSearchParams("Binary", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
+		assertNull(mySearchParamRegistry.getActiveSearchParams("Parameters", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX).get("abstract-base-code"));
 	}
 
 	@Test
@@ -481,6 +509,121 @@ public class SearchParamRegistryImplTest {
 
 	}
 
+	@Test
+	void testNonDisableableBuiltInSearchParam_RetiredInDbStaysActiveInCache() {
+		// Setup: put a RETIRED version of Basic:code (built-in non-disableable URL) in the DB
+		addSpToRegistryAndRefresh(buildBasicCodeSp(Enumerations.PublicationStatus.RETIRED));
+
+		// Verify: the built-in ACTIVE version should remain in the cache despite the RETIRED DB entry
+		RuntimeSearchParam basicCode = mySearchParamRegistry.getActiveSearchParam(
+				"Basic", "code", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertNotNull(basicCode);
+		assertEquals("code", basicCode.getName());
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, basicCode.getStatus());
+	}
+
+	@Test
+	void testNonDisableableBuiltInSearchParam_ActiveInDbUpdatesCache() {
+		// A non-disableable built-in SP that is ACTIVE in the DB should update the cache normally.
+		// The guard in overrideSearchParam() only fires when status != ACTIVE, so an ACTIVE
+		// DB version should replace the built-in entry.
+		SearchParameter basicCodeSp = buildBasicCodeSp(Enumerations.PublicationStatus.ACTIVE);
+		basicCodeSp.setDescription("customised description");
+
+		addSpToRegistryAndRefresh(basicCodeSp);
+
+		// Verify: the DB version replaced the built-in — the customised description is present
+		RuntimeSearchParam basicCode = mySearchParamRegistry.getActiveSearchParam(
+				"Basic", "code", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertNotNull(basicCode);
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, basicCode.getStatus());
+		assertEquals("customised description", basicCode.getDescription());
+	}
+
+	@Test
+	void testCustomSpOnNonDisableableResourceType_RetiredInDbIsRemovedFromCache() {
+		// Setup: add a custom (non-built-in URL) SP on Subscription
+		SearchParameter customSp = new SearchParameter();
+		customSp.setId("SearchParameter/custom-subscription-foo");
+		customSp.setUrl("http://example.com/fhir/SearchParameter/Subscription-foo");
+		customSp.setCode("foo");
+		customSp.setName("foo");
+		customSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		customSp.setType(Enumerations.SearchParamType.TOKEN);
+		customSp.setExpression("Subscription.status");
+		customSp.addBase("Subscription");
+
+		List<ResourceTable> newEntities = addSpToRegistryAndRefresh(customSp);
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
+				"Subscription", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+
+		// Now retire the custom SP
+		customSp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		newEntities.get(newEntities.size() - 1).setVersionForUnitTest(2);
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any()))
+				.thenReturn(ResourceVersionMap.fromResourceTableEntities(newEntities));
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(customSp));
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 0, 1, 0);
+		assertDbCalled();
+
+		// Verify: custom SP is removed from cache (non-disableable protection is URI-prefix-gated)
+		assertNull(mySearchParamRegistry.getActiveSearchParam(
+				"Subscription", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+	}
+
+	@Test
+	void testNonDisableableBuiltInSearchParam_ActiveDbWithNonDisabledBaseNarrowed_preservesExistingCacheEntry() {
+		// conformance-context's bases includes the non-disableable SearchParameter.
+		// A DB record narrowed to [CapabilityStatement] only — removing
+		// SearchParameter — should be ignored; the guard detects the missing non-disableable base
+		// and returns 0, preserving the full built-in cache entry.
+		addSpToRegistryAndRefresh(buildConformanceContextSp(Enumerations.PublicationStatus.ACTIVE, "CapabilityStatement"));
+
+		// Guard fired — SearchParameter:context is preserved from the built-in
+		RuntimeSearchParam conformanceContext = mySearchParamRegistry.getActiveSearchParam(
+				"SearchParameter", "context", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertNotNull(conformanceContext);
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, conformanceContext.getStatus());
+	}
+
+	@Test
+	void testMultiBaseSpWithNonDisableableBase_RetiredInDbKeepsAllBasesActiveInCache() {
+		// conformance-context spans many bases including SearchParameter (non-disableable) and
+		// CodeSystem (disableable). When the DB entry is RETIRED (but still lists these bases),
+		// the L1 guard detects SearchParameter is non-disableable and skips the override entirely —
+		// so ALL bases that exist in the built-in cache remain active, including CodeSystem.
+		addSpToRegistryAndRefresh(buildConformanceContextSp(Enumerations.PublicationStatus.RETIRED, "SearchParameter", "CodeSystem"));
+
+		// Both bases remain active — guard fires on SearchParameter (non-disableable) and returns 0
+		// immediately without modifying the cache, so the full built-in entry is kept intact
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
+				"SearchParameter", "context", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
+				"CodeSystem", "context", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+	}
+
+	/**
+	 * Simulates a new SP appearing in the DB, then drives a full refresh cycle.
+	 * Asserts that exactly one SP was added.
+	 *
+	 * @param theMockDbSpEntry the SP as it would be read from the database
+	 * @return the full entity list, so callers can perform follow-up operations
+	 *         (e.g. bumping the version to simulate an update)
+	 */
+	@Nonnull
+	private List<ResourceTable> addSpToRegistryAndRefresh(SearchParameter theMockDbSpEntry) {
+		List<ResourceTable> newEntities = new ArrayList<>(ourEntities);
+		newEntities.add(createEntity(++ourLastId, 1));
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any()))
+				.thenReturn(ResourceVersionMap.fromResourceTableEntities(newEntities));
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(theMockDbSpEntry));
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
+		assertDbCalled();
+		return newEntities;
+	}
+
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
 		// Add a new search parameter entity
 		List<ResourceTable> newEntities = new ArrayList<>(ourEntities);
@@ -495,6 +638,36 @@ public class SearchParamRegistryImplTest {
 
 		// When we ask for the new entity, return our foo search parameter
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(buildSearchParameter(theStatus)));
+	}
+
+	@Nonnull
+	private static SearchParameter buildBasicCodeSp(Enumerations.PublicationStatus theStatus) {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/Basic-code");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
+		sp.setCode("code");
+		sp.setName("code");
+		sp.setStatus(theStatus);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Basic.code");
+		sp.addBase("Basic");
+		return sp;
+	}
+
+	@Nonnull
+	private static SearchParameter buildConformanceContextSp(Enumerations.PublicationStatus theStatus, String... theBases) {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/conformance-context");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/conformance-context");
+		sp.setCode("context");
+		sp.setName("context");
+		sp.setStatus(theStatus);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("conformance.useContext");
+		for (String base : theBases) {
+			sp.addBase(base);
+		}
+		return sp;
 	}
 
 	@Nonnull
@@ -562,6 +735,34 @@ public class SearchParamRegistryImplTest {
 			return mock(IValidationSupport.class);
 		}
 
+	}
+
+	@Test
+	void testIsNonDisableableBuiltInSearchParam_builtInUri_returnsTrue() {
+		// Basic:* pattern
+		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/Basic-code", "Basic", "code"));
+		// *:url pattern
+		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/conformance-url", "ValueSet", "url"));
+		// Subscription:* pattern
+		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/Subscription-status", "Subscription", "status"));
+		// SearchParameter:* pattern
+		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/SearchParameter-url", "SearchParameter", "url"));
+	}
+
+	@Test
+	void testIsNonDisableableBuiltInSearchParam_customUri_returnsFalse() {
+		// Custom URL on a non-disableable resource type must NOT be protected
+		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/Basic-custom", "Basic", "custom"));
+		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/Subscription-foo", "Subscription", "foo"));
+		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/CustomResource-url", "CustomResource", "url"));
+		// Null URI
+		assertFalse(isNonDisableableBuiltInSearchParam(null, "Basic", "code"));
+	}
+
+	@Test
+	void testIsNonDisableableBuiltInSearchParam_builtInUriDisableableResource_returnsFalse() {
+		// Built-in URL but resource type not in SearchParamRegistryImpl.NON_DISABLEABLE_SEARCH_PARAMS
+		assertFalse(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/Patient-name", "Patient", "name"));
 	}
 
 }

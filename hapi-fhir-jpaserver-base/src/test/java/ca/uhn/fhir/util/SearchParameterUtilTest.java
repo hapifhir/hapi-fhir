@@ -11,10 +11,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -111,7 +112,7 @@ class SearchParameterUtilTest {
 	// Created by Claude Opus 4.7
 	@ParameterizedTest
 	@ValueSource(strings = {"Resource", "DomainResource", "CanonicalResource", "MetadataResource"})
-	void testIsAbstractResourceBase_forAbstractBases_returnsTrue(String theBase) {
+	void testIsAbstractResourceBase_returnsTrueForAbstractBases(String theBase) {
 		assertTrue(SearchParameterUtil.isAbstractResourceBase(theBase));
 	}
 
@@ -124,13 +125,76 @@ class SearchParameterUtilTest {
 		"resource", "RESOURCE", "domainresource", "DOMAINRESOURCE",
 		"canonicalresource", "CANONICALRESOURCE", "metadataresource", "METADATARESOURCE"
 	})
-	void testIsAbstractResourceBase_forConcreteOrMiscasedBases_returnsFalse(String theBase) {
+	void testIsAbstractResourceBase_returnsFalseForConcreteOrMiscasedBases(String theBase) {
 		assertFalse(SearchParameterUtil.isAbstractResourceBase(theBase));
 	}
 
 	// Created by Claude Opus 4.7
 	@Test
-	void testIsAbstractResourceBase_forEmptyString_returnsFalse() {
+	void testIsAbstractResourceBase_returnsFalseForEmptyString() {
 		assertFalse(SearchParameterUtil.isAbstractResourceBase(""));
 	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testExpandBaseAsStrings_withResourceBase_returnsEveryConcreteType() {
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("Resource"));
+		assertThat(result).containsExactlyInAnyOrderElementsOf(myCtx.getResourceTypes());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testExpandBaseAsStrings_withDomainResourceBase_returnsOnlyDomainResourceDerivedTypes() {
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("DomainResource"));
+		// DomainResource-derived (common examples)
+		assertThat(result).contains("Patient", "Observation", "Practitioner", "Encounter");
+		// Non-DomainResource types (extend Resource directly)
+		assertThat(result).doesNotContain("Bundle", "Binary", "Parameters");
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testExpandBaseAsStrings_withCanonicalResourceBase_returnsOnlyCanonicalResourceDerivedTypes() {
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("CanonicalResource"));
+		// CanonicalResource-derived
+		assertThat(result).contains("StructureDefinition", "ValueSet", "CodeSystem", "SearchParameter");
+		// Not CanonicalResource-derived (plain DomainResource)
+		assertThat(result).doesNotContain("Patient", "Observation", "Bundle");
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testExpandBaseAsStrings_withMetadataResourceBase_returnsOnlyMetadataResourceDerivedTypes() {
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("MetadataResource"));
+		// MetadataResource-derived
+		assertThat(result).contains("Library", "Measure", "PlanDefinition", "ActivityDefinition");
+		// CanonicalResource but not MetadataResource (no status/date metadata block)
+		assertThat(result).doesNotContain("StructureDefinition");
+		// Not CanonicalResource at all
+		assertThat(result).doesNotContain("Patient", "Bundle");
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testExpandBaseAsStrings_withMixedConcreteAndAbstractBase_unionsConcreteAndExpandedTypes() {
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("Patient", "DomainResource"));
+		// Patient is preserved, DomainResource expands to all DomainResource-derived concrete types
+		assertThat(result).contains("Patient", "Observation", "Practitioner");
+		assertThat(result).doesNotContain("Bundle", "Binary");
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testExpandBaseAsStrings_withOnlyConcreteBases_returnsInputUnchanged() {
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of("Patient", "Observation"));
+		assertThat(result).containsExactly("Patient", "Observation");
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testExpandBaseAsStrings_withEmptyList_returnsEmpty() {
+		List<String> result = SearchParameterUtil.expandBaseWhenNeeded(myCtx, List.of());
+		assertThat(result).isEmpty();
+	}
+
 }
