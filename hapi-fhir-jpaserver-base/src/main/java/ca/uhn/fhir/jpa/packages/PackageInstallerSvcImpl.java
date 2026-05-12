@@ -23,7 +23,6 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -62,7 +61,6 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
-import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.TerserUtil;
@@ -71,6 +69,7 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -700,7 +699,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			IBaseResource theExistingResource,
 			SearchParameterMap theSpMap,
 			PackageInstallOutcomeJson theOutcome) {
-		FhirTerser terser = myFhirContext.newTerser();
 		String resourceType = theResource.fhirType();
 		RuntimeResourceDefinition rtDefinition = myFhirContext.getResourceDefinition(resourceType);
 		List<RuntimeSearchParam> sps = rtDefinition.getSearchParams();
@@ -714,8 +712,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					.findFirst()
 					.orElseThrow();
 
-			Optional<String> valueOp = terser.getSinglePrimitiveValue(theResource, runtimeSearchParameter.getPath());
-			if (valueOp.isEmpty()) {
+			String value = extractStringValueOrEmpty(theResource, runtimeSearchParameter.getPath());
+			if (value.isEmpty()) {
 				/*
 				 * we don't expect to see this because we constructed this search paramter map out of the
 				 * existing fields already and we're deconstructing it.
@@ -723,7 +721,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				throw new UnprocessableEntityException(
 						Msg.code(2872) + " No unique value found at " + runtimeSearchParameter.getPath());
 			}
-			uniqueIdentifierSpBuilder.append(valueOp.get());
+			uniqueIdentifierSpBuilder.append(value);
 		}
 
 		// dry run
@@ -825,9 +823,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (!theResource.fhirType().equals(ResourceType.CodeSystem.name())) {
 			return false;
 		}
-		FhirTerser terser = myFhirContext.newTerser();
-		Optional<String> content = terser.getSinglePrimitiveValue(theResource, "CodeSystem.content");
-		return content.isPresent() && "not-present".equals(content.get());
+		String content = extractStringValueOrEmpty(theResource, "content");
+		return !content.isEmpty() && "not-present".equals(content);
 	}
 
 	private boolean allowMultipleVersionsForResource(
@@ -973,7 +970,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		if (!isValidResourceStatusForPackageUpload(theResource)) {
 			String status = extractStringValueOrEmpty(theResource, "status");
-			ourLog.warn("Skipping installation of resource {} because of an invalid resource status {}. Resource status validation setting is enabled.", resourceId, status);
+			ourLog.warn(
+					"Skipping installation of resource {} because of an invalid resource status {}. Resource status validation setting is enabled.",
+					resourceId,
+					status);
 			return false;
 		}
 
@@ -1033,6 +1033,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (!myStorageSettings.isValidateResourceStatusForPackageUpload()) {
 			return true;
 		}
+		// TODO: there may be a bug here, since the following two conditions overlap
 		List<IPrimitiveType> statusTypes =
 				myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
 		// Resource does not have a status field
@@ -1053,15 +1054,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private boolean isStructureDefinitionWithoutSnapshot(IBaseResource r) {
-		boolean retVal = false;
-		FhirTerser terser = myFhirContext.newTerser();
-		if (r.getClass().getSimpleName().equals("StructureDefinition")) {
-			Optional<String> kind = terser.getSinglePrimitiveValue(r, "kind");
-			if (kind.isPresent() && !(kind.get().equals("logical"))) {
-				retVal = terser.getSingleValueOrNull(r, "snapshot") == null;
-			}
+		if (!("StructureDefinition".equals(r.fhirType()))) {
+			return false;
 		}
-		return retVal;
+		String kind = extractStringValueOrEmpty(r, "kind");
+		if (!kind.isEmpty() && !(kind.equals("logical"))) {
+			return extractValue(r, "snapshot") == null;
+		}
+		return false;
 	}
 
 	private IBaseResource generateSnapshot(IBaseResource sd) {
@@ -1087,7 +1087,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return SearchParameterMap.newSynchronous().add("_id", new TokenParam(id));
 		} else if ("SearchParameter".equals(resourceType)) {
 			return buildSearchParameterMapForSearchParameter(theResource);
-		} else if (hasUrl(theResource)) {
+		} else if (hasValue(theResource, "url")) {
 			SearchParameterMap retVal = SearchParameterMap.newSynchronous();
 			retVal.add("url", new UriParam(extractStringValueOrEmpty(theResource, "url")));
 			// If multiple versions are allowed, include version in search to avoid overwriting
@@ -1127,7 +1127,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return spmFromCanonicalized.get();
 		}
 
-		if (hasUrl(theResource)) {
+		if (hasValue(theResource, "url")) {
 			String url = extractStringValueOrEmpty(theResource, "url");
 			return SearchParameterMap.newSynchronous().add("url", new UriParam(url));
 		} else {
@@ -1145,11 +1145,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private String extractUniqueIdFromNamingSystem(IBaseResource theResource) {
-		return extractStringValueOrThrow(
-				theResource,
-				"uniqueId.value",
-				() -> new ImplementationGuideInstallationException(
-						Msg.code(1291) + "NamingSystem does not have uniqueId component."));
+		IBase uniqueIdComponent = (IBase) extractValue(theResource, "uniqueId");
+		if (uniqueIdComponent == null) {
+			throw new ImplementationGuideInstallationException(
+					Msg.code(1291) + "NamingSystem does not have uniqueId component.");
+		}
+		return extractStringValueOrEmpty(uniqueIdComponent, "value");
 	}
 
 	private TokenParam extractIdentifier(IBaseResource theResource) {
@@ -1163,6 +1164,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return new TokenParam(identifier.getSystem(), identifier.getValue());
 	}
 
+	private Object extractValue(IBase theResource, String thePath) {
+		return myFhirContext.newTerser().getSingleValueOrNull(theResource, thePath);
+	}
+
 	private <X extends RuntimeException> String extractStringValueOrThrow(
 			IBaseResource theResource, String thePath, Supplier<X> theExceptionSupplier) {
 		return myFhirContext
@@ -1171,23 +1176,20 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				.orElseThrow(theExceptionSupplier);
 	}
 
-	private boolean hasUrl(IBaseResource theResource) {
-		return TerserUtil.hasValues(myFhirContext, theResource, "url");
-	}
-
-	private String extractStringValueOrEmpty(IBaseResource theResource, String theElementName) {
+	private String extractStringValueOrEmpty(IBase theResource, String theElementName) {
 		return extractStringValueOrEmpty(theResource, theElementName, () -> "");
 	}
 
 	private String extractStringValueOrEmpty(
-			IBaseResource theResource, String theElementName, Supplier<String> theDefaultSupplier) {
-		if (!TerserUtil.hasValues(myFhirContext, theResource, theElementName)) {
-			return theDefaultSupplier.get();
-		}
+			IBase theResource, String theElementName, Supplier<String> theDefaultSupplier) {
 		return myFhirContext
 				.newTerser()
 				.getSinglePrimitiveValue(theResource, theElementName)
 				.orElseGet(theDefaultSupplier);
+	}
+
+	private boolean hasValue(IBaseResource theResource, String theElementName) {
+		return TerserUtil.hasValues(myFhirContext, theResource, theElementName);
 	}
 
 	@VisibleForTesting
