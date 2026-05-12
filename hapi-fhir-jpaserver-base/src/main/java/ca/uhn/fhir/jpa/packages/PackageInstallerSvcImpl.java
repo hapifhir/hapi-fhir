@@ -739,9 +739,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			IFhirResourceDao theDao,
 			IBaseResource theResource,
 			@Nonnull PackageInstallationSpec thePackageInstallationSpec) {
-		PackageInstallationSpec.VersionPolicyEnum versionPolicy = thePackageInstallationSpec.getVersionPolicy();
 
-		if (allowMultipleVersionsForResource(theResource, versionPolicy)) {
+		if (allowMultipleVersionsForResource(theResource, thePackageInstallationSpec)) {
 			// Use a server-assigned ID to prevent FHIR ID conflicts for multiple versions of
 			// Conformance/Canonical resources (e.g. StructureDefinition.version),
 			// which is helpful for validation against versioned profiles.
@@ -828,12 +827,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private boolean allowMultipleVersionsForResource(
-			IBaseResource theResource, PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) {
+			IBaseResource theResource, PackageInstallationSpec thePackageInstallationSpec) {
 		// For Search parameters don't allow multi version
 		if (isSearchParameter(theResource)) {
 			return false;
 		}
-		return theVersionPolicy == PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION;
+		return thePackageInstallationSpec.getVersionPolicy() == PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION;
 	}
 
 	private void setPackageMetaSource(IBaseResource theResource, PackageInstallationSpec thePackageInstallationSpec) {
@@ -1091,8 +1090,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			SearchParameterMap retVal = SearchParameterMap.newSynchronous();
 			retVal.add("url", new UriParam(extractStringValueOrEmpty(theResource, "url")));
 			// If multiple versions are allowed, include version in search to avoid overwriting
-			PackageInstallationSpec.VersionPolicyEnum versionPolicy = theSpec.getVersionPolicy();
-			if (allowMultipleVersionsForResource(theResource, versionPolicy)) {
+			if (allowMultipleVersionsForResource(theResource, theSpec)) {
 				String version = extractStringValueOrEmpty(theResource, "version");
 				if (!version.isEmpty()) {
 					retVal.add("version", new TokenParam(version));
