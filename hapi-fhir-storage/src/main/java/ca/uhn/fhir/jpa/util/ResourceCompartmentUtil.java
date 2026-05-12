@@ -46,6 +46,12 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ResourceCompartmentUtil {
 
+	/** Name of the {@code patient} search parameter used in patient compartment definitions. */
+	public static final String PATIENT_COMPARTMENT_SP_PATIENT = "patient";
+
+	/** Name of the {@code subject} search parameter used in patient compartment definitions. */
+	public static final String PATIENT_COMPARTMENT_SP_SUBJECT = "subject";
+
 	/**
 	 * Extract, if exists, the patient compartment identity of the received resource.
 	 * It must be invoked in patient compartment mode.
