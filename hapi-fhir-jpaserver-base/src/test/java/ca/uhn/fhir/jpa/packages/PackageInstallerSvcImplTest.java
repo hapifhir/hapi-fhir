@@ -735,7 +735,7 @@ public class PackageInstallerSvcImplTest {
 			arguments(ptWithIdentifier, "identifier", "?identifier=urn%3Asys%7Cpt-id"),
 			arguments(deviceWithUrl, "url", "?url=http%3A//10.0.0.1/fhir"),
 			arguments(deviceWithBlankUrl, "identifier", "?identifier=urn%3Asys%7Cdevice-blank-url"),
-			arguments(subscription, "_id", "?_id=sub-123")
+			arguments(subscription, "_id", "?_id=Subscription/sub-123")
 		);
 	}
 
