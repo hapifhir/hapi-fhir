@@ -303,8 +303,8 @@
 			<artifactId>spring-websocket</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>jakarta.el</artifactId>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-el</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

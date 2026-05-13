@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
@@ -51,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
+public class PackageInstallerSvcCreateR4Test extends BaseJpaR4Test {
 	public static final String VERSION_1 = "abc";
 	public static final String COPYRIGHT_1 = "first";
 	public static final String VERSION_2 = "def";
@@ -79,6 +80,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	@AfterEach
 	void resetStorageSettings() {
 		myStorageSettings.setValidateResourceStatusForPackageUpload(new JpaStorageSettings().isValidateResourceStatusForPackageUpload());
+		myPartitionSettings.setPartitioningEnabled(false);
 	}
 
 	@Test
@@ -614,10 +616,301 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 			.hasMessageContaining("Unable to locate package non.existent.package#9.9.9");
 	}
 
+	// Created by Claude Opus 4.6
+	@Test
+	void installPackage_structureDefinitionWithoutSnapshot_generatesAndPersistsSnapshot() throws IOException {
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://example.com/sd-no-snapshot");
+		sd.setName("TestProfileNoSnapshot");
+		sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
+		sd.setAbstract(false);
+		sd.setType("Patient");
+		sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Patient");
+		sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+
+		PackageInstallOutcomeJson outcome = installViaPackage(sd);
+
+		assertThat(outcome.getResourcesInstalled()).containsEntry("StructureDefinition", 1);
+
+		IBundleProvider results = myStructureDefinitionDao.search(
+			SearchParameterMap.newSynchronous().add("url", new UriParam("http://example.com/sd-no-snapshot")),
+			REQUEST_DETAILS);
+		assertThat(results.getAllResources()).hasSize(1);
+		StructureDefinition persisted = (StructureDefinition) results.getAllResources().get(0);
+		assertThat(persisted.hasSnapshot()).as("Snapshot should have been generated").isTrue();
+		assertThat(persisted.getSnapshot().getElement()).isNotEmpty();
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void installPackage_structureDefinitionWithSnapshot_preservesExistingSnapshot() throws IOException {
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://example.com/sd-with-snapshot");
+		sd.setName("TestProfileWithSnapshot");
+		sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
+		sd.setAbstract(false);
+		sd.setType("Patient");
+		sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Patient");
+		sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		StructureDefinition.StructureDefinitionSnapshotComponent snapshot =
+			new StructureDefinition.StructureDefinitionSnapshotComponent();
+		snapshot.addElement().setPath("Patient").setMin(0).setMax("*");
+		sd.setSnapshot(snapshot);
+
+		PackageInstallOutcomeJson outcome = installViaPackage(sd);
+
+		assertThat(outcome.getResourcesInstalled()).containsEntry("StructureDefinition", 1);
+
+		IBundleProvider results = myStructureDefinitionDao.search(
+			SearchParameterMap.newSynchronous().add("url", new UriParam("http://example.com/sd-with-snapshot")),
+			REQUEST_DETAILS);
+		assertThat(results.getAllResources()).hasSize(1);
+		StructureDefinition persisted = (StructureDefinition) results.getAllResources().get(0);
+		assertThat(persisted.hasSnapshot()).isTrue();
+		assertThat(persisted.getSnapshot().getElement()).hasSize(1);
+		assertThat(persisted.getSnapshot().getElement().get(0).getPath()).isEqualTo("Patient");
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void installPackage_logicalStructureDefinition_doesNotGenerateSnapshot() throws IOException {
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://example.com/sd-logical");
+		sd.setName("TestLogicalModel");
+		sd.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sd.setKind(StructureDefinition.StructureDefinitionKind.LOGICAL);
+		sd.setAbstract(false);
+		sd.setType("http://example.com/sd-logical");
+		sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Element");
+		sd.setDerivation(StructureDefinition.TypeDerivationRule.SPECIALIZATION);
+
+		PackageInstallOutcomeJson outcome = installViaPackage(sd);
+
+		assertThat(outcome.getResourcesInstalled()).containsEntry("StructureDefinition", 1);
+
+		IBundleProvider results = myStructureDefinitionDao.search(
+			SearchParameterMap.newSynchronous().add("url", new UriParam("http://example.com/sd-logical")),
+			REQUEST_DETAILS);
+		assertThat(results.getAllResources()).hasSize(1);
+		StructureDefinition persisted = (StructureDefinition) results.getAllResources().get(0);
+		assertThat(persisted.hasSnapshot()).as("Logical model should not get a generated snapshot").isFalse();
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void installPackage_mixedResources_countsOnlyInstalledResources() throws IOException {
+		// Seed an existing CodeSystem with content=not-present in the database
+		CodeSystem existingCs = new CodeSystem();
+		existingCs.setUrl("http://example.com/cs-not-present");
+		existingCs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		existingCs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myCodeSystemDao.create(existingCs, REQUEST_DETAILS);
+
+		// Build a new (installable) CodeSystem
+		CodeSystem newCs = new CodeSystem();
+		newCs.setUrl("http://example.com/cs-new");
+		newCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		newCs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		// Build a CodeSystem that matches the not-present one — should be skipped
+		CodeSystem skippedCs = new CodeSystem();
+		skippedCs.setUrl("http://example.com/cs-not-present");
+		skippedCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		skippedCs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		// Build a package with both CodeSystems
+		NpmPackage pkg = createPackageWithResources(
+			new ResourceEntry("CodeSystem-new.json", newCs, "CodeSystem"),
+			new ResourceEntry("CodeSystem-skipped.json", skippedCs, "CodeSystem"));
+
+		PackageInstallationSpec spec = createInstallationSpec(packageToBytes(pkg));
+		PackageInstallOutcomeJson outcome = mySvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void install_dryRun_newResource_reportsAddedResource() throws IOException {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://example.com/cs-dryrun-new");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		PackageInstallationSpec spec = createInstallationSpec(packageToBytes());
+		spec.setDryRun(true);
+		PackageInstallOutcomeJson outcome = new PackageInstallOutcomeJson();
+
+		mySvc.install(cs, spec, outcome);
+
+		assertThat(outcome.getResourcesInstalled()).isEmpty();
+		assertThat(outcome.getAddedResourceTypeToUniqueIdentifier()).containsKey("CodeSystem");
+		assertThat(outcome.getAddedResourceTypeToUniqueIdentifier().get("CodeSystem"))
+			.containsExactly("http://example.com/cs-dryrun-new");
+
+		// Verify nothing was actually persisted
+		IBundleProvider results = myCodeSystemDao.search(
+			SearchParameterMap.newSynchronous().add("url", new UriParam("http://example.com/cs-dryrun-new")),
+			REQUEST_DETAILS);
+		assertThat(results.getAllResources()).isEmpty();
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void install_dryRun_existingResource_reportsReplacedResource() throws IOException {
+		// Seed an existing CodeSystem
+		CodeSystem existing = new CodeSystem();
+		existing.setUrl("http://example.com/cs-dryrun-existing");
+		existing.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		existing.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myCodeSystemDao.create(existing, REQUEST_DETAILS);
+
+		// Install a newer version via dry-run
+		CodeSystem updated = new CodeSystem();
+		updated.setUrl("http://example.com/cs-dryrun-existing");
+		updated.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		updated.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		PackageInstallationSpec spec = createInstallationSpec(packageToBytes());
+		spec.setDryRun(true);
+		spec.setReloadExisting(true);
+		PackageInstallOutcomeJson outcome = new PackageInstallOutcomeJson();
+
+		mySvc.install(updated, spec, outcome);
+
+		assertThat(outcome.getResourcesInstalled()).isEmpty();
+		assertThat(outcome.getReplacedResourceToUniqueIdentifier()).containsKey("CodeSystem");
+		assertThat(outcome.getReplacedResourceToUniqueIdentifier().get("CodeSystem"))
+			.containsExactly("http://example.com/cs-dryrun-existing");
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void install_existingResourceWithReloadExistingDisabled_skipsUpdate() throws IOException {
+		// Seed an existing CodeSystem
+		CodeSystem existing = new CodeSystem();
+		existing.setUrl("http://example.com/cs-reload-disabled");
+		existing.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		existing.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myCodeSystemDao.create(existing, REQUEST_DETAILS);
+
+		// Install the same URL with reloadExisting=false
+		CodeSystem updated = new CodeSystem();
+		updated.setUrl("http://example.com/cs-reload-disabled");
+		updated.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		updated.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		updated.setCopyright("should not appear");
+
+		PackageInstallationSpec spec = createInstallationSpec(packageToBytes());
+		spec.setReloadExisting(false);
+		PackageInstallOutcomeJson outcome = new PackageInstallOutcomeJson();
+
+		mySvc.install(updated, spec, outcome);
+
+		assertThat(outcome.getResourcesInstalled()).isEmpty();
+
+		// Verify original resource is unchanged
+		IBundleProvider results = myCodeSystemDao.search(
+			SearchParameterMap.newSynchronous().add("url", new UriParam("http://example.com/cs-reload-disabled")),
+			REQUEST_DETAILS);
+		assertThat(results.getAllResources()).hasSize(1);
+		CodeSystem persisted = (CodeSystem) results.getAllResources().get(0);
+		assertThat(persisted.getCopyright()).isNullOrEmpty();
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void install_contentNotPresentCodeSystem_skipsUpdateByDefault() throws IOException {
+		// Seed a CodeSystem with content=not-present
+		CodeSystem existing = new CodeSystem();
+		existing.setUrl("http://example.com/cs-not-present-skip");
+		existing.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		existing.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myCodeSystemDao.create(existing, REQUEST_DETAILS);
+
+		// Install a complete CodeSystem with the same URL
+		CodeSystem complete = new CodeSystem();
+		complete.setUrl("http://example.com/cs-not-present-skip");
+		complete.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		complete.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		complete.addConcept().setCode("A00").setDisplay("Cholera");
+
+		PackageInstallationSpec spec = createInstallationSpec(packageToBytes());
+		PackageInstallOutcomeJson outcome = new PackageInstallOutcomeJson();
+
+		mySvc.install(complete, spec, outcome);
+
+		assertThat(outcome.getResourcesInstalled()).isEmpty();
+
+		// Verify the not-present CodeSystem is still not-present
+		IBundleProvider results = myCodeSystemDao.search(
+			SearchParameterMap.newSynchronous().add("url", new UriParam("http://example.com/cs-not-present-skip")),
+			REQUEST_DETAILS);
+		assertThat(results.getAllResources()).hasSize(1);
+		CodeSystem persisted = (CodeSystem) results.getAllResources().get(0);
+		assertThat(persisted.getContent()).isEqualTo(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void installPackage_withPartitioningEnabled_usesDefaultPartition() throws IOException {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setDefaultPartitionId(0);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://example.com/cs-partitioned");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		PackageInstallOutcomeJson outcome = installViaPackage(cs);
+
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
+
+		IBundleProvider results = myCodeSystemDao.search(
+			SearchParameterMap.newSynchronous().add("url", new UriParam("http://example.com/cs-partitioned")),
+			REQUEST_DETAILS);
+		assertThat(results.getAllResources()).hasSize(1);
+	}
+
+	private PackageInstallOutcomeJson installViaPackage(IBaseResource theResource) throws IOException {
+		String resourceType = theResource.getClass().getSimpleName();
+		NpmPackage pkg = createPackageWithResources(
+			new ResourceEntry(resourceType + ".json", theResource, resourceType));
+
+		PackageInstallationSpec spec = createInstallationSpec(packageToBytes(pkg));
+		return mySvc.install(spec);
+	}
+
+	private record ResourceEntry(String fileName, IBaseResource resource, String resourceType) {}
+
+	private NpmPackage createPackageWithResources(ResourceEntry... theEntries) {
+		PackageGenerator manifestGenerator = new PackageGenerator();
+		manifestGenerator.name(PACKAGE_ID_1);
+		manifestGenerator.version(PACKAGE_VERSION);
+		manifestGenerator.description("a package");
+		manifestGenerator.fhirVersions(List.of(FhirVersionEnum.R4.getFhirVersionString()));
+
+		NpmPackage pkg = NpmPackage.empty(manifestGenerator);
+		for (ResourceEntry entry : theEntries) {
+			String json = ourCtx.newJsonParser().encodeResourceToString(entry.resource());
+			pkg.addFile("package", entry.fileName(), json.getBytes(StandardCharsets.UTF_8), entry.resourceType());
+		}
+		return pkg;
+	}
+
+	@Nonnull
+	private static byte[] packageToBytes(NpmPackage thePackage) throws IOException {
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		thePackage.save(stream);
+		return stream.toByteArray();
+	}
+
 	@Nonnull
 	private static NpmPackage createPackage() {
 		PackageGenerator manifestGenerator = new PackageGenerator();
-		manifestGenerator.name(PackageInstallerSvcImplCreateTest.PACKAGE_ID_1);
+		manifestGenerator.name(PackageInstallerSvcCreateR4Test.PACKAGE_ID_1);
 		manifestGenerator.version(PACKAGE_VERSION);
 		manifestGenerator.description("a package");
 		manifestGenerator.fhirVersions(List.of(FhirVersionEnum.R4.getFhirVersionString()));
@@ -643,7 +936,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	@Nonnull
 	private static byte[] packageToBytes() throws IOException {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		PackageInstallerSvcImplCreateTest.PACKAGE.save(stream);
+		PackageInstallerSvcCreateR4Test.PACKAGE.save(stream);
 		return stream.toByteArray();
 	}
 }
