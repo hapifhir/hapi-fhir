@@ -23,9 +23,9 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.Logs;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 
 import java.sql.SQLException;
@@ -37,7 +37,7 @@ import java.util.Set;
 
 public class ModifyColumnTask extends BaseTableColumnTypeTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ModifyColumnTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 
 	public ModifyColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
