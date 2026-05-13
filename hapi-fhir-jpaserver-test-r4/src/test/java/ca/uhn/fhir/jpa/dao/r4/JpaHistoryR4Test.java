@@ -281,7 +281,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testInstanceHistory_CacheInvalidatedAfterUpdate() {
+	void testInstanceHistory_AfterUpdate_CacheInvalidated() {
 		IIdType pid = createPatient();
 
 		// Prime the cache: total=1, single entry [v1]
@@ -301,7 +301,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTypeHistory_CacheInvalidatedAfterUpdate() {
+	void testTypeHistory_AfterUpdate_CacheInvalidated() {
 		IIdType pid = createPatient();
 
 		// Prime the type-level cache
@@ -320,7 +320,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSystemHistory_CacheInvalidatedAfterAnyWrite() {
+	void testSystemHistory_AfterAnyWrite_CacheInvalidated() {
 		createPatient();
 
 		// Prime the system-level cache (total=1)
@@ -341,7 +341,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testInstanceHistory_CacheInvalidatedAfterDelete() {
+	void testInstanceHistory_AfterDelete_CacheInvalidated() {
 		IIdType pid = createPatient();
 
 		// Prime the cache (total=1)
