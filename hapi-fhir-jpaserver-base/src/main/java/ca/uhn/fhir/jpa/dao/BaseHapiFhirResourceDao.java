@@ -3208,6 +3208,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
+	@VisibleForTesting
+	public void setMemoryCacheService(MemoryCacheService theMemoryCacheService) {
+		myMemoryCacheService = theMemoryCacheService;
+	}
+
 	@Override
 	protected void postPersist(ResourceTable theEntity, T theResource, RequestDetails theRequestDetails) {
 		super.postPersist(theEntity, theResource, theRequestDetails);
