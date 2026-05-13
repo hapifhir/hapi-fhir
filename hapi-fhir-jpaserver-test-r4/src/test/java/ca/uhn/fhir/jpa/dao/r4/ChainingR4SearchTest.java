@@ -129,10 +129,52 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myDiagnosticReportDao.search(map, newSrd());
 
+		myCaptureQueriesListener.logSelectQueries();
+
 		// Verify - Only DR1 is returned
 		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder("DiagnosticReport/DR1");
 
 		// Verify - 2 HFJ_RES_LINK joins are used, one for each performer type (Practitioner vs Organization)
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(2);
+	}
+
+	@Test
+	// Created by claude-opus-4-7
+	void testMultipleChainsOnMultiValuedGeneralPractitionerReference_UseSeparateJoins() {
+		// Setup: patA has two generalPractitioners — prac1 (Smith/male) and prac2 (Jones/female).
+		// The two chained filters are satisfied by DIFFERENT practitioners:
+		//   family=Smith  → prac1    (HFJ_SPIDX_STRING)
+		//   gender=female → prac2    (HFJ_SPIDX_TOKEN)
+		// Since Patient.generalPractitioner is 0..*, each filter needs its own HFJ_RES_LINK join
+		// so that they bind independently — no single practitioner satisfies both.
+		createPractitioner(withId("Prac1"), withFamily("Smith"), withGender("male"));
+		createPractitioner(withId("Prac2"), withFamily("Jones"), withGender("female"));
+
+		// patA: both practitioners → satisfies family=Smith (via Prac1) AND gender=female (via Prac2)
+		createPatient(withId("PatA"),
+			withReference("generalPractitioner", "Practitioner/Prac1"),
+			withReference("generalPractitioner", "Practitioner/Prac2"));
+
+		// patB: only Prac1 → satisfies family=Smith but NOT gender=female → should NOT match
+		createPatient(withId("PatB"),
+			withReference("generalPractitioner", "Practitioner/Prac1"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Patient.SP_GENERAL_PRACTITIONER, new ReferenceParam("family", "Smith"));
+		map.add(Patient.SP_GENERAL_PRACTITIONER, new ReferenceParam("gender", "female"));
+
+		// Execute
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(map, newSrd());
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Only patA is returned — each filter satisfied independently by a different practitioner
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder("Patient/PatA");
+
+		// 2 HFJ_RES_LINK joins required: multi-valued reference cannot collapse to a single join
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		String querySql = selectQueries.get(0).getSql(false, false);
 		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(2);
