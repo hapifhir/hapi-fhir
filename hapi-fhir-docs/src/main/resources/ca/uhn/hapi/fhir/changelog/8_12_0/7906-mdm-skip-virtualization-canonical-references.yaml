@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 7906
+description: "Previously, with MDM read virtualization enabled, canonical references (absolute URLs or values 
+with |version suffix) in reference-type search parameters were incorrectly resolved as FHIR resource IDs, 
+leading to failed searches and log errors. This issue has been resolved by ensuring that canonical references 
+are properly identified and skipped during the virtualization process, allowing searches to function correctly 
+without errors."
+
+

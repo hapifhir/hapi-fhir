@@ -34,6 +34,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -373,6 +374,45 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 			obsId.getValue()
 		);
 
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"http://", "https://", "urn:"})
+	public void testSearch_ObservationWithUrlReference_SkipMDMExpand(String paramPrefix) {
+		// Setup
+		createTestPatients(true);
+		createObservation(withSubject(mySourcePatientA0Id), withObservationCode("http://foo", "code0"));
+		registerVirtualizationInterceptor();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.SEARCH_TYPE);
+
+		// Execute
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add(Observation.SP_SUBJECT, new ReferenceParam(paramPrefix + "test.org/Patient/xyz|1.0"));
+		IBundleProvider outcome = myObservationDao.search(params, mySrd);
+
+		// Verify - The URL is not the value of any indexed subject reference, so search complete with empty result
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids).asList().isEmpty();
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"http://", "https://", "urn:"})
+	void testSearch_ObservationWithUrlReferenceAndInclude_SkipMDMExpand(String paramPrefix) {
+		// Setup
+		createTestPatients(true);
+		createObservation(withSubject(mySourcePatientA0Id), withObservationCode("http://foo", "code0"));
+		registerVirtualizationInterceptor();
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.SEARCH_TYPE);
+
+		// Execute
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add(Observation.SP_SUBJECT, new ReferenceParam(paramPrefix + "test.org/Patient/xyz|1.0"));
+		params.addInclude(Observation.INCLUDE_PATIENT);
+		IBundleProvider outcome = myObservationDao.search(params, mySrd);
+
+		// Verify - The URL is not the value of any indexed subject reference, so search completes with empty result
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(ids).asList().isEmpty();
 	}
 
 	private static Observation getObservation(Map<String, IBaseResource> resources, IIdType observationReferencingGoldenPatientAId) {

@@ -32,10 +32,12 @@ import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.param.BaseParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -47,6 +49,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * <b>This class is experimental and subject to change. Use with caution.</b>
@@ -77,21 +81,11 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	private static final String CURRENTLY_PROCESSING_FLAG =
 			MdmReadVirtualizationInterceptor.class.getName() + "_CURRENTLY_PROCESSING";
 
-	private static final MdmSearchExpansionSvc.IParamTester PARAM_TESTER_NO_RES_ID = (paramName, param) -> {
-		boolean hasChain = false;
-		if (param instanceof ReferenceParam) {
-			hasChain = ((ReferenceParam) param).hasChain();
-		}
-		return !hasChain && !IAnyResource.SP_RES_ID.equals(paramName);
-	};
+	private static final MdmSearchExpansionSvc.IParamTester PARAM_TESTER_NO_RES_ID =
+			(paramName, param) -> isReferenceParamExpandable(param) && !IAnyResource.SP_RES_ID.equals(paramName);
 
-	private static final MdmSearchExpansionSvc.IParamTester PARAM_TESTER_ALL = (paramName, param) -> {
-		boolean hasChain = false;
-		if (param instanceof ReferenceParam) {
-			hasChain = ((ReferenceParam) param).hasChain();
-		}
-		return !hasChain;
-	};
+	private static final MdmSearchExpansionSvc.IParamTester PARAM_TESTER_ALL =
+			(paramName, param) -> isReferenceParamExpandable(param);
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -226,5 +220,27 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 			theRequestDetails.getUserData().remove(CURRENTLY_PROCESSING_FLAG);
 		}
 		return originalResource;
+	}
+
+	private static boolean isReferenceParamExpandable(BaseParam theParam) {
+		if (theParam instanceof ReferenceParam refParam) {
+			if (refParam.hasChain()) {
+				return false;
+			}
+			return !isNonLocalReferenceValue(refParam.getValue());
+		}
+		return true;
+	}
+
+	/**
+	 * Returns {@literal true} if the given reference value is not a local FHIR
+	 * resource id — i.e. it is an absolute URL (literal or canonical, optionally
+	 * suffixed with {@literal |version}) or a URN.
+	 */
+	private static boolean isNonLocalReferenceValue(@Nonnull String theValue) {
+		if (isBlank(theValue)) {
+			return false;
+		}
+		return theValue.startsWith("http://") || theValue.startsWith("https://") || theValue.startsWith("urn:");
 	}
 }
