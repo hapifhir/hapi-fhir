@@ -29,10 +29,12 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
@@ -47,7 +49,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.TokenCompressedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
@@ -393,9 +394,8 @@ public class SearchQueryBuilder {
 	public BaseTokenPredicateBuilder addNewTokenPredicateBuilder(
 			@Nullable DbColumn[] theSourceJoinColumn, RuntimeSearchParam theSearchParam) {
 		if (myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
-			TokenCompressedPredicateBuilder.Mode mode = TokenCompressedPredicateBuilder.Mode.resolve(
-					theSearchParam, theSearchParam.getName(), myStorageSettings);
-			TokenCompressedPredicateBuilder retVal = mySqlBuilderFactory.compressedTokenIndexTable(this, mode);
+			TokenIndexMode indexMode = TokenIndexMode.resolve(theSearchParam.getName(), myStorageSettings);
+			CompressedTokenPredicateBuilder retVal = mySqlBuilderFactory.compressedTokenIndexTable(this, indexMode);
 			addTable(retVal, theSourceJoinColumn);
 			return retVal;
 		} else {

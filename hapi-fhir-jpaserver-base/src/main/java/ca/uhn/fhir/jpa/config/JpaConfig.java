@@ -140,8 +140,10 @@ import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
 import ca.uhn.fhir.jpa.search.SearchUrlJobMaintenanceSvcImpl;
 import ca.uhn.fhir.jpa.search.SynchronousSearchSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
@@ -156,7 +158,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.TokenCompressedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
@@ -852,9 +853,9 @@ public class JpaConfig {
 
 	@Bean
 	@Scope("prototype")
-	public TokenCompressedPredicateBuilder newTokenCompressedPredicateBuilder(
-			SearchQueryBuilder theSearchBuilder, TokenCompressedPredicateBuilder.Mode theMode) {
-		return new TokenCompressedPredicateBuilder(theSearchBuilder, theMode);
+	public CompressedTokenPredicateBuilder newTokenCompressedPredicateBuilder(
+			SearchQueryBuilder theSearchBuilder, TokenIndexMode theTokenIndexMode) {
+		return new CompressedTokenPredicateBuilder(theSearchBuilder, theTokenIndexMode);
 	}
 
 	@Bean

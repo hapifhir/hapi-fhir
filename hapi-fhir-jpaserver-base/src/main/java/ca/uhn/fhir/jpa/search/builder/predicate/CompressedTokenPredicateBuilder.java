@@ -19,12 +19,11 @@
  */
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
+import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
@@ -37,80 +36,25 @@ import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 /**
- * Predicate builder for the compressed token index tables introduced in HAPI-FHIR 8.8:
+ * Predicate builder for the compressed token index tables:
  * <ul>
  *   <li>{@code HFJ_SPIDX2_TOKEN_COMMON_RES} + {@code HFJ_SPIDX2_TOKEN_COMMON} (Mode.COMMON)</li>
  *   <li>{@code HFJ_SPIDX2_TOKEN_IDENTIFIER} (Mode.IDENTIFIER)</li>
  * </ul>
  *
- * <p>The {@code :missing=} predicate uses a {@code NOT EXISTS} subquery rather than
- * {@code SP_MISSING}, which the compressed tables do not have. This requires
- * {@link ca.uhn.fhir.jpa.api.config.JpaStorageSettings.IndexEnabledEnum#DISABLED}.
- *
  * @see ca.uhn.fhir.jpa.model.entity.TokenIndexStrategyEnum
  */
-public class TokenCompressedPredicateBuilder extends BaseTokenPredicateBuilder {
+public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(TokenCompressedPredicateBuilder.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(CompressedTokenPredicateBuilder.class);
 
-	/**
-	 * Controls which compressed table pair this builder queries.
-	 * Selected at construction time because the primary table name must be provided to {@code super()}.
-	 */
-	public enum Mode {
-		/**
-		 * Query {@code HFJ_SPIDX2_TOKEN_COMMON_RES} (primary, has RES_ID) with subqueries
-		 * into {@code HFJ_SPIDX2_TOKEN_COMMON} for HASH_VALUE / HASH_IDENTITY lookups.
-		 */
-		COMMON,
-		/**
-		 * Query {@code HFJ_SPIDX2_TOKEN_IDENTIFIER} directly (has RES_ID, HASH_IDENTITY, HASH_VALUE).
-		 *
-		 * <p>Note: system discrimination is not yet implemented for this mode; system+value searches
-		 * match on value only until {@code IResourceIdentifierCacheSvc#getResourceIdentifierSystemId}
-		 * is available for read-path use.
-		 */
-		IDENTIFIER;
-
-		private static final String EXTENSION_URL = "http://smilecdr.com/extension/token-index-table";
-
-		/**
-		 * Resolves which compressed token table to use for a given search parameter.
-		 * Checks the search param extension first, then the JpaStorageSettings config list.
-		 */
-		public static Mode resolve(
-				RuntimeSearchParam theSearchParam, String theParamName, JpaStorageSettings theStorageSettings) {
-			List<IBaseExtension<?, ?>> ext = theSearchParam.getExtensions(EXTENSION_URL);
-			if (!ext.isEmpty()) {
-				Object value = ext.get(0).getValue();
-				if (value instanceof IPrimitiveType) {
-					String strVal = ((IPrimitiveType<?>) value).getValueAsString();
-					try {
-						return Mode.valueOf(strVal);
-					} catch (IllegalArgumentException e) {
-						ourLog.warn(
-								"Unrecognised token-index-table extension value '{}' for param '{}'; defaulting to COMMON",
-								strVal,
-								theParamName);
-					}
-				}
-			}
-			if (theStorageSettings.getIdentifierTokenSearchParams().contains(theParamName)) {
-				return IDENTIFIER;
-			}
-			return COMMON;
-		}
-	}
-
-	private final Mode myMode;
+	private final TokenIndexMode myIndexMode;
 	private final DbColumn myColumnResId;
 
 	// COMMON mode: primary table is HFJ_SPIDX2_TOKEN_COMMON_RES
@@ -120,15 +64,12 @@ public class TokenCompressedPredicateBuilder extends BaseTokenPredicateBuilder {
 	private DbColumn myColumnIdentifierHashIdentity;
 	private DbColumn myColumnIdentifierHashValue;
 
-	public TokenCompressedPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, Mode theMode) {
-		super(
-				theSearchSqlBuilder,
-				theSearchSqlBuilder.addTable(
-						theMode == Mode.IDENTIFIER ? "HFJ_SPIDX2_TOKEN_IDENTIFIER" : "HFJ_SPIDX2_TOKEN_COMMON_RES"));
-		myMode = theMode;
+	public CompressedTokenPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, TokenIndexMode theMode) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable(theMode.getTableName()));
+		myIndexMode = theMode;
 		myColumnResId = getTable().addColumn("RES_ID");
 
-		if (myMode == Mode.COMMON) {
+		if (myIndexMode == TokenIndexMode.COMMON) {
 			myColumnCommonHashSysAndValue = getTable().addColumn("HASH_SYS_AND_VALUE");
 		} else {
 			myColumnIdentifierHashIdentity = getTable().addColumn("HASH_IDENTITY");
@@ -169,11 +110,6 @@ public class TokenCompressedPredicateBuilder extends BaseTokenPredicateBuilder {
 
 	/**
 	 * Implements {@code :missing=} via {@code NOT EXISTS} subquery.
-	 * Requires {@code IndexMissingFields = DISABLED} — compressed tables have no {@code SP_MISSING} column.
-	 *
-	 * <p>IDENTIFIER mode: single-table subquery on {@code HASH_IDENTITY}.
-	 * COMMON mode: two-table subquery joining {@code TOKEN_COMMON_RES} and {@code TOKEN_COMMON}
-	 * on {@code HASH_SYS_AND_VALUE} to reach {@code HASH_IDENTITY}.
 	 */
 	@Override
 	public Condition createPredicateParamMissingValue(MissingQueryParameterPredicateParams theParams) {
@@ -191,7 +127,7 @@ public class TokenCompressedPredicateBuilder extends BaseTokenPredicateBuilder {
 				myColumnResId, theParams.getResourceTablePredicateBuilder().getResourceIdColumn());
 
 		Condition hashIdentityCondition;
-		if (myMode == Mode.IDENTIFIER) {
+		if (myIndexMode == TokenIndexMode.IDENTIFIER) {
 			hashIdentityCondition =
 					BinaryCondition.equalTo(myColumnIdentifierHashIdentity, generatePlaceholder(hashIdentity));
 			subquery.addCondition(ComboCondition.and(resIdCondition, hashIdentityCondition));
@@ -215,8 +151,8 @@ public class TokenCompressedPredicateBuilder extends BaseTokenPredicateBuilder {
 	}
 
 	/**
-	 * Compressed tables have no {@code SP_MISSING} column. This path requires
-	 * {@code IndexMissingFields = DISABLED} — use {@link #createPredicateParamMissingValue} instead.
+	 * Not supported — compressed tables have no {@code SP_MISSING} column.
+	 * QueryStack routes to {@link #createPredicateParamMissingValue} instead.
 	 */
 	@Override
 	public Condition createPredicateParamMissingForNonReference(
@@ -230,7 +166,7 @@ public class TokenCompressedPredicateBuilder extends BaseTokenPredicateBuilder {
 			String theSearchParamName,
 			FhirVersionIndependentConcept theToken,
 			boolean theWantEquals) {
-		if (myMode == Mode.COMMON) {
+		if (myIndexMode == TokenIndexMode.COMMON) {
 			return buildCommonCondition(theResourceType, theSearchParamName, theToken, theWantEquals);
 		}
 		return buildIdentifierCondition(theResourceType, theSearchParamName, theToken, theWantEquals);
@@ -306,7 +242,7 @@ public class TokenCompressedPredicateBuilder extends BaseTokenPredicateBuilder {
 		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
 				getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);
 
-		if (myMode == Mode.IDENTIFIER) {
+		if (myIndexMode == TokenIndexMode.IDENTIFIER) {
 			return BinaryCondition.equalTo(myColumnIdentifierHashIdentity, generatePlaceholder(hashIdentity));
 		}
 		// COMMON mode: HASH_IDENTITY lives in TOKEN_COMMON, not TOKEN_COMMON_RES

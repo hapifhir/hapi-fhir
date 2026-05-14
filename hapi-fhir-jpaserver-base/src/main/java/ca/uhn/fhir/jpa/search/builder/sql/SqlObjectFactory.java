@@ -20,8 +20,10 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
@@ -36,7 +38,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.TokenCompressedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
@@ -118,9 +119,10 @@ public class SqlObjectFactory {
 		return myApplicationContext.getBean(TokenPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
-	public TokenCompressedPredicateBuilder compressedTokenIndexTable(
-			SearchQueryBuilder theSearchSqlBuilder, TokenCompressedPredicateBuilder.Mode theMode) {
-		return myApplicationContext.getBean(TokenCompressedPredicateBuilder.class, theSearchSqlBuilder, theMode);
+	public CompressedTokenPredicateBuilder compressedTokenIndexTable(
+			SearchQueryBuilder theSearchSqlBuilder, TokenIndexMode thetokenIndexMode) {
+		return myApplicationContext.getBean(
+				CompressedTokenPredicateBuilder.class, theSearchSqlBuilder, thetokenIndexMode);
 	}
 
 	public UriPredicateBuilder uriIndexTable(SearchQueryBuilder theSearchSqlBuilder) {

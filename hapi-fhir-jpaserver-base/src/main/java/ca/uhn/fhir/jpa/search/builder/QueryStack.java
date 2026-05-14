@@ -37,12 +37,14 @@ import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParam
 import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderCacheKey;
 import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderCacheLookupResult;
 import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderTypeEnum;
+import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseQuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ICanMakeMissingParamPredicate;
@@ -757,6 +759,10 @@ public class QueryStack {
 				supplier = () -> sqlBuilder.addDatePredicateBuilder(theParams.getSourceJoinColumn());
 				break;
 			case TOKEN:
+				if (myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
+					// Compressed tables don't have SP_MISSING column - use NOT EXISTS approach
+					return createMissingPredicateForCompressedToken(theParams, sqlBuilder);
+				}
 				predicateType = PredicateBuilderTypeEnum.TOKEN;
 				supplier = () -> sqlBuilder.addTokenPredicateBuilder(theParams.getSourceJoinColumn());
 				break;
@@ -824,6 +830,23 @@ public class QueryStack {
 		ICanMakeMissingParamPredicate innerQuery = PredicateBuilderFactory.createPredicateBuilderForParamType(
 				theParams.getParamType(), theParams.getSqlBuilder(), this);
 		return innerQuery.createPredicateParamMissingValue(new MissingQueryParameterPredicateParams(
+				table, theParams.isMissing(), theParams.getParamName(), theParams.getRequestPartitionId()));
+	}
+
+	/**
+	 * Creates :missing predicate for compressed token tables.
+	 * Resolves the correct table (IDENTIFIER vs COMMON) based on param name.
+	 */
+	private Condition createMissingPredicateForCompressedToken(
+			MissingParameterQueryParams theParams, SearchQueryBuilder sqlBuilder) {
+		ResourceTablePredicateBuilder table = sqlBuilder.getOrCreateResourceTablePredicateBuilder();
+
+		TokenIndexMode tokenIndexMode = TokenIndexMode.resolve(theParams.getParamName(), myStorageSettings);
+
+		CompressedTokenPredicateBuilder tokenBuilder =
+				sqlBuilder.getSqlBuilderFactory().compressedTokenIndexTable(sqlBuilder, tokenIndexMode);
+
+		return tokenBuilder.createPredicateParamMissingValue(new MissingQueryParameterPredicateParams(
 				table, theParams.isMissing(), theParams.getParamName(), theParams.getRequestPartitionId()));
 	}
 

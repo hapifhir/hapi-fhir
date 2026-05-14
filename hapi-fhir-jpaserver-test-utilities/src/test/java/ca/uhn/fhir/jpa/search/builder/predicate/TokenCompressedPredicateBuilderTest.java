@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
-import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -62,8 +62,8 @@ class TokenCompressedPredicateBuilderTest {
 	void commonMode_constructorSelectsTokenCommonResTable() {
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(myPrimaryTable);
 
-		TokenCompressedPredicateBuilder builder =
-				new TokenCompressedPredicateBuilder(mySearchQueryBuilder, TokenCompressedPredicateBuilder.Mode.COMMON);
+		CompressedTokenPredicateBuilder builder =
+				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.COMMON);
 
 		assertThat(builder.getResourceIdColumn()).isNotNull();
 		assertThat(builder.getResourceIdColumn().getColumnNameSQL()).isEqualTo("RES_ID");
@@ -73,8 +73,8 @@ class TokenCompressedPredicateBuilderTest {
 	void identifierMode_constructorSelectsTokenIdentifierTable() {
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(myPrimaryTable);
 
-		TokenCompressedPredicateBuilder builder =
-				new TokenCompressedPredicateBuilder(mySearchQueryBuilder, TokenCompressedPredicateBuilder.Mode.IDENTIFIER);
+		CompressedTokenPredicateBuilder builder =
+				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
 
 		assertThat(builder.getResourceIdColumn()).isNotNull();
 		assertThat(builder.getResourceIdColumn().getColumnNameSQL()).isEqualTo("RES_ID");
@@ -84,8 +84,8 @@ class TokenCompressedPredicateBuilderTest {
 	void commonMode_systemAndValue_producesDirectHashSysAndValuePredicate() {
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(myPrimaryTable);
 
-		TokenCompressedPredicateBuilder builder =
-				new TokenCompressedPredicateBuilder(mySearchQueryBuilder, TokenCompressedPredicateBuilder.Mode.COMMON);
+		CompressedTokenPredicateBuilder builder =
+				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.COMMON);
 
 		RuntimeSearchParam searchParam = new RuntimeSearchParam(
 				null, null, "Patient", null, null, null, null, null, null, null);
@@ -108,8 +108,8 @@ class TokenCompressedPredicateBuilderTest {
 				.thenReturn(myPrimaryTable)
 				.thenReturn(myCommonTable);
 
-		TokenCompressedPredicateBuilder builder =
-				new TokenCompressedPredicateBuilder(mySearchQueryBuilder, TokenCompressedPredicateBuilder.Mode.COMMON);
+		CompressedTokenPredicateBuilder builder =
+				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.COMMON);
 
 		RuntimeSearchParam searchParam = new RuntimeSearchParam(
 				null, null, "Patient", null, null, null, null, null, null, null);
@@ -128,8 +128,8 @@ class TokenCompressedPredicateBuilderTest {
 	void identifierMode_valueOnly_producesHashIdentityAndHashValuePredicate() {
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(myPrimaryTable);
 
-		TokenCompressedPredicateBuilder builder =
-				new TokenCompressedPredicateBuilder(mySearchQueryBuilder, TokenCompressedPredicateBuilder.Mode.IDENTIFIER);
+		CompressedTokenPredicateBuilder builder =
+				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
 
 		RuntimeSearchParam searchParam = new RuntimeSearchParam(
 				null, null, "Patient", null, null, null, null, null, null, null);
@@ -149,8 +149,8 @@ class TokenCompressedPredicateBuilderTest {
 	void identifierMode_missingParam_producesNotExistsSubquery() {
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(myPrimaryTable);
 
-		TokenCompressedPredicateBuilder builder =
-				new TokenCompressedPredicateBuilder(mySearchQueryBuilder, TokenCompressedPredicateBuilder.Mode.IDENTIFIER);
+		CompressedTokenPredicateBuilder builder =
+				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
 
 		MissingQueryParameterPredicateParams params = new MissingQueryParameterPredicateParams(
 				myResourceTablePredicateBuilder, true, "identifier", RequestPartitionId.defaultPartition());
@@ -171,8 +171,8 @@ class TokenCompressedPredicateBuilderTest {
 				.thenReturn(myPrimaryTable)
 				.thenReturn(myCommonTable);
 
-		TokenCompressedPredicateBuilder builder =
-				new TokenCompressedPredicateBuilder(mySearchQueryBuilder, TokenCompressedPredicateBuilder.Mode.COMMON);
+		CompressedTokenPredicateBuilder builder =
+				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.COMMON);
 
 		MissingQueryParameterPredicateParams params = new MissingQueryParameterPredicateParams(
 				myResourceTablePredicateBuilder, true, "status", RequestPartitionId.defaultPartition());

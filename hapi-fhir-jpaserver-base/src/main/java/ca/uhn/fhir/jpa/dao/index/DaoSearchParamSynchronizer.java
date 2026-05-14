@@ -270,6 +270,11 @@ public class DaoSearchParamSynchronizer {
 		List<ResourceIndexedSearchParamTokenIdentifier> newIdentifierEntities = new ArrayList<>();
 
 		for (ResourceIndexedSearchParamToken token : theParams.myTokenParams) {
+			// Compressed tables have no SP_MISSING column - skip tokens that represent
+			// missing values. The :missing modifier is handled via NOT EXISTS subquery.
+			if (token.isMissing()) {
+				continue;
+			}
 			// Idempotent setup — the legacy synchronize() path performs the same assignments, but
 			// under WRITE_NEW_QUERY_NEW it is skipped, so we must (re)populate these fields here.
 			// Order matters: setPartitionId can clearHashes, so calculateHashes runs last.
