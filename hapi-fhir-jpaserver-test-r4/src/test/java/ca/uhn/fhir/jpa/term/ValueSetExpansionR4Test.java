@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -120,7 +121,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 	@Test
 	public void testValueSetUrlSP() {
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("ValueSet", "url", null);
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("ValueSet", "url", ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 		assertEquals("url", sp.getName());
 	}
 
@@ -1276,13 +1277,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	@Test
 	public void testStoreTermCodeSystemAndNestedChildren() {
 		IIdType codeSystemId = createCodeSystem();
-		CodeSystem codeSystemResource = myCodeSystemDao.read(codeSystemId);
+		CodeSystem codeSystemResource = myCodeSystemDao.read(codeSystemId, newSrd());
 		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				ResourceTable resourceTable = (ResourceTable) myCodeSystemDao.readEntity(codeSystemResource.getIdElement(), null);
+				ResourceTable resourceTable = (ResourceTable) myCodeSystemDao.readEntity(codeSystemResource.getIdElement().toVersionless(), null);
 				JpaPid codeSystemResourcePid = resourceTable.getId();
 				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemResourcePid);
 				assertEquals(CS_URL, codeSystem.getCodeSystemUri());
@@ -1292,7 +1293,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 				assertEquals(9, codeSystemVersion.getConcepts().size());
 
 				List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
-				concepts.sort(Comparator.comparing(t->t.getCode()));
+				concepts.sort(Comparator.comparing(TermConcept::getCode));
 
 				int index = 0;
 
@@ -1380,10 +1381,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
-		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId, newSrd());
 		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
-		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, newSrd());
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		runInTransaction(() -> {

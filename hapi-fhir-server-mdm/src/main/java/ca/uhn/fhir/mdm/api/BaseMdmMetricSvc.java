@@ -87,19 +87,19 @@ public abstract class BaseMdmMetricSvc implements IMdmMetricSvc {
 		// find golden resources
 		map = MdmSearchParamBuildingUtils.buildBasicGoldenResourceSearchParameterMap(resourceType);
 		setCountOnly(map);
-		outcome = dao.search(map, new SystemRequestDetails());
+		outcome = dao.search(map, SystemRequestDetails.forRequestPartitionId(theParameters.getRequestPartitionId()));
 		metrics.setGoldenResourcesCount(outcome.size());
 
 		// find blocked resources
 		map = MdmSearchParamBuildingUtils.buildSearchParameterForBlockedResourceCount(resourceType);
 		setCountOnly(map);
-		outcome = dao.search(map, new SystemRequestDetails());
+		outcome = dao.search(map, SystemRequestDetails.forRequestPartitionId(theParameters.getRequestPartitionId()));
 		metrics.setExcludedResources(outcome.size());
 
 		// find all resources
 		map = new SearchParameterMap();
 		setCountOnly(map);
-		outcome = dao.search(map, new SystemRequestDetails());
+		outcome = dao.search(map, SystemRequestDetails.forRequestPartitionId(theParameters.getRequestPartitionId()));
 		metrics.setSourceResourcesCount(outcome.size() - metrics.getGoldenResourcesCount());
 
 		return metrics;

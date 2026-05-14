@@ -182,7 +182,7 @@ public class QueryStack {
 				theSqlBuilder,
 				theSearchParamRegistry,
 				thePartitionSettings,
-				EnumSet.of(PredicateBuilderTypeEnum.DATE));
+				EnumSet.of(PredicateBuilderTypeEnum.DATE, PredicateBuilderTypeEnum.REFERENCE));
 	}
 
 	/**
@@ -1493,10 +1493,22 @@ public class QueryStack {
 					theSourceJoinColumn,
 					theRequestPartitionId));
 		} else {
+			// Include all distinct resource types from the OR-group in cache key to  produce a unique key
+			String cacheParamName = theParamName;
+			String typeQualifier = theList.stream()
+					.filter(ReferenceParam.class::isInstance)
+					.map(p -> ((ReferenceParam) p).getResourceType())
+					.filter(StringUtils::isNotBlank)
+					.distinct()
+					.sorted()
+					.collect(Collectors.joining("|"));
+			if (isNotBlank(typeQualifier)) {
+				cacheParamName = theParamName + ":" + typeQualifier;
+			}
 			ResourceLinkPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(
 							PredicateBuilderTypeEnum.REFERENCE,
 							theSourceJoinColumn,
-							theParamName,
+							cacheParamName,
 							() -> theSqlBuilder.addReferencePredicateBuilder(this, theSourceJoinColumn))
 					.getResult();
 			return predicateBuilder.createPredicate(
@@ -2870,11 +2882,20 @@ public class QueryStack {
 		mySqlBuilder.addPredicate(predicate);
 	}
 
-	public void addPredicateCompositeNonUnique(List<String> theIndexStrings, RequestPartitionId theRequestPartitionId) {
+	public void addPredicateCompositeNonUnique(
+			List<String> theIndexStrings,
+			List<List<DateParam>> theDateParams,
+			RequestPartitionId theRequestPartitionId) {
 		ComboNonUniqueSearchParameterPredicateBuilder predicateBuilder =
 				mySqlBuilder.addComboNonUniquePredicateBuilder();
-		Condition predicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theIndexStrings);
-		mySqlBuilder.addPredicate(predicate);
+
+		Condition hashPredicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theIndexStrings);
+		mySqlBuilder.addPredicate(hashPredicate);
+
+		if (!theDateParams.isEmpty()) {
+			Condition datePredicate = predicateBuilder.createPredicateDateParams(theDateParams);
+			mySqlBuilder.addPredicate(datePredicate);
+		}
 	}
 
 	// expand out the pids

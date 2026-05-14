@@ -81,6 +81,8 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.sl.cache.Cache;
+import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -202,13 +204,26 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public static final int MAX_MASS_INDEXER_OBJECT_LOADING_THREADS = 6;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermReadSvcImpl.class);
 	private static final ValueSetExpansionOptions DEFAULT_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
-	private static final TermCodeSystemVersionDetails NO_CURRENT_VERSION = new TermCodeSystemVersionDetails(-1L, null);
 	private static final String OUR_PIPE_CHARACTER = "|";
 	private static final int SECONDS_IN_MINUTE = 60;
 	private static final int INDEXED_ROOTS_LOGGING_COUNT = 50_000;
-	private static final String CS_USERDATA_CURRENT_VERSION = TermReadSvcImpl.class.getName() + "_CS_CURRENT_VERSION";
-	private static final String VS_USERDATA_CURRENT_VERSION = TermReadSvcImpl.class.getName() + "_VS_CURRENT_VERSION";
 	private static Runnable myInvokeOnNextCallForUnitTest;
+
+	/**
+	 * Maps code system URL (or URL|version) to its current {@link TermCodeSystemVersionDetails}.
+	 * Used to resolve the active code system version when looking up or validating codes.
+	 */
+	private Cache<String, Optional<TermCodeSystemVersionDetails>> myCodeSystemVersionCache;
+
+	/**
+	 * Maps ValueSet canonical URL to its pre-expanded {@link TermValueSet} entity.
+	 * Used to serve ValueSet expansions and code validations from pre-calculated data.
+	 */
+	private Cache<String, Optional<TermValueSet>> myValueSetCache;
+
+	@Autowired
+	private JpaStorageSettings myJpaStorageSettings;
+
 	private static boolean ourForceDisableHibernateSearchForUnitTest;
 
 	@Autowired
@@ -298,7 +313,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		if (isBlank(theSystem)) {
 			return false;
 		}
-		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theValidationSupportContext, theSystem);
+		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
 		return cs != null;
 	}
 
@@ -483,6 +498,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	@Transactional
 	public void deleteValueSetAndChildren(ResourceTable theResourceTable) {
 		deleteValueSetForResource(theResourceTable);
+		invalidateValueSetCaches();
 	}
 
 	@Override
@@ -2062,7 +2078,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public String invalidatePreCalculatedExpansion(IIdType theValueSetId, RequestDetails theRequestDetails) {
 		IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").read(theValueSetId, theRequestDetails);
 		ValueSet canonicalValueSet = myVersionCanonicalizer.valueSetToCanonical(valueSet);
-		Optional<TermValueSet> optionalTermValueSet = fetchValueSetEntity(canonicalValueSet);
+		Optional<TermValueSet> optionalTermValueSet = getValueSetEntity(canonicalValueSet);
 		if (optionalTermValueSet.isEmpty()) {
 			return myContext
 					.getLocalizer()
@@ -2134,7 +2150,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	@Override
 	@Transactional(readOnly = true)
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
-		Optional<TermValueSet> optionalTermValueSet = fetchValueSetEntity(theValueSet);
+		Optional<TermValueSet> optionalTermValueSet = getValueSetEntity(theValueSet);
 
 		if (optionalTermValueSet.isEmpty()) {
 			ourLog.warn(
@@ -2157,18 +2173,25 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return true;
 	}
 
-	@SuppressWarnings({"OptionalAssignedToNull", "unchecked"})
-	private Optional<TermValueSet> fetchValueSetEntity(ValueSet theValueSet) {
-		Optional<TermValueSet> retVal = (Optional<TermValueSet>) theValueSet.getUserData(VS_USERDATA_CURRENT_VERSION);
-		if (retVal == null) {
-			synchronized (theValueSet) {
-				JpaPid valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
-				retVal = myTermValueSetDao.findByResourcePid(valueSetResourcePid);
-				theValueSet.setUserData(VS_USERDATA_CURRENT_VERSION, retVal);
-			}
+	private Optional<TermValueSet> getValueSetEntity(ValueSet theValueSet) {
+		String url = theValueSet.getUrl();
+		if (StringUtils.isBlank(url)) {
+			return Optional.empty();
 		}
+		String version = theValueSet.getVersion();
+		String cacheKey = isNotBlank(version) ? url + "|" + version : url;
+		if (myValueSetCache == null) {
+			return fetchValueSetEntity(cacheKey);
+		}
+		return myValueSetCache.get(cacheKey, this::fetchValueSetEntity);
+	}
 
-		return retVal;
+	private Optional<TermValueSet> fetchValueSetEntity(String theCacheKey) {
+		String version = getVersionFromIdentifier(theCacheKey);
+		if (version != null) {
+			return myTermValueSetDao.findTermValueSetByUrlAndVersion(getUrlFromIdentifier(theCacheKey), version);
+		}
+		return myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theCacheKey);
 	}
 
 	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
@@ -2220,7 +2243,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			return null;
 		}
 
-		TermValueSet valueSetEntity = fetchValueSetEntity(theValueSet).orElseThrow(IllegalStateException::new);
+		TermValueSet valueSetEntity = getValueSetEntity(theValueSet).orElseThrow(IllegalStateException::new);
 		String timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
 		String preExpansionMessage = myContext
 				.getLocalizer()
@@ -2269,6 +2292,14 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					.getLocalizer()
 					.getMessage(TermReadSvcImpl.class, "unknownCodeInSystem", theSystem, theCode);
 			append = " - " + unknownCodeMessage + ". " + preExpansionMessage;
+		}
+
+		if (isNotBlank(theSystem)
+				&& isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theSystem)) {
+			// The included CodeSystem is content=not-present with no local concepts, so fall
+			// through to the next validator in the chain rather than short-circuiting with a
+			// non-null "not found".
+			return null;
 		}
 
 		return createCodeNotFoundErrorForValidationResult(theSystem, theCode, null, append);
@@ -2341,8 +2372,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		 */
 		HapiTransactionService.requireTransaction();
 
-		TermCodeSystemVersionDetails csv =
-				getCurrentCodeSystemVersion(new ValidationSupportContext(provideValidationSupport()), theCodeSystem);
+		TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystem);
 		if (csv == null) {
 			return Optional.empty();
 		}
@@ -2353,8 +2383,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public List<TermConcept> findCodes(String theCodeSystem, List<String> theCodeList) {
 		HapiTransactionService.requireTransaction();
 
-		TermCodeSystemVersionDetails csv =
-				getCurrentCodeSystemVersion(new ValidationSupportContext(provideValidationSupport()), theCodeSystem);
+		TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystem);
 		if (csv == null) {
 			return Collections.emptyList();
 		}
@@ -2363,36 +2392,19 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Nullable
-	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(
-			ValidationSupportContext theValidationSupportContext, String theCodeSystemIdentifier) {
-		String version = getVersionFromIdentifier(theCodeSystemIdentifier);
-
-		// Fetch the CodeSystem from ValidationSupport, which should return a cached copy. We
-		// keep a copy of the current version entity in userData in that cached copy
-		// to avoid repeated lookups
-		TermCodeSystemVersionDetails retVal;
-		IBaseResource codeSystem =
-				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemIdentifier);
-		if (codeSystem != null) {
-
-			synchronized (codeSystem) {
-				retVal = (TermCodeSystemVersionDetails) codeSystem.getUserData(CS_USERDATA_CURRENT_VERSION);
-				if (retVal == null) {
-					retVal = getCurrentCodeSystemVersion(theCodeSystemIdentifier, version);
-					codeSystem.setUserData(CS_USERDATA_CURRENT_VERSION, retVal);
-				}
-			}
-		} else {
-			retVal = getCurrentCodeSystemVersion(theCodeSystemIdentifier, version);
+	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
+		if (myCodeSystemVersionCache == null) {
+			return fetchCurrentCodeSystemVersion(theCodeSystemIdentifier);
 		}
-
-		return retVal;
+		return myCodeSystemVersionCache
+				.get(theCodeSystemIdentifier, key -> Optional.ofNullable(fetchCurrentCodeSystemVersion(key)))
+				.orElse(null);
 	}
 
 	@Nullable
-	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(String theCodeSystemIdentifier, String version) {
-		TermCodeSystemVersionDetails retVal;
-		retVal = myTxTemplate.execute(tx -> {
+	private TermCodeSystemVersionDetails fetchCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
+		String version = getVersionFromIdentifier(theCodeSystemIdentifier);
+		return myTxTemplate.execute(tx -> {
 			TermCodeSystemVersion csv = null;
 			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(getUrlFromIdentifier(theCodeSystemIdentifier));
 			if (cs != null) {
@@ -2408,7 +2420,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				return null;
 			}
 		});
-		return retVal;
 	}
 
 	private String getVersionFromIdentifier(String theUri) {
@@ -2512,6 +2523,17 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		RuleBasedTransactionAttribute rules = new RuleBasedTransactionAttribute();
 		rules.getRollbackRules().add(new NoRollbackRuleAttribute(ExpansionTooCostlyException.class));
 		myTxTemplate = new TransactionTemplate(myTransactionManager, rules);
+
+		long cacheTimeoutMs =
+				TimeUnit.MINUTES.toMillis(myJpaStorageSettings.getTerminologyLookupCacheExpireAfterWriteInMinutes());
+		long cacheSize = myJpaStorageSettings.getTerminologyLookupCacheMaximumSize();
+		if (cacheTimeoutMs <= 0 || cacheSize <= 0) {
+			myCodeSystemVersionCache = null;
+			myValueSetCache = null;
+		} else {
+			myCodeSystemVersionCache = CacheFactory.build(cacheTimeoutMs, cacheSize);
+			myValueSetCache = CacheFactory.build(cacheTimeoutMs, cacheSize);
+		}
 	}
 
 	@Override
@@ -2611,26 +2633,33 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		provideValidationSupport().invalidateCaches();
 	}
 
-	@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
 	@Override
 	public void invalidateCaches() {
-		/*
-		 * Clear out anything left in the userdata caches. We do this mostly because it messes
-		 * up unit tests to have these things stick around between test runs, since many of
-		 * these resources come from DefaultProfileValidationSupport and therefore live beyond
-		 * any single test execution.
-		 */
-		for (IBaseResource next : provideValidationSupport().fetchAllConformanceResources()) {
-			if (next != null) {
-				synchronized (next) {
-					if (next.getUserData(CS_USERDATA_CURRENT_VERSION) != null) {
-						next.setUserData(CS_USERDATA_CURRENT_VERSION, null);
-					}
-					if (next.getUserData(VS_USERDATA_CURRENT_VERSION) != null) {
-						next.setUserData(VS_USERDATA_CURRENT_VERSION, null);
-					}
-				}
-			}
+		invalidateCodeSystemCaches();
+		invalidateValueSetCaches();
+	}
+
+	@Override
+	public void invalidateCodeSystemCaches() {
+		if (myCodeSystemVersionCache != null) {
+			myCodeSystemVersionCache.invalidateAll();
+		}
+	}
+
+	@Override
+	public void invalidateValueSetCaches() {
+		if (myValueSetCache != null) {
+			myValueSetCache.invalidateAll();
+		}
+	}
+
+	@Override
+	public void updateCodeSystemVersionCache(String theCodeSystemUrl, TermCodeSystemVersion theVersion) {
+		if (myCodeSystemVersionCache != null) {
+			myCodeSystemVersionCache.put(
+					theCodeSystemUrl,
+					Optional.of(new TermCodeSystemVersionDetails(
+							theVersion.getPid(), theVersion.getCodeSystemVersionId())));
 		}
 	}
 
@@ -2747,6 +2776,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 			throw new UnprocessableEntityException(Msg.code(902) + msg);
 		}
+		invalidateValueSetCaches();
 	}
 
 	private Optional<TermValueSet> getTermValueSet(String version, String url) {
@@ -2815,8 +2845,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	@Override
 	public IValidationSupport.LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		return txTemplate.execute(t -> {
+		return myTxTemplate.execute(t -> {
 			final String theSystem = theLookupCodeRequest.getSystem();
 			final String theCode = theLookupCodeRequest.getCode();
 			Optional<TermConcept> codeOpt = findCode(theSystem, theCode);
@@ -2890,6 +2919,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				return result;
 
 			} else {
+				if (isNotBlank(theSystem)
+						&& isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theSystem)) {
+					// Fall through to the next validator in the chain (e.g. UCUM, remote
+					// terminology) rather than short-circuiting with a non-null "not found" result.
+					return null;
+				}
 				return new LookupCodeResult().setFound(false);
 			}
 		});
@@ -2973,9 +3008,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		txTemplate.setReadOnly(true);
 		Optional<FhirVersionIndependentConcept> codeOpt =
 				txTemplate.execute(tx -> findCode(theCodeSystemUrl, theCode).map(c -> {
-					String codeSystemVersionId = getCurrentCodeSystemVersion(
-									theValidationSupportContext, theCodeSystemUrl)
-							.myCodeSystemVersionId;
+					TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystemUrl);
+					String codeSystemVersionId = csv != null ? csv.myCodeSystemVersionId : null;
 					return new FhirVersionIndependentConcept(
 							theCodeSystemUrl, c.getCode(), c.getDisplay(), codeSystemVersionId);
 				}));
@@ -2999,8 +3033,67 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 		}
 
+		if (isNotBlank(theCodeSystemUrl)
+				&& Boolean.TRUE.equals(txTemplate.execute(tx ->
+						isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theCodeSystemUrl)))) {
+			return null;
+		}
+
 		return createCodeNotFoundErrorForValidationResult(
 				theCodeSystemUrl, theCode, null, createMessageAppendForCodeNotFoundInCodeSystem(theCodeSystemUrl));
+	}
+
+	/**
+	 * Returns <code>true</code> when the CodeSystem identified by the given URL is a purely
+	 * algorithmic (content=not-present) code system with <b>no</b> local {@link TermCodeSystem}
+	 * row — i.e. the local term DB does not back this CodeSystem at all. In that case callers
+	 * should fall through to the next validator in the chain (e.g. UCUM, remote terminology)
+	 * rather than returning "not found" on a miss.
+	 * <p>
+	 * Returns <code>false</code> when either:
+	 * <ul>
+	 *     <li>The CodeSystem does not declare <code>content=not-present</code>, or</li>
+	 *     <li>A {@link TermCodeSystem} row exists for this URL. In that case the local DB is
+	 *         authoritative even if its concept count is zero — e.g. LOINC loaded via
+	 *         {@code TermLoaderSvcImpl.loadLoinc(...)}, codes populated via
+	 *         <code>$apply-codesystem-delta-add</code>, or an empty container created up-front
+	 *         as a delta-add target. Missing codes in these cases must surface as
+	 *         "code not found".</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * The helper operates on the R4 canonical form produced by {@link VersionCanonicalizer#codeSystemToCanonical(IBaseResource)}.
+	 * If the CodeSystem cannot be located or cannot be canonicalized, it returns <code>false</code>
+	 * so the caller preserves the existing "code not found" behavior.
+	 * </p>
+	 */
+	boolean isCodeSystemNotPresentAndHasNoLocalContent(
+			@Nonnull ValidationSupportContext theValidationSupportContext, String theCodeSystemUrl) {
+		IBaseResource codeSystem =
+				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemUrl);
+		if (codeSystem == null) {
+			return false;
+		}
+		CodeSystem canonical = myVersionCanonicalizer.codeSystemToCanonical(codeSystem);
+		if (canonical == null) {
+			return false;
+		}
+		if (canonical.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+			return false;
+		}
+		return !hasLocalTermCodeSystem(theCodeSystemUrl);
+	}
+
+	/**
+	 * Checks whether a {@link TermCodeSystem} row exists in the local term DB for the given URL.
+	 * An existing row — even one whose current version has zero concepts — means the local DB is
+	 * the authoritative source for this CodeSystem (e.g. delta-add target, loader-populated).
+	 */
+	private boolean hasLocalTermCodeSystem(String theCodeSystemUrl) {
+		if (myCodeSystemDao == null) {
+			return false;
+		}
+		return myCodeSystemDao.findByCodeSystemUri(theCodeSystemUrl) != null;
 	}
 
 	IValidationSupport.CodeValidationResult validateCodeInValueSet(

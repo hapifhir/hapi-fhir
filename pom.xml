@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.9.10-SNAPSHOT</version>
+	<version>8.11.3-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -308,10 +308,6 @@
 		<developer>
 			<id>adam-carbone</id>
 			<name>Adam Carbone</name>
-		</developer>
-		<developer>
-			<id>joelsch</id>
-			<name>Joel Schneider</name>
 		</developer>
 		<developer>
 			<id>euvitudo</id>
@@ -996,6 +992,22 @@
 			<id>mjga-trifork</id>
 			<name>Michael Jensen Garde</name>
 		</developer>
+		<developer>
+			<id>Rene2000k</id>
+		</developer>
+		<developer>
+			<id>nathanloyer</id>
+			<name>Nathan Loyer</name>
+			<organization>Athena Health</organization>
+		</developer>
+		<developer>
+			<id>tisoft</id>
+			<name>Markus Heberling</name>
+		</developer>
+		<developer>
+			<id>joel-bach</id>
+			<name>Joel Bach</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -1006,7 +1018,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.8.2</fhir_core_version>
+		<fhir_core_version>6.9.4</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<spotless.exclude.pattern>**/test/**/*.java</spotless.exclude.pattern>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -1563,7 +1575,7 @@
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
-				<version>12.4.3.jre11</version>
+				<version>13.4.0.jre11</version>
 			</dependency>
 			<dependency>
 				<!--

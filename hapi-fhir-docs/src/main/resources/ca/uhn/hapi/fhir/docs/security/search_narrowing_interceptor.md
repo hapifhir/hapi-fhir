@@ -43,7 +43,7 @@ The following example shows how to enable conditional URL narrowing on the inter
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|narrowingConditional}}
 ```
 
-<a name="constraining-by-valueset-membership"/>
+<a id="constraining-by-valueset-membership"></a>
 
 # Constraining by ValueSet Membership
 
@@ -61,7 +61,7 @@ Important note: ValueSet Membership rules are only applied in cases where the Va
 ```
 
 
-<a name="resultset-narrowing"/>
+<a id="resultset-narrowing"></a>
 
 # ResultSet Narrowing
 

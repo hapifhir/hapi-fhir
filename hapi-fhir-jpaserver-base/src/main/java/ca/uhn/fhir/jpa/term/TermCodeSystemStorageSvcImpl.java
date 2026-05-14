@@ -185,6 +185,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			addConceptInHierarchy(csv, parentCodes, nextRootConcept, retVal, codeToConcept, 0);
 		}
 
+		myTerminologySvc.invalidateCodeSystemCaches();
+
 		return retVal;
 	}
 
@@ -226,6 +228,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		for (TermConcept code : allFoundTermConcepts) {
 			deleteEverythingRelatedToConcept(code, removeCounter);
 		}
+
+		myTerminologySvc.invalidateCodeSystemCaches();
 
 		return new UploadStatistics(removeCounter.get(), target);
 	}
@@ -314,7 +318,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 									theCodeSystem.getUrl(),
 									theCodeSystem.getUrl(),
 									theCodeSystem.getVersion(),
-									theResourceEntity);
+									theResourceEntity,
+									true);
 							return;
 						}
 					}
@@ -420,7 +425,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
 		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(
-				theSystemUri, theSystemName, theCodeSystemVersionId, theCodeSystemResourceTable);
+				theSystemUri, theSystemName, theCodeSystemVersionId, theCodeSystemResourceTable, false);
 
 		List<TermCodeSystemVersion> existing =
 				myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourceTable.getResourceId());
@@ -451,9 +456,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				 * multiple CodeSystem resources with CodeSystem.version set differently (as opposed to
 				 * multiple versions of the same CodeSystem, where CodeSystem.meta.versionId is different)
 				 */
-				next.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
-				myCodeSystemVersionDao.saveAndFlush(next);
-				myDeferredStorageSvc.deleteCodeSystemVersion(next);
+				markCodeSystemVersionForDeletion(next);
 			}
 		}
 
@@ -526,6 +529,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ourLog.debug("Done saving concepts, flushing to database");
 		if (!myDeferredStorageSvc.isStorageQueueEmpty(true)) {
 			ourLog.info("Note that some concept saving has been deferred");
+		}
+
+		if (isMakeVersionCurrent) {
+			myTerminologySvc.updateCodeSystemVersionCache(theSystemUri, codeSystemToStore);
 		}
 	}
 
@@ -739,7 +746,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			String theSystemUri,
 			String theSystemName,
 			String theSystemVersionId,
-			ResourceTable theCodeSystemResourceTable) {
+			ResourceTable theCodeSystemResourceTable,
+			boolean theAllowPlaceholderRepoint) {
 		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
 		if (codeSystem == null) {
 			codeSystem = myCodeSystemDao.findByResourcePid((theCodeSystemResourceTable.getId()));
@@ -748,7 +756,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			}
 		} else {
 			checkForCodeSystemVersionDuplicate(
-					codeSystem, theSystemUri, theSystemVersionId, theCodeSystemResourceTable);
+					codeSystem,
+					theSystemUri,
+					theSystemVersionId,
+					theCodeSystemResourceTable,
+					theAllowPlaceholderRepoint);
 		}
 
 		codeSystem.setResource(theCodeSystemResourceTable);
@@ -762,7 +774,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			TermCodeSystem theCodeSystem,
 			String theSystemUri,
 			String theSystemVersionId,
-			ResourceTable theCodeSystemResourceTable) {
+			ResourceTable theCodeSystemResourceTable,
+			boolean theAllowPlaceholderRepoint) {
 		TermCodeSystemVersion codeSystemVersionEntity;
 		String msg = null;
 		if (theSystemVersionId == null) {
@@ -800,12 +813,59 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 										.getValue());
 			}
 		}
-		// Throw exception if the TermCodeSystemVersion is being duplicated.
-		if (codeSystemVersionEntity != null) {
-			if (!ObjectUtil.equals(codeSystemVersionEntity.getResource().getId(), theCodeSystemResourceTable.getId())) {
-				throw new UnprocessableEntityException(Msg.code(848) + msg);
-			}
+		// Future: re-keying TermCodeSystemVersion on (resource-pid, version) instead of
+		// (codesystem-pid, version) would remove the whole conflict-release helper, at the
+		// cost of a schema migration and a wide findByCodeSystemPid* refactor.
+		if (codeSystemVersionEntity != null
+				&& !tryReleaseConflictingVersionRow(
+						codeSystemVersionEntity, theCodeSystemResourceTable, theAllowPlaceholderRepoint)) {
+			throw new UnprocessableEntityException(Msg.code(848) + msg);
 		}
+	}
+
+	// Created by Claude Opus 4.7
+	/**
+	 * Try to release a {@code (codesystem-pid, version)} slot owned by a different resource.
+	 * Repoint a 0-concept NOTPRESENT placeholder; otherwise mark the orphan deleted if the
+	 * caller is updating an existing resource (so a create-create duplicate still throws).
+	 *
+	 * @return {@code true} if the slot is available; {@code false} for a genuine duplicate.
+	 */
+	private boolean tryReleaseConflictingVersionRow(
+			TermCodeSystemVersion theExistingRow,
+			ResourceTable theCurrentResource,
+			boolean theAllowPlaceholderRepoint) {
+		if (ObjectUtil.equals(theExistingRow.getResource().getId(), theCurrentResource.getId())) {
+			return true;
+		}
+
+		boolean isPlaceholder =
+				theAllowPlaceholderRepoint && myConceptDao.countByCodeSystemVersion(theExistingRow.getPid()) == 0;
+		boolean isUpdate = isUpdateOfExistingResource(theCurrentResource);
+
+		if (!isPlaceholder && !isUpdate) {
+			return false;
+		}
+
+		if (isPlaceholder) {
+			theExistingRow.setResource(theCurrentResource);
+			myCodeSystemVersionDao.save(theExistingRow);
+		} else {
+			markCodeSystemVersionForDeletion(theExistingRow);
+		}
+		return true;
+	}
+
+	/** {@code meta.versionId} is incremented by {@code super.updateEntity} before we run, so create=1, update&ge;2. */
+	private boolean isUpdateOfExistingResource(ResourceTable theResource) {
+		return theResource.getVersion() > 1L;
+	}
+
+	/** Renames the version row out of its unique slot and queues it for deletion. */
+	private void markCodeSystemVersionForDeletion(TermCodeSystemVersion theVersion) {
+		theVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
+		myCodeSystemVersionDao.saveAndFlush(theVersion);
+		myDeferredStorageSvc.deleteCodeSystemVersion(theVersion);
 	}
 
 	private void populateCodeSystemVersionProperties(
