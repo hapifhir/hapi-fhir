@@ -58,6 +58,9 @@ public class DependencyManager {
 	public static final String FIELD_URL = "url";
 	public static final String FIELD_VALUE = "valueString";
 
+	// Shouldn't be necessary, but we want to be sure we don't hit an infinite loop
+	private static final int MAX_CONCURRENT_UPDATE_RETRIES = 10;
+
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
 	private final PartitionSettings myPartitionSettings;
@@ -81,7 +84,7 @@ public class DependencyManager {
 		IFhirResourceDao<T> basicDao = getBasicDao();
 
 		RequestDetails srd = createRequestDetails();
-		while (true) {
+		for (int attemptCount = 0; attemptCount < MAX_CONCURRENT_UPDATE_RETRIES; attemptCount++) {
 			try {
 				T resource = basicDao.read(idType, srd);
 
@@ -99,19 +102,26 @@ public class DependencyManager {
 				// A dependency job should never find that the resource hasn't been created yet
 				//   or has already been destroyed.
 				// However, if it does happen, we should carry on to install the dependency anyway.
-				ourLog.warn(
-						"Unable to determine whether the package dependency {}#{} has been processed.",
+				ourLog.error(
+						"Unable to determine whether the package dependency {}#{} has been processed. Expected to find Resource `{}`, but this resource does not exist.",
 						thePackageName,
 						thePackageVersion,
+						theId,
 						e);
 				return true;
 			} catch (ResourceVersionConflictException e) {
-				ourLog.info(
+				ourLog.debug(
 						"Concurrent update detected while checking package dependency {}#{}.",
 						thePackageName,
 						thePackageVersion);
 			}
 		}
+
+		// If we somehow lose the concurrent update race 10 times, carry on to install the dependency anyway.
+		// This is really unlikely, and probably indicates that there is a bug somewhere, possibly a cache
+		// serving up stale versions of the resource.
+		ourLog.error("Unable to update Resource {} after {} attempts.", theId, MAX_CONCURRENT_UPDATE_RETRIES);
+		return true;
 	}
 
 	public void deleteDependencyResource(String theId) {
@@ -159,20 +169,32 @@ public class DependencyManager {
 			return false;
 		}
 
-		boolean match = true;
-		for (IBase subExtension : subExtensions) {
-			IPrimitiveType<String> subUrl =
-					(IPrimitiveType<String>) TerserUtil.getFirstFieldByFhirPath(myFhirContext, FIELD_URL, subExtension);
-			IPrimitiveType<String> subValue = (IPrimitiveType<String>)
-					TerserUtil.getFirstFieldByFhirPath(myFhirContext, FIELD_VALUE, subExtension);
-			match &= (subUrl != null && subValue != null)
-					&& ((Strings.CS.equals(subUrl.getValue(), SUBEXTENSION_NAME_URL)
-									&& Strings.CS.equals(subValue.getValue(), thePackageName))
-							|| (Strings.CS.equals(subUrl.getValue(), SUBEXTENSION_VERSION_URL)
-									&& Strings.CS.equals(subValue.getValue(), thePackageVersion)));
-		}
+		return subExtensions.stream().allMatch(t -> isSubExtensionMatch(t, thePackageName, thePackageVersion));
+	}
 
-		return match;
+	/**
+	 * We expect the extension to have two sub-extensions, representing the name and version of a package. We compare
+	 * each sub-extension to the expected package name and version to determine whether it contributes to a partial
+	 * match. The value of a sub-extension bearing the name url will be compared to the expected name, and the value
+	 * of a sub-extension bearing the version url will be compared to the exprected version. If a sub-extension is
+	 * missing either the url or value field, or if a url is encountered that represents neither name nor version,
+	 * the extension is considered to be corrupted, and not a match.
+	 * @param theSubExtension   the extension element being evaluated
+	 * @param thePackageName    the expected package name
+	 * @param thePackageVersion the expected package version
+	 * @return true if the sub-extension is a valid partial match for the expected values
+	 */
+	@SuppressWarnings("unchecked")
+	private boolean isSubExtensionMatch(IBase theSubExtension, String thePackageName, String thePackageVersion) {
+		IPrimitiveType<String> subUrl =
+				(IPrimitiveType<String>) TerserUtil.getFirstFieldByFhirPath(myFhirContext, FIELD_URL, theSubExtension);
+		IPrimitiveType<String> subValue = (IPrimitiveType<String>)
+				TerserUtil.getFirstFieldByFhirPath(myFhirContext, FIELD_VALUE, theSubExtension);
+		return (subUrl != null && subValue != null)
+				&& ((Strings.CS.equals(subUrl.getValue(), SUBEXTENSION_NAME_URL)
+								&& Strings.CS.equals(subValue.getValue(), thePackageName))
+						|| (Strings.CS.equals(subUrl.getValue(), SUBEXTENSION_VERSION_URL)
+								&& Strings.CS.equals(subValue.getValue(), thePackageVersion)));
 	}
 
 	private void addDependencyToResource(IBaseResource theResource, String thePackageName, String thePackageVersion) {

@@ -1982,6 +1982,14 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(lookupIgY.isFound()).isTrue();
 	}
 
+	/**
+	 * This test exercises the following dependency tree:
+	 *  +- test.package.a#1.0
+	 *  |-+- test.package.b#1.0
+	 *  | |--- test.package.c#1.0
+	 *  |--- test.package.c#1.0
+	 *  Each of the packages should only be processed once.
+	 */
 	@Test
 	public void testInstallR4Package_sharedDependencyWithAncestor_installsDependencyOnce() throws Exception {
 		// set up
@@ -2018,6 +2026,15 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.c/1.0")).isEqualTo(1);
 	}
 
+	/**
+	 * This test exercises the following dependency tree:
+	 *  +- test.package.a#1.0
+	 *  |-+- test.package.b#1.0
+	 *  | |--- test.package.d#1.0
+	 *  |-+- test.package.c#1.0
+	 *    |--- test.package.d#1.0
+	 *  Each of the packages should only be processed once.
+	 */
 	@Test
 	public void testInstallR4Package_sharedDependencyWithSibling_installsDependencyOnce() throws Exception {
 		// set up

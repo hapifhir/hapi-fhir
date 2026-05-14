@@ -407,6 +407,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		for (PackageUtils.DependentPackage nextPackage : dependentPackages) {
 			if (theDependencyRegister.containsDependency(nextPackage.name(), nextPackage.version())) {
+				ourLog.debug(
+						"Package {}#{} has already been installed. Skipping redundant processing.",
+						nextPackage.name(),
+						nextPackage.version());
 				continue;
 			}
 
