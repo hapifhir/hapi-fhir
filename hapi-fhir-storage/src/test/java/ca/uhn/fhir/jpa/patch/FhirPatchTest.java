@@ -47,10 +47,14 @@ public class FhirPatchTest implements ITestDataBuilder {
 	private final IParser myParser = myFhirContext.newJsonParser();
 	org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPatchTest.class);
 	private FhirPatch myPatch;
+	private FhirContext myR5FhirContext;
+	private FhirPatch myR5Patch;
 
 	@BeforeEach
 	public void before() {
 		myPatch = new FhirPatch(myFhirContext);
+		myR5FhirContext = FhirContext.forR5Cached();
+		myR5Patch = new FhirPatch(myR5FhirContext);
 	}
 
 	@Override
@@ -1010,8 +1014,6 @@ public class FhirPatchTest implements ITestDataBuilder {
 	 */
 	@Test
 	void testReplace_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException() {
-		FhirContext r5Context = FhirContext.forR5Cached();
-		FhirPatch r5Patch = new FhirPatch(r5Context);
 		Encounter encounter = buildR5EncounterWithLocation();
 
 		// "physicalType" is the R4 name — renamed to "form" in R5, so getChildByName() returns null
@@ -1059,11 +1061,13 @@ public class FhirPatchTest implements ITestDataBuilder {
 			}
 			""";
 		org.hl7.fhir.r5.model.Parameters parameters =
-				r5Context.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
+				myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
 
-		assertThatThrownBy(() -> r5Patch.apply(encounter, parameters))
+		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
 				.isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining("physicalType");
+				.hasMessageContaining("HAPI-2925")
+				.hasMessageContaining("physicalType")
+				.hasMessageContaining("Encounter.location");
 	}
 
 	/**
@@ -1072,8 +1076,6 @@ public class FhirPatchTest implements ITestDataBuilder {
 	 */
 	@Test
 	void testReplace_R5EncounterLocation_WithValidSubFieldName_Succeeds() {
-		FhirContext r5Context = FhirContext.forR5Cached();
-		FhirPatch r5Patch = new FhirPatch(r5Context);
 		Encounter encounter = buildR5EncounterWithLocation();
 
 		@Language("JSON")
@@ -1120,12 +1122,13 @@ public class FhirPatchTest implements ITestDataBuilder {
 			}
 			""";
 		org.hl7.fhir.r5.model.Parameters parameters =
-				r5Context.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
+				myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
 
-		r5Patch.apply(encounter, parameters);
+		myR5Patch.apply(encounter, parameters);
 
 		assertThat(encounter.getLocation()).hasSize(1);
 		assertThat(encounter.getLocation().get(0).getLocation().getReference()).isEqualTo("Location/loc-2");
+		assertThat(encounter.getLocation().get(0).getForm().getCodingFirstRep().getCode()).isEqualTo("ro");
 	}
 
 	private Encounter buildR5EncounterWithLocation() {

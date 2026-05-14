@@ -151,7 +151,7 @@ HAPI FHIR validates patch operations and throws an `InvalidRequestException` (HT
 
 ## Unknown Child Element Names
 
-When a `replace` (or other value-bearing) patch operation specifies a `value` part whose child element name does not exist on the resource type being patched, HAPI FHIR returns a clear error rather than a NullPointerException. For example, if a patch targets `Patient.name` and the supplied `value.part` specifies a sub-element name that is not a valid child of `HumanName`, the server will respond with:
+When a `replace` patch operation specifies a `value` part whose child element name does not exist on the resource type being patched, HAPI FHIR returns a clear error rather than a NullPointerException. For example, if a patch targets `Patient.name` and the supplied `value.part` specifies a sub-element name that is not a valid child of `HumanName`, the server will respond with:
 
 ```
 HTTP 400 Bad Request
