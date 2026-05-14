@@ -390,6 +390,15 @@ public class FhirPatch {
 					BaseRuntimeChildDefinition subChild =
 							childDefinitionToUse.getElementDefinition().getChildByName(name);
 
+					if (subChild == null) {
+						throw new InvalidRequestException(Msg.code(2925)
+								+ "Unknown child element '"
+								+ name
+								+ "' for patch operation on path '"
+								+ theParsedFhirPath.getRawPath()
+								+ "'");
+					}
+
 					subChild.getMutator().setValue(childDefinitionToUse.getBase(), optionalValue.get());
 				}
 			}
