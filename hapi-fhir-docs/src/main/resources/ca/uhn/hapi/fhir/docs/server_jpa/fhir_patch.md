@@ -145,21 +145,6 @@ The following example deletes an extension from a resource:
 }
 ```
 
-# Error Handling
-
-HAPI FHIR validates patch operations and throws an `InvalidRequestException` (HTTP 400 Bad Request) when a patch is structurally invalid or targets a path that does not exist on the resource model.
-
-## Unknown Child Element Names
-
-When a `replace` patch operation specifies a `value` part whose child element name does not exist on the resource type being patched, HAPI FHIR returns a clear error rather than a NullPointerException. For example, if a patch targets `Patient.name` and the supplied `value.part` specifies a sub-element name that is not a valid child of `HumanName`, the server will respond with:
-
-```
-HTTP 400 Bad Request
-Unknown child element '<name>' for patch operation on path '<path>'
-```
-
-This makes it easier to identify typos or incorrect element names in patch documents during development and integration.
-
 # FhirPatchBuilder
 
 The `FhirPatchBuilder` utility class can be used to programmatically generate FHIR Patch documents in Java. This is a convenient alternative to manually constructing Parameters resources.

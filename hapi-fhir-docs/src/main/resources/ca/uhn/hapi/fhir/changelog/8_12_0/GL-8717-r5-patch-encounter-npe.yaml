@@ -1,6 +1,0 @@
----
-type: fix
-title: "Fixed a NullPointerException (replaced by a descriptive InvalidRequestException) in FhirPatch
-  when a FHIR patch replace operation supplies replacement values via value.part sub-fields and one
-  of the part names does not exist on the target element definition. The server now returns a clear
-  error message identifying the unknown field name and path (Msg 2925) instead of an HTTP 500."
