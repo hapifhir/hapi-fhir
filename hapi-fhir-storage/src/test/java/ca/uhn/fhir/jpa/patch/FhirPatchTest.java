@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r5.model.Encounter;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -1002,5 +1003,150 @@ public class FhirPatchTest implements ITestDataBuilder {
 		return params;
 	}
 
+	/**
+	 * Reproduces GL-8717: when a FHIR patch replace operation uses value.part[] with a sub-field
+	 * name that does not exist in the target FHIR version (e.g., "physicalType" in R5, where the
+	 * field was renamed to "form"), getChildByName() returns null and the subsequent getMutator()
+	 * call throws a NullPointerException instead of a clear InvalidRequestException.
+	 */
+	@Test
+	void testReplace_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException() {
+		// Setup: R5 context and patch (the class-level myFhirContext and myPatch are R4)
+		FhirContext r5Context = FhirContext.forR5Cached();
+		FhirPatch r5Patch = new FhirPatch(r5Context);
+
+		// Create an R5 Encounter with a location element
+		Encounter encounter = new Encounter();
+		encounter.setId("Encounter/test-enc");
+		Encounter.EncounterLocationComponent location = encounter.addLocation();
+		location.setLocation(new org.hl7.fhir.r5.model.Reference("Location/loc-1"));
+
+		// Build a FHIR patch that replaces Encounter.location using value.part[],
+		// with "physicalType" as a sub-field name — this was the R4 name, renamed to "form" in R5.
+		// getChildByName("physicalType") will return null on the R5 EncounterLocationComponent
+		// definition, causing an NPE at subChild.getMutator() in the current code.
+		@Language("JSON")
+		String patchJson = """
+			{
+			  "resourceType": "Parameters",
+			  "parameter": [
+			    {
+			      "name": "operation",
+			      "part": [
+			        {
+			          "name": "type",
+			          "valueCode": "replace"
+			        },
+			        {
+			          "name": "path",
+			          "valueString": "Encounter.location"
+			        },
+			        {
+			          "name": "value",
+			          "part": [
+			            {
+			              "name": "location",
+			              "valueReference": {
+			                "reference": "Location/loc-2"
+			              }
+			            },
+			            {
+			              "name": "physicalType",
+			              "valueCodeableConcept": {
+			                "coding": [
+			                  {
+			                    "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+			                    "code": "ro"
+			                  }
+			                ]
+			              }
+			            }
+			          ]
+			        }
+			      ]
+			    }
+			  ]
+			}
+			""";
+		org.hl7.fhir.r5.model.Parameters parameters =
+				r5Context.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
+
+		// Test: should throw InvalidRequestException with a meaningful message, NOT an NPE
+		assertThatThrownBy(() -> r5Patch.apply(encounter, parameters))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("physicalType");
+	}
+
+	/**
+	 * Companion to {@link #testReplace_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException()}:
+	 * verifies that the correct R5 sub-field name ("form", not "physicalType") works without error.
+	 */
+	@Test
+	void testReplace_R5EncounterLocation_WithValidSubFieldName_Succeeds() {
+		// Setup: R5 context and patch
+		FhirContext r5Context = FhirContext.forR5Cached();
+		FhirPatch r5Patch = new FhirPatch(r5Context);
+
+		// Create an R5 Encounter with a location element
+		Encounter encounter = new Encounter();
+		encounter.setId("Encounter/test-enc");
+		Encounter.EncounterLocationComponent location = encounter.addLocation();
+		location.setLocation(new org.hl7.fhir.r5.model.Reference("Location/loc-1"));
+
+		// Build a patch using "form" — the correct R5 field name for Encounter.location's
+		// physical type (renamed from "physicalType" in R4)
+		@Language("JSON")
+		String patchJson = """
+			{
+			  "resourceType": "Parameters",
+			  "parameter": [
+			    {
+			      "name": "operation",
+			      "part": [
+			        {
+			          "name": "type",
+			          "valueCode": "replace"
+			        },
+			        {
+			          "name": "path",
+			          "valueString": "Encounter.location"
+			        },
+			        {
+			          "name": "value",
+			          "part": [
+			            {
+			              "name": "location",
+			              "valueReference": {
+			                "reference": "Location/loc-2"
+			              }
+			            },
+			            {
+			              "name": "form",
+			              "valueCodeableConcept": {
+			                "coding": [
+			                  {
+			                    "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+			                    "code": "ro"
+			                  }
+			                ]
+			              }
+			            }
+			          ]
+			        }
+			      ]
+			    }
+			  ]
+			}
+			""";
+		org.hl7.fhir.r5.model.Parameters parameters =
+				r5Context.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
+
+		// Test: using the correct R5 field name should not throw
+		r5Patch.apply(encounter, parameters);
+
+		// Verify: the location reference was updated
+		assertThat(encounter.getLocation()).hasSize(1);
+		assertThat(encounter.getLocation().get(0).getLocation().getReference()).isEqualTo("Location/loc-2");
+	}
 
 }
