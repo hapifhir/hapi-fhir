@@ -82,7 +82,9 @@ public interface IPackageInstallerSvc {
 	 * @param theDependency the loaded dependency package
 	 * @param theId the package ID
 	 * @param theVersion the package version
+	 * @param theShouldUpdateCache indicates whether the version-specific variant should be added to the cache
 	 * @return the original package if compatible, or the version-specific variant if found
 	 */
-	NpmPackage substituteVersionSpecificPackageIfNeeded(NpmPackage theDependency, String theId, String theVersion);
+	NpmPackage substituteVersionSpecificPackageIfNeeded(
+			NpmPackage theDependency, String theId, String theVersion, boolean theShouldUpdateCache);
 }

@@ -141,7 +141,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		ourLog.info("Package server is at base: {}", url);
 		jpaPackageCache.addPackageServer(new PackageServer(url));
 
-		myFakeNpmServlet.responses.clear();
+		myFakeNpmServlet.clear();
 	}
 
 	@AfterEach
@@ -730,7 +730,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertFalse(validationResultBefore.isSuccessful());
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/UK.Core.r4-1.1.0.tgz");
-		myFakeNpmServlet.responses.put("/UK.Core.r4/1.1.0", bytes);
+		myFakeNpmServlet.addResponse("/UK.Core.r4/1.1.0", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("UK.Core.r4").setVersion("1.1.0")
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
@@ -744,7 +744,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	@Test
 	public void testValidationCache_whenUnInstallingIG_isRefreshed() {
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/UK.Core.r4-1.1.0.tgz");
-		myFakeNpmServlet.responses.put("/UK.Core.r4/1.1.0", bytes);
+		myFakeNpmServlet.addResponse("/UK.Core.r4/1.1.0", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("UK.Core.r4").setVersion("1.1.0")
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
@@ -766,7 +766,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	@Test
 	public void testCacheDstu3Package() throws Exception {
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");
-		myFakeNpmServlet.responses.put("/nictiz.fhir.nl.stu3.questionnaires/1.0.2", bytes);
+		myFakeNpmServlet.addResponse("/nictiz.fhir.nl.stu3.questionnaires/1.0.2", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("nictiz.fhir.nl.stu3.questionnaires").setVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 		myPackageInstallerSvc.install(spec);
@@ -805,7 +805,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.12.0", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec()
 			.setName("hl7.fhir.uv.shorthand")
@@ -880,7 +880,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		{
 			byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/simple_ig_v1.tgz");
-			myFakeNpmServlet.responses.put("/simple_ig_v1/1.0.0", bytes);
+			myFakeNpmServlet.addResponse("/simple_ig_v1/1.0.0", bytes);
 
 			PackageInstallationSpec spec = new PackageInstallationSpec()
 				.setName("test-profile")
@@ -894,7 +894,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		{
 			byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/simple_ig_v2.tgz");
-			myFakeNpmServlet.responses.put("/simple_ig_v1/2.0.0", bytes);
+			myFakeNpmServlet.addResponse("/simple_ig_v1/2.0.0", bytes);
 
 			PackageInstallationSpec spec = new PackageInstallationSpec()
 				.setName("test-profile")
@@ -1006,7 +1006,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		myInterceptorService.registerInterceptor(myBinaryStorageInterceptor);
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.12.0", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
@@ -1079,7 +1079,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1 instead of "shorthand-code-system"
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.13.0.tgz");
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.13.0", bytes);
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.13.0", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.13.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		myPackageInstallerSvc.install(spec);
@@ -1106,7 +1106,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1234 instead of "shorthand-code-system"
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test_sp_numeric_id.tgz");
-		myFakeNpmServlet.responses.put("/test-exchange.fhir.us.com/2.1.1", bytes);
+		myFakeNpmServlet.addResponse("/test-exchange.fhir.us.com/2.1.1", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec()
 			.setName("test-exchange.fhir.us.com")
@@ -1134,7 +1134,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-organizations-package.tgz");
-		myFakeNpmServlet.responses.put("/test-organizations/1.0.0", bytes);
+		myFakeNpmServlet.addResponse("/test-organizations/1.0.0", bytes);
 
 		List<String> resourceList = new ArrayList<>();
 		resourceList.add("Organization");
@@ -1171,7 +1171,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-organizations-package.tgz");
-		myFakeNpmServlet.responses.put("/test-organizations/1.0.0", bytes);
+		myFakeNpmServlet.addResponse("/test-organizations/1.0.0", bytes);
 
 		List<String> resourceList = new ArrayList<>();
 		resourceList.add("Organization");
@@ -1213,7 +1213,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-missing-identifier-package.tgz");
-		myFakeNpmServlet.responses.put("/test-missing-identifier-package/1.0.0", bytes);
+		myFakeNpmServlet.addResponse("/test-missing-identifier-package/1.0.0", bytes);
 
 		List<String> resourceList = new ArrayList<>();
 		resourceList.add("Organization");
@@ -1239,7 +1239,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-auto-create-placeholder.tgz");
-		myFakeNpmServlet.responses.put("/test-ig/1.0.0", bytes);
+		myFakeNpmServlet.addResponse("/test-ig/1.0.0", bytes);
 
 		List<String> resourceList = new ArrayList<>();
 		resourceList.add("ImplementationGuide");
@@ -1269,7 +1269,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-draft-sample.tgz");
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.onlydrafts/0.11.1", bytes);
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.onlydrafts/0.11.1", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.onlydrafts").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
@@ -1281,7 +1281,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.12.0", bytes);
 
 		PackageInstallOutcomeJson outcome;
 
@@ -1306,7 +1306,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.12.0", bytes);
 
 		PackageInstallOutcomeJson outcome;
 
@@ -1328,7 +1328,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/UK.Core.r4-1.1.0.tgz");
-		myFakeNpmServlet.responses.put("/UK.Core.r4/1.1.0", bytes);
+		myFakeNpmServlet.addResponse("/UK.Core.r4/1.1.0", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("UK.Core.r4").setVersion("1.1.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		myPackageInstallerSvc.install(spec);
@@ -1347,8 +1347,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	public void testLoadPackageMetadata() throws Exception {
 		myStorageSettings.setAllowExternalReferences(true);
 
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.11.1", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.11.1", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 		myPackageInstallerSvc.install(spec);
@@ -1373,9 +1373,9 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	public void testLoadPackageUsingImpreciseId() throws Exception {
 		myStorageSettings.setAllowExternalReferences(true);
 
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.11.1", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.11.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.0.tgz"));
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.11.1", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.11.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.0.tgz"));
 
 		PackageInstallationSpec spec;
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
@@ -1409,8 +1409,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		byte[] contents0111 = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
 		byte[] contents0120 = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.11.1", contents0111);
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", contents0120);
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.11.1", contents0111);
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.12.0", contents0120);
 
 		// Install older version
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
@@ -1452,8 +1452,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	public void testInstallOlderPackageDoesntUpdateLatestVersionFlag() throws Exception {
 		myStorageSettings.setAllowExternalReferences(true);
 
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.11.1", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.11.1", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
 
 		// Install newer version
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
@@ -1495,7 +1495,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	public void testInstallAlreadyExistingIsIgnored() throws Exception {
 		myStorageSettings.setAllowExternalReferences(true);
 
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
 
 		// Install
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
@@ -1521,10 +1521,10 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] contents0111 = ClasspathUtil.loadResourceAsByteArray("/packages/test-exchange-sample.tgz");
-		myFakeNpmServlet.responses.put("/test-exchange.fhir.us.com/2.1.1", contents0111);
+		myFakeNpmServlet.addResponse("/test-exchange.fhir.us.com/2.1.1", contents0111);
 
 		contents0111 = ClasspathUtil.loadResourceAsByteArray("/packages/test-exchange-sample-2.tgz");
-		myFakeNpmServlet.responses.put("/test-exchange.fhir.us.com/2.1.2", contents0111);
+		myFakeNpmServlet.addResponse("/test-exchange.fhir.us.com/2.1.2", contents0111);
 
 		// Install older version
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
@@ -1671,9 +1671,9 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	public void testDeletePackage() throws IOException {
 		myStorageSettings.setAllowExternalReferences(true);
 
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.11.1", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
-		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.11.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.0.tgz"));
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.11.1", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
+		myFakeNpmServlet.addResponse("/hl7.fhir.uv.shorthand/0.11.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.0.tgz"));
 
 		myPackageInstallerSvc.install(new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY));
 		myPackageInstallerSvc.install(new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY));
@@ -1717,7 +1717,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-logical-structuredefinition.tgz");
-		myFakeNpmServlet.responses.put("/test-logical-structuredefinition/1.0.0", bytes);
+		myFakeNpmServlet.addResponse("/test-logical-structuredefinition/1.0.0", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-logical-structuredefinition").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
@@ -1754,7 +1754,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-logical-structuredefinition.tgz");
-		myFakeNpmServlet.responses.put("/test-logical-structuredefinition/1.0.0", bytes);
+		myFakeNpmServlet.addResponse("/test-logical-structuredefinition/1.0.0", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-logical-structuredefinition").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
@@ -1807,10 +1807,10 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testInstallR4PackageCircularDependency() throws Exception {
+	public void testInstallR4PackageCircularDependencyBetweenStructureDefinitions() throws Exception {
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test.circular.snapshot-0.0.1.tgz");
-		myFakeNpmServlet.responses.put("/test.circular.snapshot/0.0.1", bytes);
+		myFakeNpmServlet.addResponse("/test.circular.snapshot/0.0.1", bytes);
 
 		myPackageInstallerSvc.install(new PackageInstallationSpec()
 			.setName("test.circular.snapshot")
@@ -1982,6 +1982,101 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(lookupIgY.isFound()).isTrue();
 	}
 
+	/**
+	 * This test exercises the following dependency tree:
+	 *  +- test.package.a#1.0
+	 *  |-+- test.package.b#1.0
+	 *  | |--- test.package.c#1.0
+	 *  |--- test.package.c#1.0
+	 *  Each of the packages should only be processed once.
+	 */
+	@Test
+	public void testInstallR4Package_sharedDependencyWithAncestor_installsDependencyOnce() throws Exception {
+		// set up
+		byte[] packageABytes = new NpmPackageBuilder("test.package.a", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withDependency("test.package.b", "1.0")
+			.withDependency("test.package.c", "1.0")
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.a/1.0", packageABytes);
+
+		byte[] packageBBytes = new NpmPackageBuilder("test.package.b", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withDependency("test.package.c", "1.0")
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.b/1.0", packageBBytes);
+
+		byte[] packageCBytes = new NpmPackageBuilder("test.package.c", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.c/1.0", packageCBytes);
+
+		// execute
+		myPackageInstallerSvc.install(new PackageInstallationSpec()
+			.setName("test.package.a")
+			.setVersion("1.0")
+			// INSTALL_ONLY to ensure we don't cache the packages
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY)
+			.setFetchDependencies(true)
+		);
+
+		// validate
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.a/1.0")).isEqualTo(1);
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.b/1.0")).isEqualTo(1);
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.c/1.0")).isEqualTo(1);
+	}
+
+	/**
+	 * This test exercises the following dependency tree:
+	 *  +- test.package.a#1.0
+	 *  |-+- test.package.b#1.0
+	 *  | |--- test.package.d#1.0
+	 *  |-+- test.package.c#1.0
+	 *    |--- test.package.d#1.0
+	 *  Each of the packages should only be processed once.
+	 */
+	@Test
+	public void testInstallR4Package_sharedDependencyWithSibling_installsDependencyOnce() throws Exception {
+		// set up
+		byte[] packageABytes = new NpmPackageBuilder("test.package.a", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withDependency("test.package.b", "1.0")
+			.withDependency("test.package.c", "1.0")
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.a/1.0", packageABytes);
+
+		byte[] packageBBytes = new NpmPackageBuilder("test.package.b", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withDependency("test.package.d", "1.0")
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.b/1.0", packageBBytes);
+
+		byte[] packageCBytes = new NpmPackageBuilder("test.package.c", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withDependency("test.package.d", "1.0")
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.c/1.0", packageCBytes);
+
+		byte[] packageDBytes = new NpmPackageBuilder("test.package.d", "1.0")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.buildAsByteArray();
+		myFakeNpmServlet.addResponse("/test.package.d/1.0", packageDBytes);
+
+		// execute
+		myPackageInstallerSvc.install(new PackageInstallationSpec()
+			.setName("test.package.a")
+			.setVersion("1.0")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY)
+			.setFetchDependencies(true)
+		);
+
+		// validate
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.a/1.0")).isEqualTo(1);
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.b/1.0")).isEqualTo(1);
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.c/1.0")).isEqualTo(1);
+		assertThat(myFakeNpmServlet.getTimesCalled("/test.package.d/1.0")).isEqualTo(1);
+	}
+
 	private CodeSystem fetchCodeSystemByUrl(String theUrl) {
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(CodeSystem.SP_URL, new UriParam(theUrl));
@@ -1989,5 +2084,4 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(result.sizeOrThrowNpe()).isEqualTo(1);
 		return (CodeSystem) result.getResources(0, 1).get(0);
 	}
-
 }
