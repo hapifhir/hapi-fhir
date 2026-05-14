@@ -17,7 +17,6 @@
  * limitations under the License.
  * #L%
  */
-// Created by claude-opus-4-7
 package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
