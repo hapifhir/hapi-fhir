@@ -163,9 +163,6 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		super.afterCsvProcessingComplete(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 
-		String codeSystemVersion =
-				theStepExecutionDetails.getData().getLoincCodeSystem().getVersion();
-
 		// FIXME: extract sub-methods in this method
 
 		/*
@@ -186,6 +183,8 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 
 			} catch (ResourceNotFoundException | ResourceGoneException e) {
 				ConceptMapping firstMapping = entry.getValue().iterator().next();
+
+				getRecordsAddedCounter(theStepExecutionDetails).incrementConceptMapsAdded(1);
 
 				conceptMap = new ConceptMap();
 				conceptMap.setId(conceptMapId);
@@ -281,6 +280,8 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 
 				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 				myConceptMapDao.update(conceptMap, requestDetails);
+
+				getRecordsAddedCounter(theStepExecutionDetails).incrementConceptMapMappingsAdded(addedMappings);
 			}
 		}
 
@@ -331,19 +332,22 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 				requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 				myValueSetDao.update(existing, requestDetails);
 
+				getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetCodesAdded(addedCodes);
+
 			} catch (ResourceNotFoundException | ResourceGoneException e) {
 
 				/*
 				 * Ok, we didn't find an existing ValueSet with the given ID, so we'll
 				 * store the ValueSet as a new one.
 				 */
+				getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetsAdded(1);
 
-				long codeCount = 0;
+				int codeCount = 0;
 				if (valueSet.hasCompose()
 						&& valueSet.getCompose().hasInclude()
 						&& valueSet.getCompose().getIncludeFirstRep().hasConcept()) {
-					codeCount = valueSet.getCompose().getIncludeFirstRep().getConcept().stream()
-							.count();
+					codeCount = Math.toIntExact(valueSet.getCompose().getIncludeFirstRep().getConcept().stream()
+						.count());
 				}
 
 				ourLog.atInfo()
@@ -353,6 +357,9 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 						.log();
 				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 				myValueSetDao.update(valueSet, requestDetails);
+
+				getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetCodesAdded(codeCount);
+
 			}
 		}
 	}

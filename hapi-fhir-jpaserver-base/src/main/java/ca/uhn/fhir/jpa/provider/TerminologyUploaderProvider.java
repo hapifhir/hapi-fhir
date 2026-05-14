@@ -19,8 +19,12 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincJobImportParameters;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -31,6 +35,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.AttachmentUtil;
+import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
@@ -68,6 +73,9 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	@Autowired
 	private ITermLoaderSvc myTerminologyLoaderSvc;
 
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
+
 	/**
 	 * Constructor
 	 */
@@ -94,6 +102,33 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	public TerminologyUploaderProvider(FhirContext theContext, ITermLoaderSvc theTerminologyLoaderSvc) {
 		setContext(theContext);
 		myTerminologyLoaderSvc = theTerminologyLoaderSvc;
+	}
+
+	/**
+	 * <code>$hapi.fhir.upload-terminology.create-job</code>
+	 * <p></p>
+	 * This method is intended to replace the legacy {@link #uploadSnapshot(HttpServletRequest, IPrimitiveType, List, RequestDetails)}
+	 */
+	@Operation(
+		typeName = "CodeSystem",
+		name = JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB,
+		idempotent = false,
+		returnParameters = {
+			//		@OperationParam(name = "conceptCount", type = IntegerType.class, min = 1)
+		})
+	public IBaseParameters uploadTerminologyCreateJob(
+		@OperationParam(name = PARAM_SYSTEM, min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
+		RequestDetails theRequestDetails) {
+
+		String codeSystemUrl = DatatypeUtil.toStringValue(theCodeSystemUrl);
+		if (ITermLoaderSvc.LOINC_URI.equals(codeSystemUrl)) {
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+			LoincJobImportParameters parameters = new LoincJobImportParameters();
+			startRequest.setParameters(parameters)
+			myJobCoordinator.startInstance(theRequestDetails, startRequest);
+		}
+
 	}
 
 	/**

@@ -12,10 +12,12 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -64,6 +66,7 @@ class ImportLoincStep20LinguisticVariantTest {
 	void testProcess() {
 		// Setup
 		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 
 		// Test
 		JobInstance instance = new JobInstance();
@@ -73,8 +76,6 @@ class ImportLoincStep20LinguisticVariantTest {
 		importLoincFileSetJson.setCodeSystemStagingVersionId("my-staging-version-id");
 		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv", "my-chunk-attachment-id"));
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
-		ImportLoincFileSetJson.LinguisticVariantJson linguisticVariant = new ImportLoincFileSetJson.LinguisticVariantJson("8", "fr", "CA", "French (CANADA)");
-		importLoincFileSetJson.getLinguisticVariants().add(linguisticVariant);
 
 		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
@@ -104,6 +105,7 @@ class ImportLoincStep20LinguisticVariantTest {
 	void testProcess_FileNotListedInLinguisticVariantFile() {
 		// Setup
 		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 
 		// Test
 		JobInstance instance = new JobInstance();
@@ -114,8 +116,6 @@ class ImportLoincStep20LinguisticVariantTest {
 		// The following filename doesn't line up with anything we put into the LinguisticVariants
 		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("loinc-ver/v269/AccessoryFiles/LinguisticVariants/zzZZ8LinguisticVariant.csv", "my-chunk-attachment-id"));
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
-		ImportLoincFileSetJson.LinguisticVariantJson linguisticVariant = new ImportLoincFileSetJson.LinguisticVariantJson("8", "fr", "CA", "French (CANADA)");
-		importLoincFileSetJson.getLinguisticVariants().add(linguisticVariant);
 
 		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
@@ -127,14 +127,14 @@ class ImportLoincStep20LinguisticVariantTest {
 		String result = renderHierarchy(cs, true);
 		String expected = """
 			-61438-8
-			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Cellules de Purkinje cytoplasmique type 2 , IgG:Titre:Temps ponctuel:Sérum:Quantitatif:Immunofluorescence
-			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"LONG_COMMON_NAME","display":"LONG_COMMON_NAME"}]: (example long french common name)
+			  -Designation[lang=zz-ZZ, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Cellules de Purkinje cytoplasmique type 2 , IgG:Titre:Temps ponctuel:Sérum:Quantitatif:Immunofluorescence
+			  -Designation[lang=zz-ZZ, use={"system":"http://loinc.org","code":"LONG_COMMON_NAME","display":"LONG_COMMON_NAME"}]: (example long french common name)
 			-11704-4
-			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Gliale nucléaire de type 1 , IgG:Titre:Temps ponctuel:LCR:Quantitatif:Immunofluorescence
+			  -Designation[lang=zz-ZZ, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Gliale nucléaire de type 1 , IgG:Titre:Temps ponctuel:LCR:Quantitatif:Immunofluorescence
 			-17787-3
-			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Virus respiratoire syncytial bovin:Présence-Seuil:Temps ponctuel:XXX:Ordinal:Culture spécifique à un microorganisme
+			  -Designation[lang=zz-ZZ, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Virus respiratoire syncytial bovin:Présence-Seuil:Temps ponctuel:XXX:Ordinal:Culture spécifique à un microorganisme
 			-17788-1
-			  -Designation[lang=fr-CA, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Cellules de Purkinje cytoplasmique type 2 , IgG:Titre:Temps ponctuel:Sérum:Quantitatif:
+			  -Designation[lang=zz-ZZ, use={"system":"http://loinc.org","code":"FullySpecifiedName","display":"FullySpecifiedName"}]: Cellules de Purkinje cytoplasmique type 2 , IgG:Titre:Temps ponctuel:Sérum:Quantitatif:
 			""";
 		assertEquals(expected, result);
 

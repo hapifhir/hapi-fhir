@@ -42,11 +42,11 @@ public class ImportLoincStep2HandleConcepts
 
 	@Override
 	protected void handleRecord(
-            LoincJobImportParameters theJobParameters,
-            CodeExtractionContext theContext,
-            CSVRecord theRecord,
-            CodeSystem theCodeSystemToPopulate,
-            ImportLoincFileSetJson theData, String theSourceFilename) {
+		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
+		CodeExtractionContext theContext,
+		CSVRecord theRecord,
+		CodeSystem theCodeSystemToPopulate,
+		ImportLoincFileSetJson theData, String theSourceFilename) {
 		String code = trim(theRecord.get("LOINC_NUM"));
 		if (isNotBlank(code)) {
 			String longCommonName = trim(theRecord.get("LONG_COMMON_NAME"));

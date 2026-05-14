@@ -50,7 +50,7 @@ public class ImportLoincStep6HandleRsnaPlaybook
 
 	@Override
 	protected void handleRecord(
-            LoincJobImportParameters theJobParameters,
+            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
             MyContext theContext,
             CSVRecord theRecord,
             CodeSystem theCodeSystemToPopulate,

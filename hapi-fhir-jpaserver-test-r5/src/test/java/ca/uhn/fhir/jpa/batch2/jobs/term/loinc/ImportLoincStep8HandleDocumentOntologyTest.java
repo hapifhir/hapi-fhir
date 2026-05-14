@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -72,6 +73,7 @@ class ImportLoincStep8HandleDocumentOntologyTest {
 		// Setup
 		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/DocumentOntology/DocumentOntology.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 
 		// Test
 		JobInstance instance = new JobInstance();

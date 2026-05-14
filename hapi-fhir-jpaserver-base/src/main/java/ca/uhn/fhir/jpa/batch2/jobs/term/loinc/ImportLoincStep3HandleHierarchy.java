@@ -35,7 +35,7 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 
 	@Override
 	protected void handleRecord(
-            LoincJobImportParameters theJobParameters,
+            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
             MyContext theContext,
             CSVRecord theRecord,
             CodeSystem theCodeSystemToPopulate,

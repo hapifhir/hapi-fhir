@@ -189,27 +189,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 			.hasMessageContaining("HAPI-0876: 'loinc.xml' file must not have a version defined. To define a version use 'loinc.codesystem.version' property");
 	}
 
-	@Test
-	void testProcess_ExtractLinguisticVariants() {
-		mockCodeSystemStorageStartStaging();
-		mockJobPersistenceFetchDistributionFile_WithLinguisticVariants();
-		mockHandlerStep1();
-		mockHandlerStep2_LinguisticVariants();
-		mockJobPersistenceStoreNewAttachment();
 
-		// Test
-		StepExecutionDetails<LoincJobImportParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
-		myStep.run(stepExecutionDetails, myDataSink);
-
-		// Verify
-		verify(myDataSink, times(4)).accept(myTerminologyFileSetCaptor.capture());
-
-		ImportLoincFileSetJson fileSet = myTerminologyFileSetCaptor.getAllValues().get(0);
-		assertEquals(4, fileSet.getLinguisticVariants().size());
-		assertEquals("Chinese (CHINA)", fileSet.getLinguisticVariants().get(0).getLanguageName());
-		assertEquals("zh-CN", fileSet.getLinguisticVariants().get(0).getLanguageCode());
-		assertEquals("zhCN5LinguisticVariant.csv", fileSet.getLinguisticVariants().get(0).getLinguisticVariantFileName());
-	}
 
 	@Test
 	void testProcess_TwoStepsUseSameFile() {
@@ -316,35 +296,10 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		});
 	}
 
-	private void mockHandlerStep2_LinguisticVariants() {
-		when(myHandlerStep2.canHandleFile(any(), any())).thenAnswer(t -> {
-			String fileName = t.getArgument(1, String.class);
-
-			if (ImportLoincStep20LinguisticVariant.LINGUISTIC_VARIANT_FILENAME_PATTERN.matcher(fileName).matches()) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
-			}
-
-			return Optional.empty();
-		});
-	}
-
 	private void mockJobPersistenceFetchDistributionFile() {
 		Consumer<ZipCollectionBuilder> populator = files -> {
 			try {
 				TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		};
-		// Load LOINC marked as version 2.67
-
-		mockJobPersistenceFetchDistributionFile(populator);
-	}
-
-	private void mockJobPersistenceFetchDistributionFile_WithLinguisticVariants() {
-		Consumer<ZipCollectionBuilder> populator = files -> {
-			try {
-				TermTestUtil.addLoincMandatoryFilesAndConsumerNameAndLinguisticVariants(files);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

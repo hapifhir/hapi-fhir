@@ -11,6 +11,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -73,6 +74,7 @@ class ImportLoincStep17PartLinkTest {
 	void testProcess() {
 		// Setup
 		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/PartFile/LoincPartLink.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 
 		// Test
 		JobInstance instance = new JobInstance();

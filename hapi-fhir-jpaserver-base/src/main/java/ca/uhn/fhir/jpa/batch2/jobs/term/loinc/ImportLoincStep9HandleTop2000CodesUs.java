@@ -58,7 +58,7 @@ public class ImportLoincStep9HandleTop2000CodesUs
 
 	@Override
 	protected void handleRecord(
-            LoincJobImportParameters theJobParameters,
+            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
             MyBaseContext theContext,
             CSVRecord theRecord,
             CodeSystem theCodeSystemToPopulate,

@@ -31,7 +31,7 @@ public class ImportLoincStep14GroupFile
 
 	@Override
 	protected void handleRecord(
-            LoincJobImportParameters theJobParameters,
+            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
             MyBaseContext theContext,
             CSVRecord theRecord,
             CodeSystem theCodeSystemToPopulate,

@@ -8,23 +8,16 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep1ExpandDistributionIntoFilesStep
 	extends BaseExpandDistributionIntoFilesStep<LoincJobImportParameters, ImportLoincFileSetJson> {
@@ -50,39 +43,10 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		ImportLoincFileSetJson theFileSet) {
 		super.handleSynchronous(theStepExecutionDetails, theFileName, theBytes, theJobParameters, theFileSet);
 
-		String linguisticVariantsFilename = theJobParameters.getProperties().getProperty(LOINC_LINGUISTIC_VARIANTS_FILE.getCode(), LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT.getCode());
-
 		if (theFileName.endsWith("loinc.xml")) {
 			// FIXME: add test to ensure we fail if the ZIP has multiple loinc.xml
 			// FIXME: add test to ensure we fail if the ZIP has no loinc.xml
 			handleLoincXml(theStepExecutionDetails, theBytes, theJobParameters, theFileSet);
-		} else if (theFileName.endsWith(linguisticVariantsFilename)) {
-			handleLoincLinguisticVariants(theBytes, theFileSet);
-		}
-
-	}
-
-	private void handleLoincLinguisticVariants(byte[] theBytes, ImportLoincFileSetJson theFileSet) {
-		ourLog.info("Processing 'LinguisticVariants.csv' file");
-
-		String csvString = new String(theBytes, StandardCharsets.UTF_8);
-		try {
-			CSVParser csvParser = newLoincCsvParser(new StringReader(csvString));
-			for (CSVRecord record : csvParser.getRecords()) {
-				String id = trim(record.get("ID"));
-				String isoLanguage = trim(record.get("ISO_LANGUAGE"));
-				String isoCountry = trim(record.get("ISO_COUNTRY"));
-				String languageName = trim(record.get("LANGUAGE_NAME"));
-
-				if (isNotBlank(id) && isNotBlank(isoLanguage) && isNotBlank(isoCountry) && isNotBlank(languageName)) {
-					ImportLoincFileSetJson.LinguisticVariantJson linguisticVariant = new ImportLoincFileSetJson.LinguisticVariantJson(id, isoLanguage, isoCountry, languageName);
-					theFileSet.getLinguisticVariants().add(linguisticVariant);
-				}
-			}
-
-		} catch (IOException e) {
-			// FIXME: add code
-			throw new JobExecutionFailedException(Msg.code(1) + e.getMessage(), e);
 		}
 
 	}

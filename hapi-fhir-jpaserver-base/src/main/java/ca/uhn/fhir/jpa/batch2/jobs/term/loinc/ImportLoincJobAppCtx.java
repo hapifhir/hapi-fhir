@@ -19,8 +19,12 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,6 +33,12 @@ public class ImportLoincJobAppCtx {
 
 	public static final String IMPORT_TERM_LOINC = "IMPORT_TERM_LOINC";
 	public static final String DISTRIBUTION_FILE_ATTACHMENT_FILENAME = "loinc.zip";
+
+	private final DaoRegistry myDaoRegistry;
+
+	public ImportLoincJobAppCtx(DaoRegistry myDaoRegistry) {
+		this.myDaoRegistry = myDaoRegistry;
+	}
 
 	@Bean
 	public JobDefinition<LoincJobImportParameters> importLoincJobDefinition() {
@@ -134,7 +144,16 @@ public class ImportLoincJobAppCtx {
 						"Import LOINC Coding Properties",
 						ImportLoincFileSetJson.class,
 						importLoincStep19CodingProperties())
-				//				.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
+				.addIntermediateStep(
+						"import-linguistic-variant",
+						"Import LOINC Linguistic Variants",
+						ImportLoincFileSetJson.class,
+						importLoincStep20LinguisticVariant())
+				.addFinalReducerStep(
+						"finalize-import",
+						"Finalize LOINC Import",
+						ImportTerminologyResultJson.class,
+						importLoincStep21Finalize())
 				.build();
 	}
 
@@ -289,4 +308,18 @@ public class ImportLoincJobAppCtx {
 	public ImportLoincStep19CodingProperties importLoincStep19CodingProperties() {
 		return new ImportLoincStep19CodingProperties();
 	}
+
+	/**
+	 * Step 20: Linguistic Variant
+	 */
+	@Bean
+	public ImportLoincStep20LinguisticVariant importLoincStep20LinguisticVariant() {
+		return new ImportLoincStep20LinguisticVariant();
+	}
+
+	@Bean
+	public IReductionStepWorker<LoincJobImportParameters, ImportLoincFileSetJson, ImportTerminologyResultJson> importLoincStep21Finalize() {
+		return new ImportLoincStep21Finalize(myDaoRegistry);
+	}
+
 }

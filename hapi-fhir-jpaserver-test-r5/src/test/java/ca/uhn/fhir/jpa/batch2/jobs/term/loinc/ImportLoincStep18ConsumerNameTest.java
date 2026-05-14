@@ -11,10 +11,12 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincStep3HandleHierarchyTest.renderHierarchy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -61,6 +64,7 @@ class ImportLoincStep18ConsumerNameTest {
 	void testProcess() {
 		// Setup
 		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/ConsumerName/ConsumerName.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 
 		// Test
 		JobInstance instance = new JobInstance();
@@ -81,11 +85,11 @@ class ImportLoincStep18ConsumerNameTest {
 		String hierarchy = renderHierarchy(cs, true);
 		String expected = """
 			-61438-8
-			  -Designation[{"display":"ConsumerName"}: Consumer Name 61438-8
+			  -Designation[lang=null, use={"display":"ConsumerName"}]: Consumer Name 61438-8
 			-17787-3
-			  -Designation[{"display":"ConsumerName"}: Consumer Name 17787-3
+			  -Designation[lang=null, use={"display":"ConsumerName"}]: Consumer Name 17787-3
 			-38699-5
-			  -Designation[{"display":"ConsumerName"}: 1,1-Dichloroethane, Air
+			  -Designation[lang=null, use={"display":"ConsumerName"}]: 1,1-Dichloroethane, Air
 			""";
 		assertEquals(expected, hierarchy);
 

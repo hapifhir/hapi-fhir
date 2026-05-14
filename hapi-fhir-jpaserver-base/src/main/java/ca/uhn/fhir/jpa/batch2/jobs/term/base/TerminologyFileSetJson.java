@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
@@ -34,6 +35,8 @@ public class TerminologyFileSetJson implements IModelJson {
 	private Chunk myChunkForCurrentStep;
 	@JsonProperty("resourcesToActivate")
 	private Set<String> myResourcesToActivate;
+	@JsonProperty("stepIdToRecordsAdded")
+	private Map<String, RecordsAddedCounter> myStepIdToRecordsAdded;
 
 	public void addChunk(String theStepId, String theSourceFilename, String theChunkAttachmentId) {
 		Validate.notBlank(theStepId, "theStepId must not be null or blank");
@@ -85,14 +88,26 @@ public class TerminologyFileSetJson implements IModelJson {
 		return (OT) retVal;
 	}
 
-	protected void populateFutureChunksInClone(TerminologyFileSetJson retVal) {
-		retVal.myStepIdToFutureChunks = myStepIdToFutureChunks;
+	protected void populateFutureChunksInClone(TerminologyFileSetJson theFileSetToPopulate) {
+		theFileSetToPopulate.myStepIdToFutureChunks = myStepIdToFutureChunks;
 	}
 
 	public boolean isEmpty() {
 		return myChunkForCurrentStep == null &&
 			(myStepIdToFutureChunks == null || myStepIdToFutureChunks.isEmpty()) &&
-			(myResourcesToActivate == null || myResourcesToActivate.isEmpty());
+			(myResourcesToActivate == null || myResourcesToActivate.isEmpty()) &&
+			(myStepIdToRecordsAdded == null || myStepIdToRecordsAdded.isEmpty());
+	}
+
+	public Map<String, RecordsAddedCounter> getStepIdToRecordsAdded() {
+		if (myStepIdToRecordsAdded == null) {
+			myStepIdToRecordsAdded = new HashMap<>();
+		}
+		return myStepIdToRecordsAdded;
+	}
+
+	public RecordsAddedCounter getRecordsAddedCounter(String theStepId) {
+		return getStepIdToRecordsAdded().computeIfAbsent(theStepId, k -> new RecordsAddedCounter());
 	}
 
 	public static class Chunk implements IModelJson {
@@ -168,6 +183,125 @@ public class TerminologyFileSetJson implements IModelJson {
 		public void setAttachmentId(@Nonnull String theAttachmentId) {
 			Validate.notBlank(theAttachmentId, "theChunkAttachmentId must not be null or blank");
 			myAttachmentId = theAttachmentId;
+		}
+
+	}
+
+	public static class RecordsAddedCounter implements IModelJson {
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("conceptsAdded")
+		private int myConceptsAdded = 0;
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("conceptLinksAdded")
+		private int myConceptLinksAdded = 0;
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("propertiesAdded")
+		private int myPropertiesAdded = 0;
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("designationsAdded")
+		private int myDesignationsAdded = 0;
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("conceptMapsAdded")
+		private int myConceptMapsAdded = 0;
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("conceptMapMappingsAdded")
+		private int myConceptMapMappingsAdded = 0;
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("valueSetsAdded")
+		private int myValueSetsAdded = 0;
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("valueSetsCodesAdded")
+		private int myValueSetCodesAdded = 0;
+
+		public void incrementConceptsAdded(int theAddedConceptCount) {
+			Validate.isTrue(theAddedConceptCount >= 0, "theAddedConceptCount must be >= 0");
+			myConceptsAdded += theAddedConceptCount;
+		}
+
+		public void incrementConceptLinksAdded(int theAddedConceptLinkCount) {
+			Validate.isTrue(theAddedConceptLinkCount >= 0, "theAddedConceptLinkCount must be >= 0");
+			myConceptLinksAdded += theAddedConceptLinkCount;
+		}
+
+		public void incrementPropertiesAdded(int theAddedPropertyCount) {
+			Validate.isTrue(theAddedPropertyCount >= 0, "theAddedPropertyCount must be >= 0");
+			myPropertiesAdded += theAddedPropertyCount;
+		}
+
+		public void incrementDesignationsAdded(int theAddedDesignationCount) {
+			Validate.isTrue(theAddedDesignationCount >= 0, "theAddedDesignationCount must be >= 0");
+			myDesignationsAdded += theAddedDesignationCount;
+		}
+
+		public void incrementConceptMapsAdded(int theConceptMapsAddedCount) {
+			Validate.isTrue(theConceptMapsAddedCount >= 0, "theConceptMapsAddedCount must be >= 0");
+			myConceptMapsAdded += theConceptMapsAddedCount;
+		}
+
+		public void incrementConceptMapMappingsAdded(int theAddedMappingsCount) {
+			Validate.isTrue(theAddedMappingsCount >= 0, "theAddedMappingsCount must be >= 0");
+			myConceptMapMappingsAdded += theAddedMappingsCount;
+		}
+
+		public void incrementValueSetsAdded(int theAddedValueSetsCount) {
+			Validate.isTrue(theAddedValueSetsCount >= 0, "theAddedValueSetsCount must be >= 0");
+			myValueSetsAdded += theAddedValueSetsCount;
+		}
+
+		public void incrementValueSetCodesAdded(int theAddedValueSetCodesCount) {
+			Validate.isTrue(theAddedValueSetCodesCount >= 0, "theAddedValueSetCodesCount must be >= 0");
+			myValueSetCodesAdded += theAddedValueSetCodesCount;
+		}
+
+		public int getConceptsAdded() {
+			return myConceptsAdded;
+		}
+
+		public int getConceptLinksAdded() {
+			return myConceptLinksAdded;
+		}
+
+		public int getPropertiesAdded() {
+			return myPropertiesAdded;
+		}
+
+		public int getDesignationsAdded() {
+			return myDesignationsAdded;
+		}
+
+		public int getConceptMapsAdded() {
+			return myConceptMapsAdded;
+		}
+
+		public int getConceptMapMappingsAdded() {
+			return myConceptMapMappingsAdded;
+		}
+
+		public int getValueSetsAdded() {
+			return myValueSetsAdded;
+		}
+
+		public int getValueSetCodesAdded() {
+			return myValueSetCodesAdded;
+		}
+
+		public void copyFrom(RecordsAddedCounter theRecordsAddedCounter) {
+			myConceptsAdded += theRecordsAddedCounter.myConceptsAdded;
+			myConceptLinksAdded += theRecordsAddedCounter.myConceptLinksAdded;
+			myPropertiesAdded += theRecordsAddedCounter.myPropertiesAdded;
+			myDesignationsAdded += theRecordsAddedCounter.myDesignationsAdded;
+			myConceptMapsAdded += theRecordsAddedCounter.myConceptMapsAdded;
+			myConceptMapMappingsAdded += theRecordsAddedCounter.myConceptMapMappingsAdded;
+			myValueSetsAdded += theRecordsAddedCounter.myValueSetsAdded;
+			myValueSetCodesAdded += theRecordsAddedCounter.myValueSetCodesAdded;
 		}
 
 	}

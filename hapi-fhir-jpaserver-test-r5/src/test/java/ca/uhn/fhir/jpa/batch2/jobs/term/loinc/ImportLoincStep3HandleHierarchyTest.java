@@ -11,10 +11,12 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -58,6 +60,7 @@ class ImportLoincStep3HandleHierarchyTest {
 	void run_LoadCodes() {
 		// Setup
 		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 
 		// Test
 		JobInstance instance = new JobInstance();

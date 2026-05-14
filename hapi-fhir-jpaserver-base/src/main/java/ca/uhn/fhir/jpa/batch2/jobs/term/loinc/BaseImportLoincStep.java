@@ -9,6 +9,8 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import jakarta.annotation.Nonnull;
@@ -94,7 +96,7 @@ public abstract class BaseImportLoincStep<CT>
 						BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
 				CSVParser csvReader = newLoincCsvParser(reader);
 				for (CSVRecord record : csvReader.getRecords()) {
-					handleRecord(jobParameters, codeExtractionContext, record, codeSystemToPopulate, data, sourceFilename);
+					handleRecord(theStepExecutionDetails, jobParameters, codeExtractionContext, record, codeSystemToPopulate, data, sourceFilename);
 				}
 
 			} catch (IOException e) {
@@ -116,7 +118,14 @@ public abstract class BaseImportLoincStep<CT>
 						.addArgument(conceptCount)
 						.log();
 
-				myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulate);
+				UploadStatistics uploadStatistics = myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulate);
+
+				TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter = getRecordsAddedCounter(theStepExecutionDetails);
+				recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
+				recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
+				recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
+				recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
+
 			}
 		}
 
@@ -142,11 +151,19 @@ public abstract class BaseImportLoincStep<CT>
 	protected abstract List<LoincFileNameSpecification> getFilesToProcess();
 
 	protected abstract void handleRecord(
-		LoincJobImportParameters theJobParameters,
+		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
 		CT theContext,
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
 		ImportLoincFileSetJson theData, String theSourceFilename);
+
+	protected TerminologyFileSetJson.RecordsAddedCounter getRecordsAddedCounter(
+		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+
+		ImportLoincFileSetJson data = theStepExecutionDetails.getData();
+		String currentStepId = theStepExecutionDetails.getCurrentStepId();
+		return data.getRecordsAddedCounter(currentStepId);
+	}
 
 	protected record LoincFileNameSpecification(
 			LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum defaultValue, Pattern fileNamePattern) {

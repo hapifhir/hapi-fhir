@@ -8,8 +8,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -40,7 +38,7 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStepWithV
 	}
 
 	@Override
-	protected void handleRecord(LoincJobImportParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData, String theSourceFilename) {
+	protected void handleRecord(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData, String theSourceFilename) {
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		if (isBlank(loincNumber)) {
 			return;

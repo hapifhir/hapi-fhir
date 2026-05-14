@@ -50,11 +50,11 @@ public class ImportLoincStep7HandlePartRelatedCodeMapping
 
 	@Override
 	protected void handleRecord(
-		LoincJobImportParameters theJobParameters,
-		MyBaseContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		ImportLoincFileSetJson theData, String theSourceFilename) {
+            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
+            MyBaseContext theContext,
+            CSVRecord theRecord,
+            CodeSystem theCodeSystemToPopulate,
+            ImportLoincFileSetJson theData, String theSourceFilename) {
 		String partNumber = trim(theRecord.get("PartNumber"));
 		String partName = trim(theRecord.get("PartName"));
 		String extCodeId = trim(theRecord.get("ExtCodeId"));
