@@ -32,7 +32,9 @@ import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.Timing;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -1427,6 +1429,41 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 			pt1.setEffective(new DateTimeType(theDateValue));
 			IIdType id1 = myObservationDao.create(pt1, mySrd).getId().toUnqualified();
 			return id1;
+		}
+
+		/**
+		 * Creating an Observation whose effective is a Timing with only boundsPeriod (no events)
+		 * must succeed. The indexed date has no usable date portion, so the combo non-unique
+		 * extractor should skip that entry rather than fail the write.
+		 */
+		@Test
+		void testCreateObservation_TimingWithOnlyBoundsPeriod_ShouldSucceed() {
+			Observation pt1 = new Observation();
+			pt1.addNote().setText("Hello");
+			Timing timing = new Timing();
+			timing.getRepeat().setBounds(new Period().setStartElement(new DateTimeType("2021-01-02")));
+			pt1.setEffective(timing);
+
+			IIdType id1 = myObservationDao.create(pt1, mySrd).getId().toUnqualified();
+			assertThat(id1).isNotNull();
+			assertThat(id1.getIdPart()).isNotBlank();
+		}
+
+		/**
+		 * Creating an Observation whose effective is a Timing with a well-formed event datetime
+		 * must succeed — the date portion is well-defined and the combo non-unique entry is indexed.
+		 */
+		@Test
+		void testCreateObservation_TimingWithEvent_ShouldSucceed() {
+			Observation pt1 = new Observation();
+			pt1.addNote().setText("Hello");
+			Timing timing = new Timing();
+			timing.addEvent(new DateTimeType("2021-01-02T12:00:01Z").getValue());
+			pt1.setEffective(timing);
+
+			IIdType id1 = myObservationDao.create(pt1, mySrd).getId().toUnqualified();
+			assertThat(id1).isNotNull();
+			assertThat(id1.getIdPart()).isNotBlank();
 		}
 
 	}
