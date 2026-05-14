@@ -1017,51 +1017,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 		Encounter encounter = buildR5EncounterWithLocation();
 
 		// "physicalType" is the R4 name — renamed to "form" in R5, so getChildByName() returns null
-		@Language("JSON")
-		String patchJson = """
-			{
-			  "resourceType": "Parameters",
-			  "parameter": [
-			    {
-			      "name": "operation",
-			      "part": [
-			        {
-			          "name": "type",
-			          "valueCode": "replace"
-			        },
-			        {
-			          "name": "path",
-			          "valueString": "Encounter.location"
-			        },
-			        {
-			          "name": "value",
-			          "part": [
-			            {
-			              "name": "location",
-			              "valueReference": {
-			                "reference": "Location/loc-2"
-			              }
-			            },
-			            {
-			              "name": "physicalType",
-			              "valueCodeableConcept": {
-			                "coding": [
-			                  {
-			                    "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
-			                    "code": "ro"
-			                  }
-			                ]
-			              }
-			            }
-			          ]
-			        }
-			      ]
-			    }
-			  ]
-			}
-			""";
-		org.hl7.fhir.r5.model.Parameters parameters =
-				myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationPatch("physicalType");
 
 		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
 				.isInstanceOf(InvalidRequestException.class)
@@ -1078,6 +1034,16 @@ public class FhirPatchTest implements ITestDataBuilder {
 	void testReplace_R5EncounterLocation_WithValidSubFieldName_Succeeds() {
 		Encounter encounter = buildR5EncounterWithLocation();
 
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationPatch("form");
+
+		myR5Patch.apply(encounter, parameters);
+
+		assertThat(encounter.getLocation()).hasSize(1);
+		assertThat(encounter.getLocation().get(0).getLocation().getReference()).isEqualTo("Location/loc-2");
+		assertThat(encounter.getLocation().get(0).getForm().getCodingFirstRep().getCode()).isEqualTo("ro");
+	}
+
+	private org.hl7.fhir.r5.model.Parameters buildR5EncounterLocationPatch(String theSubFieldName) {
 		@Language("JSON")
 		String patchJson = """
 			{
@@ -1086,32 +1052,16 @@ public class FhirPatchTest implements ITestDataBuilder {
 			    {
 			      "name": "operation",
 			      "part": [
-			        {
-			          "name": "type",
-			          "valueCode": "replace"
-			        },
-			        {
-			          "name": "path",
-			          "valueString": "Encounter.location"
-			        },
+			        { "name": "type", "valueCode": "replace" },
+			        { "name": "path", "valueString": "Encounter.location" },
 			        {
 			          "name": "value",
 			          "part": [
+			            { "name": "location", "valueReference": { "reference": "Location/loc-2" } },
 			            {
-			              "name": "location",
-			              "valueReference": {
-			                "reference": "Location/loc-2"
-			              }
-			            },
-			            {
-			              "name": "form",
+			              "name": "%s",
 			              "valueCodeableConcept": {
-			                "coding": [
-			                  {
-			                    "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
-			                    "code": "ro"
-			                  }
-			                ]
+			                "coding": [ { "system": "http://terminology.hl7.org/CodeSystem/location-physical-type", "code": "ro" } ]
 			              }
 			            }
 			          ]
@@ -1120,15 +1070,8 @@ public class FhirPatchTest implements ITestDataBuilder {
 			    }
 			  ]
 			}
-			""";
-		org.hl7.fhir.r5.model.Parameters parameters =
-				myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
-
-		myR5Patch.apply(encounter, parameters);
-
-		assertThat(encounter.getLocation()).hasSize(1);
-		assertThat(encounter.getLocation().get(0).getLocation().getReference()).isEqualTo("Location/loc-2");
-		assertThat(encounter.getLocation().get(0).getForm().getCodingFirstRep().getCode()).isEqualTo("ro");
+			""".formatted(theSubFieldName);
+		return myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
 	}
 
 	private Encounter buildR5EncounterWithLocation() {

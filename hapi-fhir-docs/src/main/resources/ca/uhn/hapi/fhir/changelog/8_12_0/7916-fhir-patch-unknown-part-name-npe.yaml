@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7916
+title: "Fixed an HTTP 500 error when using a FHIR patch `replace` operation with
+  `value.part` sub-fields that include an element name not recognised by the server.
+  The server now returns HTTP 400 with a message identifying the unknown element name."
