@@ -1007,13 +1007,6 @@ public class FhirPatchTest implements ITestDataBuilder {
 		return params;
 	}
 
-	/**
-	 * Reproduces GL-8717: a FHIR patch "add" using value.part[] with a sub-field name that does
-	 * not exist in the target FHIR version should throw {@link InvalidRequestException}, not NPE.
-	 * "physicalType" is the R4 field name — it was renamed to "form" in R5, so both
-	 * {@code findChildDefinition()} and {@code createAndPopulateNewElement()} NPE when
-	 * {@code getChildByName()} returns null for the unknown name.
-	 */
 	@Test
 	void testAdd_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException() {
 		Encounter encounter = buildR5EncounterWithLocation();
@@ -1025,16 +1018,10 @@ public class FhirPatchTest implements ITestDataBuilder {
 				.hasMessageContaining("HAPI-2926");
 	}
 
-	/**
-	 * Reproduces GL-8717: a FHIR patch replace using value.part[] with a sub-field name that does
-	 * not exist in the target FHIR version should throw {@link InvalidRequestException}, not NPE.
-	 * "physicalType" was renamed to "form" between R4 and R5 on Encounter.location.
-	 */
 	@Test
 	void testReplace_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException() {
 		Encounter encounter = buildR5EncounterWithLocation();
 
-		// "physicalType" is the R4 name — renamed to "form" in R5, so getChildByName() returns null
 		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationPatch("replace", "physicalType");
 
 		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
@@ -1044,10 +1031,6 @@ public class FhirPatchTest implements ITestDataBuilder {
 				.hasMessageContaining("Encounter.location");
 	}
 
-	/**
-	 * Companion to {@link #testReplace_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException()}:
-	 * verifies that the correct R5 sub-field name "form" succeeds.
-	 */
 	@Test
 	void testReplace_R5EncounterLocation_WithValidSubFieldName_Succeeds() {
 		Encounter encounter = buildR5EncounterWithLocation();
