@@ -1018,28 +1018,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 	void testAdd_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException() {
 		Encounter encounter = buildR5EncounterWithLocation();
 
-		@Language("JSON")
-		String patchJson = """
-			{
-			  "resourceType": "Parameters",
-			  "parameter": [{
-			    "name": "operation",
-			    "part": [
-			      { "name": "type", "valueCode": "add" },
-			      { "name": "path", "valueString": "Encounter" },
-			      { "name": "name", "valueString": "location" },
-			      {
-			        "name": "value",
-			        "part": [
-			          { "name": "physicalType", "valueCoding": { "system": "http://example.org", "code": "room" } }
-			        ]
-			      }
-			    ]
-			  }]
-			}
-			""";
-		org.hl7.fhir.r5.model.Parameters parameters =
-				myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationAddPatch("physicalType");
 
 		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
 				.isInstanceOf(InvalidRequestException.class)
@@ -1108,6 +1087,30 @@ public class FhirPatchTest implements ITestDataBuilder {
 			      ]
 			    }
 			  ]
+			}
+			""".formatted(theSubFieldName);
+		return myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
+	}
+
+	private org.hl7.fhir.r5.model.Parameters buildR5EncounterLocationAddPatch(String theSubFieldName) {
+		@Language("JSON")
+		String patchJson = """
+			{
+			  "resourceType": "Parameters",
+			  "parameter": [{
+			    "name": "operation",
+			    "part": [
+			      { "name": "type", "valueCode": "add" },
+			      { "name": "path", "valueString": "Encounter" },
+			      { "name": "name", "valueString": "location" },
+			      {
+			        "name": "value",
+			        "part": [
+			          { "name": "%s", "valueCoding": { "system": "http://snomed.info/sct", "code": "ro" } }
+			        ]
+			      }
+			    ]
+			  }]
 			}
 			""".formatted(theSubFieldName);
 		return myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
