@@ -1011,11 +1011,23 @@ public class FhirPatchTest implements ITestDataBuilder {
 	void testAdd_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException() {
 		Encounter encounter = buildR5EncounterWithLocation();
 
-		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationPatch("add", "physicalType");
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationAddPatch("physicalType");
 
 		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("HAPI-2925");
+	}
+
+	@Test
+	void testAdd_R5EncounterLocation_WithValidSubFieldName_Succeeds() {
+		Encounter encounter = buildR5EncounterWithLocation();
+
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationAddPatch("form");
+
+		myR5Patch.apply(encounter, parameters);
+		assertThat(encounter.getLocation()).hasSize(2);
+		assertThat(encounter.getLocation().get(1).getLocation().getReference()).isEqualTo("Location/loc-2");
+		assertThat(encounter.getLocation().get(1).getForm().getCodingFirstRep().getCode()).isEqualTo("ro");
 	}
 
 	@Test
@@ -1071,6 +1083,36 @@ public class FhirPatchTest implements ITestDataBuilder {
 			  }]
 			}
 			""".formatted(theOperation, theSubFieldName);
+		return myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
+	}
+
+	private org.hl7.fhir.r5.model.Parameters buildR5EncounterLocationAddPatch(String theSubFieldName) {
+		@Language("JSON")
+		String patchJson = """
+			{
+			  "resourceType": "Parameters",
+			  "parameter": [{
+			    "name": "operation",
+			    "part": [
+			      { "name": "type", "valueCode": "add" },
+			      { "name": "path", "valueString": "Encounter" },
+			      { "name": "name", "valueString": "location" },
+			      {
+			        "name": "value",
+			        "part": [
+			          { "name": "location", "valueReference": { "reference": "Location/loc-2" } },
+			          {
+			            "name": "%s",
+			            "valueCodeableConcept": {
+			              "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/location-physical-type", "code": "ro" }]
+			            }
+			          }
+			        ]
+			      }
+			    ]
+			  }]
+			}
+			""".formatted(theSubFieldName);
 		return myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
 	}
 
