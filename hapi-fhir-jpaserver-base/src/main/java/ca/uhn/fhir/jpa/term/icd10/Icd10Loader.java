@@ -80,6 +80,7 @@ public class Icd10Loader {
 			boolean rootConcept = getChildrenByTagName(aClass, "SuperClass").isEmpty();
 			TermConcept termConcept = rootConcept ? codeSystemVersion.addConcept() : new TermConcept();
 			termConcept.setCode(code);
+			termConcept.setCodeSystemVersion(codeSystemVersion);
 
 			// Preferred label and other properties
 			for (Element rubric : getChildrenByTagName(aClass, "Rubric")) {
