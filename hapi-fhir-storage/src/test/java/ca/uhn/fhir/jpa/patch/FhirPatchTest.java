@@ -1057,6 +1057,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 		myR5Patch.apply(encounter, parameters);
 
 		assertThat(encounter.getLocation()).hasSize(1);
+		assertThat(encounter.getLocation().get(0).getLocation().getReference()).isEqualTo("Location/loc-2");
 		assertThat(encounter.getLocation().get(0).getForm().getCodingFirstRep().getCode()).isEqualTo("ro");
 	}
 
@@ -1096,10 +1097,11 @@ public class FhirPatchTest implements ITestDataBuilder {
 				      {
 				        "name": "value",
 				        "part": [
+				          { "name": "location", "valueReference": { "reference": "Location/loc-2" } },
 				          {
 				            "name": "%s",
 				            "valueCodeableConcept": {
-				              "coding": [{ "system": "http://snomed.info/sct", "code": "ro" }]
+				              "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/location-physical-type", "code": "ro" }]
 				            }
 				          }
 				        ]
