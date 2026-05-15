@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: 8759
+issue: 7920
 title: "Previously, FHIR searches that AND together multiple clauses on the same reference
   search parameter (e.g. `AuditEvent?entity=Patient/A&entity=Patient/B`) incorrectly returned
   an empty bundle. This has been fixed."
