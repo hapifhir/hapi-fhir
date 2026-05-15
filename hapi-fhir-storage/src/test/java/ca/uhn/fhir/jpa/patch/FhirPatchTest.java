@@ -1022,6 +1022,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 	void testReplace_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException() {
 		Encounter encounter = buildR5EncounterWithLocation();
 
+		// "physicalType" is the R4 name — renamed to "form" in R5, so getChildByName() returns null
 		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationPatch("replace", "physicalType");
 
 		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
