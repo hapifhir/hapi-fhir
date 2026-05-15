@@ -103,7 +103,7 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 		},
 		indexes = {
 			// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
-			@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
+			@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED, RES_ID, PARTITION_ID"),
 			@Index(name = "IDX_RES_FHIR_ID", columnList = "FHIR_ID"),
 			@Index(
 					name = "IDX_RES_TYPE_DEL_UPDATED",
