@@ -1008,6 +1008,45 @@ public class FhirPatchTest implements ITestDataBuilder {
 	}
 
 	/**
+	 * Reproduces GL-8717: a FHIR patch "add" using value.part[] with a sub-field name that does
+	 * not exist in the target FHIR version should throw {@link InvalidRequestException}, not NPE.
+	 * "physicalType" is the R4 field name — it was renamed to "form" in R5, so both
+	 * {@code findChildDefinition()} and {@code createAndPopulateNewElement()} NPE when
+	 * {@code getChildByName()} returns null for the unknown name.
+	 */
+	@Test
+	void testAdd_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException() {
+		Encounter encounter = buildR5EncounterWithLocation();
+
+		@Language("JSON")
+		String patchJson = """
+			{
+			  "resourceType": "Parameters",
+			  "parameter": [{
+			    "name": "operation",
+			    "part": [
+			      { "name": "type", "valueCode": "add" },
+			      { "name": "path", "valueString": "Encounter" },
+			      { "name": "name", "valueString": "location" },
+			      {
+			        "name": "value",
+			        "part": [
+			          { "name": "physicalType", "valueCoding": { "system": "http://example.org", "code": "room" } }
+			        ]
+			      }
+			    ]
+			  }]
+			}
+			""";
+		org.hl7.fhir.r5.model.Parameters parameters =
+				myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
+
+		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("HAPI-2926");
+	}
+
+	/**
 	 * Reproduces GL-8717: a FHIR patch replace using value.part[] with a sub-field name that does
 	 * not exist in the target FHIR version should throw {@link InvalidRequestException}, not NPE.
 	 * "physicalType" was renamed to "form" between R4 and R5 on Encounter.location.

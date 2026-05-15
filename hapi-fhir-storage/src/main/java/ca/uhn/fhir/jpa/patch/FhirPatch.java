@@ -941,6 +941,10 @@ public class FhirPatch {
 		if (childDef == null) {
 			childName = theElementName + "[x]";
 			childDef = elementDef.getChildByName(childName);
+			if (childDef == null) {
+				throw new InvalidRequestException(
+						Msg.code(2926) + "Unknown element name '" + theElementName + "' for patch operation");
+			}
 			childElement = childDef.getChildByName(
 					childDef.getValidChildNames().iterator().next());
 		} else {
@@ -1049,6 +1053,11 @@ public class FhirPatch {
 				if (isNull(partChildDef)) {
 					name = name + "[x]";
 					partChildDef = theDefinition.getUsableChildElement().getChildByName(name);
+				}
+
+				if (isNull(partChildDef)) {
+					throw new InvalidRequestException(
+							Msg.code(2927) + "Unknown element name '" + name + "' for patch operation");
 				}
 
 				partChildDef.getMutator().setValue(newElement, newValue);
