@@ -1015,7 +1015,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 
 		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
 				.isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining("HAPI-2926");
+				.hasMessageContaining("HAPI-2925");
 	}
 
 	@Test
