@@ -60,7 +60,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -1047,20 +1046,7 @@ public class FhirPatch {
 
 				IBase newValue = maybeMassageToEnumeration(optionalValue.get(), childDefinition);
 
-				BaseRuntimeChildDefinition partChildDef =
-						theDefinition.getUsableChildElement().getChildByName(name);
-
-				if (isNull(partChildDef)) {
-					name = name + "[x]";
-					partChildDef = theDefinition.getUsableChildElement().getChildByName(name);
-				}
-
-				if (isNull(partChildDef)) {
-					throw new InvalidRequestException(
-							Msg.code(2927) + "Unknown element name '" + name + "' for patch operation");
-				}
-
-				partChildDef.getMutator().setValue(newElement, newValue);
+				childDefinition.getUseableChildDef().getMutator().setValue(newElement, newValue);
 
 				// a part represent a datatype or a complexType but not both at the same time.
 				continue;
