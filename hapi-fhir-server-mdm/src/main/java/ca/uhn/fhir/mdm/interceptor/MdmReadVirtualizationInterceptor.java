@@ -238,9 +238,6 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 	 * suffixed with {@literal |version}) or a URN.
 	 */
 	private static boolean isNonLocalReferenceValue(@Nonnull String theValue) {
-		if (isBlank(theValue)) {
-			return false;
-		}
 		return theValue.startsWith("http://") || theValue.startsWith("https://") || theValue.startsWith("urn:");
 	}
 }
