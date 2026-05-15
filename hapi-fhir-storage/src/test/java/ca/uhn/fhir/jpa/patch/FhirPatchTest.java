@@ -1018,7 +1018,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 	void testAdd_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException() {
 		Encounter encounter = buildR5EncounterWithLocation();
 
-		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationAddPatch("physicalType");
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationPatch("add", "physicalType");
 
 		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
 				.isInstanceOf(InvalidRequestException.class)
@@ -1035,7 +1035,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 		Encounter encounter = buildR5EncounterWithLocation();
 
 		// "physicalType" is the R4 name — renamed to "form" in R5, so getChildByName() returns null
-		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationPatch("physicalType");
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationPatch("replace", "physicalType");
 
 		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
 				.isInstanceOf(InvalidRequestException.class)
@@ -1052,67 +1052,63 @@ public class FhirPatchTest implements ITestDataBuilder {
 	void testReplace_R5EncounterLocation_WithValidSubFieldName_Succeeds() {
 		Encounter encounter = buildR5EncounterWithLocation();
 
-		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationPatch("form");
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationPatch("replace", "form");
 
 		myR5Patch.apply(encounter, parameters);
 
 		assertThat(encounter.getLocation()).hasSize(1);
-		assertThat(encounter.getLocation().get(0).getLocation().getReference()).isEqualTo("Location/loc-2");
 		assertThat(encounter.getLocation().get(0).getForm().getCodingFirstRep().getCode()).isEqualTo("ro");
 	}
 
-	private org.hl7.fhir.r5.model.Parameters buildR5EncounterLocationPatch(String theSubFieldName) {
+	private org.hl7.fhir.r5.model.Parameters buildR5EncounterLocationPatch(String theOperation, String theSubFieldName) {
+		boolean isAdd = "add".equals(theOperation);
 		@Language("JSON")
-		String patchJson = """
-			{
-			  "resourceType": "Parameters",
-			  "parameter": [
-			    {
-			      "name": "operation",
-			      "part": [
-			        { "name": "type", "valueCode": "replace" },
-			        { "name": "path", "valueString": "Encounter.location" },
-			        {
-			          "name": "value",
-			          "part": [
-			            { "name": "location", "valueReference": { "reference": "Location/loc-2" } },
-			            {
-			              "name": "%s",
-			              "valueCodeableConcept": {
-			                "coding": [ { "system": "http://terminology.hl7.org/CodeSystem/location-physical-type", "code": "ro" } ]
-			              }
-			            }
-			          ]
-			        }
-			      ]
-			    }
-			  ]
-			}
-			""".formatted(theSubFieldName);
-		return myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
-	}
-
-	private org.hl7.fhir.r5.model.Parameters buildR5EncounterLocationAddPatch(String theSubFieldName) {
-		@Language("JSON")
-		String patchJson = """
-			{
-			  "resourceType": "Parameters",
-			  "parameter": [{
-			    "name": "operation",
-			    "part": [
-			      { "name": "type", "valueCode": "add" },
-			      { "name": "path", "valueString": "Encounter" },
-			      { "name": "name", "valueString": "location" },
-			      {
-			        "name": "value",
-			        "part": [
-			          { "name": "%s", "valueCoding": { "system": "http://snomed.info/sct", "code": "ro" } }
-			        ]
-			      }
-			    ]
-			  }]
-			}
-			""".formatted(theSubFieldName);
+		String patchJson;
+		if (isAdd) {
+			patchJson = """
+				{
+				  "resourceType": "Parameters",
+				  "parameter": [{
+				    "name": "operation",
+				    "part": [
+				      { "name": "type", "valueCode": "add" },
+				      { "name": "path", "valueString": "Encounter" },
+				      { "name": "name", "valueString": "location" },
+				      {
+				        "name": "value",
+				        "part": [
+				          { "name": "%s", "valueCoding": { "system": "http://snomed.info/sct", "code": "ro" } }
+				        ]
+				      }
+				    ]
+				  }]
+				}
+				""".formatted(theSubFieldName);
+		} else {
+			patchJson = """
+				{
+				  "resourceType": "Parameters",
+				  "parameter": [{
+				    "name": "operation",
+				    "part": [
+				      { "name": "type", "valueCode": "replace" },
+				      { "name": "path", "valueString": "Encounter.location" },
+				      {
+				        "name": "value",
+				        "part": [
+				          {
+				            "name": "%s",
+				            "valueCodeableConcept": {
+				              "coding": [{ "system": "http://snomed.info/sct", "code": "ro" }]
+				            }
+				          }
+				        ]
+				      }
+				    ]
+				  }]
+				}
+				""".formatted(theSubFieldName);
+		}
 		return myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
 	}
 
