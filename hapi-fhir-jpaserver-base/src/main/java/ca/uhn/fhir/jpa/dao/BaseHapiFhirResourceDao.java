@@ -3208,6 +3208,44 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
+	@VisibleForTesting
+	public void setMemoryCacheService(MemoryCacheService theMemoryCacheService) {
+		myMemoryCacheService = theMemoryCacheService;
+	}
+
+	@Override
+	protected void postPersist(ResourceTable theEntity, T theResource, RequestDetails theRequestDetails) {
+		super.postPersist(theEntity, theResource, theRequestDetails);
+		invalidateHistoryCountCacheAfterCommit(theEntity);
+	}
+
+	@Override
+	protected void postUpdate(ResourceTable theEntity, T theResource, RequestDetails theRequestDetails) {
+		super.postUpdate(theEntity, theResource, theRequestDetails);
+		invalidateHistoryCountCacheAfterCommit(theEntity);
+	}
+
+	@Override
+	protected void postDelete(ResourceTable theEntity) {
+		super.postDelete(theEntity);
+		invalidateHistoryCountCacheAfterCommit(theEntity);
+	}
+
+	/**
+	 * Invalidates the {@link MemoryCacheService.CacheEnum#HISTORY_COUNT} entries that the
+	 * given resource write affects, scheduled to run after the surrounding transaction commits.
+	 */
+	private void invalidateHistoryCountCacheAfterCommit(ResourceTable theEntity) {
+		myMemoryCacheService.invalidateKeyAfterCommit(
+				MemoryCacheService.CacheEnum.HISTORY_COUNT,
+				MemoryCacheService.HistoryCountKey.forInstance(theEntity.getPersistentId()));
+		myMemoryCacheService.invalidateKeyAfterCommit(
+				MemoryCacheService.CacheEnum.HISTORY_COUNT,
+				MemoryCacheService.HistoryCountKey.forType(theEntity.getResourceType()));
+		myMemoryCacheService.invalidateKeyAfterCommit(
+				MemoryCacheService.CacheEnum.HISTORY_COUNT, MemoryCacheService.HistoryCountKey.forSystem());
+	}
+
 	/**
 	 * Method return type for {@link #reindexCorrectCurrentVersion(ResourceTable, ReindexParameters.ReindexSearchParametersEnum)}
 	 */
