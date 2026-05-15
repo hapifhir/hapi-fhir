@@ -1062,55 +1062,31 @@ public class FhirPatchTest implements ITestDataBuilder {
 	}
 
 	private org.hl7.fhir.r5.model.Parameters buildR5EncounterLocationPatch(String theOperation, String theSubFieldName) {
-		boolean isAdd = "add".equals(theOperation);
 		@Language("JSON")
-		String patchJson;
-		if (isAdd) {
-			patchJson = """
-				{
-				  "resourceType": "Parameters",
-				  "parameter": [{
-				    "name": "operation",
-				    "part": [
-				      { "name": "type", "valueCode": "add" },
-				      { "name": "path", "valueString": "Encounter" },
-				      { "name": "name", "valueString": "location" },
-				      {
-				        "name": "value",
-				        "part": [
-				          { "name": "%s", "valueCoding": { "system": "http://snomed.info/sct", "code": "ro" } }
-				        ]
-				      }
-				    ]
-				  }]
-				}
-				""".formatted(theSubFieldName);
-		} else {
-			patchJson = """
-				{
-				  "resourceType": "Parameters",
-				  "parameter": [{
-				    "name": "operation",
-				    "part": [
-				      { "name": "type", "valueCode": "replace" },
-				      { "name": "path", "valueString": "Encounter.location" },
-				      {
-				        "name": "value",
-				        "part": [
-				          { "name": "location", "valueReference": { "reference": "Location/loc-2" } },
-				          {
-				            "name": "%s",
-				            "valueCodeableConcept": {
-				              "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/location-physical-type", "code": "ro" }]
-				            }
-				          }
-				        ]
-				      }
-				    ]
-				  }]
-				}
-				""".formatted(theSubFieldName);
-		}
+		String patchJson = """
+			{
+			  "resourceType": "Parameters",
+			  "parameter": [{
+			    "name": "operation",
+			    "part": [
+			      { "name": "type", "valueCode": "%s" },
+			      { "name": "path", "valueString": "Encounter.location" },
+			      {
+			        "name": "value",
+			        "part": [
+			          { "name": "location", "valueReference": { "reference": "Location/loc-2" } },
+			          {
+			            "name": "%s",
+			            "valueCodeableConcept": {
+			              "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/location-physical-type", "code": "ro" }]
+			            }
+			          }
+			        ]
+			      }
+			    ]
+			  }]
+			}
+			""".formatted(theOperation, theSubFieldName);
 		return myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
 	}
 
