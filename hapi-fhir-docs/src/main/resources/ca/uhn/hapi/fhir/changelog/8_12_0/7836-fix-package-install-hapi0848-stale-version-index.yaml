@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7836
+title: "Fixed a bug where installing a `CodeSystem` package in `MULTI_VERSION` mode could
+  incorrectly throw `HAPI-0848` (duplicate `CodeSystem`) when the FHIR search index for
+  `CodeSystem.version` was stale or misconfigured. The package installer now falls back
+  to the terminology tables to locate the existing resource when the search index misses."
