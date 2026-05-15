@@ -16,6 +16,9 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategyEnum;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -58,6 +61,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +80,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ExpungeR4Test extends BaseResourceProviderR4Test {
@@ -106,6 +109,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_OLD_QUERY_OLD);
 
 		myServer.getRestfulServer().getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
 	}
@@ -420,6 +424,50 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
 
+	}
+
+	@ParameterizedTest
+	@EnumSource(TokenIndexStrategyEnum.class)
+	void testDeleteExpungeResource_removesCompressedTokenIndexesKeepsCommonTokenTable(TokenIndexStrategyEnum theStrategy) {
+		myStorageSettings.setTokenIndexStrategy(theStrategy);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://sys").setValue("A");
+		p.setGender(Enumerations.AdministrativeGender.MALE);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		JpaPid pid = JpaPid.fromId(id.getIdPartAsLong());
+
+		if (theStrategy.writeToCompressedTokenTables()) {
+			runInTransaction(() -> {
+				assertThat(myTokenCommonResDao.findByResourceId(pid)).isNotEmpty();
+				assertThat(myTokenIdentifierDao.findByResourceId(pid)).isNotEmpty();
+			});
+		} else {
+			runInTransaction(() -> {
+				assertThat(myTokenCommonResDao.findByResourceId(pid)).isEmpty();
+				assertThat(myTokenIdentifierDao.findByResourceId(pid)).isEmpty();
+			});
+		}
+
+		myPatientDao.delete(id, mySrd);
+		myPatientDao.expunge(new ExpungeOptions().setExpungeDeletedResources(true), mySrd);
+
+		runInTransaction(() -> {
+			assertThat(myTokenCommonResDao.findByResourceId(pid))
+					.as("CommonRes link rows removed").isEmpty();
+			assertThat(myTokenIdentifierDao.findByResourceId(pid))
+					.as("Identifier rows removed").isEmpty();
+			if (theStrategy.writeToCompressedTokenTables()) {
+				long genderHash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
+						myPartitionSettings, (RequestPartitionId) null, "Patient", Patient.SP_GENDER,
+						"http://hl7.org/fhir/administrative-gender", "male");
+				long count = myEntityManager
+						.createQuery("SELECT COUNT(t) FROM ResourceIndexedSearchParamTokenCommon t WHERE t.myHashSystemAndValue = :h", Long.class)
+						.setParameter("h", genderHash)
+						.getSingleResult();
+				assertThat(count).as("Common dictionary row retained (insert-only)").isEqualTo(1);
+			}
+		});
 	}
 
 	@Test

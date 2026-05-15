@@ -185,20 +185,6 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 		});
 	}
 
-	/**
-	 * Disabled pending production-side cleanup: at delete/expunge time neither
-	 * {@code DaoSearchParamSynchronizer} (logical delete) nor {@code JpaResourceExpungeService}
-	 * (expunge) currently remove rows from {@code HFJ_SPIDX2_TOKEN_COMMON_RES} or
-	 * {@code HFJ_SPIDX2_TOKEN_IDENTIFIER}. Once that path is wired, this test can be enabled to
-	 * verify the documented insert-only semantic of {@code HFJ_SPIDX2_TOKEN_COMMON} (the Common
-	 * row must survive after the link rows are gone).
-	 */
-	@Test
-	@org.junit.jupiter.api.Disabled("Pending production fix: compressed token tables not cleaned on delete/expunge")
-	void commonTable_isInsertOnlyAfterResourceDeletion() {
-		// Intentionally empty — see method-level Javadoc.
-	}
-
 	// ===== Group C: Update lifecycle (diff-and-apply) =====
 
 	@Test
@@ -297,21 +283,6 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 			assertThat(myTokenIdentifierDao.findByResourceId(pid)).hasSize(identifierBefore);
 			assertThat(myTokenCommonResDao.findByResourceId(pid)).hasSize(commonResBefore);
 		});
-	}
-
-	// ===== Group D: Delete lifecycle =====
-
-	/**
-	 * Disabled pending production-side cleanup. Same root cause as
-	 * {@link #commonTable_isInsertOnlyAfterResourceDeletion()}: at delete/expunge time the
-	 * compressed token tables are not currently cleaned. Once wired, this test can verify that
-	 * {@code HFJ_SPIDX2_TOKEN_COMMON_RES} and {@code HFJ_SPIDX2_TOKEN_IDENTIFIER} drop the
-	 * resource's rows.
-	 */
-	@Test
-	@org.junit.jupiter.api.Disabled("Pending production fix: compressed token tables not cleaned on delete/expunge")
-	void deletePatient_removesCommonResAndIdentifierRows() {
-		// Intentionally empty — see method-level Javadoc.
 	}
 
 	// ===== Group E: Strategy semantics =====

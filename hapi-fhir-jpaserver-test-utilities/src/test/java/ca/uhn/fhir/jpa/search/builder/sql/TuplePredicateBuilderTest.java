@@ -2,13 +2,13 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirMariaDBDialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.hibernate.dialect.Dialect;
@@ -36,13 +36,13 @@ class TuplePredicateBuilderTest {
 	private SqlObjectFactory mySqlBuilderFactory;
 
 	private FhirContext myFhirContext;
-	private StorageSettings myStorageSettings;
+	private JpaStorageSettings myStorageSettings;
 	private PartitionSettings myPartitionSettings;
 
 	@BeforeEach
 	void before() {
 		myFhirContext = FhirContext.forR4Cached();
-		myStorageSettings = new StorageSettings();
+		myStorageSettings = new JpaStorageSettings();
 		myPartitionSettings = new PartitionSettings();
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDatabasePartitionMode(true);
