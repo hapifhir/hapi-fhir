@@ -393,7 +393,7 @@ public class FhirPatch {
 							childDefinitionToUse.getElementDefinition().getChildByName(name);
 
 					if (subChild == null) {
-						throw newUnknownChildElementException(name, theParsedFhirPath.getRawPath());
+						throwUnknownChildElementException(name, theParsedFhirPath.getRawPath());
 					}
 
 					subChild.getMutator().setValue(childDefinitionToUse.getBase(), optionalValue.get());
@@ -940,7 +940,7 @@ public class FhirPatch {
 			childName = theElementName + "[x]";
 			childDef = elementDef.getChildByName(childName);
 			if (childDef == null) {
-				throw newUnknownChildElementException(theElementName, thePath);
+				throwUnknownChildElementException(theElementName, thePath);
 			}
 			childElement = childDef.getChildByName(
 					childDef.getValidChildNames().iterator().next());
@@ -951,13 +951,12 @@ public class FhirPatch {
 		return new ChildDefinition(childDef, childElement);
 	}
 
-	private static InvalidRequestException newUnknownChildElementException(
-			String theFieldName, @Nullable String thePath) {
+	private static void throwUnknownChildElementException(String theFieldName, @Nullable String thePath) {
 		String msg = Msg.code(2925) + "Unknown child element '" + theFieldName + "' for patch operation";
 		if (StringUtils.isNotBlank(thePath)) {
 			msg += " on path '" + thePath + "'";
 		}
-		return new InvalidRequestException(msg);
+		throw new InvalidRequestException(msg);
 	}
 
 	private IBase getNewValue(IBase theParameters, ChildDefinition theChildDefinition) {
