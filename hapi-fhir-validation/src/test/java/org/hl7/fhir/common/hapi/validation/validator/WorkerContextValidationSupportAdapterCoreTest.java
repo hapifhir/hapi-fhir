@@ -198,6 +198,8 @@ public class WorkerContextValidationSupportAdapterCoreTest {
 		String resp = TestingUtilities.loadTestResource("tx", fn);
 		String fp = Utilities.path("[tmp]", "tx", fn);
 		JsonObject ext = testData.getExternals() == null ? null : testData.getExternals().getJsonObject(fn);
+		String fn2 = setup.getTest().has("response2") ? setup.getTest().asString("response2") : null;
+		String resp2 = fn2 == null ? null : TestingUtilities.loadTestResource("tx", fn2);
 		File fo = new File(fp);
 		if (fo.exists()) {
 			fo.delete();
@@ -210,6 +212,7 @@ public class WorkerContextValidationSupportAdapterCoreTest {
 					setup.getTest().asString("name"),
 					req,
 					resp,
+					resp2,
 					setup.getTest().asString("Content-Language"),
 					fp,
 					ext,
@@ -217,7 +220,7 @@ public class WorkerContextValidationSupportAdapterCoreTest {
 					Set.of());
 			assertNull(diff, diff);
 		} else if (setup.getTest().asString("operation").equals("cs-validate-code")) {
-			String diff = TxServiceTestHelper.getDiffForValidation(setup.getTest().str("name"), wrapper, setup.getTest().asString("name"), req, resp, setup.getTest().asString("Content-Language"), fp, ext, true, Set.of());
+			String diff = TxServiceTestHelper.getDiffForValidation(setup.getTest().str("name"), wrapper, setup.getTest().asString("name"), req, resp, resp2, setup.getTest().asString("Content-Language"), fp, ext, true, Set.of());
 			assertNull(diff, diff);
 		}
 	}

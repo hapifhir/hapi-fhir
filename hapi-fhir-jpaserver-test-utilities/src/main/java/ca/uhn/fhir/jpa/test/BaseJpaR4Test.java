@@ -1097,7 +1097,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 
 		@Override
-		public boolean isSuppressMessageId(String path, String messageId) {
+        public String relativeDatePlaceHolder() { return null; }
+
+		@Override
+		public boolean isSuppressMessageId(String path, String messageId, Object... theMessageArguments) {
 			return false;
 		}
 
