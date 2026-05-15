@@ -175,7 +175,8 @@ public class FhirPatch {
 
 		List<IBase> containingElements = fhirPath.evaluate(theResource, parsedExpression, IBase.class);
 		for (IBase nextElement : containingElements) {
-			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
+			ChildDefinition childDefinition =
+					findChildDefinition(nextElement, elementName, containingPath + "." + elementName);
 
 			IBase newValue = getNewValue(theParameters, childDefinition);
 
@@ -216,7 +217,7 @@ public class FhirPatch {
 		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 		for (IBase nextElement : containingElements) {
 
-			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
+			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName, path);
 
 			IBase newValue = getNewValue(theParameters, childDefinition);
 
@@ -282,7 +283,8 @@ public class FhirPatch {
 			IBase theContainingElement,
 			String theListElementName,
 			String theElementToDeletePath) {
-		ChildDefinition childDefinition = findChildDefinition(theContainingElement, theListElementName);
+		ChildDefinition childDefinition =
+				findChildDefinition(theContainingElement, theListElementName, theElementToDeletePath);
 
 		List<IBase> existingValues = new ArrayList<>(
 				childDefinition.getUseableChildDef().getAccessor().getValues(theContainingElement));
@@ -391,12 +393,7 @@ public class FhirPatch {
 							childDefinitionToUse.getElementDefinition().getChildByName(name);
 
 					if (subChild == null) {
-						throw new InvalidRequestException(Msg.code(2925)
-								+ "Unknown child element '"
-								+ name
-								+ "' for patch operation on path '"
-								+ theParsedFhirPath.getRawPath()
-								+ "'");
+						throw newUnknownChildElementException(name, theParsedFhirPath.getRawPath());
 					}
 
 					subChild.getMutator().setValue(childDefinitionToUse.getBase(), optionalValue.get());
@@ -708,7 +705,7 @@ public class FhirPatch {
 		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 		for (IBase nextElement : containingElements) {
 
-			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
+			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName, path);
 
 			List<IBase> existingValues = new ArrayList<>(
 					childDefinition.getUseableChildDef().getAccessor().getValues(nextElement));
@@ -932,7 +929,8 @@ public class FhirPatch {
 		return Optional.of(definition);
 	}
 
-	private ChildDefinition findChildDefinition(IBase theContainingElement, String theElementName) {
+	private ChildDefinition findChildDefinition(
+			IBase theContainingElement, String theElementName, @Nullable String thePath) {
 		BaseRuntimeElementDefinition<?> elementDef = myContext.getElementDefinition(theContainingElement.getClass());
 
 		String childName = theElementName;
@@ -942,8 +940,7 @@ public class FhirPatch {
 			childName = theElementName + "[x]";
 			childDef = elementDef.getChildByName(childName);
 			if (childDef == null) {
-				throw new InvalidRequestException(
-						Msg.code(2926) + "Unknown element name '" + theElementName + "' for patch operation");
+				throw newUnknownChildElementException(theElementName, thePath);
 			}
 			childElement = childDef.getChildByName(
 					childDef.getValidChildNames().iterator().next());
@@ -952,6 +949,15 @@ public class FhirPatch {
 		}
 
 		return new ChildDefinition(childDef, childElement);
+	}
+
+	private static InvalidRequestException newUnknownChildElementException(
+			String theFieldName, @Nullable String thePath) {
+		String msg = Msg.code(2925) + "Unknown child element '" + theFieldName + "' for patch operation";
+		if (StringUtils.isNotBlank(thePath)) {
+			msg += " on path '" + thePath + "'";
+		}
+		return new InvalidRequestException(msg);
 	}
 
 	private IBase getNewValue(IBase theParameters, ChildDefinition theChildDefinition) {
@@ -1043,7 +1049,7 @@ public class FhirPatch {
 
 				// we have a dataType. let's extract its value and assign it.
 				ChildDefinition childDefinition;
-				childDefinition = findChildDefinition(newElement, name);
+				childDefinition = findChildDefinition(newElement, name, null);
 
 				IBase newValue = maybeMassageToEnumeration(optionalValue.get(), childDefinition);
 
@@ -1066,7 +1072,7 @@ public class FhirPatch {
 			if (!part.isEmpty()) {
 				// we have a complexType.  let's find its definition and recursively process
 				// them till all complexTypes are processed.
-				ChildDefinition childDefinition = findChildDefinition(newElement, name);
+				ChildDefinition childDefinition = findChildDefinition(newElement, name, null);
 
 				IBase childNewValue = createAndPopulateNewElement(childDefinition, part);
 
