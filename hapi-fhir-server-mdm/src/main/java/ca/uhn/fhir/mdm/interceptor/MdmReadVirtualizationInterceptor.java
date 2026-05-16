@@ -80,10 +80,10 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 			MdmReadVirtualizationInterceptor.class.getName() + "_CURRENTLY_PROCESSING";
 
 	private static final MdmSearchExpansionSvc.IParamTester PARAM_TESTER_NO_RES_ID =
-			(paramName, param) -> isReferenceParamExpandable(param) && !IAnyResource.SP_RES_ID.equals(paramName);
+			(paramName, param) -> shouldMdmExpandReferenceParam(param) && !IAnyResource.SP_RES_ID.equals(paramName);
 
 	private static final MdmSearchExpansionSvc.IParamTester PARAM_TESTER_ALL =
-			(paramName, param) -> isReferenceParamExpandable(param);
+			(paramName, param) -> shouldMdmExpandReferenceParam(param);
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -220,22 +220,20 @@ public class MdmReadVirtualizationInterceptor<P extends IResourcePersistentId<?>
 		return originalResource;
 	}
 
-	private static boolean isReferenceParamExpandable(BaseParam theParam) {
+	private static boolean shouldMdmExpandReferenceParam(BaseParam theParam) {
 		if (theParam instanceof ReferenceParam refParam) {
 			if (refParam.hasChain()) {
 				return false;
 			}
-			return !isNonLocalReferenceValue(refParam.getValue());
+			return !isCanonicalReference(refParam.getValue());
 		}
 		return true;
 	}
 
 	/**
-	 * Returns {@literal true} if the given reference value is not a local FHIR
-	 * resource id — i.e. it is an absolute URL (literal or canonical, optionally
-	 * suffixed with {@literal |version}) or a URN.
+	 * Returns {@literal true} if the given reference value is an absolute canonical URL or a URN.
 	 */
-	private static boolean isNonLocalReferenceValue(@Nonnull String theValue) {
+	private static boolean isCanonicalReference(@Nonnull String theValue) {
 		return theValue.startsWith("http://") || theValue.startsWith("https://") || theValue.startsWith("urn:");
 	}
 }
