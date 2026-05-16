@@ -375,7 +375,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"http://", "https://", "urn:"})
-	public void testSearch_ObservationWithUrlReference_SkipMDMExpand(String paramPrefix) {
+	void testSearch_ObservationWithUrlReference_SkipMDMExpand(String paramPrefix) {
 		// Setup
 		createTestPatients(true);
 		createObservation(withSubject(mySourcePatientA0Id), withObservationCode("http://foo", "code0"));
