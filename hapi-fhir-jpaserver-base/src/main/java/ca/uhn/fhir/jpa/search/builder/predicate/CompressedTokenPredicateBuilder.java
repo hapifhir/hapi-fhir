@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParam
 import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
@@ -63,6 +64,7 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 	// IDENTIFIER mode: primary table is HFJ_SPIDX2_TOKEN_IDENTIFIER
 	private DbColumn myColumnIdentifierHashIdentity;
 	private DbColumn myColumnIdentifierHashValue;
+	private DbColumn myColumnIdentifierTypeHashSysAndValue;
 
 	public CompressedTokenPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, TokenIndexMode theMode) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable(theMode.getTableName()));
@@ -74,6 +76,7 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 		} else {
 			myColumnIdentifierHashIdentity = getTable().addColumn("HASH_IDENTITY");
 			myColumnIdentifierHashValue = getTable().addColumn("HASH_VALUE");
+			myColumnIdentifierTypeHashSysAndValue = getTable().addColumn("TYPE_HASH_SYS_AND_VALUE");
 		}
 	}
 
@@ -212,7 +215,17 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 			FhirVersionIndependentConcept theToken,
 			boolean theWantEquals) {
 
+		String system = theToken.getSystem();
 		String code = theToken.getCode();
+
+		// For :of-type searches with both system and code, use TYPE_HASH_SYS_AND_VALUE for direct lookup
+		if (theSearchParamName.endsWith(Constants.PARAMQUALIFIER_TOKEN_OF_TYPE) && system != null && code != null) {
+			long hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
+					getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, system, code);
+			return theWantEquals
+					? BinaryCondition.equalTo(myColumnIdentifierTypeHashSysAndValue, generatePlaceholder(hash))
+					: BinaryCondition.notEqualTo(myColumnIdentifierTypeHashSysAndValue, generatePlaceholder(hash));
+		}
 
 		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
 				getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName);

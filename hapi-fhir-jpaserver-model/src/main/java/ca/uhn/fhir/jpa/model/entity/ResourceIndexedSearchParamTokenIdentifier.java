@@ -82,8 +82,8 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	@Column(name = "SP_VALUE", length = MAX_LENGTH, nullable = false)
 	private String myValue;
 
-	@Column(name = "HASH_VALUE", nullable = false)
-	private long myHashValue;
+	@Column(name = "HASH_VALUE", nullable = true)
+	private Long myHashValue;
 
 	@Column(name = "TYPE_HASH_SYS_AND_VALUE", nullable = true)
 	private Long myTypeHashSystemAndValue;
@@ -116,7 +116,7 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 			long theHashIdentity,
 			Long theSystemUrlId,
 			String theValue,
-			long theHashValue,
+			Long theHashValue,
 			Long theTypeHashSystemAndValue) {
 		myPartitionIdValue = thePartitionId;
 		myResourceId = theResourceId;
@@ -156,7 +156,7 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 		return myValue;
 	}
 
-	public long getHashValue() {
+	public Long getHashValue() {
 		return myHashValue;
 	}
 

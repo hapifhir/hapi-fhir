@@ -41,6 +41,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -111,6 +112,13 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	 */
 	@Column(name = "HASH_VALUE", nullable = true)
 	private Long myHashValue;
+
+	/**
+	 * Transient flag indicating this token was extracted from an Identifier datatype.
+	 * Used for routing to compressed token tables - not persisted to HFJ_SPIDX_TOKEN.
+	 */
+	@Transient
+	private boolean myFromIdentifierDatatype;
 
 	@ManyToOne(
 			optional = false,
@@ -268,6 +276,15 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	private void setHashValue(Long theHashValue) {
 		myHashValue = theHashValue;
+	}
+
+	public boolean isFromIdentifierDatatype() {
+		return myFromIdentifierDatatype;
+	}
+
+	public ResourceIndexedSearchParamToken setFromIdentifierDatatype(boolean theFromIdentifierDatatype) {
+		myFromIdentifierDatatype = theFromIdentifierDatatype;
+		return this;
 	}
 
 	@Override

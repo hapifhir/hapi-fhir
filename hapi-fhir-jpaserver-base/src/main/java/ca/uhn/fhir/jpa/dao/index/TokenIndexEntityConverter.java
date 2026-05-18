@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommon;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommonRes;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenIdentifier;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.rest.api.Constants;
 import jakarta.annotation.Nullable;
 
 public final class TokenIndexEntityConverter {
@@ -52,6 +53,12 @@ public final class TokenIndexEntityConverter {
 
 	public static ResourceIndexedSearchParamTokenIdentifier toIdentifier(
 			ResourceIndexedSearchParamToken theSource, ResourceTable theEntity, Long theSystemUrlId) {
+		// TYPE_HASH_SYS_AND_VALUE is only meaningful for :of-type tokens
+		Long typeHashSysAndValue = null;
+		if (theSource.getParamName().endsWith(Constants.PARAMQUALIFIER_TOKEN_OF_TYPE)) {
+			typeHashSysAndValue = theSource.getHashSystemAndValue();
+		}
+
 		return new ResourceIndexedSearchParamTokenIdentifier(
 						partitionIdOrNull(theSource.getPartitionId()),
 						theEntity.getId().getId(),
@@ -59,7 +66,7 @@ public final class TokenIndexEntityConverter {
 						theSystemUrlId,
 						theSource.getValue(),
 						theSource.getHashValue(),
-						null)
+						typeHashSysAndValue)
 				.setResource(theEntity);
 	}
 

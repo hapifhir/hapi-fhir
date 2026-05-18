@@ -230,7 +230,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidx2TokenIdentifier.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
 			spidx2TokenIdentifier.addColumn("HASH_IDENTITY").nonNullable().type(ColumnTypeEnum.LONG);
 			spidx2TokenIdentifier.addColumn("SP_SYSTEM_URL_ID").nullable().type(ColumnTypeEnum.LONG);
-			spidx2TokenIdentifier.addColumn("HASH_VALUE").nonNullable().type(ColumnTypeEnum.LONG);
+			spidx2TokenIdentifier.addColumn("HASH_VALUE").nullable().type(ColumnTypeEnum.LONG);
 			spidx2TokenIdentifier
 					.addColumn("TYPE_HASH_SYS_AND_VALUE")
 					.nullable()

@@ -34,11 +34,13 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -455,6 +457,158 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 				.as("Should find patient with birthdate but no identifier")
 				.containsExactly(id3);
 		}
+	}
+
+	// ===== Group H: :of-type token indexing =====
+
+	@Test
+	void createPatient_identifierWithType_routesToIdentifierTable() {
+		myStorageSettings.setIndexIdentifierOfType(true);
+
+		Patient p = new Patient();
+		Identifier id = p.addIdentifier();
+		id.setSystem("http://example.com/ids").setValue("MRN123");
+		id.getType().addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
+
+		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		JpaPid pid = JpaPid.fromId(patientId.getIdPartAsLong());
+
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamTokenIdentifier> identifiers =
+				myTokenIdentifierDao.findByResourceId(pid);
+
+			// Should have 2 rows: one for "identifier", one for "identifier:of-type"
+			assertThat(identifiers).hasSize(2);
+
+			// Regular identifier row
+			ResourceIndexedSearchParamTokenIdentifier regularRow = identifiers.stream()
+				.filter(r -> r.getValue().equals("MRN123"))
+				.findFirst().orElseThrow();
+			assertThat(regularRow.getTypeHashSystemAndValue())
+				.as("regular identifier should NOT have TYPE_HASH_SYS_AND_VALUE")
+				.isNull();
+
+			// :of-type row (value = "MR|MRN123")
+			ResourceIndexedSearchParamTokenIdentifier ofTypeRow = identifiers.stream()
+				.filter(r -> r.getValue().equals("MR|MRN123"))
+				.findFirst().orElseThrow();
+			assertThat(ofTypeRow.getTypeHashSystemAndValue())
+				.as(":of-type row should have TYPE_HASH_SYS_AND_VALUE populated")
+				.isNotNull();
+
+			long expectedHash = hashSysAndValue("Patient", "identifier:of-type",
+				"http://terminology.hl7.org/CodeSystem/v2-0203", "MR|MRN123");
+			assertThat(ofTypeRow.getTypeHashSystemAndValue()).isEqualTo(expectedHash);
+		});
+	}
+
+	@Test
+	void createPatient_identifierWithMultipleTypeCodingsRoutes_createsMultipleOfTypeRows() {
+		myStorageSettings.setIndexIdentifierOfType(true);
+
+		Patient p = new Patient();
+		Identifier id = p.addIdentifier();
+		id.setSystem("http://example.com/ids").setValue("MRN123");
+		// Add TWO type codings
+		id.getType()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
+		id.getType()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("SS");
+
+		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		JpaPid pid = JpaPid.fromId(patientId.getIdPartAsLong());
+
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamTokenIdentifier> identifiers =
+				myTokenIdentifierDao.findByResourceId(pid);
+
+			// Should have 3 rows: 1 regular + 2 :of-type (one per coding)
+			assertThat(identifiers).hasSize(3);
+
+			// Regular identifier row
+			assertThat(identifiers.stream().filter(r -> r.getValue().equals("MRN123")).count())
+				.as("one regular identifier row").isEqualTo(1);
+
+			// Two :of-type rows
+			ResourceIndexedSearchParamTokenIdentifier mrRow = identifiers.stream()
+				.filter(r -> r.getValue().equals("MR|MRN123"))
+				.findFirst().orElseThrow();
+			ResourceIndexedSearchParamTokenIdentifier ssRow = identifiers.stream()
+				.filter(r -> r.getValue().equals("SS|MRN123"))
+				.findFirst().orElseThrow();
+
+			assertThat(mrRow.getTypeHashSystemAndValue()).isNotNull();
+			assertThat(ssRow.getTypeHashSystemAndValue()).isNotNull();
+			assertThat(mrRow.getTypeHashSystemAndValue())
+				.as("different type codes should have different hashes")
+				.isNotEqualTo(ssRow.getTypeHashSystemAndValue());
+		});
+	}
+
+	@Test
+	void searchIdentifier_ofType_findsResource() {
+		myStorageSettings.setIndexIdentifierOfType(true);
+
+		Patient p = new Patient();
+		Identifier id = p.addIdentifier();
+		id.setSystem("http://example.com/ids").setValue("MRN123");
+		id.getType().addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
+
+		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Patient.SP_IDENTIFIER, new TokenParam(
+			"http://terminology.hl7.org/CodeSystem/v2-0203", "MR|MRN123")
+			.setModifier(TokenParamModifier.OF_TYPE));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
+		assertThat(results).containsExactly(patientId);
+	}
+
+	@Test
+	void searchIdentifier_ofType_withMultipleTypeCodingsFindsResourceByEitherType() {
+		myStorageSettings.setIndexIdentifierOfType(true);
+
+		Patient p = new Patient();
+		Identifier id = p.addIdentifier();
+		id.setSystem("http://example.com/ids").setValue("MRN123");
+		id.getType()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
+		id.getType()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("SS");
+
+		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		// Search by MR type - should find
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Patient.SP_IDENTIFIER, new TokenParam(
+			"http://terminology.hl7.org/CodeSystem/v2-0203", "MR|MRN123")
+			.setModifier(TokenParamModifier.OF_TYPE));
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
+		assertThat(results).as("should find by MR type").containsExactly(patientId);
+
+		// Search by SS type - should also find
+		params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Patient.SP_IDENTIFIER, new TokenParam(
+			"http://terminology.hl7.org/CodeSystem/v2-0203", "SS|MRN123")
+			.setModifier(TokenParamModifier.OF_TYPE));
+		results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
+		assertThat(results).as("should find by SS type").containsExactly(patientId);
 	}
 
 	// ===== Helpers =====
