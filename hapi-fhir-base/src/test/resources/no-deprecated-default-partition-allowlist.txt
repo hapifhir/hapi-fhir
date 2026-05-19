@@ -23,6 +23,5 @@ hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/regist
 hapi-fhir-jpaserver-subscription/src/main/java/ca/uhn/fhir/jpa/topic/SubscriptionTopicRegisteringListener.java 1
 hapi-fhir-storage-batch2-jobs/src/main/java/ca/uhn/fhir/batch2/jobs/imprt/ConsumeFilesStepV1.java 1
 hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/dao/tx/HapiTransactionService.java 1
-hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/dao/tx/IHapiTransactionService.java 1
 hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/subscription/model/ResourceDeliveryMessage.java 1
 hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/subscription/model/ResourceModifiedMessage.java 1

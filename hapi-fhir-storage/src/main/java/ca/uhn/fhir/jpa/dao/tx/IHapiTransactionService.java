@@ -74,10 +74,15 @@ public interface IHapiTransactionService {
 	}
 
 	/**
-	 * Convenience for TX working with non-partitioned entities.
+	 * Convenience for transactions working with non-partitioned entities, or with whichever partition is
+	 * configured as the default. Concrete implementations should override to route through the configured
+	 * default partition ID (see
+	 * {@link ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings#getDefaultRequestPartitionId()}). The
+	 * interface-level default falls back to a {@code null} partition ID, matching the historical behavior
+	 * when no settings instance is reachable.
 	 */
 	default IExecutionBuilder withSystemRequestOnDefaultPartition() {
-		return withSystemRequestOnPartition(RequestPartitionId.defaultPartition());
+		return withSystemRequestOnPartition(RequestPartitionId.fromPartitionId(null));
 	}
 
 	/**

@@ -127,6 +127,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 		return buildExecutionBuilder(null);
 	}
 
+	@Override
+	public IExecutionBuilder withSystemRequestOnDefaultPartition() {
+		return withSystemRequestOnPartition(myPartitionSettings.getDefaultRequestPartitionId());
+	}
+
 	protected IExecutionBuilder buildExecutionBuilder(@Nullable RequestDetails theRequestDetails) {
 		return new ExecutionBuilder(theRequestDetails);
 	}
