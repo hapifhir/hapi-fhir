@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class PackageInstallerSvcImplRewriteHistoryTest extends BaseJpaR4Test {
+public class PackageInstallerSvcRewriteHistoryR4Test extends BaseJpaR4Test {
 	public static final IIdType CONCEPT_MAP_TEST_ID = new IdDt("ConceptMap/PackageInstallerSvcImplRewriteHistoryTest");
 	@Autowired
 	PackageInstallerSvcImpl mySvc;
@@ -41,7 +41,7 @@ public class PackageInstallerSvcImplRewriteHistoryTest extends BaseJpaR4Test {
 
 		// execute
 		// red-green this threw a NPE before the fix
-		mySvc.createOrUpdateResource(myConceptMapDao, conceptMap, null, new PackageInstallationSpec());
+		mySvc.installResource(myConceptMapDao, conceptMap, null, new PackageInstallationSpec());
 
 		// verify
 		IBundleProvider readConceptMap = myConceptMapDao.search(new SearchParameterMap().add(ConceptMap.SP_URL, new UriParam("http://example.com/ConceptMap/testcm")));

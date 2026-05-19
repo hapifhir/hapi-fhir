@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -218,6 +219,20 @@ public class MemoryCacheService {
 
 	public void invalidateAllCaches() {
 		myCaches.values().forEach(Cache::invalidateAll);
+	}
+
+	/**
+	 * Schedules a {@code Cache#invalidate(Object)} for the given key to run when the current
+	 * database transaction successfully commits, or executes immediately if no transaction is
+	 * active.
+	 */
+	public <K> void invalidateKeyAfterCommit(CacheEnum theCache, K theKey) {
+		if (!theCache.getKeyType().isAssignableFrom(theKey.getClass())) {
+			throw new IllegalArgumentException(Msg.code(2929) + "Key type " + theKey.getClass()
+					+ " doesn't match expected " + theCache.getKeyType() + " for cache " + theCache);
+		}
+		HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(
+				() -> getCache(theCache).invalidate(theKey));
 	}
 
 	private <K, T> Cache<K, T> getCache(CacheEnum theCache) {
