@@ -1,6 +1,5 @@
 ```mermaid
 flowchart TB
-{{snippet:file:hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/_snippets/mermaid_palette.mmd}}
     Client(["HTTP<br/>Client"]):::app
     Receive["Server Receives<br/>HTTP Request"]:::step
     MapURL["Server Maps Request<br/>URL into Operation"]:::step
@@ -23,30 +22,30 @@ flowchart TB
     PreProcExceptionHook["Java Hook:<br/>SERVER_PRE_PROCESS_OUTGOING_EXCEPTION"]:::javahook
     OutcomeHook["Java Hook:<br/>SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME"]:::javahook
 
-    Client e1@-- "PUT /Patient/123<br/>Content-Type: application/json" --> Receive
-    Receive -.-> PreProcHook
-    PreProcHook e2@--> MapURL
-    MapURL -.-> PreHandlerSelectedHook
-    PreHandlerSelectedHook e3@--> LocateHandler
-    LocateHandler -.-> PostProcHook
-    PostProcHook e4@--> PreHandledHook
-    PreHandledHook e5@--> Process
+    Client -- "PUT /Patient/123<br/>Content-Type: application/json" --> Receive
+    Receive --> PreProcHook
+    PreProcHook --> MapURL
+    MapURL --> PreHandlerSelectedHook
+    PreHandlerSelectedHook --> LocateHandler
+    LocateHandler --> PostProcHook
+    PostProcHook --> PreHandledHook
+    PreHandledHook --> Process
 
-    Process e6@-- "normal" --> Response
-    Response -.-> OutgoingHook
-    OutgoingHook e7@--> WriterCreatedHook
-    WriterCreatedHook e8@--> Sent
+    Process -- "normal" --> Response
+    Response --> OutgoingHook
+    OutgoingHook --> WriterCreatedHook
+    WriterCreatedHook --> Sent
 
-    Process e9@-- "exception" --> HandleExceptionHook
-    HandleExceptionHook e10@--> PreProcExceptionHook
-    PreProcExceptionHook e11@--> ExceptionTranslated
-    ExceptionTranslated -.-> OutcomeHook
-    OutcomeHook e12@--> Sent
+    Process -- "exception" --> HandleExceptionHook
+    HandleExceptionHook --> PreProcExceptionHook
+    PreProcExceptionHook --> ExceptionTranslated
+    ExceptionTranslated --> OutcomeHook
+    OutcomeHook --> Sent
 
-    Sent e13@-- "normal" --> CompletedNormallyHook
-    CompletedNormallyHook e14@--> CompletedHook
-    Sent e15@-- "exception" --> CompletedHook
-    CompletedHook e16@--> Client
+    Sent -- "normal" --> CompletedNormallyHook
+    CompletedNormallyHook --> CompletedHook
+    Sent -- "exception" --> CompletedHook
+    CompletedHook --> Client
 
     click PreProcHook "/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#SERVER_INCOMING_REQUEST_PRE_PROCESSED" "Open SERVER_INCOMING_REQUEST_PRE_PROCESSED pointcut docs"
     click PreHandlerSelectedHook "/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED" "Open SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED pointcut docs"

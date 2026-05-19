@@ -1,6 +1,5 @@
 ```mermaid
 flowchart TB
-{{snippet:file:hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/_snippets/mermaid_palette.mmd}}
     Client(["HTTP<br/>Client"]):::app
 
     subgraph PlainServer["Plain Server"]
@@ -30,27 +29,27 @@ flowchart TB
         TxnCommit["Database transaction<br/>committed"]:::step
     end
 
-    Client e1@-- "PUT /Patient/123<br/>Content-Type: application/json" --> Receive
-    Receive e2@--> TxnOpen
-    TxnOpen e3@--> Decide
+    Client -- "PUT /Patient/123<br/>Content-Type: application/json" --> Receive
+    Receive --> TxnOpen
+    TxnOpen --> Decide
 
-    Decide e4@-- "Read" --> CacheCheck
-    CacheCheck -.-> PreCheckHook
-    PreCheckHook e5@--> Search
-    Search -.-> PreSearchHook
-    PreSearchHook e6@--> Loaded
+    Decide -- "Read" --> CacheCheck
+    CacheCheck --> PreCheckHook
+    PreCheckHook --> Search
+    Search --> PreSearchHook
+    PreSearchHook --> Loaded
 
-    Decide e7@-- "Write" --> FetchExisting
-    FetchExisting -.-> PreStorageHook
-    PreStorageHook e8@--> EntityUpdated
-    EntityUpdated -.-> PreCommitHook
-    PreCommitHook e9@--> Loaded
+    Decide -- "Write" --> FetchExisting
+    FetchExisting --> PreStorageHook
+    PreStorageHook --> EntityUpdated
+    EntityUpdated --> PreCommitHook
+    PreCommitHook --> Loaded
 
-    Loaded -.-> PreAccessHook
-    PreAccessHook e10@--> TxnCommit
-    TxnCommit e11@--> Response
-    Response -.-> PreShowHook
-    PreShowHook e12@--> Client
+    Loaded --> PreAccessHook
+    PreAccessHook --> TxnCommit
+    TxnCommit --> Response
+    Response --> PreShowHook
+    PreShowHook --> Client
 
     click PreShowHook "/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PRESHOW_RESOURCES" "Open STORAGE_PRESHOW_RESOURCES pointcut docs"
     click PreCheckHook "/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PRECHECK_FOR_CACHED_SEARCH" "Open STORAGE_PRECHECK_FOR_CACHED_SEARCH pointcut docs"
