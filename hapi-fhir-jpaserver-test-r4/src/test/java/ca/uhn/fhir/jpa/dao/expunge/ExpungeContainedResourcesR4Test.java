@@ -57,12 +57,12 @@ class ExpungeContainedResourcesR4Test extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		JpaStorageSettings theDefaults = new JpaStorageSettings();
-		myStorageSettings.setExpungeEnabled(theDefaults.isExpungeEnabled());
-		myStorageSettings.setAllowMultipleDelete(theDefaults.isAllowMultipleDelete());
-		myStorageSettings.setIndexOnContainedResources(theDefaults.isIndexOnContainedResources());
-		myStorageSettings.setIndexOnContainedResourcesRecursively(theDefaults.isIndexOnContainedResourcesRecursively());
-		myStorageSettings.setEnforceReferentialIntegrityOnDelete(theDefaults.isEnforceReferentialIntegrityOnDelete());
+		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
+		myStorageSettings.setExpungeEnabled(defaultStorageSettings.isExpungeEnabled());
+		myStorageSettings.setAllowMultipleDelete(defaultStorageSettings.isAllowMultipleDelete());
+		myStorageSettings.setIndexOnContainedResources(defaultStorageSettings.isIndexOnContainedResources());
+		myStorageSettings.setIndexOnContainedResourcesRecursively(defaultStorageSettings.isIndexOnContainedResourcesRecursively());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(defaultStorageSettings.isEnforceReferentialIntegrityOnDelete());
 	}
 
 	/**
