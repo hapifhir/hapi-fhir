@@ -395,7 +395,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		// still-alive resource has contained-resource indexing turned on and contains
 		// a child that references this resource: per-resource $expunge of this
 		// resource would otherwise leave those rows behind and the subsequent
-		// DELETE FROM HFJ_RESOURCE would violate FK_RESLINK_TARGET. See GL-8648.
+		// DELETE FROM HFJ_RESOURCE would violate FK_RESLINK_TARGET.
 		myResourceLinkDao.deleteByTargetResourceId(theResourceId);
 	}
 
