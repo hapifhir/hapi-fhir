@@ -17,10 +17,7 @@ import java.util.Set;
  */
 public class PatientLockingInterceptor {
 
-	private final Set<String> myLockedPatients = Set.of(
-		"Patient/131707439",
-		"Patient/131896579"
-	);
+	private final Set<String> myLockedPatients = Set.of("Patient/131707439", "Patient/131896579");
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	void update(RequestDetails theRequestDetails, IBaseResource theOldResource, IBaseResource theNewResource) {
@@ -40,19 +37,19 @@ public class PatientLockingInterceptor {
 
 	private void validateNotLocked(RequestDetails theRequestDetails, IBaseResource resource) {
 		if (theRequestDetails != null) {
-			String resourceId = resource.getIdElement().toUnqualifiedVersionless().getValue();
-			ValidateUtil.isTrueOrThrowInvalidRequest(!myLockedPatients.contains(resourceId), "Resource is locked: %s", resourceId);
+			String resourceId =
+					resource.getIdElement().toUnqualifiedVersionless().getValue();
+			ValidateUtil.isTrueOrThrowInvalidRequest(
+					!myLockedPatients.contains(resourceId), "Resource is locked: %s", resourceId);
 
 			FhirContext ctx = theRequestDetails.getFhirContext();
-			List<String> owners = ctx.newTerser().getCompartmentOwnersForResource("Patient", resource, Set.of())
-				.stream()
-				.map(t->t.toUnqualifiedVersionless().getValue())
-				.toList();
+			List<String> owners =
+					ctx.newTerser().getCompartmentOwnersForResource("Patient", resource, Set.of()).stream()
+							.map(t -> t.toUnqualifiedVersionless().getValue())
+							.toList();
 
 			Collection<String> intersection = CollectionUtils.intersection(owners, myLockedPatients);
 			ValidateUtil.isTrueOrThrowInvalidRequest(intersection.isEmpty(), "Compartment is locked: %s", intersection);
 		}
 	}
-
-
 }
