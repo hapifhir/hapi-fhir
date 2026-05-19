@@ -5,6 +5,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -36,6 +38,51 @@ class HapiTransactionServiceDefaultPartitionTest {
 		RequestPartitionId partition = partitionIdOnSystemRequestDefault(settings);
 
 		assertThat(partition.getFirstPartitionIdOrNull()).isNull();
+	}
+
+	@Test
+	void executeWithDefaultPartitionInContext_whenDefaultPartitionIdConfigured_threadLocalSeesConfiguredId() {
+		PartitionSettings settings = new PartitionSettings();
+		settings.setDefaultPartitionId(7);
+		HapiTransactionService svc = new HapiTransactionService();
+		svc.setPartitionSettingsForUnitTest(settings);
+
+		AtomicReference<RequestPartitionId> insideCallback = new AtomicReference<>();
+		svc.executeWithDefaultPartitionInContext(() -> {
+			insideCallback.set(HapiTransactionService.getRequestPartitionAssociatedWithThread());
+			return null;
+		});
+
+		assertThat(insideCallback.get()).isNotNull();
+		assertThat(insideCallback.get().getFirstPartitionIdOrNull()).isEqualTo(7);
+	}
+
+	@Test
+	void executeWithDefaultPartitionInContext_whenSettingsUnconfigured_threadLocalSeesNullPartition() {
+		PartitionSettings settings = new PartitionSettings();
+		HapiTransactionService svc = new HapiTransactionService();
+		svc.setPartitionSettingsForUnitTest(settings);
+
+		AtomicReference<RequestPartitionId> insideCallback = new AtomicReference<>();
+		svc.executeWithDefaultPartitionInContext(() -> {
+			insideCallback.set(HapiTransactionService.getRequestPartitionAssociatedWithThread());
+			return null;
+		});
+
+		assertThat(insideCallback.get()).isNotNull();
+		assertThat(insideCallback.get().getFirstPartitionIdOrNull()).isNull();
+	}
+
+	@Test
+	void executeWithDefaultPartitionInContext_restoresPreviousThreadLocalAfterCallback() {
+		PartitionSettings settings = new PartitionSettings();
+		settings.setDefaultPartitionId(7);
+		HapiTransactionService svc = new HapiTransactionService();
+		svc.setPartitionSettingsForUnitTest(settings);
+
+		assertThat(HapiTransactionService.getRequestPartitionAssociatedWithThread()).isNull();
+		svc.executeWithDefaultPartitionInContext(() -> null);
+		assertThat(HapiTransactionService.getRequestPartitionAssociatedWithThread()).isNull();
 	}
 
 	private static RequestPartitionId partitionIdOnSystemRequestDefault(PartitionSettings theSettings) {

@@ -730,9 +730,9 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	public static <T> T executeWithDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
+	public <T> T executeWithDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
 		RequestPartitionId previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
-		ourRequestPartitionThreadLocal.set(RequestPartitionId.defaultPartition());
+		ourRequestPartitionThreadLocal.set(myPartitionSettings.getDefaultRequestPartitionId());
 		try {
 			return theCallback.call();
 		} finally {
