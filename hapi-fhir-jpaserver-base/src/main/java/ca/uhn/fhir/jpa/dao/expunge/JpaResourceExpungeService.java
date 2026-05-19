@@ -388,6 +388,15 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		if (resource == null || resource.isHasLinks()) {
 			myResourceLinkDao.deleteByResourceId(theResourceId);
 		}
+		// Also delete any HFJ_RES_LINK rows where this resource is the TARGET of a
+		// link from some other resource. The {@code isHasLinks()} flag on the resource
+		// row only tracks SOURCE-side links (i.e. links this resource owns), so it
+		// cannot be used to gate this delete. Residual target-side rows arise when a
+		// still-alive resource has contained-resource indexing turned on and contains
+		// a child that references this resource: per-resource $expunge of this
+		// resource would otherwise leave those rows behind and the subsequent
+		// DELETE FROM HFJ_RESOURCE would violate FK_RESLINK_TARGET. See GL-8648.
+		myResourceLinkDao.deleteByTargetResourceId(theResourceId);
 	}
 
 	private void expungeHistoricalVersionsOfId(
