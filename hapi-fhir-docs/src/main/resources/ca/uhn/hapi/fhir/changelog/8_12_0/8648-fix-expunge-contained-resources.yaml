@@ -1,4 +1,4 @@
 ---
 type: fix
 jira: SMILE-12000
-title: "Previously, when index_contained_resources was enabled and a resource was referenced via a contained resource in another resource, performing a per-resource $expunge operation on the referenced resource would fail with HAPI-2415 due to a residual resource link row. The per-resource expunge path now cleans up target-side resource link rows symmetrically with the existing source-side cleanup, matching the behaviour of bulk $expunge everything."
+title: "When index_contained_resources is enabled, performing a per-resource $expunge on a resource that is referenced from a contained resource in another resource failed with HAPI-2415. The per-resource $expunge now succeeds in this scenario."
