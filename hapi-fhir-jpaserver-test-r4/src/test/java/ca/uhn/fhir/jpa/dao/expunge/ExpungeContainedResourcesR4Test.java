@@ -111,6 +111,13 @@ class ExpungeContainedResourcesR4Test extends BaseJpaR4Test {
 				.setExpungeOldVersions(true), mySrd))
 				.as("Per-resource $expunge of a deleted target must succeed even if a still-alive source has a contained-resource link pointing at it")
 				.doesNotThrowAnyException();
+
+		// Verify the functional contract directly: target-side link rows are gone.
+		// Without this the JDBC FK was the only thing keeping us honest, which makes
+		// JPQL mutations on deleteByTargetResourceId silently survivable.
+		runInTransaction(() -> assertThat(myResourceLinkDao.findAll())
+				.as("All HFJ_RES_LINK rows targeting the expunged Patient must be cleared")
+				.noneMatch(theLink -> "Patient".equals(theLink.getTargetResourceType())));
 	}
 
 	/**
