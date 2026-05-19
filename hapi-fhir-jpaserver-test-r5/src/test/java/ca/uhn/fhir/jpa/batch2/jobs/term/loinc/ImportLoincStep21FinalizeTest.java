@@ -58,7 +58,7 @@ public class ImportLoincStep21FinalizeTest {
 	void testProcess_GenerateReport() {
 
 		// Test
-		LoincJobImportParameters parameters = new LoincJobImportParameters();
+		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
 		ImportLoincFileSetJson data = new ImportLoincFileSetJson();
 		data.getRecordsAddedCounter("import-concepts").incrementConceptsAdded(1);
 		data.getRecordsAddedCounter("import-hierarchy").incrementConceptsAdded(2);
@@ -71,7 +71,7 @@ public class ImportLoincStep21FinalizeTest {
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(4);
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<LoincJobImportParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry).importLoincJobDefinition();
+		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry).importLoincJobDefinition();
 		myStep.run(new StepExecutionDetails<>(parameters, null, new JobInstance(), new WorkChunk(), myStepExecutionSvcs, jobDefinition, null, null), myDataSink);
 
 		// Verify
@@ -94,7 +94,7 @@ public class ImportLoincStep21FinalizeTest {
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 
 		// Test
-		LoincJobImportParameters parameters = new LoincJobImportParameters();
+		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
 		ImportLoincFileSetJson data = new ImportLoincFileSetJson();
 		data.addResourceToActivate("ValueSet/A");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
@@ -104,7 +104,7 @@ public class ImportLoincStep21FinalizeTest {
 		data.addResourceToActivate("ValueSet/B");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<LoincJobImportParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry).importLoincJobDefinition();
+		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry).importLoincJobDefinition();
 		myStep.run(new StepExecutionDetails<>(parameters, null, new JobInstance(), new WorkChunk(), myStepExecutionSvcs, jobDefinition, null, null), myDataSink);
 
 		// Verify

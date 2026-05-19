@@ -15,12 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.nio.charset.StandardCharsets;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ImportLoincStep1ExpandDistributionIntoFilesStep
-	extends BaseExpandDistributionIntoFilesStep<LoincJobImportParameters, ImportLoincFileSetJson> {
+	extends BaseExpandDistributionIntoFilesStep<ImportLoincJobParameters, ImportLoincFileSetJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep1ExpandDistributionIntoFilesStep.class);
 
 	@Autowired
@@ -36,10 +34,10 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 
 	@Override
 	protected void handleSynchronous(
-		StepExecutionDetails<LoincJobImportParameters, VoidModel> theStepExecutionDetails,
+		StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
 		String theFileName,
 		byte[] theBytes,
-		LoincJobImportParameters theJobParameters,
+		ImportLoincJobParameters theJobParameters,
 		ImportLoincFileSetJson theFileSet) {
 		super.handleSynchronous(theStepExecutionDetails, theFileName, theBytes, theJobParameters, theFileSet);
 
@@ -51,35 +49,23 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 
 	}
 
-	private void handleLoincXml(StepExecutionDetails<LoincJobImportParameters, VoidModel> theStepExecutionDetails, byte[] theBytes, LoincJobImportParameters theJobParameters, ImportLoincFileSetJson theFileSet) {
+	private void handleLoincXml(StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails, byte[] theBytes, ImportLoincJobParameters theJobParameters, ImportLoincFileSetJson theFileSet) {
 		ourLog.info("Processing 'loinc.xml' file");
 
 		String loincCodeSystemXml = new String(theBytes, StandardCharsets.UTF_8);
 		theFileSet.setLoincCodeSystemXml(loincCodeSystemXml);
 
 		CodeSystem cs = theFileSet.getLoincCodeSystem();
-		if (isNotBlank(cs.getVersion())) {
-			// FIXME: add test
-			throw new JobExecutionFailedException(
-				Msg.code(876) + "'loinc.xml' file must not have a version defined. To define a version use '"
-					+ LOINC_CODESYSTEM_VERSION.getCode() + "' property of 'loincupload.properties' file");
-		}
-
 		if (!"http://loinc.org".equals(cs.getUrl())) {
-			// FIXME: add code
 			throw new JobExecutionFailedException(
-				Msg.code(1) + "'loinc.xml' file must have URL of 'http://loinc.org'. Found: " + cs.getUrl());
+				Msg.code(876) + "'loinc.xml' file must have URL of 'http://loinc.org'. Found: " + cs.getUrl());
 		}
 
-		String codeSystemVersionId =
-			theJobParameters.getProperties().getProperty(LOINC_CODESYSTEM_VERSION.getCode());
-		if (isNotBlank(codeSystemVersionId)) {
-			cs.setId(getIfNull(cs.getId(), "loinc") + "-" + codeSystemVersionId);
-			cs.setVersion(codeSystemVersionId);
-		} else {
-			// FIXME: should we allow null versions? probably not
-			cs.setId(getIfNull(cs.getId(), "loinc"));
-		}
+		String codeSystemVersionId = theJobParameters.getVersionId();
+		assert codeSystemVersionId != null;
+
+		cs.setId("loinc" + "-" + codeSystemVersionId);
+		cs.setVersion(codeSystemVersionId);
 
 		// TODO: DM 2019-09-13 - Manually add EXTERNAL_COPYRIGHT_NOTICE property until Regenstrief adds this to
 		// loinc.xml

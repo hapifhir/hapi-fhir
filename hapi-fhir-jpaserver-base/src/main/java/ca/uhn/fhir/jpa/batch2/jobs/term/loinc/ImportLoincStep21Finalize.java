@@ -31,7 +31,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ImportLoincStep21Finalize implements IReductionStepWorker<LoincJobImportParameters, ImportLoincFileSetJson, ImportTerminologyResultJson> {
+public class ImportLoincStep21Finalize implements IReductionStepWorker<ImportLoincJobParameters, ImportLoincFileSetJson, ImportTerminologyResultJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep21Finalize.class);
 
 	private final TerminologyFileSetJson.RecordsAddedCounter myTotalRecordsAddedCounter = new TerminologyFileSetJson.RecordsAddedCounter();
@@ -49,7 +49,7 @@ public class ImportLoincStep21Finalize implements IReductionStepWorker<LoincJobI
 
 	@Nonnull
 	@Override
-	public ChunkOutcome consume(ChunkExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theChunkDetails) {
+	public ChunkOutcome consume(ChunkExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theChunkDetails) {
 		ImportLoincFileSetJson data = theChunkDetails.getData();
 
 		for (Map.Entry<String, TerminologyFileSetJson.RecordsAddedCounter> entry : data.getStepIdToRecordsAdded().entrySet()) {
@@ -68,7 +68,7 @@ public class ImportLoincStep21Finalize implements IReductionStepWorker<LoincJobI
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<ImportTerminologyResultJson> theDataSink) throws JobExecutionFailedException, ReductionStepFailureException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<ImportTerminologyResultJson> theDataSink) throws JobExecutionFailedException, ReductionStepFailureException {
 
 		for (String resourceToActivate : myResourcesToActivate) {
 
@@ -103,8 +103,8 @@ public class ImportLoincStep21Finalize implements IReductionStepWorker<LoincJobI
 		return RunOutcome.SUCCESS;
 	}
 
-	private String createReport(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		JobDefinition<LoincJobImportParameters> jobDefinition = theStepExecutionDetails.getJobDefinition();
+	private String createReport(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		JobDefinition<ImportLoincJobParameters> jobDefinition = theStepExecutionDetails.getJobDefinition();
 
 		StringBuilder reportBuilder = new StringBuilder();
 
@@ -113,7 +113,7 @@ public class ImportLoincStep21Finalize implements IReductionStepWorker<LoincJobI
 
 		appendCounts(myTotalRecordsAddedCounter, reportBuilder, 0);
 
-		for (JobDefinitionStep<LoincJobImportParameters, ?, ?> step : jobDefinition.getSteps()) {
+		for (JobDefinitionStep<ImportLoincJobParameters, ?, ?> step : jobDefinition.getSteps()) {
 			if (step.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep) {
 				TerminologyFileSetJson.RecordsAddedCounter counter = myStepIdToRecordsAddedCounter.computeIfAbsent(step.getStepId(), k -> new TerminologyFileSetJson.RecordsAddedCounter());
 

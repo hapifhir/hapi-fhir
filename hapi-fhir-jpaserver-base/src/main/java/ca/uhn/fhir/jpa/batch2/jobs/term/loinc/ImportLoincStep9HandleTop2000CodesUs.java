@@ -44,7 +44,7 @@ public class ImportLoincStep9HandleTop2000CodesUs
 
 	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
@@ -58,16 +58,16 @@ public class ImportLoincStep9HandleTop2000CodesUs
 
 	@Override
 	protected void handleRecord(
-            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
-            MyBaseContext theContext,
-            CSVRecord theRecord,
-            CodeSystem theCodeSystemToPopulate,
-            ImportLoincFileSetJson theData, String theSourceFilename) {
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		MyBaseContext theContext,
+		CSVRecord theRecord,
+		CodeSystem theCodeSystemToPopulate,
+		ImportLoincFileSetJson theData, String theSourceFilename) {
 		String loincNumber = trim(theRecord.get("LOINC #"));
 		String displayName = trim(theRecord.get("Long Common Name"));
 
 		ValueSet valueSet =
-				getValueSet(theJobParameters, theData, theContext, myValueSetId, myValueSetUri, myValueSetName, null);
+				getValueSet(theStepExecutionDetails, theJobParameters, theData, theContext, myValueSetId, myValueSetUri, myValueSetName, null);
 		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
 	}
 

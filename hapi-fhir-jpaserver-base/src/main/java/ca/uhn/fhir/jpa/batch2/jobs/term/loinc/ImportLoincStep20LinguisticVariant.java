@@ -25,7 +25,7 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStepWithV
 	private IValidationSupport myValidationSupport;
 
 	@Override
-	protected MyBaseContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+	protected MyBaseContext newContextObject(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
@@ -38,7 +38,7 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStepWithV
 	}
 
 	@Override
-	protected void handleRecord(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData, String theSourceFilename) {
+	protected void handleRecord(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData, String theSourceFilename) {
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		if (isBlank(loincNumber)) {
 			return;

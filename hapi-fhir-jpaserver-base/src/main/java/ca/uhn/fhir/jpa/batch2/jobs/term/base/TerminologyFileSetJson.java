@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.HapiToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
@@ -302,6 +303,20 @@ public class TerminologyFileSetJson implements IModelJson {
 			myConceptMapMappingsAdded += theRecordsAddedCounter.myConceptMapMappingsAdded;
 			myValueSetsAdded += theRecordsAddedCounter.myValueSetsAdded;
 			myValueSetCodesAdded += theRecordsAddedCounter.myValueSetCodesAdded;
+		}
+
+		@Override
+		public String toString() {
+			HapiToStringBuilder b = new HapiToStringBuilder(RecordsAddedCounter.this, ToStringStyle.NO_CLASS_NAME_STYLE);
+			b.appendIfNonZero("conceptsAdded", myConceptsAdded);
+			b.appendIfNonZero("conceptLinksAdded", myConceptLinksAdded);
+			b.appendIfNonZero("conceptPropertiesAdded", myPropertiesAdded);
+			b.appendIfNonZero("designationsAdded", myDesignationsAdded);
+			b.appendIfNonZero("conceptMapsAdded", myConceptMapsAdded);
+			b.appendIfNonZero("conceptMapMappingsAdded", myConceptMapMappingsAdded);
+			b.appendIfNonZero("valueSetsAdded", myValueSetsAdded);
+			b.appendIfNonZero("valueSetCodesAdded", myValueSetCodesAdded);
+			return b.toString();
 		}
 
 	}

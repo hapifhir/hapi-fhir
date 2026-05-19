@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -50,7 +51,7 @@ class ImportLoincStep7HandlePartRelatedCodeMappingTest {
 	@Mock
 	private IJobStepExecutionServices myJobExecutionServices;
 	@Mock
-	private JobDefinition<LoincJobImportParameters> myJobDefinition;
+	private JobDefinition<ImportLoincJobParameters> myJobDefinition;
 	@Mock
 	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Mock
@@ -73,6 +74,7 @@ class ImportLoincStep7HandlePartRelatedCodeMappingTest {
 	void testProcess() {
 		// Setup
 		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/PartFile/PartRelatedCodeMapping.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myConceptMapDao.read(eq(new IdType("loinc-parts-to-snomed-ct-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-parts-to-pubchem-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("httpfoobar-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
@@ -86,13 +88,14 @@ class ImportLoincStep7HandlePartRelatedCodeMappingTest {
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
 
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
 		// Verify
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
-		verify(myDataSink, never()).accept(myFileSetCaptor.capture());
+		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
+		assertEquals("[conceptMapsAdded=3,conceptMapMappingsAdded=11]", myFileSetCaptor.getAllValues().get(0).getRecordsAddedCounter("step-1").toString());
 		verify(myValueSetDao, never()).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 
 		// ConceptMaps

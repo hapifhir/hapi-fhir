@@ -26,7 +26,8 @@ public enum AttachmentContentTypeEnum {
 	GZIP(false),
 	PLAIN_TEXT(true),
 	CSV(true),
-	ZIP(false);
+	ZIP(false),
+	PROPERTIES(true);
 
 	private final boolean mySupportsCompression;
 

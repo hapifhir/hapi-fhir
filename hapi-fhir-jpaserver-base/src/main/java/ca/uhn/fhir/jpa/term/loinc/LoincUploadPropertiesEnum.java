@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,10 +29,11 @@ import java.util.Map;
  * This enum is used to facilitate configurable filenames when uploading LOINC.
  */
 public enum LoincUploadPropertiesEnum {
+
 	/**
 	 * Sorting agnostic.
 	 */
-	LOINC_UPLOAD_PROPERTIES_FILE("loincupload.properties"),
+	LOINC_UPLOAD_PROPERTIES_FILE(TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE),
 	LOINC_XML_FILE("loinc.xml"),
 
 	LOINC_MAPTO_FILE("loinc.mapto.file"),
@@ -103,9 +106,11 @@ public enum LoincUploadPropertiesEnum {
 	 * OPTIONAL
 	 */
 	// This is the version identifier for the LOINC code system
+	@Deprecated(since = "8.12.0", forRemoval = true)
 	LOINC_CODESYSTEM_VERSION("loinc.codesystem.version"),
 
 	// Indicates if loading version has to become current
+	@Deprecated(since = "8.12.0", forRemoval = true)
 	LOINC_CODESYSTEM_MAKE_CURRENT("loinc.codesystem.make.current"),
 
 	// This is the version identifier for the answer list file
@@ -175,4 +180,5 @@ public enum LoincUploadPropertiesEnum {
 	 * <code>LoincUploadPropertiesEnum loincUploadPropertiesEnum = LoincUploadPropertiesEnum.values[ordinal];</code>
 	 */
 	public static final LoincUploadPropertiesEnum values[] = values();
+
 }

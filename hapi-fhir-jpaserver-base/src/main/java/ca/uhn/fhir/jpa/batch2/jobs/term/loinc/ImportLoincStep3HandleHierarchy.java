@@ -23,7 +23,7 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 
 	@Override
 	protected MyContext newContextObject(
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyContext(new HashMap<>());
 	}
 
@@ -35,11 +35,11 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 
 	@Override
 	protected void handleRecord(
-            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
-            MyContext theContext,
-            CSVRecord theRecord,
-            CodeSystem theCodeSystemToPopulate,
-            ImportLoincFileSetJson theData, String theSourceFilename) {
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		MyContext theContext,
+		CSVRecord theRecord,
+		CodeSystem theCodeSystemToPopulate,
+		ImportLoincFileSetJson theData, String theSourceFilename) {
 		String parentCode = trim(theRecord.get("IMMEDIATE_PARENT"));
 		String childCode = trim(theRecord.get("CODE"));
 
@@ -58,7 +58,7 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 	protected void afterCsvProcessingComplete(
 			MyContext theCodeExtractionContext,
 			CodeSystem theCodeSystemToPopulate,
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		super.afterCsvProcessingComplete(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 
 		// Figure out which concepts are at the very top of the hierarchy (i.e. not children of any other concept)

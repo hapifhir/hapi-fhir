@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
@@ -623,6 +624,42 @@ public class UrlUtil {
 		return candidates;
 	}
 
+	/**
+	 * Parses a versioned or unversioned canonical URL (e.g. <code>http://foo</code> or <code>http://foo|123</code>)
+	 * into its constituent parts.
+	 *
+	 * @since 8.12.0
+	 */
+	public static CanonicalUrlParts parseCanonicalUrl(String theUrl) {
+		return parseCanonicalUrl(theUrl, null);
+	}
+
+	/**
+	 * Parses a versioned or unversioned canonical URL (e.g. <code>http://foo</code> or <code>http://foo|123</code>)
+	 * into its constituent parts. An optional version ID can also be provided, for scenarios where the version can be
+	 * provided either in the URL or in a separate parameter. If both are provided, the version from the parameter
+	 * takes precedence.
+	 *
+	 * @since 8.12.0
+	 */
+	@Nonnull
+	public static CanonicalUrlParts parseCanonicalUrl(@Nonnull String theUrl, @Nullable String theVersion) {
+		int pipeIdx = theUrl.indexOf('|');
+		if (pipeIdx == -1) {
+			return new CanonicalUrlParts(theUrl, Optional.ofNullable(theVersion));
+		} else {
+			String url = theUrl.substring(0, pipeIdx);
+			String versionId = theVersion;
+			if (isBlank(versionId)) {
+				versionId = theUrl.substring(pipeIdx + 1);
+			}
+			if (isBlank(versionId)) {
+				return new CanonicalUrlParts(url, Optional.empty());
+			}
+			return new CanonicalUrlParts(url, Optional.of(versionId));
+		}
+	}
+
 	private static void throwInvalidRequestExceptionForNotValidUri(String theUri, Exception theCause) {
 		throw new InvalidRequestException(
 				Msg.code(2419) + String.format("Provided URI is not valid: %s", theUri), theCause);
@@ -666,4 +703,7 @@ public class UrlUtil {
 			myVersionId = theVersionId;
 		}
 	}
+
+	public record CanonicalUrlParts(String url, Optional<String> versionId) {}
+
 }

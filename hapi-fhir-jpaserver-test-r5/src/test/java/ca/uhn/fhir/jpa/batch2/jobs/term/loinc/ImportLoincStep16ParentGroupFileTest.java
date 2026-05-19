@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -54,7 +55,7 @@ class ImportLoincStep16ParentGroupFileTest {
 	@Mock
 	private IJobStepExecutionServices myJobExecutionServices;
 	@Mock
-	private JobDefinition<LoincJobImportParameters> myJobDefinition;
+	private JobDefinition<ImportLoincJobParameters> myJobDefinition;
 	@Mock
 	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Mock
@@ -77,6 +78,7 @@ class ImportLoincStep16ParentGroupFileTest {
 	void testProcess() {
 		// Setup
 		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/GroupFile/ParentGroup.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 
 		// Test
@@ -88,7 +90,7 @@ class ImportLoincStep16ParentGroupFileTest {
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
 
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
@@ -120,6 +122,7 @@ class ImportLoincStep16ParentGroupFileTest {
 	void testProcess_AlreadyExists() {
 		// Setup
 		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/GroupFile/ParentGroup.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 
 		// This step adds names to valueset, so populate everything except the name
 		ValueSet existing = new ValueSet();
@@ -138,7 +141,7 @@ class ImportLoincStep16ParentGroupFileTest {
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
 
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 

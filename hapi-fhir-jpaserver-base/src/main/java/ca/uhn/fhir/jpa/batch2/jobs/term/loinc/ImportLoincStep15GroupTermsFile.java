@@ -18,7 +18,7 @@ public class ImportLoincStep15GroupTermsFile
 
 	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
@@ -32,16 +32,16 @@ public class ImportLoincStep15GroupTermsFile
 
 	@Override
 	protected void handleRecord(
-            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
-            MyBaseContext theContext,
-            CSVRecord theRecord,
-            CodeSystem theCodeSystemToPopulate,
-            ImportLoincFileSetJson theData, String theSourceFilename) {
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		MyBaseContext theContext,
+		CSVRecord theRecord,
+		CodeSystem theCodeSystemToPopulate,
+		ImportLoincFileSetJson theData, String theSourceFilename) {
 		String groupId = trim(theRecord.get("GroupId"));
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 
 		ValueSet valueSet = getValueSet(
-				theJobParameters,
+			theStepExecutionDetails, theJobParameters,
 				theData,
 				theContext,
 				groupId,

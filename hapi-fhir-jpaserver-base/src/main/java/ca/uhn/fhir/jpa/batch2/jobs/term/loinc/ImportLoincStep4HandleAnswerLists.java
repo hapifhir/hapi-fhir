@@ -25,7 +25,7 @@ public class ImportLoincStep4HandleAnswerLists
 
 	@Override
 	protected MyContext newContextObject(
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyContext(theStepExecutionDetails);
 	}
 
@@ -39,11 +39,11 @@ public class ImportLoincStep4HandleAnswerLists
 
 	@Override
 	protected void handleRecord(
-            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
-            MyContext theContext,
-            CSVRecord theRecord,
-            CodeSystem theCodeSystemToPopulate,
-            ImportLoincFileSetJson theData, String theSourceFilename) {
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		MyContext theContext,
+		CSVRecord theRecord,
+		CodeSystem theCodeSystemToPopulate,
+		ImportLoincFileSetJson theData, String theSourceFilename) {
 		// this is the code for the list (will repeat)
 		String answerListId = trim(theRecord.get("AnswerListId"));
 		String answerListName = trim(theRecord.get("AnswerListName"));
@@ -73,7 +73,7 @@ public class ImportLoincStep4HandleAnswerLists
 		// Answer list ValueSet
 		String codeSystemVersionId = theData.getLoincCodeSystem().getVersion();
 		ValueSet vs = getValueSet(
-			theJobParameters,
+			theStepExecutionDetails, theJobParameters,
 			theData,
 			theContext,
 			answerListId,
@@ -106,7 +106,7 @@ public class ImportLoincStep4HandleAnswerLists
 	protected static class MyContext extends MyBaseContext {
 		private final Set<String> myAnswerListCodes = new HashSet<>();
 
-		public MyContext(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theData) {
+		public MyContext(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theData) {
 			super(theData);
 		}
 

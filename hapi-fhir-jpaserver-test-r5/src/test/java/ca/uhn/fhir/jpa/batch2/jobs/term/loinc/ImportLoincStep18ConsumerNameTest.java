@@ -47,7 +47,7 @@ class ImportLoincStep18ConsumerNameTest {
 	@Mock
 	private IJobStepExecutionServices myJobExecutionServices;
 	@Mock
-	private JobDefinition<LoincJobImportParameters> myJobDefinition;
+	private JobDefinition<ImportLoincJobParameters> myJobDefinition;
 	@Mock
 	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 
@@ -64,7 +64,7 @@ class ImportLoincStep18ConsumerNameTest {
 	void testProcess() {
 		// Setup
 		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/ConsumerName/ConsumerName.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementDesignationsAddedCount(3));
 
 		// Test
 		JobInstance instance = new JobInstance();
@@ -75,7 +75,7 @@ class ImportLoincStep18ConsumerNameTest {
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
 
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
@@ -93,7 +93,9 @@ class ImportLoincStep18ConsumerNameTest {
 			""";
 		assertEquals(expected, hierarchy);
 
-		verify(myDataSink, never()).accept(myFileSetCaptor.capture());
+		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
+		assertEquals("[designationsAdded=3]", myFileSetCaptor.getAllValues().get(0).getRecordsAddedCounter("step-1").toString());
+
 	}
 
 }

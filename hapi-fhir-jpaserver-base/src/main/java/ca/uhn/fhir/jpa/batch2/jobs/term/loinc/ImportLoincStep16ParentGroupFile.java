@@ -16,7 +16,7 @@ public class ImportLoincStep16ParentGroupFile
 
 	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
@@ -30,16 +30,16 @@ public class ImportLoincStep16ParentGroupFile
 
 	@Override
 	protected void handleRecord(
-            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
-            MyBaseContext theContext,
-            CSVRecord theRecord,
-            CodeSystem theCodeSystemToPopulate,
-            ImportLoincFileSetJson theData, String theSourceFilename) {
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		MyBaseContext theContext,
+		CSVRecord theRecord,
+		CodeSystem theCodeSystemToPopulate,
+		ImportLoincFileSetJson theData, String theSourceFilename) {
 		String parentGroupId = trim(theRecord.get("ParentGroupId"));
 		String parentGroupName = trim(theRecord.get("ParentGroup"));
 
 		getValueSet(
-				theJobParameters,
+			theStepExecutionDetails, theJobParameters,
 				theData,
 				theContext,
 				parentGroupId,

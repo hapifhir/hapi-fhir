@@ -9,12 +9,14 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 
 import java.util.List;
+import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID;
 import static ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_URI;
 import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.CM_COPYRIGHT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep12HandleIeeeMedicalDeviceCode
@@ -22,7 +24,7 @@ public class ImportLoincStep12HandleIeeeMedicalDeviceCode
 
 	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
@@ -36,18 +38,18 @@ public class ImportLoincStep12HandleIeeeMedicalDeviceCode
 
 	@Override
 	protected void handleRecord(
-            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
-            MyBaseContext theContext,
-            CSVRecord theRecord,
-            CodeSystem theCodeSystemToPopulate,
-            ImportLoincFileSetJson theData, String theSourceFilename) {
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		MyBaseContext theContext,
+		CSVRecord theRecord,
+		CodeSystem theCodeSystemToPopulate,
+		ImportLoincFileSetJson theData, String theSourceFilename) {
 		String codeSystemVersionId = theData.getLoincCodeSystem().getVersion();
 		String loincIeeeCmVersion;
-		if (codeSystemVersionId != null) {
-			loincIeeeCmVersion = theJobParameters.getProperties().getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-"
-					+ codeSystemVersionId;
+		Properties jobProperties = getJobProperties(theStepExecutionDetails);
+		if (isNotBlank(jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))) {
+				loincIeeeCmVersion = jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-"					+ codeSystemVersionId;
 		} else {
-			loincIeeeCmVersion = theJobParameters.getProperties().getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+			loincIeeeCmVersion = codeSystemVersionId;
 		}
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		String longCommonName = trim(theRecord.get("LOINC_LONG_COMMON_NAME"));

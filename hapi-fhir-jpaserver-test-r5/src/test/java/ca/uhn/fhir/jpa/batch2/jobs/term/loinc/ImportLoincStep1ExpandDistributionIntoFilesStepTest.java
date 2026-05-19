@@ -40,8 +40,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.DISTRIBUTION_FILE_ATTACHMENT_FILENAME;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,7 +65,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	@Mock
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Mock
-	private StepExecutionDetails<LoincJobImportParameters, VoidModel> myStepExecutionDetails;
+	private StepExecutionDetails<ImportLoincJobParameters, VoidModel> myStepExecutionDetails;
 	@Captor
 	private ArgumentCaptor<CodeSystem> myCodeSystemCaptor;
 	@Mock
@@ -76,13 +75,13 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	@Mock
 	private IJobDataSink<ImportLoincFileSetJson> myDataSink;
 	@Mock
-	private IJobStepWorker<LoincJobImportParameters, VoidModel, TerminologyFileSetJson> myHandlerStep0;
+	private IJobStepWorker<ImportLoincJobParameters, VoidModel, TerminologyFileSetJson> myHandlerStep0;
 	@Mock
-	private ITerminologyImportFileHandlerStep<LoincJobImportParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep1;
+	private ITerminologyImportFileHandlerStep<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep1;
 	@Mock
-	private ITerminologyImportFileHandlerStep<LoincJobImportParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep2;
+	private ITerminologyImportFileHandlerStep<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep2;
 	@Mock
-	private IJobStepWorker<LoincJobImportParameters, TerminologyFileSetJson, VoidModel> myHandlerStep3;
+	private IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, VoidModel> myHandlerStep3;
 	@Captor
 	private ArgumentCaptor<ImportLoincFileSetJson> myTerminologyFileSetCaptor;
 
@@ -100,7 +99,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		AtomicInteger attachmentCounter = mockJobPersistenceStoreNewAttachment();
 
 		// Test
-		StepExecutionDetails<LoincJobImportParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
 		myStep.run(stepExecutionDetails, myDataSink);
 
 		// Verify
@@ -124,7 +123,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	}
 
 	@Test
-	void testProcess_NoIdAndNoVersionSpecified() {
+	void testProcess_NoIdSpecified() {
 		// Setup
 		when(myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(any(), any())).thenReturn(new ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse("a-b-c-d"));
 
@@ -132,12 +131,14 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://loinc.org");
 		ImportLoincFileSetJson fileSet = new ImportLoincFileSetJson();
-		myStep.handleSynchronous(myStepExecutionDetails, "loinc.xml", toBytes(cs), new LoincJobImportParameters(), fileSet);
+		ImportLoincJobParameters jobParameters = new ImportLoincJobParameters();
+		jobParameters.setVersionId("1.23");
+		myStep.handleSynchronous(myStepExecutionDetails, "loinc.xml", toBytes(cs), jobParameters, fileSet);
 
 		// Verify
 		assertNotNull(fileSet.getLoincCodeSystem());
-		assertEquals("loinc", fileSet.getLoincCodeSystem().getIdElement().getIdPart());
-		assertNull(fileSet.getLoincCodeSystem().getVersion());
+		assertEquals("loinc-1.23", fileSet.getLoincCodeSystem().getIdElement().getIdPart());
+		assertEquals("1.23", fileSet.getLoincCodeSystem().getVersion());
 		assertEquals("EXTERNAL_COPYRIGHT_NOTICE", fileSet.getLoincCodeSystem().getProperty().get(0).getCode());
 		assertEquals(CodeSystem.PropertyType.STRING, fileSet.getLoincCodeSystem().getProperty().get(0).getType());
 
@@ -150,10 +151,10 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		// Setup
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://loinc.org");
-		cs.setId("loinc-cs");
+		cs.setId("loinc");
 
-		LoincJobImportParameters jobParameters = new LoincJobImportParameters();
-		jobParameters.setProperties(LOINC_CODESYSTEM_VERSION.getCode() + "=1.234");
+		ImportLoincJobParameters jobParameters = new ImportLoincJobParameters();
+		jobParameters.setVersionId("1.234");
 
 		when(myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(any(), any())).thenReturn(new ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse("a-b-c-d"));
 
@@ -163,7 +164,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 
 		// Verify
 		assertNotNull(fileSet.getLoincCodeSystem());
-		assertEquals("loinc-cs-1.234", fileSet.getLoincCodeSystem().getIdElement().getIdPart());
+		assertEquals("loinc-1.234", fileSet.getLoincCodeSystem().getIdElement().getIdPart());
 		assertEquals("1.234", fileSet.getLoincCodeSystem().getVersion());
 		assertEquals("EXTERNAL_COPYRIGHT_NOTICE", fileSet.getLoincCodeSystem().getProperty().get(0).getCode());
 		assertEquals(CodeSystem.PropertyType.STRING, fileSet.getLoincCodeSystem().getProperty().get(0).getType());
@@ -175,23 +176,6 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	}
 
 	@Test
-	void testProcess_VersionSpecifiedInCodeSystem() {
-		CodeSystem cs = new CodeSystem();
-		cs.setId("loinc-cs");
-		cs.setVersion("1.234");
-		cs.setUrl("http://loinc.org");
-
-		// Test
-		LoincJobImportParameters jobParameters = new LoincJobImportParameters();
-		ImportLoincFileSetJson fileSet = new ImportLoincFileSetJson();
-		assertThatThrownBy(() -> myStep.handleSynchronous(myStepExecutionDetails, "loinc.xml", toBytes(cs), jobParameters, fileSet))
-			.isInstanceOf(JobExecutionFailedException.class)
-			.hasMessageContaining("HAPI-0876: 'loinc.xml' file must not have a version defined. To define a version use 'loinc.codesystem.version' property");
-	}
-
-
-
-	@Test
 	void testProcess_TwoStepsUseSameFile() {
 		mockCodeSystemStorageStartStaging();
 		mockJobPersistenceFetchDistributionFile();
@@ -200,7 +184,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		AtomicInteger attachmentCounter = mockJobPersistenceStoreNewAttachment();
 
 		// Test
-		StepExecutionDetails<LoincJobImportParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
 		myStep.run(stepExecutionDetails, myDataSink);
 
 		// Verify
@@ -228,12 +212,12 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	void testProcess_NoChunksForStep1() {
 		mockCodeSystemStorageStartStaging();
 		mockJobPersistenceFetchDistributionFile();
-		when(myHandlerStep1.canHandleFile(any(), any())).thenAnswer(t -> Optional.empty());
+		when(myHandlerStep1.canHandleFile(any(), any(), any())).thenAnswer(t -> Optional.empty());
 		mockHandlerStep2();
 		mockJobPersistenceStoreNewAttachment();
 
 		// Test
-		StepExecutionDetails<LoincJobImportParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
 		myStep.run(stepExecutionDetails, myDataSink);
 
 		// Verify
@@ -250,13 +234,13 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	@Test
 	void testProcess_UnreadableDistributionFile() {
 		// Setup
-		when(myJobPersistence.fetchAttachmentByFilename(eq(MY_INSTANCE_ID), eq(DISTRIBUTION_FILE_ATTACHMENT_FILENAME))).thenAnswer(t -> {
+		when(myJobPersistence.fetchAttachmentByFilename(eq(MY_INSTANCE_ID), eq(FILENAME_LOINC_DISTRIBUTION_FILE))).thenAnswer(t -> {
 			byte[] bytes = RandomUtils.secure().randomBytes(1000);
-			return new AttachmentDetails(new ByteArrayInputStream(bytes), AttachmentContentTypeEnum.ZIP, DISTRIBUTION_FILE_ATTACHMENT_FILENAME);
+			return new AttachmentDetails(new ByteArrayInputStream(bytes), AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
 		});
 
 		// Test
-		StepExecutionDetails<LoincJobImportParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
 		assertThatThrownBy(() -> myStep.run(stepExecutionDetails, myDataSink))
 			.isInstanceOf(JobExecutionFailedException.class)
 			.hasMessageContaining("Files to expand LOINC zip file: Cannot find zip signature within the file");
@@ -267,8 +251,8 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	}
 
 	private void mockHandlerStep1() {
-		when(myHandlerStep1.canHandleFile(any(), any())).thenAnswer(t -> {
-			String fileName = t.getArgument(1, String.class);
+		when(myHandlerStep1.canHandleFile(any(), any(), any())).thenAnswer(t -> {
+			String fileName = t.getArgument(2, String.class);
 			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT.getCode())) {
 				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
 			}
@@ -277,8 +261,8 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	}
 
 	private void mockHandlerStep2() {
-		when(myHandlerStep2.canHandleFile(any(), any())).thenAnswer(t -> {
-			String fileName = t.getArgument(1, String.class);
+		when(myHandlerStep2.canHandleFile(any(), any(), any())).thenAnswer(t -> {
+			String fileName = t.getArgument(2, String.class);
 			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT.getCode())) {
 				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
 			}
@@ -287,8 +271,8 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	}
 
 	private void mockHandlerStep2_SameFileAsStep1() {
-		when(myHandlerStep2.canHandleFile(any(), any())).thenAnswer(t -> {
-			String fileName = t.getArgument(1, String.class);
+		when(myHandlerStep2.canHandleFile(any(), any(), any())).thenAnswer(t -> {
+			String fileName = t.getArgument(2, String.class);
 			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT.getCode())) {
 				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
 			}
@@ -313,11 +297,11 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 		populator.accept(files);
 
-		when(myJobPersistence.fetchAttachmentByFilename(eq(MY_INSTANCE_ID), eq(DISTRIBUTION_FILE_ATTACHMENT_FILENAME))).thenAnswer(t -> {
+		when(myJobPersistence.fetchAttachmentByFilename(eq(MY_INSTANCE_ID), eq(FILENAME_LOINC_DISTRIBUTION_FILE))).thenAnswer(t -> {
 			String fileName = t.getArgument(1, String.class);
-			assertEquals(DISTRIBUTION_FILE_ATTACHMENT_FILENAME, fileName);
+			assertEquals(FILENAME_LOINC_DISTRIBUTION_FILE, fileName);
 			byte[] bytes = files.getZipBytes();
-			return new AttachmentDetails(new ByteArrayInputStream(bytes), AttachmentContentTypeEnum.ZIP, DISTRIBUTION_FILE_ATTACHMENT_FILENAME);
+			return new AttachmentDetails(new ByteArrayInputStream(bytes), AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
 		});
 	}
 
@@ -328,19 +312,20 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	}
 
 	@Nonnull
-	private StepExecutionDetails<LoincJobImportParameters, VoidModel> newStepExecutionDetails() {
-		JobDefinition<LoincJobImportParameters> jobDefinition = JobDefinition.newBuilder()
+	private StepExecutionDetails<ImportLoincJobParameters, VoidModel> newStepExecutionDetails() {
+		JobDefinition<ImportLoincJobParameters> jobDefinition = JobDefinition.newBuilder()
 			.setJobDefinitionId("job")
 			.setJobDefinitionVersion(1)
 			.setJobDescription("a job")
-			.setParametersType(LoincJobImportParameters.class)
+			.setParametersType(ImportLoincJobParameters.class)
 			.addFirstStep("step-0", "step-0", TerminologyFileSetJson.class, myHandlerStep0)
 			.addIntermediateStep("step-1", "step-1", TerminologyFileSetJson.class, myHandlerStep1)
 			.addIntermediateStep("step-2", "step-2", TerminologyFileSetJson.class, myHandlerStep2)
 			.addLastStep("step-3", "step-3", myHandlerStep3)
 			.build();
 
-		LoincJobImportParameters jobParameters = new LoincJobImportParameters();
+		ImportLoincJobParameters jobParameters = new ImportLoincJobParameters();
+		jobParameters.setVersionId("1.23");
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId(MY_INSTANCE_ID);
 		return new StepExecutionDetails<>(jobParameters, null, instance, new WorkChunk(), myJobStepExecutionServices, jobDefinition, "step-0", "step-1");

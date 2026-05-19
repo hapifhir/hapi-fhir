@@ -1,18 +1,25 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseTerminologyImportParameters;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.Properties;
 
-import static org.apache.commons.lang3.ObjectUtils.getIfNull;
+public class ImportLoincJobParameters extends BaseTerminologyImportParameters {
 
-public class LoincJobImportParameters extends BaseTerminologyImportParameters {
+	@JsonIgnore
+	private Properties myJobProperties;
 
+	public Properties getJobProperties() {
+		return myJobProperties;
+	}
+
+	public void setJobProperties(Properties theJobProperties) {
+		myJobProperties = theJobProperties;
+	}
+
+	// FIXME: remove
+	/*
 	private Properties myParsedProperties;
 
 	public Properties getProperties() {
@@ -36,4 +43,6 @@ public class LoincJobImportParameters extends BaseTerminologyImportParameters {
 
 	@JsonProperty("properties")
 	private String myProperties;
+
+	 */
 }

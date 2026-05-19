@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -28,6 +30,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newLoincCsvParser;
@@ -35,7 +38,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseImportLoincStep<CT>
 		implements ITerminologyImportFileHandlerStep<
-				LoincJobImportParameters, ImportLoincFileSetJson, ImportLoincFileSetJson> {
+	ImportLoincJobParameters, ImportLoincFileSetJson, ImportLoincFileSetJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportLoincStep.class);
 
 	@Autowired
@@ -47,14 +50,18 @@ public abstract class BaseImportLoincStep<CT>
 	@Nonnull
 	@Override
 	public Optional<FileHandlingInstructions> canHandleFile(
-			LoincJobImportParameters theJobParameters, String theFileName) {
+		StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
+		ImportLoincJobParameters theJobParameters, String theFileName) {
+
+		Properties jobProperties = getJobProperties(theStepExecutionDetails);
+
 		for (LoincFileNameSpecification loincFileNameSpecification : getFilesToProcess()) {
 			boolean matches = false;
 
 			if (loincFileNameSpecification.propertyName() != null) {
 				String propertyName = loincFileNameSpecification.propertyName().getCode();
 				String defaultFileName = loincFileNameSpecification.defaultValue().getCode();
-				String fileName = theJobParameters.getProperties().getProperty(propertyName, defaultFileName);
+				String fileName = jobProperties.getProperty(propertyName, defaultFileName);
 				matches = theFileName.endsWith(fileName);
 			} else if (loincFileNameSpecification.fileNamePattern() != null) {
 				matches = loincFileNameSpecification.fileNamePattern().matcher(theFileName).matches();
@@ -69,15 +76,34 @@ public abstract class BaseImportLoincStep<CT>
 		return Optional.empty();
 	}
 
+	protected Properties getJobProperties(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+		ImportLoincJobParameters jobParameters = theStepExecutionDetails.getParameters();
+		Properties retVal = jobParameters.getJobProperties();
+		if (retVal == null) {
+			String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
+			retVal = new Properties();
+			try {
+				String filename = LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode();
+				AttachmentDetails attachment = myJobPersistence.fetchAttachmentByFilename(instanceId, filename);
+				retVal.load(attachment.getInputStream());
+			} catch (ResourceNotFoundException | IOException e) {
+				// no properties file was provided
+			}
+
+			jobParameters.setJobProperties(retVal);
+		}
+		return retVal;
+	}
+
 	@Nonnull
 	@Override
 	public RunOutcome run(
-			@Nonnull StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails,
+			@Nonnull StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<ImportLoincFileSetJson> theDataSink)
 			throws JobExecutionFailedException {
 		ImportLoincFileSetJson data = theStepExecutionDetails.getData();
 		String jobInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
-		LoincJobImportParameters jobParameters = theStepExecutionDetails.getParameters();
+		ImportLoincJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
 		CT codeExtractionContext = newContextObject(theStepExecutionDetails);
 		CodeSystem codeSystemToPopulate = new CodeSystem();
@@ -140,25 +166,25 @@ public abstract class BaseImportLoincStep<CT>
 	protected void afterCsvProcessingComplete(
 			CT theCodeExtractionContext,
 			CodeSystem theCodeSystemToPopulate,
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		// nothing
 	}
 
 	protected abstract CT newContextObject(
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails);
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails);
 
 	@Nonnull
 	protected abstract List<LoincFileNameSpecification> getFilesToProcess();
 
 	protected abstract void handleRecord(
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
 		CT theContext,
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
 		ImportLoincFileSetJson theData, String theSourceFilename);
 
 	protected TerminologyFileSetJson.RecordsAddedCounter getRecordsAddedCounter(
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 
 		ImportLoincFileSetJson data = theStepExecutionDetails.getData();
 		String currentStepId = theStepExecutionDetails.getCurrentStepId();

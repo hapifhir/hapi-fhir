@@ -18,7 +18,7 @@ public class ImportLoincStep14GroupFile
 
 	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
@@ -31,11 +31,11 @@ public class ImportLoincStep14GroupFile
 
 	@Override
 	protected void handleRecord(
-            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
-            MyBaseContext theContext,
-            CSVRecord theRecord,
-            CodeSystem theCodeSystemToPopulate,
-            ImportLoincFileSetJson theData, String theSourceFilename) {
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		MyBaseContext theContext,
+		CSVRecord theRecord,
+		CodeSystem theCodeSystemToPopulate,
+		ImportLoincFileSetJson theData, String theSourceFilename) {
 		String parentGroupId = trim(theRecord.get("ParentGroupId"));
 		String groupId = trim(theRecord.get("GroupId"));
 		String groupName = trim(theRecord.get("Group"));
@@ -46,7 +46,7 @@ public class ImportLoincStep14GroupFile
 		groupValueSetId = groupId;
 
 		ValueSet parentValueSet = getValueSet(
-				theJobParameters,
+			theStepExecutionDetails, theJobParameters,
 				theData,
 				theContext,
 				parentGroupValueSetId,
@@ -57,6 +57,6 @@ public class ImportLoincStep14GroupFile
 
 		// Create group to set its name (terms are added in a different
 		// handler)
-		getValueSet(theJobParameters, theData, theContext, groupValueSetId, VS_URI_PREFIX + groupId, groupName, null);
+		getValueSet(theStepExecutionDetails, theJobParameters, theData, theContext, groupValueSetId, VS_URI_PREFIX + groupId, groupName, null);
 	}
 }

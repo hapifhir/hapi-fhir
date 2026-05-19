@@ -195,6 +195,10 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_UPLOAD_TERMINOLOGY_START_JOB = "$hapi.fhir.upload-terminology.start-job";
 	/**
+	 * Operation name for the "$hapi.fhir.upload-terminology.poll-for-status" operation
+	 */
+	public static final String OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS = "$hapi.fhir.upload-terminology.poll-for-status";
+	/**
 	 * Operation name for the "$import" operation
 	 */
 	public static final String OPERATION_IMPORT = "$import";

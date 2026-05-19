@@ -13,6 +13,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.server.interceptor.ResponseSizeCapturingInterceptor;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -47,13 +48,15 @@ class ImportLoincStep3HandleHierarchyTest {
 	@Mock
 	private IJobStepExecutionServices myJobExecutionServices;
 	@Mock
-	private JobDefinition<LoincJobImportParameters> myJobDefinition;
+	private JobDefinition<ImportLoincJobParameters> myJobDefinition;
 
 	@InjectMocks
 	private ImportLoincStep3HandleHierarchy mySvc;
 
 	@Captor
 	private ArgumentCaptor<IBaseResource> myCodeSystemCaptor;
+	@Captor
+	private ArgumentCaptor<ImportLoincFileSetJson> myFileSetCaptor;
 
 
 	@Test
@@ -70,7 +73,7 @@ class ImportLoincStep3HandleHierarchyTest {
 		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("file.csv", "my-chunk-attachment-id"));
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
@@ -91,7 +94,7 @@ class ImportLoincStep3HandleHierarchyTest {
 			""";
 		assertEquals(expected, hierarchy);
 
-		verify(myDataSink, never()).accept(any(ImportLoincFileSetJson.class));
+		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
 	}
 
 	public static String renderHierarchy(CodeSystem theCs) {

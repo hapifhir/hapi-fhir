@@ -12,7 +12,6 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
 import ca.uhn.fhir.jpa.util.CsvUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -63,7 +62,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		PT jobParameters = theStepExecutionDetails.getParameters();
-		AttachmentDetails loincFileAttachment = myJobPersistence.fetchAttachmentByFilename(instanceId, ImportLoincJobAppCtx.DISTRIBUTION_FILE_ATTACHMENT_FILENAME);
+		AttachmentDetails loincFileAttachment = myJobPersistence.fetchAttachmentByFilename(instanceId, TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE);
 
 		ourLog.info("Import {}[{}] - Expanding file {}", getTerminologyName(), instanceId, loincFileAttachment.getFilename());
 
@@ -79,7 +78,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 						byte[] bytes = IOUtils.toByteArray(fis);
 
 						// Asynchronous processing (prepare work chunks based on input file)
-						List<StepIdAndFileHandlingInstructions> processors = getStepIdAndFileHandlingInstructionsForFileName(jobParameters, theStepExecutionDetails.getJobDefinition(), nextFileName);
+						List<StepIdAndFileHandlingInstructions> processors = getStepIdAndFileHandlingInstructionsForFileName(theStepExecutionDetails, jobParameters, theStepExecutionDetails.getJobDefinition(), nextFileName);
 
 						ListMultimap<ITerminologyImportFileHandlerStep.FileHandlingType, String> fileHandlingTypeToAttachmentIds = MultimapBuilder.hashKeys().arrayListValues().build();
 
@@ -184,13 +183,13 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		return "LOINC";
 	}
 
-	private List<StepIdAndFileHandlingInstructions> getStepIdAndFileHandlingInstructionsForFileName(PT theJobParameters, JobDefinition<PT> theJobDefinition, String theStepId) {
+	private List<StepIdAndFileHandlingInstructions> getStepIdAndFileHandlingInstructionsForFileName(StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, PT theJobParameters, JobDefinition<PT> theJobDefinition, String theStepId) {
 		List<StepIdAndFileHandlingInstructions> stepProcessingInstructions = new ArrayList<>();
 
 		for (JobDefinitionStep<PT, ?, ?> step : theJobDefinition.getSteps()) {
 			if (step.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep<PT, ?, ?> fileHandler) {
 				fileHandler
-					.canHandleFile(theJobParameters, theStepId)
+					.canHandleFile(theStepExecutionDetails, theJobParameters, theStepId)
 					.ifPresent(instructions -> stepProcessingInstructions.add(new StepIdAndFileHandlingInstructions(step.getStepId(), instructions)));
 			}
 		}

@@ -50,7 +50,7 @@ public class HeaderPassthroughOptionTest {
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	private final UploadTerminologyCommand testedCommand =
 		new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
-	private final TerminologyUploaderProvider myProvider = new TerminologyUploaderProvider();
+	private final TerminologyUploaderProvider myProvider = new TerminologyUploaderProvider(myContext, myTerminologyLoaderSvc, myJobCoordinator, myJobPersistence);
 
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;

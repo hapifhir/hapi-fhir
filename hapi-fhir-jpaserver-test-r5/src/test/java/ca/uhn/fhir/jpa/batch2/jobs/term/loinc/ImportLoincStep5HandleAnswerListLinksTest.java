@@ -46,7 +46,7 @@ class ImportLoincStep5HandleAnswerListLinksTest {
 	@Mock
 	private IJobStepExecutionServices myJobExecutionServices;
 	@Mock
-	private JobDefinition<LoincJobImportParameters> myJobDefinition;
+	private JobDefinition<ImportLoincJobParameters> myJobDefinition;
 
 	@InjectMocks
 	private ImportLoincStep5HandleAnswerListLinks mySvc;
@@ -71,7 +71,7 @@ class ImportLoincStep5HandleAnswerListLinksTest {
 		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("file.csv", "my-chunk-attachment-id"));
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
@@ -102,7 +102,7 @@ class ImportLoincStep5HandleAnswerListLinksTest {
 		assertThat(cs.getConcept().get(0).getProperty().stream().map(t -> t.getCode() + "=" + t.getValue().toString()))
 			.containsExactly("answer-list=LL1000-0");
 
-		verify(myDataSink, never()).accept(any(ImportLoincFileSetJson.class));
+		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
 	}
 
 	@Test
@@ -116,7 +116,7 @@ class ImportLoincStep5HandleAnswerListLinksTest {
 		importLoincFileSetJson.getRecordsAddedCounter("step-3").incrementConceptsAdded(3);
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
@@ -146,7 +146,7 @@ class ImportLoincStep5HandleAnswerListLinksTest {
 		importLoincFileSetJson.getRecordsAddedCounter("step-3").incrementConceptsAdded(3);
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
@@ -188,7 +188,7 @@ class ImportLoincStep5HandleAnswerListLinksTest {
 		importLoincFileSetJson.addResourceToActivate("CodeSystem/B");
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 

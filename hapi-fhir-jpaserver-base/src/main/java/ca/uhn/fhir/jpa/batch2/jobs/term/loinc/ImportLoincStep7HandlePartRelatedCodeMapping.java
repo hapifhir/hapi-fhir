@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 
 import java.util.List;
+import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID;
 import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME;
@@ -36,7 +37,7 @@ public class ImportLoincStep7HandlePartRelatedCodeMapping
 
 	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
@@ -50,16 +51,16 @@ public class ImportLoincStep7HandlePartRelatedCodeMapping
 
 	@Override
 	protected void handleRecord(
-            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
-            MyBaseContext theContext,
-            CSVRecord theRecord,
-            CodeSystem theCodeSystemToPopulate,
-            ImportLoincFileSetJson theData, String theSourceFilename) {
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		MyBaseContext theContext,
+		CSVRecord theRecord,
+		CodeSystem theCodeSystemToPopulate,
+		ImportLoincFileSetJson theData, String theSourceFilename) {
 		String partNumber = trim(theRecord.get("PartNumber"));
 		String partName = trim(theRecord.get("PartName"));
 		String extCodeId = trim(theRecord.get("ExtCodeId"));
-		// TODO: use hex code for ascii 160
-		extCodeId = extCodeId.replace(" ", "");
+		// Trim NBSP
+		extCodeId = extCodeId.replace("\u00A0", "");
 		String extCodeDisplayName = trim(theRecord.get("ExtCodeDisplayName"));
 		String extCodeSystem = trim(theRecord.get("ExtCodeSystem"));
 		String mapType = trim(theRecord.get("Equivalence"));
@@ -71,11 +72,12 @@ public class ImportLoincStep7HandlePartRelatedCodeMapping
 
 		// ConceptMap version from properties files
 		String loincPartMapVersion;
-		if (codeSystemVersionId != null) {
-			loincPartMapVersion = theJobParameters.getProperties().getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-"
+		Properties jobProperties = getJobProperties(theStepExecutionDetails);
+		if (isNotBlank(jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))) {
+			loincPartMapVersion = jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-"
 					+ codeSystemVersionId;
 		} else {
-			loincPartMapVersion = theJobParameters.getProperties().getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+			loincPartMapVersion = codeSystemVersionId;
 		}
 
 		Enumerations.ConceptMapEquivalence equivalence =

@@ -36,13 +36,13 @@ public class ImportLoincStep2HandleConcepts
 
 	@Override
 	protected CodeExtractionContext newContextObject(
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new ImportLoincStep2HandleConcepts.CodeExtractionContext(theStepExecutionDetails.getData());
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
 		CodeExtractionContext theContext,
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
@@ -115,7 +115,7 @@ public class ImportLoincStep2HandleConcepts
 	protected void afterCsvProcessingComplete(
 			CodeExtractionContext theCodeExtractionContext,
 			CodeSystem theCodeSystemToPopulate,
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		super.afterCsvProcessingComplete(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 		ourLog.info(
 				"LOINC CodeSystem populated with {} concepts",

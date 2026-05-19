@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,7 +31,6 @@ import org.springframework.context.annotation.Configuration;
 public class ImportLoincJobAppCtx {
 
 	public static final String IMPORT_TERM_LOINC = "IMPORT_TERM_LOINC";
-	public static final String DISTRIBUTION_FILE_ATTACHMENT_FILENAME = "loinc.zip";
 
 	private final DaoRegistry myDaoRegistry;
 
@@ -41,14 +39,15 @@ public class ImportLoincJobAppCtx {
 	}
 
 	@Bean
-	public JobDefinition<LoincJobImportParameters> importLoincJobDefinition() {
+	public JobDefinition<ImportLoincJobParameters> importLoincJobDefinition() {
 		return JobDefinition.newBuilder()
 				.setInitialStatus(StatusEnum.BUILDING)
 				.setJobDefinitionId(IMPORT_TERM_LOINC)
 				.setJobDescription("Import Terminology - LOINC")
 				.setJobDefinitionVersion(1)
 				.gatedExecution()
-				.setParametersType(LoincJobImportParameters.class)
+				.setParametersType(ImportLoincJobParameters.class)
+			.setParametersValidator(new ImportLoincJobParametersValidator())
 				.addFirstStep(
 						"expand-zip",
 						"Expand LOINC distribution",
@@ -318,7 +317,7 @@ public class ImportLoincJobAppCtx {
 	}
 
 	@Bean
-	public IReductionStepWorker<LoincJobImportParameters, ImportLoincFileSetJson, ImportTerminologyResultJson> importLoincStep21Finalize() {
+	public IReductionStepWorker<ImportLoincJobParameters, ImportLoincFileSetJson, ImportTerminologyResultJson> importLoincStep21Finalize() {
 		return new ImportLoincStep21Finalize(myDaoRegistry);
 	}
 

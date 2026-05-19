@@ -10,7 +10,6 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -25,8 +24,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincStep3HandleHierarchyTest.renderHierarchy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,7 +48,7 @@ class ImportLoincStep20LinguisticVariantTest {
 	@Mock
 	private IJobStepExecutionServices myJobExecutionServices;
 	@Mock
-	private JobDefinition<LoincJobImportParameters> myJobDefinition;
+	private JobDefinition<ImportLoincJobParameters> myJobDefinition;
 
 	@InjectMocks
 	private ImportLoincStep20LinguisticVariant mySvc;
@@ -77,7 +74,7 @@ class ImportLoincStep20LinguisticVariantTest {
 		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv", "my-chunk-attachment-id"));
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
@@ -98,7 +95,7 @@ class ImportLoincStep20LinguisticVariantTest {
 			""";
 		assertEquals(expected, result);
 
-		verify(myDataSink, never()).accept(any(ImportLoincFileSetJson.class));
+		verify(myDataSink, times(1)).accept(any(ImportLoincFileSetJson.class));
 	}
 
 	@Test
@@ -117,7 +114,7 @@ class ImportLoincStep20LinguisticVariantTest {
 		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("loinc-ver/v269/AccessoryFiles/LinguisticVariants/zzZZ8LinguisticVariant.csv", "my-chunk-attachment-id"));
 		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 
-		StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new LoincJobImportParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
@@ -138,7 +135,7 @@ class ImportLoincStep20LinguisticVariantTest {
 			""";
 		assertEquals(expected, result);
 
-		verify(myDataSink, never()).accept(any(ImportLoincFileSetJson.class));
+		verify(myDataSink, times(1)).accept(any(ImportLoincFileSetJson.class));
 	}
 
 }

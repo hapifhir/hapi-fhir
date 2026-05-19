@@ -12,11 +12,10 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.CM_COPYRIGHT;
@@ -32,11 +31,10 @@ import static org.apache.commons.lang3.StringUtils.trim;
 // FIXME: make sure we don't expand ValueSets until status = active
 public class ImportLoincStep6HandleRsnaPlaybook
 		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep6HandleRsnaPlaybook.MyContext> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep6HandleRsnaPlaybook.class);
 
 	@Override
 	protected MyContext newContextObject(
-			StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyContext(theStepExecutionDetails);
 	}
 
@@ -50,11 +48,11 @@ public class ImportLoincStep6HandleRsnaPlaybook
 
 	@Override
 	protected void handleRecord(
-            StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters,
-            MyContext theContext,
-            CSVRecord theRecord,
-            CodeSystem theCodeSystemToPopulate,
-            ImportLoincFileSetJson theData, String theSourceFilename) {
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		MyContext theContext,
+		CSVRecord theRecord,
+		CodeSystem theCodeSystemToPopulate,
+		ImportLoincFileSetJson theData, String theSourceFilename) {
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		String longCommonName = trim(theRecord.get("LongCommonName"));
 		String partNumber = trim(theRecord.get("PartNumber"));
@@ -68,19 +66,20 @@ public class ImportLoincStep6HandleRsnaPlaybook
 
 		// CodeSystem version from properties file
 		String codeSystemVersionId = theData.getLoincCodeSystem().getVersion();
+		Properties jobProperties = getJobProperties(theStepExecutionDetails);
 
 		// ConceptMap version from properties files
 		String loincRsnaCmVersion;
-		if (codeSystemVersionId != null) {
-			loincRsnaCmVersion = theJobParameters.getProperties().getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-"
-					+ codeSystemVersionId;
+		if (isNotBlank(jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))) {
+				loincRsnaCmVersion = jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-"
+						+ codeSystemVersionId;
 		} else {
-			loincRsnaCmVersion = theJobParameters.getProperties().getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+			loincRsnaCmVersion = codeSystemVersionId;
 		}
 
 		// RSNA Codes VS
 		ValueSet vs = getValueSet(
-				theJobParameters, theData, theContext, RSNA_CODES_VS_ID, RSNA_CODES_VS_URI, RSNA_CODES_VS_NAME, null);
+			theStepExecutionDetails, theJobParameters, theData, theContext, RSNA_CODES_VS_ID, RSNA_CODES_VS_URI, RSNA_CODES_VS_NAME, null);
 
 		if (!theContext.getCodesInRsnaPlaybookValueSet().contains(loincNumber)) {
 			vs.getCompose()
@@ -181,7 +180,7 @@ public class ImportLoincStep6HandleRsnaPlaybook
 
 		private final Set<String> myCodesInRsnaPlaybookValueSet = new HashSet<>();
 
-		public MyContext(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theData) {
+		public MyContext(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theData) {
 			super(theData);
 		}
 

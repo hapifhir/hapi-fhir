@@ -42,7 +42,7 @@ public class ImportLoincStep19CodingProperties extends BaseImportLoincStepWithVa
 	private IValidationSupport myValidationSupport;
 
 	@Override
-	protected MyBaseContext newContextObject(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+	protected MyBaseContext newContextObject(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
@@ -55,7 +55,7 @@ public class ImportLoincStep19CodingProperties extends BaseImportLoincStepWithVa
 	}
 
 	@Override
-	protected void handleRecord(StepExecutionDetails<LoincJobImportParameters, ImportLoincFileSetJson> theStepExecutionDetails, LoincJobImportParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData, String theSourceFilename) {
+	protected void handleRecord(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, ImportLoincFileSetJson theData, String theSourceFilename) {
 		if (!anyValidProperty(theContext)) {
 			return;
 		}

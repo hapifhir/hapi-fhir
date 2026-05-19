@@ -55,8 +55,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -198,6 +200,36 @@ public class RestfulServerUtils {
 
 			parser.setEncodeElements(newElements);
 		}
+	}
+
+	/**
+	 * Given a relative URL (e.g. <code>ValueSet/123/$expand</code>), creates a fully qualified URL by appending the relative URL to the server base.
+	 *
+	 * @param theRequestDetails The ServletRequestDetails object containing the server context and request details
+	 * @param theRelativeUrl The relative URL to append to the server base. Must not start with "/".
+	 * @return The fully qualified URL
+	 * @since 8.12.0
+	 */
+	@Nonnull
+	public static String createFullyQualifiedUrlFromRelativeUrl(ServletRequestDetails theRequestDetails, String theRelativeUrl) {
+		Validate.notNull(theRequestDetails, "The ServletRequestDetails object must not be null");
+		Validate.notBlank(theRelativeUrl, "The relative URL must not be blank");
+		Validate.isTrue(!theRelativeUrl.startsWith("/"), "The relative URL must not start with '/'");
+
+		ServletContext servletContext =
+			(ServletContext) theRequestDetails.getServletAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE);
+		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
+		String baseUrl = theRequestDetails
+			.getServer()
+			.getServerAddressStrategy()
+			.determineServerBase(servletContext, servletRequest);
+
+		StringBuilder pollUrlBuilder = new StringBuilder(baseUrl);
+		if (!baseUrl.endsWith("/")) {
+			pollUrlBuilder.append("/");
+		}
+		pollUrlBuilder.append(theRelativeUrl);
+		return pollUrlBuilder.toString();
 	}
 
 	public static String createLinkSelf(String theServerBase, RequestDetails theRequest) {
