@@ -60,6 +60,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -147,6 +148,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@Autowired
 	private ISearchParamRegistryController mySearchParamRegistryController;
+
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -249,16 +253,22 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				if (theInstallationSpec.getInstallMode() == STORE_AND_INSTALL
 						|| theInstallationSpec.getInstallMode()
 								== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-					installPackage(npmPackage, theInstallationSpec, retVal);
+					// Coalesce the per-resource SearchParameter persists and the trailing
+					// refreshCacheIfNecessary into a single SearchParamRegistry rebuild.
+					mySearchParamRegistry.withDeferredRebuild(() -> {
+						installPackage(npmPackage, theInstallationSpec, retVal);
 
-					if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-						retVal.getMessage()
-								.add(
-										"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
-					}
+						if (theInstallationSpec.getInstallMode()
+								== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
+							retVal.getMessage()
+									.add(
+											"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
+						}
 
-					// If any SearchParameters were installed, let's load them right away
-					mySearchParamRegistryController.refreshCacheIfNecessary();
+						// If any SearchParameters were installed, let's load them right away
+						mySearchParamRegistryController.refreshCacheIfNecessary();
+						return null;
+					});
 				}
 
 				validationSupport.invalidateCaches();

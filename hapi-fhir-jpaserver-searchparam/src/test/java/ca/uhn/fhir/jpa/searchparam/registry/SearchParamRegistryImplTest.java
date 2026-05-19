@@ -4,8 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.ResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
@@ -763,6 +765,80 @@ public class SearchParamRegistryImplTest {
 	void testIsNonDisableableBuiltInSearchParam_builtInUriDisableableResource_returnsFalse() {
 		// Built-in URL but resource type not in SearchParamRegistryImpl.NON_DISABLEABLE_SEARCH_PARAMS
 		assertFalse(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/Patient-name", "Patient", "name"));
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testWithDeferredRebuild_handleChangeInsideScope_coalescesIntoSingleRebuild() {
+		// Clear search() call count accumulated during @BeforeEach refresh
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		IResourceChangeEvent event1 = buildCreatedEvent("SearchParameter/sp1");
+		IResourceChangeEvent event2 = buildCreatedEvent("SearchParameter/sp2");
+		IResourceChangeEvent event3 = buildCreatedEvent("SearchParameter/sp3");
+
+		mySearchParamRegistry.withDeferredRebuild(() -> {
+			mySearchParamRegistry.handleChange(event1);
+			mySearchParamRegistry.handleChange(event2);
+			mySearchParamRegistry.handleChange(event3);
+			// No rebuild during deferred scope
+			verify(mySearchParamProvider, never()).search(any());
+			return null;
+		});
+
+		// Exactly one rebuild after scope exit, despite three change events
+		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testWithDeferredRebuild_noChangeEvents_doesNotRebuild() {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		mySearchParamRegistry.withDeferredRebuild(() -> null);
+
+		// No rebuild should fire if no change events were processed
+		verify(mySearchParamProvider, never()).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testWithDeferredRebuild_nestedScopes_onlyOutermostRebuilds() {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		IResourceChangeEvent event = buildCreatedEvent("SearchParameter/sp1");
+
+		mySearchParamRegistry.withDeferredRebuild(() -> {
+			mySearchParamRegistry.withDeferredRebuild(() -> {
+				mySearchParamRegistry.handleChange(event);
+				return null;
+			});
+			// Inner scope exit must NOT rebuild — outer scope is still active
+			verify(mySearchParamProvider, never()).search(any());
+			return null;
+		});
+
+		// Outer scope exit triggers the single coalesced rebuild
+		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testHandleChange_outsideDeferredScope_rebuildsImmediately() {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		mySearchParamRegistry.handleChange(buildCreatedEvent("SearchParameter/sp1"));
+
+		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	private static IResourceChangeEvent buildCreatedEvent(String theId) {
+		return ResourceChangeEvent.fromCreatedUpdatedDeletedResourceIds(
+				List.of(new IdDt(theId)), List.of(), List.of());
 	}
 
 }

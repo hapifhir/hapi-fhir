@@ -69,6 +69,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
@@ -129,6 +131,9 @@ public class SearchParamRegistryImpl
 	private volatile IPhoneticEncoder myPhoneticEncoder;
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 	private boolean myPrePopulateSearchParamIdentities = true;
+
+	private final AtomicInteger myDeferRebuildDepth = new AtomicInteger(0);
+	private volatile boolean myRebuildDeferredDirty = false;
 
 	@VisibleForTesting
 	public void setPopulateSearchParamIdentities(boolean myPrePopulateSearchParamIdentities) {
@@ -575,6 +580,10 @@ public class SearchParamRegistryImpl
 
 	@Override
 	public void forceRefresh() {
+		if (myDeferRebuildDepth.get() > 0) {
+			myRebuildDeferredDirty = true;
+			return;
+		}
 		RuntimeSearchParamCache activeSearchParams = myActiveSearchParams;
 		myResourceChangeListenerCache.forceRefresh();
 
@@ -670,7 +679,24 @@ public class SearchParamRegistryImpl
 					result.deleted,
 					unqualified(theResourceChangeEvent.getDeletedResourceIds()));
 		}
+		if (myDeferRebuildDepth.get() > 0) {
+			myRebuildDeferredDirty = true;
+			return;
+		}
 		rebuildActiveSearchParams();
+	}
+
+	@Override
+	public <T> T withDeferredRebuild(Supplier<T> theCallback) {
+		myDeferRebuildDepth.incrementAndGet();
+		try {
+			return theCallback.get();
+		} finally {
+			if (myDeferRebuildDepth.decrementAndGet() == 0 && myRebuildDeferredDirty) {
+				myRebuildDeferredDirty = false;
+				rebuildActiveSearchParams();
+			}
+		}
 	}
 
 	private String unqualified(List<IIdType> theIds) {

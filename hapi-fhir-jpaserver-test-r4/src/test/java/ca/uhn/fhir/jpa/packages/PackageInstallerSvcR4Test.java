@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.IParser;
@@ -128,6 +129,9 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 	@RegisterExtension
 	private LogbackTestExtension myTerminologyTroubleshootingLogCapture = new LogbackTestExtension(Logs.getTerminologyTroubleshootingLog());
+
+	@RegisterExtension
+	private LogbackTestExtension mySearchParamRegistryLogCapture = new LogbackTestExtension(SearchParamRegistryImpl.class);
 
 	@Override
 	@BeforeEach
@@ -1988,6 +1992,43 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		IBundleProvider result = myCodeSystemDao.search(map, new SystemRequestDetails());
 		assertThat(result.sizeOrThrowNpe()).isEqualTo(1);
 		return (CodeSystem) result.getResources(0, 1).get(0);
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void install_packageWithMultipleSearchParameters_triggersExactlyOneRegistryRebuild(@TempDir Path theTempDir) throws IOException {
+		// Build a package containing 3 custom SearchParameter resources
+		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, "sp.batch.rebuild.test", "1.0.0");
+		igCreator.setDirectory(Files.createDirectory(theTempDir.resolve("ig-sp-batch")));
+		for (int i = 0; i < 3; i++) {
+			SearchParameter sp = new SearchParameter();
+			sp.setId("custom-sp-" + i);
+			sp.setUrl("http://example.com/fhir/SearchParameter/custom-sp-" + i);
+			sp.setName("customSp" + i);
+			sp.setCode("custom-sp-" + i);
+			sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			sp.setType(Enumerations.SearchParamType.TOKEN);
+			sp.setExpression("Patient.identifier");
+			sp.addBase("Patient");
+			igCreator.addResourceToIG("sp-" + i, sp);
+		}
+		Path tarball = igCreator.createTestIG();
+
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName(igCreator.getPackageName())
+			.setVersion(igCreator.getPackageVersion())
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setPackageContents(Files.readAllBytes(tarball));
+
+		mySearchParamRegistryLogCapture.clearEvents();
+		myPackageInstallerSvc.install(spec);
+
+		long rebuildCount = mySearchParamRegistryLogCapture.getLogEvents().stream()
+			.filter(e -> e.getFormattedMessage().startsWith("Rebuilding SearchParamRegistry"))
+			.count();
+		// Without the defer logic this would be 3 (one per persisted SP). With deferral it
+		// must coalesce to exactly one rebuild for the whole package install.
+		assertEquals(1, rebuildCount, "Expected exactly one SearchParamRegistry rebuild for the install of a package with 3 SearchParameters");
 	}
 
 }
