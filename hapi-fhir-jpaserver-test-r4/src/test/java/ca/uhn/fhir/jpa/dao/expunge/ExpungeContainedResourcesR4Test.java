@@ -69,13 +69,10 @@ class ExpungeContainedResourcesR4Test extends BaseJpaR4Test {
 	 * Primary reproduction: contained-resource indexing creates extra
 	 * {@code HFJ_RES_LINK} rows where the parent resource is the source and another
 	 * real resource is the target. Per-resource {@code $expunge} of the target
-	 * resource fails because {@code JpaResourceExpungeService.deleteAllSearchParams}
-	 * only deletes link rows where the resource being expunged is the source, leaving
-	 * rows where it is the target behind. The subsequent
-	 * {@code DELETE FROM HFJ_RESOURCE} fails the {@code FK_RESLINK_TARGET}
-	 * referential integrity check and is surfaced as {@code HAPI-2415}.
-	 *
-	 * <p>Expected on master: FAIL with HAPI-2415.</p>
+	 * resource must succeed even though {@code JpaResourceExpungeService.deleteAllSearchParams}
+	 * must clear both source-side and target-side link rows before the
+	 * {@code DELETE FROM HFJ_RESOURCE} can satisfy the {@code FK_RESLINK_TARGET}
+	 * referential integrity constraint.
 	 */
 	@Test
 	void testExpungeDeletedTargetResource_WhileSourceWithContainedChildrenStillExists_Succeeds() {
@@ -108,11 +105,7 @@ class ExpungeContainedResourcesR4Test extends BaseJpaR4Test {
 		// still alive, so the HFJ_RES_LINK row targeting Patient is still present.
 		myPatientDao.delete(thePatientId, mySrd);
 
-		// Execute: per-resource $expunge of the deleted Patient. This is the
-		// JpaResourceExpungeService.expungeCurrentVersionOfResource path described
-		// in the RCA. Today this throws PreconditionFailedException with HAPI-2415
-		// because deleteAllSearchParams does not remove HFJ_RES_LINK rows where the
-		// expunged resource is the target.
+		// Execute: per-resource $expunge of the deleted Patient.
 		assertThatCode(() -> myPatientDao.expunge(thePatientId, new ExpungeOptions()
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true), mySrd))
