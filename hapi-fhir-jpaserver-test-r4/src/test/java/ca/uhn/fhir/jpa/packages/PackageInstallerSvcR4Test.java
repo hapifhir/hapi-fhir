@@ -1982,6 +1982,51 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(lookupIgY.isFound()).isTrue();
 	}
 
+	@Test
+	void install_withDependencyExcludes_skipsExcludedDependencies(@TempDir Path theTempDir) throws IOException {
+		// setup
+		IParser parser = myFhirContext.newJsonParser();
+		NamingSystem namingSystem = parser.parseResource(NamingSystem.class, """
+			{
+				"resourceType": "NamingSystem",
+				"name": "MyNamingSystem",
+				"status": "active",
+				"kind": "identifier",
+				"date": "2024-01-01",
+				"uniqueId": [
+					{ "type": "uri", "value": "http://example.org/my-system" }
+				]
+			}
+			""");
+
+		Path igDir = Files.createDirectory(Path.of(theTempDir.toString(), "main"));
+		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, "example.ig.test", "1.0.0");
+		igCreator.setDirectory(igDir);
+		igCreator.addDependency("included.dependency.pkg", "1.0.0");
+		igCreator.addDependency("excluded.dependency.pkg", "2.0.0");
+		igCreator.addResourceToIG("NamingSystem", namingSystem);
+
+		PackageInstallationSpec spec = new PackageInstallationSpec();
+		spec.setName(igCreator.getPackageName())
+			.setVersion(igCreator.getPackageVersion())
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setFetchDependencies(true)
+			.setDryRun(true);
+		spec.addDependencyExclude("^excluded\\..*");
+		spec.setPackageContents(Files.readAllBytes(igCreator.createTestIG()));
+
+		// test
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+
+		// verify
+		assertThat(outcome.getMessage())
+			.anyMatch(m -> m.contains("Installation would install") && m.contains("included.dependency.pkg"));
+		assertThat(outcome.getMessage())
+			.anyMatch(m -> m.contains("Not installing dependency excluded.dependency.pkg") && m.contains("exclude criteria"));
+		assertThat(outcome.getMessage())
+			.noneMatch(m -> m.contains("Installation would install") && m.contains("excluded.dependency.pkg"));
+	}
+
 	private CodeSystem fetchCodeSystemByUrl(String theUrl) {
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(CodeSystem.SP_URL, new UriParam(theUrl));
