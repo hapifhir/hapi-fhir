@@ -949,11 +949,11 @@ public class FhirPatch {
 	}
 
 	private static void throwUnknownChildElementException(String theFieldName, @Nullable String thePath) {
-		String msg = Msg.code(2925) + "Unknown child element '" + theFieldName + "' for patch operation";
+		String errorMsg = "Unknown child element '" + theFieldName + "' for patch operation";
 		if (StringUtils.isNotBlank(thePath)) {
-			msg += " on path '" + thePath + "'";
+			errorMsg += " on path '" + thePath + "'";
 		}
-		throw new InvalidRequestException(msg);
+		throw new InvalidRequestException(Msg.code(2930) + errorMsg);
 	}
 
 	private IBase getNewValue(IBase theParameters, ChildDefinition theChildDefinition) {

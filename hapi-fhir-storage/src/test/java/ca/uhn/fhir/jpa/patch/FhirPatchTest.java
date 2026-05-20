@@ -1015,7 +1015,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 
 		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
 				.isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining("HAPI-2925")
+				.hasMessageContaining("HAPI-2930")
 				.hasMessageContaining("physicalType");
 	}
 
@@ -1040,7 +1040,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 
 		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
 				.isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining("HAPI-2925")
+				.hasMessageContaining("HAPI-2930")
 				.hasMessageContaining("physicalType")
 				.hasMessageContaining("Encounter.location");
 	}
