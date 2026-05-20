@@ -160,12 +160,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addForeignKey("20260407.13", "FK_BT2JA_INSTANCE")
 				.toColumn("JOB_INSTANCE_ID")
 				.references("BT2_JOB_INSTANCE", "JOB_INSTANCE_ID");
-        
 
-        version.onTable(TermCodeSystemVersion.TRM_CODESYSTEM_VER)
-            .addColumn("20260427.10", "CS_INTENDED_VERSION_ID")
-            .nullable()
-            .type(ColumnTypeEnum.STRING, 200);
+		version.onTable(TermCodeSystemVersion.TRM_CODESYSTEM_VER)
+				.addColumn("20260427.10", "CS_INTENDED_VERSION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 200);
 	}
 
 	protected void init8_10_0() {

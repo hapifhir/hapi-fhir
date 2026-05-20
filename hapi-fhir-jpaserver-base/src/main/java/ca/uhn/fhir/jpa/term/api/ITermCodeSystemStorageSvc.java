@@ -26,8 +26,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +43,7 @@ public interface ITermCodeSystemStorageSvc {
 	String MAKE_LOADING_VERSION_CURRENT = "make.loading.version.current";
 
 	/**
-	 * Defaults to true when parameter is null or entry is not present in requestDetails.myUserData
+	 * Defaults to true when the parameter is null or entry is not present in requestDetails.myUserData
 	 */
 	static boolean isMakeVersionCurrent(RequestDetails theRequestDetails) {
 		return theRequestDetails == null
@@ -59,7 +59,7 @@ public interface ITermCodeSystemStorageSvc {
 			RequestDetails theRequestDetails);
 
 	/**
-	 * Default implementation supports previous signature of method which was added RequestDetails parameter
+	 * The default implementation supports the previous signature of the method which was added RequestDetails parameter
 	 */
 	@Transactional
 	default void storeNewCodeSystemVersion(
@@ -92,7 +92,7 @@ public interface ITermCodeSystemStorageSvc {
 			IBaseResource theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails);
 
 	/**
-	 * Default implementation supports previous signature of method which was added RequestDetails parameter
+	 * The default implementation supports the previous signature of the method which was added RequestDetails parameter
 	 */
 	default void storeNewCodeSystemVersionIfNeeded(IBaseResource theCodeSystem, ResourceTable theResourceEntity) {
 		storeNewCodeSystemVersionIfNeeded(theCodeSystem, theResourceEntity, null);
@@ -133,7 +133,7 @@ public interface ITermCodeSystemStorageSvc {
 
 	/**
 	 * Uploads concepts from a CodeSystem resource to the database. This method uses a CodeSystem
-	 * resource as the transport container for the concepts, but does not actually store the
+	 * resource as the transport container for the concepts but does not actually store the
 	 * actual CodeSystem resource, it just adds the concepts to the terminology database. The
 	 * {@literal CodeSystem.url} and {@literal CodeSystem.version} properties must be populated.
 	 *
@@ -144,10 +144,17 @@ public interface ITermCodeSystemStorageSvc {
 	/**
 	 * Takes a CodeSystemVersion that is being staged (see {@link #startStagingCodeSystemVersion(String, String)})
 	 * and activates it so that it can be used for code validation.
+	 * When {@link #startStagingCodeSystemVersion(String, String)} is called, the intended
+	 * version is specified, but at that time we assign a temporary ID to the staging version,
+	 * and remember the version that is intended to be used once activated. When this method
+	 * is called, we change the version to the actual intended version. If a version
+	 * already exists with the same URL and version, it will be deleted.
 	 *
 	 * @param theCodeSystemUrl The code system URL
 	 * @param theStagingVersionId The staging version ID
-	 * @param theMakeCurrent Should the given version be made the current version?
+	 * @param theMakeCurrent Should the given version be made the current version? Note that if this
+	 *                       method would result in the current version being deleted, we will make the
+	 *                       staging version the current version regardless of this parameter.
 	 * @since 8.12.0
 	 */
 	void activateStagingCodeSystemVersion(String theCodeSystemUrl, String theStagingVersionId, boolean theMakeCurrent);

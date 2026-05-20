@@ -521,7 +521,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				 * multiple CodeSystem resources with CodeSystem.version set differently (as opposed to
 				 * multiple versions of the same CodeSystem, where CodeSystem.meta.versionId is different)
 				 */
-				markCodeSystemVersionForDeletion(next);
+				deleteCodeSystemVersion(next);
 			}
 		}
 
@@ -599,6 +599,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		if (isMakeVersionCurrent) {
 			myTerminologySvc.updateCodeSystemVersionCache(theSystemUri, codeSystemToStore);
 		}
+	}
+
+	private void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+		HapiTransactionService.requireTransaction();
+
+		theCodeSystemVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
+		myCodeSystemVersionDao.saveAndFlush(theCodeSystemVersion);
+		myDeferredStorageSvc.deleteCodeSystemVersion(theCodeSystemVersion);
 	}
 
 	private TermCodeSystemVersion getExistingTermCodeSystemVersion(
@@ -757,7 +765,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		if (theStatisticsTracker.getAddedConceptCount() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
 			saveConcept(targetConcept);
 			Long nextConceptPid = targetConcept.getId();
-			Objects.requireNonNull(nextConceptPid);
+			Validate.notNull(nextConceptPid, "Concept ID cannot be null after saving");
 		} else {
 			myDeferredStorageSvc.addConceptToStorageQueue(targetConcept);
 		}

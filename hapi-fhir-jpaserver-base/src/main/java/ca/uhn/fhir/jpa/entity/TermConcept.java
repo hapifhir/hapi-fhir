@@ -527,7 +527,7 @@ public class TermConcept implements Serializable {
 			TermConcept parent = nextParentLink.getParent();
 			if (parent != null) {
 				Long parentConceptId = parent.getId();
-				Validate.notNull(parentConceptId);
+				Validate.notNull(parentConceptId, "Parent concept ID cannot be null");
 				if (theParentPids.add(parentConceptId)) {
 					parentPids(parent, theParentPids);
 				}
@@ -556,13 +556,13 @@ public class TermConcept implements Serializable {
 	private void setParentPids(Set<Long> theParentPids) {
 		StringBuilder b = new StringBuilder();
 		for (Long next : theParentPids) {
-			if (b.length() > 0) {
+			if (!b.isEmpty()) {
 				b.append(' ');
 			}
 			b.append(next);
 		}
 
-		if (b.length() == 0) {
+		if (b.isEmpty()) {
 			b.append("NONE");
 		}
 
@@ -675,10 +675,9 @@ public class TermConcept implements Serializable {
 			if (this == theO) {
 				return true;
 			}
-			if (!(theO instanceof TermConceptPk)) {
+			if (!(theO instanceof TermConceptPk that)) {
 				return false;
 			}
-			TermConceptPk that = (TermConceptPk) theO;
 			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
 		}
 

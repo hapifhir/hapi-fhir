@@ -682,8 +682,8 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			TermCodeSystemVersion existing = myCodeSystemVersionDao.findByCodeSystemUriAndVersion("http://foo", stagingVersion);
 			assertNotNull(existing);
 			assertEquals(2, existing.getConcepts().size());
-			assertEquals("Parent", existing.getConcept("PARENT").orElseThrow().getDisplay());
-			List<TermConcept> children = existing.getConcept("PARENT").orElseThrow().getChildCodes();
+			assertEquals("Parent", existing.getConceptByCode("PARENT").orElseThrow().getDisplay());
+			List<TermConcept> children = existing.getConceptByCode("PARENT").orElseThrow().getChildCodes();
 			assertEquals(1, children.size());
 			assertEquals("CHILD", children.get(0).getCode());
 			assertEquals("Child", children.get(0).getDisplay());
