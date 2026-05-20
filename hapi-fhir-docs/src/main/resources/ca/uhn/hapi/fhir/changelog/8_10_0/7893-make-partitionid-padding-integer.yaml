@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 7893
+title: "In MSSQL/SQL Server DB Partition Mode, the IN-clause padding placeholder used by SearchBuilder bound 
+a null partition ID for padded slots, which prevented query plan guide from matching consistently. 
+This has been fixed."

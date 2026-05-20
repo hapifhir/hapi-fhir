@@ -2368,6 +2368,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				}
 			}
 
+			DateStringWrapper periodEnd = null;
+			boolean isPeriod = false;
 			Optional<IBase> repeat = myTimingRepeatValueChild.getAccessor().getFirstValueOrNull(theValue);
 			if (repeat.isPresent()) {
 				Optional<IBase> bounds =
@@ -2375,6 +2377,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				if (bounds.isPresent()) {
 					String boundsType = toRootTypeName(bounds.get());
 					if ("Period".equals(boundsType)) {
+						isPeriod = true;
 						IPrimitiveType<Date> start =
 								extractValuesAsFhirDates(myPeriodStartValueChild, bounds.get()).stream()
 										.findFirst()
@@ -2388,21 +2391,25 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 							dates.add(new DateStringWrapper(start.getValue(), start.getValueAsString()));
 						}
 						if (end != null && end.getValue() != null) {
-							dates.add(new DateStringWrapper(end.getValue(), end.getValueAsString()));
+							periodEnd = new DateStringWrapper(end.getValue(), end.getValueAsString());
+							dates.add(periodEnd);
 						}
 					}
 				}
 			}
 
 			if (!dates.isEmpty()) {
+				DateStringWrapper high = isPeriod ? periodEnd : dates.last();
+				String highString = high != null ? high.getDateValueAsString() : null;
+
 				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(
 						myPartitionSettings,
 						theResourceType,
 						theSearchParam.getName(),
 						dates.first(),
 						dates.first().getDateValueAsString(),
-						dates.last(),
-						dates.last().getDateValueAsString(),
+						high,
+						highString,
 						firstValue);
 				theParams.add(myIndexedSearchParamDate);
 			}
