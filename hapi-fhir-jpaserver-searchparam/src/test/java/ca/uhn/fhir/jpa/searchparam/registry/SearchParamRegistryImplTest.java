@@ -51,10 +51,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.shaded.com.google.common.collect.Sets;
 
@@ -106,21 +106,21 @@ public class SearchParamRegistryImplTest {
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 
-	@MockBean
+	@MockitoBean
 	private PartitionSettings myPartitionSettings;
-	@MockBean
+	@MockitoBean
 	private IResourceVersionSvc myResourceVersionSvc;
-	@MockBean
+	@MockitoBean
 	private ISearchParamProvider mySearchParamProvider;
-	@MockBean
+	@MockitoBean
 	private IInterceptorService myInterceptorBroadcaster;
-	@MockBean
+	@MockitoBean
 	private SearchParamMatcher mySearchParamMatcher;
-	@MockBean
+	@MockitoBean
 	private MatchUrlService myMatchUrlService;
-	@MockBean
+	@MockitoBean
 	private SearchParamExtractorService mySearchParamExtractorService;
-	@MockBean
+	@MockitoBean
 	private IndexedSearchParamExtractor myIndexedSearchParamExtractor;
 	private int myAnswerCount = 0;
 
