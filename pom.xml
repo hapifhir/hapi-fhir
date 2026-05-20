@@ -1114,9 +1114,7 @@
 		<json_path_version>2.9.0</json_path_version>
 		<jboss_logging_version>3.6.1.Final</jboss_logging_version>
 		<stax2_api_version>3.1.4</stax2_api_version>
-		<!-- Testcontainers brings in docker transport as a dependency - we should keep the versions aligned -->
 		<testcontainers_version>2.0.2</testcontainers_version>
-		<docker_transport_version>3.7.0</docker_transport_version>
 		<thymeleaf-version>3.1.5.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -1180,26 +1178,6 @@
 				<version>${testcontainers_version}</version>
 				<type>pom</type>
 				<scope>import</scope>
-			</dependency>
-			<!--
-			Jacoco complains about duplicate "effective_tld_names.dat" in docker-java-transport-zerodep and httpclient5
-			Resolve this by excluding docker-java-transport-zerodep, and using docker-java-transport-httpclient5 instead.
-			-->
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>testcontainers</artifactId>
-				<version>${testcontainers_version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>com.github.docker-java</groupId>
-						<artifactId>docker-java-transport-zerodep</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>com.github.docker-java</groupId>
-				<artifactId>docker-java-transport-httpclient5</artifactId>
-				<version>${docker_transport_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>aopalliance</groupId>
