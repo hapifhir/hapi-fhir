@@ -292,7 +292,7 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		return this;
 	}
 
-	public Optional<TermConcept> getConcept(String theCode) {
+	public Optional<TermConcept> getConceptByCode(String theCode) {
 		return getConcepts().stream().filter(t -> t.getCode().equals(theCode)).findFirst();
 	}
 }
