@@ -843,7 +843,7 @@ public class SearchParamRegistryImplTest {
 
 	// Created by Claude Opus 4.7
 	@Test
-	void testForceRefresh_insideDeferredScope_rebuildsSynchronouslyAndSatisfiesScopeExit() {
+	void testForceRefresh_insideDeferredScope_yieldsRebuildToScopeExit() {
 		reset(mySearchParamProvider);
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 
@@ -852,13 +852,15 @@ public class SearchParamRegistryImplTest {
 			// Inside scope, no rebuild yet
 			verify(mySearchParamProvider, never()).search(any());
 
-			// Explicit forceRefresh() bypasses deferral and rebuilds now
+			// forceRefresh inside the scope drains the listener cache but
+			// yields the rebuild to scope exit, so opportunistic post-commit
+			// refresh hooks fired during a batched unit of work do not defeat
+			// the coalescing.
 			mySearchParamRegistry.forceRefresh();
-			verify(mySearchParamProvider, times(1)).search(any());
+			verify(mySearchParamProvider, never()).search(any());
 		});
 
-		// Scope exit must not fire a second rebuild — forceRefresh() already
-		// satisfied the pending marker.
+		// Single coalesced rebuild fires on scope exit.
 		verify(mySearchParamProvider, times(1)).search(any());
 	}
 

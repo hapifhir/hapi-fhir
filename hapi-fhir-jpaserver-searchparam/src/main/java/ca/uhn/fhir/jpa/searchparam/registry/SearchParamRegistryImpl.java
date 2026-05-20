@@ -589,14 +589,18 @@ public class SearchParamRegistryImpl
 		RuntimeSearchParamCache activeSearchParams = myActiveSearchParams;
 		myResourceChangeListenerCache.forceRefresh();
 
+		// Inside a deferred scope, yield the rebuild to scope exit so
+		// opportunistic post-commit refresh hooks don't defeat coalescing.
+		if (myDeferRebuildDepth.get() > 0) {
+			return;
+		}
+
 		// If the listener-cache drain didn't already produce a rebuild
-		// (e.g. handleChange events were deferred, or no changes were pending),
-		// rebuild now. forceRefresh() is an explicit request for synchronous
-		// state, so it bypasses any deferred scope.
+		// (no changes were pending), rebuild now to satisfy the sync contract.
 		if (myActiveSearchParams == activeSearchParams) {
 			// Clear pending BEFORE the rebuild reads from the DB. A handleChange
 			// firing during the rebuild then sets pending=true again and the
-			// deferred scope (or next forceRefresh) will flush it.
+			// next forceRefresh will flush it.
 			myRebuildPending = false;
 			rebuildActiveSearchParams();
 		}
@@ -702,8 +706,10 @@ public class SearchParamRegistryImpl
 	 * during {@code theCallback} into a single rebuild executed at scope exit.
 	 * Deferral is process-wide: change events on other threads observed while
 	 * any scope is active are also coalesced. Nested scopes flush only on
-	 * outermost exit. {@link #forceRefresh} bypasses deferral and rebuilds
-	 * synchronously.
+	 * outermost exit. {@link #forceRefresh} calls observed inside the scope
+	 * also yield to the scope: they drain the listener cache but defer the
+	 * rebuild to scope exit so opportunistic post-commit refresh hooks do not
+	 * defeat the coalescing.
 	 */
 	@Override
 	public void withDeferredRebuild(@Nonnull Runnable theCallback) {
