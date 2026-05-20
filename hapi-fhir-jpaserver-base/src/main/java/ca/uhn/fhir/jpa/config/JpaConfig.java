@@ -194,6 +194,7 @@ import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
+import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.PartitionedIdModeVerificationSvc;
@@ -1142,11 +1143,18 @@ public class JpaConfig {
 	}
 
 	@Bean
+	public DialectSvc dialectSvc(HibernatePropertiesProvider theHibernatePropertiesProvider) {
+		return new DialectSvc(theHibernatePropertiesProvider);
+	}
+
+	@Bean
 	public PartitionedIdModeVerificationSvc partitionedIdModeVerificationSvc(
 			PartitionSettings thePartitionSettings,
 			HibernatePropertiesProvider theHibernatePropertiesProvider,
-			PlatformTransactionManager theTxManager) {
-		return new PartitionedIdModeVerificationSvc(thePartitionSettings, theHibernatePropertiesProvider, theTxManager);
+			PlatformTransactionManager theTxManager,
+			DialectSvc theDialectSvc) {
+		return new PartitionedIdModeVerificationSvc(
+				thePartitionSettings, theHibernatePropertiesProvider, theTxManager, theDialectSvc);
 	}
 
 	@Bean

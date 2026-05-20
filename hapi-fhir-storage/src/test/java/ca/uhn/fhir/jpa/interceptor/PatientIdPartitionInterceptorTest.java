@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -221,6 +223,77 @@ class PatientIdPartitionInterceptorTest {
 		} else {
 			assertDoesNotThrow(() -> interceptor.setResourceTypePolicies(policies));
 		}
+	}
+
+	@Test
+	void testSetResourceTypePolicies_UnknownResourceType_ThrowsConfigurationException() {
+		Map<String, ResourceCompartmentStoragePolicy> policies = Map.of(
+				"NotARealResourceType", ResourceCompartmentStoragePolicy.alwaysUseDefaultPartition());
+
+		assertThatThrownBy(() -> mySvc.setResourceTypePolicies(policies))
+				.isInstanceOf(ConfigurationException.class)
+				.hasMessageContaining(Msg.code(2866))
+				.hasMessageContaining("NotARealResourceType")
+				.hasMessageContaining("is not a valid resource type");
+	}
+
+	/**
+	 * Chained search params on subject/patient (e.g. subject.gender=female)
+	 * should be tolerated in patient compartment mode. The partition is determined by the base
+	 * reference; the chained param does not contribute to partition selection and must be skipped.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', textBlock = """
+		Encounter?subject=Patient/abc                          | 6354
+		Encounter?subject=Patient/abc&subject.gender=female    | 6354
+		Encounter?subject=Patient/abc&subject.gender=male      | 6354
+		Observation?patient=Patient/123&patient.gender=female  | 3690
+		Observation?patient.gender=female&patient=Patient/123  | 3690
+		""")
+	void testSearch_ChainedParamAlongsideDirect_ReturnsPartitionFromDirectRef(String theValue, @ConvertWith(StringToIntegerListArgumentConverter.class) List<Integer> theExpectedPartitionId) {
+		MatchUrlService.ResourceTypeAndSearchParameterMap parsedMatchUrl = myMatchUrlSvc.parseAndTranslateMatchUrl(theValue);
+		SearchParameterMap params = parsedMatchUrl.searchParameterMap();
+		String resourceType = parsedMatchUrl.resourceType();
+		ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forSearchType(resourceType, params, null);
+
+		RequestPartitionId actual = mySvc.identifyForRead(readDetails, new ServletRequestDetails());
+
+		assertFalse(actual.isAllPartitions());
+		assertThat(actual.getPartitionIds()).containsExactly(theExpectedPartitionId.toArray(Integer[]::new));
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		Encounter?subject.identifier=http://patient|1
+		Encounter?subject.identifier=http://patient|1&subject.gender=female
+		Encounter?subject.gender=male&subject.identifier=http://patient|1
+		""")
+	void testSearch_ChainedParamWithNonResolvedParameter_throwsException(String theValue) {
+		MatchUrlService.ResourceTypeAndSearchParameterMap parsedMatchUrl = myMatchUrlSvc.parseAndTranslateMatchUrl(theValue);
+		SearchParameterMap params = parsedMatchUrl.searchParameterMap();
+		String resourceType = parsedMatchUrl.resourceType();
+		ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forSearchType(resourceType, params, null);
+
+		assertThatThrownBy(() -> mySvc.identifyForRead(readDetails, new ServletRequestDetails()))
+			.isInstanceOf(MethodNotAllowedException.class)
+			.hasMessageContaining(Msg.code(2928));
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		Patient?_id:text=foo
+		Patient?_id:exact=123
+		Patient?_id:contains=partial
+		""")
+	void testSearch_UnsupportedModifierOnIdParam_throwsMethodNotAllowed(String theValue) {
+		MatchUrlService.ResourceTypeAndSearchParameterMap parsedMatchUrl = myMatchUrlSvc.parseAndTranslateMatchUrl(theValue);
+		SearchParameterMap params = parsedMatchUrl.searchParameterMap();
+		String resourceType = parsedMatchUrl.resourceType();
+		ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forSearchType(resourceType, params, null);
+
+		assertThatThrownBy(() -> mySvc.identifyForRead(readDetails, new ServletRequestDetails()))
+			.isInstanceOf(MethodNotAllowedException.class)
+			.hasMessageContaining(Msg.code(1322));
 	}
 
 	@Nested

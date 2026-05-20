@@ -18,9 +18,11 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -82,5 +84,71 @@ class DeleteExpungeSqlBuilderTest {
 		assertDoesNotThrow(() -> {
 			myDeleteExpungeSqlBuilderTest.validateOkToDeleteAndExpunge(pids, false, null);
 		});
+	}
+
+	@Test
+	void validateOkToDeleteAndExpunge_RI_disabled_cascade_false_no_conflicts() {
+		// RI disabled, cascade=false → early return before any conflict check
+		when(myStorageSettings.isEnforceReferentialIntegrityOnDelete()).thenReturn(false);
+
+		Set<JpaPid> pids = new HashSet<>();
+		pids.add(JpaPid.fromIdAndResourceType(10L, "Patient"));
+
+		// Should return without throwing — no conflict check performed
+		assertThatCode(() -> myDeleteExpungeSqlBuilderTest.validateOkToDeleteAndExpunge(pids, false, null))
+				.doesNotThrowAnyException();
+	}
+
+	@Test
+	void validateOkToDeleteAndExpunge_RI_disabled_cascade_true_conflicts_resolved() {
+		// RI disabled, cascade=true, conflicts exist but all sources are resolved in one round
+		when(myStorageSettings.isEnforceReferentialIntegrityOnDelete()).thenReturn(false);
+
+		JpaPid patientPid = JpaPid.fromIdAndResourceType(10L, "Patient");
+		JpaPid observationPid = JpaPid.fromIdAndResourceType(20L, "Observation");
+
+		// Conflict: Observation refers to Patient
+		ResourceTable observationTable = new ResourceTable();
+		observationTable.setId(observationPid);
+		ResourceLink conflictLink = new ResourceLink();
+		conflictLink.setSourceResource(observationTable);
+		conflictLink.setSourcePath("Observation.subject");
+
+		// First call returns the conflict; second call (for newly added observation PID) returns nothing
+		when(myResourceLinkDao.findWithTargetPidIn(anyList()))
+				.thenReturn(List.of(conflictLink))
+				.thenReturn(List.of());
+
+		Set<JpaPid> pids = new HashSet<>();
+		pids.add(patientPid);
+
+		// All conflicting PIDs should be added to the set and no exception should be thrown
+		assertThatCode(() -> myDeleteExpungeSqlBuilderTest.validateOkToDeleteAndExpunge(pids, true, null))
+				.doesNotThrowAnyException();
+	}
+
+	@Test
+	void validateOkToDeleteAndExpunge_RI_disabled_cascade_true_maxRounds_exhausted() {
+		// RI disabled, cascade=true, maxRounds exhausted → should NOT throw (Issue 1 fix)
+		when(myStorageSettings.isEnforceReferentialIntegrityOnDelete()).thenReturn(false);
+
+		JpaPid patientPid = JpaPid.fromIdAndResourceType(10L, "Patient");
+		JpaPid observationPid = JpaPid.fromIdAndResourceType(20L, "Observation");
+
+		// Conflict: Observation refers to Patient — keeps recurring so rounds are exhausted
+		ResourceTable observationTable = new ResourceTable();
+		observationTable.setId(observationPid);
+		ResourceLink conflictLink = new ResourceLink();
+		conflictLink.setSourceResource(observationTable);
+		conflictLink.setSourcePath("Observation.subject");
+
+		when(myResourceLinkDao.findWithTargetPidIn(anyList())).thenReturn(List.of(conflictLink));
+
+		Set<JpaPid> pids = new HashSet<>();
+		pids.add(patientPid);
+
+		// With maxRounds=1, the loop exhausts after one cascade round but RI is disabled → no throw
+		assertThatCode(() -> myDeleteExpungeSqlBuilderTest.validateOkToDeleteAndExpunge(pids, true, 1))
+				.doesNotThrowAnyException();
 	}
 }

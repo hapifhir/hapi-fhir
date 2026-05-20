@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTypeInterceptor;
@@ -82,15 +81,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
@@ -480,7 +479,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				.selectCount(1)
 				.commitCount(1)
 				.noOtherCounts()
-				.selectSqlContains(0, "PARTITION_ID='65'")
+				.selectSqlAtIndex(0).contains("PARTITION_ID='65'")
 		);
 	}
 
@@ -658,18 +657,53 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		myTestDaoSearch.assertSearchFinds("find by identifier for group observation", "Observation?identifier=groupObsIdentifier", g1ObsId);
 	}
 
+	@Test
+	public void testSearchWithChainedNonCompartmentResources() {
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+
+		createPatient(withId("A"), withActiveTrue());
+		IIdType orgId = createOrganization(withId("org1"), withName("orgName"), withActiveTrue());
+		IIdType encounterId = createEncounter(withSubject("Patient/A"), withReference("serviceProvider", orgId));
+
+		myTestDaoSearch.assertSearchFinds("find Encounter", "Encounter?service-provider.name=orgName&service-provider.active=true", encounterId);
+	}
 
 	@Test
-	public void testSearchObservation_ChainedSubjectParameter() {
+	public void testSearchWithChainedAndResolvedReference() {
+		createPatient(withId("A"), withActiveTrue());
+		IIdType patAObsId = createObservation(withSubject("Patient/A"), withStatus("final"));
+
+		myTestDaoSearch.assertSearchFinds("find patient Observation", "Observation?subject=Patient/A&subject.active=true", patAObsId);
+		myTestDaoSearch.assertSearchNotFound("find patient Observation", "Observation?subject=Patient/A&subject.active=false", patAObsId);
+		myTestDaoSearch.assertSearchFinds("find patient Observation", "Observation?subject.active=true&subject=Patient/A", patAObsId);
+	}
+
+	@Test
+	public void testSearchChainedValue_noResolvedReference_fails() {
+		createPatientA();
+		createObservationB();
+
+		// Chain
+		try {
+			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("identifier", "http://foo|123")), mySrd);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-2928: Could not resolve chained parameter(s) [identifier] on parameter subject. Consider adding a direct Patient reference to your search (?subject=Patient/abc&subject.identifier=...)", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void testSearchObservation_ChainedSubjectParameterNoDirectReference() {
 		createPatientA();
 		createObservationB();
 
 		// Multiple ANDs
 		assertThatThrownBy(() -> myObservationDao.search(SearchParameterMap
 				.newSynchronous()
-				.add("subject", new ReferenceParam("identifier", "http://patient|1")), mySrd))
+				.add("performer", new ReferenceParam("identifier", "http://patient|1")), mySrd))
 			.isInstanceOf(MethodNotAllowedException.class)
-			.hasMessageContaining(Msg.code(1322) + "The parameter subject.identifier is not supported in patient compartment mode");
+			.hasMessageContaining(Msg.code(1323) + "The parameter performer.identifier is not supported in patient compartment mode");
 	}
 
 	@Test
@@ -684,6 +718,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					.add("subject", new ReferenceParam("Patient/A"))
 					.add("subject", new ReferenceParam("Patient/B"))
 				, mySrd);
+//			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(1324) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
 		}
@@ -694,23 +729,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				.add(
 					"subject", new ReferenceOrListParam().add(new ReferenceParam("Patient/A")).add(new ReferenceParam("Patient/B"))
 				), mySrd);
+//			fail();
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(1324) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
 		}
-	}
-
-	@Test
-	public void testSearchObservation_ChainedValue() {
-		createPatientA();
-		createObservationB();
-
-		// Chain
-		try {
-			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("identifier", "http://foo|123")), mySrd);
-		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(1322) + "The parameter subject.identifier is not supported in patient compartment mode", e.getMessage());
-		}
-
 	}
 
 	@Test
@@ -789,7 +811,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				.selectCount(1)
 				.commitCount(2)
 				.noOtherCounts()
-				.selectSqlContains(0, "PARTITION_ID='-1'")
+				.selectSqlAtIndex(0).contains("PARTITION_ID='-1'")
 		);
 	}
 

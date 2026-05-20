@@ -118,6 +118,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -191,7 +192,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends BaseHapiFhirDao<T>
 		implements IFhirResourceDao<T> {
 
-	public static final String BASE_RESOURCE_NAME = "resource";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
 
 	@Autowired
@@ -1469,12 +1469,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			ReindexJobParameters params = new ReindexJobParameters();
 
-			List<String> urls = List.of();
-			if (!isCommonSearchParam(theBase)) {
-				urls = theBase.stream().map(t -> t + "?").collect(Collectors.toList());
+			// abstract types will determine a full reindex
+			// we could change this to expand resource types in the future for consistency
+			boolean baseContainsAbstractResourceType =
+					theBase.stream().anyMatch(SearchParameterUtil::isAbstractResourceBase);
+			if (!baseContainsAbstractResourceType) {
+				List<String> urls = theBase.stream().map(t -> t + "?").toList();
+				myJobPartitionProvider
+						.getPartitionedUrls(theRequestDetails, urls)
+						.forEach(params::addPartitionedUrl);
 			}
-
-			myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls).forEach(params::addPartitionedUrl);
 
 			JobInstanceStartRequest request = new JobInstanceStartRequest();
 			request.setJobDefinitionId(JOB_REINDEX);
@@ -1493,11 +1497,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 		Object shouldSkip = theRequestDetails.getUserData().getOrDefault(JpaConstants.SKIP_REINDEX_ON_UPDATE, false);
 		return Boolean.parseBoolean(shouldSkip.toString());
-	}
-
-	private boolean isCommonSearchParam(List<String> theBase) {
-		// If the base contains the special resource "Resource", this is a common SP that applies to all resources
-		return theBase.stream().map(String::toLowerCase).anyMatch(BASE_RESOURCE_NAME::equals);
 	}
 
 	@Override
@@ -3207,6 +3206,44 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							theRequestPartitionId.getFirstPartitionNameOrNull());
 			throw new InvalidRequestException(Msg.code(2733) + msg);
 		}
+	}
+
+	@VisibleForTesting
+	public void setMemoryCacheService(MemoryCacheService theMemoryCacheService) {
+		myMemoryCacheService = theMemoryCacheService;
+	}
+
+	@Override
+	protected void postPersist(ResourceTable theEntity, T theResource, RequestDetails theRequestDetails) {
+		super.postPersist(theEntity, theResource, theRequestDetails);
+		invalidateHistoryCountCacheAfterCommit(theEntity);
+	}
+
+	@Override
+	protected void postUpdate(ResourceTable theEntity, T theResource, RequestDetails theRequestDetails) {
+		super.postUpdate(theEntity, theResource, theRequestDetails);
+		invalidateHistoryCountCacheAfterCommit(theEntity);
+	}
+
+	@Override
+	protected void postDelete(ResourceTable theEntity) {
+		super.postDelete(theEntity);
+		invalidateHistoryCountCacheAfterCommit(theEntity);
+	}
+
+	/**
+	 * Invalidates the {@link MemoryCacheService.CacheEnum#HISTORY_COUNT} entries that the
+	 * given resource write affects, scheduled to run after the surrounding transaction commits.
+	 */
+	private void invalidateHistoryCountCacheAfterCommit(ResourceTable theEntity) {
+		myMemoryCacheService.invalidateKeyAfterCommit(
+				MemoryCacheService.CacheEnum.HISTORY_COUNT,
+				MemoryCacheService.HistoryCountKey.forInstance(theEntity.getPersistentId()));
+		myMemoryCacheService.invalidateKeyAfterCommit(
+				MemoryCacheService.CacheEnum.HISTORY_COUNT,
+				MemoryCacheService.HistoryCountKey.forType(theEntity.getResourceType()));
+		myMemoryCacheService.invalidateKeyAfterCommit(
+				MemoryCacheService.CacheEnum.HISTORY_COUNT, MemoryCacheService.HistoryCountKey.forSystem());
 	}
 
 	/**

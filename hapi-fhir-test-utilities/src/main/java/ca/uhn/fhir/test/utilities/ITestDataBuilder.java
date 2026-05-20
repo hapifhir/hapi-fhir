@@ -147,10 +147,29 @@ public interface ITestDataBuilder {
 	}
 
 	/**
+	 * Set Observation.effectiveInstant
+	 */
+	default ICreationArgument withEffectiveInstant(@Nullable String theInstant) {
+		return withInstantAt("effectiveInstant", theInstant);
+	}
+
+	/**
+	 * Set Observation.effectivePeriod
+	 */
+	default ICreationArgument withEffectivePeriod(@Nullable String theStart, @Nullable String theEnd) {
+		return withPeriodAt("effectivePeriod", theStart, theEnd);
+	}
+
+
+	/**
 	 * Set Observation.effectiveDate
 	 */
 	default ICreationArgument withDateTimeAt(String thePath, String theDate) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "dateTime", theDate);
+	}
+
+	default ICreationArgument withInstantAt(String thePath, String theDate) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "instant", theDate);
 	}
 
 	/**
@@ -423,7 +442,9 @@ public interface ITestDataBuilder {
 	default Consumer<IBase> withPrimitiveAttribute(String thePath, Object theValue) {
 		return t -> {
 			FhirTerser terser = getFhirContext().newTerser();
-			terser.addElement(t, thePath, "" + theValue);
+			if (theValue != null) {
+				terser.addElement(t, thePath, "" + theValue);
+			}
 		};
 	}
 
@@ -498,6 +519,13 @@ public interface ITestDataBuilder {
 			withPrimitiveAttribute("system", theSystem),
 			withPrimitiveAttribute("code", theValue),
 			withPrimitiveAttribute("display", theDisplay)
+		);
+	}
+
+	default <T extends IBase> ICreationArgument withPeriodAt(String thePath, @Nullable String theStart, @Nullable String theEnd) {
+		return withElementAt(thePath,
+			withPrimitiveAttribute("start", theStart),
+			withPrimitiveAttribute("end", theEnd)
 		);
 	}
 

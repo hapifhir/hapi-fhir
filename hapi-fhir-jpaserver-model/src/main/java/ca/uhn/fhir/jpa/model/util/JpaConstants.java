@@ -372,10 +372,18 @@ public class JpaConstants {
 	public static final Long NO_MORE_PID = -1L;
 
 	/**
+	 * Numeric constant used for partition ID in {@link #NO_MORE}. A concrete sentinel
+	 * (rather than {@code null}) keeps every padded slot in an IN-clause expansion
+	 * bound to a typed value, so MSSQL {@code sp_executesql} parameter declarations
+	 * stay uniform between real and padded slots and plan-guide matching is stable.
+	 */
+	private static final Integer NO_MORE_PARTITION_ID = -1;
+
+	/**
 	 * Special PID value used as an internal constant indicating that no more results are available. PIDs should always
 	 * be positive, so this value will never appear in real data.
 	 */
-	public static final JpaPid NO_MORE = JpaPid.fromId(NO_MORE_PID);
+	public static final JpaPid NO_MORE = JpaPid.fromId(NO_MORE_PID, NO_MORE_PARTITION_ID);
 
 	/**
 	 * A page request which only returns a single result (page index = 0, page size = 1)
