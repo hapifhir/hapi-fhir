@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -54,6 +55,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -106,6 +108,8 @@ public class PackageInstallerSvcImplTest {
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Mock
 	private ISearchParamRegistryController mySearchParamRegistryController;
+	@Mock(answer = Answers.CALLS_REAL_METHODS)
+	private ISearchParamRegistry mySearchParamRegistry;
 	@Mock
 	private DaoRegistry myDaoRegistry;
 	@Mock
