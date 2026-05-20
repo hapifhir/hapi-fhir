@@ -46,7 +46,6 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -178,20 +177,37 @@ public class PackageInstallerSvcImplTest {
 			SearchParameter spWithNullStatus = new SearchParameter();
 			spWithNullStatus.setStatus(null);
 
+			// Resources with a status field in spec but never set (setStatus never called)
+			SearchParameter spWithUnsetStatus = new SearchParameter();
+
+			Subscription subscriptionWithUnsetStatus = new Subscription();
+			subscriptionWithUnsetStatus.setCriteria("Patient?name=smith");
+			subscriptionWithUnsetStatus.setChannel(new Subscription.SubscriptionChannelComponent()
+					.setType(Subscription.SubscriptionChannelType.RESTHOOK)
+					.setEndpoint("https://tinyurl.com/2p95e27r"));
+
+			DocumentReference docRefWithUnsetStatus = new DocumentReference();
+
+			Communication commWithUnsetStatus = new Communication();
+
 			return Stream.of(
 					arguments(resourceWithNoStatusElementInSpec, true),
 					arguments(spWithActiveStatus, true),
 					arguments(spWithNullStatus, false),
 					arguments(spWithDraftStatus, false),
+					arguments(spWithUnsetStatus, false),
 					arguments(createSubscription(Subscription.SubscriptionStatus.REQUESTED), true),
 					arguments(createSubscription(Subscription.SubscriptionStatus.ERROR), false),
 					arguments(createSubscription(Subscription.SubscriptionStatus.ACTIVE), false),
+					arguments(subscriptionWithUnsetStatus, false),
 					arguments(createDocumentReference(Enumerations.DocumentReferenceStatus.ENTEREDINERROR), true),
 					arguments(createDocumentReference(Enumerations.DocumentReferenceStatus.NULL), false),
 					arguments(createDocumentReference(null), false),
+					arguments(docRefWithUnsetStatus, false),
 					arguments(createCommunication(Communication.CommunicationStatus.NOTDONE), true),
 					arguments(createCommunication(Communication.CommunicationStatus.NULL), false),
 					arguments(createCommunication(null), false),
+					arguments(commWithUnsetStatus, false),
 					arguments(createValueSet("http://test/VS"),true),
 					arguments(createCodeSystem("http://test/CS"),true),
 					arguments(createValueSet(CommonCodeSystemsTerminologyService.LANGUAGES_VALUESET_URL),false),
@@ -315,8 +331,7 @@ public class PackageInstallerSvcImplTest {
 
 		// Created by Claude Opus 4.6
 		@Test
-		@Disabled("This is a bug, the assertion was incorrect do disabling the test with the correct assertion")
-		void testValidForUpload_statusElementDefinedButNeverSet_returnsTrue() {
+		void testValidForUpload_statusElementDefinedButNeverSet_returnsFalse() {
 			SearchParameter sp = new SearchParameter();
 			sp.setUrl("http://example.com/sp-no-status");
 			setupSearchParameterValidationMocksForSuccess();
@@ -375,6 +390,7 @@ public class PackageInstallerSvcImplTest {
 		cs.setId("CodeSystem/mycs");
 		cs.setUrl("http://my-code-system");
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
 		PackageInstallationSpec spec = setupResourceInPackage(existingCs, cs, myCodeSystemDao);
 

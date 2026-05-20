@@ -72,7 +72,6 @@ import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyS
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -1032,19 +1031,13 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (!myStorageSettings.isValidateResourceStatusForPackageUpload()) {
 			return true;
 		}
-		List<IPrimitiveType> statusTypes =
-				myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
-		// Resource does not have a status field
-		if (statusTypes.isEmpty()) {
+		if (!TerserUtil.fieldExists(myFhirContext, "status", theResource)) {
 			return true;
 		}
-		// TODO: there is a bug here - see testValidForUpload_statusElementDefinedButNeverSet_returnsTrue
-		// Resource has no status field, or an explicitly null one
-		if (!statusTypes.get(0).hasValue() || statusTypes.get(0).getValue() == null) {
+		String statusValue = extractStringValueOrEmpty(theResource, "status");
+		if (statusValue.isEmpty()) {
 			return false;
 		}
-		final String statusValue = statusTypes.get(0).getValueAsString();
-		// Resource has a status, and we need to check based on type
 		return switch (theResource.fhirType()) {
 			case "Subscription" -> statusValue.equals("requested");
 			case "DocumentReference", "Communication" -> !statusValue.equals("?");
@@ -1086,7 +1079,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return SearchParameterMap.newSynchronous().add("_id", new TokenParam(id));
 		} else if ("SearchParameter".equals(resourceType)) {
 			return buildSearchParameterMapForSearchParameter(theResource);
-		} else if (hasValue(theResource, "url")) {
+		} else if (TerserUtil.hasValues(myFhirContext, theResource, "url")) {
 			SearchParameterMap retVal = SearchParameterMap.newSynchronous();
 			retVal.add("url", new UriParam(extractStringValueOrEmpty(theResource, "url")));
 			// If multiple versions are allowed, include version in search to avoid overwriting
@@ -1125,7 +1118,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return spmFromCanonicalized.get();
 		}
 
-		if (hasValue(theResource, "url")) {
+		if (TerserUtil.hasValues(myFhirContext, theResource, "url")) {
 			String url = extractStringValueOrEmpty(theResource, "url");
 			return SearchParameterMap.newSynchronous().add("url", new UriParam(url));
 		} else {
@@ -1176,10 +1169,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				.newTerser()
 				.getSinglePrimitiveValue(theResource, theElementName)
 				.orElseGet(theDefaultSupplier);
-	}
-
-	private boolean hasValue(IBaseResource theResource, String theElementName) {
-		return TerserUtil.hasValues(myFhirContext, theResource, theElementName);
 	}
 
 	@VisibleForTesting
