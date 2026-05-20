@@ -30,7 +30,7 @@ public class ImportLoincStep12HandleIeeeMedicalDeviceCode
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess() {
+	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE,
 				LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT));
@@ -60,11 +60,13 @@ public class ImportLoincStep12HandleIeeeMedicalDeviceCode
 		String sourceCodeSystemUri = ITermLoaderSvc.LOINC_URI;
 		String targetCodeSystemUri = ITermLoaderSvc.IEEE_11073_10101_URI;
 		String loincCopyrightStatement = theData.getLoincCodeSystem().getCopyright();
+		String conceptMapId = LOINC_IEEE_CM_ID + "-" + codeSystemVersionId;
+
 		addConceptMapEntry(
 				theData,
 				theContext,
 				new ConceptMapping()
-						.setConceptMapId(LOINC_IEEE_CM_ID)
+						.setConceptMapId(conceptMapId)
 						.setConceptMapUri(LOINC_IEEE_CM_URI)
 						.setConceptMapVersion(loincIeeeCmVersion)
 						.setConceptMapName(LOINC_IEEE_CM_NAME)

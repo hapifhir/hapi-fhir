@@ -24,14 +24,26 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.gclient.IClientHttpExecutable;
+import ca.uhn.fhir.rest.gclient.IEntityResult;
+import ca.uhn.fhir.rest.gclient.RawRequestEntity;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.AttachmentUtil;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FileUtil;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.ValidateUtil;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import org.apache.commons.cli.CommandLine;
@@ -42,6 +54,11 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ThreadUtils;
+import org.apache.commons.lang3.Validate;
+import org.hibernate.search.mapper.pojo.model.impl.PojoModelPropertyRootElement;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -53,10 +70,17 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_FILENAME;
+import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID;
+import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
+import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.http.HttpStatus.SC_ACCEPTED;
 
 public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	static final String UPLOAD_TERMINOLOGY = "upload-terminology";
@@ -148,7 +172,128 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				requestName = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
 				break;
 		}
-		invokeOperation(termUrl, datafile, client, requestName);
+
+		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(termUrl);
+		if (LOINC_URI.equals(canonicalUrl.url())) {
+			invokeOperationAsyncJob(termUrl, datafile, client, requestName);
+		} else {
+			invokeOperation(termUrl, datafile, client, requestName);
+		}
+	}
+
+	private void invokeOperationAsyncJob(String theUrl, String[] theDatafiles, IGenericClient theClient, String theRequestName) throws ParseException {
+		ourLog.info("Beginning upload process for terminology system: {}", theUrl);
+
+		// Step 1: Create staging job
+		ourLog.info("Requesting server to create staging job for terminology system");
+		IBaseParameters createStagingRequest = ParametersUtil.newInstance(myFhirCtx);
+		ParametersUtil.addParameterToParametersUri(myFhirCtx, createStagingRequest, TerminologyUploaderProvider.PARAM_SYSTEM, theUrl);
+		IBaseParameters createStagingResponse;
+		try {
+			createStagingResponse = theClient.operation()
+				.onType("CodeSystem")
+				.named(JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB)
+				.withParameters(createStagingRequest)
+				.execute();
+		} catch (BaseServerResponseException e) {
+			// FIXME: add code
+			throw new CommandFailureException(Msg.code(1) + "Failed to create terminology staging job: " + e.getMessage());
+		}
+		String jobInstanceId = ParametersUtil.getNamedParameterValueAsString(myFhirCtx, createStagingResponse, RESP_PARAM_JOB_INSTANCE_ID).orElseThrow();
+		String outcome = ParametersUtil.getNamedParameterValueAsString(myFhirCtx, createStagingResponse, TerminologyUploaderProvider.RESP_PARAM_OUTCOME).orElseThrow();
+		ourLog.info("Server responded: {}", outcome);
+
+		// Step 2: Attach Files
+		for (String datafile : theDatafiles) {
+			File dataFile = new File(datafile);
+
+			if (!dataFile.exists() || !dataFile.isFile() || !dataFile.canRead()) {
+				// FIXME: add code
+				throw new CommandFailureException(Msg.code(1) + "File does not exist or can't be read: " + datafile);
+			}
+
+			long size = FileUtils.sizeOf(dataFile);
+			ourLog.info("Attaching file ({}) to job: {}", FileUtil.formatFileSize(size), datafile);
+			StopWatch sw = new StopWatch();
+
+			String urlBuilder = "CodeSystem/" +
+				JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
+				"?" +
+				RESP_PARAM_JOB_INSTANCE_ID +
+				"=" +
+				jobInstanceId +
+				"&" +
+				PARAM_FILENAME +
+				"=" +
+				UrlUtil.escapeUrlParam(dataFile.getName());
+
+			byte[] bytes;
+			try {
+				bytes = IOUtils.toByteArray(new FileInputStream(dataFile));
+			} catch (IOException e) {
+				// FIXME: add code
+				throw new CommandFailureException(Msg.code(1) + "Failed to read file '" + datafile + "': " + e.getMessage());
+			}
+			RawRequestEntity requestEntity = new RawRequestEntity(Constants.CT_OCTET_STREAM, bytes);
+
+			IEntityResult response = theClient.rawHttpRequest().post(urlBuilder, requestEntity).execute();
+
+			if (response.getStatusCode() != 200) {
+				// FIXME: add code
+				throw new CommandFailureException(Msg.code(1) + "Failed to upload terminology, got HTTP " + response.getStatusCode());
+			}
+
+			ourLog.info("Attached file in {}", sw);
+		}
+
+		// Step 3 - Start job
+		ourLog.info("Starting staged upload job");
+		IBaseParameters startRequest = ParametersUtil.newInstance(myFhirCtx);
+		ParametersUtil.addParameterToParametersCode(myFhirCtx, startRequest, TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID, jobInstanceId);
+		MethodOutcome startResponse = theClient.operation()
+			.onType("CodeSystem")
+			.named(JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB)
+			.withParameters(startRequest)
+			.returnMethodOutcome()
+			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.execute();
+
+		String pollUrl = startResponse.getFirstResponseHeader(Constants.HEADER_CONTENT_LOCATION).orElseThrow();
+		ourLog.info("Job is started. Server responded with poll URL: {}", pollUrl);
+
+		// Step 4 - Poll for progress
+		IEntityResult pollResponse;
+		while (true) {
+			ourLog.info("Polling for job status...");
+			pollResponse = theClient
+				.rawHttpRequest()
+				.get(pollUrl)
+				.execute();
+			if (pollResponse.getStatusCode() != SC_ACCEPTED) {
+				break;
+			}
+
+			EncodingEnum encoding = EncodingEnum.forContentType(pollResponse.getMimeType());
+			Validate.notNull(encoding, "Unknown encoding: %s", pollResponse.getMimeType());
+			IBaseOperationOutcome oo = (IBaseOperationOutcome) encoding.newParser(myFhirCtx).parseResource(pollResponse.getInputStream());
+			String diagnostics = OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirCtx, oo);
+			ourLog.info(" - Server response: {}", diagnostics);
+
+			// Sleep
+			Duration pollFrequency = Duration.ofSeconds(10);
+			if (HapiSystemProperties.isTestModeEnabled()) {
+				pollFrequency = Duration.ofMillis(500);
+			}
+			ThreadUtils.sleepQuietly(pollFrequency);
+		}
+
+		ourLog.info("Job completed with status code: {}", pollResponse.getStatusCode());
+
+		EncodingEnum encoding = EncodingEnum.forContentType(pollResponse.getMimeType());
+		Validate.notNull(encoding, "Unknown encoding: %s", pollResponse.getMimeType());
+		IBaseBundle bundle = (IBaseBundle) encoding.newParser(myFhirCtx).parseResource(pollResponse.getInputStream());
+		String report = myFhirCtx.newTerser().getSinglePrimitiveValue(bundle, "Bundle.entry.response.outcome.issue.diagnostics").orElse(null);
+		ourLog.info("Job completed with report:\n{}", report);
 	}
 
 	private void invokeOperation(

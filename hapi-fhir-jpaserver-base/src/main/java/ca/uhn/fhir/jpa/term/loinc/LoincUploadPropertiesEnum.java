@@ -60,6 +60,7 @@ public enum LoincUploadPropertiesEnum {
 	// LOINC hierarchy
 	LOINC_HIERARCHY_FILE("loinc.hierarchy.file"),
 	LOINC_HIERARCHY_FILE_DEFAULT("AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv"),
+	LOINC_HIERARCHY_FILE_DEFAULT_NEW("AccessoryFiles/ComponentHierarchyBySystem/ComponentHierarchyBySystem.csv"),
 
 	// IEEE medical device codes
 	LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE("loinc.ieee.medical.device.code.mapping.table.file"),
@@ -132,6 +133,10 @@ public enum LoincUploadPropertiesEnum {
 	// Consumer Name
 	LOINC_CONSUMER_NAME_FILE("loinc.consumer.name.file"),
 	LOINC_CONSUMER_NAME_FILE_DEFAULT("AccessoryFiles/ConsumerName/ConsumerName.csv"),
+
+	// Linguistic Variants (codes)
+	LOINC_LINGUISTIC_VARIANTS_CODES("loinc.linguistic.variants.codes"),
+	LOINC_LINGUISTIC_VARIANTS_CODES_DEFAULT(""),
 
 	// Linguistic Variants
 	LOINC_LINGUISTIC_VARIANTS_FILE("loinc.linguistic.variants.file"),

@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
@@ -45,6 +46,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.batch2.util.AsyncRequestUtil;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.AttachmentUtil;
+import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
@@ -64,6 +66,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
@@ -203,7 +207,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		})
 	public IBaseParameters uploadTerminologyAttachFile(
 		@OperationParam(name = RESP_PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code") IPrimitiveType<String> theJobInstanceId,
-		@OperationParam(name = PARAM_FILENAME, min = 0, typeName = "code") IPrimitiveType<String> theCodeSystemVersion,
+		@OperationParam(name = PARAM_FILENAME, min = 0, typeName = "code") IPrimitiveType<String> theFilename,
 		HttpServletRequest theServletRequest,
 		ServletRequestDetails theRequestDetails) {
 
@@ -213,12 +217,15 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 			if (ImportLoincJobAppCtx.IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
 				AttachmentDetails attachmentDetails;
-				switch (toStringValueOrEmpty(theCodeSystemVersion)) {
-					case FILENAME_LOINC_DISTRIBUTION_FILE -> attachmentDetails = new AttachmentDetails(inputStream, AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
-					case TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE -> attachmentDetails = new AttachmentDetails(inputStream, AttachmentContentTypeEnum.PROPERTIES, TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
+				String filename = toStringValueOrEmpty(theFilename);
+				// FIXME: Make constant
+				if (Pattern.compile("loinc[0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE).matcher(filename).find()) {
+					attachmentDetails = new AttachmentDetails(inputStream, AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
+				} else if (filename.endsWith(FILENAME_LOINC_UPLOAD_PROPERTIES_FILE)) {
+					attachmentDetails = new AttachmentDetails(inputStream, AttachmentContentTypeEnum.PROPERTIES, FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
 					// FIXME: add code
-					default ->
-						throw new InvalidRequestException(Msg.code(1) + "Don't know how to handle file: " + toStringValue(theJobInstanceId));
+				} else {
+					throw new InvalidRequestException(Msg.code(1) + "Don't know how to handle file: " + toStringValue(theFilename));
 				}
 
 				String instanceId = jobInstance.getInstanceId();
@@ -282,20 +289,22 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	@Operation(
 		typeName = "CodeSystem",
 		name = JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS,
+		manualResponse = true,
 		idempotent = true)
 	public void uploadTerminologyPollForStatus(
 		@OperationParam(name = RESP_PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code") IPrimitiveType<String> theJobInstanceId,
-		ServletRequestDetails theRequestDetails) {
+		ServletRequestDetails theRequestDetails) throws IOException {
 
 		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
 
 		if (ImportLoincJobAppCtx.IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
 
-			StatusEnum status = jobInstance.getStatus();
-			String currentStepId = jobInstance.getCurrentGatedStepId();
-			int progress = (int) (100.0 * jobInstance.getProgress());
-
-
+			Function<JobInstance, AsyncRequestUtil.CompletedJobPollResponse> completedDetailsProvider = instance -> {
+				ImportTerminologyResultJson resultJson = JsonUtil.deserialize(jobInstance.getReport(), ImportTerminologyResultJson.class);
+				String report = resultJson.getReport();
+				return new AsyncRequestUtil.CompletedJobPollResponse(null, List.of(report));
+			};
+			AsyncRequestUtil.handleAsyncJobPollForStatusResponse(theRequestDetails, jobInstance, JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB, completedDetailsProvider);
 
 		} else {
 			// FIXME: add code

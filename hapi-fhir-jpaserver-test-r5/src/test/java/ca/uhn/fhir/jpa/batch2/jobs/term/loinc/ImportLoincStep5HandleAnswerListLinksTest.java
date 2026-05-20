@@ -35,45 +35,21 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep5HandleAnswerListLinksTest {
-
-	@Mock
-	private IJobPersistence myJobPersistence;
-	@Mock
-	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-	@Mock
-	private IJobDataSink<ImportLoincFileSetJson> myDataSink;
-	@Mock
-	private IJobStepExecutionServices myJobExecutionServices;
-	@Mock
-	private JobDefinition<ImportLoincJobParameters> myJobDefinition;
+class ImportLoincStep5HandleAnswerListLinksTest extends BaseImportLoincStepTest{
 
 	@InjectMocks
 	private ImportLoincStep5HandleAnswerListLinks mySvc;
-
-	@Captor
-	private ArgumentCaptor<ImportLoincFileSetJson> myFileSetCaptor;
-	@Captor
-	private ArgumentCaptor<IBaseResource> myCodeSystemCaptor;
 
 
 	@Test
 	void run_LoadCodes() {
 		// Setup
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/AnswerFile/LoincAnswerListLink.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		String classpath = "loinc-ver/v269/AccessoryFiles/AnswerFile/LoincAnswerListLink.csv";
+		mockFetchAttachment(classpath);
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 
 		// Test
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId("my-instance-id");
-
-		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
-		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("file.csv", "my-chunk-attachment-id"));
-		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
-
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
-
-		mySvc.run(stepExecutionDetails, myDataSink);
+		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
 		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());

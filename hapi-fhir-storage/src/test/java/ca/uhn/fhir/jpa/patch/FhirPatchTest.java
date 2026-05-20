@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
@@ -23,6 +24,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -712,6 +714,27 @@ public class FhirPatchTest implements ITestDataBuilder {
 		// Verify
 		assertThat(input.getDeceased()).isInstanceOf(BooleanType.class);
 		assertThat(((BooleanType) input.getDeceased()).getValue()).isTrue();
+	}
+
+	@Test
+	void testReplace_UnqualifiedPath() {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
+
+		// Path has no resource type prefix
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.replace()
+			.path("status")
+			.value(new CodeType("active"));
+		IBaseParameters patchDocument = patchBuilder.build();
+
+		// Test
+		myPatch.apply(valueSet, patchDocument);
+
+		// Verify
+		assertEquals(Enumerations.PublicationStatus.ACTIVE, valueSet.getStatus());
+
 	}
 
 	/**

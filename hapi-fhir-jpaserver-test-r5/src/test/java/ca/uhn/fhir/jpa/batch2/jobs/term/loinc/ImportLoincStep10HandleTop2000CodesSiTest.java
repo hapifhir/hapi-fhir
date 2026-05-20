@@ -45,40 +45,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep10HandleTop2000CodesSiTest {
-
-	@Mock
-	private IJobPersistence myJobPersistence;
-	@Mock
-	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-	@Mock
-	private IJobDataSink<ImportLoincFileSetJson> myDataSink;
-	@Mock
-	private IJobStepExecutionServices myJobExecutionServices;
-	@Mock
-	private JobDefinition<ImportLoincJobParameters> myJobDefinition;
-	@Mock
-	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
-	@Mock
-	private IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
+class ImportLoincStep10HandleTop2000CodesSiTest extends BaseImportLoincStepTest{
 
 	@InjectMocks
 	private ImportLoincStep10HandleTop2000CodesSi mySvc;
 
-	@Captor
-	private ArgumentCaptor<IBaseResource> myCodeSystemCaptor;
-	@Captor
-	private ArgumentCaptor<ImportLoincFileSetJson> myFileSetCaptor;
-	@Captor
-	private ArgumentCaptor<ValueSet> myValueSetCaptor;
-	@Captor
-	private ArgumentCaptor<ConceptMap> myConceptMapCaptor;
-
-
 	@Test
 	void testProcess() {
 		// Setup
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/Top2000Results/SI/Top2000CommonLabResultsSi.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		String classpath = "loinc-ver/v269/AccessoryFiles/Top2000Results/SI/Top2000CommonLabResultsSi.csv";
+		mockFetchAttachment(classpath);
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 

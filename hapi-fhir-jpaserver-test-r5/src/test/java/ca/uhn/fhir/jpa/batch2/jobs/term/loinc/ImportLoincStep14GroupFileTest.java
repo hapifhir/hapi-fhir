@@ -46,40 +46,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep14GroupFileTest {
-
-	@Mock
-	private IJobPersistence myJobPersistence;
-	@Mock
-	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-	@Mock
-	private IJobDataSink<ImportLoincFileSetJson> myDataSink;
-	@Mock
-	private IJobStepExecutionServices myJobExecutionServices;
-	@Mock
-	private JobDefinition<ImportLoincJobParameters> myJobDefinition;
-	@Mock
-	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
-	@Mock
-	private IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
+class ImportLoincStep14GroupFileTest extends BaseImportLoincStepTest{
 
 	@InjectMocks
 	private ImportLoincStep14GroupFile mySvc;
 
-	@Captor
-	private ArgumentCaptor<IBaseResource> myCodeSystemCaptor;
-	@Captor
-	private ArgumentCaptor<ImportLoincFileSetJson> myFileSetCaptor;
-	@Captor
-	private ArgumentCaptor<ValueSet> myValueSetCaptor;
-	@Captor
-	private ArgumentCaptor<ConceptMap> myConceptMapCaptor;
-
-
 	@Test
 	void testProcess() {
 		// Setup
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv";
+		mockFetchAttachment(classpath);
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 
@@ -136,8 +112,9 @@ class ImportLoincStep14GroupFileTest {
 	@Test
 	void testProcess_ValueSetAlreadyExists_WithOtherCodes() {
 		// Setup
+		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv";
+		mockFetchAttachment(classpath);
 		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myValueSetDao.read(eq(new IdType("LG1695-8-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 
@@ -154,17 +131,7 @@ class ImportLoincStep14GroupFileTest {
 		when(myValueSetDao.read(eq(new IdType("LG100-4-1.234")), any())).thenReturn(valueSet);
 
 		// Test
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId("my-instance-id");
-
-		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
-		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("file.csv", "my-chunk-attachment-id"));
-		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
-		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
-
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
-
-		mySvc.run(stepExecutionDetails, myDataSink);
+		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
@@ -197,8 +164,9 @@ class ImportLoincStep14GroupFileTest {
 	@Test
 	void testProcess_ValueSetAlreadyExists_SameValueSetInclusion() {
 		// Setup
+		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv";
+		mockFetchAttachment(classpath);
 		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myValueSetDao.read(eq(new IdType("LG1695-8-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 
@@ -213,17 +181,7 @@ class ImportLoincStep14GroupFileTest {
 		when(myValueSetDao.read(eq(new IdType("LG100-4-1.234")), any())).thenReturn(valueSet);
 
 		// Test
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId("my-instance-id");
-
-		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
-		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("file.csv", "my-chunk-attachment-id"));
-		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
-		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
-
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
-
-		mySvc.run(stepExecutionDetails, myDataSink);
+		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());

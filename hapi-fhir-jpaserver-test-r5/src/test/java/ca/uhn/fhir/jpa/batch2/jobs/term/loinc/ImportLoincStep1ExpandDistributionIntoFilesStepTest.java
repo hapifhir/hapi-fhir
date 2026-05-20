@@ -81,7 +81,9 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	@Mock
 	private ITerminologyImportFileHandlerStep<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep2;
 	@Mock
-	private IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, VoidModel> myHandlerStep3;
+	private ITerminologyImportFileHandlerStep<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep3;
+	@Mock
+	private IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, VoidModel> myHandlerStep4;
 	@Captor
 	private ArgumentCaptor<ImportLoincFileSetJson> myTerminologyFileSetCaptor;
 
@@ -96,6 +98,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		mockJobPersistenceFetchDistributionFile();
 		mockHandlerStep1();
 		mockHandlerStep2();
+		mockHandlerStep3();
 		AtomicInteger attachmentCounter = mockJobPersistenceStoreNewAttachment();
 
 		// Test
@@ -112,13 +115,33 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 			new TerminologyFileSetJson.Chunk("SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv", "ATT-4"),
 			new TerminologyFileSetJson.Chunk("SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv", "ATT-5")
 		);
-		assertEquals("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", myTerminologyFileSetCaptor.getAllValues().get(1).getChunkForCurrentStep().getSourceFilename());
-		assertEquals("ATT-1", myTerminologyFileSetCaptor.getAllValues().get(1).getChunkForCurrentStep().getAttachmentId());
-		assertEquals("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", myTerminologyFileSetCaptor.getAllValues().get(2).getChunkForCurrentStep().getSourceFilename());
-		assertEquals("ATT-2", myTerminologyFileSetCaptor.getAllValues().get(2).getChunkForCurrentStep().getAttachmentId());
-		assertEquals("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", myTerminologyFileSetCaptor.getAllValues().get(3).getChunkForCurrentStep().getSourceFilename());
-		assertEquals("ATT-3", myTerminologyFileSetCaptor.getAllValues().get(3).getChunkForCurrentStep().getAttachmentId());
-		assertEquals(5, attachmentCounter.get());
+		assertThat(fileSet.getAndRemoveFutureChunksForStepId("step-3")).containsExactly(
+			new TerminologyFileSetJson.Chunk("SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/AnswerFile/AnswerList.csv", "ATT-6"),
+			new TerminologyFileSetJson.Chunk("SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/AnswerFile/AnswerList.csv", "ATT-7"),
+			new TerminologyFileSetJson.Chunk("SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/AnswerFile/AnswerList.csv", "ATT-8")
+		);
+
+		ImportLoincFileSetJson nextStepWorkChunk;
+
+		nextStepWorkChunk = myTerminologyFileSetCaptor.getAllValues().get(1);
+		assertEquals("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", nextStepWorkChunk.getChunkForCurrentStep().getSourceFilename());
+		assertEquals("ATT-1", nextStepWorkChunk.getChunkForCurrentStep().getAttachmentId());
+		assertThat(nextStepWorkChunk.getAndRemoveFutureChunksForStepId("step-2")).isEmpty();
+		assertThat(nextStepWorkChunk.getAndRemoveFutureChunksForStepId("step-3")).isEmpty();
+
+		nextStepWorkChunk = myTerminologyFileSetCaptor.getAllValues().get(2);
+		assertEquals("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", nextStepWorkChunk.getChunkForCurrentStep().getSourceFilename());
+		assertEquals("ATT-2", nextStepWorkChunk.getChunkForCurrentStep().getAttachmentId());
+		assertThat(nextStepWorkChunk.getAndRemoveFutureChunksForStepId("step-2")).isEmpty();
+		assertThat(nextStepWorkChunk.getAndRemoveFutureChunksForStepId("step-3")).isEmpty();
+
+		nextStepWorkChunk = myTerminologyFileSetCaptor.getAllValues().get(3);
+		assertEquals("SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv", nextStepWorkChunk.getChunkForCurrentStep().getSourceFilename());
+		assertEquals("ATT-3", nextStepWorkChunk.getChunkForCurrentStep().getAttachmentId());
+		assertThat(nextStepWorkChunk.getAndRemoveFutureChunksForStepId("step-2")).isEmpty();
+		assertThat(nextStepWorkChunk.getAndRemoveFutureChunksForStepId("step-3")).isEmpty();
+
+		assertEquals(8, attachmentCounter.get());
 
 	}
 
@@ -270,6 +293,16 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		});
 	}
 
+	private void mockHandlerStep3() {
+		when(myHandlerStep3.canHandleFile(any(), any(), any())).thenAnswer(t -> {
+			String fileName = t.getArgument(2, String.class);
+			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT.getCode())) {
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
+			}
+			return Optional.empty();
+		});
+	}
+
 	private void mockHandlerStep2_SameFileAsStep1() {
 		when(myHandlerStep2.canHandleFile(any(), any(), any())).thenAnswer(t -> {
 			String fileName = t.getArgument(2, String.class);
@@ -321,7 +354,8 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 			.addFirstStep("step-0", "step-0", TerminologyFileSetJson.class, myHandlerStep0)
 			.addIntermediateStep("step-1", "step-1", TerminologyFileSetJson.class, myHandlerStep1)
 			.addIntermediateStep("step-2", "step-2", TerminologyFileSetJson.class, myHandlerStep2)
-			.addLastStep("step-3", "step-3", myHandlerStep3)
+			.addIntermediateStep("step-3", "step-3", TerminologyFileSetJson.class, myHandlerStep3)
+			.addLastStep("step-4", "step-4", myHandlerStep4)
 			.build();
 
 		ImportLoincJobParameters jobParameters = new ImportLoincJobParameters();

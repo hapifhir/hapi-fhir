@@ -25,7 +25,7 @@ public class ImportLoincStep18ConsumerName
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess() {
+	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(LOINC_CONSUMER_NAME_FILE, LOINC_CONSUMER_NAME_FILE_DEFAULT));
 	}
 

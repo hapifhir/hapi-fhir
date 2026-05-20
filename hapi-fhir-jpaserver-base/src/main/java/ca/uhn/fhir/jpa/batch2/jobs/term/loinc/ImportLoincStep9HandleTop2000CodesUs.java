@@ -50,7 +50,7 @@ public class ImportLoincStep9HandleTop2000CodesUs
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess() {
+	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				LoincUploadPropertiesEnum.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE,
 				LoincUploadPropertiesEnum.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT));

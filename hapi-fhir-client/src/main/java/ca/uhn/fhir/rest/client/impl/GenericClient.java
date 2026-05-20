@@ -61,6 +61,8 @@ import ca.uhn.fhir.rest.client.method.DeleteMethodBinding;
 import ca.uhn.fhir.rest.client.method.HistoryMethodBinding;
 import ca.uhn.fhir.rest.client.method.HttpDeleteClientInvocation;
 import ca.uhn.fhir.rest.client.method.HttpGetClientInvocation;
+import ca.uhn.fhir.rest.client.method.HttpPostClientInvocation;
+import ca.uhn.fhir.rest.client.method.HttpRawClientInvocation;
 import ca.uhn.fhir.rest.client.method.HttpSimpleClientInvocation;
 import ca.uhn.fhir.rest.client.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
@@ -126,6 +128,7 @@ import ca.uhn.fhir.rest.gclient.IUpdateWithQuery;
 import ca.uhn.fhir.rest.gclient.IUpdateWithQueryTyped;
 import ca.uhn.fhir.rest.gclient.IValidate;
 import ca.uhn.fhir.rest.gclient.IValidateUntyped;
+import ca.uhn.fhir.rest.gclient.RawRequestEntity;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -483,12 +486,17 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> get(String theUrl) {
-			return new RawGetEntityResultInternal(theUrl);
+			return new RawGetEntityResultInternal<>(theUrl);
+		}
+
+		@Override
+		public IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> post(String theUrl, RawRequestEntity theRequest) {
+			return new RawPostEntityResultInternal<>(theUrl, theRequest);
 		}
 	}
 
-	class RawGetEntityResultInternal<T extends IClientHttpExecutable<?, EntityResult>>
-			extends BaseClientHttpExecutable<T, EntityResult> {
+	class RawGetEntityResultInternal<T extends IClientHttpExecutable<?, IEntityResult>>
+			extends BaseClientHttpExecutable<T, IEntityResult> {
 		final String myUrl;
 
 		public RawGetEntityResultInternal(String theUrl) {
@@ -496,7 +504,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public EntityResult execute() {
+		public IEntityResult execute() {
 			IClientResponseHandler<EntityResult> binding = new EntityResultResponseHandler();
 			HttpGetClientInvocation invocation = new HttpGetClientInvocation(myContext, myUrl);
 			return invokeClient(
@@ -514,7 +522,37 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	private abstract class BaseClientHttpExecutable<T extends IClientHttpExecutable<?, Y>, Y>
+	class RawPostEntityResultInternal<T extends IClientHttpExecutable<?, IEntityResult>>
+			extends BaseClientHttpExecutable<T, IEntityResult> {
+		private final String myUrl;
+		private final RawRequestEntity myRequest;
+
+		public RawPostEntityResultInternal(String theUrl, RawRequestEntity theRequest) {
+			myUrl = theUrl;
+			myRequest = theRequest;
+		}
+
+		@Override
+		public IEntityResult execute() {
+			IClientResponseHandler<EntityResult> binding = new EntityResultResponseHandler();
+			HttpRawClientInvocation invocation = new HttpRawClientInvocation(myContext, myUrl, myRequest);
+
+			return invokeClient(
+					myContext,
+					binding,
+					invocation,
+					null,
+					null,
+					false,
+					null,
+					null,
+					null,
+					myCustomAcceptHeaderValue,
+					myCustomHeaderValues);
+		}
+	}
+
+	private abstract static class BaseClientHttpExecutable<T extends IClientHttpExecutable<?, Y>, Y>
 			implements IClientHttpExecutable<T, Y> {
 		CacheControlDirective myCacheControlDirective;
 		Map<String, List<String>> myCustomHeaderValues = new HashMap<>();
@@ -767,7 +805,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				String nextKey = nextEntry.getKey();
 				List<IQueryParameterType> nextValues = nextEntry.getValue();
 				for (IQueryParameterType nextValue : nextValues) {
-					String value = nextValue.getValueAsQueryToken(myContext);
+					String value = nextValue.getValueAsQueryToken();
 					String qualifier = nextValue.getQueryParameterQualifier();
 					if (isNotBlank(qualifier)) {
 						nextKey = nextKey + qualifier;
@@ -1425,7 +1463,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		private void addParam(String theName, IQueryParameterType theValue) {
 			IPrimitiveType<?> stringType =
-					ParametersUtil.createString(myContext, theValue.getValueAsQueryToken(myContext));
+					ParametersUtil.createString(myContext, theValue.getValueAsQueryToken());
 			addParam(theName, stringType);
 		}
 
@@ -2206,11 +2244,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			Map<String, List<String>> params = getParamMap();
 
 			for (TokenParam next : myTags) {
-				addParam(params, Constants.PARAM_TAG, next.getValueAsQueryToken(myContext));
+				addParam(params, Constants.PARAM_TAG, next.getValueAsQueryToken());
 			}
 
 			for (TokenParam next : mySecurity) {
-				addParam(params, Constants.PARAM_SECURITY, next.getValueAsQueryToken(myContext));
+				addParam(params, Constants.PARAM_SECURITY, next.getValueAsQueryToken());
 			}
 
 			for (Collection<String> profileUris : myProfiles) {
@@ -2281,7 +2319,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			if (myLastUpdated != null) {
 				for (DateParam next : myLastUpdated.getValuesAsQueryTokens()) {
-					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken(myContext));
+					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken());
 				}
 			}
 

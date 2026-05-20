@@ -28,7 +28,7 @@ public class ImportLoincStep11HandleUniversalLabOrderSet
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess() {
+	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE,
 				LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT));

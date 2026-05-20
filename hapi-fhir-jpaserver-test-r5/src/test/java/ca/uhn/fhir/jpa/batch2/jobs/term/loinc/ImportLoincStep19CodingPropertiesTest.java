@@ -32,34 +32,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep19CodingPropertiesTest {
-
-	@Mock
-	private IValidationSupport myValidationSupport;
-	@Mock
-	private IJobPersistence myJobPersistence;
-	@Mock
-	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-	@Mock
-	private IJobDataSink<ImportLoincFileSetJson> myDataSink;
-	@Mock
-	private IJobStepExecutionServices myJobExecutionServices;
-	@Mock
-	private JobDefinition<ImportLoincJobParameters> myJobDefinition;
+class ImportLoincStep19CodingPropertiesTest extends BaseImportLoincStepTest {
 
 	@InjectMocks
 	private ImportLoincStep19CodingProperties mySvc;
 
-	@Captor
-	private ArgumentCaptor<ImportLoincFileSetJson> myFileSetCaptor;
-	@Captor
-	private ArgumentCaptor<IBaseResource> myCodeSystemCaptor;
-
-
 	@Test
 	void testProcess() {
 		// Setup
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream("loinc-ver/v269/LoincTable/Loinc.csv"), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		String classpath = "loinc-ver/v269/LoincTable/Loinc.csv";
+		mockFetchAttachment(classpath);
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 
 		AtomicInteger responseCounter = new AtomicInteger();
@@ -73,17 +55,7 @@ class ImportLoincStep19CodingPropertiesTest {
 		});
 
 		// Test
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId("my-instance-id");
-
-		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
-		importLoincFileSetJson.setCodeSystemStagingVersionId("my-staging-version-id");
-		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("file.csv", "my-chunk-attachment-id"));
-		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
-
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
-
-		mySvc.run(stepExecutionDetails, myDataSink);
+		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
 		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());

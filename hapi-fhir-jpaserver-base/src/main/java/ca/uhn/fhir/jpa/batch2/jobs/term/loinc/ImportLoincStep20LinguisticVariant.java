@@ -1,28 +1,39 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
+import com.google.common.base.Splitter;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
+/**
+ * Because linguistic variant files are huge, take a long time to process, and aren't
+ * needed for many use cases, we don't process them by default and this step ends up
+ * being a no-op. But they can be enabled by adding a property to the job properties
+ * with a key of {@link LoincUploadPropertiesEnum#LOINC_LINGUISTIC_VARIANTS_CODES}
+ * and a value containing the language+country+code of the linguistic variants to
+ * process, separated by commas. For example:
+ * <code>deAT24, frCA8</code>
+ */
 public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStepWithValueSetsAndConceptMaps<BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
-	public static final Pattern LINGUISTIC_VARIANT_FILENAME_PATTERN = Pattern.compile(".*LinguisticVariants/[a-zA-Z0-9]+LinguisticVariant.csv");
 
-	@Autowired
-	private IValidationSupport myValidationSupport;
+	public static final Pattern LINGUISTIC_VARIANT_FILENAME_PATTERN = Pattern.compile(".*LinguisticVariants/([a-z]{2})([A-Z]{2})([0-9]+)LinguisticVariant.csv");
 
 	@Override
 	protected MyBaseContext newContextObject(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
@@ -31,10 +42,23 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStepWithV
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess() {
-		return List.of(
-			new LoincFileNameSpecification(LINGUISTIC_VARIANT_FILENAME_PATTERN)
-		);
+	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+		Properties jobProperties = getJobProperties(theStepExecutionDetails);
+		String linguisticCodes = jobProperties.getProperty(LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_CODES.getCode(), LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_CODES_DEFAULT.getCode());
+		if (linguisticCodes.isBlank()) {
+			return List.of();
+		}
+
+		Set<String> codes = Splitter.on(",").trimResults().omitEmptyStrings().splitToStream(linguisticCodes).collect(Collectors.toSet());
+		Predicate<String> tester = (String theCode) -> {
+			Matcher matcher = LINGUISTIC_VARIANT_FILENAME_PATTERN.matcher(theCode);
+			if (matcher.matches()) {
+				return codes.contains(matcher.group(1) + matcher.group(2) + matcher.group(3));
+			}
+			return false;
+		};
+
+		return List.of(new LoincFileNameSpecification(tester));
 	}
 
 	@Override
@@ -44,11 +68,7 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStepWithV
 			return;
 		}
 
-		// loinc-ver/v269/AccessoryFiles/LinguisticVariants/deAT24LinguisticVariant.csv
-
-		// FIXME: extract pattern as constant
-		Pattern pattern = Pattern.compile(".*LinguisticVariants/([a-z]{2})([A-Z]{2})([0-9]+)LinguisticVariant.csv");
-		Matcher matcher = pattern.matcher(theSourceFilename);
+		Matcher matcher = LINGUISTIC_VARIANT_FILENAME_PATTERN.matcher(theSourceFilename);
 		Validate.isTrue(matcher.matches(), "Unexpected filename: %s", theSourceFilename);
 
 		String language = matcher.group(1);

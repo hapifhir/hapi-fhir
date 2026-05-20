@@ -50,9 +50,8 @@ public class ImportLoincFileSetJson extends TerminologyFileSetJson {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <OT extends TerminologyFileSetJson> OT cloneWithOnlyFutureChunks() {
+	public <OT extends TerminologyFileSetJson> OT cloneWithOnlyCopyForwardData() {
 		ImportLoincFileSetJson retVal = new ImportLoincFileSetJson();
-		populateFutureChunksInClone(retVal);
 
 		retVal.setLoincCodeSystemXml(getLoincCodeSystemXml());
 		retVal.setCodeSystemStagingVersionId(getCodeSystemStagingVersionId());

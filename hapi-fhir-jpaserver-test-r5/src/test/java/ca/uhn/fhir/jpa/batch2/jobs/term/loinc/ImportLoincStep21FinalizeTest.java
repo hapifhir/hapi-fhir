@@ -11,6 +11,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -44,6 +45,8 @@ public class ImportLoincStep21FinalizeTest {
 	@Mock
 	private IJobStepExecutionServices myStepExecutionSvcs;
 	@Mock
+	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	@Mock
 	private IJobDataSink<ImportTerminologyResultJson> myDataSink;
 	@InjectMocks
 	private ImportLoincStep21Finalize myStep;
@@ -71,7 +74,7 @@ public class ImportLoincStep21FinalizeTest {
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(4);
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry).importLoincJobDefinition();
+		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc).importLoincJobDefinition();
 		myStep.run(new StepExecutionDetails<>(parameters, null, new JobInstance(), new WorkChunk(), myStepExecutionSvcs, jobDefinition, null, null), myDataSink);
 
 		// Verify
@@ -104,7 +107,7 @@ public class ImportLoincStep21FinalizeTest {
 		data.addResourceToActivate("ValueSet/B");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry).importLoincJobDefinition();
+		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc).importLoincJobDefinition();
 		myStep.run(new StepExecutionDetails<>(parameters, null, new JobInstance(), new WorkChunk(), myStepExecutionSvcs, jobDefinition, null, null), myDataSink);
 
 		// Verify

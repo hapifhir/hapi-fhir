@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseSizeCapturingInterceptor;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.JsonUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -45,6 +47,7 @@ import java.nio.charset.StandardCharsets;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_JOB_ATTACHMENT_ID;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.RESP_PARAM_OUTCOME;
@@ -366,6 +369,36 @@ class TerminologyUploaderProviderTest {
 			assertThat(responseString).contains("Can't start job of this type");
 		}
 
+	}
+
+	@Test
+	void testUploadTerminologyPollForStatus() throws IOException {
+		// Setup
+		JobInstance jobInstance = new JobInstance();
+		jobInstance.setInstanceId("my-instance-id");
+		jobInstance.setStatus(StatusEnum.COMPLETED);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+		jobInstance.setReport(toUploadTerminologyReport("This is the report contents"));
+		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
+
+		// Test
+		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS +
+			"?" + TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID + "=my-instance-id";
+		HttpPost post = new HttpPost(url);
+		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
+
+			// Verify
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertThat(responseString).contains("\"diagnostics\": \"This is the report contents\"");
+		}
+
+	}
+
+	private String toUploadTerminologyReport(String theReportContents) {
+		ImportTerminologyResultJson retVal = new ImportTerminologyResultJson();
+		retVal.setReport(theReportContents);
+		return JsonUtil.serialize(retVal);
 	}
 
 }

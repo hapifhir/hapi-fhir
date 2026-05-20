@@ -24,7 +24,7 @@ public class ImportLoincStep15GroupTermsFile
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess() {
+	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE,
 				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT));

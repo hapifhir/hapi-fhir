@@ -22,10 +22,10 @@ public class ImportLoincStep16ParentGroupFile
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess() {
+	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
-				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE,
-				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT));
+				LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE,
+				LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT));
 	}
 
 	@Override

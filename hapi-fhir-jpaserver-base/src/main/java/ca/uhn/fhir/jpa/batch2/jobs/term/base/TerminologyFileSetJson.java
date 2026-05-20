@@ -83,14 +83,9 @@ public class TerminologyFileSetJson implements IModelJson {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <OT extends TerminologyFileSetJson> OT cloneWithOnlyFutureChunks() {
+	public <OT extends TerminologyFileSetJson> OT cloneWithOnlyCopyForwardData() {
 		TerminologyFileSetJson retVal = new TerminologyFileSetJson();
-		populateFutureChunksInClone(retVal);
 		return (OT) retVal;
-	}
-
-	protected void populateFutureChunksInClone(TerminologyFileSetJson theFileSetToPopulate) {
-		theFileSetToPopulate.myStepIdToFutureChunks = myStepIdToFutureChunks;
 	}
 
 	public boolean isEmpty() {

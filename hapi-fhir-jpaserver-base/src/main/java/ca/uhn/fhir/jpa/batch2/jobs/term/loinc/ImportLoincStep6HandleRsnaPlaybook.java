@@ -40,7 +40,7 @@ public class ImportLoincStep6HandleRsnaPlaybook
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess() {
+	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE,
 				LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT));

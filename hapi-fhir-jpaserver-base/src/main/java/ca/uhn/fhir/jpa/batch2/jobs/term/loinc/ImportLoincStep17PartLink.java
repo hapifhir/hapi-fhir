@@ -34,7 +34,7 @@ public class ImportLoincStep17PartLink
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess() {
+	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(
 				new LoincFileNameSpecification(
 						LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE,

@@ -15,6 +15,7 @@ import java.util.Set;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT_NEW;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -29,8 +30,11 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess() {
-		return List.of(new LoincFileNameSpecification(LOINC_HIERARCHY_FILE, LOINC_HIERARCHY_FILE_DEFAULT));
+	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+		return List.of(new LoincFileNameSpecification(LOINC_HIERARCHY_FILE,
+			LOINC_HIERARCHY_FILE_DEFAULT,
+			LOINC_HIERARCHY_FILE_DEFAULT_NEW
+		));
 	}
 
 	@Override
@@ -46,9 +50,9 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 		if (isNotBlank(parentCode) && isNotBlank(childCode)) {
 			Map<String, CodeSystem.ConceptDefinitionComponent> codeToConceptMap = theContext.codeToConcept();
 			CodeSystem.ConceptDefinitionComponent parentConcept =
-					codeToConceptMap.computeIfAbsent(parentCode, pc -> newConcept(pc));
+					codeToConceptMap.computeIfAbsent(parentCode, this::newConcept);
 			CodeSystem.ConceptDefinitionComponent childConcept =
-					codeToConceptMap.computeIfAbsent(childCode, pc -> newConcept(pc));
+					codeToConceptMap.computeIfAbsent(childCode, this::newConcept);
 
 			parentConcept.addConcept(childConcept);
 		}

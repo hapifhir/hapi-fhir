@@ -5,11 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BaseTerminologyImportParameters implements IModelJson {
 
-	@JsonProperty
+	@JsonProperty("versionId")
 	private String myVersionId;
-	// FIXME: implement - should this be "dontMakeCurrent"?
-	@JsonProperty("makeCurrent")
-	private Boolean myMakeCurrent;
+
+	@JsonProperty("dontMakeCurrent")
+	private Boolean myDontMakeCurrent;
 
 	public String getVersionId() {
 		return myVersionId;
@@ -19,12 +19,11 @@ public class BaseTerminologyImportParameters implements IModelJson {
 		myVersionId = theVersionId;
 	}
 
-	public Boolean getMakeCurrent() {
-		return myMakeCurrent;
+	public Boolean getDontMakeCurrent() {
+		return myDontMakeCurrent;
 	}
 
-	public void setMakeCurrent(Boolean theMakeCurrent) {
-		myMakeCurrent = theMakeCurrent;
+	public void setDontMakeCurrent(Boolean theDontMakeCurrent) {
+		myDontMakeCurrent = theDontMakeCurrent;
 	}
-
 }

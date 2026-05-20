@@ -35,12 +35,9 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.dao.BaseTransactionProcessor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -49,16 +46,11 @@ import ca.uhn.fhir.batch2.util.AsyncRequestUtil;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.BundleBuilder;
-import ca.uhn.fhir.util.CanonicalBundleEntry;
 import ca.uhn.fhir.util.JsonUtil;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
-import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -69,17 +61,15 @@ import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.ALL_PARTITIONS_TENANT_NAME;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -309,143 +299,46 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 			}
 		}
 
-		int status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
+		handleAsyncJobPollForStatusResponse(theRequestDetails, instance, operationName, returnValue);
+	}
+
+	private void handleAsyncJobPollForStatusResponse(ServletRequestDetails theRequestDetails, JobInstance instance, String operationName, String returnValue) throws IOException {
+		Function<JobInstance, AsyncRequestUtil.CompletedJobPollResponse> createCompletionPollResponse = theInstance -> transform(theRequestDetails, theInstance, returnValue);
+		AsyncRequestUtil.handleAsyncJobPollForStatusResponse(theRequestDetails, instance, operationName, createCompletionPollResponse);
+	}
+
+
+	// FIXME: rename method
+	private AsyncRequestUtil.CompletedJobPollResponse transform(ServletRequestDetails theRequestDetails, JobInstance theInstance, String returnValue) {
+		BulkModifyResourcesResultsJson results =
+				JsonUtil.deserialize(theInstance.getReport(), BulkModifyResourcesResultsJson.class);
+		BaseBulkModifyJobParameters jobParameters =
+				theInstance.getParameters(BaseBulkModifyJobParameters.DeserializingImpl.class);
+		boolean isDryRunCollectChanges = jobParameters.isDryRun()
+				&& jobParameters.getDryRunMode() == BaseBulkModifyJobParameters.DryRunMode.COLLECT_CHANGED;
+
+		if (JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT.equals(returnValue)) {
+			return new AsyncRequestUtil.CompletedJobPollResponse(results.getReport(), null);
+		}
+
 		List<String> messages = new ArrayList<>();
-		String severity = "";
-		String code = "";
-		String progressMessage = null;
-		String returnString = null;
-		boolean respondUsingBundle = false;
-		switch (instance.getStatus()) {
-			case QUEUED -> {
-				status = HttpStatus.SC_ACCEPTED;
-				messages.add(operationName + " job has not yet started");
-				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
-				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
-			}
-			case IN_PROGRESS -> {
-				status = HttpStatus.SC_ACCEPTED;
-				messages.add(operationName + " job has started and is in progress");
-				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
-				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
-			}
-			case FINALIZE -> {
-				status = HttpStatus.SC_ACCEPTED;
-				messages.add(operationName + " job has started and is being finalized");
-				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
-				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
-			}
-			case ERRORED, FAILED, COMPLETED -> {
-				if (instance.getStatus() == StatusEnum.COMPLETED) {
-					status = HttpStatus.SC_OK;
-					progressMessage = operationName + " job has completed successfully";
-					severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
-					code = OperationOutcomeUtil.OO_ISSUE_CODE_SUCCESS;
-				} else {
-					status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
-					progressMessage = operationName + " job has failed with error: " + instance.getErrorMessage();
-					severity = OperationOutcomeUtil.OO_SEVERITY_ERROR;
-					code = OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING;
-				}
+		messages.add(results.getReport());
+		String relativeUrl1 = createPollingRelativeUrl(theInstance.getInstanceId());
 
-				String reportText = instance.getReport();
-				if (isBlank(reportText)) {
-					messages.add(progressMessage);
-				} else {
-					BulkModifyResourcesResultsJson results =
-							JsonUtil.deserialize(reportText, BulkModifyResourcesResultsJson.class);
-					BaseBulkModifyJobParameters jobParameters =
-							instance.getParameters(BaseBulkModifyJobParameters.DeserializingImpl.class);
-					boolean isDryRunCollectChanges = jobParameters.isDryRun()
-							&& jobParameters.getDryRunMode() == BaseBulkModifyJobParameters.DryRunMode.COLLECT_CHANGED;
+		messages.add("Access raw text report at URL: "
+				+ RestfulServerUtils.createFullyQualifiedUrlFromRelativeUrl(theRequestDetails, relativeUrl1) + "&"
+				+ JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "="
+				+ JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT);
+		if (isDryRunCollectChanges) {
+			String relativeUrl = createPollingRelativeUrl(theInstance.getInstanceId());
 
-					if (JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT.equals(returnValue)) {
-						returnString = results.getReport();
-					}
-
-					messages.add(results.getReport());
-					String relativeUrl1 = createPollingRelativeUrl(instance.getInstanceId());
-
-					messages.add("Access raw text report at URL: "
-							+ RestfulServerUtils.createFullyQualifiedUrlFromRelativeUrl(theRequestDetails, relativeUrl1) + "&"
-							+ JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "="
-							+ JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT);
-					if (isDryRunCollectChanges) {
-						String relativeUrl = createPollingRelativeUrl(instance.getInstanceId());
-
-						messages.add("Access collected dry-run changes at URL: "
-								+ RestfulServerUtils.createFullyQualifiedUrlFromRelativeUrl(theRequestDetails, relativeUrl) + "&"
-								+ JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "="
-								+ JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES);
-					}
-				}
-				respondUsingBundle = true;
-			}
-			case CANCELLED -> {
-				status = HttpStatus.SC_OK;
-				messages.add(operationName + " job has been cancelled");
-				severity = OperationOutcomeUtil.OO_SEVERITY_WARN;
-				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
-				respondUsingBundle = true;
-			}
+			messages.add("Access collected dry-run changes at URL: "
+					+ RestfulServerUtils.createFullyQualifiedUrlFromRelativeUrl(theRequestDetails, relativeUrl) + "&"
+					+ JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "="
+					+ JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES);
 		}
 
-		ImmutableMultimap.Builder<String, String> additionalHeaders = ImmutableMultimap.builder();
-		if (progressMessage != null) {
-			additionalHeaders.put(Constants.HEADER_X_PROGRESS, progressMessage);
-		} else if (!messages.isEmpty()) {
-			additionalHeaders.put(Constants.HEADER_X_PROGRESS, messages.get(0));
-		}
-
-		if (returnString != null) {
-			writeResponseWithStringBody(theRequestDetails.getServletResponse(), additionalHeaders, returnString);
-			return;
-		}
-
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myContext);
-		for (String message : messages) {
-			OperationOutcomeUtil.addIssue(myContext, oo, severity, message, null, code);
-		}
-
-		IBaseResource responseResource;
-		if (respondUsingBundle) {
-			BundleBuilder bundleBuilder = new BundleBuilder(myContext);
-			bundleBuilder.setType(BundleTypeEnum.BATCH_RESPONSE.getCode());
-
-			CanonicalBundleEntry entry = new CanonicalBundleEntry();
-			entry.setResponseStatus(BaseTransactionProcessor.toStatusString(status));
-			entry.setResponseOutcome(oo);
-			bundleBuilder.addEntry(entry);
-
-			responseResource = bundleBuilder.getBundle();
-		} else {
-			responseResource = oo;
-		}
-
-		/*
-		 * According to the Asynchronous Interaction Request Pattern at
-		 * https://hl7.org/fhir/async-bundle.html,
-		 * if the job has completed (either successfully or unsuccessfully/prematurely), the response
-		 * should use an HTTP 200 status and should indicate the actual status in a Bundle
-		 * resource.
-		 */
-		if (respondUsingBundle) {
-			status = HttpStatus.SC_OK;
-		}
-
-		Multimap<String, String> additionalHeaders1 = additionalHeaders.build();
-
-		RestfulServerUtils.streamResponseAsResource(
-				theRequestDetails.getServer(),
-				responseResource,
-				Set.of(),
-				status,
-				additionalHeaders1,
-				false,
-				false,
-				theRequestDetails,
-				null,
-				null);
+		return new AsyncRequestUtil.CompletedJobPollResponse(null, messages);
 	}
 
 	private IBaseBundle createChangesBundle(BulkModifyResourcesResultsJson theResultsJson) {
@@ -460,24 +353,6 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 			bundleBuilder.addTransactionDeleteEntry(id.getResourceType(), id.getIdPart());
 		}
 		return bundleBuilder.getBundle();
-	}
-
-	private void writeResponseWithStringBody(
-			HttpServletResponse theServletResponse,
-			ImmutableMultimap.Builder<String, String> theAdditionalHeaders,
-			String theResponseString)
-			throws IOException {
-		theServletResponse.setStatus(HttpStatus.SC_OK);
-		theServletResponse.setContentType(Constants.CT_TEXT);
-		theServletResponse.setCharacterEncoding(Constants.CHARSET_NAME_UTF8);
-
-		for (Map.Entry<String, String> next : theAdditionalHeaders.build().entries()) {
-			theServletResponse.addHeader(next.getKey(), next.getValue());
-		}
-
-		try (PrintWriter writer = theServletResponse.getWriter()) {
-			writer.write(theResponseString);
-		}
 	}
 
 	@Nonnull

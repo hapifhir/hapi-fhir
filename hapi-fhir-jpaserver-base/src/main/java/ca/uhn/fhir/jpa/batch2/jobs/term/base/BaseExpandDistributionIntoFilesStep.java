@@ -48,7 +48,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 	@Autowired
 	private IJobPersistence myJobPersistence;
 
-	private int myChunkLineSize = 10_000;
+	private int myChunkLineSize = 50_000;
 
 	@VisibleForTesting
 	public void setChunkLineSizeForUnitTest(int theChunkLineSize) {
@@ -214,7 +214,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 		// Subsequent steps
 		for (TerminologyFileSetJson.Chunk chunk : attachmentIdsForNextStep) {
-			OT fileSetToSend = theFileSet.cloneWithOnlyFutureChunks();
+			OT fileSetToSend = theFileSet.cloneWithOnlyCopyForwardData();
 			fileSetToSend.setChunkForCurrentStep(chunk);
 			theDataSink.accept(fileSetToSend);
 		}

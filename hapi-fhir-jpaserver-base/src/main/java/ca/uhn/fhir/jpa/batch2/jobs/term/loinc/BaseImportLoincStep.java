@@ -11,14 +11,17 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +31,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.regex.Pattern;
+import java.util.concurrent.Callable;
+import java.util.function.Predicate;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newLoincCsvParser;
+import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseImportLoincStep<CT>
@@ -47,6 +53,9 @@ public abstract class BaseImportLoincStep<CT>
 	@Autowired
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
+	@Autowired
+	private IHapiTransactionService myTransactionService;
+
 	@Nonnull
 	@Override
 	public Optional<FileHandlingInstructions> canHandleFile(
@@ -55,19 +64,8 @@ public abstract class BaseImportLoincStep<CT>
 
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
 
-		for (LoincFileNameSpecification loincFileNameSpecification : getFilesToProcess()) {
-			boolean matches = false;
-
-			if (loincFileNameSpecification.propertyName() != null) {
-				String propertyName = loincFileNameSpecification.propertyName().getCode();
-				String defaultFileName = loincFileNameSpecification.defaultValue().getCode();
-				String fileName = jobProperties.getProperty(propertyName, defaultFileName);
-				matches = theFileName.endsWith(fileName);
-			} else if (loincFileNameSpecification.fileNamePattern() != null) {
-				matches = loincFileNameSpecification.fileNamePattern().matcher(theFileName).matches();
-			}
-
-			if (matches) {
+		for (LoincFileNameSpecification loincFileNameSpecification : getFilesToProcess(theStepExecutionDetails)) {
+			if (loincFileNameSpecification.matchFileName(jobProperties, theFileName)) {
 				return Optional.of(
 						new FileHandlingInstructions(theFileName, FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
 			}
@@ -106,7 +104,10 @@ public abstract class BaseImportLoincStep<CT>
 		ImportLoincJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
 		CT codeExtractionContext = newContextObject(theStepExecutionDetails);
+
 		CodeSystem codeSystemToPopulate = new CodeSystem();
+		codeSystemToPopulate.setUrl(data.getLoincCodeSystem().getUrl());
+		codeSystemToPopulate.setVersion(data.getCodeSystemStagingVersionId());
 
 		String attachmentId = null;
 		String sourceFilename = null;
@@ -140,11 +141,12 @@ public abstract class BaseImportLoincStep<CT>
 
 				int conceptCount = codeSystemToPopulate.getConcept().size();
 				ourLog.atInfo()
-						.setMessage("Added LOINC Answer List links to {} concepts")
+						.setMessage("Storing {} concepts")
 						.addArgument(conceptCount)
 						.log();
 
-				UploadStatistics uploadStatistics = myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulate);
+				Callable<UploadStatistics> uploader = () -> myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulate);
+				UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader);
 
 				TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter = getRecordsAddedCounter(theStepExecutionDetails);
 				recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
@@ -158,6 +160,30 @@ public abstract class BaseImportLoincStep<CT>
 		BaseExpandDistributionIntoFilesStep.submitChunksForNextStep(theStepExecutionDetails, theDataSink, data);
 
 		return RunOutcome.SUCCESS;
+	}
+
+	@Nonnull
+	private <T> T executeInNewTransactionWithRetry(Callable<T> theFunction) {
+		T retVal = null;
+		int retryCount = 0;
+		do {
+			try {
+				retVal = myTransactionService
+					.withSystemRequestOnDefaultPartition()
+					.execute(theFunction);
+			} catch (ResourceVersionConflictException e) {
+				retryCount++;
+				if (retryCount > 10) {
+					throw e;
+				}
+				ourLog.atWarn()
+						.setMessage("Failed to upload LOINC concepts, retrying in 5 seconds: {}")
+						.addArgument(e.getMessage())
+						.log();
+				sleepAtLeast(5 * DateUtils.MILLIS_PER_SECOND);
+			}
+		} while (retVal == null);
+		return retVal;
 	}
 
 	/**
@@ -174,7 +200,7 @@ public abstract class BaseImportLoincStep<CT>
 			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails);
 
 	@Nonnull
-	protected abstract List<LoincFileNameSpecification> getFilesToProcess();
+	protected abstract List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails);
 
 	protected abstract void handleRecord(
 		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
@@ -192,14 +218,32 @@ public abstract class BaseImportLoincStep<CT>
 	}
 
 	protected record LoincFileNameSpecification(
-			LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum defaultValue, Pattern fileNamePattern) {
+			LoincUploadPropertiesEnum propertyName, List<LoincUploadPropertiesEnum> defaultValues, Predicate<String> fileNameTester) {
 
-		protected LoincFileNameSpecification(LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum defaultValue) {
-			this(propertyName, defaultValue, null);
+		protected LoincFileNameSpecification(LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum... defaultValue) {
+			this(propertyName, Arrays.asList(defaultValue), null);
 		}
 
-		protected LoincFileNameSpecification(Pattern fileNamePattern) {
-			this(null, null, fileNamePattern);
+		protected LoincFileNameSpecification(Predicate<String> fileNameTester) {
+			this(null, null, fileNameTester);
+		}
+
+		public boolean matchFileName(Properties theJobProperties, String theFileName) {
+			boolean matches = false;
+			if (propertyName() != null) {
+				String propertyName = propertyName().getCode();
+				String fileName = theJobProperties.getProperty(propertyName, null);
+				if (isNotBlank(fileName)) {
+					matches = theFileName.endsWith(fileName);
+				} else {
+					for (LoincUploadPropertiesEnum nextDefault : defaultValues()) {
+						matches |= theFileName.endsWith(nextDefault.getCode());
+					}
+				}
+			} else if (this.fileNameTester() != null) {
+				matches = this.fileNameTester().test(theFileName);
+			}
+			return matches;
 		}
 	}
 }

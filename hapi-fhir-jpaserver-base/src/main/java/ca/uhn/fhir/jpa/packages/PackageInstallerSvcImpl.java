@@ -657,7 +657,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return myTxService
 				.withRequest(createRequestDetails())
 				.execute(() -> myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(url, version))
-				.map(pid -> theDao.readByPid(JpaPid.fromId(pid)));
+				.map(pid -> theDao.readByPid(pid));
 	}
 
 	private Optional<IBaseResource> readResourceById(IFhirResourceDao dao, IIdType id) {

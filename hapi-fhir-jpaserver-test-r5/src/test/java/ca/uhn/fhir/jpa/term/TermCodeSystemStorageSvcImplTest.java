@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.CodeSystem;
-import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.Test;
@@ -453,16 +452,16 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl(URL_MY_CODE_SYSTEM);
 		cs.setVersion("1.0");
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		cs.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("code1")));
+		cs.addConcept(new CodeSystem.ConceptDefinitionComponent("code1"));
 		CodeSystem created = (CodeSystem) myCodeSystemDao.create(cs, mySrd).getResource();
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		runInTransaction(() -> {
 			assertThat(myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(URL_MY_CODE_SYSTEM, "1.0"))
 				.isPresent()
-				.hasValue(created.getIdElement().getIdPartAsLong());
+				.hasValue(JpaPid.fromId(created.getIdElement().getIdPartAsLong()));
 		});
 	}
 
@@ -471,16 +470,16 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 	void findExistingCodeSystemResourcePid_unversionedCodeSystemExists_returnsPid() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl(URL_MY_CODE_SYSTEM);
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		cs.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("code1")));
+		cs.addConcept(new CodeSystem.ConceptDefinitionComponent("code1"));
 		CodeSystem created = (CodeSystem) myCodeSystemDao.create(cs, mySrd).getResource();
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		runInTransaction(() -> {
 			assertThat(myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(URL_MY_CODE_SYSTEM, null))
 				.isPresent()
-				.hasValue(created.getIdElement().getIdPartAsLong());
+				.hasValue(JpaPid.fromId(created.getIdElement().getIdPartAsLong()));
 		});
 	}
 
@@ -499,9 +498,9 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl(URL_MY_CODE_SYSTEM);
 		cs.setVersion("1.0");
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		cs.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("code1")));
+		cs.addConcept(new CodeSystem.ConceptDefinitionComponent("code1"));
 		myCodeSystemDao.create(cs, mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 

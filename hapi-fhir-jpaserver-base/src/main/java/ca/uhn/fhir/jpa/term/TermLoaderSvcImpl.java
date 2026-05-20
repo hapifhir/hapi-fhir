@@ -231,6 +231,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		return new LoadedFileDescriptors(theFiles);
 	}
 
+	// FIXME: remove this method
 	@Override
 	public UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {

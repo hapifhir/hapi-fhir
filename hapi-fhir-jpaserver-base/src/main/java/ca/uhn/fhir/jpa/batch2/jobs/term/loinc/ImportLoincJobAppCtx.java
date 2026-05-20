@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,9 +34,11 @@ public class ImportLoincJobAppCtx {
 	public static final String IMPORT_TERM_LOINC = "IMPORT_TERM_LOINC";
 
 	private final DaoRegistry myDaoRegistry;
+	private final ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
-	public ImportLoincJobAppCtx(DaoRegistry myDaoRegistry) {
+	public ImportLoincJobAppCtx(DaoRegistry myDaoRegistry, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc) {
 		this.myDaoRegistry = myDaoRegistry;
+		this.myTermCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
 	}
 
 	@Bean
@@ -318,7 +321,7 @@ public class ImportLoincJobAppCtx {
 
 	@Bean
 	public IReductionStepWorker<ImportLoincJobParameters, ImportLoincFileSetJson, ImportTerminologyResultJson> importLoincStep21Finalize() {
-		return new ImportLoincStep21Finalize(myDaoRegistry);
+		return new ImportLoincStep21Finalize(myDaoRegistry, myTermCodeSystemStorageSvc);
 	}
 
 }

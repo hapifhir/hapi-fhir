@@ -86,6 +86,8 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 
 		String version;
 		String codeSystemVersion = theData.getLoincCodeSystem().getVersion();
+		assert isNotBlank(codeSystemVersion);
+
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
 		if (isNotBlank(theVersionPropertyName) && isNotBlank(jobProperties.getProperty(theVersionPropertyName))) {
 				version =
@@ -95,10 +97,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 		}
 
 		ValueSet vs;
-		String valueSetId = theValueSetId;
-		if (isNotBlank(codeSystemVersion)) {
-			valueSetId = theValueSetId + "-" + codeSystemVersion;
-		}
+		String valueSetId = theValueSetId + "-" + codeSystemVersion;
 
 		if (!theContext.getIdToValueSet().containsKey(valueSetId)) {
 			vs = new ValueSet();

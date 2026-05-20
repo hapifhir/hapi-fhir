@@ -36,6 +36,16 @@ public interface IRawHttp {
 	 * @param theUrl The URL to send the GET request to. Can be absolute or relative
 	 *               to the client's base URL.
 	 * @return A builder for configuring and executing the HTTP GET request
+	 * @since 8.6.0
 	 */
 	IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> get(String theUrl);
+
+
+	/**
+	 * Creates a POST request to the specified URL.
+	 *
+	 * @since 8.12.0
+	 */
+	IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> post(String theUrl, RawRequestEntity theRequest);
+
 }
