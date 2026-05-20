@@ -116,6 +116,28 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 		assertThat(allCodes).contains("126816002");
 	}
 
+	@Test
+	public void testLoadSnomedCtWithNonEnglishEdition() throws Exception {
+		myFiles.addFileZip("/sct/", "sct2_Concept_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Description_Full-de_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Identifier_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Relationship_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
+		mySvc.loadSnomedCt(myFiles.getFiles(), mySrd);
+
+		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyList());
+
+		TermCodeSystemVersion csv = myCsvCaptor.getValue();
+
+		var rootCodes = csv.getConcepts().stream().map(TermConcept::getCode).toList();
+		assertThat(rootCodes).containsExactlyInAnyOrder("126813005", "126816002"); // 126813005 has no parents, 126816002 only has an inactive parent-relationship
+
+		var childrenOfRootConcept = csv.getConcepts().stream().filter(c -> "126813005".equals(c.getCode())).flatMap(c -> c.getChildren().stream().map(TermConceptParentChildLink::getChild)).toList();
+		assertThat(childrenOfRootConcept.stream().map(TermConcept::getCode)).containsExactly("126815003");
+		var childrenOfChildConcept = childrenOfRootConcept.stream().flatMap(c -> c.getChildren().stream().map(TermConceptParentChildLink::getChild)).toList();
+		assertThat(childrenOfChildConcept.stream().map(TermConcept::getCode)).containsExactly("126817006");
+	}
+
 	/**
 	 * This is just for trying stuff, it won't run without
 	 * local files external to the git repo

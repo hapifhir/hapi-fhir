@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8611
+title: "Previously, when partitioning was enabled, a topic Subscription stored in one partition could
+incorrectly receive delivery notifications for resources created in a different partition, even when the 
+Subscription was not configured as cross-partition. This has been fixed."

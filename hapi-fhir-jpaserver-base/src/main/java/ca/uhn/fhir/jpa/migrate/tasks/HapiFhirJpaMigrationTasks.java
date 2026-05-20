@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -132,11 +133,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init840();
 		init860();
 		init880();
-		init_8_10_0();
+		init8_10_0();
+		init8_12_0();
 	}
 
-	protected void init_8_10_0() {
-		Builder version = forVersion(VersionEnum.V8_10_0);
+	protected void init8_12_0() {
+		Builder version = forVersion(VersionEnum.V8_12_0);
 
 		Builder.BuilderAddTableByColumns attachment =
 				version.addTableByColumns("20260407.10", "BT2_JOB_ATTACHMENT", "JOB_INSTANCE_ID", "ATTACHMENT_ID");
@@ -154,9 +156,34 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.unique(true)
 				.withColumns("JOB_INSTANCE_ID", "FILENAME");
 		attachment
-				.addForeignKey("20260607.13", "FK_BT2JA_INSTANCE")
+				.addForeignKey("20260407.13", "FK_BT2JA_INSTANCE")
 				.toColumn("JOB_INSTANCE_ID")
 				.references("BT2_JOB_INSTANCE", "JOB_INSTANCE_ID");
+	}
+
+	protected void init8_10_0() {
+		Builder version = forVersion(VersionEnum.V8_10_0);
+
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.dropIndex("20260410.10", "IDX_IDXCMBTOKNU_STR");
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.addColumn("20260410.20", "DATE_ORDINAL")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.addIndex("20260410.30", "IDX_IDXCMBTOKNU_HD")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_COMPLETE", "DATE_ORDINAL", "RES_ID", "PARTITION_ID");
+
+		// Add index on CREATED_TIME to support ordered polling of subscription messages
+		{
+			version.onTable("HFJ_RESOURCE_MODIFIED")
+					.addIndex("20260424.1", "IDX_RES_MOD_CREATED")
+					.unique(false)
+					.online(true)
+					.withColumns("CREATED_TIME");
+		}
 	}
 
 	protected void init880() {

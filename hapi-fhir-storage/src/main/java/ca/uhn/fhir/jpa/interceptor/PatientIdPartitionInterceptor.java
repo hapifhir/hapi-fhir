@@ -58,6 +58,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Strings;
@@ -79,6 +80,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -91,6 +93,9 @@ import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionFromU
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.alwaysUseDefaultPartition;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.mandatorySingleCompartment;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.nonUniqueCompartmentInDefault;
+import static ca.uhn.fhir.jpa.util.ResourceCompartmentUtil.PATIENT_COMPARTMENT_SP_PATIENT;
+import static ca.uhn.fhir.jpa.util.ResourceCompartmentUtil.PATIENT_COMPARTMENT_SP_SUBJECT;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -183,7 +188,7 @@ public class PatientIdPartitionInterceptor {
 			String resourceType = entry.getKey();
 			ResourceCompartmentStoragePolicy policy = entry.getValue();
 
-			if ("Patient".equals(resourceType)) {
+			if (PATIENT_STR.equals(resourceType)) {
 				throw new ConfigurationException(
 						Msg.code(2864) + "Can not provide a resource type policy for resource type 'Patient'");
 			}
@@ -195,13 +200,13 @@ public class PatientIdPartitionInterceptor {
 								resourceType));
 			}
 
-			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resourceType);
-			if (resourceDef == null) {
+			if (!myFhirContext.isKnownResourceType(resourceType)) {
 				throw new ConfigurationException(Msg.code(2866)
 						+ String.format(
 								"Resource type '%s' is not a valid resource type, can not apply resource type policy",
 								resourceType));
 			}
+			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resourceType);
 
 			ResourceCompartmentStoragePolicy strictnessMode = entry.getValue();
 			if (strictnessMode == null) {
@@ -566,8 +571,9 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * @see #setResourceTypePolicies(Map) for a description of the default policies
 	 */
+	@VisibleForTesting
 	@Nonnull
-	protected ResourceCompartmentStoragePolicy getPolicyForResourceType(ReadPartitionIdRequestDetails theReadDetails) {
+	public ResourceCompartmentStoragePolicy getPolicyForResourceType(ReadPartitionIdRequestDetails theReadDetails) {
 		String resourceType = theReadDetails.getResourceType();
 		if (isBlank(resourceType)) {
 			return ResourceCompartmentStoragePolicy.alwaysUseDefaultPartition();
@@ -683,9 +689,28 @@ public class PatientIdPartitionInterceptor {
 			case SEARCH_TYPE:
 				if (theReadDetails.getSearchParams() != null) {
 					SearchParameterMap params = theReadDetails.getSearchParams();
+					// When searching Patient resources directly, a pre-resolved partition hint may have been
+					// passed down from ResourceLinkPredicateBuilder (via ReadPartitionIdRequestDetails) to
+					// handle chained searches (e.g. subject=Patient/abc&subject.gender=female). We merge that
+					// hint with the partition derived from any _id values present in the search, so both
+					// the direct patient ref and any chained params target the correct partition.
 					if (PATIENT_STR.equals(theReadDetails.getResourceType())) {
+						RequestPartitionId readRequestPartitionId = theReadDetails.getRequestPartitionId();
+
 						List<String> idParts = getResourceIdsForSearchParam(params, "_id");
-						return provideMultipleCompartmentPartition(theRequestDetails, idParts);
+						RequestPartitionId multiCompartmentRequestPartitionId =
+								provideMultipleCompartmentPartition(theRequestDetails, idParts);
+
+						if (nonNull(readRequestPartitionId) && readRequestPartitionId.hasPartitionIds()) {
+							if (multiCompartmentRequestPartitionId.hasPartitionIds()) {
+								readRequestPartitionId =
+										readRequestPartitionId.mergeIds(multiCompartmentRequestPartitionId);
+							}
+						} else {
+							readRequestPartitionId = multiCompartmentRequestPartitionId;
+						}
+
+						return readRequestPartitionId;
 					} else if (isNotBlank(theReadDetails.getResourceType())) {
 						RuntimeResourceDefinition resourceDef =
 								myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
@@ -836,39 +861,70 @@ public class PatientIdPartitionInterceptor {
 			return Collections.emptyList();
 		}
 
+		Set<String> needingAtLeastOneChainedSpToResolveSet = new LinkedHashSet<>();
 		List<String> idParts = new ArrayList<>();
-		for (List<IQueryParameterType> iQueryParameterTypes : paramAndListForParamName) {
-			for (IQueryParameterType aParam : iQueryParameterTypes) {
-				String qualifier = aParam.getQueryParameterQualifier();
-				if (isNotBlank(qualifier) && !Constants.PARAMQUALIFIER_MDM.equals(qualifier)) {
-					throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName + qualifier
-							+ " is not supported in patient compartment mode");
-				}
-				if (aParam instanceof ReferenceParam) {
-					String chain = ((ReferenceParam) aParam).getChain();
-					if (chain != null) {
-						throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
-								+ chain + " is not supported in patient compartment mode");
-					}
-				}
 
-				String valueAsQueryToken = aParam.getValueAsQueryToken();
-				if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")
-						|| Strings.CS.contains(valueAsQueryToken, "/Patient/")) {
-					IdType id = new IdType(valueAsQueryToken);
-					if (id.getResourceType().equals(PATIENT_STR)) {
-						idParts.add(id.getIdPart());
-					}
-				} else if (valueAsQueryToken.indexOf('/') == -1) {
-					IdType id = new IdType(valueAsQueryToken);
-					if (id.isIdPartValid()) {
-						idParts.add(valueAsQueryToken);
-					}
+		paramAndListForParamName.stream().flatMap(Collection::stream).forEach(aParam -> {
+			if (aParam instanceof ReferenceParam referenceParam && nonNull(referenceParam.getChain())) {
+				if (PATIENT_COMPARTMENT_SP_PATIENT.equals(theParamName)
+						|| PATIENT_COMPARTMENT_SP_SUBJECT.equals(theParamName)) {
+					// 'patient' and 'subject' SP have a 0..1 cardinality and will always refer to a Patient
+					// resource. Chained SP on subject or patient can't be resolved on their own but if combined
+					// with another SP resolving directly to a patient (?subject=Patient/abc), it is safe to
+					// assume that the chained SP points to the same object.
+					// Essentially, if we have one SP that resolves directly, we don't need to resolve other SP
+					// pointing to the same resource.
+					//
+					// we keep track of the chained SP names needing direct resolution to support SP interchangeability:
+					// ?subject=Patient/abc&subject.active=true == ?subject.active=true&subject=Patient/abc
+					needingAtLeastOneChainedSpToResolveSet.add(referenceParam.getChain());
+					return; // exits the forEach lambda, not the method
+				}
+				throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
+						+ referenceParam.getChain() + " is not supported in patient compartment mode");
+			}
+
+			String qualifier = aParam.getQueryParameterQualifier();
+			if (isNotBlank(qualifier) && !Constants.PARAMQUALIFIER_MDM.equals(qualifier)) {
+				throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName + qualifier
+						+ " is not supported in patient compartment mode");
+			}
+			String valueAsQueryToken = aParam.getValueAsQueryToken();
+			if (Strings.CS.startsWith(valueAsQueryToken, "Patient/")
+					|| Strings.CS.contains(valueAsQueryToken, "/Patient/")) {
+				IdType id = new IdType(valueAsQueryToken);
+				if (id.getResourceType().equals(PATIENT_STR)) {
+					idParts.add(id.getIdPart());
+				}
+			} else if (valueAsQueryToken.indexOf('/') == -1) {
+				IdType id = new IdType(valueAsQueryToken);
+				if (id.isIdPartValid()) {
+					idParts.add(valueAsQueryToken);
 				}
 			}
+		});
+
+		if (idParts.isEmpty() && !needingAtLeastOneChainedSpToResolveSet.isEmpty()) {
+			throw new MethodNotAllowedException(Msg.code(2928)
+					+ buildErrorMsgForChainedParameters(theParamName, needingAtLeastOneChainedSpToResolveSet));
 		}
 
 		return idParts;
+	}
+
+	private String buildErrorMsgForChainedParameters(String theParamName, @Nonnull Set<String> theChainedParameterSet) {
+		return new StringBuilder("Could not resolve chained parameter(s) ")
+				.append(theChainedParameterSet)
+				.append(" on parameter ")
+				.append(theParamName)
+				.append(". Consider adding a direct Patient reference to your search (?")
+				.append(theParamName)
+				.append("=Patient/abc&")
+				.append(theParamName)
+				.append(".")
+				.append(theChainedParameterSet.iterator().next())
+				.append("=...)")
+				.toString();
 	}
 
 	/**

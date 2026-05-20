@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7865
+title: "Previously, attempting to install resources whose FHIR ID exceeded 64 characters during package install 
+operation would throw HAPI-0521 (invalid FHIR ID), particularly when resource status validation was disabled. 
+This has been fixed by skipping installation of these invalid resources."
