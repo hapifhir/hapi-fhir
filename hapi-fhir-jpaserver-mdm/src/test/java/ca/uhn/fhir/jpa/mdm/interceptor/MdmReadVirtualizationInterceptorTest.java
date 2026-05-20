@@ -375,7 +375,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"http://", "https://", "urn:"})
-	void testSearch_ObservationWithUrlReference_SkipMDMExpand(String paramPrefix) {
+	void testSearch_ObservationWithUrlReference_SkipMDMExpand(String theParamPrefix) {
 		// Setup
 		createTestPatients(true);
 		createObservation(withSubject(mySourcePatientA0Id), withObservationCode("http://foo", "code0"));
@@ -384,7 +384,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 
 		// Execute
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
-		params.add(Observation.SP_SUBJECT, new ReferenceParam(paramPrefix + "test.org/Patient/xyz|1.0"));
+		params.add(Observation.SP_SUBJECT, new ReferenceParam(theParamPrefix + "test.org/Patient/xyz|1.0"));
 		IBundleProvider outcome = myObservationDao.search(params, mySrd);
 
 		// Verify - The URL is not the value of any indexed subject reference, so search complete with empty result
@@ -394,7 +394,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"http://", "https://", "urn:"})
-	void testSearch_ObservationWithUrlReferenceAndInclude_SkipMDMExpand(String paramPrefix) {
+	void testSearch_ObservationWithUrlReferenceAndInclude_SkipMDMExpand(String theParamPrefix) {
 		// Setup
 		createTestPatients(true);
 		createObservation(withSubject(mySourcePatientA0Id), withObservationCode("http://foo", "code0"));
@@ -403,7 +403,7 @@ public class MdmReadVirtualizationInterceptorTest extends BaseMdmR4Test {
 
 		// Execute
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
-		params.add(Observation.SP_SUBJECT, new ReferenceParam(paramPrefix + "test.org/Patient/xyz|1.0"));
+		params.add(Observation.SP_SUBJECT, new ReferenceParam(theParamPrefix + "test.org/Patient/xyz|1.0"));
 		params.addInclude(Observation.INCLUDE_PATIENT);
 		IBundleProvider outcome = myObservationDao.search(params, mySrd);
 
