@@ -208,10 +208,13 @@ public interface ISearchParamRegistry extends IResourceRepositoryCache {
 	}
 
 	/**
-	 * Runs {@code theCallback} with resource-change-driven rebuilds coalesced
-	 * into a single rebuild at scope exit. Deferral is process-wide: concurrent
-	 * change events on other threads are also coalesced. {@link #forceRefresh}
-	 * bypasses deferral and rebuilds synchronously.
+	 * Runs {@code theCallback} as a hint that resource-change-driven rebuilds
+	 * triggered during the callback should be coalesced into a single rebuild
+	 * at scope exit. Implementations <i>may</i> coalesce; the default
+	 * implementation does not — it simply invokes the callback. Callers must
+	 * therefore treat coalescing as an optimization, not a correctness
+	 * guarantee, and the callback must remain correct when each change
+	 * triggers an immediate rebuild.
 	 *
 	 * @since 8.12.0
 	 */

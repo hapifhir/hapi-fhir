@@ -133,10 +133,16 @@ public class SearchParamRegistryImpl
 
 	private final AtomicInteger myDeferRebuildDepth = new AtomicInteger(0);
 	private volatile boolean myRebuildPending = false;
+	private final AtomicInteger myRebuildCount = new AtomicInteger();
 
 	@VisibleForTesting
 	public void setPopulateSearchParamIdentities(boolean myPrePopulateSearchParamIdentities) {
 		this.myPrePopulateSearchParamIdentities = myPrePopulateSearchParamIdentities;
+	}
+
+	@VisibleForTesting
+	public int getRebuildCount() {
+		return myRebuildCount.get();
 	}
 
 	@VisibleForTesting
@@ -236,6 +242,7 @@ public class SearchParamRegistryImpl
 
 	private void rebuildActiveSearchParams() {
 		ourLog.info("Rebuilding SearchParamRegistry");
+		myRebuildCount.incrementAndGet();
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
 		params.setCount(MAX_MANAGED_PARAM_COUNT);
@@ -587,10 +594,12 @@ public class SearchParamRegistryImpl
 		// rebuild now. forceRefresh() is an explicit request for synchronous
 		// state, so it bypasses any deferred scope.
 		if (myActiveSearchParams == activeSearchParams) {
+			// Clear pending BEFORE the rebuild reads from the DB. A handleChange
+			// firing during the rebuild then sets pending=true again and the
+			// deferred scope (or next forceRefresh) will flush it.
+			myRebuildPending = false;
 			rebuildActiveSearchParams();
 		}
-		// The synchronous rebuild satisfies any pending deferred rebuild.
-		myRebuildPending = false;
 	}
 
 	@Override
@@ -686,6 +695,16 @@ public class SearchParamRegistryImpl
 		rebuildActiveSearchParams();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This implementation coalesces {@link #handleChange} events that fire
+	 * during {@code theCallback} into a single rebuild executed at scope exit.
+	 * Deferral is process-wide: change events on other threads observed while
+	 * any scope is active are also coalesced. Nested scopes flush only on
+	 * outermost exit. {@link #forceRefresh} bypasses deferral and rebuilds
+	 * synchronously.
+	 */
 	@Override
 	public void withDeferredRebuild(@Nonnull Runnable theCallback) {
 		myDeferRebuildDepth.incrementAndGet();
