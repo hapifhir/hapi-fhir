@@ -26,8 +26,10 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.util.StopWatch;
 import okhttp3.Call;
 import okhttp3.Call.Factory;
+import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okio.Buffer;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -80,9 +82,16 @@ public class OkHttpRestfulRequest extends BaseHttpRequest implements IHttpReques
 	}
 
 	@Override
-	public String getRequestBodyFromStream() {
-		// returning null to indicate this is not supported, as documented in IHttpRequest's contract
-		return null;
+	public String getRequestBodyFromStream() throws IOException {
+		if (myRequestBody == null) {
+			return null;
+		}
+		final Buffer buffer = new Buffer();
+		myRequestBody.writeTo(buffer);
+		MediaType contentType = myRequestBody.contentType();
+		return contentType == null || contentType.charset() == null
+				? buffer.readUtf8()
+				: buffer.readString(contentType.charset());
 	}
 
 	@Override
