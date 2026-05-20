@@ -1982,6 +1982,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(lookupIgY.isFound()).isTrue();
 	}
 
+	// Created by Claude Opus 4.6
 	@Test
 	void install_withDependencyExcludes_skipsExcludedDependencies(@TempDir Path theTempDir) throws IOException {
 		// setup
