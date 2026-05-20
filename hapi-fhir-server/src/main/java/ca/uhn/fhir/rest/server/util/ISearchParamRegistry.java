@@ -219,7 +219,7 @@ public interface ISearchParamRegistry extends IResourceRepositoryCache {
 	 * The default implementation does not defer — it simply runs the callback.
 	 * Implementations that own rebuild state should override.
 	 *
-	 * @since 8.11.3
+	 * @since 8.12.0
 	 */
 	default <T> T withDeferredRebuild(Supplier<T> theCallback) {
 		return theCallback.get();
