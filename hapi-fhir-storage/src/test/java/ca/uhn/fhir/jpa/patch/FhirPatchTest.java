@@ -1015,7 +1015,8 @@ public class FhirPatchTest implements ITestDataBuilder {
 
 		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
 				.isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining("HAPI-2925");
+				.hasMessageContaining("HAPI-2925")
+				.hasMessageContaining("physicalType");
 	}
 
 	@Test
@@ -1035,7 +1036,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 		Encounter encounter = buildR5EncounterWithLocation();
 
 		// "physicalType" is the R4 name — renamed to "form" in R5, so getChildByName() returns null
-		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationPatch("replace", "physicalType");
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationReplacePatch("physicalType");
 
 		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
 				.isInstanceOf(InvalidRequestException.class)
@@ -1048,7 +1049,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 	void testReplace_R5EncounterLocation_WithValidSubFieldName_Succeeds() {
 		Encounter encounter = buildR5EncounterWithLocation();
 
-		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationPatch("replace", "form");
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationReplacePatch("form");
 
 		myR5Patch.apply(encounter, parameters);
 
@@ -1057,7 +1058,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 		assertThat(encounter.getLocation().get(0).getForm().getCodingFirstRep().getCode()).isEqualTo("ro");
 	}
 
-	private org.hl7.fhir.r5.model.Parameters buildR5EncounterLocationPatch(String theOperation, String theSubFieldName) {
+	private org.hl7.fhir.r5.model.Parameters buildR5EncounterLocationReplacePatch(String theSubFieldName) {
 		@Language("JSON")
 		String patchJson = """
 			{
@@ -1065,7 +1066,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 			  "parameter": [{
 			    "name": "operation",
 			    "part": [
-			      { "name": "type", "valueCode": "%s" },
+			      { "name": "type", "valueCode": "replace" },
 			      { "name": "path", "valueString": "Encounter.location" },
 			      {
 			        "name": "value",
@@ -1082,7 +1083,7 @@ public class FhirPatchTest implements ITestDataBuilder {
 			    ]
 			  }]
 			}
-			""".formatted(theOperation, theSubFieldName);
+			""".formatted(theSubFieldName);
 		return myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
 	}
 
