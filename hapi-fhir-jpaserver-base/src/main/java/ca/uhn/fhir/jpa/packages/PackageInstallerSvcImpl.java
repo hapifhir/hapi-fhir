@@ -265,7 +265,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 											"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
 						}
 
-						// If any SearchParameters were installed, let's load them right away
+						// Drain any pending SearchParameter change events so they're picked up
+						// by the coalesced rebuild that fires when the deferred scope exits.
 						mySearchParamRegistryController.refreshCacheIfNecessary();
 						return null;
 					});
