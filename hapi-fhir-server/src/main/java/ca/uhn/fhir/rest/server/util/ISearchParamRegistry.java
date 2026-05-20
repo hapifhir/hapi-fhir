@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Supplier;
 
 // TODO: JA remove default methods
 public interface ISearchParamRegistry extends IResourceRepositoryCache {
@@ -209,20 +208,15 @@ public interface ISearchParamRegistry extends IResourceRepositoryCache {
 	}
 
 	/**
-	 * Run {@code theCallback} with SearchParameter rebuilds deferred. Any
-	 * resource-change-driven rebuilds (i.e. those triggered through
-	 * {@code handleChange}) that would normally fire during the callback are
-	 * coalesced into a single rebuild performed after the callback returns.
-	 * Nested calls are supported; only the outermost call triggers the
-	 * coalesced rebuild.
-	 * <p>
-	 * The default implementation does not defer — it simply runs the callback.
-	 * Implementations that own rebuild state should override.
+	 * Runs {@code theCallback} with resource-change-driven rebuilds coalesced
+	 * into a single rebuild at scope exit. Deferral is process-wide: concurrent
+	 * change events on other threads are also coalesced. {@link #forceRefresh}
+	 * bypasses deferral and rebuilds synchronously.
 	 *
 	 * @since 8.12.0
 	 */
-	default <T> T withDeferredRebuild(Supplier<T> theCallback) {
-		return theCallback.get();
+	default void withDeferredRebuild(@Nonnull Runnable theCallback) {
+		theCallback.run();
 	}
 
 	/**

@@ -70,7 +70,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
@@ -133,7 +132,7 @@ public class SearchParamRegistryImpl
 	private boolean myPrePopulateSearchParamIdentities = true;
 
 	private final AtomicInteger myDeferRebuildDepth = new AtomicInteger(0);
-	private volatile boolean myRebuildDeferredDirty = false;
+	private volatile boolean myRebuildPending = false;
 
 	@VisibleForTesting
 	public void setPopulateSearchParamIdentities(boolean myPrePopulateSearchParamIdentities) {
@@ -580,17 +579,18 @@ public class SearchParamRegistryImpl
 
 	@Override
 	public void forceRefresh() {
-		if (myDeferRebuildDepth.get() > 0) {
-			myRebuildDeferredDirty = true;
-			return;
-		}
 		RuntimeSearchParamCache activeSearchParams = myActiveSearchParams;
 		myResourceChangeListenerCache.forceRefresh();
 
-		// If the refresh didn't trigger a change, proceed with one anyway
+		// If the listener-cache drain didn't already produce a rebuild
+		// (e.g. handleChange events were deferred, or no changes were pending),
+		// rebuild now. forceRefresh() is an explicit request for synchronous
+		// state, so it bypasses any deferred scope.
 		if (myActiveSearchParams == activeSearchParams) {
 			rebuildActiveSearchParams();
 		}
+		// The synchronous rebuild satisfies any pending deferred rebuild.
+		myRebuildPending = false;
 	}
 
 	@Override
@@ -680,20 +680,20 @@ public class SearchParamRegistryImpl
 					unqualified(theResourceChangeEvent.getDeletedResourceIds()));
 		}
 		if (myDeferRebuildDepth.get() > 0) {
-			myRebuildDeferredDirty = true;
+			myRebuildPending = true;
 			return;
 		}
 		rebuildActiveSearchParams();
 	}
 
 	@Override
-	public <T> T withDeferredRebuild(Supplier<T> theCallback) {
+	public void withDeferredRebuild(@Nonnull Runnable theCallback) {
 		myDeferRebuildDepth.incrementAndGet();
 		try {
-			return theCallback.get();
+			theCallback.run();
 		} finally {
-			if (myDeferRebuildDepth.decrementAndGet() == 0 && myRebuildDeferredDirty) {
-				myRebuildDeferredDirty = false;
+			if (myDeferRebuildDepth.decrementAndGet() == 0 && myRebuildPending) {
+				myRebuildPending = false;
 				rebuildActiveSearchParams();
 			}
 		}

@@ -64,6 +64,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl.isNonDisableableBuiltInSearchParam;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -784,7 +785,6 @@ public class SearchParamRegistryImplTest {
 			mySearchParamRegistry.handleChange(event3);
 			// No rebuild during deferred scope
 			verify(mySearchParamProvider, never()).search(any());
-			return null;
 		});
 
 		// Exactly one rebuild after scope exit, despite three change events
@@ -797,7 +797,7 @@ public class SearchParamRegistryImplTest {
 		reset(mySearchParamProvider);
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 
-		mySearchParamRegistry.withDeferredRebuild(() -> null);
+		mySearchParamRegistry.withDeferredRebuild(() -> {});
 
 		// No rebuild should fire if no change events were processed
 		verify(mySearchParamProvider, never()).search(any());
@@ -812,13 +812,9 @@ public class SearchParamRegistryImplTest {
 		IResourceChangeEvent event = buildCreatedEvent("SearchParameter/sp1");
 
 		mySearchParamRegistry.withDeferredRebuild(() -> {
-			mySearchParamRegistry.withDeferredRebuild(() -> {
-				mySearchParamRegistry.handleChange(event);
-				return null;
-			});
+			mySearchParamRegistry.withDeferredRebuild(() -> mySearchParamRegistry.handleChange(event));
 			// Inner scope exit must NOT rebuild — outer scope is still active
 			verify(mySearchParamProvider, never()).search(any());
-			return null;
 		});
 
 		// Outer scope exit triggers the single coalesced rebuild
@@ -827,12 +823,42 @@ public class SearchParamRegistryImplTest {
 
 	// Created by Claude Opus 4.7
 	@Test
-	void testHandleChange_outsideDeferredScope_rebuildsImmediately() {
+	void testWithDeferredRebuild_callbackThrows_pendingRebuildStillFlushed() {
 		reset(mySearchParamProvider);
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 
-		mySearchParamRegistry.handleChange(buildCreatedEvent("SearchParameter/sp1"));
+		IResourceChangeEvent event = buildCreatedEvent("SearchParameter/sp1");
+		RuntimeException boom = new RuntimeException("boom");
 
+		assertThatThrownBy(() ->
+				mySearchParamRegistry.withDeferredRebuild(() -> {
+					mySearchParamRegistry.handleChange(event);
+					throw boom;
+				})
+		).isSameAs(boom);
+
+		// Pending rebuild flushes despite the callback throwing
+		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testForceRefresh_insideDeferredScope_rebuildsSynchronouslyAndSatisfiesScopeExit() {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		mySearchParamRegistry.withDeferredRebuild(() -> {
+			mySearchParamRegistry.handleChange(buildCreatedEvent("SearchParameter/sp1"));
+			// Inside scope, no rebuild yet
+			verify(mySearchParamProvider, never()).search(any());
+
+			// Explicit forceRefresh() bypasses deferral and rebuilds now
+			mySearchParamRegistry.forceRefresh();
+			verify(mySearchParamProvider, times(1)).search(any());
+		});
+
+		// Scope exit must not fire a second rebuild — forceRefresh() already
+		// satisfied the pending marker.
 		verify(mySearchParamProvider, times(1)).search(any());
 	}
 
