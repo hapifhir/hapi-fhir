@@ -131,7 +131,7 @@ public class SearchParamRegistryImpl
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 	private boolean myPrePopulateSearchParamIdentities = true;
 
-	private final AtomicInteger myDeferRebuildDepth = new AtomicInteger(0);
+	private final AtomicInteger myDeferRebuildDepth = new AtomicInteger();
 	private volatile boolean myRebuildPending = false;
 	private final AtomicInteger myRebuildCount = new AtomicInteger();
 

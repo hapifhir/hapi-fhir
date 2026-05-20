@@ -265,8 +265,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 											"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
 						}
 
-						// Must run inside the deferred scope so the resulting handleChange
-						// events are coalesced into the single scope-exit rebuild.
+						// Inside the deferred scope: the resource-change drain will fire
+						// handleChange for each newly persisted SearchParameter; the
+						// deferral collapses those N rebuilds into one at scope exit.
 						mySearchParamRegistryController.refreshCacheIfNecessary();
 					});
 				}
