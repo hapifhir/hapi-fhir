@@ -252,30 +252,16 @@ public abstract class BaseTransactionProcessor {
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
 
-		// FIXME-EHP:
-		// common entry point for batch and systemProvider bundle processing see BaseHapiFhirSystemDao.transaction()
-
-		// FIXME-EHP: wire it that service
-		//
-		// FIXME-EHP: placeholder are currenlty created in
-		// DaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo.
-		// for placeholder resource consistence (identiers/extensions), logic of building (not creating) a placeholder
-		// resource
-		// needs extraction so it can be wired in the PatientInlineMatchUrlPreCreationService.
-		//
-		// FIXME-EHP:
-		// - the execution of conditionalCreatePatientsForInlineMatchUrls needs to either be wrapped in a clause
-		// evaluating myStorageSettings.isAutoCreatePlaceholderReferenceTargets() or have the evaluation done within the
-		// invocation.
-		// - modify the service in order to have it create entries for all inlineMatchUrls, not only the one referring a
-		// Patient
-		// resource, do it for all resources
-		// FIXME-TG: ask: what is the reason that we need to do it for all resources? If we just want to create the
-		//  placeholder resource so that we can get the right partition, isn't patient enough?
-		InlineMatchUrlBundleSyntaxTransformerService inlineMatchUrlBundleSyntaxTransformerService =
-				new InlineMatchUrlBundleSyntaxTransformerService(myContext, myMatchUrlService);
-		inlineMatchUrlBundleSyntaxTransformerService.transform(theRequest);
-		// POST, ifNoneExit=Patient?identifier=system|123
+		// Gate the inline-match-URL transformer behind both flags. Both express explicit opt-in to the
+		// transformer's effects: allow inline match URLs in references (syntax) AND auto-create placeholder
+		// targets when no match is found (the transformer's on-miss behavior is exactly auto-create).
+		int syntheticEntryCount = 0;
+		if (myStorageSettings.isAllowInlineMatchUrlReferences()
+				&& myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
+			InlineMatchUrlBundleSyntaxTransformerService inlineMatchUrlBundleSyntaxTransformerService =
+					new InlineMatchUrlBundleSyntaxTransformerService(myContext, myMatchUrlService, myVersionAdapter);
+			syntheticEntryCount = inlineMatchUrlBundleSyntaxTransformerService.transform(theRequest);
+		}
 
 		// Interceptor call: STORAGE_TRANSACTION_PROCESSING
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
@@ -302,16 +288,17 @@ public abstract class BaseTransactionProcessor {
 		} else {
 			response = processTransactionAsSubRequest(
 					theRequestDetails, transactionDetails, theRequest, actionName, theNestedMode);
-
-			// FIXME-TG: find a way to remove the synthetic entries processing results
-			// inbound bundle.entries[Patient, Coverage, x, y, z, zz] - resources
-			// inbound bundle.entries[PatientPlaceHolder, Patient, Coverage] - resources
-			// outbound bundle.entries[responsePatient, responseCoverage] - processing result
-			// outbound.bundle.entries[5]
-
 		}
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);
+
+		// Synthetic conditional-create entries that the transformer prepended to the request now have
+		// corresponding response entries at the head of the response bundle. Drop them so the response
+		// aligns 1:1 with the caller's original (pre-transform) request.
+		if (syntheticEntryCount > 0) {
+			entries.subList(0, syntheticEntryCount).clear();
+		}
+
 		for (int i = 0; i < entries.size(); i++) {
 			if (ElementUtil.isEmpty(entries.get(i))) {
 				entries.remove(i);
@@ -1098,13 +1085,15 @@ public abstract class BaseTransactionProcessor {
 
 						SearchParameterMap searchParameterMap = typeAndParams.searchParameterMap();
 
+						// SearchParameterMap.get returns null when the key isn't present; treat absent and empty
+						// the same way (the match URL has no _id parameter, so we route by search).
 						List<List<IQueryParameterType>> idValues = searchParameterMap.get(IAnyResource.SP_RES_ID);
 
-						if (idValues.isEmpty()) {
+						if (idValues == null || idValues.isEmpty()) {
 							// the ifNoneExist does not have a '_id' parameters, we're searching for a resource
 							// matching the provided parameters
 							ReadPartitionIdRequestDetails details =
-									ReadPartitionIdRequestDetails.forSearchType(resourceType, searchParameterMap);
+									ReadPartitionIdRequestDetails.forSearchType(resourceType, searchParameterMap, null);
 
 							nextWriteEntryRequestPartitionId =
 									myRequestPartitionHelperService.determineReadPartitionForRequest(
@@ -1156,7 +1145,7 @@ public abstract class BaseTransactionProcessor {
 								String resourceType =
 										typeAndParams.resourceDefinition().getName();
 								ReadPartitionIdRequestDetails details =
-										ReadPartitionIdRequestDetails.forSearchType(resourceType, params);
+										ReadPartitionIdRequestDetails.forSearchType(resourceType, params, null);
 								nextWriteEntryRequestPartitionId =
 										myRequestPartitionHelperService.determineReadPartitionForRequest(
 												requestDetailsForEntry, details);

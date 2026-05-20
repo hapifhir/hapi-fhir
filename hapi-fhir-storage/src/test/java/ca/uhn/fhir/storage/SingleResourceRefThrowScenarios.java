@@ -1,0 +1,72 @@
+package ca.uhn.fhir.storage;
+
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+
+import java.util.stream.Stream;
+
+// Created by claude-opus-4-7
+class SingleResourceRefThrowScenarios implements ArgumentsProvider {
+
+	@Override
+	public Stream<? extends Arguments> provideArguments(ExtensionContext theContext) {
+		return Stream.of(
+			Arguments.of(
+				"identifier without system | throws PreconditionFailed",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=value1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				PreconditionFailedException.class,
+				"HAPI-2702: Inline match URL identifier must have both a system and a value: Patient?identifier=value1"
+			),
+			Arguments.of(
+				"identifier with blank value | throws PreconditionFailed",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=http://system|" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				PreconditionFailedException.class,
+				"HAPI-2702: Inline match URL identifier must have both a system and a value: Patient?identifier=http://system|"
+			),
+			Arguments.of(
+				"multiple search parameters | throws PreconditionFailed",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=http://system|value1&active=true" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				PreconditionFailedException.class,
+				"HAPI-2700: Inline match URL matching only supports identifier search parameters: Patient?identifier=http://system|value1&active=true"
+			)
+		);
+	}
+}

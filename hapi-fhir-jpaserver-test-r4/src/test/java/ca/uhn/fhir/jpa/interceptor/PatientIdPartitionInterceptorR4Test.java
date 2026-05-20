@@ -1541,7 +1541,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						]
 					}
 					""",
-				bundleAssert(0)
+				bundleAssert(1)
 			),
 			Arguments.of(
 				"conditional-create Patient | Patient does not exist",
@@ -1570,10 +1570,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"id" : "pat1"
+									"id" : "pat1",
 									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
 								},
-								"request" : { "method" : "PUT", "url" : "Patient"} 
+								"request" : { "method" : "PUT", "url" : "Patient/pat1"}
 							}
 						]
 					}
@@ -1589,10 +1589,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"id" : "p-123"
+									"id" : "p-123",
 									"identifier" : [ { "system" : "old-sys", "value" : "newIdent"} ]
 								},
-								"request" : { "method" : "PUT", "url" : "Patient"}
+								"request" : { "method" : "PUT", "url" : "Patient/p-123"}
 							}
 						]
 					}
@@ -1641,7 +1641,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"id" : pat1,
+									"id" : "pat1",
 									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
 								},
 								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|ident1"}
@@ -1659,7 +1659,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"id" : P-123,
+									"id" : "p-123",
 									"identifier" : [ { "system" : "old-sys", "value" : "newIden"} ]
 								},
 								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|newIden"}
@@ -1676,6 +1676,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@MethodSource("patientScenarioSupplier()")
 	void testTransaction_allPatientScenarios(String theComment, String theBundle, Consumer<Bundle> theAssertions) {
 		// fixed setup
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+
 		createPatient(
 			withId("pat1"),
 			withIdentifier("old-sys", "ident1"),
@@ -1687,7 +1689,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		// then
 		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
 
-		// expections
+		// expectations
 		assertNotNull(resultBundle);
 		assertNotNull(theAssertions);
 		theAssertions.accept(resultBundle);
@@ -1697,7 +1699,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	static List<Arguments> referenceScenarioSupplier() {
 		return List.of(
 			Arguments.of(
-				"conditional-update Patient | local reference to existing patient",
+				"create Patient | new patient",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
 						"entry" : [
@@ -1743,6 +1745,31 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
 								},
 								"request" : { "method" : "POST", "url" : "Patient"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				bundleAssert(2)
+			),
+			Arguments.of(
+				"create Observation | placeholder reference to conditional new patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|identNew"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
@@ -1825,6 +1852,24 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				bundleAssert(1)
 			),
 			Arguments.of(
+				"create Observation with logical reference to new patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "Patient?identifier=new-sys|new-val" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				bundleAssert(1)
+			),
+			Arguments.of(
 				"conditional-update Observation with logical reference to existing patient",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
@@ -1873,6 +1918,9 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@MethodSource("referenceScenarioSupplier()")
 	void testTransaction_allReferenceScenarios(String theComment, String theBundle, Consumer<Bundle> theAssertions) {
 		// fixed setup
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
 		createPatient(
 			withId("pat1"),
 			withIdentifier("old-sys", "ident1"),
@@ -1884,7 +1932,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		// then
 		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
 
-		// expections
+		// expectations
 		assertNotNull(resultBundle);
 		assertNotNull(theAssertions);
 		theAssertions.accept(resultBundle);

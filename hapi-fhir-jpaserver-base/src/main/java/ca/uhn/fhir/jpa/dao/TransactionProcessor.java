@@ -234,20 +234,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 	}
 
-	private void createPlaceHolders(
-			RequestDetails theRequest,
-			TransactionDetails theTransactionDetails,
-			List<IBase> theEntries,
-			ITransactionProcessorVersionAdapter<?, ?> theVersionAdapter,
-			RequestPartitionId theRequestPartitionId) {}
-
-	private void resolveInlineMatchUrls(
-			RequestDetails theRequest,
-			TransactionDetails theTransactionDetails,
-			List<IBase> theEntries,
-			ITransactionProcessorVersionAdapter<?, ?> theVersionAdapter,
-			RequestPartitionId theRequestPartitionId) {}
-
 	@SuppressWarnings("rawtypes")
 	private void preFetch(
 			RequestDetails theRequestDetails,

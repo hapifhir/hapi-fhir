@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.HapiExtensions;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
@@ -1393,6 +1394,96 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
+	/**
+	 * End-to-end coverage for the inline-match-URL bundle-syntax transformer pre-pass and response cleanup.
+	 * Submits a 4-entry transaction bundle whose Observations reference Patients via inline match URLs:
+	 *   A → pre-existing Patient (out-of-bundle resolution)
+	 *   B → new Patient X (triggers a synthetic conditional create)
+	 *   C → new Patient X (same as B; dedup — must hit the same synthetic)
+	 *   D → new Patient Y (different from X; second synthetic)
+	 * The transformer prepends 2 synthetic Patient entries to the request. After cleanup the response must
+	 * be 4 entries, positionally aligned with the original request (A/B/C/D), and each Observation's
+	 * subject must resolve to the right Patient on read-back.
+	 */
+	@Test
+	public void testTransactionInlineMatchUrl_multipleEntries_responseAlignsOneToOneWithOriginalRequest() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		String system = "urn:system";
+		String existingValue = "existing-patient";
+		String newValue1 = "new-patient-1";
+		String newValue2 = "new-patient-2";
+
+		// Pre-existing Patient (out-of-bundle)
+		Patient existing = new Patient();
+		existing.addIdentifier().setSystem(system).setValue(existingValue);
+		IIdType existingPatientId = myPatientDao.create(existing, mySrd).getId().toUnqualifiedVersionless();
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		// A → pre-existing Patient, B → new Patient X, C → new Patient X, D → new Patient Y
+		addObservation(request, "obs-A", "Patient?identifier=" + system + "|" + existingValue);
+		addObservation(request, "obs-B", "Patient?identifier=" + system + "|" + newValue1);
+		addObservation(request, "obs-C", "Patient?identifier=" + system + "|" + newValue1);
+		addObservation(request, "obs-D", "Patient?identifier=" + system + "|" + newValue2);
+
+		// execute
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		// response 1:1 with original request
+		assertThat(resp.getEntry()).hasSize(4);
+		for (BundleEntryComponent entry : resp.getEntry()) {
+			assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", entry.getResponse().getStatus());
+			assertThat(entry.getResponse().getLocation()).contains("Observation/");
+		}
+
+		Observation respA = readObservation(resp.getEntry().get(0));
+		Observation respB = readObservation(resp.getEntry().get(1));
+		Observation respC = readObservation(resp.getEntry().get(2));
+		Observation respD = readObservation(resp.getEntry().get(3));
+		assertEquals("obs-A", respA.getCode().getText());
+		assertEquals("obs-B", respB.getCode().getText());
+		assertEquals("obs-C", respC.getCode().getText());
+		assertEquals("obs-D", respD.getCode().getText());
+
+		// inline match URL → pre-existing Patient
+		assertEquals(existingPatientId.getValue(), respA.getSubject().getReference());
+
+		// inline match URL → new auto-created Patient
+		String patientBRef = respB.getSubject().getReference();
+		String patientCRef = respC.getSubject().getReference();
+		assertThat(patientBRef).startsWith("Patient/");
+		assertEquals(patientBRef, patientCRef);
+
+		Patient autoCreated1 = myPatientDao.read(new IdType(patientBRef), mySrd);
+		assertThat(autoCreated1.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+		assertEquals(newValue1, autoCreated1.getIdentifierFirstRep().getValue());
+
+		String patientDRef = respD.getSubject().getReference();
+		assertThat(patientDRef).startsWith("Patient/");
+		assertThat(patientDRef).isNotEqualTo(patientBRef);
+		assertThat(patientDRef).isNotEqualTo(existingPatientId.getValue());
+
+		Patient autoCreated2 = myPatientDao.read(new IdType(patientDRef), mySrd);
+		assertThat(autoCreated2.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+		assertEquals(newValue2, autoCreated2.getIdentifierFirstRep().getValue());
+	}
+
+	private static void addObservation(Bundle theBundle, String theCodeText, String theSubjectInlineMatchUrl) {
+		Observation o = new Observation();
+		o.getCode().setText(theCodeText);
+		o.getSubject().setReference(theSubjectInlineMatchUrl);
+		theBundle.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST).setUrl("Observation");
+	}
+
+	private Observation readObservation(BundleEntryComponent theResponseEntry) {
+		return myObservationDao.read(new IdType(theResponseEntry.getResponse().getLocationElement()), mySrd);
+	}
+
 	@Test
 	public void testTransactionUpdateTwoResourcesWithSameId() {
 		Bundle request = new Bundle();
@@ -1574,14 +1665,14 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
-	 * This test is testing whether someone can sneakily figure out the existence of a resource
-	 * by creating a match URL that references it, even though the user doesn't have permission
-	 * to see that resource.
-	 * <p>
-	 * This security check requires a match URL that is too complex for the pre-fetching that
-	 * happens in {@link ca.uhn.fhir.jpa.dao.TransactionProcessor}'s preFetchConditionalUrl
-	 * method (see the javadoc on that method for more details).
-	 */
+     * This test is testing whether someone can sneakily figure out the existence of a resource
+     * by creating a match URL that references it, even though the user doesn't have permission
+     * to see that resource.
+     * <p>
+     * This security check requires a match URL that is too complex for the pre-fetching that
+     * happens in {@link ca.uhn.fhir.jpa.dao.TransactionProcessor}'s preFetchConditionalUrl
+     * method (see the javadoc on that method for more details).
+     */
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithAuthorizationDenied() {
 		// setup
@@ -2405,8 +2496,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
-	 * See #253 Test that the order of deletes is version independent
-	 */
+     * See #253 Test that the order of deletes is version independent
+     */
 	@Test
 	public void testTransactionDeleteIsOrderIndependantTargetFirst() {
 		String methodName = "testTransactionDeleteIsOrderIndependantTargetFirst";
@@ -2464,8 +2555,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
-	 * See #253 Test that the order of deletes is version independent
-	 */
+     * See #253 Test that the order of deletes is version independent
+     */
 	@Test
 	public void testTransactionDeleteIsOrderIndependantTargetLast() {
 		String methodName = "testTransactionDeleteIsOrderIndependantTargetFirst";
@@ -2897,9 +2988,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
-	 * We shouldn't care about duplicate IDs when we're doing a POST, since the ID is required to
-	 * be ignored anyhow.
-	 */
+     * We shouldn't care about duplicate IDs when we're doing a POST, since the ID is required to
+     * be ignored anyhow.
+     */
 	@Test
 	public void testTransactionSucceedsWithDuplicateIdsWhenUsingPost() {
 		Bundle request = new Bundle();
