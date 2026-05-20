@@ -60,6 +60,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -712,7 +713,7 @@ public class ResourceMergeServiceTest {
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
 			when(myCrossPartitionReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of()));
+				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of()));
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -741,7 +742,7 @@ public class ResourceMergeServiceTest {
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
 			when(myCrossPartitionReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of()));
+				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of()));
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -797,7 +798,7 @@ public class ResourceMergeServiceTest {
 			IdDt copiedOriginalId = new IdDt("Observation", "obs1", "1");
 			when(myCrossPartitionReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(changedObservationId, changedListId), List.of(copiedOriginalId)));
+				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(changedObservationId, changedListId), List.of(copiedOriginalId), Map.of(), Map.of()));
 
 			// When
 			myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);

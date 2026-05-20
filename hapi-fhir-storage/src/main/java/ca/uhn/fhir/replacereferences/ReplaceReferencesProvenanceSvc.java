@@ -352,7 +352,7 @@ public class ReplaceReferencesProvenanceSvc {
 		return changedResourceIds;
 	}
 
-	private static boolean isNoChangeResponse(Bundle.BundleEntryResponseComponent theResponse) {
+	public static boolean isNoChangeResponse(Bundle.BundleEntryResponseComponent theResponse) {
 		if (!theResponse.hasOutcome()) {
 			return false;
 		}
