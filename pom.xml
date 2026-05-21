@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.10.1-SNAPSHOT</version>
+	<version>8.10.0</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1393,6 +1393,12 @@
 				<groupId>com.vladsch.flexmark</groupId>
 				<artifactId>flexmark</artifactId>
 				<version>${flexmark_version}</version>
+			</dependency>
+			<!-- Fix for Central validation: version missing from imported BOM. Need to  -->
+			<dependency>
+				<groupId>jakarta.enterprise</groupId>
+				<artifactId>jakarta.enterprise.cdi-api</artifactId>
+				<version>4.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.vladsch.flexmark</groupId>
