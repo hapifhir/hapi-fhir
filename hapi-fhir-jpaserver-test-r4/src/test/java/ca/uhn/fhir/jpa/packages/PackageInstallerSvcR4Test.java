@@ -19,7 +19,7 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.IParser;
@@ -75,6 +75,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -97,7 +98,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
@@ -129,8 +134,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	@RegisterExtension
 	private final LogbackTestExtension myTerminologyTroubleshootingLogCapture = new LogbackTestExtension(Logs.getTerminologyTroubleshootingLog());
 
-	@RegisterExtension
-	private final LogbackTestExtension mySearchParamRegistryLogCapture = new LogbackTestExtension(SearchParamRegistryImpl.class);
+	@MockitoSpyBean
+	private ISearchParamProvider mySearchParamProvider;
 
 	@Override
 	@BeforeEach
@@ -2036,18 +2041,14 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setPackageContents(Files.readAllBytes(tarball));
 
-		// Discard any bootstrap rebuild noise captured before the install runs.
-		mySearchParamRegistryLogCapture.clearEvents();
+		// Each registry rebuild calls mySearchParamProvider.search exactly once to re-read
+		// every SearchParameter from the DB; that call count is a direct proxy for the
+		// number of rebuilds. Discard bootstrap invocations from before the install runs.
+		clearInvocations(mySearchParamProvider);
 		myPackageInstallerSvc.install(spec);
-		long rebuildsDuringInstall = mySearchParamRegistryLogCapture.getLogEvents().stream()
-			.filter(e -> "Rebuilding SearchParamRegistry".equals(e.getMessage()))
-			.count();
 
-		// Without the defer logic this would be 3 (one per persisted SP). With deferral it
-		// must coalesce to exactly one rebuild for the whole package install.
-		assertThat(rebuildsDuringInstall)
-			.as("Expected exactly one SearchParamRegistry rebuild for the install of a package with 3 SearchParameters")
-			.isEqualTo(1L);
+		// Without deferral this would be 3 (one rebuild per persisted SP).
+		verify(mySearchParamProvider, times(1)).search(any());
 	}
 
 }
