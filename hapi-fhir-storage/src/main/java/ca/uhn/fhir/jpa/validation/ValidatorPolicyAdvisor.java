@@ -128,7 +128,7 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 
 	@Override
 	public String relativeDatePlaceHolder() {
-		return "";
+		return null;
 	}
 
 	@Override

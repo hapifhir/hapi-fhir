@@ -1085,7 +1085,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 		@Override
         public String relativeDatePlaceHolder() {
-            return "";
+            return null;
         }
 
 		@Override
