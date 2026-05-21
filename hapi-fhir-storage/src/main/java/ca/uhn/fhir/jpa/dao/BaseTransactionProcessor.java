@@ -1113,6 +1113,7 @@ public abstract class BaseTransactionProcessor {
 									.getValue();
 
 							if (StringUtils.equals(resourceIdSpecifiedInIfNoneExist, resourceIdFromEntryResource)) {
+								// FIXME-TG do a try catch here and use ALL PARTITION if any exceptions
 								nextWriteEntryRequestPartitionId =
 										// FIXME-TG, this will fail a test and that is correct, good catch
 										myRequestPartitionHelperService.determineCreatePartitionForRequest(

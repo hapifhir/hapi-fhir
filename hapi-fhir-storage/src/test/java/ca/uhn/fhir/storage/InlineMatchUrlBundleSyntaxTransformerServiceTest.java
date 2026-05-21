@@ -49,9 +49,9 @@ class InlineMatchUrlBundleSyntaxTransformerServiceTest {
 
 		// then
 		int actualSyntheticCount = mySvc.transform(requestBundle);
+		ourLog.info(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
 
 		// expectations
-		ourLog.info(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
 		assertThat(actualSyntheticCount).isEqualTo(theExpectedSyntheticCount);
 		assertNotNull(requestBundle);
 		assertNotNull(theAssertions);
