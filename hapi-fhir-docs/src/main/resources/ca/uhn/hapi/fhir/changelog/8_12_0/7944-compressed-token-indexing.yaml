@@ -1,0 +1,8 @@
+---
+type: add
+issue: 7944
+title: "Added a new compressed token indexing strategy that allows reducing database storage
+  for token search parameters by deduplicating common system/code combinations. This is especially
+  effective for identifiers and coded values that repeat across many resources. Enable via
+  JpaStorageSettings.setTokenIndexStrategy(). See
+  [Compressed Token Indexing](/hapi-fhir/docs/server_jpa/performance.html#compressed-token-indexing) for details."
