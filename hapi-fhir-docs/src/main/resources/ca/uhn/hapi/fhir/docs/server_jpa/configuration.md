@@ -198,3 +198,35 @@ This setting, disabled by default, allows to configure the same behaviour for la
 
 Setting this property explicitly to true enables the feature: [Prevent Conditional Updates Invalidating Match Criteria](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#isPreventInvalidatingConditionalMatchCriteria())
 
+<a id="token-index-strategy-configuration"></a>
+
+# Token Index Strategy Configuration
+
+The Token Index Strategy setting controls how token search parameters are stored and queried. This enables a phased migration from the `HFJ_SPIDX_TOKEN` table to the new [compressed token index](/hapi-fhir/docs/server_jpa/performance.html#compressed-token-indexing) tables.
+
+## Available Strategies
+
+| Strategy | Writes To | Queries From | Use Case |
+|----------|-----------|--------------|----------|
+| `WRITE_OLD_QUERY_OLD` | `HFJ_SPIDX_TOKEN` | `HFJ_SPIDX_TOKEN` | Default. No migration in progress. |
+| `WRITE_BOTH_QUERY_OLD` | Both tables | `HFJ_SPIDX_TOKEN` | Phase 1: Start populating new tables while maintaining query compatibility. |
+| `WRITE_BOTH_QUERY_NEW` | Both tables | New tables | Phase 2: Switch queries to new tables while still writing to both. |
+| `WRITE_NEW_QUERY_NEW` | New tables | New tables | Migration complete. Can be used directly for fresh databases. |
+
+## Configuration
+
+Choose a strategy from the table above and configure it:
+
+```java
+myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_BOTH_QUERY_OLD);
+```
+
+## Configuring Identifier Token Search Parameters
+
+By default, the `identifier` search parameter is routed to the `HFJ_SPIDX2_TOKEN_IDENTIFIER` table. You can customize which search parameters use this table:
+
+```java
+myStorageSettings.setIdentifierTokenSearchParams(Set.of("identifier", "code"));
+```
+
+See [Compressed Token Indexing](/hapi-fhir/docs/server_jpa/performance.html#compressed-token-indexing) for benefits.

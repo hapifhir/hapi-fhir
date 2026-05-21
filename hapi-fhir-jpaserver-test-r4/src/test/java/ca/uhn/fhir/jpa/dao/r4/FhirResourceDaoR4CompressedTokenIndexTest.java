@@ -52,6 +52,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -133,6 +134,43 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 		assertThat(identifierRow.getValue()).isEqualTo("MRN123");
 		assertThat(identifierRow.getHashValue()).isEqualTo(hashValue("Patient", Patient.SP_IDENTIFIER, "MRN123"));
 		assertThat(identifierRow.getTypeHashSystemAndValue()).isNull();
+	}
+
+	@Test
+	void createObservation_withCodeInIdentifierSearchParams_routesToIdentifierTableAndSearchWorks() {
+		myStorageSettings.setIdentifierTokenSearchParams(Set.of("identifier", "code"));
+
+		Observation obs = newObservationWithCode("http://loinc.org", "12345-6");
+		IIdType id = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		JpaPid pid = JpaPid.fromId(id.getIdPartAsLong());
+
+		long codeHash = hashSysAndValue("Observation", Observation.SP_CODE, "http://loinc.org", "12345-6");
+
+		// Verify write path: token routed to IDENTIFIER table
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamTokenIdentifier> identifiers = myTokenIdentifierDao.findByResourceId(pid);
+			assertThat(identifiers)
+					.extracting(ResourceIndexedSearchParamTokenIdentifier::getValue)
+					.as("code param should route to IDENTIFIER table when configured")
+					.contains("12345-6");
+
+			List<ResourceIndexedSearchParamTokenCommonRes> commonRes = myTokenCommonResDao.findByResourceId(pid);
+			assertThat(commonRes)
+					.extracting(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
+					.as("code param must not appear in CommonRes when routed to Identifier table")
+					.doesNotContain(codeHash);
+		});
+
+		// Verify read path: search by code finds the resource
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Observation.SP_CODE, new TokenParam("http://loinc.org", "12345-6"));
+		List<IIdType> results = toUnqualifiedVersionlessIds(myObservationDao.search(params, mySrd));
+		assertThat(results)
+				.as("search by code should find the resource when routed to IDENTIFIER table")
+				.containsExactly(id);
+
+		myStorageSettings.setIdentifierTokenSearchParams(Set.of("identifier"));
 	}
 
 	// ===== Group B: Deduplication of HFJ_SPIDX2_TOKEN_COMMON =====

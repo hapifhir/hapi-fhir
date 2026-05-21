@@ -84,3 +84,23 @@ Setting this property explicitly to true enables the feature: [Index Storage Opt
 * If this setting is enabled along with [Index Missing Fields](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#getIndexMissingFields()) setting, the following index may need to be added into the `HFJ_SPIDX_xxx` tables to improve the search performance: `(HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID)`.
 
 * This setting should not be enabled in combination with [Include Partition in Search Hashes](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionSettings.html#setIncludePartitionInSearchHashes(boolean)) flag, as in this case, Partition could not be included in Search Hashes. 
+
+<a id="compressed-token-indexing"></a>
+
+# Compressed Token Indexing
+
+Compressed token indexing is a storage optimization feature that allows reducing database storage requirements for token search parameters. This feature introduces three new tables that use a more efficient storage strategy than the `HFJ_SPIDX_TOKEN` table.
+
+## Benefits
+
+* **Storage Reduction**: The `HFJ_SPIDX2_TOKEN_COMMON` table deduplicates token values globally. Common codes (like `active`, `male`, `female`, LOINC codes, SNOMED codes) are stored once rather than repeated for every resource.
+* **Longer Identifier Values**: The `HFJ_SPIDX2_TOKEN_IDENTIFIER` table supports identifier values up to 768 characters (vs 200 in `HFJ_SPIDX_TOKEN`).
+
+## When to Use
+
+Consider enabling compressed token indexing if:
+
+* You are setting up a new database
+* You want to reduce database storage requirements
+
+See [Token Index Strategy Configuration](/hapi-fhir/docs/server_jpa/configuration.html#token-index-strategy-configuration) for configuration and migration options.

@@ -287,7 +287,8 @@ public class DaoSearchParamSynchronizer {
 
 			Long systemId = resolveTokenSystemId(theRequestDetails, requestPartitionId, token.getSystem());
 
-			if (token.isFromIdentifierDatatype()) {
+			if (token.isFromIdentifierDatatype()
+					|| myStorageSettings.getIdentifierTokenSearchParams().contains(token.getParamName())) {
 				newIdentifierEntities.add(TokenIndexEntityConverter.toIdentifier(token, theEntity, systemId));
 			} else {
 				// Common (global dedup) table is insert-only. Skip if a row with this hashSysAndValue
