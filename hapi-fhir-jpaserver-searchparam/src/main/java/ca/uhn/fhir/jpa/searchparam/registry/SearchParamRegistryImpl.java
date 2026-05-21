@@ -592,14 +592,29 @@ public class SearchParamRegistryImpl
 		RuntimeSearchParamCache activeSearchParams = myActiveSearchParams;
 		myResourceChangeListenerCache.forceRefresh();
 
-		if (myDeferRebuild && myActiveSearchParams != null) {
-			myDeferredRebuildPending = true;
+		if (tryDeferRebuild()) {
 			return;
 		}
 
 		if (myActiveSearchParams == activeSearchParams) {
 			rebuildActiveSearchParams();
 		}
+	}
+
+	/**
+	 * If a {@link #withDeferredRebuild} scope is active and the cache has already been
+	 * populated, mark a rebuild pending so the scope-exit flush picks it up, and return
+	 * {@code true} to signal the caller to skip the immediate rebuild.
+	 * <p>
+	 * Returns {@code false} when no scope is active, or while {@link #myActiveSearchParams}
+	 * is still {@code null}
+	 */
+	private boolean tryDeferRebuild() {
+		if (myDeferRebuild && myActiveSearchParams != null) {
+			myDeferredRebuildPending = true;
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -688,11 +703,7 @@ public class SearchParamRegistryImpl
 					result.deleted,
 					unqualified(theResourceChangeEvent.getDeletedResourceIds()));
 		}
-		// Defer only when the cache is already populated. Before initial population,
-		// requiresActiveSearchParams() relies on the next handleChange to fill the cache —
-		// deferring here would leave it null for any read inside the scope.
-		if (myDeferRebuild && myActiveSearchParams != null) {
-			myDeferredRebuildPending = true;
+		if (tryDeferRebuild()) {
 			return;
 		}
 		rebuildActiveSearchParams();
