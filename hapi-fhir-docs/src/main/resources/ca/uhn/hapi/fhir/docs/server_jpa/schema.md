@@ -877,6 +877,186 @@ Note: This table has the columns listed below, but it also has all common column
     </tbody>
 </table>
 
+<a id="HFJ_SPIDX2_TOKEN_COMMON"></a>
+
+# HFJ_SPIDX2_TOKEN_COMMON: Common Token Search Parameters
+
+The `HFJ_SPIDX2_TOKEN_COMMON` table stores token search parameter values (system and code combinations) that are shared across resources. Each unique system/value combination is stored once and referenced by [HFJ_SPIDX2_TOKEN_COMMON_RES](#HFJ_SPIDX2_TOKEN_COMMON_RES).
+
+This table uses a content-addressed primary key (`HASH_SYS_AND_VALUE`) which allows duplicate inserts to be silently ignored. See [Compressed Token Indexing](/hapi-fhir/docs/server_jpa/performance.html#compressed-token-indexing) for configuration and migration details.
+
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>HASH_SYS_AND_VALUE</td>
+            <td>Primary Key</td>
+            <td>Long</td>
+            <td>Not nullable</td>
+            <td>Content-addressed primary key: a hash of resource type, search parameter name, system, and value.</td>
+        </tr>
+        <tr>
+            <td>HASH_IDENTITY</td>
+            <td></td>
+            <td>Long</td>
+            <td>Not nullable</td>
+            <td>A hash of the resource type and search parameter name.</td>
+        </tr>
+        <tr>
+            <td>HASH_VALUE</td>
+            <td></td>
+            <td>Long</td>
+            <td>Not nullable</td>
+            <td>A hash of HASH_IDENTITY combined with the token value (SP_VALUE).</td>
+        </tr>
+        <tr>
+            <td>SYSTEM_ID</td>
+            <td>FK to <a href="#HFJ_RES_SYSTEM">HFJ_RES_SYSTEM</a></td>
+            <td>Long</td>
+            <td>Nullable</td>
+            <td>Foreign key to the system URL lookup table.</td>
+        </tr>
+        <tr>
+            <td>SP_VALUE</td>
+            <td></td>
+            <td>String (200)</td>
+            <td>Not nullable</td>
+            <td>The token code/value.</td>
+        </tr>
+    </tbody>
+</table>
+
+<a id="HFJ_SPIDX2_TOKEN_COMMON_RES"></a>
+
+# HFJ_SPIDX2_TOKEN_COMMON_RES: Resource to Common Tokens Join Table
+
+The `HFJ_SPIDX2_TOKEN_COMMON_RES` table links resources to their token values stored in `HFJ_SPIDX2_TOKEN_COMMON`. This table has a composite primary key of (`RES_ID`, `PARTITION_ID`, `HASH_SYS_AND_VALUE`).
+
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>RES_ID</td>
+            <td>FK to <a href="#HFJ_RESOURCE">HFJ_RESOURCE</a></td>
+            <td>Long</td>
+            <td>Not nullable</td>
+            <td>The resource this token index belongs to.</td>
+        </tr>
+        <tr>
+            <td>PARTITION_ID</td>
+            <td></td>
+            <td>Integer</td>
+            <td>Nullable</td>
+            <td>The partition ID if partitioning is enabled.</td>
+        </tr>
+        <tr>
+            <td>HASH_SYS_AND_VALUE</td>
+            <td>FK to HFJ_SPIDX2_TOKEN_COMMON</td>
+            <td>Long</td>
+            <td>Not nullable</td>
+            <td>Reference to the token data in <code>HFJ_SPIDX2_TOKEN_COMMON</code>.</td>
+        </tr>
+    </tbody>
+</table>
+
+<a id="HFJ_SPIDX2_TOKEN_IDENTIFIER"></a>
+
+# HFJ_SPIDX2_TOKEN_IDENTIFIER: Identifier Token Search Parameters
+
+The `HFJ_SPIDX2_TOKEN_IDENTIFIER` table stores identifier token search parameters with one row per resource-token pair.
+
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>SP_ID</td>
+            <td>Primary Key</td>
+            <td>Long</td>
+            <td>Not nullable</td>
+            <td>Auto-generated primary key.</td>
+        </tr>
+        <tr>
+            <td>PARTITION_ID</td>
+            <td></td>
+            <td>Integer</td>
+            <td>Nullable</td>
+            <td>The partition ID if partitioning is enabled.</td>
+        </tr>
+        <tr>
+            <td>RES_ID</td>
+            <td>FK to <a href="#HFJ_RESOURCE">HFJ_RESOURCE</a></td>
+            <td>Long</td>
+            <td>Not nullable</td>
+            <td>The resource this index belongs to.</td>
+        </tr>
+        <tr>
+            <td>HASH_IDENTITY</td>
+            <td></td>
+            <td>Long</td>
+            <td>Not nullable</td>
+            <td>A hash of the resource type and search parameter name.</td>
+        </tr>
+        <tr>
+            <td>SP_SYSTEM_URL_ID</td>
+            <td>FK to <a href="#HFJ_RES_SYSTEM">HFJ_RES_SYSTEM</a></td>
+            <td>Long</td>
+            <td>Nullable</td>
+            <td>Foreign key to the system URL lookup table.</td>
+        </tr>
+        <tr>
+            <td>SP_VALUE</td>
+            <td></td>
+            <td>String (768)</td>
+            <td>Not nullable</td>
+            <td>The identifier value. Supports longer values (768 chars) than COMMON table (200 chars).</td>
+        </tr>
+        <tr>
+            <td>HASH_VALUE</td>
+            <td></td>
+            <td>Long</td>
+            <td>Nullable</td>
+            <td>A hash of HASH_IDENTITY combined with SP_VALUE.</td>
+        </tr>
+        <tr>
+            <td>TYPE_HASH_SYS_AND_VALUE</td>
+            <td></td>
+            <td>Long</td>
+            <td>Nullable</td>
+            <td>A hash for exact matching including resource type, search parameter, system, and value.</td>
+        </tr>
+    </tbody>
+</table>
+
 
 # HFJ_SPIDX_URI: URI Search Parameters
 
@@ -918,6 +1098,42 @@ Note: This table has the columns listed below, but it also has all common column
             <td>
                 The uri string extracted by the SearchParameter.
             </td>
+        </tr>
+    </tbody>
+</table>
+
+<a id="HFJ_RES_SYSTEM"></a>
+
+# HFJ_RES_SYSTEM: System URLs
+
+The `HFJ_RES_SYSTEM` table stores system URLs (such as `http://loinc.org` or identifier systems). Each unique URL is stored once.
+
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PID</td>
+            <td>Primary Key</td>
+            <td>Long</td>
+            <td>Not nullable</td>
+            <td>Hash of the SYSTEM_URL value.</td>
+        </tr>
+        <tr>
+            <td>SYSTEM_URL</td>
+            <td></td>
+            <td>String (500)</td>
+            <td>Not nullable</td>
+            <td>The system URI. Has a unique constraint.</td>
         </tr>
     </tbody>
 </table>
