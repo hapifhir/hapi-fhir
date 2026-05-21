@@ -264,6 +264,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 												"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
 							}
 						} finally {
+							// On the exception path, so partially persisted SPs reach the
+							// registry without waiting for the next polling refresh.
 							mySearchParamRegistryController.refreshCacheIfNecessary();
 						}
 					});
