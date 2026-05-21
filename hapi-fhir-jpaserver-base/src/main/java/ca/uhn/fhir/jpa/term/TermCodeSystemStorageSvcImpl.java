@@ -762,13 +762,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			theStatisticsTracker.incrementConceptLinksAddedCount();
 		}
 
-		if (theStatisticsTracker.getAddedConceptCount() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
+		// FIXME: remove?
+//		if (theStatisticsTracker.getAddedConceptCount() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
 			saveConcept(targetConcept);
 			Long nextConceptPid = targetConcept.getId();
 			Validate.notNull(nextConceptPid, "Concept ID cannot be null after saving");
-		} else {
-			myDeferredStorageSvc.addConceptToStorageQueue(targetConcept);
-		}
+//		} else {
+//			myDeferredStorageSvc.addConceptToStorageQueue(targetConcept);
+//		}
 
 		ourLog.trace("About to save parent-child links");
 

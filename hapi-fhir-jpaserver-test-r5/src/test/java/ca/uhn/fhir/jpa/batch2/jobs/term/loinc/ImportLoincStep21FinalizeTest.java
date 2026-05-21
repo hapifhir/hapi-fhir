@@ -35,13 +35,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ImportLoincStep21FinalizeTest {
+public class ImportLoincStep21FinalizeTest extends BaseImportLoincStepTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep21FinalizeTest.class);
-	@Mock
-	private IFhirResourceDao<ValueSet> myValueSetDao;
-	@Mock
-	private DaoRegistry myDaoRegistry;
 	@Mock
 	private IJobStepExecutionServices myStepExecutionSvcs;
 	@Mock
@@ -62,13 +58,13 @@ public class ImportLoincStep21FinalizeTest {
 
 		// Test
 		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
-		ImportLoincFileSetJson data = new ImportLoincFileSetJson();
+		ImportLoincFileSetJson data = newData();
 		data.getRecordsAddedCounter("import-concepts").incrementConceptsAdded(1);
 		data.getRecordsAddedCounter("import-hierarchy").incrementConceptsAdded(2);
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(3);
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		data = new ImportLoincFileSetJson();
+		data = newData();
 		data.getRecordsAddedCounter("import-concepts").incrementConceptsAdded(2);
 		data.getRecordsAddedCounter("import-hierarchy").incrementConceptsAdded(3);
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(4);
@@ -98,11 +94,11 @@ public class ImportLoincStep21FinalizeTest {
 
 		// Test
 		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
-		ImportLoincFileSetJson data = new ImportLoincFileSetJson();
+		ImportLoincFileSetJson data = newData();
 		data.addResourceToActivate("ValueSet/A");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		data = new ImportLoincFileSetJson();
+		data = newData();
 		data.addResourceToActivate("ValueSet/A");
 		data.addResourceToActivate("ValueSet/B");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));

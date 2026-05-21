@@ -49,6 +49,12 @@ public class ImportLoincStep7HandlePartRelatedCodeMapping
 				LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT));
 	}
 
+	@Nonnull
+	@Override
+	public FileHandlingType getFileHandlingType() {
+		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS;
+	}
+
 	@Override
 	protected void handleRecord(
 		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
@@ -133,8 +139,7 @@ public class ImportLoincStep7HandlePartRelatedCodeMapping
 		}
 
 		addConceptMapEntry(
-				theData,
-				theContext,
+			theContext,
 				new ConceptMapping()
 						.setConceptMapId(loincPartMapId)
 						.setConceptMapUri(loincPartMapUri)

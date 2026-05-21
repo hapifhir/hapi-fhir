@@ -34,6 +34,13 @@ public class ImportLoincStep2HandleConcepts
 				LoincUploadPropertiesEnum.LOINC_FILE, LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT));
 	}
 
+	@Nonnull
+	@Override
+	public FileHandlingType getFileHandlingType() {
+		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
+	}
+
+
 	@Override
 	protected CodeExtractionContext newContextObject(
 			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {

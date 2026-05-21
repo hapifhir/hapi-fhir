@@ -217,6 +217,10 @@ public class TerminologyFileSetJson implements IModelJson {
 		@JsonProperty("valueSetsCodesAdded")
 		private int myValueSetCodesAdded = 0;
 
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("valueSetsInclusionsAdded")
+		private int myValueSetInclusionsAdded = 0;
+
 		public void incrementConceptsAdded(int theAddedConceptCount) {
 			Validate.isTrue(theAddedConceptCount >= 0, "theAddedConceptCount must be >= 0");
 			myConceptsAdded += theAddedConceptCount;
@@ -257,6 +261,11 @@ public class TerminologyFileSetJson implements IModelJson {
 			myValueSetCodesAdded += theAddedValueSetCodesCount;
 		}
 
+		public void incrementValueSetInclusionsAdded(int theAddedValueSetInclusionsCount) {
+			Validate.isTrue(theAddedValueSetInclusionsCount >= 0, "theAddedValueSetInclusionsCount must be >= 0");
+			myValueSetInclusionsAdded += theAddedValueSetInclusionsCount;
+		}
+
 		public int getConceptsAdded() {
 			return myConceptsAdded;
 		}
@@ -289,6 +298,10 @@ public class TerminologyFileSetJson implements IModelJson {
 			return myValueSetCodesAdded;
 		}
 
+		public int getValueSetInclusionsAdded() {
+			return myValueSetInclusionsAdded;
+		}
+
 		public void copyFrom(RecordsAddedCounter theRecordsAddedCounter) {
 			myConceptsAdded += theRecordsAddedCounter.myConceptsAdded;
 			myConceptLinksAdded += theRecordsAddedCounter.myConceptLinksAdded;
@@ -298,6 +311,7 @@ public class TerminologyFileSetJson implements IModelJson {
 			myConceptMapMappingsAdded += theRecordsAddedCounter.myConceptMapMappingsAdded;
 			myValueSetsAdded += theRecordsAddedCounter.myValueSetsAdded;
 			myValueSetCodesAdded += theRecordsAddedCounter.myValueSetCodesAdded;
+			myValueSetInclusionsAdded += theRecordsAddedCounter.myValueSetInclusionsAdded;
 		}
 
 		@Override
@@ -311,6 +325,7 @@ public class TerminologyFileSetJson implements IModelJson {
 			b.appendIfNonZero("conceptMapMappingsAdded", myConceptMapMappingsAdded);
 			b.appendIfNonZero("valueSetsAdded", myValueSetsAdded);
 			b.appendIfNonZero("valueSetCodesAdded", myValueSetCodesAdded);
+			b.appendIfNonZero("valueSetInclusionsAdded", myValueSetInclusionsAdded);
 			return b.toString();
 		}
 

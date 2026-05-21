@@ -43,7 +43,7 @@ import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseImportLoincStep<CT>
-		implements ITerminologyImportFileHandlerStep<
+	implements ITerminologyImportFileHandlerStep<
 	ImportLoincJobParameters, ImportLoincFileSetJson, ImportLoincFileSetJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportLoincStep.class);
 
@@ -67,11 +67,17 @@ public abstract class BaseImportLoincStep<CT>
 		for (LoincFileNameSpecification loincFileNameSpecification : getFilesToProcess(theStepExecutionDetails)) {
 			if (loincFileNameSpecification.matchFileName(jobProperties, theFileName)) {
 				return Optional.of(
-						new FileHandlingInstructions(theFileName, FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
+					new FileHandlingInstructions(theFileName, getFileHandlingType()));
 			}
 		}
 
 		return Optional.empty();
+	}
+
+	@Nonnull
+	@Override
+	public FileHandlingType getFileHandlingType() {
+		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS;
 	}
 
 	protected Properties getJobProperties(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
@@ -96,9 +102,9 @@ public abstract class BaseImportLoincStep<CT>
 	@Nonnull
 	@Override
 	public RunOutcome run(
-			@Nonnull StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails,
-			@Nonnull IJobDataSink<ImportLoincFileSetJson> theDataSink)
-			throws JobExecutionFailedException {
+		@Nonnull StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails,
+		@Nonnull IJobDataSink<ImportLoincFileSetJson> theDataSink)
+		throws JobExecutionFailedException {
 		ImportLoincFileSetJson data = theStepExecutionDetails.getData();
 		String jobInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		ImportLoincJobParameters jobParameters = theStepExecutionDetails.getParameters();
@@ -120,7 +126,7 @@ public abstract class BaseImportLoincStep<CT>
 			AttachmentDetails attachment = myJobPersistence.fetchAttachmentById(jobInstanceId, attachmentId);
 			try (InputStream inputStream = attachment.getInputStream()) {
 				InputStreamReader reader = new InputStreamReader(
-						BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
+					BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
 				CSVParser csvReader = newLoincCsvParser(reader);
 				for (CSVRecord record : csvReader.getRecords()) {
 					handleRecord(theStepExecutionDetails, jobParameters, codeExtractionContext, record, codeSystemToPopulate, data, sourceFilename);
@@ -129,7 +135,7 @@ public abstract class BaseImportLoincStep<CT>
 			} catch (IOException e) {
 				// FIXME: add code
 				throw new JobExecutionFailedException(
-						Msg.code(1) + "Failed to read file attachment: " + e.getMessage(), e);
+					Msg.code(1) + "Failed to read file attachment: " + e.getMessage(), e);
 			}
 
 			afterCsvProcessingComplete(codeExtractionContext, codeSystemToPopulate, theStepExecutionDetails);
@@ -141,12 +147,12 @@ public abstract class BaseImportLoincStep<CT>
 
 				int conceptCount = codeSystemToPopulate.getConcept().size();
 				ourLog.atInfo()
-						.setMessage("Storing {} concepts")
-						.addArgument(conceptCount)
-						.log();
+					.setMessage("Storing {} concepts")
+					.addArgument(conceptCount)
+					.log();
 
 				Callable<UploadStatistics> uploader = () -> myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulate);
-				UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader);
+				UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
 
 				TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter = getRecordsAddedCounter(theStepExecutionDetails);
 				recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
@@ -163,7 +169,7 @@ public abstract class BaseImportLoincStep<CT>
 	}
 
 	@Nonnull
-	private <T> T executeInNewTransactionWithRetry(Callable<T> theFunction) {
+	protected <T> T executeInNewTransactionWithRetry(Callable<T> theFunction, StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		T retVal = null;
 		int retryCount = 0;
 		do {
@@ -171,15 +177,21 @@ public abstract class BaseImportLoincStep<CT>
 				retVal = myTransactionService
 					.withSystemRequestOnDefaultPartition()
 					.execute(theFunction);
+				assert retVal != null;
 			} catch (ResourceVersionConflictException e) {
+				// FIXME: add test
 				retryCount++;
-				if (retryCount > 10) {
+				int maxRetries = 10;
+				if (retryCount > maxRetries) {
 					throw e;
 				}
 				ourLog.atWarn()
-						.setMessage("Failed to upload LOINC concepts, retrying in 5 seconds: {}")
-						.addArgument(e.getMessage())
-						.log();
+					.setMessage("Failed to save terminology for step {}, retry {}/{} in 5 seconds: {}")
+					.addArgument(theStepExecutionDetails.getCurrentStepId())
+					.addArgument(retryCount)
+					.addArgument(maxRetries)
+					.addArgument(e.getMessage())
+					.log();
 				sleepAtLeast(5 * DateUtils.MILLIS_PER_SECOND);
 			}
 		} while (retVal == null);
@@ -190,14 +202,14 @@ public abstract class BaseImportLoincStep<CT>
 	 * Invoked after all CSV rows have been processed but before the CodeSystem is submitted for storage
 	 */
 	protected void afterCsvProcessingComplete(
-			CT theCodeExtractionContext,
-			CodeSystem theCodeSystemToPopulate,
-			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		CT theCodeExtractionContext,
+		CodeSystem theCodeSystemToPopulate,
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		// nothing
 	}
 
 	protected abstract CT newContextObject(
-			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails);
+		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails);
 
 	@Nonnull
 	protected abstract List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails);
@@ -218,7 +230,8 @@ public abstract class BaseImportLoincStep<CT>
 	}
 
 	protected record LoincFileNameSpecification(
-			LoincUploadPropertiesEnum propertyName, List<LoincUploadPropertiesEnum> defaultValues, Predicate<String> fileNameTester) {
+		LoincUploadPropertiesEnum propertyName, List<LoincUploadPropertiesEnum> defaultValues,
+		Predicate<String> fileNameTester) {
 
 		protected LoincFileNameSpecification(LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum... defaultValue) {
 			this(propertyName, Arrays.asList(defaultValue), null);

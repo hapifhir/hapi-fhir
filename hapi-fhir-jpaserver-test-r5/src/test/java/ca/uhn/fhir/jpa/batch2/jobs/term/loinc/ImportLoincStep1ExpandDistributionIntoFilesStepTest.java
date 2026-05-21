@@ -13,6 +13,8 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
@@ -21,9 +23,11 @@ import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.RandomUtils;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,6 +67,10 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	@Mock
 	private IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Mock
+	private IFhirResourceDao<ValueSet> myValueSetDao;
+	@Mock
+	private DaoRegistry myDaoRegistry;
+	@Mock
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Mock
 	private StepExecutionDetails<ImportLoincJobParameters, VoidModel> myStepExecutionDetails;
@@ -86,6 +94,8 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	private IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, VoidModel> myHandlerStep4;
 	@Captor
 	private ArgumentCaptor<ImportLoincFileSetJson> myTerminologyFileSetCaptor;
+	@Captor
+	private ArgumentCaptor<AttachmentDetails> myAttachmentDetailsCaptor;
 
 	@BeforeEach
 	void setUp() {
@@ -99,6 +109,9 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		mockHandlerStep1();
 		mockHandlerStep2();
 		mockHandlerStep3();
+		mockJobStepExecutionServices();
+		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 		AtomicInteger attachmentCounter = mockJobPersistenceStoreNewAttachment();
 
 		// Test
@@ -143,12 +156,18 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 
 		assertEquals(8, attachmentCounter.get());
 
+		verify(myJobPersistence, times(8)).storeNewAttachment(any(), myAttachmentDetailsCaptor.capture());
+		assertEquals("Loinc.csv_0-4", myAttachmentDetailsCaptor.getAllValues().get(0).getFilename());
+		assertEquals("Loinc.csv_5-9", myAttachmentDetailsCaptor.getAllValues().get(1).getFilename());
 	}
 
 	@Test
 	void testProcess_NoIdSpecified() {
 		// Setup
 		when(myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(any(), any())).thenReturn(new ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse("a-b-c-d"));
+		when(myStepExecutionDetails.newSystemRequestDetails()).thenReturn(new SystemRequestDetails());
+		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 
 		// Test
 		CodeSystem cs = new CodeSystem();
@@ -180,6 +199,9 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		jobParameters.setVersionId("1.234");
 
 		when(myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(any(), any())).thenReturn(new ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse("a-b-c-d"));
+		when(myStepExecutionDetails.newSystemRequestDetails()).thenReturn(new SystemRequestDetails());
+		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 
 		// Test
 		ImportLoincFileSetJson fileSet = new ImportLoincFileSetJson();
@@ -198,6 +220,10 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		verify(myTermCodeSystemStorageSvc, times(1)).startStagingCodeSystemVersion(eq("http://loinc.org"), eq("1.234"));
 	}
 
+	private void mockJobStepExecutionServices() {
+		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
+	}
+
 	@Test
 	void testProcess_TwoStepsUseSameFile() {
 		mockCodeSystemStorageStartStaging();
@@ -205,6 +231,9 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		mockHandlerStep1();
 		mockHandlerStep2_SameFileAsStep1();
 		AtomicInteger attachmentCounter = mockJobPersistenceStoreNewAttachment();
+		mockJobStepExecutionServices();
+		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 
 		// Test
 		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
@@ -238,6 +267,9 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		when(myHandlerStep1.canHandleFile(any(), any(), any())).thenAnswer(t -> Optional.empty());
 		mockHandlerStep2();
 		mockJobPersistenceStoreNewAttachment();
+		mockJobStepExecutionServices();
+		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 
 		// Test
 		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
@@ -277,7 +309,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		when(myHandlerStep1.canHandleFile(any(), any(), any())).thenAnswer(t -> {
 			String fileName = t.getArgument(2, String.class);
 			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT.getCode())) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
 			}
 			return Optional.empty();
 		});
@@ -287,7 +319,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		when(myHandlerStep2.canHandleFile(any(), any(), any())).thenAnswer(t -> {
 			String fileName = t.getArgument(2, String.class);
 			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT.getCode())) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
 			}
 			return Optional.empty();
 		});
@@ -297,7 +329,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		when(myHandlerStep3.canHandleFile(any(), any(), any())).thenAnswer(t -> {
 			String fileName = t.getArgument(2, String.class);
 			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT.getCode())) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
 			}
 			return Optional.empty();
 		});
@@ -307,7 +339,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		when(myHandlerStep2.canHandleFile(any(), any(), any())).thenAnswer(t -> {
 			String fileName = t.getArgument(2, String.class);
 			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT.getCode())) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER));
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
 			}
 			return Optional.empty();
 		});

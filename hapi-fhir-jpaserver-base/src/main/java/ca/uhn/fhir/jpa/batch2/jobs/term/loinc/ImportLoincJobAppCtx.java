@@ -62,6 +62,11 @@ public class ImportLoincJobAppCtx {
 						ImportLoincFileSetJson.class,
 						importLoincStep2Concepts())
 				.addIntermediateStep(
+						"import-hierarchy-concepts",
+						"Import LOINC hierarchy Concepts",
+						ImportLoincFileSetJson.class,
+					importLoincStep3HandleHierarchyConcepts())
+				.addIntermediateStep(
 						"import-hierarchy",
 						"Import LOINC hierarchy",
 						ImportLoincFileSetJson.class,
@@ -173,6 +178,14 @@ public class ImportLoincJobAppCtx {
 	@Bean
 	public ImportLoincStep2HandleConcepts importLoincStep2Concepts() {
 		return new ImportLoincStep2HandleConcepts();
+	}
+
+	/**
+	 * Step 3A: Import LOINC hierarchy Concepts
+	 */
+	@Bean
+	public ImportLoincStep3aHandleHierarchyConcepts importLoincStep3HandleHierarchyConcepts() {
+		return new ImportLoincStep3aHandleHierarchyConcepts();
 	}
 
 	/**

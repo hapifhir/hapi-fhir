@@ -7,10 +7,12 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -55,6 +57,10 @@ class ImportLoincStep6HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-to-radlex-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-parts-to-radlex-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
+		when(myConceptMapDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
+		mockDaoRegistryValueSet();
+		mockDaoRegistryConceptMap();
+		mockJobExecutionServices();
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
@@ -129,6 +135,8 @@ class ImportLoincStep6HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-to-radlex-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
+		mockDaoRegistryValueSet();
+		mockDaoRegistryConceptMap();
 
 		ConceptMap conceptMap = new ConceptMap();
 		ConceptMap.ConceptMapGroupComponent conceptMapGroup = conceptMap
@@ -146,6 +154,8 @@ class ImportLoincStep6HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 			.addTarget()
 			.setCode("EXISTING_TARGET");
 		when(myConceptMapDao.read(eq(new IdType("loinc-parts-to-radlex-1.234")), any())).thenReturn(conceptMap);
+		when(myConceptMapDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
+		mockJobExecutionServices();
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);

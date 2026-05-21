@@ -11,12 +11,14 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,6 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +60,8 @@ abstract class BaseImportLoincStepTest {
 	IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Mock
 	IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
+	@Mock
+	DaoRegistry myDaoRegistry;
 
 	@Captor
 	ArgumentCaptor<IBaseResource> myCodeSystemCaptor;
@@ -73,19 +78,40 @@ abstract class BaseImportLoincStepTest {
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 
-		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
-		importLoincFileSetJson.setCodeSystemStagingVersionId("my-staging-version-id");
-		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk(classpath, "my-chunk-attachment-id"));
-		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
+		ImportLoincFileSetJson importLoincFileSetJson = newData();
 
-		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
+		if (classpath != null) {
+			importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk(classpath, "my-chunk-attachment-id"));
+		}
 
 		return new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+	}
+
+	@Nonnull
+	ImportLoincFileSetJson newData() {
+		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
+		importLoincFileSetJson.setCodeSystemStagingVersionId("my-staging-version-id");
+		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
+		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
+		return importLoincFileSetJson;
 	}
 
 	void mockFetchAttachment(String classpath) {
 		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream(classpath), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
 	}
+
+	void mockJobExecutionServices() {
+		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
+	}
+
+	void mockDaoRegistryConceptMap() {
+		when(myDaoRegistry.getResourceDao(eq("ConceptMap"))).thenReturn(myConceptMapDao);
+	}
+
+	void mockDaoRegistryValueSet() {
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+	}
+
 
 	static String renderHierarchy(CodeSystem theCs) {
 		return renderHierarchy(theCs, false);

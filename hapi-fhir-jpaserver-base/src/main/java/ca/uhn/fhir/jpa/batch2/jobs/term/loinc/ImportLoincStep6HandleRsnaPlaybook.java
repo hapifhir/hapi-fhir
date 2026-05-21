@@ -46,6 +46,12 @@ public class ImportLoincStep6HandleRsnaPlaybook
 				LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT));
 	}
 
+	@Nonnull
+	@Override
+	public FileHandlingType getFileHandlingType() {
+		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS;
+	}
+
 	@Override
 	protected void handleRecord(
 		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
@@ -136,8 +142,7 @@ public class ImportLoincStep6HandleRsnaPlaybook
 		// LOINC Part -> Radlex RID code mappings
 		if (isNotBlank(rid)) {
 			addConceptMapEntry(
-					theData,
-					theContext,
+				theContext,
 					new ConceptMapping()
 							.setConceptMapId(partConceptMapId)
 							.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI)
@@ -157,8 +162,7 @@ public class ImportLoincStep6HandleRsnaPlaybook
 		// LOINC Term -> Radlex RPID code mappings
 		if (isNotBlank(rpid)) {
 			addConceptMapEntry(
-					theData,
-					theContext,
+				theContext,
 					new ConceptMapping()
 							.setConceptMapId(termConceptMapId)
 							.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI)

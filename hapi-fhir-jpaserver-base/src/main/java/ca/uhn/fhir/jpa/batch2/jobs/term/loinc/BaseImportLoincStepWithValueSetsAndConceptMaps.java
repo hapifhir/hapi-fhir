@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.loinc.BaseLoincHandler.LOINC_WEBSITE_URL;
@@ -44,10 +45,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportLoincStepWithValueSetsAndConceptMaps.class);
 
 	@Autowired
-	private IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
-
-	@Autowired
-	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+	private DaoRegistry myDaoRegistry;
 
 	@Nonnull
 	protected CodeSystem.ConceptDefinitionComponent getOrAddConcept(
@@ -63,7 +61,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 	}
 
 	// FIXME: rename
-	protected void addConceptMapEntry(ImportLoincFileSetJson theData, CT theContext, ConceptMapping theMapping) {
+	protected void addConceptMapEntry(CT theContext, ConceptMapping theMapping) {
 		if (isBlank(theMapping.getSourceCode())) {
 			return;
 		}
@@ -164,6 +162,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 		/*
 		 * Store ConceptMaps
 		 */
+		IFhirResourceDao conceptMapDao = myDaoRegistry.getResourceDao("ConceptMap");
 		for (Map.Entry<String, Collection<ConceptMapping>> entry :
 			theCodeExtractionContext.getIdToConceptMappings().asMap().entrySet()) {
 
@@ -174,12 +173,14 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			try {
 				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 				IdType existingId = new IdType(conceptMapId);
-				conceptMap = myConceptMapDao.read(existingId, requestDetails);
+				conceptMap = (ConceptMap) conceptMapDao.read(existingId, requestDetails);
+				ourLog.info("Found existing ConceptMap: {}", conceptMapId);
 				assert conceptMap != null : "Reading ConceptMap " + conceptMapId + " returned null";
 
 			} catch (ResourceNotFoundException | ResourceGoneException e) {
 				ConceptMapping firstMapping = entry.getValue().iterator().next();
 
+				ourLog.info("Creating new ConceptMap: {}", conceptMapId);
 				getRecordsAddedCounter(theStepExecutionDetails).incrementConceptMapsAdded(1);
 
 				conceptMap = new ConceptMap();
@@ -208,6 +209,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			}
 
 			int addedMappings = 0;
+			int skippedMappings = 0;
 			for (ConceptMapping nextMapping : entry.getValue()) {
 
 				ConceptMap.SourceElementComponent source = null;
@@ -257,6 +259,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 						.setEquivalence(nextMapping.getEquivalence());
 					addedMappings++;
 				} else {
+					skippedMappings++;
 					ourLog.atDebug()
 						.setMessage("Not going to add a mapping from [{}/{}] to [{}/{}] because one already exists")
 						.addArgument(nextMapping.getSourceCodeSystem())
@@ -268,28 +271,35 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			}
 
 			if (addedMappings > 0) {
-				ourLog.atInfo()
-					.setMessage("Adding {} mappings to LOINC ConceptMap {}")
-					.addArgument(addedMappings)
-					.addArgument(conceptMap.getId())
-					.log();
-
-				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-				myConceptMapDao.update(conceptMap, requestDetails);
+				ConceptMap finalConceptMap = conceptMap;
+				Callable<?> updateFunction = () -> {
+					SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+					return conceptMapDao.update(finalConceptMap, requestDetails);
+				};
+				executeInNewTransactionWithRetry(updateFunction, theStepExecutionDetails);
 
 				getRecordsAddedCounter(theStepExecutionDetails).incrementConceptMapMappingsAdded(addedMappings);
 			}
+
+			ourLog.atInfo()
+				.setMessage("Adding {} mappings and skipped {} pre-existing mappings to LOINC ConceptMap {}")
+				.addArgument(addedMappings)
+				.addArgument(skippedMappings)
+				.addArgument(conceptMap.getId())
+				.log();
+
 		}
 
 		/*
 		 * Store ValueSets
 		 */
+		IFhirResourceDao valueSetDao = myDaoRegistry.getResourceDao("ValueSet");
 		for (ValueSet valueSet : theCodeExtractionContext.getIdToValueSet().values()) {
 
 			try {
 				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 				IdType existingId = new IdType(valueSet.getIdElement().getIdPart());
-				ValueSet existing = myValueSetDao.read(existingId, requestDetails);
+				ValueSet existing = (ValueSet) valueSetDao.read(existingId, requestDetails);
 				assert existing != null : "Reading ValueSet " + valueSet.getId() + " returned null";
 
 				/*
@@ -325,8 +335,12 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 					.addArgument(valueSet.getId())
 					.addArgument(addedCodes)
 					.log();
-				requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-				myValueSetDao.update(existing, requestDetails);
+
+				Callable<?> updateFunction = () -> {
+					SystemRequestDetails updateRequestDetails = theStepExecutionDetails.newSystemRequestDetails();
+					return valueSetDao.update(existing, updateRequestDetails);
+				};
+				executeInNewTransactionWithRetry(updateFunction, theStepExecutionDetails);
 
 				getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetCodesAdded(addedCodes);
 
@@ -352,7 +366,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 					.addArgument(codeCount)
 					.log();
 				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-				myValueSetDao.update(valueSet, requestDetails);
+				valueSetDao.update(valueSet, requestDetails);
 
 				getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetCodesAdded(codeCount);
 

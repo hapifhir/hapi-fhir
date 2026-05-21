@@ -180,6 +180,11 @@ public class ImportLoincStep21Finalize implements IReductionStepWorker<ImportLoi
 			reportBuilder.append("ValueSets Added            : ").append(counter.getValueSetsAdded()).append("\n");
 			hasAny = true;
 		}
+		if (counter.getValueSetInclusionsAdded() > 0) {
+			indent(reportBuilder, indent);
+			reportBuilder.append("ValueSets Inclusions Added : ").append(counter.getValueSetInclusionsAdded()).append("\n");
+			hasAny = true;
+		}
 		if (counter.getValueSetCodesAdded() > 0) {
 			indent(reportBuilder, indent);
 			reportBuilder.append("ValueSets Codes Added      : ").append(counter.getValueSetCodesAdded()).append("\n");

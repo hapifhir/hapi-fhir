@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
@@ -36,6 +39,20 @@ public class ImportLoincStep12HandleIeeeMedicalDeviceCode
 				LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT));
 	}
 
+
+	@Nonnull
+	@Override
+	public FileHandlingType getFileHandlingType() {
+		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS;
+	}
+
+	// FIXME: remove
+	@Nonnull
+	@Override
+	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<ImportLoincFileSetJson> theDataSink) throws JobExecutionFailedException {
+		return super.run(theStepExecutionDetails, theDataSink);
+	}
+
 	@Override
 	protected void handleRecord(
 		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
@@ -63,8 +80,7 @@ public class ImportLoincStep12HandleIeeeMedicalDeviceCode
 		String conceptMapId = LOINC_IEEE_CM_ID + "-" + codeSystemVersionId;
 
 		addConceptMapEntry(
-				theData,
-				theContext,
+			theContext,
 				new ConceptMapping()
 						.setConceptMapId(conceptMapId)
 						.setConceptMapUri(LOINC_IEEE_CM_URI)

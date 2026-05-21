@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
@@ -28,6 +31,13 @@ public class ImportLoincStep15GroupTermsFile
 		return List.of(new LoincFileNameSpecification(
 				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE,
 				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT));
+	}
+
+	// FIXME: remove
+	@Nonnull
+	@Override
+	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<ImportLoincFileSetJson> theDataSink) throws JobExecutionFailedException {
+		return super.run(theStepExecutionDetails, theDataSink);
 	}
 
 	@Override

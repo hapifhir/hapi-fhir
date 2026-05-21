@@ -13,14 +13,18 @@ public interface ITerminologyImportFileHandlerStep<PT extends BaseTerminologyImp
 	@Nonnull
 	Optional<FileHandlingInstructions> canHandleFile(StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, PT theJobParameters, String theFileName);
 
+	@Nonnull
+	FileHandlingType getFileHandlingType();
+
 
 	enum FileHandlingType {
 
+		CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 		/**
 		 * The file is a CSV file with a header row. It should be split into chunks, with
 		 * the header repeated in each chunk.
 		 */
-		CSV_SPLIT_WITH_REPEAT_HEADER
+		CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS
 
 	}
 

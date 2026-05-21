@@ -41,6 +41,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
+
 public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTerminologyImportParameters, OT extends TerminologyFileSetJson> implements IJobStepWorker<PT, VoidModel, OT> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseExpandDistributionIntoFilesStep.class);
@@ -48,11 +50,11 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 	@Autowired
 	private IJobPersistence myJobPersistence;
 
-	private int myChunkLineSize = 50_000;
+	private Integer myChunkLineSizeForUnitTests = null;
 
 	@VisibleForTesting
 	public void setChunkLineSizeForUnitTest(int theChunkLineSize) {
-		myChunkLineSize = theChunkLineSize;
+		myChunkLineSizeForUnitTests = theChunkLineSize;
 	}
 
 	@SuppressWarnings("SwitchStatementWithTooFewBranches")
@@ -94,8 +96,14 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 							}
 
 							List<String> attachmentIds = switch (fileHandlingType) {
-								case CSV_SPLIT_WITH_REPEAT_HEADER ->
-									csvSplitWithRepeatHeader(instanceId, bytes, fileSet, loincFileAttachment.getFilename(), nextFileName, processor.stepId());
+								case CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS -> {
+									int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 1000);
+									yield csvSplitWithRepeatHeader(instanceId, bytes, fileSet, loincFileAttachment.getFilename(), nextFileName, processor.stepId(), chunkSize);
+								}
+								case CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS -> {
+									int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 50000);
+									yield csvSplitWithRepeatHeader(instanceId, bytes, fileSet, loincFileAttachment.getFilename(), nextFileName, processor.stepId(), chunkSize);
+								}
 							};
 							fileHandlingTypeToAttachmentIds.putAll(fileHandlingType, attachmentIds);
 						}
@@ -131,8 +139,14 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 	/**
 	 * @return A list of attachment IDs for the work chunks that were created.
 	 */
-	private List<String> csvSplitWithRepeatHeader(String theJobInstanceId, byte[] theBytes, TerminologyFileSetJson theFileSet, String theZipOuterFilename, String theZipInnerFilename, String theStepId) {
+	private List<String> csvSplitWithRepeatHeader(String theJobInstanceId, byte[] theBytes, TerminologyFileSetJson theFileSet, String theZipOuterFilename, String theZipInnerFilename, String theStepId, int theChunkLines) throws JobExecutionFailedException {
 		List<String> attachmentIds = new ArrayList<>();
+
+		String filename = theZipInnerFilename;
+		int lastSlash = Math.max(filename.lastIndexOf('/'), filename.lastIndexOf('\\'));
+		if (lastSlash != -1) {
+			filename = filename.substring(lastSlash + 1);
+		}
 
 		ByteArrayInputStream bis = new ByteArrayInputStream(theBytes);
 		InputStreamReader reader = new InputStreamReader(bis, StandardCharsets.UTF_8);
@@ -141,18 +155,24 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 			List<String> headers = parser.getHeaderNames();
 			Iterator<CSVRecord> recordIterator = parser.getRecords().iterator();
 			List<CSVRecord> recordsBuffer = new ArrayList<>();
+			int startRow = 0;
+			int endRow = 0;
 			while (recordIterator.hasNext()) {
 
 				CSVRecord nextRecord = recordIterator.next();
 				recordsBuffer.add(nextRecord);
 
-				if (recordsBuffer.size() == myChunkLineSize || !recordIterator.hasNext()) {
-					String attachmentId = writeChunk(theJobInstanceId, headers, recordsBuffer);
+				if (recordsBuffer.size() == theChunkLines || !recordIterator.hasNext()) {
+					String attachmentId = writeChunk(theJobInstanceId, headers, recordsBuffer, filename, startRow, endRow);
 					theFileSet.addChunk(theStepId, theZipInnerFilename, attachmentId);
 					recordsBuffer.clear();
 					attachmentIds.add(attachmentId);
-				}
 
+					startRow = endRow + 1;
+					endRow = startRow;
+				} else {
+					endRow++;
+				}
 			}
 
 		} catch (IOException e) {
@@ -163,7 +183,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		return attachmentIds;
 	}
 
-	private String writeChunk(String theJobInstanceId, List<String> theHeaders, List<CSVRecord> theRecordsBuffer) {
+	private String writeChunk(String theJobInstanceId, List<String> theHeaders, List<CSVRecord> theRecordsBuffer, String theFilename, int theStartRow, int theEndRow) {
 		CsvUtil.ICsvProducer producer = thePrinter -> {
 			for (CSVRecord record : theRecordsBuffer) {
 				thePrinter.printRecord(record);
@@ -174,6 +194,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 			.build()
 			.withContentType(AttachmentContentTypeEnum.CSV)
 			.withBytes(bytes)
+			.withFilename(theFilename + "_" + theStartRow + "-" + theEndRow)
 			.build();
 		return myJobPersistence.storeNewAttachment(theJobInstanceId, attachmentDetails);
 	}

@@ -36,6 +36,8 @@ class ImportLoincStep15GroupTermsFileTest extends BaseImportLoincStepTest{
 		mockFetchAttachment(classpath);
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
+		mockDaoRegistryValueSet();
+		mockDaoRegistryConceptMap();
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);

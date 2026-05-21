@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Coding;
@@ -561,6 +562,49 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		assertEquals(theExpectedConceptCount, runInTransaction(() -> myTermConceptDao.count()));
 	}
+
+	@Test
+	void testWriteCodeSystemCodes_WithDeepHierarchy() {
+		createCodeSystem(withUrl("http://foo"), withVersion("1.23"), withCodeSystemContent("not-present"));
+
+		CodeSystem input = new CodeSystem();
+		input.setUrl("http://foo");
+		input.setVersion("1.23");
+		input.addConcept()
+			.setCode("CODE-A-A-A");
+
+		UploadStatistics response = mySvc.uploadCodeSystemConcepts(input);
+
+		// Verify
+//		assertEquals(4, response.getAddedConceptCount());
+//		assertEquals(0, response.getAddedPropertyCount());
+//		assertEquals(0, response.getAddedDesignationCount());
+//		assertEquals(2, response.getAddedConceptLinkCount());
+
+		// Add even deeper hierarchy
+
+		input = new CodeSystem();
+		input.setUrl("http://foo");
+		input.setVersion("1.23");
+		input.addConcept()
+			.setCode("CODE-A")
+			.addConcept()
+			.setCode("CODE-A-A")
+			.addConcept()
+			.setCode("CODE-A-A-A");
+
+		response = mySvc.uploadCodeSystemConcepts(input);
+
+		// Verify
+//		assertEquals(2, response.getAddedConceptCount());
+//		assertEquals(1, response.getAddedPropertyCount());
+//		assertEquals(1, response.getAddedDesignationCount());
+//		assertEquals(0, response.getAddedConceptLinkCount());
+
+
+
+	}
+
 
 	@Test
 	void testWriteCodeSystemCodes_WithPropertyAndDesignation() {

@@ -37,6 +37,13 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 		));
 	}
 
+	@Nonnull
+	@Override
+	public FileHandlingType getFileHandlingType() {
+		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
+	}
+
+
 	@Override
 	protected void handleRecord(
 		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,

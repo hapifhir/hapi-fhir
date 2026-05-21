@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -39,6 +40,8 @@ class ImportLoincStep4HandleAnswerListsTest extends BaseImportLoincStepTest {
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
+		mockDaoRegistryValueSet();
+		mockDaoRegistryConceptMap();
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
@@ -104,6 +107,9 @@ class ImportLoincStep4HandleAnswerListsTest extends BaseImportLoincStepTest {
 		when(myValueSetDao.read(eq(new IdType("LL1000-0-1.234")), any(RequestDetails.class))).thenReturn(existing);
 		when(myValueSetDao.read(eq(new IdType("LL1001-8-1.234")), any(RequestDetails.class))).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1001-8-1.234")));
 		when(myValueSetDao.read(eq(new IdType("LL1892-0-1.234")), any(RequestDetails.class))).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1001-8-1.234")));
+		when(myValueSetDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
+		mockDaoRegistryValueSet();
+		mockDaoRegistryConceptMap();
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);

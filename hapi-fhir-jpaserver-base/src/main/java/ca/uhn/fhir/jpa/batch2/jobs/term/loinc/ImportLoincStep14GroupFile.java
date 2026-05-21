@@ -5,9 +5,13 @@ import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -53,7 +57,14 @@ public class ImportLoincStep14GroupFile
 				VS_URI_PREFIX + parentGroupId,
 				null,
 				null);
-		parentValueSet.getCompose().getIncludeFirstRep().addValueSet(VS_URI_PREFIX + groupId);
+
+		ValueSet.ConceptSetComponent include = parentValueSet.getCompose().getIncludeFirstRep();
+
+		Set<String> existingInclusions = include.getValueSet().stream().map(PrimitiveType::getValue).filter(Objects::nonNull).collect(Collectors.toSet());
+		if (!existingInclusions.contains(VS_URI_PREFIX + groupId)) {
+			getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetInclusionsAdded(1);
+			include.addValueSet(VS_URI_PREFIX + groupId);
+		}
 
 		// Create group to set its name (terms are added in a different
 		// handler)

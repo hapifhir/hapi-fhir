@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -36,6 +37,8 @@ class ImportLoincStep16ParentGroupFileTest extends BaseImportLoincStepTest{
 		mockFetchAttachment(classpath);
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
+		mockDaoRegistryValueSet();
+		mockDaoRegistryConceptMap();
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
@@ -70,6 +73,10 @@ class ImportLoincStep16ParentGroupFileTest extends BaseImportLoincStepTest{
 		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/ParentGroup.csv";
 		mockFetchAttachment(classpath);
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
+		mockDaoRegistryValueSet();
+		mockDaoRegistryConceptMap();
+		when(myValueSetDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
+		mockJobExecutionServices();
 
 		// This step adds names to valueset, so populate everything except the name
 		ValueSet existing = new ValueSet();
