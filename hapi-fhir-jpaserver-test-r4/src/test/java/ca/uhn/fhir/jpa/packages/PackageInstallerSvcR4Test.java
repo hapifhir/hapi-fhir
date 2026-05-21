@@ -2021,11 +2021,9 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// verify
 		assertThat(outcome.getMessage())
-			.anyMatch(m -> m.contains("Installation would install") && m.contains("included.dependency.pkg"));
-		assertThat(outcome.getMessage())
-			.anyMatch(m -> m.contains("Not installing dependency excluded.dependency.pkg") && m.contains("exclude criteria"));
-		assertThat(outcome.getMessage())
-			.noneMatch(m -> m.contains("Installation would install") && m.contains("excluded.dependency.pkg"));
+			.contains("Not installing dependency excluded.dependency.pkg because it matches exclude criteria: ^excluded\\..*")
+			.contains("Installation would install included.dependency.pkg:1.0.0")
+			.doesNotContain("Installation would install excluded.dependency.pkg:2.0.0");
 	}
 
 	private CodeSystem fetchCodeSystemByUrl(String theUrl) {
