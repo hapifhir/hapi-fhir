@@ -843,7 +843,7 @@ public class SearchParamRegistryImplTest {
 
 	// Created by Claude Opus 4.7
 	@Test
-	void testForceRefresh_insideDeferredScope_yieldsRebuildToScopeExit() {
+	void testForceRefresh_insideDeferredScope_doesNotRebuildUntilScopeExits() {
 		reset(mySearchParamProvider);
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 
@@ -861,6 +861,44 @@ public class SearchParamRegistryImplTest {
 		});
 
 		// Single coalesced rebuild fires on scope exit.
+		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testHandleChange_uninitializedActiveSearchParams_inDeferredScope_bypassesDeferral() {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		// While myActiveSearchParams is null, handleChange must rebuild synchronously even
+		// inside a deferred scope — callers that hit requiresActiveSearchParams() during
+		// startup depend on the cache being populated by the time handleChange returns.
+		mySearchParamRegistry.setActiveSearchParams(null);
+
+		mySearchParamRegistry.withDeferredRebuild(() -> {
+			mySearchParamRegistry.handleChange(buildCreatedEvent("SearchParameter/sp1"));
+			verify(mySearchParamProvider, times(1)).search(any());
+		});
+
+		// No additional rebuild at scope exit — the synchronous rebuild already happened
+		// without setting the pending flag.
+		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testForceRefresh_insideDeferredScope_noListenerChange_stillRebuildsAtExit() {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		// forceRefresh's documented contract: rebuild even when the listener cache reports
+		// no detected change. Inside a deferred scope this must still hold — the rebuild is
+		// yielded to scope exit, not skipped.
+		mySearchParamRegistry.withDeferredRebuild(() -> {
+			mySearchParamRegistry.forceRefresh();
+			verify(mySearchParamProvider, never()).search(any());
+		});
+
 		verify(mySearchParamProvider, times(1)).search(any());
 	}
 

@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.IParser;
@@ -121,13 +122,16 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	private IInterceptorService myInterceptorService;
 	@Autowired
 	private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
-	private FakeNpmServlet myFakeNpmServlet = new FakeNpmServlet();
+	private final FakeNpmServlet myFakeNpmServlet = new FakeNpmServlet();
 	@RegisterExtension
 	public HttpServletExtension myServer = new HttpServletExtension()
 		.withServlet(myFakeNpmServlet);
 
 	@RegisterExtension
-	private LogbackTestExtension myTerminologyTroubleshootingLogCapture = new LogbackTestExtension(Logs.getTerminologyTroubleshootingLog());
+	private final LogbackTestExtension myTerminologyTroubleshootingLogCapture = new LogbackTestExtension(Logs.getTerminologyTroubleshootingLog());
+
+	@RegisterExtension
+	private final LogbackTestExtension mySearchParamRegistryLogCapture = new LogbackTestExtension(SearchParamRegistryImpl.class);
 
 	@Override
 	@BeforeEach
@@ -2016,13 +2020,18 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setPackageContents(Files.readAllBytes(tarball));
 
-		int rebuildsBefore = mySearchParamRegistry.getRebuildCount();
+		// Discard any bootstrap rebuild noise captured before the install runs.
+		mySearchParamRegistryLogCapture.clearEvents();
 		myPackageInstallerSvc.install(spec);
-		int rebuildsDuringInstall = mySearchParamRegistry.getRebuildCount() - rebuildsBefore;
+		long rebuildsDuringInstall = mySearchParamRegistryLogCapture.getLogEvents().stream()
+			.filter(e -> "Rebuilding SearchParamRegistry".equals(e.getMessage()))
+			.count();
 
 		// Without the defer logic this would be 3 (one per persisted SP). With deferral it
 		// must coalesce to exactly one rebuild for the whole package install.
-		assertEquals(1, rebuildsDuringInstall, "Expected exactly one SearchParamRegistry rebuild for the install of a package with 3 SearchParameters");
+		assertThat(rebuildsDuringInstall)
+			.as("Expected exactly one SearchParamRegistry rebuild for the install of a package with 3 SearchParameters")
+			.isEqualTo(1L);
 	}
 
 }

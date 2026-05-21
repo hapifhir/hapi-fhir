@@ -253,22 +253,19 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				if (theInstallationSpec.getInstallMode() == STORE_AND_INSTALL
 						|| theInstallationSpec.getInstallMode()
 								== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-					// Coalesce the per-resource SearchParameter persists and the trailing
-					// refreshCacheIfNecessary into a single SearchParamRegistry rebuild.
 					mySearchParamRegistry.withDeferredRebuild(() -> {
-						installPackage(npmPackage, theInstallationSpec, retVal);
+						try {
+							installPackage(npmPackage, theInstallationSpec, retVal);
 
-						if (theInstallationSpec.getInstallMode()
-								== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-							retVal.getMessage()
-									.add(
-											"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
+							if (theInstallationSpec.getInstallMode()
+									== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
+								retVal.getMessage()
+										.add(
+												"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
+							}
+						} finally {
+							mySearchParamRegistryController.refreshCacheIfNecessary();
 						}
-
-						// Inside the deferred scope: the resource-change drain will fire
-						// handleChange for each newly persisted SearchParameter; the
-						// deferral collapses those N rebuilds into one at scope exit.
-						mySearchParamRegistryController.refreshCacheIfNecessary();
 					});
 				}
 

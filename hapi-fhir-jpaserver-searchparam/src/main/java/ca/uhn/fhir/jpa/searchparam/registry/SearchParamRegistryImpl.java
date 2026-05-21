@@ -69,7 +69,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
@@ -131,18 +130,14 @@ public class SearchParamRegistryImpl
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 	private boolean myPrePopulateSearchParamIdentities = true;
 
-	private final AtomicInteger myDeferRebuildDepth = new AtomicInteger();
-	private volatile boolean myRebuildPending = false;
-	private final AtomicInteger myRebuildCount = new AtomicInteger();
+	// Single-caller deferred-rebuild state for the package-install path.
+	// Not thread-safe; behaviour under concurrent callers is undefined.
+	private boolean myDeferRebuild;
+	private boolean myDeferredRebuildPending;
 
 	@VisibleForTesting
 	public void setPopulateSearchParamIdentities(boolean myPrePopulateSearchParamIdentities) {
 		this.myPrePopulateSearchParamIdentities = myPrePopulateSearchParamIdentities;
-	}
-
-	@VisibleForTesting
-	public int getRebuildCount() {
-		return myRebuildCount.get();
 	}
 
 	@VisibleForTesting
@@ -242,7 +237,6 @@ public class SearchParamRegistryImpl
 
 	private void rebuildActiveSearchParams() {
 		ourLog.info("Rebuilding SearchParamRegistry");
-		myRebuildCount.incrementAndGet();
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
 		params.setCount(MAX_MANAGED_PARAM_COUNT);
@@ -584,24 +578,26 @@ public class SearchParamRegistryImpl
 		myResourceChangeListenerCache.requestRefresh();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Inside a {@link #withDeferredRebuild} scope this still drains the listener cache and
+	 * marks a rebuild pending unconditionally, preserving the "rebuild even if no change
+	 * was detected" guarantee — the rebuild fires at scope exit. The deferral is bypassed
+	 * while {@link #myActiveSearchParams} is still {@code null} so initial population always
+	 * runs synchronously.
+	 */
 	@Override
 	public void forceRefresh() {
 		RuntimeSearchParamCache activeSearchParams = myActiveSearchParams;
 		myResourceChangeListenerCache.forceRefresh();
 
-		// Inside a deferred scope, yield the rebuild to scope exit so
-		// opportunistic post-commit refresh hooks don't defeat coalescing.
-		if (myDeferRebuildDepth.get() > 0) {
+		if (myDeferRebuild && myActiveSearchParams != null) {
+			myDeferredRebuildPending = true;
 			return;
 		}
 
-		// If the listener-cache drain didn't already produce a rebuild
-		// (no changes were pending), rebuild now to satisfy the sync contract.
 		if (myActiveSearchParams == activeSearchParams) {
-			// Clear pending BEFORE the rebuild reads from the DB. A handleChange
-			// firing during the rebuild then sets pending=true again and the
-			// next forceRefresh will flush it.
-			myRebuildPending = false;
 			rebuildActiveSearchParams();
 		}
 	}
@@ -692,8 +688,11 @@ public class SearchParamRegistryImpl
 					result.deleted,
 					unqualified(theResourceChangeEvent.getDeletedResourceIds()));
 		}
-		if (myDeferRebuildDepth.get() > 0) {
-			myRebuildPending = true;
+		// Defer only when the cache is already populated. Before initial population,
+		// requiresActiveSearchParams() relies on the next handleChange to fill the cache —
+		// deferring here would leave it null for any read inside the scope.
+		if (myDeferRebuild && myActiveSearchParams != null) {
+			myDeferredRebuildPending = true;
 			return;
 		}
 		rebuildActiveSearchParams();
@@ -702,23 +701,29 @@ public class SearchParamRegistryImpl
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This implementation coalesces {@link #handleChange} events that fire
-	 * during {@code theCallback} into a single rebuild executed at scope exit.
-	 * Deferral is process-wide: change events on other threads observed while
-	 * any scope is active are also coalesced. Nested scopes flush only on
-	 * outermost exit. {@link #forceRefresh} calls observed inside the scope
-	 * also yield to the scope: they drain the listener cache but defer the
-	 * rebuild to scope exit so opportunistic post-commit refresh hooks do not
-	 * defeat the coalescing.
+	 * Coalesces {@link #handleChange} and {@link #forceRefresh} events fired during
+	 * {@code theCallback} into a single rebuild at scope exit. Deferral is bypassed while
+	 * {@link #myActiveSearchParams} is still {@code null} so initial population always runs
+	 * synchronously.
+	 * <p>
+	 * Single-caller, single-thread helper. Behaviour under concurrent callers is undefined.
+	 * Nested calls are supported: the outermost scope owns the flush.
 	 */
 	@Override
 	public void withDeferredRebuild(@Nonnull Runnable theCallback) {
-		myDeferRebuildDepth.incrementAndGet();
+		if (myDeferRebuild) {
+			// Nested call — outer scope owns the flush.
+			theCallback.run();
+			return;
+		}
+		myDeferRebuild = true;
+		myDeferredRebuildPending = false;
 		try {
 			theCallback.run();
 		} finally {
-			if (myDeferRebuildDepth.decrementAndGet() == 0 && myRebuildPending) {
-				myRebuildPending = false;
+			myDeferRebuild = false;
+			if (myDeferredRebuildPending) {
+				myDeferredRebuildPending = false;
 				rebuildActiveSearchParams();
 			}
 		}
