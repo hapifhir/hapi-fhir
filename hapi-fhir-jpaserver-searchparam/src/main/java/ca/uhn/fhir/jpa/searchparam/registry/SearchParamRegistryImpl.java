@@ -581,11 +581,11 @@ public class SearchParamRegistryImpl
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Inside a {@link #withDeferredRebuild} scope this still drains the listener cache and
-	 * marks a rebuild pending unconditionally, preserving the "rebuild even if no change
-	 * was detected" guarantee — the rebuild fires at scope exit. The deferral is bypassed
-	 * while {@link #myActiveSearchParams} is still {@code null} so initial population always
-	 * runs synchronously.
+	 * Inside a {@link #withDeferredRebuild} scope, drains the listener cache and yields
+	 * the rebuild to scope exit by marking it pending. Deferral is bypassed while
+	 * {@link #myActiveSearchParams} is still {@code null}; in that case the rebuild runs
+	 * synchronously so initial population always completes before {@code forceRefresh}
+	 * returns.
 	 */
 	@Override
 	public void forceRefresh() {
