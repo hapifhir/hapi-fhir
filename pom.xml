@@ -1394,12 +1394,6 @@
 				<artifactId>flexmark</artifactId>
 				<version>${flexmark_version}</version>
 			</dependency>
-			<!-- Fix for Central validation: version missing from imported BOM. Need to  -->
-			<dependency>
-				<groupId>jakarta.enterprise</groupId>
-				<artifactId>jakarta.enterprise.cdi-api</artifactId>
-				<version>4.0.1</version>
-			</dependency>
 			<dependency>
 				<groupId>com.vladsch.flexmark</groupId>
 				<artifactId>flexmark-ext-tables</artifactId>
@@ -1963,6 +1957,7 @@
 			<dependency>
 				<groupId>jakarta.enterprise</groupId>
 				<artifactId>jakarta.enterprise.cdi-api</artifactId>
+				<version>4.0.1</version>
 				<exclusions>
 					<exclusion>
 						<groupId>jakarta.el</groupId>
