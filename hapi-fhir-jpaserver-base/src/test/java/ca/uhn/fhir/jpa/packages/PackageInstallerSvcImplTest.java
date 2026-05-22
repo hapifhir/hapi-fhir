@@ -106,11 +106,9 @@ public class PackageInstallerSvcImplTest {
 	private INpmPackageVersionDao myPackageVersionDao;
 	@Mock
 	private IHapiPackageCacheManager myPackageCacheManager;
-	@Mock
-	private ISearchParamRegistryController mySearchParamRegistryController;
 	// CALLS_REAL_METHODS so the default withDeferredRebuild(Runnable) on the interface invokes the callback.
 	@Mock(answer = Answers.CALLS_REAL_METHODS)
-	private ISearchParamRegistry mySearchParamRegistry;
+	private ISearchParamRegistryController mySearchParamRegistryController;
 	@Mock
 	private DaoRegistry myDaoRegistry;
 	@Mock

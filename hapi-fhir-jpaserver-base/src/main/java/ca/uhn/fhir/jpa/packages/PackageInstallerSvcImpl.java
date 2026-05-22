@@ -60,7 +60,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -148,9 +147,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	@Autowired
 	private ISearchParamRegistryController mySearchParamRegistryController;
-
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -253,7 +249,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				if (theInstallationSpec.getInstallMode() == STORE_AND_INSTALL
 						|| theInstallationSpec.getInstallMode()
 								== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-					mySearchParamRegistry.withDeferredRebuild(() -> {
+					mySearchParamRegistryController.withDeferredRebuild(() -> {
 						try {
 							installPackage(npmPackage, theInstallationSpec, retVal);
 
@@ -264,8 +260,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 												"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
 							}
 						} finally {
-							// On the exception path, so partially persisted SPs reach the
-							// registry without waiting for the next polling refresh.
 							mySearchParamRegistryController.refreshCacheIfNecessary();
 						}
 					});

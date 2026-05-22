@@ -4,5 +4,4 @@ issue: 7932
 title: "Previously, installing an NPM package containing N custom SearchParameter resources
   would trigger N full rebuilds of the SearchParamRegistry at startup, each one re-reading
   every SearchParameter from the database. The package install path now coalesces these
-  into a single rebuild for the whole package, noticeably reducing cold-start time on
-  servers configured with NPM packages that include custom SearchParameters."
+  into a single rebuild for the whole package."
