@@ -486,18 +486,23 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		List<SqlQuery> insertTrmCodeSystem = myCaptureQueriesListener.getInsertQueries(t -> t.getSql(true, false).startsWith("insert into TRM_CODESYSTEM "));
 		assertEquals(1, insertTrmCodeSystem.size());
-		assertEquals(expectedPartitionId, parseInsertStatementParams(insertTrmCodeSystem.get(0).getSql(true, false)).get("PARTITION_ID"));
-		assertEquals("NULL", parseInsertStatementParams(insertTrmCodeSystem.get(0).getSql(true, false)).get("CURRENT_VERSION_PID"));
-		assertEquals("NULL", parseInsertStatementParams(insertTrmCodeSystem.get(0).getSql(true, false)).get("CURRENT_VERSION_PARTITION_ID"));
+		Map<String, String> insertCodeSystemParams = parseInsertStatementParams(insertTrmCodeSystem.get(0).getSql(true, false));
+		assertEquals(expectedPartitionId, insertCodeSystemParams.get("PARTITION_ID"));
+		assertEquals("NULL", insertCodeSystemParams.get("CURRENT_VERSION_PID"));
 
 		List<SqlQuery> insertTrmConcept = myCaptureQueriesListener.getInsertQueries(t -> t.getSql(true, false).startsWith("insert into TRM_CONCEPT "));
 		assertEquals(1, insertTrmConcept.size());
-		assertEquals(expectedPartitionId, parseInsertStatementParams(insertTrmConcept.get(0).getSql(true, false)).get("PARTITION_ID"));
+		Map<String, String> insertConceptParams = parseInsertStatementParams(insertTrmConcept.get(0).getSql(true, false));
+		assertEquals(expectedPartitionId, insertConceptParams.get("PARTITION_ID"));
 
 		myCaptureQueriesListener.logUpdateQueries();
 		List<SqlQuery> updateCodeSystems = myCaptureQueriesListener.getUpdateQueries(t -> t.getSql(true, false).startsWith("update TRM_CODESYSTEM "));
 		assertEquals(1, updateCodeSystems.size());
-		assertEquals(expectedPartitionId, parseUpdateStatementParams(updateCodeSystems.get(0).getSql(true, false)).get("CURRENT_VERSION_PARTITION_ID"));
+		Map<String, String> updateCodeSystemParams = parseUpdateStatementParams(updateCodeSystems.get(0).getSql(true, false));
+		assertNotNull(updateCodeSystemParams.get("CURRENT_VERSION_PID"));
+		if (myIncludePartitionIdsInPks) {
+			assertEquals(expectedPartitionId, updateCodeSystemParams.get("CURRENT_VERSION_PARTITION_ID"));
+		}
 
 		List<SqlQuery> updateCodeSystemVersions = myCaptureQueriesListener.getUpdateQueries(t -> t.getSql(true, false).startsWith("update TRM_CODESYSTEM_VER "));
 		assertEquals(1, updateCodeSystemVersions.size());

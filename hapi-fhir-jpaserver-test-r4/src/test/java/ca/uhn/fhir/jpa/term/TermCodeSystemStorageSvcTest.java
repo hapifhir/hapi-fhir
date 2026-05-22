@@ -315,7 +315,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		cs2.setUrl(URL_MY_CODE_SYSTEM);
 		cs2.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		cs2.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		myCodeSystemDao.create(cs2, mySrd);
+		myCodeSystemDao.update(cs2, "CodeSystem?url=" + URL_MY_CODE_SYSTEM, mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		runInTransaction(() -> {
