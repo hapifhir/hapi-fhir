@@ -32,6 +32,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.apache.commons.lang3.Validate;
 import org.hibernate.Length;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -50,6 +51,8 @@ import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 			@Index(name = "IDX_BT2JA_INST_ID_AND_FN", columnList = "JOB_INSTANCE_ID, FILENAME", unique = true)
 		})
 public class Batch2JobAttachmentEntity implements Serializable {
+	private static final int FILENAME_MAX_LENGTH = 300;
+
 	@EmbeddedId
 	private Batch2WorkChunkAttachmentEntityPk myId;
 
@@ -62,7 +65,7 @@ public class Batch2JobAttachmentEntity implements Serializable {
 			foreignKey = @ForeignKey(name = "FK_BT2JA_INSTANCE"))
 	private Batch2JobInstanceEntity myJobInstance;
 
-	@Column(name = "FILENAME", length = ID_MAX_LENGTH, nullable = false)
+	@Column(name = "FILENAME", length = FILENAME_MAX_LENGTH, nullable = false)
 	private String myFilename;
 
 	@Column(name = "CONTENT_TYPE", nullable = false, length = 50)
@@ -128,6 +131,7 @@ public class Batch2JobAttachmentEntity implements Serializable {
 	}
 
 	public void setFilename(String theFilename) {
+		Validate.isTrue(theFilename == null || theFilename.length() <= FILENAME_MAX_LENGTH, "Filename can not exceed length %d: %s", FILENAME_MAX_LENGTH, theFilename);
 		myFilename = theFilename;
 	}
 
