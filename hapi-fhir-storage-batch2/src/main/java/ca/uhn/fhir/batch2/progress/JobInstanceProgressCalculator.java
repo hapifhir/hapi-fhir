@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -35,6 +36,7 @@ import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 
 public class JobInstanceProgressCalculator {
@@ -59,9 +61,10 @@ public class JobInstanceProgressCalculator {
 		StopWatch stopWatch = new StopWatch();
 		ourLog.trace("calculating progress: {}", theInstanceId);
 
-		// calculate progress based on number of work chunks in COMPLETE state
+		// Phase 1: Collect statistics from work chunks
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
+		// Phase 2: Update the job instance with collected stats and determine status transitions
 		myJobPersistence.updateInstance(theInstanceId, currentInstance -> {
 			instanceProgress.updateInstance(currentInstance);
 
@@ -84,13 +87,40 @@ public class JobInstanceProgressCalculator {
 			}
 			ourLog.debug(instanceProgress.toString());
 
+			// Log per-step throughput for operational visibility
+			logStepProgress(currentInstance, instanceProgress);
+
+			// Phase 3: Apply status transitions
 			if (instanceProgress.hasNewStatus()) {
 				myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
 			}
 
+			// Emit OpenTelemetry progress event
+			BatchJobOpenTelemetryUtils.addProgressEventToCurrentSpan(currentInstance, instanceProgress);
+
 			return true;
 		});
 		ourLog.trace("calculating progress: {} - complete in {}", theInstanceId, stopWatch);
+	}
+
+	private void logStepProgress(JobInstance theInstance, InstanceProgress theProgress) {
+		Map<String, StepProgressData> stepProgressMap = theProgress.getStepProgressMap();
+		if (stepProgressMap.isEmpty()) {
+			return;
+		}
+		for (Map.Entry<String, StepProgressData> entry : stepProgressMap.entrySet()) {
+			StepProgressData stepData = entry.getValue();
+			if (stepData.getRecordsProcessed() > 0) {
+				ourLog.debug(
+						"Job {} step [{}]: {}/{} chunks complete, {} records ({}/sec)",
+						theInstance.getInstanceId(),
+						entry.getKey(),
+						stepData.getCompleteChunkCount(),
+						stepData.getChunkCount(),
+						stepData.getRecordsProcessed(),
+						String.format("%.1f", stepData.getThroughputPerSecond()));
+			}
+		}
 	}
 
 	@Nonnull
@@ -103,11 +133,11 @@ public class JobInstanceProgressCalculator {
 
 			// global stats
 			myProgressAccumulator.addChunk(next);
-			// instance stats
+			// instance stats (includes per-step tracking)
 			instanceProgress.addChunk(next);
 		}
 
-		// wipmb separate status update from stats collection in 6.8
+		// Status calculation is now a separate phase from stats collection
 		instanceProgress.calculateNewStatus(lastStepIsReduction(instanceId));
 
 		return instanceProgress;

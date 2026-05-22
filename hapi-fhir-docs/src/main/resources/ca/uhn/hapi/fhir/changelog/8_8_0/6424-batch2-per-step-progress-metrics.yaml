@@ -1,0 +1,10 @@
+---
+type: perf
+issue: 6424
+title: "The Batch2 job progress calculator now tracks per-step throughput metrics
+   including records processed per second, chunk completion rates, and elapsed time
+   for each individual step. This enables operators to identify bottleneck steps in
+   long-running batch jobs (bulk export, reindex, MDM). Progress data is also emitted
+   as OpenTelemetry span events for integration with distributed tracing systems.
+   The internal architecture has been refactored to separate statistics collection
+   from status transition logic, improving maintainability."
