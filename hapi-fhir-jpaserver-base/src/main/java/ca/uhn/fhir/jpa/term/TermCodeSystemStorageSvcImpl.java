@@ -650,16 +650,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			.log();
 
 		TermConcept targetConcept = theCodeToConcept.get(theSourceConcept.getCode());
-		List<TermConceptParentChildLink> existingParentLinks;
 		if (targetConcept != null) {
 			targetConcept.setIndexStatus(null);
-			existingParentLinks = targetConcept.getParents();
 			theStatisticsTracker.incrementUpdatedConceptCount();
 		} else {
 			targetConcept = new TermConcept();
 			targetConcept.setCode(theSourceConcept.getCode());
 			targetConcept.setCodeSystemVersion(theCsv);
-			existingParentLinks = Collections.emptyList();
 
 			theCodeToConcept.put(theSourceConcept.getCode(), targetConcept);
 			theStatisticsTracker.incrementConceptsAddedCount();
