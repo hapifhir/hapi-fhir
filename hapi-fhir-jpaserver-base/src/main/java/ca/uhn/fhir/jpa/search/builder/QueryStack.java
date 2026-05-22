@@ -1469,11 +1469,12 @@ public class QueryStack {
 					theSourceJoinColumn,
 					theRequestPartitionId));
 		} else {
-			// Include all distinct resource types from the OR-group in cache key to  produce a unique key
+			// Build a cache key to allow chained-ref AND-clauses on the same logical reference
+			// share a single HFJ_RES_LINK join (e.g. Coverage?beneficiary.family=X&beneficiary.given=Y)
 			String cacheParamName = theParamName;
 			String typeQualifier = theList.stream()
 					.filter(ReferenceParam.class::isInstance)
-					.map(p -> ((ReferenceParam) p).getResourceType())
+					.map(p -> buildReferenceCacheQualifier((ReferenceParam) p))
 					.filter(StringUtils::isNotBlank)
 					.distinct()
 					.sorted()
@@ -1497,6 +1498,24 @@ public class QueryStack {
 					theOperation,
 					theRequestPartitionId);
 		}
+	}
+
+	/**
+	 * For chained references, AND-clauses on the same logical reference share a single HFJ_RES_LINK join
+	 * (the join is keyed only by the target resource type).
+	 * For direct (non-chained) references, each AND-clause can target a different id, so include the id
+	 * in the cache key to make sure each distinct target gets its own join.
+	 */
+	private static String buildReferenceCacheQualifier(ReferenceParam theRef) {
+		String resourceType = StringUtils.defaultString(theRef.getResourceType());
+		if (theRef.hasChain()) {
+			return resourceType;
+		}
+		String idPart = StringUtils.defaultString(theRef.getIdPart());
+		if (isBlank(resourceType) && isBlank(idPart)) {
+			return "";
+		}
+		return resourceType + "/" + idPart;
 	}
 
 	public void addGrouping() {
