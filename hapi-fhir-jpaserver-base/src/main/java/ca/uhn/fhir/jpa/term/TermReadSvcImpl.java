@@ -2640,7 +2640,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	private boolean isNotSafeToPreExpandValueSets() {
-		return myDeferredStorageSvc != null && !myDeferredStorageSvc.isStorageQueueEmpty(true);
+		return myDeferredStorageSvc != null && !myDeferredStorageSvc.isStorageQueueEmpty(false);
 	}
 
 	private Optional<TermValueSet> getNextTermValueSetNotExpanded() {
@@ -2656,8 +2656,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Override
-	@Transactional
 	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
+		HapiTransactionService.requireTransaction();
+
 		// If we're in a transaction, we need to flush now so that we can correctly detect
 		// duplicates if there are multiple ValueSets in the same TX with the same URL
 		// (which is an error, but we need to catch it). It'd be better to catch this by
@@ -2688,6 +2689,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		termValueSet.setUrl(theValueSet.getUrl());
 		termValueSet.setVersion(theValueSet.getVersion());
 		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
+
+		if (theValueSet.getStatus() != null && theValueSet.getStatus() != Enumerations.PublicationStatus.ACTIVE) {
+			termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_ACTIVE);
+		}
 
 		// Delete version being replaced
 		Optional<TermValueSet> deletedTrmValueSet = deleteValueSetForResource(theResourceTable);

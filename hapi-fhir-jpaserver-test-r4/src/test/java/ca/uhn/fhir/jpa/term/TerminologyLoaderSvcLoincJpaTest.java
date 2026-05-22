@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
@@ -13,6 +14,8 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,6 +24,8 @@ import java.io.IOException;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
+import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -130,47 +135,6 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 	}
 
-	private void assertConceptDisplay(String theExpectedDisplay, LookupCodeRequest theLookupCodeRequest) {
-		myMemoryCacheService.invalidateAllCaches();
-		IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), theLookupCodeRequest);
-		assertNotNull(result);
-		assertTrue(result.isFound());
-		assertEquals(theExpectedDisplay, result.getCodeDisplay());
-	}
-
-	private void assertConceptNotFound(LookupCodeRequest theLookupCodeRequest) {
-		myMemoryCacheService.invalidateAllCaches();
-		IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), theLookupCodeRequest);
-		assertTrue(result == null || !result.isFound());
-	}
-
-	private void startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles) {
-		startImportLoincJobAndWaitForCompletion(versionId, theFiles, false);
-	}
-	private void startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
-		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
-		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
-		parameters.setVersionId(versionId);
-		if (theDontMakeCurrent) {
-			parameters.setDontMakeCurrent(true);
-		}
-		startRequest.setParameters(parameters);
-
-		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
-
-		AttachmentDetails attachmentDetails = new AttachmentDetails(
-			new ByteArrayInputStream(theFiles.getZipBytes()),
-			AttachmentContentTypeEnum.ZIP,
-			FILENAME_LOINC_DISTRIBUTION_FILE
-		);
-		myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
-
-		myJobCoordinator.enqueueBuildingJobForExecution(instanceId.getInstanceId());
-
-		myBatch2JobHelper.awaitJobCompletion(instanceId);
-	}
-
 	@Test
 	public void testLoadLoincVersionNotCurrent() throws IOException {
 		// Load LOINC marked as version 2.66
@@ -201,6 +165,81 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		});
 
 
+	}
+
+	@Test
+	public void testValueSetExpansion() throws IOException {
+		// Load LOINC marked as version 2.66
+
+		ZipCollectionBuilder files;
+		files = new ZipCollectionBuilder(true);
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
+		startImportLoincJobAndWaitForCompletion("2.67", files);
+
+		ValueSetExpansionOptions options = new ValueSetExpansionOptions();
+		ValueSet outcome = myValueSetDao.expand(new IdType("ValueSet/LL1001-8-2.67"), options, newSrd());
+		ourLog.info("Expansion outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+
+		assertEquals("http://loinc.org", outcome.getExpansion().getContains().get(0).getSystem());
+		assertEquals("2.67", outcome.getExpansion().getContains().get(0).getVersion());
+		assertEquals("LA6270-8", outcome.getExpansion().getContains().get(0).getCode());
+		assertEquals("Never", outcome.getExpansion().getContains().get(0).getDisplay());
+
+		String expansionMessage = outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE);
+		assertThat(expansionMessage).contains("has not yet been pre-expanded");
+
+		// Now run the pre-expansion
+
+		logAllValueSets();
+		myTermDeferredStorageSvc.saveDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		outcome = myValueSetDao.expand(new IdType("ValueSet/LL1001-8-2.67"), options, newSrd());
+		expansionMessage = outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE);
+		assertThat(expansionMessage).contains("using an expansion that was pre-calculated");
+
+	}
+
+	private void assertConceptDisplay(String theExpectedDisplay, LookupCodeRequest theLookupCodeRequest) {
+		myMemoryCacheService.invalidateAllCaches();
+		IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), theLookupCodeRequest);
+		assertNotNull(result);
+		assertTrue(result.isFound());
+		assertEquals(theExpectedDisplay, result.getCodeDisplay());
+	}
+
+	private void assertConceptNotFound(LookupCodeRequest theLookupCodeRequest) {
+		myMemoryCacheService.invalidateAllCaches();
+		IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), theLookupCodeRequest);
+		assertTrue(result == null || !result.isFound());
+	}
+
+	private void startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles) {
+		startImportLoincJobAndWaitForCompletion(versionId, theFiles, false);
+	}
+
+	private void startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
+		parameters.setVersionId(versionId);
+		if (theDontMakeCurrent) {
+			parameters.setDontMakeCurrent(true);
+		}
+		startRequest.setParameters(parameters);
+
+		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
+
+		AttachmentDetails attachmentDetails = new AttachmentDetails(
+			new ByteArrayInputStream(theFiles.getZipBytes()),
+			AttachmentContentTypeEnum.ZIP,
+			FILENAME_LOINC_DISTRIBUTION_FILE
+		);
+		myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
+
+		myJobCoordinator.enqueueBuildingJobForExecution(instanceId.getInstanceId());
+
+		myBatch2JobHelper.awaitJobCompletion(instanceId);
 	}
 
 }
