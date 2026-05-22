@@ -187,15 +187,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Add HFJ_SPIDX2_TOKEN_COMMON_RES table
 		{
-			// TODO execute for all except oracle
 			Builder.BuilderAddTableByColumns spidx2TokenCommonRes;
 			// PARTITION_ID should be included in the PK only in Database Partition Mode
 			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
 				spidx2TokenCommonRes = version.addTableByColumns(
-						"20260515.50", "HFJ_SPIDX2_TOKEN_COMMON_RES", "RES_ID", "PARTITION_ID", "HASH_SYS_AND_VALUE");
+								"20260515.50",
+								"HFJ_SPIDX2_TOKEN_COMMON_RES",
+								"RES_ID",
+								"PARTITION_ID",
+								"HASH_SYS_AND_VALUE")
+						.asIndexOrganizedTable(2);
 			} else {
 				spidx2TokenCommonRes = version.addTableByColumns(
-						"20260515.50", "HFJ_SPIDX2_TOKEN_COMMON_RES", "RES_ID", "HASH_SYS_AND_VALUE");
+								"20260515.50", "HFJ_SPIDX2_TOKEN_COMMON_RES", "RES_ID", "HASH_SYS_AND_VALUE")
+						.asIndexOrganizedTable(1);
 			}
 
 			spidx2TokenCommonRes.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
@@ -211,20 +216,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.addForeignKey("20260515.70", "FK_SP2_TOKEN_COMMON_RES")
 					.toColumn("RES_ID")
 					.references("HFJ_RESOURCE", "RES_ID");
-
-			// Oracle Index Orianted Table
-			version.executeRawSql(
-							"20260515.80",
-							"CREATE TABLE HFJ_SPIDX2_TOKEN_COMMON_RES (RES_ID NUMBER(19) NOT NULL, PARTITION_ID NUMBER(10) NULL, HASH_SYS_AND_VALUE NUMBER(19) NOT NULL,"
-									+ "CONSTRAINT HFJ_SPIDX2_TOKEN_COMMON_RES_PK PRIMARY KEY (RES_ID, PARTITION_ID, HASH_SYS_AND_VALUE)) ORGANIZATION INDEX COMPRESS 2")
-					.onlyAppliesToPlatforms(DriverTypeEnum.ORACLE_12C);
 		}
 
 		// Add HFJ_SPIDX2_TOKEN_IDENTIFIER table
 		{
 			version.addIdGenerator("20260515.90", "SEQ_SPIDX2_TOKEN_IDENTIFIER");
-			Builder.BuilderAddTableByColumns spidx2TokenIdentifier =
-					version.addTableByColumns("20260515.100", "HFJ_SPIDX2_TOKEN_IDENTIFIER", "SP_ID");
+			// PARTITION_ID should be included in the PK only in Database Partition Mode
+			Builder.BuilderAddTableByColumns spidx2TokenIdentifier;
+			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
+				spidx2TokenIdentifier = version.addTableByColumns(
+						"20260515.100", "HFJ_SPIDX2_TOKEN_IDENTIFIER", "SP_ID", "PARTITION_ID");
+			} else {
+				spidx2TokenIdentifier =
+						version.addTableByColumns("20260515.100", "HFJ_SPIDX2_TOKEN_IDENTIFIER", "SP_ID");
+			}
 
 			spidx2TokenIdentifier.addColumn("SP_ID").nonNullable().type(ColumnTypeEnum.LONG);
 			spidx2TokenIdentifier.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);

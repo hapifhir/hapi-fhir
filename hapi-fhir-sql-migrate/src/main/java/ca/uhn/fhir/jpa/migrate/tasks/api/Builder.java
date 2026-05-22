@@ -753,6 +753,18 @@ public class Builder {
 			return new BuilderAddColumnWithName(myRelease, myVersion, theColumnName, null, this);
 		}
 
+		/**
+		 * For Oracle, creates the table as an Index Organized Table (IOT) with
+		 * key compression on the specified number of leading primary key columns.
+		 * Has no effect on other database platforms.
+		 *
+		 * @param theCompressionLevel number of leading PK columns to compress (0 for no compression)
+		 */
+		public BuilderAddTableByColumns asIndexOrganizedTable(int theCompressionLevel) {
+			myTask.setOracleIotCompress(theCompressionLevel);
+			return this;
+		}
+
 		@Override
 		public void addTask(BaseTask theTask) {
 			if (theTask instanceof AddColumnTask) {

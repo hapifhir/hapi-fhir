@@ -41,6 +41,8 @@ public class AddTableByColumnTask extends BaseTableTask {
 	private List<String> myPkColumns;
 	private final List<ForeignKeyContainer> myFKColumns = new ArrayList<>();
 	private final Comparator<AddColumnTask> myColumnSortingRules;
+	private boolean myOracleIot;
+	private int myOracleIotCompress;
 
 	public AddTableByColumnTask() {
 		this(null);
@@ -83,6 +85,11 @@ public class AddTableByColumnTask extends BaseTableTask {
 
 	public List<String> getPkColumns() {
 		return myPkColumns;
+	}
+
+	public void setOracleIotCompress(int theCompressionLevel) {
+		myOracleIot = true;
+		myOracleIotCompress = theCompressionLevel;
 	}
 
 	public String generateSQLCreateScript() {
@@ -170,9 +177,16 @@ public class AddTableByColumnTask extends BaseTableTask {
 			case MYSQL_5_7:
 				sb.append(" engine=InnoDB");
 				break;
+			case ORACLE_12C:
+				if (myOracleIot) {
+					sb.append(" ORGANIZATION INDEX");
+					if (myOracleIotCompress > 0) {
+						sb.append(" COMPRESS ").append(myOracleIotCompress);
+					}
+				}
+				break;
 			case DERBY_EMBEDDED:
 			case POSTGRES_9_4:
-			case ORACLE_12C:
 			case MSSQL_2012:
 			case H2_EMBEDDED:
 			case COCKROACHDB_21_1:

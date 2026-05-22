@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
@@ -132,6 +134,52 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		task.setNullable(theNullable);
 		task.setColumnLength(theColumnLength);
 
+		return task;
+	}
+
+	@ParameterizedTest
+	@CsvSource({"2, true", "0, false"})
+	void testOracleIndexOrganizedTable(int theCompressLevel, boolean theExpectCompress) {
+		AddTableByColumnTask task = new AddTableByColumnTask("1", "1");
+		task.setTableName("TEST_IOT");
+		task.setDriverType(DriverTypeEnum.ORACLE_12C);
+		task.setPkColumns(Collections.singletonList("PID"));
+		task.setOracleIotCompress(theCompressLevel);
+		task.addAddColumnTask(buildLongColumnTask(DriverTypeEnum.ORACLE_12C, "TEST_IOT"));
+
+		String sql = task.generateSQLCreateScript();
+
+		assertThat(sql).contains("ORGANIZATION INDEX");
+		if (theExpectCompress) {
+			assertThat(sql).contains("COMPRESS " + theCompressLevel);
+		} else {
+			assertThat(sql).doesNotContain("COMPRESS");
+		}
+	}
+
+	// COCKROACHDB_21_1 excluded: missing LONG type mapping in ColumnTypeToDriverTypeToSqlType
+	@ParameterizedTest
+	@EnumSource(value = DriverTypeEnum.class, names = {"ORACLE_12C", "COCKROACHDB_21_1"}, mode = EnumSource.Mode.EXCLUDE)
+	void testNonOracleIgnoresIndexOrganizedTable(DriverTypeEnum theDriverType) {
+		AddTableByColumnTask task = new AddTableByColumnTask("1", "1");
+		task.setTableName("TEST_TABLE");
+		task.setDriverType(theDriverType);
+		task.setPkColumns(Collections.singletonList("PID"));
+		task.setOracleIotCompress(2);
+		task.addAddColumnTask(buildLongColumnTask(theDriverType, "TEST_TABLE"));
+
+		String sql = task.generateSQLCreateScript();
+
+		assertThat(sql).doesNotContain("ORGANIZATION INDEX").doesNotContain("COMPRESS");
+	}
+
+	private static AddColumnTask buildLongColumnTask(DriverTypeEnum theDriverType, String theTableName) {
+		AddColumnTask task = new AddColumnTask("1", "1");
+		task.setTableName(theTableName);
+		task.setColumnName("PID");
+		task.setColumnType(ColumnTypeEnum.LONG);
+		task.setDriverType(theDriverType);
+		task.setNullable(false);
 		return task;
 	}
 
