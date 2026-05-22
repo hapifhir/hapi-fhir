@@ -56,7 +56,6 @@ class ImportLoincStep7HandlePartRelatedCodeMappingTest extends BaseImportLoincSt
 		when(myConceptMapDao.read(eq(new IdType("loinc-parts-to-pubchem-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("httpfoobar-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
 		mockDaoRegistryConceptMap();
-		when(myConceptMapDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
 		mockJobExecutionServices();
 
 		// Test
@@ -69,7 +68,7 @@ class ImportLoincStep7HandlePartRelatedCodeMappingTest extends BaseImportLoincSt
 		verify(myValueSetDao, never()).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 
 		// ConceptMaps
-		verify(myConceptMapDao, times(3)).update(myConceptMapCaptor.capture(), nullable(RequestDetails.class));
+		verify(myConceptMapDao, times(3)).create(myConceptMapCaptor.capture(), nullable(RequestDetails.class));
 		ConceptMap actualConceptMap = myConceptMapCaptor.getAllValues().get(0);
 		String actualRender = renderConceptMap(actualConceptMap);
 		String expected = """

@@ -69,7 +69,7 @@ class ImportLoincStep8HandleDocumentOntologyTest extends BaseImportLoincStepTest
 			"ValueSet/loinc-document-ontology-1.234"
 		);
 
-		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		verify(myValueSetDao, times(1)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);

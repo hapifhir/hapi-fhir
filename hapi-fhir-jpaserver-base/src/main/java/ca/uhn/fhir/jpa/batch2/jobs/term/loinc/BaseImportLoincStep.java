@@ -138,29 +138,8 @@ public abstract class BaseImportLoincStep<CT>
 					Msg.code(1) + "Failed to read file attachment: " + e.getMessage(), e);
 			}
 
-			afterCsvProcessingComplete(codeExtractionContext, codeSystemToPopulate, theStepExecutionDetails);
+			syncToDb(codeExtractionContext, codeSystemToPopulate, theStepExecutionDetails);
 
-			/*
-			 * Store Concepts
-			 */
-			if (codeSystemToPopulate.hasConcept()) {
-
-				int conceptCount = codeSystemToPopulate.getConcept().size();
-				ourLog.atInfo()
-					.setMessage("Storing {} concepts")
-					.addArgument(conceptCount)
-					.log();
-
-				Callable<UploadStatistics> uploader = () -> myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulate);
-				UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
-
-				TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter = getRecordsAddedCounter(theStepExecutionDetails);
-				recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
-				recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
-				recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
-				recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
-
-			}
 		}
 
 		BaseExpandDistributionIntoFilesStep.submitChunksForNextStep(theStepExecutionDetails, theDataSink, data);
@@ -168,16 +147,34 @@ public abstract class BaseImportLoincStep<CT>
 		return RunOutcome.SUCCESS;
 	}
 
-	@Nonnull
+	private void syncConceptsToDb(@Nonnull StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, CodeSystem codeSystemToPopulate) {
+		if (codeSystemToPopulate.hasConcept()) {
+
+			int conceptCount = codeSystemToPopulate.getConcept().size();
+			ourLog.atInfo()
+				.setMessage("Storing {} concepts")
+				.addArgument(conceptCount)
+				.log();
+
+			Callable<UploadStatistics> uploader = () -> myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulate);
+			UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
+
+			TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter = getRecordsAddedCounter(theStepExecutionDetails);
+			recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
+			recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
+			recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
+			recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
+
+		}
+	}
+
 	protected <T> T executeInNewTransactionWithRetry(Callable<T> theFunction, StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		T retVal = null;
 		int retryCount = 0;
-		do {
+		while(true) {
 			try {
-				retVal = myTransactionService
+				return myTransactionService
 					.withSystemRequestOnDefaultPartition()
 					.execute(theFunction);
-				assert retVal != null;
 			} catch (ResourceVersionConflictException e) {
 				// FIXME: add test
 				retryCount++;
@@ -194,18 +191,20 @@ public abstract class BaseImportLoincStep<CT>
 					.log();
 				sleepAtLeast(5 * DateUtils.MILLIS_PER_SECOND);
 			}
-		} while (retVal == null);
-		return retVal;
+		}
 	}
 
 	/**
-	 * Invoked after all CSV rows have been processed but before the CodeSystem is submitted for storage
+	 * Invoked after all CSV rows have been processed but before the CodeSystem is submitted for storage.
+	 * Subclasses may override, but they should call this super-method too.
 	 */
-	protected void afterCsvProcessingComplete(
+	protected void syncToDb(
 		CT theCodeExtractionContext,
 		CodeSystem theCodeSystemToPopulate,
 		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		// nothing
+
+		syncConceptsToDb(theStepExecutionDetails, theCodeSystemToPopulate);
+
 	}
 
 	protected abstract CT newContextObject(

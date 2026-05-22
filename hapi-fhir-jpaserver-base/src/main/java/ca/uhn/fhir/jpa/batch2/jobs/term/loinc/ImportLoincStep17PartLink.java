@@ -34,6 +34,12 @@ public class ImportLoincStep17PartLink
 
 	@Nonnull
 	@Override
+	public FileHandlingType getFileHandlingType() {
+		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
+	}
+
+	@Nonnull
+	@Override
 	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(
 				new LoincFileNameSpecification(

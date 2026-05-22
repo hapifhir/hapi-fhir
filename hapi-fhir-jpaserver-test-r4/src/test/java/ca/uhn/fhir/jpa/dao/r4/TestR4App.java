@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -20,12 +21,16 @@ public class TestR4App extends BaseJpaR4Test {
 	@Autowired
 	private TerminologyUploaderProvider myTerminologyUploaderProvider;
 
+	@Autowired
+	private ValueSetOperationProvider myValueSetOperationProvider;
+
 	@RegisterExtension
 	private RestfulServerExtension myServer = new RestfulServerExtension(FhirVersionEnum.R4)
 		.withPort(8080)
 		.withServer(s->{
 			s.registerProviders(myResourceProviders.createProviders());
 			s.registerProvider(myTerminologyUploaderProvider);
+			s.registerProvider(myValueSetOperationProvider);
 		});
 
 	@Test

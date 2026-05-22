@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -151,226 +152,254 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 	}
 
 	@Override
-	protected void afterCsvProcessingComplete(
+	protected void syncToDb(
 		CT theCodeExtractionContext,
 		CodeSystem theCodeSystemToPopulate,
 		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		super.afterCsvProcessingComplete(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
+		super.syncToDb(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 
-		// FIXME: extract sub-methods in this method
+		syncConceptMapsToDb(theCodeExtractionContext, theStepExecutionDetails);
+		syncValueSetsToDb(theCodeExtractionContext, theStepExecutionDetails);
+	}
 
-		/*
-		 * Store ConceptMaps
-		 */
+	private void syncConceptMapsToDb(CT theCodeExtractionContext, StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
 		IFhirResourceDao conceptMapDao = myDaoRegistry.getResourceDao("ConceptMap");
 		for (Map.Entry<String, Collection<ConceptMapping>> entry :
 			theCodeExtractionContext.getIdToConceptMappings().asMap().entrySet()) {
 
 			String conceptMapId = entry.getKey();
-			ourLog.info("Checking for existence of ConceptMap: {}", conceptMapId);
+			Collection<ConceptMapping> mappings = entry.getValue();
 
-			ConceptMap conceptMap;
-			try {
-				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-				IdType existingId = new IdType(conceptMapId);
-				conceptMap = (ConceptMap) conceptMapDao.read(existingId, requestDetails);
-				ourLog.info("Found existing ConceptMap: {}", conceptMapId);
-				assert conceptMap != null : "Reading ConceptMap " + conceptMapId + " returned null";
+			executeInNewTransactionWithRetry(()->{
+				syncConceptMapToDb(theStepExecutionDetails, conceptMapId, conceptMapDao, mappings);
+				return null;
+			}, theStepExecutionDetails);
 
-			} catch (ResourceNotFoundException | ResourceGoneException e) {
-				ConceptMapping firstMapping = entry.getValue().iterator().next();
+		}
+	}
 
-				ourLog.info("Creating new ConceptMap: {}", conceptMapId);
-				getRecordsAddedCounter(theStepExecutionDetails).incrementConceptMapsAdded(1);
+	private void syncConceptMapToDb(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, String conceptMapId, IFhirResourceDao conceptMapDao, Collection<ConceptMapping> mappings) {
+		ourLog.info("Checking for existence of ConceptMap: {}", conceptMapId);
 
-				conceptMap = new ConceptMap();
-				conceptMap.setId(conceptMapId);
-				conceptMap.setUrl(firstMapping.getConceptMapUri());
-				conceptMap.setName(firstMapping.getConceptMapName());
-				conceptMap.setVersion(firstMapping.getConceptMapVersion());
-				conceptMap.setPublisher(REGENSTRIEF_INSTITUTE_INC);
-				conceptMap
-					.addContact()
-					.setName(REGENSTRIEF_INSTITUTE_INC)
-					.addTelecom()
-					.setSystem(ContactPoint.ContactPointSystem.URL)
-					.setValue(LOINC_WEBSITE_URL);
+		ConceptMap conceptMap;
+		try {
+			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+			IdType existingId = new IdType(conceptMapId);
+			conceptMap = (ConceptMap) conceptMapDao.read(existingId, requestDetails);
+			ourLog.info("Found existing ConceptMap: {}", conceptMapId);
+			assert conceptMap != null : "Reading ConceptMap " + conceptMapId + " returned null";
 
-				String copyright = firstMapping.getCopyright();
-				if (!copyright.contains("LOINC")) {
-					String loincCopyrightStatement = theStepExecutionDetails
-						.getData()
-						.getLoincCodeSystem()
-						.getCopyright();
-					copyright =
-						loincCopyrightStatement + (loincCopyrightStatement.endsWith(".") ? " " : ". ") + copyright;
-				}
-				conceptMap.setCopyright(copyright);
+		} catch (ResourceNotFoundException | ResourceGoneException e) {
+			ConceptMapping firstMapping = mappings.iterator().next();
+
+			ourLog.info("Creating new ConceptMap: {}", conceptMapId);
+			getRecordsAddedCounter(theStepExecutionDetails).incrementConceptMapsAdded(1);
+
+			conceptMap = new ConceptMap();
+			conceptMap.setUrl(firstMapping.getConceptMapUri());
+			conceptMap.setName(firstMapping.getConceptMapName());
+			conceptMap.setVersion(firstMapping.getConceptMapVersion());
+			conceptMap.setPublisher(REGENSTRIEF_INSTITUTE_INC);
+			conceptMap
+				.addContact()
+				.setName(REGENSTRIEF_INSTITUTE_INC)
+				.addTelecom()
+				.setSystem(ContactPoint.ContactPointSystem.URL)
+				.setValue(LOINC_WEBSITE_URL);
+
+			String copyright = firstMapping.getCopyright();
+			if (!copyright.contains("LOINC")) {
+				String loincCopyrightStatement = theStepExecutionDetails
+					.getData()
+					.getLoincCodeSystem()
+					.getCopyright();
+				copyright =
+					loincCopyrightStatement + (loincCopyrightStatement.endsWith(".") ? " " : ". ") + copyright;
 			}
+			conceptMap.setCopyright(copyright);
+		}
 
-			int addedMappings = 0;
-			int skippedMappings = 0;
-			for (ConceptMapping nextMapping : entry.getValue()) {
+		int addedMappings = 0;
+		int skippedMappings = 0;
+		for (ConceptMapping nextMapping : mappings) {
 
-				ConceptMap.SourceElementComponent source = null;
-				ConceptMap.ConceptMapGroupComponent group = null;
+			ConceptMap.SourceElementComponent source = null;
+			ConceptMap.ConceptMapGroupComponent group = null;
 
-				for (ConceptMap.ConceptMapGroupComponent next : conceptMap.getGroup()) {
-					if (next.getSource().equals(nextMapping.getSourceCodeSystem())) {
-						if (next.getTarget().equals(nextMapping.getTargetCodeSystem())) {
-							if (!defaultString(nextMapping.getTargetCodeSystemVersion())
-								.equals(defaultString(next.getTargetVersion()))) {
-								continue;
-							}
-							group = next;
-							break;
+			for (ConceptMap.ConceptMapGroupComponent next : conceptMap.getGroup()) {
+				if (next.getSource().equals(nextMapping.getSourceCodeSystem())) {
+					if (next.getTarget().equals(nextMapping.getTargetCodeSystem())) {
+						if (!defaultString(nextMapping.getTargetCodeSystemVersion())
+							.equals(defaultString(next.getTargetVersion()))) {
+							continue;
 						}
+						group = next;
+						break;
 					}
 				}
-				if (group == null) {
-					group = conceptMap.addGroup();
-					group.setSource(nextMapping.getSourceCodeSystem());
-					group.setSourceVersion(nextMapping.getSourceCodeSystemVersion());
-					group.setTarget(nextMapping.getTargetCodeSystem());
-					group.setTargetVersion(defaultIfBlank(nextMapping.getTargetCodeSystemVersion(), null));
-				}
+			}
+			if (group == null) {
+				group = conceptMap.addGroup();
+				group.setSource(nextMapping.getSourceCodeSystem());
+				group.setSourceVersion(nextMapping.getSourceCodeSystemVersion());
+				group.setTarget(nextMapping.getTargetCodeSystem());
+				group.setTargetVersion(defaultIfBlank(nextMapping.getTargetCodeSystemVersion(), null));
+			}
 
-				for (ConceptMap.SourceElementComponent next : group.getElement()) {
-					if (next.getCode().equals(nextMapping.getSourceCode())) {
-						source = next;
-					}
+			for (ConceptMap.SourceElementComponent next : group.getElement()) {
+				if (next.getCode().equals(nextMapping.getSourceCode())) {
+					source = next;
 				}
-				if (source == null) {
-					source = group.addElement();
-					source.setCode(nextMapping.getSourceCode());
-					source.setDisplay(nextMapping.getSourceDisplay());
-				}
+			}
+			if (source == null) {
+				source = group.addElement();
+				source.setCode(nextMapping.getSourceCode());
+				source.setDisplay(nextMapping.getSourceDisplay());
+			}
 
-				boolean found = false;
-				for (ConceptMap.TargetElementComponent next : source.getTarget()) {
-					if (next.getCode().equals(nextMapping.getTargetCode())) {
-						found = true;
-					}
+			boolean found = false;
+			for (ConceptMap.TargetElementComponent next : source.getTarget()) {
+				if (next.getCode().equals(nextMapping.getTargetCode())) {
+					found = true;
 				}
-				if (!found) {
-					source.addTarget()
-						.setCode(nextMapping.getTargetCode())
-						.setDisplay(nextMapping.getTargetDisplay())
-						.setEquivalence(nextMapping.getEquivalence());
-					addedMappings++;
-				} else {
-					skippedMappings++;
-					ourLog.atDebug()
-						.setMessage("Not going to add a mapping from [{}/{}] to [{}/{}] because one already exists")
-						.addArgument(nextMapping.getSourceCodeSystem())
-						.addArgument(nextMapping.getSourceCode())
-						.addArgument(nextMapping.getTargetCodeSystem())
-						.addArgument(nextMapping.getTargetCode())
-						.log();
+			}
+			if (!found) {
+				source.addTarget()
+					.setCode(nextMapping.getTargetCode())
+					.setDisplay(nextMapping.getTargetDisplay())
+					.setEquivalence(nextMapping.getEquivalence());
+				addedMappings++;
+			} else {
+				skippedMappings++;
+				ourLog.atDebug()
+					.setMessage("Not going to add a mapping from [{}/{}] to [{}/{}] because one already exists")
+					.addArgument(nextMapping.getSourceCodeSystem())
+					.addArgument(nextMapping.getSourceCode())
+					.addArgument(nextMapping.getTargetCodeSystem())
+					.addArgument(nextMapping.getTargetCode())
+					.log();
+			}
+		}
+
+		if (addedMappings > 0) {
+
+			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+			if (conceptMap.getId() == null) {
+				/*
+				 * Create but with an assigned ID. We do this as a create instead of an update
+				 * in order to avoid the possibility of a race condition where a new ConceptMap
+				 * is created by another thread while we are trying to also create it here, since
+				 * this would result in us overwriting the other thread's ConceptMap.
+				 */
+				conceptMap.setId(conceptMapId);
+				conceptMap.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE, conceptMap.getIdElement().getIdPart());
+				conceptMapDao.create(conceptMap, requestDetails);
+			} else {
+				conceptMapDao.update(conceptMap, requestDetails);
+			}
+
+			getRecordsAddedCounter(theStepExecutionDetails).incrementConceptMapMappingsAdded(addedMappings);
+		}
+
+		ourLog.atInfo()
+			.setMessage("Adding {} mappings and skipped {} pre-existing mappings to LOINC ConceptMap {}")
+			.addArgument(addedMappings)
+			.addArgument(skippedMappings)
+			.addArgument(conceptMap.getId())
+			.log();
+	}
+
+	private void syncValueSetsToDb(CT theCodeExtractionContext, StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		IFhirResourceDao valueSetDao = myDaoRegistry.getResourceDao("ValueSet");
+		for (ValueSet valueSet : theCodeExtractionContext.getIdToValueSet().values()) {
+			executeInNewTransactionWithRetry(()->{
+				syncValueSetToDb(theStepExecutionDetails, valueSet, valueSetDao);
+				return null;
+			}, theStepExecutionDetails);
+		}
+	}
+
+	private void syncValueSetToDb(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ValueSet valueSet, IFhirResourceDao valueSetDao) {
+		try {
+			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+			IdType existingId = new IdType(valueSet.getIdElement().getIdPart());
+			ValueSet existing = (ValueSet) valueSetDao.read(existingId, requestDetails);
+			assert existing != null : "Reading ValueSet " + valueSet.getId() + " returned null";
+
+			/*
+			 * A ValueSet already exists with the given ID, so we'll merge the contents
+			 * of our ValueSet into it and save it.
+			 */
+
+			int addedCodes = 0;
+
+			for (ValueSet.ConceptSetComponent sourceInclude :
+				valueSet.getCompose().getInclude()) {
+				ValueSet.ConceptSetComponent targetInclude = findOrAddMatchingConceptSetComponent(
+					existing.getCompose().getInclude(), sourceInclude);
+
+				// Add codes
+				Set<String> existingCodes = targetInclude.getConcept().stream()
+					.map(ValueSet.ConceptReferenceComponent::getCode)
+					.collect(Collectors.toSet());
+				for (ValueSet.ConceptReferenceComponent toAdd : sourceInclude.getConcept()) {
+					if (!existingCodes.contains(toAdd.getCode())) {
+						existing.getCompose().getIncludeFirstRep().addConcept(toAdd);
+						addedCodes++;
+					}
 				}
 			}
 
-			if (addedMappings > 0) {
-				ConceptMap finalConceptMap = conceptMap;
-				Callable<?> updateFunction = () -> {
-					SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-					return conceptMapDao.update(finalConceptMap, requestDetails);
-				};
-				executeInNewTransactionWithRetry(updateFunction, theStepExecutionDetails);
-
-				getRecordsAddedCounter(theStepExecutionDetails).incrementConceptMapMappingsAdded(addedMappings);
+			if (isNotBlank(valueSet.getName())) {
+				getRecordsAddedCounter(theStepExecutionDetails).incrementOtherChanges(1);
+				existing.setName(valueSet.getName());
 			}
 
 			ourLog.atInfo()
-				.setMessage("Adding {} mappings and skipped {} pre-existing mappings to LOINC ConceptMap {}")
-				.addArgument(addedMappings)
-				.addArgument(skippedMappings)
-				.addArgument(conceptMap.getId())
+				.setMessage("Updating existing LOINC ValueSet {} to add {} codes")
+				.addArgument(valueSet.getId())
+				.addArgument(addedCodes)
 				.log();
 
-		}
+			requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+			valueSetDao.update(existing, requestDetails);
 
-		/*
-		 * Store ValueSets
-		 */
-		IFhirResourceDao valueSetDao = myDaoRegistry.getResourceDao("ValueSet");
-		for (ValueSet valueSet : theCodeExtractionContext.getIdToValueSet().values()) {
+			getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetCodesAdded(addedCodes);
 
-			try {
-				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-				IdType existingId = new IdType(valueSet.getIdElement().getIdPart());
-				ValueSet existing = (ValueSet) valueSetDao.read(existingId, requestDetails);
-				assert existing != null : "Reading ValueSet " + valueSet.getId() + " returned null";
+		} catch (ResourceNotFoundException | ResourceGoneException e) {
 
-				/*
-				 * A ValueSet already exists with the given ID, so we'll merge the contents
-				 * of our ValueSet into it and save it.
-				 */
+			/*
+			 * Ok, we didn't find an existing ValueSet with the given ID, so we'll
+			 * store the ValueSet as a new one.
+			 */
+			getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetsAdded(1);
 
-				int addedCodes = 0;
-
-				for (ValueSet.ConceptSetComponent sourceInclude :
-					valueSet.getCompose().getInclude()) {
-					ValueSet.ConceptSetComponent targetInclude = findOrAddMatchingConceptSetComponent(
-						existing.getCompose().getInclude(), sourceInclude);
-
-					// Add codes
-					Set<String> existingCodes = targetInclude.getConcept().stream()
-						.map(ValueSet.ConceptReferenceComponent::getCode)
-						.collect(Collectors.toSet());
-					for (ValueSet.ConceptReferenceComponent toAdd : sourceInclude.getConcept()) {
-						if (!existingCodes.contains(toAdd.getCode())) {
-							existing.getCompose().getIncludeFirstRep().addConcept(toAdd);
-							addedCodes++;
-						}
-					}
-				}
-
-				if (isNotBlank(valueSet.getName())) {
-					existing.setName(valueSet.getName());
-				}
-
-				ourLog.atInfo()
-					.setMessage("Updating existing LOINC ValueSet {} to add {} codes")
-					.addArgument(valueSet.getId())
-					.addArgument(addedCodes)
-					.log();
-
-				Callable<?> updateFunction = () -> {
-					SystemRequestDetails updateRequestDetails = theStepExecutionDetails.newSystemRequestDetails();
-					return valueSetDao.update(existing, updateRequestDetails);
-				};
-				executeInNewTransactionWithRetry(updateFunction, theStepExecutionDetails);
-
-				getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetCodesAdded(addedCodes);
-
-			} catch (ResourceNotFoundException | ResourceGoneException e) {
-
-				/*
-				 * Ok, we didn't find an existing ValueSet with the given ID, so we'll
-				 * store the ValueSet as a new one.
-				 */
-				getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetsAdded(1);
-
-				int codeCount = 0;
-				if (valueSet.hasCompose()
-					&& valueSet.getCompose().hasInclude()
-					&& valueSet.getCompose().getIncludeFirstRep().hasConcept()) {
-					codeCount = Math.toIntExact(valueSet.getCompose().getIncludeFirstRep().getConcept().stream()
-						.count());
-				}
-
-				ourLog.atInfo()
-					.setMessage("Creating new LOINC ValueSet {} with {} code inclusions")
-					.addArgument(valueSet.getId())
-					.addArgument(codeCount)
-					.log();
-				SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-				valueSetDao.update(valueSet, requestDetails);
-
-				getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetCodesAdded(codeCount);
-
+			int codeCount = 0;
+			if (valueSet.hasCompose()
+				&& valueSet.getCompose().hasInclude()
+				&& valueSet.getCompose().getIncludeFirstRep().hasConcept()) {
+				codeCount = Math.toIntExact(valueSet.getCompose().getIncludeFirstRep().getConcept().stream()
+					.count());
 			}
+
+			ourLog.atInfo()
+				.setMessage("Creating new LOINC ValueSet {} with {} code inclusions")
+				.addArgument(valueSet.getId())
+				.addArgument(codeCount)
+				.log();
+			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+
+			/*
+			 * Create but with an assigned ID. We do this as a create instead of an update
+			 * in order to avoid the possibility of a race condition where a new ValueSet
+			 * is created by another thread while we are trying to also create it here, since
+			 * this would result in us overwriting the other thread's ValueSet.
+			 */
+			valueSet.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE, valueSet.getIdElement().getIdPart());
+			valueSetDao.create(valueSet, requestDetails);
+
+			getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetCodesAdded(codeCount);
+
 		}
 	}
 

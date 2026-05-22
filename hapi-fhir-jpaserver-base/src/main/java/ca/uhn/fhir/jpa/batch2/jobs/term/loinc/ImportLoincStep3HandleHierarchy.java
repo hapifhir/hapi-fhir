@@ -66,12 +66,10 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 	}
 
 	@Override
-	protected void afterCsvProcessingComplete(
+	protected void syncToDb(
 			MyContext theCodeExtractionContext,
 			CodeSystem theCodeSystemToPopulate,
 			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		super.afterCsvProcessingComplete(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
-
 		// Figure out which concepts are at the very top of the hierarchy (i.e. not children of any other concept)
 		// and put them at the root of the CodeSystem to upload
 
@@ -96,6 +94,8 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 				"Imported {} hierarchy entries including {} root entries into LOINC",
 				codeToConcept.size(),
 				rootConceptCount);
+
+		super.syncToDb(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 	}
 
 	private CodeSystem.ConceptDefinitionComponent newConcept(String theCode) {

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -35,7 +36,6 @@ class ImportLoincStep12HandleIeeeMedicalDeviceCodeTest extends BaseImportLoincSt
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myConceptMapDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
 		mockDaoRegistryConceptMap();
-		when(myConceptMapDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
 		mockJobExecutionServices();
 
 		// Test
@@ -48,8 +48,9 @@ class ImportLoincStep12HandleIeeeMedicalDeviceCodeTest extends BaseImportLoincSt
 		verify(myValueSetDao, never()).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 
 		// ConceptMaps
-		verify(myConceptMapDao, times(1)).update(myConceptMapCaptor.capture(), nullable(RequestDetails.class));
+		verify(myConceptMapDao, times(1)).create(myConceptMapCaptor.capture(), nullable(RequestDetails.class));
 		ConceptMap actualConceptMap = myConceptMapCaptor.getAllValues().get(0);
+		assertEquals("loinc-to-ieee-11073-10101-1.234", actualConceptMap.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE));
 		String actualRender = renderConceptMap(actualConceptMap);
 		String expected = """
 			Group: http://loinc.org -> urn:iso:std:iso:11073:10101

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -19,6 +20,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.nullable;
@@ -72,10 +74,11 @@ class ImportLoincStep4HandleAnswerListsTest extends BaseImportLoincStepTest {
 			"ValueSet/LL1892-0-1.234", "ValueSet/LL1001-8-1.234", "ValueSet/LL1000-0-1.234"
 		);
 
-		verify(myValueSetDao, times(3)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		verify(myValueSetDao, times(3)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);
+		assertEquals("LL1000-0-1.234", vs.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE));
 		assertEquals("LL1000-0-1.234", vs.getIdElement().getIdPart());
 		assertEquals("http://loinc.org/vs/LL1000-0", vs.getUrl());
 		assertEquals("1.234", vs.getVersion());
@@ -120,16 +123,39 @@ class ImportLoincStep4HandleAnswerListsTest extends BaseImportLoincStepTest {
 			"ValueSet/LL1892-0-1.234", "ValueSet/LL1001-8-1.234", "ValueSet/LL1000-0-1.234"
 		);
 
-		verify(myValueSetDao, times(3)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		verify(myValueSetDao, times(2)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);
-		assertEquals("LL1000-0-1.234", vs.getIdElement().getIdPart());
-		assertEquals("1", vs.getIdElement().getVersionIdPart());
-		assertEquals("1", vs.getMeta().getVersionId());
+		assertEquals("LL1001-8-1.234", vs.getIdElement().getIdPart());
+		assertEquals("LL1001-8-1.234", vs.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE));
+		assertNull(vs.getIdElement().getVersionIdPart());
+		assertNull(vs.getMeta().getVersionId());
 
 		String valueSetCompose = renderValueSetCompose(vs);
 		String expected = """
+			INCLUDE:
+			http://loinc.org
+			  LA6270-8
+			  LA13836-4
+			  LA13834-9
+			  LA13853-9
+			  LA13860-4
+			  LA13827-3
+			  LA4389-8
+			""";
+		assertEquals(expected, valueSetCompose);
+
+		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		allValueSets = myValueSetCaptor.getAllValues();
+		vs = allValueSets.get(2);
+		assertEquals("LL1000-0-1.234", vs.getIdElement().getIdPart());
+		assertNull(vs.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE));
+		assertEquals("1", vs.getIdElement().getVersionIdPart());
+		assertEquals("1", vs.getMeta().getVersionId());
+
+		 valueSetCompose = renderValueSetCompose(vs);
+		 expected = """
 			INCLUDE:
 			http://loinc.org
 			  EXISTING-1

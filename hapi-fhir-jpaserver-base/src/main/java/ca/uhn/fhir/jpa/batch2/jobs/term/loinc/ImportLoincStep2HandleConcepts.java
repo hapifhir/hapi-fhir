@@ -119,11 +119,11 @@ public class ImportLoincStep2HandleConcepts
 	}
 
 	@Override
-	protected void afterCsvProcessingComplete(
+	protected void syncToDb(
 			CodeExtractionContext theCodeExtractionContext,
 			CodeSystem theCodeSystemToPopulate,
 			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		super.afterCsvProcessingComplete(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
+		super.syncToDb(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 		ourLog.info(
 				"LOINC CodeSystem populated with {} concepts",
 				theCodeSystemToPopulate.getConcept().size());

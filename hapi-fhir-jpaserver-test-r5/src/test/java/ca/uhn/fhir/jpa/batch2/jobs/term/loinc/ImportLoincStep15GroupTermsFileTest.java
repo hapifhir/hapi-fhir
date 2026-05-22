@@ -50,7 +50,7 @@ class ImportLoincStep15GroupTermsFileTest extends BaseImportLoincStepTest{
 			"ValueSet/LG1695-8-1.234"
 		);
 
-		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		verify(myValueSetDao, times(1)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);

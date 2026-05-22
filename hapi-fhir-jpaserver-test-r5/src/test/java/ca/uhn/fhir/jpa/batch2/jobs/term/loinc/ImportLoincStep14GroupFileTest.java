@@ -69,7 +69,7 @@ class ImportLoincStep14GroupFileTest extends BaseImportLoincStepTest{
 		);
 		assertEquals(1, myFileSetCaptor.getAllValues().get(0).getRecordsAddedCounter("step-1").getValueSetInclusionsAdded());
 
-		verify(myValueSetDao, times(2)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		verify(myValueSetDao, times(2)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);
@@ -134,7 +134,7 @@ class ImportLoincStep14GroupFileTest extends BaseImportLoincStepTest{
 			"ValueSet/LG100-4-1.234", "ValueSet/LG1695-8-1.234"
 		);
 
-		verify(myValueSetDao, times(2)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);
@@ -187,7 +187,7 @@ class ImportLoincStep14GroupFileTest extends BaseImportLoincStepTest{
 			"ValueSet/LG100-4-1.234", "ValueSet/LG1695-8-1.234"
 		);
 
-		verify(myValueSetDao, times(2)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);

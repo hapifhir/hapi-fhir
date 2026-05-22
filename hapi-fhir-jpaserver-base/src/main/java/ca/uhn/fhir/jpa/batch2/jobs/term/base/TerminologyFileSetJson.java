@@ -221,6 +221,10 @@ public class TerminologyFileSetJson implements IModelJson {
 		@JsonProperty("valueSetsInclusionsAdded")
 		private int myValueSetInclusionsAdded = 0;
 
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("otherChanges")
+		private int myOtherChanges = 0;
+
 		public void incrementConceptsAdded(int theAddedConceptCount) {
 			Validate.isTrue(theAddedConceptCount >= 0, "theAddedConceptCount must be >= 0");
 			myConceptsAdded += theAddedConceptCount;
@@ -264,6 +268,15 @@ public class TerminologyFileSetJson implements IModelJson {
 		public void incrementValueSetInclusionsAdded(int theAddedValueSetInclusionsCount) {
 			Validate.isTrue(theAddedValueSetInclusionsCount >= 0, "theAddedValueSetInclusionsCount must be >= 0");
 			myValueSetInclusionsAdded += theAddedValueSetInclusionsCount;
+		}
+
+		public void incrementOtherChanges(int theOtherChangesCount) {
+			Validate.isTrue(theOtherChangesCount >= 0, "theOtherChangesCount must be >= 0");
+			myOtherChanges += theOtherChangesCount;
+		}
+
+		public int getOtherChanges() {
+			return myOtherChanges;
 		}
 
 		public int getConceptsAdded() {
@@ -312,6 +325,7 @@ public class TerminologyFileSetJson implements IModelJson {
 			myValueSetsAdded += theRecordsAddedCounter.myValueSetsAdded;
 			myValueSetCodesAdded += theRecordsAddedCounter.myValueSetCodesAdded;
 			myValueSetInclusionsAdded += theRecordsAddedCounter.myValueSetInclusionsAdded;
+			myOtherChanges += theRecordsAddedCounter.myOtherChanges;
 		}
 
 		@Override
@@ -326,6 +340,7 @@ public class TerminologyFileSetJson implements IModelJson {
 			b.appendIfNonZero("valueSetsAdded", myValueSetsAdded);
 			b.appendIfNonZero("valueSetCodesAdded", myValueSetCodesAdded);
 			b.appendIfNonZero("valueSetInclusionsAdded", myValueSetInclusionsAdded);
+			b.appendIfNonZero("otherChanges", myOtherChanges);
 			return b.toString();
 		}
 

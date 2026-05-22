@@ -57,7 +57,6 @@ class ImportLoincStep6HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-to-radlex-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-parts-to-radlex-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
-		when(myConceptMapDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
 		mockDaoRegistryValueSet();
 		mockDaoRegistryConceptMap();
 		mockJobExecutionServices();
@@ -83,7 +82,7 @@ class ImportLoincStep6HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 			"ValueSet/loinc-rsna-radiology-playbook-1.234"
 		);
 
-		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		verify(myValueSetDao, times(1)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);
@@ -102,7 +101,7 @@ class ImportLoincStep6HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		assertEquals(expected, valueSetCompose);
 
 		// ConceptMaps
-		verify(myConceptMapDao, times(2)).update(myConceptMapCaptor.capture(), nullable(RequestDetails.class));
+		verify(myConceptMapDao, times(2)).create(myConceptMapCaptor.capture(), nullable(RequestDetails.class));
 		ConceptMap actualConceptMap = myConceptMapCaptor.getAllValues().get(0);
 		String actualRender = renderConceptMap(actualConceptMap);
 		expected = """
@@ -154,14 +153,13 @@ class ImportLoincStep6HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 			.addTarget()
 			.setCode("EXISTING_TARGET");
 		when(myConceptMapDao.read(eq(new IdType("loinc-parts-to-radlex-1.234")), any())).thenReturn(conceptMap);
-		when(myConceptMapDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
 		mockJobExecutionServices();
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
-		verify(myConceptMapDao, times(2)).update(myConceptMapCaptor.capture(), nullable(RequestDetails.class));
+		verify(myConceptMapDao, times(2)).create(myConceptMapCaptor.capture(), nullable(RequestDetails.class));
 		ConceptMap actualConceptMap = myConceptMapCaptor.getAllValues().get(1);
 		String actualRender = renderConceptMap(actualConceptMap);
 		String expected = """

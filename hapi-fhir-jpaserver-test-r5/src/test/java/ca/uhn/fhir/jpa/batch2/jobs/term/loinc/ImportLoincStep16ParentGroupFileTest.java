@@ -47,11 +47,13 @@ class ImportLoincStep16ParentGroupFileTest extends BaseImportLoincStepTest{
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
 
 		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
+		ImportLoincFileSetJson fileSet = myFileSetCaptor.getAllValues().get(0);
+		assertThat(fileSet.getResourcesToActivate()).containsExactlyInAnyOrder(
 			"ValueSet/LG100-4-1.234"
 		);
+		assertEquals(1, fileSet.getRecordsAddedCounter("step-1").getValueSetsAdded());
 
-		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
+		verify(myValueSetDao, times(1)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);
@@ -93,9 +95,11 @@ class ImportLoincStep16ParentGroupFileTest extends BaseImportLoincStepTest{
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
 
 		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
+		ImportLoincFileSetJson fileSet = myFileSetCaptor.getAllValues().get(0);
+		assertThat(fileSet.getResourcesToActivate()).containsExactlyInAnyOrder(
 			"ValueSet/LG100-4-1.234"
 		);
+		assertEquals(1, fileSet.getRecordsAddedCounter("step-1").getOtherChanges());
 
 		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();

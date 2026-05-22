@@ -97,16 +97,6 @@ public class ImportLoincJobAppCtx {
 						ImportLoincFileSetJson.class,
 						importLoincStep8HandleDocumentOntology())
 				.addIntermediateStep(
-						"import-top-2000-codes-us",
-						"Import LOINC Top 2000 Codes - US",
-						ImportLoincFileSetJson.class,
-						importLoincStep9HandleTop2000CodesUs())
-				.addIntermediateStep(
-						"import-top-2000-codes-si",
-						"Import LOINC Top 2000 Codes - SI",
-						ImportLoincFileSetJson.class,
-						importLoincStep10HandleTop2000CodesSi())
-				.addIntermediateStep(
 						"import-univeral-lab-orderset",
 						"Import LOINC Lab Order Set",
 						ImportLoincFileSetJson.class,
@@ -234,22 +224,6 @@ public class ImportLoincJobAppCtx {
 	@Bean
 	public ImportLoincStep8HandleDocumentOntology importLoincStep8HandleDocumentOntology() {
 		return new ImportLoincStep8HandleDocumentOntology();
-	}
-
-	/**
-	 * Step 9: Top 2000 Codes (US)
-	 */
-	@Bean
-	public ImportLoincStep9HandleTop2000CodesUs importLoincStep9HandleTop2000CodesUs() {
-		return new ImportLoincStep9HandleTop2000CodesUs();
-	}
-
-	/**
-	 * Step 10: Top 2000 Codes (SI)
-	 */
-	@Bean
-	public ImportLoincStep10HandleTop2000CodesSi importLoincStep10HandleTop2000CodesSi() {
-		return new ImportLoincStep10HandleTop2000CodesSi();
 	}
 
 	/**
