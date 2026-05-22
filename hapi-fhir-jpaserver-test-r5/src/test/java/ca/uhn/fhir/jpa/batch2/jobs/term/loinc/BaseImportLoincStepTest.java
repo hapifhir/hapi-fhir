@@ -91,7 +91,7 @@ abstract class BaseImportLoincStepTest {
 	ImportLoincFileSetJson newData() {
 		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
 		importLoincFileSetJson.setCodeSystemStagingVersionId("my-staging-version-id");
-		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
+		importLoincFileSetJson.setCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
 		return importLoincFileSetJson;
 	}

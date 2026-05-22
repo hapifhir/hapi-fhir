@@ -87,7 +87,7 @@ class ImportLoincStep2HandleConceptsTest extends BaseImportLoincStepTest {
 		importLoincFileSetJson.addChunk("step-2", "filename.txt", "step-2-chunk-2");
 		importLoincFileSetJson.addChunk("step-3", "filename.txt", "step-3-chunk-1");
 		importLoincFileSetJson.addChunk("step-3", "filename.txt", "step-3-chunk-2");
-		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
+		importLoincFileSetJson.setCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 
 		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
@@ -124,7 +124,7 @@ class ImportLoincStep2HandleConceptsTest extends BaseImportLoincStepTest {
 		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
 		importLoincFileSetJson.addResourceToActivate("CodeSystem/A");
 		importLoincFileSetJson.addResourceToActivate("CodeSystem/B");
-		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
+		importLoincFileSetJson.setCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 
 		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 

@@ -1,13 +1,17 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincFileSetJson;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.HapiToStringBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.r4.model.CodeSystem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +42,34 @@ public class TerminologyFileSetJson implements IModelJson {
 	private Set<String> myResourcesToActivate;
 	@JsonProperty("stepIdToRecordsAdded")
 	private Map<String, RecordsAddedCounter> myStepIdToRecordsAdded;
+	@JsonProperty("codeSystemXml")
+	private String myCodeSystemXml;
+	@JsonProperty("codeSystemStagingVersionId")
+	private String myCodeSystemStagingVersionId;
+	@JsonIgnore
+	private CodeSystem myCodeSystemXmlParsed;
+
+	/**
+	 * Constructor
+	 */
+	public TerminologyFileSetJson() {
+		super();
+	}
+
+	/**
+	 * Copy constructor
+	 *
+	 * @param theTerminologyFileSetJson The value to copy from
+	 */
+	public TerminologyFileSetJson(TerminologyFileSetJson theTerminologyFileSetJson) {
+		myStepIdToFutureChunks = theTerminologyFileSetJson.myStepIdToFutureChunks;
+		myChunkForCurrentStep = theTerminologyFileSetJson.myChunkForCurrentStep;
+		myResourcesToActivate = theTerminologyFileSetJson.myResourcesToActivate;
+		myStepIdToRecordsAdded = theTerminologyFileSetJson.myStepIdToRecordsAdded;
+		myCodeSystemXml = theTerminologyFileSetJson.myCodeSystemXml;
+		myCodeSystemStagingVersionId = theTerminologyFileSetJson.myCodeSystemStagingVersionId;
+		myCodeSystemXmlParsed = theTerminologyFileSetJson.myCodeSystemXmlParsed;
+	}
 
 	public void addChunk(String theStepId, String theSourceFilename, String theChunkAttachmentId) {
 		Validate.notBlank(theStepId, "theStepId must not be null or blank");
@@ -83,10 +115,16 @@ public class TerminologyFileSetJson implements IModelJson {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <OT extends TerminologyFileSetJson> OT cloneWithOnlyCopyForwardData() {
-		TerminologyFileSetJson retVal = new TerminologyFileSetJson();
-		return (OT) retVal;
+	public TerminologyFileSetJson cloneWithOnlyCopyForwardData() {
+		ImportLoincFileSetJson retVal = new ImportLoincFileSetJson();
+
+		retVal.setCodeSystemXml(getCodeSystemXml());
+		retVal.setCodeSystemStagingVersionId(getCodeSystemStagingVersionId());
+		retVal.setResourcesToActivate(getResourcesToActivate());
+
+		return retVal;
 	}
+
 
 	public boolean isEmpty() {
 		return myChunkForCurrentStep == null &&
@@ -104,6 +142,36 @@ public class TerminologyFileSetJson implements IModelJson {
 
 	public RecordsAddedCounter getRecordsAddedCounter(String theStepId) {
 		return getStepIdToRecordsAdded().computeIfAbsent(theStepId, k -> new RecordsAddedCounter());
+	}
+
+	public CodeSystem getLoincCodeSystem() {
+		if (myCodeSystemXmlParsed == null) {
+			myCodeSystemXmlParsed =
+				FhirContext.forR4Cached().newXmlParser().parseResource(CodeSystem.class, getCodeSystemXml());
+		}
+		return myCodeSystemXmlParsed;
+	}
+
+	public void setLoincCodeSystem(@Nonnull CodeSystem theCodeSystem) {
+		setCodeSystemXml(FhirContext.forR4Cached().newXmlParser().encodeResourceToString(theCodeSystem));
+		myCodeSystemXmlParsed = theCodeSystem;
+	}
+
+	public String getCodeSystemXml() {
+		return myCodeSystemXml;
+	}
+
+	public void setCodeSystemXml(String theCodeSystemXml) {
+		myCodeSystemXml = theCodeSystemXml;
+		myCodeSystemXmlParsed = null;
+	}
+
+	public String getCodeSystemStagingVersionId() {
+		return myCodeSystemStagingVersionId;
+	}
+
+	public void setCodeSystemStagingVersionId(String theCodeSystemStagingVersionId) {
+		myCodeSystemStagingVersionId = theCodeSystemStagingVersionId;
 	}
 
 	public static class Chunk implements IModelJson {
@@ -345,5 +413,6 @@ public class TerminologyFileSetJson implements IModelJson {
 		}
 
 	}
+
 
 }

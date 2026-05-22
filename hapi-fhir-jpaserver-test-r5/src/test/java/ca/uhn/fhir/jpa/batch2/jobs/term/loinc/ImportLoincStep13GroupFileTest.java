@@ -53,7 +53,7 @@ class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 
 		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
 		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("file.csv", "my-chunk-attachment-id"));
-		importLoincFileSetJson.setLoincCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
+		importLoincFileSetJson.setCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
 
 		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");

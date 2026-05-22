@@ -6,7 +6,6 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -20,10 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL;
@@ -64,7 +61,7 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		ourLog.info("Processing 'loinc.xml' file");
 
 		String loincCodeSystemXml = new String(theBytes, StandardCharsets.UTF_8);
-		theFileSet.setLoincCodeSystemXml(loincCodeSystemXml);
+		theFileSet.setCodeSystemXml(loincCodeSystemXml);
 
 		CodeSystem cs = theFileSet.getLoincCodeSystem();
 		if (!"http://loinc.org".equals(cs.getUrl())) {
