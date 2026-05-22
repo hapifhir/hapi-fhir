@@ -127,7 +127,12 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 	}
 
 	@Override
-	public boolean isSuppressMessageId(String path, String messageId) {
+	public String relativeDatePlaceHolder() {
+		return "";
+	}
+
+	@Override
+	public boolean isSuppressMessageId(String path, String messageId, Object... theMessageArguments) {
 		if (myValidationSettings != null
 				&& !myValidationSettings
 						.getLocalReferenceValidationDefaultPolicy()

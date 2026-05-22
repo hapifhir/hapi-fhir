@@ -29,6 +29,7 @@ import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.profilemodel.PEBuilder;
+import org.hl7.fhir.r5.terminologies.client.TerminologyClientManager;
 import org.hl7.fhir.r5.terminologies.expansion.ValueSetExpansionOutcome;
 import org.hl7.fhir.r5.terminologies.utilities.CodingValidationRequest;
 import org.hl7.fhir.r5.terminologies.utilities.ValidationResult;
@@ -467,6 +468,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public TimeTracker clock() {
+		return null;
+	}
+
+	@Override
+	public TerminologyClientManager getTerminologyClientManager() {
 		return null;
 	}
 
