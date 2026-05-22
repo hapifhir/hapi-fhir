@@ -1,18 +1,24 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep16ParentGroupFile
+public class ImportLoincStep10HandleUniversalLabOrderSet
 		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
 				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+
+	private static final String VS_ID_BASE = "loinc-universal-order-set";
+	private static final String VS_URI = "http://loinc.org/vs/loinc-universal-order-set";
+	private static final String VS_NAME = "LOINC Universal Order Set";
 
 	@Override
 	protected MyBaseContext newContextObject(
@@ -24,8 +30,8 @@ public class ImportLoincStep16ParentGroupFile
 	@Override
 	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
-				LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE,
-				LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT));
+				LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE,
+				LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT));
 	}
 
 	@Override
@@ -35,17 +41,11 @@ public class ImportLoincStep16ParentGroupFile
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
 		ImportLoincFileSetJson theData, String theSourceFilename) {
-		String parentGroupId = trim(theRecord.get("ParentGroupId"));
-		String parentGroupName = trim(theRecord.get("ParentGroup"));
+		String loincNumber = trim(theRecord.get("LOINC_NUM"));
+		String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
+		String orderObs = trim(theRecord.get("ORDER_OBS"));
 
-		getValueSet(
-			theStepExecutionDetails, theJobParameters,
-				theData,
-				theContext,
-				parentGroupId,
-				ImportLoincStep14GroupFile.VS_URI_PREFIX + parentGroupId,
-				parentGroupName,
-				null);
-
+		ValueSet valueSet = getValueSet(theStepExecutionDetails, theJobParameters, theData, theContext, VS_ID_BASE, VS_URI, VS_NAME, null);
+		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
 	}
 }

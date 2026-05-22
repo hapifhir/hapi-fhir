@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
@@ -12,13 +15,9 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep11HandleUniversalLabOrderSet
+public class ImportLoincStep14GroupTermsFile
 		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
 				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
-
-	private static final String VS_ID_BASE = "loinc-universal-order-set";
-	private static final String VS_URI = "http://loinc.org/vs/loinc-universal-order-set";
-	private static final String VS_NAME = "LOINC Universal Order Set";
 
 	@Override
 	protected MyBaseContext newContextObject(
@@ -30,8 +29,15 @@ public class ImportLoincStep11HandleUniversalLabOrderSet
 	@Override
 	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
-				LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE,
-				LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT));
+				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE,
+				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT));
+	}
+
+	// FIXME: remove
+	@Nonnull
+	@Override
+	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<ImportLoincFileSetJson> theDataSink) throws JobExecutionFailedException {
+		return super.run(theStepExecutionDetails, theDataSink);
 	}
 
 	@Override
@@ -41,11 +47,17 @@ public class ImportLoincStep11HandleUniversalLabOrderSet
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
 		ImportLoincFileSetJson theData, String theSourceFilename) {
-		String loincNumber = trim(theRecord.get("LOINC_NUM"));
-		String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
-		String orderObs = trim(theRecord.get("ORDER_OBS"));
+		String groupId = trim(theRecord.get("GroupId"));
+		String loincNumber = trim(theRecord.get("LoincNumber"));
 
-		ValueSet valueSet = getValueSet(theStepExecutionDetails, theJobParameters, theData, theContext, VS_ID_BASE, VS_URI, VS_NAME, null);
-		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
+		ValueSet valueSet = getValueSet(
+			theStepExecutionDetails, theJobParameters,
+				theData,
+				theContext,
+				groupId,
+				ImportLoincStep13GroupFile.VS_URI_PREFIX + groupId,
+				null,
+				null);
+		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, null);
 	}
 }

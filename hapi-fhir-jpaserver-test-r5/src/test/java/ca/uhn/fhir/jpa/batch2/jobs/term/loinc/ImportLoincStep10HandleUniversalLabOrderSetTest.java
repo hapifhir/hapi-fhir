@@ -17,22 +17,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.nullable;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep15GroupTermsFileTest extends BaseImportLoincStepTest{
+class ImportLoincStep10HandleUniversalLabOrderSetTest extends BaseImportLoincStepTest{
 
 	@InjectMocks
-	private ImportLoincStep15GroupTermsFile mySvc;
+	private ImportLoincStep10HandleUniversalLabOrderSet mySvc;
 
 	@Test
 	void testProcess() {
 		// Setup
-		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/GroupLoincTerms.csv";
+		String classpath = "loinc-ver/v269/AccessoryFiles/LoincUniversalLabOrdersValueSet/LoincUniversalLabOrdersValueSet.csv";
 		mockFetchAttachment(classpath);
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
@@ -47,28 +43,34 @@ class ImportLoincStep15GroupTermsFileTest extends BaseImportLoincStepTest{
 
 		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
 		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/LG1695-8-1.234"
+			"ValueSet/loinc-universal-order-set-1.234"
 		);
 
 		verify(myValueSetDao, times(1)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
 		allValueSets.sort(Comparator.comparing(a -> a.getIdElement().getIdPart()));
 		ValueSet vs = allValueSets.get(0);
-		assertEquals("LG1695-8-1.234", vs.getIdElement().getIdPart());
-		assertEquals("http://loinc.org/vs/LG1695-8", vs.getUrl());
+		assertEquals("loinc-universal-order-set-1.234", vs.getIdElement().getIdPart());
+		assertEquals("http://loinc.org/vs/loinc-universal-order-set", vs.getUrl());
 		assertEquals("1.234", vs.getVersion());
 
 		String valueSetCompose = renderValueSetCompose(vs);
 		String expected = """
 			INCLUDE:
 			http://loinc.org
-			  17424-3
-			  13006-2
+			  42176-8
+			  53835-5
+			  31019-3
+			  6765-2
+			  1668-3
+			  32854-2
+			  49054-0
+			  62292-8
+			  44907-4
 			""";
 		assertEquals(expected, valueSetCompose);
 
 	}
-
 
 
 

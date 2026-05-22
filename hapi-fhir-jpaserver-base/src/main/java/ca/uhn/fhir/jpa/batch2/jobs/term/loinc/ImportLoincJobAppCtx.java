@@ -65,7 +65,7 @@ public class ImportLoincJobAppCtx {
 						"import-hierarchy-concepts",
 						"Import LOINC hierarchy Concepts",
 						ImportLoincFileSetJson.class,
-					importLoincStep3HandleHierarchyConcepts())
+					importLoincStep4HandleHierarchyConcepts())
 				.addIntermediateStep(
 						"import-hierarchy",
 						"Import LOINC hierarchy",
@@ -75,77 +75,77 @@ public class ImportLoincJobAppCtx {
 						"import-answer-lists",
 						"Import LOINC answer lists",
 						ImportLoincFileSetJson.class,
-						importLoincStep4AnswerLists())
+						importLoincStep5AnswerLists())
 				.addIntermediateStep(
 						"import-answer-list-links",
 						"Import LOINC answer list links",
 						ImportLoincFileSetJson.class,
-						importLoincStep5AnswerListLinks())
+						importLoincStep6AnswerListLinks())
 				.addIntermediateStep(
 						"import-rsna-playbook",
 						"Import LOINC RSNA playbook",
 						ImportLoincFileSetJson.class,
-						importLoincStep6RsnaPlaybook())
+						importLoincStep7RsnaPlaybook())
 				.addIntermediateStep(
 						"import-part-related-code-mapping",
 						"Import LOINC Part Related Code Mappings",
 						ImportLoincFileSetJson.class,
-						importLoincStep7PartRelatedCodeMapping())
+						importLoincStep8PartRelatedCodeMapping())
 				.addIntermediateStep(
 						"import-document-ontology",
 						"Import LOINC Document Ontology",
 						ImportLoincFileSetJson.class,
-						importLoincStep8HandleDocumentOntology())
+						importLoincStep9HandleDocumentOntology())
 				.addIntermediateStep(
 						"import-univeral-lab-orderset",
 						"Import LOINC Lab Order Set",
 						ImportLoincFileSetJson.class,
-						importLoincStep11HandleUniversalLabOrderSet())
+						importLoincStep10HandleUniversalLabOrderSet())
 				.addIntermediateStep(
 						"import-ieee-medical-device-code",
 						"Import LOINC IEEE Medical Device Codes",
 						ImportLoincFileSetJson.class,
-						importLoincStep12HandleIeeeMedicalDeviceCode())
+						importLoincStep11HandleIeeeMedicalDeviceCode())
 				.addIntermediateStep(
 						"import-imaging-document-code",
 						"Import LOINC Imaging Document Codes",
 						ImportLoincFileSetJson.class,
-						importLoincStep13ImagingDocumentCode())
+						importLoincStep12ImagingDocumentCode())
 				.addIntermediateStep(
 						"import-group-file",
 						"Import LOINC Group File",
 						ImportLoincFileSetJson.class,
-						importLoincStep14GroupFile())
+						importLoincStep13GroupFile())
 				.addIntermediateStep(
 						"import-group-terms-file",
 						"Import LOINC Group Terms File",
 						ImportLoincFileSetJson.class,
-						importLoincStep15GroupTermsFile())
+						importLoincStep14GroupTermsFile())
 				.addIntermediateStep(
 						"import-parent-group-file",
 						"Import LOINC Parent Group File",
 						ImportLoincFileSetJson.class,
-						importLoincStep16ParentGroupFile())
+						importLoincStep15ParentGroupFile())
 				.addIntermediateStep(
 						"import-part-link",
 						"Import LOINC Part Link File",
 						ImportLoincFileSetJson.class,
-						importLoincStep17PartLink())
+						importLoincStep16PartLink())
 				.addIntermediateStep(
 						"import-consumer-name",
 						"Import LOINC Consumer Names",
 						ImportLoincFileSetJson.class,
-						importLoincStep18ConsumerName())
+						importLoincStep17ConsumerName())
 				.addIntermediateStep(
 						"import-coding-properties",
 						"Import LOINC Coding Properties",
 						ImportLoincFileSetJson.class,
-						importLoincStep19CodingProperties())
+						importLoincStep18CodingProperties())
 				.addIntermediateStep(
 						"import-linguistic-variant",
 						"Import LOINC Linguistic Variants",
 						ImportLoincFileSetJson.class,
-						importLoincStep20LinguisticVariant())
+						importLoincStep19LinguisticVariant())
 				.addFinalReducerStep(
 						"finalize-import",
 						"Finalize LOINC Import",
@@ -171,14 +171,6 @@ public class ImportLoincJobAppCtx {
 	}
 
 	/**
-	 * Step 3A: Import LOINC hierarchy Concepts
-	 */
-	@Bean
-	public ImportLoincStep3aHandleHierarchyConcepts importLoincStep3HandleHierarchyConcepts() {
-		return new ImportLoincStep3aHandleHierarchyConcepts();
-	}
-
-	/**
 	 * Step 3: Import LOINC hierarchy
 	 */
 	@Bean
@@ -187,123 +179,131 @@ public class ImportLoincJobAppCtx {
 	}
 
 	/**
-	 * Step 4: Import LOINC answer lists
+	 * Step 4: Import LOINC hierarchy Concepts
 	 */
 	@Bean
-	public ImportLoincStep4HandleAnswerLists importLoincStep4AnswerLists() {
-		return new ImportLoincStep4HandleAnswerLists();
+	public ImportLoincStep4HandleHierarchyConcepts importLoincStep4HandleHierarchyConcepts() {
+		return new ImportLoincStep4HandleHierarchyConcepts();
 	}
 
 	/**
-	 * Step 5: Import LOINC answer list links
+	 * Step 5: Import LOINC answer lists
 	 */
 	@Bean
-	public ImportLoincStep5HandleAnswerListLinks importLoincStep5AnswerListLinks() {
-		return new ImportLoincStep5HandleAnswerListLinks();
+	public ImportLoincStep5HandleAnswerLists importLoincStep5AnswerLists() {
+		return new ImportLoincStep5HandleAnswerLists();
 	}
 
 	/**
-	 * Step 6: Import RSNA Playbook
+	 * Step 6: Import LOINC answer list links
 	 */
 	@Bean
-	public ImportLoincStep6HandleRsnaPlaybook importLoincStep6RsnaPlaybook() {
-		return new ImportLoincStep6HandleRsnaPlaybook();
+	public ImportLoincStep6HandleAnswerListLinks importLoincStep6AnswerListLinks() {
+		return new ImportLoincStep6HandleAnswerListLinks();
 	}
 
 	/**
-	 * Step 7: Import Part-Related Code Mappings
+	 * Step 7: Import RSNA Playbook
 	 */
 	@Bean
-	public ImportLoincStep7HandlePartRelatedCodeMapping importLoincStep7PartRelatedCodeMapping() {
-		return new ImportLoincStep7HandlePartRelatedCodeMapping();
+	public ImportLoincStep7HandleRsnaPlaybook importLoincStep7RsnaPlaybook() {
+		return new ImportLoincStep7HandleRsnaPlaybook();
 	}
 
 	/**
-	 * Step 8: Import Document Ontology
+	 * Step 8: Import Part-Related Code Mappings
 	 */
 	@Bean
-	public ImportLoincStep8HandleDocumentOntology importLoincStep8HandleDocumentOntology() {
-		return new ImportLoincStep8HandleDocumentOntology();
+	public ImportLoincStep8HandlePartRelatedCodeMapping importLoincStep8PartRelatedCodeMapping() {
+		return new ImportLoincStep8HandlePartRelatedCodeMapping();
 	}
 
 	/**
-	 * Step 11: Universal Lab Order Set
+	 * Step 9: Import Document Ontology
 	 */
 	@Bean
-	public ImportLoincStep11HandleUniversalLabOrderSet importLoincStep11HandleUniversalLabOrderSet() {
-		return new ImportLoincStep11HandleUniversalLabOrderSet();
+	public ImportLoincStep9HandleDocumentOntology importLoincStep9HandleDocumentOntology() {
+		return new ImportLoincStep9HandleDocumentOntology();
 	}
 
 	/**
-	 * Step 12: IEEE Medical Device Code
+	 * Step 10: Universal Lab Order Set
 	 */
 	@Bean
-	public ImportLoincStep12HandleIeeeMedicalDeviceCode importLoincStep12HandleIeeeMedicalDeviceCode() {
-		return new ImportLoincStep12HandleIeeeMedicalDeviceCode();
+	public ImportLoincStep10HandleUniversalLabOrderSet importLoincStep10HandleUniversalLabOrderSet() {
+		return new ImportLoincStep10HandleUniversalLabOrderSet();
 	}
 
 	/**
-	 * Step 13: Imaging Document Code
+	 * Step 11: IEEE Medical Device Code
 	 */
 	@Bean
-	public ImportLoincStep13ImagingDocumentCode importLoincStep13ImagingDocumentCode() {
-		return new ImportLoincStep13ImagingDocumentCode();
+	public ImportLoincStep11HandleIeeeMedicalDeviceCode importLoincStep11HandleIeeeMedicalDeviceCode() {
+		return new ImportLoincStep11HandleIeeeMedicalDeviceCode();
 	}
 
 	/**
-	 * Step 14: Group File
+	 * Step 12: Imaging Document Code
 	 */
 	@Bean
-	public ImportLoincStep14GroupFile importLoincStep14GroupFile() {
-		return new ImportLoincStep14GroupFile();
+	public ImportLoincStep12ImagingDocumentCode importLoincStep12ImagingDocumentCode() {
+		return new ImportLoincStep12ImagingDocumentCode();
 	}
 
 	/**
-	 * Step 15: Group Terms File
+	 * Step 13: Group File
 	 */
 	@Bean
-	public ImportLoincStep15GroupTermsFile importLoincStep15GroupTermsFile() {
-		return new ImportLoincStep15GroupTermsFile();
+	public ImportLoincStep13GroupFile importLoincStep13GroupFile() {
+		return new ImportLoincStep13GroupFile();
 	}
 
 	/**
-	 * Step 16: Parent Group File
+	 * Step 14: Group Terms File
 	 */
 	@Bean
-	public ImportLoincStep16ParentGroupFile importLoincStep16ParentGroupFile() {
-		return new ImportLoincStep16ParentGroupFile();
+	public ImportLoincStep14GroupTermsFile importLoincStep14GroupTermsFile() {
+		return new ImportLoincStep14GroupTermsFile();
 	}
 
 	/**
-	 * Step 17: Part Link
+	 * Step 15: Parent Group File
 	 */
 	@Bean
-	public ImportLoincStep17PartLink importLoincStep17PartLink() {
-		return new ImportLoincStep17PartLink();
+	public ImportLoincStep15ParentGroupFile importLoincStep15ParentGroupFile() {
+		return new ImportLoincStep15ParentGroupFile();
 	}
 
 	/**
-	 * Step 18: Consumer Name
+	 * Step 16: Part Link
 	 */
 	@Bean
-	public ImportLoincStep18ConsumerName importLoincStep18ConsumerName() {
-		return new ImportLoincStep18ConsumerName();
+	public ImportLoincStep16PartLink importLoincStep16PartLink() {
+		return new ImportLoincStep16PartLink();
 	}
 
 	/**
-	 * Step 19: Coding Properties
+	 * Step 17: Consumer Name
 	 */
 	@Bean
-	public ImportLoincStep19CodingProperties importLoincStep19CodingProperties() {
-		return new ImportLoincStep19CodingProperties();
+	public ImportLoincStep17ConsumerName importLoincStep17ConsumerName() {
+		return new ImportLoincStep17ConsumerName();
 	}
 
 	/**
-	 * Step 20: Linguistic Variant
+	 * Step 18: Coding Properties
 	 */
 	@Bean
-	public ImportLoincStep20LinguisticVariant importLoincStep20LinguisticVariant() {
-		return new ImportLoincStep20LinguisticVariant();
+	public ImportLoincStep18CodingProperties importLoincStep18CodingProperties() {
+		return new ImportLoincStep18CodingProperties();
+	}
+
+	/**
+	 * Step 19: Linguistic Variant
+	 */
+	@Bean
+	public ImportLoincStep19LinguisticVariant importLoincStep19LinguisticVariant() {
+		return new ImportLoincStep19LinguisticVariant();
 	}
 
 	@Bean

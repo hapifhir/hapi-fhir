@@ -1,36 +1,16 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
-import ca.uhn.fhir.batch2.api.AttachmentDetails;
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.ClasspathUtil;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincStep6HandleRsnaPlaybookTest.renderConceptMap;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincStep7HandleRsnaPlaybookTest.renderConceptMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,10 +21,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep7HandlePartRelatedCodeMappingTest extends BaseImportLoincStepTest {
+class ImportLoincStep8HandlePartRelatedCodeMappingTest extends BaseImportLoincStepTest {
 
 	@InjectMocks
-	private ImportLoincStep7HandlePartRelatedCodeMapping mySvc;
+	private ImportLoincStep8HandlePartRelatedCodeMapping mySvc;
 
 	@Test
 	void testProcess() {

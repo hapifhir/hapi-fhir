@@ -4,13 +4,9 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE;
@@ -19,7 +15,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARC
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep3aHandleHierarchyConcepts extends BaseImportLoincStep<ImportLoincStep3aHandleHierarchyConcepts.MyContext> {
+public class ImportLoincStep4HandleHierarchyConcepts extends BaseImportLoincStep<ImportLoincStep4HandleHierarchyConcepts.MyContext> {
 
 	@Override
 	protected MyContext newContextObject(

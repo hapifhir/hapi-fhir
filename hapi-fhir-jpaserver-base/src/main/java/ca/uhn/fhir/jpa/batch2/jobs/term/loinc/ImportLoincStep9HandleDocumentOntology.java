@@ -20,9 +20,9 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler.DOCUMENT_O
 import static ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_URI;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep8HandleDocumentOntology
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep8HandleDocumentOntology.MyBaseContext> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep8HandleDocumentOntology.class);
+public class ImportLoincStep9HandleDocumentOntology
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep9HandleDocumentOntology.MyBaseContext> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep9HandleDocumentOntology.class);
 
 	@Override
 	protected MyBaseContext newContextObject(

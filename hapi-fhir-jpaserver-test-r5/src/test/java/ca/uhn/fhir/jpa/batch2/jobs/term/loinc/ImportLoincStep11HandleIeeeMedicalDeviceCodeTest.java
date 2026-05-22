@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincStep6HandleRsnaPlaybookTest.renderConceptMap;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincStep7HandleRsnaPlaybookTest.renderConceptMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -23,10 +22,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep12HandleIeeeMedicalDeviceCodeTest extends BaseImportLoincStepTest {
+class ImportLoincStep11HandleIeeeMedicalDeviceCodeTest extends BaseImportLoincStepTest {
 
 	@InjectMocks
-	private ImportLoincStep12HandleIeeeMedicalDeviceCode mySvc;
+	private ImportLoincStep11HandleIeeeMedicalDeviceCode mySvc;
 
 	@Test
 	void testProcess() {

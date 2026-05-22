@@ -58,6 +58,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
+import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
@@ -78,6 +81,8 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBi
 import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.r4.model.Coding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -112,7 +117,7 @@ public class TermConcept implements Serializable {
 	public static final int MAX_CODE_LENGTH = 500;
 	public static final int MAX_DESC_LENGTH = 400;
 	public static final int MAX_DISP_LENGTH = 500;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(TermConcept.class);
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -212,9 +217,15 @@ public class TermConcept implements Serializable {
 	@JdbcTypeCode(SqlTypes.TINYINT)
 	private EntityIndexStatusEnum myIndexStatus;
 
+	/**
+	 * A custom @ColumnTransformer was added to this column in 8.12.0 so that as of this
+	 * release, we'll never try to read it back. It should be safe to remove
+	 * after 2 more releases.
+	 */
 	@Deprecated(since = "7.2.0")
 	@Lob
-	@Column(name = "PARENT_PIDS", nullable = true)
+	@Column(name = "PARENT_PIDS", nullable = true, insertable = false, updatable = false)
+	@ColumnTransformer(read = "NULL", write = "?")
 	private String myParentPids;
 
 	@FullTextField(
@@ -236,6 +247,8 @@ public class TermConcept implements Serializable {
 
 	@Transient
 	private boolean mySupportLegacyLob = false;
+	@Transient
+	private boolean myDontPopulateParentPids;
 
 	public TermConcept() {
 		super();
@@ -283,7 +296,7 @@ public class TermConcept implements Serializable {
 	}
 
 	private TermConceptProperty addProperty(
-			@Nonnull org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum thePropertyType,
+			@Nonnull TermConceptPropertyTypeEnum thePropertyType,
 			@Nonnull String thePropertyName,
 			@Nonnull String thePropertyValue) {
 		Validate.notBlank(thePropertyName);
@@ -307,7 +320,7 @@ public class TermConcept implements Serializable {
 			@Nonnull String thePropertyCode,
 			String theDisplayName) {
 		return addProperty(
-						org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.CODING,
+						TermConceptPropertyTypeEnum.CODING,
 						thePropertyName,
 						thePropertyCode)
 				.setCodeSystem(thePropertyCodeSystem)
@@ -316,7 +329,7 @@ public class TermConcept implements Serializable {
 
 	public TermConceptProperty addPropertyString(@Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
 		return addProperty(
-				org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.STRING,
+				TermConceptPropertyTypeEnum.STRING,
 				thePropertyName,
 				thePropertyValue);
 	}
@@ -376,7 +389,7 @@ public class TermConcept implements Serializable {
 		List<Coding> retVal = new ArrayList<>();
 		for (TermConceptProperty next : getProperties()) {
 			if (thePropertyName.equals(next.getKey())) {
-				if (next.getType() == org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.CODING) {
+				if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
 					Coding coding = new Coding();
 					coding.setSystem(next.getCodeSystem());
 					coding.setCode(next.getValue());
@@ -477,7 +490,7 @@ public class TermConcept implements Serializable {
 		List<String> retVal = new ArrayList<>();
 		for (TermConceptProperty next : getProperties()) {
 			if (thePropertyName.equals(next.getKey())) {
-				if (next.getType() == org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum.STRING) {
+				if (next.getType() == TermConceptPropertyTypeEnum.STRING) {
 					retVal.add(next.getValue());
 				}
 			}
@@ -539,17 +552,19 @@ public class TermConcept implements Serializable {
 	@PreUpdate
 	@PrePersist
 	public void prePersist() {
-		if (isNull(myParentPids) && isNull(myParentPidsVc)) {
-			Set<Long> parentPids = new HashSet<>();
-			TermConcept entity = this;
-			parentPids(entity, parentPids);
-			entity.setParentPids(parentPids);
+		if (!myDontPopulateParentPids) {
+			if (isNull(myParentPids) && isNull(myParentPidsVc)) {
+				Set<Long> parentPids = new HashSet<>();
+				TermConcept entity = this;
+				parentPids(entity, parentPids);
+				entity.setParentPids(parentPids);
 
-			ourLog.trace("Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
-		}
+				ourLog.trace("Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
+			}
 
-		if (!mySupportLegacyLob) {
-			clearParentPidsLob();
+			if (!mySupportLegacyLob) {
+				clearParentPidsLob();
+			}
 		}
 	}
 
@@ -610,6 +625,14 @@ public class TermConcept implements Serializable {
 
 	public PartitionablePartitionId getPartitionId() {
 		return PartitionablePartitionId.with(myPartitionIdValue, null);
+	}
+
+	public void setDontPopulateParentPids(boolean theDontPopulateParentPids) {
+		myDontPopulateParentPids = theDontPopulateParentPids;
+	}
+
+	public boolean isDontPopulateParentPids() {
+		return myDontPopulateParentPids;
 	}
 
 	public static class TermConceptPkValueBridge implements ValueBridge<TermConceptPk, Long> {

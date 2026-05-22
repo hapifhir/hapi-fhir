@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
@@ -15,9 +12,13 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep15GroupTermsFile
+public class ImportLoincStep12ImagingDocumentCode
 		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
 				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+
+	private static final String VS_ID_BASE = "loinc-imaging-document-codes";
+	private static final String VS_URI = "http://loinc.org/vs/loinc-imaging-document-codes";
+	private static final String VS_NAME = "LOINC Imaging Document Codes";
 
 	@Override
 	protected MyBaseContext newContextObject(
@@ -29,15 +30,8 @@ public class ImportLoincStep15GroupTermsFile
 	@Override
 	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
-				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE,
-				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT));
-	}
-
-	// FIXME: remove
-	@Nonnull
-	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<ImportLoincFileSetJson> theDataSink) throws JobExecutionFailedException {
-		return super.run(theStepExecutionDetails, theDataSink);
+				LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE,
+				LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT));
 	}
 
 	@Override
@@ -47,17 +41,10 @@ public class ImportLoincStep15GroupTermsFile
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
 		ImportLoincFileSetJson theData, String theSourceFilename) {
-		String groupId = trim(theRecord.get("GroupId"));
-		String loincNumber = trim(theRecord.get("LoincNumber"));
+		String loincNumber = trim(theRecord.get("LOINC_NUM"));
+		String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
 
-		ValueSet valueSet = getValueSet(
-			theStepExecutionDetails, theJobParameters,
-				theData,
-				theContext,
-				groupId,
-				ImportLoincStep14GroupFile.VS_URI_PREFIX + groupId,
-				null,
-				null);
-		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, null);
+		ValueSet valueSet = getValueSet(theStepExecutionDetails, theJobParameters, theData, theContext, VS_ID_BASE, VS_URI, VS_NAME, null);
+		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
 	}
 }

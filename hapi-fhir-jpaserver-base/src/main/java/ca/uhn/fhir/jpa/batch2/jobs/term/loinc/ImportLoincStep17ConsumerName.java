@@ -1,24 +1,21 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.Coding;
 
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE_DEFAULT;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep13ImagingDocumentCode
+public class ImportLoincStep17ConsumerName
 		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
 				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
-
-	private static final String VS_ID_BASE = "loinc-imaging-document-codes";
-	private static final String VS_URI = "http://loinc.org/vs/loinc-imaging-document-codes";
-	private static final String VS_NAME = "LOINC Imaging Document Codes";
 
 	@Override
 	protected MyBaseContext newContextObject(
@@ -29,9 +26,13 @@ public class ImportLoincStep13ImagingDocumentCode
 	@Nonnull
 	@Override
 	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
-		return List.of(new LoincFileNameSpecification(
-				LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE,
-				LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT));
+		return List.of(new LoincFileNameSpecification(LOINC_CONSUMER_NAME_FILE, LOINC_CONSUMER_NAME_FILE_DEFAULT));
+	}
+
+	@Nonnull
+	@Override
+	public FileHandlingType getFileHandlingType() {
+		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
 	}
 
 	@Override
@@ -41,10 +42,21 @@ public class ImportLoincStep13ImagingDocumentCode
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
 		ImportLoincFileSetJson theData, String theSourceFilename) {
-		String loincNumber = trim(theRecord.get("LOINC_NUM"));
-		String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
+		String loincNumber = trim(theRecord.get("LoincNumber"));
+		if (isBlank(loincNumber)) {
+			return;
+		}
 
-		ValueSet valueSet = getValueSet(theStepExecutionDetails, theJobParameters, theData, theContext, VS_ID_BASE, VS_URI, VS_NAME, null);
-		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
+		String consumerName = trim(theRecord.get("ConsumerName"));
+		if (isBlank(consumerName)) {
+			return;
+		}
+
+		CodeSystem.ConceptDefinitionComponent loincCode =
+				getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+		loincCode
+				.addDesignation()
+				.setUse(new Coding(null, null, "ConsumerName"))
+				.setValue(consumerName);
 	}
 }

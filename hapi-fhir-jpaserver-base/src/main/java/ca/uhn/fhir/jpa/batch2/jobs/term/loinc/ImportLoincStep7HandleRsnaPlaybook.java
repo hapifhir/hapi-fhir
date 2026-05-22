@@ -29,8 +29,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 // FIXME: make sure we don't expand ValueSets until status = active
-public class ImportLoincStep6HandleRsnaPlaybook
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep6HandleRsnaPlaybook.MyContext> {
+public class ImportLoincStep7HandleRsnaPlaybook
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep7HandleRsnaPlaybook.MyContext> {
 
 	@Override
 	protected MyContext newContextObject(

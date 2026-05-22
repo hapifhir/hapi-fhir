@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep14GroupFile
+public class ImportLoincStep13GroupFile
 		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
 				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
 	public static final String VS_URI_PREFIX = "http://loinc.org/vs/";

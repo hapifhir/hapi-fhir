@@ -32,10 +32,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep14GroupFileTest extends BaseImportLoincStepTest{
+class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 
 	@InjectMocks
-	private ImportLoincStep14GroupFile mySvc;
+	private ImportLoincStep13GroupFile mySvc;
 
 	@Test
 	void testProcess() {

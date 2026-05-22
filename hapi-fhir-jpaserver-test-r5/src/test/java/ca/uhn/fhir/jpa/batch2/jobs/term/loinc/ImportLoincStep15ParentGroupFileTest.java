@@ -25,9 +25,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep16ParentGroupFileTest extends BaseImportLoincStepTest{
+class ImportLoincStep15ParentGroupFileTest extends BaseImportLoincStepTest{
 	@InjectMocks
-	private ImportLoincStep16ParentGroupFile mySvc;
+	private ImportLoincStep15ParentGroupFile mySvc;
 
 
 	@Test

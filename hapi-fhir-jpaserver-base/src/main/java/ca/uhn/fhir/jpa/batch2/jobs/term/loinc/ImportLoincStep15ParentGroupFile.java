@@ -1,19 +1,16 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.Coding;
 
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE_DEFAULT;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep18ConsumerName
+public class ImportLoincStep15ParentGroupFile
 		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
 				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
 
@@ -26,13 +23,9 @@ public class ImportLoincStep18ConsumerName
 	@Nonnull
 	@Override
 	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
-		return List.of(new LoincFileNameSpecification(LOINC_CONSUMER_NAME_FILE, LOINC_CONSUMER_NAME_FILE_DEFAULT));
-	}
-
-	@Nonnull
-	@Override
-	public FileHandlingType getFileHandlingType() {
-		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
+		return List.of(new LoincFileNameSpecification(
+				LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE,
+				LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT));
 	}
 
 	@Override
@@ -42,21 +35,17 @@ public class ImportLoincStep18ConsumerName
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
 		ImportLoincFileSetJson theData, String theSourceFilename) {
-		String loincNumber = trim(theRecord.get("LoincNumber"));
-		if (isBlank(loincNumber)) {
-			return;
-		}
+		String parentGroupId = trim(theRecord.get("ParentGroupId"));
+		String parentGroupName = trim(theRecord.get("ParentGroup"));
 
-		String consumerName = trim(theRecord.get("ConsumerName"));
-		if (isBlank(consumerName)) {
-			return;
-		}
+		getValueSet(
+			theStepExecutionDetails, theJobParameters,
+				theData,
+				theContext,
+				parentGroupId,
+				ImportLoincStep13GroupFile.VS_URI_PREFIX + parentGroupId,
+				parentGroupName,
+				null);
 
-		CodeSystem.ConceptDefinitionComponent loincCode =
-				getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
-		loincCode
-				.addDesignation()
-				.setUse(new Coding(null, null, "ConsumerName"))
-				.setValue(consumerName);
 	}
 }

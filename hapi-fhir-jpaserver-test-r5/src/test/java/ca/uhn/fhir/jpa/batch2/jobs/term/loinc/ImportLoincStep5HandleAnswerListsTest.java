@@ -29,10 +29,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep4HandleAnswerListsTest extends BaseImportLoincStepTest {
+class ImportLoincStep5HandleAnswerListsTest extends BaseImportLoincStepTest {
 
 	@InjectMocks
-	private ImportLoincStep4HandleAnswerLists mySvc;
+	private ImportLoincStep5HandleAnswerLists mySvc;
 
 	@Test
 	void testProcess() {

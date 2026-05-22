@@ -22,8 +22,8 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPT
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep12HandleIeeeMedicalDeviceCode
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep12HandleIeeeMedicalDeviceCode.MyBaseContext> {
+public class ImportLoincStep11HandleIeeeMedicalDeviceCode
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep11HandleIeeeMedicalDeviceCode.MyBaseContext> {
 
 	@Override
 	protected MyBaseContext newContextObject(

@@ -576,10 +576,10 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		UploadStatistics response = mySvc.uploadCodeSystemConcepts(input);
 
 		// Verify
-//		assertEquals(4, response.getAddedConceptCount());
-//		assertEquals(0, response.getAddedPropertyCount());
-//		assertEquals(0, response.getAddedDesignationCount());
-//		assertEquals(2, response.getAddedConceptLinkCount());
+		assertEquals(1, response.getAddedConceptCount());
+		assertEquals(0, response.getAddedPropertyCount());
+		assertEquals(0, response.getAddedDesignationCount());
+		assertEquals(0, response.getAddedConceptLinkCount());
 
 		// Add even deeper hierarchy
 
@@ -596,12 +596,19 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		response = mySvc.uploadCodeSystemConcepts(input);
 
 		// Verify
-//		assertEquals(2, response.getAddedConceptCount());
-//		assertEquals(1, response.getAddedPropertyCount());
-//		assertEquals(1, response.getAddedDesignationCount());
-//		assertEquals(0, response.getAddedConceptLinkCount());
+		assertEquals(2, response.getAddedConceptCount());
+		assertEquals(0, response.getAddedPropertyCount());
+		assertEquals(0, response.getAddedDesignationCount());
+		assertEquals(2, response.getAddedConceptLinkCount());
 
+		runInTransaction(()->{
 
+			List<TermConcept> concepts = myTermConceptDao.findAll();
+			for (TermConcept concept : concepts) {
+				assertNull(concept.getParentPidsAsString());
+			}
+
+		});
 
 	}
 

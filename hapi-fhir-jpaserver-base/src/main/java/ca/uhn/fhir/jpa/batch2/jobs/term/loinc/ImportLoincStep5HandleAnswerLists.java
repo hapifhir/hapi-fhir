@@ -19,9 +19,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 // FIXME: make sure we don't expand ValueSets until status = active
-public class ImportLoincStep4HandleAnswerLists
-	extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep4HandleAnswerLists.MyContext> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep4HandleAnswerLists.class);
+public class ImportLoincStep5HandleAnswerLists
+	extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep5HandleAnswerLists.MyContext> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep5HandleAnswerLists.class);
 
 	@Override
 	protected MyContext newContextObject(

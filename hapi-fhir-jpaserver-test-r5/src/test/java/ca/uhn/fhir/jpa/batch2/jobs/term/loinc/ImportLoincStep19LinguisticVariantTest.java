@@ -24,10 +24,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class ImportLoincStep20LinguisticVariantTest extends BaseImportLoincStepTest {
+class ImportLoincStep19LinguisticVariantTest extends BaseImportLoincStepTest {
 
 	@InjectMocks
-	private ImportLoincStep20LinguisticVariant mySvc;
+	private ImportLoincStep19LinguisticVariant mySvc;
 
 	@Test
 	void testProcess() {

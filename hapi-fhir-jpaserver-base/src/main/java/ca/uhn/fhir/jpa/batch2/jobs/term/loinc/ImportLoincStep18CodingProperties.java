@@ -31,8 +31,8 @@ import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LO
  * are created, because they require a 'display' value associated to other TermConcept (pointed by the 'code'
  * property value), which requires that concept to have been created.
  */
-public class ImportLoincStep19CodingProperties extends BaseImportLoincStepWithValueSetsAndConceptMaps<BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep19CodingProperties.class);
+public class ImportLoincStep18CodingProperties extends BaseImportLoincStepWithValueSetsAndConceptMaps<BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep18CodingProperties.class);
 
 	private static final String ASK_AT_ORDER_ENTRY_PROP_NAME = "AskAtOrderEntry";
 	private static final String ASSOCIATED_OBSERVATIONS_PROP_NAME = "AssociatedObservations";

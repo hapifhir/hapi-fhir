@@ -662,6 +662,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			theStatisticsTracker.incrementConceptsAddedCount();
 		}
 
+		targetConcept.setDontPopulateParentPids(theSourceConcept.isDontPopulateParentPids());
+
 		// Display
 		if (isNotBlank(theSourceConcept.getDisplay())) {
 			targetConcept.setDisplay(theSourceConcept.getDisplay());
@@ -1059,7 +1061,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			CustomTerminologySet additions = new CustomTerminologySet();
 			for (CodeSystem.ConceptDefinitionComponent sourceConcept : codeSystem.getConcept()) {
-				TermConcept concept = uploadCodeSystemConceptAndChildren(sourceConcept, null);
+				TermConcept concept = convertResourceConceptAndChildrenToStorageConcepts(sourceConcept, null);
 				additions.addRootConcept(concept);
 			}
 
@@ -1131,11 +1133,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		});
 	}
 
-	private TermConcept uploadCodeSystemConceptAndChildren(
+	private TermConcept convertResourceConceptAndChildrenToStorageConcepts(
 			CodeSystem.ConceptDefinitionComponent theSourceConcept, TermConcept theParentConcept) {
 		TermConcept targetConcept = new TermConcept();
 		targetConcept.setCode(theSourceConcept.getCode());
 		targetConcept.setDisplay(theSourceConcept.getDisplay());
+		targetConcept.setDontPopulateParentPids(true);
 
 		// Populate designations
 		for (CodeSystem.ConceptDefinitionDesignationComponent sourceDesignation : theSourceConcept.getDesignation()) {
@@ -1168,7 +1171,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		// Child Concepts
 		for (CodeSystem.ConceptDefinitionComponent child : theSourceConcept.getConcept()) {
-			uploadCodeSystemConceptAndChildren(child, targetConcept);
+			convertResourceConceptAndChildrenToStorageConcepts(child, targetConcept);
 		}
 
 		return targetConcept;

@@ -136,6 +136,11 @@ public interface ITermCodeSystemStorageSvc {
 	 * resource as the transport container for the concepts but does not actually store the
 	 * actual CodeSystem resource, it just adds the concepts to the terminology database. The
 	 * {@literal CodeSystem.url} and {@literal CodeSystem.version} properties must be populated.
+	 * <p>
+	 * Note that the concept parents {@link TermConcept#getParents()} are not populated by this
+	 * method.
+	 * // FIXME: add link to job to populate these
+	 * </p>
 	 *
 	 * @since 8.12.0
 	 */
