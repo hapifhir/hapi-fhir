@@ -69,15 +69,28 @@ public interface IJobDataSink<OT extends IModelJson> {
 	 */
 	void recoveredError(String theMessage);
 
-	// FIXME: document
+	/**
+	 * Step workers may invoke this method to send a work chunk to a step that is not
+	 * the next step in the job definition.
+	 *
+	 * @param theStepId The step ID. Must be the ID of a step that comes after the current step or the job will fail.
+	 * @param theData The work chunk data to send. Must be of the correct type for {@literal theStepId} or the job will fail.
+	 * @since 8.12.0
+	 */
 	default void acceptForFutureStep(String theStepId, IModelJson theData) {
 		acceptForFutureStep(theStepId, new WorkChunkData<>(theData));
 	}
 
-	// FIXME: document
+	/**
+	 * Step workers may invoke this method to send a work chunk to a step that is not
+	 * the next step in the job definition.
+	 *
+	 * @param theStepId The step ID. Must be the ID of a step that comes after the current step or the job will fail.
+	 * @param theData The work chunk data to send. Must be of the correct type for {@literal theStepId} or the job will fail.
+	 * @since 8.12.0
+	 */
 	default void acceptForFutureStep(String theStepId, WorkChunkData<?> theData) {
-		// FIXME: add code
-		throw new UnsupportedOperationException(Msg.code(1) + "acceptForFutureStep() is not supported by this data sink");
+		throw new UnsupportedOperationException(
+				Msg.code(2931) + "acceptForFutureStep() is not supported by this data sink");
 	}
-
 }
