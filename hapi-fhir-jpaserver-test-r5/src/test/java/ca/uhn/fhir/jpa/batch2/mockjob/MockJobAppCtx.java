@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MockJobAppCtx {
 
-	public static final String BUILDING_JOB = "building-job";
+	public static final String BUILDING_JOB = "mock-building-job";
+	public static final String SEND_TO_FUTURE_STEP_JOB = "mock-send-to-future-step-job";
 
 	@Bean
 	public JobDefinition<MockJobParameters> getBuildingJobDefinition() {
@@ -19,8 +20,22 @@ public class MockJobAppCtx {
 			.setJobDefinitionVersion(1)
 			.setJobDescription("Mock job definition with an initial BUILDING status")
 			.setParametersValidator(new MockJobParametersValidator())
-			.addFirstStep("step-1", "Step 1", MockStep1OutputType.class, new MockStep1Worker())
-			.addLastStep("step-2", "Step 2", new MockStep2Worker())
+			.addFirstStep("step-1", "Step 1", MockStepOutputType.class, new MockBuildingJobStep1Worker())
+			.addLastStep("step-2", "Step 2", new MockBuildingJobStep2Worker())
+			.build();
+	}
+
+	@Bean
+	public JobDefinition<MockJobParameters> getSendToFutureStepJobDefinition() {
+		return JobDefinition.newBuilder()
+			.setParametersType(MockJobParameters.class)
+			.setInitialStatus(StatusEnum.BUILDING)
+			.setJobDefinitionId(BUILDING_JOB)
+			.setJobDefinitionVersion(1)
+			.setJobDescription("Mock job definition with an initial BUILDING status")
+			.setParametersValidator(new MockJobParametersValidator())
+			.addFirstStep("step-1", "Step 1", MockStepOutputType.class, new MockBuildingJobStep1Worker())
+			.addLastStep("step-2", "Step 2", new MockBuildingJobStep2Worker())
 			.build();
 	}
 

@@ -10,15 +10,15 @@ import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MockStep1Worker implements IJobStepWorker<MockJobParameters, VoidModel, MockStep1OutputType> {
-	private static final Logger ourLog = LoggerFactory.getLogger(MockStep1Worker.class);
+public class MockBuildingJobStep1Worker implements IJobStepWorker<MockJobParameters, VoidModel, MockStepOutputType> {
+	private static final Logger ourLog = LoggerFactory.getLogger(MockBuildingJobStep1Worker.class);
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MockJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<MockStep1OutputType> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<MockJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<MockStepOutputType> theDataSink) throws JobExecutionFailedException {
 		ourLog.info("Running MOCK JOB step 1");
 
-		MockStep1OutputType output = new MockStep1OutputType();
+		MockStepOutputType output = new MockStepOutputType();
 		theDataSink.accept(output);
 
 		return RunOutcome.SUCCESS;

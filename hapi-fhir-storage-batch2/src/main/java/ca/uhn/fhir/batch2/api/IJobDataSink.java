@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 
 public interface IJobDataSink<OT extends IModelJson> {
@@ -67,4 +68,16 @@ public interface IJobDataSink<OT extends IModelJson> {
 	 * @param theMessage An error message. This will be logged, and in the future it may be stored
 	 */
 	void recoveredError(String theMessage);
+
+	// FIXME: document
+	default void acceptForFutureStep(String theStepId, IModelJson theData) {
+		acceptForFutureStep(theStepId, new WorkChunkData<>(theData));
+	}
+
+	// FIXME: document
+	default void acceptForFutureStep(String theStepId, WorkChunkData<?> theData) {
+		// FIXME: add code
+		throw new UnsupportedOperationException(Msg.code(1) + "acceptForFutureStep() is not supported by this data sink");
+	}
+
 }
