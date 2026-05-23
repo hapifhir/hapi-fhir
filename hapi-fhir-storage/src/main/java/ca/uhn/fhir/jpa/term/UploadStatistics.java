@@ -23,7 +23,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public class UploadStatistics {
 	private final IIdType myTarget;
+
 	private int myUpdatedConceptCount;
+	private int myAddedConceptCount = 0;
+	private int myAddedDesignationCount = 0;
+	private int myAddedPropertyCount = 0;
+	private int myAddedConceptLinkCount = 0;
 
 	public UploadStatistics(IIdType theTarget) {
 		this(0, theTarget);
@@ -32,6 +37,38 @@ public class UploadStatistics {
 	public UploadStatistics(int theUpdatedConceptCount, IIdType theTarget) {
 		myUpdatedConceptCount = theUpdatedConceptCount;
 		myTarget = theTarget;
+	}
+
+	public int getAddedConceptLinkCount() {
+		return myAddedConceptLinkCount;
+	}
+
+	public void incrementConceptsAddedCount() {
+		myAddedConceptCount++;
+	}
+
+	public void incrementDesignationsAddedCount() {
+		myAddedDesignationCount++;
+	}
+
+	public void incrementPropertiesAddedCount() {
+		myAddedPropertyCount++;
+	}
+
+	public int getAddedConceptCount() {
+		return myAddedConceptCount;
+	}
+
+	public int getAddedDesignationCount() {
+		return myAddedDesignationCount;
+	}
+
+	public int getAddedPropertyCount() {
+		return myAddedPropertyCount;
+	}
+
+	public void incrementConceptLinksAddedCount() {
+		myAddedConceptLinkCount++;
 	}
 
 	public void incrementUpdatedConceptCount() {
