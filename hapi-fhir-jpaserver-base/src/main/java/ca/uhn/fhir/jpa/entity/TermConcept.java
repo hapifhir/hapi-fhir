@@ -117,7 +117,7 @@ public class TermConcept implements Serializable {
 	public static final int MAX_CODE_LENGTH = 500;
 	public static final int MAX_DESC_LENGTH = 400;
 	public static final int MAX_DISP_LENGTH = 500;
-	private static final Logger ourLog = LoggerFactory.getLogger(TermConcept.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
 
 	@Serial
 	private static final long serialVersionUID = 1L;

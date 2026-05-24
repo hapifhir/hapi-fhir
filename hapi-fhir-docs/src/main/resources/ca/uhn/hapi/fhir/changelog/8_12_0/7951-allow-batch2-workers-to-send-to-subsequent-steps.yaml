@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7951
+title: "Batch2 step workers can now send work chunks to future steps other than
+   the very next step in the job definition."

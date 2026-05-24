@@ -131,7 +131,11 @@ public class Batch2JobAttachmentEntity implements Serializable {
 	}
 
 	public void setFilename(String theFilename) {
-		Validate.isTrue(theFilename == null || theFilename.length() <= FILENAME_MAX_LENGTH, "Filename can not exceed length %d: %s", FILENAME_MAX_LENGTH, theFilename);
+		Validate.isTrue(
+				theFilename == null || theFilename.length() <= FILENAME_MAX_LENGTH,
+				"Filename can not exceed length %d: %s",
+				FILENAME_MAX_LENGTH,
+				theFilename);
 		myFilename = theFilename;
 	}
 

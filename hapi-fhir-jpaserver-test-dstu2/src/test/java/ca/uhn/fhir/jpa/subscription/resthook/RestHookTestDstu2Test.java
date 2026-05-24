@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,11 +56,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu2Test.class);
-	private static final List<String> ourCreatedObservations = Lists.newArrayList();
+	private static final List<String> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	public static final String SNOMED_CT_URL = "http://snomed.info/sct";
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static final List<String> ourUpdatedObservations = Lists.newArrayList();
+	private static final List<String> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private final List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@Autowired
