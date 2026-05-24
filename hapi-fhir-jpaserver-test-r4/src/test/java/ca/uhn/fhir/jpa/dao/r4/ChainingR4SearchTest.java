@@ -181,6 +181,34 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	void testMultipleChainsOnMultiValuedGeneralPractitionerReference_UseSeparateJoins() {
+		createPractitioner(withId("Prac1"), withFamily("Smith"), withGender("male"));
+		createPractitioner(withId("Prac2"), withFamily("Jones"), withGender("female"));
+
+		createPatient(withId("PatA"),
+			withReference("generalPractitioner", "Practitioner/Prac1"),
+			withReference("generalPractitioner", "Practitioner/Prac2"));
+
+		createPatient(withId("PatB"),
+			withReference("generalPractitioner", "Practitioner/Prac1"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Patient.SP_GENERAL_PRACTITIONER, new ReferenceParam("family", "Smith"));
+		map.add(Patient.SP_GENERAL_PRACTITIONER, new ReferenceParam("gender", "female"));
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(map, newSrd());
+
+		// Only patA is returned — each filter satisfied independently by a different practitioner
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder("Patient/PatA");
+
+		// 2 HFJ_RES_LINK joins required: multi-valued reference cannot collapse to a single join
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(2);
+	}
+
+	@Test
 	void testAndClauses_DirectReference_ReturnsResourcesMatchingAllTargets() {
 		// Setup
 		IIdType patientA = createPatient(withId("PA"));

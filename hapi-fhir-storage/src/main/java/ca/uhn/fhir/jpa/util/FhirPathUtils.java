@@ -19,7 +19,12 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.patch.ParsedFhirPath;
+import ca.uhn.fhir.parser.DataFormatException;
 
 public class FhirPathUtils {
 	/**
@@ -64,5 +69,47 @@ public class FhirPathUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Determines whether the given FhirPath expression points to a single-valued element
+	 * (cardinality 0..1 or 1..1).
+	 *
+	 * @param theFhirContext the FhirContext used to look up resource and element definitions
+	 * @param thePath the dot-separated FhirPath expression (e.g. {@code "Coverage.beneficiary"})
+	 * @return {@code true} if every segment of the FhirPath expression has a maximum cardinality of one;
+	 *         {@code false} if any segment is multi-valued (0..*) or unknown
+	 */
+	public static boolean isPathSingleValued(FhirContext theFhirContext, String thePath) {
+		String cleanPath = cleansePath(thePath);
+		String[] parts = cleanPath.split("\\.");
+		if (parts.length <= 1) {
+			return false;
+		}
+		BaseRuntimeElementCompositeDefinition<?> currentDef;
+		try {
+			currentDef = theFhirContext.getResourceDefinition(parts[0]);
+		} catch (DataFormatException e) {
+			return false;
+		}
+		for (int i = 1; i < parts.length; i++) {
+			BaseRuntimeChildDefinition child = currentDef.getChildByName(parts[i]);
+			if (child == null) {
+				// Choice types like Observation.value[x] are declared as "value[x]" but appear in
+				// search-param paths as "value". Try the [x] variant before giving up.
+				child = currentDef.getChildByName(parts[i] + "[x]");
+			}
+			if (child == null || child.isMultipleCardinality()) {
+				return false;
+			}
+			if (i < parts.length - 1) {
+				BaseRuntimeElementDefinition<?> elem = child.getChildByName(child.getElementName());
+				if (!(elem instanceof BaseRuntimeElementCompositeDefinition)) {
+					return false;
+				}
+				currentDef = (BaseRuntimeElementCompositeDefinition<?>) elem;
+			}
+		}
+		return true;
 	}
 }
