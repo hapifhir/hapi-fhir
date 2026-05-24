@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -26,7 +28,7 @@ public class ImportLoincStep9HandleDocumentOntology
 
 	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
@@ -40,11 +42,11 @@ public class ImportLoincStep9HandleDocumentOntology
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
 		MyBaseContext theContext,
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
-		ImportLoincFileSetJson theData, String theSourceFilename) {
+		TerminologyFileSetJson theData, String theSourceFilename) {
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		String partNumber = trim(theRecord.get("PartNumber"));
 		String partTypeName = trim(theRecord.get("PartTypeName"));
@@ -53,7 +55,7 @@ public class ImportLoincStep9HandleDocumentOntology
 
 		// Document Ontology Codes VS
 		ValueSet vs = getValueSet(
-			theStepExecutionDetails, theJobParameters,
+			theStepExecutionDetails, theJobMetadata, theJobParameters,
 				theData,
 				theContext,
 				DOCUMENT_ONTOLOGY_CODES_VS_ID,

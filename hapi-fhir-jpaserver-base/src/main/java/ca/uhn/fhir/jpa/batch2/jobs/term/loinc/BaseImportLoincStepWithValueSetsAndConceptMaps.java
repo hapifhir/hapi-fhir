@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -29,7 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.loinc.BaseLoincHandler.LOINC_WEBSITE_URL;
@@ -75,8 +76,8 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 
 	// FIXME: rename
 	protected ValueSet getValueSet(
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
-		ImportLoincFileSetJson theData,
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
+		TerminologyFileSetJson theData,
 		CT theContext,
 		String theValueSetId,
 		String theValueSetUri,
@@ -84,7 +85,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 		String theVersionPropertyName) {
 
 		String version;
-		String codeSystemVersion = theData.getLoincCodeSystem().getVersion();
+		String codeSystemVersion = theJobMetadata.getLoincCodeSystem().getVersion();
 		assert isNotBlank(codeSystemVersion);
 
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
@@ -110,7 +111,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 				.addTelecom()
 				.setSystem(ContactPoint.ContactPointSystem.URL)
 				.setValue(LOINC_WEBSITE_URL);
-			vs.setCopyright(theData.getLoincCodeSystem().getCopyright());
+			vs.setCopyright(theJobMetadata.getLoincCodeSystem().getCopyright());
 			theContext.getIdToValueSet().put(valueSetId, vs);
 			theData.addResourceToActivate("ValueSet/" + valueSetId);
 		} else {
@@ -153,16 +154,16 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 
 	@Override
 	protected void syncToDb(
-		CT theCodeExtractionContext,
+		ImportTerminologyMetadataAttachmentJson theJobMetadata, CT theCodeExtractionContext,
 		CodeSystem theCodeSystemToPopulate,
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		super.syncToDb(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+		super.syncToDb(theJobMetadata, theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 
-		syncConceptMapsToDb(theCodeExtractionContext, theStepExecutionDetails);
-		syncValueSetsToDb(theCodeExtractionContext, theStepExecutionDetails);
+		syncConceptMapsToDb(theJobMetadata, theCodeExtractionContext, theStepExecutionDetails);
+		syncValueSetsToDb(theJobMetadata, theCodeExtractionContext, theStepExecutionDetails);
 	}
 
-	private void syncConceptMapsToDb(CT theCodeExtractionContext, StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+	private void syncConceptMapsToDb(ImportTerminologyMetadataAttachmentJson theJobMetadata, CT theCodeExtractionContext, StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		IFhirResourceDao conceptMapDao = myDaoRegistry.getResourceDao("ConceptMap");
 		for (Map.Entry<String, Collection<ConceptMapping>> entry :
 			theCodeExtractionContext.getIdToConceptMappings().asMap().entrySet()) {
@@ -171,14 +172,14 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			Collection<ConceptMapping> mappings = entry.getValue();
 
 			executeInNewTransactionWithRetry(()->{
-				syncConceptMapToDb(theStepExecutionDetails, conceptMapId, conceptMapDao, mappings);
+				syncConceptMapToDb(theJobMetadata, theStepExecutionDetails, conceptMapId, conceptMapDao, mappings);
 				return null;
 			}, theStepExecutionDetails);
 
 		}
 	}
 
-	private void syncConceptMapToDb(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, String conceptMapId, IFhirResourceDao conceptMapDao, Collection<ConceptMapping> mappings) {
+	private void syncConceptMapToDb(ImportTerminologyMetadataAttachmentJson theJobMetadata, StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, String conceptMapId, IFhirResourceDao conceptMapDao, Collection<ConceptMapping> mappings) {
 		ourLog.info("Checking for existence of ConceptMap: {}", conceptMapId);
 
 		ConceptMap conceptMap;
@@ -209,8 +210,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 
 			String copyright = firstMapping.getCopyright();
 			if (!copyright.contains("LOINC")) {
-				String loincCopyrightStatement = theStepExecutionDetails
-					.getData()
+				String loincCopyrightStatement = theJobMetadata
 					.getLoincCodeSystem()
 					.getCopyright();
 				copyright =
@@ -309,7 +309,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			.log();
 	}
 
-	private void syncValueSetsToDb(CT theCodeExtractionContext, StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+	private void syncValueSetsToDb(ImportTerminologyMetadataAttachmentJson theJobMetadata, CT theCodeExtractionContext, StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		IFhirResourceDao valueSetDao = myDaoRegistry.getResourceDao("ValueSet");
 		for (ValueSet valueSet : theCodeExtractionContext.getIdToValueSet().values()) {
 			executeInNewTransactionWithRetry(()->{
@@ -319,7 +319,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 		}
 	}
 
-	private void syncValueSetToDb(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ValueSet valueSet, IFhirResourceDao valueSetDao) {
+	private void syncValueSetToDb(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ValueSet valueSet, IFhirResourceDao valueSetDao) {
 		try {
 			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 			IdType existingId = new IdType(valueSet.getIdElement().getIdPart());
@@ -439,25 +439,10 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 		private final SetMultimap<String, ConceptMapping> myIdToConceptMappings =
 			MultimapBuilder.hashKeys().linkedHashSetValues().build();
 		private final Map<String, CodeSystem.ConceptDefinitionComponent> myCodeToConcept = new HashMap<>();
-		private final Map<String, CodeSystem.PropertyType> myPropertyNameToType = new HashMap<>();
-		private final ImportLoincFileSetJson myData;
+		private final TerminologyFileSetJson myData;
 
-		public MyBaseContext(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theData) {
+		public MyBaseContext(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theData) {
 			myData = theData.getData();
-		}
-
-		public Map<String, CodeSystem.PropertyType> getPropertyNameToType() {
-			if (myPropertyNameToType.isEmpty()) {
-				for (CodeSystem.PropertyComponent nextProperty :
-					myData.getLoincCodeSystem().getProperty()) {
-					String nextPropertyCode = nextProperty.getCode();
-					CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
-					if (isNotBlank(nextPropertyCode)) {
-						myPropertyNameToType.put(nextPropertyCode, nextPropertyType);
-					}
-				}
-			}
-			return myPropertyNameToType;
 		}
 
 		public Map<String, CodeSystem.ConceptDefinitionComponent> getCodeToConcept() {

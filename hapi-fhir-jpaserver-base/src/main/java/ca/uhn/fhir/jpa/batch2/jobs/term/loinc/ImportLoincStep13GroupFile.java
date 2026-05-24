@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
@@ -22,7 +24,7 @@ public class ImportLoincStep13GroupFile
 
 	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
@@ -35,11 +37,11 @@ public class ImportLoincStep13GroupFile
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
 		MyBaseContext theContext,
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
-		ImportLoincFileSetJson theData, String theSourceFilename) {
+		TerminologyFileSetJson theData, String theSourceFilename) {
 		String parentGroupId = trim(theRecord.get("ParentGroupId"));
 		String groupId = trim(theRecord.get("GroupId"));
 		String groupName = trim(theRecord.get("Group"));
@@ -50,7 +52,7 @@ public class ImportLoincStep13GroupFile
 		groupValueSetId = groupId;
 
 		ValueSet parentValueSet = getValueSet(
-			theStepExecutionDetails, theJobParameters,
+			theStepExecutionDetails, theJobMetadata, theJobParameters,
 				theData,
 				theContext,
 				parentGroupValueSetId,
@@ -68,6 +70,6 @@ public class ImportLoincStep13GroupFile
 
 		// Create group to set its name (terms are added in a different
 		// handler)
-		getValueSet(theStepExecutionDetails, theJobParameters, theData, theContext, groupValueSetId, VS_URI_PREFIX + groupId, groupName, null);
+		getValueSet(theStepExecutionDetails, theJobMetadata, theJobParameters, theData, theContext, groupValueSetId, VS_URI_PREFIX + groupId, groupName, null);
 	}
 }

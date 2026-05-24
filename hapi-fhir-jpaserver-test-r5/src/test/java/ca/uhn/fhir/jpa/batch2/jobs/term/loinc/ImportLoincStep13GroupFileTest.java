@@ -51,23 +51,23 @@ class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 
-		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
+		TerminologyFileSetJson importLoincFileSetJson = new TerminologyFileSetJson();
 		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("file.csv", "my-chunk-attachment-id"));
 		importLoincFileSetJson.setCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
 
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
 		// Verify
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/LG100-4-1.234", "ValueSet/LG1695-8-1.234"
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> ResourcesToActivate[ValueSet/LG100-4-1.234, ValueSet/LG1695-8-1.234]",
+			"finalize-import -> RecordsAdded: From[step-1] Counts[valueSetsAdded=2,valueSetInclusionsAdded=1]"
 		);
-		assertEquals(1, myFileSetCaptor.getAllValues().get(0).getRecordsAddedCounter("step-1").getValueSetInclusionsAdded());
 
 		verify(myValueSetDao, times(2)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
@@ -129,9 +129,10 @@ class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 		// Verify
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/LG100-4-1.234", "ValueSet/LG1695-8-1.234"
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> ResourcesToActivate[ValueSet/LG100-4-1.234, ValueSet/LG1695-8-1.234]",
+			"finalize-import -> RecordsAdded: From[step-1] Counts[valueSetsAdded=1,valueSetInclusionsAdded=1]"
 		);
 
 		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
@@ -182,9 +183,10 @@ class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 		// Verify
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/LG100-4-1.234", "ValueSet/LG1695-8-1.234"
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> ResourcesToActivate[ValueSet/LG100-4-1.234, ValueSet/LG1695-8-1.234]",
+			"finalize-import -> RecordsAdded: From[step-1] Counts[valueSetsAdded=1,valueSetInclusionsAdded=1]"
 		);
 
 		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));

@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -34,7 +36,7 @@ class ImportLoincStep19LinguisticVariantTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv";
 		mockFetchAttachment(classpath);
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
@@ -56,17 +58,20 @@ class ImportLoincStep19LinguisticVariantTest extends BaseImportLoincStepTest {
 			""";
 		assertEquals(expected, result);
 
-		verify(myDataSink, times(1)).accept(any(ImportLoincFileSetJson.class));
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptsAdded=1]"
+		);
 	}
 
 	@Test
 	void testProcess_FileNotListedInLinguisticVariantFile() {
 		// Setup
 		mockFetchAttachment("loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv");
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		// Test
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = newStepExecutionDetails("loinc-ver/v269/AccessoryFiles/LinguisticVariants/zzZZ8LinguisticVariant.csv");
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> stepExecutionDetails = newStepExecutionDetails("loinc-ver/v269/AccessoryFiles/LinguisticVariants/zzZZ8LinguisticVariant.csv");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
@@ -87,7 +92,10 @@ class ImportLoincStep19LinguisticVariantTest extends BaseImportLoincStepTest {
 			""";
 		assertEquals(expected, result);
 
-		verify(myDataSink, times(1)).accept(any(ImportLoincFileSetJson.class));
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptsAdded=1]"
+		);
 	}
 
 	@ParameterizedTest

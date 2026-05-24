@@ -33,9 +33,14 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -51,7 +56,7 @@ abstract class BaseImportLoincStepTest {
 	@Mock
 	ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Mock
-	IJobDataSink<ImportLoincFileSetJson> myDataSink;
+	IJobDataSink<TerminologyFileSetJson> myDataSink;
 	@Mock
 	IJobStepExecutionServices myJobExecutionServices;
 	@Mock
@@ -66,7 +71,9 @@ abstract class BaseImportLoincStepTest {
 	@Captor
 	ArgumentCaptor<IBaseResource> myCodeSystemCaptor;
 	@Captor
-	ArgumentCaptor<ImportLoincFileSetJson> myFileSetCaptor;
+	ArgumentCaptor<String> myStepIdCaptor;
+	@Captor
+	ArgumentCaptor<TerminologyFileSetJson> myFileSetCaptor;
 	@Captor
 	ArgumentCaptor<ValueSet> myValueSetCaptor;
 	@Captor
@@ -74,11 +81,11 @@ abstract class BaseImportLoincStepTest {
 
 
 	@Nonnull
-	StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> newStepExecutionDetails(String classpath) {
+	StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> newStepExecutionDetails(String classpath) {
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 
-		ImportLoincFileSetJson importLoincFileSetJson = newData();
+		TerminologyFileSetJson importLoincFileSetJson = newData();
 
 		if (classpath != null) {
 			importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk(classpath, "my-chunk-attachment-id"));
@@ -88,8 +95,8 @@ abstract class BaseImportLoincStepTest {
 	}
 
 	@Nonnull
-	ImportLoincFileSetJson newData() {
-		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
+	TerminologyFileSetJson newData() {
+		TerminologyFileSetJson importLoincFileSetJson = new TerminologyFileSetJson();
 		importLoincFileSetJson.setCodeSystemStagingVersionId("my-staging-version-id");
 		importLoincFileSetJson.setCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
@@ -165,4 +172,40 @@ abstract class BaseImportLoincStepTest {
 		return builder.toString();
 	}
 
+	@Nonnull
+	protected List<String> renderEmittedChunks() {
+		return BaseImportLoincStepTest.renderEmittedChunks(myStepIdCaptor, myFileSetCaptor);
+	}
+
+	@Nonnull
+    public static List<String> renderEmittedChunks(ArgumentCaptor<String> theStepIdCaptor, ArgumentCaptor<TerminologyFileSetJson> theTerminologyFileSetCaptor) {
+        assertEquals(theStepIdCaptor.getAllValues().size(), theTerminologyFileSetCaptor.getAllValues().size());
+        List<String> emittedChunks = new ArrayList<>();
+        for (int i = 0; i < theTerminologyFileSetCaptor.getAllValues().size(); i++) {
+            String targetStep = theStepIdCaptor.getAllValues().get(i);
+			TerminologyFileSetJson data = theTerminologyFileSetCaptor.getAllValues().get(i);
+
+	        TerminologyFileSetJson.Chunk chunk = data.getChunkForCurrentStep();
+			if (chunk != null) {
+				emittedChunks.add(targetStep + " -> Chunk[" + chunk.getSourceFilename() + " | " + chunk.getAttachmentId() + "]");
+			}
+
+			Set<String> resourcesToActivate = data.getResourcesToActivate();
+			if (!resourcesToActivate.isEmpty()) {
+				emittedChunks.add(targetStep + " -> ResourcesToActivate" + new TreeSet<>(resourcesToActivate));
+			}
+
+			Map<String, TerminologyFileSetJson.RecordsAddedCounter> stepIdToRecordsAdded = data.getStepIdToRecordsAdded();
+			if (!stepIdToRecordsAdded.isEmpty()) {
+				for (Map.Entry<String, TerminologyFileSetJson.RecordsAddedCounter> next : stepIdToRecordsAdded.entrySet()) {
+					String sourceStep = next.getKey();
+					TerminologyFileSetJson.RecordsAddedCounter recordsCounter = next.getValue();
+					emittedChunks.add(targetStep + " -> RecordsAdded: From[" + sourceStep + "] Counts" + recordsCounter);
+				}
+			}
+
+
+        }
+        return emittedChunks;
+    }
 }

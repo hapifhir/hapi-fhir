@@ -31,7 +31,7 @@ class ImportLoincStep18CodingPropertiesTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/LoincTable/Loinc.csv";
 		mockFetchAttachment(classpath);
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		AtomicInteger responseCounter = new AtomicInteger();
 		when(myValidationSupport.lookupCode(any(), any(LookupCodeRequest.class))).thenAnswer(t->{
@@ -61,7 +61,10 @@ class ImportLoincStep18CodingPropertiesTest extends BaseImportLoincStepTest {
 			""";
 		assertEquals(expected, result);
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptsAdded=1]"
+		);
 	}
 
 }

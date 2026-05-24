@@ -8,8 +8,9 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -32,27 +34,29 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newLoincCsvParser;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseImportLoincStep<CT>
+	extends BaseImportTerminologyStep
 	implements ITerminologyImportFileHandlerStep<
-	ImportLoincJobParameters, ImportLoincFileSetJson, ImportLoincFileSetJson> {
+	ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportLoincStep.class);
 
 	@Autowired
 	private IJobPersistence myJobPersistence;
-
 	@Autowired
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
@@ -102,18 +106,20 @@ public abstract class BaseImportLoincStep<CT>
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails,
-		@Nonnull IJobDataSink<ImportLoincFileSetJson> theDataSink)
+		@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+		@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
 		throws JobExecutionFailedException {
-		ImportLoincFileSetJson data = theStepExecutionDetails.getData();
+		TerminologyFileSetJson data = theStepExecutionDetails.getData();
 		String jobInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		ImportLoincJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
 		CT codeExtractionContext = newContextObject(theStepExecutionDetails);
 
+		ImportTerminologyMetadataAttachmentJson jobMetadata = getJobMetadata(jobInstanceId);
+
 		CodeSystem codeSystemToPopulate = new CodeSystem();
-		codeSystemToPopulate.setUrl(data.getLoincCodeSystem().getUrl());
-		codeSystemToPopulate.setVersion(data.getCodeSystemStagingVersionId());
+		codeSystemToPopulate.setUrl(jobMetadata.getLoincCodeSystem().getUrl());
+		codeSystemToPopulate.setVersion(jobMetadata.getCodeSystemStagingVersionId());
 
 		String attachmentId = null;
 		String sourceFilename = null;
@@ -129,7 +135,7 @@ public abstract class BaseImportLoincStep<CT>
 					BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
 				CSVParser csvReader = newLoincCsvParser(reader);
 				for (CSVRecord record : csvReader.getRecords()) {
-					handleRecord(theStepExecutionDetails, jobParameters, codeExtractionContext, record, codeSystemToPopulate, data, sourceFilename);
+					handleRecord(theStepExecutionDetails, jobMetadata, jobParameters, codeExtractionContext, record, codeSystemToPopulate, data, sourceFilename);
 				}
 
 			} catch (IOException e) {
@@ -138,16 +144,21 @@ public abstract class BaseImportLoincStep<CT>
 					Msg.code(1) + "Failed to read file attachment: " + e.getMessage(), e);
 			}
 
-			syncToDb(codeExtractionContext, codeSystemToPopulate, theStepExecutionDetails);
+			syncToDb(jobMetadata, codeExtractionContext, codeSystemToPopulate, theStepExecutionDetails);
 
 		}
 
-		BaseExpandDistributionIntoFilesStep.submitChunksForNextStep(theStepExecutionDetails, theDataSink, data);
+		if (!data.getStepIdToRecordsAdded().isEmpty() || !data.getResourcesToActivate().isEmpty()) {
+			TerminologyFileSetJson counterWorkChunk = new TerminologyFileSetJson();
+			counterWorkChunk.getStepIdToRecordsAdded().putAll(data.getStepIdToRecordsAdded());
+			counterWorkChunk.getResourcesToActivate().addAll(data.getResourcesToActivate());
+			theDataSink.acceptForFutureStep(STEP_ID_FINALIZE_IMPORT, counterWorkChunk);
+		}
 
 		return RunOutcome.SUCCESS;
 	}
 
-	private void syncConceptsToDb(@Nonnull StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, CodeSystem codeSystemToPopulate) {
+	private void syncConceptsToDb(@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, CodeSystem codeSystemToPopulate) {
 		if (codeSystemToPopulate.hasConcept()) {
 
 			int conceptCount = codeSystemToPopulate.getConcept().size();
@@ -168,9 +179,9 @@ public abstract class BaseImportLoincStep<CT>
 		}
 	}
 
-	protected <T> T executeInNewTransactionWithRetry(Callable<T> theFunction, StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+	protected <T> T executeInNewTransactionWithRetry(Callable<T> theFunction, StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		int retryCount = 0;
-		while(true) {
+		while (true) {
 			try {
 				return myTransactionService
 					.withSystemRequestOnDefaultPartition()
@@ -199,31 +210,45 @@ public abstract class BaseImportLoincStep<CT>
 	 * Subclasses may override, but they should call this super-method too.
 	 */
 	protected void syncToDb(
-		CT theCodeExtractionContext,
+		ImportTerminologyMetadataAttachmentJson theJobMetadata, CT theCodeExtractionContext,
 		CodeSystem theCodeSystemToPopulate,
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 
 		syncConceptsToDb(theStepExecutionDetails, theCodeSystemToPopulate);
 
 	}
 
+	// FIXME: this gets called repeatedly, we'd better cache it somewhere
+	public Map<String, CodeSystem.PropertyType> getPropertyNameToType(ImportTerminologyMetadataAttachmentJson theJobMetadata) {
+		Map<String, CodeSystem.PropertyType> propertyNameToType = new HashMap<>();
+			for (CodeSystem.PropertyComponent nextProperty :
+				theJobMetadata.getLoincCodeSystem().getProperty()) {
+				String nextPropertyCode = nextProperty.getCode();
+				CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
+				if (isNotBlank(nextPropertyCode)) {
+					propertyNameToType.put(nextPropertyCode, nextPropertyType);
+				}
+			}
+		return propertyNameToType;
+	}
+
 	protected abstract CT newContextObject(
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails);
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails);
 
 	@Nonnull
 	protected abstract List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails);
 
 	protected abstract void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
 		CT theContext,
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
-		ImportLoincFileSetJson theData, String theSourceFilename);
+		TerminologyFileSetJson theData, String theSourceFilename);
 
 	protected TerminologyFileSetJson.RecordsAddedCounter getRecordsAddedCounter(
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 
-		ImportLoincFileSetJson data = theStepExecutionDetails.getData();
+		TerminologyFileSetJson data = theStepExecutionDetails.getData();
 		String currentStepId = theStepExecutionDetails.getCurrentStepId();
 		return data.getRecordsAddedCounter(currentStepId);
 	}

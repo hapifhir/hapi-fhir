@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -46,12 +47,11 @@ class ImportLoincStep15ParentGroupFileTest extends BaseImportLoincStepTest{
 		// Verify
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-		ImportLoincFileSetJson fileSet = myFileSetCaptor.getAllValues().get(0);
-		assertThat(fileSet.getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/LG100-4-1.234"
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> ResourcesToActivate[ValueSet/LG100-4-1.234]",
+			"finalize-import -> RecordsAdded: From[step-1] Counts[valueSetsAdded=1]"
 		);
-		assertEquals(1, fileSet.getRecordsAddedCounter("step-1").getValueSetsAdded());
 
 		verify(myValueSetDao, times(1)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();
@@ -94,12 +94,11 @@ class ImportLoincStep15ParentGroupFileTest extends BaseImportLoincStepTest{
 		// Verify
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-		ImportLoincFileSetJson fileSet = myFileSetCaptor.getAllValues().get(0);
-		assertThat(fileSet.getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/LG100-4-1.234"
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> ResourcesToActivate[ValueSet/LG100-4-1.234]",
+			"finalize-import -> RecordsAdded: From[step-1] Counts[otherChanges=1]"
 		);
-		assertEquals(1, fileSet.getRecordsAddedCounter("step-1").getOtherChanges());
 
 		verify(myValueSetDao, times(1)).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 		List<ValueSet> allValueSets = myValueSetCaptor.getAllValues();

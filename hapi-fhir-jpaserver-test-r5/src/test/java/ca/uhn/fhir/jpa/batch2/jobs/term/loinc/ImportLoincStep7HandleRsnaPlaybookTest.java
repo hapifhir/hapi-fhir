@@ -64,9 +64,10 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		assertEquals("rad-anatomic-location-region-imaged", cs.getConcept().get(0).getProperty().get(0).getCode());
 		assertEquals("{\"system\":\"http://loinc.org\",\"code\":\"LP199995-4\",\"display\":\"Neck\"}", FhirContext.forR4Cached().newJsonParser().encodeToString(cs.getConcept().get(0).getProperty().get(0).getValue()));
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/loinc-rsna-radiology-playbook-1.234"
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> ResourcesToActivate[ValueSet/loinc-rsna-radiology-playbook-1.234]",
+			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptMapsAdded=2,conceptMapMappingsAdded=8,valueSetsAdded=1,valueSetCodesAdded=3]"
 		);
 
 		verify(myValueSetDao, times(1)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));

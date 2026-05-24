@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -26,7 +27,7 @@ class ImportLoincStep3HandleHierarchyTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv";
 		mockFetchAttachment(classpath);
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
@@ -48,7 +49,10 @@ class ImportLoincStep3HandleHierarchyTest extends BaseImportLoincStepTest {
 			""";
 		assertEquals(expected, hierarchy);
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptsAdded=1]"
+		);
 	}
 
 }

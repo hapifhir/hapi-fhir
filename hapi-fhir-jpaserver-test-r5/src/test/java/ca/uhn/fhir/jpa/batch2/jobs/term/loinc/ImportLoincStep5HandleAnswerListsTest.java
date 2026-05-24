@@ -69,9 +69,10 @@ class ImportLoincStep5HandleAnswerListsTest extends BaseImportLoincStepTest {
 			""";
 		assertEquals(expected, hierarchy);
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/LL1892-0-1.234", "ValueSet/LL1001-8-1.234", "ValueSet/LL1000-0-1.234"
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> ResourcesToActivate[ValueSet/LL1000-0-1.234, ValueSet/LL1001-8-1.234, ValueSet/LL1892-0-1.234]",
+			"finalize-import -> RecordsAdded: From[step-1] Counts[valueSetsAdded=3,valueSetCodesAdded=10]"
 		);
 
 		verify(myValueSetDao, times(3)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));
@@ -101,7 +102,7 @@ class ImportLoincStep5HandleAnswerListsTest extends BaseImportLoincStepTest {
 		mockFetchAttachment(classpath);
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		ValueSet existing = new ValueSet();
 		existing.setId("ValueSet/LL1000-0-1.234/_history/1");
@@ -118,9 +119,10 @@ class ImportLoincStep5HandleAnswerListsTest extends BaseImportLoincStepTest {
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/LL1892-0-1.234", "ValueSet/LL1001-8-1.234", "ValueSet/LL1000-0-1.234"
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> ResourcesToActivate[ValueSet/LL1000-0-1.234, ValueSet/LL1001-8-1.234, ValueSet/LL1892-0-1.234]",
+			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptsAdded=1,valueSetsAdded=2,valueSetCodesAdded=10,otherChanges=1]"
 		);
 
 		verify(myValueSetDao, times(2)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));

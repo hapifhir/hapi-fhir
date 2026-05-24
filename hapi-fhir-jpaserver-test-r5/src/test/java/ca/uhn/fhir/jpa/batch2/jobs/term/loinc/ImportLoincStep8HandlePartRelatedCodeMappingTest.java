@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincStep7HandleRsnaPlaybookTest.renderConceptMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,7 +44,10 @@ class ImportLoincStep8HandlePartRelatedCodeMappingTest extends BaseImportLoincSt
 
 		// Verify
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptMapsAdded=3,conceptMapMappingsAdded=11]"
+		);
 		assertEquals("[conceptMapsAdded=3,conceptMapMappingsAdded=11]", myFileSetCaptor.getAllValues().get(0).getRecordsAddedCounter("step-1").toString());
 		verify(myValueSetDao, never()).update(myValueSetCaptor.capture(), nullable(RequestDetails.class));
 

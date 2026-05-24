@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -24,7 +26,7 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 
 	@Override
 	protected MyContext newContextObject(
-			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyContext(new HashMap<>());
 	}
 
@@ -46,11 +48,11 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
 		MyContext theContext,
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
-		ImportLoincFileSetJson theData, String theSourceFilename) {
+		TerminologyFileSetJson theData, String theSourceFilename) {
 		String parentCode = trim(theRecord.get("IMMEDIATE_PARENT"));
 		String childCode = trim(theRecord.get("CODE"));
 
@@ -67,9 +69,9 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 
 	@Override
 	protected void syncToDb(
-			MyContext theCodeExtractionContext,
-			CodeSystem theCodeSystemToPopulate,
-			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		ImportTerminologyMetadataAttachmentJson theJobMetadata, MyContext theCodeExtractionContext,
+		CodeSystem theCodeSystemToPopulate,
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		// Figure out which concepts are at the very top of the hierarchy (i.e. not children of any other concept)
 		// and put them at the root of the CodeSystem to upload
 
@@ -95,7 +97,7 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 				codeToConcept.size(),
 				rootConceptCount);
 
-		super.syncToDb(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
+		super.syncToDb(theJobMetadata, theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 	}
 
 	private CodeSystem.ConceptDefinitionComponent newConcept(String theCode) {

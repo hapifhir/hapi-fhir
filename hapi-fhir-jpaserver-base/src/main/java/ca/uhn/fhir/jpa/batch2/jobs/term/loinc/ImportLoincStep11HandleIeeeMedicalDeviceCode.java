@@ -4,6 +4,8 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import jakarta.annotation.Nonnull;
@@ -27,7 +29,7 @@ public class ImportLoincStep11HandleIeeeMedicalDeviceCode
 
 	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
@@ -49,18 +51,18 @@ public class ImportLoincStep11HandleIeeeMedicalDeviceCode
 	// FIXME: remove
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<ImportLoincFileSetJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink) throws JobExecutionFailedException {
 		return super.run(theStepExecutionDetails, theDataSink);
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
 		MyBaseContext theContext,
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
-		ImportLoincFileSetJson theData, String theSourceFilename) {
-		String codeSystemVersionId = theData.getLoincCodeSystem().getVersion();
+		TerminologyFileSetJson theData, String theSourceFilename) {
+		String codeSystemVersionId = theJobMetadata.getLoincCodeSystem().getVersion();
 		String loincIeeeCmVersion;
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
 		if (isNotBlank(jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))) {
@@ -76,7 +78,7 @@ public class ImportLoincStep11HandleIeeeMedicalDeviceCode
 		// LOINC Part -> IEEE 11073:10101 Mappings
 		String sourceCodeSystemUri = ITermLoaderSvc.LOINC_URI;
 		String targetCodeSystemUri = ITermLoaderSvc.IEEE_11073_10101_URI;
-		String loincCopyrightStatement = theData.getLoincCodeSystem().getCopyright();
+		String loincCopyrightStatement = theJobMetadata.getLoincCodeSystem().getCopyright();
 		String conceptMapId = LOINC_IEEE_CM_ID + "-" + codeSystemVersionId;
 
 		addConceptMapEntry(

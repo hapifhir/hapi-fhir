@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -45,8 +46,10 @@ class ImportLoincStep17ConsumerNameTest extends BaseImportLoincStepTest {
 			""";
 		assertEquals(expected, hierarchy);
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-		assertEquals("[designationsAdded=3]", myFileSetCaptor.getAllValues().get(0).getRecordsAddedCounter("step-1").toString());
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> RecordsAdded: From[step-1] Counts[designationsAdded=3]"
+		);
 
 	}
 

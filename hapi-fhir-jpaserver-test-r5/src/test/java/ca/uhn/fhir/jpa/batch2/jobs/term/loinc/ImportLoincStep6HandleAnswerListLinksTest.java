@@ -14,10 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,7 +33,7 @@ class ImportLoincStep6HandleAnswerListLinksTest extends BaseImportLoincStepTest{
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/AnswerFile/LoincAnswerListLink.csv";
 		mockFetchAttachment(classpath);
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
@@ -67,80 +65,13 @@ class ImportLoincStep6HandleAnswerListLinksTest extends BaseImportLoincStepTest{
 		assertThat(cs.getConcept().get(0).getProperty().stream().map(t -> t.getCode() + "=" + t.getValue().toString()))
 			.containsExactly("answer-list=LL1000-0");
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptsAdded=1]"
+		);
 	}
 
-	@Test
-	void testPassThroughUploadStatistics() {
-		// Test
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId("my-instance-id");
 
-		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
-		importLoincFileSetJson.getRecordsAddedCounter("step-2").incrementConceptsAdded(2);
-		importLoincFileSetJson.getRecordsAddedCounter("step-3").incrementConceptsAdded(3);
-		importLoincFileSetJson.setCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
-
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
-
-		mySvc.run(stepExecutionDetails, myDataSink);
-
-		// Verify
-		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(any());
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-
-		ImportLoincFileSetJson capturedFileSet0 = myFileSetCaptor.getAllValues().get(0);
-		assertNull(capturedFileSet0.getChunkForCurrentStep());
-		assertThat(capturedFileSet0.getAndRemoveFutureChunksForStepId("step-3")).isEmpty();
-		assertEquals(2, capturedFileSet0.getRecordsAddedCounter("step-2").getConceptsAdded());
-		assertEquals(3, capturedFileSet0.getRecordsAddedCounter("step-3").getConceptsAdded());
-	}
-
-	@Test
-	void run_PassThroughSubsequentStepChunkIds() {
-		// Test
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId("my-instance-id");
-
-		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
-		importLoincFileSetJson.addChunk("step-2", "filename2.txt", "step-2-chunk-1");
-		importLoincFileSetJson.addChunk("step-2", "filename2.txt", "step-2-chunk-2");
-		importLoincFileSetJson.getRecordsAddedCounter("step-2").incrementConceptsAdded(2);
-		importLoincFileSetJson.addChunk("step-3", "filename3.txt", "step-3-chunk-1");
-		importLoincFileSetJson.addChunk("step-3", "filename3.txt", "step-3-chunk-2");
-		importLoincFileSetJson.getRecordsAddedCounter("step-3").incrementConceptsAdded(3);
-		importLoincFileSetJson.setCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
-
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
-
-		mySvc.run(stepExecutionDetails, myDataSink);
-
-		// Verify
-		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(any());
-		verify(myDataSink, times(3)).accept(myFileSetCaptor.capture());
-
-		ImportLoincFileSetJson capturedFileSet0 = myFileSetCaptor.getAllValues().get(0);
-		assertNull(capturedFileSet0.getChunkForCurrentStep());
-		assertThat(capturedFileSet0.getAndRemoveFutureChunksForStepId("step-3"))
-			.containsExactly(
-				new TerminologyFileSetJson.Chunk("filename3.txt", "step-3-chunk-1"),
-				new TerminologyFileSetJson.Chunk("filename3.txt", "step-3-chunk-2")
-			);
-		assertEquals(2, capturedFileSet0.getRecordsAddedCounter("step-2").getConceptsAdded());
-		assertEquals(3, capturedFileSet0.getRecordsAddedCounter("step-3").getConceptsAdded());
-
-		ImportLoincFileSetJson capturedFileSet1 = myFileSetCaptor.getAllValues().get(1);
-		assertThat(capturedFileSet1.getChunkForCurrentStep().getAttachmentId()).isEqualTo("step-2-chunk-1");
-		assertThat(capturedFileSet1.getAndRemoveFutureChunksForStepId("step-3")).isEmpty();
-		assertEquals(0, capturedFileSet1.getRecordsAddedCounter("step-2").getConceptsAdded());
-		assertEquals(0, capturedFileSet1.getRecordsAddedCounter("step-3").getConceptsAdded());
-
-		ImportLoincFileSetJson capturedFileSet2 = myFileSetCaptor.getAllValues().get(2);
-		assertThat(capturedFileSet2.getChunkForCurrentStep().getAttachmentId()).isEqualTo("step-2-chunk-2");
-		assertThat(capturedFileSet2.getAndRemoveFutureChunksForStepId("step-3")).isEmpty();
-		assertEquals(0, capturedFileSet2.getRecordsAddedCounter("step-2").getConceptsAdded());
-		assertEquals(0, capturedFileSet2.getRecordsAddedCounter("step-3").getConceptsAdded());
-	}
 
 	@Test
 	void run_PassThroughResourcesToActivate() {
@@ -148,20 +79,23 @@ class ImportLoincStep6HandleAnswerListLinksTest extends BaseImportLoincStepTest{
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 
-		ImportLoincFileSetJson importLoincFileSetJson = new ImportLoincFileSetJson();
+		TerminologyFileSetJson importLoincFileSetJson = new TerminologyFileSetJson();
 		importLoincFileSetJson.addResourceToActivate("CodeSystem/A");
 		importLoincFileSetJson.addResourceToActivate("CodeSystem/B");
 		importLoincFileSetJson.setCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
 
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
 		// Verify
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(any());
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> ResourcesToActivate[CodeSystem/A, CodeSystem/B]"
+		);
 
-		ImportLoincFileSetJson capturedFileSet0 = myFileSetCaptor.getAllValues().get(0);
+		TerminologyFileSetJson capturedFileSet0 = myFileSetCaptor.getAllValues().get(0);
 		assertNull(capturedFileSet0.getChunkForCurrentStep());
 		assertThat(capturedFileSet0.getResourcesToActivate()).containsExactly("CodeSystem/A", "CodeSystem/B");
 	}

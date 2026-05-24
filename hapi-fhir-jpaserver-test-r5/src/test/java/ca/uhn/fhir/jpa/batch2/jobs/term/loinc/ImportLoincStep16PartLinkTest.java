@@ -29,7 +29,7 @@ class ImportLoincStep16PartLinkTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/PartFile/LoincPartLink.csv";
 		mockFetchAttachment(classpath);
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
@@ -52,7 +52,10 @@ class ImportLoincStep16PartLinkTest extends BaseImportLoincStepTest {
 			""";
 		assertEquals(expected, hierarchy);
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptsAdded=1]"
+		);
 	}
 
 }

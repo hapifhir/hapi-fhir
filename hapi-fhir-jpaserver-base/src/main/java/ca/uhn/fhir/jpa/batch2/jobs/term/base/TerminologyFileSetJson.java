@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincFileSetJson;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.HapiToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,33 +20,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static org.apache.commons.lang3.ObjectUtils.getIfNull;
-
-/**
- * In terminology import batch2 jobs, the first step extracts the archive containing
- * any+all files that will be processed and creates the chunks that will be processed
- * by subsequent steps. This means that step 1 is creating all the chunks for step 2,
- * but also all the chunks for step 3, and so on. This class is emitted by step 1 and
- * holds the chunks for all later steps. Each step pull the chunks for the next
- * step out and passes them individually and sends all the chunks for future steps beyond
- * that one as a single batch.
- */
 public class TerminologyFileSetJson implements IModelJson {
 
-	@JsonProperty("stepIdToFutureChunks")
-	private Map<String, List<Chunk>> myStepIdToFutureChunks;
 	@JsonProperty("chunkForCurrentStep")
 	private Chunk myChunkForCurrentStep;
 	@JsonProperty("resourcesToActivate")
 	private Set<String> myResourcesToActivate;
+	@JsonProperty("conceptPidsToGenerateClosureFor")
+	private List<Long> myConceptPidsToGenerateClosureFor;
 	@JsonProperty("stepIdToRecordsAdded")
 	private Map<String, RecordsAddedCounter> myStepIdToRecordsAdded;
-	@JsonProperty("codeSystemXml")
-	private String myCodeSystemXml;
-	@JsonProperty("codeSystemStagingVersionId")
-	private String myCodeSystemStagingVersionId;
-	@JsonIgnore
-	private CodeSystem myCodeSystemXmlParsed;
 
 	/**
 	 * Constructor
@@ -56,39 +38,11 @@ public class TerminologyFileSetJson implements IModelJson {
 		super();
 	}
 
-	/**
-	 * Copy constructor
-	 *
-	 * @param theTerminologyFileSetJson The value to copy from
-	 */
-	public TerminologyFileSetJson(TerminologyFileSetJson theTerminologyFileSetJson) {
-		myStepIdToFutureChunks = theTerminologyFileSetJson.myStepIdToFutureChunks;
-		myChunkForCurrentStep = theTerminologyFileSetJson.myChunkForCurrentStep;
-		myResourcesToActivate = theTerminologyFileSetJson.myResourcesToActivate;
-		myStepIdToRecordsAdded = theTerminologyFileSetJson.myStepIdToRecordsAdded;
-		myCodeSystemXml = theTerminologyFileSetJson.myCodeSystemXml;
-		myCodeSystemStagingVersionId = theTerminologyFileSetJson.myCodeSystemStagingVersionId;
-		myCodeSystemXmlParsed = theTerminologyFileSetJson.myCodeSystemXmlParsed;
-	}
-
-	public void addChunk(String theStepId, String theSourceFilename, String theChunkAttachmentId) {
-		Validate.notBlank(theStepId, "theStepId must not be null or blank");
-		Validate.notBlank(theChunkAttachmentId, "theChunkAttachmentId must not be null or blank");
-		initializeStepIdToChunkAttachmentIdsIfNecessary();
-		myStepIdToFutureChunks
-			.computeIfAbsent(theStepId, k -> new ArrayList<>())
-			.add(new Chunk(theSourceFilename, theChunkAttachmentId));
-	}
-
-	public List<Chunk> getAndRemoveFutureChunksForStepId(String theStepId) {
-		initializeStepIdToChunkAttachmentIdsIfNecessary();
-		return getIfNull(myStepIdToFutureChunks.remove(theStepId), List.of());
-	}
-
-	private void initializeStepIdToChunkAttachmentIdsIfNecessary() {
-		if (myStepIdToFutureChunks == null) {
-			myStepIdToFutureChunks = new HashMap<>();
+	public List<Long> getConceptPidsToGenerateClosureFor() {
+		if (myConceptPidsToGenerateClosureFor == null) {
+			myConceptPidsToGenerateClosureFor = new ArrayList<>();
 		}
+		return myConceptPidsToGenerateClosureFor;
 	}
 
 	public Set<String> getResourcesToActivate() {
@@ -114,21 +68,10 @@ public class TerminologyFileSetJson implements IModelJson {
 		getResourcesToActivate().add(theResourceToActivate);
 	}
 
-	@SuppressWarnings("unchecked")
-	public TerminologyFileSetJson cloneWithOnlyCopyForwardData() {
-		ImportLoincFileSetJson retVal = new ImportLoincFileSetJson();
-
-		retVal.setCodeSystemXml(getCodeSystemXml());
-		retVal.setCodeSystemStagingVersionId(getCodeSystemStagingVersionId());
-		retVal.setResourcesToActivate(getResourcesToActivate());
-
-		return retVal;
-	}
 
 
 	public boolean isEmpty() {
 		return myChunkForCurrentStep == null &&
-			(myStepIdToFutureChunks == null || myStepIdToFutureChunks.isEmpty()) &&
 			(myResourcesToActivate == null || myResourcesToActivate.isEmpty()) &&
 			(myStepIdToRecordsAdded == null || myStepIdToRecordsAdded.isEmpty());
 	}
@@ -142,36 +85,6 @@ public class TerminologyFileSetJson implements IModelJson {
 
 	public RecordsAddedCounter getRecordsAddedCounter(String theStepId) {
 		return getStepIdToRecordsAdded().computeIfAbsent(theStepId, k -> new RecordsAddedCounter());
-	}
-
-	public CodeSystem getLoincCodeSystem() {
-		if (myCodeSystemXmlParsed == null) {
-			myCodeSystemXmlParsed =
-				FhirContext.forR4Cached().newXmlParser().parseResource(CodeSystem.class, getCodeSystemXml());
-		}
-		return myCodeSystemXmlParsed;
-	}
-
-	public void setLoincCodeSystem(@Nonnull CodeSystem theCodeSystem) {
-		setCodeSystemXml(FhirContext.forR4Cached().newXmlParser().encodeResourceToString(theCodeSystem));
-		myCodeSystemXmlParsed = theCodeSystem;
-	}
-
-	public String getCodeSystemXml() {
-		return myCodeSystemXml;
-	}
-
-	public void setCodeSystemXml(String theCodeSystemXml) {
-		myCodeSystemXml = theCodeSystemXml;
-		myCodeSystemXmlParsed = null;
-	}
-
-	public String getCodeSystemStagingVersionId() {
-		return myCodeSystemStagingVersionId;
-	}
-
-	public void setCodeSystemStagingVersionId(String theCodeSystemStagingVersionId) {
-		myCodeSystemStagingVersionId = theCodeSystemStagingVersionId;
 	}
 
 	public static class Chunk implements IModelJson {

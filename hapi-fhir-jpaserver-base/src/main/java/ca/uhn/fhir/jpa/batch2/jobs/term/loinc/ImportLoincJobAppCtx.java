@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.batch2.api.IReductionStepWorker;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,126 +33,137 @@ import org.springframework.context.annotation.Configuration;
 public class ImportLoincJobAppCtx {
 
 	public static final String IMPORT_TERM_LOINC = "IMPORT_TERM_LOINC";
+	public static final String STEP_ID_FINALIZE_IMPORT = "finalize-import";
 
 	private final DaoRegistry myDaoRegistry;
 	private final ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	private final IJobPersistence myJobPersistence;
 
-	public ImportLoincJobAppCtx(DaoRegistry myDaoRegistry, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc) {
+	public ImportLoincJobAppCtx(DaoRegistry myDaoRegistry, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, IJobPersistence theJobPersistence) {
 		this.myDaoRegistry = myDaoRegistry;
 		this.myTermCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
+		this.myJobPersistence = theJobPersistence;
 	}
 
 	@Bean
 	public JobDefinition<ImportLoincJobParameters> importLoincJobDefinition() {
 		return JobDefinition.newBuilder()
-				.setInitialStatus(StatusEnum.BUILDING)
-				.setJobDefinitionId(IMPORT_TERM_LOINC)
-				.setJobDescription("Import Terminology - LOINC")
-				.setJobDefinitionVersion(1)
-				.gatedExecution()
-				.setParametersType(ImportLoincJobParameters.class)
+			.setInitialStatus(StatusEnum.BUILDING)
+			.setJobDefinitionId(IMPORT_TERM_LOINC)
+			.setJobDescription("Import Terminology - LOINC")
+			.setJobDefinitionVersion(1)
+			.gatedExecution()
+			.setParametersType(ImportLoincJobParameters.class)
 			.setParametersValidator(new ImportLoincJobParametersValidator())
-				.addFirstStep(
-						"expand-zip",
-						"Expand LOINC distribution",
-						ImportLoincFileSetJson.class,
-						importLoincStep1ExpandDistributionIntoFiles())
-				.addIntermediateStep(
-						"import-concepts",
-						"Import LOINC concepts",
-						ImportLoincFileSetJson.class,
-						importLoincStep2Concepts())
-				.addIntermediateStep(
-						"import-hierarchy-concepts",
-						"Import LOINC hierarchy Concepts",
-						ImportLoincFileSetJson.class,
-					importLoincStep4HandleHierarchyConcepts())
-				.addIntermediateStep(
-						"import-hierarchy",
-						"Import LOINC hierarchy",
-						ImportLoincFileSetJson.class,
-						importLoincStep3HandleHierarchy())
-				.addIntermediateStep(
-						"import-answer-lists",
-						"Import LOINC answer lists",
-						ImportLoincFileSetJson.class,
-						importLoincStep5AnswerLists())
-				.addIntermediateStep(
-						"import-answer-list-links",
-						"Import LOINC answer list links",
-						ImportLoincFileSetJson.class,
-						importLoincStep6AnswerListLinks())
-				.addIntermediateStep(
-						"import-rsna-playbook",
-						"Import LOINC RSNA playbook",
-						ImportLoincFileSetJson.class,
-						importLoincStep7RsnaPlaybook())
-				.addIntermediateStep(
-						"import-part-related-code-mapping",
-						"Import LOINC Part Related Code Mappings",
-						ImportLoincFileSetJson.class,
-						importLoincStep8PartRelatedCodeMapping())
-				.addIntermediateStep(
-						"import-document-ontology",
-						"Import LOINC Document Ontology",
-						ImportLoincFileSetJson.class,
-						importLoincStep9HandleDocumentOntology())
-				.addIntermediateStep(
-						"import-univeral-lab-orderset",
-						"Import LOINC Lab Order Set",
-						ImportLoincFileSetJson.class,
-						importLoincStep10HandleUniversalLabOrderSet())
-				.addIntermediateStep(
-						"import-ieee-medical-device-code",
-						"Import LOINC IEEE Medical Device Codes",
-						ImportLoincFileSetJson.class,
-						importLoincStep11HandleIeeeMedicalDeviceCode())
-				.addIntermediateStep(
-						"import-imaging-document-code",
-						"Import LOINC Imaging Document Codes",
-						ImportLoincFileSetJson.class,
-						importLoincStep12ImagingDocumentCode())
-				.addIntermediateStep(
-						"import-group-file",
-						"Import LOINC Group File",
-						ImportLoincFileSetJson.class,
-						importLoincStep13GroupFile())
-				.addIntermediateStep(
-						"import-group-terms-file",
-						"Import LOINC Group Terms File",
-						ImportLoincFileSetJson.class,
-						importLoincStep14GroupTermsFile())
-				.addIntermediateStep(
-						"import-parent-group-file",
-						"Import LOINC Parent Group File",
-						ImportLoincFileSetJson.class,
-						importLoincStep15ParentGroupFile())
-				.addIntermediateStep(
-						"import-part-link",
-						"Import LOINC Part Link File",
-						ImportLoincFileSetJson.class,
-						importLoincStep16PartLink())
-				.addIntermediateStep(
-						"import-consumer-name",
-						"Import LOINC Consumer Names",
-						ImportLoincFileSetJson.class,
-						importLoincStep17ConsumerName())
-				.addIntermediateStep(
-						"import-coding-properties",
-						"Import LOINC Coding Properties",
-						ImportLoincFileSetJson.class,
-						importLoincStep18CodingProperties())
-				.addIntermediateStep(
-						"import-linguistic-variant",
-						"Import LOINC Linguistic Variants",
-						ImportLoincFileSetJson.class,
-						importLoincStep19LinguisticVariant())
-				.addFinalReducerStep(
-						"finalize-import",
-						"Finalize LOINC Import",
-						ImportTerminologyResultJson.class,
-						importLoincStep21Finalize())
-				.build();
+			.addFirstStep(
+				"expand-zip",
+				"Expand LOINC distribution",
+				TerminologyFileSetJson.class,
+				importLoincStep1ExpandDistributionIntoFiles())
+			.addIntermediateStep(
+				"import-concepts",
+				"Import LOINC concepts",
+				TerminologyFileSetJson.class,
+				importLoincStep2Concepts())
+			.addIntermediateStep(
+				"import-hierarchy-concepts",
+				"Import LOINC hierarchy Concepts",
+				TerminologyFileSetJson.class,
+				importLoincStep4HandleHierarchyConcepts())
+			.addIntermediateStep(
+				"import-hierarchy",
+				"Import LOINC hierarchy",
+				TerminologyFileSetJson.class,
+				importLoincStep3HandleHierarchy())
+			.addIntermediateStep(
+				"import-answer-lists",
+				"Import LOINC answer lists",
+				TerminologyFileSetJson.class,
+				importLoincStep5AnswerLists())
+			.addIntermediateStep(
+				"import-answer-list-links",
+				"Import LOINC answer list links",
+				TerminologyFileSetJson.class,
+				importLoincStep6AnswerListLinks())
+			.addIntermediateStep(
+				"import-rsna-playbook",
+				"Import LOINC RSNA playbook",
+				TerminologyFileSetJson.class,
+				importLoincStep7RsnaPlaybook())
+			.addIntermediateStep(
+				"import-part-related-code-mapping",
+				"Import LOINC Part Related Code Mappings",
+				TerminologyFileSetJson.class,
+				importLoincStep8PartRelatedCodeMapping())
+			.addIntermediateStep(
+				"import-document-ontology",
+				"Import LOINC Document Ontology",
+				TerminologyFileSetJson.class,
+				importLoincStep9HandleDocumentOntology())
+			.addIntermediateStep(
+				"import-univeral-lab-orderset",
+				"Import LOINC Lab Order Set",
+				TerminologyFileSetJson.class,
+				importLoincStep10HandleUniversalLabOrderSet())
+			.addIntermediateStep(
+				"import-ieee-medical-device-code",
+				"Import LOINC IEEE Medical Device Codes",
+				TerminologyFileSetJson.class,
+				importLoincStep11HandleIeeeMedicalDeviceCode())
+			.addIntermediateStep(
+				"import-imaging-document-code",
+				"Import LOINC Imaging Document Codes",
+				TerminologyFileSetJson.class,
+				importLoincStep12ImagingDocumentCode())
+			.addIntermediateStep(
+				"import-group-file",
+				"Import LOINC Group File",
+				TerminologyFileSetJson.class,
+				importLoincStep13GroupFile())
+			.addIntermediateStep(
+				"import-group-terms-file",
+				"Import LOINC Group Terms File",
+				TerminologyFileSetJson.class,
+				importLoincStep14GroupTermsFile())
+			.addIntermediateStep(
+				"import-parent-group-file",
+				"Import LOINC Parent Group File",
+				TerminologyFileSetJson.class,
+				importLoincStep15ParentGroupFile())
+			.addIntermediateStep(
+				"import-part-link",
+				"Import LOINC Part Link File",
+				TerminologyFileSetJson.class,
+				importLoincStep16PartLink())
+			.addIntermediateStep(
+				"import-consumer-name",
+				"Import LOINC Consumer Names",
+				TerminologyFileSetJson.class,
+				importLoincStep17ConsumerName())
+			.addIntermediateStep(
+				"import-coding-properties",
+				"Import LOINC Coding Properties",
+				TerminologyFileSetJson.class,
+				importLoincStep18CodingProperties())
+			.addIntermediateStep(
+				"import-linguistic-variant",
+				"Import LOINC Linguistic Variants",
+				TerminologyFileSetJson.class,
+				importLoincStep19LinguisticVariant())
+			.addIntermediateStep("chunk-concepts-for-closure-generation",
+				"Create work chunks for calculating concept closures",
+				TerminologyFileSetJson.class,
+				importLoincStep20ChunkConceptsForClosureGeneration())
+			.addIntermediateStep("generate-concept-closures",
+				"Generate concept closures",
+				TerminologyFileSetJson.class,
+				importLoincStep21GenerateConceptClosures())
+			.addFinalReducerStep(
+				STEP_ID_FINALIZE_IMPORT,
+				"Finalize LOINC Import",
+				ImportTerminologyResultJson.class,
+				importLoincStep21Finalize())
+			.build();
 	}
 
 	/**
@@ -306,9 +318,27 @@ public class ImportLoincJobAppCtx {
 		return new ImportLoincStep19LinguisticVariant();
 	}
 
+	/**
+	 * Step 20: Chunk Concepts for Closure Generation
+	 */
+	public ImportLoincStep20ChunkConceptsForGeneratingClosure importLoincStep20ChunkConceptsForClosureGeneration() {
+		return new ImportLoincStep20ChunkConceptsForGeneratingClosure();
+	}
+
+	/**
+	 * Step 21: Generate concept closures
+	 */
 	@Bean
-	public IReductionStepWorker<ImportLoincJobParameters, ImportLoincFileSetJson, ImportTerminologyResultJson> importLoincStep21Finalize() {
-		return new ImportLoincStep21Finalize(myDaoRegistry, myTermCodeSystemStorageSvc);
+	public ImportLoincStep21GenerateConceptClosures importLoincStep21GenerateConceptClosures() {
+		return new ImportLoincStep21GenerateConceptClosures();
+	}
+
+	/**
+	 * Final reducer step
+	 */
+	@Bean
+	public ImportLoincStep22Finalize importLoincStep21Finalize() {
+		return new ImportLoincStep22Finalize(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence);
 	}
 
 }

@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -43,17 +45,20 @@ public class ImportLoincStep2HandleConcepts
 
 	@Override
 	protected CodeExtractionContext newContextObject(
-			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		return new ImportLoincStep2HandleConcepts.CodeExtractionContext(theStepExecutionDetails.getData());
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+		return new ImportLoincStep2HandleConcepts.CodeExtractionContext();
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
 		CodeExtractionContext theContext,
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
-		ImportLoincFileSetJson theData, String theSourceFilename) {
+		TerminologyFileSetJson theData, String theSourceFilename) {
+
+		Map<String, CodeSystem.PropertyType> propertyNameToType = extractPropertyNamesFromCodeSystem(theJobMetadata, theData);
+
 		String code = trim(theRecord.get("LOINC_NUM"));
 		if (isNotBlank(code)) {
 			String longCommonName = trim(theRecord.get("LONG_COMMON_NAME"));
@@ -71,13 +76,13 @@ public class ImportLoincStep2HandleConcepts
 				shortNameDesignation.setValue(shortName);
 			}
 
-			for (String nextPropertyName : theContext.propertyNamesToTypes().keySet()) {
+			for (String nextPropertyName : propertyNameToType.keySet()) {
 				if (!theRecord.toMap().containsKey(nextPropertyName)) {
 					continue;
 				}
 
 				CodeSystem.PropertyType nextPropertyType =
-						theContext.propertyNamesToTypes().get(nextPropertyName);
+					propertyNameToType.get(nextPropertyName);
 
 				String nextPropertyValue = theRecord.get(nextPropertyName);
 				if (isNotBlank(nextPropertyValue)) {
@@ -120,10 +125,10 @@ public class ImportLoincStep2HandleConcepts
 
 	@Override
 	protected void syncToDb(
-			CodeExtractionContext theCodeExtractionContext,
-			CodeSystem theCodeSystemToPopulate,
-			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
-		super.syncToDb(theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
+		ImportTerminologyMetadataAttachmentJson theJobMetadata, CodeExtractionContext theCodeExtractionContext,
+		CodeSystem theCodeSystemToPopulate,
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+		super.syncToDb(theJobMetadata, theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 		ourLog.info(
 				"LOINC CodeSystem populated with {} concepts",
 				theCodeSystemToPopulate.getConcept().size());
@@ -131,10 +136,11 @@ public class ImportLoincStep2HandleConcepts
 
 	@Nonnull
 	private static Map<String, CodeSystem.PropertyType> extractPropertyNamesFromCodeSystem(
-			ImportLoincFileSetJson data) {
+		ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			TerminologyFileSetJson data) {
 		Map<String, CodeSystem.PropertyType> propertyNamesToTypes = new HashMap<>();
 		for (CodeSystem.PropertyComponent nextProperty :
-				data.getLoincCodeSystem().getProperty()) {
+			theJobMetadata.getLoincCodeSystem().getProperty()) {
 			String nextPropertyCode = nextProperty.getCode();
 			CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
 			if (isNotBlank(nextPropertyCode)) {
@@ -145,14 +151,13 @@ public class ImportLoincStep2HandleConcepts
 		return propertyNamesToTypes;
 	}
 
-	protected record CodeExtractionContext(
-			Map<String, CodeSystem.PropertyType> propertyNamesToTypes, Set<String> seenCodes) {
+	protected record CodeExtractionContext(Set<String> seenCodes) {
 
 		/**
 		 * Constructor
 		 */
-		public CodeExtractionContext(ImportLoincFileSetJson theData) {
-			this(extractPropertyNamesFromCodeSystem(theData), new HashSet<>());
+		public CodeExtractionContext() {
+			this(new HashSet<>());
 		}
 	}
 }

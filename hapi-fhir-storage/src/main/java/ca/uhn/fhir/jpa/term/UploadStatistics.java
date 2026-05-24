@@ -43,8 +43,9 @@ public class UploadStatistics {
 		return myAddedConceptLinkCount;
 	}
 
-	public void incrementConceptsAddedCount() {
+	public UploadStatistics incrementConceptsAddedCount() {
 		myAddedConceptCount++;
+		return this;
 	}
 
 	public UploadStatistics incrementDesignationsAddedCount() {

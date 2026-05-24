@@ -8,13 +8,11 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,9 +33,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ImportLoincStep21FinalizeTest extends BaseImportLoincStepTest {
+public class ImportLoincStep22FinalizeTest extends BaseImportLoincStepTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep21FinalizeTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep22FinalizeTest.class);
 	@Mock
 	private IJobStepExecutionServices myStepExecutionSvcs;
 	@Mock
@@ -45,7 +43,7 @@ public class ImportLoincStep21FinalizeTest extends BaseImportLoincStepTest {
 	@Mock
 	private IJobDataSink<ImportTerminologyResultJson> myDataSink;
 	@InjectMocks
-	private ImportLoincStep21Finalize myStep;
+	private ImportLoincStep22Finalize myStep;
 	@Captor
 	private ArgumentCaptor<ImportTerminologyResultJson> myDataCaptor;
 	@Captor
@@ -58,7 +56,7 @@ public class ImportLoincStep21FinalizeTest extends BaseImportLoincStepTest {
 
 		// Test
 		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
-		ImportLoincFileSetJson data = newData();
+		TerminologyFileSetJson data = newData();
 		data.getRecordsAddedCounter("import-concepts").incrementConceptsAdded(1);
 		data.getRecordsAddedCounter("import-hierarchy").incrementConceptsAdded(2);
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(3);
@@ -70,7 +68,7 @@ public class ImportLoincStep21FinalizeTest extends BaseImportLoincStepTest {
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(4);
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc).importLoincJobDefinition();
+		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, theJobPersistence).importLoincJobDefinition();
 		myStep.run(new StepExecutionDetails<>(parameters, null, new JobInstance(), new WorkChunk(), myStepExecutionSvcs, jobDefinition, null, null), myDataSink);
 
 		// Verify
@@ -94,7 +92,7 @@ public class ImportLoincStep21FinalizeTest extends BaseImportLoincStepTest {
 
 		// Test
 		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
-		ImportLoincFileSetJson data = newData();
+		TerminologyFileSetJson data = newData();
 		data.addResourceToActivate("ValueSet/A");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
@@ -103,7 +101,7 @@ public class ImportLoincStep21FinalizeTest extends BaseImportLoincStepTest {
 		data.addResourceToActivate("ValueSet/B");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc).importLoincJobDefinition();
+		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, theJobPersistence).importLoincJobDefinition();
 		myStep.run(new StepExecutionDetails<>(parameters, null, new JobInstance(), new WorkChunk(), myStepExecutionSvcs, jobDefinition, null, null), myDataSink);
 
 		// Verify

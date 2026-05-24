@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import jakarta.annotation.Nonnull;
@@ -25,7 +27,7 @@ public class ImportLoincStep5HandleAnswerLists
 
 	@Override
 	protected MyContext newContextObject(
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyContext(theStepExecutionDetails);
 	}
 
@@ -39,11 +41,11 @@ public class ImportLoincStep5HandleAnswerLists
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
 		MyContext theContext,
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
-		ImportLoincFileSetJson theData, String theSourceFilename) {
+		TerminologyFileSetJson theData, String theSourceFilename) {
 		// this is the code for the list (will repeat)
 		String answerListId = trim(theRecord.get("AnswerListId"));
 		String answerListName = trim(theRecord.get("AnswerListName"));
@@ -71,9 +73,9 @@ public class ImportLoincStep5HandleAnswerLists
 		}
 
 		// Answer list ValueSet
-		String codeSystemVersionId = theData.getLoincCodeSystem().getVersion();
+		String codeSystemVersionId = theJobMetadata.getLoincCodeSystem().getVersion();
 		ValueSet vs = getValueSet(
-			theStepExecutionDetails, theJobParameters,
+			theStepExecutionDetails, theJobMetadata, theJobParameters,
 			theData,
 			theContext,
 			answerListId,
@@ -106,7 +108,7 @@ public class ImportLoincStep5HandleAnswerLists
 	protected static class MyContext extends MyBaseContext {
 		private final Set<String> myAnswerListCodes = new HashSet<>();
 
-		public MyContext(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theData) {
+		public MyContext(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theData) {
 			super(theData);
 		}
 

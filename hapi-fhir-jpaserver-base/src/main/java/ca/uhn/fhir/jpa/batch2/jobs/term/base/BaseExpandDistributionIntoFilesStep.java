@@ -43,7 +43,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
-public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTerminologyImportParameters, OT extends TerminologyFileSetJson> implements IJobStepWorker<PT, VoidModel, OT> {
+public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTerminologyImportParameters> implements IJobStepWorker<PT, VoidModel, TerminologyFileSetJson> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseExpandDistributionIntoFilesStep.class);
 
@@ -57,10 +57,9 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		myChunkLineSizeForUnitTests = theChunkLineSize;
 	}
 
-	@SuppressWarnings("SwitchStatementWithTooFewBranches")
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<OT> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink) throws JobExecutionFailedException {
 
 		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		PT jobParameters = theStepExecutionDetails.getParameters();
@@ -68,7 +67,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 		ourLog.info("Import {}[{}] - Expanding file {}", getTerminologyName(), instanceId, loincFileAttachment.getFilename());
 
-		OT fileSet = newTerminologyFileSetJson();
+		TerminologyFileSetJson fileSet = newTerminologyFileSetJson();
 
 		try (InputStream inputStream = loincFileAttachment.getInputStream()) {
 			try (BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
@@ -90,7 +89,10 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 							if (fileHandlingTypeToAttachmentIds.containsKey(fileHandlingType)) {
 								List<String> attachmentIds = fileHandlingTypeToAttachmentIds.get(fileHandlingType);
 								for (String attachmentId : attachmentIds) {
-									fileSet.addChunk(processor.stepId(), nextFileName, attachmentId);
+									TerminologyFileSetJson data = newTerminologyFileSetJson();
+									data.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk(nextFileName, attachmentId));
+									theDataSink.acceptForFutureStep(processor.stepId(), data);
+
 								}
 								continue;
 							}
@@ -98,18 +100,18 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 							List<String> attachmentIds = switch (fileHandlingType) {
 								case CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS -> {
 									int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 1000);
-									yield csvSplitWithRepeatHeader(instanceId, bytes, fileSet, loincFileAttachment.getFilename(), nextFileName, processor.stepId(), chunkSize);
+									yield csvSplitWithRepeatHeader(instanceId, bytes, loincFileAttachment.getFilename(), nextFileName, processor.stepId(), chunkSize, theDataSink);
 								}
 								case CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS -> {
 									int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 50000);
-									yield csvSplitWithRepeatHeader(instanceId, bytes, fileSet, loincFileAttachment.getFilename(), nextFileName, processor.stepId(), chunkSize);
+									yield csvSplitWithRepeatHeader(instanceId, bytes, loincFileAttachment.getFilename(), nextFileName, processor.stepId(), chunkSize, theDataSink);
 								}
 							};
 							fileHandlingTypeToAttachmentIds.putAll(fileHandlingType, attachmentIds);
 						}
 
 						// Synchronous processing (anything that is small enough to just handle it here)
-						handleSynchronous(theStepExecutionDetails, nextFileName, bytes, jobParameters, fileSet);
+						handleSynchronous(theStepExecutionDetails, theDataSink, nextFileName, bytes, jobParameters, fileSet);
 
 					}
 				}
@@ -119,27 +121,24 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 			throw new JobExecutionFailedException(Msg.code(1) + "Files to expand " + getTerminologyName() + " zip file: " + e.getMessage(), e);
 		}
 
-		submitChunksForNextStep(theStepExecutionDetails, theDataSink, fileSet);
-
 		return RunOutcome.SUCCESS;
 	}
 
 	/**
 	 * Subclasses can override this method to handle files that are small enough to just handle here.
 	 */
-	protected void handleSynchronous(StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, String theFileName, byte[] theBytes, PT theJobParameters, OT theFileSet) {
+	protected void handleSynchronous(StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, IJobDataSink<TerminologyFileSetJson> theDataSink, String theFileName, byte[] theBytes, PT theJobParameters, TerminologyFileSetJson theFileSet) {
 		// nothing
 	}
 
-	/**
-	 * A simple factory method for a new empty file set.
-	 */
-	protected abstract OT newTerminologyFileSetJson();
+	private TerminologyFileSetJson newTerminologyFileSetJson() {
+		return new TerminologyFileSetJson();
+	}
 
 	/**
 	 * @return A list of attachment IDs for the work chunks that were created.
 	 */
-	private List<String> csvSplitWithRepeatHeader(String theJobInstanceId, byte[] theBytes, TerminologyFileSetJson theFileSet, String theZipOuterFilename, String theZipInnerFilename, String theStepId, int theChunkLines) throws JobExecutionFailedException {
+	private List<String> csvSplitWithRepeatHeader(String theJobInstanceId, byte[] theBytes, String theZipOuterFilename, String theZipInnerFilename, String theStepId, int theChunkLines, IJobDataSink<TerminologyFileSetJson> theDataSink) throws JobExecutionFailedException {
 		List<String> attachmentIds = new ArrayList<>();
 
 		String filename = theZipInnerFilename;
@@ -164,7 +163,11 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 				if (recordsBuffer.size() == theChunkLines || !recordIterator.hasNext()) {
 					String attachmentId = writeChunk(theJobInstanceId, headers, recordsBuffer, filename, startRow, endRow);
-					theFileSet.addChunk(theStepId, theZipInnerFilename, attachmentId);
+
+					TerminologyFileSetJson data = newTerminologyFileSetJson();
+					data.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk(theZipInnerFilename, attachmentId));
+					theDataSink.acceptForFutureStep(theStepId, data);
+
 					recordsBuffer.clear();
 					attachmentIds.add(attachmentId);
 
@@ -218,29 +221,6 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		return stepProcessingInstructions;
 	}
 
-	public static <OT extends TerminologyFileSetJson> void submitChunksForNextStep(@Nonnull StepExecutionDetails<?, ?> theStepExecutionDetails, @Nonnull IJobDataSink<OT> theDataSink, OT theFileSet) {
-		String nextStepId = theStepExecutionDetails.getNextStepId();
-
-		/*
-		 * The chunk data holds the attachment IDs for all processing steps that have not yet been completed,
-		 * including the next step, but also including subsequent steps. We want to send one chunk to the next
-		 * step that includes all the data for subsequent steps so that it can be relayed onward, but then
-		 * all other work chunks should only hold a single attachment ID for actual processing.
-		 */
-		List<TerminologyFileSetJson.Chunk> attachmentIdsForNextStep = theFileSet.getAndRemoveFutureChunksForStepId(nextStepId);
-		theFileSet.setChunkForCurrentStep(null);
-		if (!theFileSet.isEmpty()) {
-			theDataSink.accept(theFileSet);
-		}
-
-		// Subsequent steps
-		for (TerminologyFileSetJson.Chunk chunk : attachmentIdsForNextStep) {
-			OT fileSetToSend = theFileSet.cloneWithOnlyCopyForwardData();
-			fileSetToSend.setChunkForCurrentStep(chunk);
-			theDataSink.accept(fileSetToSend);
-		}
-	}
-
 	@Nonnull
 	public static CSVParser newLoincCsvParser(Reader theReader) throws IOException {
 		return new CSVParser(theReader, CSVFormat.DEFAULT.builder()
@@ -253,7 +233,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 			.setQuoteMode(QuoteMode.NON_NUMERIC)
 			.setHeader()
 			.setSkipHeaderRecord(true)
-			.build());
+			.get());
 	}
 
 	private record StepIdAndFileHandlingInstructions(String stepId,

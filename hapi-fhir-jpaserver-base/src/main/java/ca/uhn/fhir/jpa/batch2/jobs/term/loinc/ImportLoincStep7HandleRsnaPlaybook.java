@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
@@ -34,7 +36,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 
 	@Override
 	protected MyContext newContextObject(
-			StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyContext(theStepExecutionDetails);
 	}
 
@@ -54,11 +56,11 @@ public class ImportLoincStep7HandleRsnaPlaybook
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theStepExecutionDetails, ImportLoincJobParameters theJobParameters,
+		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
 		MyContext theContext,
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
-		ImportLoincFileSetJson theData, String theSourceFilename) {
+		TerminologyFileSetJson theData, String theSourceFilename) {
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		String longCommonName = trim(theRecord.get("LongCommonName"));
 		String partNumber = trim(theRecord.get("PartNumber"));
@@ -71,7 +73,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		String longName = trim(theRecord.get("LongName"));
 
 		// CodeSystem version from properties file
-		String codeSystemVersionId = theData.getLoincCodeSystem().getVersion();
+		String codeSystemVersionId = theJobMetadata.getLoincCodeSystem().getVersion();
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
 
 		// ConceptMap version from properties files
@@ -85,7 +87,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 
 		// RSNA Codes VS
 		ValueSet vs = getValueSet(
-			theStepExecutionDetails, theJobParameters, theData, theContext, RSNA_CODES_VS_ID, RSNA_CODES_VS_URI, RSNA_CODES_VS_NAME, null);
+			theStepExecutionDetails, theJobMetadata, theJobParameters, theData, theContext, RSNA_CODES_VS_ID, RSNA_CODES_VS_URI, RSNA_CODES_VS_NAME, null);
 
 		if (!theContext.getCodesInRsnaPlaybookValueSet().contains(loincNumber)) {
 			vs.getCompose()
@@ -184,7 +186,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 
 		private final Set<String> myCodesInRsnaPlaybookValueSet = new HashSet<>();
 
-		public MyContext(StepExecutionDetails<ImportLoincJobParameters, ImportLoincFileSetJson> theData) {
+		public MyContext(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theData) {
 			super(theData);
 		}
 

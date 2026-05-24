@@ -41,9 +41,10 @@ class ImportLoincStep10HandleUniversalLabOrderSetTest extends BaseImportLoincSte
 		// Verify
 		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
 
-		verify(myDataSink, times(1)).accept(myFileSetCaptor.capture());
-		assertThat(myFileSetCaptor.getAllValues().get(0).getResourcesToActivate()).containsExactlyInAnyOrder(
-			"ValueSet/loinc-universal-order-set-1.234"
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> ResourcesToActivate[ValueSet/loinc-universal-order-set-1.234]",
+			"finalize-import -> RecordsAdded: From[step-1] Counts[valueSetsAdded=1,valueSetCodesAdded=9]"
 		);
 
 		verify(myValueSetDao, times(1)).create(myValueSetCaptor.capture(), nullable(RequestDetails.class));

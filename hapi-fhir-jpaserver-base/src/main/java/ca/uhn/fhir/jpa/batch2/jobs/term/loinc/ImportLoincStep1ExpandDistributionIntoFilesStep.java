@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
+import ca.uhn.fhir.batch2.api.AttachmentDetails;
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -7,9 +11,12 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -17,16 +24,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
-import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL;
 
 public class ImportLoincStep1ExpandDistributionIntoFilesStep
-	extends BaseExpandDistributionIntoFilesStep<ImportLoincJobParameters, ImportLoincFileSetJson> {
+	extends BaseExpandDistributionIntoFilesStep<ImportLoincJobParameters> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep1ExpandDistributionIntoFilesStep.class);
 
 	@Autowired
@@ -35,35 +43,35 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 	@Autowired
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
-	@Override
-	protected ImportLoincFileSetJson newTerminologyFileSetJson() {
-		return new ImportLoincFileSetJson();
-	}
+	@Autowired
+	private IJobPersistence myJobPersistence;
 
 	@Override
 	protected void handleSynchronous(
 		StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
-		String theFileName,
+		IJobDataSink<TerminologyFileSetJson> theDataSink, String theFileName,
 		byte[] theBytes,
 		ImportLoincJobParameters theJobParameters,
-		ImportLoincFileSetJson theFileSet) {
-		super.handleSynchronous(theStepExecutionDetails, theFileName, theBytes, theJobParameters, theFileSet);
+		TerminologyFileSetJson theFileSet) {
+		super.handleSynchronous(theStepExecutionDetails, theDataSink, theFileName, theBytes, theJobParameters, theFileSet);
 
 		if (theFileName.endsWith("loinc.xml")) {
 			// FIXME: add test to ensure we fail if the ZIP has multiple loinc.xml
 			// FIXME: add test to ensure we fail if the ZIP has no loinc.xml
-			handleLoincXml(theStepExecutionDetails, theBytes, theJobParameters, theFileSet);
+			handleLoincXml(theStepExecutionDetails, theDataSink, theBytes, theJobParameters, theFileSet);
 		}
 
 	}
 
-	private void handleLoincXml(StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails, byte[] theBytes, ImportLoincJobParameters theJobParameters, ImportLoincFileSetJson theFileSet) {
+	private void handleLoincXml(StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails, IJobDataSink<TerminologyFileSetJson> theDataSink, byte[] theBytes, ImportLoincJobParameters theJobParameters, TerminologyFileSetJson theFileSet) {
 		ourLog.info("Processing 'loinc.xml' file");
 
-		String loincCodeSystemXml = new String(theBytes, StandardCharsets.UTF_8);
-		theFileSet.setCodeSystemXml(loincCodeSystemXml);
+		ImportTerminologyMetadataAttachmentJson jobMetadataAttachment = new ImportTerminologyMetadataAttachmentJson();
 
-		CodeSystem cs = theFileSet.getLoincCodeSystem();
+		String loincCodeSystemXml = new String(theBytes, StandardCharsets.UTF_8);
+		jobMetadataAttachment.setCodeSystemXml(loincCodeSystemXml);
+
+		CodeSystem cs = jobMetadataAttachment.getLoincCodeSystem();
 		if (!"http://loinc.org".equals(cs.getUrl())) {
 			throw new JobExecutionFailedException(
 				Msg.code(876) + "'loinc.xml' file must have URL of 'http://loinc.org'. Found: " + cs.getUrl());
@@ -81,7 +89,7 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 			cs.addProperty().setCode("EXTERNAL_COPYRIGHT_NOTICE").setType(CodeSystem.PropertyType.STRING);
 		}
 
-		theFileSet.setLoincCodeSystem(cs);
+		jobMetadataAttachment.setLoincCodeSystem(cs);
 
 		// Create the CodeSystem resource
 		SystemRequestDetails srd = theStepExecutionDetails.newSystemRequestDetails();
@@ -94,11 +102,21 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		IFhirResourceDao valueSetDao = myDaoRegistry.getResourceDao("ValueSet");
 		valueSetDao.update(valueSet, srd);
 
-		theFileSet.addResourceToActivate("ValueSet/" + valueSet.getIdElement().getIdPart());
-
 		ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse response =
 			myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
-		theFileSet.setCodeSystemStagingVersionId(response.stagingVersionId());
+		jobMetadataAttachment.setCodeSystemStagingVersionId(response.stagingVersionId());
+
+		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
+		AttachmentDetails attachmentRequest = new AttachmentDetails(
+			new ByteArrayInputStream(JsonUtil.serialize(jobMetadataAttachment).getBytes(StandardCharsets.UTF_8)),
+			AttachmentContentTypeEnum.JSON,
+			ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME
+		);
+		myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
+
+		TerminologyFileSetJson fileSet = new TerminologyFileSetJson();
+		fileSet.addResourceToActivate("ValueSet/" + valueSet.getIdElement().getIdPart());
+		theDataSink.acceptForFutureStep(STEP_ID_FINALIZE_IMPORT, fileSet);
 	}
 
 	private ValueSet getValueSetLoincAll(String theLoincVersion, String theCopyrightStatement) {

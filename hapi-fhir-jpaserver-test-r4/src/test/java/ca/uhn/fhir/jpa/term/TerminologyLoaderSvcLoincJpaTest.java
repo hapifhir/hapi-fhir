@@ -56,6 +56,8 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
 		startImportLoincJobAndWaitForCompletion("2.66", files);
 
+		logAllValueSets();
+
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(58, myTermConceptDao.count());
@@ -73,6 +75,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 		logAllConcepts();
+		logAllConceptParentChildLinks();
 
 		assertConceptDisplay("R' wave amplitude in lead I", new LookupCodeRequest(LOINC_URI, "10013-1"));
 		assertConceptDisplay("R' wave amplitude in lead I", new LookupCodeRequest(LOINC_URI + "|2.66", "10013-1"));
