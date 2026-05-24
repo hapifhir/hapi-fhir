@@ -48,7 +48,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseExpandDistributionIntoFilesStep.class);
 
 	@Autowired
-	private IJobPersistence myJobPersistence;
+	protected IJobPersistence myJobPersistence;
 
 	private Integer myChunkLineSizeForUnitTests = null;
 

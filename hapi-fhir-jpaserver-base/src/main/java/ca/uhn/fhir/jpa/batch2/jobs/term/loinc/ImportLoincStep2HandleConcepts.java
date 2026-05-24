@@ -140,7 +140,7 @@ public class ImportLoincStep2HandleConcepts
 			TerminologyFileSetJson data) {
 		Map<String, CodeSystem.PropertyType> propertyNamesToTypes = new HashMap<>();
 		for (CodeSystem.PropertyComponent nextProperty :
-			theJobMetadata.getLoincCodeSystem().getProperty()) {
+			theJobMetadata.getCodeSystem().getProperty()) {
 			String nextPropertyCode = nextProperty.getCode();
 			CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
 			if (isNotBlank(nextPropertyCode)) {

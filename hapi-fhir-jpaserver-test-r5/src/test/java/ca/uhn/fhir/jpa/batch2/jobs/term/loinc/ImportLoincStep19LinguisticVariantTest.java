@@ -36,6 +36,7 @@ class ImportLoincStep19LinguisticVariantTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv";
 		mockFetchAttachment(classpath);
+		mockFetchJobMetadataAttachment();
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		// Test
@@ -67,6 +68,7 @@ class ImportLoincStep19LinguisticVariantTest extends BaseImportLoincStepTest {
 	@Test
 	void testProcess_FileNotListedInLinguisticVariantFile() {
 		// Setup
+		mockFetchJobMetadataAttachment();
 		mockFetchAttachment("loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv");
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
@@ -77,7 +79,7 @@ class ImportLoincStep19LinguisticVariantTest extends BaseImportLoincStepTest {
 
 		// Verify
 		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
-		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
+		CodeSystem cs = myCodeSystemCaptor.getValue();
 		String result = renderHierarchy(cs, true);
 		String expected = """
 			-61438-8

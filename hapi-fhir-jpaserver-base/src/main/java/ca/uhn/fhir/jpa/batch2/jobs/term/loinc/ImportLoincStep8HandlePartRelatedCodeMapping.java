@@ -76,7 +76,7 @@ public class ImportLoincStep8HandlePartRelatedCodeMapping
 		String extCodeSystemCopyrightNotice = trim(theRecord.get("ExtCodeSystemCopyrightNotice"));
 
 		// CodeSystem version from properties file
-		String codeSystemVersionId = theJobMetadata.getLoincCodeSystem().getVersion();
+		String codeSystemVersionId = theJobMetadata.getCodeSystem().getVersion();
 
 		// ConceptMap version from properties files
 		String loincPartMapVersion;
@@ -131,7 +131,7 @@ public class ImportLoincStep8HandlePartRelatedCodeMapping
 			}
 		}
 
-		String conceptMapVersion = theJobMetadata.getLoincCodeSystem().getVersion();
+		String conceptMapVersion = theJobMetadata.getCodeSystem().getVersion();
 		if (isNotBlank(conceptMapVersion)) {
 			loincPartMapId += "-" + conceptMapVersion;
 		}

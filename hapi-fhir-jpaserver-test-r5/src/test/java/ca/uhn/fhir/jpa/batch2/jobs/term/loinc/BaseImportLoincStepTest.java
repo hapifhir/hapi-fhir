@@ -12,14 +12,19 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -33,12 +38,14 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static org.apache.commons.lang3.StringUtils.compareIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,7 +58,7 @@ abstract class BaseImportLoincStepTest {
 	IHapiTransactionService myTransactionService = new MockHapiTransactionService();
 	@Mock
 	IValidationSupport myValidationSupport;
-	@Mock(strictness = Mock.Strictness.STRICT_STUBS)
+	@Mock
 	IJobPersistence myJobPersistence;
 	@Mock
 	ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
@@ -66,10 +73,12 @@ abstract class BaseImportLoincStepTest {
 	@Mock
 	IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
 	@Mock
+	IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
+	@Mock
 	DaoRegistry myDaoRegistry;
 
 	@Captor
-	ArgumentCaptor<IBaseResource> myCodeSystemCaptor;
+	ArgumentCaptor<CodeSystem> myCodeSystemCaptor;
 	@Captor
 	ArgumentCaptor<String> myStepIdCaptor;
 	@Captor
@@ -78,6 +87,8 @@ abstract class BaseImportLoincStepTest {
 	ArgumentCaptor<ValueSet> myValueSetCaptor;
 	@Captor
 	ArgumentCaptor<ConceptMap> myConceptMapCaptor;
+	@Captor
+	ArgumentCaptor<AttachmentDetails> myAttachmentDetailsCaptor;
 
 
 	@Nonnull
@@ -96,11 +107,7 @@ abstract class BaseImportLoincStepTest {
 
 	@Nonnull
 	TerminologyFileSetJson newData() {
-		TerminologyFileSetJson importLoincFileSetJson = new TerminologyFileSetJson();
-		importLoincFileSetJson.setCodeSystemStagingVersionId("my-staging-version-id");
-		importLoincFileSetJson.setCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
-		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
-		return importLoincFileSetJson;
+		return new TerminologyFileSetJson();
 	}
 
 	void mockFetchAttachment(String classpath) {
@@ -110,6 +117,22 @@ abstract class BaseImportLoincStepTest {
 	void mockJobExecutionServices() {
 		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 	}
+
+	void mockFetchPropertiesFileAttachnemtNotFound() {
+		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
+	}
+
+	void mockFetchJobMetadataAttachment() {
+		CodeSystem codeSystem = ClasspathUtil.loadResource(FhirContext.forR4Cached(), CodeSystem.class, "loinc-ver/v269/loinc.xml");
+		codeSystem.setVersion("1.234");
+
+		ImportTerminologyMetadataAttachmentJson jobMetadata = new ImportTerminologyMetadataAttachmentJson();
+		jobMetadata.setCodeSystemStagingVersionId("my-staging-version-id");
+		jobMetadata.setCodeSystem(codeSystem);
+		String jobMetadataSerialized = JsonUtil.serialize(jobMetadata);
+		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME))).thenReturn(new AttachmentDetails(jobMetadataSerialized.getBytes(StandardCharsets.UTF_8), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+	}
+
 
 	void mockDaoRegistryConceptMap() {
 		when(myDaoRegistry.getResourceDao(eq("ConceptMap"))).thenReturn(myConceptMapDao);

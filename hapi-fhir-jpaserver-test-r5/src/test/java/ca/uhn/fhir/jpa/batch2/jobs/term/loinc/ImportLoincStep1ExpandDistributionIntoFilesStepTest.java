@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.TermTestUtil;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
@@ -49,6 +50,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAM
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,25 +61,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
+class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoincStepTest {
 
 	public static final String MY_INSTANCE_ID = "my-instance-id";
 	@InjectMocks
 	private final ImportLoincStep1ExpandDistributionIntoFilesStep myStep = new ImportLoincStep1ExpandDistributionIntoFilesStep();
 	@Mock
-	private IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
-	@Mock
 	private IFhirResourceDao<ValueSet> myValueSetDao;
 	@Mock
-	private DaoRegistry myDaoRegistry;
-	@Mock
-	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-	@Mock
 	private StepExecutionDetails<ImportLoincJobParameters, VoidModel> myStepExecutionDetails;
-	@Captor
-	private ArgumentCaptor<CodeSystem> myCodeSystemCaptor;
-	@Mock
-	private IJobPersistence myJobPersistence;
 	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Mock
@@ -92,12 +84,6 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	private ITerminologyImportFileHandlerStep<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep3;
 	@Mock
 	private IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, VoidModel> myHandlerStep4;
-	@Captor
-	private ArgumentCaptor<String> myStepIdCaptor;
-	@Captor
-	private ArgumentCaptor<TerminologyFileSetJson> myTerminologyFileSetCaptor;
-	@Captor
-	private ArgumentCaptor<AttachmentDetails> myAttachmentDetailsCaptor;
 
 	@BeforeEach
 	void setUp() {
@@ -121,30 +107,32 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		myStep.run(stepExecutionDetails, myDataSink);
 
 		// Verify
-		verify(myDataSink, times(8)).acceptForFutureStep(myStepIdCaptor.capture(), myTerminologyFileSetCaptor.capture());
+		verify(myDataSink, times(10)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
 		List<String> emittedChunks = renderEmittedChunks();
 		assertThat(emittedChunks).containsExactly(
-			"step-1 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-1]",
+			"finalize-import -> ResourcesToActivate[ValueSet/loinc-all-1.23]",
 			"step-1 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-2]",
 			"step-1 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-3]",
-			"step-2 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv | ATT-4]",
+			"step-1 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-4]",
 			"step-2 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv | ATT-5]",
-			"step-3 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/AnswerFile/AnswerList.csv | ATT-6]",
+			"step-2 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv | ATT-6]",
 			"step-3 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/AnswerFile/AnswerList.csv | ATT-7]",
-			"step-3 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/AnswerFile/AnswerList.csv | ATT-8]");
+			"step-3 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/AnswerFile/AnswerList.csv | ATT-8]",
+			"step-3 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/AnswerFile/AnswerList.csv | ATT-9]");
 
-		assertEquals(8, attachmentCounter.get());
+		assertEquals(9, attachmentCounter.get());
 
-		verify(myJobPersistence, times(8)).storeNewAttachment(any(), myAttachmentDetailsCaptor.capture());
-		assertEquals("Loinc.csv_0-4", myAttachmentDetailsCaptor.getAllValues().get(0).getFilename());
-		assertEquals("Loinc.csv_5-9", myAttachmentDetailsCaptor.getAllValues().get(1).getFilename());
+		verify(myJobPersistence, times(9)).storeNewAttachment(any(), myAttachmentDetailsCaptor.capture());
+		assertEquals("metadata.json", myAttachmentDetailsCaptor.getAllValues().get(0).getFilename());
+		assertEquals("Loinc.csv_0-4", myAttachmentDetailsCaptor.getAllValues().get(1).getFilename());
+		assertEquals("Loinc.csv_5-9", myAttachmentDetailsCaptor.getAllValues().get(2).getFilename());
 	}
 
 	@Test
-	void testProcess_NoIdSpecified() {
+	void testProcess_NoIdSpecified() throws IOException {
 		// Setup
 		when(myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(any(), any())).thenReturn(new ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse("a-b-c-d"));
-		when(myStepExecutionDetails.newSystemRequestDetails()).thenReturn(new SystemRequestDetails());
+		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 
@@ -154,21 +142,22 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		TerminologyFileSetJson fileSet = new TerminologyFileSetJson();
 		ImportLoincJobParameters jobParameters = new ImportLoincJobParameters();
 		jobParameters.setVersionId("1.23");
-		myStep.handleSynchronous(myStepExecutionDetails, theDataSink, "loinc.xml", toBytes(cs), jobParameters, fileSet);
+		myStep.handleSynchronous(newStepExecutionDetails(), myDataSink, "loinc.xml", toBytes(cs), jobParameters, fileSet);
 
 		// Verify
-		assertNotNull(fileSet.getLoincCodeSystem());
-		assertEquals("loinc-1.23", fileSet.getLoincCodeSystem().getIdElement().getIdPart());
-		assertEquals("1.23", fileSet.getLoincCodeSystem().getVersion());
-		assertEquals("EXTERNAL_COPYRIGHT_NOTICE", fileSet.getLoincCodeSystem().getProperty().get(0).getCode());
-		assertEquals(CodeSystem.PropertyType.STRING, fileSet.getLoincCodeSystem().getProperty().get(0).getType());
+		verify(myJobPersistence, times(1)).storeNewAttachment(eq("my-instance-id"), myAttachmentDetailsCaptor.capture());
+		ImportTerminologyMetadataAttachmentJson jobMetadata = myAttachmentDetailsCaptor.getValue().getContentsAsJson(ImportTerminologyMetadataAttachmentJson.class);
+		assertNotNull(jobMetadata.getCodeSystem());
+		assertEquals("loinc-1.23", jobMetadata.getCodeSystem().getIdElement().getIdPart());
+		assertEquals("1.23", jobMetadata.getCodeSystem().getVersion());
+		assertEquals("EXTERNAL_COPYRIGHT_NOTICE", jobMetadata.getCodeSystem().getProperty().get(0).getCode());
+		assertEquals(CodeSystem.PropertyType.STRING, jobMetadata.getCodeSystem().getProperty().get(0).getType());
 
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), nullable(RequestDetails.class));
-		assertSame(fileSet.getLoincCodeSystem(), myCodeSystemCaptor.getValue());
 	}
 
 	@Test
-	void testProcess_IdAndVersionSpecified() {
+	void testProcess_IdAndVersionSpecified() throws IOException {
 		// Setup
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://loinc.org");
@@ -178,23 +167,26 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		jobParameters.setVersionId("1.234");
 
 		when(myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(any(), any())).thenReturn(new ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse("a-b-c-d"));
-		when(myStepExecutionDetails.newSystemRequestDetails()).thenReturn(new SystemRequestDetails());
+		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 
 		// Test
 		TerminologyFileSetJson fileSet = new TerminologyFileSetJson();
-		myStep.handleSynchronous(myStepExecutionDetails, theDataSink, "loinc.xml", toBytes(cs), jobParameters, fileSet);
+		myStep.handleSynchronous(newStepExecutionDetails(), myDataSink, "loinc.xml", toBytes(cs), jobParameters, fileSet);
 
 		// Verify
-		assertNotNull(fileSet.getLoincCodeSystem());
-		assertEquals("loinc-1.234", fileSet.getLoincCodeSystem().getIdElement().getIdPart());
-		assertEquals("1.234", fileSet.getLoincCodeSystem().getVersion());
-		assertEquals("EXTERNAL_COPYRIGHT_NOTICE", fileSet.getLoincCodeSystem().getProperty().get(0).getCode());
-		assertEquals(CodeSystem.PropertyType.STRING, fileSet.getLoincCodeSystem().getProperty().get(0).getType());
+		verify(myJobPersistence, times(1)).storeNewAttachment(eq("my-instance-id"), myAttachmentDetailsCaptor.capture());
+		ImportTerminologyMetadataAttachmentJson jobMetadata = myAttachmentDetailsCaptor.getValue().getContentsAsJson(ImportTerminologyMetadataAttachmentJson.class);
+
+		assertNotNull(jobMetadata.getCodeSystem());
+		assertEquals("loinc-1.234", jobMetadata.getCodeSystem().getIdElement().getIdPart());
+		assertEquals("1.234", jobMetadata.getCodeSystem().getVersion());
+		assertEquals("EXTERNAL_COPYRIGHT_NOTICE", jobMetadata.getCodeSystem().getProperty().get(0).getCode());
+		assertEquals(CodeSystem.PropertyType.STRING, jobMetadata.getCodeSystem().getProperty().get(0).getType());
 
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), nullable(RequestDetails.class));
-		assertSame(fileSet.getLoincCodeSystem(), myCodeSystemCaptor.getValue());
+		assertEquals(FhirContext.forR4Cached().newJsonParser().encodeToString(jobMetadata.getCodeSystem()), FhirContext.forR4Cached().newJsonParser().encodeToString(myCodeSystemCaptor.getValue()));
 
 		verify(myTermCodeSystemStorageSvc, times(1)).startStagingCodeSystemVersion(eq("http://loinc.org"), eq("1.234"));
 	}
@@ -219,15 +211,16 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		myStep.run(stepExecutionDetails, myDataSink);
 
 		// Verify
-		verify(myDataSink, times(6)).acceptForFutureStep(myStepIdCaptor.capture(), myTerminologyFileSetCaptor.capture());
+		verify(myDataSink, times(8)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
 		List<String> emittedChunks = renderEmittedChunks();
 		assertThat(emittedChunks).containsExactly(
-			"step-1 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-1]",
+			"finalize-import -> ResourcesToActivate[ValueSet/loinc-all-1.23]",
 			"step-1 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-2]",
 			"step-1 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-3]",
-			"step-2 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-1]",
+			"step-1 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-4]",
 			"step-2 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-2]",
-			"step-2 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-3]"
+			"step-2 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-3]",
+			"step-2 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/LoincTable/Loinc.csv | ATT-4]"
 		);
 
 	}
@@ -248,11 +241,12 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 		myStep.run(stepExecutionDetails, myDataSink);
 
 		// Verify
-		verify(myDataSink, times(2)).acceptForFutureStep(myStepIdCaptor.capture(), myTerminologyFileSetCaptor.capture());
+		verify(myDataSink, times(4)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
 		List<String> emittedChunks = renderEmittedChunks();
 		assertThat(emittedChunks).containsExactly(
-			"step-2 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv | ATT-1]",
-			"step-2 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv | ATT-2]"
+			"finalize-import -> ResourcesToActivate[ValueSet/loinc-all-1.23]",
+			"step-2 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv | ATT-2]",
+			"step-2 -> Chunk[SnomedCT_Release_INT_20160131_Full/Terminology/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv | ATT-3]"
 		);
 
 	}
@@ -371,11 +365,5 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest {
 	private byte[] toBytes(CodeSystem theCs) {
 		return FhirContext.forR4Cached().newXmlParser().encodeResourceToString(theCs).getBytes(StandardCharsets.UTF_8);
 	}
-
-	@Nonnull
-	private List<String> renderEmittedChunks() {
-		return BaseImportLoincStepTest.renderEmittedChunks(myStepIdCaptor, myTerminologyFileSetCaptor);
-	}
-
 
 }

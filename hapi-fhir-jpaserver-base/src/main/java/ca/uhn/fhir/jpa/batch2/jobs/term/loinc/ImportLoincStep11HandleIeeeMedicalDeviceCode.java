@@ -62,7 +62,7 @@ public class ImportLoincStep11HandleIeeeMedicalDeviceCode
 		CSVRecord theRecord,
 		CodeSystem theCodeSystemToPopulate,
 		TerminologyFileSetJson theData, String theSourceFilename) {
-		String codeSystemVersionId = theJobMetadata.getLoincCodeSystem().getVersion();
+		String codeSystemVersionId = theJobMetadata.getCodeSystem().getVersion();
 		String loincIeeeCmVersion;
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
 		if (isNotBlank(jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))) {
@@ -78,7 +78,7 @@ public class ImportLoincStep11HandleIeeeMedicalDeviceCode
 		// LOINC Part -> IEEE 11073:10101 Mappings
 		String sourceCodeSystemUri = ITermLoaderSvc.LOINC_URI;
 		String targetCodeSystemUri = ITermLoaderSvc.IEEE_11073_10101_URI;
-		String loincCopyrightStatement = theJobMetadata.getLoincCodeSystem().getCopyright();
+		String loincCopyrightStatement = theJobMetadata.getCodeSystem().getCopyright();
 		String conceptMapId = LOINC_IEEE_CM_ID + "-" + codeSystemVersionId;
 
 		addConceptMapEntry(

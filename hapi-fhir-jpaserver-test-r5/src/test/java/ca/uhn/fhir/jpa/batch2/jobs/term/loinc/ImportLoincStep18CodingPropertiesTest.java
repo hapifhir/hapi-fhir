@@ -31,6 +31,7 @@ class ImportLoincStep18CodingPropertiesTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/LoincTable/Loinc.csv";
 		mockFetchAttachment(classpath);
+		mockFetchJobMetadataAttachment();
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		AtomicInteger responseCounter = new AtomicInteger();

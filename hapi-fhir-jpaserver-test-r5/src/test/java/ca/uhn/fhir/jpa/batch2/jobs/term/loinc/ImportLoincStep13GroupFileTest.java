@@ -42,7 +42,8 @@ class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv";
 		mockFetchAttachment(classpath);
-		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
+		mockFetchJobMetadataAttachment();
+		mockFetchPropertiesFileAttachnemtNotFound();
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		mockDaoRegistryValueSet();
 		mockDaoRegistryConceptMap();
@@ -53,8 +54,6 @@ class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 
 		TerminologyFileSetJson importLoincFileSetJson = new TerminologyFileSetJson();
 		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("file.csv", "my-chunk-attachment-id"));
-		importLoincFileSetJson.setCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
-		importLoincFileSetJson.getLoincCodeSystem().setVersion("1.234");
 
 		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
@@ -103,8 +102,9 @@ class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv";
 		mockFetchAttachment(classpath);
+		mockFetchJobMetadataAttachment();
+		mockFetchPropertiesFileAttachnemtNotFound();
 		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
-		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myValueSetDao.read(eq(new IdType("LG1695-8-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		mockDaoRegistryValueSet();
 		mockDaoRegistryConceptMap();
@@ -160,8 +160,9 @@ class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv";
 		mockFetchAttachment(classpath);
+		mockFetchJobMetadataAttachment();
+		mockFetchPropertiesFileAttachnemtNotFound();
 		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
-		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 		when(myValueSetDao.read(eq(new IdType("LG1695-8-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		mockDaoRegistryValueSet();
 		mockDaoRegistryConceptMap();

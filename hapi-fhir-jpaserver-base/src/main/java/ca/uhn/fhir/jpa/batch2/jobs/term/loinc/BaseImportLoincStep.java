@@ -18,7 +18,6 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -118,7 +117,7 @@ public abstract class BaseImportLoincStep<CT>
 		ImportTerminologyMetadataAttachmentJson jobMetadata = getJobMetadata(jobInstanceId);
 
 		CodeSystem codeSystemToPopulate = new CodeSystem();
-		codeSystemToPopulate.setUrl(jobMetadata.getLoincCodeSystem().getUrl());
+		codeSystemToPopulate.setUrl(jobMetadata.getCodeSystem().getUrl());
 		codeSystemToPopulate.setVersion(jobMetadata.getCodeSystemStagingVersionId());
 
 		String attachmentId = null;
@@ -222,7 +221,7 @@ public abstract class BaseImportLoincStep<CT>
 	public Map<String, CodeSystem.PropertyType> getPropertyNameToType(ImportTerminologyMetadataAttachmentJson theJobMetadata) {
 		Map<String, CodeSystem.PropertyType> propertyNameToType = new HashMap<>();
 			for (CodeSystem.PropertyComponent nextProperty :
-				theJobMetadata.getLoincCodeSystem().getProperty()) {
+				theJobMetadata.getCodeSystem().getProperty()) {
 				String nextPropertyCode = nextProperty.getCode();
 				CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
 				if (isNotBlank(nextPropertyCode)) {

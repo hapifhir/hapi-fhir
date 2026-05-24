@@ -19,13 +19,20 @@
  */
 package ca.uhn.fhir.batch2.api;
 
+import ca.uhn.fhir.util.JsonUtil;
+
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 public class AttachmentDetails {
 	private final InputStream myInputStream;
 	private final AttachmentContentTypeEnum myContentType;
 	private final String myFilename;
+
+	public AttachmentDetails(byte[] theBytes, AttachmentContentTypeEnum theContentType, String theFilename) {
+		this(new ByteArrayInputStream(theBytes), theContentType, theFilename);
+	}
 
 	public AttachmentDetails(InputStream theInputStream, AttachmentContentTypeEnum theContentType, String theFilename) {
 		myInputStream = theInputStream;
@@ -43,6 +50,10 @@ public class AttachmentDetails {
 
 	public String getFilename() {
 		return myFilename;
+	}
+
+	public <T> T getContentsAsJson(Class<T> theType) throws IOException {
+		return JsonUtil.deserialize(getInputStream(), theType);
 	}
 
 	public static Builder build() {

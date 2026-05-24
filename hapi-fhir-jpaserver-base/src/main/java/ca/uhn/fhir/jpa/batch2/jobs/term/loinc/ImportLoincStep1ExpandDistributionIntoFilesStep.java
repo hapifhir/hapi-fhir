@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
@@ -42,9 +43,6 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 
 	@Autowired
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-
-	@Autowired
-	private IJobPersistence myJobPersistence;
 
 	@Override
 	protected void handleSynchronous(
@@ -71,7 +69,7 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		String loincCodeSystemXml = new String(theBytes, StandardCharsets.UTF_8);
 		jobMetadataAttachment.setCodeSystemXml(loincCodeSystemXml);
 
-		CodeSystem cs = jobMetadataAttachment.getLoincCodeSystem();
+		CodeSystem cs = jobMetadataAttachment.getCodeSystem();
 		if (!"http://loinc.org".equals(cs.getUrl())) {
 			throw new JobExecutionFailedException(
 				Msg.code(876) + "'loinc.xml' file must have URL of 'http://loinc.org'. Found: " + cs.getUrl());
@@ -89,7 +87,7 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 			cs.addProperty().setCode("EXTERNAL_COPYRIGHT_NOTICE").setType(CodeSystem.PropertyType.STRING);
 		}
 
-		jobMetadataAttachment.setLoincCodeSystem(cs);
+		jobMetadataAttachment.setCodeSystem(cs);
 
 		// Create the CodeSystem resource
 		SystemRequestDetails srd = theStepExecutionDetails.newSystemRequestDetails();
@@ -117,6 +115,10 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		TerminologyFileSetJson fileSet = new TerminologyFileSetJson();
 		fileSet.addResourceToActivate("ValueSet/" + valueSet.getIdElement().getIdPart());
 		theDataSink.acceptForFutureStep(STEP_ID_FINALIZE_IMPORT, fileSet);
+
+		// Send a single chunk to trigger the first closure generation step
+		fileSet = new TerminologyFileSetJson();
+		theDataSink.acceptForFutureStep(STEP_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION, fileSet);
 	}
 
 	private ValueSet getValueSetLoincAll(String theLoincVersion, String theCopyrightStatement) {

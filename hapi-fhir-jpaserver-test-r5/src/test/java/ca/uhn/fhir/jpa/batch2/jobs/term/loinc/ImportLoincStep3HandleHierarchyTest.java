@@ -27,6 +27,7 @@ class ImportLoincStep3HandleHierarchyTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv";
 		mockFetchAttachment(classpath);
+		mockFetchJobMetadataAttachment();
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		// Test

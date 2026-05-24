@@ -73,7 +73,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		String longName = trim(theRecord.get("LongName"));
 
 		// CodeSystem version from properties file
-		String codeSystemVersionId = theJobMetadata.getLoincCodeSystem().getVersion();
+		String codeSystemVersionId = theJobMetadata.getCodeSystem().getVersion();
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
 
 		// ConceptMap version from properties files

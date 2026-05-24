@@ -34,6 +34,7 @@ public class ImportLoincJobAppCtx {
 
 	public static final String IMPORT_TERM_LOINC = "IMPORT_TERM_LOINC";
 	public static final String STEP_ID_FINALIZE_IMPORT = "finalize-import";
+	public static final String STEP_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION = "chunk-concepts-for-closure-generation";
 
 	private final DaoRegistry myDaoRegistry;
 	private final ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
@@ -150,7 +151,7 @@ public class ImportLoincJobAppCtx {
 				"Import LOINC Linguistic Variants",
 				TerminologyFileSetJson.class,
 				importLoincStep19LinguisticVariant())
-			.addIntermediateStep("chunk-concepts-for-closure-generation",
+			.addIntermediateStep(STEP_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
 				"Create work chunks for calculating concept closures",
 				TerminologyFileSetJson.class,
 				importLoincStep20ChunkConceptsForClosureGeneration())
@@ -321,6 +322,7 @@ public class ImportLoincJobAppCtx {
 	/**
 	 * Step 20: Chunk Concepts for Closure Generation
 	 */
+	@Bean
 	public ImportLoincStep20ChunkConceptsForGeneratingClosure importLoincStep20ChunkConceptsForClosureGeneration() {
 		return new ImportLoincStep20ChunkConceptsForGeneratingClosure();
 	}

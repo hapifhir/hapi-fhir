@@ -73,7 +73,7 @@ public class ImportLoincStep5HandleAnswerLists
 		}
 
 		// Answer list ValueSet
-		String codeSystemVersionId = theJobMetadata.getLoincCodeSystem().getVersion();
+		String codeSystemVersionId = theJobMetadata.getCodeSystem().getVersion();
 		ValueSet vs = getValueSet(
 			theStepExecutionDetails, theJobMetadata, theJobParameters,
 			theData,

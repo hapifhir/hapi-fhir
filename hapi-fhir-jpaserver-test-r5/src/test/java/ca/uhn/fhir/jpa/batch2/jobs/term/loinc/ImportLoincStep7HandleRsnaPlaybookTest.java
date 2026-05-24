@@ -39,7 +39,8 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/LoincRsnaRadiologyPlaybook/LoincRsnaRadiologyPlaybook.csv";
 		mockFetchAttachment(classpath);
-		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
+		mockFetchJobMetadataAttachment();
+		mockFetchPropertiesFileAttachnemtNotFound();
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-to-radlex-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
@@ -118,7 +119,8 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/LoincRsnaRadiologyPlaybook/LoincRsnaRadiologyPlaybook.csv";
 		mockFetchAttachment(classpath);
-		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
+		mockFetchJobMetadataAttachment();
+		mockFetchPropertiesFileAttachnemtNotFound();
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-to-radlex-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));

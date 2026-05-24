@@ -35,7 +35,8 @@ class ImportLoincStep9HandleDocumentOntologyTest extends BaseImportLoincStepTest
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/DocumentOntology/DocumentOntology.csv";
 		mockFetchAttachment(classpath);
-		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
+		mockFetchJobMetadataAttachment();
+		mockFetchPropertiesFileAttachnemtNotFound();
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 		mockDaoRegistryValueSet();

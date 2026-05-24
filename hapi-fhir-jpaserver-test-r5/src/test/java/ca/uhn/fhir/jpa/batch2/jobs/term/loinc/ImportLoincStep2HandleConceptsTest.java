@@ -33,6 +33,7 @@ class ImportLoincStep2HandleConceptsTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/LoincTable/Loinc.csv";
 		mockFetchAttachment(classpath);
+		mockFetchJobMetadataAttachment();
 		UploadStatistics uploadStatistics = new UploadStatistics(new IdType());
 		uploadStatistics.incrementConceptsAddedCount();
 		uploadStatistics.incrementConceptsAddedCount();

@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.r4.model.IdType;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
@@ -63,14 +65,20 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			assertEquals(58, myTermConceptDao.count());
 			assertEquals(8, myTermConceptParentChildLinkDao.count());
 			assertEquals(2, myTermCodeSystemVersionDao.count());
-			assertEquals(12, myTermValueSetDao.count());
+			assertEquals(10, myTermValueSetDao.count());
 			assertEquals(6, myTermConceptMapDao.count());
-			assertEquals(19, myResourceTableDao.count());
+			assertEquals(17, myResourceTableDao.count());
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org");
 
 			TermCodeSystemVersion myTermCodeSystemVersion_versioned = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.66");
 			assertEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion_versioned.getPid());
 			assertEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion_versioned.getResource().getId());
+
+			// Make sure we calculated the concept closure
+			TermConcept concept = myTermConceptDao.findByCodeSystemAndCodeList(myTermCodeSystemVersion_versioned.getPid(), List.of(
+				"LP52258-8"
+				)).get(0);
+			assertThat(concept.getParentPidsAsString()).matches("[0-9]+ [0-9]+ [0-9]+ [0-9]+");
 		});
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
@@ -93,9 +101,9 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			assertEquals(58 * 2, myTermConceptDao.count());
 			assertEquals(8 * 2, myTermConceptParentChildLinkDao.count());
 			assertEquals(2 * 2, myTermCodeSystemVersionDao.count());
-			assertEquals(12 * 2, myTermValueSetDao.count());
+			assertEquals(10 * 2, myTermValueSetDao.count());
 			assertEquals(6 * 2, myTermConceptMapDao.count());
-			assertEquals(19 * 2, myResourceTableDao.count());
+			assertEquals(17 * 2, myResourceTableDao.count());
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org");
 
 			TermCodeSystemVersion myTermCodeSystemVersion_versioned = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.66");
@@ -118,9 +126,9 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			assertEquals(58 * 3, myTermConceptDao.count());
 			assertEquals(8 * 3, myTermConceptParentChildLinkDao.count());
 			assertEquals(2 * 3, myTermCodeSystemVersionDao.count());
-			assertEquals(12 * 3, myTermValueSetDao.count());
+			assertEquals(10 * 3, myTermValueSetDao.count());
 			assertEquals(6 * 3, myTermConceptMapDao.count());
-			assertEquals(19 * 3, myResourceTableDao.count());
+			assertEquals(17 * 3, myResourceTableDao.count());
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org");
 
 			TermCodeSystemVersion mySecondTermCodeSystemVersion_versioned = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.66");

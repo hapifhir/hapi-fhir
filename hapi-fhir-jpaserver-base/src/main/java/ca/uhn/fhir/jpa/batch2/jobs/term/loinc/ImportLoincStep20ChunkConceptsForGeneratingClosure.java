@@ -10,6 +10,8 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachment
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import jakarta.annotation.Nonnull;
@@ -27,17 +29,27 @@ public class ImportLoincStep20ChunkConceptsForGeneratingClosure extends BaseImpo
 	private ITermConceptDao myConceptDao;
 	@Autowired
 	private ITermCodeSystemVersionDao myCodeSystemVersionDao;
+	@Autowired
+	private IHapiTransactionService myTxService;
 
 	@Nonnull
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink) throws JobExecutionFailedException {
-		TerminologyFileSetJson data = theStepExecutionDetails.getData();
+		myTxService
+			.withSystemRequestOnDefaultPartition()
+			.execute(() -> generateClosures(theStepExecutionDetails, theDataSink));
+
+		return RunOutcome.SUCCESS;
+	}
+
+	private void generateClosures(@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink) {
+		HapiTransactionService.requireTransaction();
 
 		ImportTerminologyMetadataAttachmentJson jobMetadata = getJobMetadata(theStepExecutionDetails.getInstance().getInstanceId());
 		String stagingVersion = jobMetadata.getCodeSystemStagingVersionId();
 
-		TermCodeSystemVersion csv = myCodeSystemVersionDao.findByCodeSystemUriAndVersion(jobMetadata.getLoincCodeSystem().getUrl(), stagingVersion);
-		Validate.notNull(csv, "Could not find code system version %s for code system: %s", stagingVersion, jobMetadata.getLoincCodeSystem().getUrl());
+		TermCodeSystemVersion csv = myCodeSystemVersionDao.findByCodeSystemUriAndVersion(jobMetadata.getCodeSystem().getUrl(), stagingVersion);
+		Validate.notNull(csv, "Could not find code system version %s for code system: %s", stagingVersion, jobMetadata.getCodeSystem().getUrl());
 
 		Stream<TermConcept.TermConceptPk> pids = myConceptDao.findPidsByCodeSystemVersion(csv);
 		int pidCount = 0;
@@ -60,7 +72,5 @@ public class ImportLoincStep20ChunkConceptsForGeneratingClosure extends BaseImpo
 		outputChunk = new TerminologyFileSetJson();
 		outputChunk.getRecordsAddedCounter(theStepExecutionDetails.getCurrentStepId()).incrementOtherChanges(pidCount);
 		theDataSink.acceptForFutureStep(STEP_ID_FINALIZE_IMPORT, outputChunk);
-
-		return RunOutcome.SUCCESS;
 	}
 }

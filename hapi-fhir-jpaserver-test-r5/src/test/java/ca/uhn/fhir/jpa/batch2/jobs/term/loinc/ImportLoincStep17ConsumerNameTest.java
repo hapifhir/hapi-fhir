@@ -27,6 +27,7 @@ class ImportLoincStep17ConsumerNameTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/ConsumerName/ConsumerName.csv";
 		mockFetchAttachment(classpath);
+		mockFetchJobMetadataAttachment();
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementDesignationsAddedCount(3));
 
 		// Test

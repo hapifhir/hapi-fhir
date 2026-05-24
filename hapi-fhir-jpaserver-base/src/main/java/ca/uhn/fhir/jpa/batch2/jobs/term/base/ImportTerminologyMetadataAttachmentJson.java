@@ -16,20 +16,20 @@ public class ImportTerminologyMetadataAttachmentJson implements IModelJson {
 	@JsonProperty("codeSystemStagingVersionId")
 	private String myCodeSystemStagingVersionId;
 	@JsonIgnore
-	private CodeSystem myCodeSystemXmlParsed;
+	private CodeSystem myCodeSystemParsed;
 
 
-	public CodeSystem getLoincCodeSystem() {
-		if (myCodeSystemXmlParsed == null) {
-			myCodeSystemXmlParsed =
+	public CodeSystem getCodeSystem() {
+		if (myCodeSystemParsed == null) {
+			myCodeSystemParsed =
 				FhirContext.forR4Cached().newXmlParser().parseResource(CodeSystem.class, getCodeSystemXml());
 		}
-		return myCodeSystemXmlParsed;
+		return myCodeSystemParsed;
 	}
 
-	public void setLoincCodeSystem(@Nonnull CodeSystem theCodeSystem) {
+	public void setCodeSystem(@Nonnull CodeSystem theCodeSystem) {
 		setCodeSystemXml(FhirContext.forR4Cached().newXmlParser().encodeResourceToString(theCodeSystem));
-		myCodeSystemXmlParsed = theCodeSystem;
+		myCodeSystemParsed = theCodeSystem;
 	}
 
 	public String getCodeSystemXml() {
@@ -38,7 +38,7 @@ public class ImportTerminologyMetadataAttachmentJson implements IModelJson {
 
 	public void setCodeSystemXml(String theCodeSystemXml) {
 		myCodeSystemXml = theCodeSystemXml;
-		myCodeSystemXmlParsed = null;
+		myCodeSystemParsed = null;
 	}
 
 	public String getCodeSystemStagingVersionId() {

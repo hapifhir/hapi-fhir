@@ -29,6 +29,7 @@ class ImportLoincStep16PartLinkTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/PartFile/LoincPartLink.csv";
 		mockFetchAttachment(classpath);
+		mockFetchJobMetadataAttachment();
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		// Test

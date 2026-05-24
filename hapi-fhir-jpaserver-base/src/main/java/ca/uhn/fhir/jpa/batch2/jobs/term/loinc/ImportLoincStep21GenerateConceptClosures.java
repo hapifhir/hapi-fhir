@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.util.StopWatch;
@@ -30,6 +31,8 @@ public class ImportLoincStep21GenerateConceptClosures implements IJobStepWorker<
 	private PartitionSettings myPartitionSettings;
 	@Autowired
 	private EntityManager myEntityManager;
+	@Autowired
+	private IHapiTransactionService myTxService;
 
 	@Nonnull
 	@Override
@@ -44,14 +47,9 @@ public class ImportLoincStep21GenerateConceptClosures implements IJobStepWorker<
 			.map(t -> new TermConcept.TermConceptPk(t, defaultPartitionId))
 			.toList();
 
-		List<TermConcept> concepts = myConceptDao.findAllById(ids);
-		for (TermConcept concept : concepts) {
-			concept.setParentPids(null);
-			concept.prePersist();
-			myEntityManager.merge(concept);
-		}
-
-		myEntityManager.flush();
+		myTxService
+			.withSystemRequestOnDefaultPartition()
+			.execute(() -> generateClosures(ids));
 
 		ourLog.atInfo()
 			.setMessage("Calculated hierarchy closure for {} concepts in {}. {}/sec")
@@ -66,5 +64,16 @@ public class ImportLoincStep21GenerateConceptClosures implements IJobStepWorker<
 		theDataSink.acceptForFutureStep(STEP_ID_FINALIZE_IMPORT, outputChunk);
 
 		return RunOutcome.SUCCESS;
+	}
+
+	private void generateClosures(List<TermConcept.TermConceptPk> ids) {
+		List<TermConcept> concepts = myConceptDao.findAllById(ids);
+		for (TermConcept concept : concepts) {
+			concept.setParentPids(null);
+			concept.prePersist();
+			myEntityManager.merge(concept);
+		}
+
+		myEntityManager.flush();
 	}
 }

@@ -83,7 +83,7 @@ public class ImportLoincStep22Finalize extends BaseImportTerminologyStep impleme
 	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<ImportTerminologyResultJson> theDataSink) throws JobExecutionFailedException, ReductionStepFailureException {
 
 		ImportTerminologyMetadataAttachmentJson jobMetadata = getJobMetadata(theStepExecutionDetails.getInstance().getInstanceId());
-		String codeSystemUrl = jobMetadata.getLoincCodeSystem().getUrl();
+		String codeSystemUrl = jobMetadata.getCodeSystem().getUrl();
 		String stagingVersionId = jobMetadata.getCodeSystemStagingVersionId();
 
 		for (String resourceToActivate : myResourcesToActivate) {

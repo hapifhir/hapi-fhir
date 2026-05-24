@@ -85,7 +85,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 		String theVersionPropertyName) {
 
 		String version;
-		String codeSystemVersion = theJobMetadata.getLoincCodeSystem().getVersion();
+		String codeSystemVersion = theJobMetadata.getCodeSystem().getVersion();
 		assert isNotBlank(codeSystemVersion);
 
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
@@ -111,7 +111,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 				.addTelecom()
 				.setSystem(ContactPoint.ContactPointSystem.URL)
 				.setValue(LOINC_WEBSITE_URL);
-			vs.setCopyright(theJobMetadata.getLoincCodeSystem().getCopyright());
+			vs.setCopyright(theJobMetadata.getCodeSystem().getCopyright());
 			theContext.getIdToValueSet().put(valueSetId, vs);
 			theData.addResourceToActivate("ValueSet/" + valueSetId);
 		} else {
@@ -211,7 +211,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			String copyright = firstMapping.getCopyright();
 			if (!copyright.contains("LOINC")) {
 				String loincCopyrightStatement = theJobMetadata
-					.getLoincCodeSystem()
+					.getCodeSystem()
 					.getCopyright();
 				copyright =
 					loincCopyrightStatement + (loincCopyrightStatement.endsWith(".") ? " " : ". ") + copyright;
