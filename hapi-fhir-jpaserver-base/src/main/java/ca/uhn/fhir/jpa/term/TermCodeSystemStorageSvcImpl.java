@@ -394,7 +394,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
 				populateCodeSystemVersionProperties(persCs, codeSystem, theResourceEntity);
-				myEntityManager.persist(persCs);
 
 				persCs.getConcepts().addAll(TermReadSvcImpl.toPersistedConcepts(codeSystem.getConcept(), persCs));
 				ourLog.debug("Code system has {} concepts", persCs.getConcepts().size());
@@ -907,7 +906,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Future: re-keying TermCodeSystemVersion on (resource-pid, version) instead of
 		// (codesystem-pid, version) would remove the whole conflict-release helper, at the
 		// cost of a schema migration and a wide findByCodeSystemPid* refactor.
-		if (tryReleaseConflictingVersionRow(codeSystemVersionEntity, theCodeSystemResourceTable, theAllowPlaceholderRepoint)) {
+		if (tryReleaseConflictingVersionRow(
+				codeSystemVersionEntity, theCodeSystemResourceTable, theAllowPlaceholderRepoint)) {
 			return;
 		}
 

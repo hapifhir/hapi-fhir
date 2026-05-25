@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.test.util.LogbackTestExtension;
@@ -763,6 +764,95 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			assertEquals(2, concepts.size());
 		});
 
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void applyDeltaCodeSystemsAdd_newCodeSystem_shouldCreateCodeSystemAndAddConcepts() {
+		// This exercises the full entity-graph navigation in addConceptsToCodeSystemVersion:
+		// csv.getCodeSystem(), cs.getPid(), cs.getCodeSystemUri(), cs.getResource().getIdDt()
+		// All must return non-null within the same transaction that created the entities.
+		CustomTerminologySet additions = new CustomTerminologySet();
+		additions.addRootConcept("CODE1", "Display 1");
+		additions.addRootConcept("CODE2", "Display 2");
+		additions.addRootConcept("CODE3", "Display 3");
+
+		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", additions);
+
+		assertThat(stats.getAddedConceptCount()).isEqualTo(3);
+		assertThat(stats.getTarget()).isNotNull();
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri("http://example.com/delta-cs");
+			assertThat(tcs).isNotNull();
+			assertThat(tcs.getCurrentVersion()).isNotNull();
+
+			TermCodeSystemVersion csv = tcs.getCurrentVersion();
+			assertThat(csv.getCodeSystem()).isNotNull();
+			assertThat(csv.getResource()).isNotNull();
+			long conceptCount = myTermConceptDao.countByCodeSystemVersion(csv.getPid());
+			assertThat(conceptCount).isEqualTo(3);
+		});
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void applyDeltaCodeSystemsAdd_existingCodeSystem_shouldAddMoreConcepts() {
+		// First delta creates the code system
+		CustomTerminologySet firstBatch = new CustomTerminologySet();
+		firstBatch.addRootConcept("CODE1", "Display 1");
+		firstBatch.addRootConcept("CODE2", "Display 2");
+		mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", firstBatch);
+
+		// Second delta adds more concepts to the existing code system
+		CustomTerminologySet secondBatch = new CustomTerminologySet();
+		secondBatch.addRootConcept("CODE3", "Display 3");
+		secondBatch.addRootConcept("CODE4", "Display 4");
+
+		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", secondBatch);
+
+		assertThat(stats.getAddedConceptCount()).isEqualTo(2);
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri("http://example.com/delta-cs");
+			assertThat(tcs).isNotNull();
+			long conceptCount = myTermConceptDao.countByCodeSystemVersion(tcs.getCurrentVersion().getPid());
+			assertThat(conceptCount).isEqualTo(4);
+		});
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void applyDeltaCodeSystemsAdd_afterNotPresentCodeSystemCreatedViaDao_shouldAddConcepts() {
+		// Create a NOTPRESENT code system via DAO (simulates package pre-seeding)
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://example.com/delta-cs");
+		cs.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myCodeSystemDao.create(cs, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri("http://example.com/delta-cs");
+			assertThat(tcs).isNotNull();
+			assertThat(myTermConceptDao.countByCodeSystemVersion(tcs.getCurrentVersion().getPid())).isEqualTo(0);
+		});
+
+		// Now add concepts via delta
+		CustomTerminologySet additions = new CustomTerminologySet();
+		additions.addRootConcept("CODE1", "Display 1");
+		additions.addRootConcept("CODE2", "Display 2");
+
+		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", additions);
+
+		assertThat(stats.getAddedConceptCount()).isEqualTo(2);
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri("http://example.com/delta-cs");
+			assertThat(tcs).isNotNull();
+			long conceptCount = myTermConceptDao.countByCodeSystemVersion(tcs.getCurrentVersion().getPid());
+			assertThat(conceptCount).isEqualTo(2);
+		});
 	}
 
 	private static List<TermConcept> getConceptsSortedByCode(TermCodeSystemVersion theCodeSystemVersion) {
