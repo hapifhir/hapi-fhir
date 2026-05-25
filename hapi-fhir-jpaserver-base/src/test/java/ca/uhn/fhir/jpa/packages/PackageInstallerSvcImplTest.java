@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
@@ -1125,7 +1126,7 @@ public class PackageInstallerSvcImplTest {
 			PackageInstallationSpec spec = setupResourceInPackage(null, packagedCs, myCodeSystemDao);
 			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(packagedCs);
 			when(myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(CODE_SYSTEM_URL, VERSION))
-					.thenReturn(Optional.of(100L));
+					.thenReturn(Optional.of(JpaPid.fromId(100L)));
 			when(myCodeSystemDao.readByPid(any())).thenReturn(existingCs);
 
 			mySvc.install(spec);

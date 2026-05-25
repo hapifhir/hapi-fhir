@@ -168,7 +168,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			"  ChildAAA seq=0",
 			"RootB seq=0"
 		);
-		assertEquals(4, outcome.getUpdatedConceptCount());
+		assertEquals(4, outcome.getAddedConceptCount());
 
 		delta = new CustomTerminologySet();
 		delta.addRootConcept("RootB", "Root B")
@@ -433,7 +433,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codeb", "CODEB0");
 
 		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-		assertEquals(2, outcome.getUpdatedConceptCount());
+		assertEquals(2, outcome.getAddedConceptCount());
 		assertThat(myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
 			new LookupCodeRequest("http://foo", "codea")).getCodeDisplay()).isEqualTo("CODEA0");
 

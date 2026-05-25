@@ -39,7 +39,6 @@ import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.packages.util.PackageUtils;
@@ -661,7 +660,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return myTxService
 				.withRequest(createRequestDetails())
 				.execute(() -> myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(url, version))
-				.map(pid -> theDao.readByPid(JpaPid.fromId(pid)));
+				.map(pid -> theDao.readByPid(pid));
 	}
 
 	private Optional<IBaseResource> readResourceById(IFhirResourceDao dao, IIdType id) {
