@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
@@ -55,6 +56,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -105,7 +107,8 @@ public class PackageInstallerSvcImplTest {
 	private INpmPackageVersionDao myPackageVersionDao;
 	@Mock
 	private IHapiPackageCacheManager myPackageCacheManager;
-	@Mock
+	// CALLS_REAL_METHODS so the default withDeferredRebuild(Runnable) on the interface invokes the callback.
+	@Mock(answer = Answers.CALLS_REAL_METHODS)
 	private ISearchParamRegistryController mySearchParamRegistryController;
 	@Mock
 	private DaoRegistry myDaoRegistry;

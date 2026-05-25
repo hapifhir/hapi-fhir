@@ -130,6 +130,10 @@ public class SearchParamRegistryImpl
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 	private boolean myPrePopulateSearchParamIdentities = true;
 
+	// Deferred-rebuild state for the package-install path
+	private volatile boolean myDeferRebuild;
+	private volatile boolean myDeferredRebuildPending;
+
 	@VisibleForTesting
 	public void setPopulateSearchParamIdentities(boolean myPrePopulateSearchParamIdentities) {
 		this.myPrePopulateSearchParamIdentities = myPrePopulateSearchParamIdentities;
@@ -573,15 +577,43 @@ public class SearchParamRegistryImpl
 		myResourceChangeListenerCache.requestRefresh();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Inside a {@link #withDeferredRebuild} scope, drains the listener cache and yields
+	 * the rebuild to scope exit by marking it pending. Deferral is bypassed while
+	 * {@link #myActiveSearchParams} is still {@code null}; in that case the rebuild runs
+	 * synchronously so initial population always completes before {@code forceRefresh}
+	 * returns.
+	 */
 	@Override
 	public void forceRefresh() {
 		RuntimeSearchParamCache activeSearchParams = myActiveSearchParams;
 		myResourceChangeListenerCache.forceRefresh();
 
-		// If the refresh didn't trigger a change, proceed with one anyway
+		if (tryDeferRebuild()) {
+			return;
+		}
+
 		if (myActiveSearchParams == activeSearchParams) {
 			rebuildActiveSearchParams();
 		}
+	}
+
+	/**
+	 * If a {@link #withDeferredRebuild} scope is active and the cache has already been
+	 * populated, mark a rebuild pending so the scope-exit flush picks it up, and return
+	 * {@code true} to signal the caller to skip the immediate rebuild.
+	 * <p>
+	 * Returns {@code false} when no scope is active, or while {@link #myActiveSearchParams}
+	 * is still {@code null}
+	 */
+	private boolean tryDeferRebuild() {
+		if (myDeferRebuild && myActiveSearchParams != null) {
+			myDeferredRebuildPending = true;
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -670,7 +702,43 @@ public class SearchParamRegistryImpl
 					result.deleted,
 					unqualified(theResourceChangeEvent.getDeletedResourceIds()));
 		}
+		if (tryDeferRebuild()) {
+			return;
+		}
 		rebuildActiveSearchParams();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Coalesces {@link #handleChange} and {@link #forceRefresh} events fired during
+	 * {@code theCallback} into a single rebuild at scope exit. Deferral is bypassed while
+	 * {@link #myActiveSearchParams} is still {@code null} so initial population always runs
+	 * synchronously.
+	 * <p>
+	 * Production usage is single-threaded (the package-install path). The deferred-rebuild
+	 * flags are volatile so concurrent {@code handleChange} / {@code forceRefresh} from
+	 * other threads either defer correctly or trigger a (harmless) extra rebuild
+	 * Nested calls are supported: the outermost scope owns the flush.
+	 */
+	@Override
+	public void withDeferredRebuild(@Nonnull Runnable theCallback) {
+		if (myDeferRebuild) {
+			// Nested call — outer scope owns the flush.
+			theCallback.run();
+			return;
+		}
+		myDeferRebuild = true;
+		myDeferredRebuildPending = false;
+		try {
+			theCallback.run();
+		} finally {
+			myDeferRebuild = false;
+			if (myDeferredRebuildPending) {
+				myDeferredRebuildPending = false;
+				rebuildActiveSearchParams();
+			}
+		}
 	}
 
 	private String unqualified(List<IIdType> theIds) {
