@@ -31,7 +31,8 @@ public interface IPackageInstallerSvc {
 	 * Installs the IG by persisting instances of the following types of resources:
 	 * <p>
 	 * - NamingSystem, CodeSystem, ValueSet, StructureDefinition (with snapshots),
-	 * ConceptMap, SearchParameter, Subscription
+	 * ConceptMap, SearchParameter, Subscription, Questionnaire, OperationDefinition,
+	 * PlanDefinition, ActivityDefinition, ImplementationGuide
 	 * <p>
 	 * Creates the resources if non-existent, updates them otherwise.
 	 *

@@ -41,6 +41,7 @@ import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -49,9 +50,12 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -1289,6 +1293,102 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.onlydrafts").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		assertThat(outcome.getResourcesInstalled().size()).as(outcome.getResourcesInstalled().toString()).isEqualTo(0);
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void testInstallR4Package_newDefaultConformanceTypes(@TempDir Path theTempDir) throws IOException {
+		String igName = "test.new.conformance.types";
+		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, igName, "1.0.0");
+		igCreator.setDirectory(theTempDir);
+
+		Questionnaire questionnaire = new Questionnaire();
+		questionnaire.setUrl("http://example.org/Questionnaire/test-q");
+		questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		questionnaire.setName("TestQuestionnaire");
+		igCreator.addResourceToIG("questionnaire", questionnaire);
+
+		OperationDefinition opDef = new OperationDefinition();
+		opDef.setUrl("http://example.org/OperationDefinition/test-op");
+		opDef.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		opDef.setName("TestOperation");
+		opDef.setKind(OperationDefinition.OperationKind.OPERATION);
+		opDef.setCode("test-op");
+		opDef.setSystem(false);
+		opDef.setType(false);
+		opDef.setInstance(false);
+		igCreator.addResourceToIG("operationdefinition", opDef);
+
+		PlanDefinition planDef = new PlanDefinition();
+		planDef.setUrl("http://example.org/PlanDefinition/test-plan");
+		planDef.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		planDef.setName("TestPlanDefinition");
+		igCreator.addResourceToIG("plandefinition", planDef);
+
+		ActivityDefinition actDef = new ActivityDefinition();
+		actDef.setUrl("http://example.org/ActivityDefinition/test-activity");
+		actDef.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		actDef.setName("TestActivityDefinition");
+		igCreator.addResourceToIG("activitydefinition", actDef);
+
+		ImplementationGuide ig = new ImplementationGuide();
+		ig.setUrl("http://example.org/ImplementationGuide/test-ig");
+		ig.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ig.setName("TestImplementationGuide");
+		ig.setPackageId(igName);
+		igCreator.addResourceToIG("implementationguide", ig);
+
+		Path tarball = igCreator.createTestIG();
+
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName(igCreator.getPackageName())
+			.setVersion(igCreator.getPackageVersion())
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setPackageContents(Files.readAllBytes(tarball));
+
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled()).containsEntry("Questionnaire", 1);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("OperationDefinition", 1);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("PlanDefinition", 1);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("ActivityDefinition", 1);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("ImplementationGuide", 1);
+
+		verifyResourceCountInDB("Questionnaire", 1);
+		verifyResourceCountInDB("OperationDefinition", 1);
+		verifyResourceCountInDB("PlanDefinition", 1);
+		verifyResourceCountInDB("ActivityDefinition", 1);
+		verifyResourceCountInDB("ImplementationGuide", 1);
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void testInstallR4Package_draftNewConformanceTypes_notInstalled(@TempDir Path theTempDir) throws IOException {
+		String igName = "test.draft.conformance.types";
+		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, igName, "1.0.0");
+		igCreator.setDirectory(theTempDir);
+
+		Questionnaire questionnaire = new Questionnaire();
+		questionnaire.setUrl("http://example.org/Questionnaire/draft-q");
+		questionnaire.setStatus(Enumerations.PublicationStatus.DRAFT);
+		igCreator.addResourceToIG("questionnaire", questionnaire);
+
+		PlanDefinition planDef = new PlanDefinition();
+		planDef.setUrl("http://example.org/PlanDefinition/draft-plan");
+		planDef.setStatus(Enumerations.PublicationStatus.DRAFT);
+		igCreator.addResourceToIG("plandefinition", planDef);
+
+		Path tarball = igCreator.createTestIG();
+
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName(igCreator.getPackageName())
+			.setVersion(igCreator.getPackageVersion())
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setPackageContents(Files.readAllBytes(tarball));
+
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled()).isEmpty();
 	}
 
 	@Test

@@ -111,6 +111,8 @@ The following version pairs are treated as compatible:
 
 # Using Installed Packages for Validation
 
-Once a package is installed, its conformance resources (StructureDefinitions, ValueSets, CodeSystems, etc.) are stored in the JPA server database and automatically included in the validation support chain. No additional configuration is needed to validate against profiles from installed packages.
+Once a package is installed, its conformance resources are stored in the JPA server database and automatically included in the validation support chain. No additional configuration is needed to validate against profiles from installed packages.
+
+By default, the following resource types are installed from a package: NamingSystem, CodeSystem, ValueSet, StructureDefinition, ConceptMap, SearchParameter, Subscription, Questionnaire, OperationDefinition, PlanDefinition, ActivityDefinition, and ImplementationGuide. To install a different set of resource types, use `setInstallResourceTypes()` on the `PackageInstallationSpec`.
 
 See [Validating Using Packages](../validation/instance_validator.html#packages) for details on how validation uses package content.

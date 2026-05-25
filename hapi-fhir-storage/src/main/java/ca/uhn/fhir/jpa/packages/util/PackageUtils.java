@@ -45,7 +45,12 @@ public class PackageUtils {
 			"StructureDefinition",
 			"ConceptMap",
 			"SearchParameter",
-			"Subscription"));
+			"Subscription",
+			"Questionnaire",
+			"OperationDefinition",
+			"PlanDefinition",
+			"ActivityDefinition",
+			"ImplementationGuide"));
 
 	public static List<DependentPackage> extractDependentPackages(
 			NpmPackage theNpmPackage,

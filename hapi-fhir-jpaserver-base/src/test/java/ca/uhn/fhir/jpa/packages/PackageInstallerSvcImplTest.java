@@ -35,6 +35,7 @@ import ca.uhn.test.util.LogbackTestExtensionAssert;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Communication;
@@ -42,8 +43,12 @@ import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -201,7 +206,17 @@ public class PackageInstallerSvcImplTest {
 					arguments(createValueSet("http://test/VS"),true),
 					arguments(createCodeSystem("http://test/CS"),true),
 					arguments(createValueSet(CommonCodeSystemsTerminologyService.LANGUAGES_VALUESET_URL),false),
-					arguments(createCodeSystem(CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL),false)
+					arguments(createCodeSystem(CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL),false),
+					arguments(createQuestionnaire(Enumerations.PublicationStatus.ACTIVE), true),
+					arguments(createQuestionnaire(Enumerations.PublicationStatus.DRAFT), false),
+					arguments(createOperationDefinition(Enumerations.PublicationStatus.ACTIVE), true),
+					arguments(createOperationDefinition(Enumerations.PublicationStatus.DRAFT), false),
+					arguments(createPlanDefinition(Enumerations.PublicationStatus.ACTIVE), true),
+					arguments(createPlanDefinition(Enumerations.PublicationStatus.DRAFT), false),
+					arguments(createActivityDefinition(Enumerations.PublicationStatus.ACTIVE), true),
+					arguments(createActivityDefinition(Enumerations.PublicationStatus.DRAFT), false),
+					arguments(createImplementationGuide(Enumerations.PublicationStatus.ACTIVE), true),
+					arguments(createImplementationGuide(Enumerations.PublicationStatus.DRAFT), false)
 				);
 		}
 
@@ -800,6 +815,48 @@ public class PackageInstallerSvcImplTest {
 		Communication communication = new Communication();
 		communication.setStatus(theCommunicationStatus);
 		return communication;
+	}
+
+	// Created by Claude Opus 4.6
+	private static Questionnaire createQuestionnaire(Enumerations.PublicationStatus theStatus) {
+		Questionnaire q = new Questionnaire();
+		q.setUrl("http://example.com/Questionnaire/test");
+		q.setStatus(theStatus);
+		return q;
+	}
+
+	// Created by Claude Opus 4.6
+	private static OperationDefinition createOperationDefinition(Enumerations.PublicationStatus theStatus) {
+		OperationDefinition od = new OperationDefinition();
+		od.setUrl("http://example.com/OperationDefinition/test");
+		od.setStatus(theStatus);
+		od.setKind(OperationDefinition.OperationKind.OPERATION);
+		od.setCode("test-op");
+		return od;
+	}
+
+	// Created by Claude Opus 4.6
+	private static PlanDefinition createPlanDefinition(Enumerations.PublicationStatus theStatus) {
+		PlanDefinition pd = new PlanDefinition();
+		pd.setUrl("http://example.com/PlanDefinition/test");
+		pd.setStatus(theStatus);
+		return pd;
+	}
+
+	// Created by Claude Opus 4.6
+	private static ActivityDefinition createActivityDefinition(Enumerations.PublicationStatus theStatus) {
+		ActivityDefinition ad = new ActivityDefinition();
+		ad.setUrl("http://example.com/ActivityDefinition/test");
+		ad.setStatus(theStatus);
+		return ad;
+	}
+
+	// Created by Claude Opus 4.6
+	private static ImplementationGuide createImplementationGuide(Enumerations.PublicationStatus theStatus) {
+		ImplementationGuide ig = new ImplementationGuide();
+		ig.setUrl("http://example.com/ImplementationGuide/test");
+		ig.setStatus(theStatus);
+		return ig;
 	}
 
 	static Stream<Arguments> resourcesWithExpectedSearchKey() {

@@ -1,0 +1,8 @@
+---
+type: add
+issue: 7954
+title: "Expanded the default resource types installed from FHIR NPM packages to include
+  Questionnaire, OperationDefinition, PlanDefinition, ActivityDefinition, and
+  ImplementationGuide. Previously only NamingSystem, CodeSystem, ValueSet,
+  StructureDefinition, ConceptMap, SearchParameter, and Subscription were installed
+  by default."

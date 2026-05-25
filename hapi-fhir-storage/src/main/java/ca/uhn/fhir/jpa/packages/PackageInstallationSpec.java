@@ -79,7 +79,11 @@ public class PackageInstallationSpec {
 
 	@Schema(
 			description =
-					"If resources are being installed individually, this is list provides the resource types to install. By default, all conformance resources will be installed.")
+					"If resources are being installed individually, this list provides the resource types to install."
+							+ " When not specified, the following types are installed by default:"
+							+ " NamingSystem, CodeSystem, ValueSet, StructureDefinition, ConceptMap, SearchParameter,"
+							+ " Subscription, Questionnaire, OperationDefinition, PlanDefinition, ActivityDefinition,"
+							+ " ImplementationGuide.")
 	@JsonProperty("installResourceTypes")
 	private List<String> myInstallResourceTypes;
 
