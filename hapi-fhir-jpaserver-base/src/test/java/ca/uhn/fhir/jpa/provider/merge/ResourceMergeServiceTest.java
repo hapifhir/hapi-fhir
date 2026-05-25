@@ -672,6 +672,9 @@ public class ResourceMergeServiceTest {
 			myTargetPatient.setUserData(Constants.RESOURCE_PARTITION_ID, RequestPartitionId.fromPartitionId(2));
 			setupValidationMockForSuccess(mySourcePatient, myTargetPatient);
 			when(myPartitionSettingsMock.isPartitioningEnabled()).thenReturn(true);
+			DaoMethodOutcome provenanceOutcome = new DaoMethodOutcome();
+			provenanceOutcome.setId(new IdDt("Provenance/1"));
+			lenient().when(myProvenanceDaoMock.create(any(), any(RequestDetails.class))).thenReturn(provenanceOutcome);
 		}
 
 		@ParameterizedTest

@@ -113,29 +113,20 @@ public class MergeResourceHelper {
 	}
 
 	public void createProvenance(
-			IBaseResource theSourceResource,
-			IBaseResource theTargetResource,
+			IIdType theSourceVersionedId,
+			IIdType theTargetVersionedId,
 			List<IIdType> theChangedResourceIds,
-			boolean theIsDeleteSource,
+			@Nullable String theProvenanceGroupId,
 			RequestDetails theRequestDetails,
 			Date theStartTime,
 			List<IProvenanceAgent> theProvenanceAgents,
 			List<IBaseResource> theContainedResources) {
 
-		IIdType sourceIdForProvenance = theSourceResource.getIdElement();
-		if (theIsDeleteSource) {
-			// If the source resource is to be deleted, increment the version id of the source resource to be put in the
-			// provenance. Since the resource will be deleted after the provenance is created, its version will be
-			// incremented by
-			// the delete operation.
-			sourceIdForProvenance = theSourceResource
-					.getIdElement()
-					.withVersion(Long.toString(sourceIdForProvenance.getVersionIdPartAsLong() + 1));
-		}
 		myProvenanceSvc.createProvenance(
-				theTargetResource.getIdElement(),
-				sourceIdForProvenance,
+				theTargetVersionedId,
+				theSourceVersionedId,
 				theChangedResourceIds,
+				theProvenanceGroupId,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,

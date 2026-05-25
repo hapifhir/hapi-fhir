@@ -304,7 +304,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				obsId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -354,7 +354,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				encId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -397,7 +397,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				groupId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -450,7 +450,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				obsId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -521,7 +521,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				listId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -567,7 +567,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				obsId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -617,7 +617,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				expectedVersionedSourceId.toString(), expectedVersionedTargetId.toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -660,7 +660,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				obsId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -692,7 +692,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				expectedVersionedSourceId.toString(), expectedVersionedTargetId.toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);

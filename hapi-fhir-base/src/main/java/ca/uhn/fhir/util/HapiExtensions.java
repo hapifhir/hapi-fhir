@@ -260,6 +260,15 @@ public class HapiExtensions {
 			"http://hapifhir.io/fhir/StructureDefinition/patient-compartment";
 
 	/**
+	 * Extension used to group multiple Provenance resources created within a single operation execution
+	 * (e.g. cross-partition $merge creates per-partition + main Provenances sharing the same group ID).
+	 * Value is a string identifier unique to each operation invocation.
+	 *
+	 * @since 8.10.0
+	 */
+	public static final String EXT_PROVENANCE_GROUP = "http://hapifhir.io/fhir/StructureDefinition/provenance-group";
+
+	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {}

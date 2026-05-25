@@ -454,6 +454,22 @@ public class MergeOperationTestHelper {
 				theExpectedAgents);
 	}
 
+	public void assertCrossPartitionMergeProvenance(
+			@Nonnull Parameters theInputParams,
+			@Nonnull IIdType theExpectedSourceId,
+			@Nonnull IIdType theExpectedTargetId,
+			@Nonnull Set<String> theExpectedProvenanceTargets,
+			@Nullable List<IProvenanceAgent> theExpectedAgents) {
+
+		ReplaceReferencesTestHelper helper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
+		helper.assertCrossPartitionMergeProvenance(
+				theInputParams,
+				theExpectedSourceId,
+				theExpectedTargetId,
+				theExpectedProvenanceTargets,
+				theExpectedAgents);
+	}
+
 	/**
 	 * Validates that two resources are equal ignoring version, lastUpdated, and meta.source.
 	 * Used for undo-merge validation to verify resources are restored to their pre-merge state.
@@ -513,6 +529,52 @@ public class MergeOperationTestHelper {
 			@Nonnull List<Identifier> theExpectedTargetIdentifiers,
 			@Nullable List<IProvenanceAgent> theExpectedAgents) {
 
+		assertCommonMergeState(
+				theMergeParams,
+				theExpectedVersionedSourceId,
+				theExpectedVersionedTargetId,
+				theReferencingResourceIds,
+				theExpectedTargetIdentifiers);
+
+		assertMergeProvenance(
+				theMergeParams.asParametersResource(myParameterNames),
+				theExpectedVersionedSourceId,
+				theExpectedVersionedTargetId,
+				theExpectedProvenanceTargets,
+				theExpectedAgents);
+	}
+
+	public void validateResourcesAfterCrossPartitionMerge(
+			@Nonnull MergeTestParameters theMergeParams,
+			@Nonnull IIdType theExpectedVersionedSourceId,
+			@Nonnull IIdType theExpectedVersionedTargetId,
+			@Nonnull List<IIdType> theReferencingResourceIds,
+			@Nonnull Set<String> theExpectedProvenanceTargets,
+			@Nonnull List<Identifier> theExpectedTargetIdentifiers,
+			@Nullable List<IProvenanceAgent> theExpectedAgents) {
+
+		assertCommonMergeState(
+				theMergeParams,
+				theExpectedVersionedSourceId,
+				theExpectedVersionedTargetId,
+				theReferencingResourceIds,
+				theExpectedTargetIdentifiers);
+
+		assertCrossPartitionMergeProvenance(
+				theMergeParams.asParametersResource(myParameterNames),
+				theExpectedVersionedSourceId,
+				theExpectedVersionedTargetId,
+				theExpectedProvenanceTargets,
+				theExpectedAgents);
+	}
+
+	private void assertCommonMergeState(
+			@Nonnull MergeTestParameters theMergeParams,
+			@Nonnull IIdType theExpectedVersionedSourceId,
+			@Nonnull IIdType theExpectedVersionedTargetId,
+			@Nonnull List<IIdType> theReferencingResourceIds,
+			@Nonnull List<Identifier> theExpectedTargetIdentifiers) {
+
 		IIdType sourceId = theExpectedVersionedSourceId.toUnqualifiedVersionless();
 		IIdType targetId = theExpectedVersionedTargetId.toUnqualifiedVersionless();
 		boolean deleteSource = Boolean.TRUE.equals(theMergeParams.getDeleteSource());
@@ -523,13 +585,6 @@ public class MergeOperationTestHelper {
 		if (!theReferencingResourceIds.isEmpty()) {
 			assertReferencesUpdated(theReferencingResourceIds, sourceId, targetId);
 		}
-
-		assertMergeProvenance(
-				theMergeParams.asParametersResource(myParameterNames),
-				theExpectedVersionedSourceId,
-				theExpectedVersionedTargetId,
-				theExpectedProvenanceTargets,
-				theExpectedAgents);
 	}
 
 	/**

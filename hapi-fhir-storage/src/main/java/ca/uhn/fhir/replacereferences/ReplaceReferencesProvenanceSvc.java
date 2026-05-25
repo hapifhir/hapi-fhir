@@ -170,6 +170,8 @@ public class ReplaceReferencesProvenanceSvc {
 	 * @param theTargetId           the versioned id of the target resource of the operation.
 	 * @param theSourceId           the versioned id of the source resource of the operation.
 	 * @param theChangedResourceIds  the list of IDs of resources that were changed by the operation.
+	 * @param theProvenanceGroupId      optional group ID added as a {@code meta.tag} to group multiple
+	 *                               Provenance resources created within a single operation execution
 	 * @param theStartTime          the start time of the operation.
 	 * @param theRequestDetails     the request details
 	 * @param theProvenanceAgents   the list of agents to be included in the Provenance resource.
@@ -178,6 +180,7 @@ public class ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
+			@Nullable String theProvenanceGroupId,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -186,6 +189,7 @@ public class ReplaceReferencesProvenanceSvc {
 				theTargetId,
 				theSourceId,
 				theChangedResourceIds,
+				theProvenanceGroupId,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
@@ -199,6 +203,7 @@ public class ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
+			@Nullable String theProvenanceGroupId,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -214,6 +219,10 @@ public class ReplaceReferencesProvenanceSvc {
 					theProvenanceAgents,
 					theContainedResources,
 					resourceType);
+			if (theProvenanceGroupId != null) {
+				ExtensionUtil.setExtensionAsString(
+						myFhirContext, provenance, HapiExtensions.EXT_PROVENANCE_GROUP, theProvenanceGroupId);
+			}
 			myProvenanceDao.create(provenance, theRequestDetails);
 		}
 	}
