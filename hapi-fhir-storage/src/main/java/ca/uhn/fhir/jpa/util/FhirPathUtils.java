@@ -25,8 +25,12 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.patch.ParsedFhirPath;
 import ca.uhn.fhir.parser.DataFormatException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FhirPathUtils {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirPathUtils.class);
 	/**
 	 * Turns an invalid FhirPath into a valid one
 	 * -
@@ -95,14 +99,17 @@ public class FhirPathUtils {
 		for (int i = 1; i < parts.length; i++) {
 			BaseRuntimeChildDefinition child = currentDef.getChildByName(parts[i]);
 			if (child == null) {
-				// Choice types like Observation.value[x] are declared as "value[x]" but appear in
-				// search-param paths as "value". Try the [x] variant before giving up.
+				// Choice types are declared as "value[x]" but appear in search-param paths as "value".
 				child = currentDef.getChildByName(parts[i] + "[x]");
 			}
 			if (child == null || child.isMultipleCardinality()) {
 				return false;
 			}
 			if (i < parts.length - 1) {
+				if (parts[i + 1].contains("(")) {
+					ourLog.debug("Path {} is single-valued with function call.", thePath);
+					return true;
+				}
 				BaseRuntimeElementDefinition<?> elem = child.getChildByName(child.getElementName());
 				if (!(elem instanceof BaseRuntimeElementCompositeDefinition)) {
 					return false;

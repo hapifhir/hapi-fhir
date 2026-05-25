@@ -83,4 +83,10 @@ public class FhirPathUtilTest {
 		// Observation.value[x] is a choice type but single-cardinality; path uses bare "value"
 		assertThat(FhirPathUtils.isPathSingleValued(ourFhirContext, "Observation.value")).isTrue();
 	}
+
+	@Test
+	void testIsPathSingleValued_pathWithFunctionCall_returnsTrue() {
+		// medication[x] is 0..1; .as(Reference) is a type-cast function — path is single-valued overall
+		assertThat(FhirPathUtils.isPathSingleValued(ourFhirContext, "MedicationAdministration.medication.as(Reference)")).isTrue();
+	}
 }
