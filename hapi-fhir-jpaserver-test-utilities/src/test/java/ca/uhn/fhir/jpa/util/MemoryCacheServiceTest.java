@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.term.TermCodeSystemVersionDetails;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -23,6 +24,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,15 +38,20 @@ class MemoryCacheServiceTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(MemoryCacheServiceTest.class);
 	MemoryCacheService mySvc;
 
+	private final JpaStorageSettings myStorageSettings = new JpaStorageSettings();
+
 	@BeforeEach
 	public void setUp() {
-		JpaStorageSettings storageSettings = new JpaStorageSettings();
-		storageSettings.setMassIngestionMode(false);
-		mySvc = new MemoryCacheService(storageSettings);
+		myStorageSettings.setMassIngestionMode(false);
+		initCache();
+	}
+
+	private void initCache() {
+		mySvc = new MemoryCacheService(myStorageSettings);
 	}
 
 	@Test
-	public void simpleTagCacheRetrieve() {
+	void simpleTagCacheRetrieve() {
 		String system = "http://example.com";
 		TagTypeEnum type = TagTypeEnum.TAG;
 		String code = "t";
@@ -242,6 +250,46 @@ class MemoryCacheServiceTest {
 	public void testToString() {
 		String actual = new MemoryCacheService.ForcedIdCacheKey("Patient", "12", RequestPartitionId.forPartitionIdAndName(123, "Some partition", null)).toString();
 		assertEquals("MemoryCacheService.ForcedIdCacheKey[resType=Patient,resId=12,partId=[123]]", actual);
+	}
+
+
+	@Test
+	void testNopCache() {
+		// Setup
+		myStorageSettings.setTerminologyLookupCacheMaximumSize(0);
+		initCache();
+
+		// Test
+		TermCodeSystemVersionDetails firstValue = new TermCodeSystemVersionDetails(1, "1");
+		mySvc.put(MemoryCacheService.CacheEnum.CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS, "http://example.com", firstValue);
+
+		// Verify
+		Object actual = mySvc.getIfPresent(MemoryCacheService.CacheEnum.CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS, "http://example.com");
+		assertNull(actual);
+	}
+
+	@Test
+	void testNopCache_Factory() {
+		// Setup
+		myStorageSettings.setTerminologyLookupCacheMaximumSize(0);
+		initCache();
+
+		// Test
+		AtomicInteger counter = new AtomicInteger(0);
+		Function<String, TermCodeSystemVersionDetails> creationFunction = url -> {
+			int pid = counter.getAndIncrement();
+			return new TermCodeSystemVersionDetails(pid, "1");
+		};
+
+		TermCodeSystemVersionDetails actual = mySvc.get(MemoryCacheService.CacheEnum.CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS, "http://example.com", creationFunction);
+		assertEquals(0, actual.pid());
+
+		actual = mySvc.get(MemoryCacheService.CacheEnum.CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS, "http://example.com", creationFunction);
+		assertEquals(1, actual.pid());
+
+		actual = mySvc.get(MemoryCacheService.CacheEnum.CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS, "http://example.com", creationFunction);
+		assertEquals(2, actual.pid());
+
 	}
 
 
