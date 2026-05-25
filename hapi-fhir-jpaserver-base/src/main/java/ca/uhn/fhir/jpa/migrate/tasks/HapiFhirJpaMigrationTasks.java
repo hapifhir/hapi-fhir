@@ -212,10 +212,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.unique(false)
 					.withColumns("HASH_SYS_AND_VALUE", "RES_ID", "PARTITION_ID");
 
-			spidx2TokenCommonRes
-					.addForeignKey("20260515.70", "FK_SP2_TOKEN_COMMON_RES")
-					.toColumn("RES_ID")
-					.references("HFJ_RESOURCE", "RES_ID");
+			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
+				spidx2TokenCommonRes
+						.addForeignKey("20260515.70", "FK_SP2_TOKEN_COMMON_RES")
+						.toColumn("RES_ID", "PARTITION_ID")
+						.references("HFJ_RESOURCE", "RES_ID", "PARTITION_ID");
+			} else {
+				spidx2TokenCommonRes
+						.addForeignKey("20260515.70", "FK_SP2_TOKEN_COMMON_RES")
+						.toColumn("RES_ID")
+						.references("HFJ_RESOURCE", "RES_ID");
+			}
 		}
 
 		// Add HFJ_SPIDX2_TOKEN_IDENTIFIER table
@@ -266,10 +273,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.unique(false)
 					.withColumns("RES_ID");
 
-			spidx2TokenIdentifier
-					.addForeignKey("20260515.150", "FK_SP2_TOKEN_IDENTIFIER_RES")
-					.toColumn("RES_ID")
-					.references("HFJ_RESOURCE", "RES_ID");
+			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
+				spidx2TokenIdentifier
+						.addForeignKey("20260515.150", "FK_SP2_TOKEN_IDENTIFIER_RES")
+						.toColumn("RES_ID", "PARTITION_ID")
+						.references("HFJ_RESOURCE", "RES_ID", "PARTITION_ID");
+			} else {
+				spidx2TokenIdentifier
+						.addForeignKey("20260515.150", "FK_SP2_TOKEN_IDENTIFIER_RES")
+						.toColumn("RES_ID")
+						.references("HFJ_RESOURCE", "RES_ID");
+			}
 		}
 	}
 
