@@ -60,7 +60,12 @@ import org.testcontainers.shaded.com.google.common.collect.Sets;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl.isNonDisableableBuiltInSearchParam;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,6 +78,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -900,6 +906,79 @@ public class SearchParamRegistryImplTest {
 		});
 
 		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void withDeferredRebuild_concurrentExternalChanges_stayBoundedAndConsistent() throws Exception {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		final int externalChangeCount = 20;
+		final int scopedChangeCount = 20;
+		CountDownLatch startGate = new CountDownLatch(1);
+		CountDownLatch doneGate = new CountDownLatch(2);
+		AtomicReference<Throwable> failure = new AtomicReference<>();
+		ExecutorService pool = Executors.newFixedThreadPool(2);
+
+		try {
+			// Thread A: package-install simulator — many changes inside one deferred scope.
+			pool.submit(() -> {
+				try {
+					startGate.await();
+					mySearchParamRegistry.withDeferredRebuild(() -> {
+						for (int i = 0; i < scopedChangeCount; i++) {
+							mySearchParamRegistry.handleChange(buildCreatedEvent("SearchParameter/inside-" + i));
+						}
+					});
+				} catch (Throwable t) {
+					failure.compareAndSet(null, t);
+				} finally {
+					doneGate.countDown();
+				}
+			});
+
+			// Thread B: external Quartz-like driver — handleChange/forceRefresh outside any scope.
+			pool.submit(() -> {
+				try {
+					startGate.await();
+					for (int i = 0; i < externalChangeCount; i++) {
+						if (i % 2 == 0) {
+							mySearchParamRegistry.handleChange(buildCreatedEvent("SearchParameter/outside-" + i));
+						} else {
+							mySearchParamRegistry.forceRefresh();
+						}
+					}
+				} catch (Throwable t) {
+					failure.compareAndSet(null, t);
+				} finally {
+					doneGate.countDown();
+				}
+			});
+
+			startGate.countDown();
+			assertThat(doneGate.await(30, TimeUnit.SECONDS)).isTrue();
+		} finally {
+			pool.shutdownNow();
+		}
+
+		assertThat(failure.get()).isNull();
+
+		// The cache is still consistent after the race: built-in SP count matches expectation
+		// and a known SP still resolves through the read path.
+		assertThat(mySearchParamRegistry.getActiveSearchParams().size()).isEqualTo(ourBuiltInSearchParams.size());
+		assertThat(mySearchParamRegistry.getActiveSearchParam(
+						"Patient", "name", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX))
+				.isNotNull();
+
+		// Lower bound: at least one rebuild happened.
+		// Upper bound: bounded by external rebuilds + one scope-exit flush + one slack rebuild
+		// for the race where Thread B briefly observes a stale myDeferRebuild=false.
+		long searchCalls = mockingDetails(mySearchParamProvider).getInvocations().stream()
+				.filter(i -> i.getMethod().getName().equals("search"))
+				.count();
+		assertThat(searchCalls).isGreaterThanOrEqualTo(1);
+		assertThat(searchCalls).isLessThanOrEqualTo(externalChangeCount + 2);
 	}
 
 	private static IResourceChangeEvent buildCreatedEvent(String theId) {

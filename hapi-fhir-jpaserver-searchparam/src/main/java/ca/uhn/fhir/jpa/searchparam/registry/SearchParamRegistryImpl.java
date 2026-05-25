@@ -130,10 +130,9 @@ public class SearchParamRegistryImpl
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 	private boolean myPrePopulateSearchParamIdentities = true;
 
-	// Single-caller deferred-rebuild state for the package-install path.
-	// Not thread-safe; behaviour under concurrent callers is undefined.
-	private boolean myDeferRebuild;
-	private boolean myDeferredRebuildPending;
+	// Deferred-rebuild state for the package-install path
+	private volatile boolean myDeferRebuild;
+	private volatile boolean myDeferredRebuildPending;
 
 	@VisibleForTesting
 	public void setPopulateSearchParamIdentities(boolean myPrePopulateSearchParamIdentities) {
@@ -717,7 +716,9 @@ public class SearchParamRegistryImpl
 	 * {@link #myActiveSearchParams} is still {@code null} so initial population always runs
 	 * synchronously.
 	 * <p>
-	 * Single-caller, single-thread helper. Behaviour under concurrent callers is undefined.
+	 * Production usage is single-threaded (the package-install path). The deferred-rebuild
+	 * flags are volatile so concurrent {@code handleChange} / {@code forceRefresh} from
+	 * other threads either defer correctly or trigger a (harmless) extra rebuild
 	 * Nested calls are supported: the outermost scope owns the flush.
 	 */
 	@Override
