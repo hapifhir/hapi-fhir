@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
@@ -8,6 +9,7 @@ import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StringType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -18,6 +20,9 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class ImportLoincStep6HandleAnswerListLinks
 		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
 				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+
+	@Autowired
+	private IValidationSupport myValidationSupport;
 
 	@Override
 	protected MyBaseContext newContextObject(
@@ -68,6 +73,11 @@ public class ImportLoincStep6HandleAnswerListLinks
 
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		if (isBlank(loincNumber)) {
+			return;
+		}
+
+		IValidationSupport.LookupCodeResult concept = lookupPreExistingConcept(theJobMetadata, loincNumber);
+		if (concept == null || !concept.isFound()) {
 			return;
 		}
 

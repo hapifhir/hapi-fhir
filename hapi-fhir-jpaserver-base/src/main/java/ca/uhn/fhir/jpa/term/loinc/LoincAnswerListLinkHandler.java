@@ -29,6 +29,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
+// FIXME: delete this and related
 public class LoincAnswerListLinkHandler implements IZipContentsHandlerCsv {
 
 	private final Map<String, TermConcept> myCode2Concept;

@@ -7,6 +7,9 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
@@ -19,6 +22,7 @@ import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
@@ -45,6 +49,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFi
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_CODE_SYSTEM_URL;
 
 public abstract class BaseImportLoincStep<CT> extends BaseImportTerminologyStep
 		implements ITerminologyImportFileHandlerStep<
@@ -59,6 +64,9 @@ public abstract class BaseImportLoincStep<CT> extends BaseImportTerminologyStep
 
 	@Autowired
 	private IHapiTransactionService myTransactionService;
+
+	@Autowired
+	private IValidationSupport myValidationSupport;
 
 	@Nonnull
 	@Override
@@ -264,6 +272,17 @@ public abstract class BaseImportLoincStep<CT> extends BaseImportTerminologyStep
 		String currentStepId = theStepExecutionDetails.getCurrentStepId();
 		return data.getRecordsAddedCounter(currentStepId);
 	}
+
+	@Nullable
+	IValidationSupport.LookupCodeResult lookupPreExistingConcept(ImportTerminologyMetadataAttachmentJson theJobMetadata, String propertyCodeValue) {
+		String version = theJobMetadata.getCodeSystemStagingVersionId();
+		LookupCodeRequest request =
+			new LookupCodeRequest(LOINC_GENERIC_CODE_SYSTEM_URL + "|" + version, propertyCodeValue);
+		IValidationSupport.LookupCodeResult lookupResponse =
+			myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
+		return lookupResponse;
+	}
+
 
 	protected record LoincFileNameSpecification(
 			FileHandlingType fileHandlingType,
