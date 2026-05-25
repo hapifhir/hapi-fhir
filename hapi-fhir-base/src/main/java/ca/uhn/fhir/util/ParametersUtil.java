@@ -458,14 +458,6 @@ public class ParametersUtil {
 		addParameterToParameters(theCtx, theParameters, theName, value);
 	}
 
-	public static void addParameterToParametersUrl(
-			FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
-		IPrimitiveType<String> value = (IPrimitiveType<String>)
-				Objects.requireNonNull(theCtx.getElementDefinition("url")).newInstance();
-		value.setValue(theValue);
-		addParameterToParameters(theCtx, theParameters, theName, value);
-	}
-
 	/**
 	 * Add a parameter with no value (typically because we'll be adding sub-parameters)
 	 */
