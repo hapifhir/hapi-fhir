@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -139,7 +140,12 @@ public class ImportLoincJobAppCtx {
 						TerminologyFileSetJson.class,
 						importLoincStep15ParentGroupFile())
 				.addIntermediateStep(
-						"import-part-link",
+						"import-part-file",
+						"Import LOINC Part Link File",
+						TerminologyFileSetJson.class,
+						importLoincStep16aPartFile())
+				.addIntermediateStep(
+						"import-part-link-file",
 						"Import LOINC Part Link File",
 						TerminologyFileSetJson.class,
 						importLoincStep16PartLink())
@@ -294,6 +300,11 @@ public class ImportLoincJobAppCtx {
 	@Bean
 	public ImportLoincStep15ParentGroupFile importLoincStep15ParentGroupFile() {
 		return new ImportLoincStep15ParentGroupFile();
+	}
+
+	@Bean
+	public ImportLoincStep16PartFile importLoincStep16aPartFile() {
+		return new ImportLoincStep16PartFile();
 	}
 
 	/**
