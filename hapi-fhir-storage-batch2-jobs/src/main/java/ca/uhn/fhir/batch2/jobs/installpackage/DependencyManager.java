@@ -138,11 +138,7 @@ public class DependencyManager {
 	}
 
 	private RequestDetails createRequestDetails() {
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			requestDetails.setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
-		}
-		return requestDetails;
+		return SystemRequestDetails.forRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
 	}
 
 	private boolean resourceContainsDependency(
