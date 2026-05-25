@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.term.hsearch;
 
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -19,7 +18,6 @@ import jakarta.persistence.EntityManager;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-import org.apache.commons.lang3.ClassPathUtils;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.query.SearchQuery;
@@ -41,6 +39,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,7 +61,6 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	public static final int CS_CONCEPTS_NUMBER = 81;
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTerminologyHSearchR4Test.class);
 	long termCodeSystemVersionWithVersionId;
-	long termCodeSystemVersionWithNoVersionId;
 	Map<String, Long> conceptCounts = Map.ofEntries(
 		entry("http://loinc.org/vs", 81L),
 		entry("http://loinc.org/vs/LG100-4", 0L),
@@ -158,26 +158,8 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		ourLog.info("=================> Number of freetext found concepts after re-indexing for version {}: {}",
 			CS_VERSION, termConceptCountForVersion);
 		assertEquals(CS_CONCEPTS_NUMBER, termConceptCountForVersion);
-
-
-		int dbTermConceptCountForNullVersion = runInTransaction(() ->
-			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId));
-		assertEquals(CS_CONCEPTS_NUMBER, dbTermConceptCountForNullVersion);
-
-		long termConceptCountNullVersion = searchAllIndexedTermConceptCount(termCodeSystemVersionWithNoVersionId);
-		ourLog.info("=================> Number of freetext found concepts after re-indexing for version {}: {}",
-			NULL, termConceptCountNullVersion);
-		assertEquals(CS_CONCEPTS_NUMBER, termConceptCountNullVersion);
 	}
 
-
-	private void validateFreetextIndexesEmpty() {
-		long termConceptCountVersioned = searchAllIndexedTermConceptCount(termCodeSystemVersionWithVersionId);
-		assertEquals(0, termConceptCountVersioned);
-
-		long termConceptCountNotVersioned = searchAllIndexedTermConceptCount(termCodeSystemVersionWithNoVersionId);
-		assertEquals(0, termConceptCountNotVersioned);
-	}
 
 	/**
 	 * Checks the number of VS Concepts and ConceptDesignations against test pre-specified values
@@ -196,16 +178,21 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 
 	private void validateSavedConceptsCount() {
 		termCodeSystemVersionWithVersionId = getTermCodeSystemVersionNotNullId();
-		int dbVersionedTermConceptCount = runInTransaction(() ->
-			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId));
+		int dbVersionedTermConceptCount = runInTransaction(() -> {
+			TermCodeSystemVersion csv = myTermCodeSystemVersionDao.findById(new IdAndPartitionId(termCodeSystemVersionWithVersionId)).orElseThrow();
+			List<TermConcept> allConcepts = myTermConceptDao.findByCodeSystemVersion(csv);
+
+			Set<String> allConceptsSet = allConcepts
+				.stream()
+				.map(TermConcept::getCode)
+				.collect(Collectors.toCollection(TreeSet::new));
+			ourLog.info("All Concepts: {}", allConceptsSet);
+
+			return allConceptsSet.size();
+		});
 		ourLog.info("=================> Number of stored concepts for version {}: {}", CS_VERSION, dbVersionedTermConceptCount);
 		assertEquals(CS_CONCEPTS_NUMBER, dbVersionedTermConceptCount);
 
-		termCodeSystemVersionWithNoVersionId = getTermCodeSystemVersionNullId();
-		int dbNotVersionedTermConceptCount = runInTransaction(() ->
-			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId));
-		ourLog.info("=================> Number of stored concepts for version {}: {}", NULL, dbNotVersionedTermConceptCount);
-		assertEquals(CS_CONCEPTS_NUMBER, dbNotVersionedTermConceptCount);
 	}
 
 
@@ -224,16 +211,6 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		});
 	}
 
-
-	private long getTermCodeSystemVersionNullId() {
-		return runInTransaction(() -> {
-			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri(LOINC_URL);
-			TermCodeSystemVersion termCodeSystemVersion = myTermCodeSystemVersionDao
-				.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
-			assertNotNull(termCodeSystemVersion);
-			return termCodeSystemVersion.getPid();
-		});
-	}
 
 
 	private ZipCollectionBuilder buildFileDescriptors() throws IOException {

@@ -114,7 +114,7 @@ class TerminologyUploaderProviderTest {
 
 		// Verify
 		verify(myJobCoordinator, times(1)).startInstance(notNull(), myStartRequestCaptor.capture());
-		assertEquals(ImportLoincJobAppCtx.IMPORT_TERM_LOINC, myStartRequestCaptor.getValue().getJobDefinitionId());
+		assertEquals(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC, myStartRequestCaptor.getValue().getJobDefinitionId());
 
 		ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
@@ -163,7 +163,7 @@ class TerminologyUploaderProviderTest {
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
 		jobInstance.setStatus(StatusEnum.BUILDING);
-		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 		when(myJobPersistence.storeNewAttachment(any(), any())).thenAnswer(i -> {
 			AttachmentDetails attachment = i.getArgument(1, AttachmentDetails.class);
@@ -207,7 +207,7 @@ class TerminologyUploaderProviderTest {
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
 		jobInstance.setStatus(StatusEnum.QUEUED);
-		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
@@ -233,7 +233,7 @@ class TerminologyUploaderProviderTest {
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
 		jobInstance.setStatus(StatusEnum.BUILDING);
-		jobInstance.setJobDefinitionId("AA" + ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+		jobInstance.setJobDefinitionId("AA" + ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
@@ -259,7 +259,7 @@ class TerminologyUploaderProviderTest {
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
 		jobInstance.setStatus(StatusEnum.BUILDING);
-		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
@@ -285,7 +285,7 @@ class TerminologyUploaderProviderTest {
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
 		jobInstance.setStatus(StatusEnum.BUILDING);
-		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
@@ -328,7 +328,7 @@ class TerminologyUploaderProviderTest {
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
 		jobInstance.setStatus(StatusEnum.QUEUED);
-		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
@@ -352,7 +352,7 @@ class TerminologyUploaderProviderTest {
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
 		jobInstance.setStatus(StatusEnum.BUILDING);
-		jobInstance.setJobDefinitionId("AAA" + ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+		jobInstance.setJobDefinitionId("AAA" + ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
@@ -376,7 +376,7 @@ class TerminologyUploaderProviderTest {
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
 		jobInstance.setStatus(StatusEnum.COMPLETED);
-		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 		jobInstance.setReport(toUploadTerminologyReport("This is the report contents"));
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 

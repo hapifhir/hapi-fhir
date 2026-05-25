@@ -5,7 +5,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
@@ -15,20 +14,20 @@ import org.hl7.fhir.r4.model.Enumerations;
 import java.util.List;
 import java.util.Properties;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID;
-import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME;
-import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI;
-import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_PUBCHEM_PART_MAP_ID;
-import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_PUBCHEM_PART_MAP_NAME;
-import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_PUBCHEM_PART_MAP_URI;
-import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_RXNORM_PART_MAP_ID;
-import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_RXNORM_PART_MAP_NAME;
-import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_RXNORM_PART_MAP_URI;
-import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_SCT_PART_MAP_ID;
-import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_SCT_PART_MAP_NAME;
-import static ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler.LOINC_SCT_PART_MAP_URI;
-import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.CM_COPYRIGHT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_ID;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_NAME;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_PUBCHEM_PART_MAP_ID;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_PUBCHEM_PART_MAP_NAME;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_PUBCHEM_PART_MAP_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_RXNORM_PART_MAP_ID;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_RXNORM_PART_MAP_NAME;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_RXNORM_PART_MAP_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_SCT_PART_MAP_ID;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_SCT_PART_MAP_NAME;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_SCT_PART_MAP_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.CM_RSNA_COPYRIGHT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -137,7 +136,7 @@ public class ImportLoincStep8HandlePartRelatedCodeMapping
 		}
 
 		if (isBlank(extCodeSystemCopyrightNotice)) {
-			extCodeSystemCopyrightNotice = CM_COPYRIGHT;
+			extCodeSystemCopyrightNotice = CM_RSNA_COPYRIGHT;
 		}
 
 		addConceptMapEntry(

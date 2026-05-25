@@ -18,7 +18,6 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
-import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import jakarta.annotation.Nonnull;
@@ -79,8 +78,7 @@ public abstract class BaseImportLoincStep<CT> extends BaseImportTerminologyStep
 
 		for (LoincFileNameSpecification loincFileNameSpecification : getFilesToProcess(theStepExecutionDetails)) {
 			if (loincFileNameSpecification.matchFileName(jobProperties, theFileName)) {
-				return Optional.of(
-						new FileHandlingInstructions(loincFileNameSpecification.fileHandlingType()));
+				return Optional.of(new FileHandlingInstructions(loincFileNameSpecification.fileHandlingType()));
 			}
 		}
 
@@ -274,15 +272,15 @@ public abstract class BaseImportLoincStep<CT> extends BaseImportTerminologyStep
 	}
 
 	@Nullable
-	IValidationSupport.LookupCodeResult lookupPreExistingConcept(ImportTerminologyMetadataAttachmentJson theJobMetadata, String propertyCodeValue) {
+	IValidationSupport.LookupCodeResult lookupPreExistingConcept(
+			ImportTerminologyMetadataAttachmentJson theJobMetadata, String propertyCodeValue) {
 		String version = theJobMetadata.getCodeSystemStagingVersionId();
 		LookupCodeRequest request =
-			new LookupCodeRequest(LOINC_GENERIC_CODE_SYSTEM_URL + "|" + version, propertyCodeValue);
+				new LookupCodeRequest(LOINC_GENERIC_CODE_SYSTEM_URL + "|" + version, propertyCodeValue);
 		IValidationSupport.LookupCodeResult lookupResponse =
-			myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
+				myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
 		return lookupResponse;
 	}
-
 
 	protected record LoincFileNameSpecification(
 			FileHandlingType fileHandlingType,

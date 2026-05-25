@@ -27,7 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
@@ -122,7 +122,7 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 
 		// Send a single chunk to trigger the first closure generation step
 		fileSet = new TerminologyFileSetJson();
-		theDataSink.acceptForFutureStep(STEP_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION, fileSet);
+		theDataSink.acceptForFutureStep(STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION, fileSet);
 	}
 
 	private ValueSet getValueSetLoincAll(String theLoincVersion, String theCopyrightStatement) {

@@ -75,7 +75,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -329,7 +328,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		theChain.remove(theChain.size() - 1);
 	}
 
-
 	private Optional<String> loadFile(LoadedFileDescriptors theDescriptors, String... theFilenames) {
 		for (FileDescriptor next : theDescriptors.getUncompressedFileDescriptors()) {
 			for (String nextFilename : theFilenames) {
@@ -450,7 +448,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		//
 		//		return new UploadStatistics(conceptCount, target);
 	}
-
 
 	private UploadStatistics processSnomedCtFiles(
 			LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {

@@ -1,13 +1,9 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -35,16 +31,6 @@ public class ImportLoincStep14GroupTermsFile
 				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE,
 				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT));
-	}
-
-	// FIXME: remove
-	@Nonnull
-	@Override
-	public RunOutcome run(
-			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
-			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
-			throws JobExecutionFailedException {
-		return super.run(theStepExecutionDetails, theDataSink);
 	}
 
 	@Override

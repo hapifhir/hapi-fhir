@@ -11,7 +11,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
-import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
+import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -23,26 +23,26 @@ import java.io.IOException;
 import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DUPLICATE_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_PRIMARY_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_DUPLICATE_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_PRIMARY_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -57,7 +57,12 @@ public class TerminologyTestHelper {
 	private final MemoryCacheService myMemoryCacheService;
 	private final IValidationSupport myValidationSupport;
 
-	public TerminologyTestHelper(IJobPersistence theJobPersistence, IJobCoordinator theJobCoordinator, Batch2JobHelper theBatch2JobHelper, MemoryCacheService theMemoryCacheService, IValidationSupport theValidationSupport) {
+	public TerminologyTestHelper(
+			IJobPersistence theJobPersistence,
+			IJobCoordinator theJobCoordinator,
+			Batch2JobHelper theBatch2JobHelper,
+			MemoryCacheService theMemoryCacheService,
+			IValidationSupport theValidationSupport) {
 		myJobPersistence = theJobPersistence;
 		myJobCoordinator = theJobCoordinator;
 		myBatch2JobHelper = theBatch2JobHelper;
@@ -69,13 +74,15 @@ public class TerminologyTestHelper {
 		return startImportLoincJobAndWaitForCompletion(versionId, theFiles, false);
 	}
 
-	public String startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
+	public String startImportLoincJobAndWaitForCompletion(
+			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
 		return startImportLoincJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, null);
 	}
 
-	public String startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, Properties theJobProperties) {
+	public String startImportLoincJobAndWaitForCompletion(
+			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, Properties theJobProperties) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+		startRequest.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
 		parameters.setVersionId(versionId);
 		if (theDontMakeCurrent) {
@@ -86,10 +93,9 @@ public class TerminologyTestHelper {
 		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 
 		AttachmentDetails attachmentDetails = new AttachmentDetails(
-			new ByteArrayInputStream(theFiles.getZipBytes()),
-			AttachmentContentTypeEnum.ZIP,
-			FILENAME_LOINC_DISTRIBUTION_FILE
-		);
+				new ByteArrayInputStream(theFiles.getZipBytes()),
+				AttachmentContentTypeEnum.ZIP,
+				FILENAME_LOINC_DISTRIBUTION_FILE);
 		myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 
 		if (theJobProperties != null) {
@@ -100,10 +106,9 @@ public class TerminologyTestHelper {
 				fail("Failed to store properties", e);
 			}
 			attachmentDetails = new AttachmentDetails(
-				out.toByteArray(),
-				AttachmentContentTypeEnum.PROPERTIES,
-				LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()
-			);
+					out.toByteArray(),
+					AttachmentContentTypeEnum.PROPERTIES,
+					LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 		}
 
@@ -117,7 +122,12 @@ public class TerminologyTestHelper {
 	public void startImportLoincJobAndWaitForCompletion(String theVersion, boolean theMakeItCurrent) throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 
-		assertThat(theVersion == null || theVersion.equals("2.67") || theVersion.equals("2.68") || theVersion.equals("2.69")).as("Version supported are: 2.67, 2.68, 2.69 and null").isTrue();
+		assertThat(theVersion == null
+						|| theVersion.equals("2.67")
+						|| theVersion.equals("2.68")
+						|| theVersion.equals("2.69"))
+				.as("Version supported are: 2.67, 2.68, 2.69 and null")
+				.isTrue();
 
 		addLoincMandatoryFilesToZip(files, theVersion);
 
@@ -131,12 +141,12 @@ public class TerminologyTestHelper {
 	public void assertConceptDisplay(String theSystem, String theCode, String theExpectedDisplay) {
 		myMemoryCacheService.invalidateAllCaches();
 		LookupCodeRequest request = new LookupCodeRequest(theSystem, theCode);
-		IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
+		IValidationSupport.LookupCodeResult result =
+				myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
 		assertNotNull(result);
 		assertTrue(result.isFound());
 		assertEquals(theExpectedDisplay, result.getCodeDisplay());
 	}
-
 
 	/**
 	 * Uses the {@link IValidationSupport#lookupCode(ValidationSupportContext, LookupCodeRequest)} method to look up the code
@@ -145,7 +155,8 @@ public class TerminologyTestHelper {
 	public void assertConceptNotFound(String theSystem, String theCode) {
 		myMemoryCacheService.invalidateAllCaches();
 		LookupCodeRequest lookupCodeRequest = new LookupCodeRequest(theSystem, theCode);
-		IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), lookupCodeRequest);
+		IValidationSupport.LookupCodeResult result =
+				myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), lookupCodeRequest);
 		assertTrue(result == null || !result.isFound());
 	}
 
@@ -156,9 +167,8 @@ public class TerminologyTestHelper {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 	}
 
-
-	private static void addBaseLoincMandatoryFilesToZip(
-		ZipCollectionBuilder theFiles, String theClassPathPrefix) throws IOException {
+	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theClassPathPrefix)
+			throws IOException {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_XML_FILE.getCode());
 		theFiles.addFileZip(theClassPathPrefix, LOINC_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip(theClassPathPrefix, LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
@@ -179,13 +189,12 @@ public class TerminologyTestHelper {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode());
 	}
 
-
 	private String getClassPathPrefix(String theVersion) {
 		String theClassPathPrefix = "/loinc-ver/v-no-version/";
 
-		if (StringUtils.isBlank(theVersion))   return theClassPathPrefix;
+		if (StringUtils.isBlank(theVersion)) return theClassPathPrefix;
 
-		switch(theVersion) {
+		switch (theVersion) {
 			case "2.67":
 				return "/loinc-ver/v267/";
 			case "2.68":

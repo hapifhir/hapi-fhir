@@ -1,13 +1,9 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -16,11 +12,11 @@ import org.hl7.fhir.r4.model.Enumerations;
 import java.util.List;
 import java.util.Properties;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID;
-import static ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_NAME;
-import static ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_URI;
-import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.CM_COPYRIGHT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_IEEE_CM_ID;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_IEEE_CM_NAME;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_IEEE_CM_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.CM_RSNA_COPYRIGHT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -42,16 +38,6 @@ public class ImportLoincStep11HandleIeeeMedicalDeviceCode
 				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE,
 				LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT));
-	}
-
-	// FIXME: remove
-	@Nonnull
-	@Override
-	public RunOutcome run(
-			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
-			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
-			throws JobExecutionFailedException {
-		return super.run(theStepExecutionDetails, theDataSink);
 	}
 
 	@Override
@@ -99,6 +85,6 @@ public class ImportLoincStep11HandleIeeeMedicalDeviceCode
 						.setTargetCode(ieeeCode)
 						.setTargetDisplay(ieeeDisplayName)
 						.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL)
-						.setCopyright(loincCopyrightStatement + " " + CM_COPYRIGHT));
+						.setCopyright(loincCopyrightStatement + " " + CM_RSNA_COPYRIGHT));
 	}
 }

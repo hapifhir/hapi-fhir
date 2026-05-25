@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_ID;
-import static ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_NAME;
-import static ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.DOCUMENT_ONTOLOGY_CODES_VS_ID;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.DOCUMENT_ONTOLOGY_CODES_VS_NAME;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.DOCUMENT_ONTOLOGY_CODES_VS_URI;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep9HandleDocumentOntology
@@ -57,6 +57,11 @@ public class ImportLoincStep9HandleDocumentOntology
 		String partTypeName = trim(theRecord.get("PartTypeName"));
 		String partSequenceOrder = trim(theRecord.get("PartSequenceOrder"));
 		String partName = trim(theRecord.get("PartName"));
+
+		IValidationSupport.LookupCodeResult outcome = lookupPreExistingConcept(theJobMetadata, loincNumber);
+		if (outcome == null || !outcome.isFound()) {
+			return;
+		}
 
 		// Document Ontology Codes VS
 		ValueSet vs = getValueSet(

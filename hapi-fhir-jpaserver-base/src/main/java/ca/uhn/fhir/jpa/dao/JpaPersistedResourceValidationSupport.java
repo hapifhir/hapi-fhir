@@ -225,11 +225,12 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 						UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(theUri);
 						if (canonicalUrl.versionId().isPresent()) {
-							params.add(ValueSet.SP_VERSION, new TokenParam(canonicalUrl.versionId().get()));
+							params.add(
+									ValueSet.SP_VERSION,
+									new TokenParam(canonicalUrl.versionId().get()));
 						}
 						params.add(
-								ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_SYSTEM,
-								new UriParam(canonicalUrl.url()));
+								ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_SYSTEM, new UriParam(canonicalUrl.url()));
 						params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 						search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 					}
@@ -305,7 +306,9 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(1);
 		if (parsedCanonicalUrl.versionId().isPresent()) {
-			params.add(StructureDefinition.SP_VERSION, new TokenParam(parsedCanonicalUrl.versionId().get()));
+			params.add(
+					StructureDefinition.SP_VERSION,
+					new TokenParam(parsedCanonicalUrl.versionId().get()));
 			params.add(StructureDefinition.SP_URL, new UriParam(parsedCanonicalUrl.url()));
 		} else {
 			params.add(StructureDefinition.SP_URL, new UriParam(parsedCanonicalUrl.url()));
@@ -315,5 +318,4 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		}
 		return params;
 	}
-
 }

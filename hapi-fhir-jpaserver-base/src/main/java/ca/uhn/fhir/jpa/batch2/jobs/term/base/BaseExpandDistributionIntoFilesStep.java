@@ -86,7 +86,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 					try (BOMInputStream fis = new LoadedFileDescriptors.NonClosableBOMInputStream(zipInputStream)) {
 						String nextFileName = entry.getName();
 
-						ourLog.info("Import {}[{}] - Processing file: {}", getTerminologyName(), instanceId, nextFileName);
+						ourLog.info(
+								"Import {}[{}] - Processing file: {}", getTerminologyName(), instanceId, nextFileName);
 
 						byte[] bytes = IOUtils.toByteArray(fis);
 

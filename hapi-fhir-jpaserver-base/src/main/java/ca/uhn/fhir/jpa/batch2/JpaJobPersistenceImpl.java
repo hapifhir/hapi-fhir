@@ -637,10 +637,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return fetchAttachment(supplier, "Filename", theFilename);
 	}
 
-	private AttachmentDetails fetchAttachment(Supplier<Optional<Batch2JobAttachmentEntity>> supplier, String theLookupType, String theLookupValue) {
+	private AttachmentDetails fetchAttachment(
+			Supplier<Optional<Batch2JobAttachmentEntity>> supplier, String theLookupType, String theLookupValue) {
 		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
 			Batch2JobAttachmentEntity attachment = supplier.get()
-					.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2905) + "Attachment with " + theLookupType + " [" + theLookupValue + "] not found"));
+					.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2905) + "Attachment with " + theLookupType
+							+ " [" + theLookupValue + "] not found"));
 
 			byte[] attachmentData = attachment.getData();
 			InputStream readerStream = new ByteArrayInputStream(attachmentData);

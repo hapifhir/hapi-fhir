@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -113,7 +113,8 @@ public class ImportLoincStep18CodingProperties
 		List<String> propertyCodeValues = parsePropertyCodeValues(thePropertyValue);
 		for (String propertyCodeValue : propertyCodeValues) {
 
-			IValidationSupport.LookupCodeResult lookupResponse = lookupPreExistingConcept(theJobMetadata, propertyCodeValue);
+			IValidationSupport.LookupCodeResult lookupResponse =
+					lookupPreExistingConcept(theJobMetadata, propertyCodeValue);
 			if (lookupResponse == null || !lookupResponse.isFound()) {
 				ourLog.error(
 						"Couldn't find TermConcept for code: '{}'. Display property set to blank for property: '{}'",

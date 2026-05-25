@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.loinc.LoincPartRelatedCodeMappingHandler;
-import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
@@ -20,17 +19,16 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.CM_COPYRIGHT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.RID_CS_URI;
-import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.RPID_CS_URI;
-import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.RSNA_CODES_VS_ID;
-import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.RSNA_CODES_VS_NAME;
-import static ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler.RSNA_CODES_VS_URI;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.CM_RSNA_COPYRIGHT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.RID_CS_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.RPID_CS_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.RSNA_CODES_VS_ID;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.RSNA_CODES_VS_NAME;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.RSNA_CODES_VS_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-// FIXME: make sure we don't expand ValueSets until status = active
 public class ImportLoincStep7HandleRsnaPlaybook
 		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep7HandleRsnaPlaybook.MyContext> {
 
@@ -70,6 +68,11 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		String preferredName = trim(theRecord.get("PreferredName"));
 		String rpid = trim(theRecord.get("RPID"));
 		String longName = trim(theRecord.get("LongName"));
+
+		IValidationSupport.LookupCodeResult outcome = lookupPreExistingConcept(theJobMetadata, loincNumber);
+		if (outcome == null || !outcome.isFound()) {
+			return;
+		}
 
 		// CodeSystem version from properties file
 		String codeSystemVersionId = theJobMetadata.getCodeSystem().getVersion();
@@ -140,12 +143,12 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		String termConceptMapId;
 		if (codeSystemVersionId != null) {
 			partConceptMapId =
-					LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID + "-" + codeSystemVersionId;
+					ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_ID + "-" + codeSystemVersionId;
 			termConceptMapId =
-					LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID + "-" + codeSystemVersionId;
+					ImportLoincJobAppCtx.LOINC_TERM_TO_RPID_PART_MAP_ID + "-" + codeSystemVersionId;
 		} else {
-			partConceptMapId = LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID;
-			termConceptMapId = LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID;
+			partConceptMapId = ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_ID;
+			termConceptMapId = ImportLoincJobAppCtx.LOINC_TERM_TO_RPID_PART_MAP_ID;
 		}
 
 		// LOINC Part -> Radlex RID code mappings
@@ -154,9 +157,9 @@ public class ImportLoincStep7HandleRsnaPlaybook
 					theContext,
 					new ConceptMapping()
 							.setConceptMapId(partConceptMapId)
-							.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI)
+							.setConceptMapUri(ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_URI)
 							.setConceptMapVersion(loincRsnaCmVersion)
-							.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME)
+							.setConceptMapName(ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_NAME)
 							.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
 							.setSourceCodeSystemVersion(codeSystemVersionId)
 							.setSourceCode(partNumber)
@@ -165,7 +168,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 							.setTargetCode(rid)
 							.setTargetDisplay(preferredName)
 							.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL)
-							.setCopyright(CM_COPYRIGHT));
+							.setCopyright(CM_RSNA_COPYRIGHT));
 		}
 
 		// LOINC Term -> Radlex RPID code mappings
@@ -174,9 +177,9 @@ public class ImportLoincStep7HandleRsnaPlaybook
 					theContext,
 					new ConceptMapping()
 							.setConceptMapId(termConceptMapId)
-							.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI)
+							.setConceptMapUri(ImportLoincJobAppCtx.LOINC_TERM_TO_RPID_PART_MAP_URI)
 							.setConceptMapVersion(loincRsnaCmVersion)
-							.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME)
+							.setConceptMapName(ImportLoincJobAppCtx.LOINC_TERM_TO_RPID_PART_MAP_NAME)
 							.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
 							.setSourceCodeSystemVersion(codeSystemVersionId)
 							.setSourceCode(loincNumber)
@@ -185,7 +188,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 							.setTargetCode(rpid)
 							.setTargetDisplay(longName)
 							.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL)
-							.setCopyright(CM_COPYRIGHT));
+							.setCopyright(CM_RSNA_COPYRIGHT));
 		}
 	}
 

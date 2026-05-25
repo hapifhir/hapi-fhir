@@ -79,19 +79,20 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class TerminologyUploaderProvider extends BaseJpaProvider {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	public static final String PARAM_FILE = "file";
 	public static final String PARAM_CODESYSTEM = "codeSystem";
 	public static final String PARAM_SYSTEM = "system";
 	public static final String PARAM_VERSION = "version";
 	public static final String PARAM_FILENAME = "filename";
-	private static final String RESP_PARAM_CONCEPT_COUNT = "conceptCount";
-	private static final String RESP_PARAM_TARGET = "target";
-	private static final String RESP_PARAM_SUCCESS = "success";
 	public static final String PARAM_JOB_INSTANCE_ID = "jobInstanceId";
 	public static final String PARAM_JOB_ATTACHMENT_ID = "jobAttachmentId";
 	public static final String RESP_PARAM_OUTCOME = "outcome";
-
+	public static final Pattern LOINC_XML_FILENAME_PATTERN =
+			Pattern.compile("loinc[0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
+	private static final String RESP_PARAM_CONCEPT_COUNT = "conceptCount";
+	private static final String RESP_PARAM_TARGET = "target";
+	private static final String RESP_PARAM_SUCCESS = "success";
 	private CodeSystemToCustomCsvConverter myCodeSystemToCustomCsvConverter;
 
 	@Autowired
@@ -110,13 +111,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		this(null, null, null, null);
 	}
 
-	@PostConstruct
-	public void startIfNecessary() {
-		if (myCodeSystemToCustomCsvConverter == null && getContext() != null) {
-			myCodeSystemToCustomCsvConverter = new CodeSystemToCustomCsvConverter(getContext());
-		}
-	}
-
 	/**
 	 * Constructor
 	 */
@@ -129,6 +123,13 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		myTerminologyLoaderSvc = theTerminologyLoaderSvc;
 		myJobCoordinator = theJobCoordinator;
 		myJobPersistence = theJobPersistence;
+	}
+
+	@PostConstruct
+	public void startIfNecessary() {
+		if (myCodeSystemToCustomCsvConverter == null && getContext() != null) {
+			myCodeSystemToCustomCsvConverter = new CodeSystemToCustomCsvConverter(getContext());
+		}
 	}
 
 	@Override
@@ -165,7 +166,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		if (ITermLoaderSvc.LOINC_URI.equals(canonicalUrl.url())) {
 			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-			startRequest.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
+			startRequest.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 			ImportLoincJobParameters parameters = new ImportLoincJobParameters();
 			parameters.setVersionId(canonicalUrl.versionId().orElse(null));
 			startRequest.setParameters(parameters);
@@ -220,13 +221,10 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
 			validateJobIsInBuildingStatus(jobInstance);
 
-			if (ImportLoincJobAppCtx.IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
+			if (ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
 				AttachmentDetails attachmentDetails;
 				String filename = toStringValueOrEmpty(theFilename);
-				// FIXME: Make constant
-				if (Pattern.compile("loinc[0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE)
-						.matcher(filename)
-						.find()) {
+				if (LOINC_XML_FILENAME_PATTERN.matcher(filename).find()) {
 					attachmentDetails = new AttachmentDetails(
 							inputStream, AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
 				} else if (filename.endsWith(FILENAME_LOINC_UPLOAD_PROPERTIES_FILE)) {
@@ -285,7 +283,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
 		validateJobIsInBuildingStatus(jobInstance);
 
-		if (ImportLoincJobAppCtx.IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
+		if (ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
 			ourLog.info(
 					"Starting Upload Terminology job[{}] of type: {}",
 					jobInstance.getInstanceId(),
@@ -317,7 +315,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
 
-		if (ImportLoincJobAppCtx.IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
+		if (ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
 
 			Function<JobInstance, AsyncRequestUtil.CompletedJobPollResponse> completedDetailsProvider = instance -> {
 				ImportTerminologyResultJson resultJson =
@@ -336,13 +334,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		}
 	}
 
-	private static void validateJobIsInBuildingStatus(JobInstance jobInstance) {
-		if (jobInstance.getStatus() != StatusEnum.BUILDING) {
-			throw new InvalidRequestException(
-					Msg.code(2949) + "Job is not in BUILDING status: " + jobInstance.getStatus());
-		}
-	}
-
 	/**
 	 * <code>
 	 * $upload-external-codesystem
@@ -353,9 +344,9 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			name = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM,
 			idempotent = false,
 			returnParameters = {
-						@OperationParam(name = RESP_PARAM_SUCCESS, typeName = "boolean", min = 1),
-						@OperationParam(name = RESP_PARAM_CONCEPT_COUNT, typeName = "integer", min = 1),
-						@OperationParam(name = RESP_PARAM_TARGET, typeName = "Reference", min = 1)
+				@OperationParam(name = RESP_PARAM_SUCCESS, typeName = "boolean", min = 1),
+				@OperationParam(name = RESP_PARAM_CONCEPT_COUNT, typeName = "integer", min = 1),
+				@OperationParam(name = RESP_PARAM_TARGET, typeName = "Reference", min = 1)
 			})
 	public IBaseParameters uploadSnapshot(
 			HttpServletRequest theServletRequest,
@@ -566,6 +557,13 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	public void setTerminologyLoaderSvc(ITermLoaderSvc theTermLoaderSvc) {
 		myTerminologyLoaderSvc = theTermLoaderSvc;
+	}
+
+	private static void validateJobIsInBuildingStatus(JobInstance jobInstance) {
+		if (jobInstance.getStatus() != StatusEnum.BUILDING) {
+			throw new InvalidRequestException(
+					Msg.code(2949) + "Job is not in BUILDING status: " + jobInstance.getStatus());
+		}
 	}
 
 	public static class FileBackedFileDescriptor implements ITermLoaderSvc.FileDescriptor {

@@ -15,7 +15,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.loinc.LoincMapToHandler;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
@@ -75,8 +74,10 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler.ASK_AT_ORDER_ENTRY_PROP_NAME;
-import static ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler.ASSOCIATED_OBSERVATIONS_PROP_NAME;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.ASK_AT_ORDER_ENTRY_PROP_NAME;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.ASSOCIATED_OBSERVATIONS_PROP_NAME;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -113,6 +114,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 	, TestHSearchAddInConfig.NoFT.class
 })
 public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
+	public static final String CONCEPT_CODE_PROP_NAME = "LOINC";
+	public static final String MAP_TO_PROP_NAME = "MAP_TO";
+	public static final String DISPLAY_PROP_NAME = "COMMENT";
 	public static final boolean USE_REAL_DB = true;
 	public static final boolean LOAD_DB = false;
 	public static final String DB_NAME = "testDB_mapto";
@@ -187,6 +191,9 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+	@Autowired
+	private TerminologyTestHelper myTerminologyTestHelper;
+
 	private TermCodeSystemVersion termCodeSystemVersion;
 	private int associatedObservationsCount = 0;
 	private int askAtOrderEntryCount = 0;
@@ -208,11 +215,12 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	public void uploadLoincCodeSystem() throws Exception {
 
 		if (LOAD_DB) {
-			List<ITermLoaderSvc.FileDescriptor> myFileDescriptors = buildFileDescriptors();
+			ZipCollectionBuilder files = buildFileDescriptors();
 
 			// upload terminology
 			StopWatch sw = new StopWatch();
-			myTermLoaderSvc.loadLoinc(myFileDescriptors, mySrd);
+
+			myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.67", files);
 			ourLog.info("=================> Uploading terminology took {}", sw);
 
 			// save all deferred concepts, properties, links, etc
@@ -511,12 +519,12 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 				ourLog.error("Inconsistent record");
 				continue;
 			}
-			String code = nextRecord.get(LoincMapToHandler.CONCEPT_CODE_PROP_NAME);
-			assertThat(code).as("MapTo record with blank '" + LoincMapToHandler.CONCEPT_CODE_PROP_NAME + "' field: " + nextRecord).isNotNull();
-			String toValue = nextRecord.get(LoincMapToHandler.MAP_TO_PROP_NAME);
-			assertThat(code).as("MapTo record with blank '" + LoincMapToHandler.MAP_TO_PROP_NAME + "' field: " + nextRecord).isNotNull();
+			String code = nextRecord.get(CONCEPT_CODE_PROP_NAME);
+			assertThat(code).as("MapTo record with blank '" + CONCEPT_CODE_PROP_NAME + "' field: " + nextRecord).isNotNull();
+			String toValue = nextRecord.get(MAP_TO_PROP_NAME);
+			assertThat(code).as("MapTo record with blank '" + MAP_TO_PROP_NAME + "' field: " + nextRecord).isNotNull();
 
-			records.put(code, Pair.of(toValue, nextRecord.get(LoincMapToHandler.DISPLAY_PROP_NAME)));
+			records.put(code, Pair.of(toValue, nextRecord.get(DISPLAY_PROP_NAME)));
 			count++;
 		}
 		ourLog.info("Read and mapped {} {} file lines into {} map entries", ourDecimalFormat.format(count),
@@ -580,14 +588,11 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	}
 
 
-	private List<ITermLoaderSvc.FileDescriptor> buildFileDescriptors() throws FileNotFoundException {
-		List<ITermLoaderSvc.FileDescriptor> fileDescriptors = new ArrayList<>();
+	private ZipCollectionBuilder buildFileDescriptors() throws IOException {
+		ZipCollectionBuilder fileDescriptors = new ZipCollectionBuilder(true);
 
-		File propsFile = ResourceUtils.getFile(LOINC_PROPERTIES_CLASSPATH);
-		fileDescriptors.add(new TerminologyUploaderProvider.FileBackedFileDescriptor(propsFile));
-
-		File zipFile = ResourceUtils.getFile(LOINC_ZIP_CLASSPATH);
-		fileDescriptors.add(new TerminologyUploaderProvider.FileBackedFileDescriptor(zipFile));
+		fileDescriptors.addFileZip("", LOINC_PROPERTIES_CLASSPATH, FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
+		fileDescriptors.addFileZip("", LOINC_ZIP_CLASSPATH, FILENAME_LOINC_DISTRIBUTION_FILE);
 
 		return fileDescriptors;
 	}
