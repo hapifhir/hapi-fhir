@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,11 +40,13 @@ public class ImportLoincJobAppCtx {
 	private final DaoRegistry myDaoRegistry;
 	private final ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	private final IJobPersistence myJobPersistence;
+	private final IHapiTransactionService myTxService;
 
-	public ImportLoincJobAppCtx(DaoRegistry myDaoRegistry, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, IJobPersistence theJobPersistence) {
+	public ImportLoincJobAppCtx(DaoRegistry myDaoRegistry, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, IJobPersistence theJobPersistence, IHapiTransactionService theTxService) {
 		this.myDaoRegistry = myDaoRegistry;
 		this.myTermCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
 		this.myJobPersistence = theJobPersistence;
+		this.myTxService = theTxService;
 	}
 
 	@Bean
@@ -340,7 +343,7 @@ public class ImportLoincJobAppCtx {
 	 */
 	@Bean
 	public ImportLoincStep22Finalize importLoincStep21Finalize() {
-		return new ImportLoincStep22Finalize(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence);
+		return new ImportLoincStep22Finalize(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}
 
 }

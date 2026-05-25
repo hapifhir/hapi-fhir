@@ -11,6 +11,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyStep;
@@ -18,20 +19,25 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.FhirPatchBuilder;
+import ca.uhn.fhir.util.StopWatch;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,18 +51,21 @@ public class ImportLoincStep22Finalize extends BaseImportTerminologyStep impleme
 	private final Set<String> myResourcesToActivate = new HashSet<>();
 	private final DaoRegistry myDaoRegistry;
 	private final ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	private final IHapiTransactionService myTxService;
 
 
 	/**
 	 * Constructor
 	 */
-	public ImportLoincStep22Finalize(@Nonnull DaoRegistry theDaoRegistry, @Nonnull ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, @Nonnull IJobPersistence theJobPersistence) {
+	public ImportLoincStep22Finalize(@Nonnull DaoRegistry theDaoRegistry, @Nonnull ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, @Nonnull IJobPersistence theJobPersistence, @Nonnull IHapiTransactionService theTxService) {
 		super(theJobPersistence);
 
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		Validate.notNull(theTermCodeSystemStorageSvc, "theTermCodeSystemStorageSvc must not be null");
+		Validate.notNull(theTxService, "theTxService must not be null");
 		myDaoRegistry = theDaoRegistry;
 		myTermCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
+		myTxService = theTxService;
 	}
 
 	@Nonnull
@@ -129,6 +138,8 @@ public class ImportLoincStep22Finalize extends BaseImportTerminologyStep impleme
 	private String createReport(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		JobDefinition<ImportLoincJobParameters> jobDefinition = theStepExecutionDetails.getJobDefinition();
 
+		Map<String, StepStatistics> stepIdToStepStatistics = calculateStepStatistics(theStepExecutionDetails);
+
 		StringBuilder reportBuilder = new StringBuilder();
 
 		reportBuilder.append("Terminology Import Report\n");
@@ -143,11 +154,67 @@ public class ImportLoincStep22Finalize extends BaseImportTerminologyStep impleme
 				reportBuilder.append("---------------------------------------------------\n");
 				reportBuilder.append("Step: ").append(step.getStepId());
 				reportBuilder.append(" (").append(step.getStepDescription()).append(")\n");
+
+				StepStatistics stepStatistics = stepIdToStepStatistics.get(step.getStepId());
+				if (stepStatistics != null) {
+					indent(reportBuilder, 3);
+					reportBuilder.append("Total Work Chunks          : ").append(stepStatistics.chunkCount()).append("\n");
+					indent(reportBuilder, 3);
+					reportBuilder.append("Total Processing Time      : ").append(StopWatch.formatMillis(stepStatistics.millisElapsed())).append("\n");
+				}
+
 				appendCounts(counter, reportBuilder, 3);
 			}
 		}
 
 		return reportBuilder.toString();
+	}
+
+	private Map<String, StepStatistics> calculateStepStatistics(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+		return myTxService
+			.withSystemRequestOnDefaultPartition()
+			.execute(()->{
+				Map<String, Long> stepIdToEarliestStart = new HashMap<>();
+				Map<String, Long> stepIdToLatestEnd = new HashMap<>();
+				Map<String, Integer> stepIdToChunkCount = new HashMap<>();
+
+				String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
+				Iterator<WorkChunk> chunkIter = myJobPersistence.fetchAllWorkChunksIterator(instanceId, false);
+				while (chunkIter.hasNext()) {
+					WorkChunk chunk = chunkIter.next();
+					String stepId = chunk.getTargetStepId();
+					if (chunk.getStartTime() != null) {
+						long startTime = chunk.getStartTime().getTime();
+						if (!stepIdToEarliestStart.containsKey(stepId) || startTime < stepIdToEarliestStart.get(stepId)) {
+							stepIdToEarliestStart.put(stepId, startTime);
+						}
+					}
+					if (chunk.getEndTime() != null) {
+						long endTime = chunk.getEndTime().getTime();
+						if (!stepIdToLatestEnd.containsKey(stepId) || endTime > stepIdToLatestEnd.get(stepId)) {
+							stepIdToLatestEnd.put(stepId, endTime);
+						}
+					}
+					if (!stepIdToChunkCount.containsKey(stepId)) {
+						stepIdToChunkCount.put(stepId, 1);
+					} else {
+						stepIdToChunkCount.put(stepId, stepIdToChunkCount.get(stepId) + 1);
+					}
+				}
+
+				Map<String, StepStatistics> stepIdToStepStatistics1 = new HashMap<>();
+				for (String stepId : stepIdToChunkCount.keySet()) {
+					int chunkCount = stepIdToChunkCount.get(stepId);
+					Long earliestStart = stepIdToEarliestStart.get(stepId);
+					Long latestEnd = stepIdToLatestEnd.get(stepId);
+
+					long millisElapsed = earliestStart != null && latestEnd != null ? latestEnd - earliestStart : 0;
+					StepStatistics stepStatistics = new StepStatistics(chunkCount, millisElapsed);
+					stepIdToStepStatistics1.put(stepId, stepStatistics);
+				}
+
+				return stepIdToStepStatistics1;
+			});
 	}
 
 	private void appendCounts(TerminologyFileSetJson.RecordsAddedCounter counter, StringBuilder reportBuilder, int indent) {
@@ -214,6 +281,9 @@ public class ImportLoincStep22Finalize extends BaseImportTerminologyStep impleme
 
 	@Override
 	public ImportLoincStep22Finalize newInstance() {
-		return new ImportLoincStep22Finalize(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence);
+		return new ImportLoincStep22Finalize(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}
+
+	private record StepStatistics(int chunkCount, long millisElapsed) {}
+
 }

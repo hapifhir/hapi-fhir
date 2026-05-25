@@ -5,11 +5,14 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.util.StopWatch;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
@@ -18,11 +21,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 
-public class ImportLoincStep21GenerateConceptClosures implements IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
+public class ImportLoincStep21GenerateConceptClosures implements IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson>, ITerminologyImportFileHandlerStep<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep21GenerateConceptClosures.class);
 
 	@Autowired
@@ -47,9 +51,10 @@ public class ImportLoincStep21GenerateConceptClosures implements IJobStepWorker<
 			.map(t -> new TermConcept.TermConceptPk(t, defaultPartitionId))
 			.toList();
 
+		// Actually calculate the hierarchy closures
 		myTxService
 			.withSystemRequestOnDefaultPartition()
-			.execute(() -> generateClosures(ids));
+			.execute(() -> QueryChunker.chunk(ids, this::generateClosures));
 
 		ourLog.atInfo()
 			.setMessage("Calculated hierarchy closure for {} concepts in {}. {}/sec")
@@ -75,5 +80,18 @@ public class ImportLoincStep21GenerateConceptClosures implements IJobStepWorker<
 		}
 
 		myEntityManager.flush();
+	}
+
+	@Nonnull
+	@Override
+	public Optional<FileHandlingInstructions> canHandleFile(StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails, ImportLoincJobParameters theJobParameters, String theFileName) {
+		// This step doesn't process any files
+		return Optional.empty();
+	}
+
+	@Nonnull
+	@Override
+	public FileHandlingType getFileHandlingType() {
+		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
 	}
 }

@@ -136,7 +136,11 @@ public class AsyncRequestUtil {
 	 * @param theRequestDetails               The request details associated with the poll request
 	 * @param theJobInstance                  The Batch2 Job Instance being polled
 	 * @param theOperationName                A descriptive name for the operation being polled. This isn't used for anything programmatic or machine processed, it is just used in messages returned to the client. The operation name of the operation which kicked off the job is generally appropriate.
-	 * @param theCompletedJobResponseProvider A function that provides details for the completed job
+	 * @param theCompletedJobResponseProvider A function that provides details for the completed job. This function will be called
+	 *                                        when a client polls for the status of a job and the job is completed. It can supply
+	 *                                        additional messages that will be returned with the response, or even supply an entire
+	 *                                        report to return instead of the standard OperationOutcome.
+	 * @see CompletedJobPollResponse
 	 */
 	@Beta
 	public static void handleAsyncJobPollForStatusResponse(ServletRequestDetails theRequestDetails, JobInstance theJobInstance, String theOperationName, Function<JobInstance, CompletedJobPollResponse> theCompletedJobResponseProvider) throws IOException {
@@ -260,6 +264,12 @@ public class AsyncRequestUtil {
 			null);
 	}
 
+	/**
+	 * This object is created and returned by a lambda passed to {@link #HandleAsyncJobPollForStatusResponse}
+	 * @param rawBody
+	 * @param messages
+	 * @see #handleAsyncJobPollForStatusResponse(ServletRequestDetails, JobInstance, String, Function)
+	 */
 	public record CompletedJobPollResponse(@Nullable String rawBody, List<String> messages) {
 	}
 }

@@ -209,8 +209,8 @@ public class TestR4Config {
 	public void setConnectionProperties(BasicDataSource theDataSource) {
 		theDataSource.setDriver(new org.h2.Driver());
 		// FIXME: restore
-		theDataSource.setUrl("jdbc:h2:mem:testdb_r4");
-//		theDataSource.setUrl("jdbc:h2:file:/tmp/testdb_r4");
+//		theDataSource.setUrl("jdbc:h2:mem:testdb_r4");
+		theDataSource.setUrl("jdbc:h2:file:/tmp/testdb_r4");
 		theDataSource.setMaxWait(Duration.ofSeconds(30));
 		theDataSource.setUsername("");
 		theDataSource.setPassword("");

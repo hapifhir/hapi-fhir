@@ -37,7 +37,7 @@ class ImportLoincStep16PartLinkTest extends BaseImportLoincStepTest {
 
 		// Verify
 		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
-		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
+		CodeSystem cs = myCodeSystemCaptor.getValue();
 		String hierarchy = renderHierarchy(cs, true);
 		String expected = """
 			-10013-1

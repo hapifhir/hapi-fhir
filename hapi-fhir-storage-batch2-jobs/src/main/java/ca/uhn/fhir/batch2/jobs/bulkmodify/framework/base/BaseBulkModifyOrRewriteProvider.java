@@ -302,14 +302,13 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		handleAsyncJobPollForStatusResponse(theRequestDetails, instance, operationName, returnValue);
 	}
 
-	private void handleAsyncJobPollForStatusResponse(ServletRequestDetails theRequestDetails, JobInstance instance, String operationName, String returnValue) throws IOException {
-		Function<JobInstance, AsyncRequestUtil.CompletedJobPollResponse> createCompletionPollResponse = theInstance -> transform(theRequestDetails, theInstance, returnValue);
-		AsyncRequestUtil.handleAsyncJobPollForStatusResponse(theRequestDetails, instance, operationName, createCompletionPollResponse);
+	private void handleAsyncJobPollForStatusResponse(ServletRequestDetails theRequestDetails, JobInstance theJobInstance, String theOperationName, String theReturnParameterValue) throws IOException {
+		Function<JobInstance, AsyncRequestUtil.CompletedJobPollResponse> createCompletionPollResponse = theInstance -> createCompletedJobPollResponse(theRequestDetails, theInstance, theReturnParameterValue);
+		AsyncRequestUtil.handleAsyncJobPollForStatusResponse(theRequestDetails, theJobInstance, theOperationName, createCompletionPollResponse);
 	}
 
 
-	// FIXME: rename method
-	private AsyncRequestUtil.CompletedJobPollResponse transform(ServletRequestDetails theRequestDetails, JobInstance theInstance, String returnValue) {
+	private AsyncRequestUtil.CompletedJobPollResponse createCompletedJobPollResponse(ServletRequestDetails theRequestDetails, JobInstance theInstance, String theReturnParameterValue) {
 		BulkModifyResourcesResultsJson results =
 				JsonUtil.deserialize(theInstance.getReport(), BulkModifyResourcesResultsJson.class);
 		BaseBulkModifyJobParameters jobParameters =
@@ -317,7 +316,7 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		boolean isDryRunCollectChanges = jobParameters.isDryRun()
 				&& jobParameters.getDryRunMode() == BaseBulkModifyJobParameters.DryRunMode.COLLECT_CHANGED;
 
-		if (JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT.equals(returnValue)) {
+		if (JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT.equals(theReturnParameterValue)) {
 			return new AsyncRequestUtil.CompletedJobPollResponse(results.getReport(), null);
 		}
 

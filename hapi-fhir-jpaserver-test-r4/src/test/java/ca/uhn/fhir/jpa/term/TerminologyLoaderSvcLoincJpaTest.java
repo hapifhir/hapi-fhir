@@ -2,12 +2,14 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
@@ -15,6 +17,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +59,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		ZipCollectionBuilder files;
 		files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
-		startImportLoincJobAndWaitForCompletion("2.66", files);
+		String instanceId = startImportLoincJobAndWaitForCompletion("2.66", files);
 
 		logAllValueSets();
 
@@ -80,6 +83,12 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 				)).get(0);
 			assertThat(concept.getParentPidsAsString()).matches("[0-9]+ [0-9]+ [0-9]+ [0-9]+");
 		});
+
+		// Validate the report
+		JobInstance jobInstance = myJobCoordinator.getInstance(instanceId);
+		String report = JsonUtil.deserialize(jobInstance.getReport(), ImportTerminologyResultJson.class).getReport();
+		ourLog.info("Report:\n{}", report);
+		assertThat(report).contains("Concepts Added             : 58");
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 		logAllConcepts();
@@ -225,11 +234,11 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		assertTrue(result == null || !result.isFound());
 	}
 
-	private void startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles) {
-		startImportLoincJobAndWaitForCompletion(versionId, theFiles, false);
+	private String startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles) {
+		return startImportLoincJobAndWaitForCompletion(versionId, theFiles, false);
 	}
 
-	private void startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
+	private String startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ImportLoincJobAppCtx.IMPORT_TERM_LOINC);
 		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
@@ -251,6 +260,8 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		myJobCoordinator.enqueueBuildingJobForExecution(instanceId.getInstanceId());
 
 		myBatch2JobHelper.awaitJobCompletion(instanceId);
+
+		return instanceId.getInstanceId();
 	}
 
 }

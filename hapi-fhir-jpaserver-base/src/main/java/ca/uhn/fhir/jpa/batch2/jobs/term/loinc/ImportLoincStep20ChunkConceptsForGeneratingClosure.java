@@ -5,7 +5,9 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -14,16 +16,18 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.model.dstu2.resource.Contract;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 
-public class ImportLoincStep20ChunkConceptsForGeneratingClosure extends BaseImportTerminologyStep implements IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
+public class ImportLoincStep20ChunkConceptsForGeneratingClosure extends BaseImportTerminologyStep implements IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson>, ITerminologyImportFileHandlerStep<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
 
 	@Autowired
 	private ITermConceptDao myConceptDao;
@@ -58,11 +62,7 @@ public class ImportLoincStep20ChunkConceptsForGeneratingClosure extends BaseImpo
 			outputChunk.getConceptPidsToGenerateClosureFor().add(iter.next().getId());
 			pidCount++;
 
-			// We use a chuink size of 500 so that we don't run out of memory
-			// or exceed the maximum number of SQL parameters. If we decide to
-			// increase this, make sure we don't exceed the maximum number of
-			// SQL parameters.
-			if (outputChunk.getConceptPidsToGenerateClosureFor().size() >= 500 || !iter.hasNext()) {
+			if (outputChunk.getConceptPidsToGenerateClosureFor().size() >= 2000 || !iter.hasNext()) {
 				theDataSink.accept(outputChunk);
 				outputChunk = new TerminologyFileSetJson();
 			}
@@ -72,5 +72,18 @@ public class ImportLoincStep20ChunkConceptsForGeneratingClosure extends BaseImpo
 		outputChunk = new TerminologyFileSetJson();
 		outputChunk.getRecordsAddedCounter(theStepExecutionDetails.getCurrentStepId()).incrementOtherChanges(pidCount);
 		theDataSink.acceptForFutureStep(STEP_ID_FINALIZE_IMPORT, outputChunk);
+	}
+
+	@Nonnull
+	@Override
+	public Optional<FileHandlingInstructions> canHandleFile(StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails, ImportLoincJobParameters theJobParameters, String theFileName) {
+		// This step doesn't process any files
+		return Optional.empty();
+	}
+
+	@Nonnull
+	@Override
+	public FileHandlingType getFileHandlingType() {
+		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
 	}
 }

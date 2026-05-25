@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -25,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -71,7 +69,7 @@ public class ImportLoincStep22FinalizeTest extends BaseImportLoincStepTest {
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(4);
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence).importLoincJobDefinition();
+		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, theTxService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvcs, jobDefinition, null, null), myDataSink);
@@ -107,7 +105,7 @@ public class ImportLoincStep22FinalizeTest extends BaseImportLoincStepTest {
 		data.addResourceToActivate("ValueSet/B");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence).importLoincJobDefinition();
+		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, theTxService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvcs, jobDefinition, null, null), myDataSink);
