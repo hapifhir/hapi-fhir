@@ -59,7 +59,7 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 
 	@BeforeEach
 	public void beforeEach() {
-		jobStepExecutorSvc = new WorkChunkProcessor(myJobDefinitionRegistry, myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService(), myJobStepExecutionServices);
+		jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService(), myJobStepExecutionServices);
 	}
 
 	@Test

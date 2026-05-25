@@ -434,7 +434,7 @@ public class WorkChunkProcessorTest {
 	private class TestWorkChunkProcessor extends WorkChunkProcessor {
 
 		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender) {
-			super(myJobDefinitionRegistry, thePersistence, theSender, new NonTransactionalHapiTransactionService(), mock(IJobStepExecutionServices.class));
+			super(thePersistence, theSender, new NonTransactionalHapiTransactionService(), mock(IJobStepExecutionServices.class));
 		}
 
 		@Override
