@@ -13,6 +13,7 @@ import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -62,8 +63,9 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 		return loincCode;
 	}
 
-	// FIXME: rename
 	protected void addConceptMapEntry(CT theContext, ConceptMapping theMapping) {
+		Validate.notBlank(theMapping.getConceptMapId(), "ConceptMap ID must not be blank");
+
 		if (isBlank(theMapping.getSourceCode())) {
 			return;
 		}
@@ -74,11 +76,9 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 		theContext.getIdToConceptMappings().put(theMapping.getConceptMapId(), theMapping);
 	}
 
-	// FIXME: rename
-	protected ValueSet getValueSet(
+	protected ValueSet getOrAddValueSet(
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			ImportLoincJobParameters theJobParameters,
 			TerminologyFileSetJson theData,
 			CT theContext,
 			String theValueSetId,
@@ -162,7 +162,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 		super.syncToDb(theJobMetadata, theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 
 		syncConceptMapsToDb(theJobMetadata, theCodeExtractionContext, theStepExecutionDetails);
-		syncValueSetsToDb(theJobMetadata, theCodeExtractionContext, theStepExecutionDetails);
+		syncValueSetsToDb(theCodeExtractionContext, theStepExecutionDetails);
 	}
 
 	private void syncConceptMapsToDb(
@@ -321,7 +321,6 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 	}
 
 	private void syncValueSetsToDb(
-			ImportTerminologyMetadataAttachmentJson theJobMetadata,
 			CT theCodeExtractionContext,
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		IFhirResourceDao valueSetDao = myDaoRegistry.getResourceDao("ValueSet");
@@ -397,8 +396,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			if (valueSet.hasCompose()
 					&& valueSet.getCompose().hasInclude()
 					&& valueSet.getCompose().getIncludeFirstRep().hasConcept()) {
-				codeCount = Math.toIntExact(valueSet.getCompose().getIncludeFirstRep().getConcept().stream()
-						.count());
+				codeCount = Math.toIntExact(valueSet.getCompose().getIncludeFirstRep().getConcept().size());
 			}
 
 			ourLog.atInfo()
@@ -459,10 +457,8 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 		private final SetMultimap<String, ConceptMapping> myIdToConceptMappings =
 				MultimapBuilder.hashKeys().linkedHashSetValues().build();
 		private final Map<String, CodeSystem.ConceptDefinitionComponent> myCodeToConcept = new HashMap<>();
-		private final TerminologyFileSetJson myData;
 
-		public MyBaseContext(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theData) {
-			myData = theData.getData();
+		public MyBaseContext() {
 		}
 
 		public Map<String, CodeSystem.ConceptDefinitionComponent> getCodeToConcept() {

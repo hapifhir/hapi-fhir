@@ -77,11 +77,10 @@ public class ImportLoincStep5HandleAnswerLists
 
 		// Answer list ValueSet
 		String codeSystemVersionId = theJobMetadata.getCodeSystem().getVersion();
-		ValueSet vs = getValueSet(
+		ValueSet vs = getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-				theJobParameters,
-				theData,
+                theData,
 				theContext,
 				answerListId,
 				"http://loinc.org/vs/" + answerListId,
@@ -114,7 +113,7 @@ public class ImportLoincStep5HandleAnswerLists
 		private final Set<String> myAnswerListCodes = new HashSet<>();
 
 		public MyContext(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theData) {
-			super(theData);
+			super();
 		}
 
 		public Set<String> getAnswerListCodes() {

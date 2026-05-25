@@ -24,7 +24,7 @@ public class ImportLoincStep12ImagingDocumentCode
 	@Override
 	protected MyBaseContext newContextObject(
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		return new MyBaseContext(theStepExecutionDetails);
+		return new MyBaseContext();
 	}
 
 	@Nonnull
@@ -50,11 +50,10 @@ public class ImportLoincStep12ImagingDocumentCode
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
 
-		ValueSet valueSet = getValueSet(
+		ValueSet valueSet = getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-				theJobParameters,
-				theData,
+                theData,
 				theContext,
 				VS_ID_BASE,
 				VS_URI,

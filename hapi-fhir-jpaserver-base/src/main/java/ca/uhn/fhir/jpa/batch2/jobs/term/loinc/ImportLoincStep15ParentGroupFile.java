@@ -18,7 +18,7 @@ public class ImportLoincStep15ParentGroupFile
 	@Override
 	protected MyBaseContext newContextObject(
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		return new MyBaseContext(theStepExecutionDetails);
+		return new MyBaseContext();
 	}
 
 	@Nonnull
@@ -44,11 +44,10 @@ public class ImportLoincStep15ParentGroupFile
 		String parentGroupId = trim(theRecord.get("ParentGroupId"));
 		String parentGroupName = trim(theRecord.get("ParentGroup"));
 
-		getValueSet(
+		getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-				theJobParameters,
-				theData,
+                theData,
 				theContext,
 				parentGroupId,
 				ImportLoincStep13GroupFile.VS_URI_PREFIX + parentGroupId,

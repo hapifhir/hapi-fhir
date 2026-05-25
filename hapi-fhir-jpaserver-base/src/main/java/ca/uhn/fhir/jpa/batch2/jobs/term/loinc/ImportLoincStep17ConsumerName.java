@@ -22,7 +22,7 @@ public class ImportLoincStep17ConsumerName
 	@Override
 	protected MyBaseContext newContextObject(
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		return new MyBaseContext(theStepExecutionDetails);
+		return new MyBaseContext();
 	}
 
 	@Nonnull

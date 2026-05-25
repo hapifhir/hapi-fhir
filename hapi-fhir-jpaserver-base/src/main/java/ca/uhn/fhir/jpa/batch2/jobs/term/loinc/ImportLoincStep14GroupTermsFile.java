@@ -20,7 +20,7 @@ public class ImportLoincStep14GroupTermsFile
 	@Override
 	protected MyBaseContext newContextObject(
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		return new MyBaseContext(theStepExecutionDetails);
+		return new MyBaseContext();
 	}
 
 	@Nonnull
@@ -46,11 +46,10 @@ public class ImportLoincStep14GroupTermsFile
 		String groupId = trim(theRecord.get("GroupId"));
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 
-		ValueSet valueSet = getValueSet(
+		ValueSet valueSet = getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-				theJobParameters,
-				theData,
+                theData,
 				theContext,
 				groupId,
 				ImportLoincStep13GroupFile.VS_URI_PREFIX + groupId,

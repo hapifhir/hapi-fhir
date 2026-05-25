@@ -88,11 +88,10 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		}
 
 		// RSNA Codes VS
-		ValueSet vs = getValueSet(
+		ValueSet vs = getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-				theJobParameters,
-				theData,
+                theData,
 				theContext,
 				RSNA_CODES_VS_ID,
 				RSNA_CODES_VS_URI,
@@ -197,7 +196,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		private final Set<String> myCodesInRsnaPlaybookValueSet = new HashSet<>();
 
 		public MyContext(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theData) {
-			super(theData);
+			super();
 		}
 
 		public Set<String> getCodesInRsnaPlaybookValueSet() {

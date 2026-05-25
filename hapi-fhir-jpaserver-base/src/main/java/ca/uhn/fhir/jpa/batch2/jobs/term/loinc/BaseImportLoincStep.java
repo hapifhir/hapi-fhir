@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.csv.CSVParser;
@@ -200,7 +201,6 @@ public abstract class BaseImportLoincStep<CT> extends BaseImportTerminologyStep
 						.withSystemRequestOnDefaultPartition()
 						.execute(theFunction);
 			} catch (ResourceVersionConflictException e) {
-				// FIXME: add test
 				retryCount++;
 				int maxRetries = 10;
 				if (retryCount > maxRetries) {
@@ -213,7 +213,13 @@ public abstract class BaseImportLoincStep<CT> extends BaseImportTerminologyStep
 						.addArgument(maxRetries)
 						.addArgument(e.getMessage())
 						.log();
-				sleepAtLeast(5 * DateUtils.MILLIS_PER_SECOND);
+
+				long sleepTime = 5 * DateUtils.MILLIS_PER_SECOND;
+				if (HapiSystemProperties.isUnitTestModeEnabled()) {
+					sleepTime = 10;
+				}
+
+				sleepAtLeast(sleepTime);
 			}
 		}
 	}

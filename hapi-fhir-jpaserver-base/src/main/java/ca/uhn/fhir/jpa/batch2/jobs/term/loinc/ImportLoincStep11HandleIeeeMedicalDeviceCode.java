@@ -27,7 +27,7 @@ public class ImportLoincStep11HandleIeeeMedicalDeviceCode
 	@Override
 	protected MyBaseContext newContextObject(
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		return new MyBaseContext(theStepExecutionDetails);
+		return new MyBaseContext();
 	}
 
 	@Nonnull

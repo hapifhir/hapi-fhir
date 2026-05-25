@@ -29,7 +29,7 @@ public class ImportLoincStep9HandleDocumentOntology
 	@Override
 	protected MyBaseContext newContextObject(
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		return new MyBaseContext(theStepExecutionDetails);
+		return new MyBaseContext();
 	}
 
 	@Nonnull
@@ -64,11 +64,10 @@ public class ImportLoincStep9HandleDocumentOntology
 		}
 
 		// Document Ontology Codes VS
-		ValueSet vs = getValueSet(
+		ValueSet vs = getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-				theJobParameters,
-				theData,
+                theData,
 				theContext,
 				DOCUMENT_ONTOLOGY_CODES_VS_ID,
 				DOCUMENT_ONTOLOGY_CODES_VS_URI,

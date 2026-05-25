@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -112,21 +111,17 @@ public class AsyncRequestUtil {
 		return instance;
 	}
 
-	public static void writeResponseWithStringBody(
+	/**
+	 * Writes a response with a <code>text/plain</code> string as the response body and
+	 * an HTTP 200 status code.
+	 */
+	private static void writeResponseWithStringBody(
 			HttpServletResponse theServletResponse,
-			ImmutableMultimap.Builder<String, String> theAdditionalHeaders,
 			String theResponseString)
 			throws IOException {
 		theServletResponse.setStatus(HttpStatus.SC_OK);
 		theServletResponse.setContentType(Constants.CT_TEXT);
 		theServletResponse.setCharacterEncoding(Constants.CHARSET_NAME_UTF8);
-
-		// FIXME: is this used?
-		if (theAdditionalHeaders != null) {
-			for (Map.Entry<String, String> next : theAdditionalHeaders.build().entries()) {
-				theServletResponse.addHeader(next.getKey(), next.getValue());
-			}
-		}
 
 		try (PrintWriter writer = theServletResponse.getWriter()) {
 			writer.write(theResponseString);
@@ -206,7 +201,7 @@ public class AsyncRequestUtil {
 							theCompletedJobResponseProvider.apply(theJobInstance);
 					if (completedJobPollResponse.rawBody() != null) {
 						writeResponseWithStringBody(
-								theRequestDetails.getServletResponse(), null, completedJobPollResponse.rawBody());
+								theRequestDetails.getServletResponse(), completedJobPollResponse.rawBody());
 						return;
 					}
 					if (completedJobPollResponse.messages() != null) {
@@ -279,7 +274,7 @@ public class AsyncRequestUtil {
 	}
 
 	/**
-	 * This object is created and returned by a lambda passed to {@link #HandleAsyncJobPollForStatusResponse}
+	 * This object is created and returned by a lambda passed to {@link #handleAsyncJobPollForStatusResponse}
 	 * @param rawBody
 	 * @param messages
 	 * @see #handleAsyncJobPollForStatusResponse(ServletRequestDetails, JobInstance, String, Function)

@@ -1,11 +1,8 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
-import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
@@ -13,17 +10,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ImportLoincStep2HandleConceptsTest extends BaseImportLoincStepTest {
 
+	static {
+		HapiSystemProperties.enableUnitTestMode();
+	}
 
 	@InjectMocks
 	private ImportLoincStep2HandleConcepts mySvc;
@@ -82,6 +85,49 @@ class ImportLoincStep2HandleConceptsTest extends BaseImportLoincStepTest {
 		assertThat(renderEmittedChunks()).containsExactly(
 			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptsAdded=3]"
 		);
+	}
+
+	@Test
+	void run_LoadCodes_VersionConflictFailureDuringSave_Recovers() {
+		// Setup
+		String classpath = "loinc-ver/v269/LoincTable/Loinc.csv";
+		mockFetchAttachment(classpath);
+		mockFetchJobMetadataAttachment();
+		AtomicInteger failCounter = new AtomicInteger(0);
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenAnswer(t->{
+			if (failCounter.incrementAndGet() <= 5) {
+				throw new ResourceVersionConflictException("version conflict");
+			}
+			return new UploadStatistics(new IdType()).incrementConceptsAddedCount();
+		});
+
+		// Test
+		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
+
+		// Verify
+		verify(myTermCodeSystemStorageSvc, times(6)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
+		assertThat(renderEmittedChunks()).containsExactly(
+			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptsAdded=1]"
+		);
+	}
+
+	@Test
+	void run_LoadCodes_VersionConflictFailureDuringSave_TooManyFailures() {
+		// Setup
+		String classpath = "loinc-ver/v269/LoincTable/Loinc.csv";
+		mockFetchAttachment(classpath);
+		mockFetchJobMetadataAttachment();
+		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenThrow(new ResourceVersionConflictException("version conflict"));
+
+		// Test
+		assertThatThrownBy(()->mySvc.run(newStepExecutionDetails(classpath), myDataSink))
+			.isInstanceOf(ResourceVersionConflictException.class)
+			.hasMessage("version conflict");
+
+		// Verify
+		verify(myTermCodeSystemStorageSvc, times(11)).uploadCodeSystemConcepts(any());
+		verifyNoInteractions(myDataSink);
 	}
 
 

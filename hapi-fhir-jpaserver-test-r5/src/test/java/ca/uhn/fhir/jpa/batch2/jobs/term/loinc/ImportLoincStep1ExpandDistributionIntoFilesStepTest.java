@@ -268,7 +268,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		when(myHandlerStep1.canHandleFile(any(), any(), any())).thenAnswer(t -> {
 			String fileName = t.getArgument(2, String.class);
 			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT.getCode())) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
 			}
 			return Optional.empty();
 		});
@@ -278,7 +278,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		when(myHandlerStep2.canHandleFile(any(), any(), any())).thenAnswer(t -> {
 			String fileName = t.getArgument(2, String.class);
 			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT.getCode())) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
 			}
 			return Optional.empty();
 		});
@@ -288,7 +288,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		when(myHandlerStep3.canHandleFile(any(), any(), any())).thenAnswer(t -> {
 			String fileName = t.getArgument(2, String.class);
 			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT.getCode())) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
 			}
 			return Optional.empty();
 		});
@@ -298,7 +298,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		when(myHandlerStep2.canHandleFile(any(), any(), any())).thenAnswer(t -> {
 			String fileName = t.getArgument(2, String.class);
 			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT.getCode())) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(LoincUploadPropertiesEnum.LOINC_FILE.getCode(), ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
 			}
 			return Optional.empty();
 		});

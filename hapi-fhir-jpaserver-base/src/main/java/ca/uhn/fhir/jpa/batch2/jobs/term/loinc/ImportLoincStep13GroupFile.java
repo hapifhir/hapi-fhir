@@ -24,7 +24,7 @@ public class ImportLoincStep13GroupFile
 	@Override
 	protected MyBaseContext newContextObject(
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		return new MyBaseContext(theStepExecutionDetails);
+		return new MyBaseContext();
 	}
 
 	@Nonnull
@@ -56,11 +56,10 @@ public class ImportLoincStep13GroupFile
 		parentGroupValueSetId = parentGroupId;
 		groupValueSetId = groupId;
 
-		ValueSet parentValueSet = getValueSet(
+		ValueSet parentValueSet = getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-				theJobParameters,
-				theData,
+                theData,
 				theContext,
 				parentGroupValueSetId,
 				VS_URI_PREFIX + parentGroupId,
@@ -80,11 +79,10 @@ public class ImportLoincStep13GroupFile
 
 		// Create group to set its name (terms are added in a different
 		// handler)
-		getValueSet(
+		getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-				theJobParameters,
-				theData,
+                theData,
 				theContext,
 				groupValueSetId,
 				VS_URI_PREFIX + groupId,

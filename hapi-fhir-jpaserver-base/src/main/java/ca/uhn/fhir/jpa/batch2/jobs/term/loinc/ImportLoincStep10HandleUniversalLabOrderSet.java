@@ -24,7 +24,7 @@ public class ImportLoincStep10HandleUniversalLabOrderSet
 	@Override
 	protected MyBaseContext newContextObject(
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		return new MyBaseContext(theStepExecutionDetails);
+		return new MyBaseContext();
 	}
 
 	@Nonnull
@@ -51,11 +51,10 @@ public class ImportLoincStep10HandleUniversalLabOrderSet
 		String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
 		String orderObs = trim(theRecord.get("ORDER_OBS"));
 
-		ValueSet valueSet = getValueSet(
+		ValueSet valueSet = getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-				theJobParameters,
-				theData,
+                theData,
 				theContext,
 				VS_ID_BASE,
 				VS_URI,
