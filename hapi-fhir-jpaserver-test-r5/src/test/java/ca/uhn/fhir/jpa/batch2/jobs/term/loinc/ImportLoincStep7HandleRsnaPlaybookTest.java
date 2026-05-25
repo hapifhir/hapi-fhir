@@ -47,6 +47,7 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		mockDaoRegistryValueSet();
 		mockDaoRegistryConceptMap();
 		mockJobExecutionServices();
+		mockValidationSupportLookupCodeAlwaysSucceed();
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
@@ -143,6 +144,7 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 			.setCode("EXISTING_TARGET");
 		when(myConceptMapDao.read(eq(new IdType("loinc-parts-to-radlex-1.234")), any())).thenReturn(conceptMap);
 		mockJobExecutionServices();
+		mockValidationSupportLookupCodeAlwaysSucceed();
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);

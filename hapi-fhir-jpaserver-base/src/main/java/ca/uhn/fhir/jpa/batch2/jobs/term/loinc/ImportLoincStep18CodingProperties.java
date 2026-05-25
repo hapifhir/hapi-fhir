@@ -29,9 +29,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * are created, because they require a 'display' value associated to other TermConcept (pointed by the 'code'
  * property value), which requires that concept to have been created.
  */
-public class ImportLoincStep18CodingProperties
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
-				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+public class ImportLoincStep18CodingProperties extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep18CodingProperties.class);
 
 	private static final String ASK_AT_ORDER_ENTRY_PROP_NAME = "AskAtOrderEntry";
@@ -62,7 +60,7 @@ public class ImportLoincStep18CodingProperties
 			CodeSystem theCodeSystemToPopulate,
 			TerminologyFileSetJson theData,
 			String theSourceFilename) {
-		if (!anyValidProperty(theJobMetadata)) {
+		if (!anyValidProperty(theContext, theJobMetadata)) {
 			return;
 		}
 
@@ -95,11 +93,11 @@ public class ImportLoincStep18CodingProperties
 	/**
 	 * Validates that at least one ot target properties is defined in the loinc.xml file and is of the type "CODING"
 	 */
-	private boolean anyValidProperty(ImportTerminologyMetadataAttachmentJson theJobMetadata) {
+	private boolean anyValidProperty(MyBaseContext theContext, ImportTerminologyMetadataAttachmentJson theJobMetadata) {
 		CodeSystem.PropertyType askAtOrderEntryPropType =
-				getPropertyNameToType(theJobMetadata).get(ASK_AT_ORDER_ENTRY_PROP_NAME);
+				theContext.getPropertyNameToType(theJobMetadata).get(ASK_AT_ORDER_ENTRY_PROP_NAME);
 		CodeSystem.PropertyType associatedObservationsPropType =
-				getPropertyNameToType(theJobMetadata).get(ASSOCIATED_OBSERVATIONS_PROP_NAME);
+				theContext.getPropertyNameToType(theJobMetadata).get(ASSOCIATED_OBSERVATIONS_PROP_NAME);
 
 		return askAtOrderEntryPropType == CodeSystem.PropertyType.CODING
 				|| associatedObservationsPropType == CodeSystem.PropertyType.CODING;

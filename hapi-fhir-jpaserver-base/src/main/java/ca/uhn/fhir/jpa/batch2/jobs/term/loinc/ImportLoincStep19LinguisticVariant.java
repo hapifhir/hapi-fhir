@@ -32,9 +32,7 @@ import static org.apache.commons.lang3.StringUtils.trimToEmpty;
  * process, separated by commas. For example:
  * <code>deAT24, frCA8</code>
  */
-public class ImportLoincStep19LinguisticVariant
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
-				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+public class ImportLoincStep19LinguisticVariant extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 
 	public static final Pattern LINGUISTIC_VARIANT_FILENAME_PATTERN =
 			Pattern.compile(".*LinguisticVariants/([a-z]{2})([A-Z]{2})([0-9]+)LinguisticVariant.csv");

@@ -11,6 +11,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
@@ -118,6 +119,10 @@ abstract class BaseImportLoincStepTest {
 
 	void mockFetchPropertiesFileAttachnemtNotFound() {
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
+	}
+
+	void mockValidationSupportLookupCodeAlwaysSucceed() {
+		when(myValidationSupport.lookupCode(any(), any(LookupCodeRequest.class))).thenReturn(new IValidationSupport.LookupCodeResult().setFound(true));
 	}
 
 	void mockFetchJobMetadataAttachment() {

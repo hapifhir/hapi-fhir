@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import java.util.List;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.CM_RSNA_COPYRIGHT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_ID;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_NAME;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_URI;
@@ -26,7 +27,6 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_SCT_PART_MAP_ID;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_SCT_PART_MAP_NAME;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_SCT_PART_MAP_URI;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.CM_RSNA_COPYRIGHT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -34,8 +34,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep8HandlePartRelatedCodeMapping
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
-				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+		extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 
 	@Override
 	protected MyBaseContext newContextObject(

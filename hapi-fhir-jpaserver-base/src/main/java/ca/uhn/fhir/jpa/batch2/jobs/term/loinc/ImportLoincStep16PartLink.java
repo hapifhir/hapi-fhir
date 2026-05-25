@@ -23,8 +23,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.L
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep16PartLink
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep16PartLink.MyBaseContext> {
+public class ImportLoincStep16PartLink extends BaseImportLoincStep<ImportLoincStep16PartLink.MyBaseContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep16PartLink.class);
 
 	@Override
@@ -76,7 +75,7 @@ public class ImportLoincStep16PartLink
 		String propertyPart = property.substring(lastSlashIdx + 1);
 
 		CodeSystem.PropertyType propertyType =
-				getPropertyNameToType(theJobMetadata).get(propertyPart);
+				theContext.getPropertyNameToType(theJobMetadata).get(propertyPart);
 		if (propertyType == null) {
 			return;
 		}

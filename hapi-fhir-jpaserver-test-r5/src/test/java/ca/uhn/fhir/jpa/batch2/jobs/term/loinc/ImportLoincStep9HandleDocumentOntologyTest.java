@@ -1,11 +1,14 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.htmlunit.corejs.javascript.ast.Loop;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,6 +43,7 @@ class ImportLoincStep9HandleDocumentOntologyTest extends BaseImportLoincStepTest
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 		mockDaoRegistryValueSet();
 		mockDaoRegistryConceptMap();
+		mockValidationSupportLookupCodeAlwaysSucceed();
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
@@ -89,7 +93,6 @@ class ImportLoincStep9HandleDocumentOntologyTest extends BaseImportLoincStepTest
 		assertEquals(expected, valueSetCompose);
 
 	}
-
 
 
 }

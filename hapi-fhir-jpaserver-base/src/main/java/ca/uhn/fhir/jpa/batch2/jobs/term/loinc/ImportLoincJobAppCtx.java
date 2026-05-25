@@ -41,6 +41,7 @@ public class ImportLoincJobAppCtx {
 	 * the website URL to LOINC.
 	 */
 	public static final String LOINC_WEBSITE_URL = "https://loinc.org";
+
 	public static final String REGENSTRIEF_INSTITUTE_INC = "Regenstrief Institute, Inc.";
 	public static final String LOINC_IEEE_CM_ID = "loinc-to-ieee-11073-10101";
 	public static final String LOINC_IEEE_CM_URI = "http://loinc.org/cm/loinc-to-ieee-11073-10101";
@@ -81,6 +82,7 @@ public class ImportLoincJobAppCtx {
 	 * -ja
 	 */
 	public static final String RPID_CS_URI = RID_CS_URI;
+
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_ID = "loinc-document-ontology";
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_URI = "http://loinc.org/vs/loinc-document-ontology";
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_NAME = "LOINC Document Ontology Codes";
@@ -214,7 +216,7 @@ public class ImportLoincJobAppCtx {
 						TerminologyFileSetJson.class,
 						importLoincStep19LinguisticVariant())
 				.addIntermediateStep(
-					STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
+						STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
 						"Create work chunks for calculating concept closures",
 						TerminologyFileSetJson.class,
 						importLoincStep20ChunkConceptsForClosureGeneration())

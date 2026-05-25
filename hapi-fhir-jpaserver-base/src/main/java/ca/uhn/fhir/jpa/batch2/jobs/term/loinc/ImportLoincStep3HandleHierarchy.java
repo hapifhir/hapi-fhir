@@ -27,7 +27,7 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 	@Override
 	protected MyContext newContextObject(
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		return new MyContext(new HashMap<>());
+		return new MyContext();
 	}
 
 	@Nonnull
@@ -55,7 +55,7 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 		String childCode = trim(theRecord.get("CODE"));
 
 		if (isNotBlank(parentCode) && isNotBlank(childCode)) {
-			Map<String, CodeSystem.ConceptDefinitionComponent> codeToConceptMap = theContext.codeToConcept();
+			Map<String, CodeSystem.ConceptDefinitionComponent> codeToConceptMap = theContext.getCodeToConcept();
 			CodeSystem.ConceptDefinitionComponent parentConcept =
 					codeToConceptMap.computeIfAbsent(parentCode, this::newConcept);
 			CodeSystem.ConceptDefinitionComponent childConcept =
@@ -76,7 +76,7 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 
 		Set<String> childCodes = new HashSet<>();
 
-		Map<String, CodeSystem.ConceptDefinitionComponent> codeToConcept = theCodeExtractionContext.codeToConcept();
+		Map<String, CodeSystem.ConceptDefinitionComponent> codeToConcept = theCodeExtractionContext.getCodeToConcept();
 		for (CodeSystem.ConceptDefinitionComponent concept : codeToConcept.values()) {
 			for (CodeSystem.ConceptDefinitionComponent childConcept : concept.getConcept()) {
 				childCodes.add(childConcept.getCode());
@@ -105,5 +105,12 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 		return retVal;
 	}
 
-	protected record MyContext(Map<String, CodeSystem.ConceptDefinitionComponent> codeToConcept) {}
+	protected static class MyContext extends MyBaseContext {
+		private final Map<String, CodeSystem.ConceptDefinitionComponent> myCodeToConcept = new HashMap<>();
+
+		@Override
+		public Map<String, CodeSystem.ConceptDefinitionComponent> getCodeToConcept() {
+			return myCodeToConcept;
+		}
+	}
 }

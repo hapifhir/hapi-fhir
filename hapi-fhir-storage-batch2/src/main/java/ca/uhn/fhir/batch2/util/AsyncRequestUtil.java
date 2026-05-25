@@ -115,9 +115,7 @@ public class AsyncRequestUtil {
 	 * Writes a response with a <code>text/plain</code> string as the response body and
 	 * an HTTP 200 status code.
 	 */
-	private static void writeResponseWithStringBody(
-			HttpServletResponse theServletResponse,
-			String theResponseString)
+	private static void writeResponseWithStringBody(HttpServletResponse theServletResponse, String theResponseString)
 			throws IOException {
 		theServletResponse.setStatus(HttpStatus.SC_OK);
 		theServletResponse.setContentType(Constants.CT_TEXT);

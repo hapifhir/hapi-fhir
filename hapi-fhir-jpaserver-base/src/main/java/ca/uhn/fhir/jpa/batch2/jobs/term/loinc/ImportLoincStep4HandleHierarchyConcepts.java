@@ -23,7 +23,7 @@ public class ImportLoincStep4HandleHierarchyConcepts
 	@Override
 	protected MyContext newContextObject(
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		return new MyContext(new HashSet<>());
+		return new MyContext();
 	}
 
 	@Nonnull
@@ -49,15 +49,21 @@ public class ImportLoincStep4HandleHierarchyConcepts
 			String theSourceFilename) {
 
 		String parentCode = trim(theRecord.get("IMMEDIATE_PARENT"));
-		if (isNotBlank(parentCode) && theContext.seenCodes().add(parentCode)) {
+		if (isNotBlank(parentCode) && theContext.getSeenCodes().add(parentCode)) {
 			theCodeSystemToPopulate.addConcept().setCode(parentCode);
 		}
 
 		String childCode = trim(theRecord.get("CODE"));
-		if (isNotBlank(childCode) && theContext.seenCodes().add(childCode)) {
+		if (isNotBlank(childCode) && theContext.getSeenCodes().add(childCode)) {
 			theCodeSystemToPopulate.addConcept().setCode(childCode);
 		}
 	}
 
-	protected record MyContext(Set<String> seenCodes) {}
+	protected static class MyContext extends MyBaseContext {
+		private final Set<String> mySeenCodes = new HashSet<>();
+
+		public Set<String> getSeenCodes() {
+			return mySeenCodes;
+		}
+	}
 }

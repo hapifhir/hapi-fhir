@@ -30,7 +30,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep7HandleRsnaPlaybook
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep7HandleRsnaPlaybook.MyContext> {
+		extends BaseImportLoincStep<ImportLoincStep7HandleRsnaPlaybook.MyContext> {
 
 	@Override
 	protected MyContext newContextObject(
@@ -91,7 +91,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		ValueSet vs = getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-                theData,
+				theData,
 				theContext,
 				RSNA_CODES_VS_ID,
 				RSNA_CODES_VS_URI,
@@ -141,10 +141,8 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		String partConceptMapId;
 		String termConceptMapId;
 		if (codeSystemVersionId != null) {
-			partConceptMapId =
-					ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_ID + "-" + codeSystemVersionId;
-			termConceptMapId =
-					ImportLoincJobAppCtx.LOINC_TERM_TO_RPID_PART_MAP_ID + "-" + codeSystemVersionId;
+			partConceptMapId = ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_ID + "-" + codeSystemVersionId;
+			termConceptMapId = ImportLoincJobAppCtx.LOINC_TERM_TO_RPID_PART_MAP_ID + "-" + codeSystemVersionId;
 		} else {
 			partConceptMapId = ImportLoincJobAppCtx.LOINC_PART_TO_RID_PART_MAP_ID;
 			termConceptMapId = ImportLoincJobAppCtx.LOINC_TERM_TO_RPID_PART_MAP_ID;

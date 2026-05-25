@@ -16,9 +16,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep13GroupFile
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
-				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+public class ImportLoincStep13GroupFile extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 	public static final String VS_URI_PREFIX = "http://loinc.org/vs/";
 
 	@Override
@@ -59,7 +57,7 @@ public class ImportLoincStep13GroupFile
 		ValueSet parentValueSet = getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-                theData,
+				theData,
 				theContext,
 				parentGroupValueSetId,
 				VS_URI_PREFIX + parentGroupId,
@@ -82,7 +80,7 @@ public class ImportLoincStep13GroupFile
 		getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-                theData,
+				theData,
 				theContext,
 				groupValueSetId,
 				VS_URI_PREFIX + groupId,

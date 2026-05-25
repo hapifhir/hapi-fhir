@@ -16,9 +16,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep6HandleAnswerListLinks
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
-				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+public class ImportLoincStep6HandleAnswerListLinks extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 
 	@Autowired
 	private IValidationSupport myValidationSupport;

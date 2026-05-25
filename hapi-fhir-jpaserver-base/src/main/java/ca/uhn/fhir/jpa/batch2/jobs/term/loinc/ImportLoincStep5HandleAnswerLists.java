@@ -20,7 +20,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep5HandleAnswerLists
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep5HandleAnswerLists.MyContext> {
+		extends BaseImportLoincStep<ImportLoincStep5HandleAnswerLists.MyContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep5HandleAnswerLists.class);
 
 	@Override
@@ -80,7 +80,7 @@ public class ImportLoincStep5HandleAnswerLists
 		ValueSet vs = getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-                theData,
+				theData,
 				theContext,
 				answerListId,
 				"http://loinc.org/vs/" + answerListId,

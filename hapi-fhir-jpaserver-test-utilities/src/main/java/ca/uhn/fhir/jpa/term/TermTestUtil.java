@@ -86,13 +86,6 @@ public final class TermTestUtil {
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 	}
 
-	public static void addLoincMandatoryFilesWithoutTop2000ToZip(ZipCollectionBuilder theFiles) throws IOException {
-		addBaseLoincMandatoryFilesToZip(theFiles, false);
-		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
-	}
-
 	public static void addLoincMandatoryFilesWithPropertiesFileToZip(
 			ZipCollectionBuilder theFiles, String thePropertiesFile) throws IOException {
 		if (thePropertiesFile != null) {

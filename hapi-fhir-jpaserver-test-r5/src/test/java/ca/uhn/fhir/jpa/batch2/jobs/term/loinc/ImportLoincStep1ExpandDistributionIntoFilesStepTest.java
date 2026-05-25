@@ -41,12 +41,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_PRIMARY_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -123,6 +124,61 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 	}
 
 	@Test
+	void testProcess_NoLoincXml() {
+		Consumer<ZipCollectionBuilder> populator = files -> {
+			try {
+				files.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
+				files.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		};
+		// Load LOINC marked as version 2.67
+		mockJobPersistenceFetchDistributionFile(populator);
+		mockHandlerStep1();
+		mockHandlerStep2();
+		mockHandlerStep3();
+
+		// Test
+		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		assertThatThrownBy(()->myStep.run(stepExecutionDetails, myDataSink))
+			.isInstanceOf(JobExecutionFailedException.class)
+			.hasMessageContaining("No 'loinc.xml' file found in ZIP");
+
+	}
+
+	@Test
+	void testProcess_MultipleLoincXml() {
+		mockCodeSystemStorageStartStaging();
+		Consumer<ZipCollectionBuilder> populator = files -> {
+			try {
+				files.addFileZip("/loinc/", LOINC_XML_FILE.getCode());
+				files.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
+				files.addFileZip("/loinc/", LOINC_XML_FILE.getCode(), "/blah/loinc.xml");
+				files.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		};
+		// Load LOINC marked as version 2.67
+		mockJobPersistenceFetchDistributionFile(populator);
+		mockHandlerStep1();
+		mockHandlerStep2();
+		mockHandlerStep3();
+		mockJobStepExecutionServices();
+		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+		AtomicInteger attachmentCounter = mockJobPersistenceStoreNewAttachment();
+
+		// Test
+		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		assertThatThrownBy(()->myStep.run(stepExecutionDetails, myDataSink))
+			.isInstanceOf(JobExecutionFailedException.class)
+			.hasMessageContaining("Multiple 'loinc.xml' file found in ZIP");
+
+	}
+
+	@Test
 	void testProcess_NoIdSpecified() throws IOException {
 		// Setup
 		when(myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(any(), any())).thenReturn(new ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse("a-b-c-d"));
@@ -136,7 +192,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		TerminologyFileSetJson fileSet = new TerminologyFileSetJson();
 		ImportLoincJobParameters jobParameters = new ImportLoincJobParameters();
 		jobParameters.setVersionId("1.23");
-		myStep.handleSynchronous(newStepExecutionDetails(), myDataSink, "loinc.xml", toBytes(cs), jobParameters, fileSet);
+		myStep.handleSynchronous(newStepExecutionDetails(), myDataSink, new ImportLoincStep1ExpandDistributionIntoFilesStep.MyContext(), "loinc.xml", toBytes(cs), jobParameters, fileSet);
 
 		// Verify
 		verify(myJobPersistence, times(1)).storeNewAttachment(eq("my-instance-id"), myAttachmentDetailsCaptor.capture());
@@ -167,7 +223,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 
 		// Test
 		TerminologyFileSetJson fileSet = new TerminologyFileSetJson();
-		myStep.handleSynchronous(newStepExecutionDetails(), myDataSink, "loinc.xml", toBytes(cs), jobParameters, fileSet);
+		myStep.handleSynchronous(newStepExecutionDetails(), myDataSink, new ImportLoincStep1ExpandDistributionIntoFilesStep.MyContext(), "loinc.xml", toBytes(cs), jobParameters, fileSet);
 
 		// Verify
 		verify(myJobPersistence, times(1)).storeNewAttachment(eq("my-instance-id"), myAttachmentDetailsCaptor.capture());
@@ -193,9 +249,9 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 	void testProcess_TwoStepsUseSameFile() {
 		mockCodeSystemStorageStartStaging();
 		mockJobPersistenceFetchDistributionFile();
+		mockJobPersistenceStoreNewAttachment();
 		mockHandlerStep1();
 		mockHandlerStep2_SameFileAsStep1();
-		AtomicInteger attachmentCounter = mockJobPersistenceStoreNewAttachment();
 		mockJobStepExecutionServices();
 		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);

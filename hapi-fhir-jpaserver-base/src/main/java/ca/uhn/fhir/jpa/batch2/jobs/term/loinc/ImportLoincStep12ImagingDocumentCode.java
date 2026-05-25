@@ -13,9 +13,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep12ImagingDocumentCode
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
-				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+public class ImportLoincStep12ImagingDocumentCode extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 
 	private static final String VS_ID_BASE = "loinc-imaging-document-codes";
 	private static final String VS_URI = "http://loinc.org/vs/loinc-imaging-document-codes";
@@ -51,14 +49,7 @@ public class ImportLoincStep12ImagingDocumentCode
 		String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
 
 		ValueSet valueSet = getOrAddValueSet(
-				theStepExecutionDetails,
-				theJobMetadata,
-                theData,
-				theContext,
-				VS_ID_BASE,
-				VS_URI,
-				VS_NAME,
-				null);
+				theStepExecutionDetails, theJobMetadata, theData, theContext, VS_ID_BASE, VS_URI, VS_NAME, null);
 		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
 	}
 }

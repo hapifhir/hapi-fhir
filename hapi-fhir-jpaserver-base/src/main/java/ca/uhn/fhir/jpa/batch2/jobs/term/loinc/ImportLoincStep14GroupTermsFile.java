@@ -13,9 +13,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep14GroupTermsFile
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
-				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+public class ImportLoincStep14GroupTermsFile extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 
 	@Override
 	protected MyBaseContext newContextObject(
@@ -49,7 +47,7 @@ public class ImportLoincStep14GroupTermsFile
 		ValueSet valueSet = getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-                theData,
+				theData,
 				theContext,
 				groupId,
 				ImportLoincStep13GroupFile.VS_URI_PREFIX + groupId,

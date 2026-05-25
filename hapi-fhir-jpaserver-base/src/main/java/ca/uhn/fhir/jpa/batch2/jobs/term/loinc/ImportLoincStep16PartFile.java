@@ -13,8 +13,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep16PartFile
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep16PartFile.MyBaseContext> {
+public class ImportLoincStep16PartFile extends BaseImportLoincStep<ImportLoincStep16PartFile.MyBaseContext> {
 
 	@Override
 	protected MyBaseContext newContextObject(

@@ -43,7 +43,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
-public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTerminologyImportParameters>
+public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTerminologyImportParameters, CT>
 		implements IJobStepWorker<PT, VoidModel, TerminologyFileSetJson> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseExpandDistributionIntoFilesStep.class);
@@ -58,6 +58,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		myChunkLineSizeForUnitTests = theChunkLineSize;
 	}
 
+	protected abstract CT newContextObject();
+
 	@Nonnull
 	@Override
 	public RunOutcome run(
@@ -69,6 +71,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		PT jobParameters = theStepExecutionDetails.getParameters();
 		AttachmentDetails loincFileAttachment = myJobPersistence.fetchAttachmentByFilename(
 				instanceId, TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE);
+		CT context = newContextObject();
 
 		ourLog.info(
 				"Import {}[{}] - Expanding file {}",
@@ -149,7 +152,13 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 						// Synchronous processing (anything that is small enough to just handle it here)
 						handleSynchronous(
-								theStepExecutionDetails, theDataSink, nextFileName, bytes, jobParameters, fileSet);
+								theStepExecutionDetails,
+								theDataSink,
+								context,
+								nextFileName,
+								bytes,
+								jobParameters,
+								fileSet);
 					}
 				}
 			}
@@ -158,7 +167,13 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 					Msg.code(2938) + "Files to expand " + getTerminologyName() + " zip file: " + e.getMessage(), e);
 		}
 
+		afterCompletion(context);
+
 		return RunOutcome.SUCCESS;
+	}
+
+	protected void afterCompletion(CT theContext) {
+		// subclasses can override this method to do any cleanup
 	}
 
 	/**
@@ -167,6 +182,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 	protected void handleSynchronous(
 			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
 			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			CT theContext,
 			String theFileName,
 			byte[] theBytes,
 			PT theJobParameters,

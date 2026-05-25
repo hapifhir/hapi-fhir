@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +54,7 @@ public class ImportLoincStep2HandleConcepts
 			TerminologyFileSetJson theData,
 			String theSourceFilename) {
 
-		Map<String, CodeSystem.PropertyType> propertyNameToType = extractPropertyNamesFromCodeSystem(theJobMetadata);
+		Map<String, CodeSystem.PropertyType> propertyNameToType = theContext.getPropertyNameToType(theJobMetadata);
 
 		String code = trim(theRecord.get("LOINC_NUM"));
 		if (isNotBlank(code)) {
@@ -111,7 +110,7 @@ public class ImportLoincStep2HandleConcepts
 				}
 			}
 
-			boolean existingValue = theContext.seenCodes().add(code);
+			boolean existingValue = theContext.getSeenCodes().add(code);
 			if (!existingValue) {
 				throw new JobExecutionFailedException(
 						Msg.code(2942) + "The code " + code + " has appeared more than once");
@@ -131,29 +130,12 @@ public class ImportLoincStep2HandleConcepts
 				theCodeSystemToPopulate.getConcept().size());
 	}
 
-	@Nonnull
-	private static Map<String, CodeSystem.PropertyType> extractPropertyNamesFromCodeSystem(
-			ImportTerminologyMetadataAttachmentJson theJobMetadata) {
-		Map<String, CodeSystem.PropertyType> propertyNamesToTypes = new HashMap<>();
-		for (CodeSystem.PropertyComponent nextProperty :
-				theJobMetadata.getCodeSystem().getProperty()) {
-			String nextPropertyCode = nextProperty.getCode();
-			CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
-			if (isNotBlank(nextPropertyCode)) {
-				propertyNamesToTypes.put(nextPropertyCode, nextPropertyType);
-			}
-		}
-		assert propertyNamesToTypes.size() > 1;
-		return propertyNamesToTypes;
-	}
+	protected static class CodeExtractionContext extends BaseImportLoincStep.MyBaseContext {
 
-	protected record CodeExtractionContext(Set<String> seenCodes) {
+		private final Set<String> mySeenCodes = new HashSet<>();
 
-		/**
-		 * Constructor
-		 */
-		public CodeExtractionContext() {
-			this(new HashSet<>());
+		public Set<String> getSeenCodes() {
+			return mySeenCodes;
 		}
 	}
 }

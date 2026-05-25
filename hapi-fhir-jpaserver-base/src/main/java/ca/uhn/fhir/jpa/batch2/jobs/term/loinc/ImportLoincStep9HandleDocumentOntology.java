@@ -23,7 +23,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.DOCUME
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep9HandleDocumentOntology
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep9HandleDocumentOntology.MyBaseContext> {
+		extends BaseImportLoincStep<ImportLoincStep9HandleDocumentOntology.MyBaseContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep9HandleDocumentOntology.class);
 
 	@Override
@@ -67,7 +67,7 @@ public class ImportLoincStep9HandleDocumentOntology
 		ValueSet vs = getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-                theData,
+				theData,
 				theContext,
 				DOCUMENT_ONTOLOGY_CODES_VS_ID,
 				DOCUMENT_ONTOLOGY_CODES_VS_URI,

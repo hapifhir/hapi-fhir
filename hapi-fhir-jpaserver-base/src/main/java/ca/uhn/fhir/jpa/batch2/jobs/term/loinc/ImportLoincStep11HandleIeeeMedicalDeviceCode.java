@@ -12,17 +12,16 @@ import org.hl7.fhir.r4.model.Enumerations;
 import java.util.List;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.CM_RSNA_COPYRIGHT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_IEEE_CM_ID;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_IEEE_CM_NAME;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.LOINC_IEEE_CM_URI;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.CM_RSNA_COPYRIGHT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep11HandleIeeeMedicalDeviceCode
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
-				ImportLoincStep11HandleIeeeMedicalDeviceCode.MyBaseContext> {
+		extends BaseImportLoincStep<ImportLoincStep11HandleIeeeMedicalDeviceCode.MyBaseContext> {
 
 	@Override
 	protected MyBaseContext newContextObject(

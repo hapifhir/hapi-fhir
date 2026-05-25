@@ -11,9 +11,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep15ParentGroupFile
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
-				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+public class ImportLoincStep15ParentGroupFile extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 
 	@Override
 	protected MyBaseContext newContextObject(
@@ -47,7 +45,7 @@ public class ImportLoincStep15ParentGroupFile
 		getOrAddValueSet(
 				theStepExecutionDetails,
 				theJobMetadata,
-                theData,
+				theData,
 				theContext,
 				parentGroupId,
 				ImportLoincStep13GroupFile.VS_URI_PREFIX + parentGroupId,

@@ -14,8 +14,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep10HandleUniversalLabOrderSet
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
-				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+		extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 
 	private static final String VS_ID_BASE = "loinc-universal-order-set";
 	private static final String VS_URI = "http://loinc.org/vs/loinc-universal-order-set";
@@ -52,14 +51,7 @@ public class ImportLoincStep10HandleUniversalLabOrderSet
 		String orderObs = trim(theRecord.get("ORDER_OBS"));
 
 		ValueSet valueSet = getOrAddValueSet(
-				theStepExecutionDetails,
-				theJobMetadata,
-                theData,
-				theContext,
-				VS_ID_BASE,
-				VS_URI,
-				VS_NAME,
-				null);
+				theStepExecutionDetails, theJobMetadata, theData, theContext, VS_ID_BASE, VS_URI, VS_NAME, null);
 		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
 	}
 }

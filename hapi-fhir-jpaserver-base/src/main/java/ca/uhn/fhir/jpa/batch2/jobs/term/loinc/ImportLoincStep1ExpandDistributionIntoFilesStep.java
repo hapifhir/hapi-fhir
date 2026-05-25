@@ -34,7 +34,8 @@ import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LO
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL;
 
 public class ImportLoincStep1ExpandDistributionIntoFilesStep
-		extends BaseExpandDistributionIntoFilesStep<ImportLoincJobParameters> {
+		extends BaseExpandDistributionIntoFilesStep<
+				ImportLoincJobParameters, ImportLoincStep1ExpandDistributionIntoFilesStep.MyContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep1ExpandDistributionIntoFilesStep.class);
 
 	@Autowired
@@ -44,19 +45,24 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
 	@Override
+	protected MyContext newContextObject() {
+		return new MyContext();
+	}
+
+	@Override
 	protected void handleSynchronous(
 			StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
 			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			MyContext theContext,
 			String theFileName,
 			byte[] theBytes,
 			ImportLoincJobParameters theJobParameters,
 			TerminologyFileSetJson theFileSet) {
 		super.handleSynchronous(
-				theStepExecutionDetails, theDataSink, theFileName, theBytes, theJobParameters, theFileSet);
+				theStepExecutionDetails, theDataSink, theContext, theFileName, theBytes, theJobParameters, theFileSet);
 
 		if (theFileName.endsWith("loinc.xml")) {
-			// FIXME: add test to ensure we fail if the ZIP has multiple loinc.xml
-			// FIXME: add test to ensure we fail if the ZIP has no loinc.xml
+			theContext.incrementLoincXmlCount();
 			handleLoincXml(theStepExecutionDetails, theDataSink, theBytes, theJobParameters);
 		}
 	}
@@ -140,5 +146,30 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		retVal.getCompose().addInclude().setSystem(ITermLoaderSvc.LOINC_URI).setVersion(theLoincVersion);
 
 		return retVal;
+	}
+
+	@Override
+	protected void afterCompletion(MyContext theContext) {
+		super.afterCompletion(theContext);
+
+		if (theContext.getLoincXmlCount() == 0) {
+			throw new JobExecutionFailedException(Msg.code(2950) + "No 'loinc.xml' file found in ZIP");
+		}
+		if (theContext.getLoincXmlCount() > 1) {
+			throw new JobExecutionFailedException(Msg.code(2951) + "Multiple 'loinc.xml' file found in ZIP");
+		}
+	}
+
+	public static class MyContext {
+
+		private int myLoincXmlCount;
+
+		public void incrementLoincXmlCount() {
+			myLoincXmlCount++;
+		}
+
+		public int getLoincXmlCount() {
+			return myLoincXmlCount;
+		}
 	}
 }

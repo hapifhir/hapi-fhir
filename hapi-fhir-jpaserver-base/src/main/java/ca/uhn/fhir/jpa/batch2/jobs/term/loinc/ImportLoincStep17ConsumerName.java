@@ -15,9 +15,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.L
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep17ConsumerName
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
-				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+public class ImportLoincStep17ConsumerName extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 
 	@Override
 	protected MyBaseContext newContextObject(
