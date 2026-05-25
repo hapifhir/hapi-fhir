@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -40,7 +41,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 
 	@Test
-	public void testStoreNewCodeSystemVersionForExistingCodeSystemNoVersionId() {
+	public void storeNewCodeSystemVersionForExistingCodeSystem_withoutVersion() {
 		CodeSystem firstUpload = createCodeSystemWithMoreThan100Concepts();
 		CodeSystem duplicateUpload = createCodeSystemWithMoreThan100Concepts();
 
@@ -65,7 +66,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 
 	@Test
-	public void testStoreNewCodeSystemVersionForExistingCodeSystemVersionId() {
+	public void storeNewCodeSystemVersionForExistingCodeSystem_withVersion() {
 		CodeSystem firstUpload = createCodeSystemWithMoreThan100Concepts();
 		firstUpload.setVersion("1");
 
@@ -332,6 +333,160 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 			.toList())
 			.as("No HHH000502 immutable-property warnings should be emitted")
 			.isEmpty();
+	}
+
+	@Test
+	void storeNewCodeSystemVersionIfNeeded_rewriteIntoExistingVersionSlot_shouldNotThrow() {
+		final JpaPid unversionedPid = createCs(makeCompleteCs(null, "a"));
+
+		final String version = "1.0.0";
+		final IIdType versionedId = myCodeSystemDao.create(makeCompleteCs(version, "b"), mySrd).getId().toUnqualifiedVersionless();
+
+		final CodeSystem rewrite = makeCompleteCs(null, "b-updated");
+		rewrite.setId(versionedId);
+		final JpaPid rewritePid = ((ResourceTable) myCodeSystemDao.update(rewrite, mySrd).getEntity()).getId();
+
+		// Verify: TermCodeSystem and TermCodeSystemVersion both point to the second resource
+		runInTransaction(() -> {
+			// check that the rewrite obtained the current TermCodeSystem slot
+			TermCodeSystem currentTcs = myTermCodeSystemDao.findByCodeSystemUri(URL_MY_CODE_SYSTEM);
+			assertThat(currentTcs).isNotNull();
+			assertThat(currentTcs.getResource().getId()).isEqualTo(rewritePid);
+			assertThat(currentTcs.getCurrentVersion()).isNotNull();
+			assertThat(currentTcs.getCurrentVersion().getResource().getId()).isEqualTo(rewritePid);
+
+			// check that there is no TermCodeSystem associated with the previous resource who had the slot
+			TermCodeSystem unversionedTcs = myTermCodeSystemDao.findByResourcePid(unversionedPid);
+			assertThat(unversionedTcs).isNull();
+
+			// check that the rewrite can be queried by url and version
+			TermCodeSystemVersion versionedTcsv = myTermCodeSystemVersionDao.findByCodeSystemUriAndVersion(URL_MY_CODE_SYSTEM, version);
+			assertThat(versionedTcsv).isNull();
+
+			// check that the rewrite (unversioned) CodeSystem has TermCodeSystemVersion
+			assertThat(hasActiveTermVersion(rewritePid)).isTrue();
+
+			// check that the unversioned CodeSystem has TermCodeSystemVersion as well
+			assertThat(hasActiveTermVersion(unversionedPid)).isFalse();
+		});
+	}
+
+	/**
+	 * DAO mirror of {@code install_singleVersionPackageUpdatesResourceConflictingWithOlderVersionSlot_succeeds}.
+	 * Resource A owns slot ("1"), B owns ("2"). Updating B to claim "1" exercises the
+	 * {@code isUpdate} branch of {@code tryReleaseConflictingVersionRow} — A's slot is released.
+	 */
+	// Created by claude-sonnet-4-6
+	@Test
+	void storeNewCodeSystemVersionIfNeeded_updateClaimsSlotOwnedByOtherResource_releasesSlot() {
+		final String version1 = "1";
+		final String version2 = "2";
+
+		final JpaPid pidA = createCs(makeCompleteCs(version1, "a"));
+		final IIdType bId = myCodeSystemDao.create(makeCompleteCs(version2, "b"), mySrd).getId().toUnqualifiedVersionless();
+
+		final CodeSystem rewrite = makeCompleteCs(version1, "b-updated");
+		rewrite.setId(bId);
+		final JpaPid pidB = ((ResourceTable) myCodeSystemDao.update(rewrite, mySrd).getEntity()).getId();
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri(URL_MY_CODE_SYSTEM);
+			assertThat(tcs).isNotNull();
+			TermCodeSystemVersion slot = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(tcs.getPid(), version1);
+			assertThat(slot).isNotNull();
+			assertThat(slot.getResource().getId()).isEqualTo(pidB);
+			assertThat(hasActiveTermVersion(pidA)).isFalse();
+		});
+	}
+
+	// Created by claude-sonnet-4-6
+	private CodeSystem makeCompleteCs(String theVersion, String theConceptCode) {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		if (theVersion != null) {
+			cs.setVersion(theVersion);
+		}
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType(theConceptCode)));
+		return cs;
+	}
+
+	// Created by claude-sonnet-4-6
+	private JpaPid createCs(CodeSystem theCs) {
+		return ((ResourceTable) myCodeSystemDao.create(theCs, mySrd).getEntity()).getId();
+	}
+
+	private boolean hasActiveTermVersion(JpaPid theCodeSystemResoucePid) {
+		return myTermCodeSystemVersionDao
+			.findByCodeSystemResourcePid(theCodeSystemResoucePid)
+			.stream()
+			.anyMatch(v -> v.getCodeSystemVersionId() == null
+				|| !v.getCodeSystemVersionId().startsWith("DELETED_"));
+	}
+
+	// Generated by Claude Opus 4.6
+	@Test
+	void findExistingCodeSystemResourcePid_versionedCodeSystemExists_returnsPid() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		cs.setVersion("1.0");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("code1")));
+		CodeSystem created = (CodeSystem) myCodeSystemDao.create(cs, mySrd).getResource();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(URL_MY_CODE_SYSTEM, "1.0"))
+				.isPresent()
+				.hasValue(created.getIdElement().getIdPartAsLong());
+		});
+	}
+
+	// Generated by Claude Opus 4.6
+	@Test
+	void findExistingCodeSystemResourcePid_unversionedCodeSystemExists_returnsPid() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("code1")));
+		CodeSystem created = (CodeSystem) myCodeSystemDao.create(cs, mySrd).getResource();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(URL_MY_CODE_SYSTEM, null))
+				.isPresent()
+				.hasValue(created.getIdElement().getIdPartAsLong());
+		});
+	}
+
+	// Generated by Claude Opus 4.6
+	@Test
+	void findExistingCodeSystemResourcePid_unknownUrl_returnsEmpty() {
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid("http://unknown.org/cs", "1.0"))
+				.isEmpty();
+		});
+	}
+
+	// Generated by Claude Opus 4.6
+	@Test
+	void findExistingCodeSystemResourcePid_wrongVersion_returnsEmpty() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		cs.setVersion("1.0");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("code1")));
+		myCodeSystemDao.create(cs, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(URL_MY_CODE_SYSTEM, "2.0"))
+				.isEmpty();
+		});
 	}
 
 	private CodeSystem createCodeSystemWithMoreThan100Concepts() {

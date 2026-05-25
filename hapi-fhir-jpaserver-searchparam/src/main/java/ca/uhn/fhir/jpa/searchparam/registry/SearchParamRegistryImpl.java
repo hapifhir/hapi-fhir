@@ -77,7 +77,15 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParamRegistryImpl
 		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
 
-	// Basic is needed by the R4 SubscriptionTopic registry
+	/**
+	 * Search parameter patterns that must remain active because they are required for core system operation.
+	 * <ul>
+	 *   <li>{@code *:url} — used by the validator and terminology services</li>
+	 *   <li>{@code Subscription:*} — used by the Subscription module</li>
+	 *   <li>{@code SearchParameter:*} — used by the search parameter registry</li>
+	 *   <li>{@code Basic:*} — used by the R4 SubscriptionTopic registry</li>
+	 * </ul>
+	 */
 	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
 			Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*", "Basic:*"));
 
@@ -395,6 +403,31 @@ public class SearchParamRegistryImpl
 	}
 
 	/**
+	 * A search parameter is considered non-disableable and built-in if:
+	 * <ol>
+	 *   <li>Its URI starts with {@link ca.uhn.fhir.rest.api.Constants#BUILT_IN_SEARCH_PARAM_URI_PREFIX}, AND</li>
+	 *   <li>It matches at least one pattern in {@link #NON_DISABLEABLE_SEARCH_PARAMS}.</li>
+	 * </ol>
+	 *
+	 * <p>This check is intentionally limited to built-in SPs (by URI prefix) so that
+	 * custom user-defined SPs on the same resource types (e.g. a custom SP on
+	 * {@code Subscription}) remain fully manageable.
+	 *
+	 * @param theUri           the SearchParameter URL; may be {@code null}
+	 * @param theResourceBase  the base resource type (e.g. {@code "Basic"})
+	 * @param theParamName     the search parameter code/name (e.g. {@code "code"})
+	 * @return {@code true} if this SP is a built-in non-disableable parameter
+	 */
+	public static boolean isNonDisableableBuiltInSearchParam(
+			String theUri, @Nonnull String theResourceBase, @Nonnull String theParamName) {
+		if (theUri == null || !theUri.startsWith(Constants.BUILT_IN_SEARCH_PARAM_URI_PREFIX)) {
+			return false;
+		}
+		return ReadOnlySearchParamCache.searchParamMatchesAtLeastOnePattern(
+				NON_DISABLEABLE_SEARCH_PARAMS, theResourceBase, theParamName);
+	}
+
+	/**
 	 * For the given SearchParameter which was fetched from the database, look for any
 	 * existing search parameters in the cache that should be replaced by the SP (i.e.
 	 * because they represent the same parameter)
@@ -407,8 +440,9 @@ public class SearchParamRegistryImpl
 			return 0;
 		}
 
-		RuntimeSearchParam runtimeSp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theSearchParameter);
-		if (runtimeSp == null) {
+		RuntimeSearchParam newRuntimeSp =
+				mySearchParameterCanonicalizer.canonicalizeSearchParameter(theSearchParameter);
+		if (newRuntimeSp == null) {
 			return 0;
 		}
 
@@ -419,7 +453,22 @@ public class SearchParamRegistryImpl
 		 * were depending on this behaviour? I don't know.. Honestly this is probably being
 		 * overly cautious. -JA
 		 */
-		if (runtimeSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT) {
+		if (newRuntimeSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT) {
+			return 0;
+		}
+
+		/*
+		 * If the candidate SP from the database is inactive, and the SP is built-in and
+		 * non-disableable, do not override the cache's ACTIVE version. It shouldn't be
+		 * possible to retire these non-disableable SPs in DB through normal API calls,
+		 * but this acts as a last-resort safety net at the cache layer.
+		 *
+		 * It is (currently) intentionally all-or-nothing (returns 0) since this class
+		 * manages cache initialization and doesn't modify bases directly. As a
+		 * consequence, a SP with a non-disableable and disableable base would be fully
+		 * preserved, including the disableable base.
+		 */
+		if (isRetiringNonDisableableSearchParam(newRuntimeSp)) {
 			return 0;
 		}
 
@@ -428,16 +477,25 @@ public class SearchParamRegistryImpl
 		 * the old SP from anywhere it is registered. This helps us override SPs like _content
 		 * and _text.
 		 */
-		String url = runtimeSp.getUri();
+		String url = newRuntimeSp.getUri();
 		RuntimeSearchParam existingParam = theSearchParams.getByUrl(url);
 		if (existingParam != null) {
-			if (isNotBlank(existingParam.getName()) && !existingParam.getName().equals(runtimeSp.getName())) {
+			/*
+			 * It shouldn't be possible to do narrow out a non-disableable base to the DB through
+			 * normal API calls, but this is a last-resort, and we preserve the entire SP in cache
+			 * if true.
+			 */
+			if (isNarrowingNonDisableableSearchParamBase(existingParam, newRuntimeSp)) {
+				return 0;
+			}
+
+			if (isNotBlank(existingParam.getName()) && !existingParam.getName().equals(newRuntimeSp.getName())) {
 				ourLog.warn(
 						"Existing SearchParameter with URL[{}] and name[{}] doesn't match name[{}] found on SearchParameter: {}",
 						url,
 						existingParam.getName(),
-						runtimeSp.getName(),
-						runtimeSp.getId());
+						newRuntimeSp.getName(),
+						newRuntimeSp.getId());
 			} else {
 				Set<String> expandedBases = expandBaseList(existingParam.getBase());
 				for (String base : expandedBases) {
@@ -449,8 +507,8 @@ public class SearchParamRegistryImpl
 		long retval = 0;
 		for (String nextBaseName :
 				expandBaseList(SearchParameterUtil.getBaseAsStrings(myFhirContext, theSearchParameter))) {
-			String name = runtimeSp.getName();
-			theSearchParams.add(nextBaseName, name, runtimeSp);
+			String name = newRuntimeSp.getName();
+			theSearchParams.add(nextBaseName, name, newRuntimeSp);
 			ourLog.debug(
 					"Adding search parameter {}.{} to SearchParamRegistry",
 					nextBaseName,
@@ -460,17 +518,54 @@ public class SearchParamRegistryImpl
 		return retval;
 	}
 
-	private @Nonnull Set<String> expandBaseList(Collection<String> nextBase) {
-		Set<String> expandedBases = new HashSet<>();
-		for (String base : nextBase) {
-			if ("Resource".equals(base) || "DomainResource".equals(base)) {
-				expandedBases.addAll(myFhirContext.getResourceTypes());
-				break;
-			} else {
-				expandedBases.add(base);
+	/**
+	 * Determines if a non-disableable, built-in SearchParameter would be retired/evicted from the
+	 * registry's cache.
+	 * @param theNewRuntimeSp the SP from DB to potentially load into cache
+	 * @return true if the SP is non-disableable, and would be retired (evicted) from cache.
+	 * 		   false otherwise.
+	 */
+	private boolean isRetiringNonDisableableSearchParam(RuntimeSearchParam theNewRuntimeSp) {
+		if (theNewRuntimeSp.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
+			for (String nextBase : theNewRuntimeSp.getBase()) {
+				if (isNonDisableableBuiltInSearchParam(theNewRuntimeSp.getUri(), nextBase, theNewRuntimeSp.getName())) {
+					ourLog.warn(
+							"SearchParameter {} has non-active status in the database but is required for system operation; preserving the active entry in the cache.",
+							theNewRuntimeSp.getUri());
+					return true;
+				}
 			}
 		}
-		return expandedBases;
+		return false;
+	}
+
+	/**
+	 * Determines if the DB record removes a non-disableable base that the existing cached entry
+	 * has. This handles the case where status=active but the base list was narrowed to exclude
+	 * a mandatory base .
+	 * @param theExistingParam the SP that is currently in cache that may be overriden by DB
+	 * @param theNewRuntimeSp the SP from DB to potentially load into cache
+	 * @return true if the a non-disableable base would be removed from the cache.
+	 *  	   false otherwise.
+	 */
+	private boolean isNarrowingNonDisableableSearchParamBase(
+			RuntimeSearchParam theExistingParam, RuntimeSearchParam theNewRuntimeSp) {
+		for (String nextBase : theExistingParam.getBase()) {
+			if (isNonDisableableBuiltInSearchParam(theNewRuntimeSp.getUri(), nextBase, theNewRuntimeSp.getName())
+					&& !theNewRuntimeSp.getBase().contains(nextBase)) {
+				ourLog.warn(
+						"SearchParameter {} is missing required non-disableable base '{}' in the database record. "
+								+ "Ignoring the database record and preserving the existing cache entry.",
+						theNewRuntimeSp.getUri(),
+						nextBase);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private @Nonnull Set<String> expandBaseList(Collection<String> nextBase) {
+		return new HashSet<>(SearchParameterUtil.expandBaseWhenNeeded(myFhirContext, nextBase));
 	}
 
 	@Override

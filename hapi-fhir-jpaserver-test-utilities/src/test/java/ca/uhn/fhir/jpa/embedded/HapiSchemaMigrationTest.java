@@ -153,6 +153,7 @@ public class HapiSchemaMigrationTest {
 		verifyTrm_Concept_Design(myCurrentDatabase);
 
 		verifyHfjResourceFhirIdCollation(myCurrentDatabase);
+
 	}
 
 	@Test

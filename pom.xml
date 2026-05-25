@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.11.2-SNAPSHOT</version>
+	<version>8.11.5-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1018,7 +1018,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.9.4</fhir_core_version>
+		<fhir_core_version>6.9.4.1</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<spotless.exclude.pattern>**/test/**/*.java</spotless.exclude.pattern>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -1066,7 +1066,7 @@
 		<jaxb_runtime_version>4.0.4</jaxb_runtime_version>
 		<jena_version>5.5.0</jena_version>
 		<jersey_version>3.1.11</jersey_version>
-		<jetty_version>12.0.32</jetty_version>
+		<jetty_version>12.0.34</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.11.4</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
@@ -1081,9 +1081,9 @@
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.16</httpcore_version>
 		<httpclient_version>4.5.14</httpclient_version>
-		<jackson_version>2.20.0</jackson_version>
-		<jackson_databind_version>2.20.0</jackson_databind_version>
-		<jackson_annotations_version>2.20</jackson_annotations_version>
+		<jackson_version>2.21.1</jackson_version>
+		<jackson_databind_version>2.21.1</jackson_databind_version>
+		<jackson_annotations_version>2.21</jackson_annotations_version>
 		<httpclient5_version>5.4.3</httpclient5_version>
 		<httpcore5_version>5.3.1</httpcore5_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
@@ -1094,8 +1094,9 @@
 		uses a version which lines up with the OTEL instrumentation version, but with "-alpha"
 		appended to it. So we do that too here. This could change in the future.
 		-->
-		<otel_instrumentation.version>2.10.0</otel_instrumentation.version>
+		<otel_instrumentation.version>2.26.1</otel_instrumentation.version>
 		<otel_agent_for_testing.version>${otel_instrumentation.version}-alpha</otel_agent_for_testing.version>
+		<otel_api.version>1.60.1-alpha</otel_api.version>
 		<poi_version>4.1.2</poi_version>
 		<poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
 		<resteasy_version>6.2.10.Final</resteasy_version>
@@ -1108,18 +1109,17 @@
 		<swagger_jakarta_version>2.2.30</swagger_jakarta_version>
 		<slf4j_version>2.0.16</slf4j_version>
 		<log4j_to_slf4j_version>2.24.1</log4j_to_slf4j_version>
-		<spring_version>6.2.12</spring_version>
+		<spring_version>6.2.18</spring_version>
 		<spring_data_bom_version>2024.0.5</spring_data_bom_version>
-		<spring_framework_bom_version>6.2.12</spring_framework_bom_version>
-		<spring_boot_version>3.4.11</spring_boot_version>
-		<!-- Pinned here for CVE: CVE-2026-24734 -->
-		<tomcat_embed_core_version>10.1.52</tomcat_embed_core_version>
+		<spring_framework_bom_version>6.2.18</spring_framework_bom_version>
+		<spring_boot_version>3.5.14</spring_boot_version>
+		<tomcat_embed_version>10.1.53</tomcat_embed_version>
 		<spring_retry_version>2.0.10</spring_retry_version>
 		<json_path_version>2.9.0</json_path_version>
 		<jboss_logging_version>3.6.1.Final</jboss_logging_version>
 		<stax2_api_version>3.1.4</stax2_api_version>
 		<testcontainers_version>2.0.2</testcontainers_version>
-		<thymeleaf-version>3.1.2.RELEASE</thymeleaf-version>
+		<thymeleaf-version>3.1.5.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
@@ -1575,7 +1575,7 @@
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
-				<version>12.4.3.jre11</version>
+				<version>13.4.0.jre11</version>
 			</dependency>
 			<dependency>
 				<!--
@@ -1609,7 +1609,14 @@
 			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-				<version>2.6.0</version>
+				<version>2.8.17</version>
+			</dependency>
+		   <!-- Pinned for CVE-2026-40977, CVE-2026-40972, CVE-2026-40975, CVE-2026-40973
+		   transitive via springdoc-openapi-starter-webmvc-ui -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-validation</artifactId>
+				<version>3.5.14</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
@@ -1942,9 +1949,25 @@
 				<version>2.4.1</version>
 			</dependency>
 			<dependency>
-				<groupId>org.glassfish</groupId>
-				<artifactId>jakarta.el</artifactId>
-				<version>4.0.2</version>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-el</artifactId>
+				<version>${tomcat_embed_version}</version>
+			</dependency>
+			<!--
+				Jetty transitively brings in jakarta.el-api via jetty-ee10-websocket-jakarta-server (jakarta.enterprise.cdi-api)
+				but jakarta.el-api is also bundled in through spring-boot-starter-web 3.5.x+ (tomcat-embed-el)
+				We'll exclude the jetty one since the spring-boot implementation is bundled.
+			-->
+			<dependency>
+				<groupId>jakarta.enterprise</groupId>
+				<artifactId>jakarta.enterprise.cdi-api</artifactId>
+				<version>4.0.1</version>
+				<exclusions>
+					<exclusion>
+						<groupId>jakarta.el</groupId>
+						<artifactId>jakarta.el-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish</groupId>
@@ -2073,6 +2096,13 @@
 				<artifactId>log4j-to-slf4j</artifactId>
 				<version>${log4j_to_slf4j_version}</version>
 			</dependency>
+			<!-- Pinned for CVE-2026-41607, CVE-2026-41606, CVE-2026-41605, CVE-2026-41604, CVE-2026-41603, CVE-2026-41636,
+				  CVE-2026-41602, CVE-2025-48431, this is transitive via jena-arq 5.5.0 -->
+			<dependency>
+				<groupId>org.apache.thrift</groupId>
+				<artifactId>libthrift</artifactId>
+				<version>0.23.0</version>
+			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
 				<artifactId>hibernate-search-mapper-orm</artifactId>
@@ -2163,7 +2193,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.7</version>
+				<version>42.7.11</version>
 			</dependency>
 			<dependency>
 				<groupId>com.oracle.database.jdbc</groupId>
@@ -2369,7 +2399,7 @@
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>swagger-ui</artifactId>
-				<version>5.21.0</version>
+				<version>5.32.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xmlunit</groupId>
@@ -2423,6 +2453,12 @@
 				<groupId>io.opentelemetry.javaagent</groupId>
 				<artifactId>opentelemetry-agent-for-testing</artifactId>
 				<version>${otel_agent_for_testing.version}</version>
+			</dependency>
+			<!-- Pulsar brings in a different version, which is incompatible with otel_agent_for_testing.version -->
+			<dependency>
+				<groupId>io.opentelemetry</groupId>
+				<artifactId>opentelemetry-api-incubator</artifactId>
+				<version>${otel_api.version}</version>
 			</dependency>
 
 			<dependency>
