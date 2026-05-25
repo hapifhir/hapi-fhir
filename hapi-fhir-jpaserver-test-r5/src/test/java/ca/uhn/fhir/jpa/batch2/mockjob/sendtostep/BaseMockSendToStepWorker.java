@@ -32,7 +32,7 @@ public abstract class BaseMockSendToStepWorker {
 		for (MockSendToStepJobParameters.MessageJson message : messages) {
 			if (message.isSendInvalidType()) {
 				BulkImportJobFileJson invalidModel = new BulkImportJobFileJson();
-				invalidModel.setContents("hello");
+				invalidModel.setContents("These contents are invalid for the type the step is expecting!");
 				theDataSink.acceptForFutureStep(message.getTargetStepId(), invalidModel);
 				continue;
 			}
