@@ -25,7 +25,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep11HandleIeeeMedicalDeviceCode
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep11HandleIeeeMedicalDeviceCode.MyBaseContext> {
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
+				ImportLoincStep11HandleIeeeMedicalDeviceCode.MyBaseContext> {
 
 	@Override
 	protected MyBaseContext newContextObject(
@@ -35,38 +36,40 @@ public class ImportLoincStep11HandleIeeeMedicalDeviceCode
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE,
 				LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT));
-	}
-
-
-	@Nonnull
-	@Override
-	public FileHandlingType getFileHandlingType() {
-		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS;
 	}
 
 	// FIXME: remove
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
+			throws JobExecutionFailedException {
 		return super.run(theStepExecutionDetails, theDataSink);
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyBaseContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		String codeSystemVersionId = theJobMetadata.getCodeSystem().getVersion();
 		String loincIeeeCmVersion;
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
 		if (isNotBlank(jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))) {
-				loincIeeeCmVersion = jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-"					+ codeSystemVersionId;
+			loincIeeeCmVersion =
+					jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-" + codeSystemVersionId;
 		} else {
 			loincIeeeCmVersion = codeSystemVersionId;
 		}
@@ -82,7 +85,7 @@ public class ImportLoincStep11HandleIeeeMedicalDeviceCode
 		String conceptMapId = LOINC_IEEE_CM_ID + "-" + codeSystemVersionId;
 
 		addConceptMapEntry(
-			theContext,
+				theContext,
 				new ConceptMapping()
 						.setConceptMapId(conceptMapId)
 						.setConceptMapUri(LOINC_IEEE_CM_URI)
@@ -98,5 +101,4 @@ public class ImportLoincStep11HandleIeeeMedicalDeviceCode
 						.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL)
 						.setCopyright(loincCopyrightStatement + " " + CM_COPYRIGHT));
 	}
-
 }

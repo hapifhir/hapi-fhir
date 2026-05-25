@@ -642,12 +642,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		ourLog.atDebug()
-			.setMessage("Saving concept[{}] count {} at index {} with parent {}")
-			.addArgument(theSourceConcept.getCode())
-			.addArgument(theStatisticsTracker.getUpdatedConceptCount())
-			.addArgument(theSequence)
-			.addArgument(parentDescription)
-			.log();
+				.setMessage("Saving concept[{}] count {} at index {} with parent {}")
+				.addArgument(theSourceConcept.getCode())
+				.addArgument(theStatisticsTracker.getUpdatedConceptCount())
+				.addArgument(theSequence)
+				.addArgument(parentDescription)
+				.log();
 
 		TermConcept targetConcept = theCodeToConcept.get(theSourceConcept.getCode());
 		if (targetConcept != null) {
@@ -761,14 +761,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			theStatisticsTracker.incrementConceptLinksAddedCount();
 		}
 
-		// FIXME: remove?
-//		if (theStatisticsTracker.getAddedConceptCount() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
-			saveConcept(targetConcept);
-			Long nextConceptPid = targetConcept.getId();
-			Validate.notNull(nextConceptPid, "Concept ID cannot be null after saving");
-//		} else {
-//			myDeferredStorageSvc.addConceptToStorageQueue(targetConcept);
-//		}
+		saveConcept(targetConcept);
+		Long nextConceptPid = targetConcept.getId();
+		Validate.notNull(nextConceptPid, "Concept ID cannot be null after saving");
 
 		ourLog.trace("About to save parent-child links");
 
@@ -936,7 +931,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			TermCodeSystemVersion theExistingRow,
 			ResourceTable theCurrentResource,
 			boolean theAllowPlaceholderRepoint) {
-		if (ObjectUtil.equals(theExistingRow.getResource().getId(), theCurrentResource.getId())) {
+		if (Objects.equals(theExistingRow.getResource().getId(), theCurrentResource.getId())) {
 			return true;
 		}
 

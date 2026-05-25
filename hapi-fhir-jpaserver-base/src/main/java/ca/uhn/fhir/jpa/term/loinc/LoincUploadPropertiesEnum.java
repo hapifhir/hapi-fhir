@@ -185,5 +185,4 @@ public enum LoincUploadPropertiesEnum {
 	 * <code>LoincUploadPropertiesEnum loincUploadPropertiesEnum = LoincUploadPropertiesEnum.values[ordinal];</code>
 	 */
 	public static final LoincUploadPropertiesEnum values[] = values();
-
 }

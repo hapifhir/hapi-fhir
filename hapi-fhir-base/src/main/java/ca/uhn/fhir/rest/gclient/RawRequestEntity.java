@@ -1,8 +1,5 @@
 package ca.uhn.fhir.rest.gclient;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 public class RawRequestEntity {
 	private final String myContentType;
 	private final byte[] myBytes;

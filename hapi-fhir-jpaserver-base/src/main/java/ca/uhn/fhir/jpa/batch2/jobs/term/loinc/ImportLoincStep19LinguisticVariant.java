@@ -33,25 +33,36 @@ import static org.apache.commons.lang3.StringUtils.trimToEmpty;
  * process, separated by commas. For example:
  * <code>deAT24, frCA8</code>
  */
-public class ImportLoincStep19LinguisticVariant extends BaseImportLoincStepWithValueSetsAndConceptMaps<BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+public class ImportLoincStep19LinguisticVariant
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
+				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
 
-	public static final Pattern LINGUISTIC_VARIANT_FILENAME_PATTERN = Pattern.compile(".*LinguisticVariants/([a-z]{2})([A-Z]{2})([0-9]+)LinguisticVariant.csv");
+	public static final Pattern LINGUISTIC_VARIANT_FILENAME_PATTERN =
+			Pattern.compile(".*LinguisticVariants/([a-z]{2})([A-Z]{2})([0-9]+)LinguisticVariant.csv");
 
 	@Override
-	protected MyBaseContext newContextObject(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+	protected MyBaseContext newContextObject(
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
-		String linguisticCodes = jobProperties.getProperty(LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_CODES.getCode(), LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_CODES_DEFAULT.getCode());
+		String linguisticCodes = jobProperties.getProperty(
+				LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_CODES.getCode(),
+				LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_CODES_DEFAULT.getCode());
 		if (linguisticCodes.isBlank()) {
 			return List.of();
 		}
 
-		Set<String> codes = Splitter.on(",").trimResults().omitEmptyStrings().splitToStream(linguisticCodes).collect(Collectors.toSet());
+		Set<String> codes = Splitter.on(",")
+				.trimResults()
+				.omitEmptyStrings()
+				.splitToStream(linguisticCodes)
+				.collect(Collectors.toSet());
 		Predicate<String> tester = (String theCode) -> {
 			Matcher matcher = LINGUISTIC_VARIANT_FILENAME_PATTERN.matcher(theCode);
 			if (matcher.matches()) {
@@ -60,11 +71,20 @@ public class ImportLoincStep19LinguisticVariant extends BaseImportLoincStepWithV
 			return false;
 		};
 
-		return List.of(new LoincFileNameSpecification(tester));
+		return List.of(
+				new LoincFileNameSpecification(FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS, tester));
 	}
 
 	@Override
-	protected void handleRecord(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, TerminologyFileSetJson theData, String theSourceFilename) {
+	protected void handleRecord(
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		if (isBlank(loincNumber)) {
 			return;
@@ -77,7 +97,8 @@ public class ImportLoincStep19LinguisticVariant extends BaseImportLoincStepWithV
 		String country = matcher.group(2);
 		String languageCode = language + "-" + country;
 
-		CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+		CodeSystem.ConceptDefinitionComponent concept =
+				getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
 
 		// The following should be created as designations for each term:
 		// COMPONENT:PROPERTY:TIME_ASPCT:SYSTEM:SCALE_TYP:METHOD_TYP (as colon-separated concatenation - FormalName)
@@ -99,9 +120,9 @@ public class ImportLoincStep19LinguisticVariant extends BaseImportLoincStepWithV
 		// skip if COMPONENT, PROPERTY, TIME_ASPCT, SYSTEM, SCALE_TYP and METHOD_TYP are all empty
 		if (!fullySpecifiedNameStr.equals(":::::")) {
 			concept.addDesignation()
-				.setLanguage(languageCode)
-				.setUse(new Coding(ITermLoaderSvc.LOINC_URI, "FullySpecifiedName", "FullySpecifiedName"))
-				.setValue(fullySpecifiedNameStr);
+					.setLanguage(languageCode)
+					.setUse(new Coding(ITermLoaderSvc.LOINC_URI, "FullySpecifiedName", "FullySpecifiedName"))
+					.setValue(fullySpecifiedNameStr);
 		}
 
 		// -- other designations
@@ -110,16 +131,20 @@ public class ImportLoincStep19LinguisticVariant extends BaseImportLoincStepWithV
 		addDesignation(theRecord, languageCode, concept, "LinguisticVariantDisplayName");
 	}
 
-	private void addDesignation(CSVRecord theRecord, String theLanguageCode, CodeSystem.ConceptDefinitionComponent theConcept, String theFieldName) {
+	private void addDesignation(
+			CSVRecord theRecord,
+			String theLanguageCode,
+			CodeSystem.ConceptDefinitionComponent theConcept,
+			String theFieldName) {
 		String field = trim(theRecord.get(theFieldName));
 		if (isBlank(field)) {
 			return;
 		}
 
-		theConcept.addDesignation()
-			.setLanguage(theLanguageCode)
-			.setUse(new Coding(ITermLoaderSvc.LOINC_URI, theFieldName, theFieldName))
-			.setValue(field);
+		theConcept
+				.addDesignation()
+				.setLanguage(theLanguageCode)
+				.setUse(new Coding(ITermLoaderSvc.LOINC_URI, theFieldName, theFieldName))
+				.setValue(field);
 	}
-
 }

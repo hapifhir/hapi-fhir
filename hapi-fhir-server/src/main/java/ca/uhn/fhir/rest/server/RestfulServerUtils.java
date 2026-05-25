@@ -211,18 +211,19 @@ public class RestfulServerUtils {
 	 * @since 8.12.0
 	 */
 	@Nonnull
-	public static String createFullyQualifiedUrlFromRelativeUrl(ServletRequestDetails theRequestDetails, String theRelativeUrl) {
+	public static String createFullyQualifiedUrlFromRelativeUrl(
+			ServletRequestDetails theRequestDetails, String theRelativeUrl) {
 		Validate.notNull(theRequestDetails, "The ServletRequestDetails object must not be null");
 		Validate.notBlank(theRelativeUrl, "The relative URL must not be blank");
 		Validate.isTrue(!theRelativeUrl.startsWith("/"), "The relative URL must not start with '/'");
 
 		ServletContext servletContext =
-			(ServletContext) theRequestDetails.getServletAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE);
+				(ServletContext) theRequestDetails.getServletAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE);
 		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
 		String baseUrl = theRequestDetails
-			.getServer()
-			.getServerAddressStrategy()
-			.determineServerBase(servletContext, servletRequest);
+				.getServer()
+				.getServerAddressStrategy()
+				.determineServerBase(servletContext, servletRequest);
 
 		StringBuilder pollUrlBuilder = new StringBuilder(baseUrl);
 		if (!baseUrl.endsWith("/")) {

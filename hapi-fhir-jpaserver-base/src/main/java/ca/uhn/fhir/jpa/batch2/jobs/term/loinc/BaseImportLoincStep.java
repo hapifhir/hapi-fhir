@@ -46,41 +46,37 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_I
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public abstract class BaseImportLoincStep<CT>
-	extends BaseImportTerminologyStep
-	implements ITerminologyImportFileHandlerStep<
-	ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
+public abstract class BaseImportLoincStep<CT> extends BaseImportTerminologyStep
+		implements ITerminologyImportFileHandlerStep<
+				ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportLoincStep.class);
 
 	@Autowired
 	private IJobPersistence myJobPersistence;
+
 	@Autowired
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
 	@Nonnull
 	@Override
 	public Optional<FileHandlingInstructions> canHandleFile(
-		StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
-		ImportLoincJobParameters theJobParameters, String theFileName) {
+			StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
+			ImportLoincJobParameters theJobParameters,
+			String theFileName) {
 
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
 
 		for (LoincFileNameSpecification loincFileNameSpecification : getFilesToProcess(theStepExecutionDetails)) {
 			if (loincFileNameSpecification.matchFileName(jobProperties, theFileName)) {
 				return Optional.of(
-					new FileHandlingInstructions(theFileName, getFileHandlingType()));
+						new FileHandlingInstructions(loincFileNameSpecification.fileHandlingType()));
 			}
 		}
 
 		return Optional.empty();
-	}
-
-	@Nonnull
-	@Override
-	public FileHandlingType getFileHandlingType() {
-		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS;
 	}
 
 	protected Properties getJobProperties(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
@@ -105,9 +101,9 @@ public abstract class BaseImportLoincStep<CT>
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
-		@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
-		throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
+			throws JobExecutionFailedException {
 		TerminologyFileSetJson data = theStepExecutionDetails.getData();
 		String jobInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		ImportLoincJobParameters jobParameters = theStepExecutionDetails.getParameters();
@@ -131,23 +127,30 @@ public abstract class BaseImportLoincStep<CT>
 			AttachmentDetails attachment = myJobPersistence.fetchAttachmentById(jobInstanceId, attachmentId);
 			try (InputStream inputStream = attachment.getInputStream()) {
 				InputStreamReader reader = new InputStreamReader(
-					BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
+						BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
 				CSVParser csvReader = newLoincCsvParser(reader);
 				for (CSVRecord record : csvReader.getRecords()) {
-					handleRecord(theStepExecutionDetails, jobMetadata, jobParameters, codeExtractionContext, record, codeSystemToPopulate, data, sourceFilename);
+					handleRecord(
+							theStepExecutionDetails,
+							jobMetadata,
+							jobParameters,
+							codeExtractionContext,
+							record,
+							codeSystemToPopulate,
+							data,
+							sourceFilename);
 				}
 
 			} catch (IOException e) {
-				// FIXME: add code
 				throw new JobExecutionFailedException(
-					Msg.code(1) + "Failed to read file attachment: " + e.getMessage(), e);
+						Msg.code(2941) + "Failed to read file attachment: " + e.getMessage(), e);
 			}
 
 			syncToDb(jobMetadata, codeExtractionContext, codeSystemToPopulate, theStepExecutionDetails);
-
 		}
 
-		if (!data.getStepIdToRecordsAdded().isEmpty() || !data.getResourcesToActivate().isEmpty()) {
+		if (!data.getStepIdToRecordsAdded().isEmpty()
+				|| !data.getResourcesToActivate().isEmpty()) {
 			TerminologyFileSetJson counterWorkChunk = new TerminologyFileSetJson();
 			counterWorkChunk.getStepIdToRecordsAdded().putAll(data.getStepIdToRecordsAdded());
 			counterWorkChunk.getResourcesToActivate().addAll(data.getResourcesToActivate());
@@ -157,34 +160,39 @@ public abstract class BaseImportLoincStep<CT>
 		return RunOutcome.SUCCESS;
 	}
 
-	private void syncConceptsToDb(@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, CodeSystem codeSystemToPopulate) {
+	private void syncConceptsToDb(
+			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			CodeSystem codeSystemToPopulate) {
 		if (codeSystemToPopulate.hasConcept()) {
 
 			int conceptCount = codeSystemToPopulate.getConcept().size();
 			ourLog.atInfo()
-				.setMessage("Storing {} concepts")
-				.addArgument(conceptCount)
-				.log();
+					.setMessage("Storing {} concepts")
+					.addArgument(conceptCount)
+					.log();
 
-			Callable<UploadStatistics> uploader = () -> myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulate);
+			Callable<UploadStatistics> uploader =
+					() -> myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulate);
 			UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
 
-			TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter = getRecordsAddedCounter(theStepExecutionDetails);
+			TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter =
+					getRecordsAddedCounter(theStepExecutionDetails);
 			recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
 			recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
 			recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
 			recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
-
 		}
 	}
 
-	protected <T> T executeInNewTransactionWithRetry(Callable<T> theFunction, StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+	protected <T> T executeInNewTransactionWithRetry(
+			Callable<T> theFunction,
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		int retryCount = 0;
 		while (true) {
 			try {
 				return myTransactionService
-					.withSystemRequestOnDefaultPartition()
-					.execute(theFunction);
+						.withSystemRequestOnDefaultPartition()
+						.execute(theFunction);
 			} catch (ResourceVersionConflictException e) {
 				// FIXME: add test
 				retryCount++;
@@ -193,12 +201,12 @@ public abstract class BaseImportLoincStep<CT>
 					throw e;
 				}
 				ourLog.atWarn()
-					.setMessage("Failed to save terminology for step {}, retry {}/{} in 5 seconds: {}")
-					.addArgument(theStepExecutionDetails.getCurrentStepId())
-					.addArgument(retryCount)
-					.addArgument(maxRetries)
-					.addArgument(e.getMessage())
-					.log();
+						.setMessage("Failed to save terminology for step {}, retry {}/{} in 5 seconds: {}")
+						.addArgument(theStepExecutionDetails.getCurrentStepId())
+						.addArgument(retryCount)
+						.addArgument(maxRetries)
+						.addArgument(e.getMessage())
+						.log();
 				sleepAtLeast(5 * DateUtils.MILLIS_PER_SECOND);
 			}
 		}
@@ -209,43 +217,48 @@ public abstract class BaseImportLoincStep<CT>
 	 * Subclasses may override, but they should call this super-method too.
 	 */
 	protected void syncToDb(
-		ImportTerminologyMetadataAttachmentJson theJobMetadata, CT theCodeExtractionContext,
-		CodeSystem theCodeSystemToPopulate,
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			CT theCodeExtractionContext,
+			CodeSystem theCodeSystemToPopulate,
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 
 		syncConceptsToDb(theStepExecutionDetails, theCodeSystemToPopulate);
-
 	}
 
 	// FIXME: this gets called repeatedly, we'd better cache it somewhere
-	public Map<String, CodeSystem.PropertyType> getPropertyNameToType(ImportTerminologyMetadataAttachmentJson theJobMetadata) {
+	public Map<String, CodeSystem.PropertyType> getPropertyNameToType(
+			ImportTerminologyMetadataAttachmentJson theJobMetadata) {
 		Map<String, CodeSystem.PropertyType> propertyNameToType = new HashMap<>();
-			for (CodeSystem.PropertyComponent nextProperty :
+		for (CodeSystem.PropertyComponent nextProperty :
 				theJobMetadata.getCodeSystem().getProperty()) {
-				String nextPropertyCode = nextProperty.getCode();
-				CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
-				if (isNotBlank(nextPropertyCode)) {
-					propertyNameToType.put(nextPropertyCode, nextPropertyType);
-				}
+			String nextPropertyCode = nextProperty.getCode();
+			CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
+			if (isNotBlank(nextPropertyCode)) {
+				propertyNameToType.put(nextPropertyCode, nextPropertyType);
 			}
+		}
 		return propertyNameToType;
 	}
 
 	protected abstract CT newContextObject(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails);
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails);
 
 	@Nonnull
-	protected abstract List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails);
+	protected abstract List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails);
 
 	protected abstract void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		CT theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename);
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			CT theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename);
 
 	protected TerminologyFileSetJson.RecordsAddedCounter getRecordsAddedCounter(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 
 		TerminologyFileSetJson data = theStepExecutionDetails.getData();
 		String currentStepId = theStepExecutionDetails.getCurrentStepId();
@@ -253,15 +266,21 @@ public abstract class BaseImportLoincStep<CT>
 	}
 
 	protected record LoincFileNameSpecification(
-		LoincUploadPropertiesEnum propertyName, List<LoincUploadPropertiesEnum> defaultValues,
-		Predicate<String> fileNameTester) {
+			FileHandlingType fileHandlingType,
+			LoincUploadPropertiesEnum propertyName,
+			List<LoincUploadPropertiesEnum> defaultValues,
+			Predicate<String> fileNameTester) {
 
-		protected LoincFileNameSpecification(LoincUploadPropertiesEnum propertyName, LoincUploadPropertiesEnum... defaultValue) {
-			this(propertyName, Arrays.asList(defaultValue), null);
+		protected LoincFileNameSpecification(
+				FileHandlingType theFileHandlingType,
+				LoincUploadPropertiesEnum thePropertyName,
+				LoincUploadPropertiesEnum... theDefaultValue) {
+			this(theFileHandlingType, thePropertyName, Arrays.asList(theDefaultValue), null);
 		}
 
-		protected LoincFileNameSpecification(Predicate<String> fileNameTester) {
-			this(null, null, fileNameTester);
+		protected LoincFileNameSpecification(
+				FileHandlingType theFileHandlingType, Predicate<String> theFileNameTester) {
+			this(theFileHandlingType, null, null, theFileNameTester);
 		}
 
 		public boolean matchFileName(Properties theJobProperties, String theFileName) {

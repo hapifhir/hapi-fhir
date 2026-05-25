@@ -35,7 +35,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep8HandlePartRelatedCodeMapping
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
+				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
 
 	@Override
 	protected MyBaseContext newContextObject(
@@ -45,25 +46,24 @@ public class ImportLoincStep8HandlePartRelatedCodeMapping
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE,
 				LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT));
 	}
 
-	@Nonnull
-	@Override
-	public FileHandlingType getFileHandlingType() {
-		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS;
-	}
-
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyBaseContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		String partNumber = trim(theRecord.get("PartNumber"));
 		String partName = trim(theRecord.get("PartName"));
 		String extCodeId = trim(theRecord.get("ExtCodeId"));
@@ -82,8 +82,8 @@ public class ImportLoincStep8HandlePartRelatedCodeMapping
 		String loincPartMapVersion;
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
 		if (isNotBlank(jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))) {
-			loincPartMapVersion = jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-"
-					+ codeSystemVersionId;
+			loincPartMapVersion =
+					jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-" + codeSystemVersionId;
 		} else {
 			loincPartMapVersion = codeSystemVersionId;
 		}
@@ -141,7 +141,7 @@ public class ImportLoincStep8HandlePartRelatedCodeMapping
 		}
 
 		addConceptMapEntry(
-			theContext,
+				theContext,
 				new ConceptMapping()
 						.setConceptMapId(loincPartMapId)
 						.setConceptMapUri(loincPartMapUri)
@@ -158,5 +158,4 @@ public class ImportLoincStep8HandlePartRelatedCodeMapping
 						.setEquivalence(equivalence)
 						.setCopyright(extCodeSystemCopyrightNotice));
 	}
-
 }

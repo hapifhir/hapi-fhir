@@ -32,27 +32,25 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
-		return List.of(new LoincFileNameSpecification(LOINC_HIERARCHY_FILE,
-			LOINC_HIERARCHY_FILE_DEFAULT,
-			LOINC_HIERARCHY_FILE_DEFAULT_NEW
-		));
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+		return List.of(new LoincFileNameSpecification(
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
+				LOINC_HIERARCHY_FILE,
+				LOINC_HIERARCHY_FILE_DEFAULT,
+				LOINC_HIERARCHY_FILE_DEFAULT_NEW));
 	}
-
-	@Nonnull
-	@Override
-	public FileHandlingType getFileHandlingType() {
-		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
-	}
-
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		String parentCode = trim(theRecord.get("IMMEDIATE_PARENT"));
 		String childCode = trim(theRecord.get("CODE"));
 
@@ -69,9 +67,10 @@ public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportL
 
 	@Override
 	protected void syncToDb(
-		ImportTerminologyMetadataAttachmentJson theJobMetadata, MyContext theCodeExtractionContext,
-		CodeSystem theCodeSystemToPopulate,
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			MyContext theCodeExtractionContext,
+			CodeSystem theCodeSystemToPopulate,
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		// Figure out which concepts are at the very top of the hierarchy (i.e. not children of any other concept)
 		// and put them at the root of the CodeSystem to upload
 

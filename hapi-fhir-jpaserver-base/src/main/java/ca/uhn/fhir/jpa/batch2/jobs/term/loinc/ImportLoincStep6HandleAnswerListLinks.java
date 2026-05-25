@@ -16,7 +16,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep6HandleAnswerListLinks
-		extends BaseImportLoincStepWithValueSetsAndConceptMaps<BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
+				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
 
 	@Override
 	protected MyBaseContext newContextObject(
@@ -26,19 +27,24 @@ public class ImportLoincStep6HandleAnswerListLinks
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE,
 				LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT));
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyBaseContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		String applicableContext = trim(theRecord.get("ApplicableContext"));
 
 		/*
@@ -73,5 +79,4 @@ public class ImportLoincStep6HandleAnswerListLinks
 				getOrAddConcept(theContext, theCodeSystemToPopulate, answerListId);
 		answerListCode.addProperty().setCode("answers-for").setValue(new StringType(loincNumber));
 	}
-
 }

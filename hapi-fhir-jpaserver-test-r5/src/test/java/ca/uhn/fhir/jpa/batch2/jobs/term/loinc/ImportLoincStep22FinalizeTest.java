@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.model.BatchInstanceStepStatisticsDTO;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -23,6 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,7 +40,7 @@ public class ImportLoincStep22FinalizeTest extends BaseImportLoincStepTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep22FinalizeTest.class);
 	@Mock
-	private IJobStepExecutionServices myStepExecutionSvcs;
+	private IJobStepExecutionServices myStepExecutionSvc;
 	@Mock
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Mock
@@ -54,6 +57,11 @@ public class ImportLoincStep22FinalizeTest extends BaseImportLoincStepTest {
 	@Test
 	void testProcess_GenerateReport() {
 		mockFetchJobMetadataAttachment();
+		when(myJobPersistence.calculateStepStatistics(eq("my-instance-id"))).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of(
+			"import-concepts", new BatchInstanceStepStatisticsDTO.StepStatistics(10, 20),
+			"import-hierarchy", new BatchInstanceStepStatisticsDTO.StepStatistics(20, 30),
+			"import-answer-lists", new BatchInstanceStepStatisticsDTO.StepStatistics(40, 50)
+		)));
 
 		// Test
 		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
@@ -61,18 +69,18 @@ public class ImportLoincStep22FinalizeTest extends BaseImportLoincStepTest {
 		data.getRecordsAddedCounter("import-concepts").incrementConceptsAdded(1);
 		data.getRecordsAddedCounter("import-hierarchy").incrementConceptsAdded(2);
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(3);
-		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
+		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "my-instance-id", "chunk-id"));
 
 		data = newData();
 		data.getRecordsAddedCounter("import-concepts").incrementConceptsAdded(2);
 		data.getRecordsAddedCounter("import-hierarchy").incrementConceptsAdded(3);
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(4);
-		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
+		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "my-instance-id", "chunk-id"));
 
-		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, theTxService).importLoincJobDefinition();
+		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
-		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvcs, jobDefinition, null, null), myDataSink);
+		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
 
 		// Verify
 		verify(myDataSink, times(1)).accept(myDataCaptor.capture());
@@ -83,6 +91,8 @@ public class ImportLoincStep22FinalizeTest extends BaseImportLoincStepTest {
 		assertThat(report).containsSubsequence(
 			"Concepts Added             : 15",
 			"Step: import-concepts (Import LOINC concepts)",
+			"   Total Work Chunks          : 10",
+			"   Total Processing Time      : 20ms",
 			"   Concepts Added             : 3"
 		);
 	}
@@ -90,6 +100,7 @@ public class ImportLoincStep22FinalizeTest extends BaseImportLoincStepTest {
 	@Test
 	void testProcess_ActivateValueSets() {
 		// Setup
+		when(myJobPersistence.calculateStepStatistics(any())).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of()));
 		mockFetchJobMetadataAttachment();
 		when(myDaoRegistry.getFhirContext()).thenReturn(FhirContext.forR4Cached());
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
@@ -105,10 +116,10 @@ public class ImportLoincStep22FinalizeTest extends BaseImportLoincStepTest {
 		data.addResourceToActivate("ValueSet/B");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, theTxService).importLoincJobDefinition();
+		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
-		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvcs, jobDefinition, null, null), myDataSink);
+		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
 
 		// Verify
 		verify(myValueSetDao, times(2)).patch(myIdCaptor.capture(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), myPatchBodyCaptor.capture(), any(), any());

@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -35,7 +34,7 @@ import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LO
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL;
 
 public class ImportLoincStep1ExpandDistributionIntoFilesStep
-	extends BaseExpandDistributionIntoFilesStep<ImportLoincJobParameters> {
+		extends BaseExpandDistributionIntoFilesStep<ImportLoincJobParameters> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep1ExpandDistributionIntoFilesStep.class);
 
 	@Autowired
@@ -46,22 +45,27 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 
 	@Override
 	protected void handleSynchronous(
-		StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
-		IJobDataSink<TerminologyFileSetJson> theDataSink, String theFileName,
-		byte[] theBytes,
-		ImportLoincJobParameters theJobParameters,
-		TerminologyFileSetJson theFileSet) {
-		super.handleSynchronous(theStepExecutionDetails, theDataSink, theFileName, theBytes, theJobParameters, theFileSet);
+			StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			String theFileName,
+			byte[] theBytes,
+			ImportLoincJobParameters theJobParameters,
+			TerminologyFileSetJson theFileSet) {
+		super.handleSynchronous(
+				theStepExecutionDetails, theDataSink, theFileName, theBytes, theJobParameters, theFileSet);
 
 		if (theFileName.endsWith("loinc.xml")) {
 			// FIXME: add test to ensure we fail if the ZIP has multiple loinc.xml
 			// FIXME: add test to ensure we fail if the ZIP has no loinc.xml
-			handleLoincXml(theStepExecutionDetails, theDataSink, theBytes, theJobParameters, theFileSet);
+			handleLoincXml(theStepExecutionDetails, theDataSink, theBytes, theJobParameters);
 		}
-
 	}
 
-	private void handleLoincXml(StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails, IJobDataSink<TerminologyFileSetJson> theDataSink, byte[] theBytes, ImportLoincJobParameters theJobParameters, TerminologyFileSetJson theFileSet) {
+	private void handleLoincXml(
+			StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			byte[] theBytes,
+			ImportLoincJobParameters theJobParameters) {
 		ourLog.info("Processing 'loinc.xml' file");
 
 		ImportTerminologyMetadataAttachmentJson jobMetadataAttachment = new ImportTerminologyMetadataAttachmentJson();
@@ -72,7 +76,7 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		CodeSystem cs = jobMetadataAttachment.getCodeSystem();
 		if (!"http://loinc.org".equals(cs.getUrl())) {
 			throw new JobExecutionFailedException(
-				Msg.code(876) + "'loinc.xml' file must have URL of 'http://loinc.org'. Found: " + cs.getUrl());
+					Msg.code(876) + "'loinc.xml' file must have URL of 'http://loinc.org'. Found: " + cs.getUrl());
 		}
 
 		String codeSystemVersionId = theJobParameters.getVersionId();
@@ -101,15 +105,15 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		valueSetDao.update(valueSet, srd);
 
 		ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse response =
-			myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
+				myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
 		jobMetadataAttachment.setCodeSystemStagingVersionId(response.stagingVersionId());
 
 		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		AttachmentDetails attachmentRequest = new AttachmentDetails(
-			new ByteArrayInputStream(JsonUtil.serialize(jobMetadataAttachment).getBytes(StandardCharsets.UTF_8)),
-			AttachmentContentTypeEnum.JSON,
-			ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME
-		);
+				new ByteArrayInputStream(
+						JsonUtil.serialize(jobMetadataAttachment).getBytes(StandardCharsets.UTF_8)),
+				AttachmentContentTypeEnum.JSON,
+				ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME);
 		myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
 
 		TerminologyFileSetJson fileSet = new TerminologyFileSetJson();

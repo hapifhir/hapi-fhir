@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.util.AsyncRequestUtil;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -42,7 +43,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.batch2.util.AsyncRequestUtil;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -186,8 +186,10 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		String relativeUrl = createPollingRelativeUrl(outcome.getInstanceId());
 		String operationName = getOperationName();
 
-		Consumer<IBaseOperationOutcome> operationOutcomePostProcessor = oo -> postProcessResponseOperationOutcome(oo, theRequestDetails);
-		AsyncRequestUtil.handleAsynchronousOperationStartRequest(theRequestDetails, relativeUrl, operationName, operationOutcomePostProcessor);
+		Consumer<IBaseOperationOutcome> operationOutcomePostProcessor =
+				oo -> postProcessResponseOperationOutcome(oo, theRequestDetails);
+		AsyncRequestUtil.handleAsynchronousOperationStartRequest(
+				theRequestDetails, relativeUrl, operationName, operationOutcomePostProcessor);
 	}
 
 	/**
@@ -237,20 +239,23 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 
 	@Nonnull
 	private String createPollingRelativeUrl(String jobInstanceId) {
-		return getOperationPollForStatusStatus() +
-			'?' +
-			JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID +
-			'=' +
-			jobInstanceId;
+		return getOperationPollForStatusStatus()
+				+ '?'
+				+ JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID
+				+ '='
+				+ jobInstanceId;
 	}
 
 	/**
 	 * Subclasses should call this method to poll for job status
 	 */
 	protected void pollForJobStatus(
-			ServletRequestDetails theRequestDetails, IPrimitiveType<String> theJobInstanceId, IPrimitiveType<String> theReturn)
+			ServletRequestDetails theRequestDetails,
+			IPrimitiveType<String> theJobInstanceId,
+			IPrimitiveType<String> theReturn)
 			throws IOException {
-		ValidateUtil.isTrueOrThrowInvalidRequest(theJobInstanceId != null && theJobInstanceId.hasValue(), "Missing job id");
+		ValidateUtil.isTrueOrThrowInvalidRequest(
+				theJobInstanceId != null && theJobInstanceId.hasValue(), "Missing job id");
 
 		String returnValue = null;
 		if (theReturn != null) {
@@ -265,35 +270,35 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 
 		if (instance.getStatus().isEnded()) {
 			if (isNotBlank(instance.getReport())) {
-				if (JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES.equals(
-					returnValue)) {
+				if (JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES.equals(returnValue)) {
 					BaseBulkModifyJobParameters jobParameters =
-						instance.getParameters(BaseBulkModifyJobParameters.DeserializingImpl.class);
+							instance.getParameters(BaseBulkModifyJobParameters.DeserializingImpl.class);
 					boolean isDryRunCollectChanges = jobParameters.isDryRun()
-						&& jobParameters.getDryRunMode() == BaseBulkModifyJobParameters.DryRunMode.COLLECT_CHANGED;
+							&& jobParameters.getDryRunMode() == BaseBulkModifyJobParameters.DryRunMode.COLLECT_CHANGED;
 					if (!isDryRunCollectChanges) {
-						throw new InvalidRequestException(
-							Msg.code(2815) + "Changes response can only be provided for "
+						throw new InvalidRequestException(Msg.code(2815) + "Changes response can only be provided for "
 								+ JpaConstants.OPERATION_BULK_PATCH_PARAM_DRY_RUN + " jobs with "
 								+ JpaConstants.OPERATION_BULK_PATCH_PARAM_DRY_RUN_MODE + "="
 								+ JpaConstants.OPERATION_BULK_PATCH_PARAM_DRY_RUN_MODE_COLLECT_CHANGES);
 					}
 
 					BulkModifyResourcesResultsJson results =
-						JsonUtil.deserialize(instance.getReport(), BulkModifyResourcesResultsJson.class);
+							JsonUtil.deserialize(instance.getReport(), BulkModifyResourcesResultsJson.class);
 					IBaseBundle returnBundle = createChangesBundle(results);
-					int status = instance.getStatus() == StatusEnum.COMPLETED ? HttpStatus.SC_OK : HttpStatus.SC_INTERNAL_SERVER_ERROR;
+					int status = instance.getStatus() == StatusEnum.COMPLETED
+							? HttpStatus.SC_OK
+							: HttpStatus.SC_INTERNAL_SERVER_ERROR;
 					RestfulServerUtils.streamResponseAsResource(
-						theRequestDetails.getServer(),
-						returnBundle,
-						Set.of(),
-						status,
-						null,
-						false,
-						false,
-						theRequestDetails,
-						null,
-						null);
+							theRequestDetails.getServer(),
+							returnBundle,
+							Set.of(),
+							status,
+							null,
+							false,
+							false,
+							theRequestDetails,
+							null,
+							null);
 					return;
 				}
 			}
@@ -302,13 +307,20 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		handleAsyncJobPollForStatusResponse(theRequestDetails, instance, operationName, returnValue);
 	}
 
-	private void handleAsyncJobPollForStatusResponse(ServletRequestDetails theRequestDetails, JobInstance theJobInstance, String theOperationName, String theReturnParameterValue) throws IOException {
-		Function<JobInstance, AsyncRequestUtil.CompletedJobPollResponse> createCompletionPollResponse = theInstance -> createCompletedJobPollResponse(theRequestDetails, theInstance, theReturnParameterValue);
-		AsyncRequestUtil.handleAsyncJobPollForStatusResponse(theRequestDetails, theJobInstance, theOperationName, createCompletionPollResponse);
+	private void handleAsyncJobPollForStatusResponse(
+			ServletRequestDetails theRequestDetails,
+			JobInstance theJobInstance,
+			String theOperationName,
+			String theReturnParameterValue)
+			throws IOException {
+		Function<JobInstance, AsyncRequestUtil.CompletedJobPollResponse> createCompletionPollResponse =
+				theInstance -> createCompletedJobPollResponse(theRequestDetails, theInstance, theReturnParameterValue);
+		AsyncRequestUtil.handleAsyncJobPollForStatusResponse(
+				theRequestDetails, theJobInstance, theOperationName, createCompletionPollResponse);
 	}
 
-
-	private AsyncRequestUtil.CompletedJobPollResponse createCompletedJobPollResponse(ServletRequestDetails theRequestDetails, JobInstance theInstance, String theReturnParameterValue) {
+	private AsyncRequestUtil.CompletedJobPollResponse createCompletedJobPollResponse(
+			ServletRequestDetails theRequestDetails, JobInstance theInstance, String theReturnParameterValue) {
 		BulkModifyResourcesResultsJson results =
 				JsonUtil.deserialize(theInstance.getReport(), BulkModifyResourcesResultsJson.class);
 		BaseBulkModifyJobParameters jobParameters =

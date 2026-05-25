@@ -30,23 +30,37 @@ public class ImportLoincStep12ImagingDocumentCode
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE,
 				LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT));
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyBaseContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
 
-		ValueSet valueSet = getValueSet(theStepExecutionDetails, theJobMetadata, theJobParameters, theData, theContext, VS_ID_BASE, VS_URI, VS_NAME, null);
+		ValueSet valueSet = getValueSet(
+				theStepExecutionDetails,
+				theJobMetadata,
+				theJobParameters,
+				theData,
+				theContext,
+				VS_ID_BASE,
+				VS_URI,
+				VS_NAME,
+				null);
 		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
 	}
 }

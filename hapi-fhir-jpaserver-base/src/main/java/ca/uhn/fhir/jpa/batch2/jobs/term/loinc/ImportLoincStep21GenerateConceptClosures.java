@@ -26,46 +26,55 @@ import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 
-public class ImportLoincStep21GenerateConceptClosures implements IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson>, ITerminologyImportFileHandlerStep<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
+public class ImportLoincStep21GenerateConceptClosures
+		implements IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson>,
+				ITerminologyImportFileHandlerStep<
+						ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep21GenerateConceptClosures.class);
 
 	@Autowired
 	private ITermConceptDao myConceptDao;
+
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+
 	@Autowired
 	private EntityManager myEntityManager;
+
 	@Autowired
 	private IHapiTransactionService myTxService;
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
+			throws JobExecutionFailedException {
 		TerminologyFileSetJson data = theStepExecutionDetails.getData();
 		StopWatch sw = new StopWatch();
 
 		Integer defaultPartitionId = myPartitionSettings.getDefaultPartitionId();
-		List<TermConcept.TermConceptPk> ids = data
-			.getConceptPidsToGenerateClosureFor()
-			.stream()
-			.map(t -> new TermConcept.TermConceptPk(t, defaultPartitionId))
-			.toList();
+		List<TermConcept.TermConceptPk> ids = data.getConceptPidsToGenerateClosureFor().stream()
+				.map(t -> new TermConcept.TermConceptPk(t, defaultPartitionId))
+				.toList();
 
 		// Actually calculate the hierarchy closures
 		myTxService
-			.withSystemRequestOnDefaultPartition()
-			.execute(() -> QueryChunker.chunk(ids, this::generateClosures));
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> QueryChunker.chunk(ids, this::generateClosures));
 
 		ourLog.atInfo()
-			.setMessage("Calculated hierarchy closure for {} concepts in {}. {}/sec")
-			.addArgument(ids.size())
-			.addArgument(sw)
-			.addArgument(sw.formatThroughput(ids.size(), TimeUnit.SECONDS))
-			.log();
+				.setMessage("Calculated hierarchy closure for {} concepts in {}. {}/sec")
+				.addArgument(ids.size())
+				.addArgument(sw)
+				.addArgument(sw.formatThroughput(ids.size(), TimeUnit.SECONDS))
+				.log();
 
 		// Emit statistics
 		TerminologyFileSetJson outputChunk = new TerminologyFileSetJson();
-		outputChunk.getRecordsAddedCounter(theStepExecutionDetails.getCurrentStepId()).incrementOtherChanges(ids.size());
+		outputChunk
+				.getRecordsAddedCounter(theStepExecutionDetails.getCurrentStepId())
+				.incrementOtherChanges(ids.size());
 		theDataSink.acceptForFutureStep(STEP_ID_FINALIZE_IMPORT, outputChunk);
 
 		return RunOutcome.SUCCESS;
@@ -84,14 +93,11 @@ public class ImportLoincStep21GenerateConceptClosures implements IJobStepWorker<
 
 	@Nonnull
 	@Override
-	public Optional<FileHandlingInstructions> canHandleFile(StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails, ImportLoincJobParameters theJobParameters, String theFileName) {
+	public Optional<FileHandlingInstructions> canHandleFile(
+			StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
+			ImportLoincJobParameters theJobParameters,
+			String theFileName) {
 		// This step doesn't process any files
 		return Optional.empty();
-	}
-
-	@Nonnull
-	@Override
-	public FileHandlingType getFileHandlingType() {
-		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
 	}
 }

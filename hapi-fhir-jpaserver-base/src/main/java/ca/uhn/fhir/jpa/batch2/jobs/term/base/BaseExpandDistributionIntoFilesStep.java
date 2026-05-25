@@ -43,7 +43,8 @@ import java.util.List;
 
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
-public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTerminologyImportParameters> implements IJobStepWorker<PT, VoidModel, TerminologyFileSetJson> {
+public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTerminologyImportParameters>
+		implements IJobStepWorker<PT, VoidModel, TerminologyFileSetJson> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseExpandDistributionIntoFilesStep.class);
 
@@ -59,13 +60,21 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
+			throws JobExecutionFailedException {
 
 		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		PT jobParameters = theStepExecutionDetails.getParameters();
-		AttachmentDetails loincFileAttachment = myJobPersistence.fetchAttachmentByFilename(instanceId, TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE);
+		AttachmentDetails loincFileAttachment = myJobPersistence.fetchAttachmentByFilename(
+				instanceId, TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE);
 
-		ourLog.info("Import {}[{}] - Expanding file {}", getTerminologyName(), instanceId, loincFileAttachment.getFilename());
+		ourLog.info(
+				"Import {}[{}] - Expanding file {}",
+				getTerminologyName(),
+				instanceId,
+				loincFileAttachment.getFilename());
 
 		TerminologyFileSetJson fileSet = newTerminologyFileSetJson();
 
@@ -76,49 +85,76 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 				while ((entry = zipInputStream.getNextEntry()) != null) {
 					try (BOMInputStream fis = new LoadedFileDescriptors.NonClosableBOMInputStream(zipInputStream)) {
 						String nextFileName = entry.getName();
+
+						ourLog.info("Import {}[{}] - Processing file: {}", getTerminologyName(), instanceId, nextFileName);
+
 						byte[] bytes = IOUtils.toByteArray(fis);
 
 						// Asynchronous processing (prepare work chunks based on input file)
-						List<StepIdAndFileHandlingInstructions> processors = getStepIdAndFileHandlingInstructionsForFileName(theStepExecutionDetails, jobParameters, theStepExecutionDetails.getJobDefinition(), nextFileName);
+						List<StepIdAndFileHandlingInstructions> processors =
+								getStepIdAndFileHandlingInstructionsForFileName(
+										theStepExecutionDetails,
+										jobParameters,
+										theStepExecutionDetails.getJobDefinition(),
+										nextFileName);
 
-						ListMultimap<ITerminologyImportFileHandlerStep.FileHandlingType, String> fileHandlingTypeToAttachmentIds = MultimapBuilder.hashKeys().arrayListValues().build();
+						ListMultimap<ITerminologyImportFileHandlerStep.FileHandlingType, String>
+								fileHandlingTypeToAttachmentIds = MultimapBuilder.hashKeys()
+										.arrayListValues()
+										.build();
 
 						for (StepIdAndFileHandlingInstructions processor : processors) {
-							ITerminologyImportFileHandlerStep.FileHandlingType fileHandlingType = processor.fileHandlingInstructions().fileHandlingType();
+							ITerminologyImportFileHandlerStep.FileHandlingType fileHandlingType =
+									processor.fileHandlingInstructions().fileHandlingType();
 
 							if (fileHandlingTypeToAttachmentIds.containsKey(fileHandlingType)) {
 								List<String> attachmentIds = fileHandlingTypeToAttachmentIds.get(fileHandlingType);
 								for (String attachmentId : attachmentIds) {
 									TerminologyFileSetJson data = newTerminologyFileSetJson();
-									data.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk(nextFileName, attachmentId));
+									data.setChunkForCurrentStep(
+											new TerminologyFileSetJson.Chunk(nextFileName, attachmentId));
 									theDataSink.acceptForFutureStep(processor.stepId(), data);
-
 								}
 								continue;
 							}
 
-							List<String> attachmentIds = switch (fileHandlingType) {
-								case CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS -> {
-									int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 1000);
-									yield csvSplitWithRepeatHeader(instanceId, bytes, loincFileAttachment.getFilename(), nextFileName, processor.stepId(), chunkSize, theDataSink);
-								}
-								case CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS -> {
-									int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 50000);
-									yield csvSplitWithRepeatHeader(instanceId, bytes, loincFileAttachment.getFilename(), nextFileName, processor.stepId(), chunkSize, theDataSink);
-								}
-							};
+							List<String> attachmentIds =
+									switch (fileHandlingType) {
+										case CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS -> {
+											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 1000);
+											yield csvSplitWithRepeatHeader(
+													instanceId,
+													bytes,
+													loincFileAttachment.getFilename(),
+													nextFileName,
+													processor.stepId(),
+													chunkSize,
+													theDataSink);
+										}
+										case CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS -> {
+											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 50000);
+											yield csvSplitWithRepeatHeader(
+													instanceId,
+													bytes,
+													loincFileAttachment.getFilename(),
+													nextFileName,
+													processor.stepId(),
+													chunkSize,
+													theDataSink);
+										}
+									};
 							fileHandlingTypeToAttachmentIds.putAll(fileHandlingType, attachmentIds);
 						}
 
 						// Synchronous processing (anything that is small enough to just handle it here)
-						handleSynchronous(theStepExecutionDetails, theDataSink, nextFileName, bytes, jobParameters, fileSet);
-
+						handleSynchronous(
+								theStepExecutionDetails, theDataSink, nextFileName, bytes, jobParameters, fileSet);
 					}
 				}
 			}
 		} catch (IOException e) {
-			// FIXME: add code
-			throw new JobExecutionFailedException(Msg.code(1) + "Files to expand " + getTerminologyName() + " zip file: " + e.getMessage(), e);
+			throw new JobExecutionFailedException(
+					Msg.code(2938) + "Files to expand " + getTerminologyName() + " zip file: " + e.getMessage(), e);
 		}
 
 		return RunOutcome.SUCCESS;
@@ -127,7 +163,13 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 	/**
 	 * Subclasses can override this method to handle files that are small enough to just handle here.
 	 */
-	protected void handleSynchronous(StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, IJobDataSink<TerminologyFileSetJson> theDataSink, String theFileName, byte[] theBytes, PT theJobParameters, TerminologyFileSetJson theFileSet) {
+	protected void handleSynchronous(
+			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			String theFileName,
+			byte[] theBytes,
+			PT theJobParameters,
+			TerminologyFileSetJson theFileSet) {
 		// nothing
 	}
 
@@ -138,7 +180,15 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 	/**
 	 * @return A list of attachment IDs for the work chunks that were created.
 	 */
-	private List<String> csvSplitWithRepeatHeader(String theJobInstanceId, byte[] theBytes, String theZipOuterFilename, String theZipInnerFilename, String theStepId, int theChunkLines, IJobDataSink<TerminologyFileSetJson> theDataSink) throws JobExecutionFailedException {
+	private List<String> csvSplitWithRepeatHeader(
+			String theJobInstanceId,
+			byte[] theBytes,
+			String theZipOuterFilename,
+			String theZipInnerFilename,
+			String theStepId,
+			int theChunkLines,
+			IJobDataSink<TerminologyFileSetJson> theDataSink)
+			throws JobExecutionFailedException {
 		List<String> attachmentIds = new ArrayList<>();
 
 		String filename = theZipInnerFilename;
@@ -162,7 +212,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 				recordsBuffer.add(nextRecord);
 
 				if (recordsBuffer.size() == theChunkLines || !recordIterator.hasNext()) {
-					String attachmentId = writeChunk(theJobInstanceId, headers, recordsBuffer, filename, startRow, endRow);
+					String attachmentId =
+							writeChunk(theJobInstanceId, headers, recordsBuffer, filename, startRow, endRow);
 
 					TerminologyFileSetJson data = newTerminologyFileSetJson();
 					data.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk(theZipInnerFilename, attachmentId));
@@ -179,26 +230,33 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 			}
 
 		} catch (IOException e) {
-			// FIXME: add code
-			throw new JobExecutionFailedException(Msg.code(1) + "Failed to parse " + theZipInnerFilename + " in zip file: " + theZipOuterFilename + ": " + e, e);
+			throw new JobExecutionFailedException(
+					Msg.code(2939) + "Failed to parse " + theZipInnerFilename + " in zip file: " + theZipOuterFilename
+							+ ": " + e,
+					e);
 		}
 
 		return attachmentIds;
 	}
 
-	private String writeChunk(String theJobInstanceId, List<String> theHeaders, List<CSVRecord> theRecordsBuffer, String theFilename, int theStartRow, int theEndRow) {
+	private String writeChunk(
+			String theJobInstanceId,
+			List<String> theHeaders,
+			List<CSVRecord> theRecordsBuffer,
+			String theFilename,
+			int theStartRow,
+			int theEndRow) {
 		CsvUtil.ICsvProducer producer = thePrinter -> {
 			for (CSVRecord record : theRecordsBuffer) {
 				thePrinter.printRecord(record);
 			}
 		};
 		byte[] bytes = CsvUtil.writeCsvToByteArray(theHeaders.toArray(new String[0]), producer);
-		AttachmentDetails attachmentDetails = AttachmentDetails
-			.build()
-			.withContentType(AttachmentContentTypeEnum.CSV)
-			.withBytes(bytes)
-			.withFilename(theFilename + "_" + theStartRow + "-" + theEndRow)
-			.build();
+		AttachmentDetails attachmentDetails = AttachmentDetails.build()
+				.withContentType(AttachmentContentTypeEnum.CSV)
+				.withBytes(bytes)
+				.withFilename(theFilename + "_" + theStartRow + "-" + theEndRow)
+				.build();
 		return myJobPersistence.storeNewAttachment(theJobInstanceId, attachmentDetails);
 	}
 
@@ -207,14 +265,19 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		return "LOINC";
 	}
 
-	private List<StepIdAndFileHandlingInstructions> getStepIdAndFileHandlingInstructionsForFileName(StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, PT theJobParameters, JobDefinition<PT> theJobDefinition, String theStepId) {
+	private List<StepIdAndFileHandlingInstructions> getStepIdAndFileHandlingInstructionsForFileName(
+			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+			PT theJobParameters,
+			JobDefinition<PT> theJobDefinition,
+			String theStepId) {
 		List<StepIdAndFileHandlingInstructions> stepProcessingInstructions = new ArrayList<>();
 
 		for (JobDefinitionStep<PT, ?, ?> step : theJobDefinition.getSteps()) {
 			if (step.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep<PT, ?, ?> fileHandler) {
 				fileHandler
-					.canHandleFile(theStepExecutionDetails, theJobParameters, theStepId)
-					.ifPresent(instructions -> stepProcessingInstructions.add(new StepIdAndFileHandlingInstructions(step.getStepId(), instructions)));
+						.canHandleFile(theStepExecutionDetails, theJobParameters, theStepId)
+						.ifPresent(instructions -> stepProcessingInstructions.add(
+								new StepIdAndFileHandlingInstructions(step.getStepId(), instructions)));
 			}
 		}
 
@@ -223,21 +286,23 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 	@Nonnull
 	public static CSVParser newLoincCsvParser(Reader theReader) throws IOException {
-		return new CSVParser(theReader, CSVFormat.DEFAULT.builder()
-			.setDelimiter(',')
-			.setEscape(null)
-			.setIgnoreEmptyLines(true)
-			.setQuote('"')
-			.setRecordSeparator('\n')
-			.setNullString("")
-			.setQuoteMode(QuoteMode.NON_NUMERIC)
-			.setHeader()
-			.setSkipHeaderRecord(true)
-			.get());
+		return new CSVParser(
+				theReader,
+				CSVFormat.DEFAULT
+						.builder()
+						.setDelimiter(',')
+						.setEscape(null)
+						.setIgnoreEmptyLines(true)
+						.setQuote('"')
+						.setRecordSeparator('\n')
+						.setNullString("")
+						.setQuoteMode(QuoteMode.NON_NUMERIC)
+						.setHeader()
+						.setSkipHeaderRecord(true)
+						.setTrim(true)
+						.get());
 	}
 
-	private record StepIdAndFileHandlingInstructions(String stepId,
-	                                                 ITerminologyImportFileHandlerStep.FileHandlingInstructions fileHandlingInstructions) {
-	}
-
+	private record StepIdAndFileHandlingInstructions(
+			String stepId, ITerminologyImportFileHandlerStep.FileHandlingInstructions fileHandlingInstructions) {}
 }

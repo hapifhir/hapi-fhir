@@ -40,12 +40,11 @@ public interface IRawHttp {
 	 */
 	IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> get(String theUrl);
 
-
 	/**
 	 * Creates a POST request to the specified URL.
 	 *
 	 * @since 8.12.0
 	 */
-	IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> post(String theUrl, RawRequestEntity theRequest);
-
+	IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> post(
+			String theUrl, RawRequestEntity theRequest);
 }

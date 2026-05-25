@@ -32,16 +32,15 @@ public class BaseImportTerminologyStep {
 	}
 
 	protected ImportTerminologyMetadataAttachmentJson getJobMetadata(String jobInstanceId) {
-		AttachmentDetails jobMetadataAttachment = myJobPersistence.fetchAttachmentByFilename(jobInstanceId, ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME);
+		AttachmentDetails jobMetadataAttachment = myJobPersistence.fetchAttachmentByFilename(
+				jobInstanceId, ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME);
 		ImportTerminologyMetadataAttachmentJson jobMetadata;
 		try {
-			jobMetadata = JsonUtil.deserialize(jobMetadataAttachment.getInputStream(), ImportTerminologyMetadataAttachmentJson.class);
+			jobMetadata = JsonUtil.deserialize(
+					jobMetadataAttachment.getInputStream(), ImportTerminologyMetadataAttachmentJson.class);
 		} catch (IOException e) {
-			// FIXME: add code
-			throw new JobExecutionFailedException(Msg.code(1) + "Failed to retrieve job metadata attachment: " + e);
+			throw new JobExecutionFailedException(Msg.code(2940) + "Failed to retrieve job metadata attachment: " + e);
 		}
 		return jobMetadata;
 	}
-
-
 }

@@ -33,7 +33,9 @@ import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LO
  * are created, because they require a 'display' value associated to other TermConcept (pointed by the 'code'
  * property value), which requires that concept to have been created.
  */
-public class ImportLoincStep18CodingProperties extends BaseImportLoincStepWithValueSetsAndConceptMaps<BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
+public class ImportLoincStep18CodingProperties
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<
+				BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep18CodingProperties.class);
 
 	private static final String ASK_AT_ORDER_ENTRY_PROP_NAME = "AskAtOrderEntry";
@@ -44,20 +46,29 @@ public class ImportLoincStep18CodingProperties extends BaseImportLoincStepWithVa
 	private IValidationSupport myValidationSupport;
 
 	@Override
-	protected MyBaseContext newContextObject(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+	protected MyBaseContext newContextObject(
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext(theStepExecutionDetails);
 	}
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
-		return List.of(
-			new LoincFileNameSpecification(LOINC_FILE, LOINC_FILE_DEFAULT)
-		);
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+		return List.of(new LoincFileNameSpecification(
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS, LOINC_FILE, LOINC_FILE_DEFAULT));
 	}
 
 	@Override
-	protected void handleRecord(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, TerminologyFileSetJson theData, String theSourceFilename) {
+	protected void handleRecord(
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		if (!anyValidProperty(theJobMetadata)) {
 			return;
 		}
@@ -75,14 +86,16 @@ public class ImportLoincStep18CodingProperties extends BaseImportLoincStepWithVa
 			return;
 		}
 
-		CodeSystem.ConceptDefinitionComponent srcTermConcept = getOrAddConcept(theContext, theCodeSystemToPopulate, code);
+		CodeSystem.ConceptDefinitionComponent srcTermConcept =
+				getOrAddConcept(theContext, theCodeSystemToPopulate, code);
 
 		if (isNotBlank(askAtOrderEntryValue)) {
 			addCodingProperties(theJobMetadata, srcTermConcept, ASK_AT_ORDER_ENTRY_PROP_NAME, askAtOrderEntryValue);
 		}
 
 		if (isNotBlank(associatedObservationsValue)) {
-			addCodingProperties(theJobMetadata, srcTermConcept, ASSOCIATED_OBSERVATIONS_PROP_NAME, associatedObservationsValue);
+			addCodingProperties(
+					theJobMetadata, srcTermConcept, ASSOCIATED_OBSERVATIONS_PROP_NAME, associatedObservationsValue);
 		}
 	}
 
@@ -90,34 +103,42 @@ public class ImportLoincStep18CodingProperties extends BaseImportLoincStepWithVa
 	 * Validates that at least one ot target properties is defined in the loinc.xml file and is of the type "CODING"
 	 */
 	private boolean anyValidProperty(ImportTerminologyMetadataAttachmentJson theJobMetadata) {
-		CodeSystem.PropertyType askAtOrderEntryPropType = getPropertyNameToType(theJobMetadata).get(ASK_AT_ORDER_ENTRY_PROP_NAME);
+		CodeSystem.PropertyType askAtOrderEntryPropType =
+				getPropertyNameToType(theJobMetadata).get(ASK_AT_ORDER_ENTRY_PROP_NAME);
 		CodeSystem.PropertyType associatedObservationsPropType =
-			getPropertyNameToType(theJobMetadata).get(ASSOCIATED_OBSERVATIONS_PROP_NAME);
+				getPropertyNameToType(theJobMetadata).get(ASSOCIATED_OBSERVATIONS_PROP_NAME);
 
 		return askAtOrderEntryPropType == CodeSystem.PropertyType.CODING
-			|| associatedObservationsPropType == CodeSystem.PropertyType.CODING;
+				|| associatedObservationsPropType == CodeSystem.PropertyType.CODING;
 	}
 
-	private void addCodingProperties(ImportTerminologyMetadataAttachmentJson theJobMetadata, CodeSystem.ConceptDefinitionComponent theConceptToPopulate, String thePropertyName, String thePropertyValue) {
+	private void addCodingProperties(
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			CodeSystem.ConceptDefinitionComponent theConceptToPopulate,
+			String thePropertyName,
+			String thePropertyValue) {
 		List<String> propertyCodeValues = parsePropertyCodeValues(thePropertyValue);
 		for (String propertyCodeValue : propertyCodeValues) {
 
 			String version = theJobMetadata.getCodeSystemStagingVersionId();
-			LookupCodeRequest request = new LookupCodeRequest(LOINC_GENERIC_CODE_SYSTEM_URL + "|" + version, propertyCodeValue);
-			IValidationSupport.LookupCodeResult lookupResponse = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
+			LookupCodeRequest request =
+					new LookupCodeRequest(LOINC_GENERIC_CODE_SYSTEM_URL + "|" + version, propertyCodeValue);
+			IValidationSupport.LookupCodeResult lookupResponse =
+					myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
 			if (lookupResponse == null || !lookupResponse.isFound()) {
 				ourLog.error(
-					"Couldn't find TermConcept for code: '{}'. Display property set to blank for property: '{}'",
-					propertyCodeValue,
-					thePropertyName);
+						"Couldn't find TermConcept for code: '{}'. Display property set to blank for property: '{}'",
+						propertyCodeValue,
+						thePropertyName);
 				continue;
 			}
 
-			ourLog.trace("Adding coding property: {} to concept.code {}", thePropertyName, theConceptToPopulate.getCode());
+			ourLog.trace(
+					"Adding coding property: {} to concept.code {}", thePropertyName, theConceptToPopulate.getCode());
 			theConceptToPopulate
-				.addProperty()
-				.setCode(thePropertyName)
-				.setValue(new Coding(ITermLoaderSvc.LOINC_URI, propertyCodeValue, lookupResponse.getCodeDisplay()));
+					.addProperty()
+					.setCode(thePropertyName)
+					.setValue(new Coding(ITermLoaderSvc.LOINC_URI, propertyCodeValue, lookupResponse.getCodeDisplay()));
 		}
 	}
 
@@ -127,5 +148,4 @@ public class ImportLoincStep18CodingProperties extends BaseImportLoincStepWithVa
 		tokenizer.setTrimmerMatcher(new StringTrimmingTrimmerMatcher());
 		return tokenizer.getTokenList();
 	}
-
 }

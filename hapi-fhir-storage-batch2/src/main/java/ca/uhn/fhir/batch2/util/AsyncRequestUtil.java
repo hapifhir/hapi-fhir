@@ -48,21 +48,24 @@ public class AsyncRequestUtil {
 		// non-instantiable
 	}
 
-
 	/**
 	 * <p>
 	 * This method is currently considered an internal HAPI FHIR API and is subject to change. Use with caution!
 	 * </p>
 	 */
 	@Beta
-	public static void handleAsynchronousOperationStartRequest(ServletRequestDetails theRequestDetails, String theRelativeUrl, String theOperationName, @Nullable Consumer<IBaseOperationOutcome> theOperationOutcomePostProcessor) throws IOException {
+	public static void handleAsynchronousOperationStartRequest(
+			ServletRequestDetails theRequestDetails,
+			String theRelativeUrl,
+			String theOperationName,
+			@Nullable Consumer<IBaseOperationOutcome> theOperationOutcomePostProcessor)
+			throws IOException {
 		String pollUrl = RestfulServerUtils.createFullyQualifiedUrlFromRelativeUrl(theRequestDetails, theRelativeUrl);
 		FhirContext fhirContext = theRequestDetails.getServer().getFhirContext();
 
 		// Create an OperationOutcome to return
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(fhirContext);
-		String message =
-			theOperationName + " job has been accepted. Poll for status at the following URL: " + pollUrl;
+		String message = theOperationName + " job has been accepted. Poll for status at the following URL: " + pollUrl;
 		String severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 		String code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 		OperationOutcomeUtil.addIssue(fhirContext, oo, severity, message, null, code);
@@ -73,44 +76,47 @@ public class AsyncRequestUtil {
 
 		// Provide a response
 		Multimap<String, String> additionalHeaders = ImmutableMultimap.<String, String>builder()
-			.put(Constants.HEADER_CONTENT_LOCATION, pollUrl)
-			.build();
+				.put(Constants.HEADER_CONTENT_LOCATION, pollUrl)
+				.build();
 
 		RestfulServerUtils.streamResponseAsResource(
-			theRequestDetails.getServer(),
-			oo,
-			Set.of(),
-			HttpServletResponse.SC_ACCEPTED,
-			additionalHeaders,
-			false,
-			false,
-			theRequestDetails,
-			null,
-			null);
+				theRequestDetails.getServer(),
+				oo,
+				Set.of(),
+				HttpServletResponse.SC_ACCEPTED,
+				additionalHeaders,
+				false,
+				false,
+				theRequestDetails,
+				null,
+				null);
 	}
 
 	@Nonnull
-	public static JobInstance getJobInstance(IPrimitiveType<String> theJobInstanceId, IJobCoordinator jobCoordinator, String jobId, String operationName) {
+	public static JobInstance getJobInstance(
+			IPrimitiveType<String> theJobInstanceId,
+			IJobCoordinator jobCoordinator,
+			String jobId,
+			String operationName) {
 		JobInstance instance;
 		try {
 			instance = jobCoordinator.getInstance(DatatypeUtil.toStringValue(theJobInstanceId));
 		} catch (ResourceNotFoundException e) {
 			throw new ResourceNotFoundException(
-				Msg.code(2787) + "Invalid/unknown job ID: " + UrlUtil.sanitizeUrlPart(theJobInstanceId.getValue()));
+					Msg.code(2787) + "Invalid/unknown job ID: " + UrlUtil.sanitizeUrlPart(theJobInstanceId.getValue()));
 		}
 
-
 		ValidateUtil.isTrueOrThrowInvalidRequest(
-			instance.getJobDefinitionId().equals(jobId),
-			"Job ID does not correspond to a " + operationName + " job");
+				instance.getJobDefinitionId().equals(jobId),
+				"Job ID does not correspond to a " + operationName + " job");
 		return instance;
 	}
 
 	public static void writeResponseWithStringBody(
-		HttpServletResponse theServletResponse,
-		ImmutableMultimap.Builder<String, String> theAdditionalHeaders,
-		String theResponseString)
-		throws IOException {
+			HttpServletResponse theServletResponse,
+			ImmutableMultimap.Builder<String, String> theAdditionalHeaders,
+			String theResponseString)
+			throws IOException {
 		theServletResponse.setStatus(HttpStatus.SC_OK);
 		theServletResponse.setContentType(Constants.CT_TEXT);
 		theServletResponse.setCharacterEncoding(Constants.CHARSET_NAME_UTF8);
@@ -143,7 +149,12 @@ public class AsyncRequestUtil {
 	 * @see CompletedJobPollResponse
 	 */
 	@Beta
-	public static void handleAsyncJobPollForStatusResponse(ServletRequestDetails theRequestDetails, JobInstance theJobInstance, String theOperationName, Function<JobInstance, CompletedJobPollResponse> theCompletedJobResponseProvider) throws IOException {
+	public static void handleAsyncJobPollForStatusResponse(
+			ServletRequestDetails theRequestDetails,
+			JobInstance theJobInstance,
+			String theOperationName,
+			Function<JobInstance, CompletedJobPollResponse> theCompletedJobResponseProvider)
+			throws IOException {
 		int status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
 		List<String> messages = new ArrayList<>();
 		String severity = "";
@@ -173,7 +184,7 @@ public class AsyncRequestUtil {
 				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 			}
-			//noinspection deprecation
+				//noinspection deprecation
 			case ERRORED, FAILED, COMPLETED -> {
 				if (theJobInstance.getStatus() == StatusEnum.COMPLETED) {
 					status = HttpStatus.SC_OK;
@@ -181,7 +192,8 @@ public class AsyncRequestUtil {
 					severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 					code = OperationOutcomeUtil.OO_ISSUE_CODE_SUCCESS;
 				} else {
-					progressMessage = theOperationName + " job has failed with error: " + theJobInstance.getErrorMessage();
+					progressMessage =
+							theOperationName + " job has failed with error: " + theJobInstance.getErrorMessage();
 					severity = OperationOutcomeUtil.OO_SEVERITY_ERROR;
 					code = OperationOutcomeUtil.OO_ISSUE_CODE_PROCESSING;
 				}
@@ -190,9 +202,11 @@ public class AsyncRequestUtil {
 				if (isBlank(reportText)) {
 					messages.add(progressMessage);
 				} else {
-					CompletedJobPollResponse completedJobPollResponse = theCompletedJobResponseProvider.apply(theJobInstance);
+					CompletedJobPollResponse completedJobPollResponse =
+							theCompletedJobResponseProvider.apply(theJobInstance);
 					if (completedJobPollResponse.rawBody() != null) {
-						writeResponseWithStringBody(theRequestDetails.getServletResponse(), null, completedJobPollResponse.rawBody());
+						writeResponseWithStringBody(
+								theRequestDetails.getServletResponse(), null, completedJobPollResponse.rawBody());
 						return;
 					}
 					if (completedJobPollResponse.messages() != null) {
@@ -252,16 +266,16 @@ public class AsyncRequestUtil {
 		Multimap<String, String> additionalHeaders1 = additionalHeaders.build();
 
 		RestfulServerUtils.streamResponseAsResource(
-			theRequestDetails.getServer(),
-			responseResource,
-			Set.of(),
-			status,
-			additionalHeaders1,
-			false,
-			false,
-			theRequestDetails,
-			null,
-			null);
+				theRequestDetails.getServer(),
+				responseResource,
+				Set.of(),
+				status,
+				additionalHeaders1,
+				false,
+				false,
+				theRequestDetails,
+				null,
+				null);
 	}
 
 	/**
@@ -270,6 +284,5 @@ public class AsyncRequestUtil {
 	 * @param messages
 	 * @see #handleAsyncJobPollForStatusResponse(ServletRequestDetails, JobInstance, String, Function)
 	 */
-	public record CompletedJobPollResponse(@Nullable String rawBody, List<String> messages) {
-	}
+	public record CompletedJobPollResponse(@Nullable String rawBody, List<String> messages) {}
 }

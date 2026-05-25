@@ -29,8 +29,10 @@ public class ImportLoincStep14GroupTermsFile
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE,
 				LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT));
 	}
@@ -38,22 +40,30 @@ public class ImportLoincStep14GroupTermsFile
 	// FIXME: remove
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
+			throws JobExecutionFailedException {
 		return super.run(theStepExecutionDetails, theDataSink);
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyBaseContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		String groupId = trim(theRecord.get("GroupId"));
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 
 		ValueSet valueSet = getValueSet(
-			theStepExecutionDetails, theJobMetadata, theJobParameters,
+				theStepExecutionDetails,
+				theJobMetadata,
+				theJobParameters,
 				theData,
 				theContext,
 				groupId,

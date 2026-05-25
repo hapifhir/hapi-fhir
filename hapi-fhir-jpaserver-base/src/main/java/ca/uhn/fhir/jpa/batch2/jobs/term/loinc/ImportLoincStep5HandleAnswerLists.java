@@ -22,30 +22,35 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 // FIXME: make sure we don't expand ValueSets until status = active
 public class ImportLoincStep5HandleAnswerLists
-	extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep5HandleAnswerLists.MyContext> {
+		extends BaseImportLoincStepWithValueSetsAndConceptMaps<ImportLoincStep5HandleAnswerLists.MyContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep5HandleAnswerLists.class);
 
 	@Override
 	protected MyContext newContextObject(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyContext(theStepExecutionDetails);
 	}
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
-			LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE,
-			LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT));
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
+				LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE,
+				LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT));
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		// this is the code for the list (will repeat)
 		String answerListId = trim(theRecord.get("AnswerListId"));
 		String answerListName = trim(theRecord.get("AnswerListName"));
@@ -75,13 +80,15 @@ public class ImportLoincStep5HandleAnswerLists
 		// Answer list ValueSet
 		String codeSystemVersionId = theJobMetadata.getCodeSystem().getVersion();
 		ValueSet vs = getValueSet(
-			theStepExecutionDetails, theJobMetadata, theJobParameters,
-			theData,
-			theContext,
-			answerListId,
-			"http://loinc.org/vs/" + answerListId,
-			answerListName,
-			LOINC_ANSWERLIST_VERSION.getCode());
+				theStepExecutionDetails,
+				theJobMetadata,
+				theJobParameters,
+				theData,
+				theContext,
+				answerListId,
+				"http://loinc.org/vs/" + answerListId,
+				answerListName,
+				LOINC_ANSWERLIST_VERSION.getCode());
 		if (vs.getIdentifier().isEmpty()) {
 			vs.addIdentifier().setSystem("urn:ietf:rfc:3986").setValue("urn:oid:" + answerListOid);
 		}
@@ -96,12 +103,12 @@ public class ImportLoincStep5HandleAnswerLists
 			}
 
 			vs.getCompose()
-				.getIncludeFirstRep()
-				.setSystem(ITermLoaderSvc.LOINC_URI)
-				.setVersion(codeSystemVersionId)
-				.addConcept()
-				.setCode(answerString)
-				.setDisplay(displayText);
+					.getIncludeFirstRep()
+					.setSystem(ITermLoaderSvc.LOINC_URI)
+					.setVersion(codeSystemVersionId)
+					.addConcept()
+					.setCode(answerString)
+					.setDisplay(displayText);
 		}
 	}
 

@@ -30,18 +30,24 @@ public class ImportLoincStep13GroupFile
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
-				LoincUploadPropertiesEnum.LOINC_GROUP_FILE, LoincUploadPropertiesEnum.LOINC_GROUP_FILE_DEFAULT));
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
+				LoincUploadPropertiesEnum.LOINC_GROUP_FILE,
+				LoincUploadPropertiesEnum.LOINC_GROUP_FILE_DEFAULT));
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyBaseContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		String parentGroupId = trim(theRecord.get("ParentGroupId"));
 		String groupId = trim(theRecord.get("GroupId"));
 		String groupName = trim(theRecord.get("Group"));
@@ -52,7 +58,9 @@ public class ImportLoincStep13GroupFile
 		groupValueSetId = groupId;
 
 		ValueSet parentValueSet = getValueSet(
-			theStepExecutionDetails, theJobMetadata, theJobParameters,
+				theStepExecutionDetails,
+				theJobMetadata,
+				theJobParameters,
 				theData,
 				theContext,
 				parentGroupValueSetId,
@@ -62,7 +70,10 @@ public class ImportLoincStep13GroupFile
 
 		ValueSet.ConceptSetComponent include = parentValueSet.getCompose().getIncludeFirstRep();
 
-		Set<String> existingInclusions = include.getValueSet().stream().map(PrimitiveType::getValue).filter(Objects::nonNull).collect(Collectors.toSet());
+		Set<String> existingInclusions = include.getValueSet().stream()
+				.map(PrimitiveType::getValue)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
 		if (!existingInclusions.contains(VS_URI_PREFIX + groupId)) {
 			getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetInclusionsAdded(1);
 			include.addValueSet(VS_URI_PREFIX + groupId);
@@ -70,6 +81,15 @@ public class ImportLoincStep13GroupFile
 
 		// Create group to set its name (terms are added in a different
 		// handler)
-		getValueSet(theStepExecutionDetails, theJobMetadata, theJobParameters, theData, theContext, groupValueSetId, VS_URI_PREFIX + groupId, groupName, null);
+		getValueSet(
+				theStepExecutionDetails,
+				theJobMetadata,
+				theJobParameters,
+				theData,
+				theContext,
+				groupValueSetId,
+				VS_URI_PREFIX + groupId,
+				groupName,
+				null);
 	}
 }

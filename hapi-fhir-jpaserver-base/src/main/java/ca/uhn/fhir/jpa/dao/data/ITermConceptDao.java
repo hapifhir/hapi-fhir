@@ -97,7 +97,8 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, TermConcept.
 	List<TermConcept> findByCodeSystemVersion(@Param("code_system") TermCodeSystemVersion theCodeSystem);
 
 	@Query("SELECT c.myId FROM TermConcept c WHERE c.myCodeSystem = :code_system")
-	Stream<TermConcept.TermConceptPk> findPidsByCodeSystemVersion(@Param("code_system") TermCodeSystemVersion theCodeSystem);
+	Stream<TermConcept.TermConceptPk> findPidsByCodeSystemVersion(
+			@Param("code_system") TermCodeSystemVersion theCodeSystem);
 
 	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
 	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);

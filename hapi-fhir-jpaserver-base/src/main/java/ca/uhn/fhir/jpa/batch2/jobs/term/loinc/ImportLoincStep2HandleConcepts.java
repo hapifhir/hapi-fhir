@@ -31,17 +31,13 @@ public class ImportLoincStep2HandleConcepts
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
-				LoincUploadPropertiesEnum.LOINC_FILE, LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT));
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
+				LoincUploadPropertiesEnum.LOINC_FILE,
+				LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT));
 	}
-
-	@Nonnull
-	@Override
-	public FileHandlingType getFileHandlingType() {
-		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
-	}
-
 
 	@Override
 	protected CodeExtractionContext newContextObject(
@@ -51,13 +47,16 @@ public class ImportLoincStep2HandleConcepts
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		CodeExtractionContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			CodeExtractionContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 
-		Map<String, CodeSystem.PropertyType> propertyNameToType = extractPropertyNamesFromCodeSystem(theJobMetadata, theData);
+		Map<String, CodeSystem.PropertyType> propertyNameToType = extractPropertyNamesFromCodeSystem(theJobMetadata);
 
 		String code = trim(theRecord.get("LOINC_NUM"));
 		if (isNotBlank(code)) {
@@ -81,8 +80,7 @@ public class ImportLoincStep2HandleConcepts
 					continue;
 				}
 
-				CodeSystem.PropertyType nextPropertyType =
-					propertyNameToType.get(nextPropertyName);
+				CodeSystem.PropertyType nextPropertyType = propertyNameToType.get(nextPropertyName);
 
 				String nextPropertyValue = theRecord.get(nextPropertyName);
 				if (isNotBlank(nextPropertyValue)) {
@@ -116,18 +114,18 @@ public class ImportLoincStep2HandleConcepts
 
 			boolean existingValue = theContext.seenCodes().add(code);
 			if (!existingValue) {
-				// FIXME: add code
 				throw new JobExecutionFailedException(
-						Msg.code(1) + "The code " + code + " has appeared more than once");
+						Msg.code(2942) + "The code " + code + " has appeared more than once");
 			}
 		}
 	}
 
 	@Override
 	protected void syncToDb(
-		ImportTerminologyMetadataAttachmentJson theJobMetadata, CodeExtractionContext theCodeExtractionContext,
-		CodeSystem theCodeSystemToPopulate,
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			CodeExtractionContext theCodeExtractionContext,
+			CodeSystem theCodeSystemToPopulate,
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		super.syncToDb(theJobMetadata, theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 		ourLog.info(
 				"LOINC CodeSystem populated with {} concepts",
@@ -136,11 +134,10 @@ public class ImportLoincStep2HandleConcepts
 
 	@Nonnull
 	private static Map<String, CodeSystem.PropertyType> extractPropertyNamesFromCodeSystem(
-		ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			TerminologyFileSetJson data) {
+			ImportTerminologyMetadataAttachmentJson theJobMetadata) {
 		Map<String, CodeSystem.PropertyType> propertyNamesToTypes = new HashMap<>();
 		for (CodeSystem.PropertyComponent nextProperty :
-			theJobMetadata.getCodeSystem().getProperty()) {
+				theJobMetadata.getCodeSystem().getProperty()) {
 			String nextPropertyCode = nextProperty.getCode();
 			CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
 			if (isNotBlank(nextPropertyCode)) {

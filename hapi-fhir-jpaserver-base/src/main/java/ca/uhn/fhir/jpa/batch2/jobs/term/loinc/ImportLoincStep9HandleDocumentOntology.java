@@ -34,19 +34,24 @@ public class ImportLoincStep9HandleDocumentOntology
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE,
 				LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT));
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyBaseContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		String partNumber = trim(theRecord.get("PartNumber"));
 		String partTypeName = trim(theRecord.get("PartTypeName"));
@@ -55,7 +60,9 @@ public class ImportLoincStep9HandleDocumentOntology
 
 		// Document Ontology Codes VS
 		ValueSet vs = getValueSet(
-			theStepExecutionDetails, theJobMetadata, theJobParameters,
+				theStepExecutionDetails,
+				theJobMetadata,
+				theJobParameters,
 				theData,
 				theContext,
 				DOCUMENT_ONTOLOGY_CODES_VS_ID,
@@ -84,5 +91,4 @@ public class ImportLoincStep9HandleDocumentOntology
 				.setCode(loincCodePropName)
 				.setValue(new Coding(ITermLoaderSvc.LOINC_URI, partNumber, partName));
 	}
-
 }

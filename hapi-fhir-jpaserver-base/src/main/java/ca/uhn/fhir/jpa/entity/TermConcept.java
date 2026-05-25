@@ -59,8 +59,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
 import org.hibernate.annotations.ColumnTransformer;
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
@@ -81,8 +79,6 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBi
 import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.r4.model.Coding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -247,6 +243,7 @@ public class TermConcept implements Serializable {
 
 	@Transient
 	private boolean mySupportLegacyLob = false;
+
 	@Transient
 	private boolean myDontPopulateParentPids;
 
@@ -319,19 +316,13 @@ public class TermConcept implements Serializable {
 			@Nonnull String thePropertyCodeSystem,
 			@Nonnull String thePropertyCode,
 			String theDisplayName) {
-		return addProperty(
-						TermConceptPropertyTypeEnum.CODING,
-						thePropertyName,
-						thePropertyCode)
+		return addProperty(TermConceptPropertyTypeEnum.CODING, thePropertyName, thePropertyCode)
 				.setCodeSystem(thePropertyCodeSystem)
 				.setDisplay(theDisplayName);
 	}
 
 	public TermConceptProperty addPropertyString(@Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
-		return addProperty(
-				TermConceptPropertyTypeEnum.STRING,
-				thePropertyName,
-				thePropertyValue);
+		return addProperty(TermConceptPropertyTypeEnum.STRING, thePropertyName, thePropertyValue);
 	}
 
 	@Override
@@ -559,7 +550,8 @@ public class TermConcept implements Serializable {
 				parentPids(entity, parentPids);
 				entity.setParentPids(parentPids);
 
-				ourLog.trace("Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
+				ourLog.trace(
+						"Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
 			}
 
 			if (!mySupportLegacyLob) {

@@ -24,30 +24,36 @@ public class ImportLoincStep15ParentGroupFile
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE,
 				LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT));
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyBaseContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		String parentGroupId = trim(theRecord.get("ParentGroupId"));
 		String parentGroupName = trim(theRecord.get("ParentGroup"));
 
 		getValueSet(
-			theStepExecutionDetails, theJobMetadata, theJobParameters,
+				theStepExecutionDetails,
+				theJobMetadata,
+				theJobParameters,
 				theData,
 				theContext,
 				parentGroupId,
 				ImportLoincStep13GroupFile.VS_URI_PREFIX + parentGroupId,
 				parentGroupName,
 				null);
-
 	}
 }

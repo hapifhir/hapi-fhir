@@ -26,11 +26,11 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.util.AsyncRequestUtil;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -43,7 +43,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.batch2.util.AsyncRequestUtil;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.JsonUtil;
@@ -69,8 +68,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.rest.server.RestfulServerUtils.createFullyQualifiedUrlFromRelativeUrl;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValueOrEmpty;
@@ -80,6 +79,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class TerminologyUploaderProvider extends BaseJpaProvider {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	public static final String PARAM_FILE = "file";
 	public static final String PARAM_CODESYSTEM = "codeSystem";
 	public static final String PARAM_SYSTEM = "system";
@@ -87,10 +87,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	public static final String PARAM_FILENAME = "filename";
 	private static final String RESP_PARAM_CONCEPT_COUNT = "conceptCount";
 	private static final String RESP_PARAM_TARGET = "target";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	private static final String RESP_PARAM_SUCCESS = "success";
-	// FIXME: rename to remove RESP
-	public static final String RESP_PARAM_JOB_INSTANCE_ID = "jobInstanceId";
+	public static final String PARAM_JOB_INSTANCE_ID = "jobInstanceId";
 	public static final String PARAM_JOB_ATTACHMENT_ID = "jobAttachmentId";
 	public static final String RESP_PARAM_OUTCOME = "outcome";
 
@@ -122,7 +120,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	/**
 	 * Constructor
 	 */
-	public TerminologyUploaderProvider(FhirContext theContext, ITermLoaderSvc theTerminologyLoaderSvc, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
+	public TerminologyUploaderProvider(
+			FhirContext theContext,
+			ITermLoaderSvc theTerminologyLoaderSvc,
+			IJobCoordinator theJobCoordinator,
+			IJobPersistence theJobPersistence) {
 		setContext(theContext);
 		myTerminologyLoaderSvc = theTerminologyLoaderSvc;
 		myJobCoordinator = theJobCoordinator;
@@ -141,22 +143,22 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * This method is intended to replace the legacy {@link #uploadSnapshot(HttpServletRequest, IPrimitiveType, List, RequestDetails)}
 	 */
 	@Operation(
-		typeName = "CodeSystem",
-		name = JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB,
-		idempotent = false,
-		returnParameters = {
-			@OperationParam(name = RESP_PARAM_OUTCOME, typeName = "string", min = 1),
-			@OperationParam(name = RESP_PARAM_JOB_INSTANCE_ID, typeName = "code", min = 1)
-		})
+			typeName = "CodeSystem",
+			name = JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB,
+			idempotent = false,
+			returnParameters = {
+				@OperationParam(name = RESP_PARAM_OUTCOME, typeName = "string", min = 1),
+				@OperationParam(name = PARAM_JOB_INSTANCE_ID, typeName = "code", min = 1)
+			})
 	public IBaseParameters uploadTerminologyCreateJob(
-		@OperationParam(name = PARAM_SYSTEM, min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
-		@OperationParam(name = PARAM_VERSION, min = 0, typeName = "code") IPrimitiveType<String> theCodeSystemVersion,
-		ServletRequestDetails theRequestDetails) {
+			@OperationParam(name = PARAM_SYSTEM, min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
+			@OperationParam(name = PARAM_VERSION, min = 0, typeName = "code")
+					IPrimitiveType<String> theCodeSystemVersion,
+			ServletRequestDetails theRequestDetails) {
 
 		String url = toStringValue(theCodeSystemUrl);
 		if (isBlank(url)) {
-			// FIXME: add code
-			throw new InvalidRequestException(Msg.code(1) + "Missing required parameter: " + PARAM_SYSTEM);
+			throw new InvalidRequestException(Msg.code(2943) + "Missing required parameter: " + PARAM_SYSTEM);
 		}
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(url, toStringValue(theCodeSystemVersion));
@@ -178,38 +180,41 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			description.append(") and optionally upload a property file (");
 			description.append(FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
 			description.append(") to the job using the ");
-			description.append(createFullyQualifiedUrlFromRelativeUrl(theRequestDetails, "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE));
+			description.append(createFullyQualifiedUrlFromRelativeUrl(
+					theRequestDetails, "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE));
 			description.append(" operation, and then start the job using the ");
-			description.append(createFullyQualifiedUrlFromRelativeUrl(theRequestDetails, "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB));
+			description.append(createFullyQualifiedUrlFromRelativeUrl(
+					theRequestDetails, "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB));
 			description.append(" operation.");
 
 			IBaseParameters response = ParametersUtil.newInstance(getContext());
-			ParametersUtil.addParameterToParametersString(getContext(), response, RESP_PARAM_OUTCOME, description.toString());
-			ParametersUtil.addParameterToParametersCode(getContext(), response, RESP_PARAM_JOB_INSTANCE_ID, instanceId);
+			ParametersUtil.addParameterToParametersString(
+					getContext(), response, RESP_PARAM_OUTCOME, description.toString());
+			ParametersUtil.addParameterToParametersCode(getContext(), response, PARAM_JOB_INSTANCE_ID, instanceId);
 			return response;
 		}
 
-		// FIXME: add code
-		throw new InvalidRequestException(Msg.code(1) + "Unsupported code system: " + canonicalUrl.url());
+		throw new InvalidRequestException(Msg.code(2944) + "Unsupported code system: " + canonicalUrl.url());
 	}
 
 	/**
 	 * <code>$hapi.fhir.upload-terminology.attach-file</code>
 	 */
 	@Operation(
-		typeName = "CodeSystem",
-		name = JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE,
-		idempotent = false,
-		manualRequest = true,
-		returnParameters = {
-			@OperationParam(name = RESP_PARAM_OUTCOME, typeName = "string", min = 1),
-			@OperationParam(name = PARAM_JOB_ATTACHMENT_ID, typeName = "code", min = 1)
-		})
+			typeName = "CodeSystem",
+			name = JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE,
+			idempotent = false,
+			manualRequest = true,
+			returnParameters = {
+				@OperationParam(name = RESP_PARAM_OUTCOME, typeName = "string", min = 1),
+				@OperationParam(name = PARAM_JOB_ATTACHMENT_ID, typeName = "code", min = 1)
+			})
 	public IBaseParameters uploadTerminologyAttachFile(
-		@OperationParam(name = RESP_PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code") IPrimitiveType<String> theJobInstanceId,
-		@OperationParam(name = PARAM_FILENAME, min = 0, typeName = "code") IPrimitiveType<String> theFilename,
-		HttpServletRequest theServletRequest,
-		ServletRequestDetails theRequestDetails) {
+			@OperationParam(name = PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code")
+					IPrimitiveType<String> theJobInstanceId,
+			@OperationParam(name = PARAM_FILENAME, min = 0, typeName = "code") IPrimitiveType<String> theFilename,
+			HttpServletRequest theServletRequest,
+			ServletRequestDetails theRequestDetails) {
 
 		try (InputStream inputStream = theServletRequest.getInputStream()) {
 			JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
@@ -219,13 +224,17 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				AttachmentDetails attachmentDetails;
 				String filename = toStringValueOrEmpty(theFilename);
 				// FIXME: Make constant
-				if (Pattern.compile("loinc[0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE).matcher(filename).find()) {
-					attachmentDetails = new AttachmentDetails(inputStream, AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
+				if (Pattern.compile("loinc[0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE)
+						.matcher(filename)
+						.find()) {
+					attachmentDetails = new AttachmentDetails(
+							inputStream, AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
 				} else if (filename.endsWith(FILENAME_LOINC_UPLOAD_PROPERTIES_FILE)) {
-					attachmentDetails = new AttachmentDetails(inputStream, AttachmentContentTypeEnum.PROPERTIES, FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
-					// FIXME: add code
+					attachmentDetails = new AttachmentDetails(
+							inputStream, AttachmentContentTypeEnum.PROPERTIES, FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
 				} else {
-					throw new InvalidRequestException(Msg.code(1) + "Don't know how to handle file: " + toStringValue(theFilename));
+					throw new InvalidRequestException(
+							Msg.code(2944) + "Don't know how to handle file: " + toStringValue(theFilename));
 				}
 
 				String instanceId = jobInstance.getInstanceId();
@@ -240,83 +249,97 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				description.append("].");
 
 				IBaseParameters response = ParametersUtil.newInstance(getContext());
-				ParametersUtil.addParameterToParametersString(getContext(), response, RESP_PARAM_OUTCOME, description.toString());
-				ParametersUtil.addParameterToParametersCode(getContext(), response, PARAM_JOB_ATTACHMENT_ID, attachmentId);
+				ParametersUtil.addParameterToParametersString(
+						getContext(), response, RESP_PARAM_OUTCOME, description.toString());
+				ParametersUtil.addParameterToParametersCode(
+						getContext(), response, PARAM_JOB_ATTACHMENT_ID, attachmentId);
 				return response;
 			}
 		} catch (IOException e) {
-			ourLog.warn("Failed to stream job attachment for job instance[{}]: {}", theJobInstanceId, e.getMessage(), e);
-			// FIXME: add code
-			throw new InvalidRequestException(Msg.code(1) + "IO failure while streaming job attachment: " + e.getMessage(), e);
+			ourLog.warn(
+					"Failed to stream job attachment for job instance[{}]: {}", theJobInstanceId, e.getMessage(), e);
+			throw new InvalidRequestException(
+					Msg.code(2945) + "IO failure while streaming job attachment: " + e.getMessage(), e);
 		}
 
-		// FIXME: add code
-		throw new InvalidRequestException(Msg.code(1) + "Can't attach files to this job");
+		throw new InvalidRequestException(Msg.code(2946) + "Can't attach files to this job");
 	}
 
 	/**
 	 * <code>$hapi.fhir.upload-terminology.start-job</code>
 	 */
 	@Operation(
-		typeName = "CodeSystem",
-		name = JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
-		manualResponse = true,
-		idempotent = false)
+			typeName = "CodeSystem",
+			name = JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
+			manualResponse = true,
+			idempotent = false)
 	public void uploadTerminologyStartJob(
-		@OperationParam(name = RESP_PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code") IPrimitiveType<String> theJobInstanceId,
-		ServletRequestDetails theRequestDetails) throws IOException {
+			@OperationParam(name = PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code")
+					IPrimitiveType<String> theJobInstanceId,
+			ServletRequestDetails theRequestDetails)
+			throws IOException {
 
-		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
+		ServletRequestUtil.validatePreferAsyncHeader(
+				theRequestDetails, JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
 
 		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
 		validateJobIsInBuildingStatus(jobInstance);
 
 		if (ImportLoincJobAppCtx.IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
-			ourLog.info("Starting Upload Terminology job[{}] of type: {}", jobInstance.getInstanceId(), jobInstance.getJobDefinitionId());
+			ourLog.info(
+					"Starting Upload Terminology job[{}] of type: {}",
+					jobInstance.getInstanceId(),
+					jobInstance.getJobDefinitionId());
 			myJobCoordinator.enqueueBuildingJobForExecution(jobInstance.getInstanceId());
 		} else {
-			// FIXME: add code
-			throw new InvalidRequestException(Msg.code(1) + "Can't start job of this type");
+			throw new InvalidRequestException(Msg.code(2947) + "Can't start job of this type");
 		}
 
-		String pollUrl = "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS + "?" + RESP_PARAM_JOB_INSTANCE_ID + "=" + jobInstance.getInstanceId();
-		AsyncRequestUtil.handleAsynchronousOperationStartRequest(theRequestDetails, pollUrl, JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB, null);
+		String pollUrl = "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS + "?"
+				+ PARAM_JOB_INSTANCE_ID + "=" + jobInstance.getInstanceId();
+		AsyncRequestUtil.handleAsynchronousOperationStartRequest(
+				theRequestDetails, pollUrl, JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB, null);
 	}
 
 	/**
 	 * <code>$hapi.fhir.upload-terminology.poll-for-status</code>
 	 */
 	@Operation(
-		typeName = "CodeSystem",
-		name = JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS,
-		manualResponse = true,
-		idempotent = true)
+			typeName = "CodeSystem",
+			name = JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS,
+			manualResponse = true,
+			idempotent = true)
 	public void uploadTerminologyPollForStatus(
-		@OperationParam(name = RESP_PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code") IPrimitiveType<String> theJobInstanceId,
-		ServletRequestDetails theRequestDetails) throws IOException {
+			@OperationParam(name = PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code")
+					IPrimitiveType<String> theJobInstanceId,
+			ServletRequestDetails theRequestDetails)
+			throws IOException {
 
 		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
 
 		if (ImportLoincJobAppCtx.IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
 
 			Function<JobInstance, AsyncRequestUtil.CompletedJobPollResponse> completedDetailsProvider = instance -> {
-				ImportTerminologyResultJson resultJson = JsonUtil.deserialize(jobInstance.getReport(), ImportTerminologyResultJson.class);
+				ImportTerminologyResultJson resultJson =
+						JsonUtil.deserialize(jobInstance.getReport(), ImportTerminologyResultJson.class);
 				String report = resultJson.getReport();
 				return new AsyncRequestUtil.CompletedJobPollResponse(null, List.of(report));
 			};
-			AsyncRequestUtil.handleAsyncJobPollForStatusResponse(theRequestDetails, jobInstance, JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB, completedDetailsProvider);
+			AsyncRequestUtil.handleAsyncJobPollForStatusResponse(
+					theRequestDetails,
+					jobInstance,
+					JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
+					completedDetailsProvider);
 
 		} else {
-			// FIXME: add code
-			throw new InvalidRequestException(Msg.code(1) + "Can't start job of this type");
+			throw new InvalidRequestException(Msg.code(2948) + "Can't start job of this type");
 		}
-
 	}
 
 	private static void validateJobIsInBuildingStatus(JobInstance jobInstance) {
 		if (jobInstance.getStatus() != StatusEnum.BUILDING) {
-			// FIXME: add code
-			throw new InvalidRequestException(Msg.code(1) + "Job is not in BUILDING status: " + jobInstance.getStatus());
+			throw new InvalidRequestException(
+					Msg.code(2949) + "Job is not in BUILDING status: " + jobInstance.getStatus());
 		}
 	}
 
@@ -330,7 +353,9 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			name = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM,
 			idempotent = false,
 			returnParameters = {
-				//		@OperationParam(name = "conceptCount", type = IntegerType.class, min = 1)
+						@OperationParam(name = RESP_PARAM_SUCCESS, typeName = "boolean", min = 1),
+						@OperationParam(name = RESP_PARAM_CONCEPT_COUNT, typeName = "integer", min = 1),
+						@OperationParam(name = RESP_PARAM_TARGET, typeName = "Reference", min = 1)
 			})
 	public IBaseParameters uploadSnapshot(
 			HttpServletRequest theServletRequest,
@@ -368,8 +393,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						case ITermLoaderSvc.ICD10CM_URI -> myTerminologyLoaderSvc.loadIcd10cm(
 								localFiles, theRequestDetails);
 						case ITermLoaderSvc.IMGTHLA_URI -> myTerminologyLoaderSvc.loadImgthla(
-								localFiles, theRequestDetails);
-						case ITermLoaderSvc.LOINC_URI -> myTerminologyLoaderSvc.loadLoinc(
 								localFiles, theRequestDetails);
 						case ITermLoaderSvc.SCT_URI -> myTerminologyLoaderSvc.loadSnomedCt(
 								localFiles, theRequestDetails);

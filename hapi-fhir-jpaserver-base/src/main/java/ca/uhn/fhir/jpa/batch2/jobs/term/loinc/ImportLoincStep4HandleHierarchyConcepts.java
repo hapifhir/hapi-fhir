@@ -17,7 +17,8 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARC
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep4HandleHierarchyConcepts extends BaseImportLoincStep<ImportLoincStep4HandleHierarchyConcepts.MyContext> {
+public class ImportLoincStep4HandleHierarchyConcepts
+		extends BaseImportLoincStep<ImportLoincStep4HandleHierarchyConcepts.MyContext> {
 
 	@Override
 	protected MyContext newContextObject(
@@ -27,26 +28,25 @@ public class ImportLoincStep4HandleHierarchyConcepts extends BaseImportLoincStep
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
-		return List.of(new LoincFileNameSpecification(LOINC_HIERARCHY_FILE,
-			LOINC_HIERARCHY_FILE_DEFAULT,
-			LOINC_HIERARCHY_FILE_DEFAULT_NEW
-		));
-	}
-
-	@Nonnull
-	@Override
-	public FileHandlingType getFileHandlingType() {
-		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+		return List.of(new LoincFileNameSpecification(
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
+				LOINC_HIERARCHY_FILE,
+				LOINC_HIERARCHY_FILE_DEFAULT,
+				LOINC_HIERARCHY_FILE_DEFAULT_NEW));
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 
 		String parentCode = trim(theRecord.get("IMMEDIATE_PARENT"));
 		if (isNotBlank(parentCode) && theContext.seenCodes().add(parentCode)) {
@@ -58,7 +58,6 @@ public class ImportLoincStep4HandleHierarchyConcepts extends BaseImportLoincStep
 			theCodeSystemToPopulate.addConcept().setCode(childCode);
 		}
 	}
-
 
 	protected record MyContext(Set<String> seenCodes) {}
 }

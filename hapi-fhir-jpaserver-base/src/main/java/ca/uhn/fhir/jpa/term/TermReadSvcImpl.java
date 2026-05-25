@@ -70,6 +70,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
@@ -102,6 +103,7 @@ import jakarta.persistence.PersistenceContextType;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
@@ -157,6 +159,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.comparator.Comparators;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -178,6 +181,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.entity.TermConceptPropertyBinder.CONCEPT_PROPERTY_PREFIX_NAME;
+import static ca.uhn.fhir.jpa.term.TermReadSvcUtil.isLoincUnversionedCodeSystem;
+import static ca.uhn.fhir.jpa.term.TermReadSvcUtil.isLoincUnversionedValueSet;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 import static java.lang.String.join;
 import static java.util.stream.Collectors.joining;
@@ -203,9 +208,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private static final int SECONDS_IN_MINUTE = 60;
 	private static final int INDEXED_ROOTS_LOGGING_COUNT = 50_000;
 	private static Runnable myInvokeOnNextCallForUnitTest;
-
-	@Autowired
-	private JpaStorageSettings myJpaStorageSettings;
 
 	private static boolean ourForceDisableHibernateSearchForUnitTest;
 
@@ -3176,9 +3178,46 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return (ValueSet) valueSet;
 	}
 
+	@Nullable
+	@Override
+	public IBaseResource fetchCodeSystem(String theSystem) {
+		if (UrlUtil.parseCanonicalUrl(theSystem).versionId().isEmpty()) {
+			return myTxTemplate.execute(t -> {
+				String system = theSystem;
+				TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystem);
+				if (codeSystem != null && codeSystem.getCurrentVersion() != null) {
+					TermCodeSystemVersion currentVersion = codeSystem.getCurrentVersion();
+					String versionId = currentVersion.getCodeSystemVersionId();
+					system = system + "|" + versionId;
+				}
+				return provideJpaValidationSupport().fetchCodeSystem(system);
+			});
+		}
+
+		return provideJpaValidationSupport().fetchCodeSystem(theSystem);
+	}
+
 	@Override
 	public IBaseResource fetchValueSet(String theValueSetUrl) {
-		return provideJpaValidationSupport().fetchValueSet(theValueSetUrl);
+		String valueSetUrl = theValueSetUrl;
+
+		/*
+		 * ValueSets don't have a concept of the active version in the way that codesystems do
+		 * currently. So if someone supplies an unversioned URL, we'll generally just use the
+		 * first one we find, which is not optimal.
+		 *
+		 * But for loinc at least, we know the associated system so we can figure out what is
+		 * the appropriate version to use.
+		 */
+		if (isLoincUnversionedValueSet(valueSetUrl)) {
+			IBaseResource cs = fetchCodeSystem(LOINC_URI);
+			Optional<String> versionOpt = myContext.newTerser().getSinglePrimitiveValue(cs, "version");
+			if (versionOpt.isPresent()) {
+				valueSetUrl = theValueSetUrl + "|" + versionOpt.get();
+			}
+		}
+
+		return provideJpaValidationSupport().fetchValueSet(valueSetUrl);
 	}
 
 	@Override
@@ -3299,7 +3338,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	 */
 	@Override
 	public Optional<TermValueSet> findCurrentTermValueSet(String theUrl) {
-		if (TermReadSvcUtil.isLoincUnversionedValueSet(theUrl)) {
+		if (isLoincUnversionedValueSet(theUrl)) {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theUrl);
 			if (vsIdOpt.isEmpty()) {
 				return Optional.empty();

@@ -16,7 +16,6 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.model.dstu2.resource.Contract;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,33 +26,49 @@ import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 
-public class ImportLoincStep20ChunkConceptsForGeneratingClosure extends BaseImportTerminologyStep implements IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson>, ITerminologyImportFileHandlerStep<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
+public class ImportLoincStep20ChunkConceptsForGeneratingClosure extends BaseImportTerminologyStep
+		implements IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson>,
+				ITerminologyImportFileHandlerStep<
+						ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
 
 	@Autowired
 	private ITermConceptDao myConceptDao;
+
 	@Autowired
 	private ITermCodeSystemVersionDao myCodeSystemVersionDao;
+
 	@Autowired
 	private IHapiTransactionService myTxService;
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
+			throws JobExecutionFailedException {
 		myTxService
-			.withSystemRequestOnDefaultPartition()
-			.execute(() -> generateClosures(theStepExecutionDetails, theDataSink));
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> generateClosures(theStepExecutionDetails, theDataSink));
 
 		return RunOutcome.SUCCESS;
 	}
 
-	private void generateClosures(@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink) {
+	private void generateClosures(
+			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink) {
 		HapiTransactionService.requireTransaction();
 
-		ImportTerminologyMetadataAttachmentJson jobMetadata = getJobMetadata(theStepExecutionDetails.getInstance().getInstanceId());
+		ImportTerminologyMetadataAttachmentJson jobMetadata =
+				getJobMetadata(theStepExecutionDetails.getInstance().getInstanceId());
 		String stagingVersion = jobMetadata.getCodeSystemStagingVersionId();
 
-		TermCodeSystemVersion csv = myCodeSystemVersionDao.findByCodeSystemUriAndVersion(jobMetadata.getCodeSystem().getUrl(), stagingVersion);
-		Validate.notNull(csv, "Could not find code system version %s for code system: %s", stagingVersion, jobMetadata.getCodeSystem().getUrl());
+		TermCodeSystemVersion csv = myCodeSystemVersionDao.findByCodeSystemUriAndVersion(
+				jobMetadata.getCodeSystem().getUrl(), stagingVersion);
+		Validate.notNull(
+				csv,
+				"Could not find code system version %s for code system: %s",
+				stagingVersion,
+				jobMetadata.getCodeSystem().getUrl());
 
 		Stream<TermConcept.TermConceptPk> pids = myConceptDao.findPidsByCodeSystemVersion(csv);
 		int pidCount = 0;
@@ -70,20 +85,19 @@ public class ImportLoincStep20ChunkConceptsForGeneratingClosure extends BaseImpo
 
 		// Emit statistics
 		outputChunk = new TerminologyFileSetJson();
-		outputChunk.getRecordsAddedCounter(theStepExecutionDetails.getCurrentStepId()).incrementOtherChanges(pidCount);
+		outputChunk
+				.getRecordsAddedCounter(theStepExecutionDetails.getCurrentStepId())
+				.incrementOtherChanges(pidCount);
 		theDataSink.acceptForFutureStep(STEP_ID_FINALIZE_IMPORT, outputChunk);
 	}
 
 	@Nonnull
 	@Override
-	public Optional<FileHandlingInstructions> canHandleFile(StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails, ImportLoincJobParameters theJobParameters, String theFileName) {
+	public Optional<FileHandlingInstructions> canHandleFile(
+			StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
+			ImportLoincJobParameters theJobParameters,
+			String theFileName) {
 		// This step doesn't process any files
 		return Optional.empty();
-	}
-
-	@Nonnull
-	@Override
-	public FileHandlingType getFileHandlingType() {
-		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
 	}
 }

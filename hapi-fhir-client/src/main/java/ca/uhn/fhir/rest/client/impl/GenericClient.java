@@ -61,7 +61,6 @@ import ca.uhn.fhir.rest.client.method.DeleteMethodBinding;
 import ca.uhn.fhir.rest.client.method.HistoryMethodBinding;
 import ca.uhn.fhir.rest.client.method.HttpDeleteClientInvocation;
 import ca.uhn.fhir.rest.client.method.HttpGetClientInvocation;
-import ca.uhn.fhir.rest.client.method.HttpPostClientInvocation;
 import ca.uhn.fhir.rest.client.method.HttpRawClientInvocation;
 import ca.uhn.fhir.rest.client.method.HttpSimpleClientInvocation;
 import ca.uhn.fhir.rest.client.method.IClientResponseHandler;
@@ -490,7 +489,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> post(String theUrl, RawRequestEntity theRequest) {
+		public IClientHttpExecutable<IClientHttpExecutable<?, IEntityResult>, IEntityResult> post(
+				String theUrl, RawRequestEntity theRequest) {
 			return new RawPostEntityResultInternal<>(theUrl, theRequest);
 		}
 	}
@@ -1462,8 +1462,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		private void addParam(String theName, IQueryParameterType theValue) {
-			IPrimitiveType<?> stringType =
-					ParametersUtil.createString(myContext, theValue.getValueAsQueryToken());
+			IPrimitiveType<?> stringType = ParametersUtil.createString(myContext, theValue.getValueAsQueryToken());
 			addParam(theName, stringType);
 		}
 

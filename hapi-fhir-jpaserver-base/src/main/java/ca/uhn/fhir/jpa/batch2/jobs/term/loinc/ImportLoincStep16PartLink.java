@@ -36,29 +36,33 @@ public class ImportLoincStep16PartLink
 
 	@Nonnull
 	@Override
-	public FileHandlingType getFileHandlingType() {
-		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS;
-	}
-
-	@Nonnull
-	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(
 				new LoincFileNameSpecification(
+						FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
 						LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE,
 						LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_DEFAULT),
-				new LoincFileNameSpecification(LOINC_PART_LINK_FILE_PRIMARY, LOINC_PART_LINK_FILE_PRIMARY_DEFAULT),
 				new LoincFileNameSpecification(
-						LOINC_PART_LINK_FILE_SUPPLEMENTARY, LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT));
+						FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
+						LOINC_PART_LINK_FILE_PRIMARY,
+						LOINC_PART_LINK_FILE_PRIMARY_DEFAULT),
+				new LoincFileNameSpecification(
+						FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
+						LOINC_PART_LINK_FILE_SUPPLEMENTARY,
+						LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT));
 	}
 
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyBaseContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		String property = trim(theRecord.get("Property"));
@@ -98,8 +102,7 @@ public class ImportLoincStep16PartLink
 			newProperty.setValue(new Coding(ITermLoaderSvc.LOINC_URI, partNumber, partName));
 		} else {
 			throw new InternalErrorException(
-				Msg.code(914) + "Don't know how to handle property of type: " + propertyType);
+					Msg.code(914) + "Don't know how to handle property of type: " + propertyType);
 		}
 	}
-
 }

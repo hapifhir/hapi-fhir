@@ -1,22 +1,25 @@
 package ca.uhn.fhir.jpa.term.hsearch;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
+import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.util.ClasspathUtil;
+import jakarta.persistence.EntityManager;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import org.apache.commons.lang3.ClassPathUtils;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.query.SearchQuery;
@@ -33,17 +36,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.util.ResourceUtils;
 
-import jakarta.persistence.EntityManager;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import static java.util.Map.entry;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
@@ -58,10 +58,6 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	public static final boolean CLEANUP_DATA = true;
 	public static final String CS_VERSION = "2.68";
 	public static final int CS_CONCEPTS_NUMBER = 81;
-	public static final String LOINC_PROPERTIES_CLASSPATH =
-		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "Loinc_small_v68.zip";
-	public static final String LOINC_ZIP_CLASSPATH =
-		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "v268_loincupload.properties";
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTerminologyHSearchR4Test.class);
 	long termCodeSystemVersionWithVersionId;
 	long termCodeSystemVersionWithNoVersionId;
@@ -96,18 +92,21 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	@Autowired
 	private EntityManager myEntityManager;
 	@Autowired
-	private TermLoaderSvcImpl myTermLoaderSvc;
-	@Autowired
 	private ITermConceptDao myTermConceptDao;
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
+	@Autowired
+	private TerminologyTestHelper myTerminologyTestHelper;
 
 	@Test
-	public void uploadLoincCodeSystem() throws FileNotFoundException, InterruptedException {
-		List<ITermLoaderSvc.FileDescriptor> myFileDescriptors = buildFileDescriptors();
+	public void uploadLoincCodeSystem() throws IOException, InterruptedException {
+		ZipCollectionBuilder fileDescriptors = buildFileDescriptors();
+
+		Properties properties = new Properties();
+		properties.load(ClasspathUtil.loadResourceAsStream(TEST_FILES_CLASSPATH + "v268_loincupload.properties"));
 
 		// upload terminology
-		myTermLoaderSvc.loadLoinc(myFileDescriptors, mySrd);
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.68", fileDescriptors, false, properties);
 
 		// save all deferred concepts, properties, links, etc
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
@@ -237,16 +236,8 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	}
 
 
-	private List<ITermLoaderSvc.FileDescriptor> buildFileDescriptors() throws FileNotFoundException {
-		List<ITermLoaderSvc.FileDescriptor> fileDescriptors = new ArrayList<>();
-
-		File propsFile = ResourceUtils.getFile(LOINC_PROPERTIES_CLASSPATH);
-		fileDescriptors.add(new TerminologyUploaderProvider.FileBackedFileDescriptor(propsFile));
-
-		File zipFile = ResourceUtils.getFile(LOINC_ZIP_CLASSPATH);
-		fileDescriptors.add(new TerminologyUploaderProvider.FileBackedFileDescriptor(zipFile));
-
-		return fileDescriptors;
+	private ZipCollectionBuilder buildFileDescriptors() throws IOException {
+		return new ZipCollectionBuilder(ClasspathUtil.loadResourceAsByteArray(TEST_FILES_CLASSPATH + "Loinc_small_v68.zip"));
 	}
 
 

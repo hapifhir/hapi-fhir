@@ -13,16 +13,17 @@ public class ImportTerminologyMetadataAttachmentJson implements IModelJson {
 
 	@JsonProperty("codeSystemXml")
 	private String myCodeSystemXml;
+
 	@JsonProperty("codeSystemStagingVersionId")
 	private String myCodeSystemStagingVersionId;
+
 	@JsonIgnore
 	private CodeSystem myCodeSystemParsed;
-
 
 	public CodeSystem getCodeSystem() {
 		if (myCodeSystemParsed == null) {
 			myCodeSystemParsed =
-				FhirContext.forR4Cached().newXmlParser().parseResource(CodeSystem.class, getCodeSystemXml());
+					FhirContext.forR4Cached().newXmlParser().parseResource(CodeSystem.class, getCodeSystemXml());
 		}
 		return myCodeSystemParsed;
 	}
@@ -48,5 +49,4 @@ public class ImportTerminologyMetadataAttachmentJson implements IModelJson {
 	public void setCodeSystemStagingVersionId(String theCodeSystemStagingVersionId) {
 		myCodeSystemStagingVersionId = theCodeSystemStagingVersionId;
 	}
-
 }

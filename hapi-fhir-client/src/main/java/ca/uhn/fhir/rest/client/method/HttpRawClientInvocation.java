@@ -24,10 +24,8 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.gclient.RawRequestEntity;
-import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import java.util.List;
@@ -69,14 +67,14 @@ public class HttpRawClientInvocation extends BaseHttpClientInvocation {
 			urlBuilder.append(url);
 		}
 
-		IHttpClient httpClient = getRestfulClientFactory()
-			.getHttpClient(urlBuilder, null, null, RequestTypeEnum.POST, getHeaders());
+		IHttpClient httpClient =
+				getRestfulClientFactory().getHttpClient(urlBuilder, null, null, RequestTypeEnum.POST, getHeaders());
 
-		IBaseBinary binary = (IBaseBinary) getContext().getResourceDefinition("Binary").newInstance();
+		IBaseBinary binary =
+				(IBaseBinary) getContext().getResourceDefinition("Binary").newInstance();
 		binary.setContentType(myRequestEntity.getContentType());
 		binary.setContent(myRequestEntity.getBytes());
 
 		return httpClient.createBinaryRequest(getContext(), binary);
 	}
-
 }

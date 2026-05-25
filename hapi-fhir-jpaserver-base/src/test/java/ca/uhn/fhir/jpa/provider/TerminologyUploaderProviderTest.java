@@ -15,7 +15,6 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.interceptor.ResponseSizeCapturingInterceptor;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
@@ -124,7 +123,7 @@ class TerminologyUploaderProviderTest {
 			"and optionally upload a property file (loincupload.properties) to the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.attach-file operation",
 			"and then start the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.start-job operation."
 		);
-		assertEquals("my-instance-id", response.getParameter(TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID).getValue().toString());
+		assertEquals("my-instance-id", response.getParameter(TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID).getValue().toString());
 	}
 
 	@Test
@@ -178,7 +177,7 @@ class TerminologyUploaderProviderTest {
 
 		// Test
 		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
-			"?" + TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
+			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_FILENAME + "=" + TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
 		HttpPost post = new HttpPost(url);
 		post.setEntity(new StringEntity(leftPad("", 12_345), ContentType.TEXT_PLAIN));
@@ -213,7 +212,7 @@ class TerminologyUploaderProviderTest {
 
 		// Test
 		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
-			"?" + TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
+			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_FILENAME + "=" + TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
 		HttpPost post = new HttpPost(url);
 		post.setEntity(new StringEntity(leftPad("", 12_345), ContentType.TEXT_PLAIN));
@@ -239,7 +238,7 @@ class TerminologyUploaderProviderTest {
 
 		// Test
 		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
-			"?" + TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
+			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_FILENAME + "=" + TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
 		HttpPost post = new HttpPost(url);
 		post.setEntity(new StringEntity(leftPad("", 12_345), ContentType.TEXT_PLAIN));
@@ -265,7 +264,7 @@ class TerminologyUploaderProviderTest {
 
 		// Test
 		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
-			"?" + TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
+			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_FILENAME + "=foo.txt";
 		HttpPost post = new HttpPost(url);
 		post.setEntity(new StringEntity(leftPad("", 12_345), ContentType.TEXT_PLAIN));
@@ -291,7 +290,7 @@ class TerminologyUploaderProviderTest {
 
 		// Test
 		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB +
-			"?" + TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID + "=my-instance-id";
+			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id";
 		HttpPost post = new HttpPost(url);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
@@ -311,7 +310,7 @@ class TerminologyUploaderProviderTest {
 	void testUploadTerminologyStartJob_NoRespondAsync() throws IOException {
 		// Test
 		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB +
-			"?" + TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID + "=my-instance-id";
+			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id";
 		HttpPost post = new HttpPost(url);
 		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
 
@@ -334,7 +333,7 @@ class TerminologyUploaderProviderTest {
 
 		// Test
 		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB +
-			"?" + TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID + "=my-instance-id";
+			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id";
 		HttpPost post = new HttpPost(url);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
@@ -358,7 +357,7 @@ class TerminologyUploaderProviderTest {
 
 		// Test
 		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB +
-			"?" + TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID + "=my-instance-id";
+			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id";
 		HttpPost post = new HttpPost(url);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
@@ -383,7 +382,7 @@ class TerminologyUploaderProviderTest {
 
 		// Test
 		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS +
-			"?" + TerminologyUploaderProvider.RESP_PARAM_JOB_INSTANCE_ID + "=my-instance-id";
+			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id";
 		HttpPost post = new HttpPost(url);
 		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
 

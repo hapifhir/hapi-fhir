@@ -42,25 +42,24 @@ public class ImportLoincStep7HandleRsnaPlaybook
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	protected List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE,
 				LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT));
 	}
 
-	@Nonnull
-	@Override
-	public FileHandlingType getFileHandlingType() {
-		return FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS;
-	}
-
 	@Override
 	protected void handleRecord(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		MyContext theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData, String theSourceFilename) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			MyContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		String longCommonName = trim(theRecord.get("LongCommonName"));
 		String partNumber = trim(theRecord.get("PartNumber"));
@@ -79,15 +78,23 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		// ConceptMap version from properties files
 		String loincRsnaCmVersion;
 		if (isNotBlank(jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))) {
-				loincRsnaCmVersion = jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-"
-						+ codeSystemVersionId;
+			loincRsnaCmVersion =
+					jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-" + codeSystemVersionId;
 		} else {
 			loincRsnaCmVersion = codeSystemVersionId;
 		}
 
 		// RSNA Codes VS
 		ValueSet vs = getValueSet(
-			theStepExecutionDetails, theJobMetadata, theJobParameters, theData, theContext, RSNA_CODES_VS_ID, RSNA_CODES_VS_URI, RSNA_CODES_VS_NAME, null);
+				theStepExecutionDetails,
+				theJobMetadata,
+				theJobParameters,
+				theData,
+				theContext,
+				RSNA_CODES_VS_ID,
+				RSNA_CODES_VS_URI,
+				RSNA_CODES_VS_NAME,
+				null);
 
 		if (!theContext.getCodesInRsnaPlaybookValueSet().contains(loincNumber)) {
 			vs.getCompose()
@@ -144,7 +151,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		// LOINC Part -> Radlex RID code mappings
 		if (isNotBlank(rid)) {
 			addConceptMapEntry(
-				theContext,
+					theContext,
 					new ConceptMapping()
 							.setConceptMapId(partConceptMapId)
 							.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI)
@@ -164,7 +171,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		// LOINC Term -> Radlex RPID code mappings
 		if (isNotBlank(rpid)) {
 			addConceptMapEntry(
-				theContext,
+					theContext,
 					new ConceptMapping()
 							.setConceptMapId(termConceptMapId)
 							.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI)

@@ -1,16 +1,13 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.HapiToStringBuilder;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.r4.model.CodeSystem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,10 +21,13 @@ public class TerminologyFileSetJson implements IModelJson {
 
 	@JsonProperty("chunkForCurrentStep")
 	private Chunk myChunkForCurrentStep;
+
 	@JsonProperty("resourcesToActivate")
 	private Set<String> myResourcesToActivate;
+
 	@JsonProperty("conceptPidsToGenerateClosureFor")
 	private List<Long> myConceptPidsToGenerateClosureFor;
+
 	@JsonProperty("stepIdToRecordsAdded")
 	private Map<String, RecordsAddedCounter> myStepIdToRecordsAdded;
 
@@ -68,12 +68,10 @@ public class TerminologyFileSetJson implements IModelJson {
 		getResourcesToActivate().add(theResourceToActivate);
 	}
 
-
-
 	public boolean isEmpty() {
-		return myChunkForCurrentStep == null &&
-			(myResourcesToActivate == null || myResourcesToActivate.isEmpty()) &&
-			(myStepIdToRecordsAdded == null || myStepIdToRecordsAdded.isEmpty());
+		return myChunkForCurrentStep == null
+				&& (myResourcesToActivate == null || myResourcesToActivate.isEmpty())
+				&& (myStepIdToRecordsAdded == null || myStepIdToRecordsAdded.isEmpty());
 	}
 
 	public Map<String, RecordsAddedCounter> getStepIdToRecordsAdded() {
@@ -91,6 +89,7 @@ public class TerminologyFileSetJson implements IModelJson {
 
 		@JsonProperty("attachmentId")
 		private String myAttachmentId;
+
 		@JsonProperty("sourceFilename")
 		private String mySourceFilename;
 
@@ -114,7 +113,8 @@ public class TerminologyFileSetJson implements IModelJson {
 			if (!(theO instanceof Chunk chunk)) {
 				return false;
 			}
-			return Objects.equals(myAttachmentId, chunk.myAttachmentId) && Objects.equals(mySourceFilename, chunk.mySourceFilename);
+			return Objects.equals(myAttachmentId, chunk.myAttachmentId)
+					&& Objects.equals(mySourceFilename, chunk.mySourceFilename);
 		}
 
 		@Override
@@ -125,9 +125,9 @@ public class TerminologyFileSetJson implements IModelJson {
 		@Override
 		public String toString() {
 			return new ToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE)
-				.append("sourceFilename", mySourceFilename)
-				.append("attachment", myAttachmentId)
-				.toString();
+					.append("sourceFilename", mySourceFilename)
+					.append("attachment", myAttachmentId)
+					.toString();
 		}
 
 		/**
@@ -161,7 +161,6 @@ public class TerminologyFileSetJson implements IModelJson {
 			Validate.notBlank(theAttachmentId, "theChunkAttachmentId must not be null or blank");
 			myAttachmentId = theAttachmentId;
 		}
-
 	}
 
 	public static class RecordsAddedCounter implements IModelJson {
@@ -311,7 +310,8 @@ public class TerminologyFileSetJson implements IModelJson {
 
 		@Override
 		public String toString() {
-			HapiToStringBuilder b = new HapiToStringBuilder(RecordsAddedCounter.this, ToStringStyle.NO_CLASS_NAME_STYLE);
+			HapiToStringBuilder b =
+					new HapiToStringBuilder(RecordsAddedCounter.this, ToStringStyle.NO_CLASS_NAME_STYLE);
 			b.appendIfNonZero("conceptsAdded", myConceptsAdded);
 			b.appendIfNonZero("conceptLinksAdded", myConceptLinksAdded);
 			b.appendIfNonZero("conceptPropertiesAdded", myPropertiesAdded);
@@ -324,8 +324,5 @@ public class TerminologyFileSetJson implements IModelJson {
 			b.appendIfNonZero("otherChanges", myOtherChanges);
 			return b.toString();
 		}
-
 	}
-
-
 }

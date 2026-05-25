@@ -138,12 +138,13 @@ public interface ITermCodeSystemStorageSvc {
 	 * {@literal CodeSystem.url} and {@literal CodeSystem.version} properties must be populated.
 	 * <p>
 	 * Note that the concept parents {@link TermConcept#getParents()} are not populated by this
-	 * method.
-	 * // FIXME: add link to job to populate these
+	 * method. And must be explicitly populated by the caller.
 	 * </p>
 	 *
 	 * @since 8.12.0
 	 */
+	// TODO: Currently the only way to populate the getParents() is an inline step in the LOINC
+	// import job. We need to refactor that out.
 	UploadStatistics uploadCodeSystemConcepts(IBaseResource theCodeSystem);
 
 	/**

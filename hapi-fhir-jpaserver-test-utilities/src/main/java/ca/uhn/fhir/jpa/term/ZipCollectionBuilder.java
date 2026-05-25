@@ -20,9 +20,9 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +62,13 @@ public class ZipCollectionBuilder {
 			mySingleZipBytes = null;
 			mySingleZipStream = null;
 		}
+	}
+
+	public ZipCollectionBuilder(byte[] theZipBytes) throws IOException {
+		mySingleZipBytes = new ByteArrayOutputStream();
+		mySingleZipBytes.write(theZipBytes);
+		myFiles = null;
+		mySingleZipStream = null;
 	}
 
 	/**
@@ -117,13 +124,9 @@ public class ZipCollectionBuilder {
 		return byteArrayOutputStream.toByteArray();
 	}
 
-	private byte[] readFile(String theClasspathPrefix, String theClasspathFileName) throws IOException {
+	private byte[] readFile(String theClasspathPrefix, String theClasspathFileName) {
 		String classpathName = theClasspathPrefix + theClasspathFileName;
-		InputStream stream = getClass().getResourceAsStream(classpathName);
-		Validate.notNull(stream, "Couldn't load " + classpathName);
-		byte[] byteArray = IOUtils.toByteArray(stream);
-		Validate.notNull(byteArray);
-		return byteArray;
+		return ClasspathUtil.loadResourceAsByteArray(classpathName);
 	}
 
 	public List<ITermLoaderSvc.FileDescriptor> getFiles() {

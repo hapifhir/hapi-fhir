@@ -22,5 +22,4 @@ public class HapiToStringBuilder extends ToStringBuilder {
 			append(theFieldName, theValue);
 		}
 	}
-
 }

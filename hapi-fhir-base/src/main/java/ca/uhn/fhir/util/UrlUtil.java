@@ -705,5 +705,4 @@ public class UrlUtil {
 	}
 
 	public record CanonicalUrlParts(String url, Optional<String> versionId) {}
-
 }

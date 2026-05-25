@@ -10,7 +10,8 @@ import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class ImportLoincJobParametersValidator implements ca.uhn.fhir.batch2.api.IJobParametersValidator<ImportLoincJobParameters> {
+public class ImportLoincJobParametersValidator
+		implements ca.uhn.fhir.batch2.api.IJobParametersValidator<ImportLoincJobParameters> {
 	private static final Pattern VERSION_PATTERN = Pattern.compile("(\\d+\\.)*\\d+");
 
 	@Nullable

@@ -41,8 +41,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
-	CT extends BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext>
-	extends BaseImportLoincStep<CT> {
+				CT extends BaseImportLoincStepWithValueSetsAndConceptMaps.MyBaseContext>
+		extends BaseImportLoincStep<CT> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportLoincStepWithValueSetsAndConceptMaps.class);
 
@@ -51,7 +51,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 
 	@Nonnull
 	protected CodeSystem.ConceptDefinitionComponent getOrAddConcept(
-		CT theContext, CodeSystem theCodeSystemToPopulate, String theCode) {
+			CT theContext, CodeSystem theCodeSystemToPopulate, String theCode) {
 		CodeSystem.ConceptDefinitionComponent loincCode;
 		loincCode = theContext.getCodeToConcept().get(theCode);
 		if (loincCode == null) {
@@ -76,13 +76,15 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 
 	// FIXME: rename
 	protected ValueSet getValueSet(
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportLoincJobParameters theJobParameters,
-		TerminologyFileSetJson theData,
-		CT theContext,
-		String theValueSetId,
-		String theValueSetUri,
-		String theValueSetName,
-		String theVersionPropertyName) {
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportLoincJobParameters theJobParameters,
+			TerminologyFileSetJson theData,
+			CT theContext,
+			String theValueSetId,
+			String theValueSetUri,
+			String theValueSetName,
+			String theVersionPropertyName) {
 
 		String version;
 		String codeSystemVersion = theJobMetadata.getCodeSystem().getVersion();
@@ -90,8 +92,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 
 		Properties jobProperties = getJobProperties(theStepExecutionDetails);
 		if (isNotBlank(theVersionPropertyName) && isNotBlank(jobProperties.getProperty(theVersionPropertyName))) {
-				version =
-					jobProperties.getProperty(theVersionPropertyName) + "-" + codeSystemVersion;
+			version = jobProperties.getProperty(theVersionPropertyName) + "-" + codeSystemVersion;
 		} else {
 			version = codeSystemVersion;
 		}
@@ -107,10 +108,10 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			vs.setStatus(Enumerations.PublicationStatus.DRAFT);
 			vs.setPublisher(REGENSTRIEF_INSTITUTE_INC);
 			vs.addContact()
-				.setName(REGENSTRIEF_INSTITUTE_INC)
-				.addTelecom()
-				.setSystem(ContactPoint.ContactPointSystem.URL)
-				.setValue(LOINC_WEBSITE_URL);
+					.setName(REGENSTRIEF_INSTITUTE_INC)
+					.addTelecom()
+					.setSystem(ContactPoint.ContactPointSystem.URL)
+					.setValue(LOINC_WEBSITE_URL);
 			vs.setCopyright(theJobMetadata.getCodeSystem().getCopyright());
 			theContext.getIdToValueSet().put(valueSetId, vs);
 			theData.addResourceToActivate("ValueSet/" + valueSetId);
@@ -154,32 +155,43 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 
 	@Override
 	protected void syncToDb(
-		ImportTerminologyMetadataAttachmentJson theJobMetadata, CT theCodeExtractionContext,
-		CodeSystem theCodeSystemToPopulate,
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			CT theCodeExtractionContext,
+			CodeSystem theCodeSystemToPopulate,
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		super.syncToDb(theJobMetadata, theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 
 		syncConceptMapsToDb(theJobMetadata, theCodeExtractionContext, theStepExecutionDetails);
 		syncValueSetsToDb(theJobMetadata, theCodeExtractionContext, theStepExecutionDetails);
 	}
 
-	private void syncConceptMapsToDb(ImportTerminologyMetadataAttachmentJson theJobMetadata, CT theCodeExtractionContext, StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+	private void syncConceptMapsToDb(
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			CT theCodeExtractionContext,
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		IFhirResourceDao conceptMapDao = myDaoRegistry.getResourceDao("ConceptMap");
 		for (Map.Entry<String, Collection<ConceptMapping>> entry :
-			theCodeExtractionContext.getIdToConceptMappings().asMap().entrySet()) {
+				theCodeExtractionContext.getIdToConceptMappings().asMap().entrySet()) {
 
 			String conceptMapId = entry.getKey();
 			Collection<ConceptMapping> mappings = entry.getValue();
 
-			executeInNewTransactionWithRetry(()->{
-				syncConceptMapToDb(theJobMetadata, theStepExecutionDetails, conceptMapId, conceptMapDao, mappings);
-				return null;
-			}, theStepExecutionDetails);
-
+			executeInNewTransactionWithRetry(
+					() -> {
+						syncConceptMapToDb(
+								theJobMetadata, theStepExecutionDetails, conceptMapId, conceptMapDao, mappings);
+						return null;
+					},
+					theStepExecutionDetails);
 		}
 	}
 
-	private void syncConceptMapToDb(ImportTerminologyMetadataAttachmentJson theJobMetadata, StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, String conceptMapId, IFhirResourceDao conceptMapDao, Collection<ConceptMapping> mappings) {
+	private void syncConceptMapToDb(
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			String conceptMapId,
+			IFhirResourceDao conceptMapDao,
+			Collection<ConceptMapping> mappings) {
 		ourLog.info("Checking for existence of ConceptMap: {}", conceptMapId);
 
 		ConceptMap conceptMap;
@@ -202,19 +214,16 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			conceptMap.setVersion(firstMapping.getConceptMapVersion());
 			conceptMap.setPublisher(REGENSTRIEF_INSTITUTE_INC);
 			conceptMap
-				.addContact()
-				.setName(REGENSTRIEF_INSTITUTE_INC)
-				.addTelecom()
-				.setSystem(ContactPoint.ContactPointSystem.URL)
-				.setValue(LOINC_WEBSITE_URL);
+					.addContact()
+					.setName(REGENSTRIEF_INSTITUTE_INC)
+					.addTelecom()
+					.setSystem(ContactPoint.ContactPointSystem.URL)
+					.setValue(LOINC_WEBSITE_URL);
 
 			String copyright = firstMapping.getCopyright();
 			if (!copyright.contains("LOINC")) {
-				String loincCopyrightStatement = theJobMetadata
-					.getCodeSystem()
-					.getCopyright();
-				copyright =
-					loincCopyrightStatement + (loincCopyrightStatement.endsWith(".") ? " " : ". ") + copyright;
+				String loincCopyrightStatement = theJobMetadata.getCodeSystem().getCopyright();
+				copyright = loincCopyrightStatement + (loincCopyrightStatement.endsWith(".") ? " " : ". ") + copyright;
 			}
 			conceptMap.setCopyright(copyright);
 		}
@@ -230,7 +239,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 				if (next.getSource().equals(nextMapping.getSourceCodeSystem())) {
 					if (next.getTarget().equals(nextMapping.getTargetCodeSystem())) {
 						if (!defaultString(nextMapping.getTargetCodeSystemVersion())
-							.equals(defaultString(next.getTargetVersion()))) {
+								.equals(defaultString(next.getTargetVersion()))) {
 							continue;
 						}
 						group = next;
@@ -265,19 +274,19 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			}
 			if (!found) {
 				source.addTarget()
-					.setCode(nextMapping.getTargetCode())
-					.setDisplay(nextMapping.getTargetDisplay())
-					.setEquivalence(nextMapping.getEquivalence());
+						.setCode(nextMapping.getTargetCode())
+						.setDisplay(nextMapping.getTargetDisplay())
+						.setEquivalence(nextMapping.getEquivalence());
 				addedMappings++;
 			} else {
 				skippedMappings++;
 				ourLog.atDebug()
-					.setMessage("Not going to add a mapping from [{}/{}] to [{}/{}] because one already exists")
-					.addArgument(nextMapping.getSourceCodeSystem())
-					.addArgument(nextMapping.getSourceCode())
-					.addArgument(nextMapping.getTargetCodeSystem())
-					.addArgument(nextMapping.getTargetCode())
-					.log();
+						.setMessage("Not going to add a mapping from [{}/{}] to [{}/{}] because one already exists")
+						.addArgument(nextMapping.getSourceCodeSystem())
+						.addArgument(nextMapping.getSourceCode())
+						.addArgument(nextMapping.getTargetCodeSystem())
+						.addArgument(nextMapping.getTargetCode())
+						.log();
 			}
 		}
 
@@ -292,7 +301,9 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 				 * this would result in us overwriting the other thread's ConceptMap.
 				 */
 				conceptMap.setId(conceptMapId);
-				conceptMap.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE, conceptMap.getIdElement().getIdPart());
+				conceptMap.setUserData(
+						JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE,
+						conceptMap.getIdElement().getIdPart());
 				conceptMapDao.create(conceptMap, requestDetails);
 			} else {
 				conceptMapDao.update(conceptMap, requestDetails);
@@ -302,24 +313,32 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 		}
 
 		ourLog.atInfo()
-			.setMessage("Adding {} mappings and skipped {} pre-existing mappings to LOINC ConceptMap {}")
-			.addArgument(addedMappings)
-			.addArgument(skippedMappings)
-			.addArgument(conceptMap.getId())
-			.log();
+				.setMessage("Adding {} mappings and skipped {} pre-existing mappings to LOINC ConceptMap {}")
+				.addArgument(addedMappings)
+				.addArgument(skippedMappings)
+				.addArgument(conceptMap.getId())
+				.log();
 	}
 
-	private void syncValueSetsToDb(ImportTerminologyMetadataAttachmentJson theJobMetadata, CT theCodeExtractionContext, StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+	private void syncValueSetsToDb(
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			CT theCodeExtractionContext,
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		IFhirResourceDao valueSetDao = myDaoRegistry.getResourceDao("ValueSet");
 		for (ValueSet valueSet : theCodeExtractionContext.getIdToValueSet().values()) {
-			executeInNewTransactionWithRetry(()->{
-				syncValueSetToDb(theStepExecutionDetails, valueSet, valueSetDao);
-				return null;
-			}, theStepExecutionDetails);
+			executeInNewTransactionWithRetry(
+					() -> {
+						syncValueSetToDb(theStepExecutionDetails, valueSet, valueSetDao);
+						return null;
+					},
+					theStepExecutionDetails);
 		}
 	}
 
-	private void syncValueSetToDb(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ValueSet valueSet, IFhirResourceDao valueSetDao) {
+	private void syncValueSetToDb(
+			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ValueSet valueSet,
+			IFhirResourceDao valueSetDao) {
 		try {
 			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 			IdType existingId = new IdType(valueSet.getIdElement().getIdPart());
@@ -334,14 +353,14 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			int addedCodes = 0;
 
 			for (ValueSet.ConceptSetComponent sourceInclude :
-				valueSet.getCompose().getInclude()) {
+					valueSet.getCompose().getInclude()) {
 				ValueSet.ConceptSetComponent targetInclude = findOrAddMatchingConceptSetComponent(
-					existing.getCompose().getInclude(), sourceInclude);
+						existing.getCompose().getInclude(), sourceInclude);
 
 				// Add codes
 				Set<String> existingCodes = targetInclude.getConcept().stream()
-					.map(ValueSet.ConceptReferenceComponent::getCode)
-					.collect(Collectors.toSet());
+						.map(ValueSet.ConceptReferenceComponent::getCode)
+						.collect(Collectors.toSet());
 				for (ValueSet.ConceptReferenceComponent toAdd : sourceInclude.getConcept()) {
 					if (!existingCodes.contains(toAdd.getCode())) {
 						existing.getCompose().getIncludeFirstRep().addConcept(toAdd);
@@ -356,10 +375,10 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			}
 
 			ourLog.atInfo()
-				.setMessage("Updating existing LOINC ValueSet {} to add {} codes")
-				.addArgument(valueSet.getId())
-				.addArgument(addedCodes)
-				.log();
+					.setMessage("Updating existing LOINC ValueSet {} to add {} codes")
+					.addArgument(valueSet.getId())
+					.addArgument(addedCodes)
+					.log();
 
 			requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 			valueSetDao.update(existing, requestDetails);
@@ -376,17 +395,17 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 
 			int codeCount = 0;
 			if (valueSet.hasCompose()
-				&& valueSet.getCompose().hasInclude()
-				&& valueSet.getCompose().getIncludeFirstRep().hasConcept()) {
+					&& valueSet.getCompose().hasInclude()
+					&& valueSet.getCompose().getIncludeFirstRep().hasConcept()) {
 				codeCount = Math.toIntExact(valueSet.getCompose().getIncludeFirstRep().getConcept().stream()
-					.count());
+						.count());
 			}
 
 			ourLog.atInfo()
-				.setMessage("Creating new LOINC ValueSet {} with {} code inclusions")
-				.addArgument(valueSet.getId())
-				.addArgument(codeCount)
-				.log();
+					.setMessage("Creating new LOINC ValueSet {} with {} code inclusions")
+					.addArgument(valueSet.getId())
+					.addArgument(codeCount)
+					.log();
 			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 
 			/*
@@ -395,16 +414,17 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 			 * is created by another thread while we are trying to also create it here, since
 			 * this would result in us overwriting the other thread's ValueSet.
 			 */
-			valueSet.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE, valueSet.getIdElement().getIdPart());
+			valueSet.setUserData(
+					JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE,
+					valueSet.getIdElement().getIdPart());
 			valueSetDao.create(valueSet, requestDetails);
 
 			getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetCodesAdded(codeCount);
-
 		}
 	}
 
 	private ValueSet.ConceptSetComponent findOrAddMatchingConceptSetComponent(
-		List<ValueSet.ConceptSetComponent> theTargetList, ValueSet.ConceptSetComponent theSetToFind) {
+			List<ValueSet.ConceptSetComponent> theTargetList, ValueSet.ConceptSetComponent theSetToFind) {
 		ConceptSetComponentIdentity toFind = new ConceptSetComponentIdentity(theSetToFind);
 		for (ValueSet.ConceptSetComponent next : theTargetList) {
 			ConceptSetComponentIdentity nextIdentity = new ConceptSetComponentIdentity(next);
@@ -425,11 +445,11 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 	private record ConceptSetComponentIdentity(String system, Set<String> valueSets) {
 		public ConceptSetComponentIdentity(ValueSet.ConceptSetComponent theSetToFind) {
 			this(
-				theSetToFind.getSystem(),
-				theSetToFind.getValueSet().stream()
-					.map(PrimitiveType::getValue)
-					.filter(StringUtils::isNotBlank)
-					.collect(Collectors.toSet()));
+					theSetToFind.getSystem(),
+					theSetToFind.getValueSet().stream()
+							.map(PrimitiveType::getValue)
+							.filter(StringUtils::isNotBlank)
+							.collect(Collectors.toSet()));
 		}
 	}
 
@@ -437,7 +457,7 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 
 		private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 		private final SetMultimap<String, ConceptMapping> myIdToConceptMappings =
-			MultimapBuilder.hashKeys().linkedHashSetValues().build();
+				MultimapBuilder.hashKeys().linkedHashSetValues().build();
 		private final Map<String, CodeSystem.ConceptDefinitionComponent> myCodeToConcept = new HashMap<>();
 		private final TerminologyFileSetJson myData;
 
@@ -607,38 +627,38 @@ public abstract class BaseImportLoincStepWithValueSetsAndConceptMaps<
 				return false;
 			}
 			return Objects.equals(myCopyright, that.myCopyright)
-				&& Objects.equals(myConceptMapId, that.myConceptMapId)
-				&& Objects.equals(myConceptMapUri, that.myConceptMapUri)
-				&& Objects.equals(myConceptMapVersion, that.myConceptMapVersion)
-				&& Objects.equals(myConceptMapName, that.myConceptMapName)
-				&& Objects.equals(mySourceCodeSystem, that.mySourceCodeSystem)
-				&& Objects.equals(mySourceCodeSystemVersion, that.mySourceCodeSystemVersion)
-				&& Objects.equals(mySourceCode, that.mySourceCode)
-				&& Objects.equals(mySourceDisplay, that.mySourceDisplay)
-				&& Objects.equals(myTargetCodeSystem, that.myTargetCodeSystem)
-				&& Objects.equals(myTargetCode, that.myTargetCode)
-				&& Objects.equals(myTargetDisplay, that.myTargetDisplay)
-				&& myEquivalence == that.myEquivalence
-				&& Objects.equals(myTargetCodeSystemVersion, that.myTargetCodeSystemVersion);
+					&& Objects.equals(myConceptMapId, that.myConceptMapId)
+					&& Objects.equals(myConceptMapUri, that.myConceptMapUri)
+					&& Objects.equals(myConceptMapVersion, that.myConceptMapVersion)
+					&& Objects.equals(myConceptMapName, that.myConceptMapName)
+					&& Objects.equals(mySourceCodeSystem, that.mySourceCodeSystem)
+					&& Objects.equals(mySourceCodeSystemVersion, that.mySourceCodeSystemVersion)
+					&& Objects.equals(mySourceCode, that.mySourceCode)
+					&& Objects.equals(mySourceDisplay, that.mySourceDisplay)
+					&& Objects.equals(myTargetCodeSystem, that.myTargetCodeSystem)
+					&& Objects.equals(myTargetCode, that.myTargetCode)
+					&& Objects.equals(myTargetDisplay, that.myTargetDisplay)
+					&& myEquivalence == that.myEquivalence
+					&& Objects.equals(myTargetCodeSystemVersion, that.myTargetCodeSystemVersion);
 		}
 
 		@Override
 		public int hashCode() {
 			return Objects.hash(
-				myCopyright,
-				myConceptMapId,
-				myConceptMapUri,
-				myConceptMapVersion,
-				myConceptMapName,
-				mySourceCodeSystem,
-				mySourceCodeSystemVersion,
-				mySourceCode,
-				mySourceDisplay,
-				myTargetCodeSystem,
-				myTargetCode,
-				myTargetDisplay,
-				myEquivalence,
-				myTargetCodeSystemVersion);
+					myCopyright,
+					myConceptMapId,
+					myConceptMapUri,
+					myConceptMapVersion,
+					myConceptMapName,
+					mySourceCodeSystem,
+					mySourceCodeSystemVersion,
+					mySourceCode,
+					mySourceDisplay,
+					myTargetCodeSystem,
+					myTargetCode,
+					myTargetDisplay,
+					myEquivalence,
+					myTargetCodeSystemVersion);
 		}
 	}
 }
