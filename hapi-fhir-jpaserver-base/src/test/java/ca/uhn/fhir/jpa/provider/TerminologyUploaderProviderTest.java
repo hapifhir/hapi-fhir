@@ -12,12 +12,14 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -31,6 +33,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -50,10 +54,13 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLO
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_JOB_ATTACHMENT_ID;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.RESP_PARAM_OUTCOME;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -61,6 +68,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("LoggingSimilarMessage")
 @TestMethodOrder(value = MethodOrderer.MethodName.class)
 @ExtendWith(MockitoExtension.class)
 class TerminologyUploaderProviderTest {
@@ -157,6 +165,39 @@ class TerminologyUploaderProviderTest {
 			.hasMessageContaining("Missing required parameter: system");
 	}
 
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		&makeCurrent=false  , true
+		&makeCurrent=true   , false
+		                    , false
+		""")
+	void testUploadTerminologyCreateJob_MakeCurrent(String theMakeCurrent, boolean theExpectDontMakeCurrent) throws IOException {
+		// Setup
+		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
+		startResponse.setInstanceId("my-instance-id");
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+
+		// Test
+		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB +
+			"?system=" + UrlUtil.escapeUrlParam("http://loinc.org|1.2.3") + getIfNull(theMakeCurrent, "");
+		HttpPost post = new HttpPost(url);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
+			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+		}
+
+		// Verify
+		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestCaptor.capture());
+		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
+		assertEquals(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC, startRequest.getJobDefinitionId());
+		assertEquals("1.2.3", startRequest.getParameters(ImportLoincJobParameters.class).getVersionId());
+		if (theExpectDontMakeCurrent) {
+			assertTrue(startRequest.getParameters(ImportLoincJobParameters.class).getDontMakeCurrent());
+		} else {
+			assertNull(startRequest.getParameters(ImportLoincJobParameters.class).getDontMakeCurrent());
+		}
+	}
+
 	@Test
 	void testUploadTerminologyAttachFile() throws IOException {
 		// Setup
@@ -188,6 +229,7 @@ class TerminologyUploaderProviderTest {
 			InputStream contentInputStream = response.getEntity().getContent();
 			Reader contentReader = new InputStreamReader(contentInputStream, StandardCharsets.UTF_8);
 			responseParameters = myContext.newJsonParser().parseResource(Parameters.class, contentReader);
+			ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseParameters));
 		}
 
 		// Verify

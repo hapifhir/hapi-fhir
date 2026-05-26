@@ -47,7 +47,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.CountingInputStream;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ThreadUtils;
 import org.apache.commons.lang3.Validate;
@@ -117,6 +117,12 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				"size",
 				true,
 				"The maximum size of a single upload (default: 10MB). Examples: 150 kb, 3 mb, 1GB");
+		addOptionalOption(
+				options,
+				null,
+				"dont-make-current",
+				false,
+				"If specified, the terminology version being uploaded will not be marked as the current version.");
 
 		return options;
 	}
@@ -146,36 +152,31 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		String sizeString = theCommandLine.getOptionValue("s");
 		this.setTransferSizeLimitHuman(sizeString);
 
+		boolean dontMakeCurrent = theCommandLine.hasOption("dont-make-current");
+
 		IGenericClient client = newClient(theCommandLine);
 
 		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {
 			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 
-		String requestName = null;
-		switch (mode) {
-			case SNAPSHOT:
-				requestName = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
-				break;
-			case ADD:
-				requestName = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD;
-				break;
-			case REMOVE:
-				requestName = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
-				break;
-		}
+		String requestName = switch (mode) {
+			case SNAPSHOT -> JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
+			case ADD -> JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD;
+			case REMOVE -> JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
+		};
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(termUrl);
 		if (LOINC_URI.equals(canonicalUrl.url())) {
-			invokeOperationAsyncJob(termUrl, datafile, client, requestName);
+			invokeOperationAsyncJob(termUrl, datafile, client, dontMakeCurrent);
 		} else {
+			Validate.isTrue(!dontMakeCurrent, "The --dont-make-current option is not supported for this system");
 			invokeOperation(termUrl, datafile, client, requestName);
 		}
 	}
 
 	private void invokeOperationAsyncJob(
-			String theUrl, String[] theDatafiles, IGenericClient theClient, String theRequestName)
-			throws ParseException {
+		String theUrl, String[] theDatafiles, IGenericClient theClient, boolean theDontMakeCurrent) {
 		ourLog.info("Beginning upload process for terminology system: {}", theUrl);
 
 		// Step 1: Create staging job
@@ -183,6 +184,12 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		IBaseParameters createStagingRequest = ParametersUtil.newInstance(myFhirCtx);
 		ParametersUtil.addParameterToParametersUri(
 				myFhirCtx, createStagingRequest, TerminologyUploaderProvider.PARAM_SYSTEM, theUrl);
+
+		if (theDontMakeCurrent) {
+			ParametersUtil.addParameterToParametersBoolean(
+					myFhirCtx, createStagingRequest, TerminologyUploaderProvider.PARAM_MAKE_CURRENT, false);
+		}
+
 		IBaseParameters createStagingResponse;
 		try {
 			createStagingResponse = theClient
@@ -313,7 +320,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);
-		int compressedSourceBytesCount = 0;
+		long compressedSourceBytesCount = 0;
 		int compressedFileCount = 0;
 		boolean haveCompressedContents = false;
 		try {
@@ -347,7 +354,10 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 							ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));
 							zipOutputStream.putNextEntry(nextEntry);
 
-							CountingInputStream countingInputStream = new CountingInputStream(fileInputStream);
+							BoundedInputStream countingInputStream = BoundedInputStream
+								.builder()
+								.setInputStream(fileInputStream)
+								.get();
 							IOUtils.copy(countingInputStream, zipOutputStream);
 							haveCompressedContents = true;
 							compressedSourceBytesCount += countingInputStream.getCount();
@@ -372,7 +382,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			zipOutputStream.flush();
 			zipOutputStream.close();
 		} catch (IOException e) {
-			throw new ParseException(Msg.code(1543) + e.toString());
+			throw new ParseException(Msg.code(1543) + e);
 		}
 
 		if (haveCompressedContents) {
@@ -457,22 +467,13 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	private String getContentType(String theSuffix) {
 		String retVal = "";
 		if (StringUtils.isNotBlank(theSuffix)) {
-			switch (theSuffix.toLowerCase()) {
-				case "csv":
-					retVal = "text/csv";
-					break;
-				case "xml":
-					retVal = "application/xml";
-					break;
-				case "json":
-					retVal = "application/json";
-					break;
-				case "zip":
-					retVal = "application/zip";
-					break;
-				default:
-					retVal = "text/plain";
-			}
+			retVal = switch (theSuffix.toLowerCase()) {
+				case "csv" -> "text/csv";
+				case "xml" -> "application/xml";
+				case "json" -> "application/json";
+				case "zip" -> "application/zip";
+				default -> "text/plain";
+			};
 		}
 		ourLog.debug(
 				"File suffix given was {} and contentType is {}, defaulting to content type text/plain",

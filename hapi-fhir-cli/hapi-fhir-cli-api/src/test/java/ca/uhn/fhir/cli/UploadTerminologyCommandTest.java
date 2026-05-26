@@ -3,6 +3,7 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -10,6 +11,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -64,6 +66,7 @@ import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -107,6 +110,9 @@ public class UploadTerminologyCommandTest {
 	static {
 		HapiSystemProperties.enableTestMode();
 	}
+
+	@Captor
+	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestDetails;
 
 
 	static Stream<Arguments> paramsProvider(){
@@ -527,6 +533,69 @@ public class UploadTerminologyCommandTest {
 
 		// Verify
 		assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
+
+		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
+		JobInstanceStartRequest startRequest = myStartRequestDetails.getValue();
+		ImportLoincJobParameters params = startRequest.getParameters(ImportLoincJobParameters.class);
+		assertNull(params.getDontMakeCurrent());
+	}
+
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testUploadLoinc_DontMakeCurrent(String theFhirVersion, boolean theIncludeTls) throws IOException {
+
+		File tempFile = File.createTempFile("loinc", ".zip");
+		tempFile.deleteOnExit();
+		try (FileWriter w = new FileWriter(tempFile, StandardCharsets.UTF_8, false)) {
+			w.append("12345");
+		}
+
+		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
+		startResponse.setInstanceId("my-instance-id");
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+
+		JobInstance jobInstance = new JobInstance();
+		jobInstance.setInstanceId("my-instance-id");
+		jobInstance.setStatus(StatusEnum.BUILDING);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
+
+		StopWatch sw = new StopWatch();
+		doAnswer(t->{
+			if (jobInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+				if (sw.getMillis() > 2000) {
+					ImportTerminologyResultJson result = new ImportTerminologyResultJson();
+					result.setReport("This is the report line 1\nThis is the report line 2");
+
+					jobInstance.setStatus(StatusEnum.COMPLETED);
+					jobInstance.setReport(JsonUtil.serialize(result));
+				}
+			}
+			return jobInstance;
+		}).when(myJobCoordinator).getInstance(eq("my-instance-id"));
+		doAnswer(t->{
+			jobInstance.setStatus(StatusEnum.IN_PROGRESS);
+			jobInstance.setProgress(0.55);
+			return null;
+		}).when(myJobCoordinator).enqueueBuildingJobForExecution(any());
+
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", theFhirVersion,
+				"-u", LOINC_URI + "|1.23",
+				"-d", tempFile.getAbsolutePath(),
+				"--dont-make-current"
+			}, "-t", theIncludeTls
+			, myBaseRestServerHelper
+		));
+
+		// Verify
+		assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
+
+		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
+		JobInstanceStartRequest startRequest = myStartRequestDetails.getValue();
+		ImportLoincJobParameters params = startRequest.getParameters(ImportLoincJobParameters.class);
+		assertTrue(params.getDontMakeCurrent());
 	}
 
 	@ParameterizedTest

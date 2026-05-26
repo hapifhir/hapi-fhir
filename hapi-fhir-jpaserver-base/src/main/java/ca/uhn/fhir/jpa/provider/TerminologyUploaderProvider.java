@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.AttachmentUtil;
+import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -85,6 +86,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	public static final String PARAM_VERSION = "version";
 	public static final String PARAM_FILENAME = "filename";
 	public static final String PARAM_JOB_INSTANCE_ID = "jobInstanceId";
+	public static final String PARAM_MAKE_CURRENT = "makeCurrent";
 	public static final String PARAM_JOB_ATTACHMENT_ID = "jobAttachmentId";
 	public static final String RESP_PARAM_OUTCOME = "outcome";
 	public static final Pattern LOINC_XML_FILENAME_PATTERN =
@@ -155,6 +157,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			@OperationParam(name = PARAM_SYSTEM, min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
 			@OperationParam(name = PARAM_VERSION, min = 0, typeName = "code")
 					IPrimitiveType<String> theCodeSystemVersion,
+				@OperationParam(name = PARAM_MAKE_CURRENT, typeName = "boolean", min = 0)
+					IPrimitiveType<Boolean> theMakeCurrent,
 			ServletRequestDetails theRequestDetails) {
 
 		String url = toStringValue(theCodeSystemUrl);
@@ -169,6 +173,12 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			startRequest.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 			ImportLoincJobParameters parameters = new ImportLoincJobParameters();
 			parameters.setVersionId(canonicalUrl.versionId().orElse(null));
+
+			Boolean makeCurrent = DatatypeUtil.toBooleanValue(theMakeCurrent);
+			if (makeCurrent != null && !makeCurrent) {
+				parameters.setDontMakeCurrent(true);
+			}
+
 			startRequest.setParameters(parameters);
 			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(theRequestDetails, startRequest);
 			String instanceId = startResponse.getInstanceId();
