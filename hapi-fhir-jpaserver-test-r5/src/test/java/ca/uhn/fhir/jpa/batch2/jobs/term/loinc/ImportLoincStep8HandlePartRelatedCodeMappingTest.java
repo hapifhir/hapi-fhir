@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r5.model.ConceptMap;
+import org.hl7.fhir.r5.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,7 +56,7 @@ class ImportLoincStep8HandlePartRelatedCodeMappingTest extends BaseImportLoincSt
 		ConceptMap actualConceptMap = myConceptMapCaptor.getAllValues().get(0);
 		String actualRender = renderConceptMap(actualConceptMap);
 		String expected = """
-			Group: http://loinc.org -> http://snomed.info/sct
+			Group: http://loinc.org|1.234 -> http://snomed.info/sct|http://snomed.info/sct/900000000000207008/version/20170731
 			  Code[LP18172-4] -> 420710006
 			  Code[LP31706-2] -> 1018001
 			  Code[LP15826-8] -> 10192006
@@ -72,7 +72,7 @@ class ImportLoincStep8HandlePartRelatedCodeMappingTest extends BaseImportLoincSt
 		actualConceptMap = myConceptMapCaptor.getAllValues().get(1);
 		actualRender = renderConceptMap(actualConceptMap);
 		expected = """
-			Group: http://loinc.org -> http://pubchem.ncbi.nlm.nih.gov
+			Group: http://loinc.org|1.234 -> http://pubchem.ncbi.nlm.nih.gov
 			  Code[LP15842-5] -> 1054
 			""";
 		assertEquals(expected, actualRender);
@@ -80,7 +80,7 @@ class ImportLoincStep8HandlePartRelatedCodeMappingTest extends BaseImportLoincSt
 		actualConceptMap = myConceptMapCaptor.getAllValues().get(2);
 		actualRender = renderConceptMap(actualConceptMap);
 		expected = """
-			Group: http://loinc.org -> http://foo/bar
+			Group: http://loinc.org|1.234 -> http://foo/bar
 			  Code[LP15842-5] -> 1054
 			""";
 		assertEquals(expected, actualRender);

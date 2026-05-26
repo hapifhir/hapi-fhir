@@ -4,10 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.ConceptMap;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -63,7 +63,7 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 			""";
 		assertEquals(expected, hierarchy);
 		assertEquals("rad-anatomic-location-region-imaged", cs.getConcept().get(0).getProperty().get(0).getCode());
-		assertEquals("{\"system\":\"http://loinc.org\",\"code\":\"LP199995-4\",\"display\":\"Neck\"}", FhirContext.forR4Cached().newJsonParser().encodeToString(cs.getConcept().get(0).getProperty().get(0).getValue()));
+		assertEquals("{\"system\":\"http://loinc.org\",\"code\":\"LP199995-4\",\"display\":\"Neck\"}", myFhirContext.newJsonParser().encodeToString(cs.getConcept().get(0).getProperty().get(0).getValue()));
 
 		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
 		assertThat(renderEmittedChunks()).containsExactly(
@@ -94,7 +94,7 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		ConceptMap actualConceptMap = myConceptMapCaptor.getAllValues().get(0);
 		String actualRender = renderConceptMap(actualConceptMap);
 		expected = """
-			Group: http://loinc.org -> http://www.radlex.org
+			Group: http://loinc.org|1.234 -> http://www.radlex.org
 			  Code[24531-6] -> RPID2142
 			""";
 		assertEquals(expected, actualRender);
@@ -102,7 +102,7 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		actualConceptMap = myConceptMapCaptor.getAllValues().get(1);
 		actualRender = renderConceptMap(actualConceptMap);
 		expected = """
-			Group: http://loinc.org -> http://www.radlex.org
+			Group: http://loinc.org|1.234 -> http://www.radlex.org
 			  Code[LP199995-4] -> RID7488
 			  Code[LP206648-0] -> RID7578
 			  Code[LP208891-4] -> RID10330

@@ -25,11 +25,12 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.ConceptMap;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -44,7 +45,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.apache.commons.lang3.StringUtils.compareIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,7 +54,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 abstract class BaseImportLoincStepTest {
 	@Spy
+	FhirContext myFhirContext = FhirContext.forR5Cached();
+	@Spy
 	IHapiTransactionService myTransactionService = new MockHapiTransactionService();
+	@Spy
+	VersionCanonicalizer myVersionCanonicalizer = new VersionCanonicalizer(myFhirContext);
 	@Mock
 	IValidationSupport myValidationSupport;
 	@Mock
@@ -126,12 +130,11 @@ abstract class BaseImportLoincStepTest {
 	}
 
 	void mockFetchJobMetadataAttachment() {
-		CodeSystem codeSystem = ClasspathUtil.loadResource(FhirContext.forR4Cached(), CodeSystem.class, "loinc-ver/v269/loinc.xml");
-		codeSystem.setVersion("1.234");
-
 		ImportTerminologyMetadataAttachmentJson jobMetadata = new ImportTerminologyMetadataAttachmentJson();
 		jobMetadata.setCodeSystemStagingVersionId("my-staging-version-id");
-		jobMetadata.setCodeSystem(codeSystem);
+		jobMetadata.setCodeSystemXml(ClasspathUtil.loadResource("loinc-ver/v269/loinc.xml"));
+		jobMetadata.getCodeSystem().setVersion("1.234");
+		jobMetadata.setCodeSystem(jobMetadata.getCodeSystem());
 		String jobMetadataSerialized = JsonUtil.serialize(jobMetadata);
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME))).thenReturn(new AttachmentDetails(jobMetadataSerialized.getBytes(StandardCharsets.UTF_8), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
 	}
@@ -146,17 +149,17 @@ abstract class BaseImportLoincStepTest {
 	}
 
 
-	static String renderHierarchy(CodeSystem theCs) {
+	String renderHierarchy(CodeSystem theCs) {
 		return renderHierarchy(theCs, false);
 	}
 
-	static String renderHierarchy(CodeSystem theCs, boolean theIncludeProperties) {
+	String renderHierarchy(CodeSystem theCs, boolean theIncludeProperties) {
 		StringBuilder target = new StringBuilder();
 		appendToHierarchy(theCs.getConcept(), 0, target, theIncludeProperties);
 		return target.toString();
 	}
 
-	private static void appendToHierarchy(List<CodeSystem.ConceptDefinitionComponent> theConceptList, int theDepth, StringBuilder theTarget, boolean theIncludeProperties) {
+	private void appendToHierarchy(List<CodeSystem.ConceptDefinitionComponent> theConceptList, int theDepth, StringBuilder theTarget, boolean theIncludeProperties) {
 		for (CodeSystem.ConceptDefinitionComponent next : theConceptList) {
 			theTarget.append("  ".repeat(theDepth));
 			theTarget.append("-");
@@ -164,13 +167,13 @@ abstract class BaseImportLoincStepTest {
 			if (theIncludeProperties) {
 				for (CodeSystem.ConceptPropertyComponent property : next.getProperty()) {
 					theTarget.append("  ".repeat(theDepth));
-					theTarget.append("  -Property[").append(property.getCode()).append(": ").append(FhirContext.forR4Cached().newJsonParser().encodeToString(property.getValue())).append("\n");
+					theTarget.append("  -Property[").append(property.getCode()).append(": ").append(myFhirContext.newJsonParser().encodeToString(property.getValue())).append("\n");
 				}
 				for (CodeSystem.ConceptDefinitionDesignationComponent designation : next.getDesignation()) {
 					theTarget.append("  ".repeat(theDepth));
 					theTarget.append("  -Designation[lang=");
 					theTarget.append(designation.getLanguage()).append(", use=");
-					theTarget.append(FhirContext.forR4Cached().newJsonParser().encodeToString(designation.getUse()));
+					theTarget.append(myFhirContext.newJsonParser().encodeToString(designation.getUse()));
 					theTarget.append("]: ").append(designation.getValue()).append("\n");
 				}
 			}

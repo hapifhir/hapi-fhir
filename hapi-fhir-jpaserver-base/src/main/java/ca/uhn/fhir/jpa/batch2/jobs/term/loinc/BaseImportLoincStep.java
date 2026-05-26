@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -26,6 +27,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
@@ -36,11 +38,12 @@ import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
@@ -82,6 +85,9 @@ public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseC
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportLoincStep.class);
 
 	@Autowired
+	protected FhirContext myFhirContext;
+
+	@Autowired
 	private IJobPersistence myJobPersistence;
 
 	@Autowired
@@ -95,6 +101,9 @@ public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseC
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	protected VersionCanonicalizer myVersionCanonicalizer;
 
 	@Nonnull
 	@Override
@@ -391,8 +400,11 @@ public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseC
 					.addArgument(conceptCount)
 					.log();
 
-			Callable<UploadStatistics> uploader =
-					() -> myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulate);
+			Callable<UploadStatistics> uploader = () -> {
+				IBaseResource codeSystemToPopulateNonCanonical =
+						myVersionCanonicalizer.codeSystemFromCanonical(codeSystemToPopulate);
+				return myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulateNonCanonical);
+			};
 			UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
 
 			TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter =
@@ -436,8 +448,10 @@ public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseC
 		ConceptMap conceptMap;
 		try {
 			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-			IdType existingId = new IdType(conceptMapId);
-			conceptMap = (ConceptMap) conceptMapDao.read(existingId, requestDetails);
+
+			IIdType existingId = myFhirContext.getVersion().newIdType(conceptMapId);
+			IBaseResource conceptMapNonCanonical = conceptMapDao.read(existingId, requestDetails);
+			conceptMap = myVersionCanonicalizer.conceptMapToCanonical(conceptMapNonCanonical);
 			ourLog.info("Found existing ConceptMap: {}", conceptMapId);
 			assert conceptMap != null : "Reading ConceptMap " + conceptMapId + " returned null";
 
@@ -532,6 +546,7 @@ public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseC
 		if (addedMappings > 0) {
 
 			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+			IBaseResource nonCanonicalConceptMap = myVersionCanonicalizer.conceptMapFromCanonical(conceptMap);
 			if (conceptMap.getId() == null) {
 				/*
 				 * Create but with an assigned ID. We do this as a create instead of an update
@@ -539,13 +554,11 @@ public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseC
 				 * is created by another thread while we are trying to also create it here, since
 				 * this would result in us overwriting the other thread's ConceptMap.
 				 */
-				conceptMap.setId(conceptMapId);
-				conceptMap.setUserData(
-						JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE,
-						conceptMap.getIdElement().getIdPart());
-				conceptMapDao.create(conceptMap, requestDetails);
+				nonCanonicalConceptMap.setId(conceptMapId);
+				nonCanonicalConceptMap.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE, conceptMapId);
+				conceptMapDao.create(nonCanonicalConceptMap, requestDetails);
 			} else {
-				conceptMapDao.update(conceptMap, requestDetails);
+				conceptMapDao.update(nonCanonicalConceptMap, requestDetails);
 			}
 
 			getRecordsAddedCounter(theStepExecutionDetails).incrementConceptMapMappingsAdded(addedMappings);
@@ -581,8 +594,10 @@ public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseC
 			IFhirResourceDao valueSetDao) {
 		try {
 			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-			IdType existingId = new IdType(valueSet.getIdElement().getIdPart());
-			ValueSet existing = (ValueSet) valueSetDao.read(existingId, requestDetails);
+			IIdType existingId =
+					myFhirContext.getVersion().newIdType(valueSet.getIdElement().getIdPart());
+			IBaseResource valueSetNonCanonical = valueSetDao.read(existingId, requestDetails);
+			ValueSet existing = myVersionCanonicalizer.valueSetToCanonical(valueSetNonCanonical);
 			assert existing != null : "Reading ValueSet " + valueSet.getId() + " returned null";
 
 			/*
@@ -621,7 +636,7 @@ public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseC
 					.log();
 
 			requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-			valueSetDao.update(existing, requestDetails);
+			valueSetDao.update(myVersionCanonicalizer.valueSetFromCanonical(existing), requestDetails);
 
 			getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetCodesAdded(addedCodes);
 
@@ -654,10 +669,11 @@ public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseC
 			 * is created by another thread while we are trying to also create it here, since
 			 * this would result in us overwriting the other thread's ValueSet.
 			 */
-			valueSet.setUserData(
+			IBaseResource nonCanonicalValueSet = myVersionCanonicalizer.valueSetFromCanonical(valueSet);
+			nonCanonicalValueSet.setUserData(
 					JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE,
 					valueSet.getIdElement().getIdPart());
-			valueSetDao.create(valueSet, requestDetails);
+			valueSetDao.create(nonCanonicalValueSet, requestDetails);
 
 			getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetCodesAdded(codeCount);
 		}

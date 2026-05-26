@@ -3,8 +3,8 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r5.model.ConceptMap;
+import org.hl7.fhir.r5.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -55,7 +55,7 @@ class ImportLoincStep11HandleIeeeMedicalDeviceCodeTest extends BaseImportLoincSt
 		assertEquals("loinc-to-ieee-11073-10101-1.234", actualConceptMap.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE));
 		String actualRender = renderConceptMap(actualConceptMap);
 		String expected = """
-			Group: http://loinc.org -> urn:iso:std:iso:11073:10101
+			Group: http://loinc.org|1.234 -> urn:iso:std:iso:11073:10101
 			  Code[11556-8] -> 160116
 			  Code[11557-6] -> 160064
 			  Code[11558-4] -> 160004

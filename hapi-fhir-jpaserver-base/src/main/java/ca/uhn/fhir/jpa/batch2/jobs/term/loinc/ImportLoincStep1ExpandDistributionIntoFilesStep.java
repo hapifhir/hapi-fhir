@@ -103,12 +103,12 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		SystemRequestDetails srd = theStepExecutionDetails.newSystemRequestDetails();
 		srd.getUserData().put(MAKE_LOADING_VERSION_CURRENT, Boolean.FALSE);
 		IFhirResourceDao codeSystemDao = myDaoRegistry.getResourceDao("CodeSystem");
-		codeSystemDao.update(cs, srd);
+		codeSystemDao.update(myVersionCanonicalizer.codeSystemFromCanonical(cs), srd);
 
 		// Create the "all loinc" ValueSet
 		ValueSet valueSet = getValueSetLoincAll(cs.getVersion(), cs.getCopyright());
 		IFhirResourceDao valueSetDao = myDaoRegistry.getResourceDao("ValueSet");
-		valueSetDao.update(valueSet, srd);
+		valueSetDao.update(myVersionCanonicalizer.valueSetFromCanonical(valueSet), srd);
 
 		ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse response =
 				myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());

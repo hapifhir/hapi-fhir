@@ -14,6 +14,7 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
 import ca.uhn.fhir.jpa.util.CsvUtil;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
@@ -50,6 +51,9 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 	@Autowired
 	protected IJobPersistence myJobPersistence;
+
+	@Autowired
+	protected VersionCanonicalizer myVersionCanonicalizer;
 
 	private Integer myChunkLineSizeForUnitTests = null;
 

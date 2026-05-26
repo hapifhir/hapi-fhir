@@ -23,8 +23,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.RandomUtils;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -201,7 +201,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		assertEquals("loinc-1.23", jobMetadata.getCodeSystem().getIdElement().getIdPart());
 		assertEquals("1.23", jobMetadata.getCodeSystem().getVersion());
 		assertEquals("EXTERNAL_COPYRIGHT_NOTICE", jobMetadata.getCodeSystem().getProperty().get(0).getCode());
-		assertEquals(CodeSystem.PropertyType.STRING, jobMetadata.getCodeSystem().getProperty().get(0).getType());
+		assertEquals(CodeSystem.PropertyType.STRING.toCode(), jobMetadata.getCodeSystem().getProperty().get(0).getType().toCode());
 
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), nullable(RequestDetails.class));
 	}
@@ -233,10 +233,10 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		assertEquals("loinc-1.234", jobMetadata.getCodeSystem().getIdElement().getIdPart());
 		assertEquals("1.234", jobMetadata.getCodeSystem().getVersion());
 		assertEquals("EXTERNAL_COPYRIGHT_NOTICE", jobMetadata.getCodeSystem().getProperty().get(0).getCode());
-		assertEquals(CodeSystem.PropertyType.STRING, jobMetadata.getCodeSystem().getProperty().get(0).getType());
+		assertEquals(CodeSystem.PropertyType.STRING.toCode(), jobMetadata.getCodeSystem().getProperty().get(0).getType().toCode());
 
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), nullable(RequestDetails.class));
-		assertEquals(FhirContext.forR4Cached().newJsonParser().encodeToString(jobMetadata.getCodeSystem()), FhirContext.forR4Cached().newJsonParser().encodeToString(myCodeSystemCaptor.getValue()));
+		assertEquals(FhirContext.forR4Cached().newJsonParser().encodeToString(jobMetadata.getCodeSystem()), myFhirContext.newJsonParser().encodeToString(myCodeSystemCaptor.getValue()));
 
 		verify(myTermCodeSystemStorageSvc, times(1)).startStagingCodeSystemVersion(eq("http://loinc.org"), eq("1.234"));
 	}
@@ -413,7 +413,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 	}
 
 	private byte[] toBytes(CodeSystem theCs) {
-		return FhirContext.forR4Cached().newXmlParser().encodeResourceToString(theCs).getBytes(StandardCharsets.UTF_8);
+		return FhirContext.forR5Cached().newXmlParser().encodeResourceToString(theCs).getBytes(StandardCharsets.UTF_8);
 	}
 
 }

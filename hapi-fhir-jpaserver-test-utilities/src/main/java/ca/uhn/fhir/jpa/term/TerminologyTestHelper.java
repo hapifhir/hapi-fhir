@@ -167,6 +167,10 @@ public class TerminologyTestHelper {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 	}
 
+	public void startImportLoincJobAndWaitForCompletion() throws Exception {
+		startImportLoincJobAndWaitForCompletion("2.67", true);
+	}
+
 	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theClassPathPrefix)
 			throws IOException {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_XML_FILE.getCode());
