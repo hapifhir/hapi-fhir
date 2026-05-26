@@ -157,7 +157,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			@OperationParam(name = PARAM_SYSTEM, min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
 			@OperationParam(name = PARAM_VERSION, min = 0, typeName = "code")
 					IPrimitiveType<String> theCodeSystemVersion,
-				@OperationParam(name = PARAM_MAKE_CURRENT, typeName = "boolean", min = 0)
+			@OperationParam(name = PARAM_MAKE_CURRENT, typeName = "boolean", min = 0)
 					IPrimitiveType<Boolean> theMakeCurrent,
 			ServletRequestDetails theRequestDetails) {
 

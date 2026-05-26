@@ -160,11 +160,12 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 
-		String requestName = switch (mode) {
-			case SNAPSHOT -> JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
-			case ADD -> JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD;
-			case REMOVE -> JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
-		};
+		String requestName =
+				switch (mode) {
+					case SNAPSHOT -> JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
+					case ADD -> JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD;
+					case REMOVE -> JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
+				};
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(termUrl);
 		if (LOINC_URI.equals(canonicalUrl.url())) {
@@ -176,7 +177,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	}
 
 	private void invokeOperationAsyncJob(
-		String theUrl, String[] theDatafiles, IGenericClient theClient, boolean theDontMakeCurrent) {
+			String theUrl, String[] theDatafiles, IGenericClient theClient, boolean theDontMakeCurrent) {
 		ourLog.info("Beginning upload process for terminology system: {}", theUrl);
 
 		// Step 1: Create staging job
@@ -354,10 +355,9 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 							ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));
 							zipOutputStream.putNextEntry(nextEntry);
 
-							BoundedInputStream countingInputStream = BoundedInputStream
-								.builder()
-								.setInputStream(fileInputStream)
-								.get();
+							BoundedInputStream countingInputStream = BoundedInputStream.builder()
+									.setInputStream(fileInputStream)
+									.get();
 							IOUtils.copy(countingInputStream, zipOutputStream);
 							haveCompressedContents = true;
 							compressedSourceBytesCount += countingInputStream.getCount();
@@ -472,8 +472,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				case "xml" -> "application/xml";
 				case "json" -> "application/json";
 				case "zip" -> "application/zip";
-				default -> "text/plain";
-			};
+				default -> "text/plain";};
 		}
 		ourLog.debug(
 				"File suffix given was {} and contentType is {}, defaulting to content type text/plain",
