@@ -24,7 +24,10 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageWithDependenciesJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
@@ -39,11 +42,17 @@ public class InstallPackageAppCtx {
 
 	@Bean("installPackageJobDefinition")
 	public JobDefinition<PackageInstallationJobParameters> installPackageJobDefinition(
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			PartitionSettings thePartitionSettings,
 			IHapiPackageCacheManager thePackageCacheManager,
 			IPackageInstallerSvc thePackageInstallerSvc,
 			ISearchParamRegistryController theSearchParamRegistryController,
 			IValidationSupport theValidationSupport,
 			IJobCoordinator theJobCoordinator) {
+		DependencyManager dependencyManager =
+				fetchDependencyManager(theFhirContext, theDaoRegistry, thePartitionSettings);
+
 		return JobDefinition.newBuilder()
 				.setJobDefinitionId(INSTALL_PACKAGE)
 				.setJobDescription("Install NPM Package")
@@ -59,7 +68,7 @@ public class InstallPackageAppCtx {
 						"initialize-dependencies",
 						"Spawn sub-jobs to process package dependencies",
 						PackageWithDependenciesJson.class,
-						initializeDependenciesStep(theJobCoordinator))
+						initializeDependenciesStep(theJobCoordinator, dependencyManager))
 				.addIntermediateStep(
 						"consolidate-dependencies",
 						"Wait for sub-jobs to complete",
@@ -70,8 +79,17 @@ public class InstallPackageAppCtx {
 						"Install the contents of the NPM package",
 						PackageInstallOutcomeJson.class,
 						processPackageStep(
-								thePackageInstallerSvc, theSearchParamRegistryController, theValidationSupport))
+								thePackageInstallerSvc,
+								theSearchParamRegistryController,
+								theValidationSupport,
+								dependencyManager))
 				.build();
+	}
+
+	@Bean
+	public DependencyManager fetchDependencyManager(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry, PartitionSettings thePartitionSettings) {
+		return new DependencyManager(theFhirContext, theDaoRegistry, thePartitionSettings);
 	}
 
 	@Bean
@@ -81,8 +99,9 @@ public class InstallPackageAppCtx {
 	}
 
 	@Bean
-	public InitializeDependenciesStep initializeDependenciesStep(IJobCoordinator theJobCoordinator) {
-		return new InitializeDependenciesStep(theJobCoordinator);
+	public InitializeDependenciesStep initializeDependenciesStep(
+			IJobCoordinator theJobCoordinator, DependencyManager theDependencyManager) {
+		return new InitializeDependenciesStep(theJobCoordinator, theDependencyManager);
 	}
 
 	@Bean
@@ -94,7 +113,9 @@ public class InstallPackageAppCtx {
 	public ProcessPackageStep processPackageStep(
 			IPackageInstallerSvc thePackageInstallerSvc,
 			ISearchParamRegistryController theSearchParamRegistryController,
-			IValidationSupport theValidationSupport) {
-		return new ProcessPackageStep(thePackageInstallerSvc, theSearchParamRegistryController, theValidationSupport);
+			IValidationSupport theValidationSupport,
+			DependencyManager theDependencyManager) {
+		return new ProcessPackageStep(
+				thePackageInstallerSvc, theSearchParamRegistryController, theValidationSupport, theDependencyManager);
 	}
 }

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.installpackage.DependencyManager;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -39,7 +40,6 @@ import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.packages.util.PackageUtils;
@@ -89,7 +89,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.packages.PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL;
@@ -174,6 +176,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
+	@Autowired
+	private DependencyManager myDependencyManager;
+
 	/**
 	 * Constructor
 	 */
@@ -243,22 +248,26 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				retVal.getMessage().addAll(NpmPackageUtils.getProcessingMessages(npmPackage));
 
 				if (theInstallationSpec.isFetchDependencies()) {
-					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal);
+					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal, new DependencyRegister());
 				}
 
 				if (theInstallationSpec.getInstallMode() == STORE_AND_INSTALL
 						|| theInstallationSpec.getInstallMode()
 								== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-					installPackage(npmPackage, theInstallationSpec, retVal);
+					mySearchParamRegistryController.withDeferredRebuild(() -> {
+						try {
+							installPackage(npmPackage, theInstallationSpec, retVal);
 
-					if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-						retVal.getMessage()
-								.add(
-										"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
-					}
-
-					// If any SearchParameters were installed, let's load them right away
-					mySearchParamRegistryController.refreshCacheIfNecessary();
+							if (theInstallationSpec.getInstallMode()
+									== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
+								retVal.getMessage()
+										.add(
+												"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
+							}
+						} finally {
+							mySearchParamRegistryController.refreshCacheIfNecessary();
+						}
+					});
 				}
 
 				validationSupport.invalidateCaches();
@@ -388,8 +397,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		logIfPackageAlreadyInstalled(theInstallationSpec);
 
+		String dependencyResourceId = myDependencyManager.createDependencyResource();
+
 		PackageInstallationJobParameters parameters = new PackageInstallationJobParameters();
 		parameters.setInstallationSpec(theInstallationSpec);
+		parameters.setDependencyTrackerId(dependencyResourceId);
 		JobInstanceStartRequest startRequest =
 				new JobInstanceStartRequest(Batch2JobDefinitionConstants.INSTALL_PACKAGE, parameters);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(createRequestDetails(), startRequest);
@@ -412,12 +424,25 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private void fetchAndInstallDependencies(
-			NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome)
+			NpmPackage npmPackage,
+			PackageInstallationSpec theInstallationSpec,
+			PackageInstallOutcomeJson theOutcome,
+			DependencyRegister theDependencyRegister)
 			throws ImplementationGuideInstallationException {
 		List<PackageUtils.DependentPackage> dependentPackages =
 				PackageUtils.extractDependentPackages(npmPackage, theInstallationSpec, theOutcome);
 
 		for (PackageUtils.DependentPackage nextPackage : dependentPackages) {
+			if (theDependencyRegister.containsDependency(nextPackage.name(), nextPackage.version())) {
+				ourLog.debug(
+						"Package {}#{} has already been installed. Skipping redundant processing.",
+						nextPackage.name(),
+						nextPackage.version());
+				continue;
+			}
+
+			theDependencyRegister.addDependency(nextPackage.name(), nextPackage.version());
+
 			try {
 				if (theInstallationSpec.isDryRun()) {
 					theOutcome
@@ -425,19 +450,23 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 							.add(String.format(
 									"Installation would install %s:%s", nextPackage.name(), nextPackage.version()));
 				} else {
+					boolean updateCache = theInstallationSpec.getInstallMode()
+									== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL
+							|| theInstallationSpec.getInstallMode()
+									== PackageInstallationSpec.InstallModeEnum.STORE_ONLY;
 
 					// resolve in local cache or on packages.fhir.org
 					NpmPackage dependency =
-							myPackageCacheManager.loadPackage(nextPackage.name(), nextPackage.version());
+							myPackageCacheManager.loadPackage(nextPackage.name(), nextPackage.version(), updateCache);
 
 					// If the dependency's FHIR version is incompatible with the server,
 					// attempt to load a version-specific variant (e.g., {id}.r4 for R4 servers)
 					dependency = substituteVersionSpecificPackageIfNeeded(
-							dependency, nextPackage.name(), nextPackage.version());
+							dependency, nextPackage.name(), nextPackage.version(), updateCache);
 
 					// recursive call to install dependencies of a package before
 					// installing the package
-					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
+					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome, theDependencyRegister);
 
 					if (theInstallationSpec.getInstallMode()
 							== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
@@ -469,7 +498,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 */
 	@Override
 	public NpmPackage substituteVersionSpecificPackageIfNeeded(
-			NpmPackage theDependency, String theId, String theVersion) {
+			NpmPackage theDependency, String theId, String theVersion, boolean theShouldUpdateCache) {
 		String dependencyFhirVersion = theDependency.fhirVersion();
 		String serverFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();
 
@@ -499,7 +528,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				theVersion);
 
 		try {
-			NpmPackage variant = myPackageCacheManager.loadPackage(variantId, theVersion);
+			NpmPackage variant = myPackageCacheManager.loadPackage(variantId, theVersion, theShouldUpdateCache);
 			ourLog.info(
 					"Successfully substituted {}#{} with version-specific variant {}#{}",
 					theId,
@@ -657,7 +686,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return myTxService
 				.withRequest(createRequestDetails())
 				.execute(() -> myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(url, version))
-				.map(pid -> theDao.readByPid(JpaPid.fromId(pid)));
+				.map(pid -> theDao.readByPid(pid));
 	}
 
 	private Optional<IBaseResource> readResourceById(IFhirResourceDao dao, IIdType id) {
@@ -1185,5 +1214,22 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@VisibleForTesting
 	void setFhirContextForUnitTest(FhirContext theCtx) {
 		myFhirContext = theCtx;
+	}
+
+	private static class DependencyRegister {
+		private final Set<String> dependencies = new HashSet<>();
+
+		public void addDependency(String thePackageName, String theVersion) {
+			dependencies.add(buildKey(thePackageName, theVersion));
+		}
+
+		public boolean containsDependency(String thePackageName, String theVersion) {
+			return dependencies.contains(buildKey(thePackageName, theVersion));
+		}
+
+		@Nonnull
+		private static String buildKey(String thePackageName, String theVersion) {
+			return thePackageName + "#" + Objects.requireNonNullElse(theVersion, "current");
+		}
 	}
 }

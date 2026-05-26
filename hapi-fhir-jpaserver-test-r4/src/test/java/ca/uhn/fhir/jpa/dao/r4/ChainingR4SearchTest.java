@@ -181,6 +181,66 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	void testAndClauses_DirectReference_ReturnsResourcesMatchingAllTargets() {
+		// Setup
+		IIdType patientA = createPatient(withId("PA"));
+		IIdType patientB = createPatient(withId("PB"));
+
+		AuditEvent matching = new AuditEvent();
+		matching.setId("AE-MATCH");
+		matching.addEntity().setWhat(new Reference(patientA));
+		matching.addEntity().setWhat(new Reference(patientB));
+		myAuditEventDao.update(matching, mySrd);
+
+		AuditEvent partialA = new AuditEvent();
+		partialA.setId("AE-A-ONLY");
+		partialA.addEntity().setWhat(new Reference(patientA));
+		myAuditEventDao.update(partialA, mySrd);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(AuditEvent.SP_ENTITY, new ReferenceParam("Patient/PA"));
+		map.add(AuditEvent.SP_ENTITY, new ReferenceParam("Patient/PB"));
+
+		// Execute
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myAuditEventDao.search(map, newSrd());
+
+		// Verify - only the AuditEvent that references both patients is returned
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactly("AuditEvent/AE-MATCH");
+
+		// Verify - 2 HFJ_RES_LINK joins — each AND clause must bind to its own link row
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(2);
+	}
+
+	@Test
+	void testAndClauses_DirectReferenceWithoutResType_ReturnsResourcesMatchingAllTargets() {
+		// Setup
+		IIdType patientA = createPatient(withId("PA"));
+		IIdType patientB = createPatient(withId("PB"));
+
+		AuditEvent matching = new AuditEvent();
+		matching.setId("AE-MATCH");
+		matching.addEntity().setWhat(new Reference(patientA));
+		matching.addEntity().setWhat(new Reference(patientB));
+		myAuditEventDao.update(matching, mySrd);
+
+		AuditEvent partial = new AuditEvent();
+		partial.setId("AE-A");
+		partial.addEntity().setWhat(new Reference(patientA));
+		myAuditEventDao.update(partial, mySrd);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(AuditEvent.SP_ENTITY, new ReferenceParam("PA"));
+		map.add(AuditEvent.SP_ENTITY, new ReferenceParam("PB"));
+
+		IBundleProvider results = myAuditEventDao.search(map, newSrd());
+
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactly("AuditEvent/AE-MATCH");
+	}
+
+	@Test
 	public void testChainsWithNoValueShouldBeIgnored() {
 		// Setup
 		createPatient(withId("P0"), withGender("male"));

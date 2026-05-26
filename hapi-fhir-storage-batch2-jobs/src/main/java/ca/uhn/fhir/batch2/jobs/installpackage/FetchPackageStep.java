@@ -63,14 +63,17 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 			throws JobExecutionFailedException {
 
 		try {
-			PackageInstallationSpec installationSpec =
-					theStepExecutionDetails.getParameters().getInstallationSpec();
+			PackageInstallationJobParameters jobParameters = theStepExecutionDetails.getParameters();
+			PackageInstallationSpec installationSpec = jobParameters.getInstallationSpec();
 			NpmPackage npmPackage = myPackageCacheManager.installPackage(installationSpec);
 
-			if (theStepExecutionDetails.getParameters().isDependencyJob()) {
+			if (jobParameters.isDependencyJob()) {
 				// Adjust the dependency package as needed to match the FHIR version of the server
 				npmPackage = myPackageInstallerSvc.substituteVersionSpecificPackageIfNeeded(
-						npmPackage, installationSpec.getName(), installationSpec.getVersion());
+						npmPackage,
+						installationSpec.getName(),
+						installationSpec.getVersion(),
+						shouldUpdateCache(installationSpec));
 			}
 
 			if (npmPackage == null) {
@@ -96,6 +99,12 @@ public class FetchPackageStep implements IFirstJobStepWorker<PackageInstallation
 		}
 
 		return RunOutcome.SUCCESS;
+	}
+
+	private static boolean shouldUpdateCache(PackageInstallationSpec installationSpec) {
+		return !installationSpec.isDryRun()
+				&& (installationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL
+						|| installationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 	}
 
 	@Nonnull
