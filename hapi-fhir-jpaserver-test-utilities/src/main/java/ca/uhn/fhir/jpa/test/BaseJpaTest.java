@@ -112,6 +112,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -1247,6 +1248,11 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Nonnull
 	public static SystemRequestDetails newSrd() {
 		return new SystemRequestDetails();
+	}
+
+	@Nonnull
+	public static TransactionDetails newTd() {
+		return new TransactionDetails();
 	}
 
 }

@@ -23,6 +23,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
@@ -134,6 +135,36 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init860();
 		init880();
 		init8_10_0();
+		init8_12_0();
+	}
+
+	protected void init8_12_0() {
+		Builder version = forVersion(VersionEnum.V8_12_0);
+
+		Builder.BuilderAddTableByColumns attachment =
+				version.addTableByColumns("20260407.10", "BT2_JOB_ATTACHMENT", "JOB_INSTANCE_ID", "ATTACHMENT_ID");
+		attachment.addColumn("JOB_INSTANCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachment.addColumn("ATTACHMENT_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachment.addColumn("FILENAME").nonNullable().type(ColumnTypeEnum.STRING, 300);
+		attachment.addColumn("CONTENT_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 50);
+		attachment.addColumn("CMP_STATUS").nonNullable().type(ColumnTypeEnum.STRING, 50);
+		attachment.addColumn("ATTACHMENT_DATA").nonNullable().type(ColumnTypeEnum.BINARY);
+		attachment.addColumn("ATTACHMENT_LENGTH_CMP").nonNullable().type(ColumnTypeEnum.LONG);
+		attachment.addColumn("ATTACHMENT_LENGTH_UC").nonNullable().type(ColumnTypeEnum.LONG);
+		attachment.addIndex("20260407.11", "IDX_BT2JA_INST_ID").unique(false).withColumns("JOB_INSTANCE_ID");
+		attachment
+				.addIndex("20260407.12", "IDX_BT2JA_INST_ID_AND_FN")
+				.unique(true)
+				.withColumns("JOB_INSTANCE_ID", "FILENAME");
+		attachment
+				.addForeignKey("20260407.13", "FK_BT2JA_INSTANCE")
+				.toColumn("JOB_INSTANCE_ID")
+				.references("BT2_JOB_INSTANCE", "JOB_INSTANCE_ID");
+
+		version.onTable(TermCodeSystemVersion.TRM_CODESYSTEM_VER)
+				.addColumn("20260427.10", "CS_INTENDED_VERSION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 200);
 	}
 
 	protected void init8_10_0() {

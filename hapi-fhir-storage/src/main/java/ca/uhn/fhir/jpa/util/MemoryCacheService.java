@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -40,6 +41,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -80,6 +82,18 @@ public class MemoryCacheService {
 					break;
 				case RESOURCE_IDENTIFIER_SYSTEM_TO_PID:
 					nextCache = CacheFactory.buildEternal(250, 1_000);
+					break;
+				case CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS:
+				case VALUSSET_URL_TO_VALUESET:
+					long cacheTimeoutMs = TimeUnit.MINUTES.toMillis(
+							myStorageSettings.getTerminologyLookupCacheExpireAfterWriteInMinutes());
+					long cacheSize = myStorageSettings.getTerminologyLookupCacheMaximumSize();
+					if (cacheTimeoutMs == 0 || cacheSize == 0) {
+						cacheTimeoutMs = 0;
+						cacheSize = 0;
+					}
+
+					nextCache = CacheFactory.build(cacheTimeoutMs, cacheSize);
 					break;
 				case PATIENT_IDENTIFIER_TO_FHIR_ID:
 				case NAME_TO_PARTITION:
@@ -207,6 +221,20 @@ public class MemoryCacheService {
 		myCaches.values().forEach(Cache::invalidateAll);
 	}
 
+	/**
+	 * Schedules a {@code Cache#invalidate(Object)} for the given key to run when the current
+	 * database transaction successfully commits, or executes immediately if no transaction is
+	 * active.
+	 */
+	public <K> void invalidateKeyAfterCommit(CacheEnum theCache, K theKey) {
+		if (!theCache.getKeyType().isAssignableFrom(theKey.getClass())) {
+			throw new IllegalArgumentException(Msg.code(2929) + "Key type " + theKey.getClass()
+					+ " doesn't match expected " + theCache.getKeyType() + " for cache " + theCache);
+		}
+		HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(
+				() -> getCache(theCache).invalidate(theKey));
+	}
+
 	private <K, T> Cache<K, T> getCache(CacheEnum theCache) {
 		return (Cache<K, T>) myCaches.get(theCache);
 	}
@@ -242,7 +270,9 @@ public class MemoryCacheService {
 		HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY(Long.class),
 		RES_TYPE_TO_RES_TYPE_ID(String.class),
 		RESOURCE_IDENTIFIER_SYSTEM_TO_PID(String.class),
-		PATIENT_IDENTIFIER_TO_FHIR_ID(IdentifierKey.class);
+		PATIENT_IDENTIFIER_TO_FHIR_ID(IdentifierKey.class),
+		CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS(String.class),
+		VALUSSET_URL_TO_VALUESET(String.class);
 
 		private final Class<?> myKeyType;
 

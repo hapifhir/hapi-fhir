@@ -545,6 +545,18 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					continue;
 				}
 				if (date.getPrecision().ordinal() > TemporalPrecisionEnum.DAY.ordinal()) {
+					if (paramValueAsString.length() < 10) {
+						// No usable date portion (e.g., a Timing with only repeat.bounds.boundsPeriod
+						// produces an empty getValueAsQueryToken() while precision still reads as
+						// the default SECOND). Skip — treat the same as "precision below DAY".
+						myPerformanceTracingLogger.firePerformanceInfo(
+								theRequestDetails,
+								"Not creating a " + theComboParam.getComboSearchParamType()
+										+ " combo index entry for index[" + theComboParam.getName()
+										+ "] because value for component " + theParamComponent.getParamName()
+										+ " has no usable date portion");
+						continue;
+					}
 					// Limit to date portion since that's what we index in the non-unique
 					// index column. Because the search wants greater than
 					// day precision, we'll also select on the date index table in

@@ -55,9 +55,11 @@ public class InitializeDependenciesStep
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeDependenciesStep.class);
 
 	private final IJobCoordinator myJobCoordinator;
+	private final DependencyManager myDependencyManager;
 
-	public InitializeDependenciesStep(IJobCoordinator myJobCoordinator) {
+	public InitializeDependenciesStep(IJobCoordinator myJobCoordinator, DependencyManager myDependencyManager) {
 		this.myJobCoordinator = myJobCoordinator;
+		this.myDependencyManager = myDependencyManager;
 	}
 
 	@Nonnull
@@ -128,11 +130,14 @@ public class InitializeDependenciesStep
 							.add(String.format(
 									"Installation would install %s#%s",
 									nextDependency.name(), nextDependency.version()));
-				} else {
+				} else if (myDependencyManager.shouldProcessDependency(
+						theStepExecutionDetails.getParameters().getDependencyTrackerId(),
+						nextDependency.name(),
+						nextDependency.version())) {
 					// create a new installation spec, retaining all the control parameters, but targeting the
-					// dependency
-					// package
-					JobInstanceStartRequest startRequest = buildStartRequest(nextDependency, installationSpec);
+					// dependency package
+					JobInstanceStartRequest startRequest =
+							buildStartRequest(nextDependency, theStepExecutionDetails.getParameters());
 					Batch2JobStartResponse response = myJobCoordinator.startInstance(
 							theStepExecutionDetails.newSystemRequestDetails(), startRequest);
 					jobIds.add(response.getInstanceId());
@@ -151,8 +156,9 @@ public class InitializeDependenciesStep
 
 	@Nonnull
 	private static JobInstanceStartRequest buildStartRequest(
-			PackageUtils.DependentPackage theDependency, PackageInstallationSpec theParentInstallationSpec) {
-		PackageInstallationSpec dependencySpec = new PackageInstallationSpec(theParentInstallationSpec);
+			PackageUtils.DependentPackage theDependency, PackageInstallationJobParameters theParentJobParameters) {
+		PackageInstallationSpec dependencySpec =
+				new PackageInstallationSpec(theParentJobParameters.getInstallationSpec());
 		dependencySpec.setName(theDependency.name());
 		dependencySpec.setVersion(theDependency.version());
 		dependencySpec.setPackageUrl(null);
@@ -161,6 +167,7 @@ public class InitializeDependenciesStep
 		PackageInstallationJobParameters parameters = new PackageInstallationJobParameters();
 		parameters.setInstallationSpec(dependencySpec);
 		parameters.setDependencyJob(true);
+		parameters.setDependencyTrackerId(theParentJobParameters.getDependencyTrackerId());
 
 		return new JobInstanceStartRequest(Batch2JobDefinitionConstants.INSTALL_PACKAGE, parameters);
 	}

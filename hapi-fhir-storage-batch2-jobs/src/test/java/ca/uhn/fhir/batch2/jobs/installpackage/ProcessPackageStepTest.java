@@ -39,7 +39,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessPackageStepTest {
@@ -57,6 +56,9 @@ public class ProcessPackageStepTest {
 	@Mock
 	IValidationSupport myValidationSupport;
 
+	@Mock
+	DependencyManager myDependencyManager;
+
 	private ProcessPackageStep myStep;
 
 	@Captor
@@ -71,7 +73,8 @@ public class ProcessPackageStepTest {
 
 	@BeforeEach
 	public void beforeEach() {
-		myStep = new ProcessPackageStep(myPackageInstallerSvc, mySearchParamRegistryController, myValidationSupport);
+		myStep = new ProcessPackageStep(
+			myPackageInstallerSvc, mySearchParamRegistryController, myValidationSupport, myDependencyManager);
 	}
 
 	@Test
@@ -207,5 +210,70 @@ public class ProcessPackageStepTest {
 
 		// execute and validate
 		assertThatThrownBy(() -> myStep.consume(chunkDetails)).isInstanceOf(JobExecutionFailedException.class);
+	}
+
+	@Test
+	public void testRun_rootJob_cleanUpDependencyManagement() throws Exception {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		installationSpec.setFetchDependencies(true);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+		params.setDependencyTrackerId("Basic/1");
+
+		InputStream stream = ProcessPackageStepTest.class.getResourceAsStream("usCorePackage.tgz");
+		byte[] packageBytes = stream.readAllBytes();
+		PackageInstallOutcomeJson expectedReport = new PackageInstallOutcomeJson();
+
+		PackageContentsJson packageContentsJson = new PackageContentsJson();
+		packageContentsJson.setContents(Base64.getEncoder().encode(packageBytes));
+		packageContentsJson.setReport(expectedReport);
+
+		ChunkExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> chunkDetails =
+			new ChunkExecutionDetails<>(packageContentsJson, params, INSTANCE_ID, CHUNK_ID);
+		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> stepDetails =
+			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		// execute
+		myStep.consume(chunkDetails);
+		myStep.run(stepDetails, myJobDataSink);
+
+		// validate
+		verify(myDependencyManager).deleteDependencyResource("Basic/1");
+	}
+
+	@Test
+	public void testRun_childJob_leavesDependencyManagementAlone() throws Exception {
+		// set up
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
+		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
+		installationSpec.setFetchDependencies(true);
+
+		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
+		params.setInstallationSpec(installationSpec);
+		params.setDependencyJob(true);
+		params.setDependencyTrackerId("Basic/1");
+
+		InputStream stream = ProcessPackageStepTest.class.getResourceAsStream("usCorePackage.tgz");
+		byte[] packageBytes = stream.readAllBytes();
+		PackageInstallOutcomeJson expectedReport = new PackageInstallOutcomeJson();
+
+		PackageContentsJson packageContentsJson = new PackageContentsJson();
+		packageContentsJson.setContents(Base64.getEncoder().encode(packageBytes));
+		packageContentsJson.setReport(expectedReport);
+
+		ChunkExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> chunkDetails =
+			new ChunkExecutionDetails<>(packageContentsJson, params, INSTANCE_ID, CHUNK_ID);
+		StepExecutionDetails<PackageInstallationJobParameters, PackageContentsJson> stepDetails =
+			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+
+		// execute
+		myStep.consume(chunkDetails);
+		myStep.run(stepDetails, myJobDataSink);
+
+		// validate
+		verifyNoInteractions(myDependencyManager);
 	}
 }

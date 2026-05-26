@@ -40,6 +40,8 @@ import java.util.function.Supplier;
 	"packageUrl",
 	"installMode",
 	"installResourceTypes",
+	"fetchDependencies",
+	"dependencyExcludes",
 	"validationMode",
 	"reloadExisting",
 	"additionalResourceFolders",
@@ -94,6 +96,7 @@ public class PackageInstallationSpec {
 	@Schema(
 			description =
 					"Any values provided here will be interpreted as a regex. Dependencies with an ID matching any regex will be skipped.")
+	@JsonProperty("dependencyExcludes")
 	private List<String> myDependencyExcludes;
 
 	@Schema(

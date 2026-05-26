@@ -99,8 +99,14 @@ public class WorkChunkProcessor {
 
 		// all other kinds of steps
 		Validate.notNull(theWorkChunk, "theWorkChunk must not be null");
-		Optional<StepExecutionDetails<PT, IT>> stepExecutionDetailsOpt =
-				getExecutionDetailsForNonReductionStep(theWorkChunk, theInstance, inputType, parameters);
+		Optional<StepExecutionDetails<PT, IT>> stepExecutionDetailsOpt = getExecutionDetailsForNonReductionStep(
+				theWorkChunk,
+				theInstance,
+				inputType,
+				parameters,
+				theCursor.getJobDefinition(),
+				theCursor.getCurrentStepId(),
+				theCursor.getNextStepId());
 		if (stepExecutionDetailsOpt.isEmpty()) {
 			return new JobStepExecutorOutput<>(false, dataSink);
 		}
@@ -147,7 +153,13 @@ public class WorkChunkProcessor {
 	 */
 	private <PT extends IModelJson, IT extends IModelJson>
 			Optional<StepExecutionDetails<PT, IT>> getExecutionDetailsForNonReductionStep(
-					WorkChunk theWorkChunk, JobInstance theInstance, Class<IT> theInputType, PT theParameters) {
+					WorkChunk theWorkChunk,
+					JobInstance theInstance,
+					Class<IT> theInputType,
+					PT theParameters,
+					JobDefinition<PT> theJobDefinition,
+					String theCurrentStepId,
+					String theNextStepId) {
 		IT inputData = null;
 
 		if (!theInputType.equals(VoidModel.class)) {
@@ -163,6 +175,13 @@ public class WorkChunkProcessor {
 		}
 
 		return Optional.of(new StepExecutionDetails<>(
-				theParameters, inputData, theInstance, theWorkChunk, myJobStepExecutionServices));
+				theParameters,
+				inputData,
+				theInstance,
+				theWorkChunk,
+				myJobStepExecutionServices,
+				theJobDefinition,
+				theCurrentStepId,
+				theNextStepId));
 	}
 }

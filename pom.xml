@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.10.1-SNAPSHOT</version>
+	<version>8.11.5-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -308,10 +308,6 @@
 		<developer>
 			<id>adam-carbone</id>
 			<name>Adam Carbone</name>
-		</developer>
-		<developer>
-			<id>joelsch</id>
-			<name>Joel Schneider</name>
 		</developer>
 		<developer>
 			<id>euvitudo</id>
@@ -1003,6 +999,14 @@
 			<id>nathanloyer</id>
 			<name>Nathan Loyer</name>
 			<organization>Athena Health</organization>
+		</developer>
+		<developer>
+			<id>tisoft</id>
+			<name>Markus Heberling</name>
+		</developer>
+		<developer>
+			<id>joel-bach</id>
+			<name>Joel Bach</name>
 		</developer>
 	</developers>
 
@@ -1957,6 +1961,7 @@
 			<dependency>
 				<groupId>jakarta.enterprise</groupId>
 				<artifactId>jakarta.enterprise.cdi-api</artifactId>
+				<version>4.0.1</version>
 				<exclusions>
 					<exclusion>
 						<groupId>jakarta.el</groupId>
