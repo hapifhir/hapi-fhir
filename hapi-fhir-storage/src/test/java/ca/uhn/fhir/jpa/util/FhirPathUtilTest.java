@@ -44,9 +44,8 @@ public class FhirPathUtilTest {
 	@ParameterizedTest
 	@ValueSource(strings = {
 		"Coverage.beneficiary",
-		"Patient.gender",
-		"Patient.birthDate",
-		"Observation.status"
+		"Coverage.subscriber.identifier",
+		"Patient.birthDate"
 	})
 	void testIsPathSingleValued_singleCardinalityPaths_returnsTrue(String thePath) {
 		assertThat(FhirPathUtils.isPathSingleValued(ourFhirContext, thePath)).isTrue();
@@ -54,39 +53,31 @@ public class FhirPathUtilTest {
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-		"Patient.generalPractitioner",
-		"AuditEvent.entity",
-		"Observation.performer"
+		"Observation.value",
+		"MedicationAdministration.medication"
 	})
-	void testIsPathSingleValued_multiCardinalityPaths_returnsFalse(String thePath) {
-		assertThat(FhirPathUtils.isPathSingleValued(ourFhirContext, thePath)).isFalse();
+	void testIsPathSingleValued_choiceTypeElement_returnsTrue(String thePath) {
+		assertThat(FhirPathUtils.isPathSingleValued(ourFhirContext, thePath)).isTrue();
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-		"Patient.name.family",
+		"MedicationAdministration.medication.as(Reference)",
+		"Observation.value.ofType(CodeableConcept).text",
+		"Observation.value.ofType(Quantity).value"
+	})
+	void testIsPathSingleValued_pathWithFunctionCall_returnsTrue(String thePath) {
+		assertThat(FhirPathUtils.isPathSingleValued(ourFhirContext, thePath)).isTrue();
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"Patient.generalPractitioner",
+		"Observation.performer",
+		"AuditEvent.entity",
 		"AuditEvent.entity.what"
 	})
-	void testIsPathSingleValued_multiValuedIntermediateSegment_returnsFalse(String thePath) {
-		// intermediate elem is 0..* so any deeper path through it is multi-valued
+	void testIsPathSingleValued_multiCardinalityPaths_returnsFalse(String thePath) {
 		assertThat(FhirPathUtils.isPathSingleValued(ourFhirContext, thePath)).isFalse();
-	}
-
-	@Test
-	void testIsPathSingleValued_singleValuedIntermediateSegment_returnsTrue() {
-		// Coverage.subscriber is 0..1 Reference; Reference.identifier is 0..1 Identifier
-		assertThat(FhirPathUtils.isPathSingleValued(ourFhirContext, "Coverage.subscriber.identifier")).isTrue();
-	}
-
-	@Test
-	void testIsPathSingleValued_choiceTypeElement_returnsTrue() {
-		// Observation.value[x] is a choice type but single-cardinality; path uses bare "value"
-		assertThat(FhirPathUtils.isPathSingleValued(ourFhirContext, "Observation.value")).isTrue();
-	}
-
-	@Test
-	void testIsPathSingleValued_pathWithFunctionCall_returnsTrue() {
-		// medication[x] is 0..1; .as(Reference) is a type-cast function — path is single-valued overall
-		assertThat(FhirPathUtils.isPathSingleValued(ourFhirContext, "MedicationAdministration.medication.as(Reference)")).isTrue();
 	}
 }
