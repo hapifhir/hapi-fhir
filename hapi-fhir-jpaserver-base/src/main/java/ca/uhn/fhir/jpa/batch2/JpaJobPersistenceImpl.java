@@ -627,20 +627,22 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public AttachmentDetails fetchAttachmentById(String theInstanceId, String theAttachmentId) {
 		Supplier<Optional<Batch2JobAttachmentEntity>> supplier =
 				() -> myAttachmentRepository.findById(theInstanceId, theAttachmentId);
-		return fetchAttachment(supplier);
+		return fetchAttachment(supplier, "ID", theAttachmentId);
 	}
 
 	@Override
-	public AttachmentDetails fetchAttachmentByFilename(String theInstanceId, String theAttachmentId) {
+	public AttachmentDetails fetchAttachmentByFilename(String theInstanceId, String theFilename) {
 		Supplier<Optional<Batch2JobAttachmentEntity>> supplier =
-				() -> myAttachmentRepository.findByIdAndFilename(theInstanceId, theAttachmentId);
-		return fetchAttachment(supplier);
+				() -> myAttachmentRepository.findByIdAndFilename(theInstanceId, theFilename);
+		return fetchAttachment(supplier, "Filename", theFilename);
 	}
 
-	private AttachmentDetails fetchAttachment(Supplier<Optional<Batch2JobAttachmentEntity>> supplier) {
+	private AttachmentDetails fetchAttachment(
+			Supplier<Optional<Batch2JobAttachmentEntity>> supplier, String theLookupType, String theLookupValue) {
 		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
 			Batch2JobAttachmentEntity attachment = supplier.get()
-					.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2905) + "Attachment not found"));
+					.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2905) + "Attachment with " + theLookupType
+							+ " [" + theLookupValue + "] not found"));
 
 			byte[] attachmentData = attachment.getData();
 			InputStream readerStream = new ByteArrayInputStream(attachmentData);
