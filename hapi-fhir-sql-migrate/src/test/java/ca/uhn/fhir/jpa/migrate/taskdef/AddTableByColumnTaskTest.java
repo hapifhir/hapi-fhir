@@ -151,7 +151,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 
 		assertThat(sql).contains("ORGANIZATION INDEX");
 		if (theExpectCompression) {
-			assertThat(sql).contains("COMPRESS " + theExpectCompression);
+			assertThat(sql).contains("COMPRESS " + theCompressionLevel);
 		} else {
 			assertThat(sql).doesNotContain("COMPRESS");
 		}

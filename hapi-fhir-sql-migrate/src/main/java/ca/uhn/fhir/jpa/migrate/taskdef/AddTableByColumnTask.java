@@ -177,8 +177,6 @@ public class AddTableByColumnTask extends BaseTableTask {
 			case MYSQL_5_7:
 				sb.append(" engine=InnoDB");
 				break;
-			case DERBY_EMBEDDED:
-			case POSTGRES_9_4:
 			case ORACLE_12C:
 				if (myOracleIot) {
 					sb.append(" ORGANIZATION INDEX");
@@ -187,6 +185,8 @@ public class AddTableByColumnTask extends BaseTableTask {
 					}
 				}
 				break;
+			case DERBY_EMBEDDED:
+			case POSTGRES_9_4:
 			case MSSQL_2012:
 			case H2_EMBEDDED:
 			case COCKROACHDB_21_1:
