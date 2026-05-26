@@ -649,13 +649,14 @@ public class UrlUtil {
 			return new CanonicalUrlParts(theUrl, Optional.ofNullable(theVersion));
 		} else {
 			String url = theUrl.substring(0, pipeIdx);
-			String versionId = theVersion;
+			String versionId = theUrl.substring(pipeIdx + 1);
 			if (isBlank(versionId)) {
-				versionId = theUrl.substring(pipeIdx + 1);
+				return new CanonicalUrlParts(url, Optional.ofNullable(theVersion));
+			} else if (isNotBlank(theVersion) && !versionId.equals(theVersion)) {
+				throw new InvalidRequestException(Msg.code(2952) + "Version in URL[" + sanitizeUrlPart(theUrl)
+						+ " does not match expected version: " + theVersion);
 			}
-			if (isBlank(versionId)) {
-				return new CanonicalUrlParts(url, Optional.empty());
-			}
+
 			return new CanonicalUrlParts(url, Optional.of(versionId));
 		}
 	}

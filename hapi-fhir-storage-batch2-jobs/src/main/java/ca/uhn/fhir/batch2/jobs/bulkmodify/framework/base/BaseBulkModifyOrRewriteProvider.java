@@ -266,7 +266,7 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		String jobId = getJobId();
 		String operationName = getOperationName();
 
-		JobInstance instance = AsyncRequestUtil.getJobInstance(theJobInstanceId, jobCoordinator, jobId, operationName);
+		JobInstance instance = AsyncRequestUtil.getJobInstance(jobCoordinator, jobId, theJobInstanceId, operationName);
 
 		if (instance.getStatus().isEnded()) {
 			if (isNotBlank(instance.getReport())) {

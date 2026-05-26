@@ -190,6 +190,8 @@ public class BulkPatchProviderTest {
 		instance.setErrorMessage(theParams.errorMessage());
 		instance.setReport(theParams.reportMessage());
 		instance.setParameters(new BulkPatchJobParameters());
+		instance.setCurrentGatedStepId("current-gated-step");
+		instance.setProgress(0.51);
 		when(myJobCoordinator.getInstance(eq("MY-INSTANCE-ID"))).thenReturn(instance);
 
 		// Test
@@ -431,8 +433,8 @@ public class BulkPatchProviderTest {
 
 		return Stream.of(
 			new PollForStatusTest(StatusEnum.QUEUED, HttpStatus.Code.ACCEPTED.getCode(), theOperation + " job has not yet started"),
-			new PollForStatusTest(StatusEnum.IN_PROGRESS, HttpStatus.Code.ACCEPTED.getCode(), theOperation + " job has started and is in progress"),
-			new PollForStatusTest(StatusEnum.FINALIZE, HttpStatus.Code.ACCEPTED.getCode(), theOperation + " job has started and is being finalized"),
+			new PollForStatusTest(StatusEnum.IN_PROGRESS, HttpStatus.Code.ACCEPTED.getCode(), theOperation + " job has started and is in progress Current step: current-gated-step. Overall progress: 51%."),
+			new PollForStatusTest(StatusEnum.FINALIZE, HttpStatus.Code.ACCEPTED.getCode(), theOperation + " job has completed main processing and is being finalized"),
 			new PollForStatusTest(StatusEnum.CANCELLED, null, null, HttpStatus.Code.OK.getCode(), theOperation + " job has been cancelled", theOperation + " job has been cancelled", true),
 			new PollForStatusTest(StatusEnum.FAILED, "This is an error message", null, HttpStatus.Code.INTERNAL_SERVER_ERROR.getCode(), theOperation + " job has failed with error: This is an error message", theOperation + " job has failed with error: This is an error message", true),
 			new PollForStatusTest(StatusEnum.COMPLETED, null, null, HttpStatus.Code.OK.getCode(), theOperation + " job has completed successfully", theOperation + " job has completed successfully", true),
