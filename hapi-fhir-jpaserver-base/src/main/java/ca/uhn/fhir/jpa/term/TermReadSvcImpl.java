@@ -549,7 +549,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		accumulator.setTimestamp(new Date());
 		accumulator.setOffset(offset);
 
-		if (theExpansionOptions != null && isHibernateSearchEnabled()) {
+		if (theExpansionOptions != null) {
 			accumulator.addParameter().setName("offset").setValue(new IntegerType(offset));
 			accumulator.addParameter().setName("count").setValue(new IntegerType(count));
 		}
@@ -1911,14 +1911,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			boolean theAdd) {
 		ourLog.trace("Hibernate search is not enabled");
 
-		if (theValueSetCodeAccumulator instanceof ValueSetExpansionComponentWithConceptAccumulator) {
-			Validate.isTrue(
-					((ValueSetExpansionComponentWithConceptAccumulator) theValueSetCodeAccumulator)
-							.getParameter()
-							.isEmpty(),
-					"Can not expand ValueSet with parameters - Hibernate Search is not enabled on this server.");
-		}
-
 		Validate.isTrue(
 				isNotBlank(theSystem),
 				"Can not expand ValueSet without explicit system - Hibernate Search is not enabled on this server.");
@@ -3177,7 +3169,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	@Nullable
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		if (UrlUtil.parseCanonicalUrl(theSystem).versionId().isEmpty()) {
+		if (!theSystem.contains(OUR_PIPE_CHARACTER)) {
 			return myTxTemplate.execute(t -> {
 				String system = theSystem;
 				TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystem);
