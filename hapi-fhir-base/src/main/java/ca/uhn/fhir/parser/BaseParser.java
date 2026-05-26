@@ -767,6 +767,7 @@ public abstract class BaseParser implements IParser {
 	@SuppressWarnings("cast")
 	@Override
 	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, String theMessageString) {
+		Validate.notNull(theMessageString, "theMessageString must not be null");
 		StringReader reader = new StringReader(theMessageString);
 		return parseResource(theResourceType, reader);
 	}

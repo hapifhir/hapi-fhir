@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
@@ -23,6 +24,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.model.Encounter;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
@@ -717,6 +719,89 @@ public class FhirPatchTest implements ITestDataBuilder {
 		// Verify
 		assertThat(input.getDeceased()).isInstanceOf(BooleanType.class);
 		assertThat(((BooleanType) input.getDeceased()).getValue()).isTrue();
+	}
+
+	@Test
+	void testReplace_UnqualifiedPath() {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
+
+		// Path has no resource type prefix
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.replace()
+			.path("status")
+			.value(new CodeType("active"));
+		IBaseParameters patchDocument = patchBuilder.build();
+
+		// Test
+		myPatch.apply(valueSet, patchDocument);
+
+		// Verify
+		assertEquals(Enumerations.PublicationStatus.ACTIVE, valueSet.getStatus());
+
+	}
+
+	@Test
+	void testInsert_UnqualifiedPath() {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
+
+		// Path has no resource type prefix
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.insert()
+			.path("identifier")
+			.index(0)
+			.value(new Identifier().setSystem("http://system").setValue("value-new"));
+		IBaseParameters patchDocument = patchBuilder.build();
+
+		// Test
+		myPatch.apply(valueSet, patchDocument);
+
+		// Verify
+		assertEquals("http://system", valueSet.getIdentifier().get(0).getSystem());
+	}
+
+	@Test
+	void testAdd_UnqualifiedPath() {
+		Observation obs = new Observation();
+		obs.getCode().setText("foo");
+
+		// Path has no resource type prefix
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.add()
+			.path("code")
+			.name("coding")
+			.value(new Coding().setSystem("http://system").setCode("code-new"));
+		IBaseParameters patchDocument = patchBuilder.build();
+
+		// Test
+		myPatch.apply(obs, patchDocument);
+
+		// Verify
+		assertEquals("http://system", obs.getCode().getCodingFirstRep().getSystem());
+		assertEquals("foo", obs.getCode().getText());
+	}
+
+	@Test
+	void testDelete_UnqualifiedPath() {
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://system").setCode("code-old");
+
+		// Path has no resource type prefix
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.delete()
+			.path("code.coding");
+		IBaseParameters patchDocument = patchBuilder.build();
+
+		// Test
+		myPatch.apply(obs, patchDocument);
+
+		// Verify
+		assertEquals(null, obs.getCode().getCodingFirstRep().getSystem());
 	}
 
 	/**

@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.rest.client.interceptor.CookieInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.UserInfoInterceptor;
 import ca.uhn.fhir.rest.gclient.IEntityResult;
+import ca.uhn.fhir.rest.gclient.RawRequestEntity;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -187,6 +188,76 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			assertEquals(400, e.getStatusCode());
 			assertEquals("HTTP 400 Bad Request", e.getMessage());
 		}
+	}
+
+	@Test
+	void testRawPostRequestWith200Response() throws IOException {
+		// given
+		Header header = new BasicHeader("custom-header", "custom-value");
+		Header[] headers = new Header[1];
+		headers[0] = header;
+		String responseBody = """
+			 { "jobId": "blahblah" }
+			 """;
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForResponse(
+			 Constants.CT_JSON,
+			 ()->new ByteArrayInputStream(responseBody.getBytes(StandardCharsets.UTF_8)),
+			 new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"),
+			 headers
+		);
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		String requestContentType = Constants.CT_OCTET_STREAM;
+		byte[] bytes = new byte[] { 1, 2, 3, 4};
+
+		// when
+		IEntityResult result = client.rawHttpRequest().post("someurl?param1=value1", new RawRequestEntity(requestContentType, bytes))
+			 .withAdditionalHeader("custom-request-header", "custom-type")
+			 .accept("application/custom-accept")
+			 .execute();
+
+		// then
+		HttpPost httpUriRequest = (HttpPost) capt.getAllValues().get(0);
+		assertEquals("http://example.com/fhir/someurl?param1=value1", UrlUtil.unescape(httpUriRequest.getURI().toString()));
+		String response = new String(result.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+		assertEquals(responseBody, response);
+		assertEquals("application/json", result.getMimeType());
+		assertEquals(200, result.getStatusCode());
+		assertEquals("custom-value", result.getHeaders().get("custom-header").get(0));
+		assertEquals("custom-type", capt.getValue().getHeaders("custom-request-header")[0].getValue());
+		assertEquals("application/custom-accept", capt.getValue().getHeaders("accept")[0].getValue());
+		assertEquals(requestContentType, httpUriRequest.getFirstHeader("Content-Type").getValue());
+		assertEquals(4, IOUtils.toByteArray(httpUriRequest.getEntity().getContent()).length);
+	}
+
+	@Test
+	void testRawPostRequestWith400Response() throws IOException {
+		// given
+		Header header = new BasicHeader("custom-header", "custom-value");
+		Header[] headers = new Header[1];
+		headers[0] = header;
+		String responseBody = """
+			 { "jobId": "blahblah" }
+			 """;
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForResponse(
+			 Constants.CT_JSON,
+			 ()->new ByteArrayInputStream(new byte[0]),
+			 new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 400, "Bad Request"),
+			 headers
+		);
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		// when
+		try {
+			client.rawHttpRequest()
+				 .post("someurl?param1=value1", new RawRequestEntity(Constants.CT_TEXT, "".getBytes(StandardCharsets.UTF_8)))
+				 .accept("application/custom-accept")
+				 .execute();
+		} catch (InvalidRequestException e) {
+			assertEquals(400, e.getStatusCode());
+			assertEquals("HTTP 400 Bad Request", e.getMessage());
+		}
+
 	}
 
 
