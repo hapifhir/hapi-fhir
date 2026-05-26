@@ -473,6 +473,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public TerminologyClientManager getTerminologyClientManager() {
+		// This is only used in one place in org.hl7.fhir.core: https://github.com/hapifhir/org.hl7.fhir.core/blob/10bcacefd50a0a00db98562ed65e6d7287f8842d/org.hl7.fhir.validation/src/main/java/org/hl7/fhir/validation/instance/type/CompliesWithChecker.java#L486
+		// In that instance, non-null values could enter incomplete code that will throw an Error.
 		return null;
 	}
 
