@@ -228,21 +228,6 @@ public class DaoSearchParamSynchronizer {
 		myStorageSettings = theStorageSettings;
 	}
 
-	@VisibleForTesting
-	public void setResourceIdentifierCacheSvc(IResourceIdentifierCacheSvc theResourceIdentifierCacheSvc) {
-		myResourceIdentifierCacheSvc = theResourceIdentifierCacheSvc;
-	}
-
-	@VisibleForTesting
-	public void setTokenCommonResDao(IResourceIndexedSearchParamTokenCommonResDao theTokenCommonResDao) {
-		myTokenCommonResDao = theTokenCommonResDao;
-	}
-
-	@VisibleForTesting
-	public void setTokenIdentifierDao(IResourceIndexedSearchParamTokenIdentifierDao theTokenIdentifierDao) {
-		myTokenIdentifierDao = theTokenIdentifierDao;
-	}
-
 	/**
 	 * Synchronizes the extracted token params into the compressed token tables:
 	 * <ul>
