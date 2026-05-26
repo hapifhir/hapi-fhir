@@ -98,6 +98,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 				assertNotSame(csv, csv.getCodeSystem().getCurrentVersion());
 			}
 		});
+		assertNoHHH000502Warnings();
 	}
 
 
@@ -118,11 +119,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			assertEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion.getResource().getId());
 		});
 
-		assertThat(myHibernateLogCapture.getLogMessages().stream()
-			.filter(msg -> msg.contains(HHH000502))
-			.toList())
-			.as("No HHH000502 immutable-property warnings should be emitted")
-			.isEmpty();
+		assertNoHHH000502Warnings();
 	}
 
 
@@ -165,6 +162,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			assertEquals(myTermCodeSystem.getResource().getId(), mySecondTermCodeSystemVersion.getResource().getId());
 		});
 
+		assertNoHHH000502Warnings();
 	}
 
 	// Created by claude-opus-4-6
@@ -225,11 +223,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			assertThat(tcs.getCurrentVersion().getResource().getId()).isEqualTo(secondResourcePid);
 		});
 
-		assertThat(myHibernateLogCapture.getLogMessages().stream()
-			.filter(msg -> msg.contains(HHH000502))
-			.toList())
-			.as("No HHH000502 immutable-property warnings should be emitted")
-			.isEmpty();
+		assertNoHHH000502Warnings();
 	}
 
 	// Created by claude-opus-4-6
@@ -389,11 +383,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			assertThat(tcs.getCurrentVersion().getResource().getId()).isEqualTo(firstResourcePid);
 		});
 
-		assertThat(myHibernateLogCapture.getLogMessages().stream()
-			.filter(msg -> msg.contains(HHH000502))
-			.toList())
-			.as("No HHH000502 immutable-property warnings should be emitted")
-			.isEmpty();
+		assertNoHHH000502Warnings();
 	}
 
 	@Test
@@ -793,6 +783,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			long conceptCount = myTermConceptDao.countByCodeSystemVersion(csv.getPid());
 			assertThat(conceptCount).isEqualTo(3);
 		});
+		assertNoHHH000502Warnings();
 	}
 
 	// Created by Claude Opus 4.6
@@ -819,6 +810,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			long conceptCount = myTermConceptDao.countByCodeSystemVersion(tcs.getCurrentVersion().getPid());
 			assertThat(conceptCount).isEqualTo(4);
 		});
+		assertNoHHH000502Warnings();
 	}
 
 	// Created by Claude Opus 4.6
@@ -853,6 +845,14 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			long conceptCount = myTermConceptDao.countByCodeSystemVersion(tcs.getCurrentVersion().getPid());
 			assertThat(conceptCount).isEqualTo(2);
 		});
+	}
+
+	private void assertNoHHH000502Warnings() {
+		assertThat(myHibernateLogCapture.getLogMessages().stream()
+			.filter(msg -> msg.contains(HHH000502))
+			.toList())
+			.as("No HHH000502 immutable-property warnings should be emitted")
+			.isEmpty();
 	}
 
 	private static List<TermConcept> getConceptsSortedByCode(TermCodeSystemVersion theCodeSystemVersion) {

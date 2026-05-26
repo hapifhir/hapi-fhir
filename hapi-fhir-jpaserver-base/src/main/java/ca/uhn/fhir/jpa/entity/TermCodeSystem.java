@@ -74,19 +74,26 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns(
 			value = {
-				@JoinColumn(name = "CURRENT_VERSION_PID", referencedColumnName = "PID", nullable = true),
+				@JoinColumn(
+						name = "CURRENT_VERSION_PID",
+						referencedColumnName = "PID",
+						insertable = false,
+						updatable = false,
+						nullable = true),
 				@JoinColumn(
 						name = "CURRENT_VERSION_PARTITION_ID",
 						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
 						nullable = true)
 			},
 			foreignKey = @ForeignKey(name = FK_TRMCODESYSTEM_CURVER))
 	private TermCodeSystemVersion myCurrentVersion;
 
-	@Column(name = "CURRENT_VERSION_PID", nullable = true, insertable = false, updatable = false)
+	@Column(name = "CURRENT_VERSION_PID", nullable = true)
 	private Long myCurrentVersionPid;
 
-	@Column(name = "CURRENT_VERSION_PARTITION_ID", nullable = true, insertable = false, updatable = false)
+	@Column(name = "CURRENT_VERSION_PARTITION_ID", nullable = true)
 	private Integer myCurrentVersionPartitionId;
 
 	@Id()
@@ -180,7 +187,24 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 
 	public TermCodeSystem setCurrentVersion(TermCodeSystemVersion theCurrentVersion) {
 		myCurrentVersion = theCurrentVersion;
+		setCurrentVersionPid(theCurrentVersion);
 		return this;
+	}
+
+	/**
+	 * Sets only the FK column values without touching the {@code @ManyToOne} entity reference.
+	 * Use this on managed entities to avoid Hibernate HHH000502 warnings caused by dirtying
+	 * the {@link #myCurrentVersion} field whose {@code @JoinColumn} is {@code updatable = false}.
+	 */
+	// Created by claude-opus-4-6
+	public void setCurrentVersionPid(TermCodeSystemVersion theCurrentVersion) {
+		if (theCurrentVersion != null) {
+			myCurrentVersionPid = theCurrentVersion.getPid();
+			myCurrentVersionPartitionId = theCurrentVersion.getPartitionId().getPartitionId();
+		} else {
+			myCurrentVersionPid = null;
+			myCurrentVersionPartitionId = null;
+		}
 	}
 
 	public Long getPid() {

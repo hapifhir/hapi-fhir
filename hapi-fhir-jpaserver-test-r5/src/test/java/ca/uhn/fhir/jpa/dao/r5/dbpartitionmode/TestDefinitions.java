@@ -63,6 +63,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
 import jakarta.annotation.Nonnull;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -93,6 +95,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -119,7 +122,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -135,6 +138,12 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 @SuppressWarnings("unchecked")
 abstract class TestDefinitions implements ITestDataBuilder {
+
+	private static final String HHH000502 = "HHH000502";
+
+	@RegisterExtension
+	LogbackTestExtension myHibernateLogCapture = new LogbackTestExtension(
+		"org.hibernate.persister.entity.AbstractEntityPersister", Level.WARN);
 
 	private final TestPartitionSelectorInterceptor myPartitionSelectorInterceptor;
 	private final boolean myIncludePartitionIdsInSql;
@@ -505,7 +514,13 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		}
 
 		List<SqlQuery> updateCodeSystemVersions = myCaptureQueriesListener.getUpdateQueries(t -> t.getSql(true, false).startsWith("update TRM_CODESYSTEM_VER "));
-		assertEquals(1, updateCodeSystemVersions.size());
+		assertEquals(0, updateCodeSystemVersions.size());
+
+		assertThat(myHibernateLogCapture.getLogMessages().stream()
+				.filter(msg -> msg.contains(HHH000502))
+				.toList())
+			.as("No HHH000502 immutable-property warnings should be emitted")
+			.isEmpty();
 	}
 
 
@@ -972,7 +987,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		List<String> results = toUnqualifiedVersionlessIdValues(outcome);
 
 		// Verify
-		Assertions.assertThat(results).containsExactlyInAnyOrder(id.getValue());
+		assertThat(results).containsExactlyInAnyOrder(id.getValue());
 		myCaptureQueriesListener.logSelectQueries();
 		if (myIncludePartitionIdsInPks) {
 			assertThat(getSelectSql(0)).startsWith("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((EXISTS (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_SPIDX_STRING s0 ");

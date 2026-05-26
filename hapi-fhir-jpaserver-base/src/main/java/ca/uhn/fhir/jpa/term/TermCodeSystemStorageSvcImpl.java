@@ -579,10 +579,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		boolean isMakeVersionCurrent = ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequestDetails);
 		if (isMakeVersionCurrent) {
-			codeSystem.setCurrentVersion(codeSystemToStore);
-			if (codeSystem.getPid() == null) {
-				codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
-			}
+			codeSystem.setCurrentVersionPid(codeSystemToStore);
 		}
 
 		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
@@ -1135,8 +1132,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			if (makeCurrent) {
 				TermCodeSystem codeSystem = stagingCodeSystemVersionEntity.getCodeSystem();
-				codeSystem.setCurrentVersion(stagingCodeSystemVersionEntity);
-				myEntityManager.merge(codeSystem);
+				codeSystem.setCurrentVersionPid(stagingCodeSystemVersionEntity);
 			}
 		});
 	}
