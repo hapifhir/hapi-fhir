@@ -166,6 +166,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theAdditions.validateNoCycleOrThrowInvalidRequest();
 
 		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
+		TermCodeSystemVersion csv;
 		if (cs == null) {
 			CodeSystem codeSystemResource = new CodeSystem();
 			codeSystemResource.setUrl(theSystem);
@@ -176,9 +177,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(codeSystemResource);
 
 			cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
+			csv = myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(cs.getPid());
+		} else {
+			csv = cs.getCurrentVersion();
 		}
-
-		TermCodeSystemVersion csv = cs.getCurrentVersion();
 		Validate.notNull(csv, "No current version for code system: %s", theSystem);
 
 		return addConceptsToCodeSystemVersion(csv, theAdditions);
