@@ -2,9 +2,6 @@ package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
-import ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor;
-import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
-import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
@@ -12,6 +9,10 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
+import ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor;
+import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
+import ca.uhn.fhir.batch2.model.BatchInstanceStepStatisticsDTO;
+import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
@@ -86,7 +87,6 @@ import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.apache.commons.lang3.StringUtils.rightPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -115,7 +115,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public static final int JOB_DEF_VER = 1;
 	public static final int SEQUENCE_NUMBER = 1;
 	public static final String CHUNK_DATA = "{\"key\":\"value\"}";
-
+	@Autowired
+	public Batch2JobHelper myBatch2JobHelper;
+	@Autowired
+	public JobDefinitionRegistry myJobDefinitionRegistry;
 	@Autowired
 	private IJobPersistence mySvc;
 	@Autowired
@@ -124,19 +127,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Autowired
 	private IBatch2AttachmentRepository myJobAttachmentRepository;
-
-	@Autowired
-	public Batch2JobHelper myBatch2JobHelper;
-
 	// this is our spy
 	@Autowired
 	private BatchJobSender myBatchSender;
-
 	@Autowired
 	private IJobMaintenanceService myMaintenanceService;
-
-	@Autowired
-	public JobDefinitionRegistry myJobDefinitionRegistry;
 
 	@AfterEach
 	public void after() {
@@ -169,6 +164,44 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertEquals(0, myJobInstanceRepository.findAll().size());
 			assertEquals(0, myWorkChunkRepository.findAll().size());
 		});
+	}
+
+	@Test
+	public void testGetStatistics() {
+		// Setup
+
+		JobInstance instance = createInstance();
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+		for (int i = 0; i < 10; i++) {
+			String step1id = storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, i, JsonUtil.serialize(new NdJsonFileJson().setNdJsonText("{}")), false);
+			String step2id = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, i, JsonUtil.serialize(new NdJsonFileJson().setNdJsonText("{}")), false);
+
+			Date chunk1start = new Date(100_000L * i);
+			Date chunk1end = new Date(400_000L * i);
+			Date chunk2start = new Date(200_000 * i);
+			Date chunk2end = new Date(300_000 * i);
+			runInTransaction(() -> {
+				Batch2WorkChunkEntity step1chunk = myWorkChunkRepository.getReferenceById(step1id);
+				step1chunk.setStartTime(chunk1start);
+				step1chunk.setEndTime(chunk1end);
+				myWorkChunkRepository.save(step1chunk);
+				Batch2WorkChunkEntity step2chunk = myWorkChunkRepository.getReferenceById(step2id);
+				step2chunk.setStartTime(chunk2start);
+				step2chunk.setEndTime(chunk2end);
+				myWorkChunkRepository.save(step2chunk);
+			});
+		}
+
+		// Execute
+
+		BatchInstanceStepStatisticsDTO statistics = runInTransaction(() -> mySvc.calculateStepStatistics(instanceId));
+
+		// Verify
+
+		assertEquals(10, statistics.get(FIRST_STEP_ID).chunkCount());
+		assertEquals(3600000L, statistics.get(FIRST_STEP_ID).millisElapsed());
+		assertEquals(10, statistics.get(LAST_STEP_ID).chunkCount());
+		assertEquals(2700000L, statistics.get(LAST_STEP_ID).millisElapsed());
 	}
 
 	private String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData, boolean theGatedExecution) {
@@ -546,29 +579,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		mySvc.storeNewInstance(newSrd(), instance2);
 	}
 
-	/**
-	 * Test bodies are defined in {@link AbstractIJobPersistenceSpecificationTest}.
-	 * The nested test suite runs those tests here in a JPA context.
-	 */
-	@Nested
-	class Batch2SpecTest extends AbstractIJobPersistenceSpecificationTest {
-
-		@Override
-		public PlatformTransactionManager getTxManager() {
-			return JpaJobPersistenceImplTest.this.getTxManager();
-		}
-
-		@Override
-		public WorkChunk freshFetchWorkChunk(String chunkId) {
-			return JpaJobPersistenceImplTest.this.freshFetchWorkChunk(chunkId);
-		}
-
-		@Override
-		public void runMaintenancePass() {
-			myBatch2JobHelper.forceRunMaintenancePass();
-		}
-	}
-
 	@Test
 	public void testUpdateTime() {
 		// Setup
@@ -619,7 +629,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String id = mySvc.storeNewInstance(newSrd(), createInstance(true, false));
 		assertThat(id).isNotEmpty();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Batch2JobInstanceEntity storedInstance = myJobInstanceRepository.findById(id).orElseThrow();
 			storedInstance.setStatus(StatusEnum.BUILDING);
 			myJobInstanceRepository.save(storedInstance);
@@ -629,7 +639,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		myBatch2JobHelper.runMaintenancePass();
 
 		// Now let's set the job so that it appears to have been created over an hour ago
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Batch2JobInstanceEntity storedInstance = myJobInstanceRepository.findById(id).orElseThrow();
 			storedInstance.setCreateTime(DateUtils.addMilliseconds(new Date(), (int) (-1 - JobInstanceProcessor.CANCEL_BUILDING_THRESHOLD)));
 			myJobInstanceRepository.save(storedInstance);
@@ -661,7 +671,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		});
 
 	}
-
 
 	@Test
 	public void advanceJobStepAndUpdateChunkStatus_whenAlreadyInTargetStep_DoesNotUpdateStepOrChunks() {
@@ -793,7 +802,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	@Test
 	void testStoreAndFetchChunksForInstance_NoData() {
-	    // given
+		// given
 		boolean isGatedExecution = false;
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
@@ -809,7 +818,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		mySvc.onWorkChunkDequeue(completedId);
 		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(completedId, 11, 0));
 
-	    // when
+		// when
 		Iterator<WorkChunk> workChunks = mySvc.fetchAllWorkChunksIterator(instanceId, false);
 
 		// then
@@ -872,7 +881,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance(true, false);
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			boolean updated = mySvc.markInstanceAsStatusWhenStatusIn(instanceId, theJobStatus, Set.of(StatusEnum.QUEUED));
 			assertTrue(updated);
 		});
@@ -887,7 +896,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		if (theAllowed) {
 			String attachmentId = mySvc.storeNewAttachment(instanceId, request);
-			runInTransaction(()->{
+			runInTransaction(() -> {
 				Batch2JobAttachmentEntity attachment = myJobAttachmentRepository.findById(instanceId, attachmentId).orElseThrow();
 				assertEquals(Batch2JobAttachmentEntity.CompressionEnum.GZIP, attachment.getCompressedStatus());
 				assertEquals(1000, attachment.getAttachmentLengthUncompressed());
@@ -900,7 +909,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertNull(outcome.getFilename());
 
 		} else {
-			assertThatThrownBy(()->mySvc.storeNewAttachment(instanceId, request))
+			assertThatThrownBy(() -> mySvc.storeNewAttachment(instanceId, request))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("Can't add attachment to instance[" + instanceId + "] in status: " + theJobStatus);
 		}
@@ -931,7 +940,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(attachmentId0, attachmentId1);
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(1, myJobAttachmentRepository.count());
 			Batch2JobAttachmentEntity entity = myJobAttachmentRepository.findAll().get(0);
 			assertEquals("version 1", new String(entity.getData(), StandardCharsets.UTF_8));
@@ -989,7 +998,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Create a second attachment
 		request = new AttachmentDetails.Builder()
 			.withFilename("2.txt")
-			.withInputStream(new ByteArrayInputStream(new byte[]{5,6,7,8}))
+			.withInputStream(new ByteArrayInputStream(new byte[]{5, 6, 7, 8}))
 			.withContentType(AttachmentContentTypeEnum.GZIP)
 			.build();
 		mySvc.storeNewAttachment(instanceId, request);
@@ -1005,11 +1014,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	}
 
-
 	@Test
 	void testFetchAttachment_UnknownId() {
 		JobInstance instance = createInstance(true, false);
-		assertThatThrownBy(()->mySvc.fetchAttachmentById(instance.getInstanceId(), "FOO"))
+		assertThatThrownBy(() -> mySvc.fetchAttachmentById(instance.getInstanceId(), "FOO"))
 			.isInstanceOf(ResourceNotFoundException.class)
 			.hasMessageContaining("Attachment not found");
 	}
@@ -1017,11 +1025,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	void testFetchAttachment_UnknownFilename() {
 		JobInstance instance = createInstance(true, false);
-		assertThatThrownBy(()->mySvc.fetchAttachmentByFilename(instance.getInstanceId(), "FOO"))
+		assertThatThrownBy(() -> mySvc.fetchAttachmentByFilename(instance.getInstanceId(), "FOO"))
 			.isInstanceOf(ResourceNotFoundException.class)
 			.hasMessageContaining("Attachment not found");
 	}
-
 
 	@ParameterizedTest
 	@CsvSource({
@@ -1249,7 +1256,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testPrestorageInterceptor_whenModifyingJobInstance_modifiedJobInstanceIsPersisted(){
+	public void testPrestorageInterceptor_whenModifyingJobInstance_modifiedJobInstanceIsPersisted() {
 		String expectedTriggeringUserName = "bobTheUncle";
 
 		IAnonymousInterceptor prestorageBatchJobCreateInterceptor = (pointcut, params) -> {
@@ -1257,7 +1264,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			jobInstance.setTriggeringUsername(expectedTriggeringUserName);
 		};
 
-		try{
+		try {
 			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, prestorageBatchJobCreateInterceptor);
 			JobInstance instance = createInstance();
 			String instanceId = mySvc.storeNewInstance(newSrd(), instance);
@@ -1283,7 +1290,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertNull(jobInstance.getInstanceId());
 		};
 
-		try{
+		try {
 			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_POSTSTORAGE_BATCH_JOB_CREATE, poststorageBatchJobCreateInterceptor);
 			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, prestorageBatchJobCreateInterceptor);
 			JobInstance instance = createInstance();
@@ -1307,9 +1314,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		}
 
 		runInTransaction(() -> {
-				myWorkChunkRepository.updateChunkStatus(chunkIds.get(0), WorkChunkStatusEnum.READY, WorkChunkStatusEnum.COMPLETED);
-				myWorkChunkRepository.updateChunkStatus(chunkIds.get(1), WorkChunkStatusEnum.READY, WorkChunkStatusEnum.COMPLETED);
-			});
+			myWorkChunkRepository.updateChunkStatus(chunkIds.get(0), WorkChunkStatusEnum.READY, WorkChunkStatusEnum.COMPLETED);
+			myWorkChunkRepository.updateChunkStatus(chunkIds.get(1), WorkChunkStatusEnum.READY, WorkChunkStatusEnum.COMPLETED);
+		});
 
 		// Execute
 		BatchInstanceStatusDTO istatus = mySvc.fetchBatchInstanceStatus(instanceId);
@@ -1396,13 +1403,21 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		final String id = mySvc.storeNewInstance(newSrd(), jobInstance);
 
-		mySvc.updateInstance(id, instance->{
+		mySvc.updateInstance(id, instance -> {
 			instance.setEndTime(Date.from(Instant.now().minus(minutes, ChronoUnit.MINUTES)));
 			return true;
 		});
 
 
 		return id;
+	}
+
+	private Batch2JobInstanceEntity findInstanceByIdOrThrow(String instanceId) {
+		return myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalStateException::new);
+	}
+
+	private Batch2WorkChunkEntity findChunkByIdOrThrow(String secondChunkId) {
+		return myWorkChunkRepository.findById(secondChunkId).orElseThrow(IllegalArgumentException::new);
 	}
 
 	/**
@@ -1418,11 +1433,26 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		);
 	}
 
-	private Batch2JobInstanceEntity findInstanceByIdOrThrow(String instanceId) {
-		return myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalStateException::new);
-	}
+	/**
+	 * Test bodies are defined in {@link AbstractIJobPersistenceSpecificationTest}.
+	 * The nested test suite runs those tests here in a JPA context.
+	 */
+	@Nested
+	class Batch2SpecTest extends AbstractIJobPersistenceSpecificationTest {
 
-	private Batch2WorkChunkEntity findChunkByIdOrThrow(String secondChunkId) {
-		return myWorkChunkRepository.findById(secondChunkId).orElseThrow(IllegalArgumentException::new);
+		@Override
+		public PlatformTransactionManager getTxManager() {
+			return JpaJobPersistenceImplTest.this.getTxManager();
+		}
+
+		@Override
+		public WorkChunk freshFetchWorkChunk(String chunkId) {
+			return JpaJobPersistenceImplTest.this.freshFetchWorkChunk(chunkId);
+		}
+
+		@Override
+		public void runMaintenancePass() {
+			myBatch2JobHelper.forceRunMaintenancePass();
+		}
 	}
 }

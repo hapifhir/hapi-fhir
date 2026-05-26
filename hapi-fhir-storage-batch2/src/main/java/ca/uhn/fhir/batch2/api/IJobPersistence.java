@@ -348,7 +348,9 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Fetches all work chunks for the given job instance and calculates statistics such
-	 * as the total time spent on all chunks, and the number of chunks per step.
+	 * as the total time spent on all chunks, and the number of chunks per step. This method
+	 * is only intended to be called while the job is still executing, as the steps
+	 * will be cleared once the job completes.
 	 *
 	 * @param theInstanceId The job instance ID
 	 * @since 8.12.0

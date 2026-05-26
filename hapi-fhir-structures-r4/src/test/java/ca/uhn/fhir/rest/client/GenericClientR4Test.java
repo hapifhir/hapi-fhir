@@ -230,6 +230,36 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		assertEquals(4, IOUtils.toByteArray(httpUriRequest.getEntity().getContent()).length);
 	}
 
+	@Test
+	void testRawPostRequestWith400Response() throws IOException {
+		// given
+		Header header = new BasicHeader("custom-header", "custom-value");
+		Header[] headers = new Header[1];
+		headers[0] = header;
+		String responseBody = """
+			 { "jobId": "blahblah" }
+			 """;
+		ArgumentCaptor<HttpUriRequest> capt = prepareClientForResponse(
+			 Constants.CT_JSON,
+			 ()->new ByteArrayInputStream(new byte[0]),
+			 new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 400, "Bad Request"),
+			 headers
+		);
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		// when
+		try {
+			client.rawHttpRequest()
+				 .post("someurl?param1=value1", new RawRequestEntity(Constants.CT_TEXT, "".getBytes(StandardCharsets.UTF_8)))
+				 .accept("application/custom-accept")
+				 .execute();
+		} catch (InvalidRequestException e) {
+			assertEquals(400, e.getStatusCode());
+			assertEquals("HTTP 400 Bad Request", e.getMessage());
+		}
+
+	}
+
 
 	@Test
 	public void testAcceptHeaderCustom() throws Exception {

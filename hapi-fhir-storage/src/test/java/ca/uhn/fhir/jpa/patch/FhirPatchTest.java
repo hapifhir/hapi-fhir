@@ -742,6 +742,68 @@ public class FhirPatchTest implements ITestDataBuilder {
 
 	}
 
+	@Test
+	void testInsert_UnqualifiedPath() {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
+
+		// Path has no resource type prefix
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.insert()
+			.path("identifier")
+			.index(0)
+			.value(new Identifier().setSystem("http://system").setValue("value-new"));
+		IBaseParameters patchDocument = patchBuilder.build();
+
+		// Test
+		myPatch.apply(valueSet, patchDocument);
+
+		// Verify
+		assertEquals("http://system", valueSet.getIdentifier().get(0).getSystem());
+	}
+
+	@Test
+	void testAdd_UnqualifiedPath() {
+		Observation obs = new Observation();
+		obs.getCode().setText("foo");
+
+		// Path has no resource type prefix
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.add()
+			.path("code")
+			.name("coding")
+			.value(new Coding().setSystem("http://system").setCode("code-new"));
+		IBaseParameters patchDocument = patchBuilder.build();
+
+		// Test
+		myPatch.apply(obs, patchDocument);
+
+		// Verify
+		assertEquals("http://system", obs.getCode().getCodingFirstRep().getSystem());
+		assertEquals("foo", obs.getCode().getText());
+	}
+
+	@Test
+	void testDelete_UnqualifiedPath() {
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://system").setCode("code-old");
+
+		// Path has no resource type prefix
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.delete()
+			.path("code.coding");
+		IBaseParameters patchDocument = patchBuilder.build();
+
+		// Test
+		myPatch.apply(obs, patchDocument);
+
+		// Verify
+		assertEquals(null, obs.getCode().getCodingFirstRep().getSystem());
+	}
+
 	/**
 	 * Reproduces GitHub issue #7578: JSON Patch "add" operation fails with HAPI-1272
 	 * when adding a member to a Group resource that has no existing members.
