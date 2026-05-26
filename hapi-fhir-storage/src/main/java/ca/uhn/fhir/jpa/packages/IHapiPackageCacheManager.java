@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -35,6 +36,22 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 	NpmPackage installPackage(PackageInstallationSpec theInstallationSpec) throws IOException;
 
 	IBaseResource loadPackageAssetByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
+
+	/**
+	 * Load the package specified by the id and version specified by the parameters.
+	 * <p/>
+	 * Depending on the implementation logic, this may be from the package cache, or resolved from another service.
+	 *
+	 * @param thePackageId         The package id
+	 * @param thePackageVersion    The package version. If this is null, the implementation logic will attempt to
+	 *                                resolve an appropriate version based on the package id.
+	 * @param theShouldUpdateCache Indicates whether the cache should be updated
+	 * @return the NPM Package
+	 * @throws FHIRException if the package cannot be located
+	 * @throws IOException if the package cannot be processed
+	 */
+	NpmPackage loadPackage(String thePackageId, String thePackageVersion, boolean theShouldUpdateCache)
+			throws FHIRException, IOException;
 
 	/**
 	 * Returns all possible resources by the provided url and fhir version.

@@ -43,7 +43,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
 
-	private FakeNpmServlet myFakeNpmServlet = new FakeNpmServlet();
+	private final FakeNpmServlet myFakeNpmServlet = new FakeNpmServlet();
 	@RegisterExtension
 	public HttpServletExtension myServer = new HttpServletExtension()
 		.withServlet(myFakeNpmServlet);

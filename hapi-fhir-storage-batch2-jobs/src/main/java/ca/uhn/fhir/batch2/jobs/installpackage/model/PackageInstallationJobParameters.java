@@ -31,6 +31,9 @@ public class PackageInstallationJobParameters extends BaseBatchJobParameters {
 	@JsonProperty("isDependencyJob")
 	private boolean myIsDependencyJob = false;
 
+	@JsonProperty("dependencyTrackerId")
+	private String myDependencyTrackerId;
+
 	public PackageInstallationSpec getInstallationSpec() {
 		return myInstallationSpec;
 	}
@@ -45,5 +48,13 @@ public class PackageInstallationJobParameters extends BaseBatchJobParameters {
 
 	public void setDependencyJob(boolean theDependencyJob) {
 		myIsDependencyJob = theDependencyJob;
+	}
+
+	public String getDependencyTrackerId() {
+		return myDependencyTrackerId;
+	}
+
+	public void setDependencyTrackerId(String theDependencyTrackerId) {
+		myDependencyTrackerId = theDependencyTrackerId;
 	}
 }
