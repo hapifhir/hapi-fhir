@@ -93,21 +93,21 @@ public class AsyncRequestUtil {
 
 	@Nonnull
 	public static JobInstance getJobInstance(
+			IJobCoordinator theJobCoordinator,
+			String theJobDefinitionId,
 			IPrimitiveType<String> theJobInstanceId,
-			IJobCoordinator jobCoordinator,
-			String jobId,
-			String operationName) {
+			String theOperationName) {
 		JobInstance instance;
 		try {
-			instance = jobCoordinator.getInstance(DatatypeUtil.toStringValue(theJobInstanceId));
+			instance = theJobCoordinator.getInstance(DatatypeUtil.toStringValue(theJobInstanceId));
 		} catch (ResourceNotFoundException e) {
 			throw new ResourceNotFoundException(
 					Msg.code(2787) + "Invalid/unknown job ID: " + UrlUtil.sanitizeUrlPart(theJobInstanceId.getValue()));
 		}
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(
-				instance.getJobDefinitionId().equals(jobId),
-				"Job ID does not correspond to a " + operationName + " job");
+				instance.getJobDefinitionId().equals(theJobDefinitionId),
+				"Job ID does not correspond to a " + theOperationName + " job");
 		return instance;
 	}
 
@@ -167,13 +167,16 @@ public class AsyncRequestUtil {
 				if (theJobInstance.getCurrentGatedStepId() != null) {
 					message += " Current step: " + theJobInstance.getCurrentGatedStepId() + ".";
 				}
+				if (theJobInstance.getProgress() > 0) {
+					message += " Overall progress: " + ((int) (100.0 * theJobInstance.getProgress()) + "%.");
+				}
 				messages.add(message);
 				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 			}
 			case FINALIZE -> {
 				status = HttpStatus.SC_ACCEPTED;
-				messages.add(theOperationName + " job has started and is being finalized");
+				messages.add(theOperationName + " job has completed main processing and is being finalized");
 				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 			}

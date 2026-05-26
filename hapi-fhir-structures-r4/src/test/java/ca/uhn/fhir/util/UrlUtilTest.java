@@ -14,6 +14,7 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -222,11 +223,16 @@ public class UrlUtilTest {
 		http://foo|    ,                , http://foo     , null
 		http://foo|123 ,                , http://foo     , 123
 		http://foo     , 123            , http://foo     , 123
-		http://foo|456 , 123            , http://foo     , 123
+		http://foo|456 , 123            , http://foo     , FAIL
 		""")
 	void testParseCanonicalUrl(String theInputUrl, String theInputVersionId, String theExpectedUrl, String theExpectedVersionId) {
 		UrlUtil.CanonicalUrlParts parts;
-		if (isNotBlank(theExpectedUrl)) {
+		if ("FAIL".equals(theExpectedVersionId)) {
+			assertThatThrownBy(() -> UrlUtil.parseCanonicalUrl(theInputUrl, theInputVersionId))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("Version in URL[http://foo|456 does not match expected version: 123");
+			return;
+		} else if (isNotBlank(theExpectedUrl)) {
 			parts = UrlUtil.parseCanonicalUrl(theInputUrl, theInputVersionId);
 		} else {
 			parts = UrlUtil.parseCanonicalUrl(theInputUrl);

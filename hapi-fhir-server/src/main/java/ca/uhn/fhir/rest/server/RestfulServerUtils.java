@@ -225,12 +225,12 @@ public class RestfulServerUtils {
 				.getServerAddressStrategy()
 				.determineServerBase(servletContext, servletRequest);
 
-		StringBuilder pollUrlBuilder = new StringBuilder(baseUrl);
+		StringBuilder urlBuilder = new StringBuilder(baseUrl);
 		if (!baseUrl.endsWith("/")) {
-			pollUrlBuilder.append("/");
+			urlBuilder.append("/");
 		}
-		pollUrlBuilder.append(theRelativeUrl);
-		return pollUrlBuilder.toString();
+		urlBuilder.append(theRelativeUrl);
+		return urlBuilder.toString();
 	}
 
 	public static String createLinkSelf(String theServerBase, RequestDetails theRequest) {
