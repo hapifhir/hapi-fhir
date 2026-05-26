@@ -139,25 +139,25 @@ public class AddTableByColumnTaskTest extends BaseTest {
 
 	@ParameterizedTest
 	@CsvSource({"2, true", "0, false"})
-	void testOracleIndexOrganizedTable(int theCompressLevel, boolean theExpectCompress) {
+	void testOracleIndexOrganizedTable(int theCompressionLevel, boolean theExpectCompression) {
 		AddTableByColumnTask task = new AddTableByColumnTask("1", "1");
 		task.setTableName("TEST_IOT");
 		task.setDriverType(DriverTypeEnum.ORACLE_12C);
 		task.setPkColumns(Collections.singletonList("PID"));
-		task.setOracleIotCompress(theCompressLevel);
+		task.setOracleIndexOrganizedTable(theCompressionLevel);
 		task.addAddColumnTask(buildLongColumnTask(DriverTypeEnum.ORACLE_12C, "TEST_IOT"));
 
 		String sql = task.generateSQLCreateScript();
 
 		assertThat(sql).contains("ORGANIZATION INDEX");
-		if (theExpectCompress) {
-			assertThat(sql).contains("COMPRESS " + theCompressLevel);
+		if (theExpectCompression) {
+			assertThat(sql).contains("COMPRESS " + theExpectCompression);
 		} else {
 			assertThat(sql).doesNotContain("COMPRESS");
 		}
 	}
 
-	// COCKROACHDB_21_1 excluded: missing LONG type mapping in ColumnTypeToDriverTypeToSqlType
+	// COCKROACHDB_21_1 excluded: missing type mappings in ColumnTypeToDriverTypeToSqlType
 	@ParameterizedTest
 	@EnumSource(value = DriverTypeEnum.class, names = {"ORACLE_12C", "COCKROACHDB_21_1"}, mode = EnumSource.Mode.EXCLUDE)
 	void testNonOracleIgnoresIndexOrganizedTable(DriverTypeEnum theDriverType) {
@@ -165,7 +165,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		task.setTableName("TEST_TABLE");
 		task.setDriverType(theDriverType);
 		task.setPkColumns(Collections.singletonList("PID"));
-		task.setOracleIotCompress(2);
+		task.setOracleIndexOrganizedTable(2);
 		task.addAddColumnTask(buildLongColumnTask(theDriverType, "TEST_TABLE"));
 
 		String sql = task.generateSQLCreateScript();

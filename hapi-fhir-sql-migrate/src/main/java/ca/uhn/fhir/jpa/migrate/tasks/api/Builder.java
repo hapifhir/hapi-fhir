@@ -757,14 +757,13 @@ public class Builder {
 		}
 
 		/**
-		 * For Oracle, creates the table as an Index Organized Table (IOT) with
-		 * key compression on the specified number of leading primary key columns.
-		 * Has no effect on other database platforms.
+		 * For Oracle, creates an Index Organized Table (IOT) with prefix compression
+		 * on the first N primary key columns. Ignored on other databases.
 		 *
 		 * @param theCompressionLevel number of leading PK columns to compress (0 for no compression)
 		 */
-		public BuilderAddTableByColumns asIndexOrganizedTable(int theCompressionLevel) {
-			myTask.setOracleIotCompress(theCompressionLevel);
+		public BuilderAddTableByColumns asOracleIndexOrganizedTable(int theCompressionLevel) {
+			myTask.setOracleIndexOrganizedTable(theCompressionLevel);
 			return this;
 		}
 
