@@ -1,0 +1,5 @@
+---
+type: change
+issue: 7961
+title: "The JPA server terminology service will no longer pre-expand ValueSets
+   uploaded to the server if the status is set to anything other than `active`."
