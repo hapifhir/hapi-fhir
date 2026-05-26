@@ -3199,9 +3199,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		 */
 		if (isLoincUnversionedValueSet(valueSetUrl)) {
 			IBaseResource cs = fetchCodeSystem(LOINC_URI);
-			Optional<String> versionOpt = myContext.newTerser().getSinglePrimitiveValue(cs, "version");
-			if (versionOpt.isPresent()) {
-				valueSetUrl = theValueSetUrl + "|" + versionOpt.get();
+			if (cs != null) {
+				Optional<String> versionOpt = myContext.newTerser().getSinglePrimitiveValue(cs, "version");
+				if (versionOpt.isPresent()) {
+					valueSetUrl = theValueSetUrl + "|" + versionOpt.get();
+				}
 			}
 		}
 
