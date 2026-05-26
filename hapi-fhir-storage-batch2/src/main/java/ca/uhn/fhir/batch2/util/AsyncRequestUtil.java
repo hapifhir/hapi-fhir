@@ -163,7 +163,7 @@ public class AsyncRequestUtil {
 			}
 			case IN_PROGRESS -> {
 				status = HttpStatus.SC_ACCEPTED;
-				String message = theOperationName + " job has started and is in progress.";
+				String message = theOperationName + " job has started and is in progress";
 				if (theJobInstance.getCurrentGatedStepId() != null) {
 					message += " Current step: " + theJobInstance.getCurrentGatedStepId() + ".";
 				}
