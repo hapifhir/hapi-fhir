@@ -65,7 +65,7 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	public ResourceModifiedMessage(
 			FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		super(theFhirContext, theResource, theOperationType);
-		setPartitionId(RequestPartitionId.defaultPartition());
+		setPartitionId(RequestPartitionId.fromPartitionId(null));
 	}
 
 	public ResourceModifiedMessage(

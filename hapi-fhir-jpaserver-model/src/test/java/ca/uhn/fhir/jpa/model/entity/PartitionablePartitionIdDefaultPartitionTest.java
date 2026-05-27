@@ -36,19 +36,6 @@ public class PartitionablePartitionIdDefaultPartitionTest {
 	}
 
 	@Test
-	public void toRequestPartitionId_nullInputWithDefaultSettings_matchesDeprecatedHelper() {
-		PartitionSettings settings = new PartitionSettings();
-
-		RequestPartitionId fromOverload = PartitionablePartitionId.toRequestPartitionId(null, settings);
-		@SuppressWarnings("deprecation")
-		RequestPartitionId fromDeprecated = PartitionablePartitionId.toRequestPartitionId(null);
-
-		// With no configured default, the new overload is byte-for-byte equivalent to the deprecated helper, so no
-		// stored hashes change in the unconfigured (default) deployment.
-		assertThat(fromOverload).isEqualTo(fromDeprecated);
-	}
-
-	@Test
 	public void toRequestPartitionId_nonNullInput_passesThroughRegardlessOfSettings() {
 		PartitionSettings settings = new PartitionSettings().setDefaultPartitionId(7);
 		LocalDate partitionDate = LocalDate.of(2026, 5, 26);

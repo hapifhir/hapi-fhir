@@ -117,21 +117,6 @@ public class PartitionablePartitionId implements Cloneable {
 	}
 
 	/**
-	 * @deprecated Use {@link #toRequestPartitionId(PartitionablePartitionId, IDefaultPartitionSettings)} instead, which
-	 *     resolves a {@code null} input to the configured default partition rather than always to a {@code null}
-	 *     partition. Scheduled for removal once all callers are migrated.
-	 */
-	@Deprecated
-	@Nonnull
-	public static RequestPartitionId toRequestPartitionId(@Nullable PartitionablePartitionId theRequestPartitionId) {
-		if (theRequestPartitionId != null) {
-			return theRequestPartitionId.toPartitionId();
-		} else {
-			return RequestPartitionId.defaultPartition();
-		}
-	}
-
-	/**
 	 * Resolves a {@link PartitionablePartitionId} to a {@link RequestPartitionId}. When the input is {@code null}, the
 	 * configured default partition supplied by <code>theDefaultPartitionSettings</code> is used (rather than a
 	 * hard-coded {@code null} partition), so that a non-null configured default partition ID is honored.
