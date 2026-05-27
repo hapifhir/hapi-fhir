@@ -59,7 +59,9 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	 */
 	public ResourceDeliveryMessage() {
 		super();
-		myPartitionId = RequestPartitionId.defaultPartition();
+		// myPartitionId is intentionally left null until the producer or deserializer populates it. Pre-populating it
+		// with a hard-coded null-partition sentinel (the deprecated RequestPartitionId.defaultPartition()) masked the
+		// absence of a partition and ignored any configured default partition (GL-8692).
 	}
 
 	public IBaseResource getPayload(FhirContext theCtx) {
