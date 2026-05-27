@@ -644,12 +644,24 @@ public class UrlUtil {
 	 */
 	@Nonnull
 	public static CanonicalUrlParts parseCanonicalUrl(@Nonnull String theUrl, @Nullable String theVersion) {
-		int pipeIdx = theUrl.indexOf('|');
-		if (pipeIdx == -1) {
+		int separatorStart = theUrl.indexOf('|');
+		int separatorEnd;
+		if (separatorStart != -1) {
+			separatorEnd = separatorStart;
+		} else {
+			separatorStart = theUrl.indexOf("%7C");
+			if (separatorStart != -1) {
+				separatorEnd = separatorStart + 2;
+			} else {
+				separatorEnd = -1;
+			}
+		}
+
+		if (separatorStart == -1) {
 			return new CanonicalUrlParts(theUrl, Optional.ofNullable(theVersion));
 		} else {
-			String url = theUrl.substring(0, pipeIdx);
-			String versionId = theUrl.substring(pipeIdx + 1);
+			String url = theUrl.substring(0, separatorStart);
+			String versionId = theUrl.substring(separatorEnd + 1);
 			if (isBlank(versionId)) {
 				return new CanonicalUrlParts(url, Optional.ofNullable(theVersion));
 			} else if (isNotBlank(theVersion) && !versionId.equals(theVersion)) {

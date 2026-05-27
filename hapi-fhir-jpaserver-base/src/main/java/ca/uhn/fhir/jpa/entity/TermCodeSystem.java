@@ -191,6 +191,9 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 	}
 
 	public TermCodeSystem setCurrentVersion(TermCodeSystemVersion theCurrentVersion) {
+		if (theCurrentVersion != null && myCurrentVersion != null && theCurrentVersion.getCodeSystemVersionId() == null && myCurrentVersion.getCodeSystemVersionId() != null) {
+			return this;
+		}
 		if (theCurrentVersion == null) {
 			myCurrentVersion = null;
 			myCurrentVersionPid = null;

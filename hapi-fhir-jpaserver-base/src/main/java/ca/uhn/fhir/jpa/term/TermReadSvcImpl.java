@@ -3176,7 +3176,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				if (codeSystem != null && codeSystem.getCurrentVersion() != null) {
 					TermCodeSystemVersion currentVersion = codeSystem.getCurrentVersion();
 					String versionId = currentVersion.getCodeSystemVersionId();
-					system = system + "|" + versionId;
+					if (isNotBlank(versionId)) {
+						system = system + "|" + versionId;
+					}
 				}
 				return provideJpaValidationSupport().fetchCodeSystem(system);
 			});

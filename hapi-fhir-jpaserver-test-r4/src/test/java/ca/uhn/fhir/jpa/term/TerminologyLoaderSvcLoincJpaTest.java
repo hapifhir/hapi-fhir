@@ -200,7 +200,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		});
 
 		CodeSystem cs = (CodeSystem) myValidationSupport.fetchCodeSystem("http://loinc.org");
-		assertNull(cs.getVersion());
+		assertEquals("2.68", cs.getVersion());
 	}
 
 
