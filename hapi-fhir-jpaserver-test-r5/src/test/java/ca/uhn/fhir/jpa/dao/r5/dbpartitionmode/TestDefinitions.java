@@ -514,7 +514,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		}
 
 		List<SqlQuery> updateCodeSystemVersions = myCaptureQueriesListener.getUpdateQueries(t -> t.getSql(true, false).startsWith("update TRM_CODESYSTEM_VER "));
-		assertEquals(0, updateCodeSystemVersions.size());
+		assertEquals(1, updateCodeSystemVersions.size());
 
 		assertThat(myHibernateLogCapture.getLogMessages().stream()
 				.filter(msg -> msg.contains(HHH000502))

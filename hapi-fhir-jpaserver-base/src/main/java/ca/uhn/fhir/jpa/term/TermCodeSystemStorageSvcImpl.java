@@ -166,7 +166,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theAdditions.validateNoCycleOrThrowInvalidRequest();
 
 		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
-		TermCodeSystemVersion csv;
 		if (cs == null) {
 			CodeSystem codeSystemResource = new CodeSystem();
 			codeSystemResource.setUrl(theSystem);
@@ -177,25 +176,25 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(codeSystemResource);
 
 			cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
-			csv = myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(cs.getPid());
-		} else {
-			csv = cs.getCurrentVersion();
 		}
+		// Query by scalar FK — the @ManyToOne may not be populated in this session
+		TermCodeSystemVersion csv = myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(cs.getPid());
 		Validate.notNull(csv, "No current version for code system: %s", theSystem);
 
-		return addConceptsToCodeSystemVersion(csv, theAdditions);
+		return addConceptsToCodeSystemVersion(cs, csv, theAdditions);
 	}
 
 	@Nonnull
 	private UploadStatistics addConceptsToCodeSystemVersion(
-			TermCodeSystemVersion theCodeSystemVersion, CustomTerminologySet theAdditions) {
+			TermCodeSystem theTermCodeSystem,
+			TermCodeSystemVersion theCodeSystemVersion,
+			CustomTerminologySet theAdditions) {
 		HapiTransactionService.requireTransaction();
 
-		TermCodeSystem cs = theCodeSystemVersion.getCodeSystem();
-		Validate.notNull(cs, "No code system found for code system version: %s", theCodeSystemVersion);
-		Validate.notNull(cs.getPid(), "No pid found for code system: %s", cs);
+		Validate.notNull(theTermCodeSystem, "No code system found for code system version: %s", theCodeSystemVersion);
+		Validate.notNull(theTermCodeSystem.getPid(), "No pid found for code system: %s", theTermCodeSystem);
 
-		String codeSystemUrl = cs.getCodeSystemUri();
+		String codeSystemUrl = theTermCodeSystem.getCodeSystemUri();
 		CodeSystem codeSystem = myTerminologySvc.fetchCanonicalCodeSystemFromCompleteContext(codeSystemUrl);
 		if (codeSystem != null && codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 			throw new InvalidRequestException(
@@ -203,7 +202,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 							+ "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
 		}
 
-		IIdType codeSystemId = cs.getResource().getIdDt();
+		IIdType codeSystemId = theTermCodeSystem.getResource().getIdDt();
 
 		UploadStatistics retVal = new UploadStatistics(codeSystemId);
 		Map<String, TermConcept> codeToConcept = new HashMap<>();
@@ -396,6 +395,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
 				populateCodeSystemVersionProperties(persCs, codeSystem, theResourceEntity);
+				myEntityManager.persist(persCs);
 
 				persCs.getConcepts().addAll(TermReadSvcImpl.toPersistedConcepts(codeSystem.getConcept(), persCs));
 				ourLog.debug("Code system has {} concepts", persCs.getConcepts().size());
@@ -1072,7 +1072,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				additions.addRootConcept(concept);
 			}
 
-			return addConceptsToCodeSystemVersion(codeSystemVersionEntity, additions);
+			return addConceptsToCodeSystemVersion(
+					codeSystemVersionEntity.getCodeSystem(), codeSystemVersionEntity, additions);
 		});
 	}
 
