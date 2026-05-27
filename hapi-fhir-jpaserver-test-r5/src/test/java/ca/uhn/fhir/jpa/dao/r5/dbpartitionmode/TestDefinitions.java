@@ -499,6 +499,12 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertEquals(expectedPartitionId, insertCodeSystemParams.get("PARTITION_ID"));
 		assertEquals("NULL", insertCodeSystemParams.get("CURRENT_VERSION_PID"));
 
+		List<SqlQuery> insertTrmCodeSystemVer = myCaptureQueriesListener.getInsertQueries(t -> t.getSql(true, false).startsWith("insert into TRM_CODESYSTEM_VER "));
+		assertEquals(1, insertTrmCodeSystemVer.size());
+		Map<String, String> insertCodeSystemVerParams = parseInsertStatementParams(insertTrmCodeSystemVer.get(0).getSql(true, false));
+		assertEquals(expectedPartitionId, insertCodeSystemVerParams.get("PARTITION_ID"));
+		assertEquals("NULL", insertCodeSystemVerParams.get("CODESYSTEM_PID"));
+
 		List<SqlQuery> insertTrmConcept = myCaptureQueriesListener.getInsertQueries(t -> t.getSql(true, false).startsWith("insert into TRM_CONCEPT "));
 		assertEquals(1, insertTrmConcept.size());
 		Map<String, String> insertConceptParams = parseInsertStatementParams(insertTrmConcept.get(0).getSql(true, false));
@@ -515,6 +521,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		List<SqlQuery> updateCodeSystemVersions = myCaptureQueriesListener.getUpdateQueries(t -> t.getSql(true, false).startsWith("update TRM_CODESYSTEM_VER "));
 		assertEquals(1, updateCodeSystemVersions.size());
+		Map<String, String> updateCodeSystemVersionParams = parseUpdateStatementParams(updateCodeSystemVersions.get(0).getSql(true, false));
+		assertNotNull(updateCodeSystemVersionParams.get("CODESYSTEM_PID"));
 
 		assertThat(myHibernateLogCapture.getLogMessages().stream()
 				.filter(msg -> msg.contains(HHH000502))
