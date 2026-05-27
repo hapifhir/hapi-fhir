@@ -1,6 +1,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -321,6 +322,18 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
+	@DisplayName("Should throw exception when referenced prefetch key is not in context but the other expression is valid")
+	void substituteTemplateForReferencedPrefetchMissingKeyUnionValidContextKey() {
+		// setup
+		final String template = "Location?_id={{%practitionerRoles.location.resolve().id|context.locationId}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put("locationId", "Location/1");
+		// execute
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		assertThat(actual).isEqualTo("Location?_id=Location/1");
+	}
+
+	@Test
 	@DisplayName("Should successfully evaluate UNION expression combining context-based and referenced prefetch patterns")
 	void substituteTemplateComboContextAndReferencedPrefetch() {
 		// setup
@@ -396,6 +409,22 @@ class PrefetchTemplateUtilR4Test {
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("FHIR path expression returned a non-primitive result: HumanName for Prefetch Key : <patient>");
+	}
+
+	@Test
+	@DisplayName("Should throw immediately when a union part has an invalid FHIRPath (non-primitive result), even if the other union part would resolve")
+	void substituteTemplateThrowsImmediatelyOnInvalidFhirPathInUnion() {
+		// setup - first part returns a complex type (HumanName), not a primitive; second part is valid
+		final Patient patient = new Patient();
+		patient.addName(new HumanName().setFamily("Smith").addGiven("John"));
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put("patient", patient);
+		context.put("locationId", "Location/1");
+		final String template = "Patient?name={{%patient.name|context.locationId}}";
+		// execute & validate - must throw for the invalid part, must not silently fall through to context.locationId
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2860));
 	}
 
 	@Test

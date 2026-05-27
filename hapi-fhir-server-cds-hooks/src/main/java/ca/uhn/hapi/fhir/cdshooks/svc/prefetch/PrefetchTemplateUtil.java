@@ -36,10 +36,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class PrefetchTemplateUtil {
 	private static final Pattern SURROUNDING_CURLY_BRACES_PART = Pattern.compile("\\{\\{([^}]+)}}");
@@ -63,11 +63,24 @@ public class PrefetchTemplateUtil {
 			String theRawExpression,
 			@Nonnull CdsServiceRequestContextJson theContext,
 			@Nonnull FhirContext theFhirContext) {
-		final List<String> results = Stream.of(theRawExpression.split(UNION_OPERATOR_REGEX))
-				.map(String::trim)
-				.flatMap(part -> resolvePartResults(part, theContext, theFhirContext).stream())
-				.toList();
+		InvalidRequestException firstException = null;
+		final List<String> results = new ArrayList<>();
+		for (String rawPart : theRawExpression.split(UNION_OPERATOR_REGEX)) {
+			try {
+				results.addAll(resolvePartResults(rawPart.trim(), theContext, theFhirContext));
+			} catch (InvalidRequestException e) {
+				if (!e.getMessage().contains(Msg.code(2372))) {
+					throw e;
+				}
+				if (firstException == null) {
+					firstException = e;
+				}
+			}
+		}
 		if (results.isEmpty()) {
+			if (firstException != null) {
+				throw firstException;
+			}
 			throw new InvalidRequestException(Msg.code(2856) + "Unable to resolve prefetch template : "
 					+ theRawExpression + ". No result was found for the prefetch query.");
 		}
