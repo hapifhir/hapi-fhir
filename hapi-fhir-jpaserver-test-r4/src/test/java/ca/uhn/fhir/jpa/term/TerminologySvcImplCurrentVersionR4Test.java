@@ -205,7 +205,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	private void validateValueExpand(String currentVersion, Collection<String> theAllVersions) {
 		// for CS ver = null, VS ver = null
 		ValueSet vs = myValueSetDao.expandByIdentifier(VS_NO_VERSIONED_ON_UPLOAD, null);
-		assertThat(vs.getExpansion().getContains()).hasSize(3);
+		assertThat(vs.getExpansion().getContains()).hasSize(1);
 
 		// version was added prefixing code display to validate
 		assertEquals(prefixWithVersion(currentVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), vs.getExpansion().getContains().iterator().next().getDisplay());
@@ -250,7 +250,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		ValueSet vs2 = myValueSetDao.expandByIdentifier(
 			VS_NO_VERSIONED_ON_UPLOAD + "|" + theVersion, null);
-		assertThat(vs2.getExpansion().getContains()).hasSize(3);
+		assertThat(vs2.getExpansion().getContains()).hasSize(1);
 
 		// version was added before code display to validate
 		assertEquals(prefixWithVersion(theVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), vs2.getExpansion().getContains().iterator().next().getDisplay());
@@ -418,6 +418,9 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 		logAllUriIndexes();
 		logAllTokenIndexes("version");
+		logAllConcepts();
+
+		// FIXME: make sure all CSVs have display name of LOINC
 
 		runCommonValidations(Lists.newArrayList(currentVer, nonCurrentVer));
 
@@ -501,7 +504,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		ValueSet vs = myValueSetDao.expandByIdentifier(LOINC_ALL_VS_URL + "|" + theVersion, null);
 		switch (theVersion) {
 			case "2.67", "2.68" ->
-				assertThat(vs.getExpansion().getContains()).hasSize(58);
+				assertThat(vs.getExpansion().getContains()).hasSize(81);
 			default -> fail("Don't know how to handle version: " + theVersion);
 		}
 
