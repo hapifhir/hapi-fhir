@@ -25,7 +25,7 @@ public class ResourceModifiedTest {
 		Organization decodedOrg = (Organization) msg.getNewResource(myFhirContext);
 		assertEquals(org.getId(), decodedOrg.getId());
 		assertEquals(org.getName(), decodedOrg.getName());
-		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.fromPartitionId(null).toJson());
 	}
 
 	@Test
@@ -39,7 +39,7 @@ public class ResourceModifiedTest {
 		Organization decodedOrg = (Organization) msg.getNewResource(myFhirContext);
 		assertEquals(org.getId(), decodedOrg.getId());
 		assertEquals(org.getName(), decodedOrg.getName());
-		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.fromPartitionId(null).toJson());
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class ResourceModifiedTest {
 		assertEquals("Organization/testOrgId", msg.getPayloadId(myFhirContext).getValue());
 		assertEquals(ResourceModifiedMessage.OperationTypeEnum.DELETE, msg.getOperationType());
 		assertNotNull(msg.getNewResource(myFhirContext));
-		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.fromPartitionId(null).toJson());
 	}
 
 	@Test

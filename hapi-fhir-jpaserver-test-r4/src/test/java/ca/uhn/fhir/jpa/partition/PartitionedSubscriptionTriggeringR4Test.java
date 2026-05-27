@@ -65,7 +65,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	public static final RequestPartitionId REQ_PART_1 = RequestPartitionId.fromPartitionNames(PARTITION_1);
 	static final String PARTITION_2 = "PART-2";
 	public static final RequestPartitionId REQ_PART_2 = RequestPartitionId.fromPartitionNames(PARTITION_2);
-	public static final RequestPartitionId REQ_PART_DEFAULT = RequestPartitionId.defaultPartition();
+	public static final RequestPartitionId REQ_PART_DEFAULT = RequestPartitionId.fromPartitionId(null);
 
 	protected MyReadWriteInterceptor myPartitionInterceptor;
 	protected LocalDate myPartitionDate;
