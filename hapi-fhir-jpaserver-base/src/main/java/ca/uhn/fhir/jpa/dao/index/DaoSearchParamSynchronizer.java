@@ -119,8 +119,7 @@ public class DaoSearchParamSynchronizer {
 				theParams.myStringParams,
 				existingParams.myStringParams,
 				null);
-		TokenIndexStrategyEnum tokenStrategy = myStorageSettings.getTokenIndexStrategy();
-		if (tokenStrategy.writeToLegacyTokenTable()) {
+		if (myStorageSettings.getTokenIndexStrategy().writeToLegacyTokenTable()) {
 			synchronize(
 					theRequestDetails,
 					theTransactionDetails,
@@ -130,10 +129,7 @@ public class DaoSearchParamSynchronizer {
 					existingParams.myTokenParams,
 					null);
 		}
-		if (tokenStrategy.writeToCompressedTokenTables()) {
-			synchronizeTokenParamsToNewTables(theRequestDetails, theEntity, theParams, retVal);
-		}
-
+		synchronizeTokenParamsToNewTables(theRequestDetails, theEntity, theParams, retVal);
 		synchronize(
 				theRequestDetails,
 				theTransactionDetails,
@@ -229,44 +225,38 @@ public class DaoSearchParamSynchronizer {
 	}
 
 	/**
-	 * Synchronizes the extracted token params into the compressed token tables:
-	 * <ul>
-	 *   <li>{@code HFJ_SPIDX2_TOKEN_COMMON_RES} and {@code HFJ_SPIDX2_TOKEN_IDENTIFIER} are kept
-	 *       in sync with a content-diff: rows no longer matching the extracted set are removed,
-	 *       newly-extracted rows are persisted.</li>
-	 *   <li>{@code HFJ_SPIDX2_TOKEN_COMMON} is insert-only — one {@code em.persist()} per extracted
-	 *       non-identifier token. The dialect upsert deduplicates concurrent inserts on
-	 *       {@code HASH_SYS_AND_VALUE}, and rows are never removed even when no resource references
-	 *       them; the global dedup table accumulates and stabilizes.</li>
-	 * </ul>
-	 * {@code AddRemoveCount} is only updated when the legacy path did not run, to avoid
-	 * double-counting under {@code WRITE_BOTH_*} strategies.
+	 * Synchronizes the extracted token params into the compressed token tables.
 	 */
 	private void synchronizeTokenParamsToNewTables(
 			RequestDetails theRequestDetails,
 			ResourceTable theEntity,
 			ResourceIndexedSearchParams theParams,
 			AddRemoveCount theAddRemoveCount) {
+		TokenIndexStrategyEnum tokenStrategy = myStorageSettings.getTokenIndexStrategy();
+		if (!tokenStrategy.writeToCompressedTokenTables()) {
+			return;
+		}
+
 		PartitionablePartitionId partitionId = theEntity.getPartitionId();
-		Long resourceId = theEntity.getId().getId();
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(partitionId);
 
 		List<ResourceIndexedSearchParamTokenCommonRes> newCommonResEntities = new ArrayList<>();
 		List<ResourceIndexedSearchParamTokenIdentifier> newIdentifierEntities = new ArrayList<>();
 
 		for (ResourceIndexedSearchParamToken token : theParams.myTokenParams) {
-			// Compressed tables have no SP_MISSING column - skip tokens that represent
-			// missing values. The :missing modifier is handled via NOT EXISTS subquery.
+			// Compressed tables have no SP_MISSING column, so skip tokens that represent missing values
 			if (token.isMissing()) {
 				continue;
 			}
-			// Idempotent setup — the legacy synchronize() path performs the same assignments, but
-			// under WRITE_NEW_QUERY_NEW it is skipped, so we must (re)populate these fields here.
-			// Order matters: setPartitionId can clearHashes, so calculateHashes runs last.
-			token.setResourceId(resourceId);
-			token.setPartitionId(partitionId);
-			token.setResource(theEntity);
-			token.calculateHashes();
+
+			// Initialize tokens only once, if synchronize() didn't initialize them already
+			if (tokenStrategy.writeToLegacyTokenTable()) {
+				Long resourceId = theEntity.getId().getId();
+				token.setResourceId(resourceId);
+				token.setPartitionId(partitionId);
+				token.setResource(theEntity);
+				token.calculateHashes();
+			}
 
 			findOrCreateSearchParamIdentity(token);
 
@@ -295,7 +285,6 @@ public class DaoSearchParamSynchronizer {
 		AddRemoveCount identifierDelta =
 				diffAndApply(myTokenIdentifierDao.findByResourceId(theEntity.getId()), newIdentifierEntities);
 
-		TokenIndexStrategyEnum tokenStrategy = myStorageSettings.getTokenIndexStrategy();
 		if (!tokenStrategy.writeToLegacyTokenTable()) {
 			// Only count when legacy didn't run; otherwise the legacy path already populated retVal.
 			theAddRemoveCount.addToAddCount(commonResDelta.getAddCount() + identifierDelta.getAddCount());
@@ -318,6 +307,9 @@ public class DaoSearchParamSynchronizer {
 				theDesired.stream().filter(row -> !existingSet.contains(row)).collect(Collectors.toList());
 
 		for (T row : toRemove) {
+			if (!myEntityManager.contains(row)) {
+				continue;
+			}
 			myEntityManager.remove(row);
 		}
 		for (T row : toAdd) {
