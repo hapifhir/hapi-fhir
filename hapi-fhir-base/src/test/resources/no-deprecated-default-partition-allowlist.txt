@@ -12,15 +12,11 @@
 #
 # Files in ca.uhn.fhir.jpa.migrate are restricted by CLAUDE.md and tracked
 # in Stage R (owned by the user).
-hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/BaseHapiFhirResourceDao.java 1
+#
+# The remaining non-migrate entries are calls inside @Deprecated enclosing
+# methods/constructors that are themselves slated for removal; they are left in
+# place until Stage 8 removes the deprecated defaultPartition() overloads.
 hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/migrate/tasks/HapiFhirJpaMigrationTasks.java 11
-hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/search/builder/SearchBuilder.java 1
-hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/term/TermConceptClientMappingSvcImpl.java 2
 hapi-fhir-jpaserver-model/src/main/java/ca/uhn/fhir/jpa/model/entity/PartitionablePartitionId.java 1
 hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/cache/IResourceChangeListenerRegistry.java 1
-hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/extractor/ResourceIndexedSearchParams.java 1
-hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/searchparam/registry/JpaSearchParamCache.java 1
-hapi-fhir-jpaserver-subscription/src/main/java/ca/uhn/fhir/jpa/topic/SubscriptionTopicRegisteringListener.java 1
-hapi-fhir-storage-batch2-jobs/src/main/java/ca/uhn/fhir/batch2/jobs/imprt/ConsumeFilesStepV1.java 1
-hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/subscription/model/ResourceDeliveryMessage.java 1
 hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/subscription/model/ResourceModifiedMessage.java 1

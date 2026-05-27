@@ -2913,7 +2913,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			myIdHelperService.addResolvedPidToFhirIdAfterCommit(
 					entity.getPersistentId(),
 					entity.getPartitionId() == null
-							? RequestPartitionId.defaultPartition()
+							? myPartitionSettings.getDefaultRequestPartitionId()
 							: entity.getPartitionId().toPartitionId(),
 					entity.getResourceType(),
 					entity.getFhirId(),

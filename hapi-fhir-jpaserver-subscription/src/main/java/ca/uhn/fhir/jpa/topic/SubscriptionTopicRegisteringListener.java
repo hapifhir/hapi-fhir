@@ -131,7 +131,7 @@ public class SubscriptionTopicRegisteringListener implements IMessageListener<Re
 			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is
 			// enabled
 			// creates a corrupt default partition.  This resets it to a clean one.
-			payloadPartitionId = RequestPartitionId.defaultPartition();
+			payloadPartitionId = RequestPartitionId.fromPartitionId(getDefaultPartitionId());
 		}
 		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
 	}
