@@ -1024,6 +1024,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			version.setCodeSystemVersionId(UUID.randomUUID().toString());
 			version.setCodeSystemIntendedVersionId(theVersionId);
 			version.setCodeSystem(codeSystem);
+			version.setCodeSystemDisplayName(codeSystem.getName());
+
 			version = myCodeSystemVersionDao.saveAndFlush(version);
 			ourLog.info(
 					"Created new CodeSystemVersion[url={}, version={}] for writing with PID: {}",

@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -41,7 +40,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -54,7 +52,6 @@ import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LO
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
@@ -419,8 +416,6 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		logAllUriIndexes();
 		logAllTokenIndexes("version");
 		logAllConcepts();
-
-		// FIXME: make sure all CSVs have display name of LOINC
 
 		runCommonValidations(Lists.newArrayList(currentVer, nonCurrentVer));
 
