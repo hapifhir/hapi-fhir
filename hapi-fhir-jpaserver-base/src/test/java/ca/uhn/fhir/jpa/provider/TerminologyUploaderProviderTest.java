@@ -316,7 +316,7 @@ class TerminologyUploaderProviderTest {
 			// Verify
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("Don't know how to handle file: my-instance-id");
+			assertThat(responseString).contains("Don't know how to handle file: foo.txt");
 		}
 
 	}
