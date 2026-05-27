@@ -102,14 +102,20 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 			return;
 		}
 
+		/// Always put {@link #myTerminologyService} (TermReadSvcImpl) ahead of
+		/// {@link #myJpaValidationSupport} because it is able to massage unversioned
+		/// URLs and add a version when there are multiple versions available and
+		/// only one is active.
 		if (myJpaStorageSettings.isAllowDatabaseValidationOverride()) {
+			addValidationSupport(myTerminologyService);
 			addValidationSupport(myJpaValidationSupport);
 			addValidationSupport(myDefaultProfileValidationSupport);
 		} else {
 			addValidationSupport(myDefaultProfileValidationSupport);
+			addValidationSupport(myTerminologyService);
 			addValidationSupport(myJpaValidationSupport);
 		}
-		addValidationSupport(myTerminologyService);
+
 		addValidationSupport(
 				new SnapshotGeneratingValidationSupport(myFhirContext, myWorkerContextValidationSupportAdapter));
 		addValidationSupport(myInMemoryTerminologyServerValidationSupport);

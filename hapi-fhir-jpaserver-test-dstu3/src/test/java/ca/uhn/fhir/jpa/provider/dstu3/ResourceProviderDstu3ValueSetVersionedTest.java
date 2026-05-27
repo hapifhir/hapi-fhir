@@ -28,6 +28,7 @@ import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -120,6 +121,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		valueSet.setVersion("1");
 		valueSet.setId("ValueSet/vs1");
 		valueSet.getCompose().getInclude().get(0).setVersion("1");
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		myExtensionalVsId_v1 = persistSingleValueSet(valueSet, HttpVerb.POST);
 		myExtensionalVsIdOnResourceTable_v1 = JpaPid.fromId(myValueSetDao.readEntity(myExtensionalVsId_v1, null).getIdDt().getIdPartAsLong());
 
@@ -350,6 +352,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
+
+		logAllValueSets();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		Slice<TermValueSet> page = runInTransaction(()->myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED));

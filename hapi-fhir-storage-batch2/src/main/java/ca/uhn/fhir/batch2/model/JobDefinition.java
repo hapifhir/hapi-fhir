@@ -27,20 +27,18 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class JobDefinition<PT extends IModelJson> {
-	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int ID_MAX_LENGTH = 100;
 	public static final Set<StatusEnum> VALID_INITIAL_STATUSES = Set.of(StatusEnum.BUILDING, StatusEnum.QUEUED);
 
@@ -52,9 +50,9 @@ public class JobDefinition<PT extends IModelJson> {
 	private final String myJobDescription;
 	private final IJobParametersValidator<PT> myParametersValidator;
 	private final boolean myGatedExecution;
-	private final List<String> myStepIds;
 	private final IJobCompletionHandler<PT> myCompletionHandler;
 	private final IJobCompletionHandler<PT> myErrorHandler;
+	private final Map<String, Integer> myStepIdToStepIndex;
 
 	/**
 	 * Constructor
@@ -81,12 +79,17 @@ public class JobDefinition<PT extends IModelJson> {
 		myJobDefinitionVersion = theJobDefinitionVersion;
 		myJobDescription = theJobDescription;
 		mySteps = theSteps;
-		myStepIds = mySteps.stream().map(JobDefinitionStep::getStepId).collect(Collectors.toList());
 		myParametersType = theParametersType;
 		myParametersValidator = theParametersValidator;
 		myGatedExecution = theGatedExecution;
 		myCompletionHandler = theCompletionHandler;
 		myErrorHandler = theErrorHandler;
+
+		myStepIdToStepIndex = new HashMap<>();
+		for (int i = 0; i < mySteps.size(); i++) {
+			String stepId = mySteps.get(i).getStepId();
+			myStepIdToStepIndex.put(stepId, i);
+		}
 	}
 
 	@Nonnull
@@ -169,9 +172,9 @@ public class JobDefinition<PT extends IModelJson> {
 	}
 
 	public int getStepIndex(String theStepId) {
-		int retVal = myStepIds.indexOf(theStepId);
-		Validate.isTrue(retVal != -1);
-		return retVal;
+		Integer index = myStepIdToStepIndex.get(theStepId);
+		Validate.isTrue(index != null, "No step with ID %s", theStepId);
+		return index;
 	}
 
 	public static class Builder<PT extends IModelJson, NIT extends IModelJson> {
@@ -420,6 +423,7 @@ public class JobDefinition<PT extends IModelJson> {
 		}
 
 		/**
+		 * Enables gated execution mode.
 		 * If this is set, the framework will wait for all work chunks to be
 		 * processed for an individual step before moving on to beginning
 		 * processing on the next step. Otherwise, processing on subsequent
@@ -446,7 +450,41 @@ public class JobDefinition<PT extends IModelJson> {
 		 * </p>
 		 */
 		public Builder<PT, NIT> gatedExecution() {
-			myGatedExecution = true;
+			return gatedExecution(true);
+		}
+
+		/**
+		 * Enables or disables gated execution mode.
+		 * If this is set, the framework will wait for all work chunks to be
+		 * processed for an individual step before moving on to beginning
+		 * processing on the next step. Otherwise, processing on subsequent
+		 * steps may begin as soon as any data has been produced.
+		 * <p>
+		 * This is useful in a few cases:
+		 * <ul>
+		 *    <li>
+		 *       If there are potential constraint issues, e.g. data being
+		 *    	written by the third step depends on all data from the
+		 *    	second step already being written
+		 *    </li>
+		 *    <li>
+		 *       If multiple steps require expensive database queries, it may
+		 *       reduce the chances of timeouts to ensure that they are run
+		 *       discretely.
+		 *    </li>
+		 * </ul>
+		 * </p>
+		 * <p>
+		 * Setting this mode means the job may take longer, since it will
+		 * rely on a polling mechanism to determine that one step is
+		 * complete before beginning any processing for the next step.
+		 * </p>
+		 *
+		 * @param theGatedExecution Set to <code>true</code> if gated execution should be enabled, <code>false</code> if it should be disabled.
+		 * @since 8.12.0
+		 */
+		public Builder<PT, NIT> gatedExecution(boolean theGatedExecution) {
+			myGatedExecution = theGatedExecution;
 			return this;
 		}
 

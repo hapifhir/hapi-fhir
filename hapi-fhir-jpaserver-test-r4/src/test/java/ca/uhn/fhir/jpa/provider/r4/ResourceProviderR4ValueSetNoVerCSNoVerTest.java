@@ -783,6 +783,9 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		cs.addConcept().setCode("foo2").setDisplay("foo2");
 		myClient.update().resource(cs).execute();
 
+		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
+		logAllConcepts();
+
 		vs = new ValueSet();
 		vs.setId("ValueSet/VS179789");
 		vs.setUrl("http://bar");

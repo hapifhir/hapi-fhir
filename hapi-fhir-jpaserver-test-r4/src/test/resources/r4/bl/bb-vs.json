@@ -8,7 +8,7 @@
   "url": "https://bb/ValueSet/BBDemographicAgeUnit",
   "name": "BBDemographicAgeUnit",
   "title": "Babylon Demographic Age Unit",
-  "status": "draft",
+  "status": "active",
   "version": "20190731",
   "experimental": false,
   "description": "Age Unit",
