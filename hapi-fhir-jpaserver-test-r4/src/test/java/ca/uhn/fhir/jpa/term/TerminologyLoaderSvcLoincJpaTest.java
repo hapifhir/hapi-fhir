@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 	private TermLoaderSvcImpl mySvc;
@@ -198,6 +199,8 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			assertNotEquals(myTermCodeSystem.getCurrentVersion().getPid(), termCodeSystemVersion_268.getPid());
 		});
 
+		CodeSystem cs = (CodeSystem) myValidationSupport.fetchCodeSystem("http://loinc.org");
+		assertEquals("2.68", cs.getVersion());
 	}
 
 

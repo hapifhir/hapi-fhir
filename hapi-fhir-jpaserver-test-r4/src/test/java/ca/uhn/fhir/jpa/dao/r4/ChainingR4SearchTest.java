@@ -78,9 +78,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 	@Test
 	// Created by claude-sonnet-4-6
-	void testMultipleChainsOnSameResourceTypeReference_ReuseSingleJoin() {
+	void testMultipleChains_OnSingleValuedReference_ReuseSingleJoin() {
 		// Setup
-		createPatient(withId("P0"), withFamily("Smith"), withGiven("John"), withGender("male"));
+		createPatient(withId("P0"), withFamily("Smith"), withGiven("John"), withGender("male"));    // matches
 		createPatient(withId("P1"), withFamily("Jones"), withGiven("Jane"), withGender("female"));  // does not match
 		createPatient(withId("P2"), withFamily("Smith"), withGiven("Sarah"), withGender("female")); // partially matches
 		createCoverage(withId("C0"), withReference("beneficiary", "Patient/P0"));
@@ -102,12 +102,13 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		// Verify - only 1 HFJ_RES_LINK join is used (not one per chained param)
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		String querySql = selectQueries.get(0).getSql(false, false);
+		ourLog.debug("\n querySql: {}", querySql);
 		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(1);
 	}
 
 	@Test
 	// Created by claude-sonnet-4-6
-	void testMultipleQualifiedChainsOnMultiValuedReference_UseSeparateJoins() {
+	void testMultipleQualifiedChains_OnMultiValuedReference_UseSeparateJoins() {
 		// Setup
 		createPractitioner(withId("Prac1"), withFamily("Smith"));
 		createOrganization(withId("Org1"), withName("Lab"));
@@ -139,7 +140,35 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testMixedTypeOrGroupAndClause_UseSeparateJoinsRegardlessOfElementOrder() {
+	void testMultipleChainsWithSameResourceType_OnMultiValuedReference_UseSeparateJoins() {
+		createPractitioner(withId("Prac1"), withFamily("Smith"), withGender("male"));
+		createPractitioner(withId("Prac2"), withFamily("Jones"), withGender("female"));
+
+		createPatient(withId("PatA"),
+			withReference("generalPractitioner", "Practitioner/Prac1"),
+			withReference("generalPractitioner", "Practitioner/Prac2"));
+
+		createPatient(withId("PatB"),
+			withReference("generalPractitioner", "Practitioner/Prac1"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Patient.SP_GENERAL_PRACTITIONER, new ReferenceParam("family", "Smith"));
+		map.add(Patient.SP_GENERAL_PRACTITIONER, new ReferenceParam("gender", "female"));
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(map, newSrd());
+
+		// Only patA is returned — each filter satisfied independently by a different practitioner
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder("Patient/PatA");
+
+		// 2 HFJ_RES_LINK joins required: multi-valued reference cannot collapse to a single join
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(2);
+	}
+
+	@Test
+	void testMixedTypeOrGroupAndClause_OnMultiValuedReference_UseSeparateJoins() {
 		// Setup: DR1 has two Organization performers: Lab and Acme
 		createOrganization(withId("OrgLab"), withName("Lab"));
 		createOrganization(withId("OrgAcme"), withName("Acme"));

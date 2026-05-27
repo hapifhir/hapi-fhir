@@ -4,7 +4,7 @@
 	"url": "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc-canonical-valueset",
 	"version": "20220214",
 	"name": "NDC-Codes-Mental-Health-Canonical-VS",
-	"status": "draft",
+	"status": "active",
 	"experimental": true,
 	"date": "2022-02-14",
 	"compose": {

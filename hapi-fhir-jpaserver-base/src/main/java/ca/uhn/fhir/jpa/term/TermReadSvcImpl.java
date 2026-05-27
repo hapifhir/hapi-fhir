@@ -178,6 +178,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.entity.TermConceptPropertyBinder.CONCEPT_PROPERTY_PREFIX_NAME;
+import static ca.uhn.fhir.jpa.term.TermReadSvcUtil.isLoincUnversionedValueSet;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 import static java.lang.String.join;
 import static java.util.stream.Collectors.joining;
@@ -203,9 +204,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private static final int SECONDS_IN_MINUTE = 60;
 	private static final int INDEXED_ROOTS_LOGGING_COUNT = 50_000;
 	private static Runnable myInvokeOnNextCallForUnitTest;
-
-	@Autowired
-	private JpaStorageSettings myJpaStorageSettings;
 
 	private static boolean ourForceDisableHibernateSearchForUnitTest;
 
@@ -551,7 +549,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		accumulator.setTimestamp(new Date());
 		accumulator.setOffset(offset);
 
-		if (theExpansionOptions != null && isHibernateSearchEnabled()) {
+		if (theExpansionOptions != null) {
 			accumulator.addParameter().setName("offset").setValue(new IntegerType(offset));
 			accumulator.addParameter().setName("count").setValue(new IntegerType(count));
 		}
@@ -1913,14 +1911,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			boolean theAdd) {
 		ourLog.trace("Hibernate search is not enabled");
 
-		if (theValueSetCodeAccumulator instanceof ValueSetExpansionComponentWithConceptAccumulator) {
-			Validate.isTrue(
-					((ValueSetExpansionComponentWithConceptAccumulator) theValueSetCodeAccumulator)
-							.getParameter()
-							.isEmpty(),
-					"Can not expand ValueSet with parameters - Hibernate Search is not enabled on this server.");
-		}
-
 		Validate.isTrue(
 				isNotBlank(theSystem),
 				"Can not expand ValueSet without explicit system - Hibernate Search is not enabled on this server.");
@@ -2640,7 +2630,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	private boolean isNotSafeToPreExpandValueSets() {
-		return myDeferredStorageSvc != null && !myDeferredStorageSvc.isStorageQueueEmpty(true);
+		return myDeferredStorageSvc != null && !myDeferredStorageSvc.isStorageQueueEmpty(false);
 	}
 
 	private Optional<TermValueSet> getNextTermValueSetNotExpanded() {
@@ -2656,8 +2646,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Override
-	@Transactional
 	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
+		HapiTransactionService.requireTransaction();
+
 		// If we're in a transaction, we need to flush now so that we can correctly detect
 		// duplicates if there are multiple ValueSets in the same TX with the same URL
 		// (which is an error, but we need to catch it). It'd be better to catch this by
@@ -2688,6 +2679,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		termValueSet.setUrl(theValueSet.getUrl());
 		termValueSet.setVersion(theValueSet.getVersion());
 		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
+
+		if (theValueSet.getStatus() != null && theValueSet.getStatus() != Enumerations.PublicationStatus.ACTIVE) {
+			termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_ACTIVE);
+		}
 
 		// Delete version being replaced
 		Optional<TermValueSet> deletedTrmValueSet = deleteValueSetForResource(theResourceTable);
@@ -3171,9 +3166,50 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return (ValueSet) valueSet;
 	}
 
+	@Nullable
+	@Override
+	public IBaseResource fetchCodeSystem(String theSystem) {
+		if (!theSystem.contains(OUR_PIPE_CHARACTER)) {
+			return myTxTemplate.execute(t -> {
+				String system = theSystem;
+				TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystem);
+				if (codeSystem != null && codeSystem.getCurrentVersion() != null) {
+					TermCodeSystemVersion currentVersion = codeSystem.getCurrentVersion();
+					String versionId = currentVersion.getCodeSystemVersionId();
+					if (isNotBlank(versionId)) {
+						system = system + "|" + versionId;
+					}
+				}
+				return provideJpaValidationSupport().fetchCodeSystem(system);
+			});
+		}
+
+		return provideJpaValidationSupport().fetchCodeSystem(theSystem);
+	}
+
 	@Override
 	public IBaseResource fetchValueSet(String theValueSetUrl) {
-		return provideJpaValidationSupport().fetchValueSet(theValueSetUrl);
+		String valueSetUrl = theValueSetUrl;
+
+		/*
+		 * ValueSets don't have a concept of the active version in the way that codesystems do
+		 * currently. So if someone supplies an unversioned URL, we'll generally just use the
+		 * first one we find, which is not optimal.
+		 *
+		 * But for loinc at least, we know the associated system so we can figure out what is
+		 * the appropriate version to use.
+		 */
+		if (isLoincUnversionedValueSet(valueSetUrl)) {
+			IBaseResource cs = fetchCodeSystem(LOINC_URI);
+			if (cs != null) {
+				Optional<String> versionOpt = myContext.newTerser().getSinglePrimitiveValue(cs, "version");
+				if (versionOpt.isPresent()) {
+					valueSetUrl = theValueSetUrl + "|" + versionOpt.get();
+				}
+			}
+		}
+
+		return provideJpaValidationSupport().fetchValueSet(valueSetUrl);
 	}
 
 	@Override
@@ -3294,7 +3330,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	 */
 	@Override
 	public Optional<TermValueSet> findCurrentTermValueSet(String theUrl) {
-		if (TermReadSvcUtil.isLoincUnversionedValueSet(theUrl)) {
+		if (isLoincUnversionedValueSet(theUrl)) {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theUrl);
 			if (vsIdOpt.isEmpty()) {
 				return Optional.empty();

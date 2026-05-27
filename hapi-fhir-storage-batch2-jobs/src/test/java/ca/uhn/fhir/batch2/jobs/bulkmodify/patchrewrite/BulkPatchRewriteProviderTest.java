@@ -41,6 +41,7 @@ import static ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchProviderTest.val
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_BULK_PATCH_REWRITE_STATUS;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -134,6 +135,8 @@ class BulkPatchRewriteProviderTest {
 		instance.setJobDefinitionId(BulkPatchRewriteJobAppCtx.JOB_ID);
 		instance.setErrorMessage(theParams.errorMessage());
 		instance.setReport(theParams.reportMessage());
+		instance.setCurrentGatedStepId("current-gated-step");
+		instance.setProgress(0.51);
 		when(myJobCoordinator.getInstance(eq("MY-INSTANCE-ID"))).thenReturn(instance);
 
 		// Test
