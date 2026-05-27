@@ -177,8 +177,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
 		}
-		// Query by scalar FK — the @ManyToOne may not be populated in this session
-		TermCodeSystemVersion csv = myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(cs.getPid());
+		TermCodeSystemVersion csv = myCodeSystemVersionDao.findCurrentVersionByCodeSystemPid(cs.getPid());
 		Validate.notNull(csv, "No current version for code system: %s", theSystem);
 
 		return addConceptsToCodeSystemVersion(cs, csv, theAdditions);

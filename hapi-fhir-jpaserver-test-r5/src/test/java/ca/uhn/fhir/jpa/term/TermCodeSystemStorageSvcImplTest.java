@@ -847,6 +847,40 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		});
 	}
 
+	// Created by claude-opus-4-6
+	@Test
+	void applyDeltaCodeSystemsAdd_afterVersionedCodeSystemCreatedViaStoreNewVersion_shouldAddConcepts() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		cs.setVersion("1.0");
+		cs.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ResourceTable table = (ResourceTable) myCodeSystemDao.create(cs, mySrd).getEntity();
+
+		TermCodeSystemVersion ver = new TermCodeSystemVersion();
+		ver.setResource(table);
+		ver.getConcepts().add(new TermConcept(ver, "EXISTING"));
+		mySvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "My System", "1.0", ver, table);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		CustomTerminologySet additions = new CustomTerminologySet();
+		additions.addRootConcept("CODE1", "Display 1");
+		additions.addRootConcept("CODE2", "Display 2");
+
+		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd(URL_MY_CODE_SYSTEM, additions);
+
+		assertThat(stats.getAddedConceptCount()).isEqualTo(2);
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri(URL_MY_CODE_SYSTEM);
+			assertThat(tcs).isNotNull();
+			assertThat(tcs.getCurrentVersion()).isNotNull();
+			long conceptCount = myTermConceptDao.countByCodeSystemVersion(tcs.getCurrentVersion().getPid());
+			assertThat(conceptCount).isEqualTo(3);
+		});
+		assertNoHHH000502Warnings();
+	}
+
 	private void assertNoHHH000502Warnings() {
 		assertThat(myHibernateLogCapture.getLogMessages().stream()
 			.filter(msg -> msg.contains(HHH000502))
