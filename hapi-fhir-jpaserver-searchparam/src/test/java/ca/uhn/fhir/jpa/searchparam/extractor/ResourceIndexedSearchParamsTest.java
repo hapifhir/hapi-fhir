@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -167,6 +169,7 @@ class ResourceIndexedSearchParamsTest {
 																		 boolean theIndexStorageOptimized,
 																		 boolean theShouldMatch) {
 		// setup
+		PartitionSettings partitionSettings = new PartitionSettings();
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setIndexStorageOptimized(theIndexStorageOptimized);
 		ResourceIndexedSearchParamString param = new ResourceIndexedSearchParamString();
@@ -175,9 +178,40 @@ class ResourceIndexedSearchParamsTest {
 		param.setHashIdentity(theHashIdentity);
 
 		// execute
-		boolean isMatch = ResourceIndexedSearchParams.isMatchSearchParam(storageSettings, "Patient", theExpectedParamName, param);
+		boolean isMatch = ResourceIndexedSearchParams.isMatchSearchParam(partitionSettings, storageSettings, "Patient", theExpectedParamName, param);
 
 		// validate
 		assertThat(isMatch).isEqualTo(theShouldMatch);
+	}
+
+	@Test
+	void testIsMatchSearchParam_withConfiguredDefaultPartition_usesConfiguredPartitionInHash() {
+		// setup: partitioning enabled with the partition mixed into search hashes, and a configured default partition
+		PartitionSettings partitionSettings = new PartitionSettings();
+		partitionSettings.setPartitioningEnabled(true);
+		partitionSettings.setIncludePartitionInSearchHashes(true);
+		partitionSettings.setDefaultPartitionId(7);
+
+		StorageSettings storageSettings = new StorageSettings();
+		storageSettings.setIndexStorageOptimized(true);
+
+		// a param whose stored hash identity was computed with the configured default partition (id 7) mixed in
+		long hashWithConfiguredDefault = SearchParamHash.hashSearchParam(
+				partitionSettings, partitionSettings.getDefaultRequestPartitionId(), "Patient", "name");
+		ResourceIndexedSearchParamString param = new ResourceIndexedSearchParamString();
+		param.setResourceType("Patient");
+		param.setParamName("name");
+		param.setHashIdentity(hashWithConfiguredDefault);
+
+		// execute + validate: isMatchSearchParam now honors the configured default partition, so the hashes match
+		assertThat(ResourceIndexedSearchParams.isMatchSearchParam(
+						partitionSettings, storageSettings, "Patient", "name", param))
+				.isTrue();
+
+		// and the configured-default hash genuinely differs from the unconfigured (null-partition) hash that the old
+		// hard-coded new PartitionSettings()/defaultPartition() would have produced
+		long hashWithDefaultSettings = SearchParamHash.hashSearchParam(
+				new PartitionSettings(), new PartitionSettings().getDefaultRequestPartitionId(), "Patient", "name");
+		assertThat(hashWithConfiguredDefault).isNotEqualTo(hashWithDefaultSettings);
 	}
 }
