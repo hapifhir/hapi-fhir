@@ -136,9 +136,15 @@ public interface ITermCodeSystemStorageSvc {
 	 * resource as the transport container for the concepts but does not actually store the
 	 * actual CodeSystem resource, it just adds the concepts to the terminology database. The
 	 * {@literal CodeSystem.url} and {@literal CodeSystem.version} properties must be populated.
+	 * <p>
+	 * Note that the concept parents {@link TermConcept#getParents()} are not populated by this
+	 * method. And must be explicitly populated by the caller.
+	 * </p>
 	 *
 	 * @since 8.12.0
 	 */
+	// TODO: Currently the only way to populate the getParents() is an inline step in the LOINC
+	// import job. We need to refactor that out.
 	UploadStatistics uploadCodeSystemConcepts(IBaseResource theCodeSystem);
 
 	/**

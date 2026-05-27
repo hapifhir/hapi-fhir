@@ -1019,7 +1019,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance(true, false);
 		assertThatThrownBy(() -> mySvc.fetchAttachmentById(instance.getInstanceId(), "FOO"))
 			.isInstanceOf(ResourceNotFoundException.class)
-			.hasMessageContaining("Attachment not found");
+			.hasMessageContaining("Attachment with ID [FOO] not found");
 	}
 
 	@Test
@@ -1027,7 +1027,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance(true, false);
 		assertThatThrownBy(() -> mySvc.fetchAttachmentByFilename(instance.getInstanceId(), "FOO"))
 			.isInstanceOf(ResourceNotFoundException.class)
-			.hasMessageContaining("Attachment not found");
+			.hasMessageContaining("Attachment with Filename [FOO] not found");
 	}
 
 	@ParameterizedTest

@@ -218,12 +218,14 @@ public class UrlUtilTest {
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
-		# Input URL    ,  Input Version , Expected URL   , Expected Version
-		http://foo     ,                , http://foo     , null
-		http://foo|    ,                , http://foo     , null
-		http://foo|123 ,                , http://foo     , 123
-		http://foo     , 123            , http://foo     , 123
-		http://foo|456 , 123            , http://foo     , FAIL
+		# Input URL      ,  Input Version , Expected URL   , Expected Version
+		http://foo       ,                , http://foo     , null
+		http://foo|      ,                , http://foo     , null
+		http://foo%7C    ,                , http://foo     , null
+		http://foo|123   ,                , http://foo     , 123
+		http://foo%7C123 ,                , http://foo     , 123
+		http://foo       , 123            , http://foo     , 123
+		http://foo|456   , 123            , http://foo     , FAIL
 		""")
 	void testParseCanonicalUrl(String theInputUrl, String theInputVersionId, String theExpectedUrl, String theExpectedVersionId) {
 		UrlUtil.CanonicalUrlParts parts;
