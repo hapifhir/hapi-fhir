@@ -16,7 +16,6 @@
 # The remaining non-migrate entries are calls inside @Deprecated enclosing
 # methods/constructors that are themselves slated for removal; they are left in
 # place until Stage 8 removes the deprecated defaultPartition() overloads.
-hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/migrate/tasks/HapiFhirJpaMigrationTasks.java 11
 hapi-fhir-jpaserver-model/src/main/java/ca/uhn/fhir/jpa/model/entity/PartitionablePartitionId.java 1
 hapi-fhir-jpaserver-searchparam/src/main/java/ca/uhn/fhir/jpa/cache/IResourceChangeListenerRegistry.java 1
 hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/subscription/model/ResourceModifiedMessage.java 1
