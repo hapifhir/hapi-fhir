@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7961
+title: "When fetching and expanding valuesets, the system will try to use the marked current version of the codesystem when possible. Additionally, offset and count parameters will be honoured for expansions even if hibernate search is not enabled."

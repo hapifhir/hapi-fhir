@@ -1911,15 +1911,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			boolean theAdd) {
 		ourLog.trace("Hibernate search is not enabled");
 
-		// FIXME: remove?
-		//		if (theValueSetCodeAccumulator instanceof ValueSetExpansionComponentWithConceptAccumulator) {
-		//			Validate.isTrue(
-		//					((ValueSetExpansionComponentWithConceptAccumulator) theValueSetCodeAccumulator)
-		//							.getParameter()
-		//							.isEmpty(),
-		//					"Can not expand ValueSet with parameters - Hibernate Search is not enabled on this server.");
-		//		}
-
 		Validate.isTrue(
 				isNotBlank(theSystem),
 				"Can not expand ValueSet without explicit system - Hibernate Search is not enabled on this server.");
@@ -3185,7 +3176,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				if (codeSystem != null && codeSystem.getCurrentVersion() != null) {
 					TermCodeSystemVersion currentVersion = codeSystem.getCurrentVersion();
 					String versionId = currentVersion.getCodeSystemVersionId();
-					system = system + "|" + versionId;
+                    if (isNotBlank(versionId)) {
+                        system = system + "|" + versionId;
+                    }
 				}
 				return provideJpaValidationSupport().fetchCodeSystem(system);
 			});
@@ -3208,9 +3201,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		 */
 		if (isLoincUnversionedValueSet(valueSetUrl)) {
 			IBaseResource cs = fetchCodeSystem(LOINC_URI);
-			Optional<String> versionOpt = myContext.newTerser().getSinglePrimitiveValue(cs, "version");
-			if (versionOpt.isPresent()) {
-				valueSetUrl = theValueSetUrl + "|" + versionOpt.get();
+			if (cs != null) {
+				Optional<String> versionOpt = myContext.newTerser().getSinglePrimitiveValue(cs, "version");
+				if (versionOpt.isPresent()) {
+					valueSetUrl = theValueSetUrl + "|" + versionOpt.get();
+				}
 			}
 		}
 
