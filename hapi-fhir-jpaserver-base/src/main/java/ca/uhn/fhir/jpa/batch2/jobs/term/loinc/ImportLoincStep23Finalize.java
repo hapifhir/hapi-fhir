@@ -40,9 +40,9 @@ import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
-public class ImportLoincStep22Finalize extends BaseImportTerminologyStep
+public class ImportLoincStep23Finalize extends BaseImportTerminologyStep
 		implements IReductionStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, ImportTerminologyResultJson> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep22Finalize.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep23Finalize.class);
 
 	private final TerminologyFileSetJson.RecordsAddedCounter myTotalRecordsAddedCounter =
 			new TerminologyFileSetJson.RecordsAddedCounter();
@@ -56,7 +56,7 @@ public class ImportLoincStep22Finalize extends BaseImportTerminologyStep
 	/**
 	 * Constructor
 	 */
-	public ImportLoincStep22Finalize(
+	public ImportLoincStep23Finalize(
 			@Nonnull DaoRegistry theDaoRegistry,
 			@Nonnull ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc,
 			@Nonnull IJobPersistence theJobPersistence,
@@ -291,7 +291,7 @@ public class ImportLoincStep22Finalize extends BaseImportTerminologyStep
 	}
 
 	@Override
-	public ImportLoincStep22Finalize newInstance() {
-		return new ImportLoincStep22Finalize(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
+	public ImportLoincStep23Finalize newInstance() {
+		return new ImportLoincStep23Finalize(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}
 }

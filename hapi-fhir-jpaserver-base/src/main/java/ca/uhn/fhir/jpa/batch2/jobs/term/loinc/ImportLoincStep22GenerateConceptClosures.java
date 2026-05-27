@@ -26,11 +26,11 @@ import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 
-public class ImportLoincStep21GenerateConceptClosures
+public class ImportLoincStep22GenerateConceptClosures
 		implements IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson>,
 				ITerminologyImportFileHandlerStep<
 						ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep21GenerateConceptClosures.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep22GenerateConceptClosures.class);
 
 	@Autowired
 	private ITermConceptDao myConceptDao;

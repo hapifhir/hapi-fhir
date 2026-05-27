@@ -20,10 +20,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep18CodingPropertiesTest extends BaseImportLoincStepTest {
+class ImportLoincStep19CodingPropertiesTest extends BaseImportLoincStepTest {
 
 	@InjectMocks
-	private ImportLoincStep18CodingProperties mySvc;
+	private ImportLoincStep19CodingProperties mySvc;
 
 	@Test
 	void testProcess() {

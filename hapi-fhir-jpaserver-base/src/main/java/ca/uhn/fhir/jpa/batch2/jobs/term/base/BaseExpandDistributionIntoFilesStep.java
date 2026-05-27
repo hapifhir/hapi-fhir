@@ -119,8 +119,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 								List<String> attachmentIds = fileHandlingTypeToAttachmentIds.get(fileHandlingType);
 								for (String attachmentId : attachmentIds) {
 									TerminologyFileSetJson data = newTerminologyFileSetJson();
-									data.setChunkForCurrentStep(
-											new TerminologyFileSetJson.Chunk(nextFileName, attachmentId));
+									data.setSourceFilename(nextFileName);
+									data.setAttachmentId(attachmentId);
 									theDataSink.acceptForFutureStep(processor.stepId(), data);
 								}
 								continue;
@@ -237,7 +237,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 							writeChunk(theJobInstanceId, headers, recordsBuffer, filename, startRow, endRow);
 
 					TerminologyFileSetJson data = newTerminologyFileSetJson();
-					data.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk(theZipInnerFilename, attachmentId));
+					data.setSourceFilename(theZipInnerFilename);
+					data.setAttachmentId(attachmentId);
 					theDataSink.acceptForFutureStep(theStepId, data);
 
 					recordsBuffer.clear();

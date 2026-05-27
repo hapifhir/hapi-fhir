@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -39,7 +38,7 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		String classpath = "loinc-ver/v269/AccessoryFiles/LoincRsnaRadiologyPlaybook/LoincRsnaRadiologyPlaybook.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-to-radlex-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
@@ -120,7 +119,7 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		String classpath = "loinc-ver/v269/AccessoryFiles/LoincRsnaRadiologyPlaybook/LoincRsnaRadiologyPlaybook.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-to-radlex-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));

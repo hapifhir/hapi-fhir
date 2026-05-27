@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 
-public class ImportLoincStep20ChunkConceptsForGeneratingClosure extends BaseImportTerminologyStep
+public class ImportLoincStep21ChunkConceptsForGeneratingClosure extends BaseImportTerminologyStep
 		implements IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson>,
 				ITerminologyImportFileHandlerStep<
 						ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {

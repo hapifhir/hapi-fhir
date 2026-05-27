@@ -28,9 +28,11 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * These properties are added in a specific handler which is involved after all TermConcepts
  * are created, because they require a 'display' value associated to other TermConcept (pointed by the 'code'
  * property value), which requires that concept to have been created.
+ *
+ * @see ImportLoincJobAppCtx#importLoincStep19CodingProperties()
  */
-public class ImportLoincStep18CodingProperties extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep18CodingProperties.class);
+public class ImportLoincStep19CodingProperties extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep19CodingProperties.class);
 
 	private static final String ASK_AT_ORDER_ENTRY_PROP_NAME = "AskAtOrderEntry";
 	private static final String ASSOCIATED_OBSERVATIONS_PROP_NAME = "AssociatedObservations";

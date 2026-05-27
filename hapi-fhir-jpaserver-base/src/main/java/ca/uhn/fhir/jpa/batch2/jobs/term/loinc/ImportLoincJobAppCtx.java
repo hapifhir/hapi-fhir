@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -26,68 +27,22 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * This file is the Batch2 Job Definition for the LOINC Import job.
+ * See the intividual step bean definitions, starting with {@link #importLoincStep1ExpandDistributionIntoFiles()}
+ * to see descriptions of how this job works.
+ */
 @Configuration
 public class ImportLoincJobAppCtx {
 
 	public static final String JOB_ID_IMPORT_TERM_LOINC = "IMPORT_TERM_LOINC";
 	public static final String STEP_ID_FINALIZE_IMPORT = "finalize-import";
 	public static final String STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION = "chunk-concepts-for-closure-generation";
-	/**
-	 * This is <b>NOT</b> the LOINC CodeSystem URI! It is just
-	 * the website URL to LOINC.
-	 */
-	public static final String LOINC_WEBSITE_URL = "https://loinc.org";
-
-	public static final String REGENSTRIEF_INSTITUTE_INC = "Regenstrief Institute, Inc.";
-	public static final String LOINC_IEEE_CM_ID = "loinc-to-ieee-11073-10101";
-	public static final String LOINC_IEEE_CM_URI = "http://loinc.org/cm/loinc-to-ieee-11073-10101";
-	public static final String LOINC_IEEE_CM_NAME = "LOINC/IEEE Device Code Mappings";
-	public static final String CM_COPYRIGHT =
-			"The LOINC/IEEE Medical Device Code Mapping Table contains content from IEEE (http://ieee.org), copyright © 2017 IEEE.";
-	public static final String CM_RSNA_COPYRIGHT =
-			"The LOINC/RSNA Radiology Playbook and the LOINC Part File contain content from RadLex® (http://rsna.org/RadLex.aspx), copyright © 2005-2017, The Radiological Society of North America, Inc., available at no cost under the license at http://www.rsna.org/uploadedFiles/RSNA/Content/Informatics/RadLex_License_Agreement_and_Terms_of_Use_V2_Final.pdf.";
-	public static final String LOINC_SCT_PART_MAP_ID = "loinc-parts-to-snomed-ct";
-	public static final String LOINC_SCT_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-snomed-ct";
-	public static final String LOINC_TERM_TO_RPID_PART_MAP_ID = "loinc-to-radlex";
-	public static final String LOINC_TERM_TO_RPID_PART_MAP_URI = "http://loinc.org/cm/loinc-to-radlex";
-	public static final String LOINC_TERM_TO_RPID_PART_MAP_NAME = "LOINC Terms to RadLex RPIDs";
-	public static final String LOINC_PART_TO_RID_PART_MAP_ID = "loinc-parts-to-radlex";
-	public static final String LOINC_PART_TO_RID_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-radlex";
-	public static final String LOINC_PART_TO_RID_PART_MAP_NAME = "LOINC Parts to RadLex RIDs";
-	public static final String LOINC_SCT_PART_MAP_NAME = "LOINC Part Map to SNOMED CT";
-	public static final String LOINC_RXNORM_PART_MAP_ID = "loinc-parts-to-rxnorm";
-	public static final String LOINC_RXNORM_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-rxnorm";
-	public static final String LOINC_RXNORM_PART_MAP_NAME = "LOINC Part Map to RxNORM";
-	public static final String LOINC_PUBCHEM_PART_MAP_ID = "loinc-parts-to-pubchem";
-	public static final String LOINC_PUBCHEM_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-pubchem";
-	public static final String LOINC_PUBCHEM_PART_MAP_NAME = "LOINC Part Map to PubChem";
-	public static final String CM_SCT_COPYRIGHT =
-			"The LOINC Part File, LOINC/SNOMED CT Expression Association and Map Sets File, RELMA database and associated search index files include SNOMED Clinical Terms (SNOMED CT®) which is used by permission of the International Health Terminology Standards Development Organisation (IHTSDO) under license. All rights are reserved. SNOMED CT® was originally created by The College of American Pathologists. “SNOMED” and “SNOMED CT” are registered trademarks of the IHTSDO. Use of SNOMED CT content is subject to the terms and conditions set forth in the SNOMED CT Affiliate License Agreement.  It is the responsibility of those implementing this product to ensure they are appropriately licensed and for more information on the license, including how to register as an Affiliate Licensee, please refer to http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org. Under the terms of the Affiliate License, use of SNOMED CT in countries that are not IHTSDO Members is subject to reporting and fee payment obligations. However, IHTSDO agrees to waive the requirements to report and pay fees for use of SNOMED CT content included in the LOINC Part Mapping and LOINC Term Associations for purposes that support or enable more effective use of LOINC. This material includes content from the US Edition to SNOMED CT, which is developed and maintained by the U.S. National Library of Medicine and is available to authorized UMLS Metathesaurus Licensees from the UTS Downloads site at https://uts.nlm.nih.gov.";
-	public static final String RSNA_CODES_VS_ID = "loinc-rsna-radiology-playbook";
-	public static final String RSNA_CODES_VS_URI = "http://loinc.org/vs/loinc-rsna-radiology-playbook";
-	public static final String RSNA_CODES_VS_NAME = "LOINC/RSNA Radiology Playbook";
-	public static final String RID_CS_URI = "http://www.radlex.org";
-	/**
-	 * About these being the same - Per Dan Vreeman:
-	 * We had some discussion about this, and both
-	 * RIDs (RadLex clinical terms) and RPIDs (Radlex Playbook Ids)
-	 * belong to the same "code system" since they will never collide.
-	 * The codesystem uri is "http://www.radlex.org". FYI, that's
-	 * now listed on the FHIR page:
-	 * https://www.hl7.org/fhir/terminologies-systems.html
-	 * -ja
-	 */
-	public static final String RPID_CS_URI = RID_CS_URI;
-
-	public static final String DOCUMENT_ONTOLOGY_CODES_VS_ID = "loinc-document-ontology";
-	public static final String DOCUMENT_ONTOLOGY_CODES_VS_URI = "http://loinc.org/vs/loinc-document-ontology";
-	public static final String DOCUMENT_ONTOLOGY_CODES_VS_NAME = "LOINC Document Ontology Codes";
-	public static final String ASK_AT_ORDER_ENTRY_PROP_NAME = "AskAtOrderEntry";
-	public static final String ASSOCIATED_OBSERVATIONS_PROP_NAME = "AssociatedObservations";
 
 	private final DaoRegistry myDaoRegistry;
 	private final ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
@@ -105,6 +60,10 @@ public class ImportLoincJobAppCtx {
 		this.myTxService = theTxService;
 	}
 
+	/**
+	 * See the intividual step bean definitions, starting with {@link #importLoincStep1ExpandDistributionIntoFiles()}
+	 * to see descriptions of how this job works.
+	 */
 	@Bean
 	public JobDefinition<ImportLoincJobParameters> importLoincJobDefinition() {
 		return JobDefinition.newBuilder()
@@ -129,12 +88,12 @@ public class ImportLoincJobAppCtx {
 						"import-hierarchy-concepts",
 						"Import LOINC hierarchy Concepts",
 						TerminologyFileSetJson.class,
-						importLoincStep4HandleHierarchyConcepts())
+						importLoincStep3HandleHierarchyConcepts())
 				.addIntermediateStep(
 						"import-hierarchy",
 						"Import LOINC hierarchy",
 						TerminologyFileSetJson.class,
-						importLoincStep3HandleHierarchy())
+						importLoincStep4HandleHierarchy())
 				.addIntermediateStep(
 						"import-answer-lists",
 						"Import LOINC answer lists",
@@ -194,47 +153,53 @@ public class ImportLoincJobAppCtx {
 						"import-part-file",
 						"Import LOINC Part File",
 						TerminologyFileSetJson.class,
-						importLoincStep16aPartFile())
+						importLoincStep16PartFile())
 				.addIntermediateStep(
 						"import-part-link-file",
 						"Import LOINC Part Link File",
 						TerminologyFileSetJson.class,
-						importLoincStep16PartLink())
+						importLoincStep17PartLink())
 				.addIntermediateStep(
 						"import-consumer-name",
 						"Import LOINC Consumer Names",
 						TerminologyFileSetJson.class,
-						importLoincStep17ConsumerName())
+						importLoincStep18ConsumerName())
 				.addIntermediateStep(
 						"import-coding-properties",
 						"Import LOINC Coding Properties",
 						TerminologyFileSetJson.class,
-						importLoincStep18CodingProperties())
+						importLoincStep19CodingProperties())
 				.addIntermediateStep(
 						"import-linguistic-variant",
 						"Import LOINC Linguistic Variants",
 						TerminologyFileSetJson.class,
-						importLoincStep19LinguisticVariant())
+						importLoincStep20LinguisticVariant())
 				.addIntermediateStep(
 						STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
 						"Create work chunks for calculating concept closures",
 						TerminologyFileSetJson.class,
-						importLoincStep20ChunkConceptsForClosureGeneration())
+						importLoincStep21ChunkConceptsForClosureGeneration())
 				.addIntermediateStep(
 						"generate-concept-closures",
 						"Generate concept closures",
 						TerminologyFileSetJson.class,
-						importLoincStep21GenerateConceptClosures())
+						importLoincStep22GenerateConceptClosures())
 				.addFinalReducerStep(
 						STEP_ID_FINALIZE_IMPORT,
 						"Finalize LOINC Import",
 						ImportTerminologyResultJson.class,
-						importLoincStep21Finalize())
+						importLoincStep23Finalize())
 				.build();
 	}
 
 	/**
-	 * Step 1: Expand LOINC distribution ZIP into files
+	 * Step 1: Expand LOINC distribution ZIP into files.
+	 * This step extracts the various CSV files from within the Loinc.zip distribution into fragments
+	 * (i.e. it splits each CSV we care about into smaller subsets for processing), then attaches
+	 * those fragments to the job as
+	 * {@link IJobPersistence#storeNewAttachment(String, AttachmentDetails) attachments}
+	 * so that they can be processed by the subsequent steps. Finally, it sends notifications to the
+	 * steps that follow about those fragments.
 	 */
 	@Bean
 	public ImportLoincStep1ExpandDistributionIntoFilesStep importLoincStep1ExpandDistributionIntoFiles() {
@@ -242,7 +207,8 @@ public class ImportLoincJobAppCtx {
 	}
 
 	/**
-	 * Step 2: Import LOINC concepts
+	 * Step 2: Import LOINC concepts.
+	 * This step processes the primary "Loinc.csv" file, which contains the main LOINC concepts.
 	 */
 	@Bean
 	public ImportLoincStep2HandleConcepts importLoincStep2Concepts() {
@@ -250,23 +216,30 @@ public class ImportLoincJobAppCtx {
 	}
 
 	/**
-	 * Step 3: Import LOINC hierarchy
+	 * Step 3: Import LOINC hierarchy Concepts
+	 * This step processes the "MultiAxialHierarchy.csv" file, which contains the LOINC hierarchy concepts.
+	 * In this step we are just loading the hierarchy concepts, not the hierarchies. The hierarchies have LOINC
+	 * concepts from {@link ImportLoincStep2HandleConcepts Step 2} as leaf nodes, but many of the parents are new
+	 * concepts defined by the hierarchy file itself.
+	 * We add the concepts first so that we don't get collisions when adding the parent/child links.
 	 */
 	@Bean
-	public ImportLoincStep3HandleHierarchy importLoincStep3HandleHierarchy() {
-		return new ImportLoincStep3HandleHierarchy();
+	public ImportLoincStep3HandleHierarchyConcepts importLoincStep3HandleHierarchyConcepts() {
+		return new ImportLoincStep3HandleHierarchyConcepts();
 	}
 
 	/**
-	 * Step 4: Import LOINC hierarchy Concepts
+	 * Step 4: Import LOINC hierarchy
+	 * This step processes the "MultiAxialHierarchy.csv" file, adding the actual parent/child links.
 	 */
 	@Bean
-	public ImportLoincStep4HandleHierarchyConcepts importLoincStep4HandleHierarchyConcepts() {
-		return new ImportLoincStep4HandleHierarchyConcepts();
+	public ImportLoincStep4HandleHierarchy importLoincStep4HandleHierarchy() {
+		return new ImportLoincStep4HandleHierarchy();
 	}
 
 	/**
 	 * Step 5: Import LOINC answer lists
+	 * This step creates LOINC "Answer List" ValueSets.
 	 */
 	@Bean
 	public ImportLoincStep5HandleAnswerLists importLoincStep5AnswerLists() {
@@ -275,6 +248,7 @@ public class ImportLoincJobAppCtx {
 
 	/**
 	 * Step 6: Import LOINC answer list links
+	 * This step adds properties to LOINC concepts that associate them with specific answer lists.
 	 */
 	@Bean
 	public ImportLoincStep6HandleAnswerListLinks importLoincStep6AnswerListLinks() {
@@ -283,6 +257,7 @@ public class ImportLoincJobAppCtx {
 
 	/**
 	 * Step 7: Import RSNA Playbook
+	 * This step adds ConceptMap mappings between LOINC concepts and the RadLex codesystem
 	 */
 	@Bean
 	public ImportLoincStep7HandleRsnaPlaybook importLoincStep7RsnaPlaybook() {
@@ -291,6 +266,7 @@ public class ImportLoincJobAppCtx {
 
 	/**
 	 * Step 8: Import Part-Related Code Mappings
+	 * This step adds ConceptMap mappings between LOINC concepts and a few other codesystems.
 	 */
 	@Bean
 	public ImportLoincStep8HandlePartRelatedCodeMapping importLoincStep8PartRelatedCodeMapping() {
@@ -299,6 +275,8 @@ public class ImportLoincJobAppCtx {
 
 	/**
 	 * Step 9: Import Document Ontology
+	 * This step creates ValueSets and adds properties to some LOINC concepts relating to the
+	 * LOINC Document Ontology.
 	 */
 	@Bean
 	public ImportLoincStep9HandleDocumentOntology importLoincStep9HandleDocumentOntology() {
@@ -307,6 +285,7 @@ public class ImportLoincJobAppCtx {
 
 	/**
 	 * Step 10: Universal Lab Order Set
+	 * This step creates a ValueSet for the Universal Lab Order Set.
 	 */
 	@Bean
 	public ImportLoincStep10HandleUniversalLabOrderSet importLoincStep10HandleUniversalLabOrderSet() {
@@ -315,6 +294,7 @@ public class ImportLoincJobAppCtx {
 
 	/**
 	 * Step 11: IEEE Medical Device Code
+	 * This step adds ConceptMap mappings between LOINC concepts and the IEEE Medical Device Code system.
 	 */
 	@Bean
 	public ImportLoincStep11HandleIeeeMedicalDeviceCode importLoincStep11HandleIeeeMedicalDeviceCode() {
@@ -323,6 +303,7 @@ public class ImportLoincJobAppCtx {
 
 	/**
 	 * Step 12: Imaging Document Code
+	 * This step creates a ValueSet for the Imaging Document Code system.
 	 */
 	@Bean
 	public ImportLoincStep12ImagingDocumentCode importLoincStep12ImagingDocumentCode() {
@@ -331,6 +312,7 @@ public class ImportLoincJobAppCtx {
 
 	/**
 	 * Step 13: Group File
+	 * This step creates ValueSets for the LOINC Group File.
 	 */
 	@Bean
 	public ImportLoincStep13GroupFile importLoincStep13GroupFile() {
@@ -339,6 +321,7 @@ public class ImportLoincJobAppCtx {
 
 	/**
 	 * Step 14: Group Terms File
+	 * This step adds codes to the ValueSets created by {@link ImportLoincStep13GroupFile}
 	 */
 	@Bean
 	public ImportLoincStep14GroupTermsFile importLoincStep14GroupTermsFile() {
@@ -347,70 +330,100 @@ public class ImportLoincJobAppCtx {
 
 	/**
 	 * Step 15: Parent Group File
+	 * This step creates ValueSets for the LOINC Parent Group File.
 	 */
 	@Bean
 	public ImportLoincStep15ParentGroupFile importLoincStep15ParentGroupFile() {
 		return new ImportLoincStep15ParentGroupFile();
 	}
 
+	/**
+	 * Step 16: Part File
+	 * This step adds properties to specific LOINC concepts from the LOINC Part File.
+	 */
 	@Bean
-	public ImportLoincStep16PartFile importLoincStep16aPartFile() {
+	public ImportLoincStep16PartFile importLoincStep16PartFile() {
 		return new ImportLoincStep16PartFile();
 	}
 
 	/**
-	 * Step 16: Part Link
+	 * Step 17: Part Link
+	 * This step adds properties to specific LOINC concepts from the LOINC Part Link Files.
 	 */
 	@Bean
-	public ImportLoincStep16PartLink importLoincStep16PartLink() {
-		return new ImportLoincStep16PartLink();
+	public ImportLoincStep17PartLink importLoincStep17PartLink() {
+		return new ImportLoincStep17PartLink();
 	}
 
 	/**
-	 * Step 17: Consumer Name
+	 * Step 18: Consumer Name
+	 * This step adds properties to specific LOINC concepts from the LOINC Consumer Name File.
 	 */
 	@Bean
-	public ImportLoincStep17ConsumerName importLoincStep17ConsumerName() {
-		return new ImportLoincStep17ConsumerName();
+	public ImportLoincStep18ConsumerName importLoincStep18ConsumerName() {
+		return new ImportLoincStep18ConsumerName();
 	}
 
 	/**
-	 * Step 18: Coding Properties
+	 * Step 19: Coding Properties
+	 * This step adds properties to specific LOINC concepts from the LOINC Coding Properties File.
 	 */
 	@Bean
-	public ImportLoincStep18CodingProperties importLoincStep18CodingProperties() {
-		return new ImportLoincStep18CodingProperties();
+	public ImportLoincStep19CodingProperties importLoincStep19CodingProperties() {
+		return new ImportLoincStep19CodingProperties();
 	}
 
 	/**
-	 * Step 19: Linguistic Variant
+	 * Step 29: Linguistic Variant
+	 * This step adds additional designations to concepts from the LOINC Linguistic Variant File.
+	 * By default we don't add anything in this step, because these files are massive and add a long time
+	 * to process, and it's unlikely that most people want all possible linguistic variants imported.
+	 * Specific linguistic variants can be added via job properties.
 	 */
 	@Bean
-	public ImportLoincStep19LinguisticVariant importLoincStep19LinguisticVariant() {
-		return new ImportLoincStep19LinguisticVariant();
+	public ImportLoincStep20LinguisticVariant importLoincStep20LinguisticVariant() {
+		return new ImportLoincStep20LinguisticVariant();
 	}
 
 	/**
-	 * Step 20: Chunk Concepts for Closure Generation
+	 * Step 21: Chunk Concepts for Closure Generation
+	 * When importing properties, the {@link TermConcept#getParentPidsAsString()} property contains a closure of
+	 * all the parent concepts. We don't calculate it initially because we add hirarchy over multiple work chunks,
+	 * so instead we calculate it at the end. This step queries the database for the full set of concepts, and
+	 * creates work chunks for {@link #importLoincStep22GenerateConceptClosures()} to process.
 	 */
 	@Bean
-	public ImportLoincStep20ChunkConceptsForGeneratingClosure importLoincStep20ChunkConceptsForClosureGeneration() {
-		return new ImportLoincStep20ChunkConceptsForGeneratingClosure();
+	public ImportLoincStep21ChunkConceptsForGeneratingClosure importLoincStep21ChunkConceptsForClosureGeneration() {
+		return new ImportLoincStep21ChunkConceptsForGeneratingClosure();
 	}
 
 	/**
-	 * Step 21: Generate concept closures
+	 * Step 22: Generate concept closures
+	 * This step receives work chunks from {@link #importLoincStep21ChunkConceptsForClosureGeneration()},
+	 * and calculates the closure of parent concepts for each concept. The closure is a list of all parent
+	 * concept PIDs and is stored in {@link TermConcept#getParentPidsAsString()}.
 	 */
 	@Bean
-	public ImportLoincStep21GenerateConceptClosures importLoincStep21GenerateConceptClosures() {
-		return new ImportLoincStep21GenerateConceptClosures();
+	public ImportLoincStep22GenerateConceptClosures importLoincStep22GenerateConceptClosures() {
+		return new ImportLoincStep22GenerateConceptClosures();
 	}
 
 	/**
 	 * Final reducer step
+	 * This step has a few responsibilities:
+	 * <ul>
+	 *     <li>
+	 *         Any previous steps which created ValueSets have created them with status 'draft' so that
+	 *     	   they are not candidates for pre-expansion until we are done importing and updating concepts.
+	 *     	   This step moves them to 'active' status.
+	 *     </li>
+	 *     <li>
+	 *         Aggregates step outcomes and generates a report
+	 *     </li>
+	 * </ul>
 	 */
 	@Bean
-	public ImportLoincStep22Finalize importLoincStep21Finalize() {
-		return new ImportLoincStep22Finalize(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
+	public ImportLoincStep23Finalize importLoincStep23Finalize() {
+		return new ImportLoincStep23Finalize(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}
 }

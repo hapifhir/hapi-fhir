@@ -33,6 +33,9 @@ import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VE
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL;
 
+/**
+ * @see ImportLoincJobAppCtx#importLoincStep1ExpandDistributionIntoFiles()
+ */
 public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		extends BaseExpandDistributionIntoFilesStep<
 				ImportLoincJobParameters, ImportLoincStep1ExpandDistributionIntoFilesStep.MyContext> {

@@ -32,7 +32,7 @@ class ImportLoincStep8HandlePartRelatedCodeMappingTest extends BaseImportLoincSt
 		String classpath = "loinc-ver/v269/AccessoryFiles/PartFile/PartRelatedCodeMapping.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		when(myConceptMapDao.read(eq(new IdType("loinc-parts-to-snomed-ct-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-parts-to-pubchem-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("httpfoobar-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));

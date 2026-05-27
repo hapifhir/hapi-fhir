@@ -21,8 +21,11 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.L
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep3HandleHierarchy extends BaseImportLoincStep<ImportLoincStep3HandleHierarchy.MyContext> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep3HandleHierarchy.class);
+/**
+ * @see ImportLoincJobAppCtx#importLoincStep4HandleHierarchy()
+ */
+public class ImportLoincStep4HandleHierarchy extends BaseImportLoincStep<ImportLoincStep4HandleHierarchy.MyContext> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep4HandleHierarchy.class);
 
 	@Override
 	protected MyContext newContextObject(

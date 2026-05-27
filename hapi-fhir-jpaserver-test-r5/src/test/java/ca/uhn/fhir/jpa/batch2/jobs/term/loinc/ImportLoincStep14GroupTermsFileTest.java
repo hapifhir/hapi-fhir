@@ -34,7 +34,7 @@ class ImportLoincStep14GroupTermsFileTest extends BaseImportLoincStepTest{
 		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/GroupLoincTerms.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		mockDaoRegistryValueSet();
 		mockDaoRegistryConceptMap();

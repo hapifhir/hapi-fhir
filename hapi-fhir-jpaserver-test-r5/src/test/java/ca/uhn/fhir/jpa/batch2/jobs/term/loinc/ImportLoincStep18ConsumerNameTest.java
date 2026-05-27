@@ -16,10 +16,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep17ConsumerNameTest extends BaseImportLoincStepTest {
+class ImportLoincStep18ConsumerNameTest extends BaseImportLoincStepTest {
 
 	@InjectMocks
-	private ImportLoincStep17ConsumerName mySvc;
+	private ImportLoincStep18ConsumerName mySvc;
 
 
 	@Test

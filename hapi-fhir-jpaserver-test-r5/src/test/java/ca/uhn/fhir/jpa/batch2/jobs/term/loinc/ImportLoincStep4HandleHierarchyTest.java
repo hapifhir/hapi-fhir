@@ -16,10 +16,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ImportLoincStep3HandleHierarchyTest extends BaseImportLoincStepTest {
+class ImportLoincStep4HandleHierarchyTest extends BaseImportLoincStepTest {
 
 	@InjectMocks
-	private ImportLoincStep3HandleHierarchy mySvc;
+	private ImportLoincStep4HandleHierarchy mySvc;
 
 
 	@Test

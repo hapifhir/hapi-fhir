@@ -36,9 +36,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ImportLoincStep22FinalizeTest extends BaseImportLoincStepTest {
+public class ImportLoincStep23FinalizeTest extends BaseImportLoincStepTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep22FinalizeTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep23FinalizeTest.class);
 	@Mock
 	private IJobStepExecutionServices myStepExecutionSvc;
 	@Mock
@@ -46,7 +46,7 @@ public class ImportLoincStep22FinalizeTest extends BaseImportLoincStepTest {
 	@Mock
 	private IJobDataSink<ImportTerminologyResultJson> myDataSink;
 	@InjectMocks
-	private ImportLoincStep22Finalize myStep;
+	private ImportLoincStep23Finalize myStep;
 	@Captor
 	private ArgumentCaptor<ImportTerminologyResultJson> myDataCaptor;
 	@Captor

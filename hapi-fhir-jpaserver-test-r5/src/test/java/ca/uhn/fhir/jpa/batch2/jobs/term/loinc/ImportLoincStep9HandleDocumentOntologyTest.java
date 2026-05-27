@@ -1,14 +1,11 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.ValueSet;
-import org.htmlunit.corejs.javascript.ast.Loop;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,7 +35,7 @@ class ImportLoincStep9HandleDocumentOntologyTest extends BaseImportLoincStepTest
 		String classpath = "loinc-ver/v269/AccessoryFiles/DocumentOntology/DocumentOntology.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
 		mockDaoRegistryValueSet();

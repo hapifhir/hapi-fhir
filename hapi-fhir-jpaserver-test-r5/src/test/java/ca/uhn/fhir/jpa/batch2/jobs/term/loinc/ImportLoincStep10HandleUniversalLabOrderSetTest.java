@@ -30,7 +30,7 @@ class ImportLoincStep10HandleUniversalLabOrderSetTest extends BaseImportLoincSte
 		String classpath = "loinc-ver/v269/AccessoryFiles/LoincUniversalLabOrdersValueSet/LoincUniversalLabOrdersValueSet.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		mockDaoRegistryValueSet();
 		mockDaoRegistryConceptMap();

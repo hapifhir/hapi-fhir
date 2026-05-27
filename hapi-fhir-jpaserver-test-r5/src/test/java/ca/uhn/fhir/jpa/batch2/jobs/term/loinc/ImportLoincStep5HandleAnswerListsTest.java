@@ -38,7 +38,7 @@ class ImportLoincStep5HandleAnswerListsTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/AnswerFile/AnswerList.csv";
 		mockFetchAttachment(classpath);
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		mockFetchJobMetadataAttachment();
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
@@ -100,7 +100,7 @@ class ImportLoincStep5HandleAnswerListsTest extends BaseImportLoincStepTest {
 		// Setup
 		String classpath = "loinc-ver/v269/AccessoryFiles/AnswerFile/AnswerList.csv";
 		mockFetchAttachment(classpath);
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		mockFetchJobMetadataAttachment();
 		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());

@@ -13,6 +13,9 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
+/**
+ * @see ImportLoincJobAppCtx#importLoincStep12ImagingDocumentCode()
+ */
 public class ImportLoincStep12ImagingDocumentCode extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 
 	private static final String VS_ID_BASE = "loinc-imaging-document-codes";

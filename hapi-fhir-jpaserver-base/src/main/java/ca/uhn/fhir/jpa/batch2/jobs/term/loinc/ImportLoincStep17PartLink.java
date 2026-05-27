@@ -23,8 +23,11 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.L
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep16PartLink extends BaseImportLoincStep<ImportLoincStep16PartLink.MyBaseContext> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep16PartLink.class);
+/**
+ * @see ImportLoincJobAppCtx#importLoincStep17PartLink()
+ */
+public class ImportLoincStep17PartLink extends BaseImportLoincStep<ImportLoincStep17PartLink.MyBaseContext> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep17PartLink.class);
 
 	@Override
 	protected MyBaseContext newContextObject(

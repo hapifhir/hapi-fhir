@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
@@ -14,13 +13,24 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
+/**
+ * For terminology import jobs, this class is the data model that handles two
+ * jobs (TODO: this should be split up)
+ * <ul>
+ *     <li>
+ *         It conveys default about work chunks for the individual work steps
+ *         (ie. the attachment IDs of job attachments containing fragments of CSVs
+ *         that should be processed by the individual work steps)
+ *     </li>
+ *     <li>
+ *         It conveys processing statistics and IDs of resources to activate from the
+ *         processing steps to the final reducer step.
+ *     </li>
+ * </ul>
+ */
 public class TerminologyFileSetJson implements IModelJson {
-
-	@JsonProperty("chunkForCurrentStep")
-	private Chunk myChunkForCurrentStep;
 
 	@JsonProperty("resourcesToActivate")
 	private Set<String> myResourcesToActivate;
@@ -30,6 +40,12 @@ public class TerminologyFileSetJson implements IModelJson {
 
 	@JsonProperty("stepIdToRecordsAdded")
 	private Map<String, RecordsAddedCounter> myStepIdToRecordsAdded;
+
+	@JsonProperty("attachmentId")
+	private String myAttachmentId;
+
+	@JsonProperty("sourceFilename")
+	private String mySourceFilename;
 
 	/**
 	 * Constructor
@@ -56,22 +72,8 @@ public class TerminologyFileSetJson implements IModelJson {
 		myResourcesToActivate = theResourcesToActivate;
 	}
 
-	public Chunk getChunkForCurrentStep() {
-		return myChunkForCurrentStep;
-	}
-
-	public void setChunkForCurrentStep(Chunk theChunkForCurrentStep) {
-		myChunkForCurrentStep = theChunkForCurrentStep;
-	}
-
 	public void addResourceToActivate(String theResourceToActivate) {
 		getResourcesToActivate().add(theResourceToActivate);
-	}
-
-	public boolean isEmpty() {
-		return myChunkForCurrentStep == null
-				&& (myResourcesToActivate == null || myResourcesToActivate.isEmpty())
-				&& (myStepIdToRecordsAdded == null || myStepIdToRecordsAdded.isEmpty());
 	}
 
 	public Map<String, RecordsAddedCounter> getStepIdToRecordsAdded() {
@@ -85,82 +87,36 @@ public class TerminologyFileSetJson implements IModelJson {
 		return getStepIdToRecordsAdded().computeIfAbsent(theStepId, k -> new RecordsAddedCounter());
 	}
 
-	public static class Chunk implements IModelJson {
+	/**
+	 * The filename from the source archive that this chunk was extracted from.
+	 */
+	public String getSourceFilename() {
+		return mySourceFilename;
+	}
 
-		@JsonProperty("attachmentId")
-		private String myAttachmentId;
+	/**
+	 * The filename from the source archive that this chunk was extracted from.
+	 */
+	public void setSourceFilename(@Nonnull String theSourceFilename) {
+		Validate.notBlank(theSourceFilename, "theSourceFilename must not be null or blank");
+		mySourceFilename = theSourceFilename;
+	}
 
-		@JsonProperty("sourceFilename")
-		private String mySourceFilename;
+	/**
+	 * An ID for an {@link ca.uhn.fhir.batch2.api.IJobPersistence#fetchAttachmentById(String, String) attachment}
+	 * containing the data that should be processed by this step.
+	 */
+	public String getAttachmentId() {
+		return myAttachmentId;
+	}
 
-		/**
-		 * Constructor
-		 */
-		public Chunk() {
-			super();
-		}
-
-		/**
-		 * Constructor
-		 */
-		public Chunk(String theSourceFilename, String theAttachmentId) {
-			setSourceFilename(theSourceFilename);
-			setAttachmentId(theAttachmentId);
-		}
-
-		@Override
-		public boolean equals(Object theO) {
-			if (!(theO instanceof Chunk chunk)) {
-				return false;
-			}
-			return Objects.equals(myAttachmentId, chunk.myAttachmentId)
-					&& Objects.equals(mySourceFilename, chunk.mySourceFilename);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(myAttachmentId, mySourceFilename);
-		}
-
-		@Override
-		public String toString() {
-			return new ToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE)
-					.append("sourceFilename", mySourceFilename)
-					.append("attachment", myAttachmentId)
-					.toString();
-		}
-
-		/**
-		 * The filename from the source archive that this chunk was extracted from.
-		 */
-		public String getSourceFilename() {
-			return mySourceFilename;
-		}
-
-		/**
-		 * The filename from the source archive that this chunk was extracted from.
-		 */
-		public void setSourceFilename(@Nonnull String theSourceFilename) {
-			Validate.notBlank(theSourceFilename, "theSourceFilename must not be null or blank");
-			mySourceFilename = theSourceFilename;
-		}
-
-		/**
-		 * An ID for an {@link ca.uhn.fhir.batch2.api.IJobPersistence#fetchAttachmentById(String, String) attachment}
-		 * containing the data that should be processed by this step.
-		 */
-		public String getAttachmentId() {
-			return myAttachmentId;
-		}
-
-		/**
-		 * An ID for an {@link ca.uhn.fhir.batch2.api.IJobPersistence#fetchAttachmentById(String, String) attachment}
-		 * containing the data that should be processed by this step.
-		 */
-		public void setAttachmentId(@Nonnull String theAttachmentId) {
-			Validate.notBlank(theAttachmentId, "theChunkAttachmentId must not be null or blank");
-			myAttachmentId = theAttachmentId;
-		}
+	/**
+	 * An ID for an {@link ca.uhn.fhir.batch2.api.IJobPersistence#fetchAttachmentById(String, String) attachment}
+	 * containing the data that should be processed by this step.
+	 */
+	public void setAttachmentId(@Nonnull String theAttachmentId) {
+		Validate.notBlank(theAttachmentId, "theChunkAttachmentId must not be null or blank");
+		myAttachmentId = theAttachmentId;
 	}
 
 	public static class RecordsAddedCounter implements IModelJson {

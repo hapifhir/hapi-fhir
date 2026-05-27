@@ -17,8 +17,11 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.L
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ImportLoincStep4HandleHierarchyConcepts
-		extends BaseImportLoincStep<ImportLoincStep4HandleHierarchyConcepts.MyContext> {
+/**
+ * @see ImportLoincJobAppCtx#importLoincStep3HandleHierarchyConcepts()
+ */
+public class ImportLoincStep3HandleHierarchyConcepts
+		extends BaseImportLoincStep<ImportLoincStep3HandleHierarchyConcepts.MyContext> {
 
 	@Override
 	protected MyContext newContextObject(

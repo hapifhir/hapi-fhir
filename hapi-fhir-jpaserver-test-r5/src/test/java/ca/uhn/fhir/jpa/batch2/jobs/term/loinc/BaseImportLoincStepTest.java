@@ -102,7 +102,8 @@ abstract class BaseImportLoincStepTest {
 		TerminologyFileSetJson importLoincFileSetJson = newData();
 
 		if (classpath != null) {
-			importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk(classpath, "my-chunk-attachment-id"));
+			importLoincFileSetJson.setSourceFilename(classpath);
+			importLoincFileSetJson.setAttachmentId("my-chunk-attachment-id");
 		}
 
 		return new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
@@ -121,7 +122,7 @@ abstract class BaseImportLoincStepTest {
 		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 	}
 
-	void mockFetchPropertiesFileAttachnemtNotFound() {
+	void mockFetchPropertiesFileAttachmentNotFound() {
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode()))).thenThrow(new ResourceNotFoundException("Not found", null));
 	}
 
@@ -214,9 +215,8 @@ abstract class BaseImportLoincStepTest {
             String targetStep = theStepIdCaptor.getAllValues().get(i);
 			TerminologyFileSetJson data = theTerminologyFileSetCaptor.getAllValues().get(i);
 
-	        TerminologyFileSetJson.Chunk chunk = data.getChunkForCurrentStep();
-			if (chunk != null) {
-				emittedChunks.add(targetStep + " -> Chunk[" + chunk.getSourceFilename() + " | " + chunk.getAttachmentId() + "]");
+			if (data.getAttachmentId() != null) {
+				emittedChunks.add(targetStep + " -> Chunk[" + data.getSourceFilename() + " | " + data.getAttachmentId() + "]");
 			}
 
 			Set<String> resourcesToActivate = data.getResourcesToActivate();

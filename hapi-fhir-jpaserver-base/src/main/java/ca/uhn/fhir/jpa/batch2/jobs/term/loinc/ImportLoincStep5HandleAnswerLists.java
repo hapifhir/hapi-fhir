@@ -19,6 +19,9 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.L
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
+/**
+ * @see ImportLoincJobAppCtx#importLoincStep5AnswerLists()
+ */
 public class ImportLoincStep5HandleAnswerLists
 		extends BaseImportLoincStep<ImportLoincStep5HandleAnswerLists.MyContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep5HandleAnswerLists.class);

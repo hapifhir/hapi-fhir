@@ -13,6 +13,9 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
+/**
+ * @see ImportLoincJobAppCtx#importLoincStep14GroupTermsFile()
+ */
 public class ImportLoincStep14GroupTermsFile extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 
 	@Override

@@ -41,7 +41,7 @@ class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		mockDaoRegistryValueSet();
 		mockDaoRegistryConceptMap();
@@ -51,7 +51,8 @@ class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 		instance.setInstanceId("my-instance-id");
 
 		TerminologyFileSetJson importLoincFileSetJson = new TerminologyFileSetJson();
-		importLoincFileSetJson.setChunkForCurrentStep(new TerminologyFileSetJson.Chunk("file.csv", "my-chunk-attachment-id"));
+		importLoincFileSetJson.setSourceFilename("file.csv");
+		importLoincFileSetJson.setAttachmentId("my-chunk-attachment-id");
 
 		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> stepExecutionDetails = new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
@@ -101,7 +102,7 @@ class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 		when(myValueSetDao.read(eq(new IdType("LG1695-8-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		mockDaoRegistryValueSet();
@@ -159,7 +160,7 @@ class ImportLoincStep13GroupFileTest extends BaseImportLoincStepTest{
 		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/Group.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 		when(myValueSetDao.read(eq(new IdType("LG1695-8-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		mockDaoRegistryValueSet();

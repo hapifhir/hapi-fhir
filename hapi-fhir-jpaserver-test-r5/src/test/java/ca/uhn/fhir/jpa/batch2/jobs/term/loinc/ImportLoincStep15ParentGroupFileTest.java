@@ -35,7 +35,7 @@ class ImportLoincStep15ParentGroupFileTest extends BaseImportLoincStepTest{
 		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/ParentGroup.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		mockDaoRegistryValueSet();
 		mockDaoRegistryConceptMap();
@@ -74,7 +74,7 @@ class ImportLoincStep15ParentGroupFileTest extends BaseImportLoincStepTest{
 		String classpath = "loinc-ver/v269/AccessoryFiles/GroupFile/ParentGroup.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		mockDaoRegistryValueSet();
 		mockDaoRegistryConceptMap();
 		when(myValueSetDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());

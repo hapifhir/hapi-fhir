@@ -33,7 +33,7 @@ class ImportLoincStep11HandleIeeeMedicalDeviceCodeTest extends BaseImportLoincSt
 		String classpath = "loinc-ver/v269/AccessoryFiles/LoincIeeeMedicalDeviceCodeMappingTable/LoincIeeeMedicalDeviceCodeMappingTable.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		mockFetchPropertiesFileAttachnemtNotFound();
+		mockFetchPropertiesFileAttachmentNotFound();
 		when(myConceptMapDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
 		mockDaoRegistryConceptMap();
 		mockJobExecutionServices();

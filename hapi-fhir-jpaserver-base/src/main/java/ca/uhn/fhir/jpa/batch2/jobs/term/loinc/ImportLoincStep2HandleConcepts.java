@@ -23,6 +23,9 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
+/**
+ * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
+ */
 public class ImportLoincStep2HandleConcepts
 		extends BaseImportLoincStep<ImportLoincStep2HandleConcepts.CodeExtractionContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep2HandleConcepts.class);

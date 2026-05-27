@@ -17,11 +17,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.DOCUMENT_ONTOLOGY_CODES_VS_ID;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.DOCUMENT_ONTOLOGY_CODES_VS_NAME;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.DOCUMENT_ONTOLOGY_CODES_VS_URI;
 import static org.apache.commons.lang3.StringUtils.trim;
 
+/**
+ * @see ImportLoincJobAppCtx#importLoincStep9HandleDocumentOntology()
+ */
 public class ImportLoincStep9HandleDocumentOntology
 		extends BaseImportLoincStep<ImportLoincStep9HandleDocumentOntology.MyBaseContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep9HandleDocumentOntology.class);
