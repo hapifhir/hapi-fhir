@@ -127,7 +127,13 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		}
 	}
 
+	/**
+	 * @return the partition this message targets, or {@code null} if the producer/deserializer has not populated it.
+	 * A {@code null} value is resolved to the configured default partition downstream (e.g. when set on a
+	 * {@link ca.uhn.fhir.rest.api.server.SystemRequestDetails}).
+	 */
 	@Override
+	@Nullable
 	public RequestPartitionId getPartitionId() {
 		return myPartitionId;
 	}
