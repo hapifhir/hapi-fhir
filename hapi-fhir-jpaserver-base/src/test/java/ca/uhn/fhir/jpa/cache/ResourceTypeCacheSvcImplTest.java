@@ -2,14 +2,11 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTypeEntity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,13 +44,6 @@ class 	ResourceTypeCacheSvcImplTest {
 
 	@Spy
 	MemoryCacheService myMemoryCacheService = new MemoryCacheService(new JpaStorageSettings());
-
-	@BeforeEach
-	void before() {
-		// myTransactionService is constructed outside Spring, so its @Autowired PartitionSettings is null.
-		// withSystemRequestOnDefaultPartition() now reads it, so supply a default instance.
-		((HapiTransactionService) myTransactionService).setPartitionSettingsForUnitTest(new PartitionSettings());
-	}
 
 	@Test
 	void testInitResourceTypes() {
