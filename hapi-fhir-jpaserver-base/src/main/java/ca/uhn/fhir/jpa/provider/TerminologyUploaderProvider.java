@@ -71,6 +71,7 @@ import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB;
 import static ca.uhn.fhir.rest.server.RestfulServerUtils.createFullyQualifiedUrlFromRelativeUrl;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValueOrEmpty;
@@ -195,7 +196,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					theRequestDetails, "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE));
 			description.append(" operation, and then start the job using the ");
 			description.append(createFullyQualifiedUrlFromRelativeUrl(
-					theRequestDetails, "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB));
+					theRequestDetails, "CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB));
 			description.append(" operation.");
 
 			IBaseParameters response = ParametersUtil.newInstance(getContext());
@@ -242,7 +243,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 							inputStream, AttachmentContentTypeEnum.PROPERTIES, FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
 				} else {
 					throw new InvalidRequestException(
-							Msg.code(2944) + "Don't know how to handle file: " + toStringValue(theFilename));
+							Msg.code(2953) + "Don't know how to handle file: " + toStringValue(theFilename));
 				}
 
 				String instanceId = jobInstance.getInstanceId();
@@ -278,7 +279,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	 */
 	@Operation(
 			typeName = "CodeSystem",
-			name = JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
+			name = OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
 			manualResponse = true,
 			idempotent = false)
 	public void uploadTerminologyStartJob(
@@ -288,7 +289,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			throws IOException {
 
 		ServletRequestUtil.validatePreferAsyncHeader(
-				theRequestDetails, JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
+				theRequestDetails, OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
 
 		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
 		validateJobIsInBuildingStatus(jobInstance);
@@ -306,7 +307,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		String pollUrl = "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS + "?"
 				+ PARAM_JOB_INSTANCE_ID + "=" + jobInstance.getInstanceId();
 		AsyncRequestUtil.handleAsynchronousOperationStartRequest(
-				theRequestDetails, pollUrl, JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB, null);
+				theRequestDetails, pollUrl, OPERATION_UPLOAD_TERMINOLOGY_START_JOB, null);
 	}
 
 	/**
@@ -336,7 +337,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			AsyncRequestUtil.handleAsyncJobPollForStatusResponse(
 					theRequestDetails,
 					jobInstance,
-					JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
+					OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
 					completedDetailsProvider);
 
 		} else {
@@ -389,6 +390,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 			UploadStatistics stats =
 					switch (codeSystemUrl) {
+						case ITermLoaderSvc.LOINC_URI -> throw new InvalidRequestException(Msg.code(2954) + "Uploading the " + codeSystemUrl + " system now uses the " + OPERATION_UPLOAD_TERMINOLOGY_START_JOB + " operation, which accepts different parameters. Please see the documentation.");
 						case ITermLoaderSvc.ICD10_URI -> myTerminologyLoaderSvc.loadIcd10(
 								localFiles, theRequestDetails);
 						case ITermLoaderSvc.ICD10CM_URI -> myTerminologyLoaderSvc.loadIcd10cm(

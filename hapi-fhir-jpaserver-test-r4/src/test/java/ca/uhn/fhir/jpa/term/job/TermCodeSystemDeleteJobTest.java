@@ -83,7 +83,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 			termCodeSystemPidVect[0] = termCodeSystem.getPid();
 
 			assertEquals(2, myTermCodeSystemVersionDao.count());
-			assertEquals(58, myTermConceptDao.count());
+			assertEquals(81, myTermConceptDao.count());
 		});
 
 		TermCodeSystemDeleteJobParameters parameters = new TermCodeSystemDeleteJobParameters();
