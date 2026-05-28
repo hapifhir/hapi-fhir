@@ -7,9 +7,12 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -50,6 +53,12 @@ class JpaJobPersistenceImplTest {
 	@InjectMocks
 	JpaJobPersistenceImpl mySvc;
 
+	@BeforeEach
+	void before() {
+		// myTxManager is constructed outside Spring, so its @Autowired PartitionSettings is null.
+		// withSystemRequestOnDefaultPartition() now reads it, so supply a default instance.
+		((HapiTransactionService) myTxManager).setPartitionSettingsForUnitTest(new PartitionSettings());
+	}
 
 	@Test
 	void cancelSuccess() {
