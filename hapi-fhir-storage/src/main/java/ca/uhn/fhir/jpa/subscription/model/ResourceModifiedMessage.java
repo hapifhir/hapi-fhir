@@ -65,7 +65,10 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	public ResourceModifiedMessage(
 			FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		super(theFhirContext, theResource, theOperationType);
-		setPartitionId(RequestPartitionId.fromPartitionId(null));
+		// The partition is intentionally left null until a caller populates it. Pre-populating it with a hard-coded
+		// null-partition sentinel masked the absence of a partition and ignored any configured default partition
+		// (GL-8692). Callers should use a partition-aware constructor; a null partition resolves to the configured
+		// default downstream.
 	}
 
 	public ResourceModifiedMessage(
