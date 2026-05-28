@@ -25,7 +25,6 @@ import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -61,10 +60,8 @@ public class JobInstanceProgressCalculator {
 		StopWatch stopWatch = new StopWatch();
 		ourLog.trace("calculating progress: {}", theInstanceId);
 
-		// Phase 1: Collect statistics from work chunks
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
-		// Phase 2: Update the job instance with collected stats and determine status transitions
 		myJobPersistence.updateInstance(theInstanceId, currentInstance -> {
 			instanceProgress.updateInstance(currentInstance);
 
@@ -90,13 +87,9 @@ public class JobInstanceProgressCalculator {
 			// Log per-step throughput for operational visibility
 			logStepProgress(currentInstance, instanceProgress);
 
-			// Phase 3: Apply status transitions
 			if (instanceProgress.hasNewStatus()) {
 				myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
 			}
-
-			// Emit OpenTelemetry progress event
-			BatchJobOpenTelemetryUtils.addProgressEventToCurrentSpan(currentInstance, instanceProgress);
 
 			return true;
 		});
@@ -137,7 +130,7 @@ public class JobInstanceProgressCalculator {
 			instanceProgress.addChunk(next);
 		}
 
-		// Status calculation is now a separate phase from stats collection
+		// wipmb separate status update from stats collection in 6.8
 		instanceProgress.calculateNewStatus(lastStepIsReduction(instanceId));
 
 		return instanceProgress;

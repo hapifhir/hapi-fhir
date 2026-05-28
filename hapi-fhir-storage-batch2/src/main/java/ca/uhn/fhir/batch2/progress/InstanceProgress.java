@@ -77,11 +77,14 @@ public class InstanceProgress {
 	}
 
 	private void updateCompletionStatus(WorkChunk theChunk) {
-		// Update the status map first.
+		// Update the status map.
 		Map<WorkChunkStatusEnum, Integer> statusToCountMap =
-				myStepToStatusCountMap.getOrDefault(theChunk.getTargetStepId(), new HashMap<>());
-		statusToCountMap.put(theChunk.getStatus(), statusToCountMap.getOrDefault(theChunk.getStatus(), 0) + 1);
+				myStepToStatusCountMap.computeIfAbsent(theChunk.getTargetStepId(), k -> new HashMap<>());
+		statusToCountMap.merge(theChunk.getStatus(), 1, Integer::sum);
 
+		// Track instance-level counts and error messages.
+		// Note: this switch intentionally remains here (rather than deriving from StepProgressData)
+		// because it also captures error messages which are not tracked per-step.
 		switch (theChunk.getStatus()) {
 			case GATE_WAITING:
 			case READY:
