@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7829
+title: "When running the package install operation with `installDependencies=true`,
+if a package appears multiple times in the dependency hierarchy, it will only
+be processed once."
