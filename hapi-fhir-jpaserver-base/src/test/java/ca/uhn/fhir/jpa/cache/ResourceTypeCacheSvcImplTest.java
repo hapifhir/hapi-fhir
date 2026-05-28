@@ -32,13 +32,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class 	ResourceTypeCacheSvcImplTest {
+class ResourceTypeCacheSvcImplTest {
 	@InjectMocks
 	ResourceTypeCacheSvcImpl myResourceTypeCacheSvc;
 
 	@Mock
 	IResourceTypeDao myResourceTypeDao;
 
+	@SuppressWarnings("unused")
 	@Spy
 	IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 
