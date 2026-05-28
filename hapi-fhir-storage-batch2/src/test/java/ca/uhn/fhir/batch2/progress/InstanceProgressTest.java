@@ -92,7 +92,8 @@ class InstanceProgressTest {
 
 			WorkChunk chunk = new WorkChunk();
 			chunk.setStatus(WorkChunkStatusEnum.COMPLETED);
-			chunk.setTargetStepId(null);
+			// targetStepId is null by default — don't call setTargetStepId(null)
+			// as WorkChunkMetadata validates it is not blank
 			chunk.setRecordsProcessed(100);
 			progress.addChunk(chunk);
 
