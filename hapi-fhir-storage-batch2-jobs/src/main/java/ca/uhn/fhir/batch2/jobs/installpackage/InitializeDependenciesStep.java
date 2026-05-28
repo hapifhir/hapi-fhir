@@ -158,7 +158,7 @@ public class InitializeDependenciesStep
 	private static JobInstanceStartRequest buildStartRequest(
 			PackageUtils.DependentPackage theDependency, PackageInstallationJobParameters theParentJobParameters) {
 		PackageInstallationSpec dependencySpec =
-				new PackageInstallationSpec(theParentJobParameters.getInstallationSpec());
+				PackageInstallationSpec.copyOf(theParentJobParameters.getInstallationSpec());
 		dependencySpec.setName(theDependency.name());
 		dependencySpec.setVersion(theDependency.version());
 		dependencySpec.setPackageUrl(null);

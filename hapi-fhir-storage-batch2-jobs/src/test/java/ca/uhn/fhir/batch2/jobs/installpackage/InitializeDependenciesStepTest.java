@@ -76,6 +76,7 @@ public class InitializeDependenciesStepTest {
 		PackageInstallationSpec installationSpec = new PackageInstallationSpec();
 		installationSpec.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
 		installationSpec.setFetchDependencies(true);
+		installationSpec.setOverwriteContentNotPresentCodeSystems(true);
 
 		PackageInstallationJobParameters params = new PackageInstallationJobParameters();
 		params.setInstallationSpec(installationSpec);
@@ -110,11 +111,13 @@ public class InitializeDependenciesStepTest {
 
 		verify(myJobCoordinator, times(7)).startInstance(any(), myStartRequestCaptor.capture());
 		List<JobInstanceStartRequest> startRequests = myStartRequestCaptor.getAllValues();
-		List<PackageUtils.DependentPackage> dependencyNames = startRequests.stream()
+		List<PackageInstallationSpec> dependencySpecs = startRequests.stream()
 			.map(JobInstanceStartRequest::getParameters)
 			.map(t -> JsonUtil.deserialize(t, PackageInstallationJobParameters.class))
 			.map(PackageInstallationJobParameters::getInstallationSpec)
-			.map(t -> new PackageUtils.DependentPackage(t.getName(),t.getVersion()))
+			.toList();
+		List<PackageUtils.DependentPackage> dependencyNames = dependencySpecs.stream()
+			.map(t -> new PackageUtils.DependentPackage(t.getName(), t.getVersion()))
 			.toList();
 		assertThat(dependencyNames).containsExactlyInAnyOrder(
 			new PackageUtils.DependentPackage("hl7.fhir.r4.core", "4.0.1"),
@@ -130,6 +133,9 @@ public class InitializeDependenciesStepTest {
 			.map(t -> JsonUtil.deserialize(t, PackageInstallationJobParameters.class))
 			.map(PackageInstallationJobParameters::isDependencyJob)
 			.forEach(t -> assertThat(t).isTrue());
+
+		dependencySpecs.forEach(
+			t -> assertThat(t.isOverwriteContentNotPresentCodeSystems()).isTrue());
 	}
 
 	@Test
