@@ -78,7 +78,7 @@ public class JpaResourceExpungeServiceTest {
 		when(myResourceTable.getIdDt()).thenReturn(new IdDt());
 		when(myResourceTable.getId()).thenReturn(JpaPid.fromId(1L));
 		myService.expungeCurrentVersionOfResource(myRequestDetails, JpaPid.fromId(1L), new AtomicInteger(1));
-		verify(myResourceLinkDao).deleteAllLinksByResourcePid(1L);
+		verify(myResourceLinkDao).deleteAllLinksByResourcePid(JpaPid.fromId(1L));
 		verify(myService, never()).deleteAllSearchParams(any());
 	}
 

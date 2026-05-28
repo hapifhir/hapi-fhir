@@ -349,7 +349,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 				myResourceTagDao.deleteByResourceId(resource.getId());
 			}
 
-			myResourceLinkDao.deleteAllLinksByResourcePid(resource.getId().getId());
+			myResourceLinkDao.deleteAllLinksByResourcePid(resource.getId());
 			myResourceTableDao.deleteByPid(resource.getId());
 		} catch (DataIntegrityViolationException e) {
 			throw new PreconditionFailedException(Msg.code(2415)
