@@ -20,7 +20,10 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Properties;
 
 public class BaseTerminologyImportParameters implements IModelJson {
 
@@ -29,6 +32,17 @@ public class BaseTerminologyImportParameters implements IModelJson {
 
 	@JsonProperty("dontMakeCurrent")
 	private Boolean myDontMakeCurrent;
+
+	@JsonIgnore
+	private Properties myJobProperties;
+
+	public Properties getJobProperties() {
+		return myJobProperties;
+	}
+
+	public void setJobProperties(Properties theJobProperties) {
+		myJobProperties = theJobProperties;
+	}
 
 	public String getVersionId() {
 		return myVersionId;
