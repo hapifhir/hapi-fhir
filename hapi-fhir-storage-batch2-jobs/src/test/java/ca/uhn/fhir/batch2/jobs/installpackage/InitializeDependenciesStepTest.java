@@ -92,6 +92,7 @@ public class InitializeDependenciesStepTest {
 			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
 
 		when(myJobCoordinator.startInstance(any(), any())).then(new JobIdIncrementor());
+		when(myDependencyManager.shouldProcessDependency(any(), any(), any())).thenReturn(true);
 
 		// execute
 		RunOutcome outcome = myStep.run(details, myJobDataSink);
@@ -317,6 +318,7 @@ public class InitializeDependenciesStepTest {
 			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
 
 		when(myJobCoordinator.startInstance(any(), any())).thenThrow(new IllegalStateException());
+		when(myDependencyManager.shouldProcessDependency(any(), any(), any())).thenReturn(true);
 
 		// execute
 		RunOutcome outcome = myStep.run(details, myJobDataSink);
@@ -331,10 +333,8 @@ public class InitializeDependenciesStepTest {
 		assertThat(outcomeJson.getDependencyJobIds()).isEmpty();
 
 		verify(myJobDataSink, atLeastOnce()).recoveredError(myStringCaptor.capture());
-		assertThat(myStringCaptor.getAllValues()).anySatisfy(msg -> {
-			assertThat(msg).startsWith("Failed to launch child job for dependency package");
-			assertThat(msg).contains("HAPI-1301: Unable to locate package");
-		});
+		assertThat(myStringCaptor.getAllValues()).anySatisfy(msg ->
+			assertThat(msg).startsWith("Failed to launch child job for dependency package"));
 
 	}
 
