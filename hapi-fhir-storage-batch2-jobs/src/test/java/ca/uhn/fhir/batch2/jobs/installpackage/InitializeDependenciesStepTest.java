@@ -92,7 +92,6 @@ public class InitializeDependenciesStepTest {
 			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
 
 		when(myJobCoordinator.startInstance(any(), any())).then(new JobIdIncrementor());
-		when(myDependencyManager.shouldProcessDependency(any(), any(), any())).thenReturn(true);
 
 		// execute
 		RunOutcome outcome = myStep.run(details, myJobDataSink);
@@ -290,7 +289,9 @@ public class InitializeDependenciesStepTest {
 		assertThat(outcomeJson.getContents()).isEqualTo(encodedBytes);
 		assertThat(outcomeJson.getDependencyJobIds()).isEmpty();
 
-		verify(myJobDataSink).recoveredError("Failed to process dependencies for package hl7.fhir.us.core#8.0.1");
+		verify(myJobDataSink).recoveredError(myStringCaptor.capture());
+		assertThat(myStringCaptor.getValue())
+			.startsWith("HAPI-2955: Failed to process dependencies for package hl7.fhir.us.core#8.0.1: ");
 
 		verify(myJobCoordinator, never()).startInstance(any(), any());
 	}
@@ -316,7 +317,6 @@ public class InitializeDependenciesStepTest {
 			new StepExecutionDetails<>(params, packageContentsJson, ourTestInstance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
 
 		when(myJobCoordinator.startInstance(any(), any())).thenThrow(new IllegalStateException());
-		when(myDependencyManager.shouldProcessDependency(any(), any(), any())).thenReturn(true);
 
 		// execute
 		RunOutcome outcome = myStep.run(details, myJobDataSink);
@@ -331,7 +331,10 @@ public class InitializeDependenciesStepTest {
 		assertThat(outcomeJson.getDependencyJobIds()).isEmpty();
 
 		verify(myJobDataSink, atLeastOnce()).recoveredError(myStringCaptor.capture());
-		assertThat(myStringCaptor.getAllValues()).contains("Failed to launch child job for dependency package hl7.fhir.r4.core#4.0.1. Skipping this dependency.");
+		assertThat(myStringCaptor.getAllValues()).anySatisfy(msg -> {
+			assertThat(msg).startsWith("Failed to launch child job for dependency package");
+			assertThat(msg).contains("HAPI-1301: Unable to locate package");
+		});
 
 	}
 
