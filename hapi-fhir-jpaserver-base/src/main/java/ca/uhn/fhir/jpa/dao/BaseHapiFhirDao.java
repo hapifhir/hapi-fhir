@@ -960,7 +960,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					getSearchParamsMapFromTransaction(theTransactionDetails);
 			existingParams = existingSearchParams.get(entity);
 			if (existingParams == null) {
-				existingParams = ResourceIndexedSearchParams.withLists(entity);
+				existingParams =
+						ResourceIndexedSearchParams.withLists(entity, myStorageSettings.getTokenIndexStrategy());
 				existingSearchParams.put(entity, existingParams);
 
 				preResolveExistingReferences(theTransactionDetails, existingParams);

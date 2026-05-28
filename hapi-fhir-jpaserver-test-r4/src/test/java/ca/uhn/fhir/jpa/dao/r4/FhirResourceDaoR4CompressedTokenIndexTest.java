@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategyEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -323,6 +324,23 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 			assertThat(myTokenIdentifierDao.findByResourceId(pid)).hasSize(identifierBefore);
 			assertThat(myTokenCommonResDao.findByResourceId(pid)).hasSize(commonResBefore);
 		});
+	}
+
+	@Test
+	void create_doesNotQueryCompressedTokenTables() {
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://example.com/ids").setValue("MRN999");
+		p.setGender(AdministrativeGender.FEMALE);
+
+		myCaptureQueriesListener.clear();
+		myPatientDao.create(p, mySrd);
+
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		assertThat(selectQueries)
+				.extracting(q -> q.getSql(false, false).toUpperCase())
+				.as("CREATE must not issue SELECT against compressed token tables")
+				.noneMatch(sql -> sql.contains(ResourceIndexedSearchParamTokenCommonRes.HFJ_SPIDX2_TOKEN_COMMON_RES))
+				.noneMatch(sql -> sql.contains(ResourceIndexedSearchParamTokenIdentifier.HFJ_SPIDX2_TOKEN_IDENTIFIER));
 	}
 
 	// ===== Group E: Strategy semantics =====

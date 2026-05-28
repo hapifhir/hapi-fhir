@@ -25,8 +25,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.IResourceIdentifierCacheSvc;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenCommonResDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenIdentifierDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
@@ -89,12 +87,6 @@ public class DaoSearchParamSynchronizer {
 	@Autowired
 	private IResourceIdentifierCacheSvc myResourceIdentifierCacheSvc;
 
-	@Autowired
-	private IResourceIndexedSearchParamTokenCommonResDao myTokenCommonResDao;
-
-	@Autowired
-	private IResourceIndexedSearchParamTokenIdentifierDao myTokenIdentifierDao;
-
 	private UniqueIndexPreExistenceChecker myUniqueIndexPreExistenceChecker;
 
 	@PostConstruct
@@ -129,7 +121,7 @@ public class DaoSearchParamSynchronizer {
 					existingParams.myTokenParams,
 					null);
 		}
-		synchronizeTokenParamsToNewTables(theRequestDetails, theEntity, theParams, retVal);
+		synchronizeTokenParamsToNewTables(theRequestDetails, theEntity, theParams, existingParams, retVal);
 		synchronize(
 				theRequestDetails,
 				theTransactionDetails,
@@ -231,6 +223,7 @@ public class DaoSearchParamSynchronizer {
 			RequestDetails theRequestDetails,
 			ResourceTable theEntity,
 			ResourceIndexedSearchParams theParams,
+			ResourceIndexedSearchParams theExistingParams,
 			AddRemoveCount theAddRemoveCount) {
 		TokenIndexStrategyEnum tokenStrategy = myStorageSettings.getTokenIndexStrategy();
 		if (!tokenStrategy.writeToCompressedTokenTables()) {
@@ -266,11 +259,6 @@ public class DaoSearchParamSynchronizer {
 					|| myStorageSettings.getIdentifierTokenSearchParams().contains(token.getParamName())) {
 				newIdentifierEntities.add(TokenIndexEntityConverter.toIdentifier(token, theEntity, systemId));
 			} else {
-				// Common (global dedup) table is insert-only. Skip if a row with this hashSysAndValue
-				// is already managed in the current Hibernate session (e.g. another resource in the same
-				// FHIR transaction Bundle indexed the same token) — em.find() consults the session identity
-				// map first and only hits the DB on cold lookup. Cross-transaction races are still handled
-				// by the @SQLInsert dialect overrides (INSERT ... ON CONFLICT DO NOTHING / MERGE).
 				ResourceIndexedSearchParamTokenCommon commonRow = TokenIndexEntityConverter.toCommon(token, systemId);
 				if (myEntityManager.find(ResourceIndexedSearchParamTokenCommon.class, commonRow.getHashSystemAndValue())
 						== null) {
@@ -281,15 +269,20 @@ public class DaoSearchParamSynchronizer {
 		}
 
 		AddRemoveCount commonResDelta =
-				diffAndApply(myTokenCommonResDao.findByResourceId(theEntity.getId()), newCommonResEntities);
+				diffAndApply(new ArrayList<>(theExistingParams.myTokenCommonResEntities), newCommonResEntities);
 		AddRemoveCount identifierDelta =
-				diffAndApply(myTokenIdentifierDao.findByResourceId(theEntity.getId()), newIdentifierEntities);
+				diffAndApply(new ArrayList<>(theExistingParams.myTokenIdentifierEntities), newIdentifierEntities);
 
 		if (!tokenStrategy.writeToLegacyTokenTable()) {
 			// Only count when legacy didn't run; otherwise the legacy path already populated retVal.
 			theAddRemoveCount.addToAddCount(commonResDelta.getAddCount() + identifierDelta.getAddCount());
 			theAddRemoveCount.addToRemoveCount(commonResDelta.getRemoveCount() + identifierDelta.getRemoveCount());
 		}
+
+		theParams.myTokenCommonResEntities.clear();
+		theParams.myTokenCommonResEntities.addAll(newCommonResEntities);
+		theParams.myTokenIdentifierEntities.clear();
+		theParams.myTokenIdentifierEntities.addAll(newIdentifierEntities);
 	}
 
 	/**
