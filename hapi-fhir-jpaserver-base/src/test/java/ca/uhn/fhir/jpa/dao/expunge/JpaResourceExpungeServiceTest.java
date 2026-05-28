@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
@@ -68,12 +69,16 @@ public class JpaResourceExpungeServiceTest {
 	@Mock
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
 
+	@Mock
+	private IResourceLinkDao myResourceLinkDao;
+
 	@Test
-	public void testExpungeDoesNotDeleteAllSearchParams() {
+	public void testExpungeCurrentVersionOfResource_DeletesLinksNotSearchParams() {
 		when(myResourceTableDao.findById(any(JpaPid.class))).thenReturn(Optional.of(myResourceTable));
 		when(myResourceTable.getIdDt()).thenReturn(new IdDt());
-		when(myResourceTable.getId()).thenReturn(new JpaPid());
+		when(myResourceTable.getId()).thenReturn(JpaPid.fromId(1L));
 		myService.expungeCurrentVersionOfResource(myRequestDetails, JpaPid.fromId(1L), new AtomicInteger(1));
+		verify(myResourceLinkDao).deleteAllLinksByResourcePid(1L);
 		verify(myService, never()).deleteAllSearchParams(any());
 	}
 
