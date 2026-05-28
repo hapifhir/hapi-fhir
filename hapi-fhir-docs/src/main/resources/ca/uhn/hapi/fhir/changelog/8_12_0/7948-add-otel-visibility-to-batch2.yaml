@@ -1,6 +1,0 @@
----
-type: add
-issue: 7948
-title: "An enhancement was made to the Batch2 framework to provide better
-  OpenTelemetry (OTEL) visibility into the current state of processing
-  steps. Thanks to GitHub user @RohithVangalla1 for the contribution!"
