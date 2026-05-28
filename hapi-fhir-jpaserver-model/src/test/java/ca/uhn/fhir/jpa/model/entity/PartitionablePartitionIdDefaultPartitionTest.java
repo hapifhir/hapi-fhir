@@ -15,10 +15,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@code null} partition (GL-8692). The overload must honor a configured non-null default partition ID, while staying
  * behavior-preserving (partition {@code null}) when no default is configured.
  */
-public class PartitionablePartitionIdDefaultPartitionTest {
+class PartitionablePartitionIdDefaultPartitionTest {
 
 	@Test
-	public void toRequestPartitionId_nullInputWithConfiguredDefault_resolvesToConfiguredPartition() {
+	void toRequestPartitionId_nullInputWithConfiguredDefault_resolvesToConfiguredPartition() {
 		PartitionSettings settings = new PartitionSettings().setDefaultPartitionId(7);
 
 		RequestPartitionId result = PartitionablePartitionId.toRequestPartitionId(null, settings);
@@ -27,7 +27,7 @@ public class PartitionablePartitionIdDefaultPartitionTest {
 	}
 
 	@Test
-	public void toRequestPartitionId_nullInputWithDefaultSettings_resolvesToNullPartition() {
+	void toRequestPartitionId_nullInputWithDefaultSettings_resolvesToNullPartition() {
 		PartitionSettings settings = new PartitionSettings();
 
 		RequestPartitionId result = PartitionablePartitionId.toRequestPartitionId(null, settings);
@@ -36,7 +36,7 @@ public class PartitionablePartitionIdDefaultPartitionTest {
 	}
 
 	@Test
-	public void toRequestPartitionId_nonNullInput_passesThroughRegardlessOfSettings() {
+	void toRequestPartitionId_nonNullInput_passesThroughRegardlessOfSettings() {
 		PartitionSettings settings = new PartitionSettings().setDefaultPartitionId(7);
 		LocalDate partitionDate = LocalDate.of(2026, 5, 26);
 		PartitionablePartitionId input = PartitionablePartitionId.with(3, partitionDate);
