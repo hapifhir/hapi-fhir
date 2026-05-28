@@ -234,6 +234,22 @@ public final class ResourceIndexedSearchParams {
 		return myPopulatedResourceLinkParameters;
 	}
 
+	/**
+	 * @deprecated Use
+	 * {@link #matchParam(PartitionSettings, StorageSettings, String, String, RuntimeSearchParam, IQueryParameterType)},
+	 * which honors the configured default partition. This overload assumes the default (<code>null</code>) partition.
+	 */
+	@Deprecated(since = "8.12.0", forRemoval = true)
+	public boolean matchParam(
+			StorageSettings theStorageSettings,
+			String theResourceName,
+			String theParamName,
+			RuntimeSearchParam theParamDef,
+			IQueryParameterType theValue) {
+		return matchParam(
+				new PartitionSettings(), theStorageSettings, theResourceName, theParamName, theParamDef, theValue);
+	}
+
 	public boolean matchParam(
 			PartitionSettings thePartitionSettings,
 			StorageSettings theStorageSettings,
@@ -306,6 +322,21 @@ public final class ResourceIndexedSearchParams {
 		}
 
 		return false;
+	}
+
+	/**
+	 * @deprecated Use
+	 * {@link #isMatchSearchParam(PartitionSettings, StorageSettings, String, String, BaseResourceIndexedSearchParam)},
+	 * which honors the configured default partition. This overload assumes the default (<code>null</code>) partition.
+	 */
+	@Deprecated(since = "8.12.0", forRemoval = true)
+	public static boolean isMatchSearchParam(
+			StorageSettings theStorageSettings,
+			String theResourceName,
+			String theParamName,
+			BaseResourceIndexedSearchParam theIndexedSearchParam) {
+		return isMatchSearchParam(
+				new PartitionSettings(), theStorageSettings, theResourceName, theParamName, theIndexedSearchParam);
 	}
 
 	public static boolean isMatchSearchParam(

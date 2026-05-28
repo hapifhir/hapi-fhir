@@ -1,12 +1,15 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -213,5 +216,78 @@ class ResourceIndexedSearchParamsTest {
 		long hashWithDefaultSettings = SearchParamHash.hashSearchParam(
 				new PartitionSettings(), new PartitionSettings().getDefaultRequestPartitionId(), "Patient", "name");
 		assertThat(hashWithConfiguredDefault).isNotEqualTo(hashWithDefaultSettings);
+	}
+
+	@Test
+	void matchParam_deprecatedOverload_matchesByValueAsBefore() {
+		StorageSettings storageSettings = new StorageSettings();
+		RuntimeSearchParam nameParamDef = new RuntimeSearchParam(
+				null,
+				null,
+				"name",
+				"name",
+				"Patient.name",
+				RestSearchParameterTypeEnum.STRING,
+				Set.of(),
+				Set.of(),
+				RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
+				null,
+				null,
+				null);
+		// valueNormalized is upper-cased to mirror StringUtil.normalizeStringForSearchIndexing, so the query matches
+		myParams.myStringParams.add(new ResourceIndexedSearchParamString(
+				new PartitionSettings(), storageSettings, "Patient", "name", "SMITH", "Smith"));
+
+		// as before: a matching value matches, a non-matching value does not
+		assertThat(myParams.matchParam(storageSettings, "Patient", "name", nameParamDef, new StringParam("smith")))
+				.isTrue();
+		assertThat(myParams.matchParam(storageSettings, "Patient", "name", nameParamDef, new StringParam("jones")))
+				.isFalse();
+	}
+
+	@Test
+	void isMatchSearchParam_deprecatedOverload_assumesDefaultPartitionAsBefore() {
+		StorageSettings storageSettings = new StorageSettings();
+
+		// param-name branch (index storage not optimized): as before, matches case-insensitively by param name
+		ResourceIndexedSearchParamString byName = new ResourceIndexedSearchParamString();
+		byName.setResourceType("Patient");
+		byName.setParamName("name");
+		storageSettings.setIndexStorageOptimized(false);
+		assertThat(ResourceIndexedSearchParams.isMatchSearchParam(storageSettings, "Patient", "NAME", byName))
+				.isTrue();
+		assertThat(ResourceIndexedSearchParams.isMatchSearchParam(storageSettings, "Patient", "other", byName))
+				.isFalse();
+
+		// hash-identity branch (index storage optimized): as before, the deprecated overload assumes the
+		// default (null) partition when computing the hash, ignoring any configured non-null default partition
+		storageSettings.setIndexStorageOptimized(true);
+
+		// a param indexed under the default (null) partition matches
+		long defaultPartitionHash = SearchParamHash.hashSearchParam(
+				new PartitionSettings(), new PartitionSettings().getDefaultRequestPartitionId(), "Patient", "name");
+		ResourceIndexedSearchParamString indexedUnderDefault = new ResourceIndexedSearchParamString();
+		indexedUnderDefault.setResourceType("Patient");
+		indexedUnderDefault.setParamName("name");
+		indexedUnderDefault.setHashIdentity(defaultPartitionHash);
+		assertThat(ResourceIndexedSearchParams.isMatchSearchParam(
+						storageSettings, "Patient", "name", indexedUnderDefault))
+				.isTrue();
+
+		// but a param indexed under a configured non-default partition must NOT match: the deprecated overload
+		// cannot honor a configured default partition
+		PartitionSettings configuredDefault = new PartitionSettings();
+		configuredDefault.setPartitioningEnabled(true);
+		configuredDefault.setIncludePartitionInSearchHashes(true);
+		configuredDefault.setDefaultPartitionId(7);
+		long configuredPartitionHash = SearchParamHash.hashSearchParam(
+				configuredDefault, configuredDefault.getDefaultRequestPartitionId(), "Patient", "name");
+		ResourceIndexedSearchParamString indexedUnderPartition7 = new ResourceIndexedSearchParamString();
+		indexedUnderPartition7.setResourceType("Patient");
+		indexedUnderPartition7.setParamName("name");
+		indexedUnderPartition7.setHashIdentity(configuredPartitionHash);
+		assertThat(ResourceIndexedSearchParams.isMatchSearchParam(
+						storageSettings, "Patient", "name", indexedUnderPartition7))
+				.isFalse();
 	}
 }
