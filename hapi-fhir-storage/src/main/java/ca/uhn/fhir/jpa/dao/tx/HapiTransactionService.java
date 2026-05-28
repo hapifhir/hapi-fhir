@@ -735,8 +735,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 	 *
 	 * @deprecated This method binds a {@code null} partition ID to the thread, which assumes that
 	 * {@code null} means "the default partition". That assumption silently ignores any non-null configured
-	 * default partition ID. Use {@link #executeWithConfiguredDefaultPartitionInContext(ICallable)} instead,
-	 * which honors the configured default partition ID from {@link PartitionSettings}. Scheduled for removal.
+	 * default partition ID. Use the instance method {@link #executeWithConfiguredDefaultPartitionInContext(ICallable)}
+	 * instead, which honors the configured default partition ID from {@link PartitionSettings}. Scheduled for removal.
 	 */
 	@Deprecated(since = "8.12.0", forRemoval = true)
 	public static <T> T executeWithDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
@@ -751,6 +751,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	/**
 	 * Invokes the given callback with the configured default partition bound to the current thread.
+	 * @since 8.12.0
 	 */
 	public <T> T executeWithConfiguredDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
 		RequestPartitionId previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
