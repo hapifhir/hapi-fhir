@@ -1,4 +1,4 @@
 ---
 type: fix
 jira: SMILE-12000
-title: "Per-resource $expunge now removes all HFJ_RES_LINK rows referencing the expunged resource (as source or target) before deleting the HFJ_RESOURCE row, preventing FK_RESLINK_SOURCE and FK_RESLINK_TARGET constraint violations (HAPI-2415)."
+title: "Per-resource `$expunge` now removes all `HFJ_RES_LINK` rows referencing the expunged resource (as source or target) before deleting the `HFJ_RESOURCE` row, preventing `FK_RESLINK_SOURCE` and `FK_RESLINK_TARGET` constraint violations (HAPI-2415)."
