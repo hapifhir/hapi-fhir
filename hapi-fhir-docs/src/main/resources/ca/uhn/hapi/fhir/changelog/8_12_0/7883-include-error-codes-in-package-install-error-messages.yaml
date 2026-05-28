@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7968
+title: "Some error messages that occur during package installation (dependency failures and version conflict errors)
+  did not include the original exception message with HAPI error codes, making it harder to
+  trace and troubleshoot failures. This has been fixed."
