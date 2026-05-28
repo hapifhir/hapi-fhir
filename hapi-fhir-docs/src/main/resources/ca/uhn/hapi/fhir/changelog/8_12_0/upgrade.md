@@ -15,3 +15,14 @@ partition ID is honored.
 
 `IDefaultPartitionSettings` is implemented by `PartitionSettings`, so most call sites can pass the `PartitionSettings`
 instance they already hold.
+
+## Deprecation of `HapiTransactionService.executeWithDefaultPartitionInContext`
+
+The static method `HapiTransactionService.executeWithDefaultPartitionInContext(ICallable)` is now deprecated for
+removal. It binds a `null` partition ID to the thread, which assumes `null` means "the default partition" and
+silently ignores any non-null configured default partition ID. Its behavior is unchanged in this release so existing
+callers are not broken.
+
+Callers should migrate to the new instance method
+`HapiTransactionService.executeWithConfiguredDefaultPartitionInContext(ICallable)`, which honors the default partition
+ID configured in `PartitionSettings`.

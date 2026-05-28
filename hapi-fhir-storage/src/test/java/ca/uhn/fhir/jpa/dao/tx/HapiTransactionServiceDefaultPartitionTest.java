@@ -41,14 +41,14 @@ class HapiTransactionServiceDefaultPartitionTest {
 	}
 
 	@Test
-	void executeWithDefaultPartitionInContext_whenDefaultPartitionIdConfigured_threadLocalSeesConfiguredId() {
+	void executeWithConfiguredDefaultPartitionInContext_whenDefaultPartitionIdConfigured_threadLocalSeesConfiguredId() {
 		PartitionSettings settings = new PartitionSettings();
 		settings.setDefaultPartitionId(7);
 		HapiTransactionService svc = new HapiTransactionService();
 		svc.setPartitionSettingsForUnitTest(settings);
 
 		AtomicReference<RequestPartitionId> insideCallback = new AtomicReference<>();
-		svc.executeWithDefaultPartitionInContext(() -> {
+		svc.executeWithConfiguredDefaultPartitionInContext(() -> {
 			insideCallback.set(HapiTransactionService.getRequestPartitionAssociatedWithThread());
 			return null;
 		});
@@ -58,13 +58,13 @@ class HapiTransactionServiceDefaultPartitionTest {
 	}
 
 	@Test
-	void executeWithDefaultPartitionInContext_whenSettingsUnconfigured_threadLocalSeesNullPartition() {
+	void executeWithConfiguredDefaultPartitionInContext_whenSettingsUnconfigured_threadLocalSeesNullPartition() {
 		PartitionSettings settings = new PartitionSettings();
 		HapiTransactionService svc = new HapiTransactionService();
 		svc.setPartitionSettingsForUnitTest(settings);
 
 		AtomicReference<RequestPartitionId> insideCallback = new AtomicReference<>();
-		svc.executeWithDefaultPartitionInContext(() -> {
+		svc.executeWithConfiguredDefaultPartitionInContext(() -> {
 			insideCallback.set(HapiTransactionService.getRequestPartitionAssociatedWithThread());
 			return null;
 		});
@@ -74,15 +74,30 @@ class HapiTransactionServiceDefaultPartitionTest {
 	}
 
 	@Test
-	void executeWithDefaultPartitionInContext_restoresPreviousThreadLocalAfterCallback() {
+	void executeWithConfiguredDefaultPartitionInContext_restoresPreviousThreadLocalAfterCallback() {
 		PartitionSettings settings = new PartitionSettings();
 		settings.setDefaultPartitionId(7);
 		HapiTransactionService svc = new HapiTransactionService();
 		svc.setPartitionSettingsForUnitTest(settings);
 
 		assertThat(HapiTransactionService.getRequestPartitionAssociatedWithThread()).isNull();
-		svc.executeWithDefaultPartitionInContext(() -> null);
+		svc.executeWithConfiguredDefaultPartitionInContext(() -> null);
 		assertThat(HapiTransactionService.getRequestPartitionAssociatedWithThread()).isNull();
+	}
+
+	@Test
+	@SuppressWarnings("removal")
+	void executeWithDefaultPartitionInContext_deprecatedStatic_bindsNullPartitionIgnoringConfiguredId() {
+		// The deprecated static method preserves its original behaviour: it always binds a null partition
+		// to the thread, ignoring any configured default partition ID.
+		AtomicReference<RequestPartitionId> insideCallback = new AtomicReference<>();
+		HapiTransactionService.executeWithDefaultPartitionInContext(() -> {
+			insideCallback.set(HapiTransactionService.getRequestPartitionAssociatedWithThread());
+			return null;
+		});
+
+		assertThat(insideCallback.get()).isNotNull();
+		assertThat(insideCallback.get().getFirstPartitionIdOrNull()).isNull();
 	}
 
 	private static RequestPartitionId partitionIdOnSystemRequestDefault(PartitionSettings theSettings) {
