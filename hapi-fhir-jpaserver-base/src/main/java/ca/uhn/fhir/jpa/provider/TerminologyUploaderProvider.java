@@ -288,8 +288,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			ServletRequestDetails theRequestDetails)
 			throws IOException {
 
-		ServletRequestUtil.validatePreferAsyncHeader(
-				theRequestDetails, OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
+		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
 
 		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
 		validateJobIsInBuildingStatus(jobInstance);
@@ -335,10 +334,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				return new AsyncRequestUtil.CompletedJobPollResponse(null, List.of(report));
 			};
 			AsyncRequestUtil.handleAsyncJobPollForStatusResponse(
-					theRequestDetails,
-					jobInstance,
-					OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
-					completedDetailsProvider);
+					theRequestDetails, jobInstance, OPERATION_UPLOAD_TERMINOLOGY_START_JOB, completedDetailsProvider);
 
 		} else {
 			throw new InvalidRequestException(Msg.code(2948) + "Can't start job of this type");
@@ -390,7 +386,10 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 			UploadStatistics stats =
 					switch (codeSystemUrl) {
-						case ITermLoaderSvc.LOINC_URI -> throw new InvalidRequestException(Msg.code(2954) + "Uploading the " + codeSystemUrl + " system now uses the " + OPERATION_UPLOAD_TERMINOLOGY_START_JOB + " operation, which accepts different parameters. Please see the documentation.");
+						case ITermLoaderSvc.LOINC_URI -> throw new InvalidRequestException(
+								Msg.code(2954) + "Uploading the " + codeSystemUrl + " system now uses the "
+										+ OPERATION_UPLOAD_TERMINOLOGY_START_JOB
+										+ " operation, which accepts different parameters. Please see the documentation.");
 						case ITermLoaderSvc.ICD10_URI -> myTerminologyLoaderSvc.loadIcd10(
 								localFiles, theRequestDetails);
 						case ITermLoaderSvc.ICD10CM_URI -> myTerminologyLoaderSvc.loadIcd10cm(
