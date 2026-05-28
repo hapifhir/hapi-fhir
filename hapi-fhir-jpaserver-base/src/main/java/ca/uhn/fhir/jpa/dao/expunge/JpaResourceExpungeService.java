@@ -339,6 +339,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 				myResourceTagDao.deleteByResourceId(resource.getId());
 			}
 
+			myResourceLinkDao.deleteAllLinksByResourcePid(resource.getId().getId());
 			myResourceTableDao.deleteByPid(resource.getId());
 		} catch (DataIntegrityViolationException e) {
 			throw new PreconditionFailedException(Msg.code(2415)
@@ -388,16 +389,6 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		if (resource == null || resource.isHasLinks()) {
 			myResourceLinkDao.deleteByResourceId(theResourceId);
 		}
-		// Also delete any HFJ_RES_LINK rows where this resource is the TARGET of a
-		// link from some other resource. The {@code isHasLinks()} flag on the resource
-		// row only tracks SOURCE-side links (i.e. links this resource owns), so it
-		// cannot be used to gate this delete. Residual target-side rows arise when a
-		// still-alive resource has contained-resource indexing turned on and contains
-		// a child that references this resource; the subsequent DELETE FROM HFJ_RESOURCE
-		// (during $expunge or any cascade) would otherwise violate FK_RESLINK_TARGET.
-		// The delete-time call into this method (via BaseHapiFhirDao#updateResource with
-		// empty params) is what clears these rows ahead of expunge.
-		myResourceLinkDao.deleteByTargetResourceId(theResourceId);
 	}
 
 	private void expungeHistoricalVersionsOfId(
