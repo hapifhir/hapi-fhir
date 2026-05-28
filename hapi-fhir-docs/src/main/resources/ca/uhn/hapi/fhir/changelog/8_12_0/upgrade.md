@@ -9,7 +9,7 @@ partition ID is honored.
 
 | Removed method | Replacement |
 | -------------- | ----------- |
-| `RequestPartitionId.defaultPartition()` | `RequestPartitionId.defaultPartition(IDefaultPartitionSettings)` (or `IDefaultPartitionSettings.getDefaultRequestPartitionId()`) |
+| `RequestPartitionId.defaultPartition()` | `RequestPartitionId.defaultPartition(myPartitionSettings)` (or, `myPartitionSettings.getDefaultRequestPartitionId()`) |
 | `RequestPartitionId.defaultPartition(LocalDate)` | `RequestPartitionId.defaultPartition(IDefaultPartitionSettings)`, applying the partition date separately if required |
 | `PartitionablePartitionId.toRequestPartitionId(PartitionablePartitionId)` | `PartitionablePartitionId.toRequestPartitionId(PartitionablePartitionId, IDefaultPartitionSettings)` |
 
