@@ -56,6 +56,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericFie
 import org.hibernate.type.SqlTypes;
 import org.hibernate.validator.constraints.NotBlank;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
@@ -71,11 +72,14 @@ import static org.apache.commons.lang3.StringUtils.length;
 			// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index
 			// automatically
 			@Index(name = "FK_CONCEPTPROP_CONCEPT", columnList = "CONCEPT_PID", unique = false),
-			@Index(name = "FK_CONCEPTPROP_CSV", columnList = "CS_VER_PID")
+			// FIXME: delete this index and add migration
+			@Index(name = "FK_CONCEPTPROP_CSV", columnList = "CS_VER_PID"),
+			// FIXME: add migration
+			@Index(name = "FK_CONCEPTPROP_CSV_PROP", columnList = "CS_VER_PID,PROP_KEY")
 		})
 @IdClass(IdAndPartitionId.class)
 public class TermConceptProperty extends BasePartitionable implements Serializable {
-	public static final int MAX_PROPTYPE_ENUM_LENGTH = 6;
+	@Serial
 	private static final long serialVersionUID = 1L;
 	public static final int MAX_LENGTH = 500;
 
@@ -388,5 +392,9 @@ public class TermConceptProperty extends BasePartitionable implements Serializab
 
 	public Long getId() {
 		return myId;
+	}
+
+	public TermConcept getConcept() {
+		return myConcept;
 	}
 }

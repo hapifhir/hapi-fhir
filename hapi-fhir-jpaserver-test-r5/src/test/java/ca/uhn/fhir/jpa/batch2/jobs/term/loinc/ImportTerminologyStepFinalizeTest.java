@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepFinalize;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -36,9 +37,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ImportLoincStep23FinalizeTest extends BaseImportLoincStepTest {
+public class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep23FinalizeTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportTerminologyStepFinalizeTest.class);
 	@Mock
 	private IJobStepExecutionServices myStepExecutionSvc;
 	@Mock
@@ -46,7 +47,7 @@ public class ImportLoincStep23FinalizeTest extends BaseImportLoincStepTest {
 	@Mock
 	private IJobDataSink<ImportTerminologyResultJson> myDataSink;
 	@InjectMocks
-	private ImportLoincStep23Finalize myStep;
+	private ImportTerminologyStepFinalize<ImportLoincJobParameters> myStep;
 	@Captor
 	private ArgumentCaptor<ImportTerminologyResultJson> myDataCaptor;
 	@Captor

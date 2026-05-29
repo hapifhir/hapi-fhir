@@ -25,6 +25,9 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepChunkConceptsForGeneratingClosure;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepFinalize;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepGenerateConceptClosures;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -393,8 +396,8 @@ public class ImportLoincJobAppCtx {
 	 * creates work chunks for {@link #importLoincStep22GenerateConceptClosures()} to process.
 	 */
 	@Bean
-	public ImportLoincStep21ChunkConceptsForGeneratingClosure importLoincStep21ChunkConceptsForClosureGeneration() {
-		return new ImportLoincStep21ChunkConceptsForGeneratingClosure();
+	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportLoincJobParameters> importLoincStep21ChunkConceptsForClosureGeneration() {
+		return new ImportTerminologyStepChunkConceptsForGeneratingClosure<>();
 	}
 
 	/**
@@ -404,8 +407,8 @@ public class ImportLoincJobAppCtx {
 	 * concept PIDs and is stored in {@link TermConcept#getParentPidsAsString()}.
 	 */
 	@Bean
-	public ImportLoincStep22GenerateConceptClosures importLoincStep22GenerateConceptClosures() {
-		return new ImportLoincStep22GenerateConceptClosures();
+	public ImportTerminologyStepGenerateConceptClosures<ImportLoincJobParameters> importLoincStep22GenerateConceptClosures() {
+		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
 
 	/**
@@ -423,7 +426,7 @@ public class ImportLoincJobAppCtx {
 	 * </ul>
 	 */
 	@Bean
-	public ImportLoincStep23Finalize importLoincStep23Finalize() {
-		return new ImportLoincStep23Finalize(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
+	public ImportTerminologyStepFinalize<ImportLoincJobParameters> importLoincStep23Finalize() {
+		return new ImportTerminologyStepFinalize<>(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}
 }

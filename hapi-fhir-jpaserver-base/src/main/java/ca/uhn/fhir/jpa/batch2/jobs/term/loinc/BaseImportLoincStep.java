@@ -20,14 +20,9 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
-import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseContext>
-		extends BaseImportTerminologyFileStep<ImportLoincJobParameters> {
+		extends BaseImportTerminologyFileStep<ImportLoincJobParameters, CT> {
 	/**
 	 * This is <b>NOT</b> the LOINC CodeSystem URI! It is just
 	 * the website URL to LOINC.
@@ -80,6 +75,5 @@ public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseC
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_NAME = "LOINC Document Ontology Codes";
 	public static final String ASK_AT_ORDER_ENTRY_PROP_NAME = "AskAtOrderEntry";
 	public static final String ASSOCIATED_OBSERVATIONS_PROP_NAME = "AssociatedObservations";
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportLoincStep.class);
 
 }

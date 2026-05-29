@@ -17,11 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
+package ca.uhn.fhir.jpa.batch2.jobs.term.snomedct;
 
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseTerminologyImportParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
 
-public class ImportLoincJobParameters extends BaseTerminologyImportParameters {
-
+public abstract class BaseImportSnomedCtStep<CT extends BaseImportSnomedCtStep.MyBaseContext>
+		extends BaseImportTerminologyFileStep<ImportSnomedCtJobParameters, CT> {
 
 }

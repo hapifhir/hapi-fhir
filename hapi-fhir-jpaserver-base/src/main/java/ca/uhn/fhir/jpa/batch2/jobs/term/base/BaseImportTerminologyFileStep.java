@@ -55,6 +55,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -65,7 +67,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newLoincCsvParser;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newCsvParser;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
@@ -74,7 +76,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_CODE_SYSTEM_URL;
 
-public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyImportParameters, CT> extends BaseImportTerminologyStep implements ITerminologyImportFileHandlerStep<
+public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyImportParameters, CT extends BaseImportTerminologyFileStep.MyBaseContext> extends BaseImportTerminologyStep implements ITerminologyImportFileHandlerStep<
 	PT, TerminologyFileSetJson, TerminologyFileSetJson> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportTerminologyFileStep.class);
@@ -84,7 +86,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 	@Autowired
 	protected VersionCanonicalizer myVersionCanonicalizer;
 	@Autowired
-	private IJobPersistence myJobPersistence;
+	protected IJobPersistence myJobPersistence;
 	@Autowired
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
@@ -137,36 +139,48 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
 			throws JobExecutionFailedException {
-		TerminologyFileSetJson data = theStepExecutionDetails.getData();
-		String jobInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
-		PT jobParameters = theStepExecutionDetails.getParameters();
 
 		CT codeExtractionContext = newContextObject(theStepExecutionDetails);
 
-		ImportTerminologyMetadataAttachmentJson jobMetadata = getJobMetadata(jobInstanceId);
+		ImportTerminologyMetadataAttachmentJson jobMetadata = getJobMetadata(theStepExecutionDetails.getInstance().getInstanceId());
+
+		return run(theStepExecutionDetails, theDataSink, jobMetadata, codeExtractionContext);
+	}
+
+	@Nonnull
+	protected RunOutcome run(@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink, ImportTerminologyMetadataAttachmentJson theJobMetadata, CT theContext) {
+		String jobInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
+
+		TerminologyFileSetJson theData = theStepExecutionDetails.getData();
+		PT jobParameters = theStepExecutionDetails.getParameters();
 
 		CodeSystem codeSystemToPopulate = new CodeSystem();
-		codeSystemToPopulate.setUrl(jobMetadata.getCodeSystem().getUrl());
-		codeSystemToPopulate.setVersion(jobMetadata.getCodeSystemStagingVersionId());
+		codeSystemToPopulate.setUrl(theJobMetadata.getCodeSystem().getUrl());
+		codeSystemToPopulate.setVersion(theJobMetadata.getCodeSystemStagingVersionId());
 
-		String attachmentId = data.getAttachmentId();
-		String sourceFilename = data.getSourceFilename();
+		String attachmentId = theData.getAttachmentId();
+		String sourceFilename = theData.getSourceFilename();
 		if (isNotBlank(attachmentId)) {
 
 			AttachmentDetails attachment = myJobPersistence.fetchAttachmentById(jobInstanceId, attachmentId);
 			try (InputStream inputStream = attachment.getInputStream()) {
 				InputStreamReader reader = new InputStreamReader(
 						BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
-				CSVParser csvReader = newLoincCsvParser(reader);
+
+				/*
+				 * Even if the source files use a delimiter other than comma, the expand step (step 1)
+				 * splits the files up and rewrites them as CSV using a comma delimiter.
+				 */
+				CSVParser csvReader = newCsvParser(',', reader);
 				for (CSVRecord record : csvReader.getRecords()) {
 					handleRecord(
-							theStepExecutionDetails,
-							jobMetadata,
-							jobParameters,
-							codeExtractionContext,
+						theStepExecutionDetails,
+						theJobMetadata,
+						jobParameters,
+						theContext,
 							record,
 							codeSystemToPopulate,
-							data,
+						theData,
 							sourceFilename);
 				}
 
@@ -175,14 +189,14 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 						Msg.code(2941) + "Failed to read file attachment: " + e.getMessage(), e);
 			}
 
-			syncToDb(jobMetadata, codeExtractionContext, codeSystemToPopulate, theStepExecutionDetails);
+			syncToDb(theJobMetadata, theContext, codeSystemToPopulate, theStepExecutionDetails);
 		}
 
-		if (!data.getStepIdToRecordsAdded().isEmpty()
-				|| !data.getResourcesToActivate().isEmpty()) {
+		if (!theData.getStepIdToRecordsAdded().isEmpty()
+				|| !theData.getResourcesToActivate().isEmpty()) {
 			TerminologyFileSetJson counterWorkChunk = new TerminologyFileSetJson();
-			counterWorkChunk.getStepIdToRecordsAdded().putAll(data.getStepIdToRecordsAdded());
-			counterWorkChunk.getResourcesToActivate().addAll(data.getResourcesToActivate());
+			counterWorkChunk.getStepIdToRecordsAdded().putAll(theData.getStepIdToRecordsAdded());
+			counterWorkChunk.getResourcesToActivate().addAll(theData.getResourcesToActivate());
 			theDataSink.acceptForFutureStep(STEP_ID_FINALIZE_IMPORT, counterWorkChunk);
 		}
 
@@ -204,7 +218,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 				if (retryCount > maxRetries) {
 					throw e;
 				}
-				BaseImportLoincStep.ourLog.atWarn()
+				ourLog.atWarn()
 						.setMessage("Failed to save terminology for step {}, retry {}/{} in 5 seconds: {}")
 						.addArgument(theStepExecutionDetails.getCurrentStepId())
 						.addArgument(retryCount)
@@ -248,7 +262,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 	}
 
 	@Nullable
-	IValidationSupport.LookupCodeResult lookupPreExistingConcept(
+	protected IValidationSupport.LookupCodeResult lookupPreExistingConcept(
 			ImportTerminologyMetadataAttachmentJson theJobMetadata, String propertyCodeValue) {
 		String version = theJobMetadata.getCodeSystemStagingVersionId();
 		LookupCodeRequest request =
@@ -258,16 +272,37 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 
 	@Nonnull
 	protected CodeSystem.ConceptDefinitionComponent getOrAddConcept(
-		MyBaseContext theContext, CodeSystem theCodeSystemToPopulate, String theCode) {
-		CodeSystem.ConceptDefinitionComponent loincCode;
-		loincCode = theContext.getCodeToConcept().get(theCode);
-		if (loincCode == null) {
-			loincCode = theCodeSystemToPopulate.addConcept();
-			loincCode.setCode(theCode);
-			theContext.getCodeToConcept().put(theCode, loincCode);
+		MyBaseContext theContext, String theCode) {
+
+		CodeSystem.ConceptDefinitionComponent code = theContext.getCodeToConcept().get(theCode);
+		if (code == null) {
+			code = new CodeSystem.ConceptDefinitionComponent();
+			code.setCode(theCode);
+			theContext.getCodeToConcept().put(theCode, code);
 		}
-		return loincCode;
+		return code;
 	}
+
+	protected void getOrAddParentChildHierarchy(MyBaseContext theContext, String theParentCode, String theChildCode) {
+		if (isNotBlank(theParentCode) && isNotBlank(theChildCode)) {
+			Map<String, CodeSystem.ConceptDefinitionComponent> codeToConceptMap = theContext.getCodeToConcept();
+			CodeSystem.ConceptDefinitionComponent parentConcept =
+				codeToConceptMap.computeIfAbsent(theParentCode, this::newConcept);
+			CodeSystem.ConceptDefinitionComponent childConcept =
+				codeToConceptMap.computeIfAbsent(theChildCode, this::newConcept);
+
+			if (parentConcept.getConcept().stream().noneMatch(t->t.getCode().equals(theChildCode))) {
+				parentConcept.addConcept(childConcept);
+			}
+		}
+	}
+
+	private CodeSystem.ConceptDefinitionComponent newConcept(String theCode) {
+		CodeSystem.ConceptDefinitionComponent retVal = new CodeSystem.ConceptDefinitionComponent();
+		retVal.setCode(theCode);
+		return retVal;
+	}
+
 
 	protected void addConceptMapEntry(MyBaseContext theContext, ConceptMapping theMapping) {
 		Validate.notBlank(theMapping.getConceptMapId(), "ConceptMap ID must not be blank");
@@ -332,7 +367,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 		return vs;
 	}
 
-	void addCodeAsIncludeToValueSet(ValueSet theVs, String theCodeSystemUrl, String theCode, String theDisplayName) {
+	protected void addCodeAsIncludeToValueSet(ValueSet theVs, String theCodeSystemUrl, String theCode, String theDisplayName) {
 		ValueSet.ConceptSetComponent include = null;
 		for (ValueSet.ConceptSetComponent next : theVs.getCompose().getInclude()) {
 			if (next.getSystem().equals(theCodeSystemUrl)) {
@@ -369,21 +404,22 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 		CodeSystem theCodeSystemToPopulate,
 		StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
 
-		syncConceptsToDb(theStepExecutionDetails, theCodeSystemToPopulate);
+		syncConceptsToDb(theStepExecutionDetails, theCodeExtractionContext, theCodeSystemToPopulate);
 		syncValueSetsToDb(theCodeExtractionContext, theStepExecutionDetails);
 		syncConceptMapsToDb(theJobMetadata, theCodeExtractionContext, theStepExecutionDetails);
 	}
 
 	private void syncConceptsToDb(
-			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
-			CodeSystem codeSystemToPopulate) {
-		if (codeSystemToPopulate.hasConcept()) {
+		@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
+		CT theCodeExtractionContext, CodeSystem codeSystemToPopulate) {
+		if (!theCodeExtractionContext.getCodeToConcept().isEmpty()) {
 
-			int conceptCount = codeSystemToPopulate.getConcept().size();
-			ourLog.atInfo()
-					.setMessage("Storing {} concepts")
-					.addArgument(conceptCount)
-					.log();
+			populateConceptsIntoCodeSystem(theCodeExtractionContext.getCodeToConcept(), codeSystemToPopulate);
+
+			ourLog.info(
+				"Imported {} concept entries including {} root concept entries into CodeSystem for storage",
+				theCodeExtractionContext.getCodeToConcept().size(),
+				codeSystemToPopulate.getConcept().size());
 
 			Callable<UploadStatistics> uploader = () -> {
 				IBaseResource codeSystemToPopulateNonCanonical =
@@ -399,6 +435,26 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
 			recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
 		}
+	}
+
+	private static void populateConceptsIntoCodeSystem(Map<String, CodeSystem.ConceptDefinitionComponent> codeToConcept, CodeSystem codeSystemToPopulate) {
+		// Figure out which concepts are at the very top of the hierarchy (i.e. not children of any other concept)
+		// and put them at the root of the CodeSystem to upload
+
+		Set<String> childCodes = new HashSet<>();
+
+		for (CodeSystem.ConceptDefinitionComponent concept : codeToConcept.values()) {
+			for (CodeSystem.ConceptDefinitionComponent childConcept : concept.getConcept()) {
+				childCodes.add(childConcept.getCode());
+			}
+		}
+
+		for (CodeSystem.ConceptDefinitionComponent concept : codeToConcept.values()) {
+			if (!childCodes.contains(concept.getCode())) {
+				codeSystemToPopulate.addConcept(concept);
+			}
+		}
+
 	}
 
 	private void syncConceptMapsToDb(
@@ -428,7 +484,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			String conceptMapId,
 			IFhirResourceDao conceptMapDao,
 			Collection<ConceptMapping> mappings) {
-		BaseImportLoincStep.ourLog.info("Checking for existence of ConceptMap: {}", conceptMapId);
+		ourLog.info("Checking for existence of ConceptMap: {}", conceptMapId);
 
 		ConceptMap conceptMap;
 		try {
@@ -437,13 +493,13 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			IIdType existingId = myFhirContext.getVersion().newIdType(conceptMapId);
 			IBaseResource conceptMapNonCanonical = conceptMapDao.read(existingId, requestDetails);
 			conceptMap = myVersionCanonicalizer.conceptMapToCanonical(conceptMapNonCanonical);
-			BaseImportLoincStep.ourLog.info("Found existing ConceptMap: {}", conceptMapId);
+			ourLog.info("Found existing ConceptMap: {}", conceptMapId);
 			assert conceptMap != null : "Reading ConceptMap " + conceptMapId + " returned null";
 
 		} catch (ResourceNotFoundException | ResourceGoneException e) {
 			ConceptMapping firstMapping = mappings.iterator().next();
 
-			BaseImportLoincStep.ourLog.info("Creating new ConceptMap: {}", conceptMapId);
+			ourLog.info("Creating new ConceptMap: {}", conceptMapId);
 			getRecordsAddedCounter(theStepExecutionDetails).incrementConceptMapsAdded(1);
 
 			conceptMap = new ConceptMap();
@@ -518,7 +574,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 				addedMappings++;
 			} else {
 				skippedMappings++;
-				BaseImportLoincStep.ourLog.atDebug()
+				ourLog.atDebug()
 						.setMessage("Not going to add a mapping from [{}/{}] to [{}/{}] because one already exists")
 						.addArgument(nextMapping.getSourceCodeSystem())
 						.addArgument(nextMapping.getSourceCode())
@@ -549,7 +605,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			getRecordsAddedCounter(theStepExecutionDetails).incrementConceptMapMappingsAdded(addedMappings);
 		}
 
-		BaseImportLoincStep.ourLog.atInfo()
+		ourLog.atInfo()
 				.setMessage("Adding {} mappings and skipped {} pre-existing mappings to LOINC ConceptMap {}")
 				.addArgument(addedMappings)
 				.addArgument(skippedMappings)
@@ -614,7 +670,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 				existing.setName(valueSet.getName());
 			}
 
-			BaseImportLoincStep.ourLog.atInfo()
+			ourLog.atInfo()
 					.setMessage("Updating existing LOINC ValueSet {} to add {} codes")
 					.addArgument(valueSet.getId())
 					.addArgument(addedCodes)
@@ -641,7 +697,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 						valueSet.getCompose().getIncludeFirstRep().getConcept().size());
 			}
 
-			BaseImportLoincStep.ourLog.atInfo()
+			ourLog.atInfo()
 					.setMessage("Creating new LOINC ValueSet {} with {} code inclusions")
 					.addArgument(valueSet.getId())
 					.addArgument(codeCount)
@@ -694,7 +750,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 		}
 	}
 
-	protected static class ConceptMapping {
+	public static class ConceptMapping {
 
 		private String myCopyright;
 		private String myConceptMapId;
@@ -715,7 +771,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return myConceptMapId;
 		}
 
-		ConceptMapping setConceptMapId(String theConceptMapId) {
+		public ConceptMapping setConceptMapId(String theConceptMapId) {
 			myConceptMapId = theConceptMapId;
 			return this;
 		}
@@ -724,7 +780,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return myConceptMapName;
 		}
 
-		ConceptMapping setConceptMapName(String theConceptMapName) {
+		public ConceptMapping setConceptMapName(String theConceptMapName) {
 			myConceptMapName = theConceptMapName;
 			return this;
 		}
@@ -733,7 +789,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return myConceptMapUri;
 		}
 
-		ConceptMapping setConceptMapUri(String theConceptMapUri) {
+		public ConceptMapping setConceptMapUri(String theConceptMapUri) {
 			myConceptMapUri = theConceptMapUri;
 			return this;
 		}
@@ -742,7 +798,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return myConceptMapVersion;
 		}
 
-		ConceptMapping setConceptMapVersion(String theConceptMapVersion) {
+		public ConceptMapping setConceptMapVersion(String theConceptMapVersion) {
 			myConceptMapVersion = theConceptMapVersion;
 			return this;
 		}
@@ -751,7 +807,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return myCopyright;
 		}
 
-		ConceptMapping setCopyright(String theCopyright) {
+		public ConceptMapping setCopyright(String theCopyright) {
 			myCopyright = theCopyright;
 			return this;
 		}
@@ -760,7 +816,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return myEquivalence;
 		}
 
-		ConceptMapping setEquivalence(Enumerations.ConceptMapEquivalence theEquivalence) {
+		public ConceptMapping setEquivalence(Enumerations.ConceptMapEquivalence theEquivalence) {
 			myEquivalence = theEquivalence;
 			return this;
 		}
@@ -769,7 +825,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return mySourceCode;
 		}
 
-		ConceptMapping setSourceCode(String theSourceCode) {
+		public ConceptMapping setSourceCode(String theSourceCode) {
 			mySourceCode = theSourceCode;
 			return this;
 		}
@@ -778,7 +834,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return mySourceCodeSystem;
 		}
 
-		ConceptMapping setSourceCodeSystem(String theSourceCodeSystem) {
+		public ConceptMapping setSourceCodeSystem(String theSourceCodeSystem) {
 			mySourceCodeSystem = theSourceCodeSystem;
 			return this;
 		}
@@ -787,7 +843,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return mySourceCodeSystemVersion;
 		}
 
-		ConceptMapping setSourceCodeSystemVersion(String theSourceCodeSystemVersion) {
+		public ConceptMapping setSourceCodeSystemVersion(String theSourceCodeSystemVersion) {
 			mySourceCodeSystemVersion = theSourceCodeSystemVersion;
 			return this;
 		}
@@ -796,7 +852,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return mySourceDisplay;
 		}
 
-		ConceptMapping setSourceDisplay(String theSourceDisplay) {
+		public ConceptMapping setSourceDisplay(String theSourceDisplay) {
 			mySourceDisplay = theSourceDisplay;
 			return this;
 		}
@@ -805,7 +861,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return myTargetCode;
 		}
 
-		ConceptMapping setTargetCode(String theTargetCode) {
+		public ConceptMapping setTargetCode(String theTargetCode) {
 			myTargetCode = theTargetCode;
 			return this;
 		}
@@ -814,7 +870,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return myTargetCodeSystem;
 		}
 
-		ConceptMapping setTargetCodeSystem(String theTargetCodeSystem) {
+		public ConceptMapping setTargetCodeSystem(String theTargetCodeSystem) {
 			myTargetCodeSystem = theTargetCodeSystem;
 			return this;
 		}
@@ -823,7 +879,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return myTargetCodeSystemVersion;
 		}
 
-		ConceptMapping setTargetCodeSystemVersion(String theTargetCodeSystemVersion) {
+		public ConceptMapping setTargetCodeSystemVersion(String theTargetCodeSystemVersion) {
 			myTargetCodeSystemVersion = theTargetCodeSystemVersion;
 			return this;
 		}
@@ -832,7 +888,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			return myTargetDisplay;
 		}
 
-		ConceptMapping setTargetDisplay(String theTargetDisplay) {
+		public ConceptMapping setTargetDisplay(String theTargetDisplay) {
 			myTargetDisplay = theTargetDisplay;
 			return this;
 		}
@@ -884,14 +940,14 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 			List<LoincUploadPropertiesEnum> defaultValues,
 			Predicate<String> fileNameTester) {
 
-		protected LoincFileNameSpecification(
-				FileHandlingType theFileHandlingType,
-				LoincUploadPropertiesEnum thePropertyName,
-				LoincUploadPropertiesEnum... theDefaultValue) {
+		public LoincFileNameSpecification(
+			FileHandlingType theFileHandlingType,
+			LoincUploadPropertiesEnum thePropertyName,
+			LoincUploadPropertiesEnum... theDefaultValue) {
 			this(theFileHandlingType, thePropertyName, Arrays.asList(theDefaultValue), null);
 		}
 
-		protected LoincFileNameSpecification(
+		public LoincFileNameSpecification(
 				FileHandlingType theFileHandlingType, Predicate<String> theFileNameTester) {
 			this(theFileHandlingType, null, null, theFileNameTester);
 		}
@@ -915,12 +971,12 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 		}
 	}
 
-	protected static class MyBaseContext {
+	public static class MyBaseContext {
 
 		private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 		private final SetMultimap<String, ConceptMapping> myIdToConceptMappings =
 				MultimapBuilder.hashKeys().linkedHashSetValues().build();
-		private final Map<String, CodeSystem.ConceptDefinitionComponent> myCodeToConcept = new HashMap<>();
+		private final Map<String, CodeSystem.ConceptDefinitionComponent> myCodeToConcept = new LinkedHashMap<>();
 		private Map<String, CodeSystem.PropertyType> myPropertyNameToType;
 
 		public MyBaseContext() {}

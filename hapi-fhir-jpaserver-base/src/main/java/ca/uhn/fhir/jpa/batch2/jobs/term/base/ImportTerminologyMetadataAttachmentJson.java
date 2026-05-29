@@ -40,7 +40,7 @@ public class ImportTerminologyMetadataAttachmentJson implements IModelJson {
 	private CodeSystem myCodeSystemParsed;
 
 	public CodeSystem getCodeSystem() {
-		if (myCodeSystemParsed == null) {
+		if (myCodeSystemParsed == null && getCodeSystemXml() != null) {
 			myCodeSystemParsed =
 					FhirContext.forR4Cached().newXmlParser().parseResource(CodeSystem.class, getCodeSystemXml());
 		}

@@ -118,7 +118,7 @@ public class ImportLoincStep5HandleAnswerLists
 			if (!theContext.getAnswerListCodes().contains(answerString)) {
 				theContext.getAnswerListCodes().add(answerString);
 
-				theCodeSystemToPopulate.addConcept().setCode(answerString).setDisplay(displayText);
+				getOrAddConcept(theContext, answerString).setDisplay(displayText);
 			}
 
 			vs.getCompose()

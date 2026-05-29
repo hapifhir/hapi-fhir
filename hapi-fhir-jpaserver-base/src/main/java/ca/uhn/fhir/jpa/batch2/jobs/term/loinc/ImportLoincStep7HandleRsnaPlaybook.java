@@ -146,7 +146,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 							Msg.code(912) + "Unknown PartTypeName: " + partTypeName);
 				};
 
-		CodeSystem.ConceptDefinitionComponent code = getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+		CodeSystem.ConceptDefinitionComponent code = getOrAddConcept(theContext, loincNumber);
 		code.addProperty()
 				.setCode(loincCodePropName)
 				.setValue(new Coding(ITermLoaderSvc.LOINC_URI, partNumber, partName));

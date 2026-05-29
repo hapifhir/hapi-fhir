@@ -99,7 +99,7 @@ public class ImportLoincStep19CodingProperties extends BaseImportLoincStep<BaseI
 		}
 
 		CodeSystem.ConceptDefinitionComponent srcTermConcept =
-				getOrAddConcept(theContext, theCodeSystemToPopulate, code);
+				getOrAddConcept(theContext, code);
 
 		if (isNotBlank(askAtOrderEntryValue)) {
 			addCodingProperties(theJobMetadata, srcTermConcept, ASK_AT_ORDER_ENTRY_PROP_NAME, askAtOrderEntryValue);

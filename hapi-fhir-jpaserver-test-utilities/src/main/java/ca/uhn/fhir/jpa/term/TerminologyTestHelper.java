@@ -31,6 +31,8 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
+import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobParameters;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_SNOMED_CT_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT;
@@ -130,6 +133,32 @@ public class TerminologyTestHelper {
 					LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 		}
+
+		myJobCoordinator.enqueueBuildingJobForExecution(instanceId.getInstanceId());
+
+		myBatch2JobHelper.awaitJobCompletion(instanceId);
+
+		return instanceId.getInstanceId();
+	}
+
+	public String startImportSnomedCtJobAndWaitForCompletion(
+			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT);
+		ImportSnomedCtJobParameters parameters = new ImportSnomedCtJobParameters();
+		parameters.setVersionId(versionId);
+		if (theDontMakeCurrent) {
+			parameters.setDontMakeCurrent(true);
+		}
+		startRequest.setParameters(parameters);
+
+		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
+
+		AttachmentDetails attachmentDetails = new AttachmentDetails(
+				new ByteArrayInputStream(theFiles.getZipBytes()),
+				AttachmentContentTypeEnum.ZIP,
+				FILENAME_SNOMED_CT_DISTRIBUTION_FILE);
+		myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 
 		myJobCoordinator.enqueueBuildingJobForExecution(instanceId.getInstanceId());
 

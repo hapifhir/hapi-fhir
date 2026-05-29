@@ -85,7 +85,7 @@ public class ImportLoincStep2HandleConcepts
 			String consumerName = trim(theRecord.get("CONSUMER_NAME"));
 			String display = TermLoaderSvcImpl.firstNonBlank(longCommonName, shortName, consumerName);
 
-			CodeSystem.ConceptDefinitionComponent concept = theCodeSystemToPopulate.addConcept();
+			CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, code);
 			concept.setCode(code);
 			concept.setDisplay(display);
 

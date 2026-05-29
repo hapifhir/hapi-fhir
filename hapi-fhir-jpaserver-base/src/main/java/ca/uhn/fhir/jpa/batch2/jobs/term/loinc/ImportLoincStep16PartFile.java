@@ -77,7 +77,7 @@ public class ImportLoincStep16PartFile extends BaseImportLoincStep<ImportLoincSt
 		//		}
 
 		CodeSystem.ConceptDefinitionComponent concept =
-				getOrAddConcept(theContext, theCodeSystemToPopulate, partNumber);
+				getOrAddConcept(theContext, partNumber);
 		if (isNotBlank(partDisplayName)) {
 			concept.addDesignation()
 					.setUse(new Coding(null, null, "PartDisplayName"))

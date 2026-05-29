@@ -109,7 +109,7 @@ public class ImportLoincStep9HandleDocumentOntology
 		ourLog.debug("Adding coding property: {} to concept.code {}", loincCodePropName, partNumber);
 
 		CodeSystem.ConceptDefinitionComponent concept =
-				getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+				getOrAddConcept(theContext, loincNumber);
 		concept.addProperty()
 				.setCode(loincCodePropName)
 				.setValue(new Coding(ITermLoaderSvc.LOINC_URI, partNumber, partName));

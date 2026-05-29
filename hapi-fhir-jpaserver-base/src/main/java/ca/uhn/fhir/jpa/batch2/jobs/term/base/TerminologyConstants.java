@@ -26,4 +26,5 @@ public class TerminologyConstants {
 
 	public static final String FILENAME_LOINC_UPLOAD_PROPERTIES_FILE = "loincupload.properties";
 	public static final String FILENAME_LOINC_DISTRIBUTION_FILE = "loinc.zip";
+	public static final String FILENAME_SNOMED_CT_DISTRIBUTION_FILE = "snomedct.zip";
 }

@@ -19,12 +19,15 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 public interface ITermConceptPropertyDao
 		extends JpaRepository<TermConceptProperty, IdAndPartitionId>, IHapiFhirJpaRepository {
@@ -35,4 +38,7 @@ public interface ITermConceptPropertyDao
 
 	@Query("SELECT COUNT(t) FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
+
+	@Query("SELECT t FROM TermConceptProperty t LEFT JOIN FETCH t.myConcept WHERE t.myCodeSystemVersion = :csv AND t.myKey = :prop_key AND t.myValue IN (:values)")
+	List<TermConceptProperty> findByCodeSystemVersionAndCodeAndFetchConcept(@Param("csv") TermCodeSystemVersion theCodeSystemVersion, @Param("prop_key") String thePropCode, @Param("values") List<String> thePropValues);
 }

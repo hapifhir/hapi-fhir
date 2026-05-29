@@ -36,12 +36,9 @@ public interface ITerminologyImportFileHandlerStep<
 			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, PT theJobParameters, String theFileName);
 
 	enum FileHandlingType {
+		CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
 		CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
-		/**
-		 * The file is a CSV file with a header row. It should be split into chunks, with
-		 * the header repeated in each chunk.
-		 */
-		CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS
+		TSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS
 	}
 
 	record FileHandlingInstructions(FileHandlingType fileHandlingType) {}

@@ -114,7 +114,7 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStep<Base
 		String languageCode = language + "-" + country;
 
 		CodeSystem.ConceptDefinitionComponent concept =
-				getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+				getOrAddConcept(theContext, loincNumber);
 
 		// The following should be created as designations for each term:
 		// COMPONENT:PROPERTY:TIME_ASPCT:SYSTEM:SCALE_TYP:METHOD_TYP (as colon-separated concatenation - FormalName)

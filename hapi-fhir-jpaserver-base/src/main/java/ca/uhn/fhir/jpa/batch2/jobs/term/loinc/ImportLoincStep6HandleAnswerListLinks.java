@@ -27,7 +27,6 @@ import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StringType;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -36,9 +35,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep6HandleAnswerListLinks extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
-
-	@Autowired
-	private IValidationSupport myValidationSupport;
 
 	@Override
 	protected MyBaseContext newContextObject(
@@ -98,11 +94,11 @@ public class ImportLoincStep6HandleAnswerListLinks extends BaseImportLoincStep<B
 		}
 
 		CodeSystem.ConceptDefinitionComponent loincCode =
-				getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+				getOrAddConcept(theContext, loincNumber);
 		loincCode.addProperty().setCode("answer-list").setValue(new StringType(answerListId));
 
 		CodeSystem.ConceptDefinitionComponent answerListCode =
-				getOrAddConcept(theContext, theCodeSystemToPopulate, answerListId);
+				getOrAddConcept(theContext, answerListId);
 		answerListCode.addProperty().setCode("answers-for").setValue(new StringType(loincNumber));
 	}
 }
