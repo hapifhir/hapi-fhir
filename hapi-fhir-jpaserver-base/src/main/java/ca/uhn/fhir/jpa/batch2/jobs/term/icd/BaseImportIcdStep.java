@@ -17,16 +17,11 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.batch2.jobs.term.base;
+package ca.uhn.fhir.jpa.batch2.jobs.term.icd;
 
-public class TerminologyConstants {
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
 
-	/** Non-instantiable */
-	private TerminologyConstants() {}
+public abstract class BaseImportIcdStep<CT extends BaseImportIcdStep.MyBaseContext>
+		extends BaseImportTerminologyFileStep<ImportIcdJobParameters, CT> {
 
-	public static final String FILENAME_LOINC_UPLOAD_PROPERTIES_FILE = "loincupload.properties";
-	public static final String FILENAME_LOINC_DISTRIBUTION_FILE = "loinc.zip";
-	public static final String FILENAME_SNOMED_CT_DISTRIBUTION_FILE = "snomedct.zip";
-	public static final String FILENAME_ICD10_DISTRIBUTION_FILE = "icd10.zip";
-	public static final String FILENAME_ICD10CM_DISTRIBUTION_FILE = "icd10cm.zip";
 }
