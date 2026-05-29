@@ -30,6 +30,7 @@ import org.assertj.core.description.Description;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -236,6 +237,11 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 				return QueryCondition.this;
 			}
 
+			public QueryCondition countInstancesIgnoreCase(int theExpectedCount, String theExpectedSql) {
+				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES_IGNORE_CASE, theExpectedCount));
+				return QueryCondition.this;
+			}
+
 			/**
 			 * Does the SQL match exactly?
 			 */
@@ -359,11 +365,17 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 								yield Optional.empty();
 							}
 						}
-						case COUNT_INSTANCES -> {
-							int matchCount = StringUtils.countMatches(renderedSql, myExpectedSql);
+						case COUNT_INSTANCES, COUNT_INSTANCES_IGNORE_CASE -> {
+							String expectedSqlToMatch = myExpectedSql;
+							String renderedSqlToMatch = renderedSql;
+							if (mySqlMatchMode == SqlMatchModeEnum.COUNT_INSTANCES_IGNORE_CASE) {
+								expectedSqlToMatch = expectedSqlToMatch.toLowerCase(Locale.US);
+								 renderedSqlToMatch = renderedSqlToMatch.toLowerCase(Locale.US);
+							}
+							int matchCount = StringUtils.countMatches(renderedSqlToMatch, expectedSqlToMatch);
 							if (matchCount != myExpectedCount) {
-								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
-									" to contain " + myExpectedCount + " but found " + matchCount + " instances of : " + myExpectedSql);
+								yield Optional.of(LS + "Expected SQL: " + renderedSqlToMatch + LS +
+									" to contain " + myExpectedCount + " but found " + matchCount + " instances of : " + expectedSqlToMatch);
 							} else {
 								yield Optional.empty();
 							}
@@ -573,6 +585,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		CONTAINS,
 		DOES_NOT_CONTAIN,
 		COUNT_INSTANCES,
+		COUNT_INSTANCES_IGNORE_CASE,
 		MATCHES,
 		STARTS_WITH, ENDS_WITH
 

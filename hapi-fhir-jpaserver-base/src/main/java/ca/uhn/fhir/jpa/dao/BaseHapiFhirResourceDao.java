@@ -2581,6 +2581,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					theRequestPartitionId.getPartitionIds().get(0)));
 		}
 
+		/*
+		 * Partitioned PIDs have to parts (partition ID and PID), so we can only have half
+		 * as many parameters without exceeding the max parameters.
+		 */
 		int chunkSize = SearchBuilder.getMaximumPageSize();
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			chunkSize = chunkSize / 2;

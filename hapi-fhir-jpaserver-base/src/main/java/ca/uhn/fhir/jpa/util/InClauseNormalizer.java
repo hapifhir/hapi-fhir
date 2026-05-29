@@ -21,12 +21,11 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.search.SearchConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static ca.uhn.fhir.jpa.search.builder.SearchBuilder.getMaximumPageSize;
 
 /*
 	This class encapsulate the implementation providing a workaround to a known issue involving Hibernate. If queries are used with "in" clauses with large and varying
@@ -48,7 +47,7 @@ public class InClauseNormalizer {
 
 		List<JpaPid> retVal = theResourceIds;
 
-		if (theResourceIds.size() < getMaximumPageSize()) {
+		if (theResourceIds.size() < SearchConstants.MAX_PAGE_SIZE) {
 			int listSize = theResourceIds.size();
 
 			if (listSize > 1 && listSize < 10) {
@@ -61,7 +60,7 @@ public class InClauseNormalizer {
 				retVal = padIdListWithPlaceholders(theResourceIds, 200);
 			} else if (listSize > 200 && listSize < 500) {
 				retVal = padIdListWithPlaceholders(theResourceIds, 500);
-			} else if (listSize > 500 && listSize < 800) {
+			} else if (listSize > 500) {
 				retVal = padIdListWithPlaceholders(theResourceIds, 800);
 			}
 		}

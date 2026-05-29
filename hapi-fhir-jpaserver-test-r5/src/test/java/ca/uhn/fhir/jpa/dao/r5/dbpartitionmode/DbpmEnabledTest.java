@@ -129,16 +129,17 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 			// Verify
 			myCaptureQueriesListener.logSelectQueries();
 			assertThat(actual).containsExactlyInAnyOrder("Patient/A1", "Patient/B1", "Patient/C1", "Patient/A2", "Patient/B2", "Patient/C2");
-			String fetchByPidSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
-			assertThat(fetchByPidSql).contains(
-				// If the variable names in this fragment ever change, make sure they are equivalently changed
-				// below. We'll be functionally correct if we do a WHERE on the HFJ_RES_VER table and tests will pass,
-				// but it's slower at scale than if we do a WHERE on the HFJ_RESOURCE table
-				" from HFJ_RES_VER rht1_0 join HFJ_RESOURCE mrt1_0",
-				" where mrt1_0.RES_VER=rht1_0.RES_VER and (mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?,?) or mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?) or mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?))"
+
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread()
+					// If the variable names in this fragment ever change, make sure they are equivalently changed
+					// below. We'll be functionally correct if we do a WHERE on the HFJ_RES_VER table and tests will pass,
+					// but it's slower at scale than if we do a WHERE on the HFJ_RESOURCE table
+					.selectSqlAtIndex(1).withoutInlinedParams().contains(" from HFJ_RES_VER rht1_0 join HFJ_RESOURCE mrt1_0")
+					.selectSqlAtIndex(1).withoutInlinedParams().contains(" where mrt1_0.RES_VER=rht1_0.RES_VER and (mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?,?,?,?,?) or mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?))")
+					.selectSqlAtIndex(1).countInstancesIgnoreCase(1, "JOIN")
+					.selectCount(2)
 			);
-			assertEquals(1, StringUtils.countMatches(fetchByPidSql.toUpperCase(Locale.US), "JOIN"));
-			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		} finally {
 			DialectSvc.setForceMsSqlMode(false);
 		}
