@@ -205,9 +205,14 @@ public class JpaR4Config {
 			DaoRegistry theDaoRegistry,
 			MergeProvenanceSvc theMergeProvenanceSvc,
 			PreviousResourceVersionRestorer theResourceVersionRestorer,
-			MergeValidationService theMergeValidationService) {
+			MergeValidationService theMergeValidationService,
+			HapiTransactionService theHapiTransactionService) {
 		return new ResourceUndoMergeService(
-				theDaoRegistry, theMergeProvenanceSvc, theResourceVersionRestorer, theMergeValidationService);
+				theDaoRegistry,
+				theMergeProvenanceSvc,
+				theResourceVersionRestorer,
+				theMergeValidationService,
+				theHapiTransactionService);
 	}
 
 	@Bean

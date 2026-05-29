@@ -318,7 +318,7 @@ public class ReplaceReferencesTestHelper {
 		allTargetsAcrossProvenances.add(theSourcePatientIdWithExpectedVersion.toString());
 
 		for (Provenance sub : subProvenances) {
-			assertThat(sub.getTarget().size()).isGreaterThanOrEqualTo(2);
+			assertThat(sub.getTarget().size()).isGreaterThan(2);
 			assertVersionlessEquals(sub.getTarget().get(0).getReference(), theTargetPatientIdWithExpectedVersion);
 			assertVersionlessEquals(sub.getTarget().get(1).getReference(), theSourcePatientIdWithExpectedVersion);
 			assertThat(sub.hasContained()).isFalse();
