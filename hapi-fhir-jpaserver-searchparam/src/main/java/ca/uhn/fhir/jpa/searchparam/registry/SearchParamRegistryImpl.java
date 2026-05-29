@@ -75,7 +75,7 @@ import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForCont
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamRegistryImpl
-		implements ISearchParamRegistry, ISearchParamRegistryController {
+		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
 
 	/**
 	 * Search parameter patterns that must remain active because they are required for core system operation.
@@ -133,7 +133,6 @@ public class SearchParamRegistryImpl
 	// Deferred-rebuild state for the package-install path
 	private volatile boolean myDeferRebuild;
 	private volatile boolean myDeferredRebuildPending;
-	private final IResourceChangeListener myResourceChangeListener = new ResourceChangeListener();
 
 	@VisibleForTesting
 	public void setPopulateSearchParamIdentities(boolean myPrePopulateSearchParamIdentities) {
@@ -640,12 +639,12 @@ public class SearchParamRegistryImpl
 		spMap.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
 
 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
-				"SearchParameter", requestPartitionId, spMap, myResourceChangeListener, REFRESH_INTERVAL);
+				"SearchParameter", requestPartitionId, spMap, this, REFRESH_INTERVAL);
 	}
 
 	@PreDestroy
 	public void unregisterListener() {
-		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(myResourceChangeListener);
+		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(this);
 	}
 
 	public ReadOnlySearchParamCache getActiveSearchParams() {
@@ -678,10 +677,41 @@ public class SearchParamRegistryImpl
 				.forEach(searchParam -> myJpaSearchParamCache.setPhoneticEncoder(myPhoneticEncoder, searchParam));
 	}
 
+	@Override
+	public void handleChange(IResourceChangeEvent theResourceChangeEvent) {
+		if (theResourceChangeEvent.isEmpty()) {
+			return;
+		}
+
+		ResourceChangeResult result = ResourceChangeResult.fromResourceChangeEvent(theResourceChangeEvent);
+		if (result.created > 0) {
+			ourLog.info(
+					"Adding {} search parameters to SearchParamRegistry: {}",
+					result.created,
+					unqualified(theResourceChangeEvent.getCreatedResourceIds()));
+		}
+		if (result.updated > 0) {
+			ourLog.info(
+					"Updating {} search parameters in SearchParamRegistry: {}",
+					result.updated,
+					unqualified(theResourceChangeEvent.getUpdatedResourceIds()));
+		}
+		if (result.deleted > 0) {
+			ourLog.info(
+					"Deleting {} search parameters from SearchParamRegistry: {}",
+					result.deleted,
+					unqualified(theResourceChangeEvent.getDeletedResourceIds()));
+		}
+		if (tryDeferRebuild()) {
+			return;
+		}
+		rebuildActiveSearchParams();
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Coalesces {@link ResourceChangeListener#handleChange} and {@link #forceRefresh} events fired during
+	 * Coalesces {@link #handleChange} and {@link #forceRefresh} events fired during
 	 * {@code theCallback} into a single rebuild at scope exit. Deferral is bypassed while
 	 * {@link #myActiveSearchParams} is still {@code null} so initial population always runs
 	 * synchronously.
@@ -721,6 +751,20 @@ public class SearchParamRegistryImpl
 	}
 
 	@Override
+	public void handleInit(Collection<IIdType> theResourceIds) {
+		List<IBaseResource> searchParams = new ArrayList<>();
+		for (IIdType id : theResourceIds) {
+			try {
+				IBaseResource searchParam = mySearchParamProvider.read(id);
+				searchParams.add(searchParam);
+			} catch (ResourceNotFoundException e) {
+				ourLog.warn("SearchParameter {} not found.  Excluding from list of active search params.", id);
+			}
+		}
+		initializeActiveSearchParams(searchParams);
+	}
+
+	@Override
 	public boolean isInitialized() {
 		return myActiveSearchParams != null;
 	}
@@ -729,7 +773,7 @@ public class SearchParamRegistryImpl
 	public void resetForUnitTest() {
 		myBuiltInSearchParams = null;
 		setActiveSearchParams(null);
-		myResourceChangeListener.handleInit(Collections.emptyList());
+		handleInit(Collections.emptyList());
 	}
 
 	@VisibleForTesting
@@ -748,55 +792,4 @@ public class SearchParamRegistryImpl
 				.filter(t -> isAllowedForContext(t, theContext))
 				.collect(Collectors.toList());
 	}
-
-	private class ResourceChangeListener implements IResourceChangeListener {
-
-		@Override
-		public void handleInit(Collection<IIdType> theResourceIds) {
-			List<IBaseResource> searchParams = new ArrayList<>();
-			for (IIdType id : theResourceIds) {
-				try {
-					IBaseResource searchParam = mySearchParamProvider.read(id);
-					searchParams.add(searchParam);
-				} catch (ResourceNotFoundException e) {
-					ourLog.warn("SearchParameter {} not found.  Excluding from list of active search params.", id);
-				}
-			}
-			initializeActiveSearchParams(searchParams);
-		}
-
-		@Override
-		public void handleChange(IResourceChangeEvent theResourceChangeEvent) {
-			if (theResourceChangeEvent.isEmpty()) {
-				return;
-			}
-
-			ResourceChangeResult result = ResourceChangeResult.fromResourceChangeEvent(theResourceChangeEvent);
-			if (result.created > 0) {
-				ourLog.info(
-					"Adding {} search parameters to SearchParamRegistry: {}",
-					result.created,
-					unqualified(theResourceChangeEvent.getCreatedResourceIds()));
-			}
-			if (result.updated > 0) {
-				ourLog.info(
-					"Updating {} search parameters in SearchParamRegistry: {}",
-					result.updated,
-					unqualified(theResourceChangeEvent.getUpdatedResourceIds()));
-			}
-			if (result.deleted > 0) {
-				ourLog.info(
-					"Deleting {} search parameters from SearchParamRegistry: {}",
-					result.deleted,
-					unqualified(theResourceChangeEvent.getDeletedResourceIds()));
-			}
-
-			if (tryDeferRebuild()) {
-				return;
-			}
-			rebuildActiveSearchParams();
-		}
-
-	}
-
 }

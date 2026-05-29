@@ -127,7 +127,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	/**
 	 * Values in the returned map are typed resource IDs (Patient/ABC)
 	 */
-	PersistentIdToForcedIdMap<T> translatePidsToForcedIds(Collection<T> theResourceIds);
+	PersistentIdToForcedIdMap<T> translatePidsToForcedIds(Set<T> theResourceIds);
 
 	/**
 	 * This method can be called to pre-emptively add entries to the ID cache. It should
@@ -175,7 +175,7 @@ public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 	 * @param thePids The Set of pids you would like to resolve to external FHIR Resource IDs.
 	 * @return A Set of strings representing the FHIR IDs of the pids.
 	 */
-	Set<String> translatePidsToFhirResourceIds(Collection<T> thePids);
+	Set<String> translatePidsToFhirResourceIds(Set<T> thePids);
 
 	/**
 	 * @deprecated Use {@link #newPid(Object, Integer)}

@@ -2516,7 +2516,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public List<IIdType> searchForResourceIds(SearchParameterMap theParams, RequestDetails theRequest) {
-		return searchForTransformedIds(theParams, theRequest, this::pidsToVersionedIds);
+		return searchForTransformedIds(theParams, theRequest, this::pidStreamToVersionedIdStream);
 	}
 
 	private <V> List<V> searchForTransformedIds(
@@ -2570,7 +2570,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * get the Ids from the ResourceTable entities in chunks.
 	 */
 	@Nonnull
-	private Stream<IIdType> pidsToVersionedIds(
+	private Stream<IIdType> pidStreamToVersionedIdStream(
 			RequestDetails theRequestDetails, Stream<JpaPid> thePidStream, RequestPartitionId theRequestPartitionId) {
 
 		Stream<JpaPid> pidStream = thePidStream;
@@ -2589,90 +2589,55 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		return QueryChunker
 			.chunk(pidStream, chunkSize)
-			.flatMap(pids2 -> {
-//				Set<String> ids = myIdHelperService.translatePidsToFhirResourceIds(pids);
-//				return ids.stream()
-//					.map(t->myFhirContext.getVersion().newIdType(t));
+			.flatMap(this::pidListToVersionedIdList);
 
-				// FIXME: drop
-				List<JpaPid> pids = normalizeIdListForInClause(pids2);
-
-				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-				CriteriaQuery<Tuple> cq = cb.createTupleQuery();
-				Root<ResourceTable> from = cq.from(ResourceTable.class);
-				cq.multiselect(from.get("myResourceType"), from.get("myFhirId"), from.get("myVersion"));
-				Predicate wherePredicate;
-
-				if (myPartitionSettings.isDatabasePartitionMode() && myDialectSvc.isMssql()) {
-					Multimap<Integer, Long> partitionIdToPid = splitPidListByPartitionId(pids);
-					List<Predicate> partitionAndPidPredicates =
-						new ArrayList<>(partitionIdToPid.keySet().size());
-					for (Map.Entry<Integer, Collection<Long>> entry :
-						partitionIdToPid.asMap().entrySet()) {
-						Integer partitionId = entry.getKey();
-						Collection<Long> pidsForPartitionId = entry.getValue();
-
-						Predicate partitionIdPredicate = cb.equal(from.get("myPartitionIdValue"), partitionId);
-						Predicate pidPredicate = from.get("myResourceId").in(pidsForPartitionId);
-						partitionAndPidPredicates.add(cb.and(partitionIdPredicate, pidPredicate));
-					}
-					wherePredicate = cb.or(partitionAndPidPredicates.toArray(EMPTY_PREDICATE_ARRAY));
-				} else {
-					wherePredicate = from.get("myPid").in(pids);
-				}
-
-				cq.where(wherePredicate);
-
-				return myEntityManager
-					.createQuery(cq)
-					.getResultStream()
-					.map(t->{
-						String resourceType = t.get(0, String.class);
-						String fhirId = t.get(1, String.class);
-						Long version = t.get(2, Long.class);
-						return myFhirContext.getVersion().newIdType(resourceType + "/" + fhirId + "/_history/" + version);
-					});
-			});
-
-// FIXME: document why here and in the other spot
-//		int chunkSize = SearchBuilder.getMaximumPageSize();
-//		if (myPartitionSettings.isPartitioningEnabled()) {
-//			chunkSize = chunkSize / 2;
-//		}
-//		if (myPartitionSettings.isDatabasePartitionMode() && myDialectSvc.isMssql()) {
-//
-//		} else {
-//			return QueryChunker
-//				.chunk(pidStream)
-//				.flatMap(ids -> myResourceTableDao.findAllById(ids).stream())
-//				.map(ResourceTable::getIdDt);
-//		}
-//
-//				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-//				CriteriaQuery<Tuple> cq = cb.createTupleQuery();
-//				Root<ResourceTable> from = cq.from(ResourceTable.class);
-//				cq.multiselect(from.get("myFhirId"), from.get("myPartitionIdValue"));
-//
-//				Join<?, ?> resourceTable = (Join<?, ?>) from.fetch("myResourceTable", JoinType.INNER);
-//				List<Predicate> partitionAndPidPredicates =
-//					new ArrayList<>(partitionIdToPid.keySet().size());
-//				for (Map.Entry<Integer, Collection<Long>> entry :
-//					partitionIdToPid.asMap().entrySet()) {
-//					Integer partitionId = entry.getKey();
-//					Collection<Long> pids = entry.getValue();
-//
-//					Predicate partitionIdPredicate = cb.equal(resourceTable.get("myPartitionIdValue"), partitionId);
-//					Predicate pidPredicate = resourceTable.get("myResourceId").in(pids);
-//					partitionAndPidPredicates.add(cb.and(partitionIdPredicate, pidPredicate));
-//				}
-//
-//				Predicate currentVersionPredicate = cb.equal(resourceTable.get("myVersion"), from.get("myResourceVersion"));
-//
-//				cq.where(currentVersionPredicate, cb.or(partitionAndPidPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
-//
-//				TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(cq);
-//				resourceSearchViewList = query.getResultList();
 	}
+
+	/**
+	 * Converts a list of PIDS to a list of versioned resource IDs.
+	 * This method has special handling for MSSQL when operating in database partition mode.
+	 * See {@link SearchBuilder#loadCurrentResourceVersionsForMsSqlDbpm(List)} for details on why.
+	 */
+	private Stream<? extends IIdType> pidListToVersionedIdList(List<JpaPid> pids) {
+		List<JpaPid> pidsNormalized = normalizeIdListForInClause(pids);
+
+		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Tuple> cq = cb.createTupleQuery();
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.multiselect(from.get("myResourceType"), from.get("myFhirId"), from.get("myVersion"));
+		Predicate wherePredicate;
+
+		if (myPartitionSettings.isDatabasePartitionMode() && myDialectSvc.isMssql()) {
+			Multimap<Integer, Long> partitionIdToPid = splitPidListByPartitionId(pidsNormalized);
+			List<Predicate> partitionAndPidPredicates =
+				new ArrayList<>(partitionIdToPid.keySet().size());
+			for (Map.Entry<Integer, Collection<Long>> entry :
+				partitionIdToPid.asMap().entrySet()) {
+				Integer partitionId = entry.getKey();
+				Collection<Long> pidsForPartitionId = entry.getValue();
+
+				Predicate partitionIdPredicate = cb.equal(from.get("myPartitionIdValue"), partitionId);
+				Predicate pidPredicate = from.get("myResourceId").in(pidsForPartitionId);
+				partitionAndPidPredicates.add(cb.and(partitionIdPredicate, pidPredicate));
+			}
+			wherePredicate = cb.or(partitionAndPidPredicates.toArray(EMPTY_PREDICATE_ARRAY));
+		} else {
+			wherePredicate = from.get("myPid").in(pidsNormalized);
+		}
+
+		cq.where(wherePredicate);
+
+		return myEntityManager
+			.createQuery(cq)
+			.getResultStream()
+			.map(t -> {
+				String resourceType = t.get(0, String.class);
+				String fhirId = t.get(1, String.class);
+				Long version = t.get(2, Long.class);
+				return myFhirContext.getVersion().newIdType(resourceType + "/" + fhirId + "/_history/" + version);
+			});
+	}
+
 
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
 		MT retVal = ReflectionUtil.newInstance(theType);

@@ -1476,7 +1476,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * In Database Partition Mode, when loading resource bodies for most databases we issue
 	 * SQL like <code>WHERE (PARITION_ID,RES_ID) IN (1,2), (1,3)</code> but this syntax is
 	 * not supported by MSSQL / SQL Server. So for that specific platform, we rework the
-	 * call to issue SQL like <code>WHERE PARTITION = 1 AND RES_ID IN (2, 3)</code>
+	 * call to issue SQL like <code>WHERE PARTITION = 1 AND RES_ID IN (2, 3)</code>.
+	 * We do this because the Hibernate MSSQL dialect turns the tuple-based IN clause into a
+	 * series of <code>(partition_id = ? and res_id = ?) OR (partition_id = ? and res_id = ?) OR ...</code>
+	 * and MSSQL seems to have a horribe time picking a good query plan for that style of query.
 	 */
 	@VisibleForTesting
 	public List<ResourceHistoryTable> loadCurrentResourceVersionsForMsSqlDbpm(List<JpaPid> theResourcePids) {

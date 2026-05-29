@@ -516,7 +516,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	@Override
-	public PersistentIdToForcedIdMap<JpaPid> translatePidsToForcedIds(Collection<JpaPid> theResourceIds) {
+	public PersistentIdToForcedIdMap<JpaPid> translatePidsToForcedIds(Set<JpaPid> theResourceIds) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 		HashMap<JpaPid, Optional<String>> retVal = new HashMap<>(
 				myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourceIds));
@@ -651,7 +651,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	 * @return A Set of strings representing the FHIR IDs of the pids.
 	 */
 	@Override
-	public Set<String> translatePidsToFhirResourceIds(Collection<JpaPid> thePids) {
+	public Set<String> translatePidsToFhirResourceIds(Set<JpaPid> thePids) {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		PersistentIdToForcedIdMap<JpaPid> pidToForcedIdMap = translatePidsToForcedIds(thePids);
