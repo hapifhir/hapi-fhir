@@ -16,16 +16,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.UriType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,6 +61,11 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 
 		registerPartitionInterceptorAndCreatePartitions();
 		initResourceTypeCacheFromConfig();
+	}
+
+	@AfterEach
+	public void after() {
+		DialectSvc.setForceMsSqlMode(false);
 	}
 
 	@Test
@@ -117,18 +129,58 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 			// Verify
 			myCaptureQueriesListener.logSelectQueries();
 			assertThat(actual).containsExactlyInAnyOrder("Patient/A1", "Patient/B1", "Patient/C1", "Patient/A2", "Patient/B2", "Patient/C2");
-			String fetchByPidSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
-			assertThat(fetchByPidSql).contains(
-				// If the variable names in this fragment ever change, make sure they are equivalently changed
-				// below. We'll be functionally correct if we do a WHERE on the HFJ_RES_VER table and tests will pass,
-				// but it's slower at scale than if we do a WHERE on the HFJ_RESOURCE table
-				" from HFJ_RES_VER rht1_0 join HFJ_RESOURCE mrt1_0",
-				" where mrt1_0.RES_VER=rht1_0.RES_VER and (mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?,?) or mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?) or mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?))"
+
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread()
+					// If the variable names in this fragment ever change, make sure they are equivalently changed
+					// below. We'll be functionally correct if we do a WHERE on the HFJ_RES_VER table and tests will pass,
+					// but it's slower at scale than if we do a WHERE on the HFJ_RESOURCE table
+					.selectSqlAtIndex(1).withoutInlinedParams().contains(" from HFJ_RES_VER rht1_0 join HFJ_RESOURCE mrt1_0")
+					.selectSqlAtIndex(1).withoutInlinedParams().contains(" where mrt1_0.RES_VER=rht1_0.RES_VER and (mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?,?,?,?,?) or mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?))")
+					.selectSqlAtIndex(1).countInstancesIgnoreCase(1, "JOIN")
+					.selectCount(2)
 			);
-			assertEquals(1, StringUtils.countMatches(fetchByPidSql.toUpperCase(Locale.US), "JOIN"));
-			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		} finally {
 			DialectSvc.setForceMsSqlMode(false);
+		}
+	}
+
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testRefreshSearchParameterCache(boolean theMssqlMode) {
+		// Setup
+		DialectSvc.setForceMsSqlMode(theMssqlMode);
+
+		myPartitionSelectorInterceptor.setPartitionIdForResourceType("*", 1);
+		requireNonNull(myValidationSupport.fetchAllSearchParameters()).subList(0, 20).forEach(
+			sp->mySearchParameterDao.update((SearchParameter) sp, newSrd())
+		);
+
+		// Test
+		myCaptureQueriesListener.clear();
+		mySearchParamRegistry.forceRefresh();
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectCount(4)
+				.selectSqlAtIndex(0).startsWith("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'SearchParameter') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = '0'))")
+				.selectSqlAtIndex(2).startsWith("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'SearchParameter') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = '0'))")
+		);
+
+		if (theMssqlMode) {
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread()
+					.selectSqlAtIndex(1).withoutInlinedParams().endsWith(" where rt1_0.PARTITION_ID=? and rt1_0.RES_ID in (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+					.selectSqlAtIndex(3).withoutInlinedParams().endsWith(" where mrt1_0.RES_VER=rht1_0.RES_VER and (mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?))")
+			);
+		} else {
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread()
+					.selectSqlAtIndex(1).withoutInlinedParams().endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in ((?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?))")
+					.selectSqlAtIndex(3).withoutInlinedParams().endsWith(" where (mrt1_0.RES_ID,mrt1_0.PARTITION_ID) in ((?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?)) and mrt1_0.RES_VER=rht1_0.RES_VER")
+			);
 		}
 	}
 
