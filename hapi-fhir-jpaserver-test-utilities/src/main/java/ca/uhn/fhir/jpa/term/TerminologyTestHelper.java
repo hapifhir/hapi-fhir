@@ -80,11 +80,11 @@ public class TerminologyTestHelper {
 	private final IValidationSupport myValidationSupport;
 
 	public TerminologyTestHelper(
-			IJobPersistence theJobPersistence,
-			IJobCoordinator theJobCoordinator,
-			Batch2JobHelper theBatch2JobHelper,
-			MemoryCacheService theMemoryCacheService,
-			IValidationSupport theValidationSupport) {
+		IJobPersistence theJobPersistence,
+		IJobCoordinator theJobCoordinator,
+		Batch2JobHelper theBatch2JobHelper,
+		MemoryCacheService theMemoryCacheService,
+		IValidationSupport theValidationSupport) {
 		myJobPersistence = theJobPersistence;
 		myJobCoordinator = theJobCoordinator;
 		myBatch2JobHelper = theBatch2JobHelper;
@@ -97,12 +97,12 @@ public class TerminologyTestHelper {
 	}
 
 	public String startImportLoincJobAndWaitForCompletion(
-			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
+		String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
 		return startImportLoincJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, null);
 	}
 
 	public String startImportLoincJobAndWaitForCompletion(
-			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, Properties theJobProperties) {
+		String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, Properties theJobProperties) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
@@ -115,9 +115,9 @@ public class TerminologyTestHelper {
 		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 
 		AttachmentDetails attachmentDetails = new AttachmentDetails(
-				new ByteArrayInputStream(theFiles.getZipBytes()),
-				AttachmentContentTypeEnum.ZIP,
-				FILENAME_LOINC_DISTRIBUTION_FILE);
+			new ByteArrayInputStream(theFiles.getZipBytes()),
+			AttachmentContentTypeEnum.ZIP,
+			FILENAME_LOINC_DISTRIBUTION_FILE);
 		myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 
 		if (theJobProperties != null) {
@@ -128,9 +128,9 @@ public class TerminologyTestHelper {
 				fail("Failed to store properties", e);
 			}
 			attachmentDetails = new AttachmentDetails(
-					out.toByteArray(),
-					AttachmentContentTypeEnum.PROPERTIES,
-					LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+				out.toByteArray(),
+				AttachmentContentTypeEnum.PROPERTIES,
+				LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 		}
 
@@ -142,7 +142,12 @@ public class TerminologyTestHelper {
 	}
 
 	public String startImportSnomedCtJobAndWaitForCompletion(
-			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
+		String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
+		return startImportSnomedCtJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, false);
+	}
+
+	public String startImportSnomedCtJobAndWaitForCompletion(
+		String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, boolean theExpectFailure) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT);
 		ImportSnomedCtJobParameters parameters = new ImportSnomedCtJobParameters();
@@ -155,14 +160,18 @@ public class TerminologyTestHelper {
 		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 
 		AttachmentDetails attachmentDetails = new AttachmentDetails(
-				new ByteArrayInputStream(theFiles.getZipBytes()),
-				AttachmentContentTypeEnum.ZIP,
-				FILENAME_SNOMED_CT_DISTRIBUTION_FILE);
+			new ByteArrayInputStream(theFiles.getZipBytes()),
+			AttachmentContentTypeEnum.ZIP,
+			FILENAME_SNOMED_CT_DISTRIBUTION_FILE);
 		myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 
 		myJobCoordinator.enqueueBuildingJobForExecution(instanceId.getInstanceId());
 
-		myBatch2JobHelper.awaitJobCompletion(instanceId);
+		if (theExpectFailure) {
+			myBatch2JobHelper.awaitJobFailure(instanceId);
+		} else {
+			myBatch2JobHelper.awaitJobCompletion(instanceId);
+		}
 
 		return instanceId.getInstanceId();
 	}
@@ -171,11 +180,11 @@ public class TerminologyTestHelper {
 		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 
 		assertThat(theVersion == null
-						|| theVersion.equals("2.67")
-						|| theVersion.equals("2.68")
-						|| theVersion.equals("2.69"))
-				.as("Version supported are: 2.67, 2.68, 2.69 and null")
-				.isTrue();
+			|| theVersion.equals("2.67")
+			|| theVersion.equals("2.68")
+			|| theVersion.equals("2.69"))
+			.as("Version supported are: 2.67, 2.68, 2.69 and null")
+			.isTrue();
 
 		addLoincMandatoryFilesToZip(files, theVersion);
 
@@ -190,7 +199,7 @@ public class TerminologyTestHelper {
 		myMemoryCacheService.invalidateAllCaches();
 		LookupCodeRequest request = new LookupCodeRequest(theSystem, theCode);
 		IValidationSupport.LookupCodeResult result =
-				myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
+			myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
 		assertNotNull(result);
 		assertTrue(result.isFound());
 		assertEquals(theExpectedDisplay, result.getCodeDisplay());
@@ -204,7 +213,7 @@ public class TerminologyTestHelper {
 		myMemoryCacheService.invalidateAllCaches();
 		LookupCodeRequest lookupCodeRequest = new LookupCodeRequest(theSystem, theCode);
 		IValidationSupport.LookupCodeResult result =
-				myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), lookupCodeRequest);
+			myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), lookupCodeRequest);
 		assertTrue(result == null || !result.isFound());
 	}
 
@@ -217,28 +226,6 @@ public class TerminologyTestHelper {
 
 	public void startImportLoincJobAndWaitForCompletion() throws Exception {
 		startImportLoincJobAndWaitForCompletion("2.67", true);
-	}
-
-	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theClassPathPrefix)
-			throws IOException {
-		theFiles.addFileZip(theClassPathPrefix, LOINC_XML_FILE.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_GROUP_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_DUPLICATE_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_HIERARCHY_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_ANSWERLIST_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_PART_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode());
-		theFiles.addFileZip(theClassPathPrefix, LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode());
 	}
 
 	private String getClassPathPrefix(String theVersion) {
@@ -257,5 +244,27 @@ public class TerminologyTestHelper {
 
 		fail("Setup failed. Unexpected version: " + theVersion);
 		return null;
+	}
+
+	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theClassPathPrefix)
+		throws IOException {
+		theFiles.addFileZip(theClassPathPrefix, LOINC_XML_FILE.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_GROUP_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_DUPLICATE_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_HIERARCHY_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_ANSWERLIST_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_PART_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode());
+		theFiles.addFileZip(theClassPathPrefix, LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode());
 	}
 }

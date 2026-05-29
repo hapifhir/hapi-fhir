@@ -29,27 +29,29 @@ import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
  */
 public class ImportSnomedCtStep2HandleDescription
-		extends BaseImportSnomedCtStep<BaseImportTerminologyFileStep.MyBaseContext> {
+		extends BaseImportSnomedCtStep<ImportSnomedCtStep2HandleDescription.MyContext> {
 
 	@Nonnull
 	@Override
 	protected List<LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportSnomedCtJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
-				FileHandlingType.TSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
+				FileHandlingType.TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS,
 				t->t.contains("sct2_Description_Full")));
 	}
 
 	@Override
-	protected MyBaseContext newContextObject(
+	protected ImportSnomedCtStep2HandleDescription.MyContext newContextObject(
 			StepExecutionDetails<ImportSnomedCtJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		return new MyBaseContext();
+		return new MyContext();
 	}
 
 	@Override
@@ -57,7 +59,7 @@ public class ImportSnomedCtStep2HandleDescription
 			StepExecutionDetails<ImportSnomedCtJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
 			ImportSnomedCtJobParameters theJobParameters,
-			MyBaseContext theContext,
+			MyContext theContext,
 			CSVRecord theRecord,
 			CodeSystem theCodeSystemToPopulate,
 			TerminologyFileSetJson theData,
@@ -72,10 +74,20 @@ public class ImportSnomedCtStep2HandleDescription
 		String conceptId = theRecord.get("conceptId");
 		String term = theRecord.get("term");
 
-		CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, conceptId);
-		concept.setDisplay(term);
-		concept.addProperty()
-			.setCode("id")
-			.setValue(new CodeType(id));
+		if (theContext.mySeenTerms.add(term)) {
+			CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, conceptId);
+			concept.setDisplay(term);
+			concept.addProperty()
+				.setCode("id")
+				.setValue(new CodeType(id));
+		}
 	}
+
+	public static class MyContext extends BaseImportTerminologyFileStep.MyBaseContext {
+
+		private final Set<String> mySeenTerms = new HashSet<>();
+
+	}
+
+
 }

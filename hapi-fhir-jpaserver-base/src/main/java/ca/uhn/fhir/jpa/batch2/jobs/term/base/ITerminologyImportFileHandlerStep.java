@@ -35,10 +35,16 @@ public interface ITerminologyImportFileHandlerStep<
 	Optional<FileHandlingInstructions> canHandleFile(
 			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, PT theJobParameters, String theFileName);
 
+	/**
+	 * Returns true if it should be considered an error for this step to not match any files in the
+	 * distribution.
+	 */
+	boolean mustFindFile();
+
 	enum FileHandlingType {
 		CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
 		CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
-		TSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS
+		TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS
 	}
 
 	record FileHandlingInstructions(FileHandlingType fileHandlingType) {}

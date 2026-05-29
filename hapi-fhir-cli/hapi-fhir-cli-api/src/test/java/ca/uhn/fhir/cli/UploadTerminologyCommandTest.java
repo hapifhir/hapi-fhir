@@ -540,6 +540,8 @@ public class UploadTerminologyCommandTest {
 		assertNull(params.getDontMakeCurrent());
 	}
 
+	// FIXME: add test uploading attachment with unknown name
+
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testUploadLoinc_DontMakeCurrent(String theFhirVersion, boolean theIncludeTls) throws IOException {

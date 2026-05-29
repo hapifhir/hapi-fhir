@@ -65,12 +65,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Duration;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_FILENAME;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
+import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.SCT_URI;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 
@@ -103,7 +105,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				"u",
 				"url",
 				true,
-				"The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
+				"The code system URL associated with this upload (e.g. " + SCT_URI + ")");
 		addOptionalOption(
 				options,
 				"d",
@@ -168,7 +170,9 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				};
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(termUrl);
-		if (LOINC_URI.equals(canonicalUrl.url())) {
+		Set<String> newUploadUris = Set.of(LOINC_URI, SCT_URI);
+
+		if (newUploadUris.contains(canonicalUrl.url())) {
 			invokeOperationAsyncJob(termUrl, datafile, client, dontMakeCurrent);
 		} else {
 			Validate.isTrue(!dontMakeCurrent, "The --dont-make-current option is not supported for this system");

@@ -1,5 +1,10 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
@@ -28,6 +33,7 @@ import java.util.Properties;
 import java.util.TreeSet;
 import java.util.zip.ZipOutputStream;
 
+import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.SCT_URI;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -37,7 +43,6 @@ import static org.mockito.Mockito.verify;
 
 public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcSnomedCtJpaTest.class);
-	private TermLoaderSvcImpl mySvc;
 
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
@@ -46,13 +51,6 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 	@Captor
 	private ArgumentCaptor<TermCodeSystemVersion> myCsvCaptor;
 	private ZipCollectionBuilder myFiles = new ZipCollectionBuilder(true);
-	@Mock
-	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
-
-	@BeforeEach
-	public void before() {
-		mySvc = TermLoaderSvcImpl.withoutProxyCheck(myTermDeferredStorageSvc, myTermCodeSystemStorageSvc);
-	}
 
 	private ArrayList<ITermLoaderSvc.FileDescriptor> list(byte[]... theByteArray) {
 		ArrayList<ITermLoaderSvc.FileDescriptor> retVal = new ArrayList<>();
@@ -81,7 +79,11 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 		myFiles.addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
 		myFiles.addFileZip("/sct/", "sct2_TextDefinition_Full-en_INT_20160131.txt");
 
+		// Test
+
 		myTerminologyTestHelper.startImportSnomedCtJobAndWaitForCompletion("20160131", myFiles, false);
+
+		// Verify
 
 		logAllConceptProperties();
 
@@ -92,20 +94,9 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 			assertEquals(3, myTermConceptParentChildLinkDao.count());
 		});
 
-//		mySvc.loadSnomedCt(myFiles.getFiles(), mySrd);
-//
-//		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyList());
-//
-//		TermCodeSystemVersion csv = myCsvCaptor.getValue();
-//		TreeSet<String> allCodes = toCodes(csv, true);
-//		ourLog.info(allCodes.toString());
-//
-//		assertThat(allCodes).contains("116680003");
-//		assertThat(allCodes).doesNotContain("207527008");
-//
-//		allCodes = toCodes(csv, false);
-//		ourLog.info(allCodes.toString());
-//		assertThat(allCodes).contains("126816002");
+		LookupCodeRequest request = new LookupCodeRequest(SCT_URI, "116680003");
+		IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
+		assertEquals("Is a (attribute)", result.getCodeDisplay());
 	}
 
 	@Test
@@ -115,20 +106,26 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 		myFiles.addFileZip("/sct/", "sct2_Identifier_Full_INT_20160131.txt");
 		myFiles.addFileZip("/sct/", "sct2_Relationship_Full_INT_20160131.txt");
 		myFiles.addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
-		mySvc.loadSnomedCt(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyList());
+		// Test
 
-		TermCodeSystemVersion csv = myCsvCaptor.getValue();
-		TreeSet<String> allCodes = toCodes(csv, true);
-		ourLog.info(allCodes.toString());
+		myTerminologyTestHelper.startImportSnomedCtJobAndWaitForCompletion("20160131", myFiles, false);
 
-		assertThat(allCodes).contains("116680003");
-		assertThat(allCodes).doesNotContain("207527008");
+		// Verify
 
-		allCodes = toCodes(csv, false);
-		ourLog.info(allCodes.toString());
-		assertThat(allCodes).contains("126816002");
+		logAllConceptProperties();
+
+		runInTransaction(()->{
+			assertEquals(1, myTermCodeSystemDao.count());
+			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(15, myTermConceptDao.count());
+			assertEquals(3, myTermConceptParentChildLinkDao.count());
+		});
+
+		LookupCodeRequest request = new LookupCodeRequest(SCT_URI, "126816002");
+		IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
+		assertEquals("ROOT1_2", result.getCodeDisplay());
+
 	}
 
 	@Test
@@ -138,32 +135,28 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 		myFiles.addFileZip("/sct/", "sct2_Identifier_Full_INT_20160131.txt");
 		myFiles.addFileZip("/sct/", "sct2_Relationship_Full_INT_20160131.txt");
 		myFiles.addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
-		mySvc.loadSnomedCt(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyList());
+		// Test
 
-		TermCodeSystemVersion csv = myCsvCaptor.getValue();
+		myTerminologyTestHelper.startImportSnomedCtJobAndWaitForCompletion("20160131", myFiles, false);
 
-		var rootCodes = csv.getConcepts().stream().map(TermConcept::getCode).toList();
-		assertThat(rootCodes).containsExactlyInAnyOrder("126813005", "126816002"); // 126813005 has no parents, 126816002 only has an inactive parent-relationship
+		// Verify
 
-		var childrenOfRootConcept = csv.getConcepts().stream().filter(c -> "126813005".equals(c.getCode())).flatMap(c -> c.getChildren().stream().map(TermConceptParentChildLink::getChild)).toList();
-		assertThat(childrenOfRootConcept.stream().map(TermConcept::getCode)).containsExactly("126815003");
-		var childrenOfChildConcept = childrenOfRootConcept.stream().flatMap(c -> c.getChildren().stream().map(TermConceptParentChildLink::getChild)).toList();
-		assertThat(childrenOfChildConcept.stream().map(TermConcept::getCode)).containsExactly("126817006");
+		logAllConceptProperties();
+
+		runInTransaction(()->{
+			assertEquals(1, myTermCodeSystemDao.count());
+			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(5, myTermConceptDao.count());
+			assertEquals(0, myTermConceptParentChildLinkDao.count());
+		});
+
+		LookupCodeRequest request = new LookupCodeRequest(SCT_URI, "126816002");
+		IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
+		assertEquals("ROOT1_2", result.getCodeDisplay());
+
 	}
 
-	/**
-	 * This is just for trying stuff, it won't run without
-	 * local files external to the git repo
-	 */
-	@Disabled("for manual testing")
-	@Test
-	public void testLoadSnomedCtAgainstRealFile() throws Exception {
-		byte[] bytes = IOUtils.toByteArray(new FileInputStream("/Users/james/Downloads/SnomedCT_Release_INT_20160131_Full.zip"));
-
-		mySvc.loadSnomedCt(list(bytes), mySrd);
-	}
 
 	@Test
 	public void testLoadSnomedCtBadInput() throws Exception {
@@ -174,30 +167,13 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 
 		ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
 
-		try {
-			mySvc.loadSnomedCt(list(bos.toByteArray()), mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).contains("Could not find the following mandatory files in input: ");
-		}
+		String instanceId = myTerminologyTestHelper.startImportSnomedCtJobAndWaitForCompletion("20160131", myFiles, false, true);
+
+		JobInstance instance = myJobCoordinator.getInstance(instanceId);
+		assertEquals(StatusEnum.FAILED, instance.getStatus());
+		assertThat(instance.getErrorMessage()).contains("No files in the distribution were matched by step(s)");
 	}
 
-	private TreeSet<String> toCodes(TermCodeSystemVersion theCsv, boolean theAddChildren) {
-		TreeSet<String> retVal = new TreeSet<>();
-		for (TermConcept next : theCsv.getConcepts()) {
-			toCodes(retVal, next, theAddChildren);
-		}
-		return retVal;
-	}
-
-	private void toCodes(TreeSet<String> theCodes, TermConcept theConcept, boolean theAddChildren) {
-		theCodes.add(theConcept.getCode());
-		if (theAddChildren) {
-			for (TermConceptParentChildLink next : theConcept.getChildren()) {
-				toCodes(theCodes, next.getChild(), theAddChildren);
-			}
-		}
-	}
 
 
 }

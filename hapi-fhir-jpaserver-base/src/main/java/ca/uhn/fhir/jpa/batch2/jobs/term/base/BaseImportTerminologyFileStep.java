@@ -114,6 +114,11 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 		return Optional.empty();
 	}
 
+	@Override
+	public boolean mustFindFile() {
+		return true;
+	}
+
 	protected Properties getJobProperties(StepExecutionDetails<PT, ?> theStepExecutionDetails) {
 		PT jobParameters = theStepExecutionDetails.getParameters();
 		Properties retVal = jobParameters.getJobProperties();

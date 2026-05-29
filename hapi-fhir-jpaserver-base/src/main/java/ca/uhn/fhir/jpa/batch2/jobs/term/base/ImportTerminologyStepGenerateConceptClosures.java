@@ -117,4 +117,12 @@ public class ImportTerminologyStepGenerateConceptClosures<PT extends BaseTermino
 		// This step doesn't process any files
 		return Optional.empty();
 	}
+
+
+	@Override
+	public boolean mustFindFile() {
+		// This step doesn't process any files
+		return false;
+	}
+
 }

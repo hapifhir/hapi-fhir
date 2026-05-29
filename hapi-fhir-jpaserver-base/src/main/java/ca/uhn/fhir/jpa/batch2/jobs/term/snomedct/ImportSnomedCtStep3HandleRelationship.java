@@ -28,7 +28,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -77,7 +76,7 @@ public class ImportSnomedCtStep3HandleRelationship
 	protected List<LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportSnomedCtJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
-			FileHandlingType.TSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
+			FileHandlingType.TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS,
 			t->t.contains("sct2_Relationship_Full")));
 	}
 

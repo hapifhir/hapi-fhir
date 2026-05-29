@@ -57,6 +57,11 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStep<Base
 			Pattern.compile(".*LinguisticVariants/([a-z]{2})([A-Z]{2})([0-9]+)LinguisticVariant.csv");
 
 	@Override
+	public boolean mustFindFile() {
+		return false;
+	}
+
+	@Override
 	protected MyBaseContext newContextObject(
 			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext();

@@ -66,7 +66,10 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
@@ -120,6 +123,15 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 		TerminologyFileSetJson fileSet = newTerminologyFileSetJson();
 
+		Set<String> stepsWhichHaveNotFoundFileAndNeedTo = theStepExecutionDetails
+			.getJobDefinition()
+			.getSteps()
+			.stream()
+			.filter(t->t.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep<?,?,?>)
+			.filter(t->((ITerminologyImportFileHandlerStep<PT, ?, ?>) t.getJobStepWorker()).mustFindFile())
+			.map(JobDefinitionStep::getStepId)
+			.collect(Collectors.toCollection(LinkedHashSet::new));
+
 		try (InputStream inputStream = loincFileAttachment.getInputStream()) {
 			try (BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
 				ZipArchiveInputStream zipInputStream = new ZipArchiveInputStream(bufferedInputStream);
@@ -140,6 +152,10 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 										jobParameters,
 										theStepExecutionDetails.getJobDefinition(),
 										nextFileName);
+
+						for (StepIdAndFileHandlingInstructions processor : processors) {
+							stepsWhichHaveNotFoundFileAndNeedTo.remove(processor.stepId());
+						}
 
 						ListMultimap<ITerminologyImportFileHandlerStep.FileHandlingType, String>
 								fileHandlingTypeToAttachmentIds = MultimapBuilder.hashKeys()
@@ -186,8 +202,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 													chunkSize,
 													theDataSink);
 										}
-										case TSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS -> {
-											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 50000);
+										case TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS -> {
+											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 5000);
 											yield csvSplitWithRepeatHeader(
 												'\t',instanceId,
 													bytes,
@@ -217,6 +233,10 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		} catch (IOException e) {
 			throw new JobExecutionFailedException(
 					Msg.code(2938) + "Files to expand " + getTerminologyName() + " zip file: " + e.getMessage(), e);
+		}
+
+		if (!stepsWhichHaveNotFoundFileAndNeedTo.isEmpty()) {
+			throw new JobExecutionFailedException("No files in the distribution were matched by step(s): " + stepsWhichHaveNotFoundFileAndNeedTo);
 		}
 
 		afterCompletionOfFileProcessing(context, theDataSink);
@@ -409,6 +429,11 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 	@Nonnull
 	public static CSVParser newCsvParser(char theDelimiter, Reader theReader) throws IOException {
+		Character quoteCharacter = '"';
+		if (theDelimiter == '\t') {
+			quoteCharacter = null;
+		}
+
 		return new CSVParser(
 				theReader,
 				CSVFormat.DEFAULT
@@ -416,7 +441,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 						.setDelimiter(theDelimiter)
 						.setEscape(null)
 						.setIgnoreEmptyLines(true)
-						.setQuote('"')
+						.setQuote(quoteCharacter)
 						.setRecordSeparator('\n')
 						.setNullString("")
 						.setQuoteMode(QuoteMode.NON_NUMERIC)
