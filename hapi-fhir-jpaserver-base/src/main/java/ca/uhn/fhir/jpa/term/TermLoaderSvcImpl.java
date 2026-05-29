@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -31,10 +30,6 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.term.icd10.Icd10Loader;
 import ca.uhn.fhir.jpa.term.icd10cm.Icd10CmLoader;
-import ca.uhn.fhir.jpa.term.snomedct.SctHandlerConcept;
-import ca.uhn.fhir.jpa.term.snomedct.SctHandlerDescription;
-import ca.uhn.fhir.jpa.term.snomedct.SctHandlerRelationship;
-import ca.uhn.fhir.jpa.util.Counter;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -49,7 +44,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -68,14 +62,11 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -87,9 +78,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	static final String IMGTHLA_HLA_NOM_TXT = "hla_nom.txt";
 	static final String IMGTHLA_HLA_XML = "hla.xml";
 	static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
-	private static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
-	private static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full";
-	private static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
 	private static final String CUSTOM_CODESYSTEM_XML = "codesystem.xml";
 
 	private static final int LOG_INCREMENT = 1000;
@@ -149,20 +137,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	@VisibleForTesting
 	LoadedFileDescriptors getLoadedFileDescriptors(List<FileDescriptor> theFiles) {
 		return new LoadedFileDescriptors(theFiles);
-	}
-
-	@Override
-	public UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
-
-			List<String> expectedFilenameFragments =
-					Arrays.asList(SCT_FILE_DESCRIPTION, SCT_FILE_RELATIONSHIP, SCT_FILE_CONCEPT);
-			descriptors.verifyMandatoryFilesExist(expectedFilenameFragments);
-
-			ourLog.info("Beginning SNOMED CT processing");
-
-			return processSnomedCtFiles(descriptors, theRequestDetails);
-		}
 	}
 
 	@Override
@@ -290,44 +264,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		}
 	}
 
-	private void dropCircularRefs(
-			TermConcept theConcept, ArrayList<String> theChain, Map<String, TermConcept> theCode2concept) {
-
-		theChain.add(theConcept.getCode());
-		for (Iterator<TermConceptParentChildLink> childIter =
-						theConcept.getChildren().iterator();
-				childIter.hasNext(); ) {
-			TermConceptParentChildLink next = childIter.next();
-			TermConcept nextChild = next.getChild();
-			if (theChain.contains(nextChild.getCode())) {
-
-				StringBuilder b = new StringBuilder();
-				b.append("Removing circular reference code ");
-				b.append(nextChild.getCode());
-				b.append(" from parent ");
-				b.append(next.getParent().getCode());
-				b.append(". Chain was: ");
-				for (String nextInChain : theChain) {
-					TermConcept nextCode = theCode2concept.get(nextInChain);
-					b.append(nextCode.getCode());
-					b.append('[');
-					b.append(StringUtils.substring(nextCode.getDisplay(), 0, 20)
-							.replace("[", "")
-							.replace("]", "")
-							.trim());
-					b.append("] ");
-				}
-				ourLog.info(b.toString(), theConcept.getCode());
-				childIter.remove();
-				nextChild.getParents().remove(next);
-
-			} else {
-				dropCircularRefs(nextChild, theChain, theCode2concept);
-			}
-		}
-		theChain.remove(theChain.size() - 1);
-	}
-
 	private Optional<String> loadFile(LoadedFileDescriptors theDescriptors, String... theFilenames) {
 		for (FileDescriptor next : theDescriptors.getUncompressedFileDescriptors()) {
 			for (String nextFilename : theFilenames) {
@@ -449,61 +385,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		//		return new UploadStatistics(conceptCount, target);
 	}
 
-	private UploadStatistics processSnomedCtFiles(
-			LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {
-		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
-		final Map<String, TermConcept> id2concept = new HashMap<>();
-		final Map<String, TermConcept> code2concept = new HashMap<>();
-		final Set<String> validConceptIds = new HashSet<>();
-
-		IZipContentsHandlerCsv handler = new SctHandlerConcept(validConceptIds);
-		iterateOverZipFileCsv(theDescriptors, SCT_FILE_CONCEPT, handler, '\t', null, true);
-
-		ourLog.info("Have {} valid concept IDs", validConceptIds.size());
-
-		handler = new SctHandlerDescription(validConceptIds, code2concept, id2concept, codeSystemVersion);
-		iterateOverZipFileCsv(theDescriptors, SCT_FILE_DESCRIPTION, handler, '\t', null, true);
-
-		ourLog.info("Got {} concepts, cloning map", code2concept.size());
-		final HashMap<String, TermConcept> rootConcepts = new HashMap<>(code2concept);
-
-		handler = new SctHandlerRelationship(codeSystemVersion, code2concept);
-		iterateOverZipFileCsv(theDescriptors, SCT_FILE_RELATIONSHIP, handler, '\t', null, true);
-
-		IOUtils.closeQuietly(theDescriptors);
-
-		ourLog.info("Looking for root codes");
-		rootConcepts
-				.entrySet()
-				.removeIf(theStringTermConceptEntry ->
-						!theStringTermConceptEntry.getValue().getParents().isEmpty());
-
-		ourLog.info(
-				"Done loading SNOMED CT files - {} root codes, {} total codes",
-				rootConcepts.size(),
-				code2concept.size());
-
-		Counter circularCounter = new Counter();
-		for (TermConcept next : rootConcepts.values()) {
-			long count = circularCounter.getThenAdd();
-			float pct = ((float) count / rootConcepts.size()) * 100.0f;
-			ourLog.info(
-					" * Scanning for circular refs - have scanned {} / {} codes ({}%)",
-					count, rootConcepts.size(), pct);
-			dropCircularRefs(next, new ArrayList<>(), code2concept);
-		}
-
-		codeSystemVersion.getConcepts().addAll(rootConcepts.values());
-
-		CodeSystem cs = new org.hl7.fhir.r4.model.CodeSystem();
-		cs.setUrl(SCT_URI);
-		cs.setName("SNOMED CT");
-		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
-
-		return new UploadStatistics(code2concept.size(), target);
-	}
 
 	private IIdType storeCodeSystem(
 			RequestDetails theRequestDetails,
@@ -534,17 +415,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			boolean theIsPartialFilename) {
 		iterateOverZipFileCsv(
 				theDescriptors, theFileNamePart, theHandler, theDelimiter, theQuoteMode, theIsPartialFilename, true);
-	}
-
-	public static void iterateOverZipFileCsvOptional(
-			LoadedFileDescriptors theDescriptors,
-			String theFileNamePart,
-			IZipContentsHandlerCsv theHandler,
-			char theDelimiter,
-			QuoteMode theQuoteMode,
-			boolean theIsPartialFilename) {
-		iterateOverZipFileCsv(
-				theDescriptors, theFileNamePart, theHandler, theDelimiter, theQuoteMode, theIsPartialFilename, false);
 	}
 
 	private static void iterateOverZipFileCsv(

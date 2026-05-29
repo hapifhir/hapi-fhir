@@ -75,7 +75,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 			// FIXME: delete this index and add migration
 			@Index(name = "FK_CONCEPTPROP_CSV", columnList = "CS_VER_PID"),
 			// FIXME: add migration
-			@Index(name = "FK_CONCEPTPROP_CSV_PROP", columnList = "CS_VER_PID,PROP_KEY")
+			@Index(name = "FK_CONCEPTPROP_CSV_PROP_VALS", columnList = "CS_VER_PID,PROP_KEY,PROP_VAL")
 		})
 @IdClass(IdAndPartitionId.class)
 public class TermConceptProperty extends BasePartitionable implements Serializable {

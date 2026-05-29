@@ -20,7 +20,7 @@ public class ImportTerminologyTestHarnessApp {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportTerminologyTestHarnessApp.class);
 
 	public static void main(String[] args) throws Exception {
-		File targetDb = new File("target/term-loading-test-db");
+		File targetDb = new File("target/term-loading-test-db/");
 		FileUtils.deleteDirectory(targetDb);
 
 		AnnotationConfigApplicationContext appCtx = new AnnotationConfigApplicationContext(MyConfig.class);
@@ -52,7 +52,7 @@ public class ImportTerminologyTestHarnessApp {
 
 		public void setConnectionProperties(BasicDataSource theDataSource) {
 			theDataSource.setDriver(new org.h2.Driver());
-			theDataSource.setUrl("jdbc:h2:file:./target/term-loading-test-db");
+			theDataSource.setUrl("jdbc:h2:file:./target/term-loading-test-db/db");
 			theDataSource.setMaxWait(Duration.ofSeconds(30));
 			theDataSource.setUsername("");
 			theDataSource.setPassword("");

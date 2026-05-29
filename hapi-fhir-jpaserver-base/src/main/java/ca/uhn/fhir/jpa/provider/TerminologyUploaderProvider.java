@@ -435,8 +435,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						localFiles, theRequestDetails);
 					case ITermLoaderSvc.IMGTHLA_URI -> myTerminologyLoaderSvc.loadImgthla(
 						localFiles, theRequestDetails);
-					case ITermLoaderSvc.SCT_URI -> myTerminologyLoaderSvc.loadSnomedCt(
-						localFiles, theRequestDetails);
 					default -> myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
 				};
 

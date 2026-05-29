@@ -34,12 +34,15 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.util.QueryChunker;
+import ca.uhn.fhir.util.StopWatch;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -61,6 +64,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class ImportSnomedCtStep3HandleRelationship
 		extends BaseImportSnomedCtStep<ImportSnomedCtStep3HandleRelationship.ImportSnomedCtContext> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportSnomedCtStep3HandleRelationship.class);
 
 	@Autowired
 	private IHapiTransactionService myTxService;
@@ -119,6 +123,7 @@ public class ImportSnomedCtStep3HandleRelationship
 
 		Map<String, String> idToCode = new HashMap<>();
 
+		StopWatch sw = new StopWatch();
 		myTxService
 			.withSystemRequestOnDefaultPartition()
 				.execute(()->{
@@ -130,6 +135,7 @@ public class ImportSnomedCtStep3HandleRelationship
 						}
 					});
 				});
+		ourLog.info("Prefetched {} SNOMED CT concepts by ID in {}", idToCode.size(), sw);
 
 		theContext.setSnomedIdToCode(idToCode);
 
@@ -164,9 +170,9 @@ public class ImportSnomedCtStep3HandleRelationship
 			String destinationCode = theContext.getSnomedIdToCode().get(destinationId);
 
 			// FIXME: remove
-			if (sourceCode == null || destinationCode == null) {
-				return;
-			}
+//			if (sourceCode == null || destinationCode == null) {
+//				return;
+//			}
 
 			Validate.notNull(sourceCode, "Source code not found for id: %s" , sourceId);
 			Validate.notNull(destinationCode, "Target code not found for id: %s" , destinationId);
