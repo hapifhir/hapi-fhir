@@ -2604,7 +2604,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> cq = cb.createTupleQuery();
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.multiselect(from.get("myResourceType"), from.get("myFhirId"), from.get("myVersion"));
+		cq.multiselect(from.get("myPid"), from.get("myResourceType"), from.get("myFhirId"), from.get("myVersion"));
 		Predicate wherePredicate;
 
 		if (myPartitionSettings.isDatabasePartitionMode() && myDialectSvc.isMssql()) {
@@ -2628,9 +2628,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		cq.where(wherePredicate);
 
 		return myEntityManager.createQuery(cq).getResultStream().map(t -> {
-			String resourceType = t.get(0, String.class);
-			String fhirId = t.get(1, String.class);
-			Long version = t.get(2, Long.class);
+			JpaPid pid = t.get(0, JpaPid.class);
+			String resourceType = t.get(1, String.class);
+			String fhirId = t.get(2, String.class);
+			Long version = t.get(3, Long.class);
+
+			/*
+			 * There really shouldn't be any null FHIR_ID values in the wild any more, but
+			 * just in case... I think this would be fine to remove eventually.
+			 */
+			if (isBlank(fhirId)) {
+				fhirId = Long.toString(pid.getId());
+			}
+
 			return myFhirContext.getVersion().newIdType(resourceType + "/" + fhirId + "/_history/" + version);
 		});
 	}
