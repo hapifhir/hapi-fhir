@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class TestPartitionSelectorInterceptor {
+	public static final String RESOURCE_TYPE_ALL = "*";
 	private RequestPartitionId myNextPartition;
 	private final Set<String> myNonPartitionableResources = new HashSet<>();
 	private BaseRequestPartitionHelperSvc myHelperSvc = new RequestPartitionHelperSvc();
@@ -64,6 +65,9 @@ public class TestPartitionSelectorInterceptor {
 		myNextPartition = theNextPartition;
 	}
 
+	/**
+	 * @param theResourceType A resource type (e.g. "Patient") or {@link #RESOURCE_TYPE_ALL}
+	 */
 	public void setPartitionIdForResourceType(String theResourceType, Integer thePartitionId) {
 		myResourceTypeToPartitionId.put(theResourceType, thePartitionId);
 	}
@@ -93,6 +97,11 @@ public class TestPartitionSelectorInterceptor {
 
 			if (myNextPartition == null) {
 				Integer partitionIdForResourceType = myResourceTypeToPartitionId.get(theResourceType);
+				if (partitionIdForResourceType != null) {
+					return RequestPartitionId.fromPartitionId(partitionIdForResourceType);
+				}
+
+				partitionIdForResourceType = myResourceTypeToPartitionId.get(RESOURCE_TYPE_ALL);
 				if (partitionIdForResourceType != null) {
 					return RequestPartitionId.fromPartitionId(partitionIdForResourceType);
 				}
