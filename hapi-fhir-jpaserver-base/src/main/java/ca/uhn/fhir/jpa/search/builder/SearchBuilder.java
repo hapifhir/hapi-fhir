@@ -169,6 +169,8 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.index.IdHelperService.EMPTY_PREDICATE_ARRAY;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE_PARTITION_ID;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE_PID;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
@@ -1374,15 +1376,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		List<JpaPid> versionlessPids = new ArrayList<>(thePids);
 		int expectedCount = versionlessPids.size();
-		if (versionlessPids.size() < getMaximumPageSize()) {
-			/*
-			 * This method adds a bunch of extra params to the end of the parameter list
-			 * which are for a resource PID that will never exist (-1 / NO_MORE). We do this
-			 * so that the database can rely on a cached execution plan since we're not
-			 * generating a new SQL query for every possible number of resources.
-			 */
-			versionlessPids = normalizeIdListForInClause(versionlessPids);
-		}
+		versionlessPids = normalizeIdListForInClause(versionlessPids);
 
 		// Load the resource bodies
 		List<ResourceHistoryTable> resourceSearchViewList = loadCurrentResourceVersions(versionlessPids);
@@ -1487,22 +1481,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	@VisibleForTesting
 	public List<ResourceHistoryTable> loadCurrentResourceVersionsForMsSqlDbpm(List<JpaPid> theResourcePids) {
 		Validate.isTrue(myPartitionSettings.isDatabasePartitionMode(), "This method should only be called in DBPM");
-		List<ResourceHistoryTable> resourceSearchViewList;
 
-		// Split the resource PIDs into partitions for efficient querying. We use a tree
-		// for the partition IDs to make the SQL consistent for tests.
-		Multimap<Integer, Long> partitionIdToPid =
-				MultimapBuilder.treeKeys().arrayListValues().build();
-		for (JpaPid pid : theResourcePids) {
-			// The SearchBuilder pads the list with entries that will never match
-			// a real resource in order to create predictable numbers of parameters,
-			// so we'll put appropriate values here for that too
-			if (JpaConstants.NO_MORE.equals(pid)) {
-				partitionIdToPid.put(-1, -1L);
-			} else {
-				partitionIdToPid.put(pid.getPartitionId(), pid.getId());
-			}
-		}
+		Multimap<Integer, Long> partitionIdToPid = splitPidListByPartitionId(theResourcePids);
 
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceHistoryTable> cq = cb.createQuery(ResourceHistoryTable.class);
@@ -1526,8 +1506,30 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		cq.where(currentVersionPredicate, cb.or(partitionAndPidPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
 
 		TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(cq);
-		resourceSearchViewList = query.getResultList();
-		return resourceSearchViewList;
+		return query.getResultList();
+	}
+
+	@Nonnull
+	public static Multimap<Integer, Long> splitPidListByPartitionId(List<JpaPid> theResourcePids) {
+		// Split the resource PIDs into partitions for efficient querying. We use a tree
+		// for the partition IDs to make the SQL consistent for tests.
+		Multimap<Integer, Long> partitionIdToPid =
+				MultimapBuilder.treeKeys().arrayListValues().build();
+		Integer partitionInUse = null;
+		for (JpaPid pid : theResourcePids) {
+			// The SearchBuilder pads the list with entries that will never match
+			// a real resource in order to create predictable numbers of parameters,
+			// so we'll put appropriate values here for that too
+			if (JpaConstants.NO_MORE.equals(pid)) {
+				partitionIdToPid.put(getIfNull(partitionInUse, NO_MORE_PARTITION_ID), NO_MORE_PID);
+			} else {
+				partitionIdToPid.put(pid.getPartitionId(), pid.getId());
+				if (partitionInUse == null) {
+					partitionInUse = pid.getPartitionId();
+				}
+			}
+		}
+		return partitionIdToPid;
 	}
 
 	@SuppressWarnings("OptionalIsPresent")

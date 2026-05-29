@@ -16,16 +16,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.UriType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,6 +61,11 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 
 		registerPartitionInterceptorAndCreatePartitions();
 		initResourceTypeCacheFromConfig();
+	}
+
+	@AfterEach
+	public void after() {
+		DialectSvc.setForceMsSqlMode(false);
 	}
 
 	@Test
@@ -129,6 +141,45 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		} finally {
 			DialectSvc.setForceMsSqlMode(false);
+		}
+	}
+
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testRefreshSearchParameterCache(boolean theMssqlMode) {
+		// Setup
+		DialectSvc.setForceMsSqlMode(theMssqlMode);
+
+		myPartitionSelectorInterceptor.setPartitionIdForResourceType("*", 1);
+		requireNonNull(myValidationSupport.fetchAllSearchParameters()).subList(0, 20).forEach(
+			sp->mySearchParameterDao.update((SearchParameter) sp, newSrd())
+		);
+
+		// Test
+		myCaptureQueriesListener.clear();
+		mySearchParamRegistry.forceRefresh();
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectCount(4)
+				.selectSqlAtIndex(0).startsWith("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'SearchParameter') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = '0'))")
+				.selectSqlAtIndex(2).startsWith("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = 'SearchParameter') AND (t0.RES_DELETED_AT IS NULL)) AND (t0.PARTITION_ID = '0'))")
+		);
+
+		if (theMssqlMode) {
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread()
+					.selectSqlAtIndex(1).withoutInlinedParams().endsWith(" where rt1_0.PARTITION_ID=? and rt1_0.RES_ID in (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+					.selectSqlAtIndex(3).withoutInlinedParams().endsWith(" where mrt1_0.RES_VER=rht1_0.RES_VER and (mrt1_0.PARTITION_ID=? and mrt1_0.RES_ID in (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?))")
+			);
+		} else {
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread()
+					.selectSqlAtIndex(1).withoutInlinedParams().endsWith(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in ((?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?))")
+					.selectSqlAtIndex(3).withoutInlinedParams().endsWith(" where (mrt1_0.RES_ID,mrt1_0.PARTITION_ID) in ((?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?),(?,?)) and mrt1_0.RES_VER=rht1_0.RES_VER")
+			);
 		}
 	}
 
