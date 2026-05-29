@@ -2581,16 +2581,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					theRequestPartitionId.getPartitionIds().get(0)));
 		}
 
-
 		int chunkSize = SearchBuilder.getMaximumPageSize();
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			chunkSize = chunkSize / 2;
 		}
 
-		return QueryChunker
-			.chunk(pidStream, chunkSize)
-			.flatMap(this::pidListToVersionedIdList);
-
+		return QueryChunker.chunk(pidStream, chunkSize).flatMap(this::pidListToVersionedIdList);
 	}
 
 	/**
@@ -2610,9 +2606,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (myPartitionSettings.isDatabasePartitionMode() && myDialectSvc.isMssql()) {
 			Multimap<Integer, Long> partitionIdToPid = splitPidListByPartitionId(pidsNormalized);
 			List<Predicate> partitionAndPidPredicates =
-				new ArrayList<>(partitionIdToPid.keySet().size());
+					new ArrayList<>(partitionIdToPid.keySet().size());
 			for (Map.Entry<Integer, Collection<Long>> entry :
-				partitionIdToPid.asMap().entrySet()) {
+					partitionIdToPid.asMap().entrySet()) {
 				Integer partitionId = entry.getKey();
 				Collection<Long> pidsForPartitionId = entry.getValue();
 
@@ -2627,17 +2623,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		cq.where(wherePredicate);
 
-		return myEntityManager
-			.createQuery(cq)
-			.getResultStream()
-			.map(t -> {
-				String resourceType = t.get(0, String.class);
-				String fhirId = t.get(1, String.class);
-				Long version = t.get(2, Long.class);
-				return myFhirContext.getVersion().newIdType(resourceType + "/" + fhirId + "/_history/" + version);
-			});
+		return myEntityManager.createQuery(cq).getResultStream().map(t -> {
+			String resourceType = t.get(0, String.class);
+			String fhirId = t.get(1, String.class);
+			Long version = t.get(2, Long.class);
+			return myFhirContext.getVersion().newIdType(resourceType + "/" + fhirId + "/_history/" + version);
+		});
 	}
-
 
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
 		MT retVal = ReflectionUtil.newInstance(theType);
