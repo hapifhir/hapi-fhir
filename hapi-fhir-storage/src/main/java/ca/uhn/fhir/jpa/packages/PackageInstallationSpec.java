@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.model.api.annotation.ExampleSupplier;
+import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,7 +29,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -129,27 +129,9 @@ public class PackageInstallationSpec {
 
 	public PackageInstallationSpec() {}
 
-	public PackageInstallationSpec(PackageInstallationSpec theOriginalSpec) {
-		myPackageUrl = theOriginalSpec.myPackageUrl;
-		myName = theOriginalSpec.myName;
-		myVersion = theOriginalSpec.myVersion;
-		myInstallMode = theOriginalSpec.myInstallMode;
-		myFetchDependencies = theOriginalSpec.myFetchDependencies;
-		myReloadExisting = theOriginalSpec.myReloadExisting;
-		myVersionPolicy = theOriginalSpec.myVersionPolicy;
-		myDryRun = theOriginalSpec.myDryRun;
-
-		if (theOriginalSpec.myInstallResourceTypes != null) {
-			myInstallResourceTypes = new ArrayList<>(theOriginalSpec.myInstallResourceTypes);
-		}
-		if (theOriginalSpec.myDependencyExcludes != null) {
-			myDependencyExcludes = new ArrayList<>(theOriginalSpec.myDependencyExcludes);
-		}
-		if (theOriginalSpec.myAdditionalResourceFolders != null) {
-			myAdditionalResourceFolders = new HashSet<>(theOriginalSpec.myAdditionalResourceFolders);
-		}
-
-		// we don't copy myPackageContents because it is transient anyway
+	public static PackageInstallationSpec copyOf(PackageInstallationSpec theOriginalSpec) {
+		String json = JsonUtil.serialize(theOriginalSpec);
+		return JsonUtil.deserialize(json, PackageInstallationSpec.class);
 	}
 
 	public List<String> getDependencyExcludes() {

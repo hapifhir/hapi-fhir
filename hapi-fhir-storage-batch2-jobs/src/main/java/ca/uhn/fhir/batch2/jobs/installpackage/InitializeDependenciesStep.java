@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageWithDependenciesJson;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
@@ -100,9 +101,11 @@ public class InitializeDependenciesStep
 
 			result.setDependencyJobIds(jobIds);
 		} catch (Exception e) {
-			String message = String.format(
-					"Failed to process dependencies for package %s#%s",
-					installationSpec.getName(), installationSpec.getVersion());
+			// adding a code to this since the exceptions caught here do not have a code
+			String message = Msg.code(2955)
+					+ String.format(
+							"Failed to process dependencies for package %s#%s: %s",
+							installationSpec.getName(), installationSpec.getVersion(), e.getMessage());
 			ourLog.warn(message, e);
 			theDataSink.recoveredError(message);
 		}
@@ -144,8 +147,8 @@ public class InitializeDependenciesStep
 				}
 			} catch (Exception e) {
 				String message = String.format(
-						"Failed to launch child job for dependency package %s#%s. Skipping this dependency.",
-						nextDependency.name(), nextDependency.version());
+						"Failed to launch child job for dependency package %s#%s. Skipping this dependency. Cause: %s",
+						nextDependency.name(), nextDependency.version(), e.getMessage());
 				ourLog.warn(message, e);
 				theDataSink.recoveredError(message);
 			}
@@ -158,7 +161,7 @@ public class InitializeDependenciesStep
 	private static JobInstanceStartRequest buildStartRequest(
 			PackageUtils.DependentPackage theDependency, PackageInstallationJobParameters theParentJobParameters) {
 		PackageInstallationSpec dependencySpec =
-				new PackageInstallationSpec(theParentJobParameters.getInstallationSpec());
+				PackageInstallationSpec.copyOf(theParentJobParameters.getInstallationSpec());
 		dependencySpec.setName(theDependency.name());
 		dependencySpec.setVersion(theDependency.version());
 		dependencySpec.setPackageUrl(null);
