@@ -35,6 +35,7 @@ import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 
 public class JobInstanceProgressCalculator {
@@ -59,7 +60,6 @@ public class JobInstanceProgressCalculator {
 		StopWatch stopWatch = new StopWatch();
 		ourLog.trace("calculating progress: {}", theInstanceId);
 
-		// calculate progress based on number of work chunks in COMPLETE state
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
 		myJobPersistence.updateInstance(theInstanceId, currentInstance -> {
@@ -84,6 +84,9 @@ public class JobInstanceProgressCalculator {
 			}
 			ourLog.debug(instanceProgress.toString());
 
+			// Log per-step throughput for operational visibility
+			logStepProgress(currentInstance, instanceProgress);
+
 			if (instanceProgress.hasNewStatus()) {
 				myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
 			}
@@ -91,6 +94,26 @@ public class JobInstanceProgressCalculator {
 			return true;
 		});
 		ourLog.trace("calculating progress: {} - complete in {}", theInstanceId, stopWatch);
+	}
+
+	private void logStepProgress(JobInstance theInstance, InstanceProgress theProgress) {
+		Map<String, StepProgressData> stepProgressMap = theProgress.getStepProgressMap();
+		if (stepProgressMap.isEmpty()) {
+			return;
+		}
+		for (Map.Entry<String, StepProgressData> entry : stepProgressMap.entrySet()) {
+			StepProgressData stepData = entry.getValue();
+			if (stepData.getRecordsProcessed() > 0) {
+				ourLog.debug(
+						"Job {} step [{}]: {}/{} chunks complete, {} records ({}/sec)",
+						theInstance.getInstanceId(),
+						entry.getKey(),
+						stepData.getCompleteChunkCount(),
+						stepData.getChunkCount(),
+						stepData.getRecordsProcessed(),
+						String.format("%.1f", stepData.getThroughputPerSecond()));
+			}
+		}
 	}
 
 	@Nonnull
@@ -103,7 +126,7 @@ public class JobInstanceProgressCalculator {
 
 			// global stats
 			myProgressAccumulator.addChunk(next);
-			// instance stats
+			// instance stats (includes per-step tracking)
 			instanceProgress.addChunk(next);
 		}
 
