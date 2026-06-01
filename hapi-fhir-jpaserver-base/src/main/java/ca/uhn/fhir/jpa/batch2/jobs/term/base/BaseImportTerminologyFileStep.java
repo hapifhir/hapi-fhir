@@ -27,7 +27,6 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.BaseImportLoincStep;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
@@ -54,7 +53,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.Callable;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.*;
 
@@ -887,43 +885,6 @@ public abstract class BaseImportTerminologyFileStep<
 					myTargetDisplay,
 					myEquivalence,
 					myTargetCodeSystemVersion);
-		}
-	}
-
-	// FIXME: move to ITerminologyImportFileHandlerStep and rename
-	public record LoincFileNameSpecification(
-			FileHandlingType fileHandlingType,
-			LoincUploadPropertiesEnum propertyName,
-			List<LoincUploadPropertiesEnum> defaultValues,
-			Predicate<String> fileNameTester) {
-
-		public LoincFileNameSpecification(
-				FileHandlingType theFileHandlingType,
-				LoincUploadPropertiesEnum thePropertyName,
-				LoincUploadPropertiesEnum... theDefaultValue) {
-			this(theFileHandlingType, thePropertyName, Arrays.asList(theDefaultValue), null);
-		}
-
-		public LoincFileNameSpecification(FileHandlingType theFileHandlingType, Predicate<String> theFileNameTester) {
-			this(theFileHandlingType, null, null, theFileNameTester);
-		}
-
-		public boolean matchFileName(Properties theJobProperties, String theFileName) {
-			boolean matches = false;
-			if (propertyName() != null) {
-				String propertyName = propertyName().getCode();
-				String fileName = theJobProperties.getProperty(propertyName, null);
-				if (isNotBlank(fileName)) {
-					matches = theFileName.endsWith(fileName);
-				} else {
-					for (LoincUploadPropertiesEnum nextDefault : defaultValues()) {
-						matches |= theFileName.endsWith(nextDefault.getCode());
-					}
-				}
-			} else if (this.fileNameTester() != null) {
-				matches = this.fileNameTester().test(theFileName);
-			}
-			return matches;
 		}
 	}
 

@@ -164,7 +164,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 
 						for (StepIdAndFileHandlingInstructions processor : processors) {
 							ITerminologyImportFileHandlerStep.FileHandlingType fileHandlingType =
-									processor.fileHandlingInstructions().fileHandlingType();
+									processor.fileHandlingType();
 
 							if (fileHandlingTypeToAttachmentIds.containsKey(fileHandlingType)) {
 								List<String> attachmentIds = fileHandlingTypeToAttachmentIds.get(fileHandlingType);
@@ -249,8 +249,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 		}
 
 		if (!stepsWhichHaveNotFoundFileAndNeedTo.isEmpty()) {
-			throw new JobExecutionFailedException(
-					"No files in the distribution were matched by step(s): " + stepsWhichHaveNotFoundFileAndNeedTo);
+			throw new JobExecutionFailedException(Msg.code(2956)
+					+ "No files in the distribution were matched by step(s): " + stepsWhichHaveNotFoundFileAndNeedTo);
 		}
 
 		afterCompletionOfFileProcessing(context, theDataSink);
@@ -446,7 +446,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 	}
 
 	@Nonnull
-	private Optional<ITerminologyImportFileHandlerStep.FileHandlingInstructions> canHandleFile(
+	private Optional<ITerminologyImportFileHandlerStep.FileHandlingType> canHandleFile(
 			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
 			ITerminologyImportFileHandlerStep<PT, ?, ?> theFileHandler,
 			PT theJobParameters,
@@ -457,8 +457,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 		for (BaseImportTerminologyFileCsvStep.LoincFileNameSpecification loincFileNameSpecification :
 				theFileHandler.getFilesToProcess(theStepExecutionDetails)) {
 			if (loincFileNameSpecification.matchFileName(jobProperties, theFileName)) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(
-						loincFileNameSpecification.fileHandlingType()));
+				return Optional.of(loincFileNameSpecification.fileHandlingType());
 			}
 		}
 
@@ -490,5 +489,5 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 	}
 
 	private record StepIdAndFileHandlingInstructions(
-			String stepId, ITerminologyImportFileHandlerStep.FileHandlingInstructions fileHandlingInstructions) {}
+			String stepId, ITerminologyImportFileHandlerStep.FileHandlingType fileHandlingType) {}
 }
