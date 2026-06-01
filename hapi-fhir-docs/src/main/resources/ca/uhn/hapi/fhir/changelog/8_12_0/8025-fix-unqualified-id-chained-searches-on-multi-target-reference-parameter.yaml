@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 8025
+title: "Fixed: Unqualified _id chained searches on a multi-target reference parameter 
+   (e.g. DiagnosticReport?based-on._id=sr-1) silently returned zero results when the SearchParameter declared 
+   more than one target type. The per-target-type subqueries were OR'd together on a shared SearchQueryBuilder, 
+   and the first iteration whose target type didn't contain the id called setMatchNothing(), short-circuiting 
+   the entire query — even when a sibling iteration would have matched. Empty per-branch lookups now emit 
+   a branch-local always-false condition instead, leaving the surrounding OR intact."
