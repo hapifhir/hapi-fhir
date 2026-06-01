@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.CustomCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -121,7 +122,30 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 		}
 
 		if (allOrPids != null && allOrPids.isEmpty()) {
+			/*
+			 * If we are being invoked as a child predicate (i.e. our caller is joining
+			 * us back via theSourceJoinColumn), we are by construction in an OR
+			 * position — for example, the unqualified chain "?based-on._id=x" iterates
+			 * every target type of the based-on SearchParameter and OR's the per-type
+			 * subqueries together.
+			 *
+			 * In that context, calling setMatchNothing() would taint the SHARED
+			 * SearchQueryBuilder and short-circuit the entire outer query — even
+			 * though sibling OR branches may still resolve. Instead, produce an
+			 * always-false condition for this branch only (and the symmetric
+			 * always-true for `ne`, since "id NOT IN {}" is trivially satisfied by
+			 * every row).
+			 */
+			if (theSourceJoinColumn != null) {
+				SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, defaultOperation);
+				return new CustomCondition(operation == SearchFilterParser.CompareOperation.ne ? "(NULL IS NULL)" : "(NULL IS NOT NULL)");
+			}
 
+			/*
+			 * Top-level call (no source-join column): the empty set is an AND-position
+			 * guarantee that nothing can match, so the existing setMatchNothing()
+			 * short-circuit is correct and desirable.
+			 */
 			setMatchNothing();
 
 		} else if (allOrPids != null) {
