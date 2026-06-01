@@ -1118,11 +1118,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@Test
-	public void testPlaceholderWithInlineConditionalUrl(){
-		fail("Not yet implemented");
-	}
-
-	@Test
 	public void testTransaction_SplitAncillaryAndPatient_NewTransactionPerPartition() {
 		registerInterceptor(new MyTransactionSplitInterceptor());
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);

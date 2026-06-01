@@ -56,7 +56,6 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -71,7 +70,6 @@ import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -107,7 +105,6 @@ import org.apache.commons.lang3.ThreadUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -1078,106 +1075,30 @@ public abstract class BaseTransactionProcessor {
 				case POST: {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
-					String ifNoneExistStr = myVersionAdapter.getEntryIfNoneExist(theEntry);
-
-					// FIXME-TG:
-					// added to show that we need a different determination process for conditional create.
-					// this code may or may not work.
-					if (isNotBlank(ifNoneExistStr)) {
-						MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
-								myMatchUrlService.parseAndTranslateMatchUrl(ifNoneExistStr);
-
-						SearchParameterMap searchParameterMap = typeAndParams.searchParameterMap();
-
-						// SearchParameterMap.get returns null when the key isn't present; treat absent and empty
-						// the same way (the match URL has no _id parameter, so we route by search).
-						List<List<IQueryParameterType>> idValues = searchParameterMap.get(IAnyResource.SP_RES_ID);
-
-						if (idValues == null || idValues.isEmpty()) {
-							// the ifNoneExist does not have a '_id' parameters, we're searching for a resource
-							// matching the provided parameters
-							ReadPartitionIdRequestDetails details =
-									ReadPartitionIdRequestDetails.forSearchType(resourceType, searchParameterMap, null);
-
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineReadPartitionForRequest(
-											requestDetailsForEntry, details);
-
-						} else {
-							// we have an '_id' in the ifNoneExist, we can determine a partition for creation
-							TokenParam targetResourceIdParam =
-									(TokenParam) idValues.get(0).get(0);
-							String resourceIdSpecifiedInIfNoneExist = targetResourceIdParam.getValue();
-							String resourceIdFromEntryResource = resource.getIdElement()
-									.toUnqualifiedVersionless()
-									.getValue();
-
-							if (StringUtils.equals(resourceIdSpecifiedInIfNoneExist, resourceIdFromEntryResource)) {
-								// FIXME-TG do a try catch here and use ALL PARTITION if any exceptions
-								nextWriteEntryRequestPartitionId =
-										// FIXME-TG, this will fail a test and that is correct, good catch
-										myRequestPartitionHelperService.determineCreatePartitionForRequest(
-												requestDetailsForEntry, resource, resourceType);
-
-							} else {
-								// FIXME-TG: this msg code is not unique.  provide a unique one
-								throw new InvalidRequestException(
-										Msg.code(2542)
-												+ "Value for parameter '_id' in ifNoneExist request property does not match the resource id");
-							}
-						}
-
-					} else {
-						nextWriteEntryRequestPartitionId =
-								myRequestPartitionHelperService.determineCreatePartitionForRequest(
-										requestDetailsForEntry, resource, resourceType);
-					}
+					nextWriteEntryRequestPartitionId =
+							myRequestPartitionHelperService.determineCreatePartitionForRequest(
+									requestDetailsForEntry, resource, resourceType);
 					break;
 				}
 				case PUT: {
-					// FIXME-TG:
-					// added to show that we need a different determination process for conditional update.
-					// this code may or may not work.
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					if (resource != null) {
-						String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
-
-						if (isNotBlank(requestUrl)) {
-							if (requestUrl.indexOf('?') != -1) {
-								MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
-										myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
-								SearchParameterMap params = typeAndParams.searchParameterMap();
-								String resourceType =
-										typeAndParams.resourceDefinition().getName();
-								ReadPartitionIdRequestDetails details =
-										ReadPartitionIdRequestDetails.forSearchType(resourceType, params, null);
-								nextWriteEntryRequestPartitionId =
-										myRequestPartitionHelperService.determineReadPartitionForRequest(
-												requestDetailsForEntry, details);
-							}
-						} else {
-
-							String resourceType = myContext.getResourceType(resource);
-							String resourceId = null;
-
-							if (resource.getIdElement().hasIdPart()) {
-								resourceId = resourceType + "/"
-										+ resource.getIdElement().getIdPart();
-							}
-
+						String resourceType = myContext.getResourceType(resource);
+						String resourceId = null;
+						if (resource.getIdElement().hasIdPart()) {
+							resourceId =
+									resourceType + "/" + resource.getIdElement().getIdPart();
+						}
+						if (resourceId != null) {
+							nextWriteEntryRequestPartitionId = theTransactionDetails.getResolvedPartition(resourceId);
+						}
+						if (nextWriteEntryRequestPartitionId == null) {
+							nextWriteEntryRequestPartitionId =
+									myRequestPartitionHelperService.determineCreatePartitionForRequest(
+											requestDetailsForEntry, resource, resourceType);
 							if (resourceId != null) {
-								nextWriteEntryRequestPartitionId =
-										theTransactionDetails.getResolvedPartition(resourceId);
-							}
-
-							if (nextWriteEntryRequestPartitionId == null) {
-								nextWriteEntryRequestPartitionId =
-										myRequestPartitionHelperService.determineCreatePartitionForRequest(
-												requestDetailsForEntry, resource, resourceType);
-								if (resourceId != null) {
-									theTransactionDetails.addResolvedPartition(
-											resourceId, nextWriteEntryRequestPartitionId);
-								}
+								theTransactionDetails.addResolvedPartition(
+										resourceId, nextWriteEntryRequestPartitionId);
 							}
 						}
 					}
