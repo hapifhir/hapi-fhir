@@ -138,7 +138,8 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 			 */
 			if (theSourceJoinColumn != null) {
 				SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, defaultOperation);
-				return new CustomCondition(operation == SearchFilterParser.CompareOperation.ne ? "(NULL IS NULL)" : "(NULL IS NOT NULL)");
+				return new CustomCondition(
+						operation == SearchFilterParser.CompareOperation.ne ? "(NULL IS NULL)" : "(NULL IS NOT NULL)");
 			}
 
 			/*
