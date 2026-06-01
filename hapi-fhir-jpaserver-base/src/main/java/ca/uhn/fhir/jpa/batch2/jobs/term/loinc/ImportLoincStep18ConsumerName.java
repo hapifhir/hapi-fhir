@@ -53,6 +53,14 @@ public class ImportLoincStep18ConsumerName extends BaseImportLoincStep<BaseImpor
 				LOINC_CONSUMER_NAME_FILE_DEFAULT));
 	}
 
+	/**
+	 * Older distributions do not include this file
+	 */
+	@Override
+	public boolean mustFindFile() {
+		return false;
+	}
+
 	@Override
 	protected void handleRecord(
 			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
