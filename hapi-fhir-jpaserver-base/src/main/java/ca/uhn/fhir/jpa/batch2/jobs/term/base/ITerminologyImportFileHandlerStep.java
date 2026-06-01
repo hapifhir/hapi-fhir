@@ -21,19 +21,18 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface ITerminologyImportFileHandlerStep<
-				PT extends BaseTerminologyImportParameters, IT extends IModelJson, OT extends IModelJson>
+				PT extends ImportTerminologyJobParameters, IT extends IModelJson, OT extends IModelJson>
 		extends IJobStepWorker<PT, IT, OT> {
 
 	@Nonnull
-	Optional<FileHandlingInstructions> canHandleFile(
-			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, PT theJobParameters, String theFileName);
+	List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<PT, ?> theStepExecutionDetails);
 
 	/**
 	 * Returns true if it should be considered an error for this step to not match any files in the
@@ -42,9 +41,16 @@ public interface ITerminologyImportFileHandlerStep<
 	boolean mustFindFile();
 
 	enum FileHandlingType {
+		/** Comma-Separated Values */
 		CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
+		/** Comma-Separated Values */
 		CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
-		TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS
+
+		/** Tab-Separated Values */
+		TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS,
+
+		/** XML document */
+		XML
 	}
 
 	record FileHandlingInstructions(FileHandlingType fileHandlingType) {}

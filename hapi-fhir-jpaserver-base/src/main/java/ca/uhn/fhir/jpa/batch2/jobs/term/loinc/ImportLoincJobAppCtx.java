@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepChunkConceptsForGeneratingClosure;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepFinalize;
@@ -68,14 +69,14 @@ public class ImportLoincJobAppCtx {
 	 * to see descriptions of how this job works.
 	 */
 	@Bean
-	public JobDefinition<ImportLoincJobParameters> importLoincJobDefinition() {
+	public JobDefinition<ImportTerminologyJobParameters> importLoincJobDefinition() {
 		return JobDefinition.newBuilder()
 				.setInitialStatus(StatusEnum.BUILDING)
 				.setJobDefinitionId(JOB_ID_IMPORT_TERM_LOINC)
 				.setJobDescription("Import Terminology - LOINC")
 				.setJobDefinitionVersion(1)
 				.gatedExecution()
-				.setParametersType(ImportLoincJobParameters.class)
+				.setParametersType(ImportTerminologyJobParameters.class)
 				.setParametersValidator(new ImportLoincJobParametersValidator())
 				.addFirstStep(
 						"expand-zip",
@@ -377,7 +378,7 @@ public class ImportLoincJobAppCtx {
 	}
 
 	/**
-	 * Step 29: Linguistic Variant
+	 * Step 20: Linguistic Variant
 	 * This step adds additional designations to concepts from the LOINC Linguistic Variant File.
 	 * By default we don't add anything in this step, because these files are massive and add a long time
 	 * to process, and it's unlikely that most people want all possible linguistic variants imported.
@@ -396,7 +397,7 @@ public class ImportLoincJobAppCtx {
 	 * creates work chunks for {@link #importLoincStep22GenerateConceptClosures()} to process.
 	 */
 	@Bean
-	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportLoincJobParameters>
+	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportTerminologyJobParameters>
 			importLoincStep21ChunkConceptsForClosureGeneration() {
 		return new ImportTerminologyStepChunkConceptsForGeneratingClosure<>();
 	}
@@ -408,7 +409,7 @@ public class ImportLoincJobAppCtx {
 	 * concept PIDs and is stored in {@link TermConcept#getParentPidsAsString()}.
 	 */
 	@Bean
-	public ImportTerminologyStepGenerateConceptClosures<ImportLoincJobParameters>
+	public ImportTerminologyStepGenerateConceptClosures<ImportTerminologyJobParameters>
 			importLoincStep22GenerateConceptClosures() {
 		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
@@ -428,7 +429,7 @@ public class ImportLoincJobAppCtx {
 	 * </ul>
 	 */
 	@Bean
-	public ImportTerminologyStepFinalize<ImportLoincJobParameters> importLoincStep23Finalize() {
+	public ImportTerminologyStepFinalize<ImportTerminologyJobParameters> importLoincStep23Finalize() {
 		return new ImportTerminologyStepFinalize<>(
 				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}

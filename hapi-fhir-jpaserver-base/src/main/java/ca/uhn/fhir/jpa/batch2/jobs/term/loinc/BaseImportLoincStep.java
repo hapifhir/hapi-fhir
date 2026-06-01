@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 
 public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseContext>
-		extends BaseImportTerminologyFileStep<ImportLoincJobParameters, CT> {
+		extends BaseImportTerminologyFileCsvStep<ImportTerminologyJobParameters, CT> {
 	/**
 	 * This is <b>NOT</b> the LOINC CodeSystem URI! It is just
 	 * the website URL to LOINC.

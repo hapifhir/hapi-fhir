@@ -1,17 +1,29 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
-import ca.uhn.fhir.batch2.api.AttachmentDetails;
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.api.*;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.BaseImportLoincStep;
@@ -31,54 +43,28 @@ import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.PrimitiveType;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.*;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newCsvParser;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_CODE_SYSTEM_URL;
 
 public abstract class BaseImportTerminologyFileStep<
-				PT extends BaseTerminologyImportParameters, CT extends BaseImportTerminologyFileStep.MyBaseContext>
+				PT extends ImportTerminologyJobParameters, CT extends BaseImportTerminologyFileCsvStep.MyBaseContext>
 		extends BaseImportTerminologyStep
 		implements ITerminologyImportFileHandlerStep<PT, TerminologyFileSetJson, TerminologyFileSetJson> {
 
@@ -105,44 +91,9 @@ public abstract class BaseImportTerminologyFileStep<
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Nonnull
-	@Override
-	public Optional<FileHandlingInstructions> canHandleFile(
-			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, PT theJobParameters, String theFileName) {
-
-		Properties jobProperties = getJobProperties(theStepExecutionDetails);
-
-		for (LoincFileNameSpecification loincFileNameSpecification : getFilesToProcess(theStepExecutionDetails)) {
-			if (loincFileNameSpecification.matchFileName(jobProperties, theFileName)) {
-				return Optional.of(new FileHandlingInstructions(loincFileNameSpecification.fileHandlingType()));
-			}
-		}
-
-		return Optional.empty();
-	}
-
 	@Override
 	public boolean mustFindFile() {
 		return true;
-	}
-
-	protected Properties getJobProperties(StepExecutionDetails<PT, ?> theStepExecutionDetails) {
-		PT jobParameters = theStepExecutionDetails.getParameters();
-		Properties retVal = jobParameters.getJobProperties();
-		if (retVal == null) {
-			String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
-			retVal = new Properties();
-			try {
-				String filename = LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode();
-				AttachmentDetails attachment = myJobPersistence.fetchAttachmentByFilename(instanceId, filename);
-				retVal.load(attachment.getInputStream());
-			} catch (ResourceNotFoundException | IOException e) {
-				// no properties file was provided
-			}
-
-			jobParameters.setJobProperties(retVal);
-		}
-		return retVal;
 	}
 
 	@Nonnull
@@ -180,31 +131,15 @@ public abstract class BaseImportTerminologyFileStep<
 		if (isNotBlank(attachmentId)) {
 
 			AttachmentDetails attachment = myJobPersistence.fetchAttachmentById(jobInstanceId, attachmentId);
-			try (InputStream inputStream = attachment.getInputStream()) {
-				InputStreamReader reader = new InputStreamReader(
-						BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
-
-				/*
-				 * Even if the source files use a delimiter other than comma, the expand step (step 1)
-				 * splits the files up and rewrites them as CSV using a comma delimiter.
-				 */
-				CSVParser csvReader = newCsvParser(',', reader);
-				for (CSVRecord record : csvReader.getRecords()) {
-					handleRecord(
-							theStepExecutionDetails,
-							theJobMetadata,
-							jobParameters,
-							theContext,
-							record,
-							codeSystemToPopulate,
-							theData,
-							sourceFilename);
-				}
-
-			} catch (IOException e) {
-				throw new JobExecutionFailedException(
-						Msg.code(2941) + "Failed to read file attachment: " + e.getMessage(), e);
-			}
+			processAttachment(
+					theStepExecutionDetails,
+					theJobMetadata,
+					theContext,
+					attachment,
+					jobParameters,
+					codeSystemToPopulate,
+					theData,
+					sourceFilename);
 
 			syncToDb(theJobMetadata, theContext, codeSystemToPopulate, theStepExecutionDetails);
 		}
@@ -220,6 +155,16 @@ public abstract class BaseImportTerminologyFileStep<
 		return RunOutcome.SUCCESS;
 	}
 
+	protected abstract void processAttachment(
+			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			CT theContext,
+			AttachmentDetails attachment,
+			PT jobParameters,
+			CodeSystem codeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String sourceFilename);
+
 	protected <T> T executeInNewTransactionWithRetry(
 			Callable<T> theFunction, StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
 		int retryCount = 0;
@@ -232,6 +177,11 @@ public abstract class BaseImportTerminologyFileStep<
 				retryCount++;
 				int maxRetries = 10;
 				if (retryCount > maxRetries) {
+					ourLog.atError()
+							.setMessage("Failed to saver terminology due to version conflict after {} retries: {}")
+							.addArgument(retryCount)
+							.addArgument(e.getMessage())
+							.log();
 					throw e;
 				}
 				ourLog.atWarn()
@@ -253,20 +203,6 @@ public abstract class BaseImportTerminologyFileStep<
 	}
 
 	protected abstract CT newContextObject(StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails);
-
-	@Nonnull
-	protected abstract List<LoincFileNameSpecification> getFilesToProcess(
-			StepExecutionDetails<PT, ?> theStepExecutionDetails);
-
-	protected abstract void handleRecord(
-			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
-			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			PT theJobParameters,
-			CT theContext,
-			CSVRecord theRecord,
-			CodeSystem theCodeSystemToPopulate,
-			TerminologyFileSetJson theData,
-			String theSourceFilename);
 
 	protected TerminologyFileSetJson.RecordsAddedCounter getRecordsAddedCounter(
 			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
@@ -345,7 +281,7 @@ public abstract class BaseImportTerminologyFileStep<
 		String codeSystemVersion = theJobMetadata.getCodeSystem().getVersion();
 		assert isNotBlank(codeSystemVersion);
 
-		Properties jobProperties = getJobProperties(theStepExecutionDetails);
+		Properties jobProperties = ImportTerminologyUtil.getJobProperties(myJobPersistence, theStepExecutionDetails);
 		if (isNotBlank(theVersionPropertyName) && isNotBlank(jobProperties.getProperty(theVersionPropertyName))) {
 			version = jobProperties.getProperty(theVersionPropertyName) + "-" + codeSystemVersion;
 		} else {
@@ -954,7 +890,8 @@ public abstract class BaseImportTerminologyFileStep<
 		}
 	}
 
-	protected record LoincFileNameSpecification(
+	// FIXME: move to ITerminologyImportFileHandlerStep and rename
+	public record LoincFileNameSpecification(
 			FileHandlingType fileHandlingType,
 			LoincUploadPropertiesEnum propertyName,
 			List<LoincUploadPropertiesEnum> defaultValues,

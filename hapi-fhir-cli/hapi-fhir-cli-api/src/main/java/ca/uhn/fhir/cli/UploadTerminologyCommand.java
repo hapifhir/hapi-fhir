@@ -119,7 +119,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				null,
 				"dont-make-current",
 				false,
-				"If specified, the terminology version being uploaded will not be marked as the current version.");
+				"If specified, the terminology version being uploaded will not be marked as the current version. This option can only be specified on certain CodeSystem URLs.");
 
 		return options;
 	}

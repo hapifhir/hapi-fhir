@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
@@ -50,7 +51,7 @@ import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LO
  */
 public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		extends BaseExpandDistributionIntoFilesStep<
-				ImportLoincJobParameters, ImportLoincStep1ExpandDistributionIntoFilesStep.MyContext> {
+				ImportTerminologyJobParameters, ImportLoincStep1ExpandDistributionIntoFilesStep.MyContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep1ExpandDistributionIntoFilesStep.class);
 
 	@Override
@@ -66,12 +67,12 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 
 	@Override
 	protected void handleSynchronous(
-			StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
+			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
 			IJobDataSink<TerminologyFileSetJson> theDataSink,
 			MyContext theContext,
 			String theFileName,
 			byte[] theBytes,
-			ImportLoincJobParameters theJobParameters,
+			ImportTerminologyJobParameters theJobParameters,
 			TerminologyFileSetJson theFileSet,
 			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
 		super.handleSynchronous(
@@ -135,9 +136,9 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 
 	@Override
 	protected void startStaging(
-			StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
+			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
 			IJobDataSink<TerminologyFileSetJson> theDataSink,
-			ImportLoincJobParameters theJobParameters,
+			ImportTerminologyJobParameters theJobParameters,
 			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
 		super.startStaging(theStepExecutionDetails, theDataSink, theJobParameters, theJobMetadataAttachment);
 
