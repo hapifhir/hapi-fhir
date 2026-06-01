@@ -39,6 +39,22 @@ public class MatchUrlUtil {
 	}
 
 	/**
+	 * Returns {@code true} if the given reference value looks like an inline match URL
+	 * (e.g. {@code Patient?identifier=http://sys|val}) — i.e. a relative reference with a
+	 * query string. Absolute URLs ({@code http://}, {@code https://}) and existing
+	 * placeholders ({@code urn:}) are excluded.
+	 */
+	public static boolean isInlineMatchUrl(String theValue) {
+		if (StringUtils.isBlank(theValue)) {
+			return false;
+		}
+		if (theValue.startsWith("http://") || theValue.startsWith("https://") || theValue.startsWith("urn:")) {
+			return false;
+		}
+		return theValue.contains("?");
+	}
+
+	/**
 	 * Parses a FHIR-style Match URL (Patient?identifier=http://foo|bar) into
 	 * a parsed set of parameters.
 	 */

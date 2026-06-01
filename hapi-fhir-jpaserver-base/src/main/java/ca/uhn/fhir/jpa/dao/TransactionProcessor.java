@@ -708,6 +708,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						});
 					});
 		}
+
+		// FIXME:
+		// create placeholder resource here
+		// preFetchSearchParameterMaps will add MatchUrlToResolve.myRequestUrl as NOT_FOUND in the transactionDetails),
+		//
 	}
 
 	/**
