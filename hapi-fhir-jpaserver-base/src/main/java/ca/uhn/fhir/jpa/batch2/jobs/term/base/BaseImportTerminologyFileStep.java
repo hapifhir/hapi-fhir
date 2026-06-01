@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
@@ -421,10 +422,7 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 
 			populateConceptsIntoCodeSystem(theCodeExtractionContext.getCodeToConcept(), codeSystemToPopulate);
 
-			ourLog.info(
-				"Imported {} concept entries including {} root concept entries into CodeSystem for storage",
-				theCodeExtractionContext.getCodeToConcept().size(),
-				codeSystemToPopulate.getConcept().size());
+			StopWatch sw = new StopWatch();
 
 			Callable<UploadStatistics> uploader = () -> {
 				IBaseResource codeSystemToPopulateNonCanonical =
@@ -432,6 +430,13 @@ public abstract class BaseImportTerminologyFileStep<PT extends BaseTerminologyIm
 				return myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulateNonCanonical);
 			};
 			UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
+
+			ourLog.info(
+				"Imported {} concept entries including {} root concept entries for storage in {}. Outcome: {}",
+				theCodeExtractionContext.getCodeToConcept().size(),
+				codeSystemToPopulate.getConcept().size(),
+				sw,
+				uploadStatistics);
 
 			TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter =
 					getRecordsAddedCounter(theStepExecutionDetails);

@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 public class UploadStatistics {
@@ -88,5 +90,30 @@ public class UploadStatistics {
 
 	public IIdType getTarget() {
 		return myTarget;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE);
+		if (myTarget != null) {
+			b.append("target", myTarget.toUnqualifiedVersionless());
+		}
+		if (myUpdatedConceptCount > 0) {
+			b.append("updatedConcepts", myUpdatedConceptCount);
+		}
+		if (myAddedConceptCount > 0) {
+			b.append("addedConcepts", myAddedConceptCount);
+		}
+		if (myAddedDesignationCount > 0) {
+			b.append("addedDesignations", myAddedDesignationCount);
+		}
+		if (myAddedPropertyCount > 0) {
+			b.append("addedProperties", myAddedPropertyCount);
+		}
+		if (myAddedConceptLinkCount > 0) {
+			b.append("addedConceptLinks", myAddedConceptLinkCount);
+		}
+
+		return b.toString();
 	}
 }
