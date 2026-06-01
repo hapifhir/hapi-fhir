@@ -42,13 +42,10 @@ public class ImportTerminologyTestHarnessApp {
 			Thread.sleep(1000);
 			appCtx.getBean(IJobMaintenanceService.class).forceMaintenancePass();
 		}
-
 	}
-
 
 	@Configuration
 	public static class MyConfig extends TestR4Config {
-
 
 		public void setConnectionProperties(BasicDataSource theDataSource) {
 			theDataSource.setDriver(new org.h2.Driver());
@@ -58,9 +55,5 @@ public class ImportTerminologyTestHarnessApp {
 			theDataSource.setPassword("");
 			theDataSource.setMaxTotal(ourMaxThreads);
 		}
-
-
-
 	}
-
 }

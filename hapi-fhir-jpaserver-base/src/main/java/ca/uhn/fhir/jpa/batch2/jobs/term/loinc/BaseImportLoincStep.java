@@ -75,5 +75,4 @@ public abstract class BaseImportLoincStep<CT extends BaseImportLoincStep.MyBaseC
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_NAME = "LOINC Document Ontology Codes";
 	public static final String ASK_AT_ORDER_ENTRY_PROP_NAME = "AskAtOrderEntry";
 	public static final String ASSOCIATED_OBSERVATIONS_PROP_NAME = "AssociatedObservations";
-
 }

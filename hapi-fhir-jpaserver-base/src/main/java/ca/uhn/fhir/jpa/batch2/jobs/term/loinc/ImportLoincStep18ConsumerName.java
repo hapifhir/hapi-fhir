@@ -72,8 +72,7 @@ public class ImportLoincStep18ConsumerName extends BaseImportLoincStep<BaseImpor
 			return;
 		}
 
-		CodeSystem.ConceptDefinitionComponent loincCode =
-				getOrAddConcept(theContext, loincNumber);
+		CodeSystem.ConceptDefinitionComponent loincCode = getOrAddConcept(theContext, loincNumber);
 		loincCode
 				.addDesignation()
 				.setUse(new Coding(null, null, "ConsumerName"))

@@ -80,8 +80,8 @@ public class ImportSnomedCtStep3HandleRelationship
 	protected List<LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportSnomedCtJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
-			FileHandlingType.TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS,
-			t->t.contains("sct2_Relationship_Full")));
+				FileHandlingType.TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS,
+				t -> t.contains("sct2_Relationship_Full")));
 	}
 
 	@Override
@@ -92,7 +92,11 @@ public class ImportSnomedCtStep3HandleRelationship
 
 	@Nonnull
 	@Override
-	protected RunOutcome run(@Nonnull StepExecutionDetails<ImportSnomedCtJobParameters, TerminologyFileSetJson> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportSnomedCtContext theContext) {
+	protected RunOutcome run(
+			@Nonnull StepExecutionDetails<ImportSnomedCtJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportSnomedCtContext theContext) {
 		String jobInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
 
 		TerminologyFileSetJson theData = theStepExecutionDetails.getData();
@@ -103,7 +107,7 @@ public class ImportSnomedCtStep3HandleRelationship
 		AttachmentDetails attachment = myJobPersistence.fetchAttachmentById(jobInstanceId, attachmentId);
 		try (InputStream inputStream = attachment.getInputStream()) {
 			InputStreamReader reader = new InputStreamReader(
-				BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
+					BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
 			CSVParser csvReader = newCsvParser(',', reader);
 			for (CSVRecord record : csvReader.getRecords()) {
 				boolean active = "1".equals(record.get("active"));
@@ -113,28 +117,27 @@ public class ImportSnomedCtStep3HandleRelationship
 					String destinationId = record.get("destinationId");
 					allIds.add(destinationId);
 				}
-
 			}
 		} catch (IOException e) {
 			throw new JobExecutionFailedException(
-				// FIXME: add code
-				Msg.code(1) + "Failed to read file attachment: " + e.getMessage(), e);
+					// FIXME: add code
+					Msg.code(1) + "Failed to read file attachment: " + e.getMessage(), e);
 		}
 
 		Map<String, String> idToCode = new HashMap<>();
 
 		StopWatch sw = new StopWatch();
-		myTxService
-			.withSystemRequestOnDefaultPartition()
-				.execute(()->{
-					TermCodeSystemVersion csv = myTermCodeSystemVersionDao.findByCodeSystemUriAndVersion(SCT_URI, theJobMetadata.getCodeSystemStagingVersionId());
-					QueryChunker.chunk(allIds, ids -> {
-						List<TermConceptProperty> properties = myTermConceptPropertyDao.findByCodeSystemVersionAndCodeAndFetchConcept(csv, "id", ids);
-						for (TermConceptProperty property : properties) {
-							idToCode.put(property.getValue(), property.getConcept().getCode());
-						}
-					});
-				});
+		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			TermCodeSystemVersion csv = myTermCodeSystemVersionDao.findByCodeSystemUriAndVersion(
+					SCT_URI, theJobMetadata.getCodeSystemStagingVersionId());
+			QueryChunker.chunk(allIds, ids -> {
+				List<TermConceptProperty> properties =
+						myTermConceptPropertyDao.findByCodeSystemVersionAndCodeAndFetchConcept(csv, "id", ids);
+				for (TermConceptProperty property : properties) {
+					idToCode.put(property.getValue(), property.getConcept().getCode());
+				}
+			});
+		});
 		ourLog.info("Prefetched {} SNOMED CT concepts by ID in {}", idToCode.size(), sw);
 
 		theContext.setSnomedIdToCode(idToCode);
@@ -161,30 +164,27 @@ public class ImportSnomedCtStep3HandleRelationship
 		// The concept with ID "116680003" denotes the concept "Is a (attribute)".
 		// https://docs.snomed.org/snomed-international-documents/snomed-ct-glossary/r/relationship-type
 		if (isNotBlank(sourceId)
-			&& isNotBlank(destinationId)
-			&& "116680003".equals(typeId)
-			&& !sourceId.equals(destinationId)) {
+				&& isNotBlank(destinationId)
+				&& "116680003".equals(typeId)
+				&& !sourceId.equals(destinationId)) {
 
 			// Source = child, destination = parent
 			String sourceCode = theContext.getSnomedIdToCode().get(sourceId);
 			String destinationCode = theContext.getSnomedIdToCode().get(destinationId);
 
 			// FIXME: remove
-//			if (sourceCode == null || destinationCode == null) {
-//				return;
-//			}
+			//			if (sourceCode == null || destinationCode == null) {
+			//				return;
+			//			}
 
-			Validate.notNull(sourceCode, "Source code not found for id: %s" , sourceId);
-			Validate.notNull(destinationCode, "Target code not found for id: %s" , destinationId);
+			Validate.notNull(sourceCode, "Source code not found for id: %s", sourceId);
+			Validate.notNull(destinationCode, "Target code not found for id: %s", destinationId);
 
 			super.getOrAddParentChildHierarchy(theContext, destinationCode, sourceCode);
 		}
-
 	}
 
-
 	protected static class ImportSnomedCtContext extends MyBaseContext {
-
 
 		private Map<String, String> mySnomedIdToCode;
 
@@ -196,5 +196,4 @@ public class ImportSnomedCtStep3HandleRelationship
 			return mySnomedIdToCode;
 		}
 	}
-
 }

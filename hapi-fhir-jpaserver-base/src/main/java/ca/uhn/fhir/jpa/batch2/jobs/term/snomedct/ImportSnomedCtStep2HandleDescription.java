@@ -45,7 +45,7 @@ public class ImportSnomedCtStep2HandleDescription
 			StepExecutionDetails<ImportSnomedCtJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				FileHandlingType.TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS,
-				t->t.contains("sct2_Description_Full")));
+				t -> t.contains("sct2_Description_Full")));
 	}
 
 	@Override
@@ -77,17 +77,12 @@ public class ImportSnomedCtStep2HandleDescription
 		if (theContext.mySeenTerms.add(term)) {
 			CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, conceptId);
 			concept.setDisplay(term);
-			concept.addProperty()
-				.setCode("id")
-				.setValue(new CodeType(id));
+			concept.addProperty().setCode("id").setValue(new CodeType(id));
 		}
 	}
 
 	public static class MyContext extends BaseImportTerminologyFileStep.MyBaseContext {
 
 		private final Set<String> mySeenTerms = new HashSet<>();
-
 	}
-
-
 }

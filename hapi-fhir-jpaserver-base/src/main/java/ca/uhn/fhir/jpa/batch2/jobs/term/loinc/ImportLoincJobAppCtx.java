@@ -396,7 +396,8 @@ public class ImportLoincJobAppCtx {
 	 * creates work chunks for {@link #importLoincStep22GenerateConceptClosures()} to process.
 	 */
 	@Bean
-	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportLoincJobParameters> importLoincStep21ChunkConceptsForClosureGeneration() {
+	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportLoincJobParameters>
+			importLoincStep21ChunkConceptsForClosureGeneration() {
 		return new ImportTerminologyStepChunkConceptsForGeneratingClosure<>();
 	}
 
@@ -407,7 +408,8 @@ public class ImportLoincJobAppCtx {
 	 * concept PIDs and is stored in {@link TermConcept#getParentPidsAsString()}.
 	 */
 	@Bean
-	public ImportTerminologyStepGenerateConceptClosures<ImportLoincJobParameters> importLoincStep22GenerateConceptClosures() {
+	public ImportTerminologyStepGenerateConceptClosures<ImportLoincJobParameters>
+			importLoincStep22GenerateConceptClosures() {
 		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
 
@@ -427,6 +429,7 @@ public class ImportLoincJobAppCtx {
 	 */
 	@Bean
 	public ImportTerminologyStepFinalize<ImportLoincJobParameters> importLoincStep23Finalize() {
-		return new ImportTerminologyStepFinalize<>(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
+		return new ImportTerminologyStepFinalize<>(
+				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}
 }

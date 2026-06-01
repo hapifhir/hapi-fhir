@@ -93,12 +93,10 @@ public class ImportLoincStep6HandleAnswerListLinks extends BaseImportLoincStep<B
 			return;
 		}
 
-		CodeSystem.ConceptDefinitionComponent loincCode =
-				getOrAddConcept(theContext, loincNumber);
+		CodeSystem.ConceptDefinitionComponent loincCode = getOrAddConcept(theContext, loincNumber);
 		loincCode.addProperty().setCode("answer-list").setValue(new StringType(answerListId));
 
-		CodeSystem.ConceptDefinitionComponent answerListCode =
-				getOrAddConcept(theContext, answerListId);
+		CodeSystem.ConceptDefinitionComponent answerListCode = getOrAddConcept(theContext, answerListId);
 		answerListCode.addProperty().setCode("answers-for").setValue(new StringType(loincNumber));
 	}
 }

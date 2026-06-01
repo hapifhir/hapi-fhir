@@ -45,8 +45,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_I
 
 public class ImportTerminologyStepGenerateConceptClosures<PT extends BaseTerminologyImportParameters>
 		implements IJobStepWorker<PT, TerminologyFileSetJson, TerminologyFileSetJson>,
-				ITerminologyImportFileHandlerStep<
-						PT, TerminologyFileSetJson, TerminologyFileSetJson> {
+				ITerminologyImportFileHandlerStep<PT, TerminologyFileSetJson, TerminologyFileSetJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportTerminologyStepGenerateConceptClosures.class);
 
 	@Autowired
@@ -111,18 +110,14 @@ public class ImportTerminologyStepGenerateConceptClosures<PT extends BaseTermino
 	@Nonnull
 	@Override
 	public Optional<FileHandlingInstructions> canHandleFile(
-			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
-			PT theJobParameters,
-			String theFileName) {
+			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, PT theJobParameters, String theFileName) {
 		// This step doesn't process any files
 		return Optional.empty();
 	}
-
 
 	@Override
 	public boolean mustFindFile() {
 		// This step doesn't process any files
 		return false;
 	}
-
 }
