@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -101,11 +100,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		Options options = super.getOptions();
 
 		addRequiredOption(
-				options,
-				"u",
-				"url",
-				true,
-				"The code system URL associated with this upload (e.g. " + SCT_URI + ")");
+				options, "u", "url", true, "The code system URL associated with this upload (e.g. " + SCT_URI + ")");
 		addOptionalOption(
 				options,
 				"d",

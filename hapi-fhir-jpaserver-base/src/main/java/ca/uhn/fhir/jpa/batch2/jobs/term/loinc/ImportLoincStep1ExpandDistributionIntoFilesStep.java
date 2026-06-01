@@ -49,8 +49,8 @@ import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LO
  * @see ImportLoincJobAppCtx#importLoincStep1ExpandDistributionIntoFiles()
  */
 public class ImportLoincStep1ExpandDistributionIntoFilesStep
-	extends BaseExpandDistributionIntoFilesStep<
-	ImportLoincJobParameters, ImportLoincStep1ExpandDistributionIntoFilesStep.MyContext> {
+		extends BaseExpandDistributionIntoFilesStep<
+				ImportLoincJobParameters, ImportLoincStep1ExpandDistributionIntoFilesStep.MyContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep1ExpandDistributionIntoFilesStep.class);
 
 	@Override
@@ -66,15 +66,23 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 
 	@Override
 	protected void handleSynchronous(
-		StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
-		IJobDataSink<TerminologyFileSetJson> theDataSink,
-		MyContext theContext,
-		String theFileName,
-		byte[] theBytes,
-		ImportLoincJobParameters theJobParameters,
-		TerminologyFileSetJson theFileSet, ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
+			StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			MyContext theContext,
+			String theFileName,
+			byte[] theBytes,
+			ImportLoincJobParameters theJobParameters,
+			TerminologyFileSetJson theFileSet,
+			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
 		super.handleSynchronous(
-			theStepExecutionDetails, theDataSink, theContext, theFileName, theBytes, theJobParameters, theFileSet, theJobMetadataAttachment);
+				theStepExecutionDetails,
+				theDataSink,
+				theContext,
+				theFileName,
+				theBytes,
+				theJobParameters,
+				theFileSet,
+				theJobMetadataAttachment);
 
 		if (theFileName.endsWith("loinc.xml")) {
 			theContext.incrementLoincXmlCount();
@@ -82,8 +90,7 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		}
 	}
 
-	private void handleLoincXml(
-		byte[] theBytes, ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
+	private void handleLoincXml(byte[] theBytes, ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
 		ourLog.info("Processing 'loinc.xml' file");
 
 		String loincCodeSystemXml = new String(theBytes, StandardCharsets.UTF_8);
@@ -91,15 +98,14 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 
 		CodeSystem codeSystem = theJobMetadataAttachment.getCodeSystem();
 		if (!"http://loinc.org".equals(codeSystem.getUrl())) {
-			throw new JobExecutionFailedException(
-				Msg.code(876) + "'loinc.xml' file must have URL of 'http://loinc.org'. Found: " + codeSystem.getUrl());
+			throw new JobExecutionFailedException(Msg.code(876)
+					+ "'loinc.xml' file must have URL of 'http://loinc.org'. Found: " + codeSystem.getUrl());
 		}
-
 	}
 
-
 	@Override
-	protected void afterCompletionOfFileProcessing(MyContext theContext, IJobDataSink<TerminologyFileSetJson> theDataSink) {
+	protected void afterCompletionOfFileProcessing(
+			MyContext theContext, IJobDataSink<TerminologyFileSetJson> theDataSink) {
 		super.afterCompletionOfFileProcessing(theContext, theDataSink);
 
 		if (theContext.getLoincXmlCount() == 0) {
@@ -108,7 +114,6 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		if (theContext.getLoincXmlCount() > 1) {
 			throw new JobExecutionFailedException(Msg.code(2951) + "Multiple 'loinc.xml' file found in ZIP");
 		}
-
 	}
 
 	@Override
@@ -129,7 +134,11 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 	}
 
 	@Override
-	protected void startStaging(StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails, IJobDataSink<TerminologyFileSetJson> theDataSink, ImportLoincJobParameters theJobParameters, ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
+	protected void startStaging(
+			StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			ImportLoincJobParameters theJobParameters,
+			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
 		super.startStaging(theStepExecutionDetails, theDataSink, theJobParameters, theJobMetadataAttachment);
 
 		CodeSystem cs = theJobMetadataAttachment.getCodeSystem();
@@ -143,7 +152,6 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		TerminologyFileSetJson fileSet = new TerminologyFileSetJson();
 		fileSet.addResourceToActivate("ValueSet/" + valueSet.getIdElement().getIdPart());
 		theDataSink.acceptForFutureStep(STEP_ID_FINALIZE_IMPORT, fileSet);
-
 	}
 
 	private ValueSet getValueSetLoincAll(String theLoincVersion, String theCopyrightStatement) {

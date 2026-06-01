@@ -102,8 +102,7 @@ public class ImportLoincStep17PartLink extends BaseImportLoincStep<ImportLoincSt
 			return;
 		}
 
-		CodeSystem.ConceptDefinitionComponent concept =
-				getOrAddConcept(theContext, loincNumber);
+		CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, loincNumber);
 
 		// Filter duplicates
 		Optional<CodeSystem.ConceptPropertyComponent> existingProperty = concept.getProperty().stream()

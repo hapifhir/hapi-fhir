@@ -22,6 +22,4 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.snomedct;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
 
 public abstract class BaseImportSnomedCtStep<CT extends BaseImportSnomedCtStep.MyBaseContext>
-		extends BaseImportTerminologyFileStep<ImportSnomedCtJobParameters, CT> {
-
-}
+		extends BaseImportTerminologyFileStep<ImportSnomedCtJobParameters, CT> {}

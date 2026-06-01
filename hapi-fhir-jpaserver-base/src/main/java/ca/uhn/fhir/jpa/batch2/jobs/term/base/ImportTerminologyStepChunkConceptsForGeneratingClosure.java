@@ -41,10 +41,10 @@ import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 
-public class ImportTerminologyStepChunkConceptsForGeneratingClosure<PT extends BaseTerminologyImportParameters> extends BaseImportTerminologyStep
+public class ImportTerminologyStepChunkConceptsForGeneratingClosure<PT extends BaseTerminologyImportParameters>
+		extends BaseImportTerminologyStep
 		implements IJobStepWorker<PT, TerminologyFileSetJson, TerminologyFileSetJson>,
-				ITerminologyImportFileHandlerStep<
-						PT, TerminologyFileSetJson, TerminologyFileSetJson> {
+				ITerminologyImportFileHandlerStep<PT, TerminologyFileSetJson, TerminologyFileSetJson> {
 
 	@Autowired
 	private ITermConceptDao myConceptDao;
@@ -109,9 +109,7 @@ public class ImportTerminologyStepChunkConceptsForGeneratingClosure<PT extends B
 	@Nonnull
 	@Override
 	public Optional<FileHandlingInstructions> canHandleFile(
-			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
-			PT theJobParameters,
-			String theFileName) {
+			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, PT theJobParameters, String theFileName) {
 		// This step doesn't process any files
 		return Optional.empty();
 	}

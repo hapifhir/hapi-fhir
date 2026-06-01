@@ -61,7 +61,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(81, myTermConceptDao.count());
+			assertEquals(82, myTermConceptDao.count());
 			assertEquals(8, myTermConceptParentChildLinkDao.count());
 			assertEquals(2, myTermCodeSystemVersionDao.count());
 			assertEquals(10, myTermValueSetDao.count());
@@ -84,7 +84,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = myJobCoordinator.getInstance(instanceId);
 		String report = JsonUtil.deserialize(jobInstance.getReport(), ImportTerminologyResultJson.class).getReport();
 		ourLog.info("Report:\n{}", report);
-		assertThat(report).contains("Concepts Added             : 81");
+		assertThat(report).contains("Concepts Added             : 82");
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 		logAllConcepts();
@@ -103,7 +103,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(81 * 2, myTermConceptDao.count());
+			assertEquals(82 * 2, myTermConceptDao.count());
 			assertEquals(8 * 2, myTermConceptParentChildLinkDao.count());
 			assertEquals(2 * 2, myTermCodeSystemVersionDao.count());
 			assertEquals(10 * 2, myTermValueSetDao.count());
@@ -128,7 +128,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(81 * 3, myTermConceptDao.count());
+			assertEquals(82 * 3, myTermConceptDao.count());
 			assertEquals(8 * 3, myTermConceptParentChildLinkDao.count());
 			assertEquals(2 * 3, myTermCodeSystemVersionDao.count());
 			assertEquals(10 * 3, myTermValueSetDao.count());

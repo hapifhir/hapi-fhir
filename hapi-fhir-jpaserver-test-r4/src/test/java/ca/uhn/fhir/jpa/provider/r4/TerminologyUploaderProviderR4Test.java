@@ -56,8 +56,10 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.L
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -88,7 +90,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			myClient
 				.operation()
 				.onType(CodeSystem.class)
-				.named("upload-external-code-system")
+				.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
 				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI + "FOO"))
 				.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 				.execute();
@@ -105,7 +107,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
-			.named("upload-external-code-system")
+			.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
 			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.ICD10CM_URI))
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("icd10cm_tabular_2021.xml").setData(packageBytes))
 			.execute();
@@ -121,34 +123,16 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	public void testUploadLoinc() throws Exception {
 		byte[] packageBytes = createLoincZip();
 
-		Parameters respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named("upload-external-code-system")
-			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.LOINC_URI))
-			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
-			.execute();
-
-		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-
-			assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
-			assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference()).matches("CodeSystem\\/[a-zA-Z0-9\\.\\-]+");
-
-		/*
-		 * Try uploading a second time
-		 */
-
-		respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named("upload-external-code-system")
-			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.LOINC_URI))
-			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
-			.execute();
-
-		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
+		assertThatThrownBy(()->
+			myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
+				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.LOINC_URI))
+				.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
+				.execute()
+			).isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("Uploading the http://loinc.org system now uses the $hapi.fhir.upload-terminology.start-job operation")	;
 
 	}
 
@@ -158,7 +142,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			myClient
 				.operation()
 				.onType(CodeSystem.class)
-				.named("upload-external-code-system")
+				.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
 				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI))
 				.execute();
 			fail();
@@ -175,7 +159,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			myClient
 				.operation()
 				.onType(CodeSystem.class)
-				.named("upload-external-code-system")
+				.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
 				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 				.execute();
 			fail();
@@ -192,7 +176,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
-			.named("upload-external-code-system")
+			.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
 			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI))
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
@@ -216,7 +200,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
-			.named("upload-external-code-system")
+			.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
 			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI))
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("localfile:" + tempFile.getAbsolutePath()))
 			.execute();

@@ -21,7 +21,4 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseTerminologyImportParameters;
 
-public class ImportLoincJobParameters extends BaseTerminologyImportParameters {
-
-
-}
+public class ImportLoincJobParameters extends BaseTerminologyImportParameters {}

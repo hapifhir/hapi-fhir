@@ -87,8 +87,7 @@ public class ImportTerminologyStepFinalize<PT extends BaseTerminologyImportParam
 
 	@Nonnull
 	@Override
-	public ChunkOutcome consume(
-			ChunkExecutionDetails<PT, TerminologyFileSetJson> theChunkDetails) {
+	public ChunkOutcome consume(ChunkExecutionDetails<PT, TerminologyFileSetJson> theChunkDetails) {
 		TerminologyFileSetJson data = theChunkDetails.getData();
 
 		for (Map.Entry<String, TerminologyFileSetJson.RecordsAddedCounter> entry :
@@ -160,8 +159,7 @@ public class ImportTerminologyStepFinalize<PT extends BaseTerminologyImportParam
 		dao.patch(resourceId, null, PatchTypeEnum.FHIR_PATCH_JSON, patchBody, patchDocument, requestDetails);
 	}
 
-	private String createReport(
-			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
+	private String createReport(StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
 		JobDefinition<PT> jobDefinition = theStepExecutionDetails.getJobDefinition();
 
 		BatchInstanceStepStatisticsDTO allStepStatistics = calculateStepStatistics(theStepExecutionDetails);
@@ -306,6 +304,7 @@ public class ImportTerminologyStepFinalize<PT extends BaseTerminologyImportParam
 
 	@Override
 	public ImportTerminologyStepFinalize newInstance() {
-		return new ImportTerminologyStepFinalize(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
+		return new ImportTerminologyStepFinalize(
+				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}
 }

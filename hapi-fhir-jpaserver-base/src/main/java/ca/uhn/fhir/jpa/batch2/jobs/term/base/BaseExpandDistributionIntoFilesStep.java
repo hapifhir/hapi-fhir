@@ -110,8 +110,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		PT jobParameters = theStepExecutionDetails.getParameters();
-		AttachmentDetails loincFileAttachment = myJobPersistence.fetchAttachmentByFilename(
-				instanceId, getDistributionFileName());
+		AttachmentDetails loincFileAttachment =
+				myJobPersistence.fetchAttachmentByFilename(instanceId, getDistributionFileName());
 		CT context = newContextObject();
 		ImportTerminologyMetadataAttachmentJson jobMetadataAttachment = new ImportTerminologyMetadataAttachmentJson();
 
@@ -123,14 +123,11 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 		TerminologyFileSetJson fileSet = newTerminologyFileSetJson();
 
-		Set<String> stepsWhichHaveNotFoundFileAndNeedTo = theStepExecutionDetails
-			.getJobDefinition()
-			.getSteps()
-			.stream()
-			.filter(t->t.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep<?,?,?>)
-			.filter(t->((ITerminologyImportFileHandlerStep<PT, ?, ?>) t.getJobStepWorker()).mustFindFile())
-			.map(JobDefinitionStep::getStepId)
-			.collect(Collectors.toCollection(LinkedHashSet::new));
+		Set<String> stepsWhichHaveNotFoundFileAndNeedTo = theStepExecutionDetails.getJobDefinition().getSteps().stream()
+				.filter(t -> t.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep<?, ?, ?>)
+				.filter(t -> ((ITerminologyImportFileHandlerStep<PT, ?, ?>) t.getJobStepWorker()).mustFindFile())
+				.map(JobDefinitionStep::getStepId)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 
 		try (InputStream inputStream = loincFileAttachment.getInputStream()) {
 			try (BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
@@ -182,7 +179,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 										case CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 1000);
 											yield csvSplitWithRepeatHeader(
-												',',
+													',',
 													instanceId,
 													bytes,
 													loincFileAttachment.getFilename(),
@@ -194,7 +191,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 										case CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 50000);
 											yield csvSplitWithRepeatHeader(
-												',',instanceId,
+													',',
+													instanceId,
 													bytes,
 													loincFileAttachment.getFilename(),
 													nextFileName,
@@ -205,7 +203,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 										case TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 5000);
 											yield csvSplitWithRepeatHeader(
-												'\t',instanceId,
+													'\t',
+													instanceId,
 													bytes,
 													loincFileAttachment.getFilename(),
 													nextFileName,
@@ -226,7 +225,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 								bytes,
 								jobParameters,
 								fileSet,
-							jobMetadataAttachment);
+								jobMetadataAttachment);
 					}
 				}
 			}
@@ -236,7 +235,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		}
 
 		if (!stepsWhichHaveNotFoundFileAndNeedTo.isEmpty()) {
-			throw new JobExecutionFailedException("No files in the distribution were matched by step(s): " + stepsWhichHaveNotFoundFileAndNeedTo);
+			throw new JobExecutionFailedException(
+					"No files in the distribution were matched by step(s): " + stepsWhichHaveNotFoundFileAndNeedTo);
 		}
 
 		afterCompletionOfFileProcessing(context, theDataSink);
@@ -244,10 +244,10 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		startStaging(theStepExecutionDetails, theDataSink, jobParameters, jobMetadataAttachment);
 
 		AttachmentDetails attachmentRequest = new AttachmentDetails(
-			new ByteArrayInputStream(
-				JsonUtil.serialize(jobMetadataAttachment).getBytes(StandardCharsets.UTF_8)),
-			AttachmentContentTypeEnum.JSON,
-			ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME);
+				new ByteArrayInputStream(
+						JsonUtil.serialize(jobMetadataAttachment).getBytes(StandardCharsets.UTF_8)),
+				AttachmentContentTypeEnum.JSON,
+				ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME);
 		myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
 
 		return RunOutcome.SUCCESS;
@@ -260,7 +260,11 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		// subclasses can override this method to do any cleanup
 	}
 
-	protected void startStaging(StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, IJobDataSink<TerminologyFileSetJson> theDataSink, PT theJobParameters, ImportTerminologyMetadataAttachmentJson jobMetadataAttachment) {
+	protected void startStaging(
+			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			PT theJobParameters,
+			ImportTerminologyMetadataAttachmentJson jobMetadataAttachment) {
 		CodeSystem cs = jobMetadataAttachment.getCodeSystem();
 		if (cs == null) {
 			cs = new CodeSystem();
@@ -285,7 +289,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 		codeSystemDao.update(myVersionCanonicalizer.codeSystemFromCanonical(cs), srd);
 
 		ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse response =
-			myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
+				myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
 		jobMetadataAttachment.setCodeSystemStagingVersionId(response.stagingVersionId());
 
 		// Send a single chunk to trigger the first closure generation step
@@ -304,13 +308,14 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 	 * Subclasses can override this method to handle files that are small enough to just handle here.
 	 */
 	protected void handleSynchronous(
-		StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
-		IJobDataSink<TerminologyFileSetJson> theDataSink,
-		CT theContext,
-		String theFileName,
-		byte[] theBytes,
-		PT theJobParameters,
-		TerminologyFileSetJson theFileSet, ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
+			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			CT theContext,
+			String theFileName,
+			byte[] theBytes,
+			PT theJobParameters,
+			TerminologyFileSetJson theFileSet,
+			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
 		// nothing
 	}
 

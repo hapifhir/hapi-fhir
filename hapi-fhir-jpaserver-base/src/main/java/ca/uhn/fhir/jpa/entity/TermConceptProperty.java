@@ -81,6 +81,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class TermConceptProperty extends BasePartitionable implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
+
 	public static final int MAX_LENGTH = 500;
 
 	@ManyToOne(fetch = FetchType.LAZY)

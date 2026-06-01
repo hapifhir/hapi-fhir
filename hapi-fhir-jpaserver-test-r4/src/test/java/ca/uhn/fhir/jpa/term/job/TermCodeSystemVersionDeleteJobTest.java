@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.term.job;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -32,7 +31,6 @@ import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,8 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 
-	private Properties uploadProperties;
-
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
 	@Autowired
@@ -61,17 +57,18 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 
 	private void initMultipleVersionLoad() throws Exception {
 		InputStream is = new ClassPathResource("loinc-ver/" + LOINC_UPLOAD_PROPERTIES_FILE.getCode()).getInputStream();
-		uploadProperties = new Properties();
+		Properties uploadProperties = new Properties();
 		uploadProperties.load(is);
-
-		IFhirResourceDao<ValueSet> valueSetIFhirResourceDao = myDaoRegistry.getResourceDao(ValueSet.class);
 	}
 
 	@Test
 	public void runDeleteJobDeleteOneVersion() throws Exception {
 		initMultipleVersionLoad();
 
-		String firstCurrentVer = "2.67";
+		String oldVer = "2.67";
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(oldVer, true);
+
+		String firstCurrentVer = "2.68";
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(firstCurrentVer, true);
 
 		long[] termCodeSystemVersionPidVect = new long[1];  //bypass final restriction
@@ -81,11 +78,11 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org");
 			assertNotNull(termCodeSystem);
 
-			TermCodeSystemVersion termCodeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(termCodeSystem.getPid());
+			TermCodeSystemVersion termCodeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(termCodeSystem.getPid(), firstCurrentVer);
 			assertNotNull(termCodeSystemVersion);
 			termCodeSystemVersionPidVect[0] = termCodeSystemVersion.getPid();
 
-			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(2 * 2, myTermCodeSystemVersionDao.count());
 			assertEquals(81 * 2, myTermConceptDao.count());
 		});
 
@@ -104,7 +101,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org"));
-			assertEquals(1, myTermCodeSystemVersionDao.count());
+			assertEquals(3, myTermCodeSystemVersionDao.count());
 			assertEquals(81, myTermConceptDao.count());
 		});
 	}

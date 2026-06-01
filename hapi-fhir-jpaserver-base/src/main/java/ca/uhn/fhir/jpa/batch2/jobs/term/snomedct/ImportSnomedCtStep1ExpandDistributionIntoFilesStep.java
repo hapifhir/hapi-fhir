@@ -31,8 +31,7 @@ import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.SCT_URI;
  * @see ImportLoincJobAppCtx#importLoincStep1ExpandDistributionIntoFiles()
  */
 public class ImportSnomedCtStep1ExpandDistributionIntoFilesStep
-		extends BaseExpandDistributionIntoFilesStep<
-        ImportSnomedCtJobParameters, Void> {
+		extends BaseExpandDistributionIntoFilesStep<ImportSnomedCtJobParameters, Void> {
 
 	@Override
 	protected Void newContextObject() {
@@ -58,5 +57,4 @@ public class ImportSnomedCtStep1ExpandDistributionIntoFilesStep
 		theCodeSystem.setUrl(SCT_URI);
 		theCodeSystem.setName("SNOMED CT");
 	}
-
 }
