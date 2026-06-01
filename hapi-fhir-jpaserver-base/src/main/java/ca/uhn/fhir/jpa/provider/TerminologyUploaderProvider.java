@@ -78,6 +78,7 @@ import java.util.regex.Pattern;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_SNOMED_CT_DISTRIBUTION_FILE;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB;
 import static ca.uhn.fhir.rest.server.RestfulServerUtils.createFullyQualifiedUrlFromRelativeUrl;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValueOrEmpty;
@@ -281,7 +282,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						inputStream, AttachmentContentTypeEnum.PROPERTIES, jobType.propertyFileName());
 				} else {
 					throw new InvalidRequestException(
-						Msg.code(2944) + "Don't know how to handle file: " + toStringValue(theFilename));
+							Msg.code(2953) + "Don't know how to handle file: " + toStringValue(theFilename));
 				}
 
 				String instanceId = jobInstance.getInstanceId();
@@ -316,18 +317,17 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * <code>$hapi.fhir.upload-terminology.start-job</code>
 	 */
 	@Operation(
-		typeName = "CodeSystem",
-		name = JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
-		manualResponse = true,
-		idempotent = false)
+			typeName = "CodeSystem",
+			name = OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
+			manualResponse = true,
+			idempotent = false)
 	public void uploadTerminologyStartJob(
 		@OperationParam(name = PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code")
 		IPrimitiveType<String> theJobInstanceId,
 		ServletRequestDetails theRequestDetails)
 		throws IOException {
 
-		ServletRequestUtil.validatePreferAsyncHeader(
-			theRequestDetails, JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
+		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
 
 		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
 		validateJobIsInBuildingStatus(jobInstance);
@@ -346,7 +346,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		String pollUrl = "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS + "?"
 			+ PARAM_JOB_INSTANCE_ID + "=" + jobInstance.getInstanceId();
 		AsyncRequestUtil.handleAsynchronousOperationStartRequest(
-			theRequestDetails, pollUrl, JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB, null);
+				theRequestDetails, pollUrl, OPERATION_UPLOAD_TERMINOLOGY_START_JOB, null);
 	}
 
 	/**
@@ -374,10 +374,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				return new AsyncRequestUtil.CompletedJobPollResponse(null, List.of(report));
 			};
 			AsyncRequestUtil.handleAsyncJobPollForStatusResponse(
-				theRequestDetails,
-				jobInstance,
-				JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
-				completedDetailsProvider);
+					theRequestDetails, jobInstance, OPERATION_UPLOAD_TERMINOLOGY_START_JOB, completedDetailsProvider);
 
 		} else {
 			throw new InvalidRequestException(Msg.code(2948) + "Can't use this operation to poll status of this job");

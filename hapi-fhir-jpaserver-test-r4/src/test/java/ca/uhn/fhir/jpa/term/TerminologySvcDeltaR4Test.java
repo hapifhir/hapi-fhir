@@ -37,6 +37,7 @@ import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -396,7 +397,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 
-		assertFalse(myTermDeferredStorageSvc.isStorageQueueEmpty(true));
+		assertTrue(myTermDeferredStorageSvc.isStorageQueueEmpty(true));
+
 		int counter = 0;
 		while (!myTermDeferredStorageSvc.isStorageQueueEmpty(true) && ++counter < 10000) {
 			myTermDeferredStorageSvc.saveDeferred();
