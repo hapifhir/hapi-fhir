@@ -9,9 +9,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -536,7 +536,7 @@ public class UploadTerminologyCommandTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
 		JobInstanceStartRequest startRequest = myStartRequestDetails.getValue();
-		ImportLoincJobParameters params = startRequest.getParameters(ImportLoincJobParameters.class);
+		ImportTerminologyJobParameters params = startRequest.getParameters(ImportTerminologyJobParameters.class);
 		assertNull(params.getDontMakeCurrent());
 	}
 
@@ -594,7 +594,7 @@ public class UploadTerminologyCommandTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
 		JobInstanceStartRequest startRequest = myStartRequestDetails.getValue();
-		ImportLoincJobParameters params = startRequest.getParameters(ImportLoincJobParameters.class);
+		ImportTerminologyJobParameters params = startRequest.getParameters(ImportTerminologyJobParameters.class);
 		assertTrue(params.getDontMakeCurrent());
 	}
 
