@@ -88,7 +88,15 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 	@Override
 	protected Condition buildNeHashIdentityCondition(
 			RequestPartitionId theRequestPartitionId, String theResourceName, String theParamName) {
-		return buildHashIdentityPredicate(theRequestPartitionId, theResourceName, theParamName);
+		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+				getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(hashIdentity, theResourceName, theParamName);
+
+		if (myIndexMode == TokenIndexMode.IDENTIFIER) {
+			return BinaryCondition.equalTo(myColumnIdentifierHashIdentity, generatePlaceholder(hashIdentity));
+		}
+		// COMMON mode: HASH_IDENTITY is in HFJ_SPIDX2_TOKEN_COMMON, requires subquery from HFJ_SPIDX2_TOKEN_COMMON_RES
+		return buildCommonSubquery("HASH_IDENTITY", hashIdentity);
 	}
 
 	@Override
@@ -244,22 +252,6 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 
 		// TODO: add SP_SYSTEM_URL_ID discrimination once IResourceIdentifierCacheSvc exposes a read-only lookup
 		return QueryParameterUtils.toAndPredicate(identityCondition, valueCondition);
-	}
-
-	/**
-	 * Builds a HASH_IDENTITY predicate appropriate for the current mode.
-	 * Used for the ne (not-equal) compound predicate.
-	 */
-	private Condition buildHashIdentityPredicate(
-			RequestPartitionId theRequestPartitionId, String theResourceName, String theParamName) {
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-				getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);
-
-		if (myIndexMode == TokenIndexMode.IDENTIFIER) {
-			return BinaryCondition.equalTo(myColumnIdentifierHashIdentity, generatePlaceholder(hashIdentity));
-		}
-		// COMMON mode: HASH_IDENTITY lives in TOKEN_COMMON, not TOKEN_COMMON_RES
-		return buildCommonSubquery("HASH_IDENTITY", hashIdentity);
 	}
 
 	/**

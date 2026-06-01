@@ -49,6 +49,7 @@ public class AddForeignKeyTaskTest extends BaseTest {
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	void testAddCompositeForeignKey(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		// setup
 		before(theTestDatabaseDetails);
 
 		executeSql("create table PARENT_TBL (PID bigint not null, PARTITION_ID bigint not null, TEXTCOL varchar(255), primary key (PID, PARTITION_ID))");
@@ -63,11 +64,13 @@ public class AddForeignKeyTaskTest extends BaseTest {
 		task.setForeignTableName("PARENT_TBL");
 		getMigrator().addTask(task);
 
+		// execute
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT_TBL", "CHILD_TBL")).containsExactly("FK_CHILD_PARENT");
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT_TBL", "CHILD_TBL"))
+			.containsExactly("FK_CHILD_PARENT");
 
-		// Make sure additional calls don't crash
+		// validate, make sure additional calls don't crash
 		getMigrator().migrate();
 		getMigrator().migrate();
 	}
@@ -76,7 +79,8 @@ public class AddForeignKeyTaskTest extends BaseTest {
 	 * Verifies MySQL/MariaDB SQL generation quotes column names with backticks.
 	 */
 	@Test
-	void testMySqlCompositeForeignKeyQuotesColumnNames() throws SQLException {
+	void testAddCompositeForeignKey_withMySql_quotesColumnNamesWithBackticks() throws SQLException {
+		// setup
 		try (MockedStatic<JdbcUtils> jdbcUtils = Mockito.mockStatic(JdbcUtils.class)) {
 			jdbcUtils.when(() -> JdbcUtils.getForeignKeys(any(), anyString(), anyString()))
 					.thenReturn(Collections.emptySet());
@@ -91,13 +95,15 @@ public class AddForeignKeyTaskTest extends BaseTest {
 			// Dry run skips actual SQL execution but still captures statements for verification
 			task.setDryRun(true);
 
+			// execute
 			task.doExecute();
-
 			List<BaseTask.ExecutedStatement> executedStatements = task.getExecutedStatements();
+
+			// validate
 			assertThat(executedStatements).hasSize(1);
 			String sql = executedStatements.get(0).getSql();
-			assertThat(sql).contains("`PARENT_PID`, `PARTITION_ID`");
-			assertThat(sql).contains("`PID`, `PARTITION_ID`");
+			assertThat(sql).contains("(`PARENT_PID`, `PARTITION_ID`)");
+			assertThat(sql).contains("(`PID`, `PARTITION_ID`)");
 		}
 	}
 

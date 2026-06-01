@@ -94,6 +94,17 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 		super(theSearchSqlBuilder, theTable);
 	}
 
+	/**
+	 * Builds a SQL predicate for a token search parameter for standard equality searches
+	 * (no custom compare operation needed).
+	 *
+	 * @param theParameters the token values to search for (e.g. {@code system|code})
+	 * @param theResourceName the FHIR resource type (e.g. {@code "Patient"})
+	 * @param theSpnamePrefix optional prefix for chained searches, or {@code null}
+	 * @param theSearchParam the search parameter definition
+	 * @param theRequestPartitionId the partition id to search in
+	 * @return a SQL condition matching resources that have the given token values
+	 */
 	public Condition createPredicateToken(
 			Collection<IQueryParameterType> theParameters,
 			String theResourceName,
@@ -104,6 +115,20 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 				theParameters, theResourceName, theSpnamePrefix, theSearchParam, null, theRequestPartitionId);
 	}
 
+	/**
+	 * Builds a SQL predicate for a token search parameter, with an explicit compare operation.
+	 * Handles all token modifiers (e.g. {@code :not}, {@code :in}, {@code :above}, {@code :below},
+	 * {@code :of-type}) and expands ValueSets when needed. Use {@code theOperation} to pass a
+	 * compare operation from {@code _filter} searches; pass {@code null} for normal searches.
+	 *
+	 * @param theParameters the token values to search for (e.g. {@code system|code})
+	 * @param theResourceName the FHIR resource type (e.g. {@code "Patient"})
+	 * @param theSpnamePrefix optional prefix for chained searches, or {@code null}
+	 * @param theSearchParam the search parameter definition
+	 * @param theOperation compare operation from a {@code _filter} query, or {@code null} for normal equality
+	 * @param theRequestPartitionId the partition id to search in
+	 * @return a SQL condition matching resources that have (or don't have) the given token values
+	 */
 	public final Condition createPredicateToken(
 			Collection<IQueryParameterType> theParameters,
 			String theResourceName,
@@ -158,6 +183,7 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 						code);
 			}
 
+			// process token modifiers (:in, :not-in, :above, :below, :of-type, :not)
 			if (modifier == TokenParamModifier.IN || modifier == TokenParamModifier.NOT_IN) {
 				if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
 					ValueSetExpansionOptions valueSetExpansionOptions = new ValueSetExpansionOptions();
@@ -208,11 +234,16 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 				.collect(Collectors.toList());
 
 		if (sortedCodesList.isEmpty()) {
+			// This will never match anything
 			setMatchNothing();
 			return null;
 		}
 
 		if (operation == SearchFilterParser.CompareOperation.ne) {
+			/*
+			 * For a token :not search, we look for index rows that have the right identity (i.e. it's the right resource and
+			 * param name) but not the actual provided token value.
+			 */
 			Condition hashIdentityPredicate =
 					buildNeHashIdentityCondition(theRequestPartitionId, theResourceName, paramName);
 			Condition hashValuePredicate = createPredicateOrList(theResourceName, paramName, sortedCodesList, false);
@@ -230,7 +261,6 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 
 	/**
 	 * Builds the hash-identity predicate for the {@code :not} (ne) branch.
-	 * Default implementation delegates to {@link #createHashIdentityPredicate}.
 	 * Subclasses targeting tables without a direct {@code HASH_IDENTITY} column should override.
 	 */
 	protected Condition buildNeHashIdentityCondition(
@@ -239,9 +269,7 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 	}
 
 	/**
-	 * Optionally returns an additional hash-identity predicate to AND with the equality result.
-	 * Returns {@code null} by default (no extra predicate). Override to enable the
-	 * {@code isIncludeHashIdentityForTokenSearches} optimization.
+	 * Returns an optional hash-identity predicate to combine with the equality condition.
 	 */
 	protected Condition buildOptionalHashIdentityForEquals(
 			RequestPartitionId theRequestPartitionId, String theResourceName, String theParamName) {

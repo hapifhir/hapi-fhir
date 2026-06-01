@@ -51,6 +51,10 @@ public class AddForeignKeyTask extends BaseTableTask {
 		return this;
 	}
 
+	public void setColumnNames(List<String> theColumnNames) {
+		myColumnNames = List.copyOf(theColumnNames);
+	}
+
 	public void setConstraintName(String theConstraintName) {
 		myConstraintName = theConstraintName;
 	}
@@ -65,10 +69,6 @@ public class AddForeignKeyTask extends BaseTableTask {
 
 	public void setForeignColumnNames(List<String> theForeignColumnNames) {
 		myForeignColumnNames = theForeignColumnNames;
-	}
-
-	public void setColumnNames(List<String> theColumnNames) {
-		myColumnNames = List.copyOf(theColumnNames);
 	}
 
 	@Override
