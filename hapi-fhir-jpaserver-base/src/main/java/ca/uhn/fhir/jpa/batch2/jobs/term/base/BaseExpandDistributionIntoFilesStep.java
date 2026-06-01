@@ -31,8 +31,13 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.util.CsvUtil;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
@@ -46,6 +51,8 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,14 +66,28 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyUtil.getJobProperties;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
+import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
-public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTerminologyImportParameters, CT>
+public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTerminologyJobParameters, CT>
 		implements IJobStepWorker<PT, VoidModel, TerminologyFileSetJson> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseExpandDistributionIntoFilesStep.class);
+
+	@Autowired
+	protected DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
 	@Autowired
 	protected IJobPersistence myJobPersistence;
@@ -92,9 +113,10 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		PT jobParameters = theStepExecutionDetails.getParameters();
-		AttachmentDetails loincFileAttachment = myJobPersistence.fetchAttachmentByFilename(
-				instanceId, TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE);
+		AttachmentDetails loincFileAttachment =
+				myJobPersistence.fetchAttachmentByFilename(instanceId, getDistributionFileName());
 		CT context = newContextObject();
+		ImportTerminologyMetadataAttachmentJson jobMetadataAttachment = new ImportTerminologyMetadataAttachmentJson();
 
 		ourLog.info(
 				"Import {}[{}] - Expanding file {}",
@@ -103,6 +125,12 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 				loincFileAttachment.getFilename());
 
 		TerminologyFileSetJson fileSet = newTerminologyFileSetJson();
+
+		Set<String> stepsWhichHaveNotFoundFileAndNeedTo = theStepExecutionDetails.getJobDefinition().getSteps().stream()
+				.filter(t -> t.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep<?, ?, ?>)
+				.filter(t -> ((ITerminologyImportFileHandlerStep<PT, ?, ?>) t.getJobStepWorker()).mustFindFile())
+				.map(JobDefinitionStep::getStepId)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 
 		try (InputStream inputStream = loincFileAttachment.getInputStream()) {
 			try (BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
@@ -124,6 +152,10 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 										jobParameters,
 										theStepExecutionDetails.getJobDefinition(),
 										nextFileName);
+
+						for (StepIdAndFileHandlingInstructions processor : processors) {
+							stepsWhichHaveNotFoundFileAndNeedTo.remove(processor.stepId());
+						}
 
 						ListMultimap<ITerminologyImportFileHandlerStep.FileHandlingType, String>
 								fileHandlingTypeToAttachmentIds = MultimapBuilder.hashKeys()
@@ -150,6 +182,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 										case CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 1000);
 											yield csvSplitWithRepeatHeader(
+													',',
 													instanceId,
 													bytes,
 													loincFileAttachment.getFilename(),
@@ -161,6 +194,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 										case CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 50000);
 											yield csvSplitWithRepeatHeader(
+													',',
 													instanceId,
 													bytes,
 													loincFileAttachment.getFilename(),
@@ -168,6 +202,29 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 													processor.stepId(),
 													chunkSize,
 													theDataSink);
+										}
+										case TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS -> {
+											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 5000);
+											yield csvSplitWithRepeatHeader(
+													'\t',
+													instanceId,
+													bytes,
+													loincFileAttachment.getFilename(),
+													nextFileName,
+													processor.stepId(),
+													chunkSize,
+													theDataSink);
+										}
+										case XML -> {
+											AttachmentDetails attachmentRequest = new AttachmentDetails(
+													bytes, AttachmentContentTypeEnum.ZIP, nextFileName);
+											String attachmentId =
+													myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
+											TerminologyFileSetJson data = newTerminologyFileSetJson();
+											data.setSourceFilename(nextFileName);
+											data.setAttachmentId(attachmentId);
+											theDataSink.acceptForFutureStep(processor.stepId(), data);
+											yield List.of(attachmentId);
 										}
 									};
 							fileHandlingTypeToAttachmentIds.putAll(fileHandlingType, attachmentIds);
@@ -181,7 +238,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 								nextFileName,
 								bytes,
 								jobParameters,
-								fileSet);
+								fileSet,
+								jobMetadataAttachment);
 					}
 				}
 			}
@@ -190,13 +248,74 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 					Msg.code(2938) + "Files to expand " + getTerminologyName() + " zip file: " + e.getMessage(), e);
 		}
 
-		afterCompletion(context);
+		if (!stepsWhichHaveNotFoundFileAndNeedTo.isEmpty()) {
+			throw new JobExecutionFailedException(
+					"No files in the distribution were matched by step(s): " + stepsWhichHaveNotFoundFileAndNeedTo);
+		}
+
+		afterCompletionOfFileProcessing(context, theDataSink);
+
+		startStaging(theStepExecutionDetails, theDataSink, jobParameters, jobMetadataAttachment);
+
+		AttachmentDetails attachmentRequest = new AttachmentDetails(
+				new ByteArrayInputStream(
+						JsonUtil.serialize(jobMetadataAttachment).getBytes(StandardCharsets.UTF_8)),
+				AttachmentContentTypeEnum.JSON,
+				ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME);
+		myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
 
 		return RunOutcome.SUCCESS;
 	}
 
-	protected void afterCompletion(CT theContext) {
+	@Nonnull
+	protected abstract String getDistributionFileName();
+
+	protected void afterCompletionOfFileProcessing(CT theContext, IJobDataSink<TerminologyFileSetJson> theDataSink) {
 		// subclasses can override this method to do any cleanup
+	}
+
+	protected void startStaging(
+			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			PT theJobParameters,
+			ImportTerminologyMetadataAttachmentJson jobMetadataAttachment) {
+		CodeSystem cs = jobMetadataAttachment.getCodeSystem();
+		if (cs == null) {
+			cs = new CodeSystem();
+		}
+
+		String codeSystemVersionId = theJobParameters.getVersionId();
+		assert codeSystemVersionId != null;
+
+		cs.setId(getCodeSystemIdRoot() + "-" + codeSystemVersionId);
+		cs.setVersion(codeSystemVersionId);
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		massageCodeSystem(cs);
+
+		jobMetadataAttachment.setCodeSystem(cs);
+
+		// Create the CodeSystem resource
+		SystemRequestDetails srd = theStepExecutionDetails.newSystemRequestDetails();
+		srd.getUserData().put(MAKE_LOADING_VERSION_CURRENT, Boolean.FALSE);
+		IFhirResourceDao codeSystemDao = myDaoRegistry.getResourceDao("CodeSystem");
+		codeSystemDao.update(myVersionCanonicalizer.codeSystemFromCanonical(cs), srd);
+
+		ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse response =
+				myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
+		jobMetadataAttachment.setCodeSystemStagingVersionId(response.stagingVersionId());
+
+		// Send a single chunk to trigger the first closure generation step
+		TerminologyFileSetJson fileSet = new TerminologyFileSetJson();
+		theDataSink.acceptForFutureStep(STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION, fileSet);
+	}
+
+	@Nonnull
+	protected abstract String getCodeSystemIdRoot();
+
+	protected void massageCodeSystem(CodeSystem theCodeSystem) {
+		// subclasses can override this method to massage the CodeSystem
 	}
 
 	/**
@@ -209,7 +328,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 			String theFileName,
 			byte[] theBytes,
 			PT theJobParameters,
-			TerminologyFileSetJson theFileSet) {
+			TerminologyFileSetJson theFileSet,
+			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
 		// nothing
 	}
 
@@ -221,6 +341,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 	 * @return A list of attachment IDs for the work chunks that were created.
 	 */
 	private List<String> csvSplitWithRepeatHeader(
+			char theDelimiter,
 			String theJobInstanceId,
 			byte[] theBytes,
 			String theZipOuterFilename,
@@ -239,7 +360,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 		ByteArrayInputStream bis = new ByteArrayInputStream(theBytes);
 		InputStreamReader reader = new InputStreamReader(bis, StandardCharsets.UTF_8);
-		try (CSVParser parser = newLoincCsvParser(reader)) {
+		try (CSVParser parser = newCsvParser(theDelimiter, reader)) {
 
 			List<String> headers = parser.getHeaderNames();
 			Iterator<CSVRecord> recordIterator = parser.getRecords().iterator();
@@ -315,8 +436,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 		for (JobDefinitionStep<PT, ?, ?> step : theJobDefinition.getSteps()) {
 			if (step.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep<PT, ?, ?> fileHandler) {
-				fileHandler
-						.canHandleFile(theStepExecutionDetails, theJobParameters, theStepId)
+				canHandleFile(theStepExecutionDetails, fileHandler, theJobParameters, theStepId)
 						.ifPresent(instructions -> stepProcessingInstructions.add(
 								new StepIdAndFileHandlingInstructions(step.getStepId(), instructions)));
 			}
@@ -326,15 +446,40 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 	}
 
 	@Nonnull
-	public static CSVParser newLoincCsvParser(Reader theReader) throws IOException {
+	private Optional<ITerminologyImportFileHandlerStep.FileHandlingInstructions> canHandleFile(
+			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+			ITerminologyImportFileHandlerStep<PT, ?, ?> theFileHandler,
+			PT theJobParameters,
+			String theFileName) {
+
+		Properties jobProperties = getJobProperties(myJobPersistence, theStepExecutionDetails);
+
+		for (BaseImportTerminologyFileCsvStep.LoincFileNameSpecification loincFileNameSpecification :
+				theFileHandler.getFilesToProcess(theStepExecutionDetails)) {
+			if (loincFileNameSpecification.matchFileName(jobProperties, theFileName)) {
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(
+						loincFileNameSpecification.fileHandlingType()));
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	@Nonnull
+	public static CSVParser newCsvParser(char theDelimiter, Reader theReader) throws IOException {
+		Character quoteCharacter = '"';
+		if (theDelimiter == '\t') {
+			quoteCharacter = null;
+		}
+
 		return new CSVParser(
 				theReader,
 				CSVFormat.DEFAULT
 						.builder()
-						.setDelimiter(',')
+						.setDelimiter(theDelimiter)
 						.setEscape(null)
 						.setIgnoreEmptyLines(true)
-						.setQuote('"')
+						.setQuote(quoteCharacter)
 						.setRecordSeparator('\n')
 						.setNullString("")
 						.setQuoteMode(QuoteMode.NON_NUMERIC)

@@ -30,9 +30,9 @@ import ca.uhn.fhir.batch2.util.AsyncRequestUtil;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -172,7 +172,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		if (ITermLoaderSvc.LOINC_URI.equals(canonicalUrl.url())) {
 			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 			startRequest.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
-			ImportLoincJobParameters parameters = new ImportLoincJobParameters();
+			ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
 			parameters.setVersionId(canonicalUrl.versionId().orElse(null));
 
 			Boolean makeCurrent = DatatypeUtil.toBooleanValue(theMakeCurrent);

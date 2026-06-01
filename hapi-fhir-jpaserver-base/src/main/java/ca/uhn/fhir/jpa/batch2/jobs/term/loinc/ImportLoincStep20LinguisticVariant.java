@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -38,6 +39,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyUtil.getJobProperties;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
@@ -57,16 +59,21 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStep<Base
 			Pattern.compile(".*LinguisticVariants/([a-z]{2})([A-Z]{2})([0-9]+)LinguisticVariant.csv");
 
 	@Override
+	public boolean mustFindFile() {
+		return false;
+	}
+
+	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext();
 	}
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(
-			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
-		Properties jobProperties = getJobProperties(theStepExecutionDetails);
+	public List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
+		Properties jobProperties = getJobProperties(myJobPersistence, theStepExecutionDetails);
 		String linguisticCodes = jobProperties.getProperty(
 				LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_CODES.getCode(),
 				LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_CODES_DEFAULT.getCode());
@@ -93,9 +100,9 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStep<Base
 
 	@Override
 	protected void handleRecord(
-			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			ImportLoincJobParameters theJobParameters,
+			ImportTerminologyJobParameters theJobParameters,
 			MyBaseContext theContext,
 			CSVRecord theRecord,
 			CodeSystem theCodeSystemToPopulate,
@@ -113,8 +120,7 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStep<Base
 		String country = matcher.group(2);
 		String languageCode = language + "-" + country;
 
-		CodeSystem.ConceptDefinitionComponent concept =
-				getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+		CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, loincNumber);
 
 		// The following should be created as designations for each term:
 		// COMPONENT:PROPERTY:TIME_ASPCT:SYSTEM:SCALE_TYP:METHOD_TYP (as colon-separated concatenation - FormalName)

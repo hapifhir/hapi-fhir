@@ -50,14 +50,15 @@ class ImportLoincStep5HandleAnswerListsTest extends BaseImportLoincStepTest {
 
 		// Verify
 		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
-		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
+		CodeSystem cs = myCodeSystemCaptor.getValue();
 		String hierarchy = renderHierarchy(cs);
 		String expected = """
 			-LL1000-0
+			-LL1001-8
+			-LL1892-0
 			-LA13825-7
 			-LA13838-0
 			-LA13892-7
-			-LL1001-8
 			-LA6270-8
 			-LA13836-4
 			-LA13834-9
@@ -65,7 +66,6 @@ class ImportLoincStep5HandleAnswerListsTest extends BaseImportLoincStepTest {
 			-LA13860-4
 			-LA13827-3
 			-LA4389-8
-			-LL1892-0
 			""";
 		assertEquals(expected, hierarchy);
 

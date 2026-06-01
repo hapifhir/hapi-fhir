@@ -17,18 +17,13 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
+package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyStep;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -40,15 +35,15 @@ import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Iterator;
-import java.util.Optional;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 
-public class ImportLoincStep21ChunkConceptsForGeneratingClosure extends BaseImportTerminologyStep
-		implements IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson>,
-				ITerminologyImportFileHandlerStep<
-						ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> {
+public class ImportTerminologyStepChunkConceptsForGeneratingClosure<PT extends ImportTerminologyJobParameters>
+		extends BaseImportTerminologyStep
+		implements IJobStepWorker<PT, TerminologyFileSetJson, TerminologyFileSetJson>,
+				ITerminologyImportFileHandlerStep<PT, TerminologyFileSetJson, TerminologyFileSetJson> {
 
 	@Autowired
 	private ITermConceptDao myConceptDao;
@@ -62,7 +57,7 @@ public class ImportLoincStep21ChunkConceptsForGeneratingClosure extends BaseImpo
 	@Nonnull
 	@Override
 	public RunOutcome run(
-			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
 			throws JobExecutionFailedException {
 		myTxService
@@ -73,7 +68,7 @@ public class ImportLoincStep21ChunkConceptsForGeneratingClosure extends BaseImpo
 	}
 
 	private void generateClosures(
-			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink) {
 		HapiTransactionService.requireTransaction();
 
@@ -112,11 +107,15 @@ public class ImportLoincStep21ChunkConceptsForGeneratingClosure extends BaseImpo
 
 	@Nonnull
 	@Override
-	public Optional<FileHandlingInstructions> canHandleFile(
-			StepExecutionDetails<ImportLoincJobParameters, VoidModel> theStepExecutionDetails,
-			ImportLoincJobParameters theJobParameters,
-			String theFileName) {
+	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<PT, ?> theStepExecutionDetails) {
 		// This step doesn't process any files
-		return Optional.empty();
+		return List.of();
+	}
+
+	@Override
+	public boolean mustFindFile() {
+		// This step doesn't process any files
+		return false;
 	}
 }

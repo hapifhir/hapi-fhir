@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -43,14 +44,14 @@ public class ImportLoincStep12ImagingDocumentCode extends BaseImportLoincStep<Ba
 
 	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext();
 	}
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(
-			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	public List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE,
@@ -59,9 +60,9 @@ public class ImportLoincStep12ImagingDocumentCode extends BaseImportLoincStep<Ba
 
 	@Override
 	protected void handleRecord(
-			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			ImportLoincJobParameters theJobParameters,
+			ImportTerminologyJobParameters theJobParameters,
 			MyBaseContext theContext,
 			CSVRecord theRecord,
 			CodeSystem theCodeSystemToPopulate,

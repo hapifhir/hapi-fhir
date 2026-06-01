@@ -9,7 +9,9 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepFinalize;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -46,7 +48,7 @@ public class ImportLoincStep23FinalizeTest extends BaseImportLoincStepTest {
 	@Mock
 	private IJobDataSink<ImportTerminologyResultJson> myDataSink;
 	@InjectMocks
-	private ImportLoincStep23Finalize myStep;
+	private ImportTerminologyStepFinalize<ImportTerminologyJobParameters> myStep;
 	@Captor
 	private ArgumentCaptor<ImportTerminologyResultJson> myDataCaptor;
 	@Captor
@@ -64,7 +66,7 @@ public class ImportLoincStep23FinalizeTest extends BaseImportLoincStepTest {
 		)));
 
 		// Test
-		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
+		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
 		TerminologyFileSetJson data = newData();
 		data.getRecordsAddedCounter("import-concepts").incrementConceptsAdded(1);
 		data.getRecordsAddedCounter("import-hierarchy").incrementConceptsAdded(2);
@@ -77,7 +79,7 @@ public class ImportLoincStep23FinalizeTest extends BaseImportLoincStepTest {
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(4);
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "my-instance-id", "chunk-id"));
 
-		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
@@ -106,7 +108,7 @@ public class ImportLoincStep23FinalizeTest extends BaseImportLoincStepTest {
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 
 		// Test
-		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
+		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
 		TerminologyFileSetJson data = newData();
 		data.addResourceToActivate("ValueSet/A");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
@@ -116,7 +118,7 @@ public class ImportLoincStep23FinalizeTest extends BaseImportLoincStepTest {
 		data.addResourceToActivate("ValueSet/B");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportLoincJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);

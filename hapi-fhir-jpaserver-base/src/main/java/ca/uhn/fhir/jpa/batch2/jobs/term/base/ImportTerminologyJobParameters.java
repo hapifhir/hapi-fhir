@@ -17,14 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
+package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseTerminologyImportParameters;
+import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Properties;
 
-public class ImportLoincJobParameters extends BaseTerminologyImportParameters {
+public class ImportTerminologyJobParameters implements IModelJson {
+
+	@JsonProperty("versionId")
+	private String myVersionId;
+
+	@JsonProperty("dontMakeCurrent")
+	private Boolean myDontMakeCurrent;
 
 	@JsonIgnore
 	private Properties myJobProperties;
@@ -35,5 +42,28 @@ public class ImportLoincJobParameters extends BaseTerminologyImportParameters {
 
 	public void setJobProperties(Properties theJobProperties) {
 		myJobProperties = theJobProperties;
+	}
+
+	/**
+	 * Subclasses may override this to specify a job property file name
+	 */
+	protected String getJobPropertyFileName() {
+		return null;
+	}
+
+	public String getVersionId() {
+		return myVersionId;
+	}
+
+	public void setVersionId(String theVersionId) {
+		myVersionId = theVersionId;
+	}
+
+	public Boolean getDontMakeCurrent() {
+		return myDontMakeCurrent;
+	}
+
+	public void setDontMakeCurrent(Boolean theDontMakeCurrent) {
+		myDontMakeCurrent = theDontMakeCurrent;
 	}
 }

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyUtil.getJobProperties;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -47,14 +49,14 @@ public class ImportLoincStep7HandleRsnaPlaybook
 
 	@Override
 	protected MyContext newContextObject(
-			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyContext(theStepExecutionDetails);
 	}
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(
-			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	public List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE,
@@ -63,9 +65,9 @@ public class ImportLoincStep7HandleRsnaPlaybook
 
 	@Override
 	protected void handleRecord(
-			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			ImportLoincJobParameters theJobParameters,
+			ImportTerminologyJobParameters theJobParameters,
 			MyContext theContext,
 			CSVRecord theRecord,
 			CodeSystem theCodeSystemToPopulate,
@@ -89,7 +91,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 
 		// CodeSystem version from properties file
 		String codeSystemVersionId = theJobMetadata.getCodeSystem().getVersion();
-		Properties jobProperties = getJobProperties(theStepExecutionDetails);
+		Properties jobProperties = getJobProperties(myJobPersistence, theStepExecutionDetails);
 
 		// ConceptMap version from properties files
 		String loincRsnaCmVersion;
@@ -146,7 +148,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 							Msg.code(912) + "Unknown PartTypeName: " + partTypeName);
 				};
 
-		CodeSystem.ConceptDefinitionComponent code = getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+		CodeSystem.ConceptDefinitionComponent code = getOrAddConcept(theContext, loincNumber);
 		code.addProperty()
 				.setCode(loincCodePropName)
 				.setValue(new Coding(ITermLoaderSvc.LOINC_URI, partNumber, partName));
@@ -206,7 +208,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 
 		private final Set<String> myCodesInRsnaPlaybookValueSet = new HashSet<>();
 
-		public MyContext(StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theData) {
+		public MyContext(StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theData) {
 			super();
 		}
 

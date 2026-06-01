@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
+package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -33,11 +33,6 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyStep;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -59,9 +54,9 @@ import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
-public class ImportLoincStep23Finalize extends BaseImportTerminologyStep
-		implements IReductionStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, ImportTerminologyResultJson> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep23Finalize.class);
+public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParameters> extends BaseImportTerminologyStep
+		implements IReductionStepWorker<PT, TerminologyFileSetJson, ImportTerminologyResultJson> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportTerminologyStepFinalize.class);
 
 	private final TerminologyFileSetJson.RecordsAddedCounter myTotalRecordsAddedCounter =
 			new TerminologyFileSetJson.RecordsAddedCounter();
@@ -75,7 +70,7 @@ public class ImportLoincStep23Finalize extends BaseImportTerminologyStep
 	/**
 	 * Constructor
 	 */
-	public ImportLoincStep23Finalize(
+	public ImportTerminologyStepFinalize(
 			@Nonnull DaoRegistry theDaoRegistry,
 			@Nonnull ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc,
 			@Nonnull IJobPersistence theJobPersistence,
@@ -92,8 +87,7 @@ public class ImportLoincStep23Finalize extends BaseImportTerminologyStep
 
 	@Nonnull
 	@Override
-	public ChunkOutcome consume(
-			ChunkExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theChunkDetails) {
+	public ChunkOutcome consume(ChunkExecutionDetails<PT, TerminologyFileSetJson> theChunkDetails) {
 		TerminologyFileSetJson data = theChunkDetails.getData();
 
 		for (Map.Entry<String, TerminologyFileSetJson.RecordsAddedCounter> entry :
@@ -114,7 +108,7 @@ public class ImportLoincStep23Finalize extends BaseImportTerminologyStep
 	@Nonnull
 	@Override
 	public RunOutcome run(
-			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<ImportTerminologyResultJson> theDataSink)
 			throws JobExecutionFailedException, ReductionStepFailureException {
 
@@ -143,7 +137,7 @@ public class ImportLoincStep23Finalize extends BaseImportTerminologyStep
 	}
 
 	private void updateResourceStatusToActive(
-			@Nonnull StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
 			String resourceToActivate) {
 		IIdType resourceId = myDaoRegistry.getFhirContext().getVersion().newIdType(resourceToActivate);
 
@@ -165,9 +159,8 @@ public class ImportLoincStep23Finalize extends BaseImportTerminologyStep
 		dao.patch(resourceId, null, PatchTypeEnum.FHIR_PATCH_JSON, patchBody, patchDocument, requestDetails);
 	}
 
-	private String createReport(
-			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		JobDefinition<ImportLoincJobParameters> jobDefinition = theStepExecutionDetails.getJobDefinition();
+	private String createReport(StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
+		JobDefinition<PT> jobDefinition = theStepExecutionDetails.getJobDefinition();
 
 		BatchInstanceStepStatisticsDTO allStepStatistics = calculateStepStatistics(theStepExecutionDetails);
 
@@ -178,7 +171,7 @@ public class ImportLoincStep23Finalize extends BaseImportTerminologyStep
 
 		appendCounts(myTotalRecordsAddedCounter, reportBuilder, 0);
 
-		for (JobDefinitionStep<ImportLoincJobParameters, ?, ?> step : jobDefinition.getSteps()) {
+		for (JobDefinitionStep<PT, ?, ?> step : jobDefinition.getSteps()) {
 			if (step.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep) {
 				TerminologyFileSetJson.RecordsAddedCounter counter = myStepIdToRecordsAddedCounter.computeIfAbsent(
 						step.getStepId(), k -> new TerminologyFileSetJson.RecordsAddedCounter());
@@ -209,7 +202,7 @@ public class ImportLoincStep23Finalize extends BaseImportTerminologyStep
 	}
 
 	private BatchInstanceStepStatisticsDTO calculateStepStatistics(
-			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
 		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
 			String stepId = theStepExecutionDetails.getInstance().getInstanceId();
 			return myJobPersistence.calculateStepStatistics(stepId);
@@ -310,7 +303,8 @@ public class ImportLoincStep23Finalize extends BaseImportTerminologyStep
 	}
 
 	@Override
-	public ImportLoincStep23Finalize newInstance() {
-		return new ImportLoincStep23Finalize(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
+	public ImportTerminologyStepFinalize newInstance() {
+		return new ImportTerminologyStepFinalize(
+				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}
 }

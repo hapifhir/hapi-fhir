@@ -4,7 +4,8 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -14,7 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -72,7 +73,7 @@ class ImportLoincStep20LinguisticVariantTest extends BaseImportLoincStepTest {
 		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		// Test
-		StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> stepExecutionDetails = newStepExecutionDetails("loinc-ver/v269/AccessoryFiles/LinguisticVariants/zzZZ8LinguisticVariant.csv");
+		StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> stepExecutionDetails = newStepExecutionDetails("loinc-ver/v269/AccessoryFiles/LinguisticVariants/zzZZ8LinguisticVariant.csv");
 
 		mySvc.run(stepExecutionDetails, myDataSink);
 
@@ -114,15 +115,16 @@ class ImportLoincStep20LinguisticVariantTest extends BaseImportLoincStepTest {
 		}
 
 		String filename = "Loinc_2.82/AccessoryFiles/LinguisticVariants/deAT24LinguisticVariant.csv";
-		ImportLoincJobParameters jobParameters = new ImportLoincJobParameters();
+		ImportTerminologyJobParameters jobParameters = new ImportTerminologyJobParameters();
 		jobParameters.setJobProperties(properties);
-		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = new StepExecutionDetails<>(jobParameters, new VoidModel(), new JobInstance(), new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> stepExecutionDetails = new StepExecutionDetails<>(jobParameters, new VoidModel(), new JobInstance(), new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 
 		// Test
-		Optional<ITerminologyImportFileHandlerStep.FileHandlingInstructions> outcome = mySvc.canHandleFile(stepExecutionDetails, jobParameters, filename);
+		List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> outcome = mySvc.getFilesToProcess(stepExecutionDetails);
 
 		// Verify
-		assertEquals(theExpectMatch, outcome.isPresent());
+		boolean actual = outcome.stream().anyMatch(o -> o.fileNameTester().test(filename));
+		assertEquals(theExpectMatch, actual);
 	}
 
 }

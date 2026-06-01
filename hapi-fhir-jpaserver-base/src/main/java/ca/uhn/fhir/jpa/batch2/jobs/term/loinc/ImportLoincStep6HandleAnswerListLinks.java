@@ -21,13 +21,13 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StringType;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -37,19 +37,16 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportLoincStep6HandleAnswerListLinks extends BaseImportLoincStep<BaseImportLoincStep.MyBaseContext> {
 
-	@Autowired
-	private IValidationSupport myValidationSupport;
-
 	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext();
 	}
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(
-			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	public List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE,
@@ -58,9 +55,9 @@ public class ImportLoincStep6HandleAnswerListLinks extends BaseImportLoincStep<B
 
 	@Override
 	protected void handleRecord(
-			StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			ImportLoincJobParameters theJobParameters,
+			ImportTerminologyJobParameters theJobParameters,
 			MyBaseContext theContext,
 			CSVRecord theRecord,
 			CodeSystem theCodeSystemToPopulate,
@@ -97,12 +94,10 @@ public class ImportLoincStep6HandleAnswerListLinks extends BaseImportLoincStep<B
 			return;
 		}
 
-		CodeSystem.ConceptDefinitionComponent loincCode =
-				getOrAddConcept(theContext, theCodeSystemToPopulate, loincNumber);
+		CodeSystem.ConceptDefinitionComponent loincCode = getOrAddConcept(theContext, loincNumber);
 		loincCode.addProperty().setCode("answer-list").setValue(new StringType(answerListId));
 
-		CodeSystem.ConceptDefinitionComponent answerListCode =
-				getOrAddConcept(theContext, theCodeSystemToPopulate, answerListId);
+		CodeSystem.ConceptDefinitionComponent answerListCode = getOrAddConcept(theContext, answerListId);
 		answerListCode.addProperty().setCode("answers-for").setValue(new StringType(loincNumber));
 	}
 }

@@ -133,18 +133,24 @@ public class ZipCollectionBuilder {
 		return myFiles;
 	}
 
-	public void addFileText(String theText, String theFilename) {
-		myFiles.add(new ITermLoaderSvc.FileDescriptor() {
-			@Override
-			public String getFilename() {
-				return theFilename;
-			}
+	public void addFileText(String theText, String theFilename) throws IOException {
+		if (mySingleZipStream != null) {
+			mySingleZipStream.putNextEntry(new ZipEntry(ZIP_ENTRY_PREFIX + theFilename));
+			mySingleZipStream.write(theText.getBytes(Charsets.UTF_8));
+			mySingleZipStream.closeEntry();
+		} else {
+			myFiles.add(new ITermLoaderSvc.FileDescriptor() {
+				@Override
+				public String getFilename() {
+					return theFilename;
+				}
 
-			@Override
-			public InputStream getInputStream() {
-				return new ByteArrayInputStream(theText.getBytes(Charsets.UTF_8));
-			}
-		});
+				@Override
+				public InputStream getInputStream() {
+					return new ByteArrayInputStream(theText.getBytes(Charsets.UTF_8));
+				}
+			});
+		}
 	}
 
 	public byte[] getZipBytes() {
