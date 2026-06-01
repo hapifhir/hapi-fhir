@@ -267,6 +267,19 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 	}
 
 	@Test
+	public void testSearchForIds_NullFhirId() {
+		IIdType id = createPatient(withActiveTrue());
+
+		runInTransaction(() ->{
+			myEntityManager.createNativeQuery("UPDATE HFJ_RESOURCE SET FHIR_ID = null").executeUpdate();
+		});
+
+		List<IIdType> ids = myPatientDao.searchForResourceIds(new SearchParameterMap(), newSrd());
+		assertEquals(id.getIdPart(), ids.get(0).getIdPart());
+	}
+
+
+	@Test
 	public void testUpdateResourceTwiceInSameTransaction() {
 		// Update with a string param that changes, and a token param that does not
 		runInTransaction(()->{

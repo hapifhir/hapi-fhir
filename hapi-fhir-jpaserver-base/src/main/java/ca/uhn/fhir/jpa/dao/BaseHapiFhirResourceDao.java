@@ -129,11 +129,13 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -185,6 +187,8 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static ca.uhn.fhir.jpa.dao.index.IdHelperService.EMPTY_PREDICATE_ARRAY;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.SINGLE_RESULT;
+import static ca.uhn.fhir.jpa.search.builder.SearchBuilder.splitPidListByPartitionId;
+import static ca.uhn.fhir.jpa.util.InClauseNormalizer.normalizeIdListForInClause;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -2512,7 +2516,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public List<IIdType> searchForResourceIds(SearchParameterMap theParams, RequestDetails theRequest) {
-		return searchForTransformedIds(theParams, theRequest, this::pidsToIds);
+		return searchForTransformedIds(theParams, theRequest, this::pidStreamToVersionedIdStream);
 	}
 
 	private <V> List<V> searchForTransformedIds(
@@ -2566,7 +2570,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * get the Ids from the ResourceTable entities in chunks.
 	 */
 	@Nonnull
-	private Stream<IIdType> pidsToIds(
+	private Stream<IIdType> pidStreamToVersionedIdStream(
 			RequestDetails theRequestDetails, Stream<JpaPid> thePidStream, RequestPartitionId theRequestPartitionId) {
 
 		Stream<JpaPid> pidStream = thePidStream;
@@ -2577,10 +2581,68 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					theRequestPartitionId.getPartitionIds().get(0)));
 		}
 
-		return new QueryChunker<>()
-				.chunk(pidStream, SearchBuilder.getMaximumPageSize())
-				.flatMap(ids -> myResourceTableDao.findAllById(ids).stream())
-				.map(ResourceTable::getIdDt);
+		/*
+		 * Partitioned PIDs have to parts (partition ID and PID), so we can only have half
+		 * as many parameters without exceeding the max parameters.
+		 */
+		int chunkSize = SearchBuilder.getMaximumPageSize();
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			chunkSize = chunkSize / 2;
+		}
+
+		return QueryChunker.chunk(pidStream, chunkSize).flatMap(this::pidListToVersionedIdList);
+	}
+
+	/**
+	 * Converts a list of PIDS to a list of versioned resource IDs.
+	 * This method has special handling for MSSQL when operating in database partition mode.
+	 * See {@link SearchBuilder#loadCurrentResourceVersionsForMsSqlDbpm(List)} for details on why.
+	 */
+	private Stream<? extends IIdType> pidListToVersionedIdList(List<JpaPid> pids) {
+		List<JpaPid> pidsNormalized = normalizeIdListForInClause(pids);
+
+		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Tuple> cq = cb.createTupleQuery();
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.multiselect(from.get("myPid"), from.get("myResourceType"), from.get("myFhirId"), from.get("myVersion"));
+		Predicate wherePredicate;
+
+		if (myPartitionSettings.isDatabasePartitionMode() && myDialectSvc.isMssql()) {
+			Multimap<Integer, Long> partitionIdToPid = splitPidListByPartitionId(pidsNormalized);
+			List<Predicate> partitionAndPidPredicates =
+					new ArrayList<>(partitionIdToPid.keySet().size());
+			for (Map.Entry<Integer, Collection<Long>> entry :
+					partitionIdToPid.asMap().entrySet()) {
+				Integer partitionId = entry.getKey();
+				Collection<Long> pidsForPartitionId = entry.getValue();
+
+				Predicate partitionIdPredicate = cb.equal(from.get("myPartitionIdValue"), partitionId);
+				Predicate pidPredicate = from.get("myResourceId").in(pidsForPartitionId);
+				partitionAndPidPredicates.add(cb.and(partitionIdPredicate, pidPredicate));
+			}
+			wherePredicate = cb.or(partitionAndPidPredicates.toArray(EMPTY_PREDICATE_ARRAY));
+		} else {
+			wherePredicate = from.get("myPid").in(pidsNormalized);
+		}
+
+		cq.where(wherePredicate);
+
+		return myEntityManager.createQuery(cq).getResultStream().map(t -> {
+			JpaPid pid = t.get(0, JpaPid.class);
+			String resourceType = t.get(1, String.class);
+			String fhirId = t.get(2, String.class);
+			Long version = t.get(3, Long.class);
+
+			/*
+			 * There really shouldn't be any null FHIR_ID values in the wild any more, but
+			 * just in case... I think this would be fine to remove eventually.
+			 */
+			if (isBlank(fhirId)) {
+				fhirId = Long.toString(pid.getId());
+			}
+
+			return myFhirContext.getVersion().newIdType(resourceType + "/" + fhirId + "/_history/" + version);
+		});
 	}
 
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
