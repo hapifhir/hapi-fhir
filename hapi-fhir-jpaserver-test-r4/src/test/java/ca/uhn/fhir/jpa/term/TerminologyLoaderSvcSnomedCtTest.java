@@ -2,10 +2,12 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.snomedct.SctHandlerDescription;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.io.IOUtils;
@@ -25,6 +27,8 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.zip.ZipOutputStream;
 
+import static ca.uhn.fhir.jpa.term.snomedct.SctHandlerDescription.SNOMED_CONCEPT_FULLY_SPECIFIED_NAME;
+import static ca.uhn.fhir.jpa.term.snomedct.SctHandlerDescription.SNOMED_CONCEPT_SYNONYM;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -136,6 +140,82 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 		assertThat(childrenOfRootConcept.stream().map(TermConcept::getCode)).containsExactly("126815003");
 		var childrenOfChildConcept = childrenOfRootConcept.stream().flatMap(c -> c.getChildren().stream().map(TermConceptParentChildLink::getChild)).toList();
 		assertThat(childrenOfChildConcept.stream().map(TermConcept::getCode)).containsExactly("126817006");
+	}
+
+	@Test
+	public void testLoadSnomedCtWithMultipleLanguages() throws Exception {
+		myFiles.addFileZip("/sct/", "sct2_Concept_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Description_Full-en_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Description_Full-de_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Description_Full-fr_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Identifier_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Relationship_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
+		mySvc.loadSnomedCt(myFiles.getFiles(), mySrd);
+
+		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyList());
+
+		TermCodeSystemVersion csv = myCsvCaptor.getValue();
+
+		var root1 = csv.getConcepts().stream().filter(c -> c.getCode().equals("126813005")).findFirst().orElseThrow();
+		assertThat(root1.getDisplay()).isEqualTo("ROOT1");
+		assertThat(root1.getDesignations()).allSatisfy(designation -> {
+			assertThat(designation.getUseSystem()).isEqualTo("http://snomed.info/sct");
+			assertThat(designation.getUseCode()).isIn(SNOMED_CONCEPT_SYNONYM, SNOMED_CONCEPT_FULLY_SPECIFIED_NAME);
+			assertThat(designation.getUseDisplay()).isEqualTo(SNOMED_CONCEPT_SYNONYM.equals(designation.getUseCode()) ? "Synonym" : "Fully specified name");
+		}).anySatisfy(designation -> {
+			assertThat(designation.getValue()).isEqualTo("ROOT1");
+			assertThat(designation.getLanguage()).isEqualTo("en");
+			assertThat(designation.getUseCode()).isEqualTo(SNOMED_CONCEPT_SYNONYM);
+		}).anySatisfy(designation -> {
+			assertThat(designation.getValue()).isEqualTo("ROOT1_de");
+			assertThat(designation.getLanguage()).isEqualTo("de");
+			assertThat(designation.getUseCode()).isEqualTo(SNOMED_CONCEPT_SYNONYM);
+		}).anySatisfy(designation -> {
+			assertThat(designation.getValue()).isEqualTo("Synonym für Root1");
+			assertThat(designation.getLanguage()).isEqualTo("de");
+			assertThat(designation.getUseCode()).isEqualTo(SNOMED_CONCEPT_SYNONYM);
+		}).anySatisfy(designation -> {
+			assertThat(designation.getValue()).isEqualTo("Volle Bezeichnung des Root-Elements 1");
+			assertThat(designation.getLanguage()).isEqualTo("de");
+			assertThat(designation.getUseCode()).isEqualTo(SNOMED_CONCEPT_FULLY_SPECIFIED_NAME);
+		}).anySatisfy(designation -> {
+			assertThat(designation.getValue()).isEqualTo("ROOT1_fr");
+			assertThat(designation.getLanguage()).isEqualTo("fr");
+			assertThat(designation.getUseCode()).isEqualTo(SNOMED_CONCEPT_SYNONYM);
+		}).anySatisfy(designation -> {
+			assertThat(designation.getValue()).isEqualTo("Synonyme pour Root1");
+			assertThat(designation.getLanguage()).isEqualTo("fr");
+			assertThat(designation.getUseCode()).isEqualTo(SNOMED_CONCEPT_SYNONYM);
+		}).anySatisfy(designation -> {
+			assertThat(designation.getValue()).isEqualTo("nom entièrement spécifié de ROOT1");
+			assertThat(designation.getLanguage()).isEqualTo("fr");
+			assertThat(designation.getUseCode()).isEqualTo(SNOMED_CONCEPT_FULLY_SPECIFIED_NAME);
+		}).hasSize(7);
+
+		var child2OfRoot1 = root1.getChildren().stream().map(TermConceptParentChildLink::getChild).filter(c -> c.getCode().equals("126815003")).findFirst().orElseThrow();
+		assertThat(child2OfRoot1.getDisplay()).isEqualTo("ROOT1_1");
+		assertThat(child2OfRoot1.getDesignations()).allSatisfy(designation -> {
+			assertThat(designation.getUseSystem()).isEqualTo("http://snomed.info/sct");
+			assertThat(designation.getUseCode()).isIn(SNOMED_CONCEPT_SYNONYM, SNOMED_CONCEPT_FULLY_SPECIFIED_NAME);
+			assertThat(designation.getUseDisplay()).isEqualTo(SNOMED_CONCEPT_SYNONYM.equals(designation.getUseCode()) ? "Synonym" : "Fully specified name");
+		}).anySatisfy(designation -> {
+			assertThat(designation.getValue()).isEqualTo("ROOT1_1");
+			assertThat(designation.getLanguage()).isEqualTo("en");
+			assertThat(designation.getUseCode()).isEqualTo(SNOMED_CONCEPT_SYNONYM);
+		}).anySatisfy(designation -> {
+			assertThat(designation.getValue()).isEqualTo("ROOT1_1_de");
+			assertThat(designation.getLanguage()).isEqualTo("de");
+			assertThat(designation.getUseCode()).isEqualTo(SNOMED_CONCEPT_SYNONYM);
+		}).anySatisfy(designation -> {
+			assertThat(designation.getValue()).isEqualTo("Doppelter Eintrag");
+			assertThat(designation.getLanguage()).isEqualTo("de");
+			assertThat(designation.getUseCode()).isEqualTo(SNOMED_CONCEPT_FULLY_SPECIFIED_NAME);
+		}).anySatisfy(designation -> {
+			assertThat(designation.getValue()).isEqualTo("ROOT1_1_fr");
+			assertThat(designation.getLanguage()).isEqualTo("fr");
+			assertThat(designation.getUseCode()).isEqualTo(SNOMED_CONCEPT_SYNONYM);
+		}).hasSize(4);
 	}
 
 	/**

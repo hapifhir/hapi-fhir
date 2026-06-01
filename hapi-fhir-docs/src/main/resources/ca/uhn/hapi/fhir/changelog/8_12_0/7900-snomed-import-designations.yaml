@@ -1,0 +1,8 @@
+---
+type: add
+issue: 7900
+title: "Import all synonyms and fully specified names for each SNOMED concept as designations.
+  This is useful for concept with multiple synonyms in English
+  but primarily serves imports of non-English SNOMED editions
+  where there are synonyms in other languages
+  which were not imported before."
