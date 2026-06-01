@@ -56,7 +56,7 @@ public class ImportLoincStep17PartLink extends BaseImportLoincStep<ImportLoincSt
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(
+	public List<LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(
 				new LoincFileNameSpecification(

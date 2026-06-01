@@ -38,6 +38,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyUtil.getJobProperties;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
@@ -69,9 +70,9 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStep<Base
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(
+	public List<LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
-		Properties jobProperties = getJobProperties(theStepExecutionDetails);
+		Properties jobProperties = getJobProperties(myJobPersistence, theStepExecutionDetails);
 		String linguisticCodes = jobProperties.getProperty(
 				LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_CODES.getCode(),
 				LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_CODES_DEFAULT.getCode());

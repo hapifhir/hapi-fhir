@@ -13,6 +13,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
@@ -36,7 +37,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -257,7 +258,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 	void testProcess_NoChunksForStep1() {
 		mockCodeSystemStorageStartStaging();
 		mockJobPersistenceFetchDistributionFile();
-		when(myHandlerStep1.canHandleFile(any(), any(), any())).thenAnswer(t -> Optional.empty());
+		when(myHandlerStep1.getFilesToProcess(any())).thenAnswer(t -> List.of());
 		mockHandlerStep2();
 		mockJobPersistenceStoreNewAttachment();
 		mockJobStepExecutionServices();
@@ -299,42 +300,42 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 	}
 
 	private void mockHandlerStep1() {
-		when(myHandlerStep1.canHandleFile(any(), any(), any())).thenAnswer(t -> {
-			String fileName = t.getArgument(2, String.class);
-			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT.getCode())) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
-			}
-			return Optional.empty();
+		when(myHandlerStep1.getFilesToProcess(any())).thenAnswer(t -> {
+			BaseImportTerminologyFileCsvStep.LoincFileNameSpecification spec = new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
+				ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
+				f -> f.contains(LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT.getCode())
+			);
+			return List.of(spec);
 		});
 	}
 
 	private void mockHandlerStep2() {
-		when(myHandlerStep2.canHandleFile(any(), any(), any())).thenAnswer(t -> {
-			String fileName = t.getArgument(2, String.class);
-			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT.getCode())) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
-			}
-			return Optional.empty();
+		when(myHandlerStep2.getFilesToProcess(any())).thenAnswer(t -> {
+			BaseImportTerminologyFileCsvStep.LoincFileNameSpecification spec = new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
+				ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
+				f -> f.contains(LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT.getCode())
+			);
+			return List.of(spec);
 		});
 	}
 
 	private void mockHandlerStep3() {
-		when(myHandlerStep3.canHandleFile(any(), any(), any())).thenAnswer(t -> {
-			String fileName = t.getArgument(2, String.class);
-			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT.getCode())) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
-			}
-			return Optional.empty();
+		when(myHandlerStep3.getFilesToProcess(any())).thenAnswer(t -> {
+			BaseImportTerminologyFileCsvStep.LoincFileNameSpecification spec = new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
+				ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
+				f -> f.contains(LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT.getCode())
+			);
+			return List.of(spec);
 		});
 	}
 
 	private void mockHandlerStep2_SameFileAsStep1() {
-		when(myHandlerStep2.canHandleFile(any(), any(), any())).thenAnswer(t -> {
-			String fileName = t.getArgument(2, String.class);
-			if (fileName.contains(LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT.getCode())) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS));
-			}
-			return Optional.empty();
+		when(myHandlerStep2.getFilesToProcess(any())).thenAnswer(t -> {
+			BaseImportTerminologyFileCsvStep.LoincFileNameSpecification spec = new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
+				ITerminologyImportFileHandlerStep.FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
+				f -> f.contains(LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT.getCode())
+			);
+			return List.of(spec);
 		});
 	}
 
@@ -385,6 +386,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 
 		ImportLoincJobParameters jobParameters = new ImportLoincJobParameters();
 		jobParameters.setVersionId("1.23");
+		jobParameters.setJobProperties(new Properties());
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId(MY_INSTANCE_ID);
 		return new StepExecutionDetails<>(jobParameters, null, instance, new WorkChunk(), myJobStepExecutionServices, jobDefinition, "step-0", "step-1");

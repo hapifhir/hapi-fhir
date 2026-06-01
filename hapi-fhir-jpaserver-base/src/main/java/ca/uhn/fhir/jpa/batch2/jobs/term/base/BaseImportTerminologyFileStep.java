@@ -1,17 +1,10 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
-import ca.uhn.fhir.batch2.api.AttachmentDetails;
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.api.*;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.BaseImportLoincStep;
@@ -31,58 +24,32 @@ import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.PrimitiveType;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newCsvParser;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_CODE_SYSTEM_URL;
 
 public abstract class BaseImportTerminologyFileStep<
-				PT extends BaseTerminologyImportParameters, CT extends BaseImportTerminologyFileStep.MyBaseContext>
+				PT extends TerminologyImportParameters, CT extends BaseImportTerminologyFileCsvStep.MyBaseContext>
 		extends BaseImportTerminologyStep
 		implements ITerminologyImportFileHandlerStep<PT, TerminologyFileSetJson, TerminologyFileSetJson> {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportTerminologyFileStep.class);
+private static final Logger ourLog = LoggerFactory.getLogger(BaseImportTerminologyFileStep.class);
 
 	@Autowired
 	protected FhirContext myFhirContext;
@@ -105,67 +72,32 @@ public abstract class BaseImportTerminologyFileStep<
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Nonnull
-	@Override
-	public Optional<FileHandlingInstructions> canHandleFile(
-			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, PT theJobParameters, String theFileName) {
-
-		Properties jobProperties = getJobProperties(theStepExecutionDetails);
-
-		for (LoincFileNameSpecification loincFileNameSpecification : getFilesToProcess(theStepExecutionDetails)) {
-			if (loincFileNameSpecification.matchFileName(jobProperties, theFileName)) {
-				return Optional.of(new FileHandlingInstructions(loincFileNameSpecification.fileHandlingType()));
-			}
-		}
-
-		return Optional.empty();
-	}
-
 	@Override
 	public boolean mustFindFile() {
 		return true;
 	}
 
-	protected Properties getJobProperties(StepExecutionDetails<PT, ?> theStepExecutionDetails) {
-		PT jobParameters = theStepExecutionDetails.getParameters();
-		Properties retVal = jobParameters.getJobProperties();
-		if (retVal == null) {
-			String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
-			retVal = new Properties();
-			try {
-				String filename = LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode();
-				AttachmentDetails attachment = myJobPersistence.fetchAttachmentByFilename(instanceId, filename);
-				retVal.load(attachment.getInputStream());
-			} catch (ResourceNotFoundException | IOException e) {
-				// no properties file was provided
-			}
-
-			jobParameters.setJobProperties(retVal);
-		}
-		return retVal;
-	}
-
 	@Nonnull
 	@Override
 	public RunOutcome run(
-			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
-			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
-			throws JobExecutionFailedException {
+		@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
+		@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink)
+		throws JobExecutionFailedException {
 
 		CT codeExtractionContext = newContextObject(theStepExecutionDetails);
 
 		ImportTerminologyMetadataAttachmentJson jobMetadata =
-				getJobMetadata(theStepExecutionDetails.getInstance().getInstanceId());
+			getJobMetadata(theStepExecutionDetails.getInstance().getInstanceId());
 
 		return run(theStepExecutionDetails, theDataSink, jobMetadata, codeExtractionContext);
 	}
 
 	@Nonnull
 	protected RunOutcome run(
-			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
-			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink,
-			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			CT theContext) {
+		@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
+		@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink,
+		ImportTerminologyMetadataAttachmentJson theJobMetadata,
+		CT theContext) {
 		String jobInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
 
 		TerminologyFileSetJson theData = theStepExecutionDetails.getData();
@@ -180,37 +112,13 @@ public abstract class BaseImportTerminologyFileStep<
 		if (isNotBlank(attachmentId)) {
 
 			AttachmentDetails attachment = myJobPersistence.fetchAttachmentById(jobInstanceId, attachmentId);
-			try (InputStream inputStream = attachment.getInputStream()) {
-				InputStreamReader reader = new InputStreamReader(
-						BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
-
-				/*
-				 * Even if the source files use a delimiter other than comma, the expand step (step 1)
-				 * splits the files up and rewrites them as CSV using a comma delimiter.
-				 */
-				CSVParser csvReader = newCsvParser(',', reader);
-				for (CSVRecord record : csvReader.getRecords()) {
-					handleRecord(
-							theStepExecutionDetails,
-							theJobMetadata,
-							jobParameters,
-							theContext,
-							record,
-							codeSystemToPopulate,
-							theData,
-							sourceFilename);
-				}
-
-			} catch (IOException e) {
-				throw new JobExecutionFailedException(
-						Msg.code(2941) + "Failed to read file attachment: " + e.getMessage(), e);
-			}
+			processAttachment(theStepExecutionDetails, theJobMetadata, theContext, attachment, jobParameters, codeSystemToPopulate, theData, sourceFilename);
 
 			syncToDb(theJobMetadata, theContext, codeSystemToPopulate, theStepExecutionDetails);
 		}
 
 		if (!theData.getStepIdToRecordsAdded().isEmpty()
-				|| !theData.getResourcesToActivate().isEmpty()) {
+			|| !theData.getResourcesToActivate().isEmpty()) {
 			TerminologyFileSetJson counterWorkChunk = new TerminologyFileSetJson();
 			counterWorkChunk.getStepIdToRecordsAdded().putAll(theData.getStepIdToRecordsAdded());
 			counterWorkChunk.getResourcesToActivate().addAll(theData.getResourcesToActivate());
@@ -220,14 +128,16 @@ public abstract class BaseImportTerminologyFileStep<
 		return RunOutcome.SUCCESS;
 	}
 
-	protected <T> T executeInNewTransactionWithRetry(
-			Callable<T> theFunction, StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
+	protected abstract void processAttachment(@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, CT theContext, AttachmentDetails attachment, PT jobParameters, CodeSystem codeSystemToPopulate, TerminologyFileSetJson theData, String sourceFilename);
+
+		protected <T> T executeInNewTransactionWithRetry(
+		Callable<T> theFunction, StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
 		int retryCount = 0;
 		while (true) {
 			try {
 				return myTransactionService
-						.withSystemRequestOnDefaultPartition()
-						.execute(theFunction);
+					.withSystemRequestOnDefaultPartition()
+					.execute(theFunction);
 			} catch (ResourceVersionConflictException e) {
 				retryCount++;
 				int maxRetries = 10;
@@ -235,12 +145,12 @@ public abstract class BaseImportTerminologyFileStep<
 					throw e;
 				}
 				ourLog.atWarn()
-						.setMessage("Failed to save terminology for step {}, retry {}/{} in 5 seconds: {}")
-						.addArgument(theStepExecutionDetails.getCurrentStepId())
-						.addArgument(retryCount)
-						.addArgument(maxRetries)
-						.addArgument(e.getMessage())
-						.log();
+					.setMessage("Failed to save terminology for step {}, retry {}/{} in 5 seconds: {}")
+					.addArgument(theStepExecutionDetails.getCurrentStepId())
+					.addArgument(retryCount)
+					.addArgument(maxRetries)
+					.addArgument(e.getMessage())
+					.log();
 
 				long sleepTime = 5 * DateUtils.MILLIS_PER_SECOND;
 				if (HapiSystemProperties.isUnitTestModeEnabled()) {
@@ -254,22 +164,8 @@ public abstract class BaseImportTerminologyFileStep<
 
 	protected abstract CT newContextObject(StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails);
 
-	@Nonnull
-	protected abstract List<LoincFileNameSpecification> getFilesToProcess(
-			StepExecutionDetails<PT, ?> theStepExecutionDetails);
-
-	protected abstract void handleRecord(
-			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
-			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			PT theJobParameters,
-			CT theContext,
-			CSVRecord theRecord,
-			CodeSystem theCodeSystemToPopulate,
-			TerminologyFileSetJson theData,
-			String theSourceFilename);
-
 	protected TerminologyFileSetJson.RecordsAddedCounter getRecordsAddedCounter(
-			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
+		StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
 
 		TerminologyFileSetJson data = theStepExecutionDetails.getData();
 		String currentStepId = theStepExecutionDetails.getCurrentStepId();
@@ -278,10 +174,10 @@ public abstract class BaseImportTerminologyFileStep<
 
 	@Nullable
 	protected IValidationSupport.LookupCodeResult lookupPreExistingConcept(
-			ImportTerminologyMetadataAttachmentJson theJobMetadata, String propertyCodeValue) {
+		ImportTerminologyMetadataAttachmentJson theJobMetadata, String propertyCodeValue) {
 		String version = theJobMetadata.getCodeSystemStagingVersionId();
 		LookupCodeRequest request =
-				new LookupCodeRequest(LOINC_GENERIC_CODE_SYSTEM_URL + "|" + version, propertyCodeValue);
+			new LookupCodeRequest(LOINC_GENERIC_CODE_SYSTEM_URL + "|" + version, propertyCodeValue);
 		return myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
 	}
 
@@ -289,7 +185,7 @@ public abstract class BaseImportTerminologyFileStep<
 	protected CodeSystem.ConceptDefinitionComponent getOrAddConcept(MyBaseContext theContext, String theCode) {
 
 		CodeSystem.ConceptDefinitionComponent code =
-				theContext.getCodeToConcept().get(theCode);
+			theContext.getCodeToConcept().get(theCode);
 		if (code == null) {
 			code = new CodeSystem.ConceptDefinitionComponent();
 			code.setCode(theCode);
@@ -302,9 +198,9 @@ public abstract class BaseImportTerminologyFileStep<
 		if (isNotBlank(theParentCode) && isNotBlank(theChildCode)) {
 			Map<String, CodeSystem.ConceptDefinitionComponent> codeToConceptMap = theContext.getCodeToConcept();
 			CodeSystem.ConceptDefinitionComponent parentConcept =
-					codeToConceptMap.computeIfAbsent(theParentCode, this::newConcept);
+				codeToConceptMap.computeIfAbsent(theParentCode, this::newConcept);
 			CodeSystem.ConceptDefinitionComponent childConcept =
-					codeToConceptMap.computeIfAbsent(theChildCode, this::newConcept);
+				codeToConceptMap.computeIfAbsent(theChildCode, this::newConcept);
 
 			if (parentConcept.getConcept().stream().noneMatch(t -> t.getCode().equals(theChildCode))) {
 				parentConcept.addConcept(childConcept);
@@ -332,20 +228,20 @@ public abstract class BaseImportTerminologyFileStep<
 	}
 
 	protected ValueSet getOrAddValueSet(
-			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
-			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			TerminologyFileSetJson theData,
-			MyBaseContext theContext,
-			String theValueSetId,
-			String theValueSetUri,
-			String theValueSetName,
-			String theVersionPropertyName) {
+		StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
+		ImportTerminologyMetadataAttachmentJson theJobMetadata,
+		TerminologyFileSetJson theData,
+		MyBaseContext theContext,
+		String theValueSetId,
+		String theValueSetUri,
+		String theValueSetName,
+		String theVersionPropertyName) {
 
 		String version;
 		String codeSystemVersion = theJobMetadata.getCodeSystem().getVersion();
 		assert isNotBlank(codeSystemVersion);
 
-		Properties jobProperties = getJobProperties(theStepExecutionDetails);
+		Properties jobProperties = ImportTerminologyUtil.getJobProperties(myJobPersistence, theStepExecutionDetails);
 		if (isNotBlank(theVersionPropertyName) && isNotBlank(jobProperties.getProperty(theVersionPropertyName))) {
 			version = jobProperties.getProperty(theVersionPropertyName) + "-" + codeSystemVersion;
 		} else {
@@ -363,10 +259,10 @@ public abstract class BaseImportTerminologyFileStep<
 			vs.setStatus(Enumerations.PublicationStatus.DRAFT);
 			vs.setPublisher(BaseImportLoincStep.REGENSTRIEF_INSTITUTE_INC);
 			vs.addContact()
-					.setName(BaseImportLoincStep.REGENSTRIEF_INSTITUTE_INC)
-					.addTelecom()
-					.setSystem(ContactPoint.ContactPointSystem.URL)
-					.setValue(BaseImportLoincStep.LOINC_WEBSITE_URL);
+				.setName(BaseImportLoincStep.REGENSTRIEF_INSTITUTE_INC)
+				.addTelecom()
+				.setSystem(ContactPoint.ContactPointSystem.URL)
+				.setValue(BaseImportLoincStep.LOINC_WEBSITE_URL);
 			vs.setCopyright(theJobMetadata.getCodeSystem().getCopyright());
 			theContext.getIdToValueSet().put(valueSetId, vs);
 			theData.addResourceToActivate("ValueSet/" + valueSetId);
@@ -382,7 +278,7 @@ public abstract class BaseImportTerminologyFileStep<
 	}
 
 	protected void addCodeAsIncludeToValueSet(
-			ValueSet theVs, String theCodeSystemUrl, String theCode, String theDisplayName) {
+		ValueSet theVs, String theCodeSystemUrl, String theCode, String theDisplayName) {
 		ValueSet.ConceptSetComponent include = null;
 		for (ValueSet.ConceptSetComponent next : theVs.getCompose().getInclude()) {
 			if (next.getSystem().equals(theCodeSystemUrl)) {
@@ -414,10 +310,10 @@ public abstract class BaseImportTerminologyFileStep<
 	 * Subclasses may override, but they should call this super-method too.
 	 */
 	protected void syncToDb(
-			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			CT theCodeExtractionContext,
-			CodeSystem theCodeSystemToPopulate,
-			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
+		ImportTerminologyMetadataAttachmentJson theJobMetadata,
+		CT theCodeExtractionContext,
+		CodeSystem theCodeSystemToPopulate,
+		StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
 
 		syncConceptsToDb(theStepExecutionDetails, theCodeExtractionContext, theCodeSystemToPopulate);
 		syncValueSetsToDb(theCodeExtractionContext, theStepExecutionDetails);
@@ -425,9 +321,9 @@ public abstract class BaseImportTerminologyFileStep<
 	}
 
 	private void syncConceptsToDb(
-			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
-			CT theCodeExtractionContext,
-			CodeSystem codeSystemToPopulate) {
+		@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
+		CT theCodeExtractionContext,
+		CodeSystem codeSystemToPopulate) {
 		if (!theCodeExtractionContext.getCodeToConcept().isEmpty()) {
 
 			populateConceptsIntoCodeSystem(theCodeExtractionContext.getCodeToConcept(), codeSystemToPopulate);
@@ -436,20 +332,20 @@ public abstract class BaseImportTerminologyFileStep<
 
 			Callable<UploadStatistics> uploader = () -> {
 				IBaseResource codeSystemToPopulateNonCanonical =
-						myVersionCanonicalizer.codeSystemFromCanonical(codeSystemToPopulate);
+					myVersionCanonicalizer.codeSystemFromCanonical(codeSystemToPopulate);
 				return myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulateNonCanonical);
 			};
 			UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
 
 			ourLog.info(
-					"Imported {} concept entries including {} root concept entries for storage in {}. Outcome: {}",
-					theCodeExtractionContext.getCodeToConcept().size(),
-					codeSystemToPopulate.getConcept().size(),
-					sw,
-					uploadStatistics);
+				"Imported {} concept entries including {} root concept entries for storage in {}. Outcome: {}",
+				theCodeExtractionContext.getCodeToConcept().size(),
+				codeSystemToPopulate.getConcept().size(),
+				sw,
+				uploadStatistics);
 
 			TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter =
-					getRecordsAddedCounter(theStepExecutionDetails);
+				getRecordsAddedCounter(theStepExecutionDetails);
 			recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
 			recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
 			recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
@@ -458,7 +354,7 @@ public abstract class BaseImportTerminologyFileStep<
 	}
 
 	private static void populateConceptsIntoCodeSystem(
-			Map<String, CodeSystem.ConceptDefinitionComponent> codeToConcept, CodeSystem codeSystemToPopulate) {
+		Map<String, CodeSystem.ConceptDefinitionComponent> codeToConcept, CodeSystem codeSystemToPopulate) {
 		// Figure out which concepts are at the very top of the hierarchy (i.e. not children of any other concept)
 		// and put them at the root of the CodeSystem to upload
 
@@ -478,32 +374,32 @@ public abstract class BaseImportTerminologyFileStep<
 	}
 
 	private void syncConceptMapsToDb(
-			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			MyBaseContext theCodeExtractionContext,
-			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
+		ImportTerminologyMetadataAttachmentJson theJobMetadata,
+		MyBaseContext theCodeExtractionContext,
+		StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
 		IFhirResourceDao conceptMapDao = myDaoRegistry.getResourceDao("ConceptMap");
 		for (Map.Entry<String, Collection<ConceptMapping>> entry :
-				theCodeExtractionContext.getIdToConceptMappings().asMap().entrySet()) {
+			theCodeExtractionContext.getIdToConceptMappings().asMap().entrySet()) {
 
 			String conceptMapId = entry.getKey();
 			Collection<ConceptMapping> mappings = entry.getValue();
 
 			executeInNewTransactionWithRetry(
-					() -> {
-						syncConceptMapToDb(
-								theJobMetadata, theStepExecutionDetails, conceptMapId, conceptMapDao, mappings);
-						return null;
-					},
-					theStepExecutionDetails);
+				() -> {
+					syncConceptMapToDb(
+						theJobMetadata, theStepExecutionDetails, conceptMapId, conceptMapDao, mappings);
+					return null;
+				},
+				theStepExecutionDetails);
 		}
 	}
 
 	private void syncConceptMapToDb(
-			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
-			String conceptMapId,
-			IFhirResourceDao conceptMapDao,
-			Collection<ConceptMapping> mappings) {
+		ImportTerminologyMetadataAttachmentJson theJobMetadata,
+		StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
+		String conceptMapId,
+		IFhirResourceDao conceptMapDao,
+		Collection<ConceptMapping> mappings) {
 		ourLog.info("Checking for existence of ConceptMap: {}", conceptMapId);
 
 		ConceptMap conceptMap;
@@ -528,11 +424,11 @@ public abstract class BaseImportTerminologyFileStep<
 			conceptMap.setVersion(firstMapping.getConceptMapVersion());
 			conceptMap.setPublisher(BaseImportLoincStep.REGENSTRIEF_INSTITUTE_INC);
 			conceptMap
-					.addContact()
-					.setName(BaseImportLoincStep.REGENSTRIEF_INSTITUTE_INC)
-					.addTelecom()
-					.setSystem(ContactPoint.ContactPointSystem.URL)
-					.setValue(BaseImportLoincStep.LOINC_WEBSITE_URL);
+				.addContact()
+				.setName(BaseImportLoincStep.REGENSTRIEF_INSTITUTE_INC)
+				.addTelecom()
+				.setSystem(ContactPoint.ContactPointSystem.URL)
+				.setValue(BaseImportLoincStep.LOINC_WEBSITE_URL);
 
 			String copyright = firstMapping.getCopyright();
 			if (!copyright.contains("LOINC")) {
@@ -553,7 +449,7 @@ public abstract class BaseImportTerminologyFileStep<
 				if (next.getSource().equals(nextMapping.getSourceCodeSystem())) {
 					if (next.getTarget().equals(nextMapping.getTargetCodeSystem())) {
 						if (!defaultString(nextMapping.getTargetCodeSystemVersion())
-								.equals(defaultString(next.getTargetVersion()))) {
+							.equals(defaultString(next.getTargetVersion()))) {
 							continue;
 						}
 						group = next;
@@ -588,19 +484,19 @@ public abstract class BaseImportTerminologyFileStep<
 			}
 			if (!found) {
 				source.addTarget()
-						.setCode(nextMapping.getTargetCode())
-						.setDisplay(nextMapping.getTargetDisplay())
-						.setEquivalence(nextMapping.getEquivalence());
+					.setCode(nextMapping.getTargetCode())
+					.setDisplay(nextMapping.getTargetDisplay())
+					.setEquivalence(nextMapping.getEquivalence());
 				addedMappings++;
 			} else {
 				skippedMappings++;
 				ourLog.atDebug()
-						.setMessage("Not going to add a mapping from [{}/{}] to [{}/{}] because one already exists")
-						.addArgument(nextMapping.getSourceCodeSystem())
-						.addArgument(nextMapping.getSourceCode())
-						.addArgument(nextMapping.getTargetCodeSystem())
-						.addArgument(nextMapping.getTargetCode())
-						.log();
+					.setMessage("Not going to add a mapping from [{}/{}] to [{}/{}] because one already exists")
+					.addArgument(nextMapping.getSourceCodeSystem())
+					.addArgument(nextMapping.getSourceCode())
+					.addArgument(nextMapping.getTargetCodeSystem())
+					.addArgument(nextMapping.getTargetCode())
+					.log();
 			}
 		}
 
@@ -626,37 +522,37 @@ public abstract class BaseImportTerminologyFileStep<
 		}
 
 		ourLog.atInfo()
-				.setMessage("Adding {} mappings and skipped {} pre-existing mappings to LOINC ConceptMap {}")
-				.addArgument(addedMappings)
-				.addArgument(skippedMappings)
-				.addArgument(conceptMap.getId())
-				.log();
+			.setMessage("Adding {} mappings and skipped {} pre-existing mappings to LOINC ConceptMap {}")
+			.addArgument(addedMappings)
+			.addArgument(skippedMappings)
+			.addArgument(conceptMap.getId())
+			.log();
 	}
 
 	private void syncValueSetsToDb(
-			MyBaseContext theCodeExtractionContext,
-			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
+		MyBaseContext theCodeExtractionContext,
+		StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
 		if (!theCodeExtractionContext.getIdToValueSet().isEmpty()) {
 			IFhirResourceDao valueSetDao = myDaoRegistry.getResourceDao("ValueSet");
 			for (ValueSet valueSet : theCodeExtractionContext.getIdToValueSet().values()) {
 				executeInNewTransactionWithRetry(
-						() -> {
-							syncValueSetToDb(theStepExecutionDetails, valueSet, valueSetDao);
-							return null;
-						},
-						theStepExecutionDetails);
+					() -> {
+						syncValueSetToDb(theStepExecutionDetails, valueSet, valueSetDao);
+						return null;
+					},
+					theStepExecutionDetails);
 			}
 		}
 	}
 
 	private void syncValueSetToDb(
-			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
-			ValueSet valueSet,
-			IFhirResourceDao valueSetDao) {
+		StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
+		ValueSet valueSet,
+		IFhirResourceDao valueSetDao) {
 		try {
 			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 			IIdType existingId =
-					myFhirContext.getVersion().newIdType(valueSet.getIdElement().getIdPart());
+				myFhirContext.getVersion().newIdType(valueSet.getIdElement().getIdPart());
 			IBaseResource valueSetNonCanonical = valueSetDao.read(existingId, requestDetails);
 			ValueSet existing = myVersionCanonicalizer.valueSetToCanonical(valueSetNonCanonical);
 			assert existing != null : "Reading ValueSet " + valueSet.getId() + " returned null";
@@ -669,14 +565,14 @@ public abstract class BaseImportTerminologyFileStep<
 			int addedCodes = 0;
 
 			for (ValueSet.ConceptSetComponent sourceInclude :
-					valueSet.getCompose().getInclude()) {
+				valueSet.getCompose().getInclude()) {
 				ValueSet.ConceptSetComponent targetInclude = findOrAddMatchingConceptSetComponent(
-						existing.getCompose().getInclude(), sourceInclude);
+					existing.getCompose().getInclude(), sourceInclude);
 
 				// Add codes
 				Set<String> existingCodes = targetInclude.getConcept().stream()
-						.map(ValueSet.ConceptReferenceComponent::getCode)
-						.collect(Collectors.toSet());
+					.map(ValueSet.ConceptReferenceComponent::getCode)
+					.collect(Collectors.toSet());
 				for (ValueSet.ConceptReferenceComponent toAdd : sourceInclude.getConcept()) {
 					if (!existingCodes.contains(toAdd.getCode())) {
 						existing.getCompose().getIncludeFirstRep().addConcept(toAdd);
@@ -691,10 +587,10 @@ public abstract class BaseImportTerminologyFileStep<
 			}
 
 			ourLog.atInfo()
-					.setMessage("Updating existing LOINC ValueSet {} to add {} codes")
-					.addArgument(valueSet.getId())
-					.addArgument(addedCodes)
-					.log();
+				.setMessage("Updating existing LOINC ValueSet {} to add {} codes")
+				.addArgument(valueSet.getId())
+				.addArgument(addedCodes)
+				.log();
 
 			requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 			valueSetDao.update(myVersionCanonicalizer.valueSetFromCanonical(existing), requestDetails);
@@ -711,17 +607,17 @@ public abstract class BaseImportTerminologyFileStep<
 
 			int codeCount = 0;
 			if (valueSet.hasCompose()
-					&& valueSet.getCompose().hasInclude()
-					&& valueSet.getCompose().getIncludeFirstRep().hasConcept()) {
+				&& valueSet.getCompose().hasInclude()
+				&& valueSet.getCompose().getIncludeFirstRep().hasConcept()) {
 				codeCount = Math.toIntExact(
-						valueSet.getCompose().getIncludeFirstRep().getConcept().size());
+					valueSet.getCompose().getIncludeFirstRep().getConcept().size());
 			}
 
 			ourLog.atInfo()
-					.setMessage("Creating new LOINC ValueSet {} with {} code inclusions")
-					.addArgument(valueSet.getId())
-					.addArgument(codeCount)
-					.log();
+				.setMessage("Creating new LOINC ValueSet {} with {} code inclusions")
+				.addArgument(valueSet.getId())
+				.addArgument(codeCount)
+				.log();
 			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 
 			/*
@@ -732,8 +628,8 @@ public abstract class BaseImportTerminologyFileStep<
 			 */
 			IBaseResource nonCanonicalValueSet = myVersionCanonicalizer.valueSetFromCanonical(valueSet);
 			nonCanonicalValueSet.setUserData(
-					JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE,
-					valueSet.getIdElement().getIdPart());
+				JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE,
+				valueSet.getIdElement().getIdPart());
 			valueSetDao.create(nonCanonicalValueSet, requestDetails);
 
 			getRecordsAddedCounter(theStepExecutionDetails).incrementValueSetCodesAdded(codeCount);
@@ -741,7 +637,7 @@ public abstract class BaseImportTerminologyFileStep<
 	}
 
 	private ValueSet.ConceptSetComponent findOrAddMatchingConceptSetComponent(
-			List<ValueSet.ConceptSetComponent> theTargetList, ValueSet.ConceptSetComponent theSetToFind) {
+		List<ValueSet.ConceptSetComponent> theTargetList, ValueSet.ConceptSetComponent theSetToFind) {
 		ConceptSetComponentIdentity toFind = new ConceptSetComponentIdentity(theSetToFind);
 		for (ValueSet.ConceptSetComponent next : theTargetList) {
 			ConceptSetComponentIdentity nextIdentity = new ConceptSetComponentIdentity(next);
@@ -762,11 +658,11 @@ public abstract class BaseImportTerminologyFileStep<
 	private record ConceptSetComponentIdentity(String system, Set<String> valueSets) {
 		public ConceptSetComponentIdentity(ValueSet.ConceptSetComponent theSetToFind) {
 			this(
-					theSetToFind.getSystem(),
-					theSetToFind.getValueSet().stream()
-							.map(PrimitiveType::getValue)
-							.filter(StringUtils::isNotBlank)
-							.collect(Collectors.toSet()));
+				theSetToFind.getSystem(),
+				theSetToFind.getValueSet().stream()
+					.map(PrimitiveType::getValue)
+					.filter(StringUtils::isNotBlank)
+					.collect(Collectors.toSet()));
 		}
 	}
 
@@ -919,51 +815,52 @@ public abstract class BaseImportTerminologyFileStep<
 				return false;
 			}
 			return Objects.equals(myCopyright, that.myCopyright)
-					&& Objects.equals(myConceptMapId, that.myConceptMapId)
-					&& Objects.equals(myConceptMapUri, that.myConceptMapUri)
-					&& Objects.equals(myConceptMapVersion, that.myConceptMapVersion)
-					&& Objects.equals(myConceptMapName, that.myConceptMapName)
-					&& Objects.equals(mySourceCodeSystem, that.mySourceCodeSystem)
-					&& Objects.equals(mySourceCodeSystemVersion, that.mySourceCodeSystemVersion)
-					&& Objects.equals(mySourceCode, that.mySourceCode)
-					&& Objects.equals(mySourceDisplay, that.mySourceDisplay)
-					&& Objects.equals(myTargetCodeSystem, that.myTargetCodeSystem)
-					&& Objects.equals(myTargetCode, that.myTargetCode)
-					&& Objects.equals(myTargetDisplay, that.myTargetDisplay)
-					&& myEquivalence == that.myEquivalence
-					&& Objects.equals(myTargetCodeSystemVersion, that.myTargetCodeSystemVersion);
+				&& Objects.equals(myConceptMapId, that.myConceptMapId)
+				&& Objects.equals(myConceptMapUri, that.myConceptMapUri)
+				&& Objects.equals(myConceptMapVersion, that.myConceptMapVersion)
+				&& Objects.equals(myConceptMapName, that.myConceptMapName)
+				&& Objects.equals(mySourceCodeSystem, that.mySourceCodeSystem)
+				&& Objects.equals(mySourceCodeSystemVersion, that.mySourceCodeSystemVersion)
+				&& Objects.equals(mySourceCode, that.mySourceCode)
+				&& Objects.equals(mySourceDisplay, that.mySourceDisplay)
+				&& Objects.equals(myTargetCodeSystem, that.myTargetCodeSystem)
+				&& Objects.equals(myTargetCode, that.myTargetCode)
+				&& Objects.equals(myTargetDisplay, that.myTargetDisplay)
+				&& myEquivalence == that.myEquivalence
+				&& Objects.equals(myTargetCodeSystemVersion, that.myTargetCodeSystemVersion);
 		}
 
 		@Override
 		public int hashCode() {
 			return Objects.hash(
-					myCopyright,
-					myConceptMapId,
-					myConceptMapUri,
-					myConceptMapVersion,
-					myConceptMapName,
-					mySourceCodeSystem,
-					mySourceCodeSystemVersion,
-					mySourceCode,
-					mySourceDisplay,
-					myTargetCodeSystem,
-					myTargetCode,
-					myTargetDisplay,
-					myEquivalence,
-					myTargetCodeSystemVersion);
+				myCopyright,
+				myConceptMapId,
+				myConceptMapUri,
+				myConceptMapVersion,
+				myConceptMapName,
+				mySourceCodeSystem,
+				mySourceCodeSystemVersion,
+				mySourceCode,
+				mySourceDisplay,
+				myTargetCodeSystem,
+				myTargetCode,
+				myTargetDisplay,
+				myEquivalence,
+				myTargetCodeSystemVersion);
 		}
 	}
 
-	protected record LoincFileNameSpecification(
-			FileHandlingType fileHandlingType,
-			LoincUploadPropertiesEnum propertyName,
-			List<LoincUploadPropertiesEnum> defaultValues,
-			Predicate<String> fileNameTester) {
+	// FIXME: move to ITerminologyImportFileHandlerStep and rename
+	public record LoincFileNameSpecification(
+		FileHandlingType fileHandlingType,
+		LoincUploadPropertiesEnum propertyName,
+		List<LoincUploadPropertiesEnum> defaultValues,
+		Predicate<String> fileNameTester) {
 
 		public LoincFileNameSpecification(
-				FileHandlingType theFileHandlingType,
-				LoincUploadPropertiesEnum thePropertyName,
-				LoincUploadPropertiesEnum... theDefaultValue) {
+			FileHandlingType theFileHandlingType,
+			LoincUploadPropertiesEnum thePropertyName,
+			LoincUploadPropertiesEnum... theDefaultValue) {
 			this(theFileHandlingType, thePropertyName, Arrays.asList(theDefaultValue), null);
 		}
 
@@ -994,7 +891,7 @@ public abstract class BaseImportTerminologyFileStep<
 
 		private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 		private final SetMultimap<String, ConceptMapping> myIdToConceptMappings =
-				MultimapBuilder.hashKeys().linkedHashSetValues().build();
+			MultimapBuilder.hashKeys().linkedHashSetValues().build();
 		private final Map<String, CodeSystem.ConceptDefinitionComponent> myCodeToConcept = new LinkedHashMap<>();
 		private Map<String, CodeSystem.PropertyType> myPropertyNameToType;
 
@@ -1013,13 +910,13 @@ public abstract class BaseImportTerminologyFileStep<
 		}
 
 		public Map<String, CodeSystem.PropertyType> getPropertyNameToType(
-				ImportTerminologyMetadataAttachmentJson theJobMetadata) {
+			ImportTerminologyMetadataAttachmentJson theJobMetadata) {
 			if (myPropertyNameToType != null) {
 				return myPropertyNameToType;
 			}
 			Map<String, CodeSystem.PropertyType> propertyNameToType = new HashMap<>();
 			for (CodeSystem.PropertyComponent nextProperty :
-					theJobMetadata.getCodeSystem().getProperty()) {
+				theJobMetadata.getCodeSystem().getProperty()) {
 				String nextPropertyCode = nextProperty.getCode();
 				CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
 				if (isNotBlank(nextPropertyCode)) {
@@ -1030,4 +927,5 @@ public abstract class BaseImportTerminologyFileStep<
 			return propertyNameToType;
 		}
 	}
+
 }

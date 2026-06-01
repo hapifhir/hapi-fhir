@@ -50,8 +50,8 @@ public class ImportLoincStep3HandleHierarchyConcepts
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(
-			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+	public List<LoincFileNameSpecification> getFilesToProcess(
+		StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
 				LOINC_HIERARCHY_FILE,

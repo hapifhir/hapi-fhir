@@ -23,13 +23,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
-import ca.uhn.fhir.jpa.term.icd10.Icd10Loader;
-import ca.uhn.fhir.jpa.term.icd10cm.Icd10CmLoader;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -48,23 +45,16 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -122,89 +112,11 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		return new TermLoaderSvcImpl(theTermDeferredStorageSvc, theTermCodeSystemStorageSvc, false);
 	}
 
-	@Override
-	public UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
-			List<String> mandatoryFilenameFragments = Arrays.asList(IMGTHLA_HLA_NOM_TXT, IMGTHLA_HLA_XML);
-			descriptors.verifyMandatoryFilesExist(mandatoryFilenameFragments);
-
-			ourLog.info("Beginning IMGTHLA processing");
-
-			return processImgthlaFiles(descriptors, theRequestDetails);
-		}
-	}
-
 	@VisibleForTesting
 	LoadedFileDescriptors getLoadedFileDescriptors(List<FileDescriptor> theFiles) {
 		return new LoadedFileDescriptors(theFiles);
 	}
 
-	@Override
-	public UploadStatistics loadIcd10(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		ourLog.info("Beginning ICD-10 processing");
-
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(ICD10_URI);
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
-
-		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
-		int count = 0;
-
-		try (LoadedFileDescriptors compressedDescriptors = getLoadedFileDescriptors(theFiles)) {
-			for (FileDescriptor nextDescriptor : compressedDescriptors.getUncompressedFileDescriptors()) {
-				if (nextDescriptor.getFilename().toLowerCase(Locale.US).endsWith(".xml")) {
-					try (InputStream inputStream = nextDescriptor.getInputStream();
-							InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8)) {
-						Icd10Loader loader = new Icd10Loader(codeSystem, codeSystemVersion);
-						loader.load(reader);
-						count += loader.getConceptCount();
-					}
-				}
-			}
-		} catch (IOException | SAXException e) {
-			throw new InternalErrorException(Msg.code(2135) + e);
-		}
-
-		codeSystem.setVersion(codeSystemVersion.getCodeSystemVersionId());
-
-		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, codeSystem, null, null);
-		return new UploadStatistics(count, target);
-	}
-
-	@Override
-	public UploadStatistics loadIcd10cm(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		ourLog.info("Beginning ICD-10-cm processing");
-
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl(ICD10CM_URI);
-		cs.setName("ICD-10-CM");
-		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-
-		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
-		int count = 0;
-
-		try (LoadedFileDescriptors compressedDescriptors = getLoadedFileDescriptors(theFiles)) {
-			for (FileDescriptor nextDescriptor : compressedDescriptors.getUncompressedFileDescriptors()) {
-				if (nextDescriptor.getFilename().toLowerCase(Locale.US).endsWith(".xml")) {
-					try (InputStream inputStream = nextDescriptor.getInputStream();
-							InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8)) {
-						Icd10CmLoader loader = new Icd10CmLoader(codeSystemVersion);
-						loader.load(reader);
-						count += loader.getConceptCount();
-					}
-				}
-			}
-		} catch (IOException | SAXException e) {
-			throw new InternalErrorException(Msg.code(865) + e);
-		}
-
-		cs.setVersion(codeSystemVersion.getCodeSystemVersionId());
-
-		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
-		return new UploadStatistics(count, target);
-	}
 
 	@Override
 	public UploadStatistics loadCustom(
@@ -278,111 +190,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			}
 		}
 		return Optional.empty();
-	}
-
-	private UploadStatistics processImgthlaFiles(
-			LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {
-		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
-		final List<ValueSet> valueSets = new ArrayList<>();
-		final List<ConceptMap> conceptMaps = new ArrayList<>();
-
-		CodeSystem imgthlaCs;
-		try {
-			String imgthlaCsString = IOUtils.toString(
-					TermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"),
-					Charsets.UTF_8);
-			imgthlaCs = FhirContext.forR4Cached().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
-		} catch (IOException e) {
-			throw new InternalErrorException(Msg.code(869) + "Failed to load imgthla.xml", e);
-		}
-
-		boolean foundHlaNom = false;
-		boolean foundHlaXml = false;
-		for (FileDescriptor nextZipBytes : theDescriptors.getUncompressedFileDescriptors()) {
-			String nextFilename = nextZipBytes.getFilename();
-
-			if (!IMGTHLA_HLA_NOM_TXT.equals(nextFilename)
-					&& !nextFilename.endsWith("/" + IMGTHLA_HLA_NOM_TXT)
-					&& !IMGTHLA_HLA_XML.equals(nextFilename)
-					&& !nextFilename.endsWith("/" + IMGTHLA_HLA_XML)) {
-				ourLog.info("Skipping unexpected file {}", nextFilename);
-				continue;
-			}
-
-			if (IMGTHLA_HLA_NOM_TXT.equals(nextFilename) || nextFilename.endsWith("/" + IMGTHLA_HLA_NOM_TXT)) {
-				// process colon-delimited hla_nom.txt file
-				ourLog.info("Processing file {}", nextFilename);
-
-				//				IRecordHandler handler = new HlaNomTxtHandler(codeSystemVersion, code2concept,
-				// propertyNamesToTypes);
-				//				AntigenSource antigenSource = new WmdaAntigenSource(hlaNomFilename, relSerSerFilename,
-				// relDnaSerFilename);
-
-				Reader reader = null;
-				try {
-					reader = new InputStreamReader(nextZipBytes.getInputStream(), Charsets.UTF_8);
-
-					LineNumberReader lnr = new LineNumberReader(reader);
-					while (lnr.readLine() != null) {}
-					ourLog.warn("Lines read from {}:  {}", nextFilename, lnr.getLineNumber());
-
-				} catch (IOException e) {
-					throw new InternalErrorException(Msg.code(870) + e);
-				} finally {
-					IOUtils.closeQuietly(reader);
-				}
-
-				foundHlaNom = true;
-			}
-
-			if (IMGTHLA_HLA_XML.equals(nextFilename) || nextFilename.endsWith("/" + IMGTHLA_HLA_XML)) {
-				// process hla.xml file
-				ourLog.info("Processing file {}", nextFilename);
-
-				//				IRecordHandler handler = new HlaXmlHandler(codeSystemVersion, code2concept, propertyNamesToTypes);
-				//				AlleleSource alleleSource = new HlaXmlAlleleSource(hlaXmlFilename);
-
-				Reader reader = null;
-				try {
-					reader = new InputStreamReader(nextZipBytes.getInputStream(), Charsets.UTF_8);
-
-					LineNumberReader lnr = new LineNumberReader(reader);
-					while (lnr.readLine() != null) {}
-					ourLog.warn("Lines read from {}:  {}", nextFilename, lnr.getLineNumber());
-
-				} catch (IOException e) {
-					throw new InternalErrorException(Msg.code(871) + e);
-				} finally {
-					IOUtils.closeQuietly(reader);
-				}
-
-				foundHlaXml = true;
-			}
-		}
-
-		if (!foundHlaNom) {
-			throw new InvalidRequestException(Msg.code(872) + "Did not find file matching " + IMGTHLA_HLA_NOM_TXT);
-		}
-
-		if (!foundHlaXml) {
-			throw new InvalidRequestException(Msg.code(873) + "Did not find file matching " + IMGTHLA_HLA_XML);
-		}
-
-		int valueSetCount = valueSets.size();
-		int rootConceptCount = codeSystemVersion.getConcepts().size();
-		ourLog.info(
-				"Have {} total concepts, {} root concepts, {} ValueSets",
-				rootConceptCount,
-				rootConceptCount,
-				valueSetCount);
-
-		// remove this when fully implemented ...
-		throw new InternalErrorException(
-				Msg.code(874) + "HLA nomenclature terminology upload not yet fully implemented.");
-
-		//		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, imgthlaCs, valueSets, conceptMaps);
-		//
-		//		return new UploadStatistics(conceptCount, target);
 	}
 
 	private IIdType storeCodeSystem(
@@ -517,13 +324,4 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		return concept;
 	}
 
-	public static TermConceptProperty getOrCreateConceptProperty(
-			Map<String, List<TermConceptProperty>> code2Properties, String code, String key) {
-		List<TermConceptProperty> termConceptProperties = code2Properties.get(code);
-		if (termConceptProperties == null) return new TermConceptProperty();
-		Optional<TermConceptProperty> termConceptProperty = termConceptProperties.stream()
-				.filter(property -> key.equals(property.getKey()))
-				.findFirst();
-		return termConceptProperty.orElseGet(TermConceptProperty::new);
-	}
 }

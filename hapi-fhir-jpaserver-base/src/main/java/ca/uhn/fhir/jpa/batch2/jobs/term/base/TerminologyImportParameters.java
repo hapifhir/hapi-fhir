@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Properties;
 
-public class BaseTerminologyImportParameters implements IModelJson {
+public class TerminologyImportParameters implements IModelJson {
 
 	@JsonProperty("versionId")
 	private String myVersionId;
@@ -42,6 +42,13 @@ public class BaseTerminologyImportParameters implements IModelJson {
 
 	public void setJobProperties(Properties theJobProperties) {
 		myJobProperties = theJobProperties;
+	}
+
+	/**
+	 * Subclasses may override this to specify a job property file name
+	 */
+	protected String getJobPropertyFileName() {
+		return null;
 	}
 
 	public String getVersionId() {

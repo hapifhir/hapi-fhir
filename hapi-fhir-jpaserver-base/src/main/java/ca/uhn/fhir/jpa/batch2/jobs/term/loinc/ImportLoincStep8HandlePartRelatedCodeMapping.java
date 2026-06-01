@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import java.util.List;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyUtil.getJobProperties;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -53,7 +54,7 @@ public class ImportLoincStep8HandlePartRelatedCodeMapping
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(
+	public List<LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
@@ -87,7 +88,7 @@ public class ImportLoincStep8HandlePartRelatedCodeMapping
 
 		// ConceptMap version from properties files
 		String loincPartMapVersion;
-		Properties jobProperties = getJobProperties(theStepExecutionDetails);
+		Properties jobProperties = getJobProperties(myJobPersistence, theStepExecutionDetails);
 		if (isNotBlank(jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()))) {
 			loincPartMapVersion =
 					jobProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-" + codeSystemVersionId;

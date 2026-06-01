@@ -12,21 +12,21 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TerminologyLoaderSvcIcd10cmJpaTest extends BaseJpaR4Test {
+class TerminologyLoaderSvcIcd10JpaTest extends BaseJpaR4Test {
 
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
 
 	@Test
-	void testLoadIcd10cm() throws IOException {
+	void testLoadIcd10() throws IOException {
+
 		// Test
 		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
-		String filename = "icd/icd10cm_tabular_2021.xml";
+		String filename = "icd/icd102019en.xml";
 		String resource = ClasspathUtil.loadResource(filename);
 		files.addFileText(resource, filename);
 
-		myTerminologyTestHelper.startImportIcdCmJobAndWaitForCompletion("2021", files);
-
+		myTerminologyTestHelper.startImportIcdJobAndWaitForCompletion("2019", files);
 
 		// Verify
 		runInTransaction(() -> {
@@ -35,13 +35,13 @@ class TerminologyLoaderSvcIcd10cmJpaTest extends BaseJpaR4Test {
 			assertEquals(0, myTermValueSetDao.count());
 			assertEquals(0, myTermConceptMapDao.count());
 			assertEquals(1, myResourceTableDao.count());
-			assertEquals(95, myTermConceptDao.count());
-			assertEquals(83, myTermConceptParentChildLinkDao.count());
-			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(ITermLoaderSvc.ICD10CM_URI);
+			assertEquals(13, myTermConceptDao.count());
+			assertEquals(12, myTermConceptParentChildLinkDao.count());
 
-			assertEquals("2021", codeSystem.getCurrentVersion().getCodeSystemVersionId());
+			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(ITermLoaderSvc.ICD10_URI);
+			assertEquals("2019", codeSystem.getCurrentVersion().getCodeSystemVersionId());
 
-			TermCodeSystemVersion codeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(codeSystem.getPid(), "2021");
+			TermCodeSystemVersion codeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(codeSystem.getPid(), "2019");
 			assertEquals(codeSystem.getCurrentVersion().getPid(), codeSystemVersion.getPid());
 			assertEquals(codeSystem.getResource().getId(), codeSystemVersion.getResource().getId());
 		});

@@ -39,14 +39,6 @@ public interface ITermLoaderSvc {
 	String ICD10CM_URI = "http://hl7.org/fhir/sid/icd-10-cm";
 	String IEEE_11073_10101_URI = "urn:iso:std:iso:11073:10101";
 
-	UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
-
-	default UploadStatistics loadIcd10(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		return null;
-	}
-
-	UploadStatistics loadIcd10cm(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
-
 	UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
 	UploadStatistics loadDeltaAdd(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);

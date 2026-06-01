@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.snomedct;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
@@ -41,7 +41,7 @@ public class ImportSnomedCtStep2HandleDescription
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(
+	public List<LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportSnomedCtJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				FileHandlingType.TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS,
@@ -81,7 +81,7 @@ public class ImportSnomedCtStep2HandleDescription
 		}
 	}
 
-	public static class MyContext extends BaseImportTerminologyFileStep.MyBaseContext {
+	public static class MyContext extends BaseImportTerminologyFileCsvStep.MyBaseContext {
 
 		private final Set<String> mySeenTerms = new HashSet<>();
 	}

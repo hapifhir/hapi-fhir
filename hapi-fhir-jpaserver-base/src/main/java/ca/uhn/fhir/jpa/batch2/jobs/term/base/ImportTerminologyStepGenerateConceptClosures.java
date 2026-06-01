@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -38,12 +37,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 
-public class ImportTerminologyStepGenerateConceptClosures<PT extends BaseTerminologyImportParameters>
+public class ImportTerminologyStepGenerateConceptClosures<PT extends TerminologyImportParameters>
 		implements IJobStepWorker<PT, TerminologyFileSetJson, TerminologyFileSetJson>,
 				ITerminologyImportFileHandlerStep<PT, TerminologyFileSetJson, TerminologyFileSetJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportTerminologyStepGenerateConceptClosures.class);
@@ -109,10 +107,9 @@ public class ImportTerminologyStepGenerateConceptClosures<PT extends BaseTermino
 
 	@Nonnull
 	@Override
-	public Optional<FileHandlingInstructions> canHandleFile(
-			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, PT theJobParameters, String theFileName) {
+	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<PT, ?> theStepExecutionDetails) {
 		// This step doesn't process any files
-		return Optional.empty();
+		return List.of();
 	}
 
 	@Override

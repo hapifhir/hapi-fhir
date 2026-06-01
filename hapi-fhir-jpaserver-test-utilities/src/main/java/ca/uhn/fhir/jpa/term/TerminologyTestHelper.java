@@ -28,6 +28,10 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyImportParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
@@ -42,6 +46,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_SNOMED_CT_DISTRIBUTION_FILE;
@@ -92,6 +97,22 @@ public class TerminologyTestHelper {
 		myValidationSupport = theValidationSupport;
 	}
 
+	public String startImportIcdJobAndWaitForCompletion(String theVersion, ZipCollectionBuilder theFiles) {
+		String jobDefinitionId = ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10;
+		String distributionFilename = TerminologyConstants.FILENAME_ICD10_DISTRIBUTION_FILE;
+		String propertiesFilename = null;
+		Supplier<TerminologyImportParameters> parametersSupplier = ImportIcdJobParameters::new;
+		return startImportTerminologyJobAndWaitForCompletion(theVersion, theFiles, false, null, jobDefinitionId, parametersSupplier, distributionFilename, propertiesFilename);
+	}
+
+	public String startImportIcdCmJobAndWaitForCompletion(String theVersion, ZipCollectionBuilder theFiles) {
+		String jobDefinitionId = ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM;
+		String distributionFilename = TerminologyConstants.FILENAME_ICD10CM_DISTRIBUTION_FILE;
+		String propertiesFilename = null;
+		Supplier<TerminologyImportParameters> parametersSupplier = ImportIcdJobParameters::new;
+		return startImportTerminologyJobAndWaitForCompletion(theVersion, theFiles, false, null, jobDefinitionId, parametersSupplier, distributionFilename, propertiesFilename);
+	}
+
 	public String startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles) {
 		return startImportLoincJobAndWaitForCompletion(versionId, theFiles, false);
 	}
@@ -103,9 +124,17 @@ public class TerminologyTestHelper {
 
 	public String startImportLoincJobAndWaitForCompletion(
 			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, Properties theJobProperties) {
+		String jobDefinitionId = ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC;
+		String distributionFilename = FILENAME_LOINC_DISTRIBUTION_FILE;
+		String propertiesFilename = LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode();
+		Supplier<TerminologyImportParameters> parametersSupplier = ImportLoincJobParameters::new;
+		return startImportTerminologyJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, theJobProperties, jobDefinitionId, parametersSupplier, distributionFilename, propertiesFilename);
+	}
+
+	private String startImportTerminologyJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, Properties theJobProperties, String jobDefinitionId, Supplier<TerminologyImportParameters> parametersSupplier, String distributionFilename, String propertiesFilename) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
-		ImportLoincJobParameters parameters = new ImportLoincJobParameters();
+		startRequest.setJobDefinitionId(jobDefinitionId);
+		TerminologyImportParameters parameters = parametersSupplier.get();
 		parameters.setVersionId(versionId);
 		if (theDontMakeCurrent) {
 			parameters.setDontMakeCurrent(true);
@@ -117,7 +146,7 @@ public class TerminologyTestHelper {
 		AttachmentDetails attachmentDetails = new AttachmentDetails(
 				new ByteArrayInputStream(theFiles.getZipBytes()),
 				AttachmentContentTypeEnum.ZIP,
-				FILENAME_LOINC_DISTRIBUTION_FILE);
+			distributionFilename);
 		myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 
 		if (theJobProperties != null) {
@@ -130,7 +159,7 @@ public class TerminologyTestHelper {
 			attachmentDetails = new AttachmentDetails(
 					out.toByteArray(),
 					AttachmentContentTypeEnum.PROPERTIES,
-					LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+				propertiesFilename);
 			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 		}
 
@@ -246,7 +275,7 @@ public class TerminologyTestHelper {
 		return null;
 	}
 
-	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theClassPathPrefix)
+    private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theClassPathPrefix)
 			throws IOException {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_XML_FILE.getCode());
 		theFiles.addFileZip(theClassPathPrefix, LOINC_GROUP_FILE_DEFAULT.getCode());

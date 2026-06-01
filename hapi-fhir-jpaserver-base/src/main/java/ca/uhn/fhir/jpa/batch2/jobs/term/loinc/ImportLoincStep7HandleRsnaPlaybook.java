@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyUtil.getJobProperties;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -53,7 +54,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(
+	public List<LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
@@ -89,7 +90,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 
 		// CodeSystem version from properties file
 		String codeSystemVersionId = theJobMetadata.getCodeSystem().getVersion();
-		Properties jobProperties = getJobProperties(theStepExecutionDetails);
+		Properties jobProperties = getJobProperties(myJobPersistence, theStepExecutionDetails);
 
 		// ConceptMap version from properties files
 		String loincRsnaCmVersion;

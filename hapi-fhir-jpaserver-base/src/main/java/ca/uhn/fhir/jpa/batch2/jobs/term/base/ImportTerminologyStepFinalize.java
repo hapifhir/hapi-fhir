@@ -54,7 +54,7 @@ import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
-public class ImportTerminologyStepFinalize<PT extends BaseTerminologyImportParameters> extends BaseImportTerminologyStep
+public class ImportTerminologyStepFinalize<PT extends TerminologyImportParameters> extends BaseImportTerminologyStep
 		implements IReductionStepWorker<PT, TerminologyFileSetJson, ImportTerminologyResultJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportTerminologyStepFinalize.class);
 

@@ -30,12 +30,11 @@ import ca.uhn.fhir.batch2.util.AsyncRequestUtil;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseTerminologyImportParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyImportParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
-import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobParameters;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -75,6 +74,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_ICD10CM_DISTRIBUTION_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_ICD10_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_SNOMED_CT_DISTRIBUTION_FILE;
@@ -101,6 +102,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			Pattern.compile("loinc[0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE);
 	public static final Pattern SNOMED_CT_XML_FILENAME_PATTERN =
 			Pattern.compile("snomed[a-zA-Z0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE);
+	public static final Pattern ICD10_FILENAME_PATTERN =
+			Pattern.compile("icd10.*\\.zip", Pattern.CASE_INSENSITIVE);
+
+	public static final Pattern ICD10CM_FILENAME_PATTERN =
+			Pattern.compile("icd10cm.*\\.zip", Pattern.CASE_INSENSITIVE);
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	private static final String RESP_PARAM_CONCEPT_COUNT = "conceptCount";
 	private static final String RESP_PARAM_TARGET = "target";
@@ -138,33 +144,58 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		myJobCoordinator = theJobCoordinator;
 		myJobPersistence = theJobPersistence;
 
-		String loincJobDefinitionId = ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC;
-		Supplier<BaseTerminologyImportParameters> paramsFactory = ImportLoincJobParameters::new;
-		String loincTerminologyName = "LOINC";
+		// LOINC
 		JobType loincJobType = new JobType(
+			ITermLoaderSvc.LOINC_URI,
 				LOINC_XML_FILENAME_PATTERN,
 				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE,
-				loincJobDefinitionId,
-				paramsFactory,
-				loincTerminologyName,
+			ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC,
+			TerminologyImportParameters::new,
+			"LOINC",
 				FILENAME_LOINC_DISTRIBUTION_FILE,
 				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
-		myCanonicalUrlToJobType.put(ITermLoaderSvc.LOINC_URI, loincJobType);
-		myJobDefinitionIdToJobType.put(loincJobDefinitionId, loincJobType);
+		myCanonicalUrlToJobType.put(loincJobType.systemUrl(), loincJobType);
+		myJobDefinitionIdToJobType.put(loincJobType.jobDefinitionId(), loincJobType);
 
-		String sctJobDefinitionId = ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT;
-		Supplier<BaseTerminologyImportParameters> sctParamsFactory = ImportSnomedCtJobParameters::new;
-		String sctTerminologyName = "SNOMED CT";
+		// SNOMED CT
 		JobType sctJobType = new JobType(
+			ITermLoaderSvc.SCT_URI,
 				SNOMED_CT_XML_FILENAME_PATTERN,
 				null,
-				sctJobDefinitionId,
-				sctParamsFactory,
-				sctTerminologyName,
+			ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT,
+			TerminologyImportParameters::new,
+			"SNOMED CT",
 				FILENAME_SNOMED_CT_DISTRIBUTION_FILE,
 				null);
-		myCanonicalUrlToJobType.put(ITermLoaderSvc.SCT_URI, sctJobType);
-		myJobDefinitionIdToJobType.put(sctJobDefinitionId, sctJobType);
+		myCanonicalUrlToJobType.put(sctJobType.systemUrl(), sctJobType);
+		myJobDefinitionIdToJobType.put(sctJobType.jobDefinitionId(), sctJobType);
+
+		// ICD-10
+		JobType icd10JobType = new JobType(
+			ITermLoaderSvc.ICD10_URI,
+				ICD10_FILENAME_PATTERN,
+				null,
+			ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10,
+			TerminologyImportParameters::new,
+			"ICD-10",
+			FILENAME_ICD10_DISTRIBUTION_FILE,
+				null);
+		myCanonicalUrlToJobType.put(icd10JobType.systemUrl(), sctJobType);
+		myJobDefinitionIdToJobType.put(icd10JobType.jobDefinitionId(), sctJobType);
+
+		// ICD-10-CM
+		JobType icd10cmJobType = new JobType(
+			ITermLoaderSvc.ICD10CM_URI,
+				ICD10CM_FILENAME_PATTERN,
+				null,
+			ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM,
+			TerminologyImportParameters::new,
+			"ICD-10-CM",
+			FILENAME_ICD10CM_DISTRIBUTION_FILE,
+				null);
+		myCanonicalUrlToJobType.put(icd10cmJobType.systemUrl(), sctJobType);
+		myJobDefinitionIdToJobType.put(icd10cmJobType.jobDefinitionId(), sctJobType);
+
 	}
 
 	@PostConstruct
@@ -226,11 +257,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		String distributionFileName = theJobType.distributionFileName();
 		String propertyFileName = theJobType.propertyFileName();
 		String jobDefinitionId = theJobType.jobDefinitionId();
-		Supplier<BaseTerminologyImportParameters> paramsFactory = theJobType.paramsFactory();
+		Supplier<TerminologyImportParameters> paramsFactory = theJobType.paramsFactory();
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(jobDefinitionId);
-		BaseTerminologyImportParameters parameters = paramsFactory.get();
+		TerminologyImportParameters parameters = paramsFactory.get();
 		parameters.setVersionId(canonicalUrl.versionId().orElse(null));
 
 		Boolean makeCurrent = DatatypeUtil.toBooleanValue(theMakeCurrent);
@@ -445,16 +476,13 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			String codeSystemUrl = theCodeSystemUrl.getValue();
 			codeSystemUrl = trim(codeSystemUrl);
 
-			UploadStatistics stats =
-					switch (codeSystemUrl) {
-						case ITermLoaderSvc.ICD10_URI -> myTerminologyLoaderSvc.loadIcd10(
-								localFiles, theRequestDetails);
-						case ITermLoaderSvc.ICD10CM_URI -> myTerminologyLoaderSvc.loadIcd10cm(
-								localFiles, theRequestDetails);
-						case ITermLoaderSvc.IMGTHLA_URI -> myTerminologyLoaderSvc.loadImgthla(
-								localFiles, theRequestDetails);
-						default -> myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
-					};
+			UrlUtil.CanonicalUrlParts codeSystemCanonicalUrl = UrlUtil.parseCanonicalUrl(codeSystemUrl);
+			if (myCanonicalUrlToJobType.containsKey(codeSystemCanonicalUrl.url())) {
+				// FIXME: add test and code
+				throw new InvalidRequestException(Msg.code(1) + "This operation may no longer be used to upload the " + codeSystemUrl + " CodeSystem. See " + OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
+			}
+
+			UploadStatistics stats = myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
 
 			IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 			ParametersUtil.addParameterToParametersBoolean(getContext(), retVal, RESP_PARAM_SUCCESS, true);
@@ -633,10 +661,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 	private record JobType(
+		String systemUrl,
 			Pattern distributionFilenamePattern,
 			String thePropertyFileName,
 			String jobDefinitionId,
-			Supplier<BaseTerminologyImportParameters> paramsFactory,
+			Supplier<TerminologyImportParameters> paramsFactory,
 			String terminologyName,
 			String distributionFileName,
 			String propertyFileName) {}

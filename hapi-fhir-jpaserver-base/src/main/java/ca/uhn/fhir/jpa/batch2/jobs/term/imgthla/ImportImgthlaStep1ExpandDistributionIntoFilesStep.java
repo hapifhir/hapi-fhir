@@ -17,21 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.batch2.jobs.term.icd;
+package ca.uhn.fhir.jpa.batch2.jobs.term.imgthla;
 
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeSystem;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.ICD10_URI;
-import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.SCT_URI;
 
 /**
  * @see ImportLoincJobAppCtx#importLoincStep1ExpandDistributionIntoFiles()
  */
-public class ImportIcd10Step1ExpandDistributionIntoFilesStep
+public class ImportImgthlaStep1ExpandDistributionIntoFilesStep
 		extends BaseExpandDistributionIntoFilesStep<
         ImportIcdJobParameters, Void> {
 

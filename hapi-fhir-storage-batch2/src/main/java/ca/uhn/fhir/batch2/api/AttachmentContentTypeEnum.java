@@ -28,7 +28,8 @@ public enum AttachmentContentTypeEnum {
 	CSV(true),
 	ZIP(false),
 	PROPERTIES(true),
-	JSON(true);
+	JSON(true),
+	XML(true);
 
 	private final boolean mySupportsCompression;
 

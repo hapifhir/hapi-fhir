@@ -68,14 +68,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyUtil.getJobProperties;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
-public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTerminologyImportParameters, CT>
+public abstract class BaseExpandDistributionIntoFilesStep<PT extends TerminologyImportParameters, CT>
 		implements IJobStepWorker<PT, VoidModel, TerminologyFileSetJson> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseExpandDistributionIntoFilesStep.class);
@@ -211,6 +214,15 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 													processor.stepId(),
 													chunkSize,
 													theDataSink);
+										}
+										case XML -> {
+											AttachmentDetails attachmentRequest = new AttachmentDetails(bytes, AttachmentContentTypeEnum.ZIP, nextFileName);
+											String attachmentId = myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
+											TerminologyFileSetJson data = newTerminologyFileSetJson();
+											data.setSourceFilename(nextFileName);
+											data.setAttachmentId(attachmentId);
+											theDataSink.acceptForFutureStep(processor.stepId(), data);
+											yield List.of(attachmentId);
 										}
 									};
 							fileHandlingTypeToAttachmentIds.putAll(fileHandlingType, attachmentIds);
@@ -422,8 +434,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 		for (JobDefinitionStep<PT, ?, ?> step : theJobDefinition.getSteps()) {
 			if (step.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep<PT, ?, ?> fileHandler) {
-				fileHandler
-						.canHandleFile(theStepExecutionDetails, theJobParameters, theStepId)
+				canHandleFile(theStepExecutionDetails, fileHandler, theJobParameters, theStepId)
 						.ifPresent(instructions -> stepProcessingInstructions.add(
 								new StepIdAndFileHandlingInstructions(step.getStepId(), instructions)));
 			}
@@ -431,6 +442,22 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends BaseTermino
 
 		return stepProcessingInstructions;
 	}
+
+	@Nonnull
+	private Optional<ITerminologyImportFileHandlerStep.FileHandlingInstructions> canHandleFile(
+		StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, ITerminologyImportFileHandlerStep<PT, ?, ?> theFileHandler, PT theJobParameters, String theFileName) {
+
+		Properties jobProperties = getJobProperties(myJobPersistence, theStepExecutionDetails);
+
+		for (BaseImportTerminologyFileCsvStep.LoincFileNameSpecification loincFileNameSpecification : theFileHandler.getFilesToProcess(theStepExecutionDetails)) {
+			if (loincFileNameSpecification.matchFileName(jobProperties, theFileName)) {
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(loincFileNameSpecification.fileHandlingType()));
+			}
+		}
+
+		return Optional.empty();
+	}
+
 
 	@Nonnull
 	public static CSVParser newCsvParser(char theDelimiter, Reader theReader) throws IOException {
