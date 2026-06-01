@@ -35,6 +35,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -226,7 +227,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 	}
 
 	@Test
-	public void testMigrateFrom340_dryRun_whenNoMigrationTableExists() throws IOException, SQLException {
+	public void testMigrateFrom340_whenNoMigrationTableExists_requiresBaseline() throws IOException, SQLException {
 
 		File location = getLocation("migrator_h2_test_340_dryrun");
 
@@ -250,12 +251,12 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			"-n", "",
 			"-p", "",
 			"-r"
-		};
+			};
 
-		App.main(args);
-
-		assertThat(JdbcUtils.getTableNames(connectionProperties)).doesNotContain("FLY_HFJ_MIGRATION");
-	}
+			assertThatThrownBy(() -> App.main(args))
+				.isInstanceOf(CommandFailureException.class)
+				.hasMessageContaining("--baseline-version");
+		}
 
 	@Nonnull
 	private File getLocation(String theDatabaseName) throws IOException {
