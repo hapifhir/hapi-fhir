@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.installpackage.DependencyManager;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
@@ -25,7 +27,9 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
@@ -54,6 +58,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -82,7 +87,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -104,7 +108,8 @@ public class PackageInstallerSvcImplTest {
 	private INpmPackageVersionDao myPackageVersionDao;
 	@Mock
 	private IHapiPackageCacheManager myPackageCacheManager;
-	@Mock
+	// CALLS_REAL_METHODS so the default withDeferredRebuild(Runnable) on the interface invokes the callback.
+	@Mock(answer = Answers.CALLS_REAL_METHODS)
 	private ISearchParamRegistryController mySearchParamRegistryController;
 	@Mock
 	private DaoRegistry myDaoRegistry;
@@ -129,6 +134,8 @@ public class PackageInstallerSvcImplTest {
 
 	@Mock
 	private IJobCoordinator myJobCoordinatorMock;
+	@Mock
+	private DependencyManager myDependencyManagerMock;
 	@Mock
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
@@ -345,18 +352,21 @@ public class PackageInstallerSvcImplTest {
 		spec.setName("test spec");
 
 		String expectedJobId = UUID.randomUUID().toString();
+		String expectedTrackerResourceId = "Basic/1";
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(expectedJobId);
 
 		when(myJobCoordinatorMock.startInstance(any(RequestDetails.class), myJobInstanceStartRequestCaptor.capture()))
 			.thenReturn(response);
+		when(myDependencyManagerMock.createDependencyResource()).thenReturn(expectedTrackerResourceId);
 
 		String actualJobId = mySvc.installAsynchronously(spec);
 
 		assertThat(actualJobId).isEqualTo(expectedJobId);
-		assertThat(myJobInstanceStartRequestCaptor.getValue().getParameters(PackageInstallationJobParameters.class)
-			.getInstallationSpec().getName())
-			.isEqualTo("test spec");
+
+		PackageInstallationJobParameters actualParameters = myJobInstanceStartRequestCaptor.getValue().getParameters(PackageInstallationJobParameters.class);
+		assertThat(actualParameters.getInstallationSpec().getName()).isEqualTo("test spec");
+		assertThat(actualParameters.getDependencyTrackerId()).isEqualTo(expectedTrackerResourceId);
 	}
 
 	@Test
@@ -624,9 +634,9 @@ public class PackageInstallerSvcImplTest {
 			SearchParameter updatedExisting = iterator.next();
 			assertEquals("existing-sp", updatedExisting.getIdPart());
 			List<String> updatedBase = updatedExisting.getBase().stream().map(CodeType::getCode).toList();
-			assertThat(updatedBase).doesNotContain("Patient");
-			assertThat(updatedBase).doesNotContain("DomainResource");
-			assertThat(updatedBase).contains("Observation");
+			assertThat(updatedBase).doesNotContain("Patient")
+				.doesNotContain("DomainResource")
+				.contains("Observation");
 
 			SearchParameter createdIncoming = iterator.next();
 			assertEquals(List.of("Patient"), createdIncoming.getBase().stream().map(CodeType::getCode).toList());
@@ -940,9 +950,9 @@ public class PackageInstallerSvcImplTest {
 			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
 			// When the installer loads the cross-version dep, return the R5 package
-			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+			when(myPackageCacheManager.loadPackage(CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION, true))
 				.thenReturn(crossVersionDep);
-			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_R4_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+			when(myPackageCacheManager.loadPackage(CROSS_VERSION_R4_PKG_ID, CROSS_VERSION_PKG_VERSION, true))
 				.thenReturn(r4Variant);
 
 			PackageInstallationSpec spec = new PackageInstallationSpec();
@@ -1022,7 +1032,7 @@ public class PackageInstallerSvcImplTest {
 
 			// Verify: installation completed and the dep was never loaded
 			assertThat(outcome).isNotNull();
-			verify(myPackageCacheManager, never()).loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION));
+			verify(myPackageCacheManager, never()).loadPackage(CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
 		}
 
 		/**
@@ -1044,9 +1054,9 @@ public class PackageInstallerSvcImplTest {
 
 			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
-			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+			when(myPackageCacheManager.loadPackage(CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION, true))
 				.thenReturn(crossVersionDep);
-			when(myPackageCacheManager.loadPackage(eq(CROSS_VERSION_R4_PKG_ID), eq(CROSS_VERSION_PKG_VERSION)))
+			when(myPackageCacheManager.loadPackage(CROSS_VERSION_R4_PKG_ID, CROSS_VERSION_PKG_VERSION, true))
 				.thenThrow(new IOException("Package not found: " + CROSS_VERSION_R4_PKG_ID));
 
 			PackageInstallationSpec spec = new PackageInstallationSpec();
@@ -1122,7 +1132,7 @@ public class PackageInstallerSvcImplTest {
 			PackageInstallationSpec spec = setupResourceInPackage(null, packagedCs, myCodeSystemDao);
 			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(packagedCs);
 			when(myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(CODE_SYSTEM_URL, VERSION))
-					.thenReturn(Optional.of(100L));
+					.thenReturn(Optional.of(JpaPid.fromId(100L)));
 			when(myCodeSystemDao.readByPid(any())).thenReturn(existingCs);
 
 			mySvc.install(spec);
@@ -1182,5 +1192,39 @@ public class PackageInstallerSvcImplTest {
 			verify(vsDao, times(1)).create(any(ValueSet.class), any(RequestDetails.class));
 			verify(myTermCodeSystemStorageSvc, never()).findExistingCodeSystemResourcePid(any(), any());
 		}
+	}
+
+	// Created by Claude Opus 4.6
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@Test
+	void testUpdateResource_versionConflict_skipsResourceAndLogsErrorWithCause() throws IOException {
+		ValueSet existingVs = new ValueSet();
+		existingVs.setId("ValueSet/my-vs");
+		existingVs.setUrl("http://example.org/ValueSet/my-vs");
+		existingVs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		ValueSet packagedVs = new ValueSet();
+		packagedVs.setId("ValueSet/my-vs");
+		packagedVs.setUrl("http://example.org/ValueSet/my-vs");
+		packagedVs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		IFhirResourceDao<ValueSet> vsDao = mock(IFhirResourceDao.class);
+		PackageInstallationSpec spec = setupResourceInPackage(existingVs, packagedVs, vsDao);
+		when(myVersionCanonicalizerMock.valueSetToCanonical(any())).thenReturn(packagedVs);
+
+		when(vsDao.update(any(), any(RequestDetails.class)))
+				.thenThrow(new ResourceVersionConflictException("HAPI-0825: Conflict with resource version"));
+		when(vsDao.read(any(), any(RequestDetails.class))).thenReturn(existingVs);
+
+		PackageInstallOutcomeJson outcome = mySvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled()).doesNotContainKey("ValueSet");
+
+		verify(vsDao).update(any(), any(RequestDetails.class));
+		verify(vsDao, never()).create(any(), any(RequestDetails.class));
+
+		LogbackTestExtensionAssert.assertThat(myLogCapture)
+				.hasErrorMessage("Version conflict error")
+				.hasErrorMessage("Cause: HAPI-0825: Conflict with resource version");
 	}
 }

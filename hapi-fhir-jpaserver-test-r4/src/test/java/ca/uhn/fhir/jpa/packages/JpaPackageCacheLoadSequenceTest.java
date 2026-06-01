@@ -16,7 +16,6 @@ import ca.uhn.fhir.jpa.packages.loader.NpmPackageData;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,10 +27,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -156,11 +153,11 @@ public class JpaPackageCacheLoadSequenceTest {
 
 	private void insertPackageIntoCache(
 		String thePackageName, String thePackageVersion, String theDescriptionPrefix) throws IOException {
-		ByteArrayOutputStream byteStream = createPackageBytes(thePackageName, thePackageVersion, theDescriptionPrefix + "1");
+		byte[] packageBytes = createPackageBytes(thePackageName, thePackageVersion, theDescriptionPrefix + "1");
 
 		Binary binary = new Binary();
 		binary.setId("Binary/1");
-		binary.setContent(byteStream.toByteArray());
+		binary.setContent(packageBytes);
 
 		JpaPid pid = new JpaPid();
 
@@ -192,9 +189,9 @@ public class JpaPackageCacheLoadSequenceTest {
 		String thePackageVersion,
 		String theDescriptionPrefix,
 		PackageInstallationSpec theInstallationSpec) throws IOException {
-		ByteArrayOutputStream byteStream = createPackageBytes(thePackageName, thePackageVersion, theDescriptionPrefix + "2");
+		byte[] packageBytes = createPackageBytes(thePackageName, thePackageVersion, theDescriptionPrefix + "2");
 
-		theInstallationSpec.setPackageContents(byteStream.toByteArray());
+		theInstallationSpec.setPackageContents(packageBytes);
 	}
 
 	private void setUpMockDownloadFromUrl(
@@ -203,10 +200,10 @@ public class JpaPackageCacheLoadSequenceTest {
 		String theDescriptionPrefix,
 		PackageInstallationSpec theInstallationSpec) throws IOException {
 		String testUrl = "http://test.org/testPackage";
-		ByteArrayOutputStream byteStream = createPackageBytes(thePackageName, thePackageVersion, theDescriptionPrefix + "3");
+		byte[] packageBytes = createPackageBytes(thePackageName, thePackageVersion, theDescriptionPrefix + "3");
 
 		// Even if the url is configured, the algorithm may not get this far if we find the data elsewhere first
-		lenient().when(myPackageLoaderSvc.loadPackageUrlContents(testUrl)).thenReturn(byteStream.toByteArray());
+		lenient().when(myPackageLoaderSvc.loadPackageUrlContents(testUrl)).thenReturn(packageBytes);
 
 		theInstallationSpec.setPackageUrl(testUrl);
 	}
@@ -214,9 +211,8 @@ public class JpaPackageCacheLoadSequenceTest {
 	private void setUpMockDownloadFromRepository(
 		String thePackageName, String thePackageVersion, String theDescriptionPrefix) throws IOException {
 		String description = theDescriptionPrefix + "4";
-		ByteArrayOutputStream outputStream = createPackageBytes(thePackageName, thePackageVersion, description);
+		byte[] packageBytes = createPackageBytes(thePackageName, thePackageVersion, description);
 
-		byte[] packageBytes = outputStream.toByteArray();
 		ByteArrayInputStream stream = new ByteArrayInputStream(packageBytes);
 		NpmPackage npmPackage = NpmPackage.fromPackage(stream);
 		stream.reset();
@@ -232,19 +228,12 @@ public class JpaPackageCacheLoadSequenceTest {
 			.thenReturn(packageData);
 	}
 
-	private ByteArrayOutputStream createPackageBytes(
+	private byte[] createPackageBytes(
 		String thePackageName, String thePackageVersion, String theDescription) throws IOException {
-		JsonObject npmObject = new JsonObject();
-		npmObject.set("name", thePackageName);
-		npmObject.set("version", thePackageVersion);
-		npmObject.set("description", theDescription);
-		npmObject.add("fhirVersions", List.of(FhirVersionEnum.R4.getFhirVersionString()));
-		NpmPackage cachePackage = NpmPackage.empty();
-		cachePackage.setNpm(npmObject);
-
-		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-		cachePackage.save(byteStream);
-		return byteStream;
+		return new NpmPackageBuilder(thePackageName, thePackageVersion)
+			.withDescription(theDescription)
+			.withFhirVersion(FhirVersionEnum.R4)
+			.buildAsByteArray();
 	}
 
 	private void setUpMocksForCacheUpdate() throws IOException {

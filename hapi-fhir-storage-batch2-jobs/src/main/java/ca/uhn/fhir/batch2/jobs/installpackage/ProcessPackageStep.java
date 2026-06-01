@@ -58,15 +58,19 @@ public class ProcessPackageStep
 
 	private final IValidationSupport myValidationSupport;
 
+	private final DependencyManager myDependencyManager;
+
 	private PackageInstallOutcomeJson myPackageOutcome;
 
 	public ProcessPackageStep(
 			IPackageInstallerSvc thePackageInstallerSvc,
 			ISearchParamRegistryController theSearchParamRegistryController,
-			IValidationSupport theValidationSupport) {
+			IValidationSupport theValidationSupport,
+			DependencyManager theDependencyManager) {
 		this.myPackageInstallerSvc = thePackageInstallerSvc;
 		this.mySearchParamRegistryController = theSearchParamRegistryController;
 		this.myValidationSupport = theValidationSupport;
+		this.myDependencyManager = theDependencyManager;
 	}
 
 	@Nonnull
@@ -84,6 +88,11 @@ public class ProcessPackageStep
 			mySearchParamRegistryController.refreshCacheIfNecessary();
 
 			myValidationSupport.invalidateCaches();
+
+			if (StringUtils.isNotBlank(parameters.getDependencyTrackerId())) {
+				// as we are exiting the root job, we clean up the dependency manager behind us
+				myDependencyManager.deleteDependencyResource(parameters.getDependencyTrackerId());
+			}
 		}
 
 		theDataSink.accept(myPackageOutcome);
@@ -94,7 +103,8 @@ public class ProcessPackageStep
 	@Override
 	public IReductionStepWorker<PackageInstallationJobParameters, PackageContentsJson, PackageInstallOutcomeJson>
 			newInstance() {
-		return new ProcessPackageStep(myPackageInstallerSvc, mySearchParamRegistryController, myValidationSupport);
+		return new ProcessPackageStep(
+				myPackageInstallerSvc, mySearchParamRegistryController, myValidationSupport, myDependencyManager);
 	}
 
 	/**

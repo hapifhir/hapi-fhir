@@ -133,8 +133,9 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 					"Removing code system version: {} as current version of code system: {}",
 					theVersionPid,
 					codeSystem.getPid());
-			codeSystem.setCurrentVersion(null);
-			myCodeSystemDao.save(codeSystem);
+			codeSystem.setCurrentVersionPid(null);
+			// Flush the FK null before deleting the referenced TermCodeSystemVersion row
+			myCodeSystemDao.saveAndFlush(codeSystem);
 		}
 
 		ourLog.info("Deleting code system version: {}", theVersionPid);
