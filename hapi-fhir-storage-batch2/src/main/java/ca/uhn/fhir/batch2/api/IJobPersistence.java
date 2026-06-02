@@ -20,6 +20,8 @@
 package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
+import ca.uhn.fhir.batch2.model.BatchInstanceStepStatisticsDTO;
+import ca.uhn.fhir.batch2.model.BatchInstanceStepStatisticsDTO.StepStatistics;
 import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -45,8 +47,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -341,4 +345,57 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean advanceJobStepAndUpdateChunkStatus(
 			String theJobInstanceId, String theNextStepId, boolean theIsReductionStepBoolean);
+
+	/**
+	 * Fetches all work chunks for the given job instance and calculates statistics such
+	 * as the total time spent on all chunks, and the number of chunks per step. This method
+	 * is only intended to be called while the job is still executing, as the steps
+	 * will be cleared once the job completes.
+	 *
+	 * @param theInstanceId The job instance ID
+	 * @since 8.12.0
+	 */
+	default BatchInstanceStepStatisticsDTO calculateStepStatistics(String theInstanceId) {
+		HapiTransactionService.requireTransaction();
+
+		Map<String, Long> stepIdToEarliestStart = new HashMap<>();
+		Map<String, Long> stepIdToLatestEnd = new HashMap<>();
+		Map<String, Integer> stepIdToChunkCount = new HashMap<>();
+
+		Iterator<WorkChunk> chunkIter = fetchAllWorkChunksIterator(theInstanceId, false);
+		while (chunkIter.hasNext()) {
+			WorkChunk chunk = chunkIter.next();
+			String stepId = chunk.getTargetStepId();
+			if (chunk.getStartTime() != null) {
+				long startTime = chunk.getStartTime().getTime();
+				if (!stepIdToEarliestStart.containsKey(stepId) || startTime < stepIdToEarliestStart.get(stepId)) {
+					stepIdToEarliestStart.put(stepId, startTime);
+				}
+			}
+			if (chunk.getEndTime() != null) {
+				long endTime = chunk.getEndTime().getTime();
+				if (!stepIdToLatestEnd.containsKey(stepId) || endTime > stepIdToLatestEnd.get(stepId)) {
+					stepIdToLatestEnd.put(stepId, endTime);
+				}
+			}
+			if (!stepIdToChunkCount.containsKey(stepId)) {
+				stepIdToChunkCount.put(stepId, 1);
+			} else {
+				stepIdToChunkCount.put(stepId, stepIdToChunkCount.get(stepId) + 1);
+			}
+		}
+
+		Map<String, StepStatistics> stepIdToStepStatistics = new HashMap<>();
+		for (String stepId : stepIdToChunkCount.keySet()) {
+			int chunkCount = stepIdToChunkCount.get(stepId);
+			Long earliestStart = stepIdToEarliestStart.get(stepId);
+			Long latestEnd = stepIdToLatestEnd.get(stepId);
+
+			long millisElapsed = earliestStart != null && latestEnd != null ? latestEnd - earliestStart : 0;
+			StepStatistics stepStatistics = new StepStatistics(chunkCount, millisElapsed);
+			stepIdToStepStatistics.put(stepId, stepStatistics);
+		}
+
+		return new BatchInstanceStepStatisticsDTO(stepIdToStepStatistics);
+	}
 }

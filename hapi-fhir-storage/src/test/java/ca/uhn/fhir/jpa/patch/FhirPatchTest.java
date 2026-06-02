@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
@@ -23,6 +24,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r5.model.Encounter;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,10 +49,14 @@ public class FhirPatchTest implements ITestDataBuilder {
 	private final IParser myParser = myFhirContext.newJsonParser();
 	org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPatchTest.class);
 	private FhirPatch myPatch;
+	private FhirContext myR5FhirContext;
+	private FhirPatch myR5Patch;
 
 	@BeforeEach
 	public void before() {
 		myPatch = new FhirPatch(myFhirContext);
+		myR5FhirContext = FhirContext.forR5Cached();
+		myR5Patch = new FhirPatch(myR5FhirContext);
 	}
 
 	@Override
@@ -714,6 +721,89 @@ public class FhirPatchTest implements ITestDataBuilder {
 		assertThat(((BooleanType) input.getDeceased()).getValue()).isTrue();
 	}
 
+	@Test
+	void testReplace_UnqualifiedPath() {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
+
+		// Path has no resource type prefix
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.replace()
+			.path("status")
+			.value(new CodeType("active"));
+		IBaseParameters patchDocument = patchBuilder.build();
+
+		// Test
+		myPatch.apply(valueSet, patchDocument);
+
+		// Verify
+		assertEquals(Enumerations.PublicationStatus.ACTIVE, valueSet.getStatus());
+
+	}
+
+	@Test
+	void testInsert_UnqualifiedPath() {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
+
+		// Path has no resource type prefix
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.insert()
+			.path("identifier")
+			.index(0)
+			.value(new Identifier().setSystem("http://system").setValue("value-new"));
+		IBaseParameters patchDocument = patchBuilder.build();
+
+		// Test
+		myPatch.apply(valueSet, patchDocument);
+
+		// Verify
+		assertEquals("http://system", valueSet.getIdentifier().get(0).getSystem());
+	}
+
+	@Test
+	void testAdd_UnqualifiedPath() {
+		Observation obs = new Observation();
+		obs.getCode().setText("foo");
+
+		// Path has no resource type prefix
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.add()
+			.path("code")
+			.name("coding")
+			.value(new Coding().setSystem("http://system").setCode("code-new"));
+		IBaseParameters patchDocument = patchBuilder.build();
+
+		// Test
+		myPatch.apply(obs, patchDocument);
+
+		// Verify
+		assertEquals("http://system", obs.getCode().getCodingFirstRep().getSystem());
+		assertEquals("foo", obs.getCode().getText());
+	}
+
+	@Test
+	void testDelete_UnqualifiedPath() {
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://system").setCode("code-old");
+
+		// Path has no resource type prefix
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.delete()
+			.path("code.coding");
+		IBaseParameters patchDocument = patchBuilder.build();
+
+		// Test
+		myPatch.apply(obs, patchDocument);
+
+		// Verify
+		assertEquals(null, obs.getCode().getCodingFirstRep().getSystem());
+	}
+
 	/**
 	 * Reproduces GitHub issue #7578: JSON Patch "add" operation fails with HAPI-1272
 	 * when adding a member to a Group resource that has no existing members.
@@ -1002,5 +1092,121 @@ public class FhirPatchTest implements ITestDataBuilder {
 		return params;
 	}
 
+	@Test
+	void testAdd_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException() {
+		Encounter encounter = buildR5EncounterWithLocation();
+
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationAddPatch("physicalType");
+
+		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("HAPI-2930")
+				.hasMessageContaining("physicalType");
+	}
+
+	@Test
+	void testAdd_R5EncounterLocation_WithValidSubFieldName_Succeeds() {
+		Encounter encounter = buildR5EncounterWithLocation();
+
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationAddPatch("form");
+
+		myR5Patch.apply(encounter, parameters);
+		assertThat(encounter.getLocation()).hasSize(2);
+		assertThat(encounter.getLocation().get(1).getLocation().getReference()).isEqualTo("Location/loc-2");
+		assertThat(encounter.getLocation().get(1).getForm().getCodingFirstRep().getCode()).isEqualTo("ro");
+	}
+
+	@Test
+	void testReplace_R5EncounterLocation_WithInvalidSubFieldName_ThrowsInvalidRequestException() {
+		Encounter encounter = buildR5EncounterWithLocation();
+
+		// "physicalType" is the R4 name — renamed to "form" in R5, so getChildByName() returns null
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationReplacePatch("physicalType");
+
+		assertThatThrownBy(() -> myR5Patch.apply(encounter, parameters))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("HAPI-2930")
+				.hasMessageContaining("physicalType")
+				.hasMessageContaining("Encounter.location");
+	}
+
+	@Test
+	void testReplace_R5EncounterLocation_WithValidSubFieldName_Succeeds() {
+		Encounter encounter = buildR5EncounterWithLocation();
+
+		org.hl7.fhir.r5.model.Parameters parameters = buildR5EncounterLocationReplacePatch("form");
+
+		myR5Patch.apply(encounter, parameters);
+
+		assertThat(encounter.getLocation()).hasSize(1);
+		assertThat(encounter.getLocation().get(0).getLocation().getReference()).isEqualTo("Location/loc-2");
+		assertThat(encounter.getLocation().get(0).getForm().getCodingFirstRep().getCode()).isEqualTo("ro");
+	}
+
+	private org.hl7.fhir.r5.model.Parameters buildR5EncounterLocationReplacePatch(String theSubFieldName) {
+		@Language("JSON")
+		String patchJson = """
+			{
+			  "resourceType": "Parameters",
+			  "parameter": [{
+			    "name": "operation",
+			    "part": [
+			      { "name": "type", "valueCode": "replace" },
+			      { "name": "path", "valueString": "Encounter.location" },
+			      {
+			        "name": "value",
+			        "part": [
+			          { "name": "location", "valueReference": { "reference": "Location/loc-2" } },
+			          {
+			            "name": "%s",
+			            "valueCodeableConcept": {
+			              "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/location-physical-type", "code": "ro" }]
+			            }
+			          }
+			        ]
+			      }
+			    ]
+			  }]
+			}
+			""".formatted(theSubFieldName);
+		return myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
+	}
+
+	private org.hl7.fhir.r5.model.Parameters buildR5EncounterLocationAddPatch(String theSubFieldName) {
+		@Language("JSON")
+		String patchJson = """
+			{
+			  "resourceType": "Parameters",
+			  "parameter": [{
+			    "name": "operation",
+			    "part": [
+			      { "name": "type", "valueCode": "add" },
+			      { "name": "path", "valueString": "Encounter" },
+			      { "name": "name", "valueString": "location" },
+			      {
+			        "name": "value",
+			        "part": [
+			          { "name": "location", "valueReference": { "reference": "Location/loc-2" } },
+			          {
+			            "name": "%s",
+			            "valueCodeableConcept": {
+			              "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/location-physical-type", "code": "ro" }]
+			            }
+			          }
+			        ]
+			      }
+			    ]
+			  }]
+			}
+			""".formatted(theSubFieldName);
+		return myR5FhirContext.newJsonParser().parseResource(org.hl7.fhir.r5.model.Parameters.class, patchJson);
+	}
+
+	private Encounter buildR5EncounterWithLocation() {
+		Encounter encounter = new Encounter();
+		encounter.setId("Encounter/test-enc");
+		encounter.addLocation().setLocation(new org.hl7.fhir.r5.model.Reference("Location/loc-1"));
+		return encounter;
+	}
 
 }

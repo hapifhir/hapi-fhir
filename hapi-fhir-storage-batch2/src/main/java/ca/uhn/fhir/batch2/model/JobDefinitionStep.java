@@ -44,7 +44,7 @@ public class JobDefinitionStep<PT extends IModelJson, IT extends IModelJson, OT 
 		Validate.notBlank(theStepId, "No step ID specified");
 		Validate.isTrue(theStepId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
 		Validate.notBlank(theStepDescription);
-		Validate.notNull(theInputType);
+		Validate.notNull(theInputType, "No input type specified");
 		myStepId = theStepId;
 		myStepDescription = theStepDescription;
 		myJobStepWorker = theJobStepWorker;

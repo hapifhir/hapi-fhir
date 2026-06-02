@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -163,6 +164,8 @@ public class GiantTransactionPerfTest {
 	private IMetaTagSorter myMetaTagSorter;
 	@Mock
 	private IResourceTypeCacheSvc myResourceTypeCacheSvc;
+	@Mock
+	private MemoryCacheService myMemoryCacheService;
 
 	@AfterEach
 	public void afterEach() {
@@ -293,6 +296,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setResourceHistoryCalculator(myResourceHistoryCalculator);
 		myEobDao.setResourceTypeCacheSvc(myResourceTypeCacheSvc);
 		myEobDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
+		myEobDao.setMemoryCacheService(myMemoryCacheService);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));

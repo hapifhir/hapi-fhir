@@ -20,12 +20,10 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.installpackage.DependencyManager;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -48,6 +46,7 @@ import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -62,9 +61,9 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
-import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -85,11 +84,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
 
+import static ca.uhn.fhir.jpa.packages.PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL;
+import static ca.uhn.fhir.jpa.packages.PackageInstallerSvcImpl.InstallResultEnum.CREATED;
+import static ca.uhn.fhir.jpa.packages.PackageInstallerSvcImpl.InstallResultEnum.SKIPPED;
+import static ca.uhn.fhir.jpa.packages.PackageInstallerSvcImpl.InstallResultEnum.UPDATED;
 import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
 import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
 
@@ -100,6 +108,24 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageInstallerSvcImpl.class);
 	private static final String OUR_PIPE_CHARACTER = "|";
+
+	// Created by Claude Opus 4.6
+	enum InstallResultEnum {
+		SKIPPED("Skipped"),
+		CREATED("Created"),
+		UPDATED("Updated");
+
+		private final String myDisplayName;
+
+		InstallResultEnum(String theDisplayName) {
+			myDisplayName = theDisplayName;
+		}
+
+		@Override
+		public String toString() {
+			return myDisplayName;
+		}
+	}
 
 	private boolean myEnabled = true;
 
@@ -142,10 +168,16 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
 
+	@Autowired
+	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+
 	private CommonCodeSystemsTerminologyService myCommonCodeSystemsTerminologyService;
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	private DependencyManager myDependencyManager;
 
 	/**
 	 * Constructor
@@ -209,28 +241,33 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
 				if (npmPackage == null) {
-					throw new IOException(Msg.code(1284) + "Package not found");
+					throw new IOException(Msg.code(1284) + "Package " + theInstallationSpec.getName() + "#"
+							+ theInstallationSpec.getVersion() + " not found");
 				}
 
 				retVal.getMessage().addAll(NpmPackageUtils.getProcessingMessages(npmPackage));
 
 				if (theInstallationSpec.isFetchDependencies()) {
-					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal);
+					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal, new DependencyRegister());
 				}
 
-				if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL
+				if (theInstallationSpec.getInstallMode() == STORE_AND_INSTALL
 						|| theInstallationSpec.getInstallMode()
 								== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-					installPackage(npmPackage, theInstallationSpec, retVal);
+					mySearchParamRegistryController.withDeferredRebuild(() -> {
+						try {
+							installPackage(npmPackage, theInstallationSpec, retVal);
 
-					if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
-						retVal.getMessage()
-								.add(
-										"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
-					}
-
-					// If any SearchParameters were installed, let's load them right away
-					mySearchParamRegistryController.refreshCacheIfNecessary();
+							if (theInstallationSpec.getInstallMode()
+									== PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY) {
+								retVal.getMessage()
+										.add(
+												"Resources have been successfully installed. This is INSTALL only, so there will be no NPM packages persisted.");
+							}
+						} finally {
+							mySearchParamRegistryController.refreshCacheIfNecessary();
+						}
+					});
 				}
 
 				validationSupport.invalidateCaches();
@@ -247,14 +284,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private void logIfPackageAlreadyInstalled(PackageInstallationSpec theInstallationSpec) {
-		boolean exists = myTxService
-				.withSystemRequest()
-				.withRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId())
-				.execute(() -> {
-					Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(
-							theInstallationSpec.getName(), theInstallationSpec.getVersion());
-					return existing.isPresent();
-				});
+		boolean exists = myTxService.withRequest(createRequestDetails()).execute(() -> {
+			Optional<NpmPackageVersionEntity> existing = myPackageVersionDao.findByPackageIdAndVersion(
+					theInstallationSpec.getName(), theInstallationSpec.getVersion());
+			return existing.isPresent();
+		});
 		if (exists) {
 			ourLog.info(
 					"Package {}#{} is already installed",
@@ -289,18 +323,19 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 
 		ourLog.info("Installing package: {}#{}", name, version);
-		int[] count = new int[installTypes.size()];
+		Map<String, EnumMap<InstallResultEnum, Integer>> installCounts = new HashMap<>();
 
-		for (int i = 0; i < installTypes.size(); i++) {
-			String type = installTypes.get(i);
+		for (String type : installTypes) {
 
 			Collection<IBaseResource> resources = myPackageResourceParsingSvc.parseResourcesOfType(type, npmPackage);
-			count[i] = resources.size();
 
 			for (IBaseResource next : resources) {
 				try {
 					next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
-					install(next, theInstallationSpec, theOutcome);
+					InstallResultEnum result = install(next, theInstallationSpec, theOutcome);
+					installCounts
+							.computeIfAbsent(type, k -> new EnumMap<>(InstallResultEnum.class))
+							.merge(result, 1, Integer::sum);
 				} catch (Exception e) {
 					ourLog.warn(
 							"Failed to upload resource of type {} with ID {} - Error: {}",
@@ -340,11 +375,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 		ourLog.info("Finished installation of package {}#{}:", name, version);
 
-		if (ourLog.isInfoEnabled()) {
-			for (int i = 0; i < count.length; i++) {
-				ourLog.info("-- Created or updated {} resources of type {}", count[i], installTypes.get(i));
-			}
-		}
+		installCounts.forEach((type, counts) -> {
+			counts.forEach((result, count) -> ourLog.info("-- {} {} resources of type {}", result, count, type));
+		});
 	}
 
 	/**
@@ -364,8 +397,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		logIfPackageAlreadyInstalled(theInstallationSpec);
 
+		String dependencyResourceId = myDependencyManager.createDependencyResource();
+
 		PackageInstallationJobParameters parameters = new PackageInstallationJobParameters();
 		parameters.setInstallationSpec(theInstallationSpec);
+		parameters.setDependencyTrackerId(dependencyResourceId);
 		JobInstanceStartRequest startRequest =
 				new JobInstanceStartRequest(Batch2JobDefinitionConstants.INSTALL_PACKAGE, parameters);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(createRequestDetails(), startRequest);
@@ -388,12 +424,25 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private void fetchAndInstallDependencies(
-			NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome)
+			NpmPackage npmPackage,
+			PackageInstallationSpec theInstallationSpec,
+			PackageInstallOutcomeJson theOutcome,
+			DependencyRegister theDependencyRegister)
 			throws ImplementationGuideInstallationException {
 		List<PackageUtils.DependentPackage> dependentPackages =
 				PackageUtils.extractDependentPackages(npmPackage, theInstallationSpec, theOutcome);
 
 		for (PackageUtils.DependentPackage nextPackage : dependentPackages) {
+			if (theDependencyRegister.containsDependency(nextPackage.name(), nextPackage.version())) {
+				ourLog.debug(
+						"Package {}#{} has already been installed. Skipping redundant processing.",
+						nextPackage.name(),
+						nextPackage.version());
+				continue;
+			}
+
+			theDependencyRegister.addDependency(nextPackage.name(), nextPackage.version());
+
 			try {
 				if (theInstallationSpec.isDryRun()) {
 					theOutcome
@@ -401,19 +450,23 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 							.add(String.format(
 									"Installation would install %s:%s", nextPackage.name(), nextPackage.version()));
 				} else {
+					boolean updateCache = theInstallationSpec.getInstallMode()
+									== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL
+							|| theInstallationSpec.getInstallMode()
+									== PackageInstallationSpec.InstallModeEnum.STORE_ONLY;
 
 					// resolve in local cache or on packages.fhir.org
 					NpmPackage dependency =
-							myPackageCacheManager.loadPackage(nextPackage.name(), nextPackage.version());
+							myPackageCacheManager.loadPackage(nextPackage.name(), nextPackage.version(), updateCache);
 
 					// If the dependency's FHIR version is incompatible with the server,
 					// attempt to load a version-specific variant (e.g., {id}.r4 for R4 servers)
 					dependency = substituteVersionSpecificPackageIfNeeded(
-							dependency, nextPackage.name(), nextPackage.version());
+							dependency, nextPackage.name(), nextPackage.version(), updateCache);
 
 					// recursive call to install dependencies of a package before
 					// installing the package
-					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome);
+					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome, theDependencyRegister);
 
 					if (theInstallationSpec.getInstallMode()
 							== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
@@ -445,7 +498,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 */
 	@Override
 	public NpmPackage substituteVersionSpecificPackageIfNeeded(
-			NpmPackage theDependency, String theId, String theVersion) {
+			NpmPackage theDependency, String theId, String theVersion, boolean theShouldUpdateCache) {
 		String dependencyFhirVersion = theDependency.fhirVersion();
 		String serverFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();
 
@@ -475,7 +528,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				theVersion);
 
 		try {
-			NpmPackage variant = myPackageCacheManager.loadPackage(variantId, theVersion);
+			NpmPackage variant = myPackageCacheManager.loadPackage(variantId, theVersion, theShouldUpdateCache);
 			ourLog.info(
 					"Successfully substituted {}#{} with version-specific variant {}#{}",
 					theId,
@@ -554,50 +607,86 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * ============================= Utility methods ===============================
 	 */
 	@VisibleForTesting
-	void install(
+	InstallResultEnum install(
 			IBaseResource theResource,
 			PackageInstallationSpec theInstallationSpec,
 			PackageInstallOutcomeJson theOutcome) {
 
 		if (!validForUpload(theResource)) {
-			ourLog.warn(
-					"Failed to upload resource of type {} with ID {} - Error: Resource failed validation",
-					theResource.fhirType(),
-					theResource.getIdElement().getValue());
-			return;
+			return SKIPPED;
 		}
 
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		SearchParameterMap map = createSearchParameterMapFor(theResource, theInstallationSpec);
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.fhirType());
 		IBundleProvider searchResult = searchResource(dao, map);
 
 		String resourceQuery = map.toNormalizedQueryString();
 		if (!searchResult.isEmpty() && !theInstallationSpec.isReloadExisting()) {
-			ourLog.info("Skipping update of existing resource matching {}", resourceQuery);
-			return;
+			ourLog.info(
+					"Skipping update of existing resource matching {} since `PackageInstallationSpec.reloadExisting=false",
+					resourceQuery);
+			return SKIPPED;
 		}
+
 		IBaseResource existingResource =
-				!searchResult.isEmpty() ? searchResult.getResources(0, 1).get(0) : null;
+				findExistingResource(dao, theResource, searchResult).orElse(null);
 
 		if (existingResource != null
 				&& isContentNotPresentCodeSystem(existingResource)
 				&& !theInstallationSpec.isOverwriteContentNotPresentCodeSystems()) {
-			ourLog.info("Skipping update of CodeSystem with content=not-present matching {}", resourceQuery);
-			return;
+			ourLog.info(
+					"Skipping update of CodeSystem with content=not-present matching {} since `PackageInstallationSpec.overwriteContentNotPresentCodeSystems=false",
+					resourceQuery);
+			return SKIPPED;
 		}
 
 		if (!searchResult.isEmpty()) {
 			ourLog.info("Updating existing resource matching {}", resourceQuery);
 		}
-		boolean isInstalled = false;
+
 		if (theInstallationSpec.isDryRun()) {
 			constructDryRunReport(theResource, existingResource, map, theOutcome);
-		} else {
-			isInstalled = createOrUpdateResource(dao, theResource, existingResource, theInstallationSpec);
+			return SKIPPED;
 		}
-		if (isInstalled) {
+
+		InstallResultEnum result = installResource(dao, theResource, existingResource, theInstallationSpec);
+		if (result != SKIPPED) {
 			theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
 		}
+		return result;
+	}
+
+	// Generated by Claude Opus 4.6
+	private Optional<IBaseResource> findExistingResource(
+			IFhirResourceDao<?> theDao, IBaseResource theResource, IBundleProvider theSearchResult) {
+		if (!theSearchResult.isEmpty()) {
+			return theSearchResult.getAllResources().stream().findFirst();
+		}
+		if ("CodeSystem".equals(theResource.fhirType())) {
+			Optional<IBaseResource> fromTermLayer = findExistingCodeSystemViaTermLayer(theDao, theResource);
+			fromTermLayer.ifPresent(resource -> ourLog.info(
+					"FHIR search index missed existing CodeSystem but term layer found it at {}; routing to update",
+					resource.getIdElement().toUnqualifiedVersionless()));
+			return fromTermLayer;
+		}
+		// TODO: a dedicated (resourceType, url, version) -> PID registry (like TRM_CODESYSTEM_VER for CodeSystem)
+		//  would let us fall back for all canonical resource types, not just CodeSystem
+		return Optional.empty();
+	}
+
+	// Generated by Claude Opus 4.6
+	// Fallback lookup via term tables when the FHIR search index is stale/misconfigured (avoids HAPI-0848)
+	private Optional<IBaseResource> findExistingCodeSystemViaTermLayer(
+			IFhirResourceDao<?> theDao, IBaseResource theResource) {
+		String url = extractStringValueOrEmpty(theResource, "url");
+		if (url.isEmpty()) {
+			return Optional.empty();
+		}
+		String version = extractStringValueOrEmpty(theResource, "version", () -> null);
+		return myTxService
+				.withRequest(createRequestDetails())
+				.execute(() -> myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(url, version))
+				.map(pid -> theDao.readByPid(pid));
 	}
 
 	private Optional<IBaseResource> readResourceById(IFhirResourceDao dao, IIdType id) {
@@ -616,21 +705,21 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return theDao.search(theMap, createRequestDetails());
 	}
 
-	protected boolean createOrUpdateResource(
+	protected InstallResultEnum installResource(
 			IFhirResourceDao theDao,
 			IBaseResource theResource,
 			IBaseResource theExistingResource,
 			@Nonnull PackageInstallationSpec thePackageInstallationSpec) {
 
-		// If the resource to be installed has a client-provided, purely numeric id,
-		// then add a prefix to the id, since we don't allow purely numeric IDs by default
 		prefixNumericIdIfNeeded(theResource);
 		setPackageMetaSource(theResource, thePackageInstallationSpec);
 
 		if (theExistingResource == null) {
-			return createNewResource(theDao, theResource, thePackageInstallationSpec);
+			boolean created = createNewResource(theDao, theResource, thePackageInstallationSpec);
+			return created ? CREATED : SKIPPED;
 		} else {
-			return updateExistingResource(theDao, theResource, theExistingResource);
+			boolean updated = updateExistingResource(theDao, theResource, theExistingResource);
+			return updated ? UPDATED : SKIPPED;
 		}
 	}
 
@@ -639,7 +728,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			IBaseResource theExistingResource,
 			SearchParameterMap theSpMap,
 			PackageInstallOutcomeJson theOutcome) {
-		FhirTerser terser = myFhirContext.newTerser();
 		String resourceType = theResource.fhirType();
 		RuntimeResourceDefinition rtDefinition = myFhirContext.getResourceDefinition(resourceType);
 		List<RuntimeSearchParam> sps = rtDefinition.getSearchParams();
@@ -653,8 +741,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					.findFirst()
 					.orElseThrow();
 
-			Optional<String> valueOp = terser.getSinglePrimitiveValue(theResource, runtimeSearchParameter.getPath());
-			if (valueOp.isEmpty()) {
+			String value = extractStringValueOrEmpty(theResource, runtimeSearchParameter.getPath());
+			if (value.isEmpty()) {
 				/*
 				 * we don't expect to see this because we constructed this search paramter map out of the
 				 * existing fields already and we're deconstructing it.
@@ -662,7 +750,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				throw new UnprocessableEntityException(
 						Msg.code(2872) + " No unique value found at " + runtimeSearchParameter.getPath());
 			}
-			uniqueIdentifierSpBuilder.append(valueOp.get());
+			uniqueIdentifierSpBuilder.append(value);
 		}
 
 		// dry run
@@ -680,9 +768,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			IFhirResourceDao theDao,
 			IBaseResource theResource,
 			@Nonnull PackageInstallationSpec thePackageInstallationSpec) {
-		PackageInstallationSpec.VersionPolicyEnum versionPolicy = thePackageInstallationSpec.getVersionPolicy();
 
-		if (allowMultipleVersionsForResource(theResource, versionPolicy)) {
+		if (allowMultipleVersionsForResource(theResource, thePackageInstallationSpec)) {
 			// Use a server-assigned ID to prevent FHIR ID conflicts for multiple versions of
 			// Conformance/Canonical resources (e.g. StructureDefinition.version),
 			// which is helpful for validation against versioned profiles.
@@ -764,18 +851,17 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (!theResource.fhirType().equals(ResourceType.CodeSystem.name())) {
 			return false;
 		}
-		FhirTerser terser = myFhirContext.newTerser();
-		Optional<String> content = terser.getSinglePrimitiveValue(theResource, "CodeSystem.content");
-		return content.isPresent() && "not-present".equals(content.get());
+		String content = extractStringValueOrEmpty(theResource, "content");
+		return "not-present".equals(content);
 	}
 
 	private boolean allowMultipleVersionsForResource(
-			IBaseResource theResource, PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) {
+			IBaseResource theResource, PackageInstallationSpec thePackageInstallationSpec) {
 		// For Search parameters don't allow multi version
 		if (isSearchParameter(theResource)) {
 			return false;
 		}
-		return theVersionPolicy == PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION;
+		return thePackageInstallationSpec.getVersionPolicy() == PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION;
 	}
 
 	private void setPackageMetaSource(IBaseResource theResource, PackageInstallationSpec thePackageInstallationSpec) {
@@ -869,10 +955,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					(theResource instanceof MetadataResource) ? ((MetadataResource) theResource).getUrl() : null;
 
 			ourLog.error(
-					"Version conflict error: This is possibly due to a collision between ValueSets from different IGs that are coincidentally using the same resource ID: [{}] and new resource URL: [{}], with the exisitng resource having URL: [{}].  Ignoring this update and continuing:  The first IG wins.  ",
+					"Version conflict error: This is possibly due to a collision between ValueSets from different IGs that are coincidentally using the same resource ID: [{}] and new resource URL: [{}], with the existing resource having URL: [{}]. Ignoring this update and continuing: The first IG wins. Cause: {}",
 					id.getIdPart(),
 					newResourceUrlOrNull,
 					existingResourceUrlOrNull,
+					exception.getMessage(),
 					exception);
 		}
 		return outcome;
@@ -889,31 +976,33 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	boolean validForUpload(IBaseResource theResource) {
 		String resourceType = myFhirContext.getResourceType(theResource);
+		String resourceId = theResource.getIdElement().getValue();
 		if ("SearchParameter".equals(resourceType) && !isValidSearchParameter(theResource)) {
-			// this is an invalid search parameter
+			ourLog.warn("Skipping installation of resource {} because it is an invalid SearchParameter.", resourceId);
 			return false;
 		}
 
 		if ("CodeSystem".equals(resourceType) && isEmbeddedCodeSystem(theResource)) {
+			ourLog.warn("Skipping installation of resource {} because it is a common CodeSystem.", resourceId);
 			return false;
 		}
 
 		if ("ValueSet".equals(resourceType) && isEmbeddedValueSet(theResource)) {
+			ourLog.warn("Skipping installation of resource {} because it is a common ValueSet.", resourceId);
 			return false;
 		}
 
 		if (!hasValidId(theResource)) {
-			ourLog.warn(
-					"Skipping resource with ID {} longer than 64 characters, which makes an invalid FHIR ID.",
-					theResource.getIdElement().getIdPart());
+			ourLog.warn("Skipping installation of resource {} because of an invalid FHIR ID.", resourceId);
 			return false;
 		}
 
 		if (!isValidResourceStatusForPackageUpload(theResource)) {
+			String status = extractStringValueOrEmpty(theResource, "status");
 			ourLog.warn(
-					"Failed to validate resource of type {} with ID {} - Error: Resource status not accepted value.",
-					theResource.fhirType(),
-					theResource.getIdElement().getValue());
+					"Skipping installation of resource {} because of an invalid resource status {}. Resource status validation setting is enabled.",
+					resourceId,
+					status);
 			return false;
 		}
 
@@ -979,33 +1068,29 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (statusTypes.isEmpty()) {
 			return true;
 		}
+		// TODO: there is a bug here - see testValidForUpload_statusElementDefinedButNeverSet_returnsTrue
 		// Resource has no status field, or an explicitly null one
 		if (!statusTypes.get(0).hasValue() || statusTypes.get(0).getValue() == null) {
 			return false;
 		}
+		final String statusValue = statusTypes.get(0).getValueAsString();
 		// Resource has a status, and we need to check based on type
-		switch (theResource.fhirType()) {
-			case "Subscription":
-				return (statusTypes.get(0).getValueAsString().equals("requested"));
-			case "DocumentReference":
-			case "Communication":
-				return (statusTypes.get(0).isEmpty()
-						|| !statusTypes.get(0).getValueAsString().equals("?"));
-			default:
-				return (statusTypes.get(0).getValueAsString().equals("active"));
-		}
+		return switch (theResource.fhirType()) {
+			case "Subscription" -> statusValue.equals("requested");
+			case "DocumentReference", "Communication" -> !statusValue.equals("?");
+			default -> statusValue.equals("active");
+		};
 	}
 
 	private boolean isStructureDefinitionWithoutSnapshot(IBaseResource r) {
-		boolean retVal = false;
-		FhirTerser terser = myFhirContext.newTerser();
-		if (r.getClass().getSimpleName().equals("StructureDefinition")) {
-			Optional<String> kind = terser.getSinglePrimitiveValue(r, "kind");
-			if (kind.isPresent() && !(kind.get().equals("logical"))) {
-				retVal = terser.getSingleValueOrNull(r, "snapshot") == null;
-			}
+		if (!("StructureDefinition".equals(r.fhirType()))) {
+			return false;
 		}
-		return retVal;
+		String kind = extractStringValueOrEmpty(r, "kind");
+		if (!kind.isEmpty() && !(kind.equals("logical"))) {
+			return extractValue(r, "snapshot") == null;
+		}
+		return false;
 	}
 
 	private IBaseResource generateSnapshot(IBaseResource sd) {
@@ -1022,22 +1107,21 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private SearchParameterMap createSearchParameterMapFor(IBaseResource theResource, PackageInstallationSpec theSpec) {
-		String resourceType = theResource.getClass().getSimpleName();
+		String resourceType = theResource.fhirType();
 		if ("NamingSystem".equals(resourceType)) {
-			String uniqueId = extractUniqeIdFromNamingSystem(theResource);
+			String uniqueId = extractUniqueIdFromNamingSystem(theResource);
 			return SearchParameterMap.newSynchronous().add("value", new StringParam(uniqueId).setExact(true));
 		} else if ("Subscription".equals(resourceType)) {
-			String id = extractSimpleValue(theResource, "id");
+			String id = extractId(theResource);
 			return SearchParameterMap.newSynchronous().add("_id", new TokenParam(id));
 		} else if ("SearchParameter".equals(resourceType)) {
 			return buildSearchParameterMapForSearchParameter(theResource);
-		} else if (resourceHasPopulatedUrl(theResource)) {
+		} else if (hasValue(theResource, "url")) {
 			SearchParameterMap retVal = SearchParameterMap.newSynchronous();
-			retVal.add("url", new UriParam(extractSimpleValueIfPresent(theResource, "url")));
+			retVal.add("url", new UriParam(extractStringValueOrEmpty(theResource, "url")));
 			// If multiple versions are allowed, include version in search to avoid overwriting
-			PackageInstallationSpec.VersionPolicyEnum versionPolicy = theSpec.getVersionPolicy();
-			if (allowMultipleVersionsForResource(theResource, versionPolicy)) {
-				String version = extractSimpleValueIfPresent(theResource, "version");
+			if (allowMultipleVersionsForResource(theResource, theSpec)) {
+				String version = extractStringValueOrEmpty(theResource, "version");
 				if (!version.isEmpty()) {
 					retVal.add("version", new TokenParam(version));
 				}
@@ -1052,7 +1136,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			retVal.setSort(new SortSpec(Constants.PARAM_PID, SortOrderEnum.DESC));
 			return retVal;
 		} else {
-			TokenParam identifierToken = extractIdentifierFromOtherResourceTypes(theResource);
+			TokenParam identifierToken = extractIdentifier(theResource);
 			return SearchParameterMap.newSynchronous().add("identifier", identifierToken);
 		}
 	}
@@ -1071,74 +1155,82 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return spmFromCanonicalized.get();
 		}
 
-		if (resourceHasPopulatedUrl(theResource)) {
-			String url = extractSimpleValue(theResource, "url");
+		if (hasValue(theResource, "url")) {
+			String url = extractStringValueOrEmpty(theResource, "url");
 			return SearchParameterMap.newSynchronous().add("url", new UriParam(url));
 		} else {
-			TokenParam identifierToken = extractIdentifierFromOtherResourceTypes(theResource);
+			TokenParam identifierToken = extractIdentifier(theResource);
 			return SearchParameterMap.newSynchronous().add("identifier", identifierToken);
 		}
 	}
 
-	private String extractUniqeIdFromNamingSystem(IBaseResource theResource) {
+	private String extractId(IBaseResource theResource) {
+		return myFhirContext
+				.newTerser()
+				.getSinglePrimitiveValue(theResource, "id")
+				.orElseThrow(() -> new UnsupportedOperationException(Msg.code(2929) + theResource.fhirType()
+						+ " resources in a package must have an id to be loaded by the package installer."));
+	}
+
+	private String extractUniqueIdFromNamingSystem(IBaseResource theResource) {
 		IBase uniqueIdComponent = (IBase) extractValue(theResource, "uniqueId");
 		if (uniqueIdComponent == null) {
 			throw new ImplementationGuideInstallationException(
 					Msg.code(1291) + "NamingSystem does not have uniqueId component.");
 		}
-		return extractSimpleValue(uniqueIdComponent, "value");
+		return extractStringValueOrEmpty(uniqueIdComponent, "value");
 	}
 
-	private TokenParam extractIdentifierFromOtherResourceTypes(IBaseResource theResource) {
-		Identifier identifier = (Identifier) extractValue(theResource, "identifier");
-		if (identifier != null) {
-			return new TokenParam(identifier.getSystem(), identifier.getValue());
-		} else {
-			throw new UnsupportedOperationException(Msg.code(1292)
-					+ "Resources in a package must have a url or identifier to be loaded by the package installer.");
-		}
+	private TokenParam extractIdentifier(IBaseResource theResource) {
+		Identifier identifier = myFhirContext
+				.newTerser()
+				.getSingleValue(theResource, "identifier", Identifier.class)
+				.orElseThrow(
+						() -> new ImplementationGuideInstallationException(
+								Msg.code(1292)
+										+ "Resources in a package must have a url or identifier to be loaded by the package installer."));
+		return new TokenParam(identifier.getSystem(), identifier.getValue());
 	}
 
 	private Object extractValue(IBase theResource, String thePath) {
 		return myFhirContext.newTerser().getSingleValueOrNull(theResource, thePath);
 	}
 
-	private String extractSimpleValue(IBase theResource, String thePath) {
-		IPrimitiveType<?> asPrimitiveType = (IPrimitiveType<?>) extractValue(theResource, thePath);
-		if (asPrimitiveType == null) {
-			return "";
-		}
-		return (String) asPrimitiveType.getValue();
+	private String extractStringValueOrEmpty(IBase theResource, String theElementName) {
+		return extractStringValueOrEmpty(theResource, theElementName, () -> "");
 	}
 
-	private String extractSimpleValueIfPresent(IBaseResource theResource, String theElementName) {
-		return resourceHasElementNamed(theResource, theElementName)
-				? extractSimpleValue(theResource, theElementName)
-				: "";
+	private String extractStringValueOrEmpty(
+			IBase theResource, String theElementName, Supplier<String> theDefaultSupplier) {
+		return myFhirContext
+				.newTerser()
+				.getSinglePrimitiveValue(theResource, theElementName)
+				.orElseGet(theDefaultSupplier);
 	}
 
-	private boolean resourceHasPopulatedUrl(IBaseResource theResource) {
-		final String urlElementName = "url";
-		if (!resourceHasElementNamed(theResource, urlElementName)) {
-			return false;
-		}
-		String url = extractSimpleValue(theResource, urlElementName);
-		return url != null && !url.isBlank();
-	}
-
-	private boolean resourceHasElementNamed(IBaseResource theResource, String theElementName) {
-		BaseRuntimeElementDefinition<?> def = myFhirContext.getElementDefinition(theResource.getClass());
-		if (!(def instanceof BaseRuntimeElementCompositeDefinition)) {
-			throw new IllegalArgumentException(Msg.code(1293) + "Resource is not a composite type: "
-					+ theResource.getClass().getName());
-		}
-		BaseRuntimeElementCompositeDefinition<?> currentDef = (BaseRuntimeElementCompositeDefinition<?>) def;
-		BaseRuntimeChildDefinition nextDef = currentDef.getChildByName(theElementName);
-		return nextDef != null;
+	private boolean hasValue(IBaseResource theResource, String theElementName) {
+		return TerserUtil.hasValues(myFhirContext, theResource, theElementName);
 	}
 
 	@VisibleForTesting
 	void setFhirContextForUnitTest(FhirContext theCtx) {
 		myFhirContext = theCtx;
+	}
+
+	private static class DependencyRegister {
+		private final Set<String> dependencies = new HashSet<>();
+
+		public void addDependency(String thePackageName, String theVersion) {
+			dependencies.add(buildKey(thePackageName, theVersion));
+		}
+
+		public boolean containsDependency(String thePackageName, String theVersion) {
+			return dependencies.contains(buildKey(thePackageName, theVersion));
+		}
+
+		@Nonnull
+		private static String buildKey(String thePackageName, String theVersion) {
+			return thePackageName + "#" + Objects.requireNonNullElse(theVersion, "current");
+		}
 	}
 }

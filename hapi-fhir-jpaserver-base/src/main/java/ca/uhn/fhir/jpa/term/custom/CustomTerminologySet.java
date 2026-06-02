@@ -125,6 +125,10 @@ public class CustomTerminologySet {
 		return getRootConcepts().stream().map(TermConcept::getCode).collect(Collectors.toSet());
 	}
 
+	public void addRootConcept(TermConcept theConcept) {
+		myRootConcepts.add(theConcept);
+	}
+
 	@Nonnull
 	public static CustomTerminologySet load(LoadedFileDescriptors theDescriptors, boolean theFlat) {
 
