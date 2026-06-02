@@ -467,15 +467,13 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
-		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
-			myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
-					theEvent.getChunkId(),
-					new Date(),
-					theEvent.getRecordsProcessed(),
-					theEvent.getRecoveredErrorCount(),
-					WorkChunkStatusEnum.COMPLETED,
-					theEvent.getRecoveredWarningMessage());
-		});
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
+				theEvent.getChunkId(),
+				new Date(),
+				theEvent.getRecordsProcessed(),
+				theEvent.getRecoveredErrorCount(),
+				WorkChunkStatusEnum.COMPLETED,
+				theEvent.getRecoveredWarningMessage()));
 	}
 
 	@Override
@@ -854,9 +852,18 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return errorMessage;
 	}
 
-	// FIXME: document
+	/**
+	 * This class is responsible for writing the stream of bytes received from a client request
+	 * to store a job attachment using {@link #storeNewAttachment(String, AttachmentDetails)}.
+	 * It avoids ever holding too much data in RAM by flushing chunks of data first to the
+	 * initial attachment entity {@link Batch2JobAttachmentEntity} and then automatically writing
+	 * additional chunks to {@link Batch2JobAttachmentChunkEntity} instances.
+	 * This means that the contents of an attachment file will potentially be split over multiple
+	 * rows across these 2 entities. When fetching the attachment back, {@link AttachmentReadingInputStream}
+	 * is used to automatically combine them.
+	 */
 	private class AttachmentWritingOutputStream extends OutputStream {
-		private Batch2JobAttachmentEntity myAttachent;
+		private Batch2JobAttachmentEntity myAttachment;
 		private final CountingInputStream myCountingInputStream;
 		private ByteArrayOutputStream myTargetBuffer = new ByteArrayOutputStream(myMaxBytesPerAttachmentChunk);
 		private boolean myClosing;
@@ -864,7 +871,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 		private AttachmentWritingOutputStream(
 				Batch2JobAttachmentEntity theAttachment, CountingInputStream theCountingInputStream) {
-			myAttachent = theAttachment;
+			myAttachment = theAttachment;
 			myCountingInputStream = theCountingInputStream;
 		}
 
@@ -878,29 +885,37 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			if (myTargetBuffer != null) {
 				if (myTargetBuffer.size() >= myMaxBytesPerAttachmentChunk || myClosing) {
 					byte[] bytesToWrite = myTargetBuffer.toByteArray();
-					if (myAttachent.getData() == null) {
+					if (myAttachment.getData() == null) {
+						/*
+						 * We're writing the first chunk to the DB, so put the bytes directly into
+						 * the attachment entity.
+						 */
 						ourLog.info(
-								"Writing attachment with ID {} to database",
-								myAttachent.getId().getAttachmentId());
-						myAttachent.setData(bytesToWrite);
-						myAttachent.setAttachmentLengthCompressed(bytesToWrite.length);
-						myAttachent.setAttachmentLengthUncompressed(myCountingInputStream.getCount());
-						myAttachmentRepository.save(myAttachent);
+								"Writing initial chunk of attachment with ID {} to database",
+								myAttachment.getId().getAttachmentId());
+						myAttachment.setData(bytesToWrite);
+						myAttachment.setAttachmentLengthCompressed(bytesToWrite.length);
+						myAttachment.setAttachmentLengthUncompressed(myCountingInputStream.getCount());
+						myAttachmentRepository.save(myAttachment);
 					} else {
+						/*
+						 * We're writing additional chunks to the DB, so put the bytes into a new
+						 * attachment chunk entity and update the attachment entity with the chunk index.
+						 */
 						int chunkIndex = myNextAdditionalChunkIndex++;
 						ourLog.info(
-								"Writing additional chunk {} for ttachment with ID {} to database",
+								"Writing additional chunk {} for attachment with ID {} to database",
 								chunkIndex,
-								myAttachent.getId().getAttachmentId());
+								myAttachment.getId().getAttachmentId());
 						Batch2JobAttachmentChunkEntity nextChunk = new Batch2JobAttachmentChunkEntity();
-						nextChunk.setId(new Batch2JobAttachmentChunkEntity.ChunkPk(myAttachent.getId(), chunkIndex));
+						nextChunk.setId(new Batch2JobAttachmentChunkEntity.ChunkPk(myAttachment.getId(), chunkIndex));
 						nextChunk.setData(bytesToWrite);
 						myAttachmentChunkRepository.save(nextChunk);
 
-						myAttachent.setExtraChunkMaximumIndex(chunkIndex);
-						myAttachent.incrementAttachmentLengthCompressed(bytesToWrite.length);
-						myAttachent.incrementAttachmentLengthUncompressed(myCountingInputStream.getCount());
-						myAttachent = myEntityManager.merge(myAttachent);
+						myAttachment.setExtraChunkMaximumIndex(chunkIndex);
+						myAttachment.incrementAttachmentLengthCompressed(bytesToWrite.length);
+						myAttachment.incrementAttachmentLengthUncompressed(myCountingInputStream.getCount());
+						myAttachment = myEntityManager.merge(myAttachment);
 					}
 					myTargetBuffer.reset();
 				}
@@ -917,7 +932,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		}
 	}
 
-	// FIXME: document
+	/**
+	 * This class is responsible for fetching a job attachment from the database. Because
+	 * attachment bytes can be split across both {@link Batch2JobAttachmentEntity} and
+	 * {@link Batch2JobAttachmentChunkEntity} entities, this class is responsible for
+	 * combining the chunks into a single stream.
+	 */
 	private class AttachmentReadingInputStream extends InputStream {
 
 		private final Integer myMaximumExtraChunkIndex;
@@ -937,8 +957,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			int nextByte = myWrappedStream.read();
 			while (nextByte == -1) {
 				if (Objects.equals(myCurrentExtraChunkIndex, myMaximumExtraChunkIndex)) {
+					// Ok, we're done for real
 					return -1;
 				}
+
+				// We still have additional chunks to read back, so fetch the next one
 				int nextExtraChunkIndex = 0;
 				if (myCurrentExtraChunkIndex != null) {
 					nextExtraChunkIndex = myCurrentExtraChunkIndex + 1;

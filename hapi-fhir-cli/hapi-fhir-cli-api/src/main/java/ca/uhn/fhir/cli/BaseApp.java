@@ -205,10 +205,12 @@ public abstract class BaseApp {
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	public void run(String[] theArgs) {
-		LogbackUtil.loggingConfigOff();
+		if (!HapiSystemProperties.isTestModeEnabled()) {
+			LogbackUtil.loggingConfigOff();
+		}
 		validateJavaVersion();
 
-		if (System.getProperty("unit_test") != null) {
+		if (!HapiSystemProperties.isTestModeEnabled()) {
 			AnsiConsole.systemInstall();
 		}
 
@@ -245,12 +247,14 @@ public abstract class BaseApp {
 		logAppHeader();
 		validateJavaVersion();
 
-		if (System.console() == null) {
-			// Probably redirecting stdout to a file
-			LogbackUtil.loggingConfigOnWithoutColour();
-		} else {
-			// Use colours if we're logging to a console
-			LogbackUtil.loggingConfigOnWithColour();
+		if (!HapiSystemProperties.isTestModeEnabled()) {
+			if (System.console() == null) {
+				// Probably redirecting stdout to a file
+				LogbackUtil.loggingConfigOnWithoutColour();
+			} else {
+				// Use colours if we're logging to a console
+				LogbackUtil.loggingConfigOnWithColour();
+			}
 		}
 
 		try {

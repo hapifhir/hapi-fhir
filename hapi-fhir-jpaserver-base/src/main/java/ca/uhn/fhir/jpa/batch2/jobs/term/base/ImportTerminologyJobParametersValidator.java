@@ -17,9 +17,8 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.batch2.jobs.term.snomedct;
+package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -30,7 +29,7 @@ import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class ImportSnomedCtJobParametersValidator
+public class ImportTerminologyJobParametersValidator
 		implements ca.uhn.fhir.batch2.api.IJobParametersValidator<ImportTerminologyJobParameters> {
 	private static final Pattern VERSION_PATTERN = Pattern.compile("[^ ]+");
 

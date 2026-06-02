@@ -24,6 +24,9 @@ import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -64,6 +67,7 @@ import java.util.zip.ZipOutputStream;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -104,6 +108,9 @@ public class UploadTerminologyCommandTest {
 	@Mock
 	private IJobPersistence myJobPersistence;
 
+	@RegisterExtension
+	private LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(App.class);
+
 	@Captor
 	protected ArgumentCaptor<List<ITermLoaderSvc.FileDescriptor>> myDescriptorListCaptor;
 
@@ -141,7 +148,7 @@ public class UploadTerminologyCommandTest {
 			myCtx = FhirContext.forDstu3();
 			myRestServerDstu3Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc, myJobCoordinator, myJobPersistence));
 			myBaseRestServerHelper = myRestServerDstu3Helper;
-		} else if (testInfo.getDisplayName().contains(FHIR_VERSION_R4)) {
+		} else if (testInfo.getDisplayName().contains(FHIR_VERSION_R4) || testInfo.getDisplayName().endsWith("()")) {
 			myCtx = FhirContext.forR4();
 			myRestServerR4Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc, myJobCoordinator, myJobPersistence));
 			myBaseRestServerHelper = myRestServerR4Helper;
@@ -540,8 +547,6 @@ public class UploadTerminologyCommandTest {
 		assertNull(params.getDontMakeCurrent());
 	}
 
-	// FIXME: add test uploading attachment with unknown name
-
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testUploadLoinc_DontMakeCurrent(String theFhirVersion, boolean theIncludeTls) throws IOException {
@@ -598,6 +603,56 @@ public class UploadTerminologyCommandTest {
 		JobInstanceStartRequest startRequest = myStartRequestDetails.getValue();
 		ImportTerminologyJobParameters params = startRequest.getParameters(ImportTerminologyJobParameters.class);
 		assertTrue(params.getDontMakeCurrent());
+	}
+
+	@Test
+	public void testUploadLoinc_InvalidFilename() throws IOException {
+
+		File tempFile = File.createTempFile("blah", ".json");
+		tempFile.deleteOnExit();
+		try (FileWriter w = new FileWriter(tempFile, StandardCharsets.UTF_8, false)) {
+			w.append("12345");
+		}
+
+		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
+		startResponse.setInstanceId("my-instance-id");
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+
+		JobInstance jobInstance = new JobInstance();
+		jobInstance.setInstanceId("my-instance-id");
+		jobInstance.setStatus(StatusEnum.BUILDING);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
+
+		StopWatch sw = new StopWatch();
+		doAnswer(t->{
+			if (jobInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+				if (sw.getMillis() > 2000) {
+					ImportTerminologyResultJson result = new ImportTerminologyResultJson();
+					result.setReport("This is the report line 1\nThis is the report line 2");
+
+					jobInstance.setStatus(StatusEnum.COMPLETED);
+					jobInstance.setReport(JsonUtil.serialize(result));
+				}
+			}
+			return jobInstance;
+		}).when(myJobCoordinator).getInstance(eq("my-instance-id"));
+
+		assertThatThrownBy(()->App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", "r4",
+				"-u", LOINC_URI + "|1.23",
+				"-d", tempFile.getAbsolutePath(),
+				"--dont-make-current"
+			}, "-t", false
+			, myBaseRestServerHelper
+		)))
+			.isInstanceOf(CommandFailureException.class);
+
+		// Verify
+		List<ILoggingEvent> errorMessages = myLogbackTestExtension.getLogEvents(t -> t.getLevel() == Level.ERROR);
+		String lastMessage = errorMessages.get(errorMessages.size() - 1).getFormattedMessage();
+		assertThat(lastMessage).contains("HAPI-2959: Failed to attach file \"" + tempFile.getName()+ "\" to job, got HTTP 400 Bad Request: HAPI-2953: File named \"" + tempFile.getName() + "\" is not valid for import LOINC job");
 	}
 
 	@ParameterizedTest

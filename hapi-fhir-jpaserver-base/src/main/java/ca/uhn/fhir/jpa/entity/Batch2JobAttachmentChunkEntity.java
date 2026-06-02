@@ -23,6 +23,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.hibernate.Length;
 
@@ -43,6 +47,14 @@ public class Batch2JobAttachmentChunkEntity implements Serializable {
 
 	@Column(name = "ATTACHMENT_DATA", length = Length.LONG32, nullable = false)
 	private byte[] myAttachmentData;
+
+	@SuppressWarnings("unused")
+	@ManyToOne
+	@JoinColumns(value = {
+		@JoinColumn(name = "JOB_INSTANCE_ID", referencedColumnName = "JOB_INSTANCE_ID", nullable = false, insertable = false, updatable = false),
+		@JoinColumn(name = "ATTACHMENT_ID", referencedColumnName = "ATTACHMENT_ID", nullable = false, insertable = false, updatable = false)
+	}, foreignKey = @ForeignKey(name = "FK_BT2_JOB_ATTCHNK_PARENT"))
+	private Batch2JobAttachmentEntity myParent;
 
 	/**
 	 * Constructor

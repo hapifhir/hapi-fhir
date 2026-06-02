@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
+ * @see ImportSnomedCtJobAppCtx#importSnomedCtStep2Descriptions()
  */
 public class ImportSnomedCtStep2HandleDescription
 		extends BaseImportTerminologyFileCsvStep<

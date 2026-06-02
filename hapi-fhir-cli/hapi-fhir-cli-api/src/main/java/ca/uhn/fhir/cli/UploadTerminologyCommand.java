@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IEntityResult;
 import ca.uhn.fhir.rest.gclient.RawRequestEntity;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.FileUtil;
@@ -241,12 +242,16 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			}
 			RawRequestEntity requestEntity = new RawRequestEntity(Constants.CT_OCTET_STREAM, bytes);
 
-			IEntityResult response =
-					theClient.rawHttpRequest().post(urlBuilder, requestEntity).execute();
-
+			IEntityResult response;
+			try {
+				response = theClient.rawHttpRequest().post(urlBuilder, requestEntity).execute();
+			} catch (InvalidRequestException e) {
+				throw new CommandFailureException(
+					Msg.code(2959) + "Failed to attach file \"" + dataFile.getName() + "\" to job, got " + e.getMessage());
+			}
 			if (response.getStatusCode() != 200) {
 				throw new CommandFailureException(
-						Msg.code(2937) + "Failed to upload terminology, got HTTP " + response.getStatusCode());
+						Msg.code(2937) + "Failed to attach file \"" + dataFile.getName() + "\" to job, got HTTP " + response.getStatusCode());
 			}
 
 			ourLog.info("Attached file in {}", sw);
