@@ -264,7 +264,8 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 
 	public static long calculateHashComplete(
 			PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(thePartitionId, partitionSettings);
 		return SearchParamHash.hashSearchParam(partitionSettings, requestPartitionId, queryString);
 	}
 }

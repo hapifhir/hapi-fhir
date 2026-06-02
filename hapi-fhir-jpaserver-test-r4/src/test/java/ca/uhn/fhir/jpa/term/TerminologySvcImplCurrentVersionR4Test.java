@@ -499,7 +499,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		ValueSet vs = myValueSetDao.expandByIdentifier(LOINC_ALL_VS_URL + "|" + theVersion, null);
 		switch (theVersion) {
 			case "2.67", "2.68" ->
-				assertThat(vs.getExpansion().getContains()).hasSize(81);
+				assertThat(vs.getExpansion().getContains()).hasSize(82);
 			default -> fail("Don't know how to handle version: " + theVersion);
 		}
 

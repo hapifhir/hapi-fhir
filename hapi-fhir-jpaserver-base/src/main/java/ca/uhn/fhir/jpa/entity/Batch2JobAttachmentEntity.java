@@ -43,6 +43,11 @@ import java.util.UUID;
 
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 
+/**
+ * This entity represents the first chunk of an attachment. If the overall number
+ * of bytes is too big, we put subsequent chunks into
+ * {@link Batch2JobAttachmentChunkEntity}.
+ */
 @Entity
 @Table(
 		name = "BT2_JOB_ATTACHMENT",
@@ -54,7 +59,7 @@ public class Batch2JobAttachmentEntity implements Serializable {
 	private static final int FILENAME_MAX_LENGTH = 300;
 
 	@EmbeddedId
-	private Batch2WorkChunkAttachmentEntityPk myId;
+	private AttachmentPk myId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
@@ -78,7 +83,7 @@ public class Batch2JobAttachmentEntity implements Serializable {
 	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private CompressionEnum myCompressedStatus;
 
-	@Column(name = "ATTACHMENT_DATA", length = Length.LONG32, nullable = false)
+	@Column(name = "ATTACHMENT_DATA", length = Length.LONG32, nullable = false, updatable = false)
 	private byte[] myAttachmentData;
 
 	@Column(name = "ATTACHMENT_LENGTH_CMP", nullable = false)
@@ -86,6 +91,14 @@ public class Batch2JobAttachmentEntity implements Serializable {
 
 	@Column(name = "ATTACHMENT_LENGTH_UC", nullable = false)
 	private long myAttachmentLengthUncompressed;
+
+	/**
+	 * If non-null, there are additional chunks of data for this attachment
+	 * in {@link Batch2JobAttachmentChunkEntity}. Attachment chunks
+	 * are numbered from 0 to this value.
+	 */
+	@Column(name = "EXTRA_CHUNK_IDX", nullable = true)
+	private Integer myExtraChunkMaximumIndex;
 
 	/**
 	 * Constructor
@@ -98,8 +111,7 @@ public class Batch2JobAttachmentEntity implements Serializable {
 	 * Constructor - Creates a new instance for the given instance ID with a randomly generated attachment ID.
 	 */
 	public Batch2JobAttachmentEntity(String theInstanceId) {
-		myId = new Batch2WorkChunkAttachmentEntityPk(
-				theInstanceId, UUID.randomUUID().toString());
+		myId = new AttachmentPk(theInstanceId, UUID.randomUUID().toString());
 	}
 
 	public long getAttachmentLengthCompressed() {
@@ -124,6 +136,33 @@ public class Batch2JobAttachmentEntity implements Serializable {
 
 	public void setCompressedStatus(CompressionEnum theCompressedStatus) {
 		myCompressedStatus = theCompressedStatus;
+	}
+
+	/**
+	 * If non-null, there are additional chunks of data for this attachment
+	 * in {@link Batch2JobAttachmentChunkEntity}. Attachment chunks
+	 * are numbered from 0 to this value.
+	 */
+	public Integer getExtraChunkMaximumIndex() {
+		return myExtraChunkMaximumIndex;
+	}
+
+	/**
+	 * If non-null, there are additional chunks of data for this attachment
+	 * in {@link Batch2JobAttachmentChunkEntity}. Attachment chunks
+	 * are numbered from 0 to this value.
+	 */
+	public void setExtraChunkMaximumIndex(int theExtraChunkMaximumIndex) {
+		if (myExtraChunkMaximumIndex == null) {
+			Validate.isTrue(theExtraChunkMaximumIndex == 0, "Numbering must be null, 0, 1, 2... Current value: null");
+		} else {
+			Validate.isTrue(
+					theExtraChunkMaximumIndex == myExtraChunkMaximumIndex + 1,
+					"Numbering must be null, 0, 1, 2... Current value: %d, new value: %s",
+					myExtraChunkMaximumIndex,
+					theExtraChunkMaximumIndex);
+		}
+		myExtraChunkMaximumIndex = theExtraChunkMaximumIndex;
 	}
 
 	public String getFilename() {
@@ -155,8 +194,16 @@ public class Batch2JobAttachmentEntity implements Serializable {
 		myContentType = theContentType;
 	}
 
-	public Batch2WorkChunkAttachmentEntityPk getId() {
+	public AttachmentPk getId() {
 		return myId;
+	}
+
+	public void incrementAttachmentLengthCompressed(int theLength) {
+		myAttachmentLengthCompressed += theLength;
+	}
+
+	public void incrementAttachmentLengthUncompressed(int theCount) {
+		myAttachmentLengthUncompressed += theCount;
 	}
 
 	public enum CompressionEnum {
@@ -168,7 +215,7 @@ public class Batch2JobAttachmentEntity implements Serializable {
 	}
 
 	@Embeddable
-	public static class Batch2WorkChunkAttachmentEntityPk {
+	public static class AttachmentPk {
 
 		@Column(name = "JOB_INSTANCE_ID", length = ID_MAX_LENGTH)
 		private String myJobInstanceId;
@@ -179,21 +226,21 @@ public class Batch2JobAttachmentEntity implements Serializable {
 		/**
 		 * Constructor
 		 */
-		public Batch2WorkChunkAttachmentEntityPk() {
+		public AttachmentPk() {
 			// nothing
 		}
 
 		/**
 		 * Constructor
 		 */
-		public Batch2WorkChunkAttachmentEntityPk(String theInstanceId, String theAttachmentId) {
+		public AttachmentPk(String theInstanceId, String theAttachmentId) {
 			myJobInstanceId = theInstanceId;
 			myAttachmentId = theAttachmentId;
 		}
 
 		@Override
 		public boolean equals(Object theO) {
-			return (theO instanceof Batch2WorkChunkAttachmentEntityPk that)
+			return (theO instanceof AttachmentPk that)
 					&& Objects.equals(myJobInstanceId, that.myJobInstanceId)
 					&& Objects.equals(myAttachmentId, that.myAttachmentId);
 		}
@@ -201,6 +248,10 @@ public class Batch2JobAttachmentEntity implements Serializable {
 		@Override
 		public int hashCode() {
 			return Objects.hash(myJobInstanceId, myAttachmentId);
+		}
+
+		public String getJobInstanceId() {
+			return myJobInstanceId;
 		}
 
 		public String getAttachmentId() {

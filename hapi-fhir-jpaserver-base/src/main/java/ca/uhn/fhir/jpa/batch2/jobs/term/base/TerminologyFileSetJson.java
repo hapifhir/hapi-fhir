@@ -39,7 +39,7 @@ import java.util.Set;
  * jobs (TODO: this should be split up)
  * <ul>
  *     <li>
- *         It conveys default about work chunks for the individual work steps
+ *         It conveys defaults about work chunks for the individual work steps
  *         (ie. the attachment IDs of job attachments containing fragments of CSVs
  *         that should be processed by the individual work steps)
  *     </li>

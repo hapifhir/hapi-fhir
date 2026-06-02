@@ -72,10 +72,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 			// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index
 			// automatically
 			@Index(name = "FK_CONCEPTPROP_CONCEPT", columnList = "CONCEPT_PID", unique = false),
-			// FIXME: delete this index and add migration
-			@Index(name = "FK_CONCEPTPROP_CSV", columnList = "CS_VER_PID"),
-			// FIXME: add migration
-			@Index(name = "FK_CONCEPTPROP_CSV_PROP_VALS", columnList = "CS_VER_PID,PROP_KEY,PROP_VAL")
+			@Index(name = "FK_CONCEPTPROP_CSV", columnList = "CS_VER_PID")
 		})
 @IdClass(IdAndPartitionId.class)
 public class TermConceptProperty extends BasePartitionable implements Serializable {

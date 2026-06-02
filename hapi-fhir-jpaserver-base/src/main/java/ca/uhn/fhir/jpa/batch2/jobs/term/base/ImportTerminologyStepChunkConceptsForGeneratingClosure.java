@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 
-public class ImportTerminologyStepChunkConceptsForGeneratingClosure<PT extends TerminologyImportParameters>
+public class ImportTerminologyStepChunkConceptsForGeneratingClosure<PT extends ImportTerminologyJobParameters>
 		extends BaseImportTerminologyStep
 		implements IJobStepWorker<PT, TerminologyFileSetJson, TerminologyFileSetJson>,
 				ITerminologyImportFileHandlerStep<PT, TerminologyFileSetJson, TerminologyFileSetJson> {

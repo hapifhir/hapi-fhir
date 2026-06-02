@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
@@ -47,13 +48,21 @@ public class ImportTerminologyTestHarnessApp {
 	@Configuration
 	public static class MyConfig extends TestR4Config {
 
+		@Override
 		public void setConnectionProperties(BasicDataSource theDataSource) {
-			theDataSource.setDriver(new org.h2.Driver());
-			theDataSource.setUrl("jdbc:h2:file:./target/term-loading-test-db/db");
+			//			theDataSource.setDriver(new org.h2.Driver());
+			//			theDataSource.setUrl("jdbc:h2:file:./target/term-loading-test-db/db");
+			theDataSource.setDriver(new org.postgresql.Driver());
+			theDataSource.setUrl("jdbc:postgresql://localhost:5432/cdr");
 			theDataSource.setMaxWait(Duration.ofSeconds(30));
-			theDataSource.setUsername("");
-			theDataSource.setPassword("");
+			theDataSource.setUsername("cdr");
+			theDataSource.setPassword("cdr");
 			theDataSource.setMaxTotal(ourMaxThreads);
+		}
+
+		@Override
+		public String getHibernateDialect() {
+			return HapiFhirPostgresDialect.class.getName();
 		}
 	}
 }

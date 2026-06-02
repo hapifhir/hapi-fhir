@@ -1,0 +1,10 @@
+---
+type: add
+issue: 8030
+title: "This PR converts the SNOMED CT importer from using the legacy terminology importer framework into using the new Batch2 one. This new way performs much better and gives better visibility into the process.
+
+As a part of this change:
+
+* SNOMED CT importing now consumes dramatically less memory because it only loads small fragments of the distribution into memory at any given time, so it can be completed on systems with less available RAM
+* In order to support this, the Batch2 job chunk framework now supports splitting attachments into smaller chunks, with a seamless streaming API for navigating them
+* The SQL migrator framework now supports adding foreign keys spanning more than one column"

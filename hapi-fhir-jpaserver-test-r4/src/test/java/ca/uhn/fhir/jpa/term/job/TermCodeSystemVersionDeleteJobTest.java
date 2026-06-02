@@ -34,13 +34,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-
-import java.io.InputStream;
-import java.util.Properties;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -55,16 +51,8 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
-	private void initMultipleVersionLoad() throws Exception {
-		InputStream is = new ClassPathResource("loinc-ver/" + LOINC_UPLOAD_PROPERTIES_FILE.getCode()).getInputStream();
-		Properties uploadProperties = new Properties();
-		uploadProperties.load(is);
-	}
-
 	@Test
 	public void runDeleteJobDeleteOneVersion() throws Exception {
-		initMultipleVersionLoad();
-
 		String oldVer = "2.67";
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(oldVer, true);
 
@@ -80,10 +68,10 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 
 			TermCodeSystemVersion termCodeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(termCodeSystem.getPid(), firstCurrentVer);
 			assertNotNull(termCodeSystemVersion);
-			termCodeSystemVersionPidVect[0] = termCodeSystemVersion.getPid();
+			termCodeSystemVersionPidVect[0] = requireNonNull(termCodeSystemVersion.getPid());
 
 			assertEquals(2 * 2, myTermCodeSystemVersionDao.count());
-			assertEquals(81 * 2, myTermConceptDao.count());
+			assertEquals(82 * 2, myTermConceptDao.count());
 		});
 
 		TermCodeSystemDeleteVersionJobParameters jobParameters = new TermCodeSystemDeleteVersionJobParameters();
@@ -102,7 +90,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org"));
 			assertEquals(3, myTermCodeSystemVersionDao.count());
-			assertEquals(81, myTermConceptDao.count());
+			assertEquals(82, myTermConceptDao.count());
 		});
 	}
 
@@ -119,7 +107,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 				request.setJobDefinitionId(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 				request.setParameters(jobParameters);
 
-				Batch2JobStartResponse response = myJobCoordinator.startInstance(newSrd(), request);
+				myJobCoordinator.startInstance(newSrd(), request);
 			}
 		);
 		assertThat(thrown.getMessage()).contains("Invalid code system version PID 0");

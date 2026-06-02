@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.snomedct;
 
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
-import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParametersValidator;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepChunkConceptsForGeneratingClosure;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepFinalize;
@@ -71,15 +71,16 @@ public class ImportSnomedCtJobAppCtx {
 	 * to see descriptions of how this job works.
 	 */
 	@Bean
-	public JobDefinition<ImportSnomedCtJobParameters> importSnomedJobDefinition() {
+	public JobDefinition<ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
+			importSnomedJobDefinition() {
 		return JobDefinition.newBuilder()
 				.setInitialStatus(StatusEnum.BUILDING)
 				.setJobDefinitionId(JOB_ID_IMPORT_TERM_SNOMED_CT)
 				.setJobDescription("Import Terminology - SNOMED CT")
 				.setJobDefinitionVersion(1)
 				.gatedExecution()
-				.setParametersType(ImportSnomedCtJobParameters.class)
-				.setParametersValidator(new ImportSnomedCtJobParametersValidator())
+				.setParametersType(ImportTerminologyJobParameters.class)
+				.setParametersValidator(new ImportTerminologyJobParametersValidator())
 				.addFirstStep(
 						"expand-zip",
 						"Expand Snomed distribution",
@@ -123,14 +124,16 @@ public class ImportSnomedCtJobAppCtx {
 	 * steps that follow about those fragments.
 	 */
 	@Bean
-	public IJobStepWorker<ImportSnomedCtJobParameters, VoidModel, TerminologyFileSetJson>
-			importSnomedCtStep1ExpandDistributionIntoFiles() {
+	public ImportSnomedCtStep1ExpandDistributionIntoFilesStep importSnomedCtStep1ExpandDistributionIntoFiles() {
 		return new ImportSnomedCtStep1ExpandDistributionIntoFilesStep();
 	}
 
 	/**
 	 * Step 2: Import SNOMED CT concepts.
-	 * This step processes the primary "sct2_Description_Full" file, which contains the main Snomed concepts.
+	 * This step processes the "sct2_Description_Full" file, which contains the main Snomed concepts.
+	 * Note that we use the "Description" file as the primary source of concept identities instead of the
+	 * "Concept" file because there is no information stored in the Concept file that we need that isn't
+	 * also present in the Description file.
 	 */
 	@Bean
 	public ImportSnomedCtStep2HandleDescription importSnomedCtStep2Descriptions() {
@@ -139,7 +142,8 @@ public class ImportSnomedCtJobAppCtx {
 
 	/**
 	 * Step 3: Import SNOMED CT relationships.
-	 * This step processes the primary "Snomed.csv" file, which contains the main Snomed concepts.
+	 * This step processes the "sct2_Relationship" file, which contains the parent/child relationships
+	 * between concepts.
 	 */
 	@Bean
 	public ImportSnomedCtStep3HandleRelationship importSnomedCtStep3Relationship() {
@@ -147,46 +151,39 @@ public class ImportSnomedCtJobAppCtx {
 	}
 
 	/**
-	 * Step 21: Chunk Concepts for Closure Generation
+	 * Step: Chunk Concepts for Closure Generation
 	 * When importing properties, the {@link TermConcept#getParentPidsAsString()} property contains a closure of
 	 * all the parent concepts. We don't calculate it initially because we add hirarchy over multiple work chunks,
 	 * so instead we calculate it at the end. This step queries the database for the full set of concepts, and
 	 * creates work chunks for {@link #importSnomedStep22GenerateConceptClosures()} to process.
 	 */
 	@Bean
-	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportSnomedCtJobParameters>
+	public ImportTerminologyStepChunkConceptsForGeneratingClosure<
+					ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
 			importSnomedStep21ChunkConceptsForClosureGeneration() {
 		return new ImportTerminologyStepChunkConceptsForGeneratingClosure<>();
 	}
 
 	/**
-	 * Step 22: Generate concept closures
+	 * Step: Generate concept closures
 	 * This step receives work chunks from {@link #importSnomedStep21ChunkConceptsForClosureGeneration()},
 	 * and calculates the closure of parent concepts for each concept. The closure is a list of all parent
 	 * concept PIDs and is stored in {@link TermConcept#getParentPidsAsString()}.
 	 */
 	@Bean
-	public ImportTerminologyStepGenerateConceptClosures<ImportSnomedCtJobParameters>
+	public ImportTerminologyStepGenerateConceptClosures<
+					ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
 			importSnomedStep22GenerateConceptClosures() {
 		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
 
 	/**
 	 * Final reducer step
-	 * This step has a few responsibilities:
-	 * <ul>
-	 *     <li>
-	 *         Any previous steps which created ValueSets have created them with status 'draft' so that
-	 *     	   they are not candidates for pre-expansion until we are done importing and updating concepts.
-	 *     	   This step moves them to 'active' status.
-	 *     </li>
-	 *     <li>
-	 *         Aggregates step outcomes and generates a report
-	 *     </li>
-	 * </ul>
+	 * This step aggregates step outcomes and generates a report
 	 */
 	@Bean
-	public ImportTerminologyStepFinalize<ImportSnomedCtJobParameters> importSnomedStep23Finalize() {
+	public ImportTerminologyStepFinalize<ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
+			importSnomedStep23Finalize() {
 		return new ImportTerminologyStepFinalize<>(
 				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}

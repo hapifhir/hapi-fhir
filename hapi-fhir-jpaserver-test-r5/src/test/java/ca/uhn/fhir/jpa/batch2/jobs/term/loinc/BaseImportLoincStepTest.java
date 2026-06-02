@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -70,7 +71,7 @@ abstract class BaseImportLoincStepTest {
 	@Mock
 	IJobStepExecutionServices myJobExecutionServices;
 	@Mock
-	JobDefinition<ImportLoincJobParameters> myJobDefinition;
+	JobDefinition<ImportTerminologyJobParameters> myJobDefinition;
 	@Mock
 	IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Mock
@@ -95,7 +96,7 @@ abstract class BaseImportLoincStepTest {
 
 
 	@Nonnull
-	StepExecutionDetails<ImportLoincJobParameters, TerminologyFileSetJson> newStepExecutionDetails(String classpath) {
+	StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> newStepExecutionDetails(String classpath) {
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 
@@ -106,7 +107,7 @@ abstract class BaseImportLoincStepTest {
 			importLoincFileSetJson.setAttachmentId("my-chunk-attachment-id");
 		}
 
-		return new StepExecutionDetails<>(new ImportLoincJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
+		return new StepExecutionDetails<>(new ImportTerminologyJobParameters(), importLoincFileSetJson, instance, new WorkChunk(), myJobExecutionServices, myJobDefinition, "step-1", "step-2");
 	}
 
 	@Nonnull

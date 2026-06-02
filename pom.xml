@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.11.5-SNAPSHOT</version>
+	<version>8.11.8-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1007,6 +1007,9 @@
 		<developer>
 			<id>joel-bach</id>
 			<name>Joel Bach</name>
+		</developer>
+		<developer>
+			<id>RohithVangalla1</id>
 		</developer>
 	</developers>
 

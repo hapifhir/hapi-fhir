@@ -165,6 +165,22 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addColumn("20260427.10", "CS_INTENDED_VERSION_ID")
 				.nullable()
 				.type(ColumnTypeEnum.STRING, 200);
+
+		Builder.BuilderAddTableByColumns attachmentChunk = version.addTableByColumns(
+				"20260601.10", "BT2_JOB_ATTACHMENT_CHUNK", "JOB_INSTANCE_ID", "ATTACHMENT_ID", "CHUNK_INDEX");
+		attachmentChunk.addColumn("JOB_INSTANCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachmentChunk.addColumn("ATTACHMENT_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachmentChunk.addColumn("CHUNK_INDEX").nonNullable().type(ColumnTypeEnum.INT);
+		attachmentChunk.addColumn("ATTACHMENT_DATA").nonNullable().type(ColumnTypeEnum.BINARY);
+		attachmentChunk
+				.addForeignKey("20260601.20", "FK_BT2_JOB_ATTCHNK_PARENT")
+				.toColumns("JOB_INSTANCE_ID", "ATTACHMENT_ID")
+				.references("BT2_JOB_ATTACHMENT", "JOB_INSTANCE_ID", "ATTACHMENT_ID");
+
+		version.onTable("BT2_JOB_ATTACHMENT")
+				.addColumn("20260601.30", "EXTRA_CHUNK_IDX")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
 	}
 
 	protected void init8_10_0() {
@@ -3875,7 +3891,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_IDENTITY",
 							t -> BaseResourceIndexedSearchParam.calculateHashIdentity(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME")))
 					.setColumnName("HASH_IDENTITY"));
@@ -3898,7 +3914,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_IDENTITY",
 							t -> BaseResourceIndexedSearchParam.calculateHashIdentity(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME")))
 					.setColumnName("HASH_IDENTITY"));
@@ -3920,7 +3936,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_IDENTITY",
 							t -> BaseResourceIndexedSearchParam.calculateHashIdentity(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME")))
 					.setColumnName("HASH_IDENTITY"));
@@ -3957,14 +3973,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_IDENTITY",
 							t -> BaseResourceIndexedSearchParam.calculateHashIdentity(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME")))
 					.addCalculator(
 							"HASH_IDENTITY_AND_UNITS",
 							t -> ResourceIndexedSearchParamQuantity.calculateHashUnits(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME"),
 									t.getString("SP_UNITS")))
@@ -3972,7 +3988,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_IDENTITY_SYS_UNITS",
 							t -> ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME"),
 									t.getString("SP_SYSTEM"),
@@ -4001,7 +4017,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_NORM_PREFIX",
 							t -> ResourceIndexedSearchParamString.calculateHashNormalized(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									new StorageSettings(),
 									t.getResourceType(),
 									t.getString("SP_NAME"),
@@ -4052,14 +4068,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_IDENTITY",
 							t -> BaseResourceIndexedSearchParam.calculateHashIdentity(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME")))
 					.addCalculator(
 							"HASH_SYS",
 							t -> ResourceIndexedSearchParamToken.calculateHashSystem(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getParamName(),
 									t.getString("SP_SYSTEM")))
@@ -4067,7 +4083,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_SYS_AND_VALUE",
 							t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getParamName(),
 									t.getString("SP_SYSTEM"),
@@ -4076,7 +4092,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_VALUE",
 							t -> ResourceIndexedSearchParamToken.calculateHashValue(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getParamName(),
 									t.getString("SP_VALUE"))));

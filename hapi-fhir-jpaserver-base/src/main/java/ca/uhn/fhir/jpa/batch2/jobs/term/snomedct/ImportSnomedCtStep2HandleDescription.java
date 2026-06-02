@@ -21,28 +21,29 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.snomedct;
 
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeType;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 /**
- * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
+ * @see ImportSnomedCtJobAppCtx#importSnomedCtStep2Descriptions()
  */
 public class ImportSnomedCtStep2HandleDescription
-		extends BaseImportSnomedCtStep<ImportSnomedCtStep2HandleDescription.MyContext> {
+		extends BaseImportTerminologyFileCsvStep<
+				ImportTerminologyJobParameters, ImportSnomedCtStep2HandleDescription.MyContext> {
 
 	@Nonnull
 	@Override
 	public List<LoincFileNameSpecification> getFilesToProcess(
-			StepExecutionDetails<ImportSnomedCtJobParameters, ?> theStepExecutionDetails) {
+			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				FileHandlingType.TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS,
 				t -> t.contains("sct2_Description_Full")));
@@ -50,15 +51,15 @@ public class ImportSnomedCtStep2HandleDescription
 
 	@Override
 	protected ImportSnomedCtStep2HandleDescription.MyContext newContextObject(
-			StepExecutionDetails<ImportSnomedCtJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyContext();
 	}
 
 	@Override
 	protected void handleRecord(
-			StepExecutionDetails<ImportSnomedCtJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			ImportSnomedCtJobParameters theJobParameters,
+			ImportTerminologyJobParameters theJobParameters,
 			MyContext theContext,
 			CSVRecord theRecord,
 			CodeSystem theCodeSystemToPopulate,
@@ -77,11 +78,10 @@ public class ImportSnomedCtStep2HandleDescription
 		if (theContext.mySeenTerms.add(term)) {
 			CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, conceptId);
 			concept.setDisplay(term);
-			concept.addProperty().setCode("id").setValue(new CodeType(id));
 		}
 	}
 
-	public static class MyContext extends BaseImportTerminologyFileCsvStep.MyBaseContext {
+	public static class MyContext extends BaseImportTerminologyFileStep.MyBaseContext {
 
 		private final Set<String> mySeenTerms = new HashSet<>();
 	}

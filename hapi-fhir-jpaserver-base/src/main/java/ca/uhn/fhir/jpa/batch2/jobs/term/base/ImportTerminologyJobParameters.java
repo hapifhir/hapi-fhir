@@ -25,7 +25,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Properties;
 
+<<<<<<<< HEAD:hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/batch2/jobs/term/base/TerminologyImportParameters.java
 public class TerminologyImportParameters implements IModelJson {
+========
+public class ImportTerminologyJobParameters implements IModelJson {
+>>>>>>>> ja_20260527_snomed_loading:hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/batch2/jobs/term/base/ImportTerminologyJobParameters.java
 
 	@JsonProperty("versionId")
 	private String myVersionId;

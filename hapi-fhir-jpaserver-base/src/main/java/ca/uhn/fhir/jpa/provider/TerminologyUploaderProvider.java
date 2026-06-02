@@ -30,9 +30,8 @@ import ca.uhn.fhir.batch2.util.AsyncRequestUtil;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyImportParameters;
-import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -254,11 +253,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		String distributionFileName = theJobType.distributionFileName();
 		String propertyFileName = theJobType.propertyFileName();
 		String jobDefinitionId = theJobType.jobDefinitionId();
-		Supplier<TerminologyImportParameters> paramsFactory = theJobType.paramsFactory();
+		Supplier<ImportTerminologyJobParameters> paramsFactory = theJobType.paramsFactory();
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(jobDefinitionId);
-		TerminologyImportParameters parameters = paramsFactory.get();
+		ImportTerminologyJobParameters parameters = paramsFactory.get();
 		parameters.setVersionId(canonicalUrl.versionId().orElse(null));
 
 		Boolean makeCurrent = DatatypeUtil.toBooleanValue(theMakeCurrent);
@@ -330,8 +329,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					attachmentDetails = new AttachmentDetails(
 							inputStream, AttachmentContentTypeEnum.PROPERTIES, jobType.propertyFileName());
 				} else {
-					throw new InvalidRequestException(
-							Msg.code(2953) + "Don't know how to handle file: " + toStringValue(theFilename));
+					throw new InvalidRequestException(Msg.code(2953) + "File named \"" + toStringValue(theFilename)
+							+ "\" is not valid for import " + jobType.terminologyName() + " job");
 				}
 
 				String instanceId = jobInstance.getInstanceId();
@@ -663,7 +662,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			Pattern distributionFilenamePattern,
 			String thePropertyFileName,
 			String jobDefinitionId,
-			Supplier<TerminologyImportParameters> paramsFactory,
+			Supplier<ImportTerminologyJobParameters> paramsFactory,
 			String terminologyName,
 			String distributionFileName,
 			String propertyFileName) {}

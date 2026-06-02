@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
 import ca.uhn.fhir.batch2.api.*;
@@ -8,7 +27,6 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.BaseImportLoincStep;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
@@ -35,7 +53,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.Callable;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.*;
 
@@ -45,7 +62,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_CODE_SYSTEM_URL;
 
 public abstract class BaseImportTerminologyFileStep<
-				PT extends TerminologyImportParameters, CT extends BaseImportTerminologyFileCsvStep.MyBaseContext>
+				PT extends ImportTerminologyJobParameters, CT extends BaseImportTerminologyFileCsvStep.MyBaseContext>
 		extends BaseImportTerminologyStep
 		implements ITerminologyImportFileHandlerStep<PT, TerminologyFileSetJson, TerminologyFileSetJson> {
 
@@ -158,6 +175,11 @@ public abstract class BaseImportTerminologyFileStep<
 				retryCount++;
 				int maxRetries = 10;
 				if (retryCount > maxRetries) {
+					ourLog.atError()
+							.setMessage("Failed to saver terminology due to version conflict after {} retries: {}")
+							.addArgument(retryCount)
+							.addArgument(e.getMessage())
+							.log();
 					throw e;
 				}
 				ourLog.atWarn()
@@ -382,9 +404,36 @@ public abstract class BaseImportTerminologyFileStep<
 			}
 		}
 
+		/// If there is a circular hierarchy chain, we want to still add the concepts. It isn't valid
+		/// for a CodeSystem to define a circular hierarchy (where a concept is a child of itself either
+		/// directly or indirectly) but it can happen if there is weird data in the source files.
+		/// The {@link ITermCodeSystemStorageSvc} handles this gracefully by automatically breaking
+		/// any circular loops it discovers and issuing a warning.
+
+		IdentityHashMap<CodeSystem.ConceptDefinitionComponent, CodeSystem.ConceptDefinitionComponent> added =
+				new IdentityHashMap<>();
+
 		for (CodeSystem.ConceptDefinitionComponent concept : codeToConcept.values()) {
 			if (!childCodes.contains(concept.getCode())) {
 				codeSystemToPopulate.addConcept(concept);
+				added.put(concept, concept);
+				addChildrenToIdentityMap(added, concept);
+			}
+		}
+
+		for (CodeSystem.ConceptDefinitionComponent concept : codeToConcept.values()) {
+			if (!added.containsKey(concept)) {
+				codeSystemToPopulate.addConcept(concept);
+			}
+		}
+	}
+
+	private static void addChildrenToIdentityMap(
+			IdentityHashMap<CodeSystem.ConceptDefinitionComponent, CodeSystem.ConceptDefinitionComponent> theAdded,
+			CodeSystem.ConceptDefinitionComponent theConcept) {
+		for (CodeSystem.ConceptDefinitionComponent childConcept : theConcept.getConcept()) {
+			if (theAdded.put(childConcept, childConcept) == null) {
+				addChildrenToIdentityMap(theAdded, childConcept);
 			}
 		}
 	}
@@ -863,43 +912,6 @@ public abstract class BaseImportTerminologyFileStep<
 					myTargetDisplay,
 					myEquivalence,
 					myTargetCodeSystemVersion);
-		}
-	}
-
-	// FIXME: move to ITerminologyImportFileHandlerStep and rename
-	public record LoincFileNameSpecification(
-			FileHandlingType fileHandlingType,
-			LoincUploadPropertiesEnum propertyName,
-			List<LoincUploadPropertiesEnum> defaultValues,
-			Predicate<String> fileNameTester) {
-
-		public LoincFileNameSpecification(
-				FileHandlingType theFileHandlingType,
-				LoincUploadPropertiesEnum thePropertyName,
-				LoincUploadPropertiesEnum... theDefaultValue) {
-			this(theFileHandlingType, thePropertyName, Arrays.asList(theDefaultValue), null);
-		}
-
-		public LoincFileNameSpecification(FileHandlingType theFileHandlingType, Predicate<String> theFileNameTester) {
-			this(theFileHandlingType, null, null, theFileNameTester);
-		}
-
-		public boolean matchFileName(Properties theJobProperties, String theFileName) {
-			boolean matches = false;
-			if (propertyName() != null) {
-				String propertyName = propertyName().getCode();
-				String fileName = theJobProperties.getProperty(propertyName, null);
-				if (isNotBlank(fileName)) {
-					matches = theFileName.endsWith(fileName);
-				} else {
-					for (LoincUploadPropertiesEnum nextDefault : defaultValues()) {
-						matches |= theFileName.endsWith(nextDefault.getCode());
-					}
-				}
-			} else if (this.fileNameTester() != null) {
-				matches = this.fileNameTester().test(theFileName);
-			}
-			return matches;
 		}
 	}
 

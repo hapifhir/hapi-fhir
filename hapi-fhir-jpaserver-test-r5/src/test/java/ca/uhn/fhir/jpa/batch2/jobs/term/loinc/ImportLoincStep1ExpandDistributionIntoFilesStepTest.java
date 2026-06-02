@@ -15,6 +15,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.TermTestUtil;
@@ -65,19 +66,21 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 	@Mock
 	private IFhirResourceDao<ValueSet> myValueSetDao;
 	@Mock
+	private StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> myStepExecutionDetails;
+	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Mock
 	private IJobDataSink<TerminologyFileSetJson> myDataSink;
 	@Mock
-	private IJobStepWorker<ImportLoincJobParameters, VoidModel, TerminologyFileSetJson> myHandlerStep0;
+	private IJobStepWorker<ImportTerminologyJobParameters, VoidModel, TerminologyFileSetJson> myHandlerStep0;
 	@Mock
-	private ITerminologyImportFileHandlerStep<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep1;
+	private ITerminologyImportFileHandlerStep<ImportTerminologyJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep1;
 	@Mock
-	private ITerminologyImportFileHandlerStep<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep2;
+	private ITerminologyImportFileHandlerStep<ImportTerminologyJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep2;
 	@Mock
-	private ITerminologyImportFileHandlerStep<ImportLoincJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep3;
+	private ITerminologyImportFileHandlerStep<ImportTerminologyJobParameters, TerminologyFileSetJson, TerminologyFileSetJson> myHandlerStep3;
 	@Mock
-	private IJobStepWorker<ImportLoincJobParameters, TerminologyFileSetJson, VoidModel> myHandlerStep4;
+	private IJobStepWorker<ImportTerminologyJobParameters, TerminologyFileSetJson, VoidModel> myHandlerStep4;
 
 	@BeforeEach
 	void setUp() {
@@ -97,7 +100,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		AtomicInteger attachmentCounter = mockJobPersistenceStoreNewAttachment();
 
 		// Test
-		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
 		myStep.run(stepExecutionDetails, myDataSink);
 
 		// Verify
@@ -145,7 +148,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		mockHandlerStep3();
 
 		// Test
-		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
 		assertThatThrownBy(()->myStep.run(stepExecutionDetails, myDataSink))
 			.isInstanceOf(JobExecutionFailedException.class)
 			.hasMessageContaining("No 'loinc.xml' file found in ZIP");
@@ -154,7 +157,6 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 
 	@Test
 	void testProcess_MultipleLoincXml() {
-//		mockCodeSystemStorageStartStaging();
 		Consumer<ZipCollectionBuilder> populator = files -> {
 			try {
 				files.addFileZip("/loinc/", LOINC_XML_FILE.getCode());
@@ -170,13 +172,9 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		mockHandlerStep1();
 		mockHandlerStep2();
 		mockHandlerStep3();
-//		mockJobStepExecutionServices();
-//		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
-//		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
-//		mockJobPersistenceStoreNewAttachment();
 
 		// Test
-		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
 		assertThatThrownBy(()->myStep.run(stepExecutionDetails, myDataSink))
 			.isInstanceOf(JobExecutionFailedException.class)
 			.hasMessageContaining("Multiple 'loinc.xml' file found in ZIP");
@@ -236,7 +234,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 
 		// Test
-		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
 		myStep.run(stepExecutionDetails, myDataSink);
 
 		// Verify
@@ -266,7 +264,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 
 		// Test
-		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
 		myStep.run(stepExecutionDetails, myDataSink);
 
 		// Verify
@@ -289,7 +287,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		});
 
 		// Test
-		StepExecutionDetails<ImportLoincJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
+		StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> stepExecutionDetails = newStepExecutionDetails();
 		assertThatThrownBy(() -> myStep.run(stepExecutionDetails, myDataSink))
 			.isInstanceOf(JobExecutionFailedException.class)
 			.hasMessageContaining("Files to expand LOINC zip file: Cannot find zip signature within the file");
@@ -371,12 +369,12 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 	}
 
 	@Nonnull
-	private StepExecutionDetails<ImportLoincJobParameters, VoidModel> newStepExecutionDetails() {
-		JobDefinition<ImportLoincJobParameters> jobDefinition = JobDefinition.newBuilder()
+	private StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> newStepExecutionDetails() {
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = JobDefinition.newBuilder()
 			.setJobDefinitionId("job")
 			.setJobDefinitionVersion(1)
 			.setJobDescription("a job")
-			.setParametersType(ImportLoincJobParameters.class)
+			.setParametersType(ImportTerminologyJobParameters.class)
 			.addFirstStep("step-0", "step-0", TerminologyFileSetJson.class, myHandlerStep0)
 			.addIntermediateStep("step-1", "step-1", TerminologyFileSetJson.class, myHandlerStep1)
 			.addIntermediateStep("step-2", "step-2", TerminologyFileSetJson.class, myHandlerStep2)
@@ -384,7 +382,8 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 			.addLastStep("step-4", "step-4", myHandlerStep4)
 			.build();
 
-		ImportLoincJobParameters jobParameters = new ImportLoincJobParameters();
+		ImportTerminologyJobParameters jobParameters = new ImportTerminologyJobParameters();
+		jobParameters.setJobProperties(new Properties());
 		jobParameters.setVersionId("1.23");
 		jobParameters.setJobProperties(new Properties());
 		JobInstance instance = new JobInstance();

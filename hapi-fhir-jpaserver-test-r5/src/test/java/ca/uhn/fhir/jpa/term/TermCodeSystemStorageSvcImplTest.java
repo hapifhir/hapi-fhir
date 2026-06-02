@@ -10,14 +10,18 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
 import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -41,6 +45,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
+
+	private static final String HHH000502 = "HHH000502";
+
+	@RegisterExtension
+	LogbackTestExtension myHibernateLogCapture = new LogbackTestExtension(
+		"org.hibernate.persister.entity.AbstractEntityPersister", Level.WARN);
 
 	@Autowired
 	private Batch2JobHelper myBatchJobHelper;
@@ -88,6 +98,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 				assertNotSame(csv, csv.getCodeSystem().getCurrentVersion());
 			}
 		});
+		assertNoHHH000502Warnings();
 	}
 
 
@@ -107,6 +118,8 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			assertEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion.getPid());
 			assertEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion.getResource().getId());
 		});
+
+		assertNoHHH000502Warnings();
 	}
 
 
@@ -149,6 +162,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			assertEquals(myTermCodeSystem.getResource().getId(), mySecondTermCodeSystemVersion.getResource().getId());
 		});
 
+		assertNoHHH000502Warnings();
 	}
 
 	// Created by claude-opus-4-6
@@ -183,6 +197,8 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			assertThat(conceptCount).isEqualTo(0);
 		});
 
+		myHibernateLogCapture.clearEvents();
+
 		// Step 2: Create a second NOTPRESENT CodeSystem with the same URL.
 		// This simulates the scenario where a new FHIR resource is created for the same
 		// CodeSystem URL (e.g. a subsequent pre-seed run when the conditional search fails
@@ -196,6 +212,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		// from the first pre-seed. It should be updated to point to the new resource.
 		// Previously threw UnprocessableEntityException (Msg.code(848)) — fixed by SMILE-7421.
 		JpaPid secondResourcePid = ((ResourceTable) myCodeSystemDao.create(cs2, mySrd).getEntity()).getId();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		// Verify: TermCodeSystem and TermCodeSystemVersion both point to the second resource
 		runInTransaction(() -> {
@@ -205,6 +222,8 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			assertThat(tcs.getCurrentVersion()).isNotNull();
 			assertThat(tcs.getCurrentVersion().getResource().getId()).isEqualTo(secondResourcePid);
 		});
+
+		assertNoHHH000502Warnings();
 	}
 
 	// Created by claude-opus-4-6
@@ -332,6 +351,39 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		assertThatThrownBy(() -> myCodeSystemDao.create(cs2, mySrd))
 			.isInstanceOf(UnprocessableEntityException.class)
 			.hasMessageContaining("HAPI-0848");
+	}
+
+	// Created by claude-opus-4-6
+	@Test
+	void storeNewCodeSystemVersionIfNeeded_notPresentSameUrlSameResource_shouldKeepExistingVersion() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		cs.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		JpaPid firstResourcePid = ((ResourceTable) myCodeSystemDao.create(cs, mySrd).getEntity()).getId();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myHibernateLogCapture.clearEvents();
+
+		// Second NOTPRESENT with same URL — conditional create returns the same FHIR resource,
+		// so the existing TermCodeSystemVersion should be kept as-is (same resource PID).
+		CodeSystem cs2 = new CodeSystem();
+		cs2.setUrl(URL_MY_CODE_SYSTEM);
+		cs2.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		cs2.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myCodeSystemDao.update(cs2, "CodeSystem?url=" + URL_MY_CODE_SYSTEM, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemDao.count()).isEqualTo(1);
+			assertThat(myTermCodeSystemVersionDao.count()).isEqualTo(1);
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri(URL_MY_CODE_SYSTEM);
+			assertThat(tcs).isNotNull();
+			assertThat(tcs.getCurrentVersion()).isNotNull();
+			assertThat(tcs.getCurrentVersion().getResource().getId()).isEqualTo(firstResourcePid);
+		});
+
+		assertNoHHH000502Warnings();
 	}
 
 	@Test
@@ -752,6 +804,139 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			assertEquals(2, concepts.size());
 		});
 
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void applyDeltaCodeSystemsAdd_newCodeSystem_shouldCreateCodeSystemAndAddConcepts() {
+		// This exercises the full entity-graph navigation in addConceptsToCodeSystemVersion:
+		// csv.getCodeSystem(), cs.getPid(), cs.getCodeSystemUri(), cs.getResource().getIdDt()
+		// All must return non-null within the same transaction that created the entities.
+		CustomTerminologySet additions = new CustomTerminologySet();
+		additions.addRootConcept("CODE1", "Display 1");
+		additions.addRootConcept("CODE2", "Display 2");
+		additions.addRootConcept("CODE3", "Display 3");
+
+		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", additions);
+
+		assertThat(stats.getAddedConceptCount()).isEqualTo(3);
+		assertThat(stats.getTarget()).isNotNull();
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri("http://example.com/delta-cs");
+			assertThat(tcs).isNotNull();
+			assertThat(tcs.getCurrentVersion()).isNotNull();
+
+			TermCodeSystemVersion csv = tcs.getCurrentVersion();
+			assertThat(csv.getCodeSystem()).isNotNull();
+			assertThat(csv.getResource()).isNotNull();
+			long conceptCount = myTermConceptDao.countByCodeSystemVersion(csv.getPid());
+			assertThat(conceptCount).isEqualTo(3);
+		});
+		assertNoHHH000502Warnings();
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void applyDeltaCodeSystemsAdd_existingCodeSystem_shouldAddMoreConcepts() {
+		// First delta creates the code system
+		CustomTerminologySet firstBatch = new CustomTerminologySet();
+		firstBatch.addRootConcept("CODE1", "Display 1");
+		firstBatch.addRootConcept("CODE2", "Display 2");
+		mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", firstBatch);
+
+		// Second delta adds more concepts to the existing code system
+		CustomTerminologySet secondBatch = new CustomTerminologySet();
+		secondBatch.addRootConcept("CODE3", "Display 3");
+		secondBatch.addRootConcept("CODE4", "Display 4");
+
+		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", secondBatch);
+
+		assertThat(stats.getAddedConceptCount()).isEqualTo(2);
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri("http://example.com/delta-cs");
+			assertThat(tcs).isNotNull();
+			long conceptCount = myTermConceptDao.countByCodeSystemVersion(tcs.getCurrentVersion().getPid());
+			assertThat(conceptCount).isEqualTo(4);
+		});
+		assertNoHHH000502Warnings();
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void applyDeltaCodeSystemsAdd_afterNotPresentCodeSystemCreatedViaDao_shouldAddConcepts() {
+		// Create a NOTPRESENT code system via DAO (simulates package pre-seeding)
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://example.com/delta-cs");
+		cs.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myCodeSystemDao.create(cs, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri("http://example.com/delta-cs");
+			assertThat(tcs).isNotNull();
+			assertThat(myTermConceptDao.countByCodeSystemVersion(tcs.getCurrentVersion().getPid())).isEqualTo(0);
+		});
+
+		// Now add concepts via delta
+		CustomTerminologySet additions = new CustomTerminologySet();
+		additions.addRootConcept("CODE1", "Display 1");
+		additions.addRootConcept("CODE2", "Display 2");
+
+		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", additions);
+
+		assertThat(stats.getAddedConceptCount()).isEqualTo(2);
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri("http://example.com/delta-cs");
+			assertThat(tcs).isNotNull();
+			long conceptCount = myTermConceptDao.countByCodeSystemVersion(tcs.getCurrentVersion().getPid());
+			assertThat(conceptCount).isEqualTo(2);
+		});
+	}
+
+	// Created by claude-opus-4-6
+	@Test
+	void applyDeltaCodeSystemsAdd_afterVersionedCodeSystemCreatedViaStoreNewVersion_shouldAddConcepts() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		cs.setVersion("1.0");
+		cs.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ResourceTable table = (ResourceTable) myCodeSystemDao.create(cs, mySrd).getEntity();
+
+		TermCodeSystemVersion ver = new TermCodeSystemVersion();
+		ver.setResource(table);
+		ver.getConcepts().add(new TermConcept(ver, "EXISTING"));
+		mySvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "My System", "1.0", ver, table);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		CustomTerminologySet additions = new CustomTerminologySet();
+		additions.addRootConcept("CODE1", "Display 1");
+		additions.addRootConcept("CODE2", "Display 2");
+
+		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd(URL_MY_CODE_SYSTEM, additions);
+
+		assertThat(stats.getAddedConceptCount()).isEqualTo(2);
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri(URL_MY_CODE_SYSTEM);
+			assertThat(tcs).isNotNull();
+			assertThat(tcs.getCurrentVersion()).isNotNull();
+			long conceptCount = myTermConceptDao.countByCodeSystemVersion(tcs.getCurrentVersion().getPid());
+			assertThat(conceptCount).isEqualTo(3);
+		});
+		assertNoHHH000502Warnings();
+	}
+
+	private void assertNoHHH000502Warnings() {
+		assertThat(myHibernateLogCapture.getLogMessages().stream()
+			.filter(msg -> msg.contains(HHH000502))
+			.toList())
+			.as("No HHH000502 immutable-property warnings should be emitted")
+			.isEmpty();
 	}
 
 	private static List<TermConcept> getConceptsSortedByCode(TermCodeSystemVersion theCodeSystemVersion) {

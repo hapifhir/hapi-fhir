@@ -394,7 +394,7 @@ public class JpaConstants {
 	 * bound to a typed value, so MSSQL {@code sp_executesql} parameter declarations
 	 * stay uniform between real and padded slots and plan-guide matching is stable.
 	 */
-	private static final Integer NO_MORE_PARTITION_ID = -1;
+	public static final Integer NO_MORE_PARTITION_ID = -1;
 
 	/**
 	 * Special PID value used as an internal constant indicating that no more results are available. PIDs should always

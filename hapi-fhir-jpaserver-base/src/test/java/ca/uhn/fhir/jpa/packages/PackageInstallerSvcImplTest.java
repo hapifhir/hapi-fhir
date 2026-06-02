@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -1191,5 +1192,39 @@ public class PackageInstallerSvcImplTest {
 			verify(vsDao, times(1)).create(any(ValueSet.class), any(RequestDetails.class));
 			verify(myTermCodeSystemStorageSvc, never()).findExistingCodeSystemResourcePid(any(), any());
 		}
+	}
+
+	// Created by Claude Opus 4.6
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@Test
+	void testUpdateResource_versionConflict_skipsResourceAndLogsErrorWithCause() throws IOException {
+		ValueSet existingVs = new ValueSet();
+		existingVs.setId("ValueSet/my-vs");
+		existingVs.setUrl("http://example.org/ValueSet/my-vs");
+		existingVs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		ValueSet packagedVs = new ValueSet();
+		packagedVs.setId("ValueSet/my-vs");
+		packagedVs.setUrl("http://example.org/ValueSet/my-vs");
+		packagedVs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		IFhirResourceDao<ValueSet> vsDao = mock(IFhirResourceDao.class);
+		PackageInstallationSpec spec = setupResourceInPackage(existingVs, packagedVs, vsDao);
+		when(myVersionCanonicalizerMock.valueSetToCanonical(any())).thenReturn(packagedVs);
+
+		when(vsDao.update(any(), any(RequestDetails.class)))
+				.thenThrow(new ResourceVersionConflictException("HAPI-0825: Conflict with resource version"));
+		when(vsDao.read(any(), any(RequestDetails.class))).thenReturn(existingVs);
+
+		PackageInstallOutcomeJson outcome = mySvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled()).doesNotContainKey("ValueSet");
+
+		verify(vsDao).update(any(), any(RequestDetails.class));
+		verify(vsDao, never()).create(any(), any(RequestDetails.class));
+
+		LogbackTestExtensionAssert.assertThat(myLogCapture)
+				.hasErrorMessage("Version conflict error")
+				.hasErrorMessage("Cause: HAPI-0825: Conflict with resource version");
 	}
 }

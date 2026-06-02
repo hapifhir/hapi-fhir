@@ -78,7 +78,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_I
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
-public abstract class BaseExpandDistributionIntoFilesStep<PT extends TerminologyImportParameters, CT>
+public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTerminologyJobParameters, CT>
 		implements IJobStepWorker<PT, VoidModel, TerminologyFileSetJson> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseExpandDistributionIntoFilesStep.class);
@@ -98,7 +98,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 	private Integer myChunkLineSizeForUnitTests = null;
 
 	@VisibleForTesting
-	public void setChunkLineSizeForUnitTest(int theChunkLineSize) {
+	public void setChunkLineSizeForUnitTest(Integer theChunkLineSize) {
 		myChunkLineSizeForUnitTests = theChunkLineSize;
 	}
 
@@ -164,7 +164,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 
 						for (StepIdAndFileHandlingInstructions processor : processors) {
 							ITerminologyImportFileHandlerStep.FileHandlingType fileHandlingType =
-									processor.fileHandlingInstructions().fileHandlingType();
+									processor.fileHandlingType();
 
 							if (fileHandlingTypeToAttachmentIds.containsKey(fileHandlingType)) {
 								List<String> attachmentIds = fileHandlingTypeToAttachmentIds.get(fileHandlingType);
@@ -182,6 +182,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 										case CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 1000);
 											yield csvSplitWithRepeatHeader(
+													fileHandlingType,
 													',',
 													instanceId,
 													bytes,
@@ -194,6 +195,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 										case CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 50000);
 											yield csvSplitWithRepeatHeader(
+													fileHandlingType,
 													',',
 													instanceId,
 													bytes,
@@ -206,6 +208,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 										case TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 5000);
 											yield csvSplitWithRepeatHeader(
+													fileHandlingType,
 													'\t',
 													instanceId,
 													bytes,
@@ -249,8 +252,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 		}
 
 		if (!stepsWhichHaveNotFoundFileAndNeedTo.isEmpty()) {
-			throw new JobExecutionFailedException(
-					"No files in the distribution were matched by step(s): " + stepsWhichHaveNotFoundFileAndNeedTo);
+			throw new JobExecutionFailedException(Msg.code(2956)
+					+ "No files in the distribution were matched by step(s): " + stepsWhichHaveNotFoundFileAndNeedTo);
 		}
 
 		afterCompletionOfFileProcessing(context, theDataSink);
@@ -341,6 +344,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 	 * @return A list of attachment IDs for the work chunks that were created.
 	 */
 	private List<String> csvSplitWithRepeatHeader(
+			ITerminologyImportFileHandlerStep.FileHandlingType theFileHandlingType,
 			char theDelimiter,
 			String theJobInstanceId,
 			byte[] theBytes,
@@ -357,6 +361,10 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 		if (lastSlash != -1) {
 			filename = filename.substring(lastSlash + 1);
 		}
+
+		// Avoid filename collisions if two different steps want chunks from the same file,
+		// but they want them with different chunk sizes
+		filename += "_" + theFileHandlingType.ordinal();
 
 		ByteArrayInputStream bis = new ByteArrayInputStream(theBytes);
 		InputStreamReader reader = new InputStreamReader(bis, StandardCharsets.UTF_8);
@@ -446,7 +454,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 	}
 
 	@Nonnull
-	private Optional<ITerminologyImportFileHandlerStep.FileHandlingInstructions> canHandleFile(
+	private Optional<ITerminologyImportFileHandlerStep.FileHandlingType> canHandleFile(
 			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
 			ITerminologyImportFileHandlerStep<PT, ?, ?> theFileHandler,
 			PT theJobParameters,
@@ -457,8 +465,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 		for (BaseImportTerminologyFileCsvStep.LoincFileNameSpecification loincFileNameSpecification :
 				theFileHandler.getFilesToProcess(theStepExecutionDetails)) {
 			if (loincFileNameSpecification.matchFileName(jobProperties, theFileName)) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(
-						loincFileNameSpecification.fileHandlingType()));
+				return Optional.of(loincFileNameSpecification.fileHandlingType());
 			}
 		}
 
@@ -490,5 +497,5 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 	}
 
 	private record StepIdAndFileHandlingInstructions(
-			String stepId, ITerminologyImportFileHandlerStep.FileHandlingInstructions fileHandlingInstructions) {}
+			String stepId, ITerminologyImportFileHandlerStep.FileHandlingType fileHandlingType) {}
 }

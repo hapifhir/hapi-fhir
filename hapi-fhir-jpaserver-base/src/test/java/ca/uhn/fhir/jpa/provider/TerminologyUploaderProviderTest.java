@@ -9,10 +9,10 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.Constants;
@@ -224,11 +224,11 @@ class TerminologyUploaderProviderTest {
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestCaptor.capture());
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
 		assertEquals(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC, startRequest.getJobDefinitionId());
-		assertEquals("1.2.3", startRequest.getParameters(ImportLoincJobParameters.class).getVersionId());
+		assertEquals("1.2.3", startRequest.getParameters(ImportTerminologyJobParameters.class).getVersionId());
 		if (theExpectDontMakeCurrent) {
-			assertTrue(startRequest.getParameters(ImportLoincJobParameters.class).getDontMakeCurrent());
+			assertTrue(startRequest.getParameters(ImportTerminologyJobParameters.class).getDontMakeCurrent());
 		} else {
-			assertNull(startRequest.getParameters(ImportLoincJobParameters.class).getDontMakeCurrent());
+			assertNull(startRequest.getParameters(ImportTerminologyJobParameters.class).getDontMakeCurrent());
 		}
 	}
 

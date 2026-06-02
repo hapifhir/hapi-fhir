@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IEntityResult;
 import ca.uhn.fhir.rest.gclient.RawRequestEntity;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.FileUtil;
@@ -100,7 +101,11 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		Options options = super.getOptions();
 
 		addRequiredOption(
-				options, "u", "url", true, "The code system URL associated with this upload (e.g. " + SCT_URI + ")");
+				options,
+				"u",
+				"url",
+				true,
+				"The code system URL associated with this upload (e.g. \"" + SCT_URI + "|20260501\")");
 		addOptionalOption(
 				options,
 				"d",
@@ -119,7 +124,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				null,
 				"dont-make-current",
 				false,
-				"If specified, the terminology version being uploaded will not be marked as the current version.");
+				"If specified, the terminology version being uploaded will not be marked as the current version. This option can only be specified on certain CodeSystem URLs.");
 
 		return options;
 	}
@@ -165,6 +170,12 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				};
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(termUrl);
+
+		/*
+		 * These are the URIs of the code systems that can be uploaded with the new
+		 * Batch2 framework. This is only temporary until all the conversions have been
+		 * migrated.
+		 */
 		Set<String> newUploadUris = Set.of(LOINC_URI, SCT_URI);
 
 		if (newUploadUris.contains(canonicalUrl.url())) {
@@ -241,12 +252,19 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			}
 			RawRequestEntity requestEntity = new RawRequestEntity(Constants.CT_OCTET_STREAM, bytes);
 
-			IEntityResult response =
-					theClient.rawHttpRequest().post(urlBuilder, requestEntity).execute();
-
+			IEntityResult response;
+			try {
+				response = theClient
+						.rawHttpRequest()
+						.post(urlBuilder, requestEntity)
+						.execute();
+			} catch (InvalidRequestException e) {
+				throw new CommandFailureException(Msg.code(2959) + "Failed to attach file \"" + dataFile.getName()
+						+ "\" to job, got " + e.getMessage());
+			}
 			if (response.getStatusCode() != 200) {
-				throw new CommandFailureException(
-						Msg.code(2937) + "Failed to upload terminology, got HTTP " + response.getStatusCode());
+				throw new CommandFailureException(Msg.code(2937) + "Failed to attach file \"" + dataFile.getName()
+						+ "\" to job, got HTTP " + response.getStatusCode());
 			}
 
 			ourLog.info("Attached file in {}", sw);

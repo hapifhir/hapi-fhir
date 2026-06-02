@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -30,12 +31,13 @@ import java.util.regex.Pattern;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ImportLoincJobParametersValidator
-		implements ca.uhn.fhir.batch2.api.IJobParametersValidator<ImportLoincJobParameters> {
+		implements ca.uhn.fhir.batch2.api.IJobParametersValidator<ImportTerminologyJobParameters> {
 	private static final Pattern VERSION_PATTERN = Pattern.compile("(\\d+\\.)*\\d+");
 
 	@Nullable
 	@Override
-	public List<String> validate(RequestDetails theRequestDetails, @Nonnull ImportLoincJobParameters theParameters) {
+	public List<String> validate(
+			RequestDetails theRequestDetails, @Nonnull ImportTerminologyJobParameters theParameters) {
 		List<String> retVal = new ArrayList<>();
 
 		if (isBlank(theParameters.getVersionId())) {

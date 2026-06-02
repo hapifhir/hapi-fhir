@@ -69,6 +69,11 @@ public interface ITermCodeSystemVersionDao
 	TermCodeSystemVersion findCurrentVersionForCodeSystemResourcePid(
 			@Param("resource_id") Long theCodeSystemResourcePid);
 
+	// Created by claude-opus-4-6
+	@Query("SELECT csv FROM TermCodeSystemVersion csv " + "JOIN TermCodeSystem cs ON (cs.myCurrentVersion = csv) "
+			+ "WHERE cs.myId = :cs_pid")
+	TermCodeSystemVersion findCurrentVersionByCodeSystemPid(@Param("cs_pid") Long theCodeSystemPid);
+
 	/**
 	 * // TODO: JA2 Use partitioned query here
 	 */

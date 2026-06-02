@@ -4079,7 +4079,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myPatientDao.create(patient, mySrd);
 
 		long patientIdentifierHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
-			RequestPartitionId.defaultPartition(), "Patient", "identifier");
+			RequestPartitionId.fromPartitionId(null), "Patient", "identifier");
 		runInTransaction(() -> ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream()
 			.filter(t -> t.getHashIdentity().equals(patientIdentifierHashIdentity))
 			.map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * "))));
@@ -5350,7 +5350,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		IIdType id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		long patientIdentifierOfTypeHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-			new PartitionSettings(), RequestPartitionId.defaultPartition(), "Patient", "identifier:of-type");
+			new PartitionSettings(), RequestPartitionId.fromPartitionId(null), "Patient", "identifier:of-type");
 		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamToken> params = myResourceIndexedSearchParamTokenDao
 				.findAll()

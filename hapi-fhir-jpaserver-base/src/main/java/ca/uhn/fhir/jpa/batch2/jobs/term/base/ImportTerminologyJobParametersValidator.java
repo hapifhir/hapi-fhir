@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.batch2.jobs.term.snomedct;
+package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
@@ -29,13 +29,14 @@ import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class ImportSnomedCtJobParametersValidator
-		implements ca.uhn.fhir.batch2.api.IJobParametersValidator<ImportSnomedCtJobParameters> {
+public class ImportTerminologyJobParametersValidator
+		implements ca.uhn.fhir.batch2.api.IJobParametersValidator<ImportTerminologyJobParameters> {
 	private static final Pattern VERSION_PATTERN = Pattern.compile("[^ ]+");
 
 	@Nullable
 	@Override
-	public List<String> validate(RequestDetails theRequestDetails, @Nonnull ImportSnomedCtJobParameters theParameters) {
+	public List<String> validate(
+			RequestDetails theRequestDetails, @Nonnull ImportTerminologyJobParameters theParameters) {
 		List<String> retVal = new ArrayList<>();
 
 		if (isBlank(theParameters.getVersionId())) {
