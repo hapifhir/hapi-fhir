@@ -183,6 +183,23 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM = "$upload-external-code-system";
 	/**
+	 * Operation name for the "$hapi.fhir.upload-terminology.create-job" operation
+	 */
+	public static final String OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB = "$hapi.fhir.upload-terminology.create-job";
+	/**
+	 * Operation name for the "$hapi.fhir.upload-terminology.upload-file" operation
+	 */
+	public static final String OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE = "$hapi.fhir.upload-terminology.attach-file";
+	/**
+	 * Operation name for the "$hapi.fhir.upload-terminology.start-job" operation
+	 */
+	public static final String OPERATION_UPLOAD_TERMINOLOGY_START_JOB = "$hapi.fhir.upload-terminology.start-job";
+	/**
+	 * Operation name for the "$hapi.fhir.upload-terminology.poll-for-status" operation
+	 */
+	public static final String OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS =
+			"$hapi.fhir.upload-terminology.poll-for-status";
+	/**
 	 * Operation name for the "$import" operation
 	 */
 	public static final String OPERATION_IMPORT = "$import";
