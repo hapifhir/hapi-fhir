@@ -29,6 +29,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Compartment;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -142,6 +143,55 @@ public class SearchParameterUtil {
 		if (theSearchParamDefinition.name().equals("patient")
 				&& theSearchParamDefinition.path().equals("Device.patient")) {
 			validCompartments.add("Patient");
+		}
+
+		/*
+		 * Some resources (e.g. R4/R5 Observation) have a "patient" search parameter that uses
+		 * an alias path like "Observation.subject.where(resolve() is Patient)" instead of a
+		 * direct "Resource.patient" reference. Because these alias SPs omit providesMembershipIn
+		 * in their @SearchParamDefinition annotation, the loop above does not add Patient
+		 * compartment membership for them even though they logically belong in the Patient
+		 * compartment (and the base FHIR compartment definition includes them).
+		 *
+		 * The alias pattern is identified by ".where(resolve() is Patient)" appearing in the
+		 * path expression. In R4 the path is resource-specific (e.g.
+		 * "Observation.subject.where(resolve() is Patient)"), while in R5/R4B it is a
+		 * pipe-delimited cross-resource expression shared across all resources that participate
+		 * in the patient SP — the ".contains()" check works as a substring match on that full
+		 * multi-resource string. Applying the rule only to this pattern avoids over-including
+		 * direct Resource.patient references whose annotations explicitly omit providesMembershipIn.
+		 *
+		 * Before adding Patient compartment membership, the SP is checked against
+		 * RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT so that resources with
+		 * deliberate security exclusions (e.g. List.patient per issue #7118) are not affected.
+		 */
+		if ("patient".equalsIgnoreCase(theSearchParamDefinition.name())
+				&& "reference".equalsIgnoreCase(theSearchParamDefinition.type())
+				&& theSearchParamDefinition.path().contains(".where(resolve() is Patient)")) {
+			// Derive the FHIR resource type name from the @ResourceDef annotation on the class
+			// hierarchy. The Java simple name may differ from the FHIR type name (e.g.
+			// ListResource.class → "List"), so we cannot use getSimpleName() directly.
+			// Fall back to the Java simple name if no @ResourceDef annotation is present.
+			String fhirResourceType = theResourceClazz.getSimpleName();
+			Class<?> cls = theResourceClazz;
+			while (cls != null && cls != Object.class) {
+				ResourceDef resourceDef = cls.getAnnotation(ResourceDef.class);
+				if (resourceDef != null && !resourceDef.name().isEmpty()) {
+					fhirResourceType = resourceDef.name();
+					break;
+				}
+				cls = cls.getSuperclass();
+			}
+			Set<String> omittedSps = RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.getOrDefault(
+					fhirResourceType, Collections.emptySet());
+			if (!omittedSps.contains(theSearchParamDefinition.name())) {
+				for (Class<? extends IBaseResource> target : theSearchParamDefinition.target()) {
+					if ("Patient".equals(target.getSimpleName())) {
+						validCompartments.add("Patient");
+						break;
+					}
+				}
+			}
 		}
 
 		return validCompartments;
