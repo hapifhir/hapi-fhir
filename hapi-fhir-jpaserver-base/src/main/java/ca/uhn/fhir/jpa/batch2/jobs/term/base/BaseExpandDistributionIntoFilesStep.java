@@ -216,8 +216,10 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 													theDataSink);
 										}
 										case XML -> {
-											AttachmentDetails attachmentRequest = new AttachmentDetails(bytes, AttachmentContentTypeEnum.ZIP, nextFileName);
-											String attachmentId = myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
+											AttachmentDetails attachmentRequest = new AttachmentDetails(
+													bytes, AttachmentContentTypeEnum.ZIP, nextFileName);
+											String attachmentId =
+													myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
 											TerminologyFileSetJson data = newTerminologyFileSetJson();
 											data.setSourceFilename(nextFileName);
 											data.setAttachmentId(attachmentId);
@@ -445,19 +447,23 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends Terminology
 
 	@Nonnull
 	private Optional<ITerminologyImportFileHandlerStep.FileHandlingInstructions> canHandleFile(
-		StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, ITerminologyImportFileHandlerStep<PT, ?, ?> theFileHandler, PT theJobParameters, String theFileName) {
+			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+			ITerminologyImportFileHandlerStep<PT, ?, ?> theFileHandler,
+			PT theJobParameters,
+			String theFileName) {
 
 		Properties jobProperties = getJobProperties(myJobPersistence, theStepExecutionDetails);
 
-		for (BaseImportTerminologyFileCsvStep.LoincFileNameSpecification loincFileNameSpecification : theFileHandler.getFilesToProcess(theStepExecutionDetails)) {
+		for (BaseImportTerminologyFileCsvStep.LoincFileNameSpecification loincFileNameSpecification :
+				theFileHandler.getFilesToProcess(theStepExecutionDetails)) {
 			if (loincFileNameSpecification.matchFileName(jobProperties, theFileName)) {
-				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(loincFileNameSpecification.fileHandlingType()));
+				return Optional.of(new ITerminologyImportFileHandlerStep.FileHandlingInstructions(
+						loincFileNameSpecification.fileHandlingType()));
 			}
 		}
 
 		return Optional.empty();
 	}
-
 
 	@Nonnull
 	public static CSVParser newCsvParser(char theDelimiter, Reader theReader) throws IOException {

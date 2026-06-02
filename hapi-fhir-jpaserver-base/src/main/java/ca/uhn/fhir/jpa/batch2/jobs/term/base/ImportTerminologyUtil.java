@@ -15,7 +15,9 @@ public class ImportTerminologyUtil {
 		// nothing
 	}
 
-	public static Properties getJobProperties(IJobPersistence theJobPersistence, StepExecutionDetails<? extends TerminologyImportParameters, ?> theStepExecutionDetails) {
+	public static Properties getJobProperties(
+			IJobPersistence theJobPersistence,
+			StepExecutionDetails<? extends TerminologyImportParameters, ?> theStepExecutionDetails) {
 		TerminologyImportParameters jobParameters = theStepExecutionDetails.getParameters();
 		Properties retVal = jobParameters.getJobProperties();
 		if (retVal == null) {
@@ -33,6 +35,4 @@ public class ImportTerminologyUtil {
 		}
 		return retVal;
 	}
-
-
 }

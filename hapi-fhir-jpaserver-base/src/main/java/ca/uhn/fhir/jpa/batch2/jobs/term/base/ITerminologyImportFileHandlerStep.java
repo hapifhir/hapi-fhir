@@ -32,7 +32,7 @@ public interface ITerminologyImportFileHandlerStep<
 
 	@Nonnull
 	List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
-		StepExecutionDetails<PT, ?> theStepExecutionDetails);
+			StepExecutionDetails<PT, ?> theStepExecutionDetails);
 
 	/**
 	 * Returns true if it should be considered an error for this step to not match any files in the

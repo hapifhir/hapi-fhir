@@ -117,7 +117,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		return new LoadedFileDescriptors(theFiles);
 	}
 
-
 	@Override
 	public UploadStatistics loadCustom(
 			String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
@@ -323,5 +322,4 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		}
 		return concept;
 	}
-
 }

@@ -20,19 +20,13 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.icd.icd10;
 
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.util.XmlUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -44,14 +38,11 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.util.XmlUtil.getChildrenByTagName;
-import static ca.uhn.fhir.util.XmlUtil.parseDocument;
 
 /**
  * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
@@ -64,14 +55,23 @@ public class ImportIcd10Step2HandleConcepts
 	@Nonnull
 	@Override
 	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
-		StepExecutionDetails<ImportIcdJobParameters, ?> theStepExecutionDetails) {
+			StepExecutionDetails<ImportIcdJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
-			FileHandlingType.XML,
-			t-> Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE).matcher(t).find()));
+				FileHandlingType.XML, t -> Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE)
+						.matcher(t)
+						.find()));
 	}
 
 	@Override
-	protected void processAttachment(@Nonnull StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, MyBaseContext theContext, AttachmentDetails theAttachment, ImportIcdJobParameters theJobParameters, CodeSystem theCodeSystemToPopulate, TerminologyFileSetJson theData, String theSourceFilename) {
+	protected void processAttachment(
+			@Nonnull StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			MyBaseContext theContext,
+			AttachmentDetails theAttachment,
+			ImportIcdJobParameters theJobParameters,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 
 		InputStreamReader reader = new InputStreamReader(theAttachment.getInputStream(), StandardCharsets.UTF_8);
 		Document document;
@@ -97,10 +97,10 @@ public class ImportIcd10Step2HandleConcepts
 			}
 
 			// FIXME: validate version?
-//			String version = title.getAttribute("version");
-//			if (!version.isEmpty()) {
-//				codeSystemVersion.setCodeSystemVersionId(version);
-//			}
+			//			String version = title.getAttribute("version");
+			//			if (!version.isEmpty()) {
+			//				codeSystemVersion.setCodeSystemVersionId(version);
+			//			}
 
 			theCodeSystemToPopulate.setDescription(title.getTextContent());
 		}
@@ -117,12 +117,12 @@ public class ImportIcd10Step2HandleConcepts
 			for (Element rubric : getChildrenByTagName(aClass, "Rubric")) {
 				String kind = rubric.getAttribute("kind");
 				Optional<Element> firstLabel =
-					getChildrenByTagName(rubric, "Label").stream().findFirst();
+						getChildrenByTagName(rubric, "Label").stream().findFirst();
 				if (firstLabel.isPresent()) {
 					String textContent = firstLabel.get().getTextContent();
 					if (textContent != null && !textContent.isEmpty()) {
 						textContent =
-							textContent.replace("\n", "").replace("\r", "").replace("\t", "");
+								textContent.replace("\n", "").replace("\r", "").replace("\t", "");
 						if (kind.equals("preferred")) {
 							termConcept.setDisplay(textContent);
 						} else {
@@ -137,14 +137,12 @@ public class ImportIcd10Step2HandleConcepts
 				CodeSystem.ConceptDefinitionComponent parent = getOrAddConcept(theContext, parentCode);
 				parent.addConcept(termConcept);
 			}
-
 		}
-
 	}
 
 	@Override
-	protected MyBaseContext newContextObject(StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+	protected MyBaseContext newContextObject(
+			StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext();
 	}
-
 }

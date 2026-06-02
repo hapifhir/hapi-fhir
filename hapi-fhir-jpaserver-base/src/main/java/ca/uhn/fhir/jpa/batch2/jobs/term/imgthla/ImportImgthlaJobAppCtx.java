@@ -36,7 +36,6 @@ import org.springframework.context.annotation.Configuration;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 
-
 /**
  * This file is the Batch2 Job Definition for the SNOMED CT Import job.
  * See the intividual step bean definitions, starting with {@link #importIcd10Step1ExpandDistributionIntoFiles()}
@@ -54,10 +53,10 @@ public class ImportImgthlaJobAppCtx {
 	private final IHapiTransactionService myTxService;
 
 	public ImportImgthlaJobAppCtx(
-		DaoRegistry myDaoRegistry,
-		ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc,
-		IJobPersistence theJobPersistence,
-		IHapiTransactionService theTxService) {
+			DaoRegistry myDaoRegistry,
+			ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc,
+			IJobPersistence theJobPersistence,
+			IHapiTransactionService theTxService) {
 		this.myDaoRegistry = myDaoRegistry;
 		this.myTermCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
 		this.myJobPersistence = theJobPersistence;
@@ -70,39 +69,39 @@ public class ImportImgthlaJobAppCtx {
 	@Bean
 	public JobDefinition<ImportImgthlaJobParameters> importIcd10JobDefinition() {
 		return JobDefinition.newBuilder()
-			.setInitialStatus(StatusEnum.BUILDING)
-			.setJobDefinitionId(JOB_ID_IMPORT_ICD_10)
-			.setJobDescription("Import Terminology - ICD-10")
-			.setJobDefinitionVersion(1)
-			.gatedExecution()
-			.setParametersType(ImportImgthlaJobParameters.class)
-			.setParametersValidator(new ImportImgthlaJobParametersValidator())
-			.addFirstStep(
-				"expand-zip",
-				"Expand ICD-10 distribution file",
-				TerminologyFileSetJson.class,
-				importIcd10Step1ExpandDistributionIntoFiles())
-			.addIntermediateStep(
-				"import-concepts",
-				"Import ICD-10 concepts",
-				TerminologyFileSetJson.class,
-				importIcd10Step2Concepts())
-			.addIntermediateStep(
-				STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
-				"Create work chunks for calculating concept closures",
-				TerminologyFileSetJson.class,
-				importIcdStepChunkConceptsForClosureGeneration())
-			.addIntermediateStep(
-				"generate-concept-closures",
-				"Generate concept closures",
-				TerminologyFileSetJson.class,
-				importIcdStepGenerateConceptClosures())
-			.addFinalReducerStep(
-				STEP_ID_FINALIZE_IMPORT,
-				"Finalize ICD-10 Import",
-				ImportTerminologyResultJson.class,
-				importIcd10StepFinalize())
-			.build();
+				.setInitialStatus(StatusEnum.BUILDING)
+				.setJobDefinitionId(JOB_ID_IMPORT_ICD_10)
+				.setJobDescription("Import Terminology - ICD-10")
+				.setJobDefinitionVersion(1)
+				.gatedExecution()
+				.setParametersType(ImportImgthlaJobParameters.class)
+				.setParametersValidator(new ImportImgthlaJobParametersValidator())
+				.addFirstStep(
+						"expand-zip",
+						"Expand ICD-10 distribution file",
+						TerminologyFileSetJson.class,
+						importIcd10Step1ExpandDistributionIntoFiles())
+				.addIntermediateStep(
+						"import-concepts",
+						"Import ICD-10 concepts",
+						TerminologyFileSetJson.class,
+						importIcd10Step2Concepts())
+				.addIntermediateStep(
+						STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
+						"Create work chunks for calculating concept closures",
+						TerminologyFileSetJson.class,
+						importIcdStepChunkConceptsForClosureGeneration())
+				.addIntermediateStep(
+						"generate-concept-closures",
+						"Generate concept closures",
+						TerminologyFileSetJson.class,
+						importIcdStepGenerateConceptClosures())
+				.addFinalReducerStep(
+						STEP_ID_FINALIZE_IMPORT,
+						"Finalize ICD-10 Import",
+						ImportTerminologyResultJson.class,
+						importIcd10StepFinalize())
+				.build();
 	}
 
 	/**
@@ -111,39 +110,39 @@ public class ImportImgthlaJobAppCtx {
 	@Bean
 	public JobDefinition<ImportImgthlaJobParameters> importIcd10CmJobDefinition() {
 		return JobDefinition.newBuilder()
-			.setInitialStatus(StatusEnum.BUILDING)
-			.setJobDefinitionId(JOB_ID_IMPORT_ICD_10_CM)
-			.setJobDescription("Import Terminology - ICD-10-CM")
-			.setJobDefinitionVersion(1)
-			.gatedExecution()
-			.setParametersType(ImportImgthlaJobParameters.class)
-			.setParametersValidator(new ImportImgthlaJobParametersValidator())
-			.addFirstStep(
-				"expand-zip",
-				"Expand ICD-10-CM distribution file",
-				TerminologyFileSetJson.class,
-				importIcd10CmStep1ExpandDistributionIntoFiles())
-			.addIntermediateStep(
-				"import-concepts",
-				"Import ICD-10-CM concepts",
-				TerminologyFileSetJson.class,
-				importIcd10CmStep2Concepts())
-			.addIntermediateStep(
-				STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
-				"Create work chunks for calculating concept closures",
-				TerminologyFileSetJson.class,
-				importIcdStepChunkConceptsForClosureGeneration())
-			.addIntermediateStep(
-				"generate-concept-closures",
-				"Generate concept closures",
-				TerminologyFileSetJson.class,
-				importIcdStepGenerateConceptClosures())
-			.addFinalReducerStep(
-				STEP_ID_FINALIZE_IMPORT,
-				"Finalize ICD-10 Import",
-				ImportTerminologyResultJson.class,
-				importIcd10StepFinalize())
-			.build();
+				.setInitialStatus(StatusEnum.BUILDING)
+				.setJobDefinitionId(JOB_ID_IMPORT_ICD_10_CM)
+				.setJobDescription("Import Terminology - ICD-10-CM")
+				.setJobDefinitionVersion(1)
+				.gatedExecution()
+				.setParametersType(ImportImgthlaJobParameters.class)
+				.setParametersValidator(new ImportImgthlaJobParametersValidator())
+				.addFirstStep(
+						"expand-zip",
+						"Expand ICD-10-CM distribution file",
+						TerminologyFileSetJson.class,
+						importIcd10CmStep1ExpandDistributionIntoFiles())
+				.addIntermediateStep(
+						"import-concepts",
+						"Import ICD-10-CM concepts",
+						TerminologyFileSetJson.class,
+						importIcd10CmStep2Concepts())
+				.addIntermediateStep(
+						STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
+						"Create work chunks for calculating concept closures",
+						TerminologyFileSetJson.class,
+						importIcdStepChunkConceptsForClosureGeneration())
+				.addIntermediateStep(
+						"generate-concept-closures",
+						"Generate concept closures",
+						TerminologyFileSetJson.class,
+						importIcdStepGenerateConceptClosures())
+				.addFinalReducerStep(
+						STEP_ID_FINALIZE_IMPORT,
+						"Finalize ICD-10 Import",
+						ImportTerminologyResultJson.class,
+						importIcd10StepFinalize())
+				.build();
 	}
 
 	@Bean
@@ -168,24 +167,25 @@ public class ImportImgthlaJobAppCtx {
 
 	@Bean
 	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportImgthlaJobParameters>
-	importIcdStepChunkConceptsForClosureGeneration() {
+			importIcdStepChunkConceptsForClosureGeneration() {
 		return new ImportTerminologyStepChunkConceptsForGeneratingClosure<>();
 	}
 
 	@Bean
 	public ImportTerminologyStepGenerateConceptClosures<ImportImgthlaJobParameters>
-	importIcdStepGenerateConceptClosures() {
+			importIcdStepGenerateConceptClosures() {
 		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
 
-
 	@Bean
 	public ImportTerminologyStepFinalize<ImportImgthlaJobParameters> importIcd10StepFinalize() {
-		return new ImportTerminologyStepFinalize<>(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
+		return new ImportTerminologyStepFinalize<>(
+				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}
 
 	@Bean
 	public ImportTerminologyStepFinalize<ImportImgthlaJobParameters> importIcd10CmStepFinalize() {
-		return new ImportTerminologyStepFinalize<>(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
+		return new ImportTerminologyStepFinalize<>(
+				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}
 }

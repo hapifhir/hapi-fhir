@@ -13,8 +13,7 @@ import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.ICD10CM_URI;
  * @see ImportLoincJobAppCtx#importLoincStep1ExpandDistributionIntoFiles()
  */
 public class ImportIcd10CmStep1ExpandDistributionIntoFilesStep
-	extends BaseExpandDistributionIntoFilesStep<
-	ImportIcdJobParameters, Void> {
+		extends BaseExpandDistributionIntoFilesStep<ImportIcdJobParameters, Void> {
 
 	@Override
 	protected Void newContextObject() {
@@ -40,5 +39,4 @@ public class ImportIcd10CmStep1ExpandDistributionIntoFilesStep
 		theCodeSystem.setUrl(ICD10CM_URI);
 		theCodeSystem.setName("ICD-10-CM");
 	}
-
 }

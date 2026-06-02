@@ -54,7 +54,7 @@ public class ImportLoincStep9HandleDocumentOntology
 	@Nonnull
 	@Override
 	public List<LoincFileNameSpecification> getFilesToProcess(
-		StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
+			StepExecutionDetails<ImportLoincJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 				LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE,

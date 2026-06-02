@@ -102,11 +102,9 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			Pattern.compile("loinc[0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE);
 	public static final Pattern SNOMED_CT_XML_FILENAME_PATTERN =
 			Pattern.compile("snomed[a-zA-Z0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE);
-	public static final Pattern ICD10_FILENAME_PATTERN =
-			Pattern.compile("icd10.*\\.zip", Pattern.CASE_INSENSITIVE);
+	public static final Pattern ICD10_FILENAME_PATTERN = Pattern.compile("icd10.*\\.zip", Pattern.CASE_INSENSITIVE);
 
-	public static final Pattern ICD10CM_FILENAME_PATTERN =
-			Pattern.compile("icd10cm.*\\.zip", Pattern.CASE_INSENSITIVE);
+	public static final Pattern ICD10CM_FILENAME_PATTERN = Pattern.compile("icd10cm.*\\.zip", Pattern.CASE_INSENSITIVE);
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	private static final String RESP_PARAM_CONCEPT_COUNT = "conceptCount";
 	private static final String RESP_PARAM_TARGET = "target";
@@ -146,12 +144,12 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		// LOINC
 		JobType loincJobType = new JobType(
-			ITermLoaderSvc.LOINC_URI,
+				ITermLoaderSvc.LOINC_URI,
 				LOINC_XML_FILENAME_PATTERN,
 				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE,
-			ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC,
-			TerminologyImportParameters::new,
-			"LOINC",
+				ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC,
+				TerminologyImportParameters::new,
+				"LOINC",
 				FILENAME_LOINC_DISTRIBUTION_FILE,
 				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
 		myCanonicalUrlToJobType.put(loincJobType.systemUrl(), loincJobType);
@@ -159,12 +157,12 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		// SNOMED CT
 		JobType sctJobType = new JobType(
-			ITermLoaderSvc.SCT_URI,
+				ITermLoaderSvc.SCT_URI,
 				SNOMED_CT_XML_FILENAME_PATTERN,
 				null,
-			ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT,
-			TerminologyImportParameters::new,
-			"SNOMED CT",
+				ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT,
+				TerminologyImportParameters::new,
+				"SNOMED CT",
 				FILENAME_SNOMED_CT_DISTRIBUTION_FILE,
 				null);
 		myCanonicalUrlToJobType.put(sctJobType.systemUrl(), sctJobType);
@@ -172,30 +170,29 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		// ICD-10
 		JobType icd10JobType = new JobType(
-			ITermLoaderSvc.ICD10_URI,
+				ITermLoaderSvc.ICD10_URI,
 				ICD10_FILENAME_PATTERN,
 				null,
-			ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10,
-			TerminologyImportParameters::new,
-			"ICD-10",
-			FILENAME_ICD10_DISTRIBUTION_FILE,
+				ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10,
+				TerminologyImportParameters::new,
+				"ICD-10",
+				FILENAME_ICD10_DISTRIBUTION_FILE,
 				null);
 		myCanonicalUrlToJobType.put(icd10JobType.systemUrl(), sctJobType);
 		myJobDefinitionIdToJobType.put(icd10JobType.jobDefinitionId(), sctJobType);
 
 		// ICD-10-CM
 		JobType icd10cmJobType = new JobType(
-			ITermLoaderSvc.ICD10CM_URI,
+				ITermLoaderSvc.ICD10CM_URI,
 				ICD10CM_FILENAME_PATTERN,
 				null,
-			ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM,
-			TerminologyImportParameters::new,
-			"ICD-10-CM",
-			FILENAME_ICD10CM_DISTRIBUTION_FILE,
+				ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM,
+				TerminologyImportParameters::new,
+				"ICD-10-CM",
+				FILENAME_ICD10CM_DISTRIBUTION_FILE,
 				null);
 		myCanonicalUrlToJobType.put(icd10cmJobType.systemUrl(), sctJobType);
 		myJobDefinitionIdToJobType.put(icd10cmJobType.jobDefinitionId(), sctJobType);
-
 	}
 
 	@PostConstruct
@@ -479,7 +476,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			UrlUtil.CanonicalUrlParts codeSystemCanonicalUrl = UrlUtil.parseCanonicalUrl(codeSystemUrl);
 			if (myCanonicalUrlToJobType.containsKey(codeSystemCanonicalUrl.url())) {
 				// FIXME: add test and code
-				throw new InvalidRequestException(Msg.code(1) + "This operation may no longer be used to upload the " + codeSystemUrl + " CodeSystem. See " + OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
+				throw new InvalidRequestException(Msg.code(1) + "This operation may no longer be used to upload the "
+						+ codeSystemUrl + " CodeSystem. See " + OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
 			}
 
 			UploadStatistics stats = myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
@@ -661,7 +659,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 	private record JobType(
-		String systemUrl,
+			String systemUrl,
 			Pattern distributionFilenamePattern,
 			String thePropertyFileName,
 			String jobDefinitionId,

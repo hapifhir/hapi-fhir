@@ -107,7 +107,8 @@ public class ImportTerminologyStepGenerateConceptClosures<PT extends Terminology
 
 	@Nonnull
 	@Override
-	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(StepExecutionDetails<PT, ?> theStepExecutionDetails) {
+	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<PT, ?> theStepExecutionDetails) {
 		// This step doesn't process any files
 		return List.of();
 	}

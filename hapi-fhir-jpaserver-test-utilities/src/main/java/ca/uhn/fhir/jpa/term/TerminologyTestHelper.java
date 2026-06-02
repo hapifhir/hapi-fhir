@@ -28,8 +28,8 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyImportParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyImportParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
@@ -102,7 +102,15 @@ public class TerminologyTestHelper {
 		String distributionFilename = TerminologyConstants.FILENAME_ICD10_DISTRIBUTION_FILE;
 		String propertiesFilename = null;
 		Supplier<TerminologyImportParameters> parametersSupplier = ImportIcdJobParameters::new;
-		return startImportTerminologyJobAndWaitForCompletion(theVersion, theFiles, false, null, jobDefinitionId, parametersSupplier, distributionFilename, propertiesFilename);
+		return startImportTerminologyJobAndWaitForCompletion(
+				theVersion,
+				theFiles,
+				false,
+				null,
+				jobDefinitionId,
+				parametersSupplier,
+				distributionFilename,
+				propertiesFilename);
 	}
 
 	public String startImportIcdCmJobAndWaitForCompletion(String theVersion, ZipCollectionBuilder theFiles) {
@@ -110,7 +118,15 @@ public class TerminologyTestHelper {
 		String distributionFilename = TerminologyConstants.FILENAME_ICD10CM_DISTRIBUTION_FILE;
 		String propertiesFilename = null;
 		Supplier<TerminologyImportParameters> parametersSupplier = ImportIcdJobParameters::new;
-		return startImportTerminologyJobAndWaitForCompletion(theVersion, theFiles, false, null, jobDefinitionId, parametersSupplier, distributionFilename, propertiesFilename);
+		return startImportTerminologyJobAndWaitForCompletion(
+				theVersion,
+				theFiles,
+				false,
+				null,
+				jobDefinitionId,
+				parametersSupplier,
+				distributionFilename,
+				propertiesFilename);
 	}
 
 	public String startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles) {
@@ -128,10 +144,26 @@ public class TerminologyTestHelper {
 		String distributionFilename = FILENAME_LOINC_DISTRIBUTION_FILE;
 		String propertiesFilename = LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode();
 		Supplier<TerminologyImportParameters> parametersSupplier = ImportLoincJobParameters::new;
-		return startImportTerminologyJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, theJobProperties, jobDefinitionId, parametersSupplier, distributionFilename, propertiesFilename);
+		return startImportTerminologyJobAndWaitForCompletion(
+				versionId,
+				theFiles,
+				theDontMakeCurrent,
+				theJobProperties,
+				jobDefinitionId,
+				parametersSupplier,
+				distributionFilename,
+				propertiesFilename);
 	}
 
-	private String startImportTerminologyJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, Properties theJobProperties, String jobDefinitionId, Supplier<TerminologyImportParameters> parametersSupplier, String distributionFilename, String propertiesFilename) {
+	private String startImportTerminologyJobAndWaitForCompletion(
+			String versionId,
+			ZipCollectionBuilder theFiles,
+			boolean theDontMakeCurrent,
+			Properties theJobProperties,
+			String jobDefinitionId,
+			Supplier<TerminologyImportParameters> parametersSupplier,
+			String distributionFilename,
+			String propertiesFilename) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(jobDefinitionId);
 		TerminologyImportParameters parameters = parametersSupplier.get();
@@ -144,9 +176,7 @@ public class TerminologyTestHelper {
 		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 
 		AttachmentDetails attachmentDetails = new AttachmentDetails(
-				new ByteArrayInputStream(theFiles.getZipBytes()),
-				AttachmentContentTypeEnum.ZIP,
-			distributionFilename);
+				new ByteArrayInputStream(theFiles.getZipBytes()), AttachmentContentTypeEnum.ZIP, distributionFilename);
 		myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 
 		if (theJobProperties != null) {
@@ -156,10 +186,8 @@ public class TerminologyTestHelper {
 			} catch (IOException e) {
 				fail("Failed to store properties", e);
 			}
-			attachmentDetails = new AttachmentDetails(
-					out.toByteArray(),
-					AttachmentContentTypeEnum.PROPERTIES,
-				propertiesFilename);
+			attachmentDetails =
+					new AttachmentDetails(out.toByteArray(), AttachmentContentTypeEnum.PROPERTIES, propertiesFilename);
 			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 		}
 
@@ -275,7 +303,7 @@ public class TerminologyTestHelper {
 		return null;
 	}
 
-    private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theClassPathPrefix)
+	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theClassPathPrefix)
 			throws IOException {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_XML_FILE.getCode());
 		theFiles.addFileZip(theClassPathPrefix, LOINC_GROUP_FILE_DEFAULT.getCode());

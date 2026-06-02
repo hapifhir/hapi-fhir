@@ -54,14 +54,23 @@ public class ImportImgthlaStep2HandleConcepts
 	@Nonnull
 	@Override
 	public List<LoincFileNameSpecification> getFilesToProcess(
-		StepExecutionDetails<ImportIcdJobParameters, ?> theStepExecutionDetails) {
+			StepExecutionDetails<ImportIcdJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
-			FileHandlingType.XML,
-			t-> Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE).matcher(t).find()));
+				FileHandlingType.XML, t -> Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE)
+						.matcher(t)
+						.find()));
 	}
 
 	@Override
-	protected void processAttachment(@Nonnull StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, MyBaseContext theContext, AttachmentDetails theAttachment, ImportIcdJobParameters theJobParameters, CodeSystem theCodeSystemToPopulate, TerminologyFileSetJson theData, String theSourceFilename) {
+	protected void processAttachment(
+			@Nonnull StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			MyBaseContext theContext,
+			AttachmentDetails theAttachment,
+			ImportIcdJobParameters theJobParameters,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 
 		InputStreamReader reader = new InputStreamReader(theAttachment.getInputStream(), StandardCharsets.UTF_8);
 		Document document;
@@ -87,10 +96,10 @@ public class ImportImgthlaStep2HandleConcepts
 			}
 
 			// FIXME: validate version?
-//			String version = title.getAttribute("version");
-//			if (!version.isEmpty()) {
-//				codeSystemVersion.setCodeSystemVersionId(version);
-//			}
+			//			String version = title.getAttribute("version");
+			//			if (!version.isEmpty()) {
+			//				codeSystemVersion.setCodeSystemVersionId(version);
+			//			}
 
 			theCodeSystemToPopulate.setDescription(title.getTextContent());
 		}
@@ -107,12 +116,12 @@ public class ImportImgthlaStep2HandleConcepts
 			for (Element rubric : getChildrenByTagName(aClass, "Rubric")) {
 				String kind = rubric.getAttribute("kind");
 				Optional<Element> firstLabel =
-					getChildrenByTagName(rubric, "Label").stream().findFirst();
+						getChildrenByTagName(rubric, "Label").stream().findFirst();
 				if (firstLabel.isPresent()) {
 					String textContent = firstLabel.get().getTextContent();
 					if (textContent != null && !textContent.isEmpty()) {
 						textContent =
-							textContent.replace("\n", "").replace("\r", "").replace("\t", "");
+								textContent.replace("\n", "").replace("\r", "").replace("\t", "");
 						if (kind.equals("preferred")) {
 							termConcept.setDisplay(textContent);
 						} else {
@@ -127,14 +136,12 @@ public class ImportImgthlaStep2HandleConcepts
 				CodeSystem.ConceptDefinitionComponent parent = getOrAddConcept(theContext, parentCode);
 				parent.addConcept(termConcept);
 			}
-
 		}
-
 	}
 
 	@Override
-	protected MyBaseContext newContextObject(StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+	protected MyBaseContext newContextObject(
+			StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext();
 	}
-
 }

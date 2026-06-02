@@ -18,13 +18,21 @@ import java.nio.charset.StandardCharsets;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newCsvParser;
 
 public abstract class BaseImportTerminologyFileCsvStep<
-	PT extends TerminologyImportParameters, CT extends BaseImportTerminologyFileCsvStep.MyBaseContext>
-	extends BaseImportTerminologyFileStep<PT, CT> {
+				PT extends TerminologyImportParameters, CT extends BaseImportTerminologyFileCsvStep.MyBaseContext>
+		extends BaseImportTerminologyFileStep<PT, CT> {
 
-	protected void processAttachment(@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, CT theContext, AttachmentDetails attachment, PT jobParameters, CodeSystem codeSystemToPopulate, TerminologyFileSetJson theData, String sourceFilename) {
+	protected void processAttachment(
+			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			CT theContext,
+			AttachmentDetails attachment,
+			PT jobParameters,
+			CodeSystem codeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String sourceFilename) {
 		try (InputStream inputStream = attachment.getInputStream()) {
 			InputStreamReader reader = new InputStreamReader(
-				BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
+					BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
 
 			/*
 			 * Even if the source files use a delimiter other than comma, the expand step (step 1)
@@ -33,30 +41,29 @@ public abstract class BaseImportTerminologyFileCsvStep<
 			CSVParser csvReader = newCsvParser(',', reader);
 			for (CSVRecord record : csvReader.getRecords()) {
 				handleRecord(
-					theStepExecutionDetails,
-					theJobMetadata,
-					jobParameters,
-					theContext,
-					record,
-					codeSystemToPopulate,
-					theData,
-					sourceFilename);
+						theStepExecutionDetails,
+						theJobMetadata,
+						jobParameters,
+						theContext,
+						record,
+						codeSystemToPopulate,
+						theData,
+						sourceFilename);
 			}
 
 		} catch (IOException e) {
 			throw new JobExecutionFailedException(
-				Msg.code(2941) + "Failed to read file attachment: " + e.getMessage(), e);
+					Msg.code(2941) + "Failed to read file attachment: " + e.getMessage(), e);
 		}
 	}
 
 	protected abstract void handleRecord(
-		StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
-		ImportTerminologyMetadataAttachmentJson theJobMetadata,
-		PT theJobParameters,
-		CT theContext,
-		CSVRecord theRecord,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData,
-		String theSourceFilename);
-
+			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			PT theJobParameters,
+			CT theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename);
 }

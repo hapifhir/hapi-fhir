@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
  */
 public class ImportIcd10CmStep2HandleConcepts
-	extends BaseImportTerminologyFileStep<ImportIcdJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
+		extends BaseImportTerminologyFileStep<ImportIcdJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
 
 	private static final String SEVEN_CHR_DEF = "sevenChrDef";
 	private static final String EXTENSION = "extension";
@@ -36,14 +36,23 @@ public class ImportIcd10CmStep2HandleConcepts
 	@Nonnull
 	@Override
 	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
-		StepExecutionDetails<ImportIcdJobParameters, ?> theStepExecutionDetails) {
+			StepExecutionDetails<ImportIcdJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
-			FileHandlingType.XML,
-			t-> Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE).matcher(t).find()));
+				FileHandlingType.XML, t -> Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE)
+						.matcher(t)
+						.find()));
 	}
 
 	@Override
-	protected void processAttachment(@Nonnull StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, MyBaseContext theContext, AttachmentDetails theAttachment, ImportIcdJobParameters theJobParameters, CodeSystem theCodeSystemToPopulate, TerminologyFileSetJson theData, String theSourceFilename) {
+	protected void processAttachment(
+			@Nonnull StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			MyBaseContext theContext,
+			AttachmentDetails theAttachment,
+			ImportIcdJobParameters theJobParameters,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 
 		InputStreamReader reader = new InputStreamReader(theAttachment.getInputStream(), StandardCharsets.UTF_8);
 		Document document;
@@ -60,9 +69,9 @@ public class ImportIcd10CmStep2HandleConcepts
 		for (Element nextVersion : XmlUtil.getChildrenByTagName(documentElement, "version")) {
 			String versionId = nextVersion.getTextContent();
 			// FIXME: validate version
-//			if (isNotBlank(versionId)) {
-//				myCodeSystemVersion.setCodeSystemVersionId(versionId);
-//			}
+			//			if (isNotBlank(versionId)) {
+			//				myCodeSystemVersion.setCodeSystemVersionId(versionId);
+			//			}
 		}
 
 		// Extract Diags (codes)
@@ -73,12 +82,13 @@ public class ImportIcd10CmStep2HandleConcepts
 				}
 			}
 		}
-
-
 	}
 
-
-	private void extractCode(Element theDiagElement, CodeSystem.ConceptDefinitionComponent theParentConcept, List<Element> theParentSevenChrDef, MyBaseContext theContext) {
+	private void extractCode(
+			Element theDiagElement,
+			CodeSystem.ConceptDefinitionComponent theParentConcept,
+			List<Element> theParentSevenChrDef,
+			MyBaseContext theContext) {
 		String code = theDiagElement.getElementsByTagName(NAME).item(0).getTextContent();
 		String display = theDiagElement.getElementsByTagName(DESC).item(0).getTextContent();
 		List<Element> mySevenChrDef = null;
@@ -103,7 +113,7 @@ public class ImportIcd10CmStep2HandleConcepts
 		// If this concept has no children, apply the seventh character definitions.
 		// Otherwise create the children.
 		if (mySevenChrDef != null
-			&& XmlUtil.getChildrenByTagName(theDiagElement, DIAG).isEmpty()) {
+				&& XmlUtil.getChildrenByTagName(theDiagElement, DIAG).isEmpty()) {
 			if (theParentConcept == null) {
 				// This is a root concept. Add the extensions as children of the current concept.
 				extractExtension(mySevenChrDef, theDiagElement, concept, true);
@@ -116,18 +126,17 @@ public class ImportIcd10CmStep2HandleConcepts
 				extractCode(nextChildDiag, concept, mySevenChrDef, theContext);
 			}
 		}
-
 	}
 
 	private void extractExtension(
-		List<Element> theSevenChrDefElement,
-		Element theChildDiag,
-		CodeSystem.ConceptDefinitionComponent theParentConcept,
-		boolean isRootCode) {
+			List<Element> theSevenChrDefElement,
+			Element theChildDiag,
+			CodeSystem.ConceptDefinitionComponent theParentConcept,
+			boolean isRootCode) {
 		for (Element nextChrNote : theSevenChrDefElement) {
 			for (Element nextExtension : XmlUtil.getChildrenByTagName(nextChrNote, EXTENSION)) {
 				String baseCode =
-					theChildDiag.getElementsByTagName(NAME).item(0).getTextContent();
+						theChildDiag.getElementsByTagName(NAME).item(0).getTextContent();
 				if (isRootCode) {
 					baseCode = baseCode + ".";
 				}
@@ -159,11 +168,9 @@ public class ImportIcd10CmStep2HandleConcepts
 		return code.toString();
 	}
 
-
 	@Override
-	protected MyBaseContext newContextObject(StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+	protected MyBaseContext newContextObject(
+			StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new BaseImportTerminologyFileStep.MyBaseContext();
 	}
-
 }
-

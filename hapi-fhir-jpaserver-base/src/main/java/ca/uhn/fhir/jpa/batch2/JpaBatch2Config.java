@@ -37,11 +37,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({
-	BulkExportJobConfig.class,
-	ImportLoincJobAppCtx.class,
-	ImportSnomedCtJobAppCtx.class,
-	ImportIcdJobAppCtx.class
+@Import({BulkExportJobConfig.class, ImportLoincJobAppCtx.class, ImportSnomedCtJobAppCtx.class, ImportIcdJobAppCtx.class
 })
 public class JpaBatch2Config extends BaseBatch2Config {
 

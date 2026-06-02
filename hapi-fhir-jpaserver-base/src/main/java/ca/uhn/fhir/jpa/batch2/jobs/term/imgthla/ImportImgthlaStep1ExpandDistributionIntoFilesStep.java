@@ -32,8 +32,7 @@ import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.ICD10_URI;
  * @see ImportLoincJobAppCtx#importLoincStep1ExpandDistributionIntoFiles()
  */
 public class ImportImgthlaStep1ExpandDistributionIntoFilesStep
-		extends BaseExpandDistributionIntoFilesStep<
-        ImportIcdJobParameters, Void> {
+		extends BaseExpandDistributionIntoFilesStep<ImportIcdJobParameters, Void> {
 
 	@Override
 	protected Void newContextObject() {
@@ -59,5 +58,4 @@ public class ImportImgthlaStep1ExpandDistributionIntoFilesStep
 		theCodeSystem.setUrl(ICD10_URI);
 		theCodeSystem.setName("ICD-10");
 	}
-
 }
