@@ -253,10 +253,38 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			"-r"
 			};
 
-			assertThatThrownBy(() -> App.main(args))
-				.isInstanceOf(CommandFailureException.class)
-				.hasMessageContaining("--baseline-version");
-		}
+				assertThatThrownBy(() -> App.main(args))
+					.isInstanceOf(CommandFailureException.class)
+					.hasMessageContaining("--baseline-version");
+			}
+
+	@Test
+	public void testMigrateFrom340_whenMigrationHistoryExists_rejectsBaselineVersion() throws IOException, SQLException {
+
+		File location = getLocation("migrator_h2_test_340_with_history_and_baseline");
+
+		String url = "jdbc:h2:" + location.getAbsolutePath();
+		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
+		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(connectionProperties.getDataSource(), connectionProperties.getDriverType(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
+
+		String initSql = "/persistence_create_h2_340.sql";
+		executeSqlStatements(connectionProperties, initSql);
+		seedDatabase340(connectionProperties);
+		seedDatabaseMigration340(hapiMigrationDao);
+
+		String[] args = new String[]{
+			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
+			"-d", "H2_EMBEDDED",
+			"-u", url,
+			"-n", "",
+			"-p", "",
+			"--baseline-version", "3.4.0"
+		};
+
+		assertThatThrownBy(() -> App.main(args))
+			.isInstanceOf(CommandFailureException.class)
+			.hasMessageContaining("Remove --baseline-version");
+	}
 
 	@Nonnull
 	private File getLocation(String theDatabaseName) throws IOException {

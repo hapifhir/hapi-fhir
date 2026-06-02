@@ -224,13 +224,22 @@ public class HapiMigrator {
 	private Set<MigrationVersion> applyBaselineIfRequired(DriverTypeEnum.ConnectionProperties theConnectionProperties)
 			throws SQLException {
 		boolean schemaExists = isExistingSchemaDetected(theConnectionProperties);
-		boolean migrationHistoryIsEmpty = !myHapiMigrationStorageSvc.hasSuccessfulMigrationVersions();
-		if (!schemaExists || !migrationHistoryIsEmpty) {
+		boolean hasMigrationHistory = myHapiMigrationStorageSvc.hasSuccessfulMigrationVersions();
+		if (hasMigrationHistory) {
+			if (!isBlank(myBaselineVersion)) {
+				throw new HapiMigrationException(Msg.code(2958)
+						+ "Successful migration history was found in the migration table. "
+						+ "Remove --baseline-version and rerun the migration.");
+			}
+			return Collections.emptySet();
+		}
+
+		if (!schemaExists) {
 			return Collections.emptySet();
 		}
 
 		if (isBlank(myBaselineVersion)) {
-			throw new HapiMigrationException(Msg.code(2742)
+			throw new HapiMigrationException(Msg.code(2957)
 					+ "Existing HAPI FHIR schema detected, but no successful migration history was found. "
 					+ "Specify --baseline-version to record the existing schema version before running migrations.");
 		}

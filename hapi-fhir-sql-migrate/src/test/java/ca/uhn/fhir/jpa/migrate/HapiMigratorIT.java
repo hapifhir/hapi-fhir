@@ -174,6 +174,25 @@ class HapiMigratorIT {
 	}
 
 	@Test
+	void test_existingMigrationHistory_rejectsExplicitBaseline() {
+		MigrationTaskList taskList = new MigrationTaskList();
+		Builder version = HapiMigrationStorageSvcTest.forVersion(taskList);
+		version.addTableByColumns("1", "TABLE_ONE", "PID")
+				.addColumn("PID")
+				.nonNullable()
+				.type(ColumnTypeEnum.LONG);
+
+		HapiMigrator migrator = buildMigrator(taskList.toTaskArray());
+		migrator.migrate();
+
+		migrator = buildMigrator(taskList.toTaskArray());
+		migrator.setBaselineVersion("1.0.0");
+		assertThatThrownBy(migrator::migrate)
+				.isInstanceOf(HapiMigrationException.class)
+				.hasMessageContaining("Remove --baseline-version");
+	}
+
+	@Test
 	void test_twocalls_block() throws InterruptedException, ExecutionException {
 
 		ExecutorService executor = Executors.newFixedThreadPool(2);
