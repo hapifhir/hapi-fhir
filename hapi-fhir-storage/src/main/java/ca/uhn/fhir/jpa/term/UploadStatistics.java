@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.term;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import ca.uhn.fhir.util.HapiToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -94,25 +94,15 @@ public class UploadStatistics {
 
 	@Override
 	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE);
+		HapiToStringBuilder b = new HapiToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE);
 		if (myTarget != null) {
 			b.append("target", myTarget.toUnqualifiedVersionless());
 		}
-		if (myUpdatedConceptCount > 0) {
-			b.append("updatedConcepts", myUpdatedConceptCount);
-		}
-		if (myAddedConceptCount > 0) {
-			b.append("addedConcepts", myAddedConceptCount);
-		}
-		if (myAddedDesignationCount > 0) {
-			b.append("addedDesignations", myAddedDesignationCount);
-		}
-		if (myAddedPropertyCount > 0) {
-			b.append("addedProperties", myAddedPropertyCount);
-		}
-		if (myAddedConceptLinkCount > 0) {
-			b.append("addedConceptLinks", myAddedConceptLinkCount);
-		}
+		b.appendIfNonZero("updatedConcepts", myUpdatedConceptCount);
+		b.appendIfNonZero("addedConcepts", myAddedConceptCount);
+		b.appendIfNonZero("addedDesignations", myAddedDesignationCount);
+		b.appendIfNonZero("addedProperties", myAddedPropertyCount);
+		b.appendIfNonZero("addedConceptLinks", myAddedConceptLinkCount);
 
 		return b.toString();
 	}

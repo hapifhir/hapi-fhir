@@ -404,8 +404,11 @@ public abstract class BaseImportTerminologyFileStep<
 			}
 		}
 
-		// If there is a circular hierarchy chain, we want to still add the concepts. This isn't valid
-		// but it can happen. The terminology service will handle this gracefully.
+		/// If there is a circular hierarchy chain, we want to still add the concepts. It isn't valid
+		/// for a CodeSystem to define a circular hierarchy (where a concept is a child of itself either
+		/// directly or indirectly) but it can happen if there is weird data in the source files.
+		/// The {@link ITermCodeSystemStorageSvc} handles this gracefully by automatically breaking
+		/// any circular loops it discovers and issuing a warning.
 
 		IdentityHashMap<CodeSystem.ConceptDefinitionComponent, CodeSystem.ConceptDefinitionComponent> added =
 				new IdentityHashMap<>();

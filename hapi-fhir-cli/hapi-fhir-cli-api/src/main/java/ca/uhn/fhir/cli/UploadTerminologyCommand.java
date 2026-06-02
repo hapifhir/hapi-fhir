@@ -101,7 +101,11 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		Options options = super.getOptions();
 
 		addRequiredOption(
-				options, "u", "url", true, "The code system URL associated with this upload (e.g. " + SCT_URI + ")");
+				options,
+				"u",
+				"url",
+				true,
+				"The code system URL associated with this upload (e.g. \"" + SCT_URI + "|20260501\")");
 		addOptionalOption(
 				options,
 				"d",
@@ -166,6 +170,12 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				};
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(termUrl);
+
+		/*
+		 * These are the URIs of the code systems that can be uploaded with the new
+		 * Batch2 framework. This is only temporary until all the conversions have been
+		 * migrated.
+		 */
 		Set<String> newUploadUris = Set.of(LOINC_URI, SCT_URI);
 
 		if (newUploadUris.contains(canonicalUrl.url())) {
