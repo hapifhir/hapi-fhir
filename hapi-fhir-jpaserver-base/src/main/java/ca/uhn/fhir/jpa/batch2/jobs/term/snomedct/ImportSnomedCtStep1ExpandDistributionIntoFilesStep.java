@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.snomedct;
 
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import jakarta.annotation.Nonnull;
@@ -31,7 +32,7 @@ import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.SCT_URI;
  * @see ImportLoincJobAppCtx#importLoincStep1ExpandDistributionIntoFiles()
  */
 public class ImportSnomedCtStep1ExpandDistributionIntoFilesStep
-		extends BaseExpandDistributionIntoFilesStep<ImportSnomedCtJobParameters, Void> {
+		extends BaseExpandDistributionIntoFilesStep<ImportTerminologyJobParameters, Void> {
 
 	@Override
 	protected Void newContextObject() {

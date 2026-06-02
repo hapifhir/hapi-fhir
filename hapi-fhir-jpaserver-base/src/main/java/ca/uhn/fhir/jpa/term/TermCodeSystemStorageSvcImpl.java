@@ -1057,7 +1057,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			CustomTerminologySet additions = new CustomTerminologySet();
 			for (CodeSystem.ConceptDefinitionComponent sourceConcept : codeSystem.getConcept()) {
-				TermConcept concept = convertResourceConceptAndChildrenToStorageConcepts(sourceConcept, null);
+				TermConcept concept = convertResourceConceptAndChildrenToStorageConcepts(new HashSet<>(), sourceConcept, null);
 				additions.addRootConcept(concept);
 			}
 
@@ -1129,7 +1129,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		});
 	}
 
-	private TermConcept convertResourceConceptAndChildrenToStorageConcepts(
+	private TermConcept convertResourceConceptAndChildrenToStorageConcepts(Set<String> theSeenCodes,
 			CodeSystem.ConceptDefinitionComponent theSourceConcept, TermConcept theParentConcept) {
 		TermConcept targetConcept = new TermConcept();
 		targetConcept.setCode(theSourceConcept.getCode());
@@ -1167,7 +1167,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		// Child Concepts
 		for (CodeSystem.ConceptDefinitionComponent child : theSourceConcept.getConcept()) {
-			convertResourceConceptAndChildrenToStorageConcepts(child, targetConcept);
+			if (theSeenCodes.add(child.getCode())) {
+				convertResourceConceptAndChildrenToStorageConcepts(theSeenCodes, child, targetConcept);
+			}
 		}
 
 		return targetConcept;

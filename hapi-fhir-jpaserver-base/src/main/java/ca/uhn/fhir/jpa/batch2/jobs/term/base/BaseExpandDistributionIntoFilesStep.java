@@ -98,7 +98,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 	private Integer myChunkLineSizeForUnitTests = null;
 
 	@VisibleForTesting
-	public void setChunkLineSizeForUnitTest(int theChunkLineSize) {
+	public void setChunkLineSizeForUnitTest(Integer theChunkLineSize) {
 		myChunkLineSizeForUnitTests = theChunkLineSize;
 	}
 
