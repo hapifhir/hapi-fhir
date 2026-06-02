@@ -122,7 +122,8 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 		}
 
 		if (allOrPids != null && allOrPids.isEmpty()) {
-			// During unqualified chain resolution, e.g. ?based-on._idx=x, do not drop out early and instead evaluate all target types
+			// During unqualified chain resolution, e.g. ?based-on._idx=x, do not drop out early and instead evaluate
+			// all target types
 			if (theSourceJoinColumn != null) {
 				SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, defaultOperation);
 				return new CustomCondition(
