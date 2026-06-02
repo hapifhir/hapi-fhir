@@ -133,7 +133,8 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 			String theParamName,
 			String theSystem,
 			String theUnits) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId, thePartitionSettings);
 		return calculateHashSystemAndUnits(
 				thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem, theUnits);
 	}
@@ -155,7 +156,8 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 			String theResourceType,
 			String theParamName,
 			String theUnits) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId, thePartitionSettings);
 		return calculateHashUnits(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUnits);
 	}
 
