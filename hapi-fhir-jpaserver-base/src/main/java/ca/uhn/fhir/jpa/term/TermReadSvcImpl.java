@@ -3169,7 +3169,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	@Nullable
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		if (!theSystem.contains(OUR_PIPE_CHARACTER)) {
+		if (UrlUtil.parseCanonicalUrl(theSystem).versionId().isEmpty()) {
 			return myTxTemplate.execute(t -> {
 				String system = theSystem;
 				TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystem);

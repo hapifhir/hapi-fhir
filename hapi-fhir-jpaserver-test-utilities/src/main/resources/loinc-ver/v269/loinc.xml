@@ -8,7 +8,7 @@ This CodeSystem resource describes 'LOINC' independent of any particular version
 Note that the following set of codes are defined by the LOINC code systems:
  - the main LOINC codes
  - the LOINC Answer codes (LA) and the LOINC Answer list codes (LL)
- - the LOINC Part codes (LP) in the Multiaxial Hierarchy
+ - the LOINC Part codes (LP) in the LOINC Component Hierarchy by System
  - the LOINC Part codes (LP) for the properties
     Note: there are license restrictions on the use of LOINC Part codes
  - the LOINC Group codes (LG)
@@ -32,13 +32,15 @@ Servers may generate variants of this for the LOINC version(s) and features they
 		<value value="urn:oid:2.16.840.1.113883.6.1"/>
 	</identifier>
 
-<!--    <version value="2.69"/>-->
+	<!--
+    If a version is specified: <version value="2.70"/>
+    -->
 
 	<!--
     If a specific version is specified, the name should carry this information (e.g. LOINC_270).
     -->
 	<name value="LOINC"/>
-	<title value="LOINC Code System (Testing Copy)"/>
+	<title value="LOINC Code System"/>
 	<status value="active"/>
 	<experimental value="false"/>
 
@@ -51,16 +53,21 @@ Servers may generate variants of this for the LOINC version(s) and features they
 	</contact>
 
 	<!--
-	<date value=2021-06/>
+	<date value=2022-02/>
 	-->
 	<description value="LOINC is a freely available international standard for tests, measurements, and observations"/>
-	<copyright value="This material contains content from LOINC (http://loinc.org). LOINC is copyright ©1995-2021, Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the license at http://loinc.org/license. LOINC® is a registered United States trademark of Regenstrief Institute, Inc."/>
+	<copyright value="This material contains content from LOINC (http://loinc.org). LOINC is copyright Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the license at http://loinc.org/license. LOINC® is a registered United States trademark of Regenstrief Institute, Inc."/>
 	<caseSensitive  value="false"/>
 
 	<valueSet value="http://loinc.org/vs"/>
+	<!--
+	 To reference a version-specific resource, append the version number such as:
+	 <valueSet value="http://loinc.org/vs/LG38848-4-2.72"/>
+	 Where "-2.72" indicates LOINC version 2.72 of the LOINC Group code LG38848-4.
+  -->
 
 	<!--
-	  It's at the discretion of servers whether to present fragments of LOINC hierarchically or not, when using the code system resource. But, if they are hierarchical, the Hierarchy SHALL be based on the is-a relationship that is derived from the LOINC Multiaxial Hierarchy.
+	  It's at the discretion of servers whether to present fragments of LOINC hierarchically or not, when using the code system resource. But, if they are hierarchical, the Hierarchy SHALL be based on the is-a relationship that is derived from the LOINC Component Hierarchy by System.
 	-->
 	<hierarchyMeaning value="is-a"/>
 	<compositional value="false"/> <!-- no compositional grammar in LOINC -->
@@ -84,7 +91,7 @@ Servers may generate variants of this for the LOINC version(s) and features they
 	  In LOINC, all the properties can also be used as filters, but they are not defined explicitly as filters.
 	  Parent/child properties are as defined by FHIR. Note that at this time the LOINC code system resource does not support ancestor/descendant relationships.
 
-	  For illustration purposes, consider this slice of the LOINC Multiaxial Hierarchy when reading the descriptions below:
+	  For illustration purposes, consider this slice of the LOINC Component Hierarchy by System when reading the descriptions below:
 
 	  Laboratory [LP29693-6]
         Microbiology and Antimicrobial susceptibility [LP343406-7]
@@ -100,13 +107,13 @@ Servers may generate variants of this for the LOINC version(s) and features they
 	  -->
 	<filter>
 		<code value="parent"/>
-		<description value="Allows for the selection of a set of codes based on their appearance in the LOINC Multiaxial Hierarchy. Parent selects immediate parent only. For example, the code '79190-5' has the parent 'LP379670-5'"/>
+		<description value="Allows for the selection of a set of codes based on their appearance in the LOINC Component Hierarchy by System. Parent selects immediate parent only. For example, the code '79190-5' has the parent 'LP379670-5'"/>
 		<operator value="="/>
 		<value value="A Part code"/>
 	</filter>
 	<filter>
 		<code value="child"/>
-		<description value="Allows for the selection of a set of codes based on their appearance in the LOINC Multiaxial Hierarchy. Child selects immediate children only. For example, the code 'LP379670-5' has the child '79190-5'. Only LOINC Parts have children; LOINC codes do not have any children because they are leaf nodes."/>
+		<description value="Allows for the selection of a set of codes based on their appearance in the LOINC Component Hierarchy by System. Child selects immediate children only. For example, the code 'LP379670-5' has the child '79190-5'. Only LOINC Parts have children; LOINC codes do not have any children because they are leaf nodes."/>
 		<operator value="="/>
 		<value value="A comma separated list of Part or LOINC codes"/>
 	</filter>
@@ -121,7 +128,7 @@ Servers may generate variants of this for the LOINC version(s) and features they
 	PROPERTIES
 	There are 4 kinds of properties that apply to all LOINC codes:
 	  1. FHIR: display, designation; these are not described here since they are inherent in the specification
-	  2. Infrastructural: defined by FHIR, but documented here for the LOINC Multiaxial Hierarchy
+	  2. Infrastructural: defined by FHIR, but documented here for the LOINC Component Hierarchy by System
 	  3. Primary LOINC properties: defined by the main LOINC table
 	  4. Secondary LOINC properties: defined by the LoincPartLink table
 	Additionally, there are 2 kinds of properties specific to Document ontology and Radiology codes, respectively:
@@ -129,37 +136,31 @@ Servers may generate variants of this for the LOINC version(s) and features they
 	  2. Document Ontology properties
 	-->
 	<!--
-	Infrastructural properties - inherited from FHIR, but documented here for the LOINC Multiaxial Hierarchy.
+	Infrastructural properties - inherited from FHIR, but documented here for the LOINC Component Hierarchy by System.
 	-->
 
 	<property>
 		<code value="parent"/>
 		<uri value="http://hl7.org/fhir/concept-properties#parent"/>
-		<description value="A parent code in the Multiaxial Hierarchy"/>
+		<description value="A parent code in the Component Hierarchy by System"/>
 		<type value="code"/>
 	</property>
 	<property>
 		<code value="child"/>
 		<uri value="http://hl7.org/fhir/concept-properties#child"/>
-		<description value="A child code in the Multiaxial Hierarchy"/>
+		<description value="A child code in the Component Hierarchy by System"/>
 		<type value="code"/>
 	</property>
 
 	<!--
 	  Primary LOINC properties.
-	  These apply to the main LOINC codes, but not the Multiaxial Hierarchy, Answer lists, or the Part codes.
+	  These apply to the main LOINC codes, but not the LOINC Component Hierarchy by System, Answer lists, or the Part codes.
 	  Notes:
 		 In the LOINC code system resource, the display element = LONG_COMMON_NAME
 		 Many properties are specified as type "Coding", which allows use of LOINC Part codes (LP-) and the display text. LOINC Parts and their associations to LOINC terms are published in the LOINC Part File.
 		 The properties defined here follow the guidance of the LOINC Users' Guide, which states that they should be expressed with the LOINC attributes contained in the LOINC Table. Properties that are not defined in the LOINC Table use FHIR-styled names.
 	-->
 
-	<property>
-		<code value="STATUS"/>
-		<uri value="http://loinc.org/property/STATUS"/>
-		<description value="Status of the term. Within LOINC, codes with STATUS=DEPRECATED are considered inactive. Current values: ACTIVE, TRIAL, DISCOURAGED, and DEPRECATED"/>
-		<type value="string"/>
-	</property>
 	<property>
 		<code value="COMPONENT"/>
 		<uri value="http://loinc.org/property/COMPONENT"/>
@@ -209,9 +210,75 @@ Servers may generate variants of this for the LOINC version(s) and features they
 		<type value="string"/>
 	</property>
 	<property>
+		<code value="CHNG_TYPE"/>
+		<uri value="http://loinc.org/property/CHNG_TYPE"/>
+		<description value="DEL = delete (deprecate); ADD = add; PANEL = addition or removal of child elements or change in the conditionality of child elements in the panel or in sub-panels contained by the panel; NAM = change to Analyte/Component (field #2); MAJ = change to name field other than #2 (#3 - #7); MIN = change to field other than name; UND = undelete"/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="DefinitionDescription"/>
+		<uri value="http://loinc.org/property/DefinitionDescription"/>
+		<description value="Narrative text that describes the LOINC term taken as a whole (i.e., taking all of the parts of the term together) or relays information specific to the term, such as the context in which the term was requested or its clinical utility."/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="STATUS"/>
+		<uri value="http://loinc.org/property/STATUS"/>
+		<description value="Status of the term. Within LOINC, codes with STATUS=DEPRECATED are considered inactive. Current values: ACTIVE, TRIAL, DISCOURAGED, and DEPRECATED"/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="CONSUMER_NAME"/>
+		<uri value="http://loinc.org/property/CONSUMER_NAME"/>
+		<description value="An experimental (beta) consumer friendly name for this item. The intent is to provide a test name that health care consumers will recognize."/>
+		<type value="string"/>
+	</property>
+	<property>
 		<code value="CLASSTYPE"/>
 		<uri value="http://loinc.org/property/CLASSTYPE"/>
 		<description value="1=Laboratory class; 2=Clinical class; 3=Claims attachments; 4=Surveys"/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="FORMULA"/>
+		<uri value="http://loinc.org/property/FORMULA"/>
+		<description value="Contains the formula in human readable form, for calculating the value of any measure that is based on an algebraic or other formula except those for which the component expresses the formula. So Sodium/creatinine does not need a formula, but Free T3 index does."/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="EXMPL_ANSWERS"/>
+		<uri value="http://loinc.org/property/EXMPL_ANSWERS"/>
+		<description value="For some tests and measurements, we have supplied examples of valid answers, such as “1:64”, “negative @ 1:16”, or “55”."/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="SURVEY_QUEST_TEXT"/>
+		<uri value="http://loinc.org/property/SURVEY_QUEST_TEXT"/>
+		<description value="Verbatim question from the survey instrument"/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="SURVEY_QUEST_SRC"/>
+		<uri value="http://loinc.org/property/SURVEY_QUEST_SRC"/>
+		<description value="Exact name of the survey instrument and the item/question number"/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="UNITSREQUIRED"/>
+		<uri value="http://loinc.org/property/UNITSREQUIRED"/>
+		<description value="Y/N field that indicates that units are required when this LOINC is included as an OBX segment in a HIPAA attachment"/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="RELATEDNAMES2"/>
+		<uri value="http://loinc.org/property/RELATEDNAMES2"/>
+		<description value="This field was introduced in version 2.05. It contains synonyms for each of the parts of the fully specified LOINC name (component, property, time, system, scale, method)."/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="SHORTNAME"/>
+		<uri value="http://loinc.org/property/SHORTNAME"/>
+		<description value="Introduced in version 2.07, this field contains the short form of the LOINC name and is created via a table-driven algorithmic process. The short name often includes abbreviations and acronyms."/>
 		<type value="string"/>
 	</property>
 	<property>
@@ -221,21 +288,99 @@ Servers may generate variants of this for the LOINC version(s) and features they
 		<type value="string"/>
 	</property>
 	<property>
+		<code value="HL7_FIELD_SUBFIELD_ID"/>
+		<uri value="http://loinc.org/property/HL7_FIELD_SUBFIELD_ID"/>
+		<description value="A value in this field means that the content should be delivered in the named field/subfield of the HL7 message. When NULL, the data for this data element should be sent in an OBX segment with this LOINC code stored in OBX-3 and with the value in the OBX-5."/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="EXTERNAL_COPYRIGHT_NOTICE"/>
+		<uri value="http://loinc.org/property/EXTERNAL_COPYRIGHT_NOTICE"/>
+		<description value="External copyright holders copyright notice for this LOINC code"/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="EXAMPLE_UNITS"/>
+		<uri value="http://loinc.org/property/EXAMPLE_UNITS"/>
+		<description value="This field is populated with a combination of submitters units and units that people have sent us. Its purpose is to show users representative, but not necessarily recommended, units in which data could be sent for this term."/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="LONG_COMMON_NAME"/>
+		<uri value="http://loinc.org/property/LONG_COMMON_NAME"/>
+		<description value="This field contains the LOINC name in a more readable format than the fully specified name. The long common names have been created via a tabledriven algorithmic process. Most abbreviations and acronyms that are used in the LOINC database have been fully spelled out in English."/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="EXAMPLE_UCUM_UNITS"/>
+		<uri value="http://loinc.org/property/EXAMPLE_UCUM_UNITS"/>
+		<description value="The Unified Code for Units of Measure (UCUM) is a code system intended to include all units of measures being contemporarily used in international science, engineering, and business. (www.unitsofmeasure.org) This field contains example units of measures for this term expressed as UCUM units."/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="STATUS_REASON"/>
+		<uri value="http://loinc.org/property/STATUS_REASON"/>
+	<description value="Classification of the reason for concept status. This field will be Null for ACTIVE concepts, and optionally populated for terms in other status where the reason is clear. DEPRECATED or DISCOURAGED terms may take values of: AMBIGUOUS, DUPLICATE, or ERRONEOUS."/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="STATUS_TEXT"/>
+		<uri value="http://loinc.org/property/STATUS_TEXT"/>
+		<description value="Explanation of concept status in narrative text. This field will be Null for ACTIVE concepts, and optionally populated for terms in other status."/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="CHANGE_REASON_PUBLIC"/>
+		<uri value="http://loinc.org/property/CHANGE_REASON_PUBLIC"/>
+		<description value="Detailed explanation about special changes to the term over time."/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="COMMON_TEST_RANK"/>
+		<uri value="http://loinc.org/property/COMMON_TEST_RANK"/>
+		<description value="Ranking of approximately 2000 common tests performed by laboratories in USA."/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="COMMON_ORDER_RANK"/>
+		<uri value="http://loinc.org/property/COMMON_ORDER_RANK"/>
+		<description value="Ranking of approximately 300 common orders performed by laboratories in USA."/>
+		<type value="string"/>
+	</property>
+	<property>
 		<code value="HL7_ATTACHMENT_STRUCTURE"/>
 		<uri value="http://loinc.org/property/HL7_ATTACHMENT_STRUCTURE"/>
 		<description value="This property is populated in collaboration with the HL7 Payer-Provider Exchange (PIE) Work Group (previously called Attachments Work Group) as described in the HL7 Attachment Specification: Supplement to Consolidated CDA Templated Guide."/>
 		<type value="string"/>
 	</property>
 	<property>
-		<code value="VersionFirstReleased"/>
-		<uri value="http://loinc.org/property/VersionFirstReleased"/>
-		<description value="This is the LOINC version number in which this LOINC term was first published."/>
+		<code value="EXTERNAL_COPYRIGHT_LINK"/>
+		<uri value="http://loinc.org/property/EXTERNAL_COPYRIGHT_LINK"/>
+		<description value="For terms that have a third party copyright, this field is populated with the COPYRIGHT_ID from the Source Organization table (see below). It links an external copyright statement to a term."/>
 		<type value="string"/>
 	</property>
 	<property>
 		<code value="PanelType"/>
 		<uri value="http://loinc.org/property/PanelType"/>
 		<description value="For LOINC terms that are panels, this attribute classifies them as a 'Convenience group', 'Organizer', or 'Panel'"/>
+		<type value="string"/>
+	</property>
+	<property>
+		<code value="AskAtOrderEntry"/>
+		<uri value="http://loinc.org/property/AskAtOrderEntry"/>
+		<description value="A multi-valued, semicolon delimited list of LOINC codes that represent optional Ask at Order Entry (AOE) observations for a clinical observation or laboratory test. A LOINC term in this field may represent a single AOE observation or a panel containing several AOE observations."/>
+		<type value="Coding"/>
+	</property>
+	<property>
+		<code value="AssociatedObservations"/>
+		<uri value="http://loinc.org/property/AssociatedObservations"/>
+		<description value="A multi-valued, semicolon delimited list of LOINC codes that represent optional associated observation(s) for a clinical observation or laboratory test. A LOINC term in this field may represent a single associated observation or panel containing several associated observations."/>
+		<type value="Coding"/>
+	</property>
+	<property>
+		<code value="VersionFirstReleased"/>
+		<uri value="http://loinc.org/property/VersionFirstReleased"/>
+		<description value="This is the LOINC version number in which this LOINC term was first published."/>
 		<type value="string"/>
 	</property>
 	<property>
@@ -250,16 +395,23 @@ Servers may generate variants of this for the LOINC version(s) and features they
 		<description value="A name that is more 'clinician-friendly' compared to the current LOINC Short Name, Long Common Name, and Fully Specified Name. It is created algorithmically from the manually crafted display text for each Part and is generally more concise than the Long Common Name."/>
 		<type value="string"/>
 	</property>
+
 	<property>
 		<code value="answer-list"/>
 		<uri value="http://loinc.org/property/answer-list"/>
 		<description value="An answer list associated with this LOINC code (if there are matching answer lists defined)."/>
 		<type value="Coding"/>
 	</property>
+  <property>
+    <code value="MAP_TO"/>
+    <uri value="http://loinc.org/property/MAP_TO"/>
+    <description value="A replacement term that is to be used in place of the deprecated or discouraged term."/>
+    <type value="Coding"/>
+  </property>
 
 	<!--
 		Secondary LOINC properties.
-		These properties also apply to the main LOINC codes, but not the Multiaxial Hierarchy, Answer lists, or the Part codes.
+		These properties also apply to the main LOINC codes, but not the Component Hierarchy by System, Answer lists, or the Part codes.
 		Notes:
 		  These properties are defined in the LoincPartLink table.
 	 -->
@@ -523,6 +675,7 @@ Servers may generate variants of this for the LOINC version(s) and features they
 		<description value="A LOINC Code for which this answer list is used."/>
 		<type value="Coding"/>
 	</property>
+
 
 	<!-- Note for future consideration. These are properties of LA codes in the context of a particular list. Not global properties.
 	<property>
