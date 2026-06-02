@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
+<<<<<<<< HEAD:hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/batch2/jobs/term/base/TerminologyConstants.java
 public class TerminologyConstants {
 
 	/** Non-instantiable */
@@ -27,4 +28,29 @@ public class TerminologyConstants {
 	public static final String FILENAME_LOINC_UPLOAD_PROPERTIES_FILE = "loincupload.properties";
 	public static final String FILENAME_LOINC_DISTRIBUTION_FILE = "loinc.zip";
 	public static final String FILENAME_SNOMED_CT_DISTRIBUTION_FILE = "snomedct.zip";
+========
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class ImportTerminologyResultJson implements IModelJson {
+
+	@JsonProperty("report")
+	private String myReport;
+
+	public String getReport() {
+		return myReport;
+	}
+
+	public void setReport(String theReport) {
+		myReport = theReport;
+	}
+========
+public class TerminologyConstants {
+
+	/** Non-instantiable */
+	private TerminologyConstants() {}
+
+	public static final String FILENAME_LOINC_UPLOAD_PROPERTIES_FILE = "loincupload.properties";
+	public static final String FILENAME_LOINC_DISTRIBUTION_FILE = "loinc.zip";
+>>>>>>>> master:hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/batch2/jobs/term/base/TerminologyConstants.java
 }
