@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao.tx;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.transaction.support.SimpleTransactionStatus;
@@ -36,6 +37,14 @@ import java.util.Set;
 public class NonTransactionalHapiTransactionService extends HapiTransactionService {
 
 	private Set<Pair<RequestPartitionId, RequestPartitionId>> myNonCompatiblePartitions = new HashSet<>();
+
+	public NonTransactionalHapiTransactionService() {
+		// This class is only ever instantiated directly (without Spring) in tests, so the @Autowired
+		// PartitionSettings on the superclass would otherwise stay null and default-partition resolution
+		// (e.g. withSystemRequestOnDefaultPartition()) would NPE. Default it here; if this service is ever
+		// wired as a Spring bean, field injection still overrides this value.
+		myPartitionSettings = new PartitionSettings();
+	}
 
 	@Nullable
 	@Override

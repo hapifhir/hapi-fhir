@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.ThreadPoolUtil;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
@@ -102,6 +103,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -112,12 +114,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -299,6 +303,39 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("Patient/PT0/_history/1", actualPatient.getId());
 	}
 
+
+
+	@Test
+	public void testCreateWithIdSuppliedInMetadata_Concurrently() {
+		ThreadPoolTaskExecutor threadPool = ThreadPoolUtil.newThreadPool(10, "test");
+
+		// Test
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			Future<?> future = threadPool.submit(this::testCreateWithIdSuppliedInMetadata);
+			futures.add(future);
+		}
+
+		int success = 0;
+		int fail = 0;
+		for (var future : futures) {
+			try {
+				future.get();
+				success++;
+			} catch (Exception e) {
+				ourLog.warn("Failed: {}", e.toString());
+				fail++;
+			}
+		}
+
+		// Verify
+		Patient actualPatient = myPatientDao.read(new IdType("Patient/PT0"), newSrd());
+		assertTrue(actualPatient.getActive());
+		assertEquals(1, success);
+		assertEquals(9, fail);
+
+		runInTransaction(()-> assertEquals(1, myResourceTableDao.count()));
+	}
 
 
 	@Test
@@ -540,8 +577,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
-	 * See #410
-	 */
+     * See #410
+     */
 	@Test
 	public void testContainedArePreservedForBug410() throws IOException {
 		String input = ClasspathUtil.loadResource("/r4/bug-410-bundle.xml");
@@ -1574,14 +1611,14 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
-	 * This test is testing whether someone can sneakily figure out the existence of a resource
-	 * by creating a match URL that references it, even though the user doesn't have permission
-	 * to see that resource.
-	 * <p>
-	 * This security check requires a match URL that is too complex for the pre-fetching that
-	 * happens in {@link ca.uhn.fhir.jpa.dao.TransactionProcessor}'s preFetchConditionalUrl
-	 * method (see the javadoc on that method for more details).
-	 */
+     * This test is testing whether someone can sneakily figure out the existence of a resource
+     * by creating a match URL that references it, even though the user doesn't have permission
+     * to see that resource.
+     * <p>
+     * This security check requires a match URL that is too complex for the pre-fetching that
+     * happens in {@link ca.uhn.fhir.jpa.dao.TransactionProcessor}'s preFetchConditionalUrl
+     * method (see the javadoc on that method for more details).
+     */
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithAuthorizationDenied() {
 		// setup
@@ -2405,8 +2442,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
-	 * See #253 Test that the order of deletes is version independent
-	 */
+     * See #253 Test that the order of deletes is version independent
+     */
 	@Test
 	public void testTransactionDeleteIsOrderIndependantTargetFirst() {
 		String methodName = "testTransactionDeleteIsOrderIndependantTargetFirst";
@@ -2464,8 +2501,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
-	 * See #253 Test that the order of deletes is version independent
-	 */
+     * See #253 Test that the order of deletes is version independent
+     */
 	@Test
 	public void testTransactionDeleteIsOrderIndependantTargetLast() {
 		String methodName = "testTransactionDeleteIsOrderIndependantTargetFirst";
@@ -2897,9 +2934,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
-	 * We shouldn't care about duplicate IDs when we're doing a POST, since the ID is required to
-	 * be ignored anyhow.
-	 */
+     * We shouldn't care about duplicate IDs when we're doing a POST, since the ID is required to
+     * be ignored anyhow.
+     */
 	@Test
 	public void testTransactionSucceedsWithDuplicateIdsWhenUsingPost() {
 		Bundle request = new Bundle();

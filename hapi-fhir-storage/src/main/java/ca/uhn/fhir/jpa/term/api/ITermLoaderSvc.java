@@ -41,8 +41,6 @@ public interface ITermLoaderSvc {
 
 	UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-	UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
-
 	UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
 	default UploadStatistics loadIcd10(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {

@@ -644,28 +644,28 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			parentDescription = theParentCodes.toString();
 		}
 
-		ourLog.info(
-				"Saving concept[{}] count {} at index {} with parent {}",
-				theSourceConcept.getCode(),
-				theStatisticsTracker.getUpdatedConceptCount(),
-				theSequence,
-				parentDescription);
+		ourLog.atDebug()
+				.setMessage("Saving concept[{}] count {} at index {} with parent {}")
+				.addArgument(theSourceConcept.getCode())
+				.addArgument(theStatisticsTracker.getUpdatedConceptCount())
+				.addArgument(theSequence)
+				.addArgument(parentDescription)
+				.log();
 
 		TermConcept targetConcept = theCodeToConcept.get(theSourceConcept.getCode());
-		List<TermConceptParentChildLink> existingParentLinks;
 		if (targetConcept != null) {
 			targetConcept.setIndexStatus(null);
-			existingParentLinks = targetConcept.getParents();
 			theStatisticsTracker.incrementUpdatedConceptCount();
 		} else {
 			targetConcept = new TermConcept();
 			targetConcept.setCode(theSourceConcept.getCode());
 			targetConcept.setCodeSystemVersion(theCsv);
-			existingParentLinks = Collections.emptyList();
 
 			theCodeToConcept.put(theSourceConcept.getCode(), targetConcept);
 			theStatisticsTracker.incrementConceptsAddedCount();
 		}
+
+		targetConcept.setDontPopulateParentPids(theSourceConcept.isDontPopulateParentPids());
 
 		// Display
 		if (isNotBlank(theSourceConcept.getDisplay())) {
@@ -764,13 +764,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			theStatisticsTracker.incrementConceptLinksAddedCount();
 		}
 
-		if (theStatisticsTracker.getAddedConceptCount() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
-			saveConcept(targetConcept);
-			Long nextConceptPid = targetConcept.getId();
-			Validate.notNull(nextConceptPid, "Concept ID cannot be null after saving");
-		} else {
-			myDeferredStorageSvc.addConceptToStorageQueue(targetConcept);
-		}
+		saveConcept(targetConcept);
+		Long nextConceptPid = targetConcept.getId();
+		Validate.notNull(nextConceptPid, "Concept ID cannot be null after saving");
 
 		ourLog.trace("About to save parent-child links");
 
@@ -1036,6 +1032,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			version.setCodeSystemVersionId(UUID.randomUUID().toString());
 			version.setCodeSystemIntendedVersionId(theVersionId);
 			version.setCodeSystem(codeSystem);
+			version.setCodeSystemDisplayName(codeSystem.getName());
+
 			version = myCodeSystemVersionDao.saveAndFlush(version);
 			ourLog.info(
 					"Created new CodeSystemVersion[url={}, version={}] for writing with PID: {}",
@@ -1067,7 +1065,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			CustomTerminologySet additions = new CustomTerminologySet();
 			for (CodeSystem.ConceptDefinitionComponent sourceConcept : codeSystem.getConcept()) {
-				TermConcept concept = uploadCodeSystemConceptAndChildren(sourceConcept, null);
+				TermConcept concept = convertResourceConceptAndChildrenToStorageConcepts(sourceConcept, null);
 				additions.addRootConcept(concept);
 			}
 
@@ -1114,7 +1112,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						theCodeSystemUrl,
 						existingCodeSystemVersionEntity.getId(),
 						theStagingVersionId);
-				deleteCodeSystemVersion(existingCodeSystemVersionEntity);
+				markCodeSystemVersionForDeletion(existingCodeSystemVersionEntity);
 
 				if (Objects.equals(
 						existingCodeSystemVersionEntity,
@@ -1139,11 +1137,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		});
 	}
 
-	private TermConcept uploadCodeSystemConceptAndChildren(
+	private TermConcept convertResourceConceptAndChildrenToStorageConcepts(
 			CodeSystem.ConceptDefinitionComponent theSourceConcept, TermConcept theParentConcept) {
 		TermConcept targetConcept = new TermConcept();
 		targetConcept.setCode(theSourceConcept.getCode());
 		targetConcept.setDisplay(theSourceConcept.getDisplay());
+		targetConcept.setDontPopulateParentPids(true);
 
 		// Populate designations
 		for (CodeSystem.ConceptDefinitionDesignationComponent sourceDesignation : theSourceConcept.getDesignation()) {
@@ -1176,7 +1175,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		// Child Concepts
 		for (CodeSystem.ConceptDefinitionComponent child : theSourceConcept.getConcept()) {
-			uploadCodeSystemConceptAndChildren(child, targetConcept);
+			convertResourceConceptAndChildrenToStorageConcepts(child, targetConcept);
 		}
 
 		return targetConcept;

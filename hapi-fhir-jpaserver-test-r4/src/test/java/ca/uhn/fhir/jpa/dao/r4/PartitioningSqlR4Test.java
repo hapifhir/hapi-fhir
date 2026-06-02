@@ -3317,7 +3317,7 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertNoRemainingPartitionIds();
 
 		// Update the patient
-		addNextTargetPartitionForUpdate(defaultPartition());
+		addNextTargetPartitionForUpdate(RequestPartitionId.fromPartitionId(null));
 		Patient patient = new Patient();
 		patient.setActive(false);
 		patient.setId(id);

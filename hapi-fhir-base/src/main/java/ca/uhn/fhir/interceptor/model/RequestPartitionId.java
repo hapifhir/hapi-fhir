@@ -408,16 +408,6 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	/**
-	 * @deprecated use {@link RequestPartitionId#defaultPartition(IDefaultPartitionSettings)} instead
-	 */
-	@Deprecated
-	@Nonnull
-	//	TODO GGG: This is a now-bad usage and we should remove it. we cannot assume null means default.
-	public static RequestPartitionId defaultPartition() {
-		return fromPartitionIds(Collections.singletonList(null));
-	}
-
-	/**
 	 * Creates a RequestPartitionId for the default partition using the provided partition settings.
 	 * This method uses the default partition ID from the given settings to create the RequestPartitionId.
 	 *
@@ -427,13 +417,6 @@ public class RequestPartitionId implements IModelJson {
 	@Nonnull
 	public static RequestPartitionId defaultPartition(IDefaultPartitionSettings theDefaultPartitionSettings) {
 		return fromPartitionId(theDefaultPartitionSettings.getDefaultPartitionId());
-	}
-
-	@Deprecated
-	@Nonnull
-	//	TODO GGG: This is a now-bad usage and we should remove it. we cannot assume null means default.
-	public static RequestPartitionId defaultPartition(@Nullable LocalDate thePartitionDate) {
-		return fromPartitionIds(Collections.singletonList(null), thePartitionDate);
 	}
 
 	@Nonnull

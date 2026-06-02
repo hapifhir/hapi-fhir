@@ -83,7 +83,7 @@ class MdmLinkExpandSvcTest {
 	private static Stream<Arguments> partitionsAndExpectedPids() {
 		return Stream.of(
 			Arguments.of(RequestPartitionId.allPartitions(), ALL_PIDS),
-			Arguments.of(RequestPartitionId.defaultPartition(), Collections.singleton(JPA_PID_PARTITION_DEFAULT)),
+			Arguments.of(RequestPartitionId.fromPartitionId(null), Collections.singleton(JPA_PID_PARTITION_DEFAULT)),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A)), Set.of(JPA_PID_PARTITION_A_1, JPA_PID_PARTITION_A_2)),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_B)), Collections.singleton(JPA_PID_PARTITION_B)),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_GOLDEN)), Collections.singleton(JPA_PID_PARTITION_GOLDEN)),
@@ -140,7 +140,7 @@ class MdmLinkExpandSvcTest {
 	private static Stream<Arguments> partitionsAndTuples() {
 		return Stream.of(
 			Arguments.of(RequestPartitionId.allPartitions(), JPA_PID_MDM_PID_TUPLE_1, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_A_1)),
-			Arguments.of(RequestPartitionId.defaultPartition(), JPA_PID_MDM_PID_TUPLE_1, Collections.emptySet()),
+			Arguments.of(RequestPartitionId.fromPartitionId(null), JPA_PID_MDM_PID_TUPLE_1, Collections.emptySet()),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A)), JPA_PID_MDM_PID_TUPLE_1, Collections.singleton(JPA_PID_PARTITION_A_1)),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_B)), JPA_PID_MDM_PID_TUPLE_1, Collections.emptySet()),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_GOLDEN)), JPA_PID_MDM_PID_TUPLE_1, Collections.singleton(JPA_PID_PARTITION_GOLDEN)),
@@ -148,7 +148,7 @@ class MdmLinkExpandSvcTest {
 			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, null)), JPA_PID_MDM_PID_TUPLE_1, Collections.singleton(JPA_PID_PARTITION_A_1)),
 			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null)), JPA_PID_MDM_PID_TUPLE_1, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_A_1)),
 			Arguments.of(RequestPartitionId.allPartitions(), JPA_PID_MDM_PID_TUPLE_2, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_B)),
-			Arguments.of(RequestPartitionId.defaultPartition(), JPA_PID_MDM_PID_TUPLE_2, Collections.emptySet()),
+			Arguments.of(RequestPartitionId.fromPartitionId(null), JPA_PID_MDM_PID_TUPLE_2, Collections.emptySet()),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A)), JPA_PID_MDM_PID_TUPLE_2, Collections.emptySet()),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_B)), JPA_PID_MDM_PID_TUPLE_2, Collections.singleton(JPA_PID_PARTITION_B)),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_GOLDEN)), JPA_PID_MDM_PID_TUPLE_2, Collections.singleton(JPA_PID_PARTITION_GOLDEN)),
@@ -156,7 +156,7 @@ class MdmLinkExpandSvcTest {
 			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, null)), JPA_PID_MDM_PID_TUPLE_2, Collections.singleton(JPA_PID_PARTITION_B)),
 			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null)), JPA_PID_MDM_PID_TUPLE_2, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_B)),
 			Arguments.of(RequestPartitionId.allPartitions(), JPA_PID_MDM_PID_TUPLE_3, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_A_2)),
-			Arguments.of(RequestPartitionId.defaultPartition(), JPA_PID_MDM_PID_TUPLE_3, Collections.emptySet()),
+			Arguments.of(RequestPartitionId.fromPartitionId(null), JPA_PID_MDM_PID_TUPLE_3, Collections.emptySet()),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A)), JPA_PID_MDM_PID_TUPLE_3, Collections.singleton(JPA_PID_PARTITION_A_2)),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_B)), JPA_PID_MDM_PID_TUPLE_3, Collections.emptySet()),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_GOLDEN)), JPA_PID_MDM_PID_TUPLE_3, Collections.singleton(JPA_PID_PARTITION_GOLDEN)),
@@ -164,7 +164,7 @@ class MdmLinkExpandSvcTest {
 			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, null)), JPA_PID_MDM_PID_TUPLE_3, Collections.singleton(JPA_PID_PARTITION_A_2)),
 			Arguments.of(RequestPartitionId.fromPartitionIds(Arrays.asList(PARTITION_A, PARTITION_B, PARTITION_GOLDEN, null)), JPA_PID_MDM_PID_TUPLE_3, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_A_2)),
 			Arguments.of(RequestPartitionId.allPartitions(), JPA_PID_MDM_PID_TUPLE_4, Set.of(JPA_PID_PARTITION_GOLDEN, JPA_PID_PARTITION_DEFAULT)),
-			Arguments.of(RequestPartitionId.defaultPartition(), JPA_PID_MDM_PID_TUPLE_4, Collections.singleton(JPA_PID_PARTITION_DEFAULT)),
+			Arguments.of(RequestPartitionId.fromPartitionId(null), JPA_PID_MDM_PID_TUPLE_4, Collections.singleton(JPA_PID_PARTITION_DEFAULT)),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_A)), JPA_PID_MDM_PID_TUPLE_4, Collections.emptySet()),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_B)), JPA_PID_MDM_PID_TUPLE_4, Collections.emptySet()),
 			Arguments.of(RequestPartitionId.fromPartitionIds(List.of(PARTITION_GOLDEN)), JPA_PID_MDM_PID_TUPLE_4, Collections.singleton(JPA_PID_PARTITION_GOLDEN)),
