@@ -36,7 +36,8 @@ public class ImportSnomedCtJobParametersValidator
 
 	@Nullable
 	@Override
-	public List<String> validate(RequestDetails theRequestDetails, @Nonnull ImportTerminologyJobParameters theParameters) {
+	public List<String> validate(
+			RequestDetails theRequestDetails, @Nonnull ImportTerminologyJobParameters theParameters) {
 		List<String> retVal = new ArrayList<>();
 
 		if (isBlank(theParameters.getVersionId())) {

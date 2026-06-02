@@ -39,7 +39,8 @@ import java.util.Set;
  * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
  */
 public class ImportSnomedCtStep2HandleDescription
-		extends BaseImportTerminologyFileCsvStep<ImportTerminologyJobParameters,ImportSnomedCtStep2HandleDescription.MyContext> {
+		extends BaseImportTerminologyFileCsvStep<
+				ImportTerminologyJobParameters, ImportSnomedCtStep2HandleDescription.MyContext> {
 
 	@Nonnull
 	@Override

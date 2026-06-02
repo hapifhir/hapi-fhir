@@ -65,7 +65,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
  */
 public class ImportSnomedCtStep3HandleRelationship
-		extends BaseImportTerminologyFileCsvStep<ImportTerminologyJobParameters, ImportSnomedCtStep3HandleRelationship.ImportSnomedCtContext> {
+		extends BaseImportTerminologyFileCsvStep<
+				ImportTerminologyJobParameters, ImportSnomedCtStep3HandleRelationship.ImportSnomedCtContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportSnomedCtStep3HandleRelationship.class);
 
 	@Autowired
@@ -95,7 +96,9 @@ public class ImportSnomedCtStep3HandleRelationship
 	@Nonnull
 	@Override
 	protected RunOutcome run(
-			@Nonnull StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull
+					StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson>
+							theStepExecutionDetails,
 			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
 			ImportSnomedCtContext theContext) {
