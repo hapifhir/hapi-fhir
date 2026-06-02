@@ -31,6 +31,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface ITermConceptDao extends JpaRepository<TermConcept, TermConcept.TermConceptPk>, IHapiFhirJpaRepository {
 
@@ -94,6 +95,10 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, TermConcept.
 
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system")
 	List<TermConcept> findByCodeSystemVersion(@Param("code_system") TermCodeSystemVersion theCodeSystem);
+
+	@Query("SELECT c.myId FROM TermConcept c WHERE c.myCodeSystem = :code_system")
+	Stream<TermConcept.TermConceptPk> findPidsByCodeSystemVersion(
+			@Param("code_system") TermCodeSystemVersion theCodeSystem);
 
 	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
 	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);

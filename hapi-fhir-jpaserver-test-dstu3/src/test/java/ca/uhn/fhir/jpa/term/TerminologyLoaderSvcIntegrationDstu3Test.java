@@ -1,8 +1,5 @@
 package ca.uhn.fhir.jpa.term;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -24,21 +21,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologyLoaderSvcIntegrationDstu3Test.class);
 
 	@Autowired
-	private ITermLoaderSvc myLoader;
+	private TerminologyTestHelper myTerminologyTestHelper;
 
 	@AfterEach
 	public void after() {
@@ -63,9 +61,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testExpandWithPropertyCoding() throws Exception {
-		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
-		myLoader.loadLoinc(files.getFiles(), mySrd);
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion();
 
 		// Search by code
 		ValueSet input = new ValueSet();
@@ -115,21 +111,8 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testStoreAndProcessDeferred() throws IOException {
-		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
-		myLoader.loadLoinc(files.getFiles(), mySrd);
-
-		myTerminologyDeferredStorageSvc.saveDeferred();
-
-		await().untilAsserted(() -> runInTransaction(() -> assertThat(myTermConceptMapDao.count()).isGreaterThan(0L)));
-	}
-
-	@Test
 	public void testExpandWithPropertyString() throws Exception {
-		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
-		myLoader.loadLoinc(files.getFiles(), mySrd);
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion();
 
 		ValueSet input = new ValueSet();
 		input
@@ -149,9 +132,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testLookupWithProperties() throws Exception {
-		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
-		myLoader.loadLoinc(files.getFiles(), mySrd);
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion();
 
 		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, null);
@@ -181,9 +162,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testLookupWithProperties2() throws Exception {
-		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
-		myLoader.loadLoinc(files.getFiles(), mySrd);
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion();
 
 		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, null);
@@ -199,9 +178,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testLookupWithPropertiesExplicit() throws Exception {
-		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
-		myLoader.loadLoinc(files.getFiles(), mySrd);
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion();
 
 		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		List<? extends IPrimitiveType<String>> properties = Lists.newArrayList(new CodeType("SCALE_TYP"));
@@ -222,11 +199,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testValidateCodeFound() throws Exception {
-		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
-		myLoader.loadLoinc(files.getFiles(), mySrd);
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion();
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
@@ -236,11 +209,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testValidateCodeNotFound() throws Exception {
-		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
-		myLoader.loadLoinc(files.getFiles(), mySrd);
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion();
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 		assertFalse(result.isOk());
