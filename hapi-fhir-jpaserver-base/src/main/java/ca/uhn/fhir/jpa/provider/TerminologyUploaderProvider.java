@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -136,7 +137,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		myJobPersistence = theJobPersistence;
 
 		String loincJobDefinitionId = ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC;
-		Supplier<BaseTerminologyImportParameters> paramsFactory = ImportLoincJobParameters::new;
+		Supplier<ImportTerminologyJobParameters> paramsFactory = ImportTerminologyJobParameters::new;
 		String loincTerminologyName = "LOINC";
 		JobType loincJobType = new JobType(
 				LOINC_XML_FILENAME_PATTERN,
@@ -150,7 +151,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		myJobDefinitionIdToJobType.put(loincJobDefinitionId, loincJobType);
 
 		String sctJobDefinitionId = ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT;
-		Supplier<BaseTerminologyImportParameters> sctParamsFactory = ImportSnomedCtJobParameters::new;
+		Supplier<ImportTerminologyJobParameters> sctParamsFactory = ImportTerminologyJobParameters::new;
 		String sctTerminologyName = "SNOMED CT";
 		JobType sctJobType = new JobType(
 				SNOMED_CT_XML_FILENAME_PATTERN,
@@ -223,11 +224,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		String distributionFileName = theJobType.distributionFileName();
 		String propertyFileName = theJobType.propertyFileName();
 		String jobDefinitionId = theJobType.jobDefinitionId();
-		Supplier<BaseTerminologyImportParameters> paramsFactory = theJobType.paramsFactory();
+		Supplier<ImportTerminologyJobParameters> paramsFactory = theJobType.paramsFactory();
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(jobDefinitionId);
-		BaseTerminologyImportParameters parameters = paramsFactory.get();
+		ImportTerminologyJobParameters parameters = paramsFactory.get();
 		parameters.setVersionId(canonicalUrl.versionId().orElse(null));
 
 		Boolean makeCurrent = DatatypeUtil.toBooleanValue(theMakeCurrent);
@@ -633,7 +634,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			Pattern distributionFilenamePattern,
 			String thePropertyFileName,
 			String jobDefinitionId,
-			Supplier<BaseTerminologyImportParameters> paramsFactory,
+			Supplier<ImportTerminologyJobParameters> paramsFactory,
 			String terminologyName,
 			String distributionFileName,
 			String propertyFileName) {}

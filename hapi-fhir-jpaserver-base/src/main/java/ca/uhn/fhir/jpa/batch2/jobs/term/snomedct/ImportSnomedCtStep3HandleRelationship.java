@@ -25,6 +25,8 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
@@ -63,7 +65,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
  */
 public class ImportSnomedCtStep3HandleRelationship
-		extends BaseImportSnomedCtStep<ImportSnomedCtStep3HandleRelationship.ImportSnomedCtContext> {
+		extends BaseImportTerminologyFileCsvStep<
+				ImportTerminologyJobParameters, ImportSnomedCtStep3HandleRelationship.ImportSnomedCtContext> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportSnomedCtStep3HandleRelationship.class);
 
 	@Autowired
@@ -77,8 +80,8 @@ public class ImportSnomedCtStep3HandleRelationship
 
 	@Nonnull
 	@Override
-	protected List<LoincFileNameSpecification> getFilesToProcess(
-			StepExecutionDetails<ImportSnomedCtJobParameters, ?> theStepExecutionDetails) {
+	public List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				FileHandlingType.TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS,
 				t -> t.contains("sct2_Relationship_Full")));
@@ -86,14 +89,16 @@ public class ImportSnomedCtStep3HandleRelationship
 
 	@Override
 	protected ImportSnomedCtContext newContextObject(
-			StepExecutionDetails<ImportSnomedCtJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new ImportSnomedCtContext();
 	}
 
 	@Nonnull
 	@Override
 	protected RunOutcome run(
-			@Nonnull StepExecutionDetails<ImportSnomedCtJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull
+					StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson>
+							theStepExecutionDetails,
 			@Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
 			ImportSnomedCtContext theContext) {
@@ -147,9 +152,9 @@ public class ImportSnomedCtStep3HandleRelationship
 
 	@Override
 	protected void handleRecord(
-			StepExecutionDetails<ImportSnomedCtJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
-			ImportSnomedCtJobParameters theJobParameters,
+			ImportTerminologyJobParameters theJobParameters,
 			ImportSnomedCtContext theContext,
 			CSVRecord theRecord,
 			CodeSystem theCodeSystemToPopulate,

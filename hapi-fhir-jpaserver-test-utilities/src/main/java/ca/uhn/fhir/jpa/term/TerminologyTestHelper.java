@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
-import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobParameters;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -151,7 +150,7 @@ public class TerminologyTestHelper {
 			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, boolean theExpectFailure) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT);
-		ImportSnomedCtJobParameters parameters = new ImportSnomedCtJobParameters();
+		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
 		parameters.setVersionId(versionId);
 		if (theDontMakeCurrent) {
 			parameters.setDontMakeCurrent(true);

@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepChunkConceptsForGeneratingClosure;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepFinalize;
@@ -71,14 +72,14 @@ public class ImportSnomedCtJobAppCtx {
 	 * to see descriptions of how this job works.
 	 */
 	@Bean
-	public JobDefinition<ImportSnomedCtJobParameters> importSnomedJobDefinition() {
+	public JobDefinition<ImportTerminologyJobParameters> importSnomedJobDefinition() {
 		return JobDefinition.newBuilder()
 				.setInitialStatus(StatusEnum.BUILDING)
 				.setJobDefinitionId(JOB_ID_IMPORT_TERM_SNOMED_CT)
 				.setJobDescription("Import Terminology - SNOMED CT")
 				.setJobDefinitionVersion(1)
 				.gatedExecution()
-				.setParametersType(ImportSnomedCtJobParameters.class)
+				.setParametersType(ImportTerminologyJobParameters.class)
 				.setParametersValidator(new ImportSnomedCtJobParametersValidator())
 				.addFirstStep(
 						"expand-zip",
@@ -123,7 +124,7 @@ public class ImportSnomedCtJobAppCtx {
 	 * steps that follow about those fragments.
 	 */
 	@Bean
-	public IJobStepWorker<ImportSnomedCtJobParameters, VoidModel, TerminologyFileSetJson>
+	public IJobStepWorker<ImportTerminologyJobParameters, VoidModel, TerminologyFileSetJson>
 			importSnomedCtStep1ExpandDistributionIntoFiles() {
 		return new ImportSnomedCtStep1ExpandDistributionIntoFilesStep();
 	}
@@ -154,7 +155,7 @@ public class ImportSnomedCtJobAppCtx {
 	 * creates work chunks for {@link #importSnomedStep22GenerateConceptClosures()} to process.
 	 */
 	@Bean
-	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportSnomedCtJobParameters>
+	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportTerminologyJobParameters>
 			importSnomedStep21ChunkConceptsForClosureGeneration() {
 		return new ImportTerminologyStepChunkConceptsForGeneratingClosure<>();
 	}
@@ -166,7 +167,7 @@ public class ImportSnomedCtJobAppCtx {
 	 * concept PIDs and is stored in {@link TermConcept#getParentPidsAsString()}.
 	 */
 	@Bean
-	public ImportTerminologyStepGenerateConceptClosures<ImportSnomedCtJobParameters>
+	public ImportTerminologyStepGenerateConceptClosures<ImportTerminologyJobParameters>
 			importSnomedStep22GenerateConceptClosures() {
 		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
@@ -186,7 +187,7 @@ public class ImportSnomedCtJobAppCtx {
 	 * </ul>
 	 */
 	@Bean
-	public ImportTerminologyStepFinalize<ImportSnomedCtJobParameters> importSnomedStep23Finalize() {
+	public ImportTerminologyStepFinalize<ImportTerminologyJobParameters> importSnomedStep23Finalize() {
 		return new ImportTerminologyStepFinalize<>(
 				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}

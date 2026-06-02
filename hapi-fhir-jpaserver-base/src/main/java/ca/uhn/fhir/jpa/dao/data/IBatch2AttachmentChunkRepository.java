@@ -19,28 +19,17 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentEntity;
+import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentChunkEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
-
-public interface IBatch2AttachmentRepository
-		extends JpaRepository<Batch2JobAttachmentEntity, Batch2JobAttachmentEntity.AttachmentPk>,
+public interface IBatch2AttachmentChunkRepository
+		extends JpaRepository<Batch2JobAttachmentChunkEntity, Batch2JobAttachmentChunkEntity.ChunkPk>,
 				IHapiFhirJpaRepository {
 
-	default Optional<Batch2JobAttachmentEntity> findById(String theInstanceId, String theAttachmentId) {
-		return findById(new Batch2JobAttachmentEntity.AttachmentPk(theInstanceId, theAttachmentId));
-	}
-
 	@Modifying
-	@Query("DELETE FROM Batch2JobAttachmentEntity e WHERE e.myId.myJobInstanceId = :instanceId")
+	@Query("DELETE FROM Batch2JobAttachmentChunkEntity e WHERE e.myId.myJobInstanceId = :instanceId")
 	void deleteAllForInstance(@Param("instanceId") String theInstanceId);
-
-	@Query(
-			"SELECT e FROM Batch2JobAttachmentEntity e WHERE e.myId.myJobInstanceId = :instanceId AND e.myFilename = :filename")
-	Optional<Batch2JobAttachmentEntity> findByIdAndFilename(
-			@Param("instanceId") String theInstanceId, @Param("filename") String theFilename);
 }

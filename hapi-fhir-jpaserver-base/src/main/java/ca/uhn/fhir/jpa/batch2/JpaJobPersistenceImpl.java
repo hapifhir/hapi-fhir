@@ -38,11 +38,13 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentChunkRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkMetadataViewRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentChunkEntity;
 import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentEntity;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
@@ -60,11 +62,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.dnault.xmlpatch.repackaged.org.apache.commons.io.input.CountingInputStream;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -87,6 +91,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -99,6 +104,8 @@ import java.util.zip.GZIPOutputStream;
 
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
+import static java.lang.Math.toIntExact;
+import static java.util.Objects.requireNonNullElseGet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -106,12 +113,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public static final String CREATE_TIME = "myCreateTime";
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IBatch2AttachmentRepository myAttachmentRepository;
+	private final IBatch2AttachmentChunkRepository myAttachmentChunkRepository;
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
 	private final IBatch2WorkChunkMetadataViewRepository myWorkChunkMetadataViewRepo;
 	private final EntityManager myEntityManager;
 	private final IHapiTransactionService myTransactionService;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+	private int myMaxBytesPerAttachmentChunk;
 
 	/**
 	 * Constructor
@@ -123,8 +132,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			IBatch2WorkChunkMetadataViewRepository theWorkChunkMetadataViewRepo,
 			IHapiTransactionService theTransactionService,
 			EntityManager theEntityManager,
-			IInterceptorBroadcaster theInterceptorBroadcaster) {
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			IBatch2AttachmentChunkRepository theAttachmentChunkRepository) {
 		Validate.notNull(theAttachmentRepository, "theAttachmentRepository");
+		Validate.notNull(theAttachmentChunkRepository, "theAttachmentChunkRepository");
 		Validate.notNull(theJobInstanceRepository, "theJobInstanceRepository");
 		Validate.notNull(theWorkChunkRepository, "theWorkChunkRepository");
 		myAttachmentRepository = theAttachmentRepository;
@@ -134,6 +145,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		myTransactionService = theTransactionService;
 		myEntityManager = theEntityManager;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		myAttachmentChunkRepository = theAttachmentChunkRepository;
+		setMaxBytesPerAttachmentChunk(null);
+	}
+
+	/**
+	 * Set to <code>null</code> for a default value
+	 */
+	@VisibleForTesting
+	public void setMaxBytesPerAttachmentChunk(Integer theMaxBytesPerAttachmentChunk) {
+		myMaxBytesPerAttachmentChunk =
+				requireNonNullElseGet(theMaxBytesPerAttachmentChunk, () -> toIntExact(FileUtils.ONE_MB));
 	}
 
 	@Override
@@ -568,7 +590,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 						+ "] in status: " + instance.getStatus());
 			}
 
-			Batch2JobAttachmentEntity attachment = null;
+			Batch2JobAttachmentEntity attachment;
 			if (isNotBlank(theRequest.getFilename())) {
 				Optional<Batch2JobAttachmentEntity> existingOpt =
 						myAttachmentRepository.findByIdAndFilename(theInstanceId, theRequest.getFilename());
@@ -591,33 +613,29 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				attachment = new Batch2JobAttachmentEntity(theInstanceId);
 				attachment.setFilename(attachment.getId().getAttachmentId());
 			}
+			attachment.setContentType(theRequest.getContentType());
+			attachment.setCompressedStatus(
+					theRequest.getContentType().isSupportsCompression()
+							? Batch2JobAttachmentEntity.CompressionEnum.GZIP
+							: Batch2JobAttachmentEntity.CompressionEnum.NONE);
 
 			try {
-				Batch2JobAttachmentEntity.CompressionEnum compressedStatus;
 				CountingInputStream countingInputStream = new CountingInputStream(theRequest.getInputStream());
-				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+				AttachmentWritingOutputStream storageOutputStream =
+						new AttachmentWritingOutputStream(attachment, countingInputStream);
 				OutputStream outputStream;
 				if (theRequest.getContentType().isSupportsCompression()) {
-					outputStream = new GZIPOutputStream(byteArrayOutputStream);
-					compressedStatus = Batch2JobAttachmentEntity.CompressionEnum.GZIP;
+					outputStream = new GZIPOutputStream(storageOutputStream);
 				} else {
-					outputStream = byteArrayOutputStream;
-					compressedStatus = Batch2JobAttachmentEntity.CompressionEnum.NONE;
+					outputStream = storageOutputStream;
 				}
+
 				countingInputStream.transferTo(outputStream);
+				outputStream.flush();
 				outputStream.close();
-
-				attachment.setData(byteArrayOutputStream.toByteArray());
-				attachment.setContentType(theRequest.getContentType());
-				attachment.setAttachmentLengthUncompressed(countingInputStream.getCount());
-				attachment.setAttachmentLengthCompressed(byteArrayOutputStream.toByteArray().length);
-				attachment.setCompressedStatus(compressedStatus);
-
 			} catch (IOException e) {
 				throw new InternalErrorException(Msg.code(2904) + e.getMessage(), e);
 			}
-
-			myEntityManager.persist(attachment);
 
 			return attachment.getId().getAttachmentId();
 		});
@@ -644,8 +662,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2905) + "Attachment with " + theLookupType
 							+ " [" + theLookupValue + "] not found"));
 
-			byte[] attachmentData = attachment.getData();
-			InputStream readerStream = new ByteArrayInputStream(attachmentData);
+			InputStream readerStream = new AttachmentReadingInputStream(attachment);
+
 			if (attachment.getCompressedStatus() == Batch2JobAttachmentEntity.CompressionEnum.GZIP) {
 				try {
 					readerStream = new GZIPInputStream(readerStream);
@@ -700,6 +718,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteInstanceAndChunks(String theInstanceId) {
 		ourLog.info("Deleting instance and chunks: {}", theInstanceId);
+		myAttachmentChunkRepository.deleteAllForInstance(theInstanceId);
 		myAttachmentRepository.deleteAllForInstance(theInstanceId);
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 		myJobInstanceRepository.deleteById(theInstanceId);
@@ -833,5 +852,120 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			errorMessage = theErrorMessage;
 		}
 		return errorMessage;
+	}
+
+	// FIXME: document
+	private class AttachmentWritingOutputStream extends OutputStream {
+		private Batch2JobAttachmentEntity myAttachent;
+		private final CountingInputStream myCountingInputStream;
+		private ByteArrayOutputStream myTargetBuffer = new ByteArrayOutputStream(myMaxBytesPerAttachmentChunk);
+		private boolean myClosing;
+		private int myNextAdditionalChunkIndex = 0;
+
+		private AttachmentWritingOutputStream(
+				Batch2JobAttachmentEntity theAttachment, CountingInputStream theCountingInputStream) {
+			myAttachent = theAttachment;
+			myCountingInputStream = theCountingInputStream;
+		}
+
+		@Override
+		public void write(int b) {
+			myTargetBuffer.write(b);
+			flushIfNecessary();
+		}
+
+		private void flushIfNecessary() {
+			if (myTargetBuffer != null) {
+				if (myTargetBuffer.size() >= myMaxBytesPerAttachmentChunk || myClosing) {
+					byte[] bytesToWrite = myTargetBuffer.toByteArray();
+					if (myAttachent.getData() == null) {
+						ourLog.info(
+								"Writing attachment with ID {} to database",
+								myAttachent.getId().getAttachmentId());
+						myAttachent.setData(bytesToWrite);
+						myAttachent.setAttachmentLengthCompressed(bytesToWrite.length);
+						myAttachent.setAttachmentLengthUncompressed(myCountingInputStream.getCount());
+						myAttachmentRepository.save(myAttachent);
+					} else {
+						int chunkIndex = myNextAdditionalChunkIndex++;
+						ourLog.info(
+								"Writing additional chunk {} for ttachment with ID {} to database",
+								chunkIndex,
+								myAttachent.getId().getAttachmentId());
+						Batch2JobAttachmentChunkEntity nextChunk = new Batch2JobAttachmentChunkEntity();
+						nextChunk.setId(new Batch2JobAttachmentChunkEntity.ChunkPk(myAttachent.getId(), chunkIndex));
+						nextChunk.setData(bytesToWrite);
+						myAttachmentChunkRepository.save(nextChunk);
+
+						myAttachent.setExtraChunkMaximumIndex(chunkIndex);
+						myAttachent.incrementAttachmentLengthCompressed(bytesToWrite.length);
+						myAttachent.incrementAttachmentLengthUncompressed(myCountingInputStream.getCount());
+						myAttachent = myEntityManager.merge(myAttachent);
+					}
+					myTargetBuffer.reset();
+				}
+			}
+		}
+
+		@Override
+		public void close() throws IOException {
+			super.close();
+
+			myClosing = true;
+			flushIfNecessary();
+			myTargetBuffer = null;
+		}
+	}
+
+	// FIXME: document
+	private class AttachmentReadingInputStream extends InputStream {
+
+		private final Integer myMaximumExtraChunkIndex;
+		private final Batch2JobAttachmentEntity myAttachment;
+		private ByteArrayInputStream myWrappedStream;
+		private Integer myCurrentExtraChunkIndex;
+
+		public AttachmentReadingInputStream(Batch2JobAttachmentEntity theAttachment) {
+			myAttachment = theAttachment;
+			myWrappedStream = new ByteArrayInputStream(theAttachment.getData());
+			myCurrentExtraChunkIndex = null;
+			myMaximumExtraChunkIndex = theAttachment.getExtraChunkMaximumIndex();
+		}
+
+		@Override
+		public int read() {
+			int nextByte = myWrappedStream.read();
+			while (nextByte == -1) {
+				if (Objects.equals(myCurrentExtraChunkIndex, myMaximumExtraChunkIndex)) {
+					return -1;
+				}
+				int nextExtraChunkIndex = 0;
+				if (myCurrentExtraChunkIndex != null) {
+					nextExtraChunkIndex = myCurrentExtraChunkIndex + 1;
+				}
+				if (nextExtraChunkIndex > myMaximumExtraChunkIndex) {
+					return -1;
+				}
+				myCurrentExtraChunkIndex = nextExtraChunkIndex;
+
+				ourLog.atInfo()
+						.setMessage("Fetching JobInstance[{}] Attachment[{}] chunk with index: {}")
+						.addArgument(myAttachment.getId().getJobInstanceId())
+						.addArgument(myAttachment.getId().getAttachmentId())
+						.addArgument(nextExtraChunkIndex)
+						.log();
+
+				Batch2JobAttachmentChunkEntity.ChunkPk nextId =
+						new Batch2JobAttachmentChunkEntity.ChunkPk(myAttachment.getId(), nextExtraChunkIndex);
+				myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+					Batch2JobAttachmentChunkEntity nextAttachment =
+							myAttachmentChunkRepository.getReferenceById(nextId);
+					myWrappedStream = new ByteArrayInputStream(nextAttachment.getData());
+				});
+
+				nextByte = myWrappedStream.read();
+			}
+			return nextByte;
+		}
 	}
 }
