@@ -2420,7 +2420,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				readPartition =
 						myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, type);
 			} else {
-				readPartition = RequestPartitionId.defaultPartition();
+				readPartition = myPartitionSettings.getDefaultRequestPartitionId();
 			}
 			if (readPartition.hasPartitionIds()) {
 				partitionIds.addAll(readPartition.getPartitionIds());

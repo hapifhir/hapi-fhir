@@ -903,18 +903,18 @@ public class GiantTransactionPerfTest {
 		@Nonnull
 		@Override
 		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(null);
 		}
 
 		@Override
 		public RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails) {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(null);
 		}
 
 		@Nonnull
 		@Override
 		public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(null);
 		}
 
 		@Nonnull
@@ -931,12 +931,12 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(null);
 		}
 
 		@Override
 		public RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(null);
 		}
 
 
