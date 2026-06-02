@@ -467,13 +467,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
-		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
-				theEvent.getChunkId(),
-				new Date(),
-				theEvent.getRecordsProcessed(),
-				theEvent.getRecoveredErrorCount(),
-				WorkChunkStatusEnum.COMPLETED,
-				theEvent.getRecoveredWarningMessage()));
+		myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
+						theEvent.getChunkId(),
+						new Date(),
+						theEvent.getRecordsProcessed(),
+						theEvent.getRecoveredErrorCount(),
+						WorkChunkStatusEnum.COMPLETED,
+						theEvent.getRecoveredWarningMessage()));
 	}
 
 	@Override

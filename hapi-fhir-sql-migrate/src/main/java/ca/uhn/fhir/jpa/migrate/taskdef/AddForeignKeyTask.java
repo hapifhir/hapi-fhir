@@ -77,7 +77,10 @@ public class AddForeignKeyTask extends BaseTableTask {
 		Validate.isTrue(isNotBlank(myForeignTableName));
 		Validate.notEmpty(myColumnNames, "No column names specified for foreign key %s", myConstraintName);
 		Validate.notEmpty(myForeignColumnNames, "No column names specified for foreign key %s", myConstraintName);
-		Validate.isTrue(myColumnNames.size() == myForeignColumnNames.size(), "Number of column names must match for foreign key %s", myConstraintName);
+		Validate.isTrue(
+				myColumnNames.size() == myForeignColumnNames.size(),
+				"Number of column names must match for foreign key %s",
+				myConstraintName);
 		setDescription("Add foreign key " + myConstraintName + " from column(s) " + getColumnNames() + " of table "
 				+ getTableName() + " to column(s) " + getForeignColumnNames() + " of table " + myForeignTableName);
 	}
@@ -91,12 +94,13 @@ public class AddForeignKeyTask extends BaseTableTask {
 			return;
 		}
 
-		boolean quoteNames = switch (getDriverType()) {
-			case MARIADB_10_1, MYSQL_5_7 ->
-				// Quote the column names as "SYSTEM" is a reserved word in MySQL
-				true;
-			case COCKROACHDB_21_1, POSTGRES_9_4, DERBY_EMBEDDED, H2_EMBEDDED, ORACLE_12C, MSSQL_2012 -> false;
-		};
+		boolean quoteNames =
+				switch (getDriverType()) {
+					case MARIADB_10_1, MYSQL_5_7 ->
+					// Quote the column names as "SYSTEM" is a reserved word in MySQL
+					true;
+					case COCKROACHDB_21_1, POSTGRES_9_4, DERBY_EMBEDDED, H2_EMBEDDED, ORACLE_12C, MSSQL_2012 -> false;
+				};
 
 		StringBuilder b = new StringBuilder();
 
@@ -149,7 +153,8 @@ public class AddForeignKeyTask extends BaseTableTask {
 		theBuilder.append(myForeignColumnNames, otherObject.myForeignColumnNames);
 	}
 
-	private static void appendColumnList(List<String> theColumnNames, boolean theQuoteNames, StringBuilder theStringBuilder) {
+	private static void appendColumnList(
+			List<String> theColumnNames, boolean theQuoteNames, StringBuilder theStringBuilder) {
 		for (int i = 0; i < theColumnNames.size(); i++) {
 			if (i > 0) {
 				theStringBuilder.append(", ");

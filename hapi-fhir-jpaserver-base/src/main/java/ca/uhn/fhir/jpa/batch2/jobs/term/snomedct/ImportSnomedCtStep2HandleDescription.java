@@ -25,11 +25,9 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeType;
 
 import java.util.HashSet;
 import java.util.List;

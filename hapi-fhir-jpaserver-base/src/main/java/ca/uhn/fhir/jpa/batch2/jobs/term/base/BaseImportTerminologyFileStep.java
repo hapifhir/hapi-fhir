@@ -407,7 +407,8 @@ public abstract class BaseImportTerminologyFileStep<
 		// If there is a circular hierarchy chain, we want to still add the concepts. This isn't valid
 		// but it can happen. The terminology service will handle this gracefully.
 
-		IdentityHashMap<CodeSystem.ConceptDefinitionComponent, CodeSystem.ConceptDefinitionComponent> added = new IdentityHashMap<>();
+		IdentityHashMap<CodeSystem.ConceptDefinitionComponent, CodeSystem.ConceptDefinitionComponent> added =
+				new IdentityHashMap<>();
 
 		for (CodeSystem.ConceptDefinitionComponent concept : codeToConcept.values()) {
 			if (!childCodes.contains(concept.getCode())) {
@@ -422,10 +423,11 @@ public abstract class BaseImportTerminologyFileStep<
 				codeSystemToPopulate.addConcept(concept);
 			}
 		}
-
 	}
 
-	private static void addChildrenToIdentityMap(IdentityHashMap<CodeSystem.ConceptDefinitionComponent, CodeSystem.ConceptDefinitionComponent> theAdded, CodeSystem.ConceptDefinitionComponent theConcept) {
+	private static void addChildrenToIdentityMap(
+			IdentityHashMap<CodeSystem.ConceptDefinitionComponent, CodeSystem.ConceptDefinitionComponent> theAdded,
+			CodeSystem.ConceptDefinitionComponent theConcept) {
 		for (CodeSystem.ConceptDefinitionComponent childConcept : theConcept.getConcept()) {
 			if (theAdded.put(childConcept, childConcept) == null) {
 				addChildrenToIdentityMap(theAdded, childConcept);

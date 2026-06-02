@@ -172,7 +172,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		attachmentChunk.addColumn("ATTACHMENT_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
 		attachmentChunk.addColumn("CHUNK_INDEX").nonNullable().type(ColumnTypeEnum.INT);
 		attachmentChunk.addColumn("ATTACHMENT_DATA").nonNullable().type(ColumnTypeEnum.BINARY);
-		attachmentChunk.addForeignKey("20260601.20", "FK_BT2_JOB_ATTCHNK_PARENT")
+		attachmentChunk
+				.addForeignKey("20260601.20", "FK_BT2_JOB_ATTCHNK_PARENT")
 				.toColumns("JOB_INSTANCE_ID", "ATTACHMENT_ID")
 				.references("BT2_JOB_ATTACHMENT", "JOB_INSTANCE_ID", "ATTACHMENT_ID");
 

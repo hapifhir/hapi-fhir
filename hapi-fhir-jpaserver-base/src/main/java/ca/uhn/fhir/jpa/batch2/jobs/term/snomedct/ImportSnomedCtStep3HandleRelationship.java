@@ -42,7 +42,7 @@ public class ImportSnomedCtStep3HandleRelationship
 	@Nonnull
 	@Override
 	public List<LoincFileNameSpecification> getFilesToProcess(
-		StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
+			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
 				FileHandlingType.TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS,
 				t -> t.contains("sct2_Relationship_Full")));
@@ -74,9 +74,9 @@ public class ImportSnomedCtStep3HandleRelationship
 			// The concept with ID "116680003" denotes the concept "Is a (attribute)".
 			// https://docs.snomed.org/snomed-international-documents/snomed-ct-glossary/r/relationship-type
 			if (isNotBlank(sourceId)
-				&& isNotBlank(destinationId)
-				&& "116680003".equals(typeId)
-				&& !sourceId.equals(destinationId)) {
+					&& isNotBlank(destinationId)
+					&& "116680003".equals(typeId)
+					&& !sourceId.equals(destinationId)) {
 
 				// In the RF2 relationships file:
 				// Source = child, destination = parent
@@ -85,5 +85,4 @@ public class ImportSnomedCtStep3HandleRelationship
 			}
 		}
 	}
-
 }

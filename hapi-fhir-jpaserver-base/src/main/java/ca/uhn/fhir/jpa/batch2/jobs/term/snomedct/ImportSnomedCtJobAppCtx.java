@@ -71,7 +71,8 @@ public class ImportSnomedCtJobAppCtx {
 	 * to see descriptions of how this job works.
 	 */
 	@Bean
-	public JobDefinition<ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters> importSnomedJobDefinition() {
+	public JobDefinition<ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
+			importSnomedJobDefinition() {
 		return JobDefinition.newBuilder()
 				.setInitialStatus(StatusEnum.BUILDING)
 				.setJobDefinitionId(JOB_ID_IMPORT_TERM_SNOMED_CT)
@@ -123,8 +124,7 @@ public class ImportSnomedCtJobAppCtx {
 	 * steps that follow about those fragments.
 	 */
 	@Bean
-	public ImportSnomedCtStep1ExpandDistributionIntoFilesStep
-			importSnomedCtStep1ExpandDistributionIntoFiles() {
+	public ImportSnomedCtStep1ExpandDistributionIntoFilesStep importSnomedCtStep1ExpandDistributionIntoFiles() {
 		return new ImportSnomedCtStep1ExpandDistributionIntoFilesStep();
 	}
 
@@ -158,7 +158,8 @@ public class ImportSnomedCtJobAppCtx {
 	 * creates work chunks for {@link #importSnomedStep22GenerateConceptClosures()} to process.
 	 */
 	@Bean
-	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
+	public ImportTerminologyStepChunkConceptsForGeneratingClosure<
+					ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
 			importSnomedStep21ChunkConceptsForClosureGeneration() {
 		return new ImportTerminologyStepChunkConceptsForGeneratingClosure<>();
 	}
@@ -170,7 +171,8 @@ public class ImportSnomedCtJobAppCtx {
 	 * concept PIDs and is stored in {@link TermConcept#getParentPidsAsString()}.
 	 */
 	@Bean
-	public ImportTerminologyStepGenerateConceptClosures<ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
+	public ImportTerminologyStepGenerateConceptClosures<
+					ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
 			importSnomedStep22GenerateConceptClosures() {
 		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
@@ -180,7 +182,8 @@ public class ImportSnomedCtJobAppCtx {
 	 * This step aggregates step outcomes and generates a report
 	 */
 	@Bean
-	public ImportTerminologyStepFinalize<ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters> importSnomedStep23Finalize() {
+	public ImportTerminologyStepFinalize<ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
+			importSnomedStep23Finalize() {
 		return new ImportTerminologyStepFinalize<>(
 				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}

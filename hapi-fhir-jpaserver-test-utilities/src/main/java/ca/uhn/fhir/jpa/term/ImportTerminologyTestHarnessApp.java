@@ -50,8 +50,8 @@ public class ImportTerminologyTestHarnessApp {
 
 		@Override
 		public void setConnectionProperties(BasicDataSource theDataSource) {
-//			theDataSource.setDriver(new org.h2.Driver());
-//			theDataSource.setUrl("jdbc:h2:file:./target/term-loading-test-db/db");
+			//			theDataSource.setDriver(new org.h2.Driver());
+			//			theDataSource.setUrl("jdbc:h2:file:./target/term-loading-test-db/db");
 			theDataSource.setDriver(new org.postgresql.Driver());
 			theDataSource.setUrl("jdbc:postgresql://localhost:5432/cdr");
 			theDataSource.setMaxWait(Duration.ofSeconds(30));

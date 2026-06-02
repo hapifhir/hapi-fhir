@@ -50,10 +50,22 @@ public class Batch2JobAttachmentChunkEntity implements Serializable {
 
 	@SuppressWarnings("unused")
 	@ManyToOne
-	@JoinColumns(value = {
-		@JoinColumn(name = "JOB_INSTANCE_ID", referencedColumnName = "JOB_INSTANCE_ID", nullable = false, insertable = false, updatable = false),
-		@JoinColumn(name = "ATTACHMENT_ID", referencedColumnName = "ATTACHMENT_ID", nullable = false, insertable = false, updatable = false)
-	}, foreignKey = @ForeignKey(name = "FK_BT2_JOB_ATTCHNK_PARENT"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "JOB_INSTANCE_ID",
+						referencedColumnName = "JOB_INSTANCE_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false),
+				@JoinColumn(
+						name = "ATTACHMENT_ID",
+						referencedColumnName = "ATTACHMENT_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_BT2_JOB_ATTCHNK_PARENT"))
 	private Batch2JobAttachmentEntity myParent;
 
 	/**

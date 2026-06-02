@@ -24,8 +24,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -246,14 +244,17 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 
 			IEntityResult response;
 			try {
-				response = theClient.rawHttpRequest().post(urlBuilder, requestEntity).execute();
+				response = theClient
+						.rawHttpRequest()
+						.post(urlBuilder, requestEntity)
+						.execute();
 			} catch (InvalidRequestException e) {
-				throw new CommandFailureException(
-					Msg.code(2959) + "Failed to attach file \"" + dataFile.getName() + "\" to job, got " + e.getMessage());
+				throw new CommandFailureException(Msg.code(2959) + "Failed to attach file \"" + dataFile.getName()
+						+ "\" to job, got " + e.getMessage());
 			}
 			if (response.getStatusCode() != 200) {
-				throw new CommandFailureException(
-						Msg.code(2937) + "Failed to attach file \"" + dataFile.getName() + "\" to job, got HTTP " + response.getStatusCode());
+				throw new CommandFailureException(Msg.code(2937) + "Failed to attach file \"" + dataFile.getName()
+						+ "\" to job, got HTTP " + response.getStatusCode());
 			}
 
 			ourLog.info("Attached file in {}", sw);

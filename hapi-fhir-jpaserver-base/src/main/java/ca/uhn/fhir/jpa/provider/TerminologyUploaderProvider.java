@@ -300,8 +300,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					attachmentDetails = new AttachmentDetails(
 							inputStream, AttachmentContentTypeEnum.PROPERTIES, jobType.propertyFileName());
 				} else {
-					throw new InvalidRequestException(
-							Msg.code(2953) + "File named \"" + toStringValue(theFilename) + "\" is not valid for import " + jobType.terminologyName() + " job");
+					throw new InvalidRequestException(Msg.code(2953) + "File named \"" + toStringValue(theFilename)
+							+ "\" is not valid for import " + jobType.terminologyName() + " job");
 				}
 
 				String instanceId = jobInstance.getInstanceId();

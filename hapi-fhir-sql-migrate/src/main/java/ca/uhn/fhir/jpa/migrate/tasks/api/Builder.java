@@ -550,7 +550,8 @@ public class Builder {
 
 			public BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn toColumns(
 					String... theColumnNames) {
-				return new BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn(Arrays.asList(theColumnNames));
+				return new BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn(
+						Arrays.asList(theColumnNames));
 			}
 
 			public class BuilderAddForeignKeyToColumn {
