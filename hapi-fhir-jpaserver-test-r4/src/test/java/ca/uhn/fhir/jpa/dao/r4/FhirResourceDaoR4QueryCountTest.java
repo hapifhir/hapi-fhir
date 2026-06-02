@@ -284,6 +284,61 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		mySubscriptionLoader.setMaxRetries(null);
 	}
 
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# AlreadyExisting , ExpectSelectCount , ExpectInsertCount , ExpectUpdateCount
+		true              , 8                 , 0                 , 10
+		false             , 7                 , 25                , 0
+		""")
+	void testCodeSystem(boolean theAlreadyExisting, int theExpectSelectCount, int theExpectInsertCount, int theExpectUpdateCount) {
+		// Setup
+		createCodeSystem(withUrl("http://foo"), withCodeSystemContent("not-present"));
+
+		String stagingVersion = myTermCodeSystemStorageSvc.startStagingCodeSystemVersion("http://foo", "123").stagingVersionId();
+
+		Supplier<CodeSystem> inputSupplier = ()->{
+			CodeSystem input = new CodeSystem();
+			input.setUrl("http://foo");
+			input.setVersion(stagingVersion);
+			for (int i = 0; i < 5; i++) {
+				CodeSystem.ConceptDefinitionComponent parent = input.addConcept()
+					.setCode("PARENT" + i)
+					.setDisplay("Parent" + i);
+				parent.addConcept()
+					.setCode("CHILD" + i)
+					.setDisplay("Child" + i)
+					.addDesignation(
+						new CodeSystem.ConceptDefinitionDesignationComponent()
+							.setLanguage("en_CA")
+							.setValue("Child Desigation" + i)
+					).addProperty(new CodeSystem.ConceptPropertyComponent()
+						.setCode("property" + i)
+						.setValue(new StringType("property value" + i))
+					);
+			}
+			return input;
+		};
+
+		if (theAlreadyExisting) {
+			myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(inputSupplier.get());
+		}
+
+		// Test
+		myCaptureQueriesListener.clear();
+		myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(inputSupplier.get());
+
+		// Verify
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectCount(theExpectSelectCount)
+				.insertCount(theExpectInsertCount)
+				.updateCount(theExpectUpdateCount)
+				.commitCount(1)
+				.noOtherCounts()
+		);
+	}
+
+
 	/**
 	 * See the class javadoc before changing the counts in this test!
 	 */
@@ -4885,7 +4940,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(result.getMessage()).isNull();
 
 		assertEquals(4, myCaptureQueriesListener.countGetConnections());
-		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(10, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logSelectQueries();
 
 		// Again (should use cache)

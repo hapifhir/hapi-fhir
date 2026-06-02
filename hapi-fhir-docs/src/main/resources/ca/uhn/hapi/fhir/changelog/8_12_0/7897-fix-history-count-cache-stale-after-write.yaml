@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 7897
+jira: SMILE-11997
+title: "Fixed the bug where a `_history` query immediately following a resource update could
+  return a stale total and omit older versions for up to 60 seconds. The HISTORY_COUNT
+  memory cache was populated by reads but never invalidated by writes, so a primed total
+  of 1 caused the next history page to be sized to a single row and return only the newest
+  version. Resource create/update/delete now invalidates the affected instance, type, and
+  system level HISTORY_COUNT cache entries after the transaction commits."

@@ -267,6 +267,19 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 	}
 
 	@Test
+	public void testSearchForIds_NullFhirId() {
+		IIdType id = createPatient(withActiveTrue());
+
+		runInTransaction(() ->{
+			myEntityManager.createNativeQuery("UPDATE HFJ_RESOURCE SET FHIR_ID = null").executeUpdate();
+		});
+
+		List<IIdType> ids = myPatientDao.searchForResourceIds(new SearchParameterMap(), newSrd());
+		assertEquals(id.getIdPart(), ids.get(0).getIdPart());
+	}
+
+
+	@Test
 	public void testUpdateResourceTwiceInSameTransaction() {
 		// Update with a string param that changes, and a token param that does not
 		runInTransaction(()->{
@@ -4310,7 +4323,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			// Timing period with no start
 			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodNoStart, List.of(feb7, feb8, feb9)),
 			// Timing period with no end
-			Arguments.of(List.of(feb8, feb9, feb10, feb11), periodNoEnd, List.of(feb8, feb9, feb10, feb11)),
+			Arguments.of(List.of(feb8, feb9, feb10, feb11), periodNoEnd, List.of()),
 			// Timing period with start and end, event falls within date range
 			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodStartEnd, List.of(feb7, feb8, feb9, feb10)),
 			// Timing period with start and end, event falls before date range

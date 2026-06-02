@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.packages.util;
 
+import ca.uhn.fhir.jpa.packages.NpmPackageBuilder;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
-import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.Test;
 
@@ -15,18 +15,11 @@ public class PackageUtilsTest {
 	@Test
 	public void testExtractDependentPackages() {
 		// set up
-		JsonObject dependencies = new JsonObject();
-		dependencies.add("hl7.fhir.us.core", "3.1.1");
-		dependencies.add("de.fhir.medication", "1.0.4");
-		dependencies.add("hl7.fhir.uv.cqm", "2.0.0");
-
-		JsonObject npm = new JsonObject();
-		npm.add("name", "packageName");
-		npm.add("version", "packageVersion");
-		npm.add("dependencies", dependencies);
-
-		NpmPackage npmPackage = NpmPackage.empty();
-		npmPackage.setNpm(npm);
+		NpmPackage npmPackage = new NpmPackageBuilder("packageName", "packageVersion")
+			.withDependency("hl7.fhir.us.core", "3.1.1")
+			.withDependency("de.fhir.medication", "1.0.4")
+			.withDependency("hl7.fhir.uv.cqm", "2.0.0")
+			.build();
 
 		PackageInstallationSpec packageInstallationSpec = new PackageInstallationSpec();
 		packageInstallationSpec.addDependencyExclude("^de\\..*");
@@ -54,12 +47,7 @@ public class PackageUtilsTest {
 	@Test
 	public void testExtractDependentPackages_packageHasNoDependencies_returnEmptyList() {
 		// set up
-		JsonObject npm = new JsonObject();
-		npm.add("name", "packageName");
-		npm.add("version", "packageVersion");
-
-		NpmPackage npmPackage = NpmPackage.empty();
-		npmPackage.setNpm(npm);
+		NpmPackage npmPackage = new NpmPackageBuilder("packageName", "packageVersion").build();
 
 		PackageInstallationSpec packageInstallationSpec = new PackageInstallationSpec();
 

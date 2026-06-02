@@ -4,8 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.ResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
@@ -49,18 +51,25 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.shaded.com.google.common.collect.Sets;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
+import static ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl.isNonDisableableBuiltInSearchParam;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -69,6 +78,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -102,21 +112,21 @@ public class SearchParamRegistryImplTest {
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 
-	@MockBean
+	@MockitoBean
 	private PartitionSettings myPartitionSettings;
-	@MockBean
+	@MockitoBean
 	private IResourceVersionSvc myResourceVersionSvc;
-	@MockBean
+	@MockitoBean
 	private ISearchParamProvider mySearchParamProvider;
-	@MockBean
+	@MockitoBean
 	private IInterceptorService myInterceptorBroadcaster;
-	@MockBean
+	@MockitoBean
 	private SearchParamMatcher mySearchParamMatcher;
-	@MockBean
+	@MockitoBean
 	private MatchUrlService myMatchUrlService;
-	@MockBean
+	@MockitoBean
 	private SearchParamExtractorService mySearchParamExtractorService;
-	@MockBean
+	@MockitoBean
 	private IndexedSearchParamExtractor myIndexedSearchParamExtractor;
 	private int myAnswerCount = 0;
 
@@ -508,6 +518,121 @@ public class SearchParamRegistryImplTest {
 
 	}
 
+	@Test
+	void testNonDisableableBuiltInSearchParam_RetiredInDbStaysActiveInCache() {
+		// Setup: put a RETIRED version of Basic:code (built-in non-disableable URL) in the DB
+		addSpToRegistryAndRefresh(buildBasicCodeSp(Enumerations.PublicationStatus.RETIRED));
+
+		// Verify: the built-in ACTIVE version should remain in the cache despite the RETIRED DB entry
+		RuntimeSearchParam basicCode = mySearchParamRegistry.getActiveSearchParam(
+				"Basic", "code", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertNotNull(basicCode);
+		assertEquals("code", basicCode.getName());
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, basicCode.getStatus());
+	}
+
+	@Test
+	void testNonDisableableBuiltInSearchParam_ActiveInDbUpdatesCache() {
+		// A non-disableable built-in SP that is ACTIVE in the DB should update the cache normally.
+		// The guard in overrideSearchParam() only fires when status != ACTIVE, so an ACTIVE
+		// DB version should replace the built-in entry.
+		SearchParameter basicCodeSp = buildBasicCodeSp(Enumerations.PublicationStatus.ACTIVE);
+		basicCodeSp.setDescription("customised description");
+
+		addSpToRegistryAndRefresh(basicCodeSp);
+
+		// Verify: the DB version replaced the built-in — the customised description is present
+		RuntimeSearchParam basicCode = mySearchParamRegistry.getActiveSearchParam(
+				"Basic", "code", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertNotNull(basicCode);
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, basicCode.getStatus());
+		assertEquals("customised description", basicCode.getDescription());
+	}
+
+	@Test
+	void testCustomSpOnNonDisableableResourceType_RetiredInDbIsRemovedFromCache() {
+		// Setup: add a custom (non-built-in URL) SP on Subscription
+		SearchParameter customSp = new SearchParameter();
+		customSp.setId("SearchParameter/custom-subscription-foo");
+		customSp.setUrl("http://example.com/fhir/SearchParameter/Subscription-foo");
+		customSp.setCode("foo");
+		customSp.setName("foo");
+		customSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		customSp.setType(Enumerations.SearchParamType.TOKEN);
+		customSp.setExpression("Subscription.status");
+		customSp.addBase("Subscription");
+
+		List<ResourceTable> newEntities = addSpToRegistryAndRefresh(customSp);
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
+				"Subscription", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+
+		// Now retire the custom SP
+		customSp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		newEntities.get(newEntities.size() - 1).setVersionForUnitTest(2);
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any()))
+				.thenReturn(ResourceVersionMap.fromResourceTableEntities(newEntities));
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(customSp));
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 0, 1, 0);
+		assertDbCalled();
+
+		// Verify: custom SP is removed from cache (non-disableable protection is URI-prefix-gated)
+		assertNull(mySearchParamRegistry.getActiveSearchParam(
+				"Subscription", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+	}
+
+	@Test
+	void testNonDisableableBuiltInSearchParam_ActiveDbWithNonDisabledBaseNarrowed_preservesExistingCacheEntry() {
+		// conformance-context's bases includes the non-disableable SearchParameter.
+		// A DB record narrowed to [CapabilityStatement] only — removing
+		// SearchParameter — should be ignored; the guard detects the missing non-disableable base
+		// and returns 0, preserving the full built-in cache entry.
+		addSpToRegistryAndRefresh(buildConformanceContextSp(Enumerations.PublicationStatus.ACTIVE, "CapabilityStatement"));
+
+		// Guard fired — SearchParameter:context is preserved from the built-in
+		RuntimeSearchParam conformanceContext = mySearchParamRegistry.getActiveSearchParam(
+				"SearchParameter", "context", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+		assertNotNull(conformanceContext);
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, conformanceContext.getStatus());
+	}
+
+	@Test
+	void testMultiBaseSpWithNonDisableableBase_RetiredInDbKeepsAllBasesActiveInCache() {
+		// conformance-context spans many bases including SearchParameter (non-disableable) and
+		// CodeSystem (disableable). When the DB entry is RETIRED (but still lists these bases),
+		// the L1 guard detects SearchParameter is non-disableable and skips the override entirely —
+		// so ALL bases that exist in the built-in cache remain active, including CodeSystem.
+		addSpToRegistryAndRefresh(buildConformanceContextSp(Enumerations.PublicationStatus.RETIRED, "SearchParameter", "CodeSystem"));
+
+		// Both bases remain active — guard fires on SearchParameter (non-disableable) and returns 0
+		// immediately without modifying the cache, so the full built-in entry is kept intact
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
+				"SearchParameter", "context", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam(
+				"CodeSystem", "context", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX));
+	}
+
+	/**
+	 * Simulates a new SP appearing in the DB, then drives a full refresh cycle.
+	 * Asserts that exactly one SP was added.
+	 *
+	 * @param theMockDbSpEntry the SP as it would be read from the database
+	 * @return the full entity list, so callers can perform follow-up operations
+	 *         (e.g. bumping the version to simulate an update)
+	 */
+	@Nonnull
+	private List<ResourceTable> addSpToRegistryAndRefresh(SearchParameter theMockDbSpEntry) {
+		List<ResourceTable> newEntities = new ArrayList<>(ourEntities);
+		newEntities.add(createEntity(++ourLastId, 1));
+		when(myResourceVersionSvc.getVersionMap(any(), any(), any()))
+				.thenReturn(ResourceVersionMap.fromResourceTableEntities(newEntities));
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(theMockDbSpEntry));
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
+		assertDbCalled();
+		return newEntities;
+	}
+
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
 		// Add a new search parameter entity
 		List<ResourceTable> newEntities = new ArrayList<>(ourEntities);
@@ -522,6 +647,36 @@ public class SearchParamRegistryImplTest {
 
 		// When we ask for the new entity, return our foo search parameter
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(buildSearchParameter(theStatus)));
+	}
+
+	@Nonnull
+	private static SearchParameter buildBasicCodeSp(Enumerations.PublicationStatus theStatus) {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/Basic-code");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/Basic-code");
+		sp.setCode("code");
+		sp.setName("code");
+		sp.setStatus(theStatus);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Basic.code");
+		sp.addBase("Basic");
+		return sp;
+	}
+
+	@Nonnull
+	private static SearchParameter buildConformanceContextSp(Enumerations.PublicationStatus theStatus, String... theBases) {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/conformance-context");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/conformance-context");
+		sp.setCode("context");
+		sp.setName("context");
+		sp.setStatus(theStatus);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("conformance.useContext");
+		for (String base : theBases) {
+			sp.addBase(base);
+		}
+		return sp;
 	}
 
 	@Nonnull
@@ -589,6 +744,246 @@ public class SearchParamRegistryImplTest {
 			return mock(IValidationSupport.class);
 		}
 
+	}
+
+	@Test
+	void testIsNonDisableableBuiltInSearchParam_builtInUri_returnsTrue() {
+		// Basic:* pattern
+		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/Basic-code", "Basic", "code"));
+		// *:url pattern
+		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/conformance-url", "ValueSet", "url"));
+		// Subscription:* pattern
+		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/Subscription-status", "Subscription", "status"));
+		// SearchParameter:* pattern
+		assertTrue(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/SearchParameter-url", "SearchParameter", "url"));
+	}
+
+	@Test
+	void testIsNonDisableableBuiltInSearchParam_customUri_returnsFalse() {
+		// Custom URL on a non-disableable resource type must NOT be protected
+		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/Basic-custom", "Basic", "custom"));
+		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/Subscription-foo", "Subscription", "foo"));
+		assertFalse(isNonDisableableBuiltInSearchParam("http://example.com/fhir/SearchParameter/CustomResource-url", "CustomResource", "url"));
+		// Null URI
+		assertFalse(isNonDisableableBuiltInSearchParam(null, "Basic", "code"));
+	}
+
+	@Test
+	void testIsNonDisableableBuiltInSearchParam_builtInUriDisableableResource_returnsFalse() {
+		// Built-in URL but resource type not in SearchParamRegistryImpl.NON_DISABLEABLE_SEARCH_PARAMS
+		assertFalse(isNonDisableableBuiltInSearchParam("http://hl7.org/fhir/SearchParameter/Patient-name", "Patient", "name"));
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testWithDeferredRebuild_handleChangeInsideScope_coalescesIntoSingleRebuild() {
+		// Clear search() call count accumulated during @BeforeEach refresh
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		IResourceChangeEvent event1 = buildCreatedEvent("SearchParameter/sp1");
+		IResourceChangeEvent event2 = buildCreatedEvent("SearchParameter/sp2");
+		IResourceChangeEvent event3 = buildCreatedEvent("SearchParameter/sp3");
+
+		mySearchParamRegistry.withDeferredRebuild(() -> {
+			mySearchParamRegistry.handleChange(event1);
+			mySearchParamRegistry.handleChange(event2);
+			mySearchParamRegistry.handleChange(event3);
+			// No rebuild during deferred scope
+			verify(mySearchParamProvider, never()).search(any());
+		});
+
+		// Exactly one rebuild after scope exit, despite three change events
+		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testWithDeferredRebuild_noChangeEvents_doesNotRebuild() {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		mySearchParamRegistry.withDeferredRebuild(() -> {});
+
+		// No rebuild should fire if no change events were processed
+		verify(mySearchParamProvider, never()).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testWithDeferredRebuild_nestedScopes_onlyOutermostRebuilds() {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		IResourceChangeEvent event = buildCreatedEvent("SearchParameter/sp1");
+
+		mySearchParamRegistry.withDeferredRebuild(() -> {
+			mySearchParamRegistry.withDeferredRebuild(() -> mySearchParamRegistry.handleChange(event));
+			// Inner scope exit must NOT rebuild — outer scope is still active
+			verify(mySearchParamProvider, never()).search(any());
+		});
+
+		// Outer scope exit triggers the single coalesced rebuild
+		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testWithDeferredRebuild_callbackThrows_pendingRebuildStillFlushed() {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		IResourceChangeEvent event = buildCreatedEvent("SearchParameter/sp1");
+		RuntimeException boom = new RuntimeException("boom");
+
+		assertThatThrownBy(() ->
+				mySearchParamRegistry.withDeferredRebuild(() -> {
+					mySearchParamRegistry.handleChange(event);
+					throw boom;
+				})
+		).isSameAs(boom);
+
+		// Pending rebuild flushes despite the callback throwing
+		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testForceRefresh_insideDeferredScope_doesNotRebuildUntilScopeExits() {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		mySearchParamRegistry.withDeferredRebuild(() -> {
+			mySearchParamRegistry.handleChange(buildCreatedEvent("SearchParameter/sp1"));
+			// Inside scope, no rebuild yet
+			verify(mySearchParamProvider, never()).search(any());
+
+			// forceRefresh inside the scope drains the listener cache but
+			// yields the rebuild to scope exit, so opportunistic post-commit
+			// refresh hooks fired during a batched unit of work do not defeat
+			// the coalescing.
+			mySearchParamRegistry.forceRefresh();
+			verify(mySearchParamProvider, never()).search(any());
+		});
+
+		// Single coalesced rebuild fires on scope exit.
+		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testHandleChange_uninitializedActiveSearchParams_inDeferredScope_bypassesDeferral() {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		// While myActiveSearchParams is null, handleChange must rebuild synchronously even
+		// inside a deferred scope — callers that hit requiresActiveSearchParams() during
+		// startup depend on the cache being populated by the time handleChange returns.
+		mySearchParamRegistry.setActiveSearchParams(null);
+
+		mySearchParamRegistry.withDeferredRebuild(() -> {
+			mySearchParamRegistry.handleChange(buildCreatedEvent("SearchParameter/sp1"));
+			verify(mySearchParamProvider, times(1)).search(any());
+		});
+
+		// No additional rebuild at scope exit — the synchronous rebuild already happened
+		// without setting the pending flag.
+		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void testForceRefresh_insideDeferredScope_noListenerChange_stillRebuildsAtExit() {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		// forceRefresh's documented contract: rebuild even when the listener cache reports
+		// no detected change. Inside a deferred scope this must still hold — the rebuild is
+		// yielded to scope exit, not skipped.
+		mySearchParamRegistry.withDeferredRebuild(() -> {
+			mySearchParamRegistry.forceRefresh();
+			verify(mySearchParamProvider, never()).search(any());
+		});
+
+		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	// Created by Claude Opus 4.7
+	@Test
+	void withDeferredRebuild_concurrentExternalChanges_stayBoundedAndConsistent() throws Exception {
+		reset(mySearchParamProvider);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+
+		final int externalChangeCount = 20;
+		final int scopedChangeCount = 20;
+		CountDownLatch startGate = new CountDownLatch(1);
+		CountDownLatch doneGate = new CountDownLatch(2);
+		AtomicReference<Throwable> failure = new AtomicReference<>();
+		ExecutorService pool = Executors.newFixedThreadPool(2);
+
+		try {
+			// Thread A: package-install simulator — many changes inside one deferred scope.
+			pool.submit(() -> {
+				try {
+					startGate.await();
+					mySearchParamRegistry.withDeferredRebuild(() -> {
+						for (int i = 0; i < scopedChangeCount; i++) {
+							mySearchParamRegistry.handleChange(buildCreatedEvent("SearchParameter/inside-" + i));
+						}
+					});
+				} catch (Throwable t) {
+					failure.compareAndSet(null, t);
+				} finally {
+					doneGate.countDown();
+				}
+			});
+
+			// Thread B: external Quartz-like driver — handleChange/forceRefresh outside any scope.
+			pool.submit(() -> {
+				try {
+					startGate.await();
+					for (int i = 0; i < externalChangeCount; i++) {
+						if (i % 2 == 0) {
+							mySearchParamRegistry.handleChange(buildCreatedEvent("SearchParameter/outside-" + i));
+						} else {
+							mySearchParamRegistry.forceRefresh();
+						}
+					}
+				} catch (Throwable t) {
+					failure.compareAndSet(null, t);
+				} finally {
+					doneGate.countDown();
+				}
+			});
+
+			startGate.countDown();
+			assertThat(doneGate.await(30, TimeUnit.SECONDS)).isTrue();
+		} finally {
+			pool.shutdownNow();
+		}
+
+		assertThat(failure.get()).isNull();
+
+		// The cache is still consistent after the race: built-in SP count matches expectation
+		// and a known SP still resolves through the read path.
+		assertThat(mySearchParamRegistry.getActiveSearchParams().size()).isEqualTo(ourBuiltInSearchParams.size());
+		assertThat(mySearchParamRegistry.getActiveSearchParam(
+						"Patient", "name", ISearchParamRegistry.SearchParamLookupContextEnum.INDEX))
+				.isNotNull();
+
+		// Lower bound: at least one rebuild happened.
+		// Upper bound: bounded by external rebuilds + one scope-exit flush + one slack rebuild
+		// for the race where Thread B briefly observes a stale myDeferRebuild=false.
+		long searchCalls = mockingDetails(mySearchParamProvider).getInvocations().stream()
+				.filter(i -> i.getMethod().getName().equals("search"))
+				.count();
+		assertThat(searchCalls).isGreaterThanOrEqualTo(1);
+		assertThat(searchCalls).isLessThanOrEqualTo(externalChangeCount + 2);
+	}
+
+	private static IResourceChangeEvent buildCreatedEvent(String theId) {
+		return ResourceChangeEvent.fromCreatedUpdatedDeletedResourceIds(
+				List.of(new IdDt(theId)), List.of(), List.of());
 	}
 
 }

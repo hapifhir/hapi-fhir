@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,6 +54,7 @@ public class InstanceProgress {
 	private String myErrormessage = null;
 	private StatusEnum myNewStatus = null;
 	private final Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
+	private final Map<String, StepProgressData> myStepProgressMap = new HashMap<>();
 	private final Set<String> myWarningMessages = new HashSet<>();
 
 	public void addChunk(WorkChunk theChunk) {
@@ -64,14 +66,25 @@ public class InstanceProgress {
 		updateEarliestTime(theChunk);
 		updateLatestEndTime(theChunk);
 		updateCompletionStatus(theChunk);
+		updateStepProgress(theChunk);
+	}
+
+	private void updateStepProgress(WorkChunk theChunk) {
+		String stepId = theChunk.getTargetStepId();
+		if (stepId != null) {
+			myStepProgressMap.computeIfAbsent(stepId, StepProgressData::new).addChunk(theChunk);
+		}
 	}
 
 	private void updateCompletionStatus(WorkChunk theChunk) {
-		// Update the status map first.
+		// Update the status map.
 		Map<WorkChunkStatusEnum, Integer> statusToCountMap =
-				myStepToStatusCountMap.getOrDefault(theChunk.getTargetStepId(), new HashMap<>());
-		statusToCountMap.put(theChunk.getStatus(), statusToCountMap.getOrDefault(theChunk.getStatus(), 0) + 1);
+				myStepToStatusCountMap.computeIfAbsent(theChunk.getTargetStepId(), k -> new HashMap<>());
+		statusToCountMap.merge(theChunk.getStatus(), 1, Integer::sum);
 
+		// Track instance-level counts and error messages.
+		// Note: this switch intentionally remains here (rather than deriving from StepProgressData)
+		// because it also captures error messages which are not tracked per-step.
 		switch (theChunk.getStatus()) {
 			case GATE_WAITING:
 			case READY:
@@ -226,5 +239,21 @@ public class InstanceProgress {
 
 	public boolean hasNewStatus() {
 		return myNewStatus != null;
+	}
+
+	/**
+	 * Returns per-step progress data for all steps that have been observed.
+	 * The returned map is keyed by step ID.
+	 */
+	public Map<String, StepProgressData> getStepProgressMap() {
+		return Collections.unmodifiableMap(myStepProgressMap);
+	}
+
+	/**
+	 * Returns the progress data for a specific step, or null if no chunks
+	 * have been observed for that step.
+	 */
+	public StepProgressData getStepProgress(String theStepId) {
+		return myStepProgressMap.get(theStepId);
 	}
 }

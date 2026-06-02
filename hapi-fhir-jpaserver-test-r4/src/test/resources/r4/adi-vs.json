@@ -8,7 +8,7 @@
 	"url": "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc",
 	"version": "20220214",
 	"name": "NDC-Codes-Mental-Health",
-	"status": "draft",
+	"status": "active",
 	"experimental": true,
 	"date": "2022-02-14",
 	"compose": {

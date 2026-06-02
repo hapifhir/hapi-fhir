@@ -207,6 +207,9 @@ public class Constants {
 	public static final String PARAM_AT = "_at";
 	public static final String PARAM_ID = "_id";
 	public static final String PARAM_IN = "_in";
+	/** URL prefix shared by all canonical HL7 built-in search parameters. */
+	public static final String BUILT_IN_SEARCH_PARAM_URI_PREFIX = "http://hl7.org/fhir/SearchParameter/";
+
 	public static final String PARAM_ID_URL = "http://hl7.org/fhir/SearchParameter/Resource-id";
 	/**
 	 * Used in paging links

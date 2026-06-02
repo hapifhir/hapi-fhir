@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
 import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageWithDependenciesJson;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
@@ -55,9 +56,11 @@ public class InitializeDependenciesStep
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeDependenciesStep.class);
 
 	private final IJobCoordinator myJobCoordinator;
+	private final DependencyManager myDependencyManager;
 
-	public InitializeDependenciesStep(IJobCoordinator myJobCoordinator) {
+	public InitializeDependenciesStep(IJobCoordinator myJobCoordinator, DependencyManager myDependencyManager) {
 		this.myJobCoordinator = myJobCoordinator;
+		this.myDependencyManager = myDependencyManager;
 	}
 
 	@Nonnull
@@ -98,9 +101,11 @@ public class InitializeDependenciesStep
 
 			result.setDependencyJobIds(jobIds);
 		} catch (Exception e) {
-			String message = String.format(
-					"Failed to process dependencies for package %s#%s",
-					installationSpec.getName(), installationSpec.getVersion());
+			// adding a code to this since the exceptions caught here do not have a code
+			String message = Msg.code(2955)
+					+ String.format(
+							"Failed to process dependencies for package %s#%s: %s",
+							installationSpec.getName(), installationSpec.getVersion(), e.getMessage());
 			ourLog.warn(message, e);
 			theDataSink.recoveredError(message);
 		}
@@ -128,19 +133,22 @@ public class InitializeDependenciesStep
 							.add(String.format(
 									"Installation would install %s#%s",
 									nextDependency.name(), nextDependency.version()));
-				} else {
+				} else if (myDependencyManager.shouldProcessDependency(
+						theStepExecutionDetails.getParameters().getDependencyTrackerId(),
+						nextDependency.name(),
+						nextDependency.version())) {
 					// create a new installation spec, retaining all the control parameters, but targeting the
-					// dependency
-					// package
-					JobInstanceStartRequest startRequest = buildStartRequest(nextDependency, installationSpec);
+					// dependency package
+					JobInstanceStartRequest startRequest =
+							buildStartRequest(nextDependency, theStepExecutionDetails.getParameters());
 					Batch2JobStartResponse response = myJobCoordinator.startInstance(
 							theStepExecutionDetails.newSystemRequestDetails(), startRequest);
 					jobIds.add(response.getInstanceId());
 				}
 			} catch (Exception e) {
 				String message = String.format(
-						"Failed to launch child job for dependency package %s#%s. Skipping this dependency.",
-						nextDependency.name(), nextDependency.version());
+						"Failed to launch child job for dependency package %s#%s. Skipping this dependency. Cause: %s",
+						nextDependency.name(), nextDependency.version(), e.getMessage());
 				ourLog.warn(message, e);
 				theDataSink.recoveredError(message);
 			}
@@ -151,8 +159,9 @@ public class InitializeDependenciesStep
 
 	@Nonnull
 	private static JobInstanceStartRequest buildStartRequest(
-			PackageUtils.DependentPackage theDependency, PackageInstallationSpec theParentInstallationSpec) {
-		PackageInstallationSpec dependencySpec = new PackageInstallationSpec(theParentInstallationSpec);
+			PackageUtils.DependentPackage theDependency, PackageInstallationJobParameters theParentJobParameters) {
+		PackageInstallationSpec dependencySpec =
+				PackageInstallationSpec.copyOf(theParentJobParameters.getInstallationSpec());
 		dependencySpec.setName(theDependency.name());
 		dependencySpec.setVersion(theDependency.version());
 		dependencySpec.setPackageUrl(null);
@@ -161,6 +170,7 @@ public class InitializeDependenciesStep
 		PackageInstallationJobParameters parameters = new PackageInstallationJobParameters();
 		parameters.setInstallationSpec(dependencySpec);
 		parameters.setDependencyJob(true);
+		parameters.setDependencyTrackerId(theParentJobParameters.getDependencyTrackerId());
 
 		return new JobInstanceStartRequest(Batch2JobDefinitionConstants.INSTALL_PACKAGE, parameters);
 	}
