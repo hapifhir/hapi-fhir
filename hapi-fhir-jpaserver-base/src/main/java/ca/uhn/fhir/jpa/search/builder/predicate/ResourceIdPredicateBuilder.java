@@ -122,33 +122,13 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 		}
 
 		if (allOrPids != null && allOrPids.isEmpty()) {
-			/*
-			 * If we are being invoked as a child predicate (i.e. our caller is joining
-			 * us back via theSourceJoinColumn), we are by construction in an OR
-			 * position — for example, the unqualified chain "?based-on._id=x" iterates
-			 * every target type of the based-on SearchParameter and OR's the per-type
-			 * subqueries together.
-			 *
-			 * In that context, calling setMatchNothing() would taint the SHARED
-			 * SearchQueryBuilder and short-circuit the entire outer query — even
-			 * though sibling OR branches may still resolve. Instead, produce an
-			 * always-false condition for this branch only (and the symmetric
-			 * always-true for `ne`, since "id NOT IN {}" is trivially satisfied by
-			 * every row).
-			 */
+			// During unqualified chain resolution, e.g. ?based-on._idx=x, do not drop out early and instead evaluate all target types
 			if (theSourceJoinColumn != null) {
 				SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, defaultOperation);
 				return new CustomCondition(
 						operation == SearchFilterParser.CompareOperation.ne ? "(NULL IS NULL)" : "(NULL IS NOT NULL)");
 			}
-
-			/*
-			 * Top-level call (no source-join column): the empty set is an AND-position
-			 * guarantee that nothing can match, so the existing setMatchNothing()
-			 * short-circuit is correct and desirable.
-			 */
 			setMatchNothing();
-
 		} else if (allOrPids != null) {
 
 			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, defaultOperation);
