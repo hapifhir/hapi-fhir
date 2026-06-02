@@ -177,23 +177,23 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
 		}
-
-		TermCodeSystemVersion csv = cs.getCurrentVersion();
+		TermCodeSystemVersion csv = myCodeSystemVersionDao.findCurrentVersionByCodeSystemPid(cs.getPid());
 		Validate.notNull(csv, "No current version for code system: %s", theSystem);
 
-		return addConceptsToCodeSystemVersion(csv, theAdditions);
+		return addConceptsToCodeSystemVersion(cs, csv, theAdditions);
 	}
 
 	@Nonnull
 	private UploadStatistics addConceptsToCodeSystemVersion(
-			TermCodeSystemVersion theCodeSystemVersion, CustomTerminologySet theAdditions) {
+			TermCodeSystem theTermCodeSystem,
+			TermCodeSystemVersion theCodeSystemVersion,
+			CustomTerminologySet theAdditions) {
 		HapiTransactionService.requireTransaction();
 
-		TermCodeSystem cs = theCodeSystemVersion.getCodeSystem();
-		Validate.notNull(cs, "No code system found for code system version: %s", theCodeSystemVersion);
-		Validate.notNull(cs.getPid(), "No pid found for code system: %s", cs);
+		Validate.notNull(theTermCodeSystem, "No code system found for code system version: %s", theCodeSystemVersion);
+		Validate.notNull(theTermCodeSystem.getPid(), "No pid found for code system: %s", theTermCodeSystem);
 
-		String codeSystemUrl = cs.getCodeSystemUri();
+		String codeSystemUrl = theTermCodeSystem.getCodeSystemUri();
 		CodeSystem codeSystem = myTerminologySvc.fetchCanonicalCodeSystemFromCompleteContext(codeSystemUrl);
 		if (codeSystem != null && codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 			throw new InvalidRequestException(
@@ -201,7 +201,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 							+ "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
 		}
 
-		IIdType codeSystemId = cs.getResource().getIdDt();
+		IIdType codeSystemId = theTermCodeSystem.getResource().getIdDt();
 
 		UploadStatistics retVal = new UploadStatistics(codeSystemId);
 		Map<String, TermConcept> codeToConcept = new HashMap<>();
@@ -384,7 +384,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 									codeSystem.getVersion(),
 									theResourceEntity,
 									true);
-							return;
+							if (getExistingTermCodeSystemVersion(termCodeSystem.getPid(), codeSystem.getVersion())
+									!= null) {
+								return;
+							}
 						}
 					}
 				}
@@ -528,7 +531,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		 * Do the upload
 		 */
 
-		codeSystemToStore.setCodeSystem(codeSystem);
+		if (codeSystemToStore.getPid() == null) {
+			codeSystemToStore.setCodeSystem(codeSystem);
+		} else {
+			codeSystemToStore.setCodeSystemPid(codeSystem.getPid());
+		}
 		codeSystemToStore.setCodeSystemDisplayName(theSystemName);
 		codeSystemToStore.setCodeSystemVersionId(theCodeSystemVersionId);
 
@@ -573,10 +580,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		boolean isMakeVersionCurrent = ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequestDetails);
 		if (isMakeVersionCurrent) {
-			codeSystem.setCurrentVersion(codeSystemToStore);
-			if (codeSystem.getPid() == null) {
-				codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
-			}
+			codeSystem.setCurrentVersionPid(codeSystemToStore);
 		}
 
 		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
@@ -858,7 +862,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 					theAllowPlaceholderRepoint);
 		}
 
-		codeSystem.setResource(theCodeSystemResourceTable);
+		if (codeSystem.getPid() == null) {
+			codeSystem.setResource(theCodeSystemResourceTable);
+		} else {
+			codeSystem.setResourcePid(theCodeSystemResourceTable);
+		}
 		codeSystem.setCodeSystemUri(theSystemUri);
 		codeSystem.setName(theSystemName);
 		codeSystem = myCodeSystemDao.save(codeSystem);
@@ -872,50 +880,33 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			ResourceTable theCodeSystemResourceTable,
 			boolean theAllowPlaceholderRepoint) {
 		TermCodeSystemVersion codeSystemVersionEntity;
-		String msg = null;
 		if (theSystemVersionId == null) {
-			// Check if a non-versioned TermCodeSystemVersion entity already exists for this TermCodeSystem.
 			codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(theCodeSystem.getPid());
-			if (codeSystemVersionEntity != null) {
-				msg = myContext
-						.getLocalizer()
-						.getMessage(
-								TermReadSvcImpl.class,
-								"cannotCreateDuplicateCodeSystemUrl",
-								theSystemUri,
-								codeSystemVersionEntity
-										.getResource()
-										.getIdDt()
-										.toUnqualifiedVersionless()
-										.getValue());
-			}
 		} else {
-			// Check if a TermCodeSystemVersion entity already exists for this TermCodeSystem and version.
 			codeSystemVersionEntity =
 					myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCodeSystem.getPid(), theSystemVersionId);
-			if (codeSystemVersionEntity != null) {
-				msg = myContext
-						.getLocalizer()
-						.getMessage(
-								TermReadSvcImpl.class,
-								"cannotCreateDuplicateCodeSystemUrlAndVersion",
-								theSystemUri,
-								theSystemVersionId,
-								codeSystemVersionEntity
-										.getResource()
-										.getIdDt()
-										.toUnqualifiedVersionless()
-										.getValue());
-			}
 		}
+
+		if (codeSystemVersionEntity == null) {
+			return;
+		}
+
+		if (Objects.equals(
+				codeSystemVersionEntity.getResourcePidValue(),
+				theCodeSystemResourceTable.getId().getId())) {
+			return;
+		}
+
 		// Future: re-keying TermCodeSystemVersion on (resource-pid, version) instead of
 		// (codesystem-pid, version) would remove the whole conflict-release helper, at the
 		// cost of a schema migration and a wide findByCodeSystemPid* refactor.
-		if (codeSystemVersionEntity != null
-				&& !tryReleaseConflictingVersionRow(
-						codeSystemVersionEntity, theCodeSystemResourceTable, theAllowPlaceholderRepoint)) {
-			throw new UnprocessableEntityException(Msg.code(848) + msg);
+		if (tryReleaseConflictingVersionRow(
+				codeSystemVersionEntity, theCodeSystemResourceTable, theAllowPlaceholderRepoint)) {
+			return;
 		}
+
+		throw new UnprocessableEntityException(Msg.code(848)
+				+ buildDuplicateCodeSystemMessage(codeSystemVersionEntity, theSystemUri, theSystemVersionId));
 	}
 
 	// Created by Claude Opus 4.7
@@ -943,7 +934,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		if (isPlaceholder) {
-			theExistingRow.setResource(theCurrentResource);
+			theExistingRow.setResourcePid(theCurrentResource);
 			myCodeSystemVersionDao.save(theExistingRow);
 		} else {
 			markCodeSystemVersionForDeletion(theExistingRow);
@@ -961,6 +952,23 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
 		myCodeSystemVersionDao.saveAndFlush(theVersion);
 		myDeferredStorageSvc.deleteCodeSystemVersion(theVersion);
+	}
+
+	// Created by claude-opus-4-6
+	private String buildDuplicateCodeSystemMessage(
+			TermCodeSystemVersion theVersionEntity, String theSystemUri, String theSystemVersionId) {
+		String resourceRef = theVersionEntity
+				.getResource()
+				.getIdDt()
+				.toUnqualifiedVersionless()
+				.getValue();
+		boolean hasVersion = theSystemVersionId != null;
+		String messageKey =
+				hasVersion ? "cannotCreateDuplicateCodeSystemUrlAndVersion" : "cannotCreateDuplicateCodeSystemUrl";
+		Object[] args = hasVersion
+				? new Object[] {theSystemUri, theSystemVersionId, resourceRef}
+				: new Object[] {theSystemUri, resourceRef};
+		return myContext.getLocalizer().getMessage(TermReadSvcImpl.class, messageKey, args);
 	}
 
 	private void populateCodeSystemVersionProperties(
@@ -990,7 +998,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theConceptsStack.add(theConcept.getCode());
 
 		int retVal = 0;
-		if (theAllConcepts.put(theConcept, theAllConcepts) == null) {
+		if (theAllConcepts.put(theConcept, PLACEHOLDER_OBJECT) == null) {
 			if (theAllConcepts.size() % 1000 == 0) {
 				ourLog.info("Have validated {} concepts", theAllConcepts.size());
 			}
@@ -1061,7 +1069,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				additions.addRootConcept(concept);
 			}
 
-			return addConceptsToCodeSystemVersion(codeSystemVersionEntity, additions);
+			return addConceptsToCodeSystemVersion(
+					codeSystemVersionEntity.getCodeSystem(), codeSystemVersionEntity, additions);
 		});
 	}
 
@@ -1123,8 +1132,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			if (makeCurrent) {
 				TermCodeSystem codeSystem = stagingCodeSystemVersionEntity.getCodeSystem();
-				codeSystem.setCurrentVersion(stagingCodeSystemVersionEntity);
-				myEntityManager.merge(codeSystem);
+				codeSystem.setCurrentVersionPid(stagingCodeSystemVersionEntity);
 			}
 		});
 	}

@@ -8,11 +8,14 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+@SuppressWarnings("deprecation")
 public class ResourceModifiedTest {
-	private FhirContext myFhirContext = FhirContext.forR4();
+	private final FhirContext myFhirContext = FhirContext.forR4();
 
 	@Test
 	public void testCreate() {
@@ -23,9 +26,10 @@ public class ResourceModifiedTest {
 		assertEquals(org.getIdElement(), msg.getPayloadId(myFhirContext));
 		assertEquals(ResourceModifiedMessage.OperationTypeEnum.CREATE, msg.getOperationType());
 		Organization decodedOrg = (Organization) msg.getNewResource(myFhirContext);
-		assertEquals(org.getId(), decodedOrg.getId());
-		assertEquals(org.getName(), decodedOrg.getName());
-		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		assertThat(decodedOrg)
+				.returns(org.getId(), Organization::getId)
+				.returns(org.getName(), Organization::getName);
+		assertNull(msg.getPartitionId());
 	}
 
 	@Test
@@ -37,9 +41,10 @@ public class ResourceModifiedTest {
 		assertEquals(org.getIdElement(), msg.getPayloadId(myFhirContext));
 		assertEquals(ResourceModifiedMessage.OperationTypeEnum.UPDATE, msg.getOperationType());
 		Organization decodedOrg = (Organization) msg.getNewResource(myFhirContext);
-		assertEquals(org.getId(), decodedOrg.getId());
-		assertEquals(org.getName(), decodedOrg.getName());
-		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		assertThat(decodedOrg)
+				.returns(org.getId(), Organization::getId)
+				.returns(org.getName(), Organization::getName);
+		assertNull(msg.getPartitionId());
 	}
 
 	@Test
@@ -51,7 +56,7 @@ public class ResourceModifiedTest {
 		assertEquals("Organization/testOrgId", msg.getPayloadId(myFhirContext).getValue());
 		assertEquals(ResourceModifiedMessage.OperationTypeEnum.DELETE, msg.getOperationType());
 		assertNotNull(msg.getNewResource(myFhirContext));
-		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		assertNull(msg.getPartitionId());
 	}
 
 	@Test
@@ -62,8 +67,8 @@ public class ResourceModifiedTest {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, org, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 		msg.setPartitionId(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
 
-		assertEquals(msg.getPartitionId().getPartitionIds().size(), 1);
-		assertEquals(msg.getPartitionId().getPartitionIds().get(0), 123);
+		assertEquals(1, msg.getPartitionId().getPartitionIds().size());
+		assertEquals(123, msg.getPartitionId().getPartitionIds().get(0));
 	}
 
 }

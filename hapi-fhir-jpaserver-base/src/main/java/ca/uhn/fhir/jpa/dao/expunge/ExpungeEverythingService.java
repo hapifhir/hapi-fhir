@@ -246,9 +246,10 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 					for (TermCodeSystem next : myEntityManager
 							.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class)
 							.getResultList()) {
-						next.setCurrentVersion(null);
-						myEntityManager.merge(next);
+						next.setCurrentVersionPid(null);
 					}
+					// Flush FK nulls before deleting TermCodeSystemVersion rows below
+					myEntityManager.flush();
 				});
 		counter.addAndGet(
 				expungeEverythingByTypeWithoutPurging(theRequest, ResourceSystemEntity.class, requestPartitionId));

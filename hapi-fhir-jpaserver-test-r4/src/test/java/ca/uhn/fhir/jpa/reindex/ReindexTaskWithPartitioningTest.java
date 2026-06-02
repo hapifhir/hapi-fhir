@@ -39,7 +39,7 @@ public class ReindexTaskWithPartitioningTest extends BaseJpaR4Test {
 
 		RequestPartitionId partition1 = RequestPartitionId.fromPartitionId(1);
 		RequestPartitionId partition2 = RequestPartitionId.fromPartitionId(2);
-		RequestPartitionId defaultPartition = RequestPartitionId.defaultPartition();
+		RequestPartitionId defaultPartition = RequestPartitionId.fromPartitionId(null);
 
 		Observation observation1 = buildResource("Observation", withStatus(Observation.ObservationStatus.FINAL.toCode()));
 		myObservationDao.create(observation1, new SystemRequestDetails().setRequestPartitionId(partition1));

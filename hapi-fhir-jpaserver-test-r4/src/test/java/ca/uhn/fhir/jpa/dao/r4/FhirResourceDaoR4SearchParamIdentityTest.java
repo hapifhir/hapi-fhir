@@ -233,7 +233,7 @@ class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 				.filter(q -> q.getSql(false, false).contains("insert into HFJ_SPIDX_IDENTITY")).count());
 
 			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
-				RequestPartitionId.defaultPartition(), theResourceType, theSearchParamName);
+				RequestPartitionId.fromPartitionId(null), theResourceType, theSearchParamName);
 
 			validateIndexedSearchParamIdentity(hashIdentity, theResourceType, theSearchParamName);
 
