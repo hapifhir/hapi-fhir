@@ -94,13 +94,13 @@ public class Batch2JobAttachmentChunkEntity implements Serializable {
 	@Embeddable
 	public static class ChunkPk {
 
-		@Column(name = "JOB_INSTANCE_ID", length = ID_MAX_LENGTH)
+		@Column(name = "JOB_INSTANCE_ID", length = ID_MAX_LENGTH, nullable = false)
 		private String myJobInstanceId;
 
-		@Column(name = "ATTACHMENT_ID", length = ID_MAX_LENGTH)
+		@Column(name = "ATTACHMENT_ID", length = ID_MAX_LENGTH, nullable = false)
 		private String myAttachmentId;
 
-		@Column(name = "CHUNK_INDEX", length = ID_MAX_LENGTH)
+		@Column(name = "CHUNK_INDEX", length = ID_MAX_LENGTH, nullable = false)
 		private int myChunkIndex;
 
 		/**

@@ -82,7 +82,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UploadTerminologyCommandTest {
+public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest{
 	private static final String FHIR_VERSION_DSTU3 = "DSTU3";
 	private static final String FHIR_VERSION_R4 = "R4";
 	private FhirContext myCtx;
@@ -107,9 +107,6 @@ public class UploadTerminologyCommandTest {
 	private IJobCoordinator myJobCoordinator;
 	@Mock
 	private IJobPersistence myJobPersistence;
-
-	@RegisterExtension
-	private LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(App.class);
 
 	@Captor
 	protected ArgumentCaptor<List<ITermLoaderSvc.FileDescriptor>> myDescriptorListCaptor;
@@ -650,9 +647,7 @@ public class UploadTerminologyCommandTest {
 			.isInstanceOf(CommandFailureException.class);
 
 		// Verify
-		List<ILoggingEvent> errorMessages = myLogbackTestExtension.getLogEvents(t -> t.getLevel() == Level.ERROR);
-		String lastMessage = errorMessages.get(errorMessages.size() - 1).getFormattedMessage();
-		assertThat(lastMessage).contains("HAPI-2959: Failed to attach file \"" + tempFile.getName()+ "\" to job, got HTTP 400 Bad Request: HAPI-2953: File named \"" + tempFile.getName() + "\" is not valid for import LOINC job");
+		assertThat(getConsoleOutput()).contains("HAPI-2959: Failed to attach file \"" + tempFile.getName()+ "\" to job, got HTTP 400 Bad Request: HAPI-2953: File named \"" + tempFile.getName() + "\" is not valid for import LOINC job");
 	}
 
 	@ParameterizedTest

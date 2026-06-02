@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
@@ -595,11 +596,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				Optional<Batch2JobAttachmentEntity> existingOpt =
 						myAttachmentRepository.findByIdAndFilename(theInstanceId, theRequest.getFilename());
 				if (existingOpt.isPresent()) {
-					ourLog.info(
-							"Replacing existing attachment with filename[{}] for instance[{}]",
-							theRequest.getFilename(),
-							theInstanceId);
-					attachment = existingOpt.get();
+					throw new JobExecutionFailedException(Msg.code(2960) + "Attachment with filename["
+							+ theRequest.getFilename() + "] already exists for instance[" + theInstanceId + "]");
 				} else {
 					ourLog.info(
 							"Storing new attachment with filename[{}] for instance[{}]",

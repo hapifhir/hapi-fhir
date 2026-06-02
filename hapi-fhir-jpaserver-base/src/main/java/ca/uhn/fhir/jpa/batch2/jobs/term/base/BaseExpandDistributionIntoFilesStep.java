@@ -182,6 +182,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 										case CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 1000);
 											yield csvSplitWithRepeatHeader(
+													fileHandlingType,
 													',',
 													instanceId,
 													bytes,
@@ -194,6 +195,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 										case CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 50000);
 											yield csvSplitWithRepeatHeader(
+													fileHandlingType,
 													',',
 													instanceId,
 													bytes,
@@ -206,6 +208,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 										case TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 5000);
 											yield csvSplitWithRepeatHeader(
+													fileHandlingType,
 													'\t',
 													instanceId,
 													bytes,
@@ -341,6 +344,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 	 * @return A list of attachment IDs for the work chunks that were created.
 	 */
 	private List<String> csvSplitWithRepeatHeader(
+			ITerminologyImportFileHandlerStep.FileHandlingType theFileHandlingType,
 			char theDelimiter,
 			String theJobInstanceId,
 			byte[] theBytes,
@@ -357,6 +361,10 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 		if (lastSlash != -1) {
 			filename = filename.substring(lastSlash + 1);
 		}
+
+		// Avoid filename collisions if two different steps want chunks from the same file,
+		// but they want them with different chunk sizes
+		filename += "_" + theFileHandlingType.ordinal();
 
 		ByteArrayInputStream bis = new ByteArrayInputStream(theBytes);
 		InputStreamReader reader = new InputStreamReader(bis, StandardCharsets.UTF_8);
