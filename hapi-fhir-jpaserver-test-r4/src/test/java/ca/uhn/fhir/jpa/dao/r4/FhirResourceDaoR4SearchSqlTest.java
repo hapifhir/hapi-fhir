@@ -306,7 +306,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 		@Hook(STORAGE_PARTITION_IDENTIFY_ANY)
 		public RequestPartitionId partition() {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(null);
 		}
 
 	}

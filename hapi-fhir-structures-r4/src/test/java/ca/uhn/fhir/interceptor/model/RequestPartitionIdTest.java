@@ -63,9 +63,9 @@ public class RequestPartitionIdTest {
 
 		assertFalse(allPartitions().isDefaultPartition());
 		assertFalse(allPartitions().isPartition(null));
-		assertFalse(defaultPartition().isAllPartitions());
-		assertTrue(defaultPartition().isDefaultPartition());
-		assertTrue(defaultPartition().isPartition(myPartitionSettings.getDefaultPartitionId()));
+		assertFalse(RequestPartitionId.fromPartitionId(null).isAllPartitions());
+		assertTrue(RequestPartitionId.fromPartitionId(null).isDefaultPartition());
+		assertTrue(RequestPartitionId.fromPartitionId(null).isPartition(myPartitionSettings.getDefaultPartitionId()));
 		assertFalse(defaultPartition(myPartitionSettings).isAllPartitions());
 		assertTrue(defaultPartition(myPartitionSettings).isDefaultPartition());
 		assertTrue(defaultPartition(myPartitionSettings).isPartition(myPartitionSettings.getDefaultPartitionId()));
@@ -78,10 +78,10 @@ public class RequestPartitionIdTest {
 
 	@Test
 	public void testIsDefaultPartition_withPartitionAsParameter() {
-		assertThat(defaultPartition().isPartition(null)).isTrue();
+		assertThat(RequestPartitionId.fromPartitionId(null).isPartition(null)).isTrue();
 		assertThat(fromPartitionIds(ourDefaultPartitionId).isPartition(ourDefaultPartitionId)).isTrue();
 
-		assertThat(defaultPartition().isPartition(ourDefaultPartitionId)).isFalse();
+		assertThat(RequestPartitionId.fromPartitionId(null).isPartition(ourDefaultPartitionId)).isFalse();
 		assertThat(allPartitions().isPartition(ourDefaultPartitionId)).isFalse();
 		assertThat(fromPartitionIds(ourDefaultPartitionId, 2).isPartition(ourDefaultPartitionId)).isFalse();
 	}
@@ -89,13 +89,13 @@ public class RequestPartitionIdTest {
 	@Test
 	public void testHasDefaultPartition_withDefaultPartitionAsParameter() {
 
-		assertThat(defaultPartition().hasDefaultPartitionId(null)).isTrue();
+		assertThat(RequestPartitionId.fromPartitionId(null).hasDefaultPartitionId(null)).isTrue();
 		assertThat(fromPartitionIds(ourDefaultPartitionId).hasDefaultPartitionId(ourDefaultPartitionId)).isTrue();
 		assertThat(fromPartitionIds(ourDefaultPartitionId, null).hasDefaultPartitionId(null)).isTrue();
 		assertThat(fromPartitionIds(ourDefaultPartitionId, null).hasDefaultPartitionId(ourDefaultPartitionId)).isTrue();
 
 		assertThat(fromPartitionIds(ourDefaultPartitionId).hasDefaultPartitionId(null)).isFalse();
-		assertThat(defaultPartition().hasDefaultPartitionId(ourDefaultPartitionId)).isFalse();
+		assertThat(RequestPartitionId.fromPartitionId(null).hasDefaultPartitionId(ourDefaultPartitionId)).isFalse();
 	}
 
 	@Test
@@ -153,7 +153,7 @@ public class RequestPartitionIdTest {
 	@Test
 	public void testMergeIds_IncludesDefault() {
 		RequestPartitionId input0 = fromPartitionIds(1, 2, 3);
-		RequestPartitionId input1 = defaultPartition();
+		RequestPartitionId input1 = RequestPartitionId.fromPartitionId(null);
 
 		RequestPartitionId actual = input0.mergeIds(input1);
 		RequestPartitionId expected = fromPartitionIds(1, 2, 3, null);
@@ -172,7 +172,7 @@ public class RequestPartitionIdTest {
 	static Stream<Object[]> testStringifyForKeyTestCases() {
 		return Stream.of(
 			new Object[]{RequestPartitionId.allPartitions(), "(all)"},
-			new Object[]{RequestPartitionId.defaultPartition(), "null"},
+			new Object[]{RequestPartitionId.fromPartitionId(null), "null"},
 			new Object[]{RequestPartitionId.fromPartitionIds(1, 2, 3), "1 2 3"},
 			new Object[]{RequestPartitionId.fromPartitionIds(null, 2, 3), "null 2 3"},
 			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(1, 2, 3), "(all) 1 2 3"}
@@ -249,7 +249,7 @@ public class RequestPartitionIdTest {
 			assertThat(json).contains("partitionNames\":[\"Name1\",\"Name2\"]");
 		}
 		assertSerDeserSer(allPartitions());
-		assertSerDeserSer(defaultPartition());
+		assertSerDeserSer(RequestPartitionId.fromPartitionId(null));
 	}
 
 	private String assertSerDeserSer(RequestPartitionId start) throws JsonProcessingException {
