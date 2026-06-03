@@ -44,17 +44,18 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 
 	@Test
 	public void testLoadSnomedCt() throws Exception {
-		new ZipCollectionBuilder(true).addFileZip("/sct/", "sct2_Concept_Full_INT_20160131.txt");
-		new ZipCollectionBuilder(true).addFileZip("/sct/", "sct2_Concept_Full-en_INT_20160131.txt");
-		new ZipCollectionBuilder(true).addFileZip("/sct/", "sct2_Description_Full_INT_20160131.txt");
-		new ZipCollectionBuilder(true).addFileZip("/sct/", "sct2_Identifier_Full_INT_20160131.txt");
-		new ZipCollectionBuilder(true).addFileZip("/sct/", "sct2_Relationship_Full_INT_20160131.txt");
-		new ZipCollectionBuilder(true).addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
-		new ZipCollectionBuilder(true).addFileZip("/sct/", "sct2_TextDefinition_Full-en_INT_20160131.txt");
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
+		files.addFileZip("/sct/", "sct2_Concept_Full_INT_20160131.txt");
+		files.addFileZip("/sct/", "sct2_Concept_Full-en_INT_20160131.txt");
+		files.addFileZip("/sct/", "sct2_Description_Full_INT_20160131.txt");
+		files.addFileZip("/sct/", "sct2_Identifier_Full_INT_20160131.txt");
+		files.addFileZip("/sct/", "sct2_Relationship_Full_INT_20160131.txt");
+		files.addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
+		files.addFileZip("/sct/", "sct2_TextDefinition_Full-en_INT_20160131.txt");
 
 		// Test
 
-		myTerminologyTestHelper.startImportSnomedCtJobAndWaitForCompletion("20160131", new ZipCollectionBuilder(true), false);
+		myTerminologyTestHelper.startImportSnomedCtJobAndWaitForCompletion("20160131", files, false);
 
 		// Verify
 
@@ -103,8 +104,8 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 		runInTransaction(()->{
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(2, myTermCodeSystemVersionDao.count());
-			assertEquals(15, myTermConceptDao.count());
-			assertEquals(3, myTermConceptParentChildLinkDao.count());
+			assertEquals(16, myTermConceptDao.count());
+			assertEquals(5, myTermConceptParentChildLinkDao.count());
 		});
 
 		LookupCodeRequest request = new LookupCodeRequest(SCT_URI, "116680003");
@@ -163,7 +164,7 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(2, myTermCodeSystemVersionDao.count());
 			assertEquals(5, myTermConceptDao.count());
-			assertEquals(0, myTermConceptParentChildLinkDao.count());
+			assertEquals(3, myTermConceptParentChildLinkDao.count());
 		});
 
 		LookupCodeRequest request = new LookupCodeRequest(SCT_URI, "126816002");

@@ -39,6 +39,18 @@ public class ImportSnomedCtStep3HandleRelationship
 		extends BaseImportTerminologyFileCsvStep<
 				ImportTerminologyJobParameters, ImportSnomedCtStep3HandleRelationship.MyBaseContext> {
 
+	private static final String COL_ACTIVE = "active";
+	private static final String COL_ACTIVE_VAL_1 = "1";
+	private static final String COL_TYPE_ID = "typeId";
+	private static final String COL_DESTINATION_ID = "destinationId";
+	private static final String COL_SOURCE_ID = "sourceId";
+
+	/**
+	 * The concept with ID "116680003" denotes the concept "Is a (attribute)".
+	 * https://docs.snomed.org/snomed-international-documents/snomed-ct-glossary/r/relationship-type
+	 */
+	private static final String COL_TYPE_ID_VAL_IS_A = "116680003";
+
 	@Nonnull
 	@Override
 	public List<LoincFileNameSpecification> getFilesToProcess(
@@ -65,17 +77,15 @@ public class ImportSnomedCtStep3HandleRelationship
 			TerminologyFileSetJson theData,
 			String theSourceFilename) {
 
-		String sourceId = theRecord.get("sourceId");
-		String destinationId = theRecord.get("destinationId");
-		String typeId = theRecord.get("typeId");
-		boolean active = "1".equals(theRecord.get("active"));
+		String sourceId = theRecord.get(COL_SOURCE_ID);
+		String destinationId = theRecord.get(COL_DESTINATION_ID);
+		String typeId = theRecord.get(COL_TYPE_ID);
+		boolean active = COL_ACTIVE_VAL_1.equals(theRecord.get(COL_ACTIVE));
 		if (active) {
 
-			// The concept with ID "116680003" denotes the concept "Is a (attribute)".
-			// https://docs.snomed.org/snomed-international-documents/snomed-ct-glossary/r/relationship-type
 			if (isNotBlank(sourceId)
 					&& isNotBlank(destinationId)
-					&& "116680003".equals(typeId)
+					&& COL_TYPE_ID_VAL_IS_A.equals(typeId)
 					&& !sourceId.equals(destinationId)) {
 
 				// In the RF2 relationships file:

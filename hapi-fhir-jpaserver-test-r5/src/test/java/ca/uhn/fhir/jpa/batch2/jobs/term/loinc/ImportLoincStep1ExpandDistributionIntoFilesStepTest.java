@@ -120,14 +120,14 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		assertEquals(9, attachmentCounter.get());
 
 		verify(myJobPersistence, times(9)).storeNewAttachment(any(), myAttachmentDetailsCaptor.capture());
-		assertEquals("Loinc.csv_0-4", myAttachmentDetailsCaptor.getAllValues().get(0).getFilename());
-		assertEquals("Loinc.csv_5-9", myAttachmentDetailsCaptor.getAllValues().get(1).getFilename());
-		assertEquals("Loinc.csv_10-14", myAttachmentDetailsCaptor.getAllValues().get(2).getFilename());
-		assertEquals("MultiAxialHierarchy.csv_0-4", myAttachmentDetailsCaptor.getAllValues().get(3).getFilename());
-		assertEquals("MultiAxialHierarchy.csv_5-8", myAttachmentDetailsCaptor.getAllValues().get(4).getFilename());
-		assertEquals("AnswerList.csv_0-4", myAttachmentDetailsCaptor.getAllValues().get(5).getFilename());
-		assertEquals("AnswerList.csv_5-9", myAttachmentDetailsCaptor.getAllValues().get(6).getFilename());
-		assertEquals("AnswerList.csv_10-10", myAttachmentDetailsCaptor.getAllValues().get(7).getFilename());
+		assertEquals("Loinc.csv_0_0-4", myAttachmentDetailsCaptor.getAllValues().get(0).getFilename());
+		assertEquals("Loinc.csv_0_5-9", myAttachmentDetailsCaptor.getAllValues().get(1).getFilename());
+		assertEquals("Loinc.csv_0_10-14", myAttachmentDetailsCaptor.getAllValues().get(2).getFilename());
+		assertEquals("MultiAxialHierarchy.csv_0_0-4", myAttachmentDetailsCaptor.getAllValues().get(3).getFilename());
+		assertEquals("MultiAxialHierarchy.csv_0_5-8", myAttachmentDetailsCaptor.getAllValues().get(4).getFilename());
+		assertEquals("AnswerList.csv_0_0-4", myAttachmentDetailsCaptor.getAllValues().get(5).getFilename());
+		assertEquals("AnswerList.csv_0_5-9", myAttachmentDetailsCaptor.getAllValues().get(6).getFilename());
+		assertEquals("AnswerList.csv_0_10-10", myAttachmentDetailsCaptor.getAllValues().get(7).getFilename());
 		assertEquals("metadata.json", myAttachmentDetailsCaptor.getAllValues().get(8).getFilename());
 	}
 

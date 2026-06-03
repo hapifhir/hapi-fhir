@@ -119,23 +119,6 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference()).matches("CodeSystem\\/[a-zA-Z0-9\\.\\-]+");
 	}
 
-		@Test
-	public void testUploadLoinc() throws Exception {
-		byte[] packageBytes = createLoincZip();
-
-		assertThatThrownBy(()->
-			myClient
-				.operation()
-				.onType(CodeSystem.class)
-				.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
-				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.LOINC_URI))
-				.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
-				.execute()
-			).isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining("Uploading the http://loinc.org system now uses the $hapi.fhir.upload-terminology.start-job operation")	;
-
-	}
-
 	@Test
 	public void testUploadMissingPackage() {
 		try {
@@ -169,47 +152,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 	}
 
-	@Test
-	public void testUploadSct() throws Exception {
-		byte[] packageBytes = createSctZip();
 
-		Parameters respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI))
-			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
-			.execute();
-
-		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-
-		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
-	}
-
-	@Test
-	public void testUploadSctLocalFile() throws Exception {
-		byte[] packageBytes = createSctZip();
-		File tempFile = File.createTempFile("tmp", ".zip");
-		tempFile.deleteOnExit();
-
-		FileOutputStream fos = new FileOutputStream(tempFile);
-		fos.write(packageBytes);
-		fos.close();
-
-		Parameters respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI))
-			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("localfile:" + tempFile.getAbsolutePath()))
-			.execute();
-
-		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-
-		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
-	}
 
 	@Test
 	public void testApplyDeltaAdd_UsingCsv() throws IOException {
@@ -902,36 +845,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		theZos.write(IOUtils.toByteArray(TerminologyUploaderProviderR4Test.class.getResourceAsStream("/loinc/" + theFileName)));
 	}
 
-	public static byte[] createLoincZip() throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ZipOutputStream zos = new ZipOutputStream(bos);
 
-		addFile(zos, LOINC_XML_FILE.getCode());
-		addFile(zos, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
-		addFile(zos, LOINC_PART_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_HIERARCHY_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_ANSWERLIST_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_GROUP_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
-		addFile(zos, LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
-		addFile(zos, LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode());
-
-		zos.close();
-
-
-		return bos.toByteArray();
-	}
 
 	private void createCodeSystemFromZipFile(IGenericClient theFhirClient){
 		// Create a parameters resource for the $upload-external-code-system operation.

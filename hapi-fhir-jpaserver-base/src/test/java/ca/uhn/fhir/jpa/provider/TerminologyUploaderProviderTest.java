@@ -350,7 +350,7 @@ class TerminologyUploaderProviderTest {
 			// Verify
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("Don't know how to handle file: foo.txt");
+			assertThat(responseString).contains("File named \\\"foo.txt\\\" is not valid for import LOINC job");
 		}
 
 	}

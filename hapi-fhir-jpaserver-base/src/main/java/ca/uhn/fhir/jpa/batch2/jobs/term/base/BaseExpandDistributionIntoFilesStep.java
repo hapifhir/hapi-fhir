@@ -362,8 +362,18 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 			filename = filename.substring(lastSlash + 1);
 		}
 
-		// Avoid filename collisions if two different steps want chunks from the same file,
-		// but they want them with different chunk sizes
+		/*
+		 * Avoid filename collisions if two different steps want chunks from the same file,
+		 * but they want them with different chunk sizes, e.g. if one step wants CSVs split
+		 * into chunks 1000 and another wants chunks of 50000. Using the file handling type
+		 * ordinal as a suffix ensures unique filenames for different chunk sizes.
+		 *
+		 * Note that these filenames aren't actually used for anything other than making
+		 * the logs slightly more meaningful for troubleshooting, since the job steps
+		 * use the attachment IDs to fetch these attachments and not the filenames. Also
+		 * they only survive as long as the job does. So we don't need to worry about
+		 * ordinal changes over time.
+		 */
 		filename += "_" + theFileHandlingType.ordinal();
 
 		ByteArrayInputStream bis = new ByteArrayInputStream(theBytes);

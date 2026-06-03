@@ -31,7 +31,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ImportTerminologyJobParametersValidator
 		implements ca.uhn.fhir.batch2.api.IJobParametersValidator<ImportTerminologyJobParameters> {
-	private static final Pattern VERSION_PATTERN = Pattern.compile("[^ ]+");
+	private static final Pattern VERSION_PATTERN = Pattern.compile("^\\S+$");
 
 	@Nullable
 	@Override
