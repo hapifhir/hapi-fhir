@@ -430,10 +430,10 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			String obsResBody = myFhirContext.newJsonParser().encodeResourceToString(o);
 
 			o.setId(new IdType("obs-to-delete"));
-			DaoMethodOutcome toDeleteObs = myObservationDao.update(o);
+			DaoMethodOutcome toDeleteObs = myObservationDao.update(o, newSrd());
 
 			o.setId(new IdType("obs-to-keep"));
-			DaoMethodOutcome toKeepObs = myObservationDao.update(o);
+			DaoMethodOutcome toKeepObs = myObservationDao.update(o, newSrd());
 
 			DaoMethodOutcome deleteOutcome = myObservationDao.delete(toDeleteObs.getId(), mySrd);
 
@@ -468,20 +468,20 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			String obsResBody = myFhirContext.newJsonParser().encodeResourceToString(o);
 
 			o.setId(new IdType("obs-to-delete"));
-			DaoMethodOutcome toDeleteObs = myObservationDao.update(o);
+			DaoMethodOutcome toDeleteObs = myObservationDao.update(o, newSrd());
 			DaoMethodOutcome obsToDeleteOutcome = myObservationDao.delete(toDeleteObs.getId(), mySrd);
 
 			o.setId(new IdType("obs-to-keep"));
-			DaoMethodOutcome toKeepObs = myObservationDao.update(o);
+			DaoMethodOutcome toKeepObs = myObservationDao.update(o, newSrd());
 
 			BaseDateTimeDt date = new DateTimeDt().setValue(new Date());
 			sleepAtLeast(1000);
 
 			o.setId(new IdType("obs-to-keep-2"));
-			DaoMethodOutcome toKeepObs2 = myObservationDao.update(o);
+			DaoMethodOutcome toKeepObs2 = myObservationDao.update(o, newSrd());
 
 			o.setId(new IdType("obs-to-delete-2"));
-			DaoMethodOutcome toDeleteObs2 = myObservationDao.update(o);
+			DaoMethodOutcome toDeleteObs2 = myObservationDao.update(o, newSrd());
 			DaoMethodOutcome obsToDeleteOutcome2 = myObservationDao.delete(toDeleteObs2.getId(), mySrd);
 
 			JpaPid obsDeletedJpaPid = (JpaPid) toDeleteObs.getPersistentId();
@@ -498,7 +498,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			// When
 			String theLastUpdatedParam = "&" + Constants.PARAM_LASTUPDATED + "=le" + date.getValueAsString();
 			String theFullUrl = "?_includeDeleted=" + theIncludeDeleted.getCode() + theLastUpdatedParam;
-			ourLog.info("Reindexing with URL: " + theFullUrl);
+			ourLog.info("Reindexing with URL: {}", theFullUrl);
 
 			doOptimizeStorageReindexWithUrl(theFullUrl);
 
@@ -538,10 +538,10 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			String obsResBody = myFhirContext.newJsonParser().encodeResourceToString(o);
 
 			o.setId(new IdType("obs-to-delete"));
-			DaoMethodOutcome toDeleteObs = myObservationDao.update(o);
+			DaoMethodOutcome toDeleteObs = myObservationDao.update(o, newSrd());
 
 			o.setId(new IdType("obs-to-keep"));
-			DaoMethodOutcome toKeepObs = myObservationDao.update(o);
+			DaoMethodOutcome toKeepObs = myObservationDao.update(o, newSrd());
 
 			DaoMethodOutcome afterDeleteObsVersion = myObservationDao.delete(toDeleteObs.getId(), mySrd);
 
@@ -576,11 +576,11 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			String obsResBody = myFhirContext.newJsonParser().encodeResourceToString(o);
 
 			o.setId(new IdType("obs-to-delete"));
-			DaoMethodOutcome toDeleteObs = myObservationDao.update(o);
+			DaoMethodOutcome toDeleteObs = myObservationDao.update(o, newSrd());
 			DaoMethodOutcome deletedObsVersionBeforeDate = myObservationDao.delete(toDeleteObs.getId(), mySrd);
 
 			o.setId(new IdType("obs-to-keep"));
-			DaoMethodOutcome toKeepObs = myObservationDao.update(o);
+			DaoMethodOutcome toKeepObs = myObservationDao.update(o, newSrd());
 
 			Patient p = new Patient().setActive(true);
 			p.setId("p1");
@@ -591,10 +591,10 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			sleepAtLeast(1000);
 
 			o.setId(new IdType("obs-to-keep-2"));
-			DaoMethodOutcome toKeepObs2 = myObservationDao.update(o);
+			DaoMethodOutcome toKeepObs2 = myObservationDao.update(o, newSrd());
 
 			o.setId(new IdType("obs-to-delete-2"));
-			DaoMethodOutcome toDeleteObs2 = myObservationDao.update(o);
+			DaoMethodOutcome toDeleteObs2 = myObservationDao.update(o, newSrd());
 			DaoMethodOutcome deletedObsVersionAfterDate = myObservationDao.delete(toDeleteObs2.getId(), mySrd);
 
 			JpaPid obsDeletedJpaPid = (JpaPid) toDeleteObs.getPersistentId();
@@ -611,7 +611,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 
 			// When
 			String theFullUrl = "Observation?_includeDeleted=" + theIncludeDeleted.getCode() + buildAdditionalSearchParams(theIncludeDeleted, theLastUpdatedParam, theIdParam, date);
-			ourLog.info("Reindexing with URL: " + theFullUrl);
+			ourLog.info("Reindexing with URL: {}", theFullUrl);
 			doOptimizeStorageReindexWithUrl(theFullUrl);
 
 			// Then
@@ -683,19 +683,19 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			String obsResBody = myFhirContext.newJsonParser().encodeResourceToString(o);
 
 			o.setId(new IdType("obs1"));
-			DaoMethodOutcome obs1 = myObservationDao.update(o);
+			DaoMethodOutcome obs1 = myObservationDao.update(o, newSrd());
 			JpaPid obs1Pid = (JpaPid) obs1.getPersistentId();
 			DaoMethodOutcome obs1Deleted = myObservationDao.delete(obs1.getId(), mySrd);
 			JpaPid obs1DeletedPid = (JpaPid) obs1Deleted.getPersistentId();
 
 			o.setId(new IdType("obs2"));
-			DaoMethodOutcome obs2 = myObservationDao.update(o);
+			DaoMethodOutcome obs2 = myObservationDao.update(o, newSrd());
 			JpaPid obs2Pid = (JpaPid) obs2.getPersistentId();
 			DaoMethodOutcome obs2Deleted = myObservationDao.delete(obs2.getId(), mySrd);
 			JpaPid obs2DeletedPid = (JpaPid) obs2Deleted.getPersistentId();
 
 			o.setId(new IdType("obs3"));
-			DaoMethodOutcome obs3 = myObservationDao.update(o);
+			DaoMethodOutcome obs3 = myObservationDao.update(o, newSrd());
 			JpaPid obs3Pid = (JpaPid) obs3.getPersistentId();
 			DaoMethodOutcome obs3Deleted = myObservationDao.delete(obs3.getId(), mySrd);
 			JpaPid obs3DeletedPid = (JpaPid) obs3Deleted.getPersistentId();
@@ -844,7 +844,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			assertEquals(1, entriesInSpIndexTokenTable);
 
 			// simulate resource deletion
-			ResourceTable resource = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow();
+			ResourceTable resource = myResourceTableDao.findById(JpaPid.fromId(obsId.getIdPartAsLong())).orElseThrow();
 			Date currentDate = new Date();
 			resource.setDeleted(currentDate);
 			resource.setUpdated(currentDate);

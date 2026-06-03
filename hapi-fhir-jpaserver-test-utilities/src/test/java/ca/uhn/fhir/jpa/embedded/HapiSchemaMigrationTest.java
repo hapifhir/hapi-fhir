@@ -53,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
+@SuppressWarnings("LoggingSimilarMessage")
 @RequiresDocker
 public class HapiSchemaMigrationTest {
 
@@ -88,7 +89,7 @@ public class HapiSchemaMigrationTest {
 
 	private JpaEmbeddedDatabase myCurrentDatabase;
 
-	private HapiFhirJpaMigrationTasks myHapiFhirJpaMigrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
+	private final HapiFhirJpaMigrationTasks myHapiFhirJpaMigrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
 
 	@AfterEach
 	public void afterEach() {
@@ -222,7 +223,7 @@ public class HapiSchemaMigrationTest {
 	 * We start with a single record in HFJ_RES_SEARCH_URL:
 	 * <p/>
 	 * <ul>
-	 *     <li>Primary key:  ONLY RES_SEARCH_URL</li>
+	 *     <li>Primary key: ONLY RES_SEARCH_URL</li>
 	 *     <li>PK: RES_SEARCH_URL: https://example.com</li>
 	 *     <li>CREATED_TIME: 2023-06-29 10:14:39.69</li>
 	 *     <li>RES_ID: 1678</li>
@@ -230,7 +231,7 @@ public class HapiSchemaMigrationTest {
 	 * <p/>
 	 * Once the migration is complete, we should have:
 	 * <ul>
-	 *     <li>Primary key:  RES_SEARCH_URL, PARTITION_ID</li>
+	 *     <li>Primary key: RES_SEARCH_URL, PARTITION_ID</li>
 	 *     <li>PK: RES_SEARCH_URL: https://example.com</li>
 	 *     <li>PK: PARTITION_ID: -1</li>
 	 *     <li>CREATED_TIME: 2023-06-29 10:14:39.69</li>
@@ -427,7 +428,7 @@ public class HapiSchemaMigrationTest {
 		@SuppressWarnings("DataFlowIssue")
 		int nullCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id is null", Integer.class);
 		assertThat(nullCount).as("no fhir_id should be null").isZero();
-		int trailingSpaceCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id <> trim(fhir_id)", Integer.class);
+		Integer trailingSpaceCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id <> trim(fhir_id)", Integer.class);
 		assertThat(trailingSpaceCount).as("no fhir_id should contain a space").isZero();
 	}
 
@@ -487,11 +488,11 @@ public class HapiSchemaMigrationTest {
 				assertThat(tableColumnCollationRow).containsEntry("collation_name",COLLATION_CASE_SENSITIVE);
 
 				// We have not changed the database collation, so we can reference the table and column names with the wrong
-				// case and the query will work
+				// case, and the query will work
 				@Language("SQL")
 				final String fhirIdSql = """
-					SELECT fhir_id 
-					FROM hFj_ReSoUrCe  -- db must be case insensitive for the table name to be recognized 
+					SELECT fhir_id
+					FROM hFj_ReSoUrCe  -- db must be case-insensitive for the table name to be recognized
 					WHERE fhir_ID = 'PatientId22'
 				""";
 

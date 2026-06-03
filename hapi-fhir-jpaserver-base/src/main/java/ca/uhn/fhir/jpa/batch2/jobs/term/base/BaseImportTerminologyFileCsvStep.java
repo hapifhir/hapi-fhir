@@ -40,6 +40,7 @@ public abstract class BaseImportTerminologyFileCsvStep<
 				PT extends ImportTerminologyJobParameters, CT extends BaseImportTerminologyFileCsvStep.MyBaseContext>
 		extends BaseImportTerminologyFileStep<PT, CT> {
 
+	@Override
 	protected void processAttachment(
 			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,

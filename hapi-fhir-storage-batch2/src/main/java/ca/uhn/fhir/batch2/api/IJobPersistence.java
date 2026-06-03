@@ -190,7 +190,22 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	}
 
 	/**
-	 * Stores an attachment associated with a specific job instance
+	 * Stores an attachment associated with a specific job instance. A job attachment is not the
+	 * same thing as the FHIR "attachment" datatype, it's a binary or text blob that is attached
+	 * to a specific Batch2 job instance. Job Attachments have two primary use cases:
+	 * <ul>
+	 * <li>
+	 *     They can be used to store data that should be used as input to the first step of a job, such
+	 *     as a terminology distribution file (loinc.zip) that will be used as the input to a terminology
+	 *     import job.
+	 * </li>
+	 * <li>
+	 *     They can be used to send data from one step of a job to the next step, in cases where the
+	 *     data being shared needs to be sent to multiple steps, or isn't JSON data and would therefore
+	 *     eat a lot of space if it was serialized into a JSON container. In this case, you would
+	 *     typically use the attachment ID as an element in the work chunk JSON passed between steps.
+	 * </li>
+	 * </ul>
 	 *
 	 * @param theInstanceId   The job instance ID
 	 * @param theRequest The request containing the attachment data
@@ -199,8 +214,9 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	String storeNewAttachment(String theInstanceId, AttachmentDetails theRequest);
 
 	/**
-	 * Fetches the attachment data for a specific attachment ID
+	 * Fetches the attachment data for a specific attachment ID.
 	 *
+	 * @see #storeNewAttachment(String, AttachmentDetails) for a description of what attachments are used for.
 	 * @param theInstanceId   The job instance ID
 	 * @param theAttachmentId The attachment ID
 	 * @return The bytes of the attachment data
@@ -211,6 +227,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Fetches the attachment data for a specific attachment filename
+	 *
+	 * @see #storeNewAttachment(String, AttachmentDetails) for a description of what attachments are used for.
 	 * @param theInstanceId   The job instance ID
 	 * @param theFilename The attachment filename
 	 * @return The bytes of the attachment data

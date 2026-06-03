@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -32,6 +31,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IEntityResult;
 import ca.uhn.fhir.rest.gclient.RawRequestEntity;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.FileUtil;
@@ -65,12 +65,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Duration;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_FILENAME;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
+import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.SCT_URI;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 
@@ -103,7 +105,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				"u",
 				"url",
 				true,
-				"The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
+				"The code system URL associated with this upload (e.g. \"" + SCT_URI + "|20260501\")");
 		addOptionalOption(
 				options,
 				"d",
@@ -168,7 +170,15 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				};
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(termUrl);
-		if (LOINC_URI.equals(canonicalUrl.url())) {
+
+		/*
+		 * These are the URIs of the code systems that can be uploaded with the new
+		 * Batch2 framework. This is only temporary until all the conversions have been
+		 * migrated.
+		 */
+		Set<String> newUploadUris = Set.of(LOINC_URI, SCT_URI);
+
+		if (newUploadUris.contains(canonicalUrl.url())) {
 			invokeOperationAsyncJob(termUrl, datafile, client, dontMakeCurrent);
 		} else {
 			Validate.isTrue(!dontMakeCurrent, "The --dont-make-current option is not supported for this system");
@@ -242,12 +252,19 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			}
 			RawRequestEntity requestEntity = new RawRequestEntity(Constants.CT_OCTET_STREAM, bytes);
 
-			IEntityResult response =
-					theClient.rawHttpRequest().post(urlBuilder, requestEntity).execute();
-
+			IEntityResult response;
+			try {
+				response = theClient
+						.rawHttpRequest()
+						.post(urlBuilder, requestEntity)
+						.execute();
+			} catch (InvalidRequestException e) {
+				throw new CommandFailureException(Msg.code(2959) + "Failed to attach file \"" + dataFile.getName()
+						+ "\" to job, got " + e.getMessage());
+			}
 			if (response.getStatusCode() != 200) {
-				throw new CommandFailureException(
-						Msg.code(2937) + "Failed to upload terminology, got HTTP " + response.getStatusCode());
+				throw new CommandFailureException(Msg.code(2937) + "Failed to attach file \"" + dataFile.getName()
+						+ "\" to job, got HTTP " + response.getStatusCode());
 			}
 
 			ourLog.info("Attached file in {}", sw);
