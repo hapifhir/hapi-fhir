@@ -1964,6 +1964,84 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			.contains("HASH_EXACT");
 	}
 
+	@Test
+	// Created by claude-opus-4-7 for https://github.com/hapifhir/hapi-fhir/issues/8025
+	void test_unqualifiedChainedIdOnMultiTargetReference_returnsMatchingResource() {
+		// SearchParameter http://hl7.org/fhir/SearchParameter/DiagnosticReport-based-on declares
+		//   target = [ CarePlan, ImmunizationRecommendation, MedicationRequest, NutritionOrder, ServiceRequest ]
+		// The customer's DiagnosticReport references a ServiceRequest with FHIR id "sr-1".
+		createResource("ServiceRequest", withId("sr-1"));
+		createResource("DiagnosticReport", withId("dr-1"),
+			withReference("basedOn", "ServiceRequest/sr-1"));
+
+		// Sanity: the qualified form works. resourceTypes contains only ServiceRequest,
+		// so the iteration in ResourceLinkPredicateBuilder runs once, resolveResourceIdentities
+		// returns a non-empty PID set, and setMatchNothing() is never called.
+		SearchParameterMap qualified = SearchParameterMap.newSynchronous();
+		qualified.add(DiagnosticReport.SP_BASED_ON, new ReferenceParam("ServiceRequest", "_id", "sr-1"));
+		IBundleProvider qualifiedResult = myDiagnosticReportDao.search(qualified, newSrd());
+		assertThat(toUnqualifiedVersionlessIdValues(qualifiedResult))
+			.as("qualified chain (sanity)")
+			.containsExactly("DiagnosticReport/dr-1");
+
+		// The unqualified form must return the same resource. Today, it does not.
+		// resourceTypes contains all 5 SP targets. The first iteration (CarePlan) builds
+		// IIdHelperService.resolveResourceIdentities([CarePlan/sr-1]), which returns empty,
+		// triggers setMatchNothing() on the shared SearchQueryBuilder, and the entire query
+		// is short-circuited to "no rows" — even though the ServiceRequest iteration would
+		// have built a perfectly correct subquery on its turn.
+		SearchParameterMap unqualified = SearchParameterMap.newSynchronous();
+		unqualified.add(DiagnosticReport.SP_BASED_ON, new ReferenceParam(null, "_id", "sr-1"));
+		IBundleProvider unqualifiedResult = myDiagnosticReportDao.search(unqualified, newSrd());
+		assertThat(toUnqualifiedVersionlessIdValues(unqualifiedResult))
+			.as("unqualified chain — fails today, must return the same DR as the qualified form")
+			.containsExactly("DiagnosticReport/dr-1");
+	}
+
+	@Test
+	// Created by claude-opus-4-7 for https://github.com/hapifhir/hapi-fhir/issues/8025
+	void test_unqualifiedChainedIdOnMultiTargetReference_returnsAllWhenIdAmbiguousAcrossTypes() {
+		// FHIR ids are unique within a resource type but may collide ACROSS types.
+		// An unqualified chained _id search on a multi-target reference must therefore
+		// return matches from every target type whose resource has that id.
+		//
+		// Today this case is doubly broken: setMatchNothing() fires on the first iteration
+		// whose target type doesn't have the id, even though TWO of the iterations would
+		// have produced correct subqueries. After the fix, both DRs must come back.
+		createResource("ServiceRequest", withId("shared-id"));
+		createResource("CarePlan",       withId("shared-id"));
+
+		createResource("DiagnosticReport", withId("dr-sr"),
+			withReference("basedOn", "ServiceRequest/shared-id"));
+		createResource("DiagnosticReport", withId("dr-cp"),
+			withReference("basedOn", "CarePlan/shared-id"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(DiagnosticReport.SP_BASED_ON, new ReferenceParam(null, "_id", "shared-id"));
+		IBundleProvider result = myDiagnosticReportDao.search(map, newSrd());
+
+		assertThat(toUnqualifiedVersionlessIdValues(result))
+			.containsExactlyInAnyOrder("DiagnosticReport/dr-sr", "DiagnosticReport/dr-cp");
+	}
+
+	@Test
+	// Created by claude-opus-4-7 for https://github.com/hapifhir/hapi-fhir/issues/8025
+	void test_unqualifiedChainedIdOnMultiTargetReference_returnsEmptyWhenIdMatchesNoTargetType() {
+		// Regression guard. After fixing the OR-context handling in ResourceIdPredicateBuilder,
+		// we must still return an empty bundle when the id genuinely does not exist for any
+		// target type. The fix should change HOW we arrive at empty (per-iteration FALSE
+		// condition in the OR, rather than a global setMatchNothing), not WHETHER we do.
+		createResource("ServiceRequest", withId("sr-1"));
+		createResource("DiagnosticReport", withId("dr-1"),
+			withReference("basedOn", "ServiceRequest/sr-1"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(DiagnosticReport.SP_BASED_ON, new ReferenceParam(null, "_id", "does-not-exist"));
+		IBundleProvider result = myDiagnosticReportDao.search(map, newSrd());
+
+		assertThat(toUnqualifiedVersionlessIdValues(result)).isEmpty();
+	}
+
 	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) {
 		myCaptureQueriesListener.clear();
 		myTestDaoSearch.searchForIds(theUrl);
