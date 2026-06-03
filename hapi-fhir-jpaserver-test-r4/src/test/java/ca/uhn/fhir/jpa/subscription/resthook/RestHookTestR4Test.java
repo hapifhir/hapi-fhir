@@ -80,6 +80,46 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
+		myStorageSettings.setFilterParameterEnabled(new JpaStorageSettings().isFilterParameterEnabled());
+	}
+
+	/**
+	 * GL-6885: A subscription whose criteria uses the _filter search parameter must only
+	 * deliver for resources that satisfy the filter. Historically _filter was silently
+	 * dropped during match-URL parsing, so the subscription fired for every resource.
+	 * <p>
+	 * We send a non-matching Patient first and a matching Patient second, then assert exactly
+	 * ONE delivery. If _filter were dropped, both Patients would deliver (count 2). This proves
+	 * the filter discriminates without relying on a fragile negative-timing assertion (AC1 + AC2).
+	 */
+	@Test
+	void testRestHookSubscriptionWithFilterCriteria() throws Exception {
+		myStorageSettings.setFilterParameterEnabled(true);
+
+		String payload = "application/fhir+json";
+		String criteria = "Patient?_filter=name%20eq%20Smith";
+
+		createSubscription(criteria, payload);
+		waitForActivatedSubscriptionCount(1);
+
+		// Non-matching Patient (family name Jones) must NOT deliver
+		Patient nonMatching = new Patient();
+		nonMatching.addName().setFamily("Jones");
+		nonMatching.setActive(true);
+		myClient.create().resource(nonMatching).execute();
+
+		// Matching Patient (family name Smith) MUST deliver
+		Patient matching = new Patient();
+		matching.addName().setFamily("Smith");
+		matching.setActive(true);
+		myClient.create().resource(matching).execute();
+
+		waitForQueueToDrain();
+
+		// Only the matching Patient should have been delivered
+		ourPatientProvider.waitForCreateCount(0);
+		ourPatientProvider.waitForUpdateCount(1);
+		assertEquals("Smith", ourPatientProvider.getStoredResources().get(0).getName().get(0).getFamily());
 	}
 
 	/**
