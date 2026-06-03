@@ -23,9 +23,9 @@ import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.util.XmlUtil;
 import jakarta.annotation.Nonnull;
@@ -48,14 +48,14 @@ import static ca.uhn.fhir.util.XmlUtil.getChildrenByTagName;
  * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
  */
 public class ImportIcd10Step2HandleConcepts
-		extends BaseImportTerminologyFileStep<ImportIcdJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
+		extends BaseImportTerminologyFileStep<ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
 
 	private static final String EXPECTED_ROOT_NODE = "ClaML";
 
 	@Nonnull
 	@Override
 	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
-			StepExecutionDetails<ImportIcdJobParameters, ?> theStepExecutionDetails) {
+			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
 				FileHandlingType.XML, t -> Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE)
 						.matcher(t)
@@ -64,11 +64,11 @@ public class ImportIcd10Step2HandleConcepts
 
 	@Override
 	protected void processAttachment(
-			@Nonnull StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
 			MyBaseContext theContext,
 			AttachmentDetails theAttachment,
-			ImportIcdJobParameters theJobParameters,
+			ImportTerminologyJobParameters theJobParameters,
 			CodeSystem theCodeSystemToPopulate,
 			TerminologyFileSetJson theData,
 			String theSourceFilename) {
@@ -142,7 +142,7 @@ public class ImportIcd10Step2HandleConcepts
 
 	@Override
 	protected MyBaseContext newContextObject(
-			StepExecutionDetails<ImportIcdJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext();
 	}
 }

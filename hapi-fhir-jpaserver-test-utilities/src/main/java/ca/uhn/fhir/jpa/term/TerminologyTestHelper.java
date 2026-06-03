@@ -29,6 +29,8 @@ import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
@@ -41,7 +43,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_SNOMED_CT_DISTRIBUTION_FILE;
@@ -97,15 +98,13 @@ public class TerminologyTestHelper {
 		String jobDefinitionId = ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10;
 		String distributionFilename = TerminologyConstants.FILENAME_ICD10_DISTRIBUTION_FILE;
 		String propertiesFilename = null;
-		Supplier<TerminologyImportParameters> parametersSupplier = ImportIcdJobParameters::new;
 		return startImportTerminologyJobAndWaitForCompletion(
 				theVersion,
 				theFiles,
 				false,
 				null,
 				jobDefinitionId,
-				parametersSupplier,
-				distributionFilename,
+			distributionFilename,
 				propertiesFilename);
 	}
 
@@ -113,15 +112,13 @@ public class TerminologyTestHelper {
 		String jobDefinitionId = ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM;
 		String distributionFilename = TerminologyConstants.FILENAME_ICD10CM_DISTRIBUTION_FILE;
 		String propertiesFilename = null;
-		Supplier<TerminologyImportParameters> parametersSupplier = ImportIcdJobParameters::new;
 		return startImportTerminologyJobAndWaitForCompletion(
 				theVersion,
 				theFiles,
 				false,
 				null,
 				jobDefinitionId,
-				parametersSupplier,
-				distributionFilename,
+			distributionFilename,
 				propertiesFilename);
 	}
 
@@ -139,15 +136,13 @@ public class TerminologyTestHelper {
 		String jobDefinitionId = ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC;
 		String distributionFilename = FILENAME_LOINC_DISTRIBUTION_FILE;
 		String propertiesFilename = LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode();
-		Supplier<TerminologyImportParameters> parametersSupplier = ImportLoincJobParameters::new;
 		return startImportTerminologyJobAndWaitForCompletion(
 				versionId,
 				theFiles,
 				theDontMakeCurrent,
 				theJobProperties,
 				jobDefinitionId,
-				parametersSupplier,
-				distributionFilename,
+			distributionFilename,
 				propertiesFilename);
 	}
 
@@ -157,12 +152,11 @@ public class TerminologyTestHelper {
 			boolean theDontMakeCurrent,
 			Properties theJobProperties,
 			String jobDefinitionId,
-			Supplier<TerminologyImportParameters> parametersSupplier,
 			String distributionFilename,
 			String propertiesFilename) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(jobDefinitionId);
-		TerminologyImportParameters parameters = parametersSupplier.get();
+		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
 		parameters.setVersionId(versionId);
 		if (theDontMakeCurrent) {
 			parameters.setDontMakeCurrent(true);

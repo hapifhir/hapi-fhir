@@ -32,6 +32,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -147,7 +148,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				LOINC_XML_FILENAME_PATTERN,
 				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE,
 				ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC,
-				TerminologyImportParameters::new,
+				ImportTerminologyJobParameters::new,
 				"LOINC",
 				FILENAME_LOINC_DISTRIBUTION_FILE,
 				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
@@ -160,7 +161,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				SNOMED_CT_XML_FILENAME_PATTERN,
 				null,
 				ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT,
-				TerminologyImportParameters::new,
+			ImportTerminologyJobParameters::new,
 				"SNOMED CT",
 				FILENAME_SNOMED_CT_DISTRIBUTION_FILE,
 				null);
@@ -173,7 +174,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				ICD10_FILENAME_PATTERN,
 				null,
 				ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10,
-				TerminologyImportParameters::new,
+			ImportTerminologyJobParameters::new,
 				"ICD-10",
 				FILENAME_ICD10_DISTRIBUTION_FILE,
 				null);
@@ -186,7 +187,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				ICD10CM_FILENAME_PATTERN,
 				null,
 				ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM,
-				TerminologyImportParameters::new,
+			ImportTerminologyJobParameters::new,
 				"ICD-10-CM",
 				FILENAME_ICD10CM_DISTRIBUTION_FILE,
 				null);

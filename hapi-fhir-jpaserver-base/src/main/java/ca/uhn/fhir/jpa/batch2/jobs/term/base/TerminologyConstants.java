@@ -29,4 +29,11 @@ public class TerminologyConstants {
 	public static final String FILENAME_SNOMED_CT_DISTRIBUTION_FILE = "snomedct.zip";
 	public static final String FILENAME_ICD10_DISTRIBUTION_FILE = "icd10.zip";
 	public static final String FILENAME_ICD10CM_DISTRIBUTION_FILE = "icd10cm.zip";
+
+	public static final String FILENAME_CUSTOM_DISTRIBUTION_FILE = "custom.zip";
+
+	public static final String CUSTOM_CONCEPTS_FILE = "concepts.csv";
+	public static final String CUSTOM_HIERARCHY_FILE = "hierarchy.csv";
+	public static final String CUSTOM_PROPERTIES_FILE = "properties.csv";
+
 }

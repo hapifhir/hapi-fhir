@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch2.jobs.term.icd.icd10cm;
+package ca.uhn.fhir.jpa.batch2.jobs.term.custom;
 
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
@@ -9,10 +9,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.ICD10CM_URI;
 
-/**
- * @see ImportLoincJobAppCtx#importLoincStep1ExpandDistributionIntoFiles()
- */
-public class ImportIcd10CmStep1ExpandDistributionIntoFilesStep
+public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 		extends BaseExpandDistributionIntoFilesStep<ImportTerminologyJobParameters, Void> {
 
 	@Override
