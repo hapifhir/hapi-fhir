@@ -104,7 +104,6 @@ public class SearchParameterUtil {
 	 * @return a set of valid compartments for the provided search parameter.
 	 */
 	public static Set<String> getMembershipCompartmentsForSearchParameter(
-			FhirContext theContext,
 			Class<? extends IBase> theResourceClazz, SearchParamDefinition theSearchParamDefinition) {
 		RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.forCode(
 				theSearchParamDefinition.type().toLowerCase());
@@ -132,12 +131,6 @@ public class SearchParameterUtil {
 			}
 		}
 
-		boolean resourceIsInPatientCompartment = false;
-		RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition((Class<? extends IBaseResource>) theResourceClazz);
-		if (!resourceDefinition.getSearchParamsForCompartmentName("Patient").isEmpty()) {
-			resourceIsInPatientCompartment = true;
-		}
-
 		/*
 		 * In the base FHIR R4 specification, the Device resource is not a part of the Patient compartment.
 		 * However, it is a patient-specific resource that most users expect to be, and several derivative
@@ -147,7 +140,7 @@ public class SearchParameterUtil {
 		 * See https://github.com/hapifhir/hapi-fhir/issues/6536 for more information.
 		 */
 		if (theSearchParamDefinition.name().equals("patient")
-				&& resourceIsInPatientCompartment) {
+				&& theSearchParamDefinition.path().equals("Device.patient")) {
 			validCompartments.add("Patient");
 		}
 
