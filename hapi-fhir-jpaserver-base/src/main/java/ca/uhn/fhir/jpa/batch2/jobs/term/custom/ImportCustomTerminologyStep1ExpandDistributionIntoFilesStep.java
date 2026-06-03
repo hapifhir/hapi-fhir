@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 	extends BaseExpandDistributionIntoFilesStep<ImportTerminologyJobParameters, ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep.MyContext> {
@@ -85,6 +86,13 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 		}
 
 		if (codeSystem != null) {
+
+			String expectedUrl = theJobParameters.getUrl();
+			if (!Objects.equals(codeSystem.getUrl(), expectedUrl)) {
+				// FIXME: add code
+				throw new JobExecutionFailedException(Msg.code(1) + "CodeSystem resources has unexpected URL: " + codeSystem.getUrl() + ". Expected: " + expectedUrl);
+			}
+
 			if ( theContext.getCodeSystem() != null) {
 				// FIXME: add code
 				throw new JobExecutionFailedException(Msg.code(1) + "Multiple CodeSystem resources were supplied in the custom terminology distribution file.");

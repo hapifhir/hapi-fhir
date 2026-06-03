@@ -32,6 +32,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
@@ -105,12 +107,14 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	public static final Pattern ICD10_FILENAME_PATTERN = Pattern.compile("icd10.*\\.zip", Pattern.CASE_INSENSITIVE);
 
 	public static final Pattern ICD10CM_FILENAME_PATTERN = Pattern.compile("icd10cm.*\\.zip", Pattern.CASE_INSENSITIVE);
+	public static final Pattern CUSTOM_TERMINOLOGY_PATTERN = Pattern.compile("custom.*\\.zip", Pattern.CASE_INSENSITIVE);
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	private static final String RESP_PARAM_CONCEPT_COUNT = "conceptCount";
 	private static final String RESP_PARAM_TARGET = "target";
 	private static final String RESP_PARAM_SUCCESS = "success";
 	private final Map<String, JobType> myCanonicalUrlToJobType = new HashMap<>();
 	private final Map<String, JobType> myJobDefinitionIdToJobType = new HashMap<>();
+	private final JobType myCustomJobType;
 	private CodeSystemToCustomCsvConverter myCodeSystemToCustomCsvConverter;
 
 	@Autowired
@@ -144,7 +148,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		// LOINC
 		JobType loincJobType = new JobType(
-				ITermLoaderSvc.LOINC_URI,
 				LOINC_XML_FILENAME_PATTERN,
 				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE,
 				ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC,
@@ -152,12 +155,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				"LOINC",
 				FILENAME_LOINC_DISTRIBUTION_FILE,
 				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
-		myCanonicalUrlToJobType.put(loincJobType.systemUrl(), loincJobType);
+		myCanonicalUrlToJobType.put(ITermLoaderSvc.LOINC_URI, loincJobType);
 		myJobDefinitionIdToJobType.put(loincJobType.jobDefinitionId(), loincJobType);
 
 		// SNOMED CT
 		JobType sctJobType = new JobType(
-				ITermLoaderSvc.SCT_URI,
 				SNOMED_CT_XML_FILENAME_PATTERN,
 				null,
 				ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT,
@@ -165,12 +167,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				"SNOMED CT",
 				FILENAME_SNOMED_CT_DISTRIBUTION_FILE,
 				null);
-		myCanonicalUrlToJobType.put(sctJobType.systemUrl(), sctJobType);
+		myCanonicalUrlToJobType.put(ITermLoaderSvc.SCT_URI, sctJobType);
 		myJobDefinitionIdToJobType.put(sctJobType.jobDefinitionId(), sctJobType);
 
 		// ICD-10
 		JobType icd10JobType = new JobType(
-				ITermLoaderSvc.ICD10_URI,
 				ICD10_FILENAME_PATTERN,
 				null,
 				ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10,
@@ -178,12 +179,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				"ICD-10",
 				FILENAME_ICD10_DISTRIBUTION_FILE,
 				null);
-		myCanonicalUrlToJobType.put(icd10JobType.systemUrl(), sctJobType);
+		myCanonicalUrlToJobType.put(ITermLoaderSvc.ICD10_URI, sctJobType);
 		myJobDefinitionIdToJobType.put(icd10JobType.jobDefinitionId(), sctJobType);
 
 		// ICD-10-CM
 		JobType icd10cmJobType = new JobType(
-				ITermLoaderSvc.ICD10CM_URI,
 				ICD10CM_FILENAME_PATTERN,
 				null,
 				ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM,
@@ -191,8 +191,20 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				"ICD-10-CM",
 				FILENAME_ICD10CM_DISTRIBUTION_FILE,
 				null);
-		myCanonicalUrlToJobType.put(icd10cmJobType.systemUrl(), sctJobType);
+		myCanonicalUrlToJobType.put(ITermLoaderSvc.ICD10CM_URI, sctJobType);
 		myJobDefinitionIdToJobType.put(icd10cmJobType.jobDefinitionId(), sctJobType);
+
+		// Custom
+		myCustomJobType = new JobType(
+			CUSTOM_TERMINOLOGY_PATTERN,
+			null,
+			ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY,
+			ImportTerminologyJobParameters::new,
+			"Custom Terminology",
+			TerminologyConstants.FILENAME_CUSTOM_DISTRIBUTION_FILE,
+			null
+		);
+
 	}
 
 	@PostConstruct
@@ -237,11 +249,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(url, toStringValue(theCodeSystemVersion));
 
 		JobType jobType = myCanonicalUrlToJobType.get(canonicalUrl.url());
-		if (jobType != null) {
-			return startImportTerminologyJob(theMakeCurrent, theRequestDetails, canonicalUrl, jobType);
+		if (jobType == null) {
+			jobType = myCustomJobType;
 		}
 
-		throw new InvalidRequestException(Msg.code(2944) + "Unsupported code system: " + canonicalUrl.url());
+		return startImportTerminologyJob(theMakeCurrent, theRequestDetails, canonicalUrl, jobType);
 	}
 
 	@Nonnull
@@ -660,7 +672,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 	private record JobType(
-			String systemUrl,
 			Pattern distributionFilenamePattern,
 			String thePropertyFileName,
 			String jobDefinitionId,

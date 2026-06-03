@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -107,6 +108,36 @@ class TerminologyUploaderProviderTest {
 	private ArgumentCaptor<AttachmentDetails> myAttachmentDetailsCaptor;
 
 	@Test
+	void testUploadTerminologyCreateJob_Custom() {
+		// Setup
+		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
+		startResponse.setInstanceId("my-instance-id");
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+
+		// Test
+		Parameters response = myServerExtension
+			.getFhirClient()
+			.operation()
+			.onType("CodeSystem")
+			.named(OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo"))
+			.andParameter(TerminologyUploaderProvider.PARAM_VERSION, new StringType("1.2"))
+			.execute();
+
+		// Verify
+		verify(myJobCoordinator, times(1)).startInstance(notNull(), myStartRequestCaptor.capture());
+		assertEquals(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY, myStartRequestCaptor.getValue().getJobDefinitionId());
+
+		ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+
+		assertThat(response.getParameter(RESP_PARAM_OUTCOME).getValue().toString()).contains(
+			"Upload Custom Terminology Job has been created and is in BUILDING state with ID[my-instance-id]",
+			"and then start the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.start-job operation."
+		);
+		assertEquals("my-instance-id", response.getParameter(TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID).getValue().toString());
+	}
+
+	@Test
 	void testUploadTerminologyCreateJob_Loinc() {
 		// Setup
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
@@ -166,22 +197,6 @@ class TerminologyUploaderProviderTest {
 			"and then start the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.start-job operation."
 		);
 		assertEquals("my-instance-id", response.getParameter(TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID).getValue().toString());
-	}
-
-	@Test
-	void testUploadTerminologyCreateJob_UnknownCodeSystem() {
-		// Test
-		assertThatThrownBy(() ->
-			myServerExtension
-				.getFhirClient()
-				.operation()
-				.onType("CodeSystem")
-				.named(OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB)
-				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://blah.org"))
-				.andParameter(TerminologyUploaderProvider.PARAM_VERSION, new StringType("2.69"))
-				.execute()
-		).isInstanceOf(InvalidRequestException.class)
-			.hasMessageContaining("Unsupported code system: http://blah.org");
 	}
 
 	@Test

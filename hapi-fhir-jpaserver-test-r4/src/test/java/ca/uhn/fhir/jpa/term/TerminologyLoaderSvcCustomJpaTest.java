@@ -74,6 +74,20 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testLoadWithWrongCodeSystemUrl() throws Exception {
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
+		files.addFileZip("/custom_term_wrong_url/", TerminologyConstants.CUSTOM_CODESYSTEM_JSON);
+		files.addFileZip("/custom_term/", TerminologyConstants.CUSTOM_CONCEPTS_FILE);
+
+		// Test
+		String jobId = myTerminologyTestHelper.startImportCustomJobAndWaitForFailure(CODESYSTEM_URL, VERSION_1_0, files);
+
+		// Verify
+		JobInstance instance = myJobCoordinator.getInstance(jobId);
+		assertThat(instance.getErrorMessage()).contains("CodeSystem resources has unexpected URL: http://this-is-the-wrong-url. Expected: http://example.com/labCodes");
+	}
+
+	@Test
 	public void testLoadWithMultipleCodeSystem() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 		files.addFileZip("/custom_term/", TerminologyConstants.CUSTOM_CODESYSTEM_XML);
