@@ -28,12 +28,11 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface IBatch2AttachmentRepository
-		extends JpaRepository<Batch2JobAttachmentEntity, Batch2JobAttachmentEntity.Batch2WorkChunkAttachmentEntityPk>,
+		extends JpaRepository<Batch2JobAttachmentEntity, Batch2JobAttachmentEntity.AttachmentPk>,
 				IHapiFhirJpaRepository {
 
 	default Optional<Batch2JobAttachmentEntity> findById(String theInstanceId, String theAttachmentId) {
-		return findById(
-				new Batch2JobAttachmentEntity.Batch2WorkChunkAttachmentEntityPk(theInstanceId, theAttachmentId));
+		return findById(new Batch2JobAttachmentEntity.AttachmentPk(theInstanceId, theAttachmentId));
 	}
 
 	@Modifying

@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -54,6 +55,8 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLO
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_JOB_ATTACHMENT_ID;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.RESP_PARAM_OUTCOME;
+import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
+import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.SCT_URI;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,7 +92,7 @@ class TerminologyUploaderProviderTest {
 	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestCaptor;
 
 	@RegisterExtension
-	private RestfulServerExtension myServerExtension = new RestfulServerExtension(myContext)
+	private final RestfulServerExtension myServerExtension = new RestfulServerExtension(myContext)
 		.withServer(t -> {
 			assert myContext != null;
 			assert myTerminologyLoaderSvc != null;
@@ -98,13 +101,13 @@ class TerminologyUploaderProviderTest {
 		});
 
 	@RegisterExtension
-	private HttpClientExtension myHttpClient = new HttpClientExtension();
+	private final HttpClientExtension myHttpClient = new HttpClientExtension();
 
 	@Captor
 	private ArgumentCaptor<AttachmentDetails> myAttachmentDetailsCaptor;
 
 	@Test
-	void testUploadTerminologyCreateJob() {
+	void testUploadTerminologyCreateJob_Loinc() {
 		// Setup
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 		startResponse.setInstanceId("my-instance-id");
@@ -116,7 +119,7 @@ class TerminologyUploaderProviderTest {
 			.operation()
 			.onType("CodeSystem")
 			.named(OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://loinc.org"))
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(LOINC_URI))
 			.andParameter(TerminologyUploaderProvider.PARAM_VERSION, new StringType("2.69"))
 			.execute();
 
@@ -129,6 +132,37 @@ class TerminologyUploaderProviderTest {
 		assertThat(response.getParameter(RESP_PARAM_OUTCOME).getValue().toString()).contains(
 			"Upload LOINC Job has been created and is in BUILDING state with ID[my-instance-id]",
 			"and optionally upload a property file (loincupload.properties) to the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.attach-file operation",
+			"and then start the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.start-job operation."
+		);
+		assertEquals("my-instance-id", response.getParameter(TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID).getValue().toString());
+	}
+
+	@Test
+	void testUploadTerminologyCreateJob_SnomedCt() {
+		// Setup
+		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
+		startResponse.setInstanceId("my-instance-id");
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+
+		// Test
+		Parameters response = myServerExtension
+			.getFhirClient()
+			.operation()
+			.onType("CodeSystem")
+			.named(OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(SCT_URI))
+			.andParameter(TerminologyUploaderProvider.PARAM_VERSION, new StringType("20260501T120000Z"))
+			.execute();
+
+		// Verify
+		verify(myJobCoordinator, times(1)).startInstance(notNull(), myStartRequestCaptor.capture());
+		assertEquals(ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT, myStartRequestCaptor.getValue().getJobDefinitionId());
+
+		ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+
+		assertThat(response.getParameter(RESP_PARAM_OUTCOME).getValue().toString()).contains(
+			"Upload SNOMED CT Job has been created and is in BUILDING state with ID[my-instance-id]",
+			"to the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.attach-file operation",
 			"and then start the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.start-job operation."
 		);
 		assertEquals("my-instance-id", response.getParameter(TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID).getValue().toString());
@@ -316,7 +350,7 @@ class TerminologyUploaderProviderTest {
 			// Verify
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("Don't know how to handle file: foo.txt");
+			assertThat(responseString).contains("File named \\\"foo.txt\\\" is not valid for import LOINC job");
 		}
 
 	}

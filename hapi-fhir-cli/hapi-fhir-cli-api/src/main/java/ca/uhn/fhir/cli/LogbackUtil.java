@@ -30,7 +30,7 @@ class LogbackUtil {
 	private static final Logger ourLog = LoggerFactory.getLogger(LogbackUtil.class);
 
 	static void loggingConfigOff() {
-		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+		if (HapiSystemProperties.isUnitTestModeEnabled() || HapiSystemProperties.isTestModeEnabled()) {
 			return;
 		}
 		try {

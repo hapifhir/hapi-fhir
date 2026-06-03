@@ -48,7 +48,7 @@ class ImportLoincStep2HandleConceptsTest extends BaseImportLoincStepTest {
 
 		// Verify
 		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
-		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
+		CodeSystem cs = myCodeSystemCaptor.getValue();
 		assertThat(cs.getConcept().stream().map(CodeSystem.ConceptDefinitionComponent::getCode)).containsExactly(
 			"10013-1",
 			"10014-9",

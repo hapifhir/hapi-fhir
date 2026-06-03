@@ -56,6 +56,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericFie
 import org.hibernate.type.SqlTypes;
 import org.hibernate.validator.constraints.NotBlank;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
@@ -75,8 +76,9 @@ import static org.apache.commons.lang3.StringUtils.length;
 		})
 @IdClass(IdAndPartitionId.class)
 public class TermConceptProperty extends BasePartitionable implements Serializable {
-	public static final int MAX_PROPTYPE_ENUM_LENGTH = 6;
+	@Serial
 	private static final long serialVersionUID = 1L;
+
 	public static final int MAX_LENGTH = 500;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -388,5 +390,9 @@ public class TermConceptProperty extends BasePartitionable implements Serializab
 
 	public Long getId() {
 		return myId;
+	}
+
+	public TermConcept getConcept() {
+		return myConcept;
 	}
 }

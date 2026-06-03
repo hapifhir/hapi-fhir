@@ -195,7 +195,11 @@ public class AsyncRequestUtil {
 			}
 			case FINALIZE -> {
 				status = HttpStatus.SC_ACCEPTED;
-				messages.add(theOperationName + " job has completed main processing and is being finalized");
+				String message = theOperationName + " job has completed main processing and is being finalized.";
+				if (theJobInstance.getProgress() > 0) {
+					message += " Overall progress: " + ((int) (100.0 * theJobInstance.getProgress()) + "%.");
+				}
+				messages.add(message);
 				severity = OperationOutcomeUtil.OO_SEVERITY_INFO;
 				code = OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL;
 			}
