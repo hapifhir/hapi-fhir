@@ -1087,6 +1087,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 
 		@Override
+        public String relativeDatePlaceHolder() {
+            return null;
+        }
+
+		@Override
 		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator,
 																	 Object appContext,
 																	 org.hl7.fhir.r5.model.StructureDefinition structure,
@@ -1100,7 +1105,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 
 		@Override
-		public boolean isSuppressMessageId(String path, String messageId) {
+		public boolean isSuppressMessageId(String path, String messageId, Object... theMessageArguments) {
 			return false;
 		}
 
