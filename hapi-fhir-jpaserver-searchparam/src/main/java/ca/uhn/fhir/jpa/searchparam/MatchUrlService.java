@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
@@ -227,6 +228,17 @@ public class MatchUrlService {
 				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(
 						myFhirContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
+			} else if (Constants.PARAM_FILTER.equals(nextParamName)) {
+				// Retain _filter so the DB search path (SearchBuilder/QueryStack) can evaluate it. We
+				// represent it as a StringParam under Constants.PARAM_FILTER, mirroring the normal REST
+				// search path. The match-URL parser historically dropped it, which silently ignored the
+				// constraint for conditional operations, bulk export _typeFilter, and subscription matching.
+				for (QualifiedParamList nextValue : paramList) {
+					String filterString = String.join(",", nextValue);
+					if (isNotBlank(filterString)) {
+						paramMap.add(nextParamName, new StringParam(filterString));
+					}
+				}
 			} else if (nextParamName.startsWith("_") && !Constants.PARAM_LANGUAGE.equals(nextParamName)) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
