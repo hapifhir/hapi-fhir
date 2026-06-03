@@ -7,8 +7,6 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeSystem;
 
-import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.ICD10CM_URI;
-
 /**
  * @see ImportLoincJobAppCtx#importLoincStep1ExpandDistributionIntoFiles()
  */
@@ -33,10 +31,9 @@ public class ImportIcd10CmStep1ExpandDistributionIntoFilesStep
 	}
 
 	@Override
-	protected void massageCodeSystem(CodeSystem theCodeSystem) {
-		super.massageCodeSystem(theCodeSystem);
+	protected void massageCodeSystem(CodeSystem theCodeSystem, Void theContext) {
+		super.massageCodeSystem(theCodeSystem, theContext);
 
-		theCodeSystem.setUrl(ICD10CM_URI);
 		theCodeSystem.setName("ICD-10-CM");
 	}
 }

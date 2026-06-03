@@ -43,6 +43,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.csv.CSVFormat;
@@ -51,6 +52,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.slf4j.Logger;
@@ -257,7 +259,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 
 		afterCompletionOfFileProcessing(context, theDataSink);
 
-		startStaging(theStepExecutionDetails, theDataSink, jobParameters, jobMetadataAttachment);
+		startStaging(theStepExecutionDetails, theDataSink, jobParameters, jobMetadataAttachment, context);
 
 		AttachmentDetails attachmentRequest = new AttachmentDetails(
 				new ByteArrayInputStream(
@@ -277,24 +279,35 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 	}
 
 	protected void startStaging(
-			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
-			IJobDataSink<TerminologyFileSetJson> theDataSink,
-			PT theJobParameters,
-			ImportTerminologyMetadataAttachmentJson jobMetadataAttachment) {
+		StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+		IJobDataSink<TerminologyFileSetJson> theDataSink,
+		PT theJobParameters,
+		ImportTerminologyMetadataAttachmentJson jobMetadataAttachment, CT theContext) {
 		CodeSystem cs = jobMetadataAttachment.getCodeSystem();
 		if (cs == null) {
 			cs = new CodeSystem();
 		}
 
-		String codeSystemVersionId = theJobParameters.getVersionId();
-		assert codeSystemVersionId != null;
 
-		cs.setId(getCodeSystemIdRoot() + "-" + codeSystemVersionId);
+		String codeSystemVersionId = theJobParameters.getVersionId();
+		Validate.notBlank(codeSystemVersionId, "No version ID specified in job parameters");
 		cs.setVersion(codeSystemVersionId);
+
+		String url = theJobParameters.getUrl();
+		Validate.notBlank(url, "No URL specified in job parameters");
+		cs.setUrl(url);
+
+		massageCodeSystem(cs, theContext);
+
+		if (getCodeSystemIdRoot() != null) {
+			cs.setId(getCodeSystemIdRoot() + "-" + codeSystemVersionId);
+		} else {
+			Validate.notNull(cs.getId(), "CodeSystem was not assigned an ID");
+		}
+
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		massageCodeSystem(cs);
 
 		jobMetadataAttachment.setCodeSystem(cs);
 
@@ -313,10 +326,18 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 		theDataSink.acceptForFutureStep(STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION, fileSet);
 	}
 
-	@Nonnull
+	/**
+	 * Subclasses may only return <code>null</code> if they intend to explicitly supply
+	 * an ID for the CodeSystem in the {@link #massageCodeSystem(CodeSystem, CT)} method.
+	 */
+	@Nullable
 	protected abstract String getCodeSystemIdRoot();
 
-	protected void massageCodeSystem(CodeSystem theCodeSystem) {
+	/**
+	 * Subclasses may override this method to make modifications to the CodeSystem
+	 * resource that will be stored in the database to support this CodeSystem.
+	 */
+	protected void massageCodeSystem(CodeSystem theCodeSystem, CT theContext) {
 		// subclasses can override this method to massage the CodeSystem
 	}
 

@@ -32,8 +32,35 @@ public class TerminologyConstants {
 
 	public static final String FILENAME_CUSTOM_DISTRIBUTION_FILE = "custom.zip";
 
+	/**
+	 * Used by the
+	 * {@link ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx Import Custom Terminology}
+	 * job
+	 */
+	public static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
+	/**
+	 * Used by the
+	 * {@link ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx Import Custom Terminology}
+	 * job
+	 */
+	public static final String CUSTOM_CODESYSTEM_XML = "codesystem.xml";
+	/**
+	 * Used by the
+	 * {@link ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx Import Custom Terminology}
+	 * job
+	 */
 	public static final String CUSTOM_CONCEPTS_FILE = "concepts.csv";
+	/**
+	 * Used by the
+	 * {@link ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx Import Custom Terminology}
+	 * job
+	 */
 	public static final String CUSTOM_HIERARCHY_FILE = "hierarchy.csv";
+	/**
+	 * Used by the
+	 * {@link ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx Import Custom Terminology}
+	 * job
+	 */
 	public static final String CUSTOM_PROPERTIES_FILE = "properties.csv";
 
 }

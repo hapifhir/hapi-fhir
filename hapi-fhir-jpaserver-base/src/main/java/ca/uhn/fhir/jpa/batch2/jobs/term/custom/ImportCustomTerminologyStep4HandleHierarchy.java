@@ -31,6 +31,11 @@ public class ImportCustomTerminologyStep4HandleHierarchy
 	}
 
 	@Override
+	public boolean mustFindFile() {
+		return false;
+	}
+
+	@Override
 	protected void handleRecord(StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportTerminologyJobParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, TerminologyFileSetJson theData, String theSourceFilename) {
 		String parent = trim(theRecord.get(PARENT));
 		String child = trim(theRecord.get(CHILD));

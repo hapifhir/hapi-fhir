@@ -77,6 +77,16 @@ public class ImportCustomTerminologyJobAppCtx {
 						TerminologyFileSetJson.class,
 						importCustomTerminologyStep2Concepts())
 				.addIntermediateStep(
+						"import-properties",
+						"Import custom terminology properties",
+						TerminologyFileSetJson.class,
+						importCustomTerminologyStep3Properties())
+				.addIntermediateStep(
+						"import-hierarchy",
+						"Import custom terminology hierarchy",
+						TerminologyFileSetJson.class,
+						importCustomTerminologyStep4Hierarchy())
+				.addIntermediateStep(
 						STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
 						"Create work chunks for calculating concept closures",
 						TerminologyFileSetJson.class,

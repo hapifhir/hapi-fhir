@@ -41,6 +41,10 @@ public class ImportCustomTerminologyStep3HandleProperties
 				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS, t -> t.endsWith(CUSTOM_PROPERTIES_FILE)));
 	}
 
+	@Override
+	public boolean mustFindFile() {
+		return false;
+	}
 
 	@Override
 	protected void handleRecord(StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportTerminologyJobParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, TerminologyFileSetJson theData, String theSourceFilename) {

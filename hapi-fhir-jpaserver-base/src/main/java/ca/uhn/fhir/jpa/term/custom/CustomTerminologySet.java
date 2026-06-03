@@ -41,6 +41,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_CONCEPTS_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_HIERARCHY_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_PROPERTIES_FILE;
+
 public class CustomTerminologySet {
 
 	private final int mySize;
@@ -138,18 +142,18 @@ public class CustomTerminologySet {
 
 		TermLoaderSvcImpl.iterateOverZipFileCsv(
 				theDescriptors,
-				TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE,
+				CUSTOM_CONCEPTS_FILE,
 				conceptHandler,
 				',',
 				QuoteMode.NON_NUMERIC,
 				false);
 
-		if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE)) {
+		if (theDescriptors.hasFile(CUSTOM_PROPERTIES_FILE)) {
 			Map<String, List<TermConceptProperty>> theCode2property = new LinkedHashMap<>();
 			IZipContentsHandlerCsv propertyHandler = new PropertyHandler(theCode2property);
 			TermLoaderSvcImpl.iterateOverZipFileCsv(
 					theDescriptors,
-					TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE,
+					CUSTOM_PROPERTIES_FILE,
 					propertyHandler,
 					',',
 					QuoteMode.NON_NUMERIC,
@@ -171,11 +175,11 @@ public class CustomTerminologySet {
 		} else {
 
 			// Hierarchy
-			if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE)) {
+			if (theDescriptors.hasFile(CUSTOM_HIERARCHY_FILE)) {
 				IZipContentsHandlerCsv hierarchyHandler = new HierarchyHandler(code2concept);
 				TermLoaderSvcImpl.iterateOverZipFileCsv(
 						theDescriptors,
-						TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE,
+						CUSTOM_HIERARCHY_FILE,
 						hierarchyHandler,
 						',',
 						QuoteMode.NON_NUMERIC,

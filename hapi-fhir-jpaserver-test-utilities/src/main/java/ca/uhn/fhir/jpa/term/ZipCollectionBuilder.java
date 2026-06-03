@@ -52,6 +52,7 @@ public class ZipCollectionBuilder {
 		this(false);
 	}
 
+	// FIXME: always be true
 	public ZipCollectionBuilder(boolean theSingleZipFile) {
 		if (theSingleZipFile) {
 			myFiles = null;

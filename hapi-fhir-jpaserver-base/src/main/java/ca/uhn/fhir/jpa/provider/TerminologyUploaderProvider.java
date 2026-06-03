@@ -259,6 +259,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(jobDefinitionId);
 		ImportTerminologyJobParameters parameters = paramsFactory.get();
+		parameters.setUrl(canonicalUrl.url());
 		parameters.setVersionId(canonicalUrl.versionId().orElse(null));
 
 		Boolean makeCurrent = DatatypeUtil.toBooleanValue(theMakeCurrent);

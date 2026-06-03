@@ -118,8 +118,8 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 	}
 
 	@Override
-	protected void massageCodeSystem(CodeSystem theCodeSystem) {
-		super.massageCodeSystem(theCodeSystem);
+	protected void massageCodeSystem(CodeSystem theCodeSystem, MyContext theContext) {
+		super.massageCodeSystem(theCodeSystem, theContext);
 
 		// TODO: DM 2019-09-13 - Manually add EXTERNAL_COPYRIGHT_NOTICE property until Regenstrief adds this to
 		// loinc.xml
@@ -136,11 +136,11 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 
 	@Override
 	protected void startStaging(
-			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
-			IJobDataSink<TerminologyFileSetJson> theDataSink,
-			ImportTerminologyJobParameters theJobParameters,
-			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
-		super.startStaging(theStepExecutionDetails, theDataSink, theJobParameters, theJobMetadataAttachment);
+		StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
+		IJobDataSink<TerminologyFileSetJson> theDataSink,
+		ImportTerminologyJobParameters theJobParameters,
+		ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment, MyContext theContext) {
+		super.startStaging(theStepExecutionDetails, theDataSink, theJobParameters, theJobMetadataAttachment, theContext);
 
 		CodeSystem cs = theJobMetadataAttachment.getCodeSystem();
 
