@@ -5,14 +5,17 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.IChannelTypeValidator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.RegexEndpointUrlValidationStrategy;
@@ -77,6 +80,8 @@ public class SubscriptionValidatingInterceptorTest {
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@MockBean
 	private SubscriptionSettings mySubscriptionSettings;
+	@MockBean
+	private JpaStorageSettings myStorageSettings;
 	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
@@ -286,6 +291,53 @@ public class SubscriptionValidatingInterceptorTest {
 		}
 	}
 
+	// GL-6885: a _filter subscription must be rejected at submission when filter search is disabled (the default)
+	@Test
+	public void testFilterCriteria_whenFilterParameterDisabled_isRejected() {
+		when(myStorageSettings.isFilterParameterEnabled()).thenReturn(false);
+		Subscription subscription = createSubscription();
+		subscription.setCriteria("Patient?_filter=name eq smith");
+
+		try {
+			mySubscriptionValidatingInterceptor.resourcePreCreate(subscription, null, null);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage()).startsWith(Msg.code(2792));
+			assertThat(e.getMessage()).contains("_filter");
+		}
+	}
+
+	// GL-6885: a _filter subscription is accepted when filter search is enabled
+	@Test
+	public void testFilterCriteria_whenFilterParameterEnabled_isAccepted() {
+		when(myStorageSettings.isFilterParameterEnabled()).thenReturn(true);
+		when(mySubscriptionStrategyEvaluator.determineStrategy(any(CanonicalSubscription.class))).thenReturn(SubscriptionMatchingStrategy.DATABASE);
+		Subscription subscription = createSubscription();
+		subscription.setCriteria("Patient?_filter=name eq smith");
+
+		assertThatNoException()
+				.isThrownBy(() -> mySubscriptionValidatingInterceptor.resourcePreCreate(subscription, null, null));
+	}
+
+	// GL-6885 (AC4): a _filter subscription is stamped with the DATABASE matching-strategy extension
+	@Test
+	public void testFilterCriteria_whenFilterParameterEnabled_stampsDatabaseStrategy() {
+		when(myStorageSettings.isFilterParameterEnabled()).thenReturn(true);
+		when(mySubscriptionStrategyEvaluator.determineStrategy(any(CanonicalSubscription.class))).thenReturn(SubscriptionMatchingStrategy.DATABASE);
+		Subscription subscription = createSubscription();
+		subscription.setCriteria("Patient?_filter=name eq smith");
+
+		mySubscriptionValidatingInterceptor.resourcePreCreate(subscription, null, null);
+
+		String strategy = subscription
+				.getMeta()
+				.getTag(
+						HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY,
+						SubscriptionMatchingStrategy.DATABASE.toString())
+				.getCode();
+		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), strategy);
+	}
+
 	private void initSubscription(IBaseResource theSubscription) {
 		setFhirContext(theSubscription);
 		SubscriptionUtil.setStatus(myFhirContext, theSubscription, "active");
@@ -355,8 +407,8 @@ public class SubscriptionValidatingInterceptorTest {
 		}
 
 		@Bean
-        SubscriptionQueryValidator subscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
-			return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
+        SubscriptionQueryValidator subscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator, JpaStorageSettings theStorageSettings) {
+			return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator, theStorageSettings);
 		}
 
 		@Bean

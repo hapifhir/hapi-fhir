@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.config;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
@@ -29,7 +30,9 @@ import org.springframework.context.annotation.Configuration;
 public class SubscriptionConfig {
 	@Bean
 	public SubscriptionQueryValidator subscriptionQueryValidator(
-			DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
-		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
+			DaoRegistry theDaoRegistry,
+			SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator,
+			JpaStorageSettings theStorageSettings) {
+		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator, theStorageSettings);
 	}
 }

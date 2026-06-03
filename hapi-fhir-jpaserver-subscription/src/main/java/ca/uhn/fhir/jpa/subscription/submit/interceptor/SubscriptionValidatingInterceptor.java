@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
@@ -88,6 +89,9 @@ public class SubscriptionValidatingInterceptor {
 
 	@Autowired
 	private SubscriptionQueryValidator mySubscriptionQueryValidator;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
 	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
@@ -357,7 +361,13 @@ public class SubscriptionValidatingInterceptor {
 	public void setSubscriptionStrategyEvaluatorForUnitTest(
 			SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
-		mySubscriptionQueryValidator = new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator);
+		mySubscriptionQueryValidator =
+				new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator, myStorageSettings);
+	}
+
+	@VisibleForTesting
+	public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	@VisibleForTesting
