@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -228,6 +229,49 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.add(Constants.PARAM_FILTER, new StringParam("name eq smith"));
 		try {
 			myPatientDao.search(map);
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(1222) + "_filter parameter is disabled on this server", e.getMessage());
+		}
+	}
+
+	/**
+	 * A conditional operation whose only match-URL parameter is {@code _filter} must run a real
+	 * search rather than failing with Msg 518 ("URL has no search parameters"). Previously the
+	 * match-URL translation dropped {@code _filter}, leaving an empty {@link SearchParameterMap}.
+	 */
+	@Test
+	public void testConditionalUpdate_filterOnlyMatchUrl_whenFilterEnabled_resolves() {
+		Patient existing = new Patient();
+		existing.addName().setFamily("Smith").addGiven("John");
+		existing.setActive(true);
+		IIdType existingId = myPatientDao.create(existing).getId().toUnqualifiedVersionless();
+
+		Patient update = new Patient();
+		update.addName().setFamily("Smith").addGiven("John");
+		update.setActive(false);
+
+		DaoMethodOutcome outcome = myPatientDao.update(update, "Patient?_filter=name%20eq%20Smith");
+
+		// The conditional update resolved to the existing Patient instead of throwing Msg 518.
+		assertThat(outcome.getCreated()).isFalse();
+		assertEquals(existingId.getValue(), outcome.getId().toUnqualifiedVersionless().getValue());
+	}
+
+	/**
+	 * When {@code _filter} search is disabled, a {@code _filter}-only conditional match URL must
+	 * be rejected with Msg 1222 (filter disabled) rather than being silently dropped and failing
+	 * with Msg 518.
+	 */
+	@Test
+	public void testConditionalUpdate_filterOnlyMatchUrl_whenFilterDisabled_throwsFilterDisabled() {
+		myStorageSettings.setFilterParameterEnabled(false);
+
+		Patient update = new Patient();
+		update.addName().setFamily("Smith").addGiven("John");
+
+		try {
+			myPatientDao.update(update, "Patient?_filter=name%20eq%20Smith");
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1222) + "_filter parameter is disabled on this server", e.getMessage());
 		}

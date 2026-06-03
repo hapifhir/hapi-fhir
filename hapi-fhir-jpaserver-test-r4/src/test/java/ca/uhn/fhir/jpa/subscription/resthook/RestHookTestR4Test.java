@@ -115,7 +115,10 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		waitForQueueToDrain();
 
-		// Only the matching Patient should have been delivered
+		// Only the matching Patient should have been delivered.
+		// Note: waitForCreateCount(0) is a weak check (it asserts the absence of an event that
+		// never fires for an update delivery anyway); the real discriminator is the
+		// waitForUpdateCount(1) below plus the family-name assertion.
 		ourPatientProvider.waitForCreateCount(0);
 		ourPatientProvider.waitForUpdateCount(1);
 		assertEquals("Smith", ourPatientProvider.getStoredResources().get(0).getName().get(0).getFamily());
