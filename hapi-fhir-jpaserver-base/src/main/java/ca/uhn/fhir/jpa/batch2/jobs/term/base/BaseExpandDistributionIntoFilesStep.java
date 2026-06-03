@@ -98,7 +98,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 	private Integer myChunkLineSizeForUnitTests = null;
 
 	@VisibleForTesting
-	public void setChunkLineSizeForUnitTest(int theChunkLineSize) {
+	public void setChunkLineSizeForUnitTest(Integer theChunkLineSize) {
 		myChunkLineSizeForUnitTests = theChunkLineSize;
 	}
 
@@ -149,7 +149,6 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 						List<StepIdAndFileHandlingInstructions> processors =
 								getStepIdAndFileHandlingInstructionsForFileName(
 										theStepExecutionDetails,
-										jobParameters,
 										theStepExecutionDetails.getJobDefinition(),
 										nextFileName);
 
@@ -182,6 +181,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 										case CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 1000);
 											yield csvSplitWithRepeatHeader(
+													fileHandlingType,
 													',',
 													instanceId,
 													bytes,
@@ -194,6 +194,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 										case CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 50000);
 											yield csvSplitWithRepeatHeader(
+													fileHandlingType,
 													',',
 													instanceId,
 													bytes,
@@ -206,6 +207,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 										case TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS -> {
 											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 5000);
 											yield csvSplitWithRepeatHeader(
+													fileHandlingType,
 													'\t',
 													instanceId,
 													bytes,
@@ -341,6 +343,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 	 * @return A list of attachment IDs for the work chunks that were created.
 	 */
 	private List<String> csvSplitWithRepeatHeader(
+			ITerminologyImportFileHandlerStep.FileHandlingType theFileHandlingType,
 			char theDelimiter,
 			String theJobInstanceId,
 			byte[] theBytes,
@@ -357,6 +360,20 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 		if (lastSlash != -1) {
 			filename = filename.substring(lastSlash + 1);
 		}
+
+		/*
+		 * Avoid filename collisions if two different steps want chunks from the same file,
+		 * but they want them with different chunk sizes, e.g. if one step wants CSVs split
+		 * into chunks 1000 and another wants chunks of 50000. Using the file handling type
+		 * ordinal as a suffix ensures unique filenames for different chunk sizes.
+		 *
+		 * Note that these filenames aren't actually used for anything other than making
+		 * the logs slightly more meaningful for troubleshooting, since the job steps
+		 * use the attachment IDs to fetch these attachments and not the filenames. Also
+		 * they only survive as long as the job does. So we don't need to worry about
+		 * ordinal changes over time.
+		 */
+		filename += "_" + theFileHandlingType.ordinal();
 
 		ByteArrayInputStream bis = new ByteArrayInputStream(theBytes);
 		InputStreamReader reader = new InputStreamReader(bis, StandardCharsets.UTF_8);
@@ -429,14 +446,13 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 
 	private List<StepIdAndFileHandlingInstructions> getStepIdAndFileHandlingInstructionsForFileName(
 			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
-			PT theJobParameters,
 			JobDefinition<PT> theJobDefinition,
 			String theStepId) {
 		List<StepIdAndFileHandlingInstructions> stepProcessingInstructions = new ArrayList<>();
 
 		for (JobDefinitionStep<PT, ?, ?> step : theJobDefinition.getSteps()) {
 			if (step.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep<PT, ?, ?> fileHandler) {
-				canHandleFile(theStepExecutionDetails, fileHandler, theJobParameters, theStepId)
+				canHandleFile(theStepExecutionDetails, fileHandler, theStepId)
 						.ifPresent(instructions -> stepProcessingInstructions.add(
 								new StepIdAndFileHandlingInstructions(step.getStepId(), instructions)));
 			}
@@ -449,7 +465,6 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 	private Optional<ITerminologyImportFileHandlerStep.FileHandlingType> canHandleFile(
 			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
 			ITerminologyImportFileHandlerStep<PT, ?, ?> theFileHandler,
-			PT theJobParameters,
 			String theFileName) {
 
 		Properties jobProperties = getJobProperties(myJobPersistence, theStepExecutionDetails);

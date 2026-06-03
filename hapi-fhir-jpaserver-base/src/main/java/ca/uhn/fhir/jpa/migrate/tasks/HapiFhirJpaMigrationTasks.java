@@ -159,12 +159,28 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		attachment
 				.addForeignKey("20260407.13", "FK_BT2JA_INSTANCE")
 				.toColumn("JOB_INSTANCE_ID")
-				.references("BT2_JOB_INSTANCE", "JOB_INSTANCE_ID");
+				.references("BT2_JOB_INSTANCE", "ID");
 
 		version.onTable(TermCodeSystemVersion.TRM_CODESYSTEM_VER)
 				.addColumn("20260427.10", "CS_INTENDED_VERSION_ID")
 				.nullable()
 				.type(ColumnTypeEnum.STRING, 200);
+
+		Builder.BuilderAddTableByColumns attachmentChunk = version.addTableByColumns(
+				"20260601.10", "BT2_JOB_ATTACHMENT_CHUNK", "JOB_INSTANCE_ID", "ATTACHMENT_ID", "CHUNK_INDEX");
+		attachmentChunk.addColumn("JOB_INSTANCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachmentChunk.addColumn("ATTACHMENT_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachmentChunk.addColumn("CHUNK_INDEX").nonNullable().type(ColumnTypeEnum.INT);
+		attachmentChunk.addColumn("ATTACHMENT_DATA").nonNullable().type(ColumnTypeEnum.BINARY);
+		attachmentChunk
+				.addForeignKey("20260601.20", "FK_BT2_JOB_ATTCHNK_PARENT")
+				.toColumns("JOB_INSTANCE_ID", "ATTACHMENT_ID")
+				.references("BT2_JOB_ATTACHMENT", "JOB_INSTANCE_ID", "ATTACHMENT_ID");
+
+		version.onTable("BT2_JOB_ATTACHMENT")
+				.addColumn("20260601.30", "EXTRA_CHUNK_IDX")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
 	}
 
 	protected void init8_10_0() {

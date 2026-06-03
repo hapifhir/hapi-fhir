@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
+import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -42,6 +43,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_SNOMED_CT_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT;
@@ -139,6 +141,41 @@ public class TerminologyTestHelper {
 		return instanceId.getInstanceId();
 	}
 
+	public String startImportSnomedCtJobAndWaitForCompletion(
+			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
+		return startImportSnomedCtJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, false);
+	}
+
+	public String startImportSnomedCtJobAndWaitForCompletion(
+			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, boolean theExpectFailure) {
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT);
+		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
+		parameters.setVersionId(versionId);
+		if (theDontMakeCurrent) {
+			parameters.setDontMakeCurrent(true);
+		}
+		startRequest.setParameters(parameters);
+
+		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
+
+		AttachmentDetails attachmentDetails = new AttachmentDetails(
+				new ByteArrayInputStream(theFiles.getZipBytes()),
+				AttachmentContentTypeEnum.ZIP,
+				FILENAME_SNOMED_CT_DISTRIBUTION_FILE);
+		myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
+
+		myJobCoordinator.enqueueBuildingJobForExecution(instanceId.getInstanceId());
+
+		if (theExpectFailure) {
+			myBatch2JobHelper.awaitJobFailure(instanceId);
+		} else {
+			myBatch2JobHelper.awaitJobCompletion(instanceId);
+		}
+
+		return instanceId.getInstanceId();
+	}
+
 	public void startImportLoincJobAndWaitForCompletion(String theVersion, boolean theMakeItCurrent) throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 
@@ -191,6 +228,24 @@ public class TerminologyTestHelper {
 		startImportLoincJobAndWaitForCompletion("2.67", true);
 	}
 
+	private String getClassPathPrefix(String theVersion) {
+		String theClassPathPrefix = "/loinc-ver/v-no-version/";
+
+		if (StringUtils.isBlank(theVersion)) return theClassPathPrefix;
+
+		switch (theVersion) {
+			case "2.67":
+				return "/loinc-ver/v267/";
+			case "2.68":
+				return "/loinc-ver/v268/";
+			case "2.69":
+				return "/loinc-ver/v269/";
+		}
+
+		fail("Setup failed. Unexpected version: " + theVersion);
+		return null;
+	}
+
 	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theClassPathPrefix)
 			throws IOException {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_XML_FILE.getCode());
@@ -212,23 +267,5 @@ public class TerminologyTestHelper {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode());
 		theFiles.addFileZip(theClassPathPrefix, LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode());
 		theFiles.addFileZip(theClassPathPrefix, LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode());
-	}
-
-	private String getClassPathPrefix(String theVersion) {
-		String theClassPathPrefix = "/loinc-ver/v-no-version/";
-
-		if (StringUtils.isBlank(theVersion)) return theClassPathPrefix;
-
-		switch (theVersion) {
-			case "2.67":
-				return "/loinc-ver/v267/";
-			case "2.68":
-				return "/loinc-ver/v268/";
-			case "2.69":
-				return "/loinc-ver/v269/";
-		}
-
-		fail("Setup failed. Unexpected version: " + theVersion);
-		return null;
 	}
 }

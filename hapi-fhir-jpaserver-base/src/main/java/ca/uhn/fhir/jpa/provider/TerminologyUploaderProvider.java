@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -65,12 +66,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_SNOMED_CT_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB;
 import static ca.uhn.fhir.rest.server.RestfulServerUtils.createFullyQualifiedUrlFromRelativeUrl;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
@@ -92,10 +97,14 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	public static final String RESP_PARAM_OUTCOME = "outcome";
 	public static final Pattern LOINC_XML_FILENAME_PATTERN =
 			Pattern.compile("loinc[0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE);
+	public static final Pattern SNOMED_CT_XML_FILENAME_PATTERN =
+			Pattern.compile("snomed[a-zA-Z0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE);
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	private static final String RESP_PARAM_CONCEPT_COUNT = "conceptCount";
 	private static final String RESP_PARAM_TARGET = "target";
 	private static final String RESP_PARAM_SUCCESS = "success";
+	private final Map<String, JobType> myCanonicalUrlToJobType = new HashMap<>();
+	private final Map<String, JobType> myJobDefinitionIdToJobType = new HashMap<>();
 	private CodeSystemToCustomCsvConverter myCodeSystemToCustomCsvConverter;
 
 	@Autowired
@@ -126,6 +135,34 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		myTerminologyLoaderSvc = theTerminologyLoaderSvc;
 		myJobCoordinator = theJobCoordinator;
 		myJobPersistence = theJobPersistence;
+
+		String loincJobDefinitionId = ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC;
+		Supplier<ImportTerminologyJobParameters> paramsFactory = ImportTerminologyJobParameters::new;
+		String loincTerminologyName = "LOINC";
+		JobType loincJobType = new JobType(
+				LOINC_XML_FILENAME_PATTERN,
+				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE,
+				loincJobDefinitionId,
+				paramsFactory,
+				loincTerminologyName,
+				FILENAME_LOINC_DISTRIBUTION_FILE,
+				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
+		myCanonicalUrlToJobType.put(ITermLoaderSvc.LOINC_URI, loincJobType);
+		myJobDefinitionIdToJobType.put(loincJobDefinitionId, loincJobType);
+
+		String sctJobDefinitionId = ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT;
+		Supplier<ImportTerminologyJobParameters> sctParamsFactory = ImportTerminologyJobParameters::new;
+		String sctTerminologyName = "SNOMED CT";
+		JobType sctJobType = new JobType(
+				SNOMED_CT_XML_FILENAME_PATTERN,
+				null,
+				sctJobDefinitionId,
+				sctParamsFactory,
+				sctTerminologyName,
+				FILENAME_SNOMED_CT_DISTRIBUTION_FILE,
+				null);
+		myCanonicalUrlToJobType.put(ITermLoaderSvc.SCT_URI, sctJobType);
+		myJobDefinitionIdToJobType.put(sctJobDefinitionId, sctJobType);
 	}
 
 	@PostConstruct
@@ -169,44 +206,64 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(url, toStringValue(theCodeSystemVersion));
 
-		if (ITermLoaderSvc.LOINC_URI.equals(canonicalUrl.url())) {
-			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-			startRequest.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
-			ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
-			parameters.setVersionId(canonicalUrl.versionId().orElse(null));
-
-			Boolean makeCurrent = DatatypeUtil.toBooleanValue(theMakeCurrent);
-			if (makeCurrent != null && !makeCurrent) {
-				parameters.setDontMakeCurrent(true);
-			}
-
-			startRequest.setParameters(parameters);
-			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(theRequestDetails, startRequest);
-			String instanceId = startResponse.getInstanceId();
-
-			StringBuilder description = new StringBuilder();
-			description.append("Upload LOINC Job has been created and is in BUILDING state with ID[");
-			description.append(instanceId);
-			description.append("]. You can now upload the distribution file (");
-			description.append(FILENAME_LOINC_DISTRIBUTION_FILE);
-			description.append(") and optionally upload a property file (");
-			description.append(FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
-			description.append(") to the job using the ");
-			description.append(createFullyQualifiedUrlFromRelativeUrl(
-					theRequestDetails, "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE));
-			description.append(" operation, and then start the job using the ");
-			description.append(createFullyQualifiedUrlFromRelativeUrl(
-					theRequestDetails, "CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB));
-			description.append(" operation.");
-
-			IBaseParameters response = ParametersUtil.newInstance(getContext());
-			ParametersUtil.addParameterToParametersString(
-					getContext(), response, RESP_PARAM_OUTCOME, description.toString());
-			ParametersUtil.addParameterToParametersCode(getContext(), response, PARAM_JOB_INSTANCE_ID, instanceId);
-			return response;
+		JobType jobType = myCanonicalUrlToJobType.get(canonicalUrl.url());
+		if (jobType != null) {
+			return startImportTerminologyJob(theMakeCurrent, theRequestDetails, canonicalUrl, jobType);
 		}
 
 		throw new InvalidRequestException(Msg.code(2944) + "Unsupported code system: " + canonicalUrl.url());
+	}
+
+	@Nonnull
+	private IBaseParameters startImportTerminologyJob(
+			IPrimitiveType<Boolean> theMakeCurrent,
+			ServletRequestDetails theRequestDetails,
+			UrlUtil.CanonicalUrlParts canonicalUrl,
+			JobType theJobType) {
+		String terminologyName = theJobType.terminologyName();
+		String distributionFileName = theJobType.distributionFileName();
+		String propertyFileName = theJobType.propertyFileName();
+		String jobDefinitionId = theJobType.jobDefinitionId();
+		Supplier<ImportTerminologyJobParameters> paramsFactory = theJobType.paramsFactory();
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(jobDefinitionId);
+		ImportTerminologyJobParameters parameters = paramsFactory.get();
+		parameters.setVersionId(canonicalUrl.versionId().orElse(null));
+
+		Boolean makeCurrent = DatatypeUtil.toBooleanValue(theMakeCurrent);
+		if (makeCurrent != null && !makeCurrent) {
+			parameters.setDontMakeCurrent(true);
+		}
+
+		startRequest.setParameters(parameters);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(theRequestDetails, startRequest);
+		String instanceId = startResponse.getInstanceId();
+
+		StringBuilder description = new StringBuilder();
+		description.append("Upload " + terminologyName + " Job has been created and is in BUILDING state with ID[");
+		description.append(instanceId);
+		description.append("]. You can now upload the distribution file (");
+		description.append(distributionFileName);
+		description.append(")");
+		if (propertyFileName != null) {
+			description.append(" and optionally upload a property file (");
+			description.append(propertyFileName);
+			description.append(")");
+		}
+		description.append(" to the job using the ");
+		description.append(createFullyQualifiedUrlFromRelativeUrl(
+				theRequestDetails, "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE));
+		description.append(" operation, and then start the job using the ");
+		description.append(createFullyQualifiedUrlFromRelativeUrl(
+				theRequestDetails, "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB));
+		description.append(" operation.");
+
+		IBaseParameters response = ParametersUtil.newInstance(getContext());
+		ParametersUtil.addParameterToParametersString(
+				getContext(), response, RESP_PARAM_OUTCOME, description.toString());
+		ParametersUtil.addParameterToParametersCode(getContext(), response, PARAM_JOB_INSTANCE_ID, instanceId);
+		return response;
 	}
 
 	/**
@@ -232,18 +289,19 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
 			validateJobIsInBuildingStatus(jobInstance);
 
-			if (ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
+			JobType jobType = myJobDefinitionIdToJobType.get(jobInstance.getJobDefinitionId());
+			if (jobType != null) {
 				AttachmentDetails attachmentDetails;
 				String filename = toStringValueOrEmpty(theFilename);
-				if (LOINC_XML_FILENAME_PATTERN.matcher(filename).find()) {
+				if (jobType.distributionFilenamePattern().matcher(filename).find()) {
 					attachmentDetails = new AttachmentDetails(
-							inputStream, AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
-				} else if (filename.endsWith(FILENAME_LOINC_UPLOAD_PROPERTIES_FILE)) {
+							inputStream, AttachmentContentTypeEnum.ZIP, jobType.distributionFileName());
+				} else if (filename.endsWith(jobType.propertyFileName())) {
 					attachmentDetails = new AttachmentDetails(
-							inputStream, AttachmentContentTypeEnum.PROPERTIES, FILENAME_LOINC_UPLOAD_PROPERTIES_FILE);
+							inputStream, AttachmentContentTypeEnum.PROPERTIES, jobType.propertyFileName());
 				} else {
-					throw new InvalidRequestException(
-							Msg.code(2953) + "Don't know how to handle file: " + toStringValue(theFilename));
+					throw new InvalidRequestException(Msg.code(2953) + "File named \"" + toStringValue(theFilename)
+							+ "\" is not valid for import " + jobType.terminologyName() + " job");
 				}
 
 				String instanceId = jobInstance.getInstanceId();
@@ -293,7 +351,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
 		validateJobIsInBuildingStatus(jobInstance);
 
-		if (ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
+		JobType jobType = myJobDefinitionIdToJobType.get(jobInstance.getJobDefinitionId());
+		if (jobType != null) {
 			ourLog.info(
 					"Starting Upload Terminology job[{}] of type: {}",
 					jobInstance.getInstanceId(),
@@ -325,8 +384,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
 
-		if (ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC.equals(jobInstance.getJobDefinitionId())) {
-
+		JobType jobType = myJobDefinitionIdToJobType.get(jobInstance.getJobDefinitionId());
+		if (jobType != null) {
 			Function<JobInstance, AsyncRequestUtil.CompletedJobPollResponse> completedDetailsProvider = instance -> {
 				ImportTerminologyResultJson resultJson =
 						JsonUtil.deserialize(jobInstance.getReport(), ImportTerminologyResultJson.class);
@@ -337,7 +396,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					theRequestDetails, jobInstance, OPERATION_UPLOAD_TERMINOLOGY_START_JOB, completedDetailsProvider);
 
 		} else {
-			throw new InvalidRequestException(Msg.code(2948) + "Can't start job of this type");
+			throw new InvalidRequestException(Msg.code(2948) + "Can't use this operation to poll status of this job");
 		}
 	}
 
@@ -386,17 +445,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 			UploadStatistics stats =
 					switch (codeSystemUrl) {
-						case ITermLoaderSvc.LOINC_URI -> throw new InvalidRequestException(
-								Msg.code(2954) + "Uploading the " + codeSystemUrl + " system now uses the "
-										+ OPERATION_UPLOAD_TERMINOLOGY_START_JOB
-										+ " operation, which accepts different parameters. Please see the documentation.");
 						case ITermLoaderSvc.ICD10_URI -> myTerminologyLoaderSvc.loadIcd10(
 								localFiles, theRequestDetails);
 						case ITermLoaderSvc.ICD10CM_URI -> myTerminologyLoaderSvc.loadIcd10cm(
 								localFiles, theRequestDetails);
 						case ITermLoaderSvc.IMGTHLA_URI -> myTerminologyLoaderSvc.loadImgthla(
-								localFiles, theRequestDetails);
-						case ITermLoaderSvc.SCT_URI -> myTerminologyLoaderSvc.loadSnomedCt(
 								localFiles, theRequestDetails);
 						default -> myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
 					};
@@ -576,6 +629,15 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					Msg.code(2949) + "Job is not in BUILDING status: " + jobInstance.getStatus());
 		}
 	}
+
+	private record JobType(
+			Pattern distributionFilenamePattern,
+			String thePropertyFileName,
+			String jobDefinitionId,
+			Supplier<ImportTerminologyJobParameters> paramsFactory,
+			String terminologyName,
+			String distributionFileName,
+			String propertyFileName) {}
 
 	public static class FileBackedFileDescriptor implements ITermLoaderSvc.FileDescriptor {
 		private final File myNextFile;
