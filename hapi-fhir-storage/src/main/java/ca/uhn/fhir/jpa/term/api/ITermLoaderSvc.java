@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term.api;
 
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.apache.commons.lang3.Validate;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -40,6 +41,15 @@ public interface ITermLoaderSvc {
 	String IEEE_11073_10101_URI = "urn:iso:std:iso:11073:10101";
 
 	UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+
+	/**
+	 * TODO: remove this once we're done all the conversion
+	 */
+	@SuppressWarnings("DataFlowIssue")
+	default UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
+		Validate.isTrue(false, "Not supported");
+		return null;
+	}
 
 	default UploadStatistics loadIcd10(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		return null;
