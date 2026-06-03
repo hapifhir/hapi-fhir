@@ -12,6 +12,7 @@ import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -855,6 +856,58 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 			// Verify: No resources for Patient/tgt
 			assertThat(searchBySubject(Observation.class, myPatientIdTgt.getValue())).isEmpty();
 			assertThat(searchBySubject(Encounter.class, myPatientIdTgt.getValue())).isEmpty();
+		}
+
+		// In a single database, a grouped undo runs in one transaction (partition changes use REQUIRED
+		// propagation), so a failure partway through rolls the whole undo back — nothing is left reverted.
+		// The source is restored first and would succeed, but a later sub-Provenance restore is forced to
+		// fail; we assert the source was NOT left reverted (it still carries its post-merge replaced-by link).
+		@Test
+		void testUndoMerge_failurePartway_rollsBackAtomicallyInSingleDatabase() {
+			IIdType groupId = createGroup(myPatientIdSrc);
+
+			// Merge, keeping the source. Source gains a replaced-by link to target; the Group's member is
+			// rewritten from source to target.
+			callMerge(new MergeTestParameters()
+				.sourceResource(new Reference(myPatientIdSrc))
+				.targetResource(new Reference(myPatientIdTgt))
+				.deleteSource(false));
+
+			Patient mergedSource = readResource(Patient.class, myPatientIdSrc);
+			assertThat(mergedSource.getLink())
+				.as("source should carry a replaced-by link after merge")
+				.isNotEmpty();
+			assertThat(readResource(Group.class, groupId).getMemberFirstRep().getEntity().getReference())
+				.isEqualTo(myPatientIdTgt.getValue());
+
+			// Bump the Group's version so its restore fails the version check, forcing the undo to fail
+			// after the source (restored first) has already been restored within the transaction.
+			Group bump = readResource(Group.class, groupId);
+			bump.setName("version-bumped-to-force-restore-conflict");
+			myClient.update().resource(bump).execute();
+
+			// Snapshot the post-merge state right before the undo. An atomic rollback must leave every
+			// resource the undo touches — source, target, and the Group — exactly as it is now.
+			IBaseResource sourceBeforeUndo = readResource(Patient.class, myPatientIdSrc);
+			IBaseResource targetBeforeUndo = readResource(Patient.class, myPatientIdTgt);
+			IBaseResource groupBeforeUndo = readResource(Group.class, groupId);
+
+			// Undo must fail.
+			Parameters undoParams = new Parameters();
+			undoParams.addParameter().setName("source-resource").setValue(new Reference(myPatientIdSrc));
+			undoParams.addParameter().setName("target-resource").setValue(new Reference(myPatientIdTgt));
+			assertThatThrownBy(() -> myMergeHelper.callUndoMergeOperation("Patient", undoParams))
+				.isInstanceOf(BaseServerResponseException.class);
+
+			// Atomic rollback: the source restore ran first and would have removed the replaced-by link, but
+			// it was rolled back together with the failing restore. Every touched resource must remain in its
+			// pre-undo (merged) state.
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				sourceBeforeUndo, readResource(Patient.class, myPatientIdSrc));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				targetBeforeUndo, readResource(Patient.class, myPatientIdTgt));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				groupBeforeUndo, readResource(Group.class, groupId));
 		}
 	}
 }

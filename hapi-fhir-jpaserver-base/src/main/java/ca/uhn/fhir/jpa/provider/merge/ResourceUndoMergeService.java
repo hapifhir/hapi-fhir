@@ -21,8 +21,11 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
@@ -31,6 +34,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -43,6 +47,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -73,23 +78,30 @@ public class ResourceUndoMergeService {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceUndoMergeService.class);
 
+	private static final String ISSUE_TYPE_EXCEPTION = "exception";
+
 	private final MergeProvenanceSvc myMergeProvenanceSvc;
 	private final PreviousResourceVersionRestorer myResourceVersionRestorer;
 	private final MergeValidationService myMergeValidationService;
 	private final IHapiTransactionService myHapiTransactionService;
 	private final FhirContext myFhirContext;
+	private final DaoRegistry myDaoRegistry;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	public ResourceUndoMergeService(
 			DaoRegistry theDaoRegistry,
 			MergeProvenanceSvc theMergeProvenanceSvc,
 			PreviousResourceVersionRestorer theResourceVersionRestorer,
 			MergeValidationService theMergeValidationService,
-			IHapiTransactionService theHapiTransactionService) {
+			IHapiTransactionService theHapiTransactionService,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		myDaoRegistry = theDaoRegistry;
 		myMergeProvenanceSvc = theMergeProvenanceSvc;
 		myResourceVersionRestorer = theResourceVersionRestorer;
 		myFhirContext = theDaoRegistry.getFhirContext();
 		myMergeValidationService = theMergeValidationService;
 		myHapiTransactionService = theHapiTransactionService;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
 	public OperationOutcomeWithStatusCode undoMerge(
@@ -109,7 +121,7 @@ public class ResourceUndoMergeService {
 			} else {
 				undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_500_INTERNAL_ERROR);
 			}
-			addErrorToOperationOutcome(myFhirContext, opOutcome, e.getMessage(), "exception");
+			addErrorToOperationOutcome(myFhirContext, opOutcome, e.getMessage(), ISSUE_TYPE_EXCEPTION);
 		}
 		return undoMergeOutcome;
 	}
@@ -140,19 +152,12 @@ public class ResourceUndoMergeService {
 				"Found Provenance resource with id: {} to be used for $undo-merge operation",
 				mainProvenance.getIdElement().asStringValue());
 
-		int restoredCount;
 		if (provenances.size() == 1) {
-			restoredCount = undoSingleProvenance(mainProvenance, inputParameters, theRequestDetails);
+			undoSingleProvenance(mainProvenance, inputParameters, theRequestDetails, undoMergeOutcome);
 		} else {
 			List<Provenance> subProvenances = provenances.subList(1, provenances.size());
-			restoredCount = undoGroupedMerge(mainProvenance, subProvenances, inputParameters, theRequestDetails);
+			undoGroupedMerge(mainProvenance, subProvenances, inputParameters, theRequestDetails, undoMergeOutcome);
 		}
-
-		String msg = format(
-				"Successfully restored %d resources to their previous versions based on the Provenance resource: %s",
-				restoredCount, mainProvenance.getIdElement().getValue());
-		addInfoToOperationOutcome(myFhirContext, opOutcome, null, msg);
-		undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_200_OK);
 
 		return undoMergeOutcome;
 	}
@@ -178,10 +183,11 @@ public class ResourceUndoMergeService {
 		return provenances;
 	}
 
-	private int undoSingleProvenance(
+	private void undoSingleProvenance(
 			Provenance theProvenance,
 			UndoMergeOperationInputParameters inputParameters,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails,
+			OperationOutcomeWithStatusCode theUndoMergeOutcome) {
 
 		ourLog.info(
 				"Undoing merge from a single Provenance: {}",
@@ -196,14 +202,15 @@ public class ResourceUndoMergeService {
 		}
 
 		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(referencesToRestore, theRequestDetails);
-		return referencesToRestore.size();
+		populateSuccessOutcome(referencesToRestore.size(), theProvenance, theUndoMergeOutcome);
 	}
 
-	private int undoGroupedMerge(
+	private void undoGroupedMerge(
 			Provenance theMainProvenance,
 			List<Provenance> theSubProvenances,
 			UndoMergeOperationInputParameters inputParameters,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails,
+			OperationOutcomeWithStatusCode theUndoMergeOutcome) {
 
 		validateGroupedMergeResourceLimit(theMainProvenance, theSubProvenances, inputParameters);
 
@@ -219,44 +226,185 @@ public class ResourceUndoMergeService {
 		Reference targetRef = theMainProvenance.getTarget().get(0);
 		Reference sourceRef = theMainProvenance.getTarget().get(1);
 
-		// Restore all Provenances within a single outer transaction so that when all the data lives in
-		// a single database the whole undo is atomic — if any restore fails, the entire group rolls back.
-		// When partitions are configured to require a new transaction on partition change (see
-		// HapiTransactionService#isCompatiblePartition), the per-partition restores open their own
-		// transactions, so the outer transaction has no cross-partition effect and each partition
-		// commits independently.
-		return myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
-			// Restore source first (undelete if deleted) so that referential integrity
-			// checks pass when restoring data resources that reference source.
-			int totalRestored = 0;
-			ourLog.info("Restoring source resource: {}", sourceRef.getReference());
-			myResourceVersionRestorer.restoreToPreviousVersionsInTrx(List.of(sourceRef), theRequestDetails);
-			totalRestored++;
+		// Restore all Provenances within a single outer transaction. When all the data lives in a single
+		// database the whole undo is atomic — if any restore fails, the entire transaction rolls back and
+		// nothing persists. When changing partitions requires a new transaction, each per-partition restore
+		// commits independently, so a failure can leave earlier partitions reverted while later ones stay
+		// merged. We stop at the first failure and then report which partitions actually persisted.
+		try {
+			int restoredCount = myHapiTransactionService
+					.withRequest(theRequestDetails)
+					.execute(() -> {
+						int totalRestored = 0;
 
-			// Restore each sub-Provenance's data separately,
-			// each of which contains resources from the same partition
-			for (Provenance sub : theSubProvenances) {
-				List<Reference> dataRefs =
-						sub.getTarget().subList(2, sub.getTarget().size());
-				ourLog.info(
-						"Restoring {} resource(s) from sub-Provenance: {}",
-						dataRefs.size(),
-						sub.getIdElement().toUnqualifiedVersionless().getValue());
-				if (!dataRefs.isEmpty()) {
-					myResourceVersionRestorer.restoreToPreviousVersionsInTrx(dataRefs, theRequestDetails);
-					totalRestored += dataRefs.size();
-				}
+						// Restore source first (undelete if deleted) so that referential integrity checks pass when
+						// restoring data resources that reference source. Each restore is pinned to the partition the
+						// resources live on so the resources of one Provenance share a single transaction and are
+						// restored all-or-nothing (see PreviousResourceVersionRestorer#restoreToPreviousVersionsInTrx).
+						ourLog.info("Restoring source resource: {}", sourceRef.getReference());
+						myResourceVersionRestorer.restoreToPreviousVersionsInTrx(
+								List.of(sourceRef), partitionFor(sourceRef, theRequestDetails), theRequestDetails);
+						totalRestored++;
+
+						// Restore each sub-Provenance's data separately,
+						// each of which contains resources from the same partition
+						for (Provenance sub : theSubProvenances) {
+							List<Reference> dataRefs =
+									sub.getTarget().subList(2, sub.getTarget().size());
+							ourLog.info(
+									"Restoring {} resource(s) from sub-Provenance: {}",
+									dataRefs.size(),
+									sub.getIdElement()
+											.toUnqualifiedVersionless()
+											.getValue());
+							if (!dataRefs.isEmpty()) {
+								myResourceVersionRestorer.restoreToPreviousVersionsInTrx(
+										dataRefs, partitionFor(dataRefs.get(0), theRequestDetails), theRequestDetails);
+								totalRestored += dataRefs.size();
+							}
+						}
+
+						// Restore target last.
+						if (!wasTargetUpdateANoop(theMainProvenance)) {
+							ourLog.info("Restoring target resource: {}", targetRef.getReference());
+							myResourceVersionRestorer.restoreToPreviousVersionsInTrx(
+									List.of(targetRef), partitionFor(targetRef, theRequestDetails), theRequestDetails);
+							totalRestored++;
+						}
+
+						return totalRestored;
+					});
+			populateSuccessOutcome(restoredCount, theMainProvenance, theUndoMergeOutcome);
+		} catch (Exception theException) {
+			ourLog.error(
+					"Grouped undo-merge failed; determining which partitions were already committed", theException);
+			buildGroupedUndoFailureOutcome(
+					theMainProvenance, theSubProvenances, theException, theRequestDetails, theUndoMergeOutcome);
+		}
+	}
+
+	/**
+	 * Populates the {@link OperationOutcomeWithStatusCode} for a successful undo-merge with an informational
+	 * message and a 200 status code.
+	 */
+	private void populateSuccessOutcome(
+			int theRestoredCount, Provenance theMainProvenance, OperationOutcomeWithStatusCode theUndoMergeOutcome) {
+		String msg = format(
+				"Successfully restored %d resources to their previous versions based on the Provenance resource: %s",
+				theRestoredCount, theMainProvenance.getIdElement().getValue());
+		addInfoToOperationOutcome(myFhirContext, theUndoMergeOutcome.getOperationOutcome(), null, msg);
+		theUndoMergeOutcome.setHttpStatusCode(STATUS_HTTP_200_OK);
+	}
+
+	/**
+	 * Builds the {@link OperationOutcomeWithStatusCode} for a failed grouped undo-merge.
+	 *
+	 * <p>Per-partition restores can commit independently when partitions span separate databases, so a
+	 * failure partway through can leave some partitions reverted to their pre-merge state while others remain
+	 * merged. We determine which actually persisted by probing the current version of one reference per
+	 * Provenance (see {@link #wasReferenceRestored(Reference, RequestDetails)}): a committed restore advances
+	 * the version, while a rolled-back or never-attempted one does not. When everything lives in a single
+	 * database the failed outer transaction rolls all of it back, so nothing probes as persisted and the
+	 * merge is reported as fully intact.
+	 */
+	private void buildGroupedUndoFailureOutcome(
+			Provenance theMainProvenance,
+			List<Provenance> theSubProvenances,
+			Exception theFailure,
+			RequestDetails theRequestDetails,
+			OperationOutcomeWithStatusCode theUndoMergeOutcome) {
+
+		IBaseOperationOutcome opOutcome = theUndoMergeOutcome.getOperationOutcome();
+		theUndoMergeOutcome.setHttpStatusCode(STATUS_HTTP_500_INTERNAL_ERROR);
+
+		Reference targetRef = theMainProvenance.getTarget().get(0);
+		Reference sourceRef = theMainProvenance.getTarget().get(1);
+
+		boolean sourceReverted = wasReferenceRestored(sourceRef, theRequestDetails);
+		boolean targetReverted = wasReferenceRestored(targetRef, theRequestDetails);
+
+		// Each sub-Provenance restores atomically, so its first data reference tells us whether the whole
+		// Provenance was reverted.
+		List<String> revertedProvenances = new ArrayList<>();
+		List<String> notRevertedProvenances = new ArrayList<>();
+		for (Provenance sub : theSubProvenances) {
+			List<Reference> dataRefs =
+					sub.getTarget().subList(2, sub.getTarget().size());
+			if (dataRefs.isEmpty()) {
+				continue;
 			}
-
-			// Restore target last.
-			if (!wasTargetUpdateANoop(theMainProvenance)) {
-				ourLog.info("Restoring target resource: {}", targetRef.getReference());
-				myResourceVersionRestorer.restoreToPreviousVersionsInTrx(List.of(targetRef), theRequestDetails);
-				totalRestored++;
+			String provenanceId = sub.getIdElement().toUnqualifiedVersionless().getValue();
+			if (wasReferenceRestored(dataRefs.get(0), theRequestDetails)) {
+				revertedProvenances.add(provenanceId);
+			} else {
+				notRevertedProvenances.add(provenanceId);
 			}
+		}
 
-			return totalRestored;
-		});
+		if (revertedProvenances.isEmpty() && !sourceReverted && !targetReverted) {
+			// Single-database (atomic) case, or the failure happened before anything was restored: the
+			// outer transaction rolled everything back, so the merge is fully intact.
+			String msg = format(
+					"Undo-merge failed. No resources could be restored; the merge remains fully in effect. Cause: %s",
+					theFailure.getMessage());
+			addErrorToOperationOutcome(myFhirContext, opOutcome, msg, ISSUE_TYPE_EXCEPTION);
+			return;
+		}
+
+		// Some restores committed independently before the failure and cannot be automatically rolled back.
+		// Report at Provenance granularity (each Provenance is all-or-nothing) plus the source and target.
+		String msg = format(
+				"Undo-merge partially failed; changes that were already committed cannot be automatically "
+						+ "rolled back and require manual reconciliation. Restored provenances: %s. Not restored "
+						+ "provenances: %s. Source resource restored: %s (%s). Target resource restored: %s (%s). "
+						+ "Cause: %s",
+				revertedProvenances,
+				notRevertedProvenances,
+				sourceReverted,
+				sourceRef.getReferenceElement().toUnqualifiedVersionless().getValue(),
+				targetReverted,
+				targetRef.getReferenceElement().toUnqualifiedVersionless().getValue(),
+				theFailure.getMessage());
+		addErrorToOperationOutcome(myFhirContext, opOutcome, msg, ISSUE_TYPE_EXCEPTION);
+	}
+
+	/**
+	 * Returns {@code true} if the resource referenced by the given versioned Provenance reference now has a
+	 * current version greater than the version recorded in the reference — i.e. a restore actually committed
+	 * for it. A resource that was created by the merge and restored by deleting it is detected via its
+	 * tombstone version. Probe failures are treated as "not restored" so the resource is reported as needing
+	 * manual cleanup rather than being silently assumed reverted.
+	 */
+	private boolean wasReferenceRestored(Reference theProvenanceRef, RequestDetails theRequestDetails) {
+		IIdType versionedId = theProvenanceRef.getReferenceElement();
+		if (!versionedId.hasVersionIdPart()) {
+			return false;
+		}
+		long provenanceVersion = versionedId.getVersionIdPartAsLong();
+		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(versionedId.getResourceType());
+		try {
+			IBaseResource current = dao.read(versionedId.toUnqualifiedVersionless(), theRequestDetails);
+			return current.getIdElement().getVersionIdPartAsLong() > provenanceVersion;
+		} catch (ResourceGoneException e) {
+			// Resource was created by the merge and restored by deleting it; the tombstone is a new version.
+			IIdType goneId = e.getResourceId();
+			return goneId != null && goneId.hasVersionIdPart() && goneId.getVersionIdPartAsLong() > provenanceVersion;
+		} catch (Exception e) {
+			ourLog.warn(
+					"Could not determine whether {} was restored; reporting it as still merged",
+					versionedId.getValue(),
+					e);
+			return false;
+		}
+	}
+
+	/**
+	 * Resolves the partition a referenced resource lives on, so the restore can be pinned to it. All
+	 * references within a single sub-Provenance live on the same partition, so resolving from one is enough.
+	 */
+	private RequestPartitionId partitionFor(Reference theRef, RequestDetails theRequestDetails) {
+		IIdType id = theRef.getReferenceElement().toUnqualifiedVersionless();
+		return myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequestDetails, id);
 	}
 
 	/**
