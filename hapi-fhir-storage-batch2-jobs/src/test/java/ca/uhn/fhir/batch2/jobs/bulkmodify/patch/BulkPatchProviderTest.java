@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
@@ -76,6 +75,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("LoggingSimilarMessage")
 @ExtendWith(MockitoExtension.class)
 public class BulkPatchProviderTest {
 
@@ -346,7 +346,7 @@ public class BulkPatchProviderTest {
 		2|_ALL|1    # {"allPartitions":true}
 		FOO         # EX: HAPI-2820: Invalid partition ID: FOO
 		""")
-	void testPparsePartitionIdsParameter(String theValues, String theExpected) {
+	void testParsePartitionIdsParameter(String theValues, String theExpected) {
 		List<IPrimitiveType<String>> input = Arrays.stream(StringUtils.split(theValues, '|'))
 			.map(StringType::new)
 			.collect(Collectors.toUnmodifiableList());

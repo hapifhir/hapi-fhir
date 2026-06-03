@@ -92,7 +92,7 @@ class TerminologyUploaderProviderTest {
 	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestCaptor;
 
 	@RegisterExtension
-	private RestfulServerExtension myServerExtension = new RestfulServerExtension(myContext)
+	private final RestfulServerExtension myServerExtension = new RestfulServerExtension(myContext)
 		.withServer(t -> {
 			assert myContext != null;
 			assert myTerminologyLoaderSvc != null;
@@ -101,7 +101,7 @@ class TerminologyUploaderProviderTest {
 		});
 
 	@RegisterExtension
-	private HttpClientExtension myHttpClient = new HttpClientExtension();
+	private final HttpClientExtension myHttpClient = new HttpClientExtension();
 
 	@Captor
 	private ArgumentCaptor<AttachmentDetails> myAttachmentDetailsCaptor;

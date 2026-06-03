@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -26,8 +25,6 @@ import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,33 +33,12 @@ import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_PRIMARY_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Test {
@@ -76,7 +52,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		List<String> inputNames = Arrays.asList("sct2_Concept_Full_INT_20160131.txt", "sct2_Concept_Full-en_INT_20160131.txt", "sct2_Description_Full-en_INT_20160131.txt", "sct2_Identifier_Full_INT_20160131.txt", "sct2_Relationship_Full_INT_20160131.txt", "sct2_StatedRelationship_Full_INT_20160131.txt", "sct2_TextDefinition_Full-en_INT_20160131.txt");
 		for (String nextName : inputNames) {
 			zos.putNextEntry(new ZipEntry("SnomedCT_Release_INT_20160131_Full/Terminology/" + nextName));
-			zos.write(IOUtils.toByteArray(getClass().getResourceAsStream("/sct/" + nextName)));
+			zos.write(ClasspathUtil.loadResourceAsByteArray("/sct/" + nextName));
 		}
 		zos.close();
 		return bos.toByteArray();
@@ -116,7 +92,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		ourLog.info(resp);
 
 		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
-		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference()).matches("CodeSystem\\/[a-zA-Z0-9\\.\\-]+");
+		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference()).matches("CodeSystem/[a-zA-Z0-9.\\-]+");
 	}
 
 	@Test
@@ -232,14 +208,14 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		runInTransaction(() -> {
 			TermCodeSystem cs = myTermCodeSystemDao.findByCodeSystemUri("http://foo/cs");
 			TermCodeSystemVersion version = cs.getCurrentVersion();
-			TermConcept microCode = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "NEUT").get();
+			TermConcept microCode = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "NEUT").orElseThrow();
 			assertEquals(2, microCode.getProperties().size());
-			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "HB").get();
+			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "HB").orElseThrow();
 			assertEquals(6, code.getProperties().size());
 			Integer codeProperties = myTermConceptPropertyDao.countByCodeSystemVersion(version.getPid());
 			assertEquals(11, codeProperties);
 			Optional<TermConceptProperty> first = code.getProperties().stream().filter(property -> "color".equalsIgnoreCase(property.getKey()) && "red".equalsIgnoreCase(property.getValue())).findFirst();
-			if (!first.isPresent()) {
+			if (first.isEmpty()) {
 				String failureMessage = String.format("Concept %s did not contain property with key %s and value %s ", code.getCode(), "property1", "property1Value");
 				fail(failureMessage);
 			}
@@ -443,14 +419,14 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		runInTransaction(() -> {
 			TermCodeSystem cs = myTermCodeSystemDao.findByCodeSystemUri("http://foo/cs");
 			TermCodeSystemVersion version = cs.getCurrentVersion();
-			TermConcept microCode = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "NEUT").get();
+			TermConcept microCode = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "NEUT").orElseThrow();
 			assertEquals(2, microCode.getProperties().size());
-			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "HB").get();
+			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "HB").orElseThrow();
 			assertEquals(1, code.getProperties().size());
 			Integer codeProperties = myTermConceptPropertyDao.countByCodeSystemVersion(version.getPid());
 			assertEquals(6, codeProperties);
 			Optional<TermConceptProperty> first = code.getProperties().stream().filter(property -> "color".equalsIgnoreCase(property.getKey()) && "red".equalsIgnoreCase(property.getValue())).findFirst();
-			if (!first.isPresent()) {
+			if (first.isEmpty()) {
 				String failureMessage = String.format("Concept %s did not contain property with key %s and value %s ", code.getCode(), "property1", "property1Value");
 				fail(failureMessage);
 			}
@@ -462,7 +438,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testApplyDeltaAdd_UsingCodeSystemWithComma() throws IOException {
 
-		// Create initial codesystem
+		// Create initial CodeSystem
 		{
 			CodeSystem codeSystem = new CodeSystem();
 			codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
@@ -510,10 +486,10 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		runInTransaction(() -> {
 			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri("https://good.health");
 			TermCodeSystemVersion version = codeSystem.getCurrentVersion();
-			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "1111222233").get();
+			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "1111222233").orElseThrow();
 			assertEquals("Some label for the parent - with a dash too", code.getDisplay());
 
-			code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "1111222234").get();
+			code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "1111222234").orElseThrow();
 			assertEquals("Some very very very very very looooooong child label with a coma, another one, one more, more and final one", code.getDisplay());
 		});
 	}
@@ -531,7 +507,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 			LoggingInterceptor interceptor = new LoggingInterceptor(true);
 			myClient.registerInterceptor(interceptor);
-			Parameters outcome = myClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
@@ -547,7 +523,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		{
 			CodeSystem codeSystem = new CodeSystem();
 			codeSystem.setUrl("http://foo/cs");
-			CodeSystem.ConceptDefinitionComponent chem = codeSystem.addConcept().setCode("HB").setDisplay("Hemoglobin")
+			codeSystem.addConcept().setCode("HB").setDisplay("Hemoglobin")
 				.addConcept().setCode("HBA").setDisplay(leftPad("", 500, 'Z'));
 
 			LoggingInterceptor interceptor = new LoggingInterceptor(true);
@@ -580,11 +556,11 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testApplyDeltaAdd_UsingCodeSystem_NoDisplaySetOnConcepts() throws IOException {
+	public void testApplyDeltaAdd_UsingCodeSystem_NoDisplaySetOnConcepts() {
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://foo/cs");
-		// setting codes are enough, no need to call setDisplay etc
+		// setting codes are enough, no need to call setDisplay etc.
 		codeSystem.addConcept().setCode("Code1");
 		codeSystem.addConcept().setCode("Code2");
 
@@ -604,7 +580,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		ourLog.info(encoded);
 		assertThat(encoded).contains("\"valueInteger\": 2");
 
-		// assert other codes remain, and HB and NEUT is removed
+		// assert other codes remain, and HB and NEUT are removed
 		assertHierarchyContainsExactly(
 			"Code1 seq=0",
 			"Code2 seq=0"
@@ -719,7 +695,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		ourLog.info(encoded);
 		assertThat(encoded).contains("\"valueInteger\": 2");
 
-		// assert other codes remain, and HB and NEUT is removed
+		// assert other codes remain, and HB and NEUT are removed
 		assertHierarchyContainsExactly(
 			"CHEM seq=0",
 			"MICRO seq=0",
@@ -737,7 +713,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		// remove 2 of them using CodeSystemPayload
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://foo/cs");
-		// setting codes are enough for remove, no need to call setDisplay etc
+		// setting codes are enough to remove, no need to call setDisplay etc.
 		codeSystem.addConcept().setCode("HB");
 		codeSystem.addConcept().setCode("NEUT");
 
@@ -757,7 +733,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		ourLog.info(encoded);
 		assertThat(encoded).contains("\"valueInteger\": 2");
 
-		// assert other codes remain, and HB and NEUT is removed
+		// assert other codes remain, and HB and NEUT are removed
 		assertHierarchyContainsExactly(
 			"CHEM seq=0",
 			"MICRO seq=0",
@@ -796,7 +772,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.withParameters(inputParameters)
 			.returnResourceType(Parameters.class).execute();
 
-		// verify that property is returned (therefore retrieved by the internal join)
+		// verify that property is returned (therefore, retrieved by the internal join)
 		assertTrue(response.hasParameter("property"));
 	}
 
@@ -839,12 +815,6 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 
 	}
-
-	private static void addFile(ZipOutputStream theZos, String theFileName) throws IOException {
-		theZos.putNextEntry(new ZipEntry(theFileName));
-		theZos.write(IOUtils.toByteArray(TerminologyUploaderProviderR4Test.class.getResourceAsStream("/loinc/" + theFileName)));
-	}
-
 
 
 	private void createCodeSystemFromZipFile(IGenericClient theFhirClient){
