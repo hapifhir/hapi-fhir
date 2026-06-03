@@ -229,10 +229,8 @@ public class MatchUrlService {
 						myFhirContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (Constants.PARAM_FILTER.equals(nextParamName)) {
-				// Retain _filter so the DB search path (SearchBuilder/QueryStack) can evaluate it. We
-				// represent it as a StringParam under Constants.PARAM_FILTER, mirroring the normal REST
-				// search path. The match-URL parser historically dropped it, which silently ignored the
-				// constraint for conditional operations, bulk export _typeFilter, and subscription matching.
+				// Retain _filter as a StringParam under Constants.PARAM_FILTER so the DB search path
+				// (SearchBuilder/QueryStack) can evaluate it, mirroring the normal REST search path.
 				for (QualifiedParamList nextValue : paramList) {
 					String filterString = String.join(",", nextValue);
 					if (isNotBlank(filterString)) {

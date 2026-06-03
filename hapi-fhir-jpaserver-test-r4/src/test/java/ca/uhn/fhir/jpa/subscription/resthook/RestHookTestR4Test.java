@@ -84,13 +84,12 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	/**
-	 * GL-6885: A subscription whose criteria uses the _filter search parameter must only
-	 * deliver for resources that satisfy the filter. Historically _filter was silently
-	 * dropped during match-URL parsing, so the subscription fired for every resource.
+	 * A subscription whose criteria uses the _filter search parameter must only deliver for
+	 * resources that satisfy the filter.
 	 * <p>
 	 * We send a non-matching Patient first and a matching Patient second, then assert exactly
-	 * ONE delivery. If _filter were dropped, both Patients would deliver (count 2). This proves
-	 * the filter discriminates without relying on a fragile negative-timing assertion (AC1 + AC2).
+	 * ONE delivery. If _filter were ignored, both Patients would deliver (count 2). This proves
+	 * the filter discriminates without relying on a fragile negative-timing assertion.
 	 */
 	@Test
 	void testRestHookSubscriptionWithFilterCriteria() throws Exception {

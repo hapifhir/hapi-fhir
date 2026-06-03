@@ -291,7 +291,7 @@ public class SubscriptionValidatingInterceptorTest {
 		}
 	}
 
-	// GL-6885: a _filter subscription must be rejected at submission when filter search is disabled (the default)
+	// A _filter subscription must be rejected at submission when filter search is disabled (the default)
 	@Test
 	public void testFilterCriteria_whenFilterParameterDisabled_isRejected() {
 		when(myStorageSettings.isFilterParameterEnabled()).thenReturn(false);
@@ -307,7 +307,7 @@ public class SubscriptionValidatingInterceptorTest {
 		}
 	}
 
-	// GL-6885: a _filter subscription is accepted when filter search is enabled
+	// A _filter subscription is accepted when filter search is enabled
 	@Test
 	public void testFilterCriteria_whenFilterParameterEnabled_isAccepted() {
 		when(myStorageSettings.isFilterParameterEnabled()).thenReturn(true);
@@ -319,7 +319,7 @@ public class SubscriptionValidatingInterceptorTest {
 				.isThrownBy(() -> mySubscriptionValidatingInterceptor.resourcePreCreate(subscription, null, null));
 	}
 
-	// GL-6885 (AC4): a _filter subscription is stamped with the DATABASE matching-strategy extension
+	// A _filter subscription is stamped with the DATABASE matching-strategy extension
 	@Test
 	public void testFilterCriteria_whenFilterParameterEnabled_stampsDatabaseStrategy() {
 		when(myStorageSettings.isFilterParameterEnabled()).thenReturn(true);
