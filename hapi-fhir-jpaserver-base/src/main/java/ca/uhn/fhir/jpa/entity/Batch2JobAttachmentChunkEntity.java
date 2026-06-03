@@ -65,7 +65,15 @@ public class Batch2JobAttachmentChunkEntity implements Serializable {
 						insertable = false,
 						updatable = false)
 			},
-			foreignKey = @ForeignKey(name = "FK_BT2_JOB_ATTCHNK_PARENT"))
+			foreignKey =
+					@ForeignKey(
+							name = "FK_BT2_JOB_ATTCHNK_PARENT",
+							/*
+							 * The explicit foreignKeyDefinition=(...) is only here to force the order of the columns in the foreign key definition.
+							 * By default, hibernate seems to reorder them alphabetically, which causes our schema migration tests to fail.
+							 */
+							foreignKeyDefinition =
+									"FOREIGN KEY (JOB_INSTANCE_ID, ATTACHMENT_ID) REFERENCES BT2_JOB_ATTACHMENT(JOB_INSTANCE_ID, ATTACHMENT_ID)"))
 	private Batch2JobAttachmentEntity myParent;
 
 	/**
