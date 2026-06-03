@@ -210,6 +210,7 @@ public class WorkerContextValidationSupportAdapterCoreTest {
 					setup.getTest().asString("name"),
 					req,
 					resp,
+					null,
 					setup.getTest().asString("Content-Language"),
 					fp,
 					ext,
@@ -217,7 +218,7 @@ public class WorkerContextValidationSupportAdapterCoreTest {
 					Set.of());
 			assertNull(diff, diff);
 		} else if (setup.getTest().asString("operation").equals("cs-validate-code")) {
-			String diff = TxServiceTestHelper.getDiffForValidation(setup.getTest().str("name"), wrapper, setup.getTest().asString("name"), req, resp, setup.getTest().asString("Content-Language"), fp, ext, true, Set.of());
+			String diff = TxServiceTestHelper.getDiffForValidation(setup.getTest().str("name"), wrapper, setup.getTest().asString("name"), req, resp, null, setup.getTest().asString("Content-Language"), fp, ext, true, Set.of());
 			assertNull(diff, diff);
 		}
 	}
