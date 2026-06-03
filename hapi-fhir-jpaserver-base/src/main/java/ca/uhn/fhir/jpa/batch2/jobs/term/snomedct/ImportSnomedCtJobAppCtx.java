@@ -100,17 +100,17 @@ public class ImportSnomedCtJobAppCtx {
 						STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
 						"Create work chunks for calculating concept closures",
 						TerminologyFileSetJson.class,
-						importSnomedStep21ChunkConceptsForClosureGeneration())
+						importSnomedStep4ChunkConceptsForClosureGeneration())
 				.addIntermediateStep(
 						"generate-concept-closures",
 						"Generate concept closures",
 						TerminologyFileSetJson.class,
-						importSnomedStep22GenerateConceptClosures())
+						importSnomedStep5GenerateConceptClosures())
 				.addFinalReducerStep(
 						STEP_ID_FINALIZE_IMPORT,
 						"Finalize Snomed Import",
 						ImportTerminologyResultJson.class,
-						importSnomedStep23Finalize())
+						importSnomedStep6Finalize())
 				.build();
 	}
 
@@ -151,29 +151,29 @@ public class ImportSnomedCtJobAppCtx {
 	}
 
 	/**
-	 * Step: Chunk Concepts for Closure Generation
+	 * Step 4: Chunk Concepts for Closure Generation
 	 * When importing properties, the {@link TermConcept#getParentPidsAsString()} property contains a closure of
 	 * all the parent concepts. We don't calculate it initially because we add hirarchy over multiple work chunks,
 	 * so instead we calculate it at the end. This step queries the database for the full set of concepts, and
-	 * creates work chunks for {@link #importSnomedStep22GenerateConceptClosures()} to process.
+	 * creates work chunks for {@link #importSnomedStep5GenerateConceptClosures()} to process.
 	 */
 	@Bean
 	public ImportTerminologyStepChunkConceptsForGeneratingClosure<
 					ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
-			importSnomedStep21ChunkConceptsForClosureGeneration() {
+			importSnomedStep4ChunkConceptsForClosureGeneration() {
 		return new ImportTerminologyStepChunkConceptsForGeneratingClosure<>();
 	}
 
 	/**
-	 * Step: Generate concept closures
-	 * This step receives work chunks from {@link #importSnomedStep21ChunkConceptsForClosureGeneration()},
+	 * Step 5: Generate concept closures
+	 * This step receives work chunks from {@link #importSnomedStep4ChunkConceptsForClosureGeneration()},
 	 * and calculates the closure of parent concepts for each concept. The closure is a list of all parent
 	 * concept PIDs and is stored in {@link TermConcept#getParentPidsAsString()}.
 	 */
 	@Bean
 	public ImportTerminologyStepGenerateConceptClosures<
 					ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
-			importSnomedStep22GenerateConceptClosures() {
+			importSnomedStep5GenerateConceptClosures() {
 		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
 
@@ -183,7 +183,7 @@ public class ImportSnomedCtJobAppCtx {
 	 */
 	@Bean
 	public ImportTerminologyStepFinalize<ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters>
-			importSnomedStep23Finalize() {
+			importSnomedStep6Finalize() {
 		return new ImportTerminologyStepFinalize<>(
 				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}

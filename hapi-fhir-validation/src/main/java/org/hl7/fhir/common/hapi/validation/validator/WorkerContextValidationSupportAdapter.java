@@ -41,6 +41,7 @@ import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.profilemodel.PEBuilder;
+import org.hl7.fhir.r5.terminologies.client.TerminologyClientManager;
 import org.hl7.fhir.r5.terminologies.expansion.ValueSetExpansionOutcome;
 import org.hl7.fhir.r5.terminologies.utilities.CodingValidationRequest;
 import org.hl7.fhir.r5.terminologies.utilities.TerminologyServiceErrorClass;
@@ -654,17 +655,18 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			public void cachePackage(PackageInformation packageInfo) {}
 
 			@Override
-			public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader) throws FHIRException {
+			public int loadFromPackage(NpmPackage pi, IContextResourceLoader loader, boolean isMaster)
+					throws FHIRException {
 				return 0;
 			}
 
 			@Override
-			public int loadPackage(NpmPackage pi) throws FHIRException {
+			public int loadPackage(NpmPackage pi, boolean isMaster) throws FHIRException {
 				return 0;
 			}
 
 			@Override
-			public int loadPackage(String idAndVer) throws FHIRException {
+			public int loadPackage(String idAndVer, boolean isMaster) throws FHIRException {
 				return 0;
 			}
 
@@ -676,6 +678,11 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 			@Override
 			public PackageLoadController getPackageLoadController() {
+				return null;
+			}
+
+			@Override
+			public List<String> getLoadedPackages() {
 				return null;
 			}
 		};
@@ -1154,5 +1161,10 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	@Override
 	public OperationOutcome validateTxResource(ValidationOptions options, Resource resource) {
 		throw new UnsupportedOperationException(Msg.code(2735));
+	}
+
+	@Override
+	public TerminologyClientManager getTerminologyClientManager() {
+		return null;
 	}
 }

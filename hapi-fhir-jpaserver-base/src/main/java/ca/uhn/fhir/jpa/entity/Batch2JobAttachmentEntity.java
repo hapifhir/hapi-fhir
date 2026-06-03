@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
+import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
@@ -44,9 +45,13 @@ import java.util.UUID;
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 
 /**
- * This entity represents the first chunk of an attachment. If the overall number
- * of bytes is too big, we put subsequent chunks into
- * {@link Batch2JobAttachmentChunkEntity}.
+ * This entity represents the first chunk of a Batch2 job attachment.
+ * See {@link ca.uhn.fhir.batch2.api.IJobPersistence#storeNewAttachment(String, AttachmentDetails)}
+ * for a description of what attachments are used for.
+ * <p>
+ * If the overall number of bytes is too big to reasonably store in a single entity, we put further data
+ * chunks of the attachment into {@link Batch2JobAttachmentChunkEntity}.
+ * </p>
  */
 @Entity
 @Table(
@@ -151,8 +156,12 @@ public class Batch2JobAttachmentEntity implements Serializable {
 	 * If non-null, there are additional chunks of data for this attachment
 	 * in {@link Batch2JobAttachmentChunkEntity}. Attachment chunks
 	 * are numbered from 0 to this value.
+	 * <p>
+	 * This method is intended to be private, and the max index should only ever
+	 * be modified by {@link #newChunkEntity(byte[])}.
+	 * </p>
 	 */
-	public void setExtraChunkMaximumIndex(int theExtraChunkMaximumIndex) {
+	private void setExtraChunkMaximumIndex(int theExtraChunkMaximumIndex) {
 		if (myExtraChunkMaximumIndex == null) {
 			Validate.isTrue(theExtraChunkMaximumIndex == 0, "Numbering must be null, 0, 1, 2... Current value: null");
 		} else {
@@ -204,6 +213,26 @@ public class Batch2JobAttachmentEntity implements Serializable {
 
 	public void incrementAttachmentLengthUncompressed(int theCount) {
 		myAttachmentLengthUncompressed += theCount;
+	}
+
+	/**
+	 * Creates a new chunk entity for this attachment. The returned entity should
+	 * be persisted immediately.
+	 */
+	public Batch2JobAttachmentChunkEntity newChunkEntity(byte[] theBytes) {
+		int chunkIndex;
+		if (myExtraChunkMaximumIndex == null) {
+			chunkIndex = 0;
+		} else {
+			chunkIndex = myExtraChunkMaximumIndex + 1;
+		}
+		setExtraChunkMaximumIndex(chunkIndex);
+
+		Batch2JobAttachmentChunkEntity retVal = new Batch2JobAttachmentChunkEntity();
+		retVal.setId(new Batch2JobAttachmentChunkEntity.ChunkPk(getId(), chunkIndex));
+		retVal.setData(theBytes);
+
+		return retVal;
 	}
 
 	public enum CompressionEnum {

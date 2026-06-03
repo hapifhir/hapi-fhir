@@ -1,7 +1,7 @@
 ---
 type: add
 issue: 8030
-title: "This PR converts the SNOMED CT importer from using the legacy terminology importer framework into using the new Batch2 one. This new way performs much better and gives better visibility into the process.
+title: "The SNOMED CT importer has been converted from using the legacy terminology importer framework into using the new Batch2 one. This new way performs much better and gives better visibility into the process.
 
 As a part of this change:
 

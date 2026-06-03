@@ -44,6 +44,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -145,7 +146,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			myCtx = FhirContext.forDstu3();
 			myRestServerDstu3Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc, myJobCoordinator, myJobPersistence));
 			myBaseRestServerHelper = myRestServerDstu3Helper;
-		} else if (testInfo.getDisplayName().contains(FHIR_VERSION_R4) || testInfo.getDisplayName().endsWith("()")) {
+		} else if (testInfo.getDisplayName().contains(FHIR_VERSION_R4) || testInfo.getDisplayName().endsWith("()") || testInfo.getDisplayName().endsWith("(File)")) {
 			myCtx = FhirContext.forR4();
 			myRestServerR4Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc, myJobCoordinator, myJobPersistence));
 			myBaseRestServerHelper = myRestServerR4Helper;
@@ -546,9 +547,9 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testUploadLoinc_DontMakeCurrent(String theFhirVersion, boolean theIncludeTls) throws IOException {
+	public void testUploadLoinc_DontMakeCurrent(String theFhirVersion, boolean theIncludeTls, @TempDir File theTempDir) throws IOException {
 
-		File tempFile = File.createTempFile("loinc", ".zip");
+		File tempFile = new File(theTempDir, "loinc.zip");
 		tempFile.deleteOnExit();
 		try (FileWriter w = new FileWriter(tempFile, StandardCharsets.UTF_8, false)) {
 			w.append("12345");
@@ -603,10 +604,9 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 	}
 
 	@Test
-	public void testUploadLoinc_InvalidFilename() throws IOException {
+	public void testUploadLoinc_InvalidFilename(@TempDir File theTempDir) throws IOException {
 
-		File tempFile = File.createTempFile("blah", ".json");
-		tempFile.deleteOnExit();
+		File tempFile = new File(theTempDir, "blah.json");
 		try (FileWriter w = new FileWriter(tempFile, StandardCharsets.UTF_8, false)) {
 			w.append("12345");
 		}

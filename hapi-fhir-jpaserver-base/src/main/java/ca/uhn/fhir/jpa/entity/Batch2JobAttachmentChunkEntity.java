@@ -132,8 +132,8 @@ public class Batch2JobAttachmentChunkEntity implements Serializable {
 			return Objects.hash(myJobInstanceId, myAttachmentId, myChunkIndex);
 		}
 
-		public String getAttachmentId() {
-			return myAttachmentId;
+		public int getChunkIndex() {
+			return myChunkIndex;
 		}
 	}
 }

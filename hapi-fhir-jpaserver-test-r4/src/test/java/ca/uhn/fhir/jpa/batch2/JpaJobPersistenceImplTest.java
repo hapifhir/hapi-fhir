@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
@@ -979,15 +980,13 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			.withInputStream(new ByteArrayInputStream("version 1".getBytes(StandardCharsets.UTF_8)))
 			.withContentType(AttachmentContentTypeEnum.GZIP)
 			.build();
-		String attachmentId1 = mySvc.storeNewAttachment(instanceId, request1);
 
-		// Verify
-		assertEquals(attachmentId0, attachmentId1);
-		runInTransaction(() -> {
-			assertEquals(1, myJobAttachmentRepository.count());
-			Batch2JobAttachmentEntity entity = myJobAttachmentRepository.findAll().get(0);
-			assertEquals("version 1", new String(entity.getData(), StandardCharsets.UTF_8));
-		});
+		// Test
+		assertThatThrownBy(()->mySvc.storeNewAttachment(instanceId, request1))
+
+			// Verify
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("Attachment with filename[hello.txt] already exists for instance");
 
 	}
 

@@ -92,7 +92,7 @@ class TerminologyUploaderProviderTest {
 	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestCaptor;
 
 	@RegisterExtension
-	private RestfulServerExtension myServerExtension = new RestfulServerExtension(myContext)
+	private final RestfulServerExtension myServerExtension = new RestfulServerExtension(myContext)
 		.withServer(t -> {
 			assert myContext != null;
 			assert myTerminologyLoaderSvc != null;
@@ -101,7 +101,7 @@ class TerminologyUploaderProviderTest {
 		});
 
 	@RegisterExtension
-	private HttpClientExtension myHttpClient = new HttpClientExtension();
+	private final HttpClientExtension myHttpClient = new HttpClientExtension();
 
 	@Captor
 	private ArgumentCaptor<AttachmentDetails> myAttachmentDetailsCaptor;
@@ -350,7 +350,7 @@ class TerminologyUploaderProviderTest {
 			// Verify
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("Don't know how to handle file: foo.txt");
+			assertThat(responseString).contains("File named \\\"foo.txt\\\" is not valid for import LOINC job");
 		}
 
 	}

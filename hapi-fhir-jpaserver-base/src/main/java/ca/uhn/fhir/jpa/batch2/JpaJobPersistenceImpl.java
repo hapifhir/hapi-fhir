@@ -902,17 +902,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 						 * We're writing additional chunks to the DB, so put the bytes into a new
 						 * attachment chunk entity and update the attachment entity with the chunk index.
 						 */
-						int chunkIndex = myNextAdditionalChunkIndex++;
+						Batch2JobAttachmentChunkEntity nextChunk = myAttachment.newChunkEntity(bytesToWrite);
+
 						ourLog.info(
 								"Writing additional chunk {} for attachment with ID {} to database",
-								chunkIndex,
+								nextChunk.getId().getChunkIndex(),
 								myAttachment.getId().getAttachmentId());
-						Batch2JobAttachmentChunkEntity nextChunk = new Batch2JobAttachmentChunkEntity();
-						nextChunk.setId(new Batch2JobAttachmentChunkEntity.ChunkPk(myAttachment.getId(), chunkIndex));
-						nextChunk.setData(bytesToWrite);
 						myAttachmentChunkRepository.save(nextChunk);
 
-						myAttachment.setExtraChunkMaximumIndex(chunkIndex);
 						myAttachment.incrementAttachmentLengthCompressed(bytesToWrite.length);
 						myAttachment.incrementAttachmentLengthUncompressed(myCountingInputStream.getCount());
 						myAttachment = myEntityManager.merge(myAttachment);

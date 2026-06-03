@@ -40,6 +40,11 @@ public class ImportSnomedCtStep2HandleDescription
 		extends BaseImportTerminologyFileCsvStep<
 				ImportTerminologyJobParameters, ImportSnomedCtStep2HandleDescription.MyContext> {
 
+	private static final String COL_ACTIVE = "active";
+	private static final String COL_ACTIVE_VALUE_1 = "1";
+	private static final String COL_CONCEPT_ID = "conceptId";
+	private static final String COL_TERM = "term";
+
 	@Nonnull
 	@Override
 	public List<LoincFileNameSpecification> getFilesToProcess(
@@ -66,14 +71,13 @@ public class ImportSnomedCtStep2HandleDescription
 			TerminologyFileSetJson theData,
 			String theSourceFilename) {
 
-		String id = theRecord.get("id");
-		boolean active = "1".equals(theRecord.get("active"));
+		boolean active = COL_ACTIVE_VALUE_1.equals(theRecord.get(COL_ACTIVE));
 		if (!active) {
 			return;
 		}
 
-		String conceptId = theRecord.get("conceptId");
-		String term = theRecord.get("term");
+		String conceptId = theRecord.get(COL_CONCEPT_ID);
+		String term = theRecord.get(COL_TERM);
 
 		if (theContext.mySeenTerms.add(term)) {
 			CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, conceptId);
