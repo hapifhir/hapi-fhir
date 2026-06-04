@@ -27,6 +27,9 @@ import java.util.regex.Pattern;
 public class ImportIcd10CmStep2HandleConcepts
 		extends BaseImportTerminologyFileStep<ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
 
+	public static final Pattern ICD10CM_FILE_PATTERN = Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE);
+	public static final String ICD10CM_FILENAME = "icd10cm.xml";
+
 	private static final String SEVEN_CHR_DEF = "sevenChrDef";
 	private static final String EXTENSION = "extension";
 	private static final String DIAG = "diag";
@@ -38,7 +41,7 @@ public class ImportIcd10CmStep2HandleConcepts
 	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
-				FileHandlingType.XML, t -> Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE)
+				FileHandlingType.XML, t -> ICD10CM_FILE_PATTERN
 						.matcher(t)
 						.find()));
 	}

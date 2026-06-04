@@ -204,8 +204,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 	public void testValueSetExpansion() throws IOException {
 		// Load LOINC marked as version 2.66
 
-		ZipCollectionBuilder files;
-		files = new ZipCollectionBuilder(true);
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.67", files);
 
@@ -233,6 +232,15 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	void testLoadLoinc_NoDistributionAttached() {
+		// Test
+		ZipCollectionBuilder files = new ZipCollectionBuilder(false);
+		String instanceId = myTerminologyTestHelper.startImportLoincJobAndWaitForFailure("2.67", files);
 
+		// Verify
+		String errorMessage = myJobCoordinator.getInstance(instanceId).getErrorMessage();
+		assertThat(errorMessage).contains("No distribution file (loinc.zip) was attached for LOINC");
+	}
 
 }

@@ -217,9 +217,23 @@ public class TerminologyTestHelper {
 
 		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 
-		AttachmentDetails attachmentDetails = new AttachmentDetails(
-				new ByteArrayInputStream(theFiles.getZipBytes()), AttachmentContentTypeEnum.ZIP, distributionFilename);
-		myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
+		if (theFiles.isSingleZip()) {
+			AttachmentDetails attachmentDetails = AttachmentDetails.build()
+				.withInputStream(new ByteArrayInputStream(theFiles.getZipBytes()))
+				.withContentType(AttachmentContentTypeEnum.ZIP)
+				.withFilename(distributionFilename)
+				.build();
+			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
+		} else {
+			for (ITermLoaderSvc.FileDescriptor descriptor : theFiles.getFiles()) {
+				AttachmentDetails attachmentDetails = AttachmentDetails.build()
+					.withInputStream(descriptor.getInputStream())
+					.withContentType(AttachmentContentTypeEnum.PLAIN_TEXT)
+					.withFilename(descriptor.getFilename())
+					.build();
+				myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
+			}
+		}
 
 		if (theJobProperties != null) {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -228,8 +242,7 @@ public class TerminologyTestHelper {
 			} catch (IOException e) {
 				fail("Failed to store properties", e);
 			}
-			attachmentDetails =
-					new AttachmentDetails(out.toByteArray(), AttachmentContentTypeEnum.PROPERTIES, propertiesFilename);
+			AttachmentDetails attachmentDetails = new AttachmentDetails(out.toByteArray(), AttachmentContentTypeEnum.PROPERTIES, propertiesFilename);
 			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 		}
 
@@ -347,6 +360,21 @@ public class TerminologyTestHelper {
 
 		fail("Setup failed. Unexpected version: " + theVersion);
 		return null;
+	}
+
+	public String startImportLoincJobAndWaitForFailure(String theVersion, ZipCollectionBuilder theFiles) {
+		String jobDefinitionId = ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC;
+		String distributionFilename = FILENAME_LOINC_DISTRIBUTION_FILE;
+		String propertiesFilename = LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode();
+		return startImportTerminologyJobAndWaitForFailure(
+			ITermLoaderSvc.LOINC_URI,
+			theVersion,
+			theFiles,
+			false,
+			null,
+			jobDefinitionId,
+			distributionFilename,
+			propertiesFilename);
 	}
 
 

@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.util.CsvUtil;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
@@ -115,10 +116,16 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 
 		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		PT jobParameters = theStepExecutionDetails.getParameters();
-		AttachmentDetails loincFileAttachment =
-				myJobPersistence.fetchAttachmentByFilename(instanceId, getDistributionFileName());
 		CT context = newContextObject();
 		ImportTerminologyMetadataAttachmentJson jobMetadataAttachment = new ImportTerminologyMetadataAttachmentJson();
+
+		AttachmentDetails loincFileAttachment = null;
+		try {
+			loincFileAttachment = myJobPersistence.fetchAttachmentByFilename(instanceId, getDistributionFileName());
+		} catch (ResourceNotFoundException e) {
+			// FIXME: add code
+			throw new JobExecutionFailedException(Msg.code(1) + "No distribution file (" + getDistributionFileName() + ") was attached for " + getTerminologyName(), e);
+		}
 
 		ourLog.info(
 				"Import {}[{}] - Expanding file {}",
@@ -139,111 +146,17 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 				ZipArchiveInputStream zipInputStream = new ZipArchiveInputStream(bufferedInputStream);
 				ZipArchiveEntry entry;
 				while ((entry = zipInputStream.getNextEntry()) != null) {
-					try (BOMInputStream fis = new LoadedFileDescriptors.NonClosableBOMInputStream(zipInputStream)) {
+					try (InputStream fis = new LoadedFileDescriptors.NonClosableBOMInputStream(zipInputStream)) {
 						String nextFileName = entry.getName();
 
 						ourLog.info(
-								"Import {}[{}] - Processing file: {}", getTerminologyName(), instanceId, nextFileName);
+								"Import {}[{}] - Processing file from distribution: {}", getTerminologyName(), instanceId, nextFileName);
 
-						byte[] bytes = IOUtils.toByteArray(fis);
+						processSingleFile(theStepExecutionDetails, theDataSink, fis, nextFileName, stepsWhichHaveNotFoundFileAndNeedTo, instanceId, loincFileAttachment, context, jobParameters, fileSet, jobMetadataAttachment);
 
-						// Asynchronous processing (prepare work chunks based on input file)
-						List<StepIdAndFileHandlingInstructions> processors =
-								getStepIdAndFileHandlingInstructionsForFileName(
-										theStepExecutionDetails,
-										theStepExecutionDetails.getJobDefinition(),
-										nextFileName);
-
-						for (StepIdAndFileHandlingInstructions processor : processors) {
-							stepsWhichHaveNotFoundFileAndNeedTo.remove(processor.stepId());
-						}
-
-						ListMultimap<ITerminologyImportFileHandlerStep.FileHandlingType, String>
-								fileHandlingTypeToAttachmentIds = MultimapBuilder.hashKeys()
-										.arrayListValues()
-										.build();
-
-						for (StepIdAndFileHandlingInstructions processor : processors) {
-							ITerminologyImportFileHandlerStep.FileHandlingType fileHandlingType =
-									processor.fileHandlingType();
-
-							if (fileHandlingTypeToAttachmentIds.containsKey(fileHandlingType)) {
-								List<String> attachmentIds = fileHandlingTypeToAttachmentIds.get(fileHandlingType);
-								for (String attachmentId : attachmentIds) {
-									TerminologyFileSetJson data = newTerminologyFileSetJson();
-									data.setSourceFilename(nextFileName);
-									data.setAttachmentId(attachmentId);
-									theDataSink.acceptForFutureStep(processor.stepId(), data);
-								}
-								continue;
-							}
-
-							List<String> attachmentIds =
-									switch (fileHandlingType) {
-										case CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS -> {
-											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 1000);
-											yield csvSplitWithRepeatHeader(
-													fileHandlingType,
-													',',
-													instanceId,
-													bytes,
-													loincFileAttachment.getFilename(),
-													nextFileName,
-													processor.stepId(),
-													chunkSize,
-													theDataSink);
-										}
-										case CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS -> {
-											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 50000);
-											yield csvSplitWithRepeatHeader(
-													fileHandlingType,
-													',',
-													instanceId,
-													bytes,
-													loincFileAttachment.getFilename(),
-													nextFileName,
-													processor.stepId(),
-													chunkSize,
-													theDataSink);
-										}
-										case TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS -> {
-											int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 5000);
-											yield csvSplitWithRepeatHeader(
-													fileHandlingType,
-													'\t',
-													instanceId,
-													bytes,
-													loincFileAttachment.getFilename(),
-													nextFileName,
-													processor.stepId(),
-													chunkSize,
-													theDataSink);
-										}
-										case XML -> {
-											AttachmentDetails attachmentRequest = new AttachmentDetails(
-													bytes, AttachmentContentTypeEnum.ZIP, nextFileName);
-											String attachmentId =
-													myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
-											TerminologyFileSetJson data = newTerminologyFileSetJson();
-											data.setSourceFilename(nextFileName);
-											data.setAttachmentId(attachmentId);
-											theDataSink.acceptForFutureStep(processor.stepId(), data);
-											yield List.of(attachmentId);
-										}
-									};
-							fileHandlingTypeToAttachmentIds.putAll(fileHandlingType, attachmentIds);
-						}
-
-						// Synchronous processing (anything that is small enough to just handle it here)
-						handleSynchronous(
-								theStepExecutionDetails,
-								theDataSink,
-								context,
-								nextFileName,
-								bytes,
-								jobParameters,
-								fileSet,
-								jobMetadataAttachment);
+						// If no steps handled the bytes, consume them now so we
+						// can proceed to the next entry in the ZIP
+						IOUtils.consume(fis);
 					}
 				}
 			}
@@ -269,6 +182,121 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 		myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
 
 		return RunOutcome.SUCCESS;
+	}
+
+	private void processSingleFile(@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<TerminologyFileSetJson> theDataSink, InputStream fis, String nextFileName, Set<String> stepsWhichHaveNotFoundFileAndNeedTo, String instanceId, AttachmentDetails loincFileAttachment, CT context, PT jobParameters, TerminologyFileSetJson fileSet, ImportTerminologyMetadataAttachmentJson jobMetadataAttachment) throws IOException {
+		byte[] bytes = IOUtils.toByteArray(fis);
+
+		// Asynchronous processing (prepare work chunks based on input file)
+		List<StepIdAndFileHandlingInstructions> processors =
+				getStepIdAndFileHandlingInstructionsForFileName(
+					theStepExecutionDetails,
+						theStepExecutionDetails.getJobDefinition(),
+					nextFileName);
+
+		for (StepIdAndFileHandlingInstructions processor : processors) {
+			stepsWhichHaveNotFoundFileAndNeedTo.remove(processor.stepId());
+		}
+
+		ListMultimap<ITerminologyImportFileHandlerStep.FileHandlingType, String>
+				fileHandlingTypeToAttachmentIds = MultimapBuilder.hashKeys()
+						.arrayListValues()
+						.build();
+
+		for (StepIdAndFileHandlingInstructions processor : processors) {
+			ITerminologyImportFileHandlerStep.FileHandlingType fileHandlingType =
+					processor.fileHandlingType();
+
+			if (fileHandlingTypeToAttachmentIds.containsKey(fileHandlingType)) {
+				List<String> attachmentIds = fileHandlingTypeToAttachmentIds.get(fileHandlingType);
+				for (String attachmentId : attachmentIds) {
+					TerminologyFileSetJson data = newTerminologyFileSetJson();
+					data.setSourceFilename(nextFileName);
+					data.setAttachmentId(attachmentId);
+					theDataSink.acceptForFutureStep(processor.stepId(), data);
+				}
+				continue;
+			}
+
+			List<String> attachmentIds =
+					switch (fileHandlingType) {
+						case CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS -> {
+							int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 1000);
+							yield csvSplitWithRepeatHeader(
+									fileHandlingType,
+									',',
+								instanceId,
+									bytes,
+									loincFileAttachment.getFilename(),
+								nextFileName,
+									processor.stepId(),
+									chunkSize,
+								theDataSink);
+						}
+						case CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS -> {
+							int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 50000);
+							yield csvSplitWithRepeatHeader(
+									fileHandlingType,
+									',',
+								instanceId,
+									bytes,
+									loincFileAttachment.getFilename(),
+								nextFileName,
+									processor.stepId(),
+									chunkSize,
+								theDataSink);
+						}
+						case TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS -> {
+							int chunkSize = getIfNull(myChunkLineSizeForUnitTests, 5000);
+							yield csvSplitWithRepeatHeader(
+									fileHandlingType,
+									'\t',
+								instanceId,
+									bytes,
+									loincFileAttachment.getFilename(),
+								nextFileName,
+									processor.stepId(),
+									chunkSize,
+								theDataSink);
+						}
+						case XML -> {
+							AttachmentDetails attachmentRequest = new AttachmentDetails(
+									bytes, AttachmentContentTypeEnum.ZIP, nextFileName);
+							String attachmentId =
+									myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
+							TerminologyFileSetJson data = newTerminologyFileSetJson();
+							data.setSourceFilename(nextFileName);
+							data.setAttachmentId(attachmentId);
+							theDataSink.acceptForFutureStep(processor.stepId(), data);
+							yield List.of(attachmentId);
+						}
+					};
+			fileHandlingTypeToAttachmentIds.putAll(fileHandlingType, attachmentIds);
+		}
+
+		// Synchronous processing (anything that is small enough to just handle it here)
+		handleSynchronous(
+			theStepExecutionDetails,
+			theDataSink,
+			context,
+			nextFileName,
+				bytes,
+			jobParameters,
+			fileSet,
+			jobMetadataAttachment);
+	}
+
+	/**
+	 * Subclasses may override if this type of job supports the attaching of
+	 * individual files instead of just a single ZIP distribution file.
+	 * CodeSystems like LOINC and SNOMED CT can't be imported without a complete
+	 * collection of inter-related files, so we will always require the outer
+	 * ZIP file to be attached (return = true). Other CodeSystems like ICD or "custom CSV" jobs
+	 * make sense with only a single content file, so we allow either the
+	 * distribution ZIP or the individual file(s) to be attached (return = false).
+	 */
+	protected boolean isIndividualFileAttachmentsSupported() {
+		return false;
 	}
 
 	@Nonnull

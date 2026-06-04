@@ -51,13 +51,15 @@ public class ImportIcd10Step2HandleConcepts
 		extends BaseImportTerminologyFileStep<ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
 
 	private static final String EXPECTED_ROOT_NODE = "ClaML";
+	public static final Pattern ICD10_XML_FILE_PATTERN = Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE);
+	public static final String ICD10_XML_FILENAME = "icd10.xml";
 
 	@Nonnull
 	@Override
 	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
-				FileHandlingType.XML, t -> Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE)
+				FileHandlingType.XML, t -> ICD10_XML_FILE_PATTERN
 						.matcher(t)
 						.find()));
 	}

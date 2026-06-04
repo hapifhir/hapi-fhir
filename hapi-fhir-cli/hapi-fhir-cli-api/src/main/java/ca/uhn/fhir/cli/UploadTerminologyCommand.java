@@ -297,7 +297,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			// Sleep
 			Duration pollFrequency = Duration.ofSeconds(10);
 			if (HapiSystemProperties.isTestModeEnabled()) {
-				pollFrequency = Duration.ofMillis(500);
+				pollFrequency = Duration.ofMillis(100);
 			}
 			ThreadUtils.sleepQuietly(pollFrequency);
 		}

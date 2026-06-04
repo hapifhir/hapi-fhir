@@ -154,6 +154,10 @@ public class ZipCollectionBuilder {
 		}
 	}
 
+	public boolean isSingleZip() {
+		return mySingleZipBytes != null;
+	}
+
 	public byte[] getZipBytes() {
 		assert mySingleZipBytes != null;
 		IOUtils.closeQuietly(mySingleZipStream);

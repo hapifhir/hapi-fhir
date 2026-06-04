@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
+import ca.uhn.fhir.batch2.api.AttachmentMetadata;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
@@ -681,6 +682,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					.withInputStream(readerStream)
 					.build();
 		});
+	}
+
+	@Override
+	public List<AttachmentMetadata> listAttachmentsForJobInstance(Pageable thePage, String theInstanceId) {
+		return myTransactionService
+			.withSystemRequestOnDefaultPartition()
+			.execute(()->{
+				return myAttachmentRepository.listAttachmentsForJobInstance(thePage, theInstanceId);
+			});
 	}
 
 	@Override
