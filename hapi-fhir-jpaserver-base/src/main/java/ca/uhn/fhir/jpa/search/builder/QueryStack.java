@@ -2324,7 +2324,7 @@ public class QueryStack {
 		if (paramInverted) {
 			boolean selectPartitionId = myPartitionSettings.isDatabasePartitionMode();
 			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder(selectPartitionId);
-			BaseTokenPredicateBuilder tokenSelector = sqlBuilder.addNewTokenPredicateBuilder(null, theSearchParam);
+			BaseTokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null, theSearchParam);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(
 					tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
 
@@ -2351,7 +2351,7 @@ public class QueryStack {
 							PredicateBuilderTypeEnum.TOKEN,
 							theSourceJoinColumn,
 							paramName,
-							() -> theSqlBuilder.addNewTokenPredicateBuilder(theSourceJoinColumn, theSearchParam))
+							() -> theSqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn, theSearchParam))
 					.getResult();
 
 			predicate = tokenJoin.createPredicateToken(

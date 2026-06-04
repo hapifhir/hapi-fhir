@@ -17,7 +17,7 @@ import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategyEnum;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -61,7 +61,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,9 +70,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
+import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.LEGACY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
@@ -109,7 +111,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_OLD_QUERY_OLD);
+		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY));
 
 		myServer.getRestfulServer().getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
 	}
@@ -427,8 +429,8 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@ParameterizedTest
-	@EnumSource(TokenIndexStrategyEnum.class)
-	void testDeleteExpungeResource_removesCompressedTokenIndexesKeepsCommonTokenTable(TokenIndexStrategyEnum theStrategy) {
+	@MethodSource("ca.uhn.fhir.jpa.test.util.TokenIndexStrategyTestUtil#all")
+	void testDeleteExpungeResource_removesCompressedTokenIndexesKeepsCommonTokenTable(TokenIndexStrategy theStrategy) {
 		myStorageSettings.setTokenIndexStrategy(theStrategy);
 
 		Patient p = new Patient();

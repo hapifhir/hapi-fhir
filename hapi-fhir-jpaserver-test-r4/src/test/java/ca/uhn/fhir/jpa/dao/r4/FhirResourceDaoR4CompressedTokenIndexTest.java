@@ -29,7 +29,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommon;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommonRes;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenIdentifier;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategyEnum;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -49,12 +49,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.COMPRESSED;
+import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.LEGACY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
@@ -67,12 +70,12 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	void enableCompressedTokenIndexStrategy() {
-		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_NEW_QUERY_NEW);
+		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
 	}
 
 	@AfterEach
 	void resetTokenIndexStrategy() {
-		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_OLD_QUERY_OLD);
+		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY));
 	}
 
 	// ===== Group A: Routing — identifier vs. common =====
@@ -346,8 +349,8 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 	// ===== Group E: Strategy semantics =====
 
 	@ParameterizedTest
-	@EnumSource(TokenIndexStrategyEnum.class)
-	void writeStrategy_writesToCorrectTablesOnly(TokenIndexStrategyEnum theStrategy) {
+	@MethodSource("ca.uhn.fhir.jpa.test.util.TokenIndexStrategyTestUtil#all")
+	void writeStrategy_writesToCorrectTablesOnly(TokenIndexStrategy theStrategy) {
 		myStorageSettings.setTokenIndexStrategy(theStrategy);
 
 		Patient p = new Patient();
@@ -376,7 +379,7 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 	/**
 	 * Stubbed pending the query-capture scaffolding choice. Once decided, capture SQL during a
-	 * token search under {@link TokenIndexStrategyEnum#WRITE_BOTH_QUERY_NEW} and assert it
+	 * token search under a write-both/query-new strategy and assert it
 	 * references {@code HFJ_SPIDX2_TOKEN_*} rather than {@code HFJ_SPIDX_TOKEN}. Pattern available
 	 * in {@code FhirResourceDaoR4SearchSqlTest}.
 	 */
@@ -441,7 +444,7 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 	@Test
 	void addRemoveCount_underWriteNewQueryNew_isCountedFromNewTables() {
-		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_NEW_QUERY_NEW);
+		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("http://sys").setValue("A");
@@ -460,7 +463,7 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 	@Test
 	void addRemoveCount_underWriteBothQueryOld_isNotDoubleCounted() {
-		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_BOTH_QUERY_OLD);
+		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY));
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("http://sys").setValue("A");
@@ -480,7 +483,7 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 	@Test
 	void testTokenMissingSearch_worksWithIndexMissingFieldsEnabled() {
 		// Given: compressed token tables AND IndexMissingFields = ENABLED
-		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_BOTH_QUERY_NEW);
+		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), COMPRESSED));
 		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
 
 		// Patient with identifier AND birthdate
@@ -721,12 +724,12 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 	public class WriteBothQueryOldFhirResourceDaoR4SearchNoFtTest extends FhirResourceDaoR4SearchNoFtTest {
 		@BeforeEach
 		void setUp() {
-			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_BOTH_QUERY_OLD);
+			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY));
 		}
 
 		@AfterEach
 		void cleanUp() {
-			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_OLD_QUERY_OLD);
+			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY));
 		}
 	}
 
@@ -734,12 +737,12 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 	public class WriteBothQueryNewFhirResourceDaoR4SearchNoFtTest extends FhirResourceDaoR4SearchNoFtTest {
 		@BeforeEach
 		void setUp() {
-			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_BOTH_QUERY_NEW);
+			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), COMPRESSED));
 		}
 
 		@AfterEach
 		void cleanUp() {
-			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_OLD_QUERY_OLD);
+			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY));
 		}
 	}
 
@@ -747,12 +750,12 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 	public class WriteNewQueryNewFhirResourceDaoR4SearchNoFtTest extends FhirResourceDaoR4SearchNoFtTest {
 		@BeforeEach
 		void setUp() {
-			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_NEW_QUERY_NEW);
+			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
 		}
 
 		@AfterEach
 		void cleanUp() {
-			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_OLD_QUERY_OLD);
+			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY));
 		}
 	}
 }

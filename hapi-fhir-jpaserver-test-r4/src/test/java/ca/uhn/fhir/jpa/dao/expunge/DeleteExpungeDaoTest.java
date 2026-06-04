@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategyEnum;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -25,11 +25,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
+import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.LEGACY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -54,7 +56,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		myStorageSettings.setDeleteExpungeEnabled(defaultStorageSettings.isDeleteExpungeEnabled());
 		myStorageSettings.setExpungeBatchSize(defaultStorageSettings.getExpungeBatchSize());
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(defaultStorageSettings.isEnforceReferentialIntegrityOnDelete());
-		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_OLD_QUERY_OLD);
+		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY));
 	}
 
 	@Test
@@ -279,8 +281,8 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 	}
 
 	@ParameterizedTest
-	@EnumSource(TokenIndexStrategyEnum.class)
-	void testDeleteExpunge_removesCompressedTokenIndexesKeepsCommonTokenTable(TokenIndexStrategyEnum theStrategy) {
+	@MethodSource("ca.uhn.fhir.jpa.test.util.TokenIndexStrategyTestUtil#all")
+	void testDeleteExpunge_removesCompressedTokenIndexesKeepsCommonTokenTable(TokenIndexStrategy theStrategy) {
 		// setup
 		myStorageSettings.setTokenIndexStrategy(theStrategy);
 

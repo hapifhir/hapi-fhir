@@ -38,7 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenIdentifier;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategyEnum;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
@@ -225,7 +225,7 @@ public class DaoSearchParamSynchronizer {
 			ResourceIndexedSearchParams theParams,
 			ResourceIndexedSearchParams theExistingParams,
 			AddRemoveCount theAddRemoveCount) {
-		TokenIndexStrategyEnum tokenStrategy = myStorageSettings.getTokenIndexStrategy();
+		TokenIndexStrategy tokenStrategy = myStorageSettings.getTokenIndexStrategy();
 		if (!tokenStrategy.writeToCompressedTokenTables()) {
 			return;
 		}

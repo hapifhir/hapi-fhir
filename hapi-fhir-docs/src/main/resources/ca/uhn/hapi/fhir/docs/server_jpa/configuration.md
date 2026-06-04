@@ -206,19 +206,19 @@ The Token Index Strategy setting controls how token search parameters are stored
 
 ## Available Strategies
 
-| Strategy | Writes To | Queries From | Use Case |
-|----------|-----------|--------------|----------|
-| `WRITE_OLD_QUERY_OLD` | `HFJ_SPIDX_TOKEN` | `HFJ_SPIDX_TOKEN` | Default. No migration in progress. |
-| `WRITE_BOTH_QUERY_OLD` | Both tables | `HFJ_SPIDX_TOKEN` | Phase 1: Start populating new tables while maintaining query compatibility. |
-| `WRITE_BOTH_QUERY_NEW` | Both tables | New tables | Phase 2: Switch queries to new tables while still writing to both. |
-| `WRITE_NEW_QUERY_NEW` | New tables | New tables | Migration complete. Can be used directly for fresh databases. |
+| Phase | Configuration | Writes To | Queries From | Use Case |
+|-------|---------------|-----------|--------------|----------|
+| Old only | `TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY)` | `HFJ_SPIDX_TOKEN` | `HFJ_SPIDX_TOKEN` | Default. No migration in progress. |
+| Write both, query old | `TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY)` | Both tables | `HFJ_SPIDX_TOKEN` | Phase 1: Start populating new tables while maintaining query compatibility. |
+| Write both, query new | `TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), COMPRESSED)` | Both tables | New tables | Phase 2: Switch queries to new tables while still writing to both. |
+| New only | `TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED)` | New tables | New tables | Migration complete. Can be used directly for fresh databases. |
 
 ## Configuration
 
 Choose a strategy from the table above and configure it:
 
 ```java
-myStorageSettings.setTokenIndexStrategy(TokenIndexStrategyEnum.WRITE_BOTH_QUERY_OLD);
+myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY));
 ```
 
 ## Configuring Identifier Token Search Parameters

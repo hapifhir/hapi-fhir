@@ -40,7 +40,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategyEnum;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex;
 import ca.uhn.fhir.jpa.model.util.ResourceLinkUtils;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -59,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -114,7 +116,7 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	private ResourceIndexedSearchParams(
-			ResourceTable theEntity, Mode theMode, TokenIndexStrategyEnum theTokenIndexStrategy) {
+			ResourceTable theEntity, Mode theMode, TokenIndexStrategy theTokenIndexStrategy) {
 		this(theMode);
 		if (theEntity.isParamsStringPopulated()) {
 			myStringParams.addAll(theEntity.getParamsString());
@@ -683,11 +685,11 @@ public final class ResourceIndexedSearchParams {
 	 * Create a new instance that holds all the existing indexes in lists so that any
 	 * duplicates are preserved. The strategy controls which token tables are lazily
 	 * fetched from the entity — pass the deployment's actual
-	 * {@link TokenIndexStrategyEnum} so that token tables which are not being written
+	 * {@link TokenIndexStrategy} so that token tables which are not being written
 	 * for this deployment are not pointlessly SELECTed.
 	 */
 	public static ResourceIndexedSearchParams withLists(
-			ResourceTable theResourceTable, TokenIndexStrategyEnum theTokenIndexStrategy) {
+			ResourceTable theResourceTable, TokenIndexStrategy theTokenIndexStrategy) {
 		return new ResourceIndexedSearchParams(theResourceTable, Mode.LIST, theTokenIndexStrategy);
 	}
 
@@ -696,7 +698,7 @@ public final class ResourceIndexedSearchParams {
 	 * legacy token rows included, compressed token rows excluded.
 	 */
 	public static ResourceIndexedSearchParams withLists(ResourceTable theResourceTable) {
-		return withLists(theResourceTable, TokenIndexStrategyEnum.WRITE_OLD_QUERY_OLD);
+		return withLists(theResourceTable, TokenIndexStrategy.of(EnumSet.of(TokenIndex.LEGACY), TokenIndex.LEGACY));
 	}
 
 	private enum Mode {

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.search.builder.models;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategyEnum;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
 import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
 
 import static ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommonRes.HFJ_SPIDX2_TOKEN_COMMON_RES;
@@ -10,14 +10,14 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenIdenti
 /**
  * Determines which compressed token index table to query during search.
  *
- * <p>When {@link TokenIndexStrategyEnum} enables compressed token indexing,
+ * <p>When {@link TokenIndexStrategy} enables compressed token indexing,
  * this mode controls which physical table structure is used:
  * <ul>
  *   <li>{@link #COMMON} — two-table design for general token parameters</li>
  *   <li>{@link #IDENTIFIER} — single-table design optimized for identifier lookups</li>
  * </ul>
  *
- * @see TokenIndexStrategyEnum
+ * @see TokenIndexStrategy
  * @see CompressedTokenPredicateBuilder
  */
 public enum TokenIndexMode {

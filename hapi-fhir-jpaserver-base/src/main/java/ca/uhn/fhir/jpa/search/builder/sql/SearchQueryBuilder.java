@@ -389,20 +389,20 @@ public class SearchQueryBuilder {
 	}
 
 	/**
-	 * Create, add and return a predicate builder (or a root query if no root query exists yet) for selecting on a TOKEN search parameter
+	 * Adds a predicate builder for a TOKEN search parameter.
 	 */
-	public BaseTokenPredicateBuilder addNewTokenPredicateBuilder(
+	public BaseTokenPredicateBuilder addTokenPredicateBuilder(
 			@Nullable DbColumn[] theSourceJoinColumn, RuntimeSearchParam theSearchParam) {
 		if (myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
 			TokenIndexMode indexMode = TokenIndexMode.resolve(theSearchParam.getName(), myStorageSettings);
 			CompressedTokenPredicateBuilder retVal = mySqlBuilderFactory.compressedTokenIndexTable(this, indexMode);
 			addTable(retVal, theSourceJoinColumn);
 			return retVal;
-		} else {
-			TokenPredicateBuilder retVal = createTokenPredicateBuilder();
-			addTable(retVal, theSourceJoinColumn);
-			return retVal;
 		}
+		// Default read from Legacy token table
+		TokenPredicateBuilder retVal = createTokenPredicateBuilder();
+		addTable(retVal, theSourceJoinColumn);
+		return retVal;
 	}
 
 	/**
