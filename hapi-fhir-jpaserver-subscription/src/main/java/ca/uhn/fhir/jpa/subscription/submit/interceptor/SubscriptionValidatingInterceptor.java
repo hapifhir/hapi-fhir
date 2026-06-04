@@ -90,7 +90,13 @@ public class SubscriptionValidatingInterceptor {
 	@Autowired
 	private SubscriptionQueryValidator mySubscriptionQueryValidator;
 
-	@Autowired
+	/**
+	 * Optional: not every Spring context that loads the subscription configuration exposes a
+	 * {@link JpaStorageSettings} bean (e.g. Smile CDR composes its contexts differently). When
+	 * absent, the {@code _filter} submission guard is skipped, preserving prior behavior for
+	 * those contexts.
+	 */
+	@Autowired(required = false)
 	private JpaStorageSettings myStorageSettings;
 
 	@Autowired

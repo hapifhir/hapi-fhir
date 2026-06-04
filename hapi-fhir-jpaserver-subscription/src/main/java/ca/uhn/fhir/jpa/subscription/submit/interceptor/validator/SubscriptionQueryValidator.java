@@ -28,18 +28,27 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteri
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SubscriptionQueryValidator {
 	private final DaoRegistry myDaoRegistry;
 	private final SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
+
+	/**
+	 * May be {@literal null} in deployments whose Spring context does not expose a
+	 * {@link JpaStorageSettings} bean to the subscription configuration (e.g. Smile CDR composes
+	 * its contexts differently). When absent, the {@code _filter} submission guard is skipped,
+	 * matching the pre-existing behavior for those contexts.
+	 */
+	@Nullable
 	private final JpaStorageSettings myStorageSettings;
 
 	public SubscriptionQueryValidator(
 			DaoRegistry theDaoRegistry,
 			SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator,
-			JpaStorageSettings theStorageSettings) {
+			@Nullable JpaStorageSettings theStorageSettings) {
 		myDaoRegistry = theDaoRegistry;
 		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
 		myStorageSettings = theStorageSettings;
@@ -82,7 +91,9 @@ public class SubscriptionQueryValidator {
 					Msg.code(15) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
 		}
 
-		if (!myStorageSettings.isFilterParameterEnabled() && containsFilterParameter(theCriteria, sep)) {
+		if (myStorageSettings != null
+				&& !myStorageSettings.isFilterParameterEnabled()
+				&& containsFilterParameter(theCriteria, sep)) {
 			throw new UnprocessableEntityException(Msg.code(2792) + theFieldName + " contains the "
 					+ Constants.PARAM_FILTER + " parameter, but " + Constants.PARAM_FILTER
 					+ " is disabled on this server");
