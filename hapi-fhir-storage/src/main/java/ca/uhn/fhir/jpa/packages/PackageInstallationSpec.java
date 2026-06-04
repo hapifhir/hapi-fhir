@@ -222,8 +222,9 @@ public class PackageInstallationSpec {
 		return myAdditionalResourceFolders;
 	}
 
-	public void setAdditionalResourceFolders(Set<String> additionalResourceFolders) {
-		this.myAdditionalResourceFolders = additionalResourceFolders;
+	public PackageInstallationSpec setAdditionalResourceFolders(Set<String> theAdditionalResourceFolders) {
+		myAdditionalResourceFolders = theAdditionalResourceFolders;
+		return this;
 	}
 
 	public PackageInstallationSpec addDependencyExclude(String theExclude) {

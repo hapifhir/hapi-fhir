@@ -28,17 +28,21 @@ import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class AdditionalResourcesParser {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(AdditionalResourcesParser.class);
+
+	private AdditionalResourcesParser() {}
 
 	public static IBaseBundle bundleAdditionalResources(
 			Set<String> additionalResources, PackageInstallationSpec packageInstallationSpec, FhirContext fhirContext) {
@@ -59,12 +63,17 @@ public class AdditionalResourcesParser {
 	public static List<IBaseResource> getAdditionalResources(
 			Set<String> folderNames, NpmPackage npmPackage, FhirContext fhirContext) {
 
-		List<NpmPackage.NpmPackageFolder> npmFolders = folderNames.stream()
-				.map(name -> npmPackage.getFolders().get(name))
-				.filter(Objects::nonNull)
-				.collect(Collectors.toList());
+		List<NpmPackage.NpmPackageFolder> npmFolders = new ArrayList<>();
+		for (String name : folderNames) {
+			NpmPackage.NpmPackageFolder folder = npmPackage.getFolders().get(name);
+			if (folder != null) {
+				npmFolders.add(folder);
+			} else {
+				ourLog.warn("Additional resource folder '{}' not found in package", name);
+			}
+		}
 
-		List<IBaseResource> resources = new LinkedList<>();
+		List<IBaseResource> resources = new ArrayList<>();
 		IParser parser = fhirContext.newJsonParser().setSuppressNarratives(true);
 
 		for (NpmPackage.NpmPackageFolder folder : npmFolders) {
@@ -72,7 +81,7 @@ public class AdditionalResourcesParser {
 			try {
 				fileNames = folder.getTypes().values().stream()
 						.flatMap(Collection::stream)
-						.collect(Collectors.toList());
+						.toList();
 			} catch (IOException e) {
 				throw new InternalErrorException(Msg.code(2766) + e.getMessage(), e);
 			}
@@ -86,7 +95,7 @@ public class AdditionalResourcesParser {
 						}
 					})
 					.map(parser::parseResource)
-					.collect(Collectors.toList()));
+					.toList());
 		}
 		return resources;
 	}

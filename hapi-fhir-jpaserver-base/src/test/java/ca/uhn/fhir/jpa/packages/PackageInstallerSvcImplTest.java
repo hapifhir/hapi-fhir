@@ -1197,6 +1197,25 @@ public class PackageInstallerSvcImplTest {
 	// Created by Claude Opus 4.6
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
+	void testInstallPackage_withNonExistentAdditionalFolder_installsOnlyStandardResources() throws IOException {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://example.org/CodeSystem/test-cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		PackageInstallationSpec spec = setupResourceInPackage(null, cs, myCodeSystemDao);
+		spec.setAdditionalResourceFolders(java.util.Set.of("nonexistent-folder"));
+
+		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(cs);
+
+		PackageInstallOutcomeJson outcome = mySvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
+		assertThat(outcome.getResourcesInstalled()).hasSize(1);
+	}
+
+	// Created by Claude Opus 4.6
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@Test
 	void testUpdateResource_versionConflict_skipsResourceAndLogsErrorWithCause() throws IOException {
 		ValueSet existingVs = new ValueSet();
 		existingVs.setId("ValueSet/my-vs");

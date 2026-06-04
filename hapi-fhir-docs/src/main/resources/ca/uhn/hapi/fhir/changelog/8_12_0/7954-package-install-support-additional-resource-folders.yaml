@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7954
+title: "Fixed `PackageInstallationSpec.setAdditionalResourceFolders()` so that
+  resources from the specified folders (e.g. `examples`) are now installed alongside
+  standard package resources during NPM package installation."

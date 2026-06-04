@@ -1291,6 +1291,71 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(outcome.getResourcesInstalled().size()).as(outcome.getResourcesInstalled().toString()).isEqualTo(0);
 	}
 
+	// Created by Claude Opus 4.6
+	@Test
+	void testInstallR4Package_withAdditionalResourceFolders_installsProfileAndExampleResources() throws IOException {
+		String packageName = "test.ig.with.examples";
+		String packageVersion = "1.0.0";
+
+		// StructureDefinition profile in the standard "package" folder
+		StructureDefinition profile = new StructureDefinition();
+		profile.setUrl("http://example.org/StructureDefinition/my-patient-profile");
+		profile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		profile.setName("MyPatientProfile");
+		profile.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
+		profile.setAbstract(false);
+		profile.setType("Patient");
+		profile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Patient");
+		profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+
+		// Example Patient in the "examples" folder conforming to the profile
+		Patient examplePatient = new Patient();
+		examplePatient.setId("Patient/example-patient-1");
+		examplePatient.getMeta().addProfile("http://example.org/StructureDefinition/my-patient-profile");
+		examplePatient.addIdentifier().setSystem("http://example.org/mrn").setValue("MRN-12345");
+		examplePatient.addName().setFamily("Smith").addGiven("John");
+
+		// A second example in "examples"
+		Organization exampleOrg = new Organization();
+		exampleOrg.setId("Organization/example-org-1");
+		exampleOrg.addIdentifier().setSystem("http://example.org/org-id").setValue("ORG-001");
+		exampleOrg.setName("Example Hospital");
+
+		PackageGenerator manifestGenerator = new PackageGenerator();
+		manifestGenerator.name(packageName);
+		manifestGenerator.version(packageVersion);
+		manifestGenerator.description("An IG with a profile and example resources");
+		manifestGenerator.fhirVersions(List.of(FhirVersionEnum.R4.getFhirVersionString()));
+
+		NpmPackage pkg = NpmPackage.empty(manifestGenerator);
+		pkg.addFile("package", "StructureDefinition-my-patient-profile.json",
+			myFhirContext.newJsonParser().encodeResourceToString(profile).getBytes(StandardCharsets.UTF_8), "StructureDefinition");
+		pkg.addFile("examples", "Patient-example-1.json",
+			myFhirContext.newJsonParser().encodeResourceToString(examplePatient).getBytes(StandardCharsets.UTF_8), "Patient");
+		pkg.addFile("examples", "Organization-example-1.json",
+			myFhirContext.newJsonParser().encodeResourceToString(exampleOrg).getBytes(StandardCharsets.UTF_8), "Organization");
+
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		pkg.save(stream);
+
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName(packageName)
+			.setVersion(packageVersion)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setPackageContents(stream.toByteArray())
+			.setAdditionalResourceFolders(java.util.Set.of("examples"));
+
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled()).containsEntry("StructureDefinition", 1);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("Patient", 1);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("Organization", 1);
+
+		verifyResourceCountInDB("StructureDefinition", 1);
+		verifyResourceCountInDB("Patient", 1);
+		verifyResourceCountInDB("Organization", 1);
+	}
+
 	@Test
 	public void testInstallR4Package_Twice() {
 		myStorageSettings.setAllowExternalReferences(true);
