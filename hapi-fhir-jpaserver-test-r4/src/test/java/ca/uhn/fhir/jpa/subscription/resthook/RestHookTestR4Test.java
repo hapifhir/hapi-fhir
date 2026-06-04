@@ -84,15 +84,48 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	/**
-	 * A subscription whose criteria uses the _filter search parameter must only deliver for
-	 * resources that satisfy the filter.
+	 * A subscription whose criteria uses the _filter search parameter must deliver EXACTLY ONCE for
+	 * a resource that satisfies the filter, and the delivered resource must be the matching one.
 	 * <p>
-	 * We send a non-matching Patient first and a matching Patient second, then assert exactly
-	 * ONE delivery. If _filter were ignored, both Patients would deliver (count 2). This proves
-	 * the filter discriminates without relying on a fragile negative-timing assertion.
+	 * Guards against a <b>false negative</b>: a matching resource that silently fails to deliver, or
+	 * a delivery that carries the wrong resource. The delivery count is asserted exactly (== 1) and
+	 * the delivered family name is verified, so a {@code >0}-style pass cannot mask a broken filter.
 	 */
 	@Test
-	void testRestHookSubscriptionWithFilterCriteria() throws Exception {
+	void testRestHookSubscriptionWithFilterCriteria_matchingResourceDeliversExactlyOnce() throws Exception {
+		myStorageSettings.setFilterParameterEnabled(true);
+
+		String payload = "application/fhir+json";
+		String criteria = "Patient?_filter=name%20eq%20Smith";
+
+		createSubscription(criteria, payload);
+		waitForActivatedSubscriptionCount(1);
+
+		// Matching Patient (family name Smith) MUST deliver
+		Patient matching = new Patient();
+		matching.addName().setFamily("Smith");
+		matching.setActive(true);
+		myClient.create().resource(matching).execute();
+
+		waitForQueueToDrain();
+
+		// Exactly one delivery, and it must be the matching Patient.
+		ourPatientProvider.waitForUpdateCount(1);
+		assertThat(ourPatientProvider.getStoredResources()).hasSize(1);
+		assertThat(ourPatientProvider.getStoredResources().get(0).getName().get(0).getFamily())
+				.isEqualTo("Smith");
+	}
+
+	/**
+	 * A resource that does NOT satisfy the _filter must produce ZERO deliveries.
+	 * <p>
+	 * Guards against a <b>false positive</b>: the original bug shape where _filter was silently
+	 * dropped, causing the subscription to fire for EVERY Patient. Here the only Patient created
+	 * does not match the filter, so any delivery at all is a failure. The zero-delivery assertion
+	 * is direct (update count == 0), not inferred from a total count.
+	 */
+	@Test
+	void testRestHookSubscriptionWithFilterCriteria_nonMatchingResourceDoesNotDeliver() throws Exception {
 		myStorageSettings.setFilterParameterEnabled(true);
 
 		String payload = "application/fhir+json";
@@ -107,21 +140,61 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		nonMatching.setActive(true);
 		myClient.create().resource(nonMatching).execute();
 
-		// Matching Patient (family name Smith) MUST deliver
-		Patient matching = new Patient();
-		matching.addName().setFamily("Smith");
-		matching.setActive(true);
-		myClient.create().resource(matching).execute();
+		// Drain the delivery queue so the matching pipeline has fully processed the create. Once the
+		// queue is empty, any delivery the _filter subscription would have made is already visible,
+		// so the zero-delivery assertions below are not racing against in-flight work.
+		waitForQueueToDrain();
+
+		// The non-matching Patient must have produced no delivery whatsoever.
+		assertThat(ourPatientProvider.getCountUpdate()).isZero();
+		assertThat(ourPatientProvider.getCountCreate()).isZero();
+		assertThat(ourPatientProvider.getStoredResources()).isEmpty();
+	}
+
+	/**
+	 * Regression guard for the original bug shape (GL-6885): _filter being silently dropped so the
+	 * subscription fired for EVERY resource of the type.
+	 * <p>
+	 * We create THREE non-matching Patients (Jones) and TWO matching Patients (Smith). Only the two
+	 * Smith Patients may deliver. If _filter were ignored, all FIVE would deliver and the exact
+	 * {@code waitForUpdateCount(2)} assertion would fail. The discrimination is unmistakable: a
+	 * "fires for everything" bug yields a count of 5, not 2. We also assert every delivered resource
+	 * is a Smith, so a bug that delivered the wrong subset would also be caught.
+	 */
+	@Test
+	void testRestHookSubscriptionWithFilterCriteria_onlyMatchingResourcesDeliver() throws Exception {
+		myStorageSettings.setFilterParameterEnabled(true);
+
+		String payload = "application/fhir+json";
+		String criteria = "Patient?_filter=name%20eq%20Smith";
+
+		createSubscription(criteria, payload);
+		waitForActivatedSubscriptionCount(1);
+
+		// Three non-matching Patients (family name Jones) must NOT deliver
+		for (int i = 0; i < 3; i++) {
+			Patient nonMatching = new Patient();
+			nonMatching.addName().setFamily("Jones");
+			nonMatching.setActive(true);
+			myClient.create().resource(nonMatching).execute();
+		}
+
+		// Two matching Patients (family name Smith) MUST deliver
+		for (int i = 0; i < 2; i++) {
+			Patient matching = new Patient();
+			matching.addName().setFamily("Smith");
+			matching.setActive(true);
+			myClient.create().resource(matching).execute();
+		}
 
 		waitForQueueToDrain();
 
-		// Only the matching Patient should have been delivered.
-		// Note: waitForCreateCount(0) is a weak check (it asserts the absence of an event that
-		// never fires for an update delivery anyway); the real discriminator is the
-		// waitForUpdateCount(1) below plus the family-name assertion.
-		ourPatientProvider.waitForCreateCount(0);
-		ourPatientProvider.waitForUpdateCount(1);
-		assertEquals("Smith", ourPatientProvider.getStoredResources().get(0).getName().get(0).getFamily());
+		// Only the two matching Patients may deliver. If _filter were dropped this would be 5.
+		ourPatientProvider.waitForUpdateCount(2);
+		assertThat(ourPatientProvider.getStoredResources()).hasSize(2);
+		assertThat(ourPatientProvider.getStoredResources())
+				.allSatisfy(patient ->
+						assertThat(patient.getName().get(0).getFamily()).isEqualTo("Smith"));
 	}
 
 	/**

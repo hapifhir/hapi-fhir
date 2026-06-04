@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -298,13 +299,10 @@ public class SubscriptionValidatingInterceptorTest {
 		Subscription subscription = createSubscription();
 		subscription.setCriteria("Patient?_filter=name eq smith");
 
-		try {
-			mySubscriptionValidatingInterceptor.resourcePreCreate(subscription, null, null);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).startsWith(Msg.code(2792));
-			assertThat(e.getMessage()).contains("_filter");
-		}
+		assertThatThrownBy(() -> mySubscriptionValidatingInterceptor.resourcePreCreate(subscription, null, null))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageStartingWith(Msg.code(2792))
+				.hasMessageContaining("_filter");
 	}
 
 	// A _filter subscription is accepted when filter search is enabled
