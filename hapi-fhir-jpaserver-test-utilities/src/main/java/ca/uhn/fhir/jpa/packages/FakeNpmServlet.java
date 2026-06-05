@@ -30,16 +30,19 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FakeNpmServlet extends HttpServlet {
 	private static final Logger ourLog = LoggerFactory.getLogger(FakeNpmServlet.class);
 
-	final Map<String, byte[]> responses = new HashMap<>();
+	private final Map<String, byte[]> myResponses = new HashMap<>();
+	private final Map<String, AtomicInteger> myTimesCalled = new HashMap<>();
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String requestUrl = req.getRequestURI();
-		if (responses.containsKey(requestUrl)) {
+		if (myResponses.containsKey(requestUrl)) {
+			myTimesCalled.computeIfAbsent(requestUrl, k -> new AtomicInteger()).incrementAndGet();
 			ourLog.info("Responding to request: {}", requestUrl);
 
 			resp.setStatus(200);
@@ -49,7 +52,7 @@ public class FakeNpmServlet extends HttpServlet {
 			} else {
 				resp.setHeader(Constants.HEADER_CONTENT_TYPE, "application/gzip");
 			}
-			resp.getOutputStream().write(responses.get(requestUrl));
+			resp.getOutputStream().write(myResponses.get(requestUrl));
 			resp.getOutputStream().close();
 		} else {
 			ourLog.warn("Unknown request: {}", requestUrl);
@@ -59,6 +62,19 @@ public class FakeNpmServlet extends HttpServlet {
 	}
 
 	public Map<String, byte[]> getResponses() {
-		return responses;
+		return myResponses;
+	}
+
+	public void addResponse(String theRequestUrl, byte[] theResponse) {
+		myResponses.put(theRequestUrl, theResponse);
+	}
+
+	public int getTimesCalled(String theRequestUrl) {
+		return myTimesCalled.getOrDefault(theRequestUrl, new AtomicInteger()).get();
+	}
+
+	public void clear() {
+		myResponses.clear();
+		myTimesCalled.clear();
 	}
 }

@@ -37,6 +37,7 @@ import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -168,7 +169,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			"  ChildAAA seq=0",
 			"RootB seq=0"
 		);
-		assertEquals(4, outcome.getUpdatedConceptCount());
+		assertEquals(4, outcome.getAddedConceptCount());
 
 		delta = new CustomTerminologySet();
 		delta.addRootConcept("RootB", "Root B")
@@ -396,7 +397,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 
-		assertFalse(myTermDeferredStorageSvc.isStorageQueueEmpty(true));
+		assertTrue(myTermDeferredStorageSvc.isStorageQueueEmpty(true));
+
 		int counter = 0;
 		while (!myTermDeferredStorageSvc.isStorageQueueEmpty(true) && ++counter < 10000) {
 			myTermDeferredStorageSvc.saveDeferred();
@@ -433,7 +435,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codeb", "CODEB0");
 
 		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-		assertEquals(2, outcome.getUpdatedConceptCount());
+		assertEquals(2, outcome.getAddedConceptCount());
 		assertThat(myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
 			new LookupCodeRequest("http://foo", "codea")).getCodeDisplay()).isEqualTo("CODEA0");
 

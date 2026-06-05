@@ -35,6 +35,46 @@ myPackageInstallerSvc.installAsynchronously(spec);
 
 When `setFetchDependencies(true)` is set on the `PackageInstallationSpec`, the installer recursively fetches and installs all transitive dependencies declared in each package's `package.json` file. Dependencies are resolved from the local package cache first, then fetched from the [packages.fhir.org](https://packages.fhir.org) registry if not found locally.
 
+# Excluding Dependencies
+
+When `fetchDependencies` is enabled, you can use the `dependencyExcludes` field to skip specific transitive dependencies. This field accepts a list of Java regular expressions. Each dependency's package ID is tested against every pattern, and if any pattern matches, that dependency is skipped.
+
+This is useful for excluding large base packages that are already built into the server (e.g., `hl7.fhir.r4.core`) or packages that are not needed in your environment.
+
+```java
+PackageInstallationSpec spec = new PackageInstallationSpec()
+    .setName("hl7.fhir.us.core")
+    .setVersion("7.0.0")
+    .setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+    .setFetchDependencies(true)
+    .addDependencyExclude("^hl7\\.fhir\\.r4\\.core$")
+    .addDependencyExclude("^hl7\\.terminology.*");
+```
+
+The equivalent JSON representation:
+
+```json
+{
+  "name": "hl7.fhir.us.core",
+  "version": "7.0.0",
+  "installMode": "STORE_AND_INSTALL",
+  "fetchDependencies": true,
+  "dependencyExcludes": [
+    "^hl7\\.fhir\\.r4\\.core$",
+    "^hl7\\.terminology.*"
+  ]
+}
+```
+
+In the example above:
+
+* `^hl7\.fhir\.r4\.core$` matches the exact package ID `hl7.fhir.r4.core`.
+* `^hl7\.terminology.*` matches any package ID starting with `hl7.terminology`, such as `hl7.terminology.r4`.
+
+<p class="doc_info_bubble">
+<b>Note:</b> The values are Java regular expressions, not simple strings. Use <code>\.</code> to match a literal dot, since <code>.</code> in regex matches any character.
+</p>
+
 # Cross-Version Package Dependencies
 
 Some FHIR packages are designed to work across multiple FHIR versions. For example, `hl7.fhir.uv.extensions` is a cross-version extensions package that declares FHIR version `5.0.0` in its package metadata, even though it is commonly used as a dependency of R4 Implementation Guides.

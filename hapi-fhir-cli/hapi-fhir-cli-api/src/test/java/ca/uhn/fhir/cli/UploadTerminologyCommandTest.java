@@ -1,8 +1,17 @@
 package ca.uhn.fhir.cli;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -12,9 +21,13 @@ import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
+import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.common.base.Charsets;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
@@ -31,6 +44,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -45,26 +59,31 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UploadTerminologyCommandTest {
+public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest{
 	private static final String FHIR_VERSION_DSTU3 = "DSTU3";
 	private static final String FHIR_VERSION_R4 = "R4";
 	private FhirContext myCtx;
@@ -85,6 +104,10 @@ public class UploadTerminologyCommandTest {
 
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
+	@Mock
+	private IJobCoordinator myJobCoordinator;
+	@Mock
+	private IJobPersistence myJobPersistence;
 
 	@Captor
 	protected ArgumentCaptor<List<ITermLoaderSvc.FileDescriptor>> myDescriptorListCaptor;
@@ -92,6 +115,10 @@ public class UploadTerminologyCommandTest {
 	static {
 		HapiSystemProperties.enableTestMode();
 	}
+
+	@Captor
+	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestDetails;
+
 
 	static Stream<Arguments> paramsProvider(){
 		return Stream.of(
@@ -117,11 +144,11 @@ public class UploadTerminologyCommandTest {
 		writeConceptAndHierarchyFiles();
 		if (testInfo.getDisplayName().contains(FHIR_VERSION_DSTU3)) {
 			myCtx = FhirContext.forDstu3();
-			myRestServerDstu3Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc));
+			myRestServerDstu3Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc, myJobCoordinator, myJobPersistence));
 			myBaseRestServerHelper = myRestServerDstu3Helper;
-		} else if (testInfo.getDisplayName().contains(FHIR_VERSION_R4)) {
+		} else if (testInfo.getDisplayName().contains(FHIR_VERSION_R4) || testInfo.getDisplayName().endsWith("()") || testInfo.getDisplayName().endsWith("(File)")) {
 			myCtx = FhirContext.forR4();
-			myRestServerR4Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc));
+			myRestServerR4Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc, myJobCoordinator, myJobPersistence));
 			myBaseRestServerHelper = myRestServerR4Helper;
 		} else {
 			fail("Unknown FHIR Version param provided: " + testInfo.getDisplayName());
@@ -459,6 +486,168 @@ public class UploadTerminologyCommandTest {
 		assertThat(listOfDescriptors).hasSize(1);
 		assertThat(listOfDescriptors.get(0).getFilename()).matches(".*\\.zip$");
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
+	}
+
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testUploadLoinc(String theFhirVersion, boolean theIncludeTls) throws IOException {
+
+		File tempFile = File.createTempFile("loinc", ".zip");
+		tempFile.deleteOnExit();
+		try (FileWriter w = new FileWriter(tempFile, StandardCharsets.UTF_8, false)) {
+			w.append("12345");
+		}
+
+		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
+		startResponse.setInstanceId("my-instance-id");
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+
+		JobInstance jobInstance = new JobInstance();
+		jobInstance.setInstanceId("my-instance-id");
+		jobInstance.setStatus(StatusEnum.BUILDING);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
+
+		StopWatch sw = new StopWatch();
+		doAnswer(t->{
+			if (jobInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+				if (sw.getMillis() > 2000) {
+					ImportTerminologyResultJson result = new ImportTerminologyResultJson();
+					result.setReport("This is the report line 1\nThis is the report line 2");
+
+					jobInstance.setStatus(StatusEnum.COMPLETED);
+					jobInstance.setReport(JsonUtil.serialize(result));
+				}
+			}
+			return jobInstance;
+		}).when(myJobCoordinator).getInstance(eq("my-instance-id"));
+		doAnswer(t->{
+			jobInstance.setStatus(StatusEnum.IN_PROGRESS);
+			jobInstance.setProgress(0.55);
+			return null;
+		}).when(myJobCoordinator).enqueueBuildingJobForExecution(any());
+
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", theFhirVersion,
+				"-u", LOINC_URI + "|1.23",
+				"-d", tempFile.getAbsolutePath()
+			},
+			"-t", theIncludeTls, myBaseRestServerHelper
+		));
+
+		// Verify
+		assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
+
+		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
+		JobInstanceStartRequest startRequest = myStartRequestDetails.getValue();
+		ImportTerminologyJobParameters params = startRequest.getParameters(ImportTerminologyJobParameters.class);
+		assertNull(params.getDontMakeCurrent());
+	}
+
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testUploadLoinc_DontMakeCurrent(String theFhirVersion, boolean theIncludeTls, @TempDir File theTempDir) throws IOException {
+
+		File tempFile = new File(theTempDir, "loinc.zip");
+		tempFile.deleteOnExit();
+		try (FileWriter w = new FileWriter(tempFile, StandardCharsets.UTF_8, false)) {
+			w.append("12345");
+		}
+
+		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
+		startResponse.setInstanceId("my-instance-id");
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+
+		JobInstance jobInstance = new JobInstance();
+		jobInstance.setInstanceId("my-instance-id");
+		jobInstance.setStatus(StatusEnum.BUILDING);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
+
+		StopWatch sw = new StopWatch();
+		doAnswer(t->{
+			if (jobInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+				if (sw.getMillis() > 2000) {
+					ImportTerminologyResultJson result = new ImportTerminologyResultJson();
+					result.setReport("This is the report line 1\nThis is the report line 2");
+
+					jobInstance.setStatus(StatusEnum.COMPLETED);
+					jobInstance.setReport(JsonUtil.serialize(result));
+				}
+			}
+			return jobInstance;
+		}).when(myJobCoordinator).getInstance(eq("my-instance-id"));
+		doAnswer(t->{
+			jobInstance.setStatus(StatusEnum.IN_PROGRESS);
+			jobInstance.setProgress(0.55);
+			return null;
+		}).when(myJobCoordinator).enqueueBuildingJobForExecution(any());
+
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", theFhirVersion,
+				"-u", LOINC_URI + "|1.23",
+				"-d", tempFile.getAbsolutePath(),
+				"--dont-make-current"
+			}, "-t", theIncludeTls
+			, myBaseRestServerHelper
+		));
+
+		// Verify
+		assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
+
+		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
+		JobInstanceStartRequest startRequest = myStartRequestDetails.getValue();
+		ImportTerminologyJobParameters params = startRequest.getParameters(ImportTerminologyJobParameters.class);
+		assertTrue(params.getDontMakeCurrent());
+	}
+
+	@Test
+	public void testUploadLoinc_InvalidFilename(@TempDir File theTempDir) throws IOException {
+
+		File tempFile = new File(theTempDir, "blah.json");
+		try (FileWriter w = new FileWriter(tempFile, StandardCharsets.UTF_8, false)) {
+			w.append("12345");
+		}
+
+		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
+		startResponse.setInstanceId("my-instance-id");
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+
+		JobInstance jobInstance = new JobInstance();
+		jobInstance.setInstanceId("my-instance-id");
+		jobInstance.setStatus(StatusEnum.BUILDING);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
+
+		StopWatch sw = new StopWatch();
+		doAnswer(t->{
+			if (jobInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+				if (sw.getMillis() > 2000) {
+					ImportTerminologyResultJson result = new ImportTerminologyResultJson();
+					result.setReport("This is the report line 1\nThis is the report line 2");
+
+					jobInstance.setStatus(StatusEnum.COMPLETED);
+					jobInstance.setReport(JsonUtil.serialize(result));
+				}
+			}
+			return jobInstance;
+		}).when(myJobCoordinator).getInstance(eq("my-instance-id"));
+
+		assertThatThrownBy(()->App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", "r4",
+				"-u", LOINC_URI + "|1.23",
+				"-d", tempFile.getAbsolutePath(),
+				"--dont-make-current"
+			}, "-t", false
+			, myBaseRestServerHelper
+		)))
+			.isInstanceOf(CommandFailureException.class);
+
+		// Verify
+		assertThat(getConsoleOutput()).contains("HAPI-2959: Failed to attach file \"" + tempFile.getName()+ "\" to job, got HTTP 400 Bad Request: HAPI-2953: File named \"" + tempFile.getName() + "\" is not valid for import LOINC job");
 	}
 
 	@ParameterizedTest

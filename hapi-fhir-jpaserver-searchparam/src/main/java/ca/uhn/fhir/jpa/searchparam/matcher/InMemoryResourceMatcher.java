@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -88,6 +89,9 @@ public class InMemoryResourceMatcher {
 
 	@Autowired
 	StorageSettings myStorageSettings;
+
+	@Autowired
+	PartitionSettings myPartitionSettings;
 
 	@Autowired
 	FhirContext myFhirContext;
@@ -560,7 +564,8 @@ public class InMemoryResourceMatcher {
 					theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, (TokenParam)
 							theToken);
 		} else {
-			return theSearchParams.matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theToken);
+			return theSearchParams.matchParam(
+					myPartitionSettings, theStorageSettings, theResourceName, theParamName, theParamDef, theToken);
 		}
 	}
 
@@ -589,26 +594,38 @@ public class InMemoryResourceMatcher {
 			switch (theQueryParam.getModifier()) {
 				case IN:
 					return theSearchParams.myTokenParams.stream()
-							.filter(t -> isMatchSearchParam(theStorageSettings, theResourceName, theParamName, t))
+							.filter(t -> isMatchSearchParam(
+									myPartitionSettings, theStorageSettings, theResourceName, theParamName, t))
 							.anyMatch(t -> systemContainsCode(theQueryParam, t));
 				case NOT_IN:
 					return theSearchParams.myTokenParams.stream()
-							.filter(t -> isMatchSearchParam(theStorageSettings, theResourceName, theParamName, t))
+							.filter(t -> isMatchSearchParam(
+									myPartitionSettings, theStorageSettings, theResourceName, theParamName, t))
 							.noneMatch(t -> systemContainsCode(theQueryParam, t));
 				case NOT:
 					return !theSearchParams.matchParam(
-							theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
+							myPartitionSettings,
+							theStorageSettings,
+							theResourceName,
+							theParamName,
+							theParamDef,
+							theQueryParam);
 				case ABOVE:
 				case BELOW:
 				case TEXT:
 				case OF_TYPE:
 				default:
 					return theSearchParams.matchParam(
-							theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
+							myPartitionSettings,
+							theStorageSettings,
+							theResourceName,
+							theParamName,
+							theParamDef,
+							theQueryParam);
 			}
 		} else {
 			return theSearchParams.matchParam(
-					theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
+					myPartitionSettings, theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
 		}
 	}
 

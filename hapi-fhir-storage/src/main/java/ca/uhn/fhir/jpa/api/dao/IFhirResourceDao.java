@@ -452,11 +452,14 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	}
 
 	/**
-	 * Return the FHIR Ids matching theParams.
+	 * Return a list of versioned FHIR IDs matching a SearchParameterMap.
+	 * <p>
 	 * This call does not currently invoke any interceptors, so should only be used for infrastructure that
 	 * will not need to participate in the consent services, or caching.
+	 * </p>
 	 * @param theParams the search
 	 * @param theRequest for partition target info
+	 * @return This method returns versioned IDs, with the resource type, FHIR ID, and resource version populated.
 	 */
 	default List<IIdType> searchForResourceIds(SearchParameterMap theParams, RequestDetails theRequest) {
 		return searchForResources(theParams, theRequest).stream()

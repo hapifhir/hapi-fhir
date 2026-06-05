@@ -282,7 +282,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		searchParameter.setCode("myGender");
 		searchParameter.addBase("Patient").addBase("Person");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
-		searchParameter.setExpression("Patient.gender | Person.gender");
+		searchParameter.setExpression("Patient.gender|Person.gender");
 
 		MethodOutcome result= myClient.create().resource(searchParameter).execute();
 
@@ -1780,7 +1780,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
+		assertThat(ids).containsExactlyInAnyOrder(c1Id, obs1Id);
+		assertThat(ids).doesNotContain(p1Id);
 		assertThat(ids).doesNotContain(o1Id);
 		assertThat(ids).doesNotContain(m1Id);
 	}
@@ -1811,7 +1812,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
+		assertThat(ids).containsExactlyInAnyOrder(c1Id, obs1Id);
+		assertThat(ids).doesNotContain(p1Id);
 		assertThat(ids).doesNotContain(o1Id);
 		assertThat(ids).doesNotContain(m1Id);
 	}
@@ -1850,7 +1852,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
+		assertThat(ids).containsExactlyInAnyOrder(c1Id, obs1Id);
+		assertThat(ids).doesNotContain(p1Id);
 		assertThat(ids).doesNotContain(o1Id);
 		assertThat(ids).doesNotContain(m1Id);
 		assertThat(ids).doesNotContain(p2Id);

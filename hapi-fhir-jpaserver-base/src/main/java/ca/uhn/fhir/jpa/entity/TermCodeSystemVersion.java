@@ -46,14 +46,16 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Table(
-		name = "TRM_CODESYSTEM_VER",
+		name = TermCodeSystemVersion.TRM_CODESYSTEM_VER,
 		// Note, we used to have a constraint named IDX_CSV_RESOURCEPID_AND_VER (don't reuse this)
 		uniqueConstraints = {
 			@UniqueConstraint(
@@ -69,7 +71,11 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class TermCodeSystemVersion extends BasePartitionable implements Serializable {
 	public static final String IDX_CODESYSTEM_AND_VER = "IDX_CODESYSTEM_AND_VER";
 	public static final int MAX_VERSION_LENGTH = 200;
+
+	@Serial
 	private static final long serialVersionUID = 1L;
+
+	public static final String TRM_CODESYSTEM_VER = "TRM_CODESYSTEM_VER";
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCodeSystem")
 	private Collection<TermConcept> myConcepts;
@@ -104,6 +110,9 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 
 	@Column(name = "CS_VERSION_ID", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemVersionId;
+
+	@Column(name = "CS_INTENDED_VERSION_ID", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
+	private String myCodeSystemIntendedVersionId;
 
 	/**
 	 * This was added in HAPI FHIR 3.3.0 and is nullable just to avoid migration
@@ -141,6 +150,30 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		super();
 	}
 
+	/**
+	 * If this is a CodeSystem version that is currently being staged for publishing (meaning
+	 * we are currently in the process of writing concepts to it), this is the version ID
+	 * intended to eventually be placed in {@link #myCodeSystemVersionId} once published.
+	 *
+	 * @since 8.12.0
+	 * @see ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc#startStagingCodeSystemVersion(String, String)
+	 */
+	public String getCodeSystemIntendedVersionId() {
+		return myCodeSystemIntendedVersionId;
+	}
+
+	/**
+	 * If this is a CodeSystem version that is currently being staged for publishing (meaning
+	 * we are currently in the process of writing concepts to it), this is the version ID
+	 * intended to eventually be placed in {@link #myCodeSystemVersionId} once published.
+	 *
+	 * @since 8.12.0
+	 * @see ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc#startStagingCodeSystemVersion(String, String)
+	 */
+	public void setCodeSystemIntendedVersionId(String theCodeSystemIntendedVersionId) {
+		myCodeSystemIntendedVersionId = theCodeSystemIntendedVersionId;
+	}
+
 	public TermCodeSystem getCodeSystem() {
 		return myCodeSystem;
 	}
@@ -150,6 +183,16 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		myCodeSystemPid = theCodeSystem.getPid();
 		assert myCodeSystemPid != null;
 		return this;
+	}
+
+	/**
+	 * Sets only the FK column value without touching the {@code @ManyToOne} entity reference.
+	 * Use this on managed entities to avoid Hibernate HHH000502 warnings caused by dirtying
+	 * the {@link #myCodeSystem} field whose {@code @JoinColumn} is {@code updatable = false}.
+	 */
+	// Created by Claude Opus 4.6
+	public void setCodeSystemPid(long theCodeSystemPid) {
+		myCodeSystemPid = theCodeSystemPid;
 	}
 
 	public String getCodeSystemVersionId() {
@@ -182,8 +225,18 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		return IdAndPartitionId.forId(myId, this);
 	}
 
+	public TermCodeSystemVersion setId(Long theId) {
+		myId = theId;
+		return this;
+	}
+
 	public ResourceTable getResource() {
 		return myResource;
+	}
+
+	// Created by Claude Opus 4.6
+	public Long getResourcePidValue() {
+		return myResourcePid;
 	}
 
 	public TermCodeSystemVersion setResource(ResourceTable theResource) {
@@ -193,9 +246,15 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		return this;
 	}
 
-	public TermCodeSystemVersion setId(Long theId) {
-		myId = theId;
-		return this;
+	/**
+	 * Sets only the FK column value and partition without touching the {@code @ManyToOne} entity reference.
+	 * Use this on managed entities to avoid Hibernate HHH000502 warnings caused by dirtying
+	 * the {@link #myResource} field whose {@code @JoinColumn} is {@code updatable = false}.
+	 */
+	// Created by Claude Opus 4.6
+	public void setResourcePid(ResourceTable theResource) {
+		myResourcePid = theResource.getId().getId();
+		setPartitionId(theResource.getPartitionId());
 	}
 
 	@Override
@@ -257,5 +316,9 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 	TermCodeSystemVersion setCodeSystemPidForUnitTest(long theCodeSystemPid) {
 		myCodeSystemPid = theCodeSystemPid;
 		return this;
+	}
+
+	public Optional<TermConcept> getConceptByCode(String theCode) {
+		return getConcepts().stream().filter(t -> t.getCode().equals(theCode)).findFirst();
 	}
 }

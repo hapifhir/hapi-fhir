@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7940
+title: "Fixed a bug where the `dependencyExcludes` field in `PackageInstallationSpec` was not
+  serialized or deserialized via JSON due to a missing `@JsonProperty` annotation. This
+  prevented dependency exclusion rules from being applied when the spec was provided as JSON."

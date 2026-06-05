@@ -27,21 +27,22 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Set;
 
 public class JobDefinition<PT extends IModelJson> {
-	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int ID_MAX_LENGTH = 100;
+	public static final Set<StatusEnum> VALID_INITIAL_STATUSES = Set.of(StatusEnum.BUILDING, StatusEnum.QUEUED);
 
+	private final StatusEnum myInitialStatus;
 	private final String myJobDefinitionId;
 	private final int myJobDefinitionVersion;
 	private final Class<PT> myParametersType;
@@ -49,14 +50,15 @@ public class JobDefinition<PT extends IModelJson> {
 	private final String myJobDescription;
 	private final IJobParametersValidator<PT> myParametersValidator;
 	private final boolean myGatedExecution;
-	private final List<String> myStepIds;
 	private final IJobCompletionHandler<PT> myCompletionHandler;
 	private final IJobCompletionHandler<PT> myErrorHandler;
+	private final Map<String, Integer> myStepIdToStepIndex;
 
 	/**
 	 * Constructor
 	 */
 	private JobDefinition(
+			StatusEnum theInitialStatus,
 			String theJobDefinitionId,
 			int theJobDefinitionVersion,
 			String theJobDescription,
@@ -66,21 +68,33 @@ public class JobDefinition<PT extends IModelJson> {
 			boolean theGatedExecution,
 			IJobCompletionHandler<PT> theCompletionHandler,
 			IJobCompletionHandler<PT> theErrorHandler) {
+		Validate.isTrue(VALID_INITIAL_STATUSES.contains(theInitialStatus), "Initial status is invalid");
 		Validate.isTrue(theJobDefinitionId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
 		Validate.notBlank(theJobDefinitionId, "No job definition ID supplied");
 		Validate.notBlank(theJobDescription, "No job description supplied");
 		Validate.isTrue(theJobDefinitionVersion >= 1, "No job definition version supplied (must be >= 1)");
 		Validate.isTrue(theSteps.size() >= 2, "At least 2 steps must be supplied");
+		myInitialStatus = theInitialStatus;
 		myJobDefinitionId = theJobDefinitionId;
 		myJobDefinitionVersion = theJobDefinitionVersion;
 		myJobDescription = theJobDescription;
 		mySteps = theSteps;
-		myStepIds = mySteps.stream().map(JobDefinitionStep::getStepId).collect(Collectors.toList());
 		myParametersType = theParametersType;
 		myParametersValidator = theParametersValidator;
 		myGatedExecution = theGatedExecution;
 		myCompletionHandler = theCompletionHandler;
 		myErrorHandler = theErrorHandler;
+
+		myStepIdToStepIndex = new HashMap<>();
+		for (int i = 0; i < mySteps.size(); i++) {
+			String stepId = mySteps.get(i).getStepId();
+			myStepIdToStepIndex.put(stepId, i);
+		}
+	}
+
+	@Nonnull
+	public StatusEnum getInitialStatus() {
+		return myInitialStatus;
 	}
 
 	@Nullable
@@ -158,13 +172,14 @@ public class JobDefinition<PT extends IModelJson> {
 	}
 
 	public int getStepIndex(String theStepId) {
-		int retVal = myStepIds.indexOf(theStepId);
-		Validate.isTrue(retVal != -1);
-		return retVal;
+		Integer index = myStepIdToStepIndex.get(theStepId);
+		Validate.isTrue(index != null, "No step with ID %s", theStepId);
+		return index;
 	}
 
 	public static class Builder<PT extends IModelJson, NIT extends IModelJson> {
 
+		private StatusEnum myInitialStatus = StatusEnum.QUEUED;
 		private final List<JobDefinitionStep<PT, ?, ?>> mySteps;
 		private String myJobDefinitionId;
 		private int myJobDefinitionVersion;
@@ -184,6 +199,7 @@ public class JobDefinition<PT extends IModelJson> {
 		}
 
 		Builder(
+				StatusEnum theInitialStatus,
 				List<JobDefinitionStep<PT, ?, ?>> theSteps,
 				String theJobDefinitionId,
 				int theJobDefinitionVersion,
@@ -194,6 +210,7 @@ public class JobDefinition<PT extends IModelJson> {
 				boolean theGatedExecution,
 				IJobCompletionHandler<PT> theCompletionHandler,
 				IJobCompletionHandler<PT> theErrorHandler) {
+			myInitialStatus = theInitialStatus;
 			mySteps = theSteps;
 			myJobDefinitionId = theJobDefinitionId;
 			myJobDefinitionVersion = theJobDefinitionVersion;
@@ -240,6 +257,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps.add(new JobDefinitionStep<>(
 					theStepId, theStepDescription, theStepWorker, VoidModel.class, theOutputType));
 			return new Builder<>(
+					myInitialStatus,
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
@@ -269,6 +287,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps.add(new JobDefinitionStep<>(
 					theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
 			return new Builder<>(
+					myInitialStatus,
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
@@ -295,6 +314,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps.add(new JobDefinitionStep<>(
 					theStepId, theStepDescription, theStepWorker, myNextInputType, VoidModel.class));
 			return new Builder<>(
+					myInitialStatus,
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
@@ -319,6 +339,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps.add(new JobDefinitionReductionStep<>(
 					theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
 			return new Builder<>(
+					myInitialStatus,
 					mySteps,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
@@ -334,6 +355,7 @@ public class JobDefinition<PT extends IModelJson> {
 		public JobDefinition<PT> build() {
 			Validate.notNull(myJobParametersType, "No job parameters type was supplied");
 			return new JobDefinition<>(
+					myInitialStatus,
 					myJobDefinitionId,
 					myJobDefinitionVersion,
 					myJobDescription,
@@ -401,6 +423,7 @@ public class JobDefinition<PT extends IModelJson> {
 		}
 
 		/**
+		 * Enables gated execution mode.
 		 * If this is set, the framework will wait for all work chunks to be
 		 * processed for an individual step before moving on to beginning
 		 * processing on the next step. Otherwise, processing on subsequent
@@ -427,7 +450,41 @@ public class JobDefinition<PT extends IModelJson> {
 		 * </p>
 		 */
 		public Builder<PT, NIT> gatedExecution() {
-			myGatedExecution = true;
+			return gatedExecution(true);
+		}
+
+		/**
+		 * Enables or disables gated execution mode.
+		 * If this is set, the framework will wait for all work chunks to be
+		 * processed for an individual step before moving on to beginning
+		 * processing on the next step. Otherwise, processing on subsequent
+		 * steps may begin as soon as any data has been produced.
+		 * <p>
+		 * This is useful in a few cases:
+		 * <ul>
+		 *    <li>
+		 *       If there are potential constraint issues, e.g. data being
+		 *    	written by the third step depends on all data from the
+		 *    	second step already being written
+		 *    </li>
+		 *    <li>
+		 *       If multiple steps require expensive database queries, it may
+		 *       reduce the chances of timeouts to ensure that they are run
+		 *       discretely.
+		 *    </li>
+		 * </ul>
+		 * </p>
+		 * <p>
+		 * Setting this mode means the job may take longer, since it will
+		 * rely on a polling mechanism to determine that one step is
+		 * complete before beginning any processing for the next step.
+		 * </p>
+		 *
+		 * @param theGatedExecution Set to <code>true</code> if gated execution should be enabled, <code>false</code> if it should be disabled.
+		 * @since 8.12.0
+		 */
+		public Builder<PT, NIT> gatedExecution(boolean theGatedExecution) {
+			myGatedExecution = theGatedExecution;
 			return this;
 		}
 
@@ -446,6 +503,12 @@ public class JobDefinition<PT extends IModelJson> {
 		public Builder<PT, NIT> errorHandler(IJobCompletionHandler<PT> theErrorHandler) {
 			Validate.isTrue(myErrorHandler == null, "Can not supply multiple error handlers");
 			myErrorHandler = theErrorHandler;
+			return this;
+		}
+
+		public Builder<PT, NIT> setInitialStatus(StatusEnum theInitialStatus) {
+			Validate.isTrue(VALID_INITIAL_STATUSES.contains(theInitialStatus), "Initial status is invalid");
+			myInitialStatus = theInitialStatus;
 			return this;
 		}
 	}

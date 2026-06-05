@@ -243,7 +243,7 @@ public abstract class BaseTransactionProcessor {
 			RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
 		String actionName = "Transaction";
 
-		TransactionDetails transactionDetails = new TransactionDetails();
+		TransactionDetails transactionDetails = new TransactionDetails(theRequest);
 
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
@@ -338,7 +338,8 @@ public abstract class BaseTransactionProcessor {
 			IBase theNewEntry,
 			String theResourceType,
 			IBaseResource theRes,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails) {
 		IIdType newId = theOutcome.getId().toUnqualified();
 		IIdType resourceId =
 				isPlaceholder(theNextResourceId) ? theNextResourceId : theNextResourceId.toUnqualifiedVersionless();
@@ -347,6 +348,8 @@ public abstract class BaseTransactionProcessor {
 				theIdSubstitutions.put(resourceId, newId);
 			}
 			if (isPlaceholder(resourceId)) {
+				theTransactionDetails.addResolvedResource(resourceId, theRes);
+
 				/*
 				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.
 				 */
@@ -458,7 +461,11 @@ public abstract class BaseTransactionProcessor {
 				if (i < totalAttempts && transactionSemantics.isTryBatchAsTransactionFirst()) {
 					BundleUtil.setBundleType(myContext, theRequest, "transaction");
 					response = processTransaction(
-							theRequestDetails, new TransactionDetails(), theRequest, "Transaction", theNestedMode);
+							theRequestDetails,
+							new TransactionDetails(theRequest),
+							theRequest,
+							"Transaction",
+							theNestedMode);
 				} else {
 					BundleUtil.setBundleType(myContext, theRequest, "batch");
 					response = processBatch(theRequestDetails, theRequest, theNestedMode);
@@ -1459,7 +1466,8 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									requestDetailsForEntry);
+									requestDetailsForEntry,
+									theTransactionDetails);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						theTransactionDetails.addResolvedResource(outcome.getId(), outcome::getResource);
@@ -1500,9 +1508,6 @@ public abstract class BaseTransactionProcessor {
 								deletedResources.add(deleted.getIdDt()
 										.toUnqualifiedVersionless()
 										.getValueAsString());
-							}
-							if (allDeleted.isEmpty()) {
-								status = Constants.STATUS_HTTP_204_NO_CONTENT;
 							}
 
 							myVersionAdapter.setResponseOutcome(nextRespEntry, deleteOutcome.getOperationOutcome());
@@ -1566,7 +1571,8 @@ public abstract class BaseTransactionProcessor {
 								nextRespEntry,
 								resourceType,
 								res,
-								requestDetailsForEntry);
+								requestDetailsForEntry,
+								theTransactionDetails);
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						break;
 					}
@@ -1651,7 +1657,8 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									requestDetailsForEntry);
+									requestDetailsForEntry,
+									theTransactionDetails);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 
@@ -2780,7 +2787,7 @@ public abstract class BaseTransactionProcessor {
 			IInterceptorBroadcaster compositeBroadcaster =
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequestDetails);
 
-			TransactionDetails transactionDetails = new TransactionDetails();
+			TransactionDetails transactionDetails = new TransactionDetails(subRequestBundle);
 
 			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {

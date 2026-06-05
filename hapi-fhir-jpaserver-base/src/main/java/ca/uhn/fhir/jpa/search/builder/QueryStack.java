@@ -63,6 +63,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
+import ca.uhn.fhir.jpa.util.FhirPathUtils;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -1469,24 +1470,19 @@ public class QueryStack {
 					theSourceJoinColumn,
 					theRequestPartitionId));
 		} else {
-			// Include all distinct resource types from the OR-group in cache key to  produce a unique key
-			String cacheParamName = theParamName;
-			String typeQualifier = theList.stream()
-					.filter(ReferenceParam.class::isInstance)
-					.map(p -> ((ReferenceParam) p).getResourceType())
-					.filter(StringUtils::isNotBlank)
-					.distinct()
-					.sorted()
-					.collect(Collectors.joining("|"));
-			if (isNotBlank(typeQualifier)) {
-				cacheParamName = theParamName + ":" + typeQualifier;
+			ResourceLinkPredicateBuilder predicateBuilder;
+			if (isReferenceSingleValued(theResourceName, theSearchParam)) {
+				// Cardinality 0..1 reference — chained AND-clauses can share a single HFJ_RES_LINK join.
+				predicateBuilder = createOrReusePredicateBuilder(
+								PredicateBuilderTypeEnum.REFERENCE,
+								theSourceJoinColumn,
+								theParamName,
+								() -> theSqlBuilder.addReferencePredicateBuilder(this, theSourceJoinColumn))
+						.getResult();
+			} else {
+				// Cardinality 0..* multivalued reference: each AND clause must bind to its own HFJ_RES_LINK row
+				predicateBuilder = theSqlBuilder.addReferencePredicateBuilder(this, theSourceJoinColumn);
 			}
-			ResourceLinkPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(
-							PredicateBuilderTypeEnum.REFERENCE,
-							theSourceJoinColumn,
-							cacheParamName,
-							() -> theSqlBuilder.addReferencePredicateBuilder(this, theSourceJoinColumn))
-					.getResult();
 			return predicateBuilder.createPredicate(
 					myRequestDetails,
 					theResourceName,
@@ -1497,6 +1493,18 @@ public class QueryStack {
 					theOperation,
 					theRequestPartitionId);
 		}
+	}
+
+	/**
+	 * Returns true when every source path of the given reference SP on {@code theResourceName} traverses only
+	 * single-valued (0..1 or 1..1) fields. Default to false for unknowns (missing SP, unparseable path, unknown child).
+	 */
+	private boolean isReferenceSingleValued(String theResourceName, RuntimeSearchParam theSearchParam) {
+		if (theSearchParam == null || isBlank(theResourceName)) {
+			return false;
+		}
+		List<String> paths = theSearchParam.getPathsSplitForResourceType(theResourceName);
+		return !paths.isEmpty() && paths.stream().allMatch(p -> FhirPathUtils.isPathSingleValued(myFhirContext, p));
 	}
 
 	public void addGrouping() {
@@ -2858,11 +2866,20 @@ public class QueryStack {
 		mySqlBuilder.addPredicate(predicate);
 	}
 
-	public void addPredicateCompositeNonUnique(List<String> theIndexStrings, RequestPartitionId theRequestPartitionId) {
+	public void addPredicateCompositeNonUnique(
+			List<String> theIndexStrings,
+			List<List<DateParam>> theDateParams,
+			RequestPartitionId theRequestPartitionId) {
 		ComboNonUniqueSearchParameterPredicateBuilder predicateBuilder =
 				mySqlBuilder.addComboNonUniquePredicateBuilder();
-		Condition predicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theIndexStrings);
-		mySqlBuilder.addPredicate(predicate);
+
+		Condition hashPredicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theIndexStrings);
+		mySqlBuilder.addPredicate(hashPredicate);
+
+		if (!theDateParams.isEmpty()) {
+			Condition datePredicate = predicateBuilder.createPredicateDateParams(theDateParams);
+			mySqlBuilder.addPredicate(datePredicate);
+		}
 	}
 
 	// expand out the pids

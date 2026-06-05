@@ -1,0 +1,8 @@
+---
+type: change
+issue: 7945
+title: "The deprecated `RequestPartitionId.defaultPartition()` and `defaultPartition(LocalDate)`
+  methods, along with the single-argument `PartitionablePartitionId.toRequestPartitionId` overload, have
+  been removed. Callers should migrate to `RequestPartitionId.defaultPartition(IDefaultPartitionSettings)`
+  (or the IDefaultPartitionSettings.getDefaultRequestPartitionId() instance method) so that the
+  configured default partition ID is honoured."

@@ -517,11 +517,19 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	@Transactional
 	public NpmPackage loadPackage(String thePackageId, String thePackageVersion) throws FHIRException, IOException {
-		return loadPackageInner(thePackageId, thePackageVersion);
+		return loadPackageInner(thePackageId, thePackageVersion, true);
+	}
+
+	@Override
+	@Transactional
+	public NpmPackage loadPackage(String thePackageId, String thePackageVersion, boolean theShouldUpdateCache)
+			throws FHIRException, IOException {
+		return loadPackageInner(thePackageId, thePackageVersion, theShouldUpdateCache);
 	}
 
 	@Nonnull
-	private NpmPackage loadPackageInner(String thePackageId, String thePackageVersion) throws IOException {
+	private NpmPackage loadPackageInner(String thePackageId, String thePackageVersion, boolean theShouldUpdateCache)
+			throws IOException {
 		// check package cache
 		NpmPackage cachedPackage = loadPackageFromCacheOnlyInner(thePackageId, thePackageVersion);
 		if (cachedPackage != null) {
@@ -532,8 +540,15 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		NpmPackageData pkgData = myPackageLoaderSvc.fetchPackageFromPackageSpec(thePackageId, thePackageVersion);
 
 		try {
-			// and add it to the cache
-			NpmPackage retVal = addPackageToCacheInternal(pkgData);
+			NpmPackage retVal;
+
+			if (theShouldUpdateCache) {
+				// and add it to the cache
+				retVal = addPackageToCacheInternal(pkgData);
+			} else {
+				retVal = pkgData.getPackage();
+			}
+
 			NpmPackageUtils.addFirstProcessingMessage(
 					retVal,
 					"Package fetched from server at: " + pkgData.getPackage().url());
@@ -546,7 +561,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	@Transactional
 	public NpmPackage loadPackage(String theS) throws FHIRException, IOException {
-		return loadPackageInner(theS, null);
+		return loadPackageInner(theS, null, true);
 	}
 
 	private TransactionTemplate newTxTemplate() {
@@ -559,8 +574,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		Validate.notBlank(theInstallationSpec.getName(), "thePackageId must not be blank");
 		Validate.notBlank(theInstallationSpec.getVersion(), "thePackageVersion must not be blank");
 
+		NpmPackage cachedPackage = newTxTemplate()
+				.execute(tx ->
+						loadPackageFromCacheOnlyInner(theInstallationSpec.getName(), theInstallationSpec.getVersion()));
+
+		if (cachedPackage != null) {
+			return cachedPackage;
+		}
+
 		String sourceDescription = "Embedded content";
-		if (isNotBlank(theInstallationSpec.getPackageUrl())) {
+		if (theInstallationSpec.getPackageContents() == null && isNotBlank(theInstallationSpec.getPackageUrl())) {
 			byte[] contents = myPackageLoaderSvc.loadPackageUrlContents(theInstallationSpec.getPackageUrl());
 			theInstallationSpec.setPackageContents(contents);
 			sourceDescription = theInstallationSpec.getPackageUrl();
@@ -573,10 +596,11 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		if (isNonStoringMode && theInstallationSpec.getPackageContents() != null) {
 			return NpmPackage.fromPackage(new ByteArrayInputStream(theInstallationSpec.getPackageContents()));
 		}
+
 		if (isNonStoringMode) {
-			return newTxTemplate()
-					.execute(tx -> loadPackageFromCacheOnlyInner(
-							theInstallationSpec.getName(), theInstallationSpec.getVersion()));
+			NpmPackageData pkgData = myPackageLoaderSvc.fetchPackageFromPackageSpec(
+					theInstallationSpec.getName(), theInstallationSpec.getVersion());
+			return pkgData.getPackage();
 		}
 
 		if (theInstallationSpec.getPackageContents() != null) {
@@ -589,7 +613,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		return newTxTemplate().execute(tx -> {
 			try {
-				return loadPackageInner(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+				return loadPackageInner(theInstallationSpec.getName(), theInstallationSpec.getVersion(), true);
 			} catch (IOException e) {
 				throw new InternalErrorException(Msg.code(1302) + e, e);
 			}

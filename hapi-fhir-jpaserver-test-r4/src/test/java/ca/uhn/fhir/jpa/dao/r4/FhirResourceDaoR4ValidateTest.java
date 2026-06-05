@@ -660,8 +660,9 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String codingIsNotInValueSetMessageWithBindingSpecificReason ="None of the codings provided are in the value set 'ValueSet[http://mytest/ValueSet/OrgContactSampleVS]' (http://mytest/ValueSet/OrgContactSampleVS), and";
 		String unknownCodeSystemMessage = "CodeSystem is unknown and can't be validated: http://mylocalcodesystem for 'http://mylocalcodesystem#mylocalcode'";
 		String unableToValidateCodeMessage = "Unable to validate code http://mylocalcodesystem#mylocalcode - No codes in ValueSet belong to CodeSystem with URL http://mylocalcodesystem";
+		String noneOfTheCodingsMessage = "None of the codings provided are in the value set 'ValueSet[http://mytest/ValueSet/OrgContactSampleVS]' (http://mytest/ValueSet/OrgContactSampleVS), and a coding is recommended to come from this value set (codes = http://mylocalcodesystem#mylocalcode)";
 		// We control the severity of the unknownCodeSystemMessage through the ValidationMessageUnknownCodeSystemPostProcessingInterceptor
-		// but the severity of the other two messages is determined by the core validator based on binding strength currently.
+		// but the severity of the other messages is determined by the core validator, which is currently based on binding strength.
 		return Stream.of(
 			Arguments.of(Enumerations.BindingStrength.REQUIRED, "Error",
 				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage, codingIsNotInValueSetMessageWithBindingSpecificReason),
@@ -676,11 +677,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage, codingIsNotInValueSetMessageWithBindingSpecificReason),
 				List.of("Warning", "Warning", "Warning")),
 			Arguments.of(Enumerations.BindingStrength.PREFERRED, "Error",
-				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage),
-				List.of("Warning", "Error")),
+				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage, noneOfTheCodingsMessage),
+				List.of("Warning", "Error", "Information")),
 			Arguments.of(Enumerations.BindingStrength.PREFERRED, "Warning",
-				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage),
-				List.of("Warning", "Warning")),
+				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage, noneOfTheCodingsMessage),
+				List.of("Warning", "Warning", "Information")),
 			Arguments.of(Enumerations.BindingStrength.EXAMPLE, "Error",
 				List.of(unknownCodeSystemMessage),
 				List.of("Error")),

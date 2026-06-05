@@ -73,7 +73,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	@Nonnull
 	@Override
 	public Integer getCapacityRemaining() {
-		return (myMaxCapacity - myAddedConcepts) + mySkipCountRemaining;
+		return Math.max(0, (myMaxCapacity - myAddedConcepts) + mySkipCountRemaining);
 	}
 
 	public List<String> getMessages() {
@@ -111,6 +111,10 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 
 		incrementConceptsCount();
 
+		if (getCapacityRemaining() == 0) {
+			return;
+		}
+
 		ValueSet.ValueSetExpansionContainsComponent contains = this.addContains();
 		setSystemAndVersion(theSystem, contains);
 		contains.setCode(theCode);
@@ -129,6 +133,9 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			String theCodeSystemVersion) {
 		if (mySkipCountRemaining > 0) {
 			mySkipCountRemaining--;
+			return;
+		}
+		if (getCapacityRemaining() == 0) {
 			return;
 		}
 
@@ -198,13 +205,6 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	}
 
 	private void incrementConceptsCount() {
-		Integer capacityRemaining = getCapacityRemaining();
-		if (capacityRemaining == 0) {
-			String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "expansionTooLarge", myMaxCapacity);
-			msg = appendAccumulatorMessages(msg);
-			throw new ExpansionTooCostlyException(Msg.code(831) + msg);
-		}
-
 		if (myHardExpansionMaximumSize > 0 && myAddedConcepts > myHardExpansionMaximumSize) {
 			String msg = myContext
 					.getLocalizer()

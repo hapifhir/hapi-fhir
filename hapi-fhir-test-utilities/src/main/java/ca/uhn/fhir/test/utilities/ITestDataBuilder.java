@@ -147,10 +147,29 @@ public interface ITestDataBuilder {
 	}
 
 	/**
+	 * Set Observation.effectiveInstant
+	 */
+	default ICreationArgument withEffectiveInstant(@Nullable String theInstant) {
+		return withInstantAt("effectiveInstant", theInstant);
+	}
+
+	/**
+	 * Set Observation.effectivePeriod
+	 */
+	default ICreationArgument withEffectivePeriod(@Nullable String theStart, @Nullable String theEnd) {
+		return withPeriodAt("effectivePeriod", theStart, theEnd);
+	}
+
+
+	/**
 	 * Set Observation.effectiveDate
 	 */
 	default ICreationArgument withDateTimeAt(String thePath, String theDate) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "dateTime", theDate);
+	}
+
+	default ICreationArgument withInstantAt(String thePath, String theDate) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "instant", theDate);
 	}
 
 	/**
@@ -294,12 +313,20 @@ public interface ITestDataBuilder {
 		return createResource("Patient", theModifiers);
 	}
 
+	default IIdType createCodeSystem(ICreationArgument... theModifiers) {
+		return createResource("CodeSystem", theModifiers);
+	}
+
 	default IIdType createCoverage(ICreationArgument... theModifiers) {
 		return createResource("Coverage", theModifiers);
 	}
 
 	default IIdType createOrganization(ICreationArgument... theModifiers) {
 		return createResource("Organization", theModifiers);
+	}
+
+	default IBaseResource buildOrganization(ICreationArgument... theModifiers) {
+		return buildResource("Organization", theModifiers);
 	}
 
 	default IIdType createPractitioner(ICreationArgument... theModifiers) {
@@ -415,7 +442,9 @@ public interface ITestDataBuilder {
 	default Consumer<IBase> withPrimitiveAttribute(String thePath, Object theValue) {
 		return t -> {
 			FhirTerser terser = getFhirContext().newTerser();
-			terser.addElement(t, thePath, "" + theValue);
+			if (theValue != null) {
+				terser.addElement(t, thePath, "" + theValue);
+			}
 		};
 	}
 
@@ -493,6 +522,13 @@ public interface ITestDataBuilder {
 		);
 	}
 
+	default <T extends IBase> ICreationArgument withPeriodAt(String thePath, @Nullable String theStart, @Nullable String theEnd) {
+		return withElementAt(thePath,
+			withPrimitiveAttribute("start", theStart),
+			withPrimitiveAttribute("end", theEnd)
+		);
+	}
+
 	default ICreationArgument withObservationComponent(ICreationArgument... theModifiers) {
 		return withElementAt("component", theModifiers);
 	}
@@ -504,13 +540,34 @@ public interface ITestDataBuilder {
 	/**
 	 * Sets the <code>managingOrganization</code> element on a Patient
 	 */
-	default ICreationArgument withOrganization(@Nullable String theHasMember) {
-		IIdType id = theHasMember != null ? getFhirContext().getVersion().newIdType(theHasMember) : null;
+	default ICreationArgument withOrganization(@Nullable String theOrganizationId) {
+		IIdType id = theOrganizationId != null ? getFhirContext().getVersion().newIdType(theOrganizationId) : null;
 		return withReference("managingOrganization", id);
 	}
 
-	default ICreationArgument withOrganization(@Nullable IIdType theHasMember) {
-		return withReference("managingOrganization", theHasMember);
+	default ICreationArgument withOrganization(@Nullable IIdType theOrganizationId) {
+		return withReference("managingOrganization", theOrganizationId);
+	}
+
+	/**
+	 * Set the "url" property on a canonical resource such as a CodeSystem
+	 */
+	default ICreationArgument withUrl(String theUrl) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "url", "uri", theUrl);
+	}
+
+	/**
+	 * Set the "version" property on a canonical resource such as a CodeSystem
+	 */
+	default ICreationArgument withVersion(String theVersion) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "version", "uri", theVersion);
+	}
+
+	/**
+	 * CodeSystem.content
+	 */
+	default ICreationArgument withCodeSystemContent(String theContent) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "content", "code", theContent);
 	}
 
 	/**
