@@ -2,7 +2,7 @@
 type: fix
 issue: 7954
 title: "Fixed `PackageInstallationSpec.setAdditionalResourceFolders()` so that
-  resources from the specified folders (e.g. `examples`) are now installed alongside
+  resources from the specified folders (e.g. `example`) are now installed alongside
   standard package resources during NPM package installation. This allows
   Implementation Guides that include example or test resources in non-standard
   folders to have those resources loaded into the server."

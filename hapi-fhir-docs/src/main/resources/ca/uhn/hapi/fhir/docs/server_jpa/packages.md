@@ -129,14 +129,14 @@ PackageInstallationSpec spec = new PackageInstallationSpec()
 
 # Installing Resources from Additional Folders
 
-FHIR NPM packages may contain resources in folders other than the standard `package` folder (e.g., `examples`). To install resources from these additional folders, use `setAdditionalResourceFolders()` on the `PackageInstallationSpec`:
+FHIR NPM packages may contain resources in folders other than the standard `package` folder (e.g., `example`). To install resources from these additional folders, use `setAdditionalResourceFolders()` on the `PackageInstallationSpec`:
 
 ```java
 PackageInstallationSpec spec = new PackageInstallationSpec()
     .setName("com.example.my-ig")
     .setVersion("1.0.0")
     .setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
-    .setAdditionalResourceFolders(Set.of("examples"));
+    .setAdditionalResourceFolders(Set.of("example"));
 ```
 
 Resources from additional folders are installed the same way as resources from the standard `package` folder.
