@@ -62,5 +62,4 @@ public class TerminologyConstants {
 	 * job
 	 */
 	public static final String CUSTOM_PROPERTIES_FILE = "properties.csv";
-
 }

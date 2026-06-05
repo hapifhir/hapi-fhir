@@ -47,6 +47,7 @@ public interface IBatch2AttachmentRepository
 	Optional<Batch2JobAttachmentEntity> findByIdAndFilename(
 			@Param("instanceId") String theInstanceId, @Param("filename") String theFilename);
 
-	@Query("SELECT new ca.uhn.fhir.batch2.api.AttachmentMetadata(e.myId.myAttachmentId, e.myFilename) FROM Batch2JobAttachmentEntity e WHERE e.myId.myJobInstanceId = :instanceId ORDER BY e.myId.myAttachmentId")
-    List<AttachmentMetadata> listAttachmentsForJobInstance(Pageable thePage, @Param("instanceId") String theInstanceId);
+	@Query(
+			"SELECT new ca.uhn.fhir.batch2.api.AttachmentMetadata(e.myId.myAttachmentId, e.myFilename) FROM Batch2JobAttachmentEntity e WHERE e.myId.myJobInstanceId = :instanceId ORDER BY e.myId.myAttachmentId")
+	List<AttachmentMetadata> listAttachmentsForJobInstance(Pageable thePage, @Param("instanceId") String theInstanceId);
 }

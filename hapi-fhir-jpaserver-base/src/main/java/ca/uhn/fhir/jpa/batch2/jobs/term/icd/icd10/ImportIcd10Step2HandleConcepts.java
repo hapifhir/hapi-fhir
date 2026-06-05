@@ -26,18 +26,13 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
-import ca.uhn.fhir.util.XmlUtil;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyXmlUtil;
+import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StringType;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -45,10 +40,11 @@ import java.util.regex.Pattern;
 import static ca.uhn.fhir.util.XmlUtil.getChildrenByTagName;
 
 /**
- * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
+ * @see ImportIcdJobAppCtx#importIcd10Step2Concepts()
  */
 public class ImportIcd10Step2HandleConcepts
-		extends BaseImportTerminologyFileStep<ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
+		extends BaseImportTerminologyFileStep<
+				ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
 
 	private static final String EXPECTED_ROOT_NODE = "ClaML";
 	public static final Pattern ICD10_XML_FILE_PATTERN = Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE);
@@ -59,14 +55,14 @@ public class ImportIcd10Step2HandleConcepts
 	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
-				FileHandlingType.XML, t -> ICD10_XML_FILE_PATTERN
-						.matcher(t)
-						.find()));
+				FileHandlingType.XML, t -> ICD10_XML_FILE_PATTERN.matcher(t).find()));
 	}
 
 	@Override
 	protected void processAttachment(
-			@Nonnull StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull
+					StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson>
+							theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
 			MyBaseContext theContext,
 			AttachmentDetails theAttachment,
@@ -75,16 +71,7 @@ public class ImportIcd10Step2HandleConcepts
 			TerminologyFileSetJson theData,
 			String theSourceFilename) {
 
-		InputStreamReader reader = new InputStreamReader(theAttachment.getInputStream(), StandardCharsets.UTF_8);
-		Document document;
-		try {
-			document = XmlUtil.parseDocument(reader, false, true);
-		} catch (SAXException | IOException theE) {
-			// FIXME: add code
-			throw new RuntimeException(theE);
-		}
-
-		Element documentElement = document.getDocumentElement();
+		Element documentElement = TerminologyXmlUtil.parseXmlDocument(theAttachment, theSourceFilename);
 
 		String rootNodeName = documentElement.getTagName();
 		if (!EXPECTED_ROOT_NODE.equals(rootNodeName)) {
@@ -97,12 +84,6 @@ public class ImportIcd10Step2HandleConcepts
 				theCodeSystemToPopulate.setName(name);
 				theCodeSystemToPopulate.setTitle(name);
 			}
-
-			// FIXME: validate version?
-			//			String version = title.getAttribute("version");
-			//			if (!version.isEmpty()) {
-			//				codeSystemVersion.setCodeSystemVersionId(version);
-			//			}
 
 			theCodeSystemToPopulate.setDescription(title.getTextContent());
 		}

@@ -27,6 +27,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.UriType;
@@ -50,6 +51,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS;
@@ -106,6 +108,30 @@ class TerminologyUploaderProviderTest {
 
 	@Captor
 	private ArgumentCaptor<AttachmentDetails> myAttachmentDetailsCaptor;
+
+	/**
+	 * Make sure we throw a useful error if the user tries to use the old
+	 * method.
+	 */
+	@Test
+	void testUploadExternalCodeSystem() {
+		// Test
+		Attachment attachment = new Attachment();
+		attachment.setData(new byte[] { 0x41, 0x41, 0x41, 0x41 });
+		attachment.setUrl("http://foo.com/loinc.csv");
+
+		assertThatThrownBy(() ->
+			myServerExtension
+				.getFhirClient()
+				.operation()
+				.onType("CodeSystem")
+				.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
+				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(LOINC_URI))
+				.andParameter(TerminologyUploaderProvider.PARAM_FILE, attachment)
+				.execute()
+		).isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("This operation may no longer be used to upload the http://loinc.org CodeSystem. See $hapi.fhir.upload-terminology.create-job");
+	}
 
 	@Test
 	void testUploadTerminologyCreateJob_Custom() {

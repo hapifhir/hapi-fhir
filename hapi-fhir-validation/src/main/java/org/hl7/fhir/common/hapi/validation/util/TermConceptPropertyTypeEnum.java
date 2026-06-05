@@ -96,7 +96,7 @@ public enum TermConceptPropertyTypeEnum {
 		TermConceptPropertyTypeEnum retVal;
 		try {
 			retVal =
-				TermConceptPropertyTypeEnum.valueOf(defaultString(theString).toUpperCase(Locale.US));
+					TermConceptPropertyTypeEnum.valueOf(defaultString(theString).toUpperCase(Locale.US));
 		} catch (Exception e) {
 			ourLog.warn("Unknown Concept Property Type: {}", theString);
 			retVal = TermConceptPropertyTypeEnum.STRING;

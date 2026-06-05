@@ -17,12 +17,18 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
-	extends BaseExpandDistributionIntoFilesStep<ImportTerminologyJobParameters, ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep.MyContext> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep.class);
+		extends BaseExpandDistributionIntoFilesStep<
+				ImportTerminologyJobParameters, ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep.MyContext> {
+	private static final Logger ourLog =
+			LoggerFactory.getLogger(ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep.class);
 
 	private final FhirContext myCanonicalFhirContext = FhirContext.forR4Cached();
 
@@ -44,17 +50,28 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 	}
 
 	@Override
+	protected boolean isIndividualFileAttachmentsSupported() {
+		return true;
+	}
+
+	@Override
 	protected void massageCodeSystem(CodeSystem theCodeSystem, MyContext theContext) {
 		super.massageCodeSystem(theCodeSystem, theContext);
 
 		CodeSystem codeSystem = theContext.getCodeSystem();
 		if (codeSystem == null) {
-			// FIXME: add test
-			throw new JobExecutionFailedException(Msg.code(1) + "No CodeSystem resource was supplied in the custom terminology distribution file.");
+			throw new JobExecutionFailedException(
+					Msg.code(2964) + "No CodeSystem resource was supplied in the custom terminology distribution file.");
 		}
 
-		// FIXME: throw error if no ID, and add test
-		ourLog.info("CodeSystem will be stored with ID: CodeSystem/{}", codeSystem.getIdElement().getIdPart());
+		if (!codeSystem.getIdElement().hasIdPart()) {
+			throw new JobExecutionFailedException(
+					Msg.code(2963) + "CodeSystem resource supplied with the job must have an ID");
+		}
+
+		ourLog.info(
+				"CodeSystem will be stored with ID: CodeSystem/{}",
+				codeSystem.getIdElement().getIdPart());
 		theCodeSystem.setId(codeSystem.getIdElement().getIdPart());
 
 		theCodeSystem.setName(codeSystem.getName());
@@ -75,32 +92,54 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 	}
 
 	@Override
-	protected void handleSynchronous(StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails, IJobDataSink<TerminologyFileSetJson> theDataSink, MyContext theContext, String theFileName, byte[] theBytes, ImportTerminologyJobParameters theJobParameters, TerminologyFileSetJson theFileSet, ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
-		super.handleSynchronous(theStepExecutionDetails, theDataSink, theContext, theFileName, theBytes, theJobParameters, theFileSet, theJobMetadataAttachment);
+	protected void handleSynchronous(
+			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			MyContext theContext,
+			String theFileName,
+			Supplier<InputStream> theInputStreamSupplier,
+			ImportTerminologyJobParameters theJobParameters,
+			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
+			throws IOException {
+		super.handleSynchronous(
+				theStepExecutionDetails,
+				theDataSink,
+				theContext,
+				theFileName,
+				theInputStreamSupplier,
+				theJobParameters,
+				theJobMetadataAttachment);
 
 		CodeSystem codeSystem = null;
 		if (theFileName.endsWith(TerminologyConstants.CUSTOM_CODESYSTEM_JSON)) {
-			codeSystem = myCanonicalFhirContext.newJsonParser().parseResource(CodeSystem.class, new String(theBytes, StandardCharsets.UTF_8));
+			codeSystem = myCanonicalFhirContext
+					.newJsonParser()
+					.parseResource(
+							CodeSystem.class,
+							new InputStreamReader(theInputStreamSupplier.get(), StandardCharsets.UTF_8));
 		} else if (theFileName.endsWith(TerminologyConstants.CUSTOM_CODESYSTEM_XML)) {
-			codeSystem = myCanonicalFhirContext.newXmlParser().parseResource(CodeSystem.class, new String(theBytes, StandardCharsets.UTF_8));
+			codeSystem = myCanonicalFhirContext
+					.newXmlParser()
+					.parseResource(
+							CodeSystem.class,
+							new InputStreamReader(theInputStreamSupplier.get(), StandardCharsets.UTF_8));
 		}
 
 		if (codeSystem != null) {
 
 			String expectedUrl = theJobParameters.getUrl();
 			if (!Objects.equals(codeSystem.getUrl(), expectedUrl)) {
-				// FIXME: add code
-				throw new JobExecutionFailedException(Msg.code(1) + "CodeSystem resources has unexpected URL: " + codeSystem.getUrl() + ". Expected: " + expectedUrl);
+				throw new JobExecutionFailedException(Msg.code(2965) + "CodeSystem resources has unexpected URL: "
+						+ codeSystem.getUrl() + ". Expected: " + expectedUrl);
 			}
 
-			if ( theContext.getCodeSystem() != null) {
-				// FIXME: add code
-				throw new JobExecutionFailedException(Msg.code(1) + "Multiple CodeSystem resources were supplied in the custom terminology distribution file.");
+			if (theContext.getCodeSystem() != null) {
+				throw new JobExecutionFailedException(Msg.code(2966)
+						+ "Multiple CodeSystem resources were supplied in the custom terminology distribution file.");
 			}
 			theContext.setCodeSystem(codeSystem);
 		}
 	}
-
 
 	protected static class MyContext {
 
@@ -113,7 +152,5 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 		public void setCodeSystem(CodeSystem theCodeSystem) {
 			myCodeSystem = theCodeSystem;
 		}
-
 	}
-
 }

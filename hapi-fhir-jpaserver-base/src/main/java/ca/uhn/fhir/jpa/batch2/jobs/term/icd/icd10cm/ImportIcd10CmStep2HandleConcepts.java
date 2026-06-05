@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyXmlUtil;
+import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.util.XmlUtil;
 import jakarta.annotation.Nonnull;
@@ -22,10 +24,11 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
+ * @see ImportIcdJobAppCtx#importIcd10CmStep2Concepts()
  */
 public class ImportIcd10CmStep2HandleConcepts
-		extends BaseImportTerminologyFileStep<ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
+		extends BaseImportTerminologyFileStep<
+				ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
 
 	public static final Pattern ICD10CM_FILE_PATTERN = Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE);
 	public static final String ICD10CM_FILENAME = "icd10cm.xml";
@@ -41,14 +44,14 @@ public class ImportIcd10CmStep2HandleConcepts
 	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
-				FileHandlingType.XML, t -> ICD10CM_FILE_PATTERN
-						.matcher(t)
-						.find()));
+				FileHandlingType.XML, t -> ICD10CM_FILE_PATTERN.matcher(t).find()));
 	}
 
 	@Override
 	protected void processAttachment(
-			@Nonnull StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			@Nonnull
+					StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson>
+							theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
 			MyBaseContext theContext,
 			AttachmentDetails theAttachment,
@@ -57,25 +60,7 @@ public class ImportIcd10CmStep2HandleConcepts
 			TerminologyFileSetJson theData,
 			String theSourceFilename) {
 
-		InputStreamReader reader = new InputStreamReader(theAttachment.getInputStream(), StandardCharsets.UTF_8);
-		Document document;
-		try {
-			document = XmlUtil.parseDocument(reader, false, true);
-		} catch (SAXException | IOException theE) {
-			// FIXME: add code
-			throw new RuntimeException(theE);
-		}
-
-		Element documentElement = document.getDocumentElement();
-
-		// Extract version: Should only be 1 tag
-		for (Element nextVersion : XmlUtil.getChildrenByTagName(documentElement, "version")) {
-			String versionId = nextVersion.getTextContent();
-			// FIXME: validate version
-			//			if (isNotBlank(versionId)) {
-			//				myCodeSystemVersion.setCodeSystemVersionId(versionId);
-			//			}
-		}
+		Element documentElement = TerminologyXmlUtil.parseXmlDocument(theAttachment, theSourceFilename);
 
 		// Extract Diags (codes)
 		for (Element nextChapter : XmlUtil.getChildrenByTagName(documentElement, "chapter")) {

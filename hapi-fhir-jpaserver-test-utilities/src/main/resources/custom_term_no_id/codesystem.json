@@ -1,0 +1,10 @@
+{
+	"resourceType": "CodeSystem",
+	"url": "http://example.com/labCodes",
+	"name": "Example Lab Codes",
+	"description": "A set of lab codes",
+	"status": "active",
+	"publisher": "Example Organization Corporation Worldwide",
+	"date": "2019-07-30",
+	"content": "not-present"
+}

@@ -29,10 +29,13 @@ public class ImportTerminologyJobParameters implements IModelJson {
 
 	@JsonProperty("url")
 	private String myUrl;
+
 	@JsonProperty("versionId")
 	private String myVersionId;
+
 	@JsonProperty("dontMakeCurrent")
 	private Boolean myDontMakeCurrent;
+
 	@JsonIgnore
 	private Properties myJobProperties;
 

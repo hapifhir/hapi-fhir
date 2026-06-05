@@ -33,14 +33,18 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
@@ -71,30 +75,31 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 			IJobDataSink<TerminologyFileSetJson> theDataSink,
 			MyContext theContext,
 			String theFileName,
-			byte[] theBytes,
+			Supplier<InputStream> theInputStreamSupplier,
 			ImportTerminologyJobParameters theJobParameters,
-			TerminologyFileSetJson theFileSet,
-			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
+			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
+			throws IOException {
 		super.handleSynchronous(
 				theStepExecutionDetails,
 				theDataSink,
 				theContext,
 				theFileName,
-				theBytes,
+				theInputStreamSupplier,
 				theJobParameters,
-				theFileSet,
 				theJobMetadataAttachment);
 
 		if (theFileName.endsWith("loinc.xml")) {
 			theContext.incrementLoincXmlCount();
-			handleLoincXml(theBytes, theJobMetadataAttachment);
+			handleLoincXml(theInputStreamSupplier, theJobMetadataAttachment);
 		}
 	}
 
-	private void handleLoincXml(byte[] theBytes, ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
+	private void handleLoincXml(
+			Supplier<InputStream> theInputStream, ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
+			throws IOException {
 		ourLog.info("Processing 'loinc.xml' file");
 
-		String loincCodeSystemXml = new String(theBytes, StandardCharsets.UTF_8);
+		String loincCodeSystemXml = IOUtils.toString(theInputStream.get(), StandardCharsets.UTF_8);
 		theJobMetadataAttachment.setCodeSystemXml(loincCodeSystemXml);
 
 		CodeSystem codeSystem = theJobMetadataAttachment.getCodeSystem();
@@ -136,11 +141,13 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 
 	@Override
 	protected void startStaging(
-		StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
-		IJobDataSink<TerminologyFileSetJson> theDataSink,
-		ImportTerminologyJobParameters theJobParameters,
-		ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment, MyContext theContext) {
-		super.startStaging(theStepExecutionDetails, theDataSink, theJobParameters, theJobMetadataAttachment, theContext);
+			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			ImportTerminologyJobParameters theJobParameters,
+			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment,
+			MyContext theContext) {
+		super.startStaging(
+				theStepExecutionDetails, theDataSink, theJobParameters, theJobMetadataAttachment, theContext);
 
 		CodeSystem cs = theJobMetadataAttachment.getCodeSystem();
 

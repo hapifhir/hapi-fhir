@@ -141,23 +141,13 @@ public class CustomTerminologySet {
 		IZipContentsHandlerCsv conceptHandler = new ConceptHandler(code2concept);
 
 		TermLoaderSvcImpl.iterateOverZipFileCsv(
-				theDescriptors,
-				CUSTOM_CONCEPTS_FILE,
-				conceptHandler,
-				',',
-				QuoteMode.NON_NUMERIC,
-				false);
+				theDescriptors, CUSTOM_CONCEPTS_FILE, conceptHandler, ',', QuoteMode.NON_NUMERIC, false);
 
 		if (theDescriptors.hasFile(CUSTOM_PROPERTIES_FILE)) {
 			Map<String, List<TermConceptProperty>> theCode2property = new LinkedHashMap<>();
 			IZipContentsHandlerCsv propertyHandler = new PropertyHandler(theCode2property);
 			TermLoaderSvcImpl.iterateOverZipFileCsv(
-					theDescriptors,
-					CUSTOM_PROPERTIES_FILE,
-					propertyHandler,
-					',',
-					QuoteMode.NON_NUMERIC,
-					false);
+					theDescriptors, CUSTOM_PROPERTIES_FILE, propertyHandler, ',', QuoteMode.NON_NUMERIC, false);
 			for (TermConcept termConcept : code2concept.values()) {
 				if (!theCode2property.isEmpty() && theCode2property.get(termConcept.getCode()) != null) {
 					theCode2property.get(termConcept.getCode()).forEach(property -> {
@@ -178,12 +168,7 @@ public class CustomTerminologySet {
 			if (theDescriptors.hasFile(CUSTOM_HIERARCHY_FILE)) {
 				IZipContentsHandlerCsv hierarchyHandler = new HierarchyHandler(code2concept);
 				TermLoaderSvcImpl.iterateOverZipFileCsv(
-						theDescriptors,
-						CUSTOM_HIERARCHY_FILE,
-						hierarchyHandler,
-						',',
-						QuoteMode.NON_NUMERIC,
-						false);
+						theDescriptors, CUSTOM_HIERARCHY_FILE, hierarchyHandler, ',', QuoteMode.NON_NUMERIC, false);
 			}
 
 			Map<String, Integer> codesInOrder = new HashMap<>();

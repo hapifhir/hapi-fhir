@@ -122,7 +122,7 @@ public class ImportIcdJobAppCtx {
 				.setJobDefinitionVersion(1)
 				.gatedExecution()
 				.setParametersType(ImportTerminologyJobParameters.class)
-			.setParametersValidator(new ImportTerminologyJobParametersValidator())
+				.setParametersValidator(new ImportTerminologyJobParametersValidator())
 				.addFirstStep(
 						"expand-zip",
 						"Expand ICD-10-CM distribution file",
@@ -178,7 +178,8 @@ public class ImportIcdJobAppCtx {
 	}
 
 	@Bean
-	public ImportTerminologyStepGenerateConceptClosures<ImportTerminologyJobParameters> importIcdStepGenerateConceptClosures() {
+	public ImportTerminologyStepGenerateConceptClosures<ImportTerminologyJobParameters>
+			importIcdStepGenerateConceptClosures() {
 		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
 

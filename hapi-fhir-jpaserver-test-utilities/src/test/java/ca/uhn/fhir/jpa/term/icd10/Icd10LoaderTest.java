@@ -17,6 +17,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+
+// FIXME: move and rework, and then drop Icd10Loader
 public class Icd10LoaderTest {
 
 	@Test

@@ -71,6 +71,7 @@ import java.util.zip.ZipOutputStream;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_CONCEPTS_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_HIERARCHY_FILE;
+import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.ICD10CM_URI;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -102,11 +103,9 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 	private final File myCodeSystemFile = new File(myCodeSystemFileName);
 	private final String myTextFileName = "target/hello.txt";
 	private final File myTextFile = new File(myTextFileName);
-	private final String myPropertiesFileName = "target/hello.properties";
 	private final File myPropertiesFile = new File(myTextFileName);
 	private File myArchiveFile;
 	private String myArchiveFileName;
-	private final String myICD10URL = "http://hl7.org/fhir/sid/icd-10-cm";
 	private final String myICD10FileName = new File("src/test/resources").getAbsolutePath() + "/icd10cm_tabular_2021.xml";
 
 	@Mock
@@ -401,7 +400,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testSnapshot(String theFhirVersion, boolean theIncludeTls) throws IOException {
+	public void testSnapshot(String theFhirVersion, boolean theIncludeTls) {
 		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
@@ -437,7 +436,6 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 				"-v", theFhirVersion,
 				"-m", "SNAPSHOT",
 				"-u", "http://foo",
-				// FIXME: make sure the job supports this
 				"-d", myConceptsFileName,
 				"-d", myHierarchyFileName,
 				"-s", "10MB"
@@ -703,7 +701,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 				"-v", theFhirVersion,
-				"-u", myICD10URL,
+				"-u", ICD10CM_URI,
 				"-d", myICD10FileName
 			},
 			"-t", theIncludeTls, myBaseRestServerHelper

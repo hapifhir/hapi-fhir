@@ -24,7 +24,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ImportCustomTerminologyStep3HandleProperties
-		extends BaseImportTerminologyFileCsvStep<ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
+		extends BaseImportTerminologyFileCsvStep<
+				ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
 
 	private final FhirContext myCanonicalFhirContext = FhirContext.forR4Cached();
 
@@ -38,7 +39,8 @@ public class ImportCustomTerminologyStep3HandleProperties
 	public List<LoincFileNameSpecification> getFilesToProcess(
 			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new LoincFileNameSpecification(
-				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS, t -> t.endsWith(CUSTOM_PROPERTIES_FILE)));
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
+				t -> t.endsWith(CUSTOM_PROPERTIES_FILE)));
 	}
 
 	@Override
@@ -47,7 +49,15 @@ public class ImportCustomTerminologyStep3HandleProperties
 	}
 
 	@Override
-	protected void handleRecord(StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails, ImportTerminologyMetadataAttachmentJson theJobMetadata, ImportTerminologyJobParameters theJobParameters, MyBaseContext theContext, CSVRecord theRecord, CodeSystem theCodeSystemToPopulate, TerminologyFileSetJson theData, String theSourceFilename) {
+	protected void handleRecord(
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportTerminologyJobParameters theJobParameters,
+			MyBaseContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 		String code = trim(theRecord.get(CODE));
 		String key = trim(theRecord.get(KEY));
 
@@ -65,7 +75,9 @@ public class ImportCustomTerminologyStep3HandleProperties
 
 			switch (typeEnum) {
 				case BOOLEAN, INTEGER, DECIMAL, DATETIME, CODE, STRING -> {
-					IPrimitiveType<?> valueInstance = (IPrimitiveType<?>) myCanonicalFhirContext.getElementDefinition(typeEnum.getDatatype()).newInstance();
+					IPrimitiveType<?> valueInstance = (IPrimitiveType<?>) myCanonicalFhirContext
+							.getElementDefinition(typeEnum.getDatatype())
+							.newInstance();
 					valueInstance.setValueAsString(value);
 					conceptProperty.setValue((Type) valueInstance);
 				}
@@ -75,7 +87,7 @@ public class ImportCustomTerminologyStep3HandleProperties
 					conceptProperty.setValue(coding);
 				}
 				default -> throw new IllegalArgumentException(
-					Msg.code(2886) + "Unable to handle property type: " + type);
+						Msg.code(2886) + "Unable to handle property type: " + type);
 			}
 		}
 	}

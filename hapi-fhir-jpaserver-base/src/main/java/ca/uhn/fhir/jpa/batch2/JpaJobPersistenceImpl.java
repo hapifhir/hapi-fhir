@@ -686,11 +686,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public List<AttachmentMetadata> listAttachmentsForJobInstance(Pageable thePage, String theInstanceId) {
-		return myTransactionService
-			.withSystemRequestOnDefaultPartition()
-			.execute(()->{
-				return myAttachmentRepository.listAttachmentsForJobInstance(thePage, theInstanceId);
-			});
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			return myAttachmentRepository.listAttachmentsForJobInstance(thePage, theInstanceId);
+		});
 	}
 
 	@Override

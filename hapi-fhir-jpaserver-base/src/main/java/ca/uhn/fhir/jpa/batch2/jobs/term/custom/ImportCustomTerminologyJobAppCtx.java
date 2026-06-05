@@ -105,7 +105,8 @@ public class ImportCustomTerminologyJobAppCtx {
 	}
 
 	@Bean
-	public ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep importCustomTerminologyStep1ExpandDistributionIntoFiles() {
+	public ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
+			importCustomTerminologyStep1ExpandDistributionIntoFiles() {
 		return new ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep();
 	}
 
@@ -124,7 +125,6 @@ public class ImportCustomTerminologyJobAppCtx {
 		return new ImportCustomTerminologyStep4HandleHierarchy();
 	}
 
-
 	@Bean
 	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportTerminologyJobParameters>
 			importIcdStepChunkConceptsForClosureGeneration() {
@@ -132,7 +132,8 @@ public class ImportCustomTerminologyJobAppCtx {
 	}
 
 	@Bean
-	public ImportTerminologyStepGenerateConceptClosures<ImportTerminologyJobParameters> importIcdStepGenerateConceptClosures() {
+	public ImportTerminologyStepGenerateConceptClosures<ImportTerminologyJobParameters>
+			importIcdStepGenerateConceptClosures() {
 		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
 
@@ -141,5 +142,4 @@ public class ImportCustomTerminologyJobAppCtx {
 		return new ImportTerminologyStepFinalize<>(
 				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
 	}
-
 }
