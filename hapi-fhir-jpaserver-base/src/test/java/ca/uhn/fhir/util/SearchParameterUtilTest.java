@@ -270,10 +270,33 @@ class SearchParameterUtilTest {
 	}
 
 	// Created by claude-sonnet-4-6
+	static Stream<FhirContext> allBuildableFhirContexts() {
+		// Any FhirVersionEnum value that can be instantiated is included automatically —
+		// R6 or later versions are picked up without changes here.
+		return Arrays.stream(FhirVersionEnum.values())
+			.map(v -> {
+				try {
+					return FhirContext.forCached(v);
+				} catch (Exception e) {
+					return null;
+				}
+			})
+			.filter(Objects::nonNull);
+	}
+
+	// Created by claude-sonnet-4-6
 	/**
-	 * Invariant: whenever {@code getSearchParamsForCompartmentName("Patient")} includes the
-	 * {@code patient} SP for a resource, that inclusion must be consistent with the FHIR spec
-	 * annotation. Two cases are checked across every FHIR version in {@link FhirVersionEnum}:
+	 * Complementary cross-check: whenever {@code getSearchParamsForCompartmentName("Patient")}
+	 * includes the {@code patient} SP for a resource, that inclusion must be consistent with the
+	 * FHIR spec annotation. This test is now a complementary validator — the production logic in
+	 * {@code getMembershipCompartmentsForSearchParameter()} embeds the same invariant via the
+	 * annotation scan (Gate 2 of the two-gate rule), but this test independently verifies the
+	 * end result across all FHIR versions using a different code path. It remains valuable as:
+	 * a regression guard if production logic changes in the future; an independent validator
+	 * that the annotation scan is working correctly end-to-end; and the catch for future FHIR
+	 * versions (R6+) that introduce a new pattern not yet considered.
+	 *
+	 * <p>Two cases are checked per FHIR version:
 	 *
 	 * <p>Alias SP (e.g. {@code Observation.subject.where(resolve() is Patient)}): the SP
 	 * whose path the {@code patient} SP aliases (e.g. {@code subject}) must itself already
@@ -284,209 +307,263 @@ class SearchParameterUtilTest {
 	 * Patient compartment entry. R5 model classes from {@code org.hl7.fhir.core} that are
 	 * abstract or unannotated are skipped gracefully.
 	 */
-	@Test
-	void testPatientSpCompartmentMembershipAlignedWithBaseField() {
+	@ParameterizedTest
+	@MethodSource("allBuildableFhirContexts")
+	void testPatientSpCompartmentMembershipAlignedWithBaseField(FhirContext ctx) {
 		SoftAssertions softly = new SoftAssertions();
+		String fhirVersion = ctx.getVersion().getVersion().name();
 
-		// Collect a FhirContext for every FHIR version that can be instantiated.
-		// When R6 or later versions are added to FhirVersionEnum, they are picked up
-		// automatically without any change to this test.
-		List<FhirContext> contexts = Arrays.stream(FhirVersionEnum.values())
-			.map(v -> {
-				try {
-					return FhirContext.forCached(v);
-				} catch (Exception e) {
-					return null;
-				}
-			})
-			.filter(Objects::nonNull)
-			.collect(Collectors.toList());
+		for (String resourceName : ctx.getResourceTypes()) {
+			RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(resourceName);
 
-		for (FhirContext ctx : contexts) {
-			String fhirVersion = ctx.getVersion().getVersion().name();
+			RuntimeSearchParam patientSp = resourceDef.getSearchParam("patient");
+			if (patientSp == null) {
+				continue;
+			}
+			if (patientSp.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
+				continue;
+			}
 
-			for (String resourceName : ctx.getResourceTypes()) {
-				RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(resourceName);
+			String path = patientSp.getPath();
+			if (path == null || path.isBlank()) {
+				continue;
+			}
 
-				RuntimeSearchParam patientSp = resourceDef.getSearchParam("patient");
-				if (patientSp == null) {
-					continue;
-				}
-				if (patientSp.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
-					continue;
-				}
+			// In R5/R4B the "patient" SP annotation path is a pipe-delimited multi-resource
+			// expression (e.g. "Account.subject.where(resolve() is Patient) | ... |
+			// Observation.subject.where(resolve() is Patient) | ..."). Extract only the
+			// segment that starts with "ResourceName." before stripping the alias clause,
+			// so that Case 3 gets a resource-specific path rather than a mangled
+			// multi-resource string that matches nothing.
+			String workingPath = path;
+			if (path.contains("|")) {
+				workingPath = Arrays.stream(path.split("\\|"))
+					.map(String::trim)
+					.filter(s -> s.startsWith(resourceName + "."))
+					.findFirst()
+					.orElse(path); // fall back to full path if no segment matches
+			}
 
-				String path = patientSp.getPath();
-				if (path == null || path.isBlank()) {
-					continue;
-				}
+			// Strip .where(resolve() is Patient) to find the aliased base path.
+			// e.g. "Observation.subject.where(resolve() is Patient)" → "Observation.subject"
+			String basePath = workingPath.replace(".where(resolve() is Patient)", "").trim();
 
-				// In R5/R4B the "patient" SP annotation path is a pipe-delimited multi-resource
-				// expression (e.g. "Account.subject.where(resolve() is Patient) | ... |
-				// Observation.subject.where(resolve() is Patient) | ..."). Extract only the
-				// segment that starts with "ResourceName." before stripping the alias clause,
-				// so that Case 3 gets a resource-specific path rather than a mangled
-				// multi-resource string that matches nothing.
-				String workingPath = path;
-				if (path.contains("|")) {
-					workingPath = Arrays.stream(path.split("\\|"))
-						.map(String::trim)
-						.filter(s -> s.startsWith(resourceName + "."))
-						.findFirst()
-						.orElse(path); // fall back to full path if no segment matches
-				}
+			List<RuntimeSearchParam> compartmentParams =
+				resourceDef.getSearchParamsForCompartmentName("Patient");
+			Set<String> compartmentParamNames = compartmentParams.stream()
+				.map(RuntimeSearchParam::getName)
+				.collect(Collectors.toSet());
 
-				// Strip .where(resolve() is Patient) to find the aliased base path.
-				// e.g. "Observation.subject.where(resolve() is Patient)" → "Observation.subject"
-				String basePath = workingPath.replace(".where(resolve() is Patient)", "").trim();
-
-				List<RuntimeSearchParam> compartmentParams =
-					resourceDef.getSearchParamsForCompartmentName("Patient");
-				Set<String> compartmentParamNames = compartmentParams.stream()
-					.map(RuntimeSearchParam::getName)
-					.collect(Collectors.toSet());
-
-				// ---------------------------------------------------------------
-				// CASE 1: Direct reference — "ResourceName.patient" (no aliasing).
-				// Validate using the @SearchParamDefinition annotation on the model
-				// class field, which is generated from the FHIR spec.
-				// ---------------------------------------------------------------
-				String directPath = resourceName + ".patient";
-				if (basePath.equals(directPath)) {
-					// R5 (and other versions using org.hl7.fhir.core model classes) may
-					// expose abstract or inaccessible implementing classes — skip those.
-					Class<?> resourceClass = resourceDef.getImplementingClass();
-					if (resourceClass == null || resourceClass.isInterface() || resourceClass.isAnnotation()) {
-						continue;
-					}
-
-					// Find the @SearchParamDefinition field annotation where name = "patient".
-					// The annotation is placed on public static final String SP_PATIENT fields.
-					SearchParamDefinition patientAnnotation = null;
-					Class<?> cls = resourceClass;
-					while (cls != null && cls != Object.class) {
-						for (Field field : cls.getDeclaredFields()) {
-							SearchParamDefinition spd = field.getAnnotation(SearchParamDefinition.class);
-							if (spd != null && "patient".equalsIgnoreCase(spd.name())) {
-								patientAnnotation = spd;
-								break;
-							}
-						}
-						if (patientAnnotation != null) {
-							break;
-						}
-						cls = cls.getSuperclass();
-					}
-
-					if (patientAnnotation == null) {
-						// No annotation found — model class may be synthetic or from an
-						// external dependency without annotations. Skip gracefully.
-						continue;
-					}
-
-					// Check whether the annotation declares Patient compartment membership.
-					// R4B and R5 annotations use the prefix "Base FHIR compartment definition for "
-					// before the compartment name — strip it before comparing, mirroring
-					// SearchParameterUtil.getCleansedCompartmentName().
-					boolean annotationSaysPatientCompartment = Arrays.stream(patientAnnotation.providesMembershipIn())
-						.anyMatch(c -> {
-							String name = c.name();
-							if (name.startsWith("Base FHIR compartment definition for ")) {
-								name = name.substring("Base FHIR compartment definition for ".length());
-							}
-							return "Patient".equalsIgnoreCase(name);
-						});
-
-					// Device is excluded from the over-inclusion check because HAPI FHIR 8.0.0
-					// deliberately added it to the Patient compartment against the base spec.
-					// See https://github.com/hapifhir/hapi-fhir/issues/6536.
-					if ("Device".equals(resourceName)) {
-						continue;
-					}
-
-					// If "patient" is in the compartment but the spec annotation disagrees,
-					// flag it as potential over-inclusion by the general alias rule.
-					if (compartmentParamNames.contains("patient") && !annotationSaysPatientCompartment) {
-						softly.fail(
-							"%s %s: 'patient' SP is in Patient compartment but @SearchParamDefinition "
-								+ "providesMembershipIn does not include Patient — potential over-inclusion",
-							fhirVersion,
-							resourceName);
-					}
+			// ---------------------------------------------------------------
+			// CASE 1: Direct reference — "ResourceName.patient" (no aliasing).
+			// Validate using the @SearchParamDefinition annotation on the model
+			// class field, which is generated from the FHIR spec.
+			// ---------------------------------------------------------------
+			String directPath = resourceName + ".patient";
+			if (basePath.equals(directPath)) {
+				// R5 (and other versions using org.hl7.fhir.core model classes) may
+				// expose abstract or inaccessible implementing classes — skip those.
+				Class<?> resourceClass = resourceDef.getImplementingClass();
+				if (resourceClass == null || resourceClass.isInterface() || resourceClass.isAnnotation()) {
 					continue;
 				}
 
-				// ---------------------------------------------------------------
-				// CASE 2: Defensive fallthrough — the working path segment contains no
-				// ".where(resolve() is Patient)" and is not "ResourceName.patient", so neither
-				// the direct-reference nor the alias pattern applies.
-				// In practice this never fires for a SP named "patient": every real FHIR
-				// "patient" SP is either a direct Resource.patient field (Case 1) or an alias
-				// via .where(resolve() is Patient) (Case 3). Skip rather than false-fail in
-				// case a future path format breaks that assumption.
-				// ---------------------------------------------------------------
-				if (basePath.equals(workingPath)) {
-					continue;
-				}
-
-				// ---------------------------------------------------------------
-				// CASE 3: Alias SP — the working path contains ".where(resolve() is Patient)"
-				// and is not a direct "ResourceName.patient" path.
-				//
-				// Security exclusion invariant: if this resource+SP is in
-				// RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT, then
-				// getMembershipCompartmentsForSearchParameter must NOT return "Patient" for it.
-				// Note: getSearchParamsForCompartmentName("Patient") may still include the SP
-				// via RuntimeResourceDefinition.sealAndInitialize()'s path-similarity propagation
-				// (which adds SPs sharing the same path prefix with compartment members). That
-				// is a separate pre-existing mechanism not guarded here. This test verifies only
-				// that the alias-path rule itself is correctly gated by the omit map.
-				// ---------------------------------------------------------------
-				Set<String> omittedSpsForResource =
-					SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
-						.getOrDefault(resourceName, Collections.emptySet());
-				if (omittedSpsForResource.contains("patient")) {
-					// Verify getMembershipCompartmentsForSearchParameter directly — this is the
-					// layer guarded by the omit-map check, not getSearchParamsForCompartmentName.
-					SearchParamDefinition patientAnnotation = null;
-					for (Field f : resourceDef.getImplementingClass().getFields()) {
-						SearchParamDefinition spd = f.getAnnotation(SearchParamDefinition.class);
-						if (spd != null && "patient".equalsIgnoreCase(spd.name())
-								&& spd.path().contains(".where(resolve() is Patient)")) {
+				// Find the @SearchParamDefinition field annotation where name = "patient".
+				// The annotation is placed on public static final String SP_PATIENT fields.
+				SearchParamDefinition patientAnnotation = null;
+				Class<?> cls = resourceClass;
+				while (cls != null && cls != Object.class) {
+					for (Field field : cls.getDeclaredFields()) {
+						SearchParamDefinition spd = field.getAnnotation(SearchParamDefinition.class);
+						if (spd != null && "patient".equalsIgnoreCase(spd.name())) {
 							patientAnnotation = spd;
 							break;
 						}
 					}
 					if (patientAnnotation != null) {
-						Set<String> directCompartments =
-							SearchParameterUtil.getMembershipCompartmentsForSearchParameter(
-								resourceDef.getImplementingClass(), patientAnnotation);
-						softly.assertThat(directCompartments)
-							.as("%s %s: getMembershipCompartmentsForSearchParameter must return empty "
-								+ "for security-excluded patient SP — omit-map guard is missing or broken",
-								fhirVersion, resourceName)
-							.doesNotContain("Patient");
+						break;
 					}
+					cls = cls.getSuperclass();
+				}
+
+				if (patientAnnotation == null) {
+					// No annotation found — model class may be synthetic or from an
+					// external dependency without annotations. Skip gracefully.
 					continue;
 				}
 
-				if (!compartmentParamNames.contains("patient")) {
-					// "patient" is not in this resource's compartment — nothing to assert.
+				// Check whether the annotation declares Patient compartment membership.
+				// R4B and R5 annotations use the prefix "Base FHIR compartment definition for "
+				// before the compartment name — strip it before comparing, mirroring
+				// SearchParameterUtil.getCleansedCompartmentName().
+				boolean annotationSaysPatientCompartment = Arrays.stream(patientAnnotation.providesMembershipIn())
+					.anyMatch(c -> {
+						String name = c.name();
+						if (name.startsWith("Base FHIR compartment definition for ")) {
+							name = name.substring("Base FHIR compartment definition for ".length());
+						}
+						return "Patient".equalsIgnoreCase(name);
+					});
+
+				// Device is excluded from the over-inclusion check because HAPI FHIR 8.0.0
+				// deliberately added it to the Patient compartment against the base spec.
+				// See https://github.com/hapifhir/hapi-fhir/issues/6536.
+				if ("Device".equals(resourceName)) {
 					continue;
 				}
 
-				// Confirm inclusion was via the alias mechanism (the path segment for this
-				// resource must contain the ".where(resolve() is Patient)" clause).
-				softly.assertThat(workingPath)
-					.as("%s %s: 'patient' SP is in Patient compartment but its path segment "
-						+ "'%s' does not contain '.where(resolve() is Patient)' — "
-						+ "unexpected inclusion mechanism",
-						fhirVersion, resourceName, workingPath)
-					.contains(".where(resolve() is Patient)");
+				// If "patient" is in the compartment but the spec annotation disagrees,
+				// flag it as potential over-inclusion by the general alias rule.
+				if (compartmentParamNames.contains("patient") && !annotationSaysPatientCompartment) {
+					softly.fail(
+						"%s %s: 'patient' SP is in Patient compartment but @SearchParamDefinition "
+							+ "providesMembershipIn does not include Patient — potential over-inclusion",
+						fhirVersion,
+						resourceName);
+				}
+				continue;
 			}
+
+			// ---------------------------------------------------------------
+			// CASE 2: Defensive fallthrough — the working path segment contains no
+			// ".where(resolve() is Patient)" and is not "ResourceName.patient", so neither
+			// the direct-reference nor the alias pattern applies.
+			// In practice this never fires for a SP named "patient": every real FHIR
+			// "patient" SP is either a direct Resource.patient field (Case 1) or an alias
+			// via .where(resolve() is Patient) (Case 3). Skip rather than false-fail in
+			// case a future path format breaks that assumption.
+			// ---------------------------------------------------------------
+			if (basePath.equals(workingPath)) {
+				continue;
+			}
+
+			// ---------------------------------------------------------------
+			// CASE 3: Alias SP — the working path contains ".where(resolve() is Patient)"
+			// and is not a direct "ResourceName.patient" path.
+			//
+			// Security exclusion invariant: if this resource+SP is in
+			// RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT, then
+			// getMembershipCompartmentsForSearchParameter must NOT return "Patient" for it.
+			// Note: getSearchParamsForCompartmentName("Patient") may still include the SP
+			// via RuntimeResourceDefinition.sealAndInitialize()'s path-similarity propagation
+			// (which adds SPs sharing the same path prefix with compartment members). That
+			// is a separate pre-existing mechanism not guarded here. This test verifies only
+			// that the alias-path rule itself is correctly gated by the omit map.
+			// ---------------------------------------------------------------
+			Set<String> omittedSpsForResource =
+				SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
+					.getOrDefault(resourceName, Collections.emptySet());
+			if (omittedSpsForResource.contains("patient")) {
+				// Verify getMembershipCompartmentsForSearchParameter directly — this is the
+				// layer guarded by the omit-map check, not getSearchParamsForCompartmentName.
+				SearchParamDefinition patientAnnotation = null;
+				for (Field f : resourceDef.getImplementingClass().getFields()) {
+					SearchParamDefinition spd = f.getAnnotation(SearchParamDefinition.class);
+					if (spd != null && "patient".equalsIgnoreCase(spd.name())
+							&& spd.path().contains(".where(resolve() is Patient)")) {
+						patientAnnotation = spd;
+						break;
+					}
+				}
+				if (patientAnnotation != null) {
+					Set<String> directCompartments =
+						SearchParameterUtil.getMembershipCompartmentsForSearchParameter(
+							resourceDef.getImplementingClass(), patientAnnotation);
+					softly.assertThat(directCompartments)
+						.as("%s %s: getMembershipCompartmentsForSearchParameter must return empty "
+							+ "for security-excluded patient SP — omit-map guard is missing or broken",
+							fhirVersion, resourceName)
+						.doesNotContain("Patient");
+				}
+				continue;
+			}
+
+			if (!compartmentParamNames.contains("patient")) {
+				// "patient" is not in this resource's compartment — nothing to assert.
+				continue;
+			}
+
+			// Confirm inclusion was via the alias mechanism (the path segment for this
+			// resource must contain the ".where(resolve() is Patient)" clause).
+			softly.assertThat(workingPath)
+				.as("%s %s: 'patient' SP is in Patient compartment but its path segment "
+					+ "'%s' does not contain '.where(resolve() is Patient)' — "
+					+ "unexpected inclusion mechanism",
+					fhirVersion, resourceName, workingPath)
+				.contains(".where(resolve() is Patient)");
 		}
 
 		softly.assertAll();
+	}
+
+	// Created by claude-sonnet-4-6
+	/**
+	 * Snapshot test: asserts that the set of resource types in the Patient compartment does not
+	 * change unexpectedly. If a future change silently adds a new resource type to the Patient
+	 * compartment, this test fails and requires explicit acknowledgment and update of the
+	 * expected set.
+	 *
+	 * <p>Run once without the expected set to discover the actual set, then hardcode it here.
+	 * Both R4 and R5 are checked because they have different resource type sets.
+	 */
+	@Test
+	void testNoNewResourceTypesAddedToPatientCompartment() {
+		Set<String> r4ExpectedTypes = Set.of(
+				"Account", "AdverseEvent", "AllergyIntolerance", "Appointment", "AppointmentResponse",
+				"AuditEvent", "Basic", "BodyStructure", "CarePlan", "CareTeam", "ChargeItem", "Claim",
+				"ClaimResponse", "ClinicalImpression", "Communication", "CommunicationRequest",
+				"Composition", "Condition", "Consent", "Coverage", "CoverageEligibilityRequest",
+				"CoverageEligibilityResponse", "DetectedIssue", "Device", "DeviceRequest",
+				"DeviceUseStatement", "DiagnosticReport", "DocumentManifest", "DocumentReference",
+				"Encounter", "EnrollmentRequest", "EpisodeOfCare", "ExplanationOfBenefit",
+				"FamilyMemberHistory", "Flag", "Goal", "Group", "ImagingStudy",
+				"Immunization", "ImmunizationEvaluation", "ImmunizationRecommendation", "Invoice",
+				"List", "MeasureReport", "Media", "MedicationAdministration", "MedicationDispense",
+				"MedicationRequest", "MedicationStatement", "MolecularSequence", "NutritionOrder",
+				"Observation", "Patient", "Person", "Procedure", "Provenance",
+				"QuestionnaireResponse", "RelatedPerson", "RequestGroup", "ResearchSubject",
+				"RiskAssessment", "Schedule", "ServiceRequest", "Specimen", "SupplyDelivery",
+				"SupplyRequest", "VisionPrescription");
+
+		Set<String> r5ExpectedTypes = Set.of(
+				"Account", "AdverseEvent", "AllergyIntolerance", "Appointment", "AppointmentResponse",
+				"AuditEvent", "Basic", "BiologicallyDerivedProductDispense", "BodyStructure",
+				"CarePlan", "CareTeam", "ChargeItem", "Claim", "ClaimResponse", "ClinicalImpression",
+				"Communication", "CommunicationRequest", "Composition", "Condition", "Consent",
+				"Contract", "Coverage", "CoverageEligibilityRequest", "CoverageEligibilityResponse",
+				"DetectedIssue", "DeviceAssociation", "DeviceRequest", "DeviceUsage",
+				"DiagnosticReport", "DocumentReference", "Encounter", "EncounterHistory",
+				"EnrollmentRequest", "EpisodeOfCare", "ExplanationOfBenefit", "FamilyMemberHistory",
+				"Flag", "GenomicStudy", "Goal", "Group", "GuidanceResponse", "ImagingSelection",
+				"ImagingStudy", "Immunization", "ImmunizationEvaluation", "ImmunizationRecommendation",
+				"Invoice", "List", "MeasureReport", "MedicationAdministration", "MedicationDispense",
+				"MedicationRequest", "MedicationStatement", "MolecularSequence", "NutritionIntake",
+				"NutritionOrder", "Observation", "Patient", "Person", "Procedure", "Provenance",
+				"QuestionnaireResponse", "RelatedPerson", "RequestOrchestration", "ResearchSubject",
+				"RiskAssessment", "Schedule", "ServiceRequest", "Specimen", "SupplyDelivery",
+				"SupplyRequest", "Task", "VisionPrescription");
+
+		FhirContext r4Ctx = FhirContext.forR4Cached();
+		Set<String> r4ActualTypes = r4Ctx.getResourceTypes().stream()
+				.filter(type -> !r4Ctx.getResourceDefinition(type)
+						.getSearchParamsForCompartmentName("Patient")
+						.isEmpty())
+				.collect(Collectors.toSet());
+
+		FhirContext r5Ctx = FhirContext.forR5Cached();
+		Set<String> r5ActualTypes = r5Ctx.getResourceTypes().stream()
+				.filter(type -> !r5Ctx.getResourceDefinition(type)
+						.getSearchParamsForCompartmentName("Patient")
+						.isEmpty())
+				.collect(Collectors.toSet());
+
+		assertThat(r4ActualTypes)
+				.as("R4 Patient compartment resource types — update this set if FHIR spec changes")
+				.containsExactlyInAnyOrderElementsOf(r4ExpectedTypes);
+
+		assertThat(r5ActualTypes)
+				.as("R5 Patient compartment resource types — update this set if FHIR spec changes")
+				.containsExactlyInAnyOrderElementsOf(r5ExpectedTypes);
 	}
 
 }

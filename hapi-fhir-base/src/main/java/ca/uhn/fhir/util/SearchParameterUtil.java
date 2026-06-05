@@ -74,7 +74,6 @@ public class SearchParameterUtil {
 	static {
 		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.put("Group", new HashSet<>());
 		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.put("List", new HashSet<>());
-		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.put("Sequence", new HashSet<>());
 
 		// group
 		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("Group").add("member");
@@ -83,11 +82,6 @@ public class SearchParameterUtil {
 		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("List").add("subject");
 		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("List").add("source");
 		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("List").add("patient");
-
-		// DSTU3 Sequence.patient has no providesMembershipIn — the DSTU3 spec did not place
-		// Sequence in the Patient compartment. The resource was renamed to MolecularSequence
-		// in R4, where compartment membership was added via annotation.
-		RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.get("Sequence").add("patient");
 	}
 
 	/**
@@ -139,43 +133,51 @@ public class SearchParameterUtil {
 		}
 
 		/*
-		 * Resources with a "patient" reference SP that targets Patient belong in the Patient
-		 * compartment. This covers both direct Resource.patient fields (e.g. Device.patient,
-		 * which is not in the base R4 compartment definition but is expected by g(10) testing
-		 * and derivative specs) and alias SPs (e.g. Observation.patient, which resolves to
-		 * Observation.subject.where(resolve() is Patient)).
-		 *
-		 * The SP is checked against RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
-		 * before being added, so deliberate security exclusions (e.g. List.patient per
-		 * issue #7118) are preserved.
-		 *
-		 * Note: the Java simple name of the resource class may differ from the FHIR resource
-		 * type name (e.g. ListResource.class → "List"), so the @ResourceDef annotation is
-		 * used to derive the correct name for the omit-map lookup.
+		 * In the base FHIR R4 specification, the Device resource is not a part of the Patient compartment.
+		 * However, it is a patient-specific resource that most users expect to be, and several derivative
+		 * specifications including g(10) testing expect it to be, and the fact that it is not has led to many
+		 * bug reports in HAPI FHIR. As of HAPI FHIR 8.0.0 it is being manually added in response to those
+		 * requests.
+		 * See https://github.com/hapifhir/hapi-fhir/issues/6536 for more information.
 		 */
-		// if resource has field that puts it in pat compartment --> then patient SP should also define in pat compartment
-		//
- 		// if resource IS already in patient comparmtnet
-		// then put patient SP in the patient compartment, since there are other SPs that already put the resourcetype in the patient compartment
-		// pass in fhir context or runtime resource definition
+		if (theSearchParamDefinition.name().equals("patient")
+				&& theSearchParamDefinition.path().equals("Device.patient")) {
+			validCompartments.add("Patient");
+		}
 
+		/*
+		 * Two-gate rule for alias-style "patient" SPs (e.g. Observation.patient, which resolves
+		 * to Observation.subject.where(resolve() is Patient)).
+		 *
+		 * <p>Gate 1 — path check: the SP's path must contain
+		 * {@code .where(resolve() is Patient)}, confirming it is an alias-style SP rather than
+		 * a direct {@code Resource.patient} field. This prevents over-inclusion if a future FHIR
+		 * version introduces a resource with a direct {@code patient} field that happens to pass
+		 * Gate 2 coincidentally.
+		 *
+		 * <p>Gate 2 — annotation scan: at least one <em>other</em>
+		 * {@code @SearchParamDefinition} field on {@code theResourceClazz} must declare
+		 * {@code providesMembershipIn} containing a Compartment whose cleansed name equals
+		 * {@code "Patient"}. This confirms the resource is already in the Patient compartment via
+		 * a direct SP (e.g. {@code Observation.subject}), so the alias SP should also be included.
+		 * Scanning the compiled annotation rather than the partially-built
+		 * {@code RuntimeResourceDefinition} avoids ordering sensitivity during model construction.
+		 *
+		 * <p>The SP is also checked against
+		 * {@link #RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT} so that deliberate
+		 * security exclusions (e.g. List.patient per issue #7118) are preserved.
+		 */
 		if ("patient".equalsIgnoreCase(theSearchParamDefinition.name())
-				&& "reference".equalsIgnoreCase(theSearchParamDefinition.type())) {
-			ResourceDef resourceDef = theResourceClazz.getAnnotation(ResourceDef.class);
-			String fhirResourceType =
-					(resourceDef != null && !resourceDef.name().isEmpty())
-							? resourceDef.name()
-							: theResourceClazz.getSimpleName();
+				&& "reference".equalsIgnoreCase(theSearchParamDefinition.type())
+				&& theSearchParamDefinition.path().contains(".where(resolve() is Patient)")) {
+
+			String fhirResourceType = getResourceTypeName(theResourceClazz);
 			Set<String> omittedSps = RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.getOrDefault(
 					fhirResourceType, Collections.emptySet());
-			if (!omittedSps.contains(theSearchParamDefinition.name())) {
-				for (Class<? extends IBaseResource> target : theSearchParamDefinition.target()) {
-					if ("Patient".equals(target.getSimpleName())) {
-						//todo jdjd what is the above "Patient" check. Also compared to james' solution, would need to check if resource type alrady in patient compartment via some other SP
-						validCompartments.add("Patient");
-						break;
-					}
-				}
+
+			if (!omittedSps.contains(theSearchParamDefinition.name())
+					&& isResourceAlreadyInPatientCompartment(theResourceClazz, theSearchParamDefinition.name())) {
+				validCompartments.add("Patient");
 			}
 		}
 
@@ -188,6 +190,34 @@ public class SearchParameterUtil {
 			return theCompartmentName.substring("Base FHIR compartment definition for ".length());
 		}
 		return theCompartmentName;
+	}
+
+	/**
+	 * Returns the FHIR resource type name for the given class. Uses the {@link ResourceDef}
+	 * annotation when present (since Java class names may differ from FHIR type names, e.g.
+	 * {@code ListResource.class} → {@code "List"}), falling back to the simple class name.
+	 */
+	private static String getResourceTypeName(Class<? extends IBase> theResourceClazz) {
+		ResourceDef resourceDef = theResourceClazz.getAnnotation(ResourceDef.class);
+		return (resourceDef != null && !resourceDef.name().isEmpty())
+				? resourceDef.name()
+				: theResourceClazz.getSimpleName();
+	}
+
+	/**
+	 * Returns true if any {@code @SearchParamDefinition} field on {@code theResourceClazz}
+	 * (other than the SP named {@code theExcludedSpName}) declares {@code providesMembershipIn}
+	 * containing the Patient compartment. Scans compiled annotations directly rather than the
+	 * partially-built {@code RuntimeResourceDefinition} to avoid field-iteration ordering issues
+	 * during model construction.
+	 */
+	private static boolean isResourceAlreadyInPatientCompartment(
+			Class<? extends IBase> theResourceClazz, String theExcludedSpName) {
+		return Arrays.stream(theResourceClazz.getFields())
+				.map(f -> f.getAnnotation(SearchParamDefinition.class))
+				.filter(spd -> spd != null && !theExcludedSpName.equalsIgnoreCase(spd.name()))
+				.flatMap(spd -> Arrays.stream(spd.providesMembershipIn()))
+				.anyMatch(c -> "Patient".equals(getCleansedCompartmentName(c.name())));
 	}
 
 	// Created by Claude Opus 4.7
