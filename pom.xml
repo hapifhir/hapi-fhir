@@ -1004,6 +1004,11 @@
 			<name>Nathan Loyer</name>
 			<organization>Athena Health</organization>
 		</developer>
+		<developer>
+			<id>tanmaydarmorha</id>
+			<name>Tanmay Darmorha</name>
+			<organization>Optum</organization>
+		</developer>
 	</developers>
 
 	<licenses>
