@@ -20,12 +20,12 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -35,7 +35,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class AddForeignKeyTask extends BaseTableTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(AddForeignKeyTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 	private String myConstraintName;
 	private String myForeignTableName;
 	private List<String> myForeignColumnNames;

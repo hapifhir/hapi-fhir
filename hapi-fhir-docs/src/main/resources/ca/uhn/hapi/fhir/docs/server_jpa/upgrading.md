@@ -94,3 +94,30 @@ SELECT * FROM HFJ_RES_REINDEX_JOB
 As of version 4.2.0, HAPI FHIR JPA now uses Flyway for schema migrations.  The "from" and "to" parameters are no longer used.  Flyway maintains a list of completed migrations in a table called `FLY_HFJ_MIGRATION`.  When you run the migration command, flyway scans the list of completed migrations in this table and compares them to the list of known migrations, and runs only the new ones.
 
 As of version 6.2.0, HAPI FHIR JPA no longer relies on Flyway for schema migrations.  HAPI FHIR still maintains a list of completed migrations in a table called `FLY_HFJ_MIGRATION`.  When you run the migration command, HAPI FHIR scans the list of completed migrations in this table and compares them to the list of known migrations and executes only the new ones.
+
+# Migration Logging
+
+Database migrations use a dedicated logger named `ca.uhn.fhir.log.database_migration`. This logger captures all migration activity including task execution, schema changes, and migration lock acquisition.
+
+To enable detailed migration logging, add the following to your logging configuration (Logback example):
+
+```xml
+<logger name="ca.uhn.fhir.log.database_migration" level="DEBUG"/>
+```
+
+You can also direct migration logs to a separate file for easier analysis:
+
+```xml
+<appender name="MIGRATION_FILE" class="ch.qos.logback.core.FileAppender">
+    <file>migration.log</file>
+    <encoder>
+        <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+</appender>
+
+<logger name="ca.uhn.fhir.log.database_migration" level="DEBUG" additivity="false">
+    <appender-ref ref="MIGRATION_FILE"/>
+</logger>
+```
+
+For more information about specialized loggers in HAPI FHIR, see the [Logging documentation](/docs/appendix/logging.html#specialized-loggers).
