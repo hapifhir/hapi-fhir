@@ -40,6 +40,11 @@ public class Icd10LoaderTest {
 		assertThat(properties).hasSize(2);
 		assertEquals("Include fruit", chapterA.getStringProperty("inclusion"));
 		assertEquals("Things that are not fruit", chapterA.getStringProperty("exclusion"));
+		TermConcept chapterA3 = chapterA.getChildCodes().stream()
+			.flatMap(concept -> concept.getChildCodes().stream())
+			.filter(concept -> "A3".equals(concept.getCode()))
+			.findFirst().orElseThrow();
+		assertEquals("Banana is a fruit.", chapterA3.getStringProperty("text"));
 
 		assertThat(toTree(rootConcepts)).isEqualTo("""
 						A "Fruit"

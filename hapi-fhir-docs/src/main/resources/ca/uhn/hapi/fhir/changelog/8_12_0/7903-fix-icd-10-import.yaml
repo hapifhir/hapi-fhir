@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7903
+title: "Previously, the ICD-10 import failed with a NullPointerException.
+  This fixes this exception as well as a longer standing problem
+  where child concepts are not properly associated with the CodeSystemVersion."

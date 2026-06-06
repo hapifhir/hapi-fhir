@@ -44,6 +44,11 @@
 		<Rubric kind="preferred">
 			<Label xml:lang="en" xml:space="default">Bananas</Label>
 		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953274-8" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>Banana is a fruit.</Para>
+			</Label>
+		</Rubric>
 	</Class>
 	<Class code="B1-B2" kind="block">
 		<SuperClass code="B"/>
