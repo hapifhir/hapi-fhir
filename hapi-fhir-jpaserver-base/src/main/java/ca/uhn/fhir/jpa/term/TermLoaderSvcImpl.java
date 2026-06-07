@@ -27,11 +27,9 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
@@ -110,38 +108,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	@VisibleForTesting
 	LoadedFileDescriptors getLoadedFileDescriptors(List<FileDescriptor> theFiles) {
 		return new LoadedFileDescriptors(theFiles);
-	}
-
-	@Override
-	public UploadStatistics loadCustom(
-			String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
-			Optional<String> codeSystemContent = loadFile(descriptors, CUSTOM_CODESYSTEM_JSON, CUSTOM_CODESYSTEM_XML);
-			CodeSystem codeSystem;
-			if (codeSystemContent.isPresent()) {
-				codeSystem = EncodingEnum.detectEncoding(codeSystemContent.get())
-						.newParser(myCtx)
-						.parseResource(CodeSystem.class, codeSystemContent.get());
-				ValidateUtil.isTrueOrThrowInvalidRequest(
-						theSystem.equalsIgnoreCase(codeSystem.getUrl()),
-						"CodeSystem.url does not match the supplied system: %s",
-						theSystem);
-				ValidateUtil.isTrueOrThrowInvalidRequest(
-						CodeSystem.CodeSystemContentMode.NOTPRESENT.equals(codeSystem.getContent()),
-						"CodeSystem.content does not match the expected value: %s",
-						CodeSystem.CodeSystemContentMode.NOTPRESENT.toCode());
-			} else {
-				codeSystem = new CodeSystem();
-				codeSystem.setUrl(theSystem);
-				codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-			}
-
-			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, false);
-			TermCodeSystemVersion csv = terminologySet.toCodeSystemVersion();
-
-			IIdType target = storeCodeSystem(theRequestDetails, csv, codeSystem, null, null);
-			return new UploadStatistics(terminologySet.getSize(), target);
-		}
 	}
 
 	@Override

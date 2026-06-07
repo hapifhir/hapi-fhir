@@ -1,6 +1,12 @@
 package ca.uhn.fhir.cli;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -15,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -28,12 +35,15 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,7 +60,15 @@ public class HeaderPassthroughOptionTest {
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	private final UploadTerminologyCommand testedCommand =
 		new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
-	private final TerminologyUploaderProvider myProvider = new TerminologyUploaderProvider();
+
+	@Mock
+	private IJobCoordinator myJobCoordinator;
+
+	@Mock
+	private IJobPersistence myJobPersistence;
+
+	@InjectMocks
+	private TerminologyUploaderProvider myProvider = new TerminologyUploaderProvider();
 
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
@@ -64,8 +82,20 @@ public class HeaderPassthroughOptionTest {
 		myProvider.setContext(myCtx);
 		myProvider.setTerminologyLoaderSvc(myTermLoaderSvc);
 
-		when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
-			.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+//		when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
+//			.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(new Batch2JobStartResponse().setInstanceId("A"));
+		JobInstance instance = new JobInstance();
+		instance.setJobDefinitionId(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
+		instance.setStatus(StatusEnum.BUILDING);
+		when(myJobCoordinator.getInstance(any())).thenReturn(instance);
+
+		doAnswer(t->{
+			instance.setStatus(StatusEnum.COMPLETED);
+			return null;
+		})
+			.when(myJobCoordinator).enqueueBuildingJobForExecution(any());
 	}
 
 	@Test

@@ -90,14 +90,12 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.icd.icd10.ImportIcd10Step2HandleC
 import static ca.uhn.fhir.jpa.batch2.jobs.term.icd.icd10.ImportIcd10Step2HandleConcepts.ICD10_XML_FILE_PATTERN;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.icd.icd10cm.ImportIcd10CmStep2HandleConcepts.ICD10CM_FILENAME;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.icd.icd10cm.ImportIcd10CmStep2HandleConcepts.ICD10CM_FILE_PATTERN;
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB;
 import static ca.uhn.fhir.rest.server.RestfulServerUtils.createFullyQualifiedUrlFromRelativeUrl;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValueOrEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
 
 public class TerminologyUploaderProvider extends BaseJpaProvider {
 
@@ -210,13 +208,15 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						TerminologyConstants.FILENAME_CUSTOM_DISTRIBUTION_FILE,
 						AttachmentContentTypeEnum.ZIP),
 				new DistributionFilenamePattern(
-						filenameToPattern(CUSTOM_CONCEPTS_FILE), CUSTOM_CONCEPTS_FILE, AttachmentContentTypeEnum.CSV),
+						Pattern.compile("concepts.*\\.csv", Pattern.CASE_INSENSITIVE),
+						CUSTOM_CONCEPTS_FILE,
+						AttachmentContentTypeEnum.CSV),
 				new DistributionFilenamePattern(
-						filenameToPattern(CUSTOM_PROPERTIES_FILE),
+						Pattern.compile("properties.*\\.csv", Pattern.CASE_INSENSITIVE),
 						CUSTOM_PROPERTIES_FILE,
 						AttachmentContentTypeEnum.CSV),
 				new DistributionFilenamePattern(
-						filenameToPattern(CUSTOM_HIERARCHY_FILE),
+						Pattern.compile("hierarchy.*\\.csv", Pattern.CASE_INSENSITIVE),
 						CUSTOM_HIERARCHY_FILE,
 						AttachmentContentTypeEnum.CSV));
 		myCustomJobType = new JobType(
@@ -243,7 +243,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	/**
 	 * <code>$hapi.fhir.upload-terminology.create-job</code>
 	 * <p></p>
-	 * This method is intended to replace the legacy {@link #uploadSnapshot(HttpServletRequest, IPrimitiveType, List, RequestDetails)}
+	 * This method is intended to replace the legacy "uploadSnapshot" method
 	 */
 	@Operation(
 			typeName = "CodeSystem",
@@ -468,73 +468,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		} else {
 			throw new InvalidRequestException(Msg.code(2948) + "Can't use this operation to poll status of this job");
-		}
-	}
-
-	/**
-	 * <code>
-	 * $upload-external-codesystem
-	 * </code>
-	 */
-	@Operation(
-			typeName = "CodeSystem",
-			name = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM,
-			idempotent = false,
-			returnParameters = {
-				@OperationParam(name = RESP_PARAM_SUCCESS, typeName = "boolean", min = 1),
-				@OperationParam(name = RESP_PARAM_CONCEPT_COUNT, typeName = "integer", min = 1),
-				@OperationParam(name = RESP_PARAM_TARGET, typeName = "Reference", min = 1)
-			})
-	public IBaseParameters uploadSnapshot(
-			HttpServletRequest theServletRequest,
-			@OperationParam(name = PARAM_SYSTEM, min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
-			@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment")
-					List<ICompositeType> theFiles,
-			RequestDetails theRequestDetails) {
-
-		startRequest(theServletRequest);
-
-		if (theCodeSystemUrl == null || isBlank(theCodeSystemUrl.getValueAsString())) {
-			throw new InvalidRequestException(Msg.code(1137) + "Missing mandatory parameter: " + PARAM_SYSTEM);
-		}
-
-		if (theFiles == null || theFiles.isEmpty()) {
-			throw new InvalidRequestException(
-					Msg.code(1138) + "No '" + PARAM_FILE + "' parameter, or package had no data");
-		}
-		for (ICompositeType next : theFiles) {
-			ValidateUtil.isTrueOrThrowInvalidRequest(
-					getContext().getElementDefinition(next.getClass()).getName().equals("Attachment"),
-					"Package must be of type Attachment");
-		}
-
-		try {
-			List<ITermLoaderSvc.FileDescriptor> localFiles = convertAttachmentsToFileDescriptors(theFiles);
-
-			String codeSystemUrl = theCodeSystemUrl.getValue();
-			codeSystemUrl = trim(codeSystemUrl);
-
-			UrlUtil.CanonicalUrlParts codeSystemCanonicalUrl = UrlUtil.parseCanonicalUrl(codeSystemUrl);
-			if (myCanonicalUrlToJobType.containsKey(codeSystemCanonicalUrl.url())) {
-				throw new InvalidRequestException(Msg.code(2962) + "This operation may no longer be used to upload the "
-						+ codeSystemUrl + " CodeSystem. See " + OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB);
-			}
-
-			UploadStatistics stats = myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
-
-			IBaseParameters retVal = ParametersUtil.newInstance(getContext());
-			ParametersUtil.addParameterToParametersBoolean(getContext(), retVal, RESP_PARAM_SUCCESS, true);
-			ParametersUtil.addParameterToParametersInteger(
-					getContext(),
-					retVal,
-					RESP_PARAM_CONCEPT_COUNT,
-					stats.getAddedConceptCount() + stats.getUpdatedConceptCount());
-			ParametersUtil.addParameterToParametersReference(
-					getContext(), retVal, RESP_PARAM_TARGET, stats.getTarget().getValue());
-
-			return retVal;
-		} finally {
-			endRequest(theServletRequest);
 		}
 	}
 
