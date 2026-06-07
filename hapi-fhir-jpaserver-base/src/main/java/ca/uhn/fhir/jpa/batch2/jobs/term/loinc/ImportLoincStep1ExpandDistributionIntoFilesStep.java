@@ -123,8 +123,11 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 	}
 
 	@Override
-	protected void massageCodeSystem(CodeSystem theCodeSystem, MyContext theContext) {
-		super.massageCodeSystem(theCodeSystem, theContext);
+	protected void massageCodeSystem(
+			CodeSystem theCodeSystem,
+			MyContext theContext,
+			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails) {
+		super.massageCodeSystem(theCodeSystem, theContext, theStepExecutionDetails);
 
 		// TODO: DM 2019-09-13 - Manually add EXTERNAL_COPYRIGHT_NOTICE property until Regenstrief adds this to
 		// loinc.xml

@@ -81,8 +81,9 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CODESYSTEM_URL, VERSION_1_0, files);
 
 		// Verify
-		
-
+		runInTransaction(()-> {
+			assertEquals(5, myTermConceptDao.count());
+		});
 	}
 
 	@Test
@@ -95,7 +96,7 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 
 		// Verify
 		JobInstance instance = myJobCoordinator.getInstance(jobId);
-		assertThat(instance.getErrorMessage()).contains("No CodeSystem resource was supplied in the custom terminology distribution file");
+		assertThat(instance.getErrorMessage()).contains("No CodeSystem resource was supplied in the custom terminology distribution file, and no CodeSystem resource was found in the database with URL[http://example.com/labCodes] and version[1.0]");
 	}
 
 	@Test

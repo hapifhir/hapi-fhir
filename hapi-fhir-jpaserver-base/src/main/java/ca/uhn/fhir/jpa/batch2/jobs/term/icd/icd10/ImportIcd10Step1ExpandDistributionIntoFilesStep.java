@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.icd.icd10;
 
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
@@ -55,8 +57,11 @@ public class ImportIcd10Step1ExpandDistributionIntoFilesStep
 	}
 
 	@Override
-	protected void massageCodeSystem(CodeSystem theCodeSystem, Void theContext) {
-		super.massageCodeSystem(theCodeSystem, theContext);
+	protected void massageCodeSystem(
+			CodeSystem theCodeSystem,
+			Void theContext,
+			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails) {
+		super.massageCodeSystem(theCodeSystem, theContext, theStepExecutionDetails);
 
 		theCodeSystem.setName("ICD-10");
 	}

@@ -37,10 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.util.XmlUtil.getChildrenByTagName;
@@ -49,8 +47,8 @@ import static ca.uhn.fhir.util.XmlUtil.getChildrenByTagName;
  * @see ImportIcdJobAppCtx#importIcd10Step2Concepts()
  */
 public class ImportIcd10Step2HandleConcepts
-	extends BaseImportTerminologyFileStep<
-	ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
+		extends BaseImportTerminologyFileStep<
+				ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
 	public static final Pattern ICD10_XML_FILE_PATTERN = Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE);
 	public static final String ICD10_XML_FILENAME = "icd10.xml";
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportIcd10Step2HandleConcepts.class);
@@ -59,29 +57,30 @@ public class ImportIcd10Step2HandleConcepts
 	@Nonnull
 	@Override
 	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
-		StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
+			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
 		return List.of(new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
-			FileHandlingType.XML, t -> ICD10_XML_FILE_PATTERN.matcher(t).find()));
+				FileHandlingType.XML, t -> ICD10_XML_FILE_PATTERN.matcher(t).find()));
 	}
 
 	@Override
 	protected void processAttachment(
-		@Nonnull
-		StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson>
-			theStepExecutionDetails,
-		ImportTerminologyMetadataAttachmentJson theJobMetadata,
-		MyBaseContext theContext,
-		AttachmentDetails theAttachment,
-		ImportTerminologyJobParameters theJobParameters,
-		CodeSystem theCodeSystemToPopulate,
-		TerminologyFileSetJson theData,
-		String theSourceFilename) {
+			@Nonnull
+					StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson>
+							theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			MyBaseContext theContext,
+			AttachmentDetails theAttachment,
+			ImportTerminologyJobParameters theJobParameters,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 
 		Element documentElement = TerminologyXmlUtil.parseXmlDocument(theAttachment, theSourceFilename);
 
 		String rootNodeName = documentElement.getTagName();
 		if (!EXPECTED_ROOT_NODE.equals(rootNodeName)) {
-			throw new JobExecutionFailedException(Msg.code(2969) + "Unexpected root node in ICD-10 document: " + rootNodeName);
+			throw new JobExecutionFailedException(
+					Msg.code(2969) + "Unexpected root node in ICD-10 document: " + rootNodeName);
 		}
 
 		for (Element title : getChildrenByTagName(documentElement, "Title")) {
@@ -111,12 +110,12 @@ public class ImportIcd10Step2HandleConcepts
 			for (Element rubric : getChildrenByTagName(aClass, "Rubric")) {
 				String kind = rubric.getAttribute("kind");
 				Optional<Element> firstLabel =
-					getChildrenByTagName(rubric, "Label").stream().findFirst();
+						getChildrenByTagName(rubric, "Label").stream().findFirst();
 				if (firstLabel.isPresent()) {
 					String textContent = firstLabel.get().getTextContent();
 					if (textContent != null && !textContent.isEmpty()) {
 						textContent =
-							textContent.replace("\n", "").replace("\r", "").replace("\t", "");
+								textContent.replace("\n", "").replace("\r", "").replace("\t", "");
 						if (kind.equals("preferred")) {
 							termConcept.setDisplay(textContent);
 						} else {
@@ -133,19 +132,17 @@ public class ImportIcd10Step2HandleConcepts
 				parent.addConcept(termConcept);
 
 				ourLog.atDebug()
-					.setMessage("ICD-10 code[{}] has parent[{}]")
-					.addArgument(code)
-					.addArgument(parentCode)
-					.log();
-
+						.setMessage("ICD-10 code[{}] has parent[{}]")
+						.addArgument(code)
+						.addArgument(parentCode)
+						.log();
 			}
-
 		}
 	}
 
 	@Override
 	protected MyBaseContext newContextObject(
-		StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
 		return new MyBaseContext();
 	}
 }

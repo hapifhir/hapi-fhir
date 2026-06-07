@@ -435,7 +435,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 		Validate.notBlank(url, "No URL specified in job parameters");
 		cs.setUrl(url);
 
-		massageCodeSystem(cs, theContext);
+		massageCodeSystem(cs, theContext, theStepExecutionDetails);
 
 		if (getCodeSystemIdRoot() != null) {
 			cs.setId(getCodeSystemIdRoot() + "-" + codeSystemVersionId);
@@ -465,7 +465,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 
 	/**
 	 * Subclasses may only return <code>null</code> if they intend to explicitly supply
-	 * an ID for the CodeSystem in the {@link #massageCodeSystem(CodeSystem, CT)} method.
+	 * an ID for the CodeSystem in the {@link #massageCodeSystem(CodeSystem, Object, StepExecutionDetails)} method.
 	 */
 	@Nullable
 	protected abstract String getCodeSystemIdRoot();
@@ -474,7 +474,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 	 * Subclasses may override this method to make modifications to the CodeSystem
 	 * resource that will be stored in the database to support this CodeSystem.
 	 */
-	protected void massageCodeSystem(CodeSystem theCodeSystem, CT theContext) {
+	protected void massageCodeSystem(
+			CodeSystem theCodeSystem, CT theContext, StepExecutionDetails<PT, VoidModel> theStepExecutionDetails) {
 		// subclasses can override this method to massage the CodeSystem
 	}
 

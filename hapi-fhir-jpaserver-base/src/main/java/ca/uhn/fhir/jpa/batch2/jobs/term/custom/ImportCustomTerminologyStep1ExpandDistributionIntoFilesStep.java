@@ -6,13 +6,19 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,13 +61,46 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 	}
 
 	@Override
-	protected void massageCodeSystem(CodeSystem theCodeSystem, MyContext theContext) {
-		super.massageCodeSystem(theCodeSystem, theContext);
+	protected void massageCodeSystem(
+			CodeSystem theCodeSystem,
+			MyContext theContext,
+			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails) {
+		super.massageCodeSystem(theCodeSystem, theContext, theStepExecutionDetails);
 
 		CodeSystem codeSystem = theContext.getCodeSystem();
 		if (codeSystem == null) {
-			throw new JobExecutionFailedException(Msg.code(2964)
-					+ "No CodeSystem resource was supplied in the custom terminology distribution file.");
+
+			// These should never happen since we validate
+			ImportTerminologyJobParameters jobParameters = theStepExecutionDetails.getParameters();
+			Validate.notBlank(jobParameters.getUrl(), "No URL specified in job parameters");
+			Validate.notBlank(jobParameters.getVersionId(), "No version specified in job parameters");
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous().setLoadSynchronousUpTo(2);
+			map.add(CodeSystem.SP_URL, new UriParam(jobParameters.getUrl()));
+			map.add(CodeSystem.SP_VERSION, new TokenParam(jobParameters.getVersionId()));
+
+			IFhirResourceDao dao = myDaoRegistry.getResourceDao("CodeSystem");
+			IBundleProvider results = dao.search(map, theStepExecutionDetails.newSystemRequestDetails());
+			if (results.isEmpty()) {
+				throw new JobExecutionFailedException(Msg.code(2964)
+						+ "No CodeSystem resource was supplied in the custom terminology distribution file, and no CodeSystem resource was found in the database with URL["
+						+ jobParameters.getUrl() + "] and version[" + jobParameters.getVersionId() + "]");
+			}
+
+			// There can't be more than one CodeSystem with the same URL and version
+			// because the DAO enforces it
+			Validate.isTrue(
+					results.size() == 1,
+					"Expected exactly one CodeSystem resource with URL[%s] and version[%s]",
+					jobParameters.getUrl(),
+					jobParameters.getVersionId());
+
+			codeSystem = (CodeSystem) results.getResources(0, 1).get(0);
+			ourLog.info(
+					"Found existing CodeSystem resource with URL[{}] and version[{}]: {}",
+					jobParameters.getUrl(),
+					jobParameters.getVersionId(),
+					codeSystem.getId());
 		}
 
 		if (!codeSystem.getIdElement().hasIdPart()) {
