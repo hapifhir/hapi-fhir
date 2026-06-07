@@ -12,6 +12,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,11 +25,9 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
 
-	// FIXME: add test where the CodeSystem resource is already present in the database
-
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testLoadComplete(boolean theZipDistribution) throws Exception {
+	void testLoadComplete(boolean theZipDistribution) throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder(theZipDistribution);
 		files.addFileZip("/custom_term/", TerminologyConstants.CUSTOM_CODESYSTEM_JSON);
 		files.addFileZip("/custom_term/", TerminologyConstants.CUSTOM_CONCEPTS_FILE);
@@ -65,8 +65,28 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 		});
 	}
 
+
 	@Test
-	public void testLoadWithNoCodeSystem() throws Exception {
+	void testCodeSystemNotPresentInDistribution_FoundInRepository() throws IOException {
+		// Setup
+		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/custom_term/" + TerminologyConstants.CUSTOM_CODESYSTEM_JSON);
+		myCodeSystemDao.update(cs, newSrd());
+
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
+		files.addFileZip("/custom_term/", TerminologyConstants.CUSTOM_CONCEPTS_FILE);
+		files.addFileZip("/custom_term/", TerminologyConstants.CUSTOM_HIERARCHY_FILE);
+		files.addFileZip("/custom_term/", TerminologyConstants.CUSTOM_PROPERTIES_FILE);
+
+		// Test
+		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CODESYSTEM_URL, VERSION_1_0, files);
+
+		// Verify
+		
+
+	}
+
+	@Test
+	void testLoadWithNoCodeSystem() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 		files.addFileZip("/custom_term/", TerminologyConstants.CUSTOM_CONCEPTS_FILE);
 

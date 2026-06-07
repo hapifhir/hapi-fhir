@@ -1,5 +1,6 @@
 {
 	"id": "exampleLabCodes",
+	"version": "1.0",
 	"resourceType": "CodeSystem",
 	"url": "http://example.com/labCodes",
 	"name": "Example Lab Codes",

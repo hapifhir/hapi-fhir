@@ -17,6 +17,8 @@ import org.w3c.dom.Element;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * @see ImportIcdJobAppCtx#importIcd10CmStep2Concepts()
  */
@@ -55,6 +57,14 @@ public class ImportIcd10CmStep2HandleConcepts
 			String theSourceFilename) {
 
 		Element documentElement = TerminologyXmlUtil.parseXmlDocument(theAttachment, theSourceFilename);
+
+		// Extract version: Should only be 1 tag
+		for (Element nextVersion : XmlUtil.getChildrenByTagName(documentElement, "version")) {
+			String versionId = nextVersion.getTextContent();
+			if (isNotBlank(versionId)) {
+				theCodeSystemToPopulate.setVersion(versionId);
+			}
+		}
 
 		// Extract Diags (codes)
 		for (Element nextChapter : XmlUtil.getChildrenByTagName(documentElement, "chapter")) {

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.icd.icd10;
 
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
@@ -77,12 +78,10 @@ public class ImportIcd10Step2HandleConcepts
 		String theSourceFilename) {
 
 		Element documentElement = TerminologyXmlUtil.parseXmlDocument(theAttachment, theSourceFilename);
-		Set<String> rootConcepts = new HashSet<>();
 
 		String rootNodeName = documentElement.getTagName();
 		if (!EXPECTED_ROOT_NODE.equals(rootNodeName)) {
-			// FIXME: add test
-			throw new IllegalStateException(Msg.code(2969) + "Unexpected root node in ICD-10 document: " + rootNodeName);
+			throw new JobExecutionFailedException(Msg.code(2969) + "Unexpected root node in ICD-10 document: " + rootNodeName);
 		}
 
 		for (Element title : getChildrenByTagName(documentElement, "Title")) {
@@ -90,6 +89,11 @@ public class ImportIcd10Step2HandleConcepts
 			if (!name.isEmpty()) {
 				theCodeSystemToPopulate.setName(name);
 				theCodeSystemToPopulate.setTitle(name);
+			}
+
+			String version = title.getAttribute("version");
+			if (!version.isEmpty()) {
+				theCodeSystemToPopulate.setVersion(version);
 			}
 
 			theCodeSystemToPopulate.setDescription(title.getTextContent());
@@ -128,23 +132,12 @@ public class ImportIcd10Step2HandleConcepts
 				CodeSystem.ConceptDefinitionComponent parent = getOrAddConcept(theContext, parentCode);
 				parent.addConcept(termConcept);
 
-				ourLog.atInfo()
+				ourLog.atDebug()
 					.setMessage("ICD-10 code[{}] has parent[{}]")
 					.addArgument(code)
 					.addArgument(parentCode)
 					.log();
 
-			}
-
-			if (superClassElements.isEmpty()) {
-				theCodeSystemToPopulate.addConcept(termConcept);
-				rootConcepts.add(code);
-			} else {
-				if (rootConcepts.contains(code)) {
-					if (theCodeSystemToPopulate.getConcept().removeIf(t -> t.getCode().equals(code))) {
-						rootConcepts.remove(code);
-					}
-				}
 			}
 
 		}
