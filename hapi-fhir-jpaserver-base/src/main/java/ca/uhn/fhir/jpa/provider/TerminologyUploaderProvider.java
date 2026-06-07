@@ -117,8 +117,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	public static final Pattern ICD10_FILENAME_PATTERN = Pattern.compile("icd10.*\\.zip", Pattern.CASE_INSENSITIVE);
 
 	public static final Pattern ICD10CM_FILENAME_PATTERN = Pattern.compile("icd10cm.*\\.zip", Pattern.CASE_INSENSITIVE);
-	public static final Pattern CUSTOM_TERMINOLOGY_PATTERN =
-			Pattern.compile(".*\\.zip", Pattern.CASE_INSENSITIVE);
+	public static final Pattern CUSTOM_TERMINOLOGY_PATTERN = Pattern.compile(".*\\.zip", Pattern.CASE_INSENSITIVE);
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	private static final String RESP_PARAM_CONCEPT_COUNT = "conceptCount";
 	private static final String RESP_PARAM_TARGET = "target";

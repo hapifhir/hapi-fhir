@@ -60,8 +60,8 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 
 		CodeSystem codeSystem = theContext.getCodeSystem();
 		if (codeSystem == null) {
-			throw new JobExecutionFailedException(
-					Msg.code(2964) + "No CodeSystem resource was supplied in the custom terminology distribution file.");
+			throw new JobExecutionFailedException(Msg.code(2964)
+					+ "No CodeSystem resource was supplied in the custom terminology distribution file.");
 		}
 
 		if (!codeSystem.getIdElement().hasIdPart()) {

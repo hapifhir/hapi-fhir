@@ -9,17 +9,11 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachment
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyXmlUtil;
 import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
-import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.util.XmlUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.regex.Pattern;
 

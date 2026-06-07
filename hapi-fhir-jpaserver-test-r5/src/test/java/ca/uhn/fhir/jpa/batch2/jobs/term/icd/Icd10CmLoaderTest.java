@@ -1,7 +1,8 @@
-package ca.uhn.fhir.jpa.term.icd10cm;
+package ca.uhn.fhir.jpa.batch2.jobs.term.icd;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.term.icd10cm.Icd10CmLoader;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+// FIXME: rename and rework
 class Icd10CmLoaderTest {
 
 	private static TermCodeSystemVersion codeSystemVersion;

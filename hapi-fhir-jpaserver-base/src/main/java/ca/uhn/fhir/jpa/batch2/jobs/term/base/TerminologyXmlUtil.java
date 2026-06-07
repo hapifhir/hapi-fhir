@@ -33,7 +33,8 @@ public class TerminologyXmlUtil {
 		try {
 			document = XmlUtil.parseDocument(reader, false, true);
 		} catch (SAXException | IOException e) {
-			throw new JobExecutionFailedException(Msg.code(2967) + "Failed to parse file " + theSourceFilename + ": " + e.getMessage(), e);
+			throw new JobExecutionFailedException(
+					Msg.code(2967) + "Failed to parse file " + theSourceFilename + ": " + e.getMessage(), e);
 		}
 
 		return document.getDocumentElement();
