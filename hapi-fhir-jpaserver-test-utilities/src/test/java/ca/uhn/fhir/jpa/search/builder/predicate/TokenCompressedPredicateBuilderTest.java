@@ -53,7 +53,7 @@ class TokenCompressedPredicateBuilderTest {
 				.thenAnswer(inv -> "?" + inv.getArgument(0));
 		Mockito.lenient()
 				.when(mySearchQueryBuilder.getRequestPartitionId())
-				.thenReturn(RequestPartitionId.defaultPartition());
+				.thenReturn(RequestPartitionId.defaultPartition(new PartitionSettings()));
 		Mockito.lenient().when(myResourceTablePredicateBuilder.getResourceIdColumn()).thenReturn(myResourceIdColumn);
 		Mockito.lenient().when(myResourceTablePredicateBuilder.getResourceType()).thenReturn("Patient");
 	}
@@ -92,7 +92,7 @@ class TokenCompressedPredicateBuilderTest {
 		List<IQueryParameterType> params = List.of(new TokenParam("http://example.com", "abc"));
 
 		Condition predicate =
-				builder.createPredicateToken(params, "Patient", null, searchParam, RequestPartitionId.defaultPartition());
+				builder.createPredicateToken(params, "Patient", null, searchParam, RequestPartitionId.defaultPartition(new PartitionSettings()));
 
 		assertThat(predicate).isNotNull();
 		// system+value → should be a BinaryCondition on HASH_SYS_AND_VALUE, not a subquery
@@ -117,7 +117,7 @@ class TokenCompressedPredicateBuilderTest {
 		List<IQueryParameterType> params = List.of(new TokenParam(null, "abc"));
 
 		Condition predicate =
-				builder.createPredicateToken(params, "Patient", null, searchParam, RequestPartitionId.defaultPartition());
+				builder.createPredicateToken(params, "Patient", null, searchParam, RequestPartitionId.defaultPartition(new PartitionSettings()));
 
 		assertThat(predicate).isNotNull();
 		// value-only → should produce an IN (subquery) condition
@@ -136,7 +136,7 @@ class TokenCompressedPredicateBuilderTest {
 		List<IQueryParameterType> params = List.of(new TokenParam(null, "abc"));
 
 		Condition predicate =
-				builder.createPredicateToken(params, "Patient", null, searchParam, RequestPartitionId.defaultPartition());
+				builder.createPredicateToken(params, "Patient", null, searchParam, RequestPartitionId.defaultPartition(new PartitionSettings()));
 
 		assertThat(predicate).isNotNull();
 		// IDENTIFIER mode with value → AND predicate containing HASH_IDENTITY and HASH_VALUE
@@ -158,7 +158,7 @@ class TokenCompressedPredicateBuilderTest {
 		List<IQueryParameterType> params = List.of(new TokenParam("http://hospital.org/mrn", null));
 
 		Condition predicate =
-				builder.createPredicateToken(params, "Patient", null, searchParam, RequestPartitionId.defaultPartition());
+				builder.createPredicateToken(params, "Patient", null, searchParam, RequestPartitionId.defaultPartition(new PartitionSettings()));
 
 		assertThat(predicate).isNotNull();
 		// IDENTIFIER mode system-only → AND predicate containing HASH_IDENTITY and SP_SYSTEM_URL_ID (no HASH_VALUE)
@@ -184,7 +184,7 @@ class TokenCompressedPredicateBuilderTest {
 		List<IQueryParameterType> params = List.of(new TokenParam("http://loinc.org", null));
 
 		Condition predicate =
-				builder.createPredicateToken(params, "Patient", null, searchParam, RequestPartitionId.defaultPartition());
+				builder.createPredicateToken(params, "Patient", null, searchParam, RequestPartitionId.defaultPartition(new PartitionSettings()));
 
 		assertThat(predicate).isNotNull();
 		// system-only in COMMON mode → IN (subquery) filtering by HASH_IDENTITY and SYSTEM_ID
@@ -202,7 +202,7 @@ class TokenCompressedPredicateBuilderTest {
 				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
 
 		MissingQueryParameterPredicateParams params = new MissingQueryParameterPredicateParams(
-				myResourceTablePredicateBuilder, true, "identifier", RequestPartitionId.defaultPartition());
+				myResourceTablePredicateBuilder, true, "identifier", RequestPartitionId.defaultPartition(new PartitionSettings()));
 
 		Condition predicate = builder.createPredicateParamMissingValue(params);
 
@@ -224,7 +224,7 @@ class TokenCompressedPredicateBuilderTest {
 				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.COMMON);
 
 		MissingQueryParameterPredicateParams params = new MissingQueryParameterPredicateParams(
-				myResourceTablePredicateBuilder, true, "status", RequestPartitionId.defaultPartition());
+				myResourceTablePredicateBuilder, true, "status", RequestPartitionId.defaultPartition(new PartitionSettings()));
 
 		Condition predicate = builder.createPredicateParamMissingValue(params);
 

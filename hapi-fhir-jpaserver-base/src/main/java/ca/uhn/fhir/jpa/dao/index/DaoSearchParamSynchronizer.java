@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.cache.IResourceIdentifierCacheSvc;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
@@ -86,6 +87,9 @@ public class DaoSearchParamSynchronizer {
 
 	@Autowired
 	private IResourceIdentifierCacheSvc myResourceIdentifierCacheSvc;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	private UniqueIndexPreExistenceChecker myUniqueIndexPreExistenceChecker;
 
@@ -231,7 +235,8 @@ public class DaoSearchParamSynchronizer {
 		}
 
 		PartitionablePartitionId partitionId = theEntity.getPartitionId();
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(partitionId);
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(partitionId, myPartitionSettings);
 
 		List<ResourceIndexedSearchParamTokenCommonRes> newCommonResEntities = new ArrayList<>();
 		List<ResourceIndexedSearchParamTokenIdentifier> newIdentifierEntities = new ArrayList<>();

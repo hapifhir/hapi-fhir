@@ -561,13 +561,13 @@ public class Builder {
 					myColumnNames = theColumnNames;
 				}
 
-				public BuilderCompleteTask references(String theForeignTable, String theForeignColumn) {
+				public BuilderCompleteTask references(String theForeignTable, String... theForeignColumns) {
 					AddForeignKeyTask task = new AddForeignKeyTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setConstraintName(myForeignKeyName);
-					task.setColumnName(getColumnName());
+					task.setColumnNames(myColumnNames);
 					task.setForeignTableName(theForeignTable);
-					task.setForeignColumnName(theForeignColumn);
+					task.setForeignColumnNames(Arrays.asList(theForeignColumns));
 					addTask(task);
 					return new BuilderCompleteTask(task);
 				}
