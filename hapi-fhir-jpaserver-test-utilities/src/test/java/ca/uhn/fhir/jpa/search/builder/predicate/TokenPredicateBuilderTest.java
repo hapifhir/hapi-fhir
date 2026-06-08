@@ -78,7 +78,7 @@ public class TokenPredicateBuilderTest {
 		RuntimeSearchParam runtimeSearchParam = new RuntimeSearchParam(null, null, "SearchParameter", null, null, null, null, null, null, null);
 
 		// execute
-		myTokenPredicateBuilder.createPredicateToken(tokenParams, "SearchParameter", "SPPrefix", runtimeSearchParam, RequestPartitionId.defaultPartition());
+		myTokenPredicateBuilder.createPredicateToken(tokenParams, "SearchParameter", "SPPrefix", runtimeSearchParam, RequestPartitionId.fromPartitionId(null));
 
 		// verify
 		List<ILoggingEvent> logList = myListAppender.list;

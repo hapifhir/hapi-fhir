@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7950
+title: "Fixed the issue where chained searches could return empty results when a reference parameter was 
+multi-valued (cardinality 0..*) and multiple AND conditions targeted the same resource type,
+e.g. Patient?generalPractitioner.family=Smith&generalPractitioner.gender=female. Each value now binds to 
+its own HFJ_RES_LINK row during chained searches to ensure correct search results."

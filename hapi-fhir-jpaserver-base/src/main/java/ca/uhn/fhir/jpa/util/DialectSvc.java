@@ -69,7 +69,9 @@ public class DialectSvc {
 	 */
 	@VisibleForTesting
 	public static void setForceMsSqlMode(boolean theForceMsSqlMode) {
-		ourLog.warn("Forcing MS SQL mode: {}", theForceMsSqlMode);
+		if (theForceMsSqlMode) {
+			ourLog.warn("Forcing MS SQL mode");
+		}
 		ourForceMsSqlMode = theForceMsSqlMode;
 	}
 }

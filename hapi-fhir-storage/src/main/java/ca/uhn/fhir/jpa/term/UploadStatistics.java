@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.util.HapiToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 public class UploadStatistics {
@@ -43,12 +45,19 @@ public class UploadStatistics {
 		return myAddedConceptLinkCount;
 	}
 
-	public void incrementConceptsAddedCount() {
+	public UploadStatistics incrementConceptsAddedCount() {
 		myAddedConceptCount++;
+		return this;
 	}
 
-	public void incrementDesignationsAddedCount() {
+	public UploadStatistics incrementDesignationsAddedCount() {
 		myAddedDesignationCount++;
+		return this;
+	}
+
+	public UploadStatistics incrementDesignationsAddedCount(int theCount) {
+		myAddedDesignationCount += theCount;
+		return this;
 	}
 
 	public void incrementPropertiesAddedCount() {
@@ -81,5 +90,20 @@ public class UploadStatistics {
 
 	public IIdType getTarget() {
 		return myTarget;
+	}
+
+	@Override
+	public String toString() {
+		HapiToStringBuilder b = new HapiToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE);
+		if (myTarget != null) {
+			b.append("target", myTarget.toUnqualifiedVersionless());
+		}
+		b.appendIfNonZero("updatedConcepts", myUpdatedConceptCount);
+		b.appendIfNonZero("addedConcepts", myAddedConceptCount);
+		b.appendIfNonZero("addedDesignations", myAddedDesignationCount);
+		b.appendIfNonZero("addedProperties", myAddedPropertyCount);
+		b.appendIfNonZero("addedConceptLinks", myAddedConceptLinkCount);
+
+		return b.toString();
 	}
 }

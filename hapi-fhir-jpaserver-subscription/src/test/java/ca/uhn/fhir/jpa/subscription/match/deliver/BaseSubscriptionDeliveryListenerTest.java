@@ -58,7 +58,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -346,9 +345,10 @@ public class BaseSubscriptionDeliveryListenerTest {
 		assertThat(jsonString).contains("\"operationType\":\"CREATE");
 		assertThat(jsonString).contains("\"canonicalSubscription\":");
 
-		// Assert that the default partitionID is being generated and is being serialized in JSON
-		assertThat(jsonString).contains("\"allPartitions\":false");
-		assertThat(jsonString).contains("\"partitionIds\":[null]");
+		// When no partition is set, the partition stays null and is no longer serialized. Previously the no-arg
+		// constructor pre-populated the deprecated RequestPartitionId.defaultPartition() sentinel (GL-8692).
+		assertThat(message.getPartitionId()).isNull();
+		assertThat(jsonString).doesNotContain("\"partitionId\":");
 	}
 
 	@Test
@@ -432,10 +432,9 @@ public class BaseSubscriptionDeliveryListenerTest {
 
 		ResourceDeliveryJsonMessage jsonMessage = ResourceDeliveryJsonMessage.fromJson(legacyDeliveryMessageJson);
 
-		ourLog.info(jsonMessage.getPayload().getPartitionId().asJson());
-
-		assertNotNull(jsonMessage.getPayload().getPartitionId());
-		assertEquals(jsonMessage.getPayload().getPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		// A legacy message serialized without a partitionId field now deserializes to a null partition. Previously the
+		// no-arg constructor pre-populated the deprecated RequestPartitionId.defaultPartition() sentinel (GL-8692).
+		assertThat(jsonMessage.getPayload().getPartitionId()).isNull();
 	}
 
 	@Test

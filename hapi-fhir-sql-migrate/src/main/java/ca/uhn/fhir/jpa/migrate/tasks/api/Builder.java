@@ -537,7 +537,6 @@ public class Builder {
 		public class BuilderAddForeignKey {
 			private final String myVersion;
 			private final String myForeignKeyName;
-			private List<String> myColumnNames;
 
 			public BuilderAddForeignKey(String theVersion, String theForeignKeyName) {
 				myVersion = theVersion;
@@ -545,25 +544,30 @@ public class Builder {
 			}
 
 			public BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn toColumn(
+					String theColumnName) {
+				return toColumns(theColumnName);
+			}
+
+			public BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn toColumns(
 					String... theColumnNames) {
-				myColumnNames = Arrays.asList(theColumnNames);
-				return new BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn(myVersion);
+				return new BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn(
+						Arrays.asList(theColumnNames));
 			}
 
 			public class BuilderAddForeignKeyToColumn {
-				private final String myVersion;
+				private final List<String> myColumnNames;
 
-				public BuilderAddForeignKeyToColumn(String theVersion) {
-					myVersion = theVersion;
+				public BuilderAddForeignKeyToColumn(List<String> theColumnNames) {
+					myColumnNames = theColumnNames;
 				}
 
-				public BuilderCompleteTask references(String theForeignTable, String... theForeignColumns) {
+				public BuilderCompleteTask references(String theForeignTable, String theForeignColumn) {
 					AddForeignKeyTask task = new AddForeignKeyTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setConstraintName(myForeignKeyName);
-					task.setColumnNames(myColumnNames);
+					task.setColumnName(getColumnName());
 					task.setForeignTableName(theForeignTable);
-					task.setForeignColumnNames(Arrays.asList(theForeignColumns));
+					task.setForeignColumnName(theForeignColumn);
 					addTask(task);
 					return new BuilderCompleteTask(task);
 				}

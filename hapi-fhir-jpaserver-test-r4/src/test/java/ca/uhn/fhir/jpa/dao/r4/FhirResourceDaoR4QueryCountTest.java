@@ -288,7 +288,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@CsvSource(textBlock = """
 		# AlreadyExisting , ExpectSelectCount , ExpectInsertCount , ExpectUpdateCount
 		true              , 8                 , 0                 , 10
-		false             , 5                 , 25                , 0
+		false             , 7                 , 25                , 0
 		""")
 	void testCodeSystem(boolean theAlreadyExisting, int theExpectSelectCount, int theExpectInsertCount, int theExpectUpdateCount) {
 		// Setup
@@ -4940,7 +4940,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(result.getMessage()).isNull();
 
 		assertEquals(4, myCaptureQueriesListener.countGetConnections());
-		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(10, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logSelectQueries();
 
 		// Again (should use cache)

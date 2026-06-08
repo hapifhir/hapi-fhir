@@ -20,6 +20,8 @@
 package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
+import ca.uhn.fhir.batch2.model.BatchInstanceStepStatisticsDTO;
+import ca.uhn.fhir.batch2.model.BatchInstanceStepStatisticsDTO.StepStatistics;
 import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -45,8 +47,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -186,7 +190,22 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	}
 
 	/**
-	 * Stores an attachment associated with a specific job instance
+	 * Stores an attachment associated with a specific job instance. A job attachment is not the
+	 * same thing as the FHIR "attachment" datatype, it's a binary or text blob that is attached
+	 * to a specific Batch2 job instance. Job Attachments have two primary use cases:
+	 * <ul>
+	 * <li>
+	 *     They can be used to store data that should be used as input to the first step of a job, such
+	 *     as a terminology distribution file (loinc.zip) that will be used as the input to a terminology
+	 *     import job.
+	 * </li>
+	 * <li>
+	 *     They can be used to send data from one step of a job to the next step, in cases where the
+	 *     data being shared needs to be sent to multiple steps, or isn't JSON data and would therefore
+	 *     eat a lot of space if it was serialized into a JSON container. In this case, you would
+	 *     typically use the attachment ID as an element in the work chunk JSON passed between steps.
+	 * </li>
+	 * </ul>
 	 *
 	 * @param theInstanceId   The job instance ID
 	 * @param theRequest The request containing the attachment data
@@ -195,8 +214,9 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	String storeNewAttachment(String theInstanceId, AttachmentDetails theRequest);
 
 	/**
-	 * Fetches the attachment data for a specific attachment ID
+	 * Fetches the attachment data for a specific attachment ID.
 	 *
+	 * @see #storeNewAttachment(String, AttachmentDetails) for a description of what attachments are used for.
 	 * @param theInstanceId   The job instance ID
 	 * @param theAttachmentId The attachment ID
 	 * @return The bytes of the attachment data
@@ -207,6 +227,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Fetches the attachment data for a specific attachment filename
+	 *
+	 * @see #storeNewAttachment(String, AttachmentDetails) for a description of what attachments are used for.
 	 * @param theInstanceId   The job instance ID
 	 * @param theFilename The attachment filename
 	 * @return The bytes of the attachment data
@@ -341,4 +363,57 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean advanceJobStepAndUpdateChunkStatus(
 			String theJobInstanceId, String theNextStepId, boolean theIsReductionStepBoolean);
+
+	/**
+	 * Fetches all work chunks for the given job instance and calculates statistics such
+	 * as the total time spent on all chunks, and the number of chunks per step. This method
+	 * is only intended to be called while the job is still executing, as the steps
+	 * will be cleared once the job completes.
+	 *
+	 * @param theInstanceId The job instance ID
+	 * @since 8.12.0
+	 */
+	default BatchInstanceStepStatisticsDTO calculateStepStatistics(String theInstanceId) {
+		HapiTransactionService.requireTransaction();
+
+		Map<String, Long> stepIdToEarliestStart = new HashMap<>();
+		Map<String, Long> stepIdToLatestEnd = new HashMap<>();
+		Map<String, Integer> stepIdToChunkCount = new HashMap<>();
+
+		Iterator<WorkChunk> chunkIter = fetchAllWorkChunksIterator(theInstanceId, false);
+		while (chunkIter.hasNext()) {
+			WorkChunk chunk = chunkIter.next();
+			String stepId = chunk.getTargetStepId();
+			if (chunk.getStartTime() != null) {
+				long startTime = chunk.getStartTime().getTime();
+				if (!stepIdToEarliestStart.containsKey(stepId) || startTime < stepIdToEarliestStart.get(stepId)) {
+					stepIdToEarliestStart.put(stepId, startTime);
+				}
+			}
+			if (chunk.getEndTime() != null) {
+				long endTime = chunk.getEndTime().getTime();
+				if (!stepIdToLatestEnd.containsKey(stepId) || endTime > stepIdToLatestEnd.get(stepId)) {
+					stepIdToLatestEnd.put(stepId, endTime);
+				}
+			}
+			if (!stepIdToChunkCount.containsKey(stepId)) {
+				stepIdToChunkCount.put(stepId, 1);
+			} else {
+				stepIdToChunkCount.put(stepId, stepIdToChunkCount.get(stepId) + 1);
+			}
+		}
+
+		Map<String, StepStatistics> stepIdToStepStatistics = new HashMap<>();
+		for (String stepId : stepIdToChunkCount.keySet()) {
+			int chunkCount = stepIdToChunkCount.get(stepId);
+			Long earliestStart = stepIdToEarliestStart.get(stepId);
+			Long latestEnd = stepIdToLatestEnd.get(stepId);
+
+			long millisElapsed = earliestStart != null && latestEnd != null ? latestEnd - earliestStart : 0;
+			StepStatistics stepStatistics = new StepStatistics(chunkCount, millisElapsed);
+			stepIdToStepStatistics.put(stepId, stepStatistics);
+		}
+
+		return new BatchInstanceStepStatisticsDTO(stepIdToStepStatistics);
+	}
 }

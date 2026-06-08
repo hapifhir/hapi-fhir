@@ -1,0 +1,7 @@
+---
+type: change
+issue: 7539
+title: "The automatically generated server CapabilityStatement for HAPI FHIR Plain Providers
+   will no longer automatically include all search parameters as `include` options if the
+   search method(s) have an explicit `@IncludeParam` annotation which specifies a different
+   list of parameters. Thanks to Tanmay Darmorha for the contribution!"
