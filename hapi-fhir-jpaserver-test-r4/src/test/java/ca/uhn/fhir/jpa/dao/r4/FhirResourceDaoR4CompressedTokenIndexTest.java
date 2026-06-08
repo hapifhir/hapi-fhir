@@ -33,7 +33,10 @@ import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -670,7 +673,343 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 		assertThat(results).as("should find by SS type").containsExactly(patientId);
 	}
 
+	// ===== Group I: system-only search and system discrimination =====
+
+	@Test
+	void searchIdentifier_systemOnly_findsOnlyResourcesWithThatSystem() {
+		// IDENTIFIER mode: identifier routes to HFJ_SPIDX2_TOKEN_IDENTIFIER.
+		Patient withSystem = new Patient();
+		withSystem.addIdentifier().setSystem("http://hospital.org/mrn").setValue("12345");
+		IIdType matchId = myPatientDao.create(withSystem, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient otherSystem = new Patient();
+		otherSystem.addIdentifier().setSystem("http://other.org/mrn").setValue("67890");
+		myPatientDao.create(otherSystem, mySrd);
+
+		// identifier=http://hospital.org/mrn|
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Patient.SP_IDENTIFIER, new TokenParam("http://hospital.org/mrn", null));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
+		assertThat(results)
+				.as("system-only search must find only resources whose identifier has that system")
+				.containsExactly(matchId);
+	}
+
+	@Test
+	void searchCommonToken_systemOnly_findsOnlyResourcesWithThatSystem() {
+		// Observation.code is NOT an "identifier" param -> routes to the HFJ_SPIDX2_TOKEN_COMMON tables.
+		IIdType loincId = myObservationDao
+				.create(newObservationWithCode("http://loinc.org", "12345-6"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+		myObservationDao.create(newObservationWithCode("http://snomed.info/sct", "999"), mySrd);
+
+		// code=http://loinc.org|
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Observation.SP_CODE, new TokenParam("http://loinc.org", null));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myObservationDao.search(params, mySrd));
+		assertThat(results)
+				.as("system-only search must find only resources whose token has that system (COMMON mode)")
+				.containsExactly(loincId);
+	}
+
+	@Test
+	void searchIdentifier_systemAndValue_narrowsBySystem() {
+		// Two patients sharing the same identifier VALUE but different SYSTEMS.
+		Patient a = new Patient();
+		a.addIdentifier().setSystem("http://system-a.org").setValue("SHARED");
+		IIdType aId = myPatientDao.create(a, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient b = new Patient();
+		b.addIdentifier().setSystem("http://system-b.org").setValue("SHARED");
+		myPatientDao.create(b, mySrd);
+
+		// identifier=http://system-a.org|SHARED
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Patient.SP_IDENTIFIER, new TokenParam("http://system-a.org", "SHARED"));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
+		assertThat(results)
+				.as("system+value search must narrow by system, not match the same value in another system")
+				.containsExactly(aId);
+	}
+
+	@Test
+	void searchIdentifier_systemOnly_nonExistentSystem_findsNothing() {
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://hospital.org/mrn").setValue("12345");
+		myPatientDao.create(p, mySrd);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Patient.SP_IDENTIFIER, new TokenParam("http://never-indexed.example.org", null));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
+		assertThat(results)
+				.as("system-only search for a never-indexed system must find nothing")
+				.isEmpty();
+	}
+
+	// ===== Group J: :not modifier (negation) with system discrimination =====
+
+	@Test
+	void searchCommonToken_notSystemOnly_excludesMatchingSystemAndKeepsEmpty() {
+		// COMMON mode (Observation.code). Mirrors FhirResourceDaoR4StandardQueriesNoFTTest.NotModifier.
+		IIdType withMatchingSystem = myObservationDao
+				.create(newObservationWithCode("http://example.com", "value"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+		IIdType withOtherSystem = myObservationDao
+				.create(newObservationWithCode("http://example2.com", "value"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+		IIdType empty =
+				myObservationDao.create(new Observation(), mySrd).getId().toUnqualifiedVersionless();
+
+		// code:not=http://example.com|
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(
+				Observation.SP_CODE,
+				new TokenParam("http://example.com", null).setModifier(TokenParamModifier.NOT));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myObservationDao.search(params, mySrd));
+		assertThat(results)
+				.as(":not system-only must exclude the matching system but keep others and resources without the token")
+				.doesNotContain(withMatchingSystem)
+				.contains(withOtherSystem, empty);
+	}
+
+	@Test
+	void searchIdentifier_notSystemOnly_excludesMatchingSystemAndKeepsEmpty() {
+		// IDENTIFIER mode (Patient.identifier).
+		IIdType withMatchingSystem = myPatientDao
+				.create(newPatientWithIdentifier("http://hospital.org/mrn", "12345"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+		IIdType withOtherSystem = myPatientDao
+				.create(newPatientWithIdentifier("http://other.org/mrn", "67890"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+		IIdType empty = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless();
+
+		// identifier:not=http://hospital.org/mrn|
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(
+				Patient.SP_IDENTIFIER,
+				new TokenParam("http://hospital.org/mrn", null).setModifier(TokenParamModifier.NOT));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
+		assertThat(results)
+				.as(":not system-only must exclude the matching system but keep others and resources without the token")
+				.doesNotContain(withMatchingSystem)
+				.contains(withOtherSystem, empty);
+	}
+
+	@Test
+	void searchIdentifier_notSystemAndValue_excludesOnlyExactSystemAndValue() {
+		// identifier value shared across systems; :not on one system+value must only exclude that exact pair.
+		IIdType exact = myPatientDao
+				.create(newPatientWithIdentifier("http://system-a.org", "SHARED"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+		IIdType sameValueOtherSystem = myPatientDao
+				.create(newPatientWithIdentifier("http://system-b.org", "SHARED"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+
+		// identifier:not=http://system-a.org|SHARED
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(
+				Patient.SP_IDENTIFIER,
+				new TokenParam("http://system-a.org", "SHARED").setModifier(TokenParamModifier.NOT));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
+		assertThat(results)
+				.as(":not system+value must exclude only the exact pair, keeping the same value under another system")
+				.doesNotContain(exact)
+				.contains(sameValueOtherSystem);
+	}
+
+	// ===== Group K: _filter "ne" and mixed OR-lists (compressed mode; expected results validated against legacy) =====
+
+	@Test
+	void filterNe_commonSystemOnly() {
+		myStorageSettings.setFilterParameterEnabled(true);
+
+		IIdType inSystem = myObservationDao
+				.create(newObservationWithCode("http://example.com", "value"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+		IIdType otherSystem = myObservationDao
+				.create(newObservationWithCode("http://example2.com", "value"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("code ne http://example.com|"));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myObservationDao.search(map, mySrd));
+		assertThat(results)
+				.as("_filter code ne system|")
+				.doesNotContain(inSystem)
+				.contains(otherSystem);
+	}
+
+	@Test
+	void filterNe_identifierSystemOnly() {
+		myStorageSettings.setFilterParameterEnabled(true);
+
+		IIdType inSystem = myPatientDao
+				.create(newPatientWithIdentifier("http://hospital.org/mrn", "12345"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+		IIdType otherSystem = myPatientDao
+				.create(newPatientWithIdentifier("http://other.org/mrn", "67890"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("identifier ne http://hospital.org/mrn|"));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(map, mySrd));
+		assertThat(results)
+				.as("_filter identifier ne system|")
+				.doesNotContain(inSystem)
+				.contains(otherSystem);
+	}
+
+	@Test
+	void filterNe_identifierSystemAndValue() {
+		myStorageSettings.setFilterParameterEnabled(true);
+
+		IIdType exact = myPatientDao
+				.create(newPatientWithIdentifier("http://system-a.org", "SHARED"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+		IIdType sameValueOtherSystem = myPatientDao
+				.create(newPatientWithIdentifier("http://system-b.org", "SHARED"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("identifier ne http://system-a.org|SHARED"));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(map, mySrd));
+		assertThat(results)
+				.as("_filter identifier ne system|value")
+				.doesNotContain(exact)
+				.contains(sameValueOtherSystem);
+	}
+
+	@Test
+	void searchIdentifier_systemOnlyOrList_withUnknownSystem_stillMatchesKnown() {
+		IIdType known = myPatientDao
+				.create(newPatientWithIdentifier("http://a.org", "1"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+
+		// identifier=http://a.org|,http://nonexistent.org|
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(
+				Patient.SP_IDENTIFIER,
+				new TokenOrListParam()
+						.add(new TokenParam("http://a.org", null))
+						.add(new TokenParam("http://nonexistent.org", null)));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(map, mySrd));
+		assertThat(results)
+				.as("OR-list with an unknown system must still match the known system")
+				.contains(known);
+	}
+
+	// ===== Group L: NULL-system rows under "ne" (compressed mode; expected results validated against legacy) =====
+
+	@Test
+	void filterNe_identifierSystemOnly_includesResourceWithNoSystem() {
+		myStorageSettings.setFilterParameterEnabled(true);
+
+		Patient noSystem = new Patient();
+		noSystem.addIdentifier().setValue("V2"); // value, but no system
+		IIdType noSystemId = myPatientDao.create(noSystem, mySrd).getId().toUnqualifiedVersionless();
+
+		IIdType inSystem = myPatientDao
+				.create(newPatientWithIdentifier("http://sys-a.org", "V1"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("identifier ne http://sys-a.org|"));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(map, mySrd));
+		assertThat(results)
+				.as("_filter identifier ne system| must include a resource whose identifier has no system")
+				.contains(noSystemId)
+				.doesNotContain(inSystem);
+	}
+
+	@Test
+	void filterNe_identifierSystemAndValue_includesSameValueWithNoSystem() {
+		myStorageSettings.setFilterParameterEnabled(true);
+
+		IIdType exact = myPatientDao
+				.create(newPatientWithIdentifier("http://system-a.org", "SHARED"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+
+		Patient noSystemSameValue = new Patient();
+		noSystemSameValue.addIdentifier().setValue("SHARED"); // same value, no system
+		IIdType noSystemId =
+				myPatientDao.create(noSystemSameValue, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("identifier ne http://system-a.org|SHARED"));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(map, mySrd));
+		assertThat(results)
+				.as("_filter identifier ne system|value must include the same value with no system")
+				.doesNotContain(exact)
+				.contains(noSystemId);
+	}
+
+	// ===== Group M: explicit empty-system search (compressed mode; expected results validated against legacy) =====
+
+	@Test
+	void searchIdentifier_explicitNoSystem_matchesOnlyNoSystemValue() {
+		Patient noSystem = new Patient();
+		noSystem.addIdentifier().setValue("MRN123"); // value, but no system
+		IIdType noSystemId = myPatientDao.create(noSystem, mySrd).getId().toUnqualifiedVersionless();
+
+		IIdType withSystem = myPatientDao
+				.create(newPatientWithIdentifier("http://hospital.org/mrn", "MRN123"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+
+		// identifier=|MRN123  (explicit "no system")
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Patient.SP_IDENTIFIER, new TokenParam("", "MRN123"));
+
+		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(map, mySrd));
+		assertThat(results)
+				.as("identifier=|value must match a no-system identifier but not the same value under a system")
+				.contains(noSystemId)
+				.doesNotContain(withSystem);
+	}
+
 	// ===== Helpers =====
+
+	private Patient newPatientWithIdentifier(String theSystem, String theValue) {
+		Patient p = new Patient();
+		p.addIdentifier().setSystem(theSystem).setValue(theValue);
+		return p;
+	}
 
 	private Observation newObservationWithCode(String theSystem, String theCode) {
 		Observation obs = new Observation();

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceSystemEntity;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -37,10 +38,11 @@ import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Predicate builder for the compressed token index tables:
@@ -49,11 +51,9 @@ import java.util.List;
  *   <li>{@code HFJ_SPIDX2_TOKEN_IDENTIFIER} (Mode.IDENTIFIER)</li>
  * </ul>
  *
- * @see ca.uhn.fhir.jpa.model.entity.TokenIndexStrategyEnum
+ * @see ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy
  */
 public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
-
-	private static final Logger ourLog = LoggerFactory.getLogger(CompressedTokenPredicateBuilder.class);
 
 	private final TokenIndexMode myIndexMode;
 	private final DbColumn myColumnResId;
@@ -65,6 +65,7 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 	private DbColumn myColumnIdentifierHashIdentity;
 	private DbColumn myColumnIdentifierHashValue;
 	private DbColumn myColumnIdentifierTypeHashSysAndValue;
+	private DbColumn myColumnIdentifierSystemUrlId;
 
 	public CompressedTokenPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, TokenIndexMode theMode) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable(theMode.getTableName()));
@@ -77,6 +78,7 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 			myColumnIdentifierHashIdentity = getTable().addColumn("HASH_IDENTITY");
 			myColumnIdentifierHashValue = getTable().addColumn("HASH_VALUE");
 			myColumnIdentifierTypeHashSysAndValue = getTable().addColumn("TYPE_HASH_SYS_AND_VALUE");
+			myColumnIdentifierSystemUrlId = getTable().addColumn("SP_SYSTEM_URL_ID");
 		}
 	}
 
@@ -97,26 +99,6 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 		}
 		// COMMON mode: HASH_IDENTITY is in HFJ_SPIDX2_TOKEN_COMMON, requires subquery from HFJ_SPIDX2_TOKEN_COMMON_RES
 		return buildCommonSubquery("HASH_IDENTITY", hashIdentity);
-	}
-
-	@Override
-	protected Condition createPredicateOrList(
-			String theResourceType,
-			String theSearchParamName,
-			List<FhirVersionIndependentConcept> theCodes,
-			boolean theWantEquals) {
-
-		Condition[] conditions = new Condition[theCodes.size()];
-		for (int i = 0; i < theCodes.size(); i++) {
-			conditions[i] = buildSingleCondition(theResourceType, theSearchParamName, theCodes.get(i), theWantEquals);
-		}
-
-		if (conditions.length == 1) {
-			return conditions[0];
-		}
-		return theWantEquals
-				? QueryParameterUtils.toOrPredicate(conditions)
-				: QueryParameterUtils.toAndPredicate(conditions);
 	}
 
 	/**
@@ -172,17 +154,36 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 				"SP_MISSING is not supported with compressed token tables. Set IndexMissingFields = DISABLED.");
 	}
 
-	private Condition buildSingleCondition(
+	@Override
+	protected Condition createPredicateOrList(
 			String theResourceType,
 			String theSearchParamName,
-			FhirVersionIndependentConcept theToken,
+			List<FhirVersionIndependentConcept> theCodes,
 			boolean theWantEquals) {
-		if (myIndexMode == TokenIndexMode.COMMON) {
-			return buildCommonCondition(theResourceType, theSearchParamName, theToken, theWantEquals);
+
+		Condition[] conditions = new Condition[theCodes.size()];
+		for (int i = 0; i < theCodes.size(); i++) {
+			FhirVersionIndependentConcept token = theCodes.get(i);
+			if (myIndexMode == TokenIndexMode.COMMON) {
+				conditions[i] = buildCommonCondition(theResourceType, theSearchParamName, token, theWantEquals);
+			} else {
+				conditions[i] = buildIdentifierCondition(theResourceType, theSearchParamName, token, theWantEquals);
+			}
 		}
-		return buildIdentifierCondition(theResourceType, theSearchParamName, theToken, theWantEquals);
+
+		if (conditions.length == 1) {
+			return conditions[0];
+		}
+		return theWantEquals
+				? QueryParameterUtils.toOrPredicate(conditions)
+				: QueryParameterUtils.toAndPredicate(conditions);
 	}
 
+	/**
+	 * Builds the predicate for one token in COMMON mode. A system+value token matches
+	 * {@code HASH_SYS_AND_VALUE} directly on {@code HFJ_SPIDX2_TOKEN_COMMON_RES}; a value-only or system-only
+	 * token is resolved with a subquery into {@code HFJ_SPIDX2_TOKEN_COMMON}.
+	 */
 	private Condition buildCommonCondition(
 			String theResourceType,
 			String theSearchParamName,
@@ -192,70 +193,33 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 		String system = theToken.getSystem();
 		String code = theToken.getCode();
 
-		if (code != null && system != null) {
-			// system + value → direct HASH_SYS_AND_VALUE lookup on TOKEN_COMMON_RES (fast, single index hit)
-			long hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
-					getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, system, code);
-			return theWantEquals
-					? BinaryCondition.equalTo(myColumnCommonHashSysAndValue, generatePlaceholder(hash))
-					: BinaryCondition.notEqualTo(myColumnCommonHashSysAndValue, generatePlaceholder(hash));
-		}
-
-		if (code != null) {
-			// value only → subquery into TOKEN_COMMON by HASH_VALUE
+		if (system == null) {
+			// value only: subquery into TOKEN_COMMON by HASH_VALUE
 			long hash = ResourceIndexedSearchParamToken.calculateHashValue(
 					getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, code);
 			Condition subquery = buildCommonSubquery("HASH_VALUE", hash);
 			return theWantEquals ? subquery : new NotCondition(subquery);
 		}
 
-		// system only: no HASH_SYS column in compressed tables; caller should route elsewhere
-		ourLog.warn(
-				"System-only token search is not supported with compressed token tables for param [{}]; returning no results",
-				theSearchParamName);
-		setMatchNothing();
-		return null;
-	}
-
-	private Condition buildIdentifierCondition(
-			String theResourceType,
-			String theSearchParamName,
-			FhirVersionIndependentConcept theToken,
-			boolean theWantEquals) {
-
-		String system = theToken.getSystem();
-		String code = theToken.getCode();
-
-		// For :of-type searches with both system and code, use TYPE_HASH_SYS_AND_VALUE for direct lookup
-		if (theSearchParamName.endsWith(Constants.PARAMQUALIFIER_TOKEN_OF_TYPE) && system != null && code != null) {
-			long hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
-					getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, system, code);
-			return theWantEquals
-					? BinaryCondition.equalTo(myColumnIdentifierTypeHashSysAndValue, generatePlaceholder(hash))
-					: BinaryCondition.notEqualTo(myColumnIdentifierTypeHashSysAndValue, generatePlaceholder(hash));
+		if (isBlank(code)) {
+			// system only: subquery into TOKEN_COMMON by HASH_IDENTITY + SYSTEM_ID
+			long systemId = ResourceSystemEntity.calculatePid(system);
+			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+					getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName);
+			Condition subquery = buildCommonSystemOnlySubquery(hashIdentity, systemId);
+			return theWantEquals ? subquery : new NotCondition(subquery);
 		}
 
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-				getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName);
-		Condition identityCondition =
-				BinaryCondition.equalTo(myColumnIdentifierHashIdentity, generatePlaceholder(hashIdentity));
-
-		if (code == null) {
-			return identityCondition;
-		}
-
-		long hashValue = ResourceIndexedSearchParamToken.calculateHashValue(
-				getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, code);
-		Condition valueCondition = theWantEquals
-				? BinaryCondition.equalTo(myColumnIdentifierHashValue, generatePlaceholder(hashValue))
-				: BinaryCondition.notEqualTo(myColumnIdentifierHashValue, generatePlaceholder(hashValue));
-
-		// TODO: add SP_SYSTEM_URL_ID discrimination once IResourceIdentifierCacheSvc exposes a read-only lookup
-		return QueryParameterUtils.toAndPredicate(identityCondition, valueCondition);
+		// system + value: direct HASH_SYS_AND_VALUE lookup on TOKEN_COMMON_RES
+		long hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
+				getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, system, code);
+		return equalsPredicate(theWantEquals, myColumnCommonHashSysAndValue, hash);
 	}
 
 	/**
-	 * Builds: HASH_SYS_AND_VALUE IN (SELECT HASH_SYS_AND_VALUE FROM HFJ_SPIDX2_TOKEN_COMMON WHERE {@code theHashColumnName} = ?)
+	 * Builds a predicate for COMMON mode:
+	 * HASH_SYS_AND_VALUE IN (SELECT HASH_SYS_AND_VALUE FROM HFJ_SPIDX2_TOKEN_COMMON WHERE theHashColumnName = ?).
+	 * theHashColumnName is HASH_VALUE for a value-only search, or HASH_IDENTITY for the not-equals (ne) identity scoping.
 	 */
 	private InCondition buildCommonSubquery(String theHashColumnName, long theHashValue) {
 		DbTable commonTable = getSearchQueryBuilder().addTable("HFJ_SPIDX2_TOKEN_COMMON");
@@ -268,5 +232,106 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 		subquery.addCondition(BinaryCondition.equalTo(hashCol, generatePlaceholder(theHashValue)));
 
 		return new InCondition(myColumnCommonHashSysAndValue, subquery);
+	}
+
+	/**
+	 * Builds a system-only predicate for COMMON mode:
+	 * HASH_SYS_AND_VALUE IN (SELECT HASH_SYS_AND_VALUE FROM HFJ_SPIDX2_TOKEN_COMMON WHERE HASH_IDENTITY = ? AND SYSTEM_ID = ?).
+	 */
+	private InCondition buildCommonSystemOnlySubquery(long theHashIdentity, long theSystemId) {
+		DbTable commonTable = getSearchQueryBuilder().addTable("HFJ_SPIDX2_TOKEN_COMMON");
+		DbColumn hashSysAndValueCol = commonTable.addColumn("HASH_SYS_AND_VALUE");
+		DbColumn hashIdentityCol = commonTable.addColumn("HASH_IDENTITY");
+		DbColumn systemIdCol = commonTable.addColumn("SYSTEM_ID");
+
+		SelectQuery subquery = new SelectQuery();
+		subquery.addColumns(hashSysAndValueCol);
+		subquery.addFromTable(commonTable);
+		subquery.addCondition(ComboCondition.and(
+				BinaryCondition.equalTo(hashIdentityCol, generatePlaceholder(theHashIdentity)),
+				BinaryCondition.equalTo(systemIdCol, generatePlaceholder(theSystemId))));
+
+		return new InCondition(myColumnCommonHashSysAndValue, subquery);
+	}
+
+	private Condition buildIdentifierCondition(
+			String theResourceType,
+			String theSearchParamName,
+			FhirVersionIndependentConcept theToken,
+			boolean theWantEquals) {
+
+		String system = theToken.getSystem();
+		String code = theToken.getCode();
+
+		// for :of-type search parameters we use TYPE_HASH_SYS_AND_VALUE column for lookup
+		if (theSearchParamName.endsWith(Constants.PARAMQUALIFIER_TOKEN_OF_TYPE) && system != null && isNotBlank(code)) {
+			long hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
+					getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, system, code);
+			return equalsPredicate(theWantEquals, myColumnIdentifierTypeHashSysAndValue, hash);
+		}
+
+		// HASH_IDENTITY (resource type + param) added only for equality searches; :not/ne gets it from the
+		// caller (buildNeHashIdentityCondition), and value searches already imply it via HASH_VALUE.
+		Condition hashIdentityCondition = null;
+		if (theWantEquals) {
+			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+					getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName);
+			hashIdentityCondition =
+					BinaryCondition.equalTo(myColumnIdentifierHashIdentity, generatePlaceholder(hashIdentity));
+		}
+
+		// build the system and value predicates
+		Condition systemCondition = systemPredicate(theWantEquals, system);
+		Condition valueCondition = null;
+		if (isNotBlank(code)) {
+			long hashValue = ResourceIndexedSearchParamToken.calculateHashValue(
+					getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, code);
+			valueCondition = equalsPredicate(theWantEquals, myColumnIdentifierHashValue, hashValue);
+		}
+
+		// equals - system AND value must match; :not/ne - the inverse, system OR value <>
+		Condition tokenCondition = theWantEquals
+				? QueryParameterUtils.toAndPredicate(systemCondition, valueCondition)
+				: QueryParameterUtils.toOrPredicate(systemCondition, valueCondition);
+
+		return QueryParameterUtils.toAndPredicate(hashIdentityCondition, tokenCondition);
+	}
+
+	/**
+	 * Builds the {@code SP_SYSTEM_URL_ID} predicate for a token's system, or {@code null} when there is no system
+	 * constraint.
+	 */
+	private Condition systemPredicate(boolean theWantEquals, String theSystem) {
+		// null system = no system constraint (value-only search)
+		if (theSystem == null) {
+			return null;
+		}
+
+		// empty system ("identifier=|value") is indexed as NULL, so match on NULL/NOT NULL
+		if (isBlank(theSystem)) {
+			return theWantEquals
+					? UnaryCondition.isNull(myColumnIdentifierSystemUrlId)
+					: UnaryCondition.isNotNull(myColumnIdentifierSystemUrlId);
+		}
+
+		long systemId = ResourceSystemEntity.calculatePid(theSystem);
+		if (theWantEquals) {
+			// equals on a concrete system: SP_SYSTEM_URL_ID must equal this system's id
+			return BinaryCondition.equalTo(myColumnIdentifierSystemUrlId, generatePlaceholder(systemId));
+		}
+
+		// concrete system, :not/ne: match any row that isn't this system (including rows with no system)
+		return QueryParameterUtils.toOrPredicate(
+				equalsPredicate(false, myColumnIdentifierSystemUrlId, systemId),
+				UnaryCondition.isNull(myColumnIdentifierSystemUrlId));
+	}
+
+	/**
+	 * Builds {@code theColumn = ?} when {@code theWantEquals} is {@code true}, otherwise {@code theColumn <> ?}.
+	 */
+	private Condition equalsPredicate(boolean theWantEquals, DbColumn theColumn, long theValue) {
+		return theWantEquals
+				? BinaryCondition.equalTo(theColumn, generatePlaceholder(theValue))
+				: BinaryCondition.notEqualTo(theColumn, generatePlaceholder(theValue));
 	}
 }

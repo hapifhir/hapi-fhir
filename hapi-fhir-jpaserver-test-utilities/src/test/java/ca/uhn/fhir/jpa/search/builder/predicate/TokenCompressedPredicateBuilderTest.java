@@ -146,6 +146,55 @@ class TokenCompressedPredicateBuilderTest {
 	}
 
 	@Test
+	void identifierMode_systemOnly_producesHashIdentityAndSystemUrlIdPredicate() {
+		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(myPrimaryTable);
+
+		CompressedTokenPredicateBuilder builder =
+				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
+
+		RuntimeSearchParam searchParam =
+				new RuntimeSearchParam(null, null, "Patient", null, null, null, null, null, null, null);
+		// system-only: identifier=http://hospital.org/mrn|
+		List<IQueryParameterType> params = List.of(new TokenParam("http://hospital.org/mrn", null));
+
+		Condition predicate =
+				builder.createPredicateToken(params, "Patient", null, searchParam, RequestPartitionId.defaultPartition());
+
+		assertThat(predicate).isNotNull();
+		// IDENTIFIER mode system-only → AND predicate containing HASH_IDENTITY and SP_SYSTEM_URL_ID (no HASH_VALUE)
+		String sql = predicate.toString();
+		assertThat(sql).contains("HASH_IDENTITY");
+		assertThat(sql).contains("SP_SYSTEM_URL_ID");
+		assertThat(sql).doesNotContain("HASH_VALUE");
+	}
+
+	@Test
+	void commonMode_systemOnly_producesSubqueryIntoTokenCommonBySystemId() {
+		// Constructor gets primary table; system-only subquery needs TOKEN_COMMON too
+		when(mySearchQueryBuilder.addTable(Mockito.anyString()))
+				.thenReturn(myPrimaryTable)
+				.thenReturn(myCommonTable);
+
+		CompressedTokenPredicateBuilder builder =
+				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.COMMON);
+
+		RuntimeSearchParam searchParam =
+				new RuntimeSearchParam(null, null, "Patient", null, null, null, null, null, null, null);
+		// system-only: code=http://loinc.org|
+		List<IQueryParameterType> params = List.of(new TokenParam("http://loinc.org", null));
+
+		Condition predicate =
+				builder.createPredicateToken(params, "Patient", null, searchParam, RequestPartitionId.defaultPartition());
+
+		assertThat(predicate).isNotNull();
+		// system-only in COMMON mode → IN (subquery) filtering by HASH_IDENTITY and SYSTEM_ID
+		assertThat(predicate).isInstanceOf(InCondition.class);
+		String sql = predicate.toString();
+		assertThat(sql).contains("SYSTEM_ID");
+		assertThat(sql).contains("HASH_IDENTITY");
+	}
+
+	@Test
 	void identifierMode_missingParam_producesNotExistsSubquery() {
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(myPrimaryTable);
 
