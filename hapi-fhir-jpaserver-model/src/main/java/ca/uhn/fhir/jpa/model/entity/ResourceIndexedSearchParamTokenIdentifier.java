@@ -50,10 +50,9 @@ import java.util.Objects;
 			@Index(
 					name = "IDX_SP_TOKEN_ID_HASH_VALUE",
 					columnList =
-							"HASH_IDENTITY,HASH_VALUE,RES_ID,PARTITION_ID,SP_SYSTEM_URL_ID,TYPE_HASH_SYS_AND_VALUE"),
-			@Index(name = "IDX_SP_TOKEN_ID_RES_ID", columnList = "RES_ID")
+							"HASH_IDENTITY,HASH_VALUE,RES_ID,PARTITION_ID,SP_SYSTEM_URL_ID,TYPE_HASH_SYS_AND_VALUE")
 		})
-@IdClass(IdAndPartitionId.class)
+@IdClass(ResIdSpIdAndPartitionId.class)
 public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	public static final String HFJ_SPIDX2_TOKEN_IDENTIFIER = "HFJ_SPIDX2_TOKEN_IDENTIFIER";
 	public static final int MAX_LENGTH = 768;
@@ -70,8 +69,9 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	@Column(name = "PARTITION_ID", nullable = true)
 	private Integer myPartitionIdValue;
 
+	@Id
 	@Column(name = "RES_ID", nullable = false)
-	private long myResourceId;
+	private Long myResourceId;
 
 	@Column(name = "HASH_IDENTITY", nullable = false)
 	private long myHashIdentity;
@@ -112,7 +112,7 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 
 	public ResourceIndexedSearchParamTokenIdentifier(
 			Integer thePartitionId,
-			long theResourceId,
+			Long theResourceId,
 			long theHashIdentity,
 			Long theSystemUrlId,
 			String theValue,
@@ -140,7 +140,7 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 		return myPartitionIdValue;
 	}
 
-	public long getResourceId() {
+	public Long getResourceId() {
 		return myResourceId;
 	}
 
@@ -172,7 +172,7 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
 		if (!(theO instanceof ResourceIndexedSearchParamTokenIdentifier that)) return false;
-		return myResourceId == that.myResourceId
+		return Objects.equals(myResourceId, that.myResourceId)
 				&& myHashIdentity == that.myHashIdentity
 				&& myHashValue == that.myHashValue
 				&& Objects.equals(mySystemUrlId, that.mySystemUrlId)

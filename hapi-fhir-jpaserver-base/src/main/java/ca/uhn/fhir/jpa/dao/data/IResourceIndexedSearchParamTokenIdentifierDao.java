@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import ca.uhn.fhir.jpa.model.entity.ResIdSpIdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenIdentifier;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -30,7 +30,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface IResourceIndexedSearchParamTokenIdentifierDao
-		extends JpaRepository<ResourceIndexedSearchParamTokenIdentifier, IdAndPartitionId>, IHapiFhirJpaRepository {
+		extends JpaRepository<ResourceIndexedSearchParamTokenIdentifier, ResIdSpIdAndPartitionId>,
+				IHapiFhirJpaRepository {
 
 	@Query("select t from ResourceIndexedSearchParamTokenIdentifier t WHERE t.myResource.myPid = :resid")
 	List<ResourceIndexedSearchParamTokenIdentifier> findByResourceId(@Param("resid") JpaPid theResourcePid);

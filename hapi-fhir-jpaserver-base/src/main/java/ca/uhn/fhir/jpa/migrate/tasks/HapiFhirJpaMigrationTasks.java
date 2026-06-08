@@ -238,10 +238,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Builder.BuilderAddTableByColumns spidx2TokenIdentifier;
 			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
 				spidx2TokenIdentifier = version.addTableByColumns(
-						"20260526.100", "HFJ_SPIDX2_TOKEN_IDENTIFIER", "SP_ID", "PARTITION_ID");
+						"20260526.100", "HFJ_SPIDX2_TOKEN_IDENTIFIER", "RES_ID", "PARTITION_ID", "SP_ID");
 			} else {
 				spidx2TokenIdentifier =
-						version.addTableByColumns("20260526.100", "HFJ_SPIDX2_TOKEN_IDENTIFIER", "SP_ID");
+						version.addTableByColumns("20260526.100", "HFJ_SPIDX2_TOKEN_IDENTIFIER", "RES_ID", "SP_ID");
 			}
 
 			spidx2TokenIdentifier.addColumn("SP_ID").nonNullable().type(ColumnTypeEnum.LONG);
@@ -274,10 +274,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"PARTITION_ID",
 							"SP_SYSTEM_URL_ID",
 							"TYPE_HASH_SYS_AND_VALUE");
-			spidx2TokenIdentifier
-					.addIndex("20260526.140", "IDX_SP_TOKEN_ID_RES_ID")
-					.unique(false)
-					.withColumns("RES_ID");
 
 			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
 				spidx2TokenIdentifier
