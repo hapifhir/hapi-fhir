@@ -303,7 +303,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	protected boolean isRequiresNewTransactionWhenChangingPartitions() {
+	@Override
+	public boolean isRequiresNewTransactionWhenChangingPartitions() {
 		return myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW;
 	}
 

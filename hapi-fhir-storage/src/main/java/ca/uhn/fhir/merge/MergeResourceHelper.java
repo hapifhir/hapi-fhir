@@ -112,7 +112,7 @@ public class MergeResourceHelper {
 		return targetOutcome;
 	}
 
-	public void createProvenance(
+	public IIdType createProvenance(
 			IIdType theSourceVersionedId,
 			IIdType theTargetVersionedId,
 			List<IIdType> theChangedResourceIds,
@@ -122,7 +122,7 @@ public class MergeResourceHelper {
 			List<IProvenanceAgent> theProvenanceAgents,
 			List<IBaseResource> theContainedResources) {
 
-		myProvenanceSvc.createProvenance(
+		return myProvenanceSvc.createProvenance(
 				theTargetVersionedId,
 				theSourceVersionedId,
 				theChangedResourceIds,

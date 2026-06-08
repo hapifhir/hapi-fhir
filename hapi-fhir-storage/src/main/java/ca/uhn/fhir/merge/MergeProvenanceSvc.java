@@ -60,7 +60,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	}
 
 	@Override
-	public void createProvenance(
+	public IIdType createProvenance(
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
@@ -70,7 +70,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 			List<IProvenanceAgent> theProvenanceAgents,
 			List<IBaseResource> theContainedResources) {
 
-		super.createProvenance(
+		return super.createProvenance(
 				theTargetId,
 				theSourceId,
 				theChangedResourceIds,

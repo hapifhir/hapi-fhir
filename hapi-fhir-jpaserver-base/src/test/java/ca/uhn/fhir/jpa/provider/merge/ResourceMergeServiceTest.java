@@ -141,6 +141,9 @@ public class ResourceMergeServiceTest {
 	@Mock
 	CrossPartitionReplaceReferencesSvc myCrossPartitionReplaceReferencesSvcMock;
 
+	@Mock
+	CrossPartitionMergeRollbackService myCrossPartitionMergeRollbackServiceMock;
+
 	private ResourceMergeService myResourceMergeService;
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -154,6 +157,11 @@ public class ResourceMergeServiceTest {
 		lenient().when(myDaoRegistryMock.getResourceDao("Patient")).thenReturn(myPatientDaoMock);
 		when(myDaoRegistryMock.getResourceDao(Task.class)).thenReturn(myTaskDaoMock);
 		when(myDaoRegistryMock.getResourceDao("Provenance")).thenReturn(myProvenanceDaoMock);
+		// createProvenance now returns the created id; the merge service reads create(...).getId(), so the mock
+		// must return a non-null outcome (the id value is irrelevant to these tests, which capture the argument).
+		lenient()
+				.when(myProvenanceDaoMock.create(any(), any(RequestDetails.class)))
+				.thenReturn(new DaoMethodOutcome());
 		when(myDaoRegistryMock.getFhirContext()).thenReturn(myFhirContext);
 		lenient().when(myDaoRegistryMock.getSystemDao()).thenReturn(mySystemDaoMock);
 		lenient().when(myRequestDetailsMock.getResourceName()).thenReturn("Patient");
@@ -177,7 +185,8 @@ public class ResourceMergeServiceTest {
 			myMergeValidationServiceMock,
 			myMergeResourceHelper,
 			myCrossPartitionReplaceReferencesSvcMock,
-			myPartitionSettingsMock);
+			myPartitionSettingsMock,
+			myCrossPartitionMergeRollbackServiceMock);
 	}
 
 	@Nested

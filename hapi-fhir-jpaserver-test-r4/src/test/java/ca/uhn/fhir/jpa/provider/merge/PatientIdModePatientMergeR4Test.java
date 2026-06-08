@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
@@ -11,8 +14,10 @@ import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -908,6 +913,84 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				targetBeforeUndo, readResource(Patient.class, myPatientIdTgt));
 			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
 				groupBeforeUndo, readResource(Group.class, groupId));
+		}
+	}
+
+	@Nested
+	class MergeAutoRollback {
+
+		// A cross-partition merge spans partitions whose writes can commit independently (e.g. MegaScale uses
+		// REQUIRES_NEW when changing partitions), so the merge service runs a compensating rollback on failure.
+		// In a single database the whole merge runs in one transaction with REQUIRED propagation, so a failure
+		// rolls everything back automatically; the rollback then probes, finds nothing committed, and reports a
+		// full rollback. We force a failure during the src/tgt update (after the data bundle and per-partition
+		// Provenances have run) and assert every resource is back to its pre-merge state.
+		@Test
+		void testMerge_failurePartway_rollsBackFullyInSingleDatabase() {
+			// Data the merge will touch: a Group referencing the source (updated in place) and an Observation in
+			// the source compartment (copied to the target partition).
+			IIdType groupId = createGroup(myPatientIdSrc);
+			IIdType obsId = createObservation(myPatientIdSrc, null, null, "obs-rollback");
+
+			IBaseResource sourceBefore = readResource(Patient.class, myPatientIdSrc);
+			IBaseResource targetBefore = readResource(Patient.class, myPatientIdTgt);
+			IBaseResource groupBefore = readResource(Group.class, groupId);
+			IBaseResource obsBefore = readResource(Observation.class, obsId);
+
+			// Fail the merge while updating the target Patient (Step 3), after Step 1 (data) and Step 2
+			// (per-partition Provenances) have run within the merge's transaction.
+			FailOnTargetPatientUpdateInterceptor failer =
+				new FailOnTargetPatientUpdateInterceptor(myPatientIdTgt.getIdPart());
+			myInterceptorRegistry.registerInterceptor(failer);
+			try {
+				myMergeHelper.callMergeAndValidateException(
+					"Patient",
+					new MergeTestParameters()
+						.sourceResource(new Reference(myPatientIdSrc))
+						.targetResource(new Reference(myPatientIdTgt))
+						.deleteSource(false),
+					InternalErrorException.class,
+					"fully rolled back");
+			} finally {
+				myInterceptorRegistry.unregisterInterceptor(failer);
+			}
+
+			// Single-database merge runs in one transaction, so the failure rolled everything back: every
+			// resource matches its pre-merge snapshot.
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				sourceBefore, readResource(Patient.class, myPatientIdSrc));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				targetBefore, readResource(Patient.class, myPatientIdTgt));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				groupBefore, readResource(Group.class, groupId));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				obsBefore, readResource(Observation.class, obsId));
+
+			// No copy was created in the target's compartment; the original is still in the source's.
+			assertThat(searchBySubject(Observation.class, myPatientIdTgt.getValue())).isEmpty();
+			assertThat(searchBySubject(Observation.class, myPatientIdSrc.getValue())).hasSize(1);
+		}
+	}
+
+	/**
+	 * Test interceptor that fails the merge while the target Patient is being updated (Step 3 of the
+	 * cross-partition forward flow), after the data bundle and per-partition Provenances have run.
+	 */
+	@Interceptor
+	static class FailOnTargetPatientUpdateInterceptor {
+		private final String myTargetIdPart;
+
+		FailOnTargetPatientUpdateInterceptor(String theTargetIdPart) {
+			myTargetIdPart = theTargetIdPart;
+		}
+
+		@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+		public void preUpdate(
+			RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+			if (theNewResource instanceof Patient
+				&& myTargetIdPart.equals(theNewResource.getIdElement().getIdPart())) {
+				throw new InternalErrorException("Simulated failure during target Patient update");
+			}
 		}
 	}
 }
