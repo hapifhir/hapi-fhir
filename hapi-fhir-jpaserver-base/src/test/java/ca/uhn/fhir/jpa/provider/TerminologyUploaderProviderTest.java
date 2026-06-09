@@ -130,7 +130,7 @@ class TerminologyUploaderProviderTest {
 				.andParameter(TerminologyUploaderProvider.PARAM_FILE, attachment)
 				.execute()
 		).isInstanceOf(InvalidRequestException.class)
-			.hasMessageContaining("This operation may no longer be used to upload the http://loinc.org CodeSystem. See $hapi.fhir.upload-terminology.create-job");
+			.hasMessageContaining("The $upload-external-code-system operation has been removed. To upload terminology, see the $hapi.fhir.upload-terminology.create-job operation.");
 	}
 
 	@Test
@@ -188,7 +188,7 @@ class TerminologyUploaderProviderTest {
 
 		assertThat(response.getParameter(RESP_PARAM_OUTCOME).getValue().toString()).contains(
 			"Upload LOINC Job has been created and is in BUILDING state with ID[my-instance-id]",
-			"and optionally upload a property file (loincupload.properties) to the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.attach-file operation",
+			"You can now upload the distribution file(s) (loinc.zip, loincupload.properties) to the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.attach-file operation",
 			"and then start the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.start-job operation."
 		);
 		assertEquals("my-instance-id", response.getParameter(TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID).getValue().toString());

@@ -87,7 +87,7 @@ public class ImportCustomTerminologyStep3HandleProperties
 					conceptProperty.setValue(coding);
 				}
 				default -> throw new IllegalArgumentException(
-						Msg.code(2886) + "Unable to handle property type: " + type);
+						Msg.code(2970) + "Unable to handle property type: " + type);
 			}
 		}
 	}

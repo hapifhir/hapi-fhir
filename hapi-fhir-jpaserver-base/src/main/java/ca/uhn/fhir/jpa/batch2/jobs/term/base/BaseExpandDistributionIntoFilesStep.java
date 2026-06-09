@@ -135,7 +135,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 		} catch (ResourceNotFoundException e) {
 			if (!isIndividualFileAttachmentsSupported()) {
 				throw new JobExecutionFailedException(
-						Msg.code(1) + "No distribution file (" + getDistributionFileName() + ") was attached for "
+						Msg.code(2971) + "No distribution file (" + getDistributionFileName() + ") was attached for "
 								+ getTerminologyName(),
 						e);
 			}

@@ -473,6 +473,33 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	/**
 	 * <code>
+	 * $upload-external-codesystem
+	 * </code>
+	 * This method is no longer supported and doesn't do anything. It has been left
+	 * here to flag to anyone who tries to call it that there is a
+	 * new method to call.
+	 */
+	@Deprecated(since = "8.12.0", forRemoval = true)
+	@Operation(
+			typeName = "CodeSystem",
+			name = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM,
+			idempotent = false,
+			returnParameters = {
+				@OperationParam(name = RESP_PARAM_SUCCESS, typeName = "boolean", min = 1),
+				@OperationParam(name = RESP_PARAM_CONCEPT_COUNT, typeName = "integer", min = 1),
+				@OperationParam(name = RESP_PARAM_TARGET, typeName = "Reference", min = 1)
+			})
+	public IBaseParameters uploadSnapshot(
+			HttpServletRequest theServletRequest,
+			@OperationParam(name = PARAM_SYSTEM, min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
+			@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment")
+					List<ICompositeType> theFiles,
+			RequestDetails theRequestDetails) {
+		throw new InvalidRequestException(Msg.code(2972) + "The " + JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM + " operation has been removed. To upload terminology, see the " + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB + " operation.");
+	}
+
+	/**
+	 * <code>
 	 * $apply-codesystem-delta-add
 	 * </code>
 	 */

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -8,8 +7,8 @@ import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
+import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -19,21 +18,16 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,89 +39,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProviderR4Test.class);
 
-	private byte[] createSctZip() throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ZipOutputStream zos = new ZipOutputStream(bos);
-
-		List<String> inputNames = Arrays.asList("sct2_Concept_Full_INT_20160131.txt", "sct2_Concept_Full-en_INT_20160131.txt", "sct2_Description_Full-en_INT_20160131.txt", "sct2_Identifier_Full_INT_20160131.txt", "sct2_Relationship_Full_INT_20160131.txt", "sct2_StatedRelationship_Full_INT_20160131.txt", "sct2_TextDefinition_Full-en_INT_20160131.txt");
-		for (String nextName : inputNames) {
-			zos.putNextEntry(new ZipEntry("SnomedCT_Release_INT_20160131_Full/Terminology/" + nextName));
-			zos.write(ClasspathUtil.loadResourceAsByteArray("/sct/" + nextName));
-		}
-		zos.close();
-		return bos.toByteArray();
-	}
-
-	@Test
-	public void testUploadInvalidUrl() throws Exception {
-		byte[] packageBytes = createSctZip();
-
-		try {
-			myClient
-				.operation()
-				.onType(CodeSystem.class)
-				.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
-				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI + "FOO"))
-				.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
-				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).contains("Did not find file matching concepts.csv");
-		}
-	}
-
-	@Test
-	public void testUploadIcd10cm() {
-		byte[] packageBytes = ClasspathUtil.loadResourceAsByteArray("/icd/icd10cm_tabular_2021.xml");
-
-		Parameters respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.ICD10CM_URI))
-			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("icd10cm_tabular_2021.xml").setData(packageBytes))
-			.execute();
-
-		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
-
-		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
-		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference()).matches("CodeSystem/[a-zA-Z0-9.\\-]+");
-	}
-
-	@Test
-	public void testUploadMissingPackage() {
-		try {
-			myClient
-				.operation()
-				.onType(CodeSystem.class)
-				.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
-				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI))
-				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1138) + "No 'file' parameter, or package had no data", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testUploadMissingUrl() throws Exception {
-		byte[] packageBytes = createSctZip();
-
-		try {
-			myClient
-				.operation()
-				.onType(CodeSystem.class)
-				.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
-				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
-				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).contains("Missing mandatory parameter: system");
-		}
-
-	}
-
+	@Autowired
+	private TerminologyTestHelper myTerminologyTestHelper;
 
 
 	@Test
@@ -742,10 +655,10 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testUploadExternalCodeSystemAsZip_tempConceptPropertyIsLinkedToTermConcept() {
+	public void testUploadExternalCodeSystemAsZip_tempConceptPropertyIsLinkedToTermConcept() throws IOException {
 
 		// Insert external code system as zip
-		createCodeSystemFromZipFile(myClient);
+		createCodeSystemFromZipFile();
 
 		// Execute a "$lookup" operation on one of the codes created in the code system created above
 		String myLookupParametersJson = """
@@ -817,37 +730,11 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	}
 
 
-	private void createCodeSystemFromZipFile(IGenericClient theFhirClient){
-		// Create a parameters resource for the $upload-external-code-system operation.
-		// The data section in the attachment is a base64 zip file containing two files, "properties.csv" and "concepts.csv".
-		// The concepts.csv contains two code values. The properties.csv contains two properties each for each code in the concepts.csv.
-		String myInputParametersJson = """
-              {
-                "resourceType" : "Parameters",
-                "parameter": [
-                  {
-                    "name": "system",
-                    "valueUri": "http://www.nlm.nih.gov/research/umls/rxnorm"
-                  },
-                  {
-                    "name": "file",
-                    "valueAttachment": {
-                      "contentType": "application/zip",
-                      "language": "en-US",
-                      "url": "file:rx_norm_simplified.zip",
-                      "data": "UEsDBBQAAAAAADN8HFsAAAAAAAAAAAAAAAATACAAcnhfbm9ybV9zaW1wbGlmaWVkL3V4CwABBPUBAAAEFAAAAFVUDQAHEq+waBKvsGgSr7BoUEsDBBQACAAIADN8HFsAAAAAAAAAAAAAAAAhACAAcnhfbm9ybV9zaW1wbGlmaWVkL3Byb3BlcnRpZXMuY3N2dXgLAAEE9QEAAAQUAAAAVVQNAAcSr7BoFK+waBKvsGhz9ndx1fF2jdQJc/QJddUJiQxw5TI3sbAwNtIJDonUCQn1tAoxMjDWCS4pysxLh0mFAKXcA5y9kYVNzXDqAEqBdDgh6QAAUEsHCJ/XFg9GAAAAeAAAAFBLAwQUAAgACAAVfBxbAAAAAAAAAAAAAAAAHwAgAHJ4X25vcm1fc2ltcGxpZmllZC9jb25jZXB0cy5jc3Z1eAsAAQT1AQAABBQAAABVVA0AB9uusGjdrrBo266waJWQTQuCQBRF9/6KtzSQ0nH82EZGBIVCbSRaTPmwoWEmxiEw6b+X0q5x4fpezj3cVZ6tvWx7KHbL0klomobE62Jw0dy4bAVgYzSruBLgz/0Q9htYgMCnkkrXfYZDEPVBrpmAI7sINLNvK/AnUgJiw0QjFDrmktgoCbhcojbAZa2x4ihNA8Ff8Q0Fu96HH6LY6wgFt9KqeXCNUkmEn7pViFhm6ZRZOJXsBSSFjLVn5wNQSwcIZXHlH68AAACZAQAAUEsDBBQACAAIABV8HFsAAAAAAAAAAAAAAAAqACAAX19NQUNPU1gvcnhfbm9ybV9zaW1wbGlmaWVkLy5fY29uY2VwdHMuY3N2dXgLAAEE9QEAAAQUAAAAVVQNAAfbrrBo3a6waImvsGhjYBVjZ2BiYPBNTFbwD1aIUIACkBgDJxAbAfE2IAbxXzAQBRxDQoKgTJCOA0CsgaaECSouwMAglZyfq5dYUJCTqpeTWFxSWpyakpJYkqocEAxVewGIJRgYRBHqCksTixLzSjLzUhkmrd2QAVLU8zJAG0QX6hsYWBham1mYmaUZJltYO2cU5eemWjMAAFBLBwh3Nm0XjAAAAOgAAABQSwECFAMUAAAAAAAzfBxbAAAAAAAAAAAAAAAAEwAYAAAAAAAAAAAA7UEAAAAAcnhfbm9ybV9zaW1wbGlmaWVkL3V4CwABBPUBAAAEFAAAAFVUBQABEq+waFBLAQIUAxQACAAIADN8HFuf1xYPRgAAAHgAAAAhABgAAAAAAAAAAACkgVEAAAByeF9ub3JtX3NpbXBsaWZpZWQvcHJvcGVydGllcy5jc3Z1eAsAAQT1AQAABBQAAABVVAUAARKvsGhQSwECFAMUAAgACAAVfBxbZXHlH68AAACZAQAAHwAYAAAAAAAAAAAApIEGAQAAcnhfbm9ybV9zaW1wbGlmaWVkL2NvbmNlcHRzLmNzdnV4CwABBPUBAAAEFAAAAFVUBQAB266waFBLAQIUAxQACAAIABV8HFt3Nm0XjAAAAOgAAAAqABgAAAAAAAAAAACkgSICAABfX01BQ09TWC9yeF9ub3JtX3NpbXBsaWZpZWQvLl9jb25jZXB0cy5jc3Z1eAsAAQT1AQAABBQAAABVVAUAAduusGhQSwUGAAAAAAQABACVAQAAJgMAAAAA"
-                  }
-                  }
-                ]
-              }
-              """;
-		Parameters inputParameters = myFhirContext.newJsonParser().parseResource(Parameters.class, myInputParametersJson);
-		theFhirClient
-			.operation()
-			.onType(myFhirContext.getResourceDefinition("CodeSystem").getImplementingClass())
-			.named("$upload-external-code-system")
-			.withParameters(inputParameters)
-			.execute();
+	private void createCodeSystemFromZipFile() throws IOException {
+		String system = "http://www.nlm.nih.gov/research/umls/rxnorm";
+		String version = "1.0";
+		ZipCollectionBuilder files = new ZipCollectionBuilder(ClasspathUtil.loadResourceAsByteArray("custom_term/rx_norm_simplified.zip"));
 
+		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(system, version, files);
 	}
 }
