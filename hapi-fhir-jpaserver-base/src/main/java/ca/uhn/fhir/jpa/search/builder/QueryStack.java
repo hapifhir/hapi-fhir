@@ -729,6 +729,13 @@ public class QueryStack {
 		 * that do not have a missing field (:missing=false) for much the same reason.
 		 */
 		SearchQueryBuilder sqlBuilder = theParams.getSqlBuilder();
+
+		// Compressed token tables have no SP_MISSING column, so :missing is handled in a separate branch
+		if (theParams.getParamType() == RestSearchParameterTypeEnum.TOKEN
+				&& myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
+			return createMissingPredicateForCompressedToken(theParams, sqlBuilder);
+		}
+
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
 			// new search
 			return createMissingPredicateForUnindexedMissingFields(theParams, sqlBuilder);
@@ -760,10 +767,6 @@ public class QueryStack {
 				supplier = () -> sqlBuilder.addDatePredicateBuilder(theParams.getSourceJoinColumn());
 				break;
 			case TOKEN:
-				if (myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
-					// Compressed tables don't have SP_MISSING column - use NOT EXISTS approach
-					return createMissingPredicateForCompressedToken(theParams, sqlBuilder);
-				}
 				predicateType = PredicateBuilderTypeEnum.TOKEN;
 				supplier = () -> sqlBuilder.addTokenPredicateBuilder(theParams.getSourceJoinColumn());
 				break;
@@ -836,7 +839,6 @@ public class QueryStack {
 
 	/**
 	 * Creates :missing predicate for compressed token tables.
-	 * Resolves the correct table (IDENTIFIER vs COMMON) based on param name.
 	 */
 	private Condition createMissingPredicateForCompressedToken(
 			MissingParameterQueryParams theParams, SearchQueryBuilder sqlBuilder) {

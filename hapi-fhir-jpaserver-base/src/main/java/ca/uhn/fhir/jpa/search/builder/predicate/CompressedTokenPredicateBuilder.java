@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -111,6 +112,8 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 				theParams.getRequestPartitionId(),
 				theParams.getResourceTablePredicateBuilder().getResourceType(),
 				theParams.getParamName());
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(
+				hashIdentity, theParams.getResourceTablePredicateBuilder().getResourceType(), theParams.getParamName());
 
 		SelectQuery subquery = new SelectQuery();
 		subquery.addCustomColumns(1);
@@ -144,14 +147,14 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 	}
 
 	/**
-	 * Not supported — compressed tables have no {@code SP_MISSING} column.
-	 * QueryStack routes to {@link #createPredicateParamMissingValue} instead.
+	 * This method should never be invoked for compressed token tables, as compressed tables have no
+	 * {@code SP_MISSING} column for the base implementation to use.
 	 */
 	@Override
 	public Condition createPredicateParamMissingForNonReference(
 			String theResourceName, String theParamName, Boolean theMissing, RequestPartitionId theRequestPartitionId) {
 		throw new IllegalStateException(
-				"SP_MISSING is not supported with compressed token tables. Set IndexMissingFields = DISABLED.");
+				Msg.code(2973) + ":missing searches are not supported for this type of token index.");
 	}
 
 	@Override
@@ -283,7 +286,8 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 		// build the system and value predicates
 		Condition systemCondition = systemPredicate(theWantEquals, system);
 		Condition valueCondition = null;
-		if (isNotBlank(code)) {
+		// a null system (value-only search) or a non-blank code matches on HASH_VALUE
+		if (system == null || isNotBlank(code)) {
 			long hashValue = ResourceIndexedSearchParamToken.calculateHashValue(
 					getPartitionSettings(), getRequestPartitionId(), theResourceType, theSearchParamName, code);
 			valueCondition = equalsPredicate(theWantEquals, myColumnIdentifierHashValue, hashValue);

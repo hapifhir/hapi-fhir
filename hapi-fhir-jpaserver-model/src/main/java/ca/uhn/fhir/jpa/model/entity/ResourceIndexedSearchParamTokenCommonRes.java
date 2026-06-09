@@ -41,7 +41,7 @@ import java.util.Objects;
 @Table(
 		name = ResourceIndexedSearchParamTokenCommonRes.HFJ_SPIDX2_TOKEN_COMMON_RES,
 		indexes = {
-			@Index(name = "HFJ_SPIDX2_TOKEN_COMMON_RES_HASH", columnList = "HASH_SYS_AND_VALUE, RES_ID, PARTITION_ID"),
+			@Index(name = "IDX_SP2_TOKEN_COMMON_RES_HASH", columnList = "HASH_SYS_AND_VALUE, RES_ID, PARTITION_ID"),
 		})
 @IdClass(ResIdPartitionIdAndHashSystemAndValue.class)
 public class ResourceIndexedSearchParamTokenCommonRes implements Serializable {

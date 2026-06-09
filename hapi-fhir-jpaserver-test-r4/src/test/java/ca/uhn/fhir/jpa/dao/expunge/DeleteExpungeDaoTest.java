@@ -30,7 +30,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.COMPRESSED;
 import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.LEGACY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -280,8 +282,16 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 //		assertEquals(2, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
 	}
 
+	private static Stream<TokenIndexStrategy> tokenIndexStrategies() {
+		return Stream.of(
+				TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY),
+				TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY),
+				TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), COMPRESSED),
+				TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
+	}
+
 	@ParameterizedTest
-	@MethodSource("ca.uhn.fhir.jpa.test.util.TokenIndexStrategyTestUtil#all")
+	@MethodSource("tokenIndexStrategies")
 	void testDeleteExpunge_removesCompressedTokenIndexesKeepsCommonTokenTable(TokenIndexStrategy theStrategy) {
 		// setup
 		myStorageSettings.setTokenIndexStrategy(theStrategy);

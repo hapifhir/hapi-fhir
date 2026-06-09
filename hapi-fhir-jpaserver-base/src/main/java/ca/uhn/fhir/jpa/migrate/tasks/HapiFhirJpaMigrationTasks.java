@@ -230,7 +230,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidx2TokenCommonRes.addColumn("PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
 
 			spidx2TokenCommonRes
-					.addIndex("20260609.60", "HFJ_SPIDX2_TOKEN_COMMON_RES_HASH")
+					.addIndex("20260609.60", "IDX_SP2_TOKEN_COMMON_RES_HASH")
 					.unique(false)
 					.withColumns("HASH_SYS_AND_VALUE", "RES_ID", "PARTITION_ID");
 

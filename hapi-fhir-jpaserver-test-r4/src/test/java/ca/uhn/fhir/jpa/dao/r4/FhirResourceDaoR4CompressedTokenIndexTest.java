@@ -58,6 +58,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.COMPRESSED;
 import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.LEGACY;
@@ -351,8 +352,16 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 	// ===== Group E: Strategy semantics =====
 
+	private static Stream<TokenIndexStrategy> tokenIndexStrategies() {
+		return Stream.of(
+				TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY),
+				TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY),
+				TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), COMPRESSED),
+				TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
+	}
+
 	@ParameterizedTest
-	@MethodSource("ca.uhn.fhir.jpa.test.util.TokenIndexStrategyTestUtil#all")
+	@MethodSource("tokenIndexStrategies")
 	void writeStrategy_writesToCorrectTablesOnly(TokenIndexStrategy theStrategy) {
 		myStorageSettings.setTokenIndexStrategy(theStrategy);
 
@@ -519,6 +528,49 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 				.as("Should find patient with birthdate but no identifier")
 				.containsExactly(id3);
 		}
+	}
+
+	@Test
+	void testTokenMissingSearch_worksWithIndexMissingFieldsDisabled() {
+		// Given: compressed-only token tables (legacy HFJ_SPIDX_TOKEN is NOT written) AND
+		// IndexMissingFields = DISABLED. Token :missing must still work for compressed tables,
+		// routed through the NOT EXISTS path regardless of the IndexMissingFields setting.
+		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
+		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.DISABLED);
+
+		// p1: has identifier (IDENTIFIER mode) AND gender (COMMON mode)
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("http://sys").setValue("ID1");
+		p1.setGender(AdministrativeGender.MALE);
+		IIdType id1 = myPatientDao.create(p1, mySrd).getId().toUnqualifiedVersionless();
+
+		// p2: has neither identifier nor gender
+		Patient p2 = new Patient();
+		p2.addName().setFamily("NoTokens");
+		IIdType id2 = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless();
+
+		// IDENTIFIER mode
+		assertThat(searchForPatientIdsByMissingToken(Patient.SP_IDENTIFIER, true))
+			.as("identifier:missing=true -> only the patient without an identifier")
+			.containsExactly(id2);
+		assertThat(searchForPatientIdsByMissingToken(Patient.SP_IDENTIFIER, false))
+			.as("identifier:missing=false -> only the patient with an identifier")
+			.containsExactly(id1);
+
+		// COMMON mode
+		assertThat(searchForPatientIdsByMissingToken(Patient.SP_GENDER, true))
+			.as("gender:missing=true -> only the patient without a gender")
+			.containsExactly(id2);
+		assertThat(searchForPatientIdsByMissingToken(Patient.SP_GENDER, false))
+			.as("gender:missing=false -> only the patient with a gender")
+			.containsExactly(id1);
+	}
+
+	private List<IIdType> searchForPatientIdsByMissingToken(String theParamName, boolean theMissing) {
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(theParamName, new TokenParam().setMissing(theMissing));
+		return toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
 	}
 
 	// ===== Group H: :of-type token indexing =====

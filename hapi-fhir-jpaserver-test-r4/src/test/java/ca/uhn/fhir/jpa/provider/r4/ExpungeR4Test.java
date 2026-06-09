@@ -72,8 +72,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
+import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.COMPRESSED;
 import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.LEGACY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -428,8 +430,16 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	private static Stream<TokenIndexStrategy> tokenIndexStrategies() {
+		return Stream.of(
+				TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY),
+				TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY),
+				TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), COMPRESSED),
+				TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
+	}
+
 	@ParameterizedTest
-	@MethodSource("ca.uhn.fhir.jpa.test.util.TokenIndexStrategyTestUtil#all")
+	@MethodSource("tokenIndexStrategies")
 	void testDeleteExpungeResource_removesCompressedTokenIndexesKeepsCommonTokenTable(TokenIndexStrategy theStrategy) {
 		myStorageSettings.setTokenIndexStrategy(theStrategy);
 
