@@ -92,7 +92,7 @@ public class ImportIcd10Step2HandleConcepts
 
 			String version = title.getAttribute("version");
 			if (!version.isEmpty()) {
-				theCodeSystemToPopulate.setVersion(version);
+				ourLog.info("ICD-10 file reports version: {}", version);
 			}
 
 			theCodeSystemToPopulate.setDescription(title.getTextContent());

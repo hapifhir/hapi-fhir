@@ -38,7 +38,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * This file is the Batch2 Job Definition for the LOINC Import job.
- * See the intividual step bean definitions, starting with {@link #importLoincStep1ExpandDistributionIntoFiles()}
+ * See the individual step bean definitions, starting with {@link #importLoincStep1ExpandDistributionIntoFiles()}
  * to see descriptions of how this job works.
  */
 @Configuration
@@ -65,7 +65,7 @@ public class ImportLoincJobAppCtx {
 	}
 
 	/**
-	 * See the intividual step bean definitions, starting with {@link #importLoincStep1ExpandDistributionIntoFiles()}
+	 * See the individual step bean definitions, starting with {@link #importLoincStep1ExpandDistributionIntoFiles()}
 	 * to see descriptions of how this job works.
 	 */
 	@Bean

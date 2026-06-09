@@ -167,7 +167,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				"LOINC",
 				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE,
 				loincDistributionFiles);
-		myCanonicalUrlToJobType.put(ITermLoaderSvc.LOINC_URI, loincJobType);
+		myCanonicalUrlToJobType.put(TerminologyConstants.LOINC_URI, loincJobType);
 		myJobDefinitionIdToJobType.put(loincJobType.jobDefinitionId(), loincJobType);
 
 		// SNOMED CT
@@ -177,7 +177,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				null,
 				SNOMED_CT_XML_FILENAME_PATTERN,
 				FILENAME_SNOMED_CT_DISTRIBUTION_FILE);
-		myCanonicalUrlToJobType.put(ITermLoaderSvc.SCT_URI, sctJobType);
+		myCanonicalUrlToJobType.put(TerminologyConstants.SCT_URI, sctJobType);
 		myJobDefinitionIdToJobType.put(sctJobType.jobDefinitionId(), sctJobType);
 
 		// ICD-10
@@ -188,7 +188,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						ICD10_XML_FILE_PATTERN, ICD10_XML_FILENAME, AttachmentContentTypeEnum.XML));
 		JobType icd10JobType =
 				new JobType(ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10, "ICD-10", null, icd10DistributionFiles);
-		myCanonicalUrlToJobType.put(ITermLoaderSvc.ICD10_URI, icd10JobType);
+		myCanonicalUrlToJobType.put(TerminologyConstants.ICD10_URI, icd10JobType);
 		myJobDefinitionIdToJobType.put(icd10JobType.jobDefinitionId(), icd10JobType);
 
 		// ICD-10-CM
@@ -198,7 +198,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				new DistributionFilenamePattern(ICD10CM_FILE_PATTERN, ICD10CM_FILENAME, AttachmentContentTypeEnum.XML));
 		JobType icd10cmJobType =
 				new JobType(ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM, "ICD-10-CM", null, icd10CpDistributionFiles);
-		myCanonicalUrlToJobType.put(ITermLoaderSvc.ICD10CM_URI, icd10cmJobType);
+		myCanonicalUrlToJobType.put(TerminologyConstants.ICD10CM_URI, icd10cmJobType);
 		myJobDefinitionIdToJobType.put(icd10cmJobType.jobDefinitionId(), icd10cmJobType);
 
 		// Custom
@@ -495,7 +495,9 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment")
 					List<ICompositeType> theFiles,
 			RequestDetails theRequestDetails) {
-		throw new InvalidRequestException(Msg.code(2972) + "The " + JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM + " operation has been removed. To upload terminology, see the " + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB + " operation.");
+		throw new InvalidRequestException(Msg.code(2972) + "The " + JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM
+				+ " operation has been removed. To upload terminology, see the "
+				+ JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB + " operation.");
 	}
 
 	/**

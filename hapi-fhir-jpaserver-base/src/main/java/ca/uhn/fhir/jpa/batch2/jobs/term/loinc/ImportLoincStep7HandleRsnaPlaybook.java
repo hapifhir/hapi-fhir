@@ -24,8 +24,8 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
@@ -116,7 +116,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		if (!theContext.getCodesInRsnaPlaybookValueSet().contains(loincNumber)) {
 			vs.getCompose()
 					.getIncludeFirstRep()
-					.setSystem(ITermLoaderSvc.LOINC_URI)
+					.setSystem(TerminologyConstants.LOINC_URI)
 					.setVersion(codeSystemVersionId)
 					.addConcept()
 					.setCode(loincNumber)
@@ -151,7 +151,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 		CodeSystem.ConceptDefinitionComponent code = getOrAddConcept(theContext, loincNumber);
 		code.addProperty()
 				.setCode(loincCodePropName)
-				.setValue(new Coding(ITermLoaderSvc.LOINC_URI, partNumber, partName));
+				.setValue(new Coding(TerminologyConstants.LOINC_URI, partNumber, partName));
 
 		String partConceptMapId;
 		String termConceptMapId;
@@ -172,7 +172,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 							.setConceptMapUri(BaseImportLoincStep.LOINC_PART_TO_RID_PART_MAP_URI)
 							.setConceptMapVersion(loincRsnaCmVersion)
 							.setConceptMapName(BaseImportLoincStep.LOINC_PART_TO_RID_PART_MAP_NAME)
-							.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
+							.setSourceCodeSystem(TerminologyConstants.LOINC_URI)
 							.setSourceCodeSystemVersion(codeSystemVersionId)
 							.setSourceCode(partNumber)
 							.setSourceDisplay(partName)
@@ -192,7 +192,7 @@ public class ImportLoincStep7HandleRsnaPlaybook
 							.setConceptMapUri(BaseImportLoincStep.LOINC_TERM_TO_RPID_PART_MAP_URI)
 							.setConceptMapVersion(loincRsnaCmVersion)
 							.setConceptMapName(BaseImportLoincStep.LOINC_TERM_TO_RPID_PART_MAP_NAME)
-							.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
+							.setSourceCodeSystem(TerminologyConstants.LOINC_URI)
 							.setSourceCodeSystemVersion(codeSystemVersionId)
 							.setSourceCode(loincNumber)
 							.setSourceDisplay(longCommonName)

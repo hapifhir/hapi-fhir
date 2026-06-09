@@ -68,22 +68,19 @@ public class HeaderPassthroughOptionTest {
 	private IJobPersistence myJobPersistence;
 
 	@InjectMocks
-	private TerminologyUploaderProvider myProvider = new TerminologyUploaderProvider();
+	private TerminologyUploaderProvider myProvider;
 
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
 
 	@RegisterExtension
 	public RestfulServerExtension myServer = new RestfulServerExtension(myCtx)
-		.registerProvider(myProvider);
+		.withServer(t->t.registerProvider(myProvider));
 
 	@BeforeEach
 	public void beforeEach() {
 		myProvider.setContext(myCtx);
 		myProvider.setTerminologyLoaderSvc(myTermLoaderSvc);
-
-//		when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
-//			.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(new Batch2JobStartResponse().setInstanceId("A"));
 		JobInstance instance = new JobInstance();
@@ -94,8 +91,9 @@ public class HeaderPassthroughOptionTest {
 		doAnswer(t->{
 			instance.setStatus(StatusEnum.COMPLETED);
 			return null;
-		})
-			.when(myJobCoordinator).enqueueBuildingJobForExecution(any());
+		}).when(myJobCoordinator).enqueueBuildingJobForExecution(any());
+
+		when(myJobPersistence.storeNewAttachment(any(), any())).thenReturn("id");
 	}
 
 	@Test

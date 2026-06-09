@@ -1,11 +1,10 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.util.ClasspathUtil;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,7 @@ class TerminologyLoaderSvcIcd10cmJpaTest extends BaseJpaR4Test {
 			assertEquals(1, myResourceTableDao.count());
 			assertEquals(95, myTermConceptDao.count());
 			assertEquals(83, myTermConceptParentChildLinkDao.count());
-			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(ITermLoaderSvc.ICD10CM_URI);
+			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(TerminologyConstants.ICD10CM_URI);
 
 			assertEquals("2021", codeSystem.getCurrentVersion().getCodeSystemVersionId());
 

@@ -733,8 +733,14 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	private void createCodeSystemFromZipFile() throws IOException {
 		String system = "http://www.nlm.nih.gov/research/umls/rxnorm";
 		String version = "1.0";
-		ZipCollectionBuilder files = new ZipCollectionBuilder(ClasspathUtil.loadResourceAsByteArray("custom_term/rx_norm_simplified.zip"));
 
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(system);
+		codeSystem.setVersion(version);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(codeSystem, newSrd());
+
+		ZipCollectionBuilder files = new ZipCollectionBuilder(ClasspathUtil.loadResourceAsByteArray("custom_term/rx_norm_simplified.zip"));
 		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(system, version, files);
 	}
 }

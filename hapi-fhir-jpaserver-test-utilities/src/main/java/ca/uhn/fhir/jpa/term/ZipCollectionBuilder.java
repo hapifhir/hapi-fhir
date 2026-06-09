@@ -154,5 +154,4 @@ public class ZipCollectionBuilder {
 		IOUtils.closeQuietly(mySingleZipBytes);
 		return mySingleZipBytes.toByteArray();
 	}
-
 }

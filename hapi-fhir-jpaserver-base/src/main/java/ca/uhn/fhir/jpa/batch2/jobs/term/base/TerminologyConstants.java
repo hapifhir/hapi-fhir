@@ -21,6 +21,13 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
 public class TerminologyConstants {
 
+	public static final String IMGTHLA_URI = "http://www.ebi.ac.uk/ipd/imgt/hla";
+	public static final String LOINC_URI = "http://loinc.org";
+	public static final String SCT_URI = "http://snomed.info/sct";
+	public static final String ICD10_URI = "http://hl7.org/fhir/sid/icd-10";
+	public static final String ICD10CM_URI = "http://hl7.org/fhir/sid/icd-10-cm";
+	public static final String IEEE_11073_10101_URI = "urn:iso:std:iso:11073:10101";
+
 	/** Non-instantiable */
 	private TerminologyConstants() {}
 
