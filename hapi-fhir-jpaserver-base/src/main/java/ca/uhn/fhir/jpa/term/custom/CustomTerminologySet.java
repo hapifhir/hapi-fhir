@@ -45,6 +45,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_HIERARCHY_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_PROPERTIES_FILE;
 
+// FIXME: is this used?
 public class CustomTerminologySet {
 
 	private final int mySize;

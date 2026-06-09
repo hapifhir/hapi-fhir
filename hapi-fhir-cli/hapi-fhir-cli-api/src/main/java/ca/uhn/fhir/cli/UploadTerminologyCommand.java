@@ -487,6 +487,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		return retVal;
 	}
 
+	// FIXME: replace
 	private enum ModeEnum {
 		SNAPSHOT,
 		ADD,

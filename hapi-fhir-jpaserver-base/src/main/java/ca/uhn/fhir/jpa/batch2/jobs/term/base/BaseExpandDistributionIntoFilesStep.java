@@ -644,19 +644,23 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 
 		return new CSVParser(
 				theReader,
-				CSVFormat.DEFAULT
-						.builder()
-						.setDelimiter(theDelimiter)
-						.setEscape(null)
-						.setIgnoreEmptyLines(true)
-						.setQuote(quoteCharacter)
-						.setRecordSeparator('\n')
-						.setNullString("")
-						.setQuoteMode(QuoteMode.NON_NUMERIC)
-						.setHeader()
-						.setSkipHeaderRecord(true)
-						.setTrim(true)
-						.get());
+			newCsvFormat(theDelimiter, quoteCharacter));
+	}
+
+	public static CSVFormat newCsvFormat(char theDelimiter, Character quoteCharacter) {
+		return CSVFormat.DEFAULT
+			.builder()
+			.setDelimiter(theDelimiter)
+			.setEscape(null)
+			.setIgnoreEmptyLines(true)
+			.setQuote(quoteCharacter)
+			.setRecordSeparator('\n')
+			.setNullString("")
+			.setQuoteMode(QuoteMode.NON_NUMERIC)
+			.setHeader()
+			.setSkipHeaderRecord(true)
+			.setTrim(true)
+			.get();
 	}
 
 	private record StepIdAndFileHandlingInstructions(

@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -1046,7 +1047,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Override
-	public UploadStatistics uploadCodeSystemConcepts(IBaseResource theCodeSystem) {
+	public UploadStatistics uploadCodeSystemConcepts(ImportTerminologyModeEnum theMode, IBaseResource theCodeSystem) {
 		CodeSystem codeSystem = myVersionCanonicalizer.codeSystemToCanonical(theCodeSystem);
 
 		String systemUrl = codeSystem.getUrl();
