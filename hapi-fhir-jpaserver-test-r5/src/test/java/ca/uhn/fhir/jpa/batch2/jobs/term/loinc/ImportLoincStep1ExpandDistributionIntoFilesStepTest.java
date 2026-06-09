@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.TermTestUtil;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
@@ -384,7 +385,9 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 
 		ImportTerminologyJobParameters jobParameters = new ImportTerminologyJobParameters();
 		jobParameters.setJobProperties(new Properties());
+		jobParameters.setUrl(TerminologyConstants.LOINC_URI);
 		jobParameters.setVersionId("1.23");
+		jobParameters.setJobProperties(new Properties());
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId(MY_INSTANCE_ID);
 		return new StepExecutionDetails<>(jobParameters, null, instance, new WorkChunk(), myJobStepExecutionServices, jobDefinition, "step-0", "step-1");

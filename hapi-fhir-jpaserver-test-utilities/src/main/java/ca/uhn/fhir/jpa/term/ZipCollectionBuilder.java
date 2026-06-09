@@ -89,30 +89,21 @@ public class ZipCollectionBuilder {
 		addBytes(theOutputFilename, theOutputFilename, bytes);
 	}
 
-	private void addBytes(String theClasspathFileName, String theOutputFilename, byte[] bytes) throws IOException {
+	private void addBytes(String theClasspathFileName, String theOutputFilename, byte[] theBytes) throws IOException {
 		if (mySingleZipStream != null) {
 			mySingleZipStream.putNextEntry(new ZipEntry(ZIP_ENTRY_PREFIX + theOutputFilename));
-			mySingleZipStream.write(bytes);
+			mySingleZipStream.write(theBytes);
 			mySingleZipStream.closeEntry();
 		} else {
-			ByteArrayOutputStream bos;
-			bos = new ByteArrayOutputStream();
-			ZipOutputStream zos = new ZipOutputStream(bos);
-			ourLog.info("Adding {} to test zip", theClasspathFileName);
-			zos.putNextEntry(new ZipEntry(ZIP_ENTRY_PREFIX + theOutputFilename));
-			zos.write(bytes);
-			zos.closeEntry();
-			zos.close();
-			ourLog.info("ZIP file has {} bytes", bos.toByteArray().length);
 			myFiles.add(new ITermLoaderSvc.FileDescriptor() {
 				@Override
 				public String getFilename() {
-					return "AAA.zip";
+					return theOutputFilename;
 				}
 
 				@Override
 				public InputStream getInputStream() {
-					return new ByteArrayInputStream(bos.toByteArray());
+					return new ByteArrayInputStream(theBytes);
 				}
 			});
 		}
@@ -151,6 +142,10 @@ public class ZipCollectionBuilder {
 				}
 			});
 		}
+	}
+
+	public boolean isSingleZip() {
+		return mySingleZipBytes != null;
 	}
 
 	public byte[] getZipBytes() {

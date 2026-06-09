@@ -8,12 +8,12 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -2525,7 +2525,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		addLoincCodeToCodeSystemDao(loincCode);
 
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType(loincCode), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType(loincCode), new StringType(TerminologyConstants.LOINC_URI), null, null, null, mySrd);
 
 		assertFalse(result.isOk());
 		assertEquals("Validator is unable to provide validation for 10013-1#http://loinc.org - Unknown or unusable ValueSet[http://fooVs]", result.getMessage());
@@ -2533,7 +2533,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	private void addLoincCodeToCodeSystemDao(String loincCode) {
 		CodeSystem cs = new CodeSystem();
-		cs.setUrl(ITermLoaderSvc.LOINC_URI);
+		cs.setUrl(TerminologyConstants.LOINC_URI);
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.addConcept().setCode(loincCode);
 		cs.setId(LOINC_LOW);

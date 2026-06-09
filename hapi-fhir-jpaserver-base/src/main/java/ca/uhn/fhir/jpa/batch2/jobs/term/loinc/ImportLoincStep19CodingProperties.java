@@ -23,9 +23,9 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.searchparam.extractor.StringTrimmingTrimmerMatcher;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.text.StringTokenizer;
@@ -147,7 +147,8 @@ public class ImportLoincStep19CodingProperties extends BaseImportLoincStep<BaseI
 			theConceptToPopulate
 					.addProperty()
 					.setCode(thePropertyName)
-					.setValue(new Coding(ITermLoaderSvc.LOINC_URI, propertyCodeValue, lookupResponse.getCodeDisplay()));
+					.setValue(new Coding(
+							TerminologyConstants.LOINC_URI, propertyCodeValue, lookupResponse.getCodeDisplay()));
 		}
 	}
 
