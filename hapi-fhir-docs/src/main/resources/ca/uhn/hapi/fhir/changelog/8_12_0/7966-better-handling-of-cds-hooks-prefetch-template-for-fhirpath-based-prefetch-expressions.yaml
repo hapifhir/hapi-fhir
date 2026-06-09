@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7966
+title: "CDS Hooks prefetch template substitution now correctly reports a missing context key error
+  when an expression references a key that is not present in the request context. Previously, when
+  a union expression contained a part referencing a missing key alongside valid parts, the error
+  could be silently swallowed. The server now returns results from any matching parts of the union,
+  and only raises an error if no part produces a result."
