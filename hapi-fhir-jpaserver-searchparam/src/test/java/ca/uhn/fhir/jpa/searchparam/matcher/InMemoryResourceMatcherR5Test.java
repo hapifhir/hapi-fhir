@@ -514,6 +514,11 @@ public class InMemoryResourceMatcherR5Test {
         StorageSettings storageSettings() {
 			return new StorageSettings();
 		}
+
+		@Bean
+		PartitionSettings partitionSettings() {
+			return new PartitionSettings();
+		}
 	}
 
 }

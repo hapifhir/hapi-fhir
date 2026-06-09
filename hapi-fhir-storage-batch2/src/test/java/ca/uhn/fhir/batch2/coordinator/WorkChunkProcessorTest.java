@@ -69,6 +69,8 @@ public class WorkChunkProcessorTest {
 	private IJobPersistence myJobPersistence;
 	@Mock
 	private BatchJobSender myJobSender;
+	@Mock
+	private JobDefinitionRegistry myJobDefinitionRegistry;
 
 	// general mocks
 	private TestWorkChunkProcessor myExecutorSvc;

@@ -171,8 +171,8 @@ public class LoadedFileDescriptors implements Closeable {
 		}
 	}
 
-	private static class NonClosableBOMInputStream extends BOMInputStream {
-		NonClosableBOMInputStream(InputStream theWrap) {
+	public static class NonClosableBOMInputStream extends BOMInputStream {
+		public NonClosableBOMInputStream(InputStream theWrap) {
 			super(theWrap);
 		}
 

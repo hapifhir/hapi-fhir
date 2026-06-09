@@ -9,6 +9,7 @@ Servers/
 *.iml
 *.log
 *.log*
+*.amazonq/
 nohup.out
 .DS_Store
 *.orig

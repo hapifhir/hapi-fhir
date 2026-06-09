@@ -39,6 +39,7 @@ class ResourceTypeCacheSvcImplTest {
 	@Mock
 	IResourceTypeDao myResourceTypeDao;
 
+	@SuppressWarnings("unused")
 	@Spy
 	IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 

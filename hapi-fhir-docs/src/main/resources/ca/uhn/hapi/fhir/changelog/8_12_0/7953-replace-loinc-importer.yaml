@@ -1,0 +1,8 @@
+---
+type: add
+issue: 7953
+title: "The importer used to import the LOINC CodeSystem has been completely
+   redesigned to use a batch process instead of a hidden background task. This
+   means that LOINC importing now has much better performance and much better
+   job visibility. See [Uploading LOINC](https://smilecdr.com/docs/terminology.md#uploading-loinc)
+   for information on the new importer."

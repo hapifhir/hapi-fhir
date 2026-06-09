@@ -27,7 +27,7 @@ import org.springframework.transaction.support.TransactionCallback;
 
 public class MockHapiTransactionService extends HapiTransactionService {
 
-	private TransactionStatus myTransactionStatus;
+	private final TransactionStatus myTransactionStatus;
 
 	public MockHapiTransactionService() {
 		this(new SimpleTransactionStatus());
@@ -37,9 +37,15 @@ public class MockHapiTransactionService extends HapiTransactionService {
 		myTransactionStatus = theTransactionStatus;
 	}
 
+	@SuppressWarnings("ClassEscapesDefinedScope")
 	@Nullable
 	@Override
 	public <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
 		return theCallback.doInTransaction(myTransactionStatus);
+	}
+
+	@Override
+	public IExecutionBuilder withSystemRequestOnDefaultPartition() {
+		return withSystemRequest();
 	}
 }

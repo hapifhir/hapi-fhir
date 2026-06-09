@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.CustomCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -121,9 +122,14 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 		}
 
 		if (allOrPids != null && allOrPids.isEmpty()) {
-
+			// During unqualified chain resolution, e.g. ?based-on._idx=x, do not drop out early and instead evaluate
+			// all target types
+			if (theSourceJoinColumn != null) {
+				SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, defaultOperation);
+				return new CustomCondition(
+						operation == SearchFilterParser.CompareOperation.ne ? "(NULL IS NULL)" : "(NULL IS NOT NULL)");
+			}
 			setMatchNothing();
-
 		} else if (allOrPids != null) {
 
 			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, defaultOperation);

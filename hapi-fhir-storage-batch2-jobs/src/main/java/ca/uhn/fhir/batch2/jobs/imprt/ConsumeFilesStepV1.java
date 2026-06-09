@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -78,6 +79,9 @@ public class ConsumeFilesStepV1 implements ILastJobStepWorker<BulkImportJobParam
 	@Autowired
 	private IFhirSystemDao<?, ?> mySystemDao;
 
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+
 	@Nonnull
 	@Override
 	public RunOutcome run(
@@ -113,7 +117,7 @@ public class ConsumeFilesStepV1 implements ILastJobStepWorker<BulkImportJobParam
 	public void storeResources(List<IBaseResource> resources, RequestPartitionId thePartitionId) {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		if (thePartitionId == null) {
-			requestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
+			requestDetails.setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
 		} else {
 			requestDetails.setRequestPartitionId(thePartitionId);
 		}

@@ -79,8 +79,10 @@ Note that the path and exact filename of the terminology files will likely need 
 
 ### LOINC
 
+LOINC can be downloaded from the [LOINC website](http://loinc.org/downloads). Note that the URL must be a versioned canonical URL containing the version of LOINC found in the distribution ZIP file as shown below, e.g. `http://loinc.org|2.82`.
+
 ```
-./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d Downloads/LOINC_2.54_Text.zip -v r4 -t http://localhost:8080/fhir -u http://loinc.org
+./hapi-fhir-cli upload-terminology -d Downloads/Loinc_2.82.zip -v r4 -t http://localhost:8080/fhir -u http://loinc.org|2.82
 ```
 
 ### ICD-10 (International Version)

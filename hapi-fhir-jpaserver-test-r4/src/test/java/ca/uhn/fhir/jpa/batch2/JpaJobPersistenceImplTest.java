@@ -25,17 +25,21 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentChunkRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentChunkEntity;
 import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentEntity;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.testjob.TestJobDefinitionUtils;
 import ca.uhn.fhir.testjob.models.FirstStepOutput;
 import ca.uhn.fhir.util.JsonUtil;
@@ -87,6 +91,7 @@ import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.apache.commons.lang3.StringUtils.rightPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -127,6 +132,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Autowired
 	private IBatch2AttachmentRepository myJobAttachmentRepository;
+	@Autowired
+	private IBatch2AttachmentChunkRepository myJobAttachmentChunkRepository;
 	// this is our spy
 	@Autowired
 	private BatchJobSender myBatchSender;
@@ -137,6 +144,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public void after() {
 		myJobDefinitionRegistry.removeJobDefinition(JOB_DEFINITION_ID, JOB_DEF_VER);
 		myMaintenanceService.enableMaintenancePass(true);
+
+		JpaJobPersistenceImpl proxy = ProxyUtil.getSingletonTarget(mySvc, JpaJobPersistenceImpl.class);
+		proxy.setMaxBytesPerAttachmentChunk(null);
 	}
 
 	@Test
@@ -914,7 +924,41 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 				.hasMessageContaining("Can't add attachment to instance[" + instanceId + "] in status: " + theJobStatus);
 		}
 
+	}
 
+	@Test
+	void testStoreAttachment_MultipleChunks() throws IOException {
+		JpaJobPersistenceImpl proxy = ProxyUtil.getSingletonTarget(mySvc, JpaJobPersistenceImpl.class);
+		proxy.setMaxBytesPerAttachmentChunk(3);
+
+		JobInstance instance = createInstance(true, false);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		// Test
+		byte[] bytes = new byte[] {
+			1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+		};
+		AttachmentDetails request = new AttachmentDetails.Builder()
+			.withInputStream(new ByteArrayInputStream(bytes))
+			.withContentType(AttachmentContentTypeEnum.ZIP)
+			.build();
+		String attachmentId = mySvc.storeNewAttachment(instanceId, request);
+
+		// Verify
+		runInTransaction(()->{
+			Batch2JobAttachmentEntity attachment = myJobAttachmentRepository.findById(new Batch2JobAttachmentEntity.AttachmentPk(instanceId, attachmentId)).orElseThrow();
+			assertEquals(5, attachment.getExtraChunkMaximumIndex());
+
+			for (int i = 0; i < 5; i++) {
+				Batch2JobAttachmentChunkEntity nextChunk = myJobAttachmentChunkRepository.findById(new Batch2JobAttachmentChunkEntity.ChunkPk(attachment.getId(), i)).orElseThrow();
+				assertNotNull(nextChunk);
+			}
+		});
+
+		// Read it back
+		AttachmentDetails fetchResponse = mySvc.fetchAttachmentById(instanceId, attachmentId);
+		byte[] actualBytes = IOUtils.toByteArray(fetchResponse.getInputStream());
+		assertArrayEquals(bytes, actualBytes);
 	}
 
 	@Test
@@ -936,15 +980,13 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			.withInputStream(new ByteArrayInputStream("version 1".getBytes(StandardCharsets.UTF_8)))
 			.withContentType(AttachmentContentTypeEnum.GZIP)
 			.build();
-		String attachmentId1 = mySvc.storeNewAttachment(instanceId, request1);
 
-		// Verify
-		assertEquals(attachmentId0, attachmentId1);
-		runInTransaction(() -> {
-			assertEquals(1, myJobAttachmentRepository.count());
-			Batch2JobAttachmentEntity entity = myJobAttachmentRepository.findAll().get(0);
-			assertEquals("version 1", new String(entity.getData(), StandardCharsets.UTF_8));
-		});
+		// Test
+		assertThatThrownBy(()->mySvc.storeNewAttachment(instanceId, request1))
+
+			// Verify
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("Attachment with filename[hello.txt] already exists for instance");
 
 	}
 
