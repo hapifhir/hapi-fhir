@@ -58,8 +58,8 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLO
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_JOB_ATTACHMENT_ID;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.RESP_PARAM_OUTCOME;
-import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
-import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.SCT_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.LOINC_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.SCT_URI;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;

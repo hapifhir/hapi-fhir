@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ class TerminologyLoaderSvcIcd10JpaTest extends BaseJpaR4Test {
 			assertEquals(13, myTermConceptDao.count());
 			assertEquals(12, myTermConceptParentChildLinkDao.count());
 
-			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(ITermLoaderSvc.ICD10_URI);
+			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(TerminologyConstants.ICD10_URI);
 			assertEquals("2019", codeSystem.getCurrentVersion().getCodeSystemVersionId());
 
 			TermCodeSystemVersion codeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(codeSystem.getPid(), "2019");

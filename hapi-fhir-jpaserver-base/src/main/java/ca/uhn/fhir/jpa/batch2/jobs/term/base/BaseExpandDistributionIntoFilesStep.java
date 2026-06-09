@@ -150,9 +150,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 					context,
 					jobParameters,
 					jobMetadataAttachment);
-		}
-
-		if (isIndividualFileAttachmentsSupported()) {
+		} else if (isIndividualFileAttachmentsSupported()) {
 			Pageable page = Pageable.ofSize(10);
 			List<AttachmentMetadata> attachments;
 			do {
@@ -260,7 +258,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 
 	/**
 	 * This method processes a single file (by filename) from a terminology distribution. So, for
-	 * a ZIP file containing a bunch of different files, this methos will be called once per file
+	 * a ZIP file containing a bunch of different files, this method will be called once per file
 	 * in the ZIP.
 	 * <p>
 	 * For each file, it checks with each step in the import job definition to see whether that step

@@ -12,6 +12,8 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.util.XmlUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import java.util.List;
@@ -25,6 +27,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class ImportIcd10CmStep2HandleConcepts
 		extends BaseImportTerminologyFileStep<
 				ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportIcd10CmStep2HandleConcepts.class);
 
 	public static final Pattern ICD10CM_FILE_PATTERN = Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE);
 	public static final String ICD10CM_FILENAME = "icd10cm.xml";
@@ -62,7 +65,7 @@ public class ImportIcd10CmStep2HandleConcepts
 		for (Element nextVersion : XmlUtil.getChildrenByTagName(documentElement, "version")) {
 			String versionId = nextVersion.getTextContent();
 			if (isNotBlank(versionId)) {
-				theCodeSystemToPopulate.setVersion(versionId);
+				ourLog.info("ICD-10-CM file reports version: {}", versionId);
 			}
 		}
 

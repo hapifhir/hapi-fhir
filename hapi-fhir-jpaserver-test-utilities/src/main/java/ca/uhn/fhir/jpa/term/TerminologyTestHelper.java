@@ -117,7 +117,7 @@ public class TerminologyTestHelper {
 		String distributionFilename = TerminologyConstants.FILENAME_ICD10_DISTRIBUTION_FILE;
 		String propertiesFilename = null;
 		return startImportTerminologyJobAndWaitForCompletion(
-				ITermLoaderSvc.ICD10_URI,
+				TerminologyConstants.ICD10_URI,
 				theVersion,
 				theFiles,
 				false,
@@ -132,7 +132,7 @@ public class TerminologyTestHelper {
 		String distributionFilename = TerminologyConstants.FILENAME_ICD10_DISTRIBUTION_FILE;
 		String propertiesFilename = null;
 		return startImportTerminologyJobAndWaitForFailure(
-				ITermLoaderSvc.ICD10_URI,
+				TerminologyConstants.ICD10_URI,
 				theVersion,
 				theFiles,
 				false,
@@ -147,7 +147,7 @@ public class TerminologyTestHelper {
 		String distributionFilename = TerminologyConstants.FILENAME_ICD10CM_DISTRIBUTION_FILE;
 		String propertiesFilename = null;
 		return startImportTerminologyJobAndWaitForCompletion(
-				ITermLoaderSvc.ICD10CM_URI,
+				TerminologyConstants.ICD10CM_URI,
 				theVersion,
 				theFiles,
 				false,
@@ -172,7 +172,7 @@ public class TerminologyTestHelper {
 		String distributionFilename = FILENAME_LOINC_DISTRIBUTION_FILE;
 		String propertiesFilename = LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode();
 		return startImportTerminologyJobAndWaitForCompletion(
-				ITermLoaderSvc.LOINC_URI,
+				TerminologyConstants.LOINC_URI,
 				versionId,
 				theFiles,
 				theDontMakeCurrent,
@@ -298,7 +298,7 @@ public class TerminologyTestHelper {
 		String distributionFilename = FILENAME_SNOMED_CT_DISTRIBUTION_FILE;
 		if (theExpectFailure) {
 			return startImportTerminologyJobAndWaitForFailure(
-					ITermLoaderSvc.SCT_URI,
+					TerminologyConstants.SCT_URI,
 					versionId,
 					theFiles,
 					theDontMakeCurrent,
@@ -308,7 +308,7 @@ public class TerminologyTestHelper {
 					null);
 		} else {
 			return startImportTerminologyJobAndWaitForCompletion(
-					ITermLoaderSvc.SCT_URI,
+					TerminologyConstants.SCT_URI,
 					versionId,
 					theFiles,
 					theDontMakeCurrent,
@@ -394,7 +394,7 @@ public class TerminologyTestHelper {
 		String distributionFilename = FILENAME_LOINC_DISTRIBUTION_FILE;
 		String propertiesFilename = LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode();
 		return startImportTerminologyJobAndWaitForFailure(
-				ITermLoaderSvc.LOINC_URI,
+				TerminologyConstants.LOINC_URI,
 				theVersion,
 				theFiles,
 				false,

@@ -42,7 +42,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_I
 
 /**
  * This file is the Batch2 Job Definition for the SNOMED CT Import job.
- * See the intividual step bean definitions, starting with {@link #importSnomedCtStep1ExpandDistributionIntoFiles()}
+ * See the individual step bean definitions, starting with {@link #importSnomedCtStep1ExpandDistributionIntoFiles()}
  * to see descriptions of how this job works.
  */
 @Configuration
@@ -67,7 +67,7 @@ public class ImportSnomedCtJobAppCtx {
 	}
 
 	/**
-	 * See the intividual step bean definitions, starting with {@link #importSnomedCtStep1ExpandDistributionIntoFiles()}
+	 * See the individual step bean definitions, starting with {@link #importSnomedCtStep1ExpandDistributionIntoFiles()}
 	 * to see descriptions of how this job works.
 	 */
 	@Bean

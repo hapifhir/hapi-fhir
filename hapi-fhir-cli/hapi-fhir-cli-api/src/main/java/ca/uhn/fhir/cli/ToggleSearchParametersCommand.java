@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.cli;
 
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -48,7 +48,7 @@ public class ToggleSearchParametersCommand extends BaseCommand {
 				"u",
 				"url",
 				true,
-				"The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
+				"The code system URL associated with this upload (e.g. " + TerminologyConstants.SCT_URI + ")");
 		addBasicAuthOption(options);
 		return options;
 	}

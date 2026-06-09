@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
@@ -177,7 +176,10 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		retVal.setPublisher("Regenstrief Institute, Inc.");
 		retVal.setDescription("A value set that includes all LOINC codes");
 		retVal.setCopyright(theCopyrightStatement);
-		retVal.getCompose().addInclude().setSystem(ITermLoaderSvc.LOINC_URI).setVersion(theLoincVersion);
+		retVal.getCompose()
+				.addInclude()
+				.setSystem(TerminologyConstants.LOINC_URI)
+				.setVersion(theLoincVersion);
 
 		return retVal;
 	}

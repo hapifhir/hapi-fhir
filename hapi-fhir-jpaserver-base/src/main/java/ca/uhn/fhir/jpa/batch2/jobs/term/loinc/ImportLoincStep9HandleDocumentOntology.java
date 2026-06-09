@@ -24,8 +24,8 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
@@ -93,7 +93,7 @@ public class ImportLoincStep9HandleDocumentOntology
 				DOCUMENT_ONTOLOGY_CODES_VS_URI,
 				DOCUMENT_ONTOLOGY_CODES_VS_NAME,
 				null);
-		addCodeAsIncludeToValueSet(vs, ITermLoaderSvc.LOINC_URI, loincNumber, null);
+		addCodeAsIncludeToValueSet(vs, TerminologyConstants.LOINC_URI, loincNumber, null);
 
 		// Part Properties
 		String loincCodePropName =
@@ -112,6 +112,6 @@ public class ImportLoincStep9HandleDocumentOntology
 		CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, loincNumber);
 		concept.addProperty()
 				.setCode(loincCodePropName)
-				.setValue(new Coding(ITermLoaderSvc.LOINC_URI, partNumber, partName));
+				.setValue(new Coding(TerminologyConstants.LOINC_URI, partNumber, partName));
 	}
 }

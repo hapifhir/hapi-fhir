@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -8,7 +9,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -67,7 +67,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.operation()
 				.onType(CodeSystem.class)
 				.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
-				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI + "FOO"))
+				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(TerminologyConstants.SCT_URI + "FOO"))
 				.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 				.execute();
 			fail();
@@ -84,7 +84,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onType(CodeSystem.class)
 			.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.ICD10CM_URI))
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(TerminologyConstants.ICD10CM_URI))
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("icd10cm_tabular_2021.xml").setData(packageBytes))
 			.execute();
 
@@ -102,7 +102,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.operation()
 				.onType(CodeSystem.class)
 				.named(OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
-				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI))
+				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(TerminologyConstants.SCT_URI))
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
