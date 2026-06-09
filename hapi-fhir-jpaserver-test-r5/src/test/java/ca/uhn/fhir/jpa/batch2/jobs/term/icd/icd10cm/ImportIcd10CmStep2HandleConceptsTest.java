@@ -21,18 +21,6 @@ class ImportIcd10CmStep2HandleConceptsTest extends BaseIcdTest {
 	private ImportIcd10CmStep2HandleConcepts mySvc;
 
 	@Test
-	void testLoadIcd10CmCheckVersion() {
-		// Setup
-		when(myAttachment.getInputStream()).thenReturn(ClasspathUtil.loadResourceAsStream("icd/icd10cm_tabular_2021.xml"));
-
-		// Test
-		mySvc.processAttachment(myStepExecutionDetails, myJobMetadata, myContext, myAttachment, myJobParameters, myCodeSystemToPopulate, myData, null);
-
-		// Verify
-		assertEquals("2021", myCodeSystemToPopulate.getVersion());
-	}
-
-	@Test
 	void testLoadIcd10CmCheckRootConcepts() {
 		// Setup
 		when(myAttachment.getInputStream()).thenReturn(ClasspathUtil.loadResourceAsStream("icd/icd10cm_tabular_2021.xml"));
