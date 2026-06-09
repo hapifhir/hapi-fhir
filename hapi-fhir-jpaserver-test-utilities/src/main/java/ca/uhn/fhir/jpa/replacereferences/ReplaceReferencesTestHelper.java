@@ -41,7 +41,6 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -68,8 +67,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -96,7 +93,6 @@ public class ReplaceReferencesTestHelper {
 
 	private final FhirContext myFhirContext;
 	private final SystemRequestDetails mySrd = new SystemRequestDetails();
-	private final IParser myJsonParser;
 
 	public ReplaceReferencesTestHelper(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
@@ -104,7 +100,6 @@ public class ReplaceReferencesTestHelper {
 		myTaskDao = theDaoRegistry.getResourceDao(Task.class);
 		myProvenanceDao = theDaoRegistry.getResourceDao(Provenance.class);
 		myPractitionerDao = theDaoRegistry.getResourceDao(Practitioner.class);
-		myJsonParser = myFhirContext.newJsonParser();
 	}
 
 	public Patient readPatient(IIdType thePatientId) {
@@ -168,7 +163,7 @@ public class ReplaceReferencesTestHelper {
 		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
 		assertThat(allActualTargets).containsAll(theExpectedPatchedResourceTargetReferences);
 
-		validateAgents(theExpectedProvenanceAgents, provenance);
+		validateAgents(myFhirContext, theExpectedProvenanceAgents, provenance);
 
 		Instant now = Instant.now();
 		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
@@ -193,201 +188,6 @@ public class ReplaceReferencesTestHelper {
 		assertThat(activityCoding).isNotNull();
 		assertThat(activityCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle");
 		assertThat(activityCoding.getCode()).isEqualTo("link");
-	}
-
-	public void assertMergeProvenance(
-			Parameters theInputParameters,
-			ReplaceReferencesLargeTestData theTestData,
-			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgent) {
-		IIdType versionedSourceId = theTestData.getSourcePatientId().withVersion("2");
-		IIdType versionedTargetId = theTestData.getTargetPatientId().withVersion("2");
-		Set<String> allExpectedTargets = new HashSet<>(theTestData.getExpectedProvenanceTargetsForPatchedResources());
-		allExpectedTargets.add(versionedSourceId.toString());
-		allExpectedTargets.add(versionedTargetId.toString());
-		assertMergeProvenance(
-				theInputParameters,
-				versionedSourceId,
-				versionedTargetId,
-				allExpectedTargets,
-				theExpectedProvenanceAgent);
-	}
-
-	public void assertMergeProvenance(
-			Parameters theInputParameters,
-			IIdType theSourcePatientIdWithExpectedVersion,
-			IIdType theTargetPatientIdWithExpectedVersion,
-			Set<String> theExpectedProvenanceTargets,
-			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
-
-		List<IBaseResource> provenances = searchProvenance(theTargetPatientIdWithExpectedVersion);
-		assertThat(provenances).hasSize(1);
-		assertSingleMergeProvenance(
-				(Provenance) provenances.get(0),
-				theInputParameters,
-				theSourcePatientIdWithExpectedVersion,
-				theTargetPatientIdWithExpectedVersion,
-				theExpectedProvenanceTargets,
-				theExpectedProvenanceAgents);
-	}
-
-	public void assertCrossPartitionMergeProvenance(
-			Parameters theInputParameters,
-			IIdType theSourcePatientIdWithExpectedVersion,
-			IIdType theTargetPatientIdWithExpectedVersion,
-			Set<String> theExpectedProvenanceTargets,
-			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
-
-		List<IBaseResource> provenances = searchProvenance(theTargetPatientIdWithExpectedVersion);
-		assertThat(provenances).isNotEmpty();
-		assertCrossPartitionMergeProvenances(
-				provenances,
-				theInputParameters,
-				theSourcePatientIdWithExpectedVersion,
-				theTargetPatientIdWithExpectedVersion,
-				theExpectedProvenanceTargets,
-				theExpectedProvenanceAgents);
-	}
-
-	private void assertSingleMergeProvenance(
-			Provenance theProvenance,
-			Parameters theInputParameters,
-			IIdType theSourcePatientIdWithExpectedVersion,
-			IIdType theTargetPatientIdWithExpectedVersion,
-			Set<String> theExpectedProvenanceTargets,
-			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
-
-		assertThat(theProvenance.getTarget()).hasSize(theExpectedProvenanceTargets.size());
-		assertFirstTwoTargetsAreTargetAndSource(
-				theProvenance, theTargetPatientIdWithExpectedVersion, theSourcePatientIdWithExpectedVersion);
-
-		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(theProvenance.getTarget());
-		assertThat(allActualTargets).containsExactlyInAnyOrderElementsOf(theExpectedProvenanceTargets);
-
-		assertCommonMergeProvenanceFields(
-				theProvenance, theTargetPatientIdWithExpectedVersion, theExpectedProvenanceAgents);
-		assertMainMergeProvenanceContainedResources(
-				theProvenance, theInputParameters, theTargetPatientIdWithExpectedVersion);
-	}
-
-	private void assertCrossPartitionMergeProvenances(
-			List<IBaseResource> theProvenances,
-			Parameters theInputParameters,
-			IIdType theSourcePatientIdWithExpectedVersion,
-			IIdType theTargetPatientIdWithExpectedVersion,
-			Set<String> theExpectedProvenanceTargets,
-			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
-
-		Provenance mainProvenance = null;
-		List<Provenance> subProvenances = new ArrayList<>();
-
-		for (IBaseResource resource : theProvenances) {
-			Provenance p = (Provenance) resource;
-			if (p.hasContained()) {
-				assertThat(mainProvenance)
-						.as("Expected exactly one main Provenance with contained resources")
-						.isNull();
-				mainProvenance = p;
-			} else {
-				subProvenances.add(p);
-			}
-		}
-		assertThat(mainProvenance)
-				.as("Expected a main Provenance with contained resources")
-				.isNotNull();
-
-		// Validate main Provenance
-		assertFirstTwoTargetsAreTargetAndSource(
-				mainProvenance, theTargetPatientIdWithExpectedVersion, theSourcePatientIdWithExpectedVersion);
-		assertThat(mainProvenance.getTarget()).hasSize(2);
-		assertCommonMergeProvenanceFields(
-				mainProvenance, theTargetPatientIdWithExpectedVersion, theExpectedProvenanceAgents);
-		assertMainMergeProvenanceContainedResources(
-				mainProvenance, theInputParameters, theTargetPatientIdWithExpectedVersion);
-
-		// Validate all Provenances share the same provenance group extension
-		String mainGroupId = mainProvenance
-				.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP)
-				.getValueAsPrimitive()
-				.getValueAsString();
-		assertThat(mainGroupId).isNotBlank();
-
-		// Sub-Provenances are created before src/tgt update, so they reference pre-update versions.
-		// Verify target and source versionlessly, collect partition-specific targets.
-		Set<String> allTargetsAcrossProvenances = new HashSet<>();
-		allTargetsAcrossProvenances.add(theTargetPatientIdWithExpectedVersion.toString());
-		allTargetsAcrossProvenances.add(theSourcePatientIdWithExpectedVersion.toString());
-
-		for (Provenance sub : subProvenances) {
-			assertThat(sub.getTarget().size()).isGreaterThan(2);
-			assertVersionlessEquals(sub.getTarget().get(0).getReference(), theTargetPatientIdWithExpectedVersion);
-			assertVersionlessEquals(sub.getTarget().get(1).getReference(), theSourcePatientIdWithExpectedVersion);
-			assertThat(sub.hasContained()).isFalse();
-			assertCommonMergeProvenanceFields(sub, theTargetPatientIdWithExpectedVersion, theExpectedProvenanceAgents);
-
-			String subGroupId = sub.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP)
-					.getValueAsPrimitive()
-					.getValueAsString();
-			assertThat(subGroupId).isEqualTo(mainGroupId);
-
-			for (int i = 2; i < sub.getTarget().size(); i++) {
-				allTargetsAcrossProvenances.add(new IdDt(sub.getTarget().get(i).getReference()).toString());
-			}
-		}
-
-		assertThat(allTargetsAcrossProvenances).containsExactlyInAnyOrderElementsOf(theExpectedProvenanceTargets);
-	}
-
-	private void assertFirstTwoTargetsAreTargetAndSource(
-			Provenance theProvenance, IIdType theTargetId, IIdType theSourceId) {
-		assertThat(theProvenance.getTarget().size()).isGreaterThanOrEqualTo(2);
-		assertThat(theProvenance.getTarget().get(0).getReference()).isEqualTo(theTargetId.toString());
-		assertThat(theProvenance.getTarget().get(1).getReference()).isEqualTo(theSourceId.toString());
-	}
-
-	private void assertCommonMergeProvenanceFields(
-			Provenance theProvenance,
-			IIdType theTargetIdWithExpectedVersion,
-			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
-
-		validateAgents(theExpectedProvenanceAgents, theProvenance);
-
-		Instant now = Instant.now();
-		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
-		assertThat(theProvenance.getRecorded()).isBetween(oneMinuteAgo, now);
-
-		Period period = theProvenance.getOccurredPeriod();
-		assertThat(period.getStart()).isBefore(period.getEnd());
-		assertThat(period.getStart()).isBetween(oneMinuteAgo, now);
-		assertThat(period.getEnd()).isEqualTo(theProvenance.getRecorded());
-
-		String resourceType = theTargetIdWithExpectedVersion.getResourceType();
-		String expectedReasonCode = "Patient".equals(resourceType) ? "PATADMIN" : "RECORDMGT";
-		assertThat(theProvenance.getReason()).hasSize(1);
-		Coding reasonCoding = theProvenance.getReason().get(0).getCodingFirstRep();
-		assertThat(reasonCoding).isNotNull();
-		assertThat(reasonCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/v3-ActReason");
-		assertThat(reasonCoding.getCode()).isEqualTo(expectedReasonCode);
-
-		Coding activityCoding = theProvenance.getActivity().getCodingFirstRep();
-		assertThat(activityCoding).isNotNull();
-		assertThat(activityCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle");
-		assertThat(activityCoding.getCode()).isEqualTo("merge");
-	}
-
-	private void assertMainMergeProvenanceContainedResources(
-			Provenance theProvenance, Parameters theInputParameters, IIdType theTargetIdWithExpectedVersion) {
-
-		assertThat(theProvenance.hasContained()).isTrue();
-		assertThat(theProvenance.getContained()).hasSize(2);
-		Parameters containedParameters =
-				(Parameters) theProvenance.getContained().get(0);
-		containedParameters.setId((String) null);
-		assertThat(containedParameters.equalsDeep(theInputParameters)).isTrue();
-
-		OperationOutcome outcome =
-				(OperationOutcome) theProvenance.getContained().get(1);
-		assertThat(outcome.getIssue()).hasSize(1);
-		assertThat(outcome.getIssueFirstRep().getDiagnostics()).contains(theTargetIdWithExpectedVersion.toString());
 	}
 
 	private Set<IIdType> getEverythingResourceIds(IIdType thePatientId) {
@@ -683,7 +483,7 @@ public class ReplaceReferencesTestHelper {
 		theServer.getInterceptorService().registerInterceptor(agentInterceptor);
 	}
 
-	private static Set<String> extractResourceIdsFromProvenanceTarget(List<Reference> theTargets) {
+	public static Set<String> extractResourceIdsFromProvenanceTarget(List<Reference> theTargets) {
 		return theTargets.stream()
 				.map(Reference::getReference)
 				.map(IdDt::new)
@@ -691,12 +491,8 @@ public class ReplaceReferencesTestHelper {
 				.collect(Collectors.toSet());
 	}
 
-	private static void assertVersionlessEquals(String theActualReference, IIdType theExpectedId) {
-		assertThat(new IdDt(theActualReference).toUnqualifiedVersionless().getValue())
-				.isEqualTo(theExpectedId.toUnqualifiedVersionless().getValue());
-	}
-
-	private void assertEqualReferences(IBaseReference theRef1, IBaseReference theRef2) {
+	public static void assertEqualReferences(
+			FhirContext theFhirContext, IBaseReference theRef1, IBaseReference theRef2) {
 		// xor checks if one is null and the other is not
 		if (theRef1 == null ^ theRef2 == null) {
 			Assertions.fail(
@@ -706,17 +502,22 @@ public class ReplaceReferencesTestHelper {
 			// handles the case where both are null as well
 			return;
 		}
-		assertThat(myJsonParser.encodeToString(theRef1)).isEqualTo(myJsonParser.encodeToString(theRef2));
+		IParser jsonParser = theFhirContext.newJsonParser();
+		assertThat(jsonParser.encodeToString(theRef1)).isEqualTo(jsonParser.encodeToString(theRef2));
 	}
 
-	private void validateAgent(IProvenanceAgent theExpectedAgent, Provenance.ProvenanceAgentComponent theActualAgent) {
+	public static void validateAgent(
+			FhirContext theFhirContext,
+			IProvenanceAgent theExpectedAgent,
+			Provenance.ProvenanceAgentComponent theActualAgent) {
 		Reference theActualWho = theActualAgent.hasWho() ? theActualAgent.getWho() : null;
 		Reference theActualOnBehalfOf = theActualAgent.hasOnBehalfOf() ? theActualAgent.getOnBehalfOf() : null;
-		assertEqualReferences(theActualWho, theExpectedAgent.getWho());
-		assertEqualReferences(theActualOnBehalfOf, theExpectedAgent.getOnBehalfOf());
+		assertEqualReferences(theFhirContext, theActualWho, theExpectedAgent.getWho());
+		assertEqualReferences(theFhirContext, theActualOnBehalfOf, theExpectedAgent.getOnBehalfOf());
 	}
 
-	private void validateAgents(@Nullable List<IProvenanceAgent> theExpectedAgents, Provenance theProvenance) {
+	public static void validateAgents(
+			FhirContext theFhirContext, @Nullable List<IProvenanceAgent> theExpectedAgents, Provenance theProvenance) {
 		if (theExpectedAgents == null) {
 			assertThat(theProvenance.hasAgent()).isFalse();
 			return;
@@ -724,7 +525,7 @@ public class ReplaceReferencesTestHelper {
 		var actualAgents = theProvenance.getAgent();
 		assertThat(actualAgents).hasSameSizeAs(theExpectedAgents);
 		for (int i = 0; i < theExpectedAgents.size(); i++) {
-			validateAgent(theExpectedAgents.get(i), actualAgents.get(i));
+			validateAgent(theFhirContext, theExpectedAgents.get(i), actualAgents.get(i));
 		}
 	}
 
@@ -737,7 +538,7 @@ public class ReplaceReferencesTestHelper {
 			Parameters outParams = jsonParser.parseResource(Parameters.class, body);
 			OperationOutcome outcome =
 					(OperationOutcome) outParams.getParameter("outcome").getResource();
-			ourLog.info(
+			ourLog.debug(
 					"Extracted OperationOutcome from exception: {}",
 					jsonParser.setPrettyPrint(true).encodeResourceToString(outcome));
 			return outcome.getIssue().stream()

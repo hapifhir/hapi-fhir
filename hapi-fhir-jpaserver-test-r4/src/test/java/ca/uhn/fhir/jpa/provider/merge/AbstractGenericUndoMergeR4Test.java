@@ -101,7 +101,7 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 		// verify that Provenance resources were saved with versioned target references
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
-		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry);
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory);
 	}
 
 

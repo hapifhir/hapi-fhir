@@ -119,7 +119,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
 		myMergeHelper = new MergeOperationTestHelper(
-			myClient, myBatch2JobHelper, myFhirContext, myResourceLinkServiceFactory, myDaoRegistry);
+			myClient, myBatch2JobHelper, myFhirContext, myResourceLinkServiceFactory);
 		myReplaceReferencesHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 
 		mySourceIdentifiers = List.of(createTestIdentifier("patient-src"));
