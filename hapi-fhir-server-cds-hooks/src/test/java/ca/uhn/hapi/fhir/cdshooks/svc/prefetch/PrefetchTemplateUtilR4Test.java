@@ -322,7 +322,7 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
-	@DisplayName("Should throw exception when referenced prefetch key is not in context but the other expression is valid")
+	@DisplayName("Should resolve when referenced prefetch key is not in context but the other expression is valid")
 	void substituteTemplateForReferencedPrefetchMissingKeyUnionValidContextKey() {
 		// setup
 		final String template = "Location?_id={{%practitionerRoles.location.resolve().id|context.locationId}}";
