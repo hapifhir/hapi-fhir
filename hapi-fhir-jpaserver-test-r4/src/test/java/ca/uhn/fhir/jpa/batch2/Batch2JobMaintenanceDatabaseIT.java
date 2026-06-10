@@ -111,9 +111,9 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void runMaintenancePass_noChunks_noChange() {
+	public void runActiveMaintenancePass_noChunks_noChange() {
 		assertInstanceCount(1);
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 		assertInstanceCount(1);
 
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
@@ -121,35 +121,35 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 
 	@Test
-	public void runMaintenancePass_SingleQueuedChunk_noChange() {
+	public void runActiveMaintenancePass_SingleQueuedChunk_noChange() {
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
 			"chunk1, FIRST, QUEUED",
 			""
 		);
 
 		expectation.storeChunks();
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 		expectation.assertNotifications();
 
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
 	}
 
 	@Test
-	public void runMaintenancePass_SingleInProgressChunk_noChange() {
+	public void runActiveMaintenancePass_SingleInProgressChunk_noChange() {
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
 			"chunk1, FIRST, IN_PROGRESS",
 			""
 		);
 
 		expectation.storeChunks();
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 		expectation.assertNotifications();
 
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
 	}
 
 	@Test
-	public void runMaintenancePass_SingleCompleteChunk_notifiesAndChangesGatedStep() throws InterruptedException {
+	public void runActiveMaintenancePass_SingleCompleteChunk_notifiesAndChangesGatedStep() throws InterruptedException {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
@@ -164,7 +164,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 		expectation.storeChunks();
 		myChannelInterceptor.setExpectedCount(1);
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 		myChannelInterceptor.awaitExpected();
 		expectation.assertNotifications();
 
@@ -173,7 +173,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void runMaintenancePass_DoubleCompleteChunk_notifiesAndChangesGatedStep() throws InterruptedException {
+	public void runActiveMaintenancePass_DoubleCompleteChunk_notifiesAndChangesGatedStep() throws InterruptedException {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
@@ -190,7 +190,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 		expectation.storeChunks();
 		myChannelInterceptor.setExpectedCount(2);
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 		myChannelInterceptor.awaitExpected();
 		expectation.assertNotifications();
 
@@ -199,7 +199,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void runMaintenancePass_DoubleIncompleteChunk_noChange() {
+	public void runActiveMaintenancePass_DoubleIncompleteChunk_noChange() {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
@@ -213,7 +213,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		);
 
 		expectation.storeChunks();
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 		expectation.assertNotifications();
 
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
@@ -221,7 +221,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	}
 	
 	@Test
-	public void runMaintenancePass_allStepsComplete_jobCompletes() {
+	public void runActiveMaintenancePass_allStepsComplete_jobCompletes() {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
@@ -239,7 +239,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		expectation.storeChunks();
 
 
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 
 
 		expectation.assertNotifications();
@@ -266,10 +266,10 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 		expectation.storeChunks();
 
-		myJobMaintenanceService.runMaintenancePass();
-		myJobMaintenanceService.runMaintenancePass();
-		myJobMaintenanceService.runMaintenancePass();
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 
 		expectation.assertNotifications();
 
@@ -296,9 +296,9 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 		expectation.storeChunks();
 
-		myJobMaintenanceService.runMaintenancePass();
-		myJobMaintenanceService.runMaintenancePass();
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 
 		expectation.assertNotifications();
 
@@ -308,7 +308,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	// TODO MB Ken and Nathan created these.  Do we want to make them real?
 	@Test
 	@Disabled("future plans")
-	public void runMaintenancePass_MultipleStepsInProgress_CancelsInstance() {
+	public void runActiveMaintenancePass_MultipleStepsInProgress_CancelsInstance() {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
@@ -320,7 +320,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		);
 
 		expectation.storeChunks();
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 		expectation.assertNotifications();
 
 		assertInstanceStatus(StatusEnum.FAILED);
@@ -329,7 +329,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 	@Test
 	@Disabled("future plans")
-	public void runMaintenancePass_MultipleOtherStepsInProgress_CancelsInstance() {
+	public void runActiveMaintenancePass_MultipleOtherStepsInProgress_CancelsInstance() {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
@@ -341,7 +341,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		);
 
 		expectation.storeChunks();
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 		expectation.assertNotifications();
 
 		assertInstanceStatus(StatusEnum.FAILED);
@@ -350,7 +350,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 	@Test
 	@Disabled("future plans")
-	public void runMaintenancePass_MultipleStepsQueued_CancelsInstance() {
+	public void runActiveMaintenancePass_MultipleStepsQueued_CancelsInstance() {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
@@ -363,7 +363,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		);
 
 		expectation.storeChunks();
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 		expectation.assertNotifications();
 
 		assertInstanceStatus(StatusEnum.FAILED);

@@ -52,7 +52,10 @@ import static org.apache.commons.lang3.StringUtils.left;
 @Entity
 @Table(
 		name = "BT2_JOB_INSTANCE",
-		indexes = {@Index(name = "IDX_BT2JI_CT", columnList = "CREATE_TIME")})
+		indexes = {
+			@Index(name = "IDX_BT2JI_CT", columnList = "CREATE_TIME"),
+			@Index(name = "IDX_BT2JI_STAT_CT", columnList = "STAT,ID")
+		})
 public class Batch2JobInstanceEntity implements Serializable {
 
 	public static final int STATUS_MAX_LENGTH = 20;

@@ -23,12 +23,14 @@ import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -108,4 +110,8 @@ public interface IBatch2JobInstanceRepository
 	@Query(
 			"SELECT new ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO(e.myId, e.myStatus, e.myStartTime, e.myEndTime) FROM Batch2JobInstanceEntity e WHERE e.myId = :id")
 	BatchInstanceStatusDTO fetchBatchInstanceStatus(@Param("id") String theInstanceId);
+
+	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myStatus IN (:statuses) ORDER BY e.myId")
+	Collection<Batch2JobInstanceEntity> findAllWithStatuses(
+			PageRequest thePageRequest, @Param("statuses") Set<StatusEnum> theStatuses);
 }

@@ -49,7 +49,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class JobInstanceProcessor {
+/**
+ * This processor is invoked by {@link JobMaintenanceServiceImpl}
+ * and is responsible for ongoing maintenance of jobs that have not
+ * yet started and jobs that have started but have not yet finished.
+ * It handles advancing gated jobs to subsequent steps, as well as
+ * calculating progress for jobs that are in progress.
+ */
+public class ActiveJobInstanceProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
 	public static final long CANCEL_BUILDING_THRESHOLD = DateUtils.MILLIS_PER_HOUR;
@@ -65,29 +72,22 @@ public class JobInstanceProcessor {
 	private final String myInstanceId;
 	private final JobDefinitionRegistry myJobDefinitionegistry;
 
-	private long myPurgeThreshold = PURGE_THRESHOLD;
-
-	public JobInstanceProcessor(
+	public ActiveJobInstanceProcessor(
 			IJobPersistence theJobPersistence,
 			BatchJobSender theBatchJobSender,
 			String theInstanceId,
-			JobChunkProgressAccumulator theProgressAccumulator,
 			IReductionStepExecutorService theReductionStepExecutorService,
 			JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull IInterceptorService theInterceptorService) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myInstanceId = theInstanceId;
-		myProgressAccumulator = theProgressAccumulator;
+		myProgressAccumulator = new JobChunkProgressAccumulator();
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		myJobDefinitionegistry = theJobDefinitionRegistry;
 		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(
-				theJobPersistence, theProgressAccumulator, theJobDefinitionRegistry, theInterceptorService);
+				theJobPersistence, myProgressAccumulator, theJobDefinitionRegistry, theInterceptorService);
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
-	}
-
-	public void setPurgeThreshold(long thePurgeThreshold) {
-		myPurgeThreshold = thePurgeThreshold;
 	}
 
 	public void process() {
@@ -115,8 +115,21 @@ public class JobInstanceProcessor {
 
 		// move POLL_WAITING -> READY
 		processPollingChunks(theInstance.getInstanceId());
+
 		// determine job progress; delete CANCELED/COMPLETE/FAILED jobs that are no longer needed
-		cleanupInstance(theInstance);
+		switch (theInstance.getStatus()) {
+			case IN_PROGRESS:
+			case ERRORED:
+				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress(theInstance.getInstanceId());
+				break;
+			case QUEUED:
+			case FINALIZE:
+			case COMPLETED:
+			case FAILED:
+			case CANCELLED:
+				break;
+		}
+
 		// move gated jobs to the next step, if needed
 		// moves GATE_WAITING / QUEUED (legacy) chunks to:
 		// READY (for regular gated jobs)
@@ -165,7 +178,7 @@ public class JobInstanceProcessor {
 	private boolean handleCancellation(JobInstance theInstance) {
 		if (theInstance.isPendingCancellationRequest()) {
 			String errorMessage = buildCancelledMessage(theInstance);
-			ourLog.info("Job {} moving to CANCELLED", theInstance.getInstanceId());
+			ourLog.info("Job {} has cancellation requested, moving to CANCELLED", theInstance.getInstanceId());
 			return myJobPersistence.updateInstance(theInstance.getInstanceId(), instance -> {
 				boolean changed = myJobInstanceStatusUpdater.updateInstanceStatus(instance, StatusEnum.CANCELLED);
 				if (changed) {
@@ -183,49 +196,6 @@ public class JobInstanceProcessor {
 			msg += " while running step " + theInstance.getCurrentGatedStepId();
 		}
 		return msg;
-	}
-
-	private void cleanupInstance(JobInstance theInstance) {
-		switch (theInstance.getStatus()) {
-			case QUEUED:
-				// If we're still QUEUED, there are no stats to calculate
-				break;
-			case FINALIZE:
-				// If we're in FINALIZE, the reduction step is working, so we should stay out of the way until it
-				// marks the job as COMPLETED
-				return;
-			case IN_PROGRESS:
-			case ERRORED:
-				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress(theInstance.getInstanceId());
-				break;
-			case COMPLETED:
-			case FAILED:
-				if (purgeExpiredInstance(theInstance)) {
-					return;
-				}
-				break;
-			case CANCELLED:
-				purgeExpiredInstance(theInstance);
-				// wipmb For 6.8 - Are we deliberately not purging chunks for cancelled jobs?  This is a very
-				// complicated way to say that.
-				return;
-		}
-
-		if (theInstance.isFinished() && !theInstance.isWorkChunksPurged()) {
-			myJobPersistence.deleteChunksAndMarkInstanceAsChunksPurged(theInstance.getInstanceId());
-		}
-	}
-
-	private boolean purgeExpiredInstance(JobInstance theInstance) {
-		if (theInstance.getEndTime() != null) {
-			long cutoff = System.currentTimeMillis() - myPurgeThreshold;
-			if (theInstance.getEndTime().getTime() < cutoff) {
-				ourLog.info("Deleting old job instance {}", theInstance.getInstanceId());
-				myJobPersistence.deleteInstanceAndChunks(theInstance.getInstanceId());
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private void triggerGatedExecutions(JobInstance theInstance, JobDefinition<?> theJobDefinition) {
@@ -418,7 +388,6 @@ public class JobInstanceProcessor {
 	 */
 	private void processPollingChunks(String theInstanceId) {
 		int updatedChunkCount = myJobPersistence.updatePollWaitingChunksForJobIfReady(theInstanceId);
-
 		ourLog.debug(
 				"Moved {} Work Chunks in POLL_WAITING to READY for Job Instance {}", updatedChunkCount, theInstanceId);
 	}

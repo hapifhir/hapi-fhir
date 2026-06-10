@@ -856,7 +856,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// waiting for the multitude of failures
 		await().until(() -> {
-			myJobMaintenanceService.runMaintenancePass();
+			myJobMaintenanceService.runActiveJobMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			ourLog.info("Attempt " + counter.get() + " for "
 				+ instance.getInstanceId() + ". Status: " + instance.getStatus());
@@ -1028,7 +1028,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// we want to control the maintenance runner ourselves in this case
 		// to prevent intermittent test failures
-		myJobMaintenanceService.enableMaintenancePass(false);
+		myJobMaintenanceService.enableMaintenance(false);
 
 		try {
 			IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
@@ -1064,7 +1064,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			myBatch2JobHelper.awaitJobHasStatusWithForcedMaintenanceRuns(instanceId,
 				StatusEnum.CANCELLED);
 		} finally {
-			myJobMaintenanceService.enableMaintenancePass(true);
+			myJobMaintenanceService.enableMaintenance(true);
 		}
 	}
 

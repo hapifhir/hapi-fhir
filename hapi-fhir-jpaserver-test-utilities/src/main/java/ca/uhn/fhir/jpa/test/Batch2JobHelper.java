@@ -160,7 +160,7 @@ public class Batch2JobHelper {
 		if (hasStatus(theInstanceId, theExpectedStatuses)) {
 			return true;
 		}
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 		return hasStatus(theInstanceId, theExpectedStatuses);
 	}
 
@@ -328,7 +328,7 @@ public class Batch2JobHelper {
 		HashMap<String, String> map = new HashMap<>();
 		Awaitility.await().atMost(DEFAULT_WAIT_DURATION)
 			.until(() -> {
-				myJobMaintenanceService.runMaintenancePass();
+				myJobMaintenanceService.runActiveJobMaintenancePass();
 
 				List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 1);
 				// "All Jobs" assumes at least one job exists
@@ -355,12 +355,12 @@ public class Batch2JobHelper {
 	}
 
 	public void runMaintenancePass() {
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 	}
 
 	@VisibleForTesting
 	public void enableMaintenanceRunner(boolean theEnabled) {
-		myJobMaintenanceService.enableMaintenancePass(theEnabled);
+		myJobMaintenanceService.enableMaintenance(theEnabled);
 	}
 
 	/**
@@ -368,7 +368,7 @@ public class Batch2JobHelper {
 	 * the semaphore to release
 	 */
 	public void forceRunMaintenancePass() {
-		myJobMaintenanceService.forceMaintenancePass();
+		myJobMaintenanceService.forceActiveJobMaintenancePass();
 	}
 
 	public void cancelAllJobsAndAwaitCancellation() {

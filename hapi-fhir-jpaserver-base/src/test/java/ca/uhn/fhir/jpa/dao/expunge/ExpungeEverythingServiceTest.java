@@ -38,7 +38,7 @@ class ExpungeEverythingServiceTest {
 	void testExpungeBatch2_acquiresAndReleasesMaintenanceHold() throws Exception {
 		// Setup
 		Closeable mockHold = mock(Closeable.class);
-		when(myJobMaintenanceService.holdMaintenanceForExpunge()).thenReturn(mockHold);
+		when(myJobMaintenanceService.holdActiveJobMaintenanceForExpunge()).thenReturn(mockHold);
 
 		IHapiTransactionService.IExecutionBuilder mockBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
 		when(myTxService.withRequest(any())).thenReturn(mockBuilder);
@@ -50,7 +50,7 @@ class ExpungeEverythingServiceTest {
 		int result = myExpungeEverythingService.expungeBatch2Entities(null, RequestPartitionId.allPartitions());
 
 		// Verify hold was acquired and released
-		verify(myJobMaintenanceService).holdMaintenanceForExpunge();
+		verify(myJobMaintenanceService).holdActiveJobMaintenanceForExpunge();
 		verify(mockHold).close();
 		assertThat(result).isEqualTo(5);
 	}
@@ -59,7 +59,7 @@ class ExpungeEverythingServiceTest {
 	void testExpungeBatch2_retriesOnFkViolationThenSucceeds() throws Exception {
 		// Setup: first call throws FK violation, second call succeeds, third returns 0
 		Closeable mockHold = mock(Closeable.class);
-		when(myJobMaintenanceService.holdMaintenanceForExpunge()).thenReturn(mockHold);
+		when(myJobMaintenanceService.holdActiveJobMaintenanceForExpunge()).thenReturn(mockHold);
 
 		IHapiTransactionService.IExecutionBuilder mockBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
 		when(myTxService.withRequest(any())).thenReturn(mockBuilder);
@@ -82,7 +82,7 @@ class ExpungeEverythingServiceTest {
 	void testExpungeBatch2_throwsAfterMaxRetries() throws Exception {
 		// Setup: always throw FK violation
 		Closeable mockHold = mock(Closeable.class);
-		when(myJobMaintenanceService.holdMaintenanceForExpunge()).thenReturn(mockHold);
+		when(myJobMaintenanceService.holdActiveJobMaintenanceForExpunge()).thenReturn(mockHold);
 
 		IHapiTransactionService.IExecutionBuilder mockBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
 		when(myTxService.withRequest(any())).thenReturn(mockBuilder);

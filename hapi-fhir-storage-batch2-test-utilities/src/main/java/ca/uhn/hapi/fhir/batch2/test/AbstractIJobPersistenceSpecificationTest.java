@@ -45,7 +45,6 @@ import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep2InputType;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
 import ca.uhn.test.concurrency.PointcutLatch;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.mockito.ArgumentCaptor;
@@ -157,7 +156,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		myJobDefinitionRegistry.removeJobDefinition(JOB_DEFINITION_ID, JOB_DEF_VER);
 
 		// re-enable our runner after every test (just in case)
-		myMaintenanceService.enableMaintenancePass(true);
+		myMaintenanceService.enableMaintenance(true);
 
 		// clear invocations on the batch sender from previous jobs that might be
 		// kicking around
@@ -290,7 +289,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 	}
 
 	public void enableMaintenanceRunner(boolean theToEnable) {
-		myMaintenanceService.enableMaintenancePass(theToEnable);
+		myMaintenanceService.enableMaintenance(theToEnable);
 	}
 
 	public PointcutLatch disableWorkChunkMessageHandler() {
