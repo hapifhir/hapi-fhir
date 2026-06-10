@@ -354,7 +354,15 @@ public class Batch2JobHelper {
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #runActiveJobMaintenancePass()} instead
+	 */
+	@Deprecated(since = "8.12.0", forRemoval = true)
 	public void runMaintenancePass() {
+		myJobMaintenanceService.runActiveJobMaintenancePass();
+	}
+
+	public void runActiveJobMaintenancePass() {
 		myJobMaintenanceService.runActiveJobMaintenancePass();
 	}
 
