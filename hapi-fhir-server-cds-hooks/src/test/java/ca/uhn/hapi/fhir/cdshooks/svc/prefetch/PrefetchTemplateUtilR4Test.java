@@ -334,6 +334,33 @@ class PrefetchTemplateUtilR4Test {
 	}
 
 	@Test
+	@DisplayName("Should resolve when DaVinci context key is missing but the other union expression is valid")
+	void substituteTemplateDaVinciMissingKeyUnionValidContextKey() {
+		// setup
+		final String template = "ServiceRequest?_id={{context.missingDraftOrders.ServiceRequest.id|context.patientId}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		// execute
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		// validate
+		assertThat(actual).isEqualTo("ServiceRequest?_id=" + TEST_PATIENT_ID);
+	}
+
+	@Test
+	@DisplayName("Should throw MissingContextKey error when all union expressions reference missing context keys")
+	void substituteTemplateAllUnionExpressionsMissingContextKey() {
+		// setup
+		final String template = "ServiceRequest?_id={{context.missingDraftOrders.ServiceRequest.id|context.missingPatientId}}";
+		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		context.put("someOtherKey", "someValue");
+		// execute & validate - should report the missing key error (2372), not the generic no-result error (2856)
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2372))
+			.hasMessageContaining("missingDraftOrders");
+	}
+
+	@Test
 	@DisplayName("Should successfully evaluate UNION expression combining context-based and referenced prefetch patterns")
 	void substituteTemplateComboContextAndReferencedPrefetch() {
 		// setup

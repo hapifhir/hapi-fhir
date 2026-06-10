@@ -52,6 +52,8 @@ public class PrefetchTemplateUtil {
 	private PrefetchTemplateUtil() {}
 
 	private interface PartResolutionResult {
+		record Proceed() implements PartResolutionResult {}
+
 		record Success(List<String> values) implements PartResolutionResult {}
 
 		record MissingContextKey(String key, String availableKeys) implements PartResolutionResult {}
@@ -59,8 +61,11 @@ public class PrefetchTemplateUtil {
 		record NoMatch() implements PartResolutionResult {}
 	}
 
+	@Nonnull
 	public static String substituteTemplate(
-			String theTemplate, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
+			@Nonnull String theTemplate,
+			@Nonnull CdsServiceRequestContextJson theContext,
+			@Nonnull FhirContext theFhirContext) {
 		return SURROUNDING_CURLY_BRACES_PART
 				.matcher(theTemplate)
 				.replaceAll(match ->
@@ -81,7 +86,9 @@ public class PrefetchTemplateUtil {
 				firstMissingKey = m;
 			}
 		}
-		if (!results.isEmpty()) return String.join(",", results);
+		if (!results.isEmpty()) {
+			return String.join(",", results);
+		}
 		if (firstMissingKey != null) {
 			throw new InvalidRequestException(Msg.code(2372) + "Request context did not provide a value for key <"
 					+ firstMissingKey.key() + ">.  Available keys in context are: " + firstMissingKey.availableKeys());
@@ -94,9 +101,12 @@ public class PrefetchTemplateUtil {
 	private static PartResolutionResult resolvePartResults(
 			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
 		PartResolutionResult result = handleDaVinciPart(thePart, theContext, theFhirContext);
-		if (result instanceof PartResolutionResult.NoMatch) result = handleDefaultPart(thePart, theContext);
-		if (result instanceof PartResolutionResult.NoMatch)
+		if (result instanceof PartResolutionResult.NoMatch) {
+			result = handleDefaultPart(thePart, theContext);
+		}
+		if (result instanceof PartResolutionResult.NoMatch) {
 			result = handleFhirPathAndReferencedPrefetchPart(thePart, theContext, theFhirContext);
+		}
 		return result;
 	}
 
@@ -109,8 +119,10 @@ public class PrefetchTemplateUtil {
 	private static PartResolutionResult handleDaVinciPart(
 			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
 		final Matcher m = DA_VINCI_PART.matcher(thePart);
-		final PartResolutionResult earlyExit = matchAndCheckKey(m, theContext);
-		if (earlyExit != null) return earlyExit;
+		final PartResolutionResult partResolutionResult = matchAndCheckKey(m, theContext);
+		if (!(partResolutionResult instanceof PartResolutionResult.Proceed)) {
+			return partResolutionResult;
+		}
 		final String key = m.group(1);
 		final String resourceType = m.group(2);
 		try {
@@ -136,8 +148,10 @@ public class PrefetchTemplateUtil {
 	private static PartResolutionResult handleDefaultPart(
 			String thePart, @Nonnull CdsServiceRequestContextJson theContext) {
 		final Matcher m = DEFAULT_PART.matcher(thePart);
-		final PartResolutionResult earlyExit = matchAndCheckKey(m, theContext);
-		if (earlyExit != null) return earlyExit;
+		final PartResolutionResult partResolutionResult = matchAndCheckKey(m, theContext);
+		if (!(partResolutionResult instanceof PartResolutionResult.Proceed)) {
+			return partResolutionResult;
+		}
 		final String key = m.group(1);
 		try {
 			final String value = theContext.getString(key);
@@ -156,9 +170,14 @@ public class PrefetchTemplateUtil {
 	private static PartResolutionResult handleFhirPathAndReferencedPrefetchPart(
 			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
 		Matcher m = FHIR_PATH_PART.matcher(thePart);
-		if (!m.matches()) m = REFERENCED_PREFETCH_PART.matcher(thePart);
-		final PartResolutionResult earlyExit = matchAndCheckKey(m, theContext);
-		if (earlyExit != null) return earlyExit;
+		PartResolutionResult partResolutionResult = matchAndCheckKey(m, theContext);
+		if (partResolutionResult instanceof PartResolutionResult.NoMatch) {
+			m = REFERENCED_PREFETCH_PART.matcher(thePart);
+			partResolutionResult = matchAndCheckKey(m, theContext);
+		}
+		if (!(partResolutionResult instanceof PartResolutionResult.Proceed)) {
+			return partResolutionResult;
+		}
 		final String key = m.group(1);
 		final String expression = m.group(2);
 		return new PartResolutionResult.Success(convertPrimitiveResultsToString(
@@ -187,16 +206,18 @@ public class PrefetchTemplateUtil {
 		}
 	}
 
-	@Nullable
+	@Nonnull
 	private static PartResolutionResult matchAndCheckKey(
 			Matcher theMatcher, @Nonnull CdsServiceRequestContextJson theContext) {
-		if (!theMatcher.matches()) return new PartResolutionResult.NoMatch();
+		if (!theMatcher.matches()) {
+			return new PartResolutionResult.NoMatch();
+		}
 		final String key = theMatcher.group(1);
 		if (!theContext.containsKey(key)) {
 			return new PartResolutionResult.MissingContextKey(
 					key, theContext.getKeys().toString());
 		}
-		return null;
+		return new PartResolutionResult.Proceed();
 	}
 
 	@Nonnull
