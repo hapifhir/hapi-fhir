@@ -1,18 +1,20 @@
 package ca.uhn.fhir.jpa.dao.r5.dbpartitionmode;
 
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
+import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Parameters;
@@ -27,9 +29,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
 
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static java.util.Objects.requireNonNull;
@@ -50,6 +51,8 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
+	@Autowired
+	private TerminologyTestHelper myTerminologyTestHelper;
 
 	@Override
 	@BeforeEach
@@ -63,24 +66,24 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 		initResourceTypeCacheFromConfig();
 	}
 
+	@Override
 	@AfterEach
-	public void after() {
+	public void after() throws Exception {
+		super.after();
 		DialectSvc.setForceMsSqlMode(false);
 	}
 
 	@Test
-	public void testUploadIcd10cm() {
-		byte[] packageBytes = ClasspathUtil.loadResourceAsByteArray("/icd/icd10cm_tabular_2021.xml");
+	public void testUploadIcd10cm() throws IOException {
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 
-		Parameters respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named("upload-external-code-system")
-			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.ICD10CM_URI))
-			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("icd10cm_tabular_2021.xml").setData(packageBytes))
-			.execute();
+		String packageBytes = ClasspathUtil.loadResource("/icd/icd10cm_tabular_2021.xml");
+		files.addFileText(packageBytes, "icd10cm.xml");
 
-		assertThat(respParam.getParameter("success").getValueBooleanType().getValue()).isEqualTo(true);
+		String jobId = myTerminologyTestHelper.startImportIcdCmJobAndWaitForCompletion("2021", files);
+
+		JobInstance jobInstance = myJobCoordinator.getInstance(jobId);
+		assertEquals(178, jobInstance.getCombinedRecordsProcessed());
 	}
 
 	@Test

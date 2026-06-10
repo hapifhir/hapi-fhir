@@ -1,49 +1,44 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.util.ClasspathUtil;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TerminologyLoaderSvcIcd10cmJpaTest extends BaseJpaR4Test {
-	private TermLoaderSvcImpl mySvc;
 
-	@BeforeEach
-	@Override
-	public void before() {
-		mySvc = new TermLoaderSvcImpl(myTerminologyDeferredStorageSvc, myTermCodeSystemStorageSvc);
+	@Autowired
+	private TerminologyTestHelper myTerminologyTestHelper;
 
-	}
-
-	@Test
-	void testLoadIcd10cm() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testLoadIcd10cm(boolean theSingleFile) throws IOException {
+		// Test
+		ZipCollectionBuilder files = new ZipCollectionBuilder(theSingleFile);
 		String filename = "icd/icd10cm_tabular_2021.xml";
-
 		String resource = ClasspathUtil.loadResource(filename);
-		List<ITermLoaderSvc.FileDescriptor> descriptors = new ArrayList<>();
-		descriptors.add(new ITermLoaderSvc.ByteArrayFileDescriptor(filename, resource.getBytes(StandardCharsets.UTF_8)));
-		mySvc.loadIcd10cm(descriptors, new SystemRequestDetails());
+		files.addFileText(resource, "icd10c-tabular-April-1-2026.xml");
 
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTerminologyTestHelper.startImportIcdCmJobAndWaitForCompletion("2021", files);
 
+		// Verify
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(1, myTermCodeSystemVersionDao.count());
+			assertEquals(2, myTermCodeSystemVersionDao.count());
 			assertEquals(0, myTermValueSetDao.count());
 			assertEquals(0, myTermConceptMapDao.count());
 			assertEquals(1, myResourceTableDao.count());
 			assertEquals(95, myTermConceptDao.count());
-			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(ITermLoaderSvc.ICD10CM_URI);
+			assertEquals(83, myTermConceptParentChildLinkDao.count());
+			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(TerminologyConstants.ICD10CM_URI);
 
 			assertEquals("2021", codeSystem.getCurrentVersion().getCodeSystemVersionId());
 

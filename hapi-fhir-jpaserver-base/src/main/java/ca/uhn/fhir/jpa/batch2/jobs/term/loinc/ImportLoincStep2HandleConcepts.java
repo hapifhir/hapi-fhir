@@ -142,15 +142,17 @@ public class ImportLoincStep2HandleConcepts
 	}
 
 	@Override
-	protected void syncToDb(
+	protected int syncToDb(
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
 			CodeExtractionContext theCodeExtractionContext,
 			CodeSystem theCodeSystemToPopulate,
 			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		super.syncToDb(theJobMetadata, theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
+		int retVal = super.syncToDb(
+				theJobMetadata, theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 		ourLog.info(
 				"LOINC CodeSystem populated with {} concepts",
 				theCodeSystemToPopulate.getConcept().size());
+		return retVal;
 	}
 
 	protected static class CodeExtractionContext extends BaseImportLoincStep.MyBaseContext {

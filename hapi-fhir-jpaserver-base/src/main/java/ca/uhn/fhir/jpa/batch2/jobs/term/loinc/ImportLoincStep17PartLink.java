@@ -23,8 +23,8 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
@@ -119,7 +119,7 @@ public class ImportLoincStep17PartLink extends BaseImportLoincStep<ImportLoincSt
 		if (propertyType == CodeSystem.PropertyType.STRING) {
 			newProperty.setValue(new StringType(partName));
 		} else if (propertyType == CodeSystem.PropertyType.CODING) {
-			newProperty.setValue(new Coding(ITermLoaderSvc.LOINC_URI, partNumber, partName));
+			newProperty.setValue(new Coding(TerminologyConstants.LOINC_URI, partNumber, partName));
 		} else {
 			throw new InternalErrorException(
 					Msg.code(914) + "Don't know how to handle property of type: " + propertyType);

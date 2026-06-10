@@ -27,6 +27,9 @@ import java.util.Properties;
 
 public class ImportTerminologyJobParameters implements IModelJson {
 
+	@JsonProperty("url")
+	private String myUrl;
+
 	@JsonProperty("versionId")
 	private String myVersionId;
 
@@ -35,6 +38,14 @@ public class ImportTerminologyJobParameters implements IModelJson {
 
 	@JsonIgnore
 	private Properties myJobProperties;
+
+	public String getUrl() {
+		return myUrl;
+	}
+
+	public void setUrl(String theUrl) {
+		myUrl = theUrl;
+	}
 
 	public Properties getJobProperties() {
 		return myJobProperties;
