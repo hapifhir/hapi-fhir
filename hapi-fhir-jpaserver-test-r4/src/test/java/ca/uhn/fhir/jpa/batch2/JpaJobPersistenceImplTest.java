@@ -319,8 +319,12 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			.atZone(ZoneId.systemDefault())
 			.toInstant());
 
+		logAllBatch2JobInstances();
+
+		myCaptureQueriesListener.clear();
 		final List<JobInstance> jobInstancesByCutoff =
 			mySvc.fetchInstances(JOB_DEFINITION_ID, StatusEnum.getEndedStatuses(), cutoffDate, PageRequest.of(0, 2));
+		myCaptureQueriesListener.logSelectQueries();
 
 		assertThat(jobInstancesByCutoff.stream()
 			.map(JobInstance::getInstanceId)
@@ -672,7 +676,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		});
 
 		// The maintenance pass should now cancel the job since it's been building for too long
-		myBatch2JobHelper.runMaintenancePass();
+		myBatch2JobHelper.runEndedJobMaintenancePass();
 
 		// Verify
 		runInTransaction(() -> {

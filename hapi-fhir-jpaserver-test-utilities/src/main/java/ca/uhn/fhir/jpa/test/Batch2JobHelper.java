@@ -366,6 +366,10 @@ public class Batch2JobHelper {
 		myJobMaintenanceService.runActiveJobMaintenancePass();
 	}
 
+	public void runEndedJobMaintenancePass() {
+		myJobMaintenanceService.runEndedJobMaintenancePass();
+	}
+
 	@VisibleForTesting
 	public void enableMaintenanceRunner(boolean theEnabled) {
 		myJobMaintenanceService.enableMaintenance(theEnabled);
