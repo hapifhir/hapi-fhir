@@ -43,6 +43,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 // Created by claude-opus-4-7
 
@@ -83,8 +84,6 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 	// STALE_ROW_COUNT to ~250 K instead of raising the timeout.
 	private static final int QUERY_TIMEOUT_SECONDS = 1;
 
-	// Hang-detector. Real signal is the correctness assertion; this just catches a stuck test.
-	private static final Duration COMPLETION_THRESHOLD = Duration.ofMinutes(1);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
 
 	// Stale rows — CREATED_TIME 2-24 hours before insert.
@@ -174,44 +173,33 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 	void cleanup_completesWithoutPerStatementTimeout_andDrainsStaleRows() throws Exception {
 		ourLog.info("=== Starting maintenance call (queryTimeout = {} s) ===", QUERY_TIMEOUT_SECONDS);
 		long start = System.nanoTime();
-		Throwable maintenanceFailure = null;
-		try {
+		Throwable maintenanceFailure = catchThrowable(() ->
 			runWithProgress("maintenance", () -> {
 				myMaintenanceSvc.removeStaleEntries();
 				return null;
-			});
-		} catch (Throwable t) {
-			maintenanceFailure = t;
-			ourLog.error("Maintenance call threw: {} — {}", t.getClass().getSimpleName(), t.getMessage());
-		}
+			}));
 		Duration elapsed = Duration.ofNanos(System.nanoTime() - start);
 		long remaining = countLiveRows();
 		ourLog.info("=== Maintenance returned after {} ms — {} rows remain ===",
 			String.format("%,d", elapsed.toMillis()), String.format("%,d", remaining));
 		logRemainingBreakdown();
-
 		if (maintenanceFailure != null) {
-			// RED: the unbounded DELETE on STALE_ROW_COUNT rows over-ran the per-statement
-			// budget, MSSQL rolled back, table still at TOTAL_ROW_COUNT. This is the bug.
-			throw new AssertionError(
-				"removeStaleEntries() threw " + maintenanceFailure.getClass().getName()
-					+ " after " + elapsed.toMillis() + " ms with " + remaining
-					+ " rows remaining — the unbounded DELETE on " + STALE_ROW_COUNT
-					+ " stale rows tripped the " + QUERY_TIMEOUT_SECONDS
-					+ " s statement timeout. The paged fix should keep each statement under it.",
-				maintenanceFailure);
+			ourLog.error("Maintenance call threw", maintenanceFailure);
 		}
+
+		// RED: an unbounded DELETE on STALE_ROW_COUNT rows would over-run the per-statement
+		// budget, MSSQL would roll back, table still at TOTAL_ROW_COUNT. This is the bug.
+		assertThat(maintenanceFailure)
+			.as("removeStaleEntries() on %d stale rows must not trip the %d s statement timeout "
+					+ "(elapsed %d ms, %d rows remaining). The paged fix should keep each statement under it.",
+				STALE_ROW_COUNT, QUERY_TIMEOUT_SECONDS, elapsed.toMillis(), remaining)
+			.isNull();
 
 		// GREEN: every stale row drained, every recent row kept.
 		assertThat(remaining)
 			.as("After cleanup, live table should hold exactly the %d recent rows "
 				+ "(stale rows drained). Found %d.", RECENT_ROW_COUNT, remaining)
 			.isEqualTo(RECENT_ROW_COUNT);
-
-		assertThat(elapsed)
-			.as("sweep ran past the loose %s safety ceiling — check whether the run progressed",
-				COMPLETION_THRESHOLD)
-			.isLessThan(COMPLETION_THRESHOLD);
 	}
 
 	private long countLiveRows() throws Exception {

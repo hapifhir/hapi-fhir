@@ -1,7 +1,5 @@
 ---
 type: fix
 issue: 8037
-title: "Fixed: The scheduled cleanup of stale entries in HFJ_RES_SEARCH_URL issued a single unbounded DELETE
-   that could exceed the database per-statement timeout once the table grew large, causing the cleanup to roll
-   back and stale entries to accumulate indefinitely. Cleanup now removes stale rows in paged batches so each
-   statement stays well within the timeout."
+title: "Fixed: Scheduled cleanup of HFJ_RES_SEARCH_URL no longer issues a single unbounded DELETE
+   that could exceed per-statement timeouts on large tables; cleanup now removes stale rows in paged batches."

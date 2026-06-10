@@ -44,6 +44,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -52,7 +53,6 @@ import java.util.stream.Collectors;
  *
  * @see SearchUrlJobMaintenanceSvcImpl which deletes stale entities
  */
-@Transactional
 @Service
 public class ResourceSearchUrlSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceSearchUrlSvc.class);
@@ -103,7 +103,7 @@ public class ResourceSearchUrlSvc {
 	public void deleteEntriesOlderThan(Date theCutoffDate) {
 		ourLog.debug("About to delete SearchUrl which are older than {}", theCutoffDate);
 		PageRequest page = PageRequest.of(0, DELETE_PAGE_SIZE);
-		AtomicInteger totalDeleted = new AtomicInteger();
+		AtomicLong totalDeleted = new AtomicLong();
 		while (true) {
 			// Each page in its own transaction — the repository is @Transactional(MANDATORY), so it
 			// needs an enclosing tx, and we want that tx to commit between pages, not span the sweep.
@@ -120,13 +120,14 @@ public class ResourceSearchUrlSvc {
 				break;
 			}
 		}
-		ourLog.debug("Deleted {} SearchUrls", totalDeleted.get());
+		ourLog.info("Deleted {} SearchUrls", totalDeleted.get());
 	}
 
 	/**
 	 * Once a resource is updated or deleted, we can trust that future match checks will find the committed resource in the db.
 	 * The use of the constraint table is done, and we can delete it to keep the table small.
 	 */
+	@Transactional
 	public void deleteByResId(JpaPid theResId) {
 		myResourceSearchUrlDao.deleteByResId(theResId.getId());
 	}
@@ -135,6 +136,7 @@ public class ResourceSearchUrlSvc {
 	 * Once a resource is updated or deleted, we can trust that future match checks will find the committed resource in the db.
 	 * The use of the constraint table is done, and we can delete it to keep the table small.
 	 */
+	@Transactional
 	public void deleteByResIds(Collection<JpaPid> theResId) {
 		myResourceSearchUrlDao.deleteByResIds(
 				theResId.stream().map(JpaPid::getId).collect(Collectors.toList()));
@@ -146,6 +148,7 @@ public class ResourceSearchUrlSvc {
 	 *
 	 *  We store a record of match urls with res_id so a db constraint can catch simultaneous creates that slip through.
 	 */
+	@Transactional
 	public void enforceMatchUrlResourceUniqueness(
 			String theResourceName, String theMatchUrl, ResourceTable theResourceTable) {
 		Validate.notBlank(theResourceName, "theResourceName must not be blank");
