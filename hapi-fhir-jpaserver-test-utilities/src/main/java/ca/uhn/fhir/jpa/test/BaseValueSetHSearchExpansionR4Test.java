@@ -404,6 +404,42 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		return id;
 	}
 
+	/**
+	 * Creates a CodeSystem with 304 concepts in a 3-level hierarchy:
+	 * Root -> 3 branches -> 50 children each -> 1 leaf each = 1 + 3 + 150 + 150 = 304
+	 */
+	private void createLargerCodeSystem() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.setName("LARGE SYSTEM");
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+
+		TermConcept root = new TermConcept(cs, "Root");
+		cs.getConcepts().add(root);
+
+		for (int b = 1; b <= 3; b++) {
+			TermConcept branch = new TermConcept(cs, "Branch_" + b);
+			root.addChild(branch, RelationshipTypeEnum.ISA);
+
+			for (int c = 0; c < 50; c++) {
+				TermConcept child = new TermConcept(cs, "Branch_" + b + "_Child_" + c);
+				branch.addChild(child, RelationshipTypeEnum.ISA);
+
+				TermConcept leaf = new TermConcept(cs, "Branch_" + b + "_Child_" + c + "_Leaf_0");
+				child.addChild(leaf, RelationshipTypeEnum.ISA);
+			}
+		}
+
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "LARGE SYSTEM", null, cs, table);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+	}
+
 	private List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
 		List<String> retVal = new ArrayList<>();
 
@@ -1736,6 +1772,92 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			assertThat(codes).isEmpty();
 		}
 
+		// Created by Claude Opus 4.6
+		@Test
+		void testExpandWithIsAFilter() {
+			createCodeSystem();
+
+			ValueSet vs = new ValueSet();
+			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.ISA).setValue("childAA");
+
+			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
+			List<String> codes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(codes).containsExactlyInAnyOrder("childAA", "childAAA", "childAAB");
+		}
+
+		// Created by Claude Opus 4.6
+		@Test
+		void testExpandWithDescendentOfFilter() {
+			createCodeSystem();
+
+			ValueSet vs = new ValueSet();
+			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.DESCENDENTOF).setValue("childAA");
+
+			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
+			List<String> codes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(codes).containsExactlyInAnyOrder("childAAA", "childAAB");
+		}
+
+		// Created by Claude Opus 4.6
+		@Test
+		void testExpandWithIsNotAFilter() {
+			createCodeSystem();
+
+			ValueSet vs = new ValueSet();
+			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.ISNOTA).setValue("childAA");
+
+			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
+			List<String> codes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(codes).containsExactlyInAnyOrder(
+				"ParentWithNoChildrenA", "ParentWithNoChildrenB", "ParentWithNoChildrenC",
+				"ParentA", "childAB", "ParentB");
+		}
+
+		// Created by Claude Opus 4.6
+		@Test
+		void testExpandHierarchyFiltersWithLargerCodeSystem() {
+			createLargerCodeSystem();
+
+			// ISA on "Branch_2" should include Branch_2 + its 50 children + 50 grandchildren = 101
+			ValueSet vs = new ValueSet();
+			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.ISA).setValue("Branch_2");
+			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
+			List<String> isaCodes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(isaCodes).contains("Branch_2", "Branch_2_Child_0", "Branch_2_Child_0_Leaf_0");
+			assertThat(isaCodes).hasSize(101);
+
+			// DESCENDENTOF on "Branch_2" should exclude Branch_2 itself = 100
+			vs = new ValueSet();
+			include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.DESCENDENTOF).setValue("Branch_2");
+			outcome = myTermSvc.expandValueSet(null, vs);
+			List<String> descCodes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(descCodes).doesNotContain("Branch_2");
+			assertThat(descCodes).hasSize(100);
+
+			// ISNOTA on "Branch_2" should return everything except Branch_2 and its descendants
+			// Total concepts: Root + 3 branches + 3*50 children + 3*50 grandchildren = 304
+			// Excluded: Branch_2 + 50 children + 50 grandchildren = 101
+			// Expected: 304 - 101 = 203
+			vs = new ValueSet();
+			include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.ISNOTA).setValue("Branch_2");
+			outcome = myTermSvc.expandValueSet(null, vs);
+			List<String> isNotACodes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(isNotACodes).contains("Root", "Branch_1", "Branch_3");
+			assertThat(isNotACodes).doesNotContain("Branch_2", "Branch_2_Child_0", "Branch_2_Child_0_Leaf_0");
+			assertThat(isNotACodes).hasSize(203);
+		}
 
 		@Test
 		public void testSearchWithRegexExclude() {
