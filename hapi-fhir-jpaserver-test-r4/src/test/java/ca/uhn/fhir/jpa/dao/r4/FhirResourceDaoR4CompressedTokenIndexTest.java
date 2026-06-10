@@ -19,8 +19,10 @@
  */
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenCommonResDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenIdentifierDao;
+import ca.uhn.fhir.jpa.search.TokenSearchParameterTestCases;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -28,21 +30,16 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommon;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommonRes;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenIdentifier;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
@@ -103,32 +100,32 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 			List<ResourceIndexedSearchParamTokenCommonRes> commonRes = myTokenCommonResDao.findByResourceId(pid);
 			assertThat(commonRes)
-					.extracting(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
-					.as("identifier param must not appear in CommonRes (it routes to Identifier table)")
-					.doesNotContain(identifierHash);
+				.extracting(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
+				.as("identifier param must not appear in CommonRes (it routes to Identifier table)")
+				.doesNotContain(identifierHash);
 			ResourceIndexedSearchParamTokenCommonRes genderLink = commonRes.stream()
-					.filter(r -> r.getHashSystemAndValue() == genderHash)
-					.findFirst()
-					.orElseThrow(() -> new AssertionError("expected CommonRes row for gender=male hash"));
+				.filter(r -> r.getHashSystemAndValue() == genderHash)
+				.findFirst()
+				.orElseThrow(() -> new AssertionError("expected CommonRes row for gender=male hash"));
 			assertThat(genderLink.getResourceId()).isEqualTo(pid.getId());
 			assertThat(genderLink.getPartitionId()).as("default partition").isNull();
 			assertThat(genderLink.getHashSystemAndValue()).isEqualTo(genderHash);
 
 			ResourceIndexedSearchParamTokenCommon genderCommon =
-					myEntityManager.find(ResourceIndexedSearchParamTokenCommon.class, genderHash);
+				myEntityManager.find(ResourceIndexedSearchParamTokenCommon.class, genderHash);
 			assertThat(genderCommon).as("gender should be stored in TokenCommon").isNotNull();
 			assertThat(genderCommon.getHashSystemAndValue()).isEqualTo(genderHash);
 			assertThat(genderCommon.getHashIdentity())
-					.isEqualTo(hashIdentity("Patient", Patient.SP_GENDER));
+				.isEqualTo(hashIdentity("Patient", Patient.SP_GENDER));
 			assertThat(genderCommon.getHashValue())
-					.isEqualTo(hashValue("Patient", Patient.SP_GENDER, "male"));
+				.isEqualTo(hashValue("Patient", Patient.SP_GENDER, "male"));
 			assertThat(genderCommon.getSystemId())
-					.as("gender system URL resolved to non-null FK")
-					.isNotNull();
+				.as("gender system URL resolved to non-null FK")
+				.isNotNull();
 			assertThat(genderCommon.getValue()).isEqualTo("male");
 
 			ResourceIndexedSearchParamTokenCommon identifierCommon =
-					myEntityManager.find(ResourceIndexedSearchParamTokenCommon.class, identifierHash);
+				myEntityManager.find(ResourceIndexedSearchParamTokenCommon.class, identifierHash);
 			assertThat(identifierCommon).as("identifier must NOT appear in TokenCommon").isNull();
 		});
 	}
@@ -158,15 +155,15 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamTokenIdentifier> identifiers = myTokenIdentifierDao.findByResourceId(pid);
 			assertThat(identifiers)
-					.extracting(ResourceIndexedSearchParamTokenIdentifier::getValue)
-					.as("code param should route to IDENTIFIER table when configured")
-					.contains("12345-6");
+				.extracting(ResourceIndexedSearchParamTokenIdentifier::getValue)
+				.as("code param should route to IDENTIFIER table when configured")
+				.contains("12345-6");
 
 			List<ResourceIndexedSearchParamTokenCommonRes> commonRes = myTokenCommonResDao.findByResourceId(pid);
 			assertThat(commonRes)
-					.extracting(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
-					.as("code param must not appear in CommonRes when routed to Identifier table")
-					.doesNotContain(codeHash);
+				.extracting(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
+				.as("code param must not appear in CommonRes when routed to Identifier table")
+				.doesNotContain(codeHash);
 		});
 
 		// Verify read path: search by code finds the resource
@@ -175,8 +172,8 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 		params.add(Observation.SP_CODE, new TokenParam("http://loinc.org", "12345-6"));
 		List<IIdType> results = toUnqualifiedVersionlessIds(myObservationDao.search(params, mySrd));
 		assertThat(results)
-				.as("search by code should find the resource when routed to IDENTIFIER table")
-				.containsExactly(id);
+			.as("search by code should find the resource when routed to IDENTIFIER table")
+			.containsExactly(id);
 
 		myStorageSettings.setIdentifierTokenSearchParams(Set.of("identifier"));
 	}
@@ -186,13 +183,13 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 	@Test
 	void createTwoResources_sameToken_yieldsOneCommonRowAndTwoCommonResRows() {
 		IIdType id1 = myObservationDao
-				.create(newObservationWithCode("http://loinc.org", "12345-6"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
+			.create(newObservationWithCode("http://loinc.org", "12345-6"), mySrd)
+			.getId()
+			.toUnqualifiedVersionless();
 		IIdType id2 = myObservationDao
-				.create(newObservationWithCode("http://loinc.org", "12345-6"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
+			.create(newObservationWithCode("http://loinc.org", "12345-6"), mySrd)
+			.getId()
+			.toUnqualifiedVersionless();
 		JpaPid pid1 = JpaPid.fromId(id1.getIdPartAsLong());
 		JpaPid pid2 = JpaPid.fromId(id2.getIdPartAsLong());
 
@@ -202,11 +199,11 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 			assertThat(countCommonByHash(codeHash)).as("exactly one Common row per unique token").isEqualTo(1);
 
 			assertThat(myTokenCommonResDao.findByResourceId(pid1))
-					.extracting(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
-					.contains(codeHash);
+				.extracting(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
+				.contains(codeHash);
 			assertThat(myTokenCommonResDao.findByResourceId(pid2))
-					.extracting(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
-					.contains(codeHash);
+				.extracting(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
+				.contains(codeHash);
 		});
 	}
 
@@ -225,11 +222,11 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			assertThat(countCommonByHash(genderHash))
-					.as("session identity-map dedup must collapse 5 inserts into 1 row")
-					.isEqualTo(1);
+				.as("session identity-map dedup must collapse 5 inserts into 1 row")
+				.isEqualTo(1);
 			assertThat(countCommonResByHash(genderHash))
-					.as("each of the 5 resources gets its own CommonRes link row")
-					.isEqualTo(5);
+				.as("each of the 5 resources gets its own CommonRes link row")
+				.isEqualTo(5);
 		});
 	}
 
@@ -248,9 +245,9 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 		myPatientDao.update(updated, mySrd);
 
 		runInTransaction(() -> assertThat(myTokenIdentifierDao.findByResourceId(pid))
-				.extracting(ResourceIndexedSearchParamTokenIdentifier::getValue)
-				.as("stale identifier row must be removed; new value present")
-				.containsExactly("B"));
+			.extracting(ResourceIndexedSearchParamTokenIdentifier::getValue)
+			.as("stale identifier row must be removed; new value present")
+			.containsExactly("B"));
 	}
 
 	@Test
@@ -270,16 +267,16 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			List<Long> commonResHashes = myTokenCommonResDao.findByResourceId(pid).stream()
-					.map(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
-					.toList();
+				.map(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
+				.toList();
 			assertThat(commonResHashes)
-					.as("CommonRes points only at female; male link is removed")
-					.contains(femaleHash)
-					.doesNotContain(maleHash);
+				.as("CommonRes points only at female; male link is removed")
+				.contains(femaleHash)
+				.doesNotContain(maleHash);
 
 			assertThat(countCommonByHash(maleHash))
-					.as("male Common row retained — insert-only")
-					.isEqualTo(1);
+				.as("male Common row retained — insert-only")
+				.isEqualTo(1);
 			assertThat(countCommonByHash(femaleHash)).isEqualTo(1);
 		});
 	}
@@ -344,20 +341,20 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		assertThat(selectQueries)
-				.extracting(q -> q.getSql(false, false).toUpperCase())
-				.as("CREATE must not issue SELECT against compressed token tables")
-				.noneMatch(sql -> sql.contains(ResourceIndexedSearchParamTokenCommonRes.HFJ_SPIDX2_TOKEN_COMMON_RES))
-				.noneMatch(sql -> sql.contains(ResourceIndexedSearchParamTokenIdentifier.HFJ_SPIDX2_TOKEN_IDENTIFIER));
+			.extracting(q -> q.getSql(false, false).toUpperCase())
+			.as("CREATE must not issue SELECT against compressed token tables")
+			.noneMatch(sql -> sql.contains(ResourceIndexedSearchParamTokenCommonRes.HFJ_SPIDX2_TOKEN_COMMON_RES))
+			.noneMatch(sql -> sql.contains(ResourceIndexedSearchParamTokenIdentifier.HFJ_SPIDX2_TOKEN_IDENTIFIER));
 	}
 
 	// ===== Group E: Strategy semantics =====
 
 	private static Stream<TokenIndexStrategy> tokenIndexStrategies() {
 		return Stream.of(
-				TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY),
-				TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY),
-				TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), COMPRESSED),
-				TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
+			TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY),
+			TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY),
+			TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), COMPRESSED),
+			TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
 	}
 
 	@ParameterizedTest
@@ -374,7 +371,7 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			int legacyRows = myResourceIndexedSearchParamTokenDao.countForResourceId(pid);
 			int compressedRows = myTokenCommonResDao.findByResourceId(pid).size()
-					+ myTokenIdentifierDao.findByResourceId(pid).size();
+				+ myTokenIdentifierDao.findByResourceId(pid).size();
 
 			if (theStrategy.writeToLegacyTokenTable()) {
 				assertThat(legacyRows).as("legacy populated under %s", theStrategy).isGreaterThan(0);
@@ -416,7 +413,7 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			ResourceIndexedSearchParamTokenCommon row =
-					myEntityManager.find(ResourceIndexedSearchParamTokenCommon.class, expectedHashSysAndValue);
+				myEntityManager.find(ResourceIndexedSearchParamTokenCommon.class, expectedHashSysAndValue);
 			assertThat(row).as("Common row for gender=male").isNotNull();
 			assertThat(row.getHashIdentity()).isEqualTo(expectedHashIdentity);
 			assertThat(row.getHashValue()).isEqualTo(expectedHashValue);
@@ -438,7 +435,7 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			ResourceIndexedSearchParamTokenCommon row =
-					myEntityManager.find(ResourceIndexedSearchParamTokenCommon.class, expectedHashSysAndValue);
+				myEntityManager.find(ResourceIndexedSearchParamTokenCommon.class, expectedHashSysAndValue);
 			assertThat(row).isNotNull();
 			assertThat(row.getSystemId()).as("systemId is null when system is blank").isNull();
 			assertThat(row.getValue()).isEqualTo("custom-no-system");
@@ -467,7 +464,7 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			int legacyRows = myResourceIndexedSearchParamTokenDao.countForResourceId(pid);
 			int newRows = myTokenCommonResDao.findByResourceId(pid).size()
-					+ myTokenIdentifierDao.findByResourceId(pid).size();
+				+ myTokenIdentifierDao.findByResourceId(pid).size();
 			assertThat(legacyRows).as("legacy untouched under WRITE_NEW_QUERY_NEW").isZero();
 			assertThat(newRows).as("new tables populated").isGreaterThan(0);
 		});
@@ -486,91 +483,10 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			int legacyRows = myResourceIndexedSearchParamTokenDao.countForResourceId(pid);
 			int newRows = myTokenCommonResDao.findByResourceId(pid).size()
-					+ myTokenIdentifierDao.findByResourceId(pid).size();
+				+ myTokenIdentifierDao.findByResourceId(pid).size();
 			assertThat(legacyRows).as("legacy populated under WRITE_BOTH_QUERY_OLD").isGreaterThan(0);
 			assertThat(newRows).as("new tables also populated under WRITE_BOTH_QUERY_OLD").isGreaterThan(0);
 		});
-	}
-
-	@Test
-	void testTokenMissingSearch_worksWithIndexMissingFieldsEnabled() {
-		// Given: compressed token tables AND IndexMissingFields = ENABLED
-		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), COMPRESSED));
-		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
-
-		// Patient with identifier AND birthdate
-		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("http://sys").setValue("ID1");
-		p1.setBirthDateElement(new DateType("2000-01-01"));
-		IIdType id1 = myPatientDao.create(p1, mySrd).getId().toUnqualifiedVersionless();
-
-		// Patient with identifier but NO birthdate
-		Patient p2 = new Patient();
-		p2.addIdentifier().setSystem("http://sys").setValue("ID2");
-		IIdType id2 = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless();
-
-		// Patient without identifier but WITH birthdate
-		Patient p3 = new Patient();
-		p3.setBirthDateElement(new DateType("1990-05-15"));
-		IIdType id3 = myPatientDao.create(p3, mySrd).getId().toUnqualifiedVersionless();
-
-		// Search: identifier:missing=true AND birthdate:missing=false
-		// Should find only p3 (no identifier, has birthdate)
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			params.add(Patient.SP_IDENTIFIER, new TokenParam().setMissing(true));
-			params.add(Patient.SP_BIRTHDATE, new DateParam().setMissing(false));
-
-			List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
-
-			assertThat(results)
-				.as("Should find patient with birthdate but no identifier")
-				.containsExactly(id3);
-		}
-	}
-
-	@Test
-	void testTokenMissingSearch_worksWithIndexMissingFieldsDisabled() {
-		// Given: compressed-only token tables (legacy HFJ_SPIDX_TOKEN is NOT written) AND
-		// IndexMissingFields = DISABLED. Token :missing must still work for compressed tables,
-		// routed through the NOT EXISTS path regardless of the IndexMissingFields setting.
-		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
-		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.DISABLED);
-
-		// p1: has identifier (IDENTIFIER mode) AND gender (COMMON mode)
-		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("http://sys").setValue("ID1");
-		p1.setGender(AdministrativeGender.MALE);
-		IIdType id1 = myPatientDao.create(p1, mySrd).getId().toUnqualifiedVersionless();
-
-		// p2: has neither identifier nor gender
-		Patient p2 = new Patient();
-		p2.addName().setFamily("NoTokens");
-		IIdType id2 = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless();
-
-		// IDENTIFIER mode
-		assertThat(searchForPatientIdsByMissingToken(Patient.SP_IDENTIFIER, true))
-			.as("identifier:missing=true -> only the patient without an identifier")
-			.containsExactly(id2);
-		assertThat(searchForPatientIdsByMissingToken(Patient.SP_IDENTIFIER, false))
-			.as("identifier:missing=false -> only the patient with an identifier")
-			.containsExactly(id1);
-
-		// COMMON mode
-		assertThat(searchForPatientIdsByMissingToken(Patient.SP_GENDER, true))
-			.as("gender:missing=true -> only the patient without a gender")
-			.containsExactly(id2);
-		assertThat(searchForPatientIdsByMissingToken(Patient.SP_GENDER, false))
-			.as("gender:missing=false -> only the patient with a gender")
-			.containsExactly(id1);
-	}
-
-	private List<IIdType> searchForPatientIdsByMissingToken(String theParamName, boolean theMissing) {
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(theParamName, new TokenParam().setMissing(theMissing));
-		return toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
 	}
 
 	// ===== Group H: :of-type token indexing =====
@@ -665,403 +581,7 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 		});
 	}
 
-	@Test
-	void searchIdentifier_ofType_findsResource() {
-		myStorageSettings.setIndexIdentifierOfType(true);
-
-		Patient p = new Patient();
-		Identifier id = p.addIdentifier();
-		id.setSystem("http://example.com/ids").setValue("MRN123");
-		id.getType().addCoding()
-			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-			.setCode("MR");
-
-		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(Patient.SP_IDENTIFIER, new TokenParam(
-			"http://terminology.hl7.org/CodeSystem/v2-0203", "MR|MRN123")
-			.setModifier(TokenParamModifier.OF_TYPE));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
-		assertThat(results).containsExactly(patientId);
-	}
-
-	@Test
-	void searchIdentifier_ofType_withMultipleTypeCodingsFindsResourceByEitherType() {
-		myStorageSettings.setIndexIdentifierOfType(true);
-
-		Patient p = new Patient();
-		Identifier id = p.addIdentifier();
-		id.setSystem("http://example.com/ids").setValue("MRN123");
-		id.getType()
-			.addCoding()
-			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-			.setCode("MR");
-		id.getType()
-			.addCoding()
-			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-			.setCode("SS");
-
-		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		// Search by MR type - should find
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(Patient.SP_IDENTIFIER, new TokenParam(
-			"http://terminology.hl7.org/CodeSystem/v2-0203", "MR|MRN123")
-			.setModifier(TokenParamModifier.OF_TYPE));
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
-		assertThat(results).as("should find by MR type").containsExactly(patientId);
-
-		// Search by SS type - should also find
-		params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(Patient.SP_IDENTIFIER, new TokenParam(
-			"http://terminology.hl7.org/CodeSystem/v2-0203", "SS|MRN123")
-			.setModifier(TokenParamModifier.OF_TYPE));
-		results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
-		assertThat(results).as("should find by SS type").containsExactly(patientId);
-	}
-
-	// ===== Group I: system-only search and system discrimination =====
-
-	@Test
-	void searchIdentifier_systemOnly_findsOnlyResourcesWithThatSystem() {
-		// IDENTIFIER mode: identifier routes to HFJ_SPIDX2_TOKEN_IDENTIFIER.
-		Patient withSystem = new Patient();
-		withSystem.addIdentifier().setSystem("http://hospital.org/mrn").setValue("12345");
-		IIdType matchId = myPatientDao.create(withSystem, mySrd).getId().toUnqualifiedVersionless();
-
-		Patient otherSystem = new Patient();
-		otherSystem.addIdentifier().setSystem("http://other.org/mrn").setValue("67890");
-		myPatientDao.create(otherSystem, mySrd);
-
-		// identifier=http://hospital.org/mrn|
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(Patient.SP_IDENTIFIER, new TokenParam("http://hospital.org/mrn", null));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
-		assertThat(results)
-				.as("system-only search must find only resources whose identifier has that system")
-				.containsExactly(matchId);
-	}
-
-	@Test
-	void searchCommonToken_systemOnly_findsOnlyResourcesWithThatSystem() {
-		// Observation.code is NOT an "identifier" param -> routes to the HFJ_SPIDX2_TOKEN_COMMON tables.
-		IIdType loincId = myObservationDao
-				.create(newObservationWithCode("http://loinc.org", "12345-6"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-		myObservationDao.create(newObservationWithCode("http://snomed.info/sct", "999"), mySrd);
-
-		// code=http://loinc.org|
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(Observation.SP_CODE, new TokenParam("http://loinc.org", null));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myObservationDao.search(params, mySrd));
-		assertThat(results)
-				.as("system-only search must find only resources whose token has that system (COMMON mode)")
-				.containsExactly(loincId);
-	}
-
-	@Test
-	void searchIdentifier_systemAndValue_narrowsBySystem() {
-		// Two patients sharing the same identifier VALUE but different SYSTEMS.
-		Patient a = new Patient();
-		a.addIdentifier().setSystem("http://system-a.org").setValue("SHARED");
-		IIdType aId = myPatientDao.create(a, mySrd).getId().toUnqualifiedVersionless();
-
-		Patient b = new Patient();
-		b.addIdentifier().setSystem("http://system-b.org").setValue("SHARED");
-		myPatientDao.create(b, mySrd);
-
-		// identifier=http://system-a.org|SHARED
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(Patient.SP_IDENTIFIER, new TokenParam("http://system-a.org", "SHARED"));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
-		assertThat(results)
-				.as("system+value search must narrow by system, not match the same value in another system")
-				.containsExactly(aId);
-	}
-
-	@Test
-	void searchIdentifier_systemOnly_nonExistentSystem_findsNothing() {
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("http://hospital.org/mrn").setValue("12345");
-		myPatientDao.create(p, mySrd);
-
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(Patient.SP_IDENTIFIER, new TokenParam("http://never-indexed.example.org", null));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
-		assertThat(results)
-				.as("system-only search for a never-indexed system must find nothing")
-				.isEmpty();
-	}
-
-	// ===== Group J: :not modifier (negation) with system discrimination =====
-
-	@Test
-	void searchCommonToken_notSystemOnly_excludesMatchingSystemAndKeepsEmpty() {
-		// COMMON mode (Observation.code). Mirrors FhirResourceDaoR4StandardQueriesNoFTTest.NotModifier.
-		IIdType withMatchingSystem = myObservationDao
-				.create(newObservationWithCode("http://example.com", "value"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-		IIdType withOtherSystem = myObservationDao
-				.create(newObservationWithCode("http://example2.com", "value"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-		IIdType empty =
-				myObservationDao.create(new Observation(), mySrd).getId().toUnqualifiedVersionless();
-
-		// code:not=http://example.com|
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(
-				Observation.SP_CODE,
-				new TokenParam("http://example.com", null).setModifier(TokenParamModifier.NOT));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myObservationDao.search(params, mySrd));
-		assertThat(results)
-				.as(":not system-only must exclude the matching system but keep others and resources without the token")
-				.doesNotContain(withMatchingSystem)
-				.contains(withOtherSystem, empty);
-	}
-
-	@Test
-	void searchIdentifier_notSystemOnly_excludesMatchingSystemAndKeepsEmpty() {
-		// IDENTIFIER mode (Patient.identifier).
-		IIdType withMatchingSystem = myPatientDao
-				.create(newPatientWithIdentifier("http://hospital.org/mrn", "12345"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-		IIdType withOtherSystem = myPatientDao
-				.create(newPatientWithIdentifier("http://other.org/mrn", "67890"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-		IIdType empty = myPatientDao.create(new Patient(), mySrd).getId().toUnqualifiedVersionless();
-
-		// identifier:not=http://hospital.org/mrn|
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(
-				Patient.SP_IDENTIFIER,
-				new TokenParam("http://hospital.org/mrn", null).setModifier(TokenParamModifier.NOT));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
-		assertThat(results)
-				.as(":not system-only must exclude the matching system but keep others and resources without the token")
-				.doesNotContain(withMatchingSystem)
-				.contains(withOtherSystem, empty);
-	}
-
-	@Test
-	void searchIdentifier_notSystemAndValue_excludesOnlyExactSystemAndValue() {
-		// identifier value shared across systems; :not on one system+value must only exclude that exact pair.
-		IIdType exact = myPatientDao
-				.create(newPatientWithIdentifier("http://system-a.org", "SHARED"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-		IIdType sameValueOtherSystem = myPatientDao
-				.create(newPatientWithIdentifier("http://system-b.org", "SHARED"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-
-		// identifier:not=http://system-a.org|SHARED
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(
-				Patient.SP_IDENTIFIER,
-				new TokenParam("http://system-a.org", "SHARED").setModifier(TokenParamModifier.NOT));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(params, mySrd));
-		assertThat(results)
-				.as(":not system+value must exclude only the exact pair, keeping the same value under another system")
-				.doesNotContain(exact)
-				.contains(sameValueOtherSystem);
-	}
-
-	// ===== Group K: _filter "ne" and mixed OR-lists (compressed mode; expected results validated against legacy) =====
-
-	@Test
-	void filterNe_commonSystemOnly() {
-		myStorageSettings.setFilterParameterEnabled(true);
-
-		IIdType inSystem = myObservationDao
-				.create(newObservationWithCode("http://example.com", "value"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-		IIdType otherSystem = myObservationDao
-				.create(newObservationWithCode("http://example2.com", "value"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add(Constants.PARAM_FILTER, new StringParam("code ne http://example.com|"));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myObservationDao.search(map, mySrd));
-		assertThat(results)
-				.as("_filter code ne system|")
-				.doesNotContain(inSystem)
-				.contains(otherSystem);
-	}
-
-	@Test
-	void filterNe_identifierSystemOnly() {
-		myStorageSettings.setFilterParameterEnabled(true);
-
-		IIdType inSystem = myPatientDao
-				.create(newPatientWithIdentifier("http://hospital.org/mrn", "12345"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-		IIdType otherSystem = myPatientDao
-				.create(newPatientWithIdentifier("http://other.org/mrn", "67890"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add(Constants.PARAM_FILTER, new StringParam("identifier ne http://hospital.org/mrn|"));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(map, mySrd));
-		assertThat(results)
-				.as("_filter identifier ne system|")
-				.doesNotContain(inSystem)
-				.contains(otherSystem);
-	}
-
-	@Test
-	void filterNe_identifierSystemAndValue() {
-		myStorageSettings.setFilterParameterEnabled(true);
-
-		IIdType exact = myPatientDao
-				.create(newPatientWithIdentifier("http://system-a.org", "SHARED"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-		IIdType sameValueOtherSystem = myPatientDao
-				.create(newPatientWithIdentifier("http://system-b.org", "SHARED"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add(Constants.PARAM_FILTER, new StringParam("identifier ne http://system-a.org|SHARED"));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(map, mySrd));
-		assertThat(results)
-				.as("_filter identifier ne system|value")
-				.doesNotContain(exact)
-				.contains(sameValueOtherSystem);
-	}
-
-	@Test
-	void searchIdentifier_systemOnlyOrList_withUnknownSystem_stillMatchesKnown() {
-		IIdType known = myPatientDao
-				.create(newPatientWithIdentifier("http://a.org", "1"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-
-		// identifier=http://a.org|,http://nonexistent.org|
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add(
-				Patient.SP_IDENTIFIER,
-				new TokenOrListParam()
-						.add(new TokenParam("http://a.org", null))
-						.add(new TokenParam("http://nonexistent.org", null)));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(map, mySrd));
-		assertThat(results)
-				.as("OR-list with an unknown system must still match the known system")
-				.contains(known);
-	}
-
-	// ===== Group L: NULL-system rows under "ne" (compressed mode; expected results validated against legacy) =====
-
-	@Test
-	void filterNe_identifierSystemOnly_includesResourceWithNoSystem() {
-		myStorageSettings.setFilterParameterEnabled(true);
-
-		Patient noSystem = new Patient();
-		noSystem.addIdentifier().setValue("V2"); // value, but no system
-		IIdType noSystemId = myPatientDao.create(noSystem, mySrd).getId().toUnqualifiedVersionless();
-
-		IIdType inSystem = myPatientDao
-				.create(newPatientWithIdentifier("http://sys-a.org", "V1"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add(Constants.PARAM_FILTER, new StringParam("identifier ne http://sys-a.org|"));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(map, mySrd));
-		assertThat(results)
-				.as("_filter identifier ne system| must include a resource whose identifier has no system")
-				.contains(noSystemId)
-				.doesNotContain(inSystem);
-	}
-
-	@Test
-	void filterNe_identifierSystemAndValue_includesSameValueWithNoSystem() {
-		myStorageSettings.setFilterParameterEnabled(true);
-
-		IIdType exact = myPatientDao
-				.create(newPatientWithIdentifier("http://system-a.org", "SHARED"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-
-		Patient noSystemSameValue = new Patient();
-		noSystemSameValue.addIdentifier().setValue("SHARED"); // same value, no system
-		IIdType noSystemId =
-				myPatientDao.create(noSystemSameValue, mySrd).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add(Constants.PARAM_FILTER, new StringParam("identifier ne http://system-a.org|SHARED"));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(map, mySrd));
-		assertThat(results)
-				.as("_filter identifier ne system|value must include the same value with no system")
-				.doesNotContain(exact)
-				.contains(noSystemId);
-	}
-
-	// ===== Group M: explicit empty-system search (compressed mode; expected results validated against legacy) =====
-
-	@Test
-	void searchIdentifier_explicitNoSystem_matchesOnlyNoSystemValue() {
-		Patient noSystem = new Patient();
-		noSystem.addIdentifier().setValue("MRN123"); // value, but no system
-		IIdType noSystemId = myPatientDao.create(noSystem, mySrd).getId().toUnqualifiedVersionless();
-
-		IIdType withSystem = myPatientDao
-				.create(newPatientWithIdentifier("http://hospital.org/mrn", "MRN123"), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-
-		// identifier=|MRN123  (explicit "no system")
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add(Patient.SP_IDENTIFIER, new TokenParam("", "MRN123"));
-
-		List<IIdType> results = toUnqualifiedVersionlessIds(myPatientDao.search(map, mySrd));
-		assertThat(results)
-				.as("identifier=|value must match a no-system identifier but not the same value under a system")
-				.contains(noSystemId)
-				.doesNotContain(withSystem);
-	}
-
 	// ===== Helpers =====
-
-	private Patient newPatientWithIdentifier(String theSystem, String theValue) {
-		Patient p = new Patient();
-		p.addIdentifier().setSystem(theSystem).setValue(theValue);
-		return p;
-	}
 
 	private Observation newObservationWithCode(String theSystem, String theCode) {
 		Observation obs = new Observation();
@@ -1071,56 +591,108 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 	private long hashIdentity(String theResourceType, String theParamName) {
 		return BaseResourceIndexedSearchParam.calculateHashIdentity(
-				myPartitionSettings, (PartitionablePartitionId) null, theResourceType, theParamName);
+			myPartitionSettings, (PartitionablePartitionId) null, theResourceType, theParamName);
 	}
 
 	private long hashValue(String theResourceType, String theParamName, String theValue) {
 		return ResourceIndexedSearchParamToken.calculateHashValue(
-				myPartitionSettings, (PartitionablePartitionId) null, theResourceType, theParamName, theValue);
+			myPartitionSettings, (PartitionablePartitionId) null, theResourceType, theParamName, theValue);
 	}
 
 	private long hashSysAndValue(String theResourceType, String theParamName, String theSystem, String theValue) {
 		return ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
-				myPartitionSettings,
-				(PartitionablePartitionId) null,
-				theResourceType,
-				theParamName,
-				theSystem,
-				theValue);
+			myPartitionSettings,
+			(PartitionablePartitionId) null,
+			theResourceType,
+			theParamName,
+			theSystem,
+			theValue);
 	}
 
 	private int countCommonByHash(long theHash) {
 		return myEntityManager
-				.createQuery(
-						"SELECT COUNT(t) FROM ResourceIndexedSearchParamTokenCommon t WHERE t.myHashSystemAndValue = :h",
-						Long.class)
-				.setParameter("h", theHash)
-				.getSingleResult()
-				.intValue();
+			.createQuery(
+				"SELECT COUNT(t) FROM ResourceIndexedSearchParamTokenCommon t WHERE t.myHashSystemAndValue = :h",
+				Long.class)
+			.setParameter("h", theHash)
+			.getSingleResult()
+			.intValue();
 	}
 
 	private int countCommonResByHash(long theHash) {
 		return myEntityManager
-				.createQuery(
-						"SELECT COUNT(t) FROM ResourceIndexedSearchParamTokenCommonRes t WHERE t.myHashSystemAndValue = :h",
-						Long.class)
-				.setParameter("h", theHash)
-				.getSingleResult()
-				.intValue();
+			.createQuery(
+				"SELECT COUNT(t) FROM ResourceIndexedSearchParamTokenCommonRes t WHERE t.myHashSystemAndValue = :h",
+				Long.class)
+			.setParameter("h", theHash)
+			.getSingleResult()
+			.intValue();
 	}
 
-	// ===== Existing strategy-permutation @Nested wrappers =====
+	private ITestDataBuilder.Support tokenSearchSupport() {
+		return new ITestDataBuilder.Support() {
+			@Override
+			public FhirContext getFhirContext() {
+				return FhirResourceDaoR4CompressedTokenIndexTest.this.getFhirContext();
+			}
+
+			@Override
+			public IIdType doCreateResource(IBaseResource theResource) {
+				return FhirResourceDaoR4CompressedTokenIndexTest.this.doCreateResource(theResource);
+			}
+
+			@Override
+			public IIdType doUpdateResource(IBaseResource theResource) {
+				return FhirResourceDaoR4CompressedTokenIndexTest.this.doUpdateResource(theResource);
+			}
+		};
+	}
 
 	@Nested
-	public class WriteBothQueryOldFhirResourceDaoR4SearchNoFtTest extends FhirResourceDaoR4SearchNoFtTest {
-		@BeforeEach
-		void setUp() {
-			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY));
+	public class LegacyTokenSearch extends TokenSearchParameterTestCases {
+		public LegacyTokenSearch() {
+			super(tokenSearchSupport(), myTestDaoSearch, myStorageSettings);
 		}
 
-		@AfterEach
-		void cleanUp() {
+		@BeforeEach
+		void setStrategy() {
 			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY));
+		}
+	}
+
+	@Nested
+	public class CompressedWriteNewQueryNew extends TokenSearchParameterTestCases {
+		public CompressedWriteNewQueryNew() {
+			super(tokenSearchSupport(), myTestDaoSearch, myStorageSettings);
+		}
+
+		@BeforeEach
+		void setStrategy() {
+			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
+		}
+	}
+
+	@Nested
+	public class CompressedWriteBothQueryNew extends TokenSearchParameterTestCases {
+		public CompressedWriteBothQueryNew() {
+			super(tokenSearchSupport(), myTestDaoSearch, myStorageSettings);
+		}
+
+		@BeforeEach
+		void setStrategy() {
+			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), COMPRESSED));
+		}
+	}
+
+	@Nested
+	public class CompressedWriteBothQueryOld extends TokenSearchParameterTestCases {
+		public CompressedWriteBothQueryOld() {
+			super(tokenSearchSupport(), myTestDaoSearch, myStorageSettings);
+		}
+
+		@BeforeEach
+		void setStrategy() {
+			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY));
 		}
 	}
 
@@ -1135,6 +707,11 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 		void cleanUp() {
 			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY));
 		}
+
+		@Override
+		protected boolean readsFromLegacyTokenTable() {
+			return false;
+		}
 	}
 
 	@Nested
@@ -1147,6 +724,16 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 		@AfterEach
 		void cleanUp() {
 			myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY));
+		}
+
+		@Override
+		protected boolean writesToLegacyTokenTable() {
+			return false;
+		}
+
+		@Override
+		protected boolean readsFromLegacyTokenTable() {
+			return false;
 		}
 	}
 }

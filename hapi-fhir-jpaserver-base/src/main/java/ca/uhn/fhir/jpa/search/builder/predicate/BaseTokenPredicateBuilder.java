@@ -95,14 +95,7 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 	}
 
 	/**
-	 * Builds a SQL predicate for a token search parameter for standard equality searches
-	 * (no custom compare operation needed).
-	 *
-	 * @param theParameters the token values to search for (e.g. {@code system|code})
-	 * @param theResourceName the FHIR resource type (e.g. {@code "Patient"})
-	 * @param theSpnamePrefix optional prefix for chained searches, or {@code null}
-	 * @param theSearchParam the search parameter definition
-	 * @param theRequestPartitionId the partition id to search in
+	 * Builds a SQL predicate for a token search parameter for standard equality searches.
 	 * @return a SQL condition matching resources that have the given token values
 	 */
 	public Condition createPredicateToken(
@@ -116,18 +109,8 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 	}
 
 	/**
-	 * Builds a SQL predicate for a token search parameter, with an explicit compare operation.
-	 * Handles all token modifiers (e.g. {@code :not}, {@code :in}, {@code :above}, {@code :below},
-	 * {@code :of-type}) and expands ValueSets when needed. Use {@code theOperation} to pass a
-	 * compare operation from {@code _filter} searches; pass {@code null} for normal searches.
-	 *
-	 * @param theParameters the token values to search for (e.g. {@code system|code})
-	 * @param theResourceName the FHIR resource type (e.g. {@code "Patient"})
-	 * @param theSpnamePrefix optional prefix for chained searches, or {@code null}
-	 * @param theSearchParam the search parameter definition
-	 * @param theOperation compare operation from a {@code _filter} query, or {@code null} for normal equality
-	 * @param theRequestPartitionId the partition id to search in
-	 * @return a SQL condition matching resources that have (or don't have) the given token values
+	 * Builds a SQL predicate for a token search parameter. Pass {@code theOperation} to use a
+	 * compare operation from a {@code _filter} search, or {@code null} for a standard equality match.
 	 */
 	public final Condition createPredicateToken(
 			Collection<IQueryParameterType> theParameters,

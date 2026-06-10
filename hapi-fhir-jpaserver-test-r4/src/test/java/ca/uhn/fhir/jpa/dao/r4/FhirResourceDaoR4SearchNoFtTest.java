@@ -1525,6 +1525,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertThat(search.getAllResources()).hasSize(1);
 	}
 
+	// True when tokens are written to the legacy HFJ_SPIDX_TOKEN table, so tests may assert on its rows.
+	protected boolean writesToLegacyTokenTable() {
+		return true;
+	}
+
+	// True when token searches hit the legacy HFJ_SPIDX_TOKEN table, so tests may assert its SQL shape.
+	protected boolean readsFromLegacyTokenTable() {
+		return true;
+	}
+
 	@Test
 	public void testIndexNoDuplicatesToken() {
 		Patient res = new Patient();
@@ -1535,14 +1545,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		IIdType id = myPatientDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamToken> type = ResourceIndexedSearchParamToken.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			// This is 3 for now because the FluentPath for Patient:deceased adds a value.. this should
-			// be corrected at some point, and we'll then drop back down to 2
-			assertEquals(3, results.size());
-		});
+		if (writesToLegacyTokenTable()) {
+			runInTransaction(() -> {
+				Class<ResourceIndexedSearchParamToken> type = ResourceIndexedSearchParamToken.class;
+				List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
+				ourLog.info(toStringMultiline(results));
+				// This is 3 for now because the FluentPath for Patient:deceased adds a value.. this should
+				// be corrected at some point, and we'll then drop back down to 2
+				assertEquals(3, results.size());
+			});
+		}
 
 
 		List<IIdType> actual = toUnqualifiedVersionlessIds(myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_IDENTIFIER, new TokenParam("http://foo1", "123"))));
@@ -3625,8 +3637,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 		String resultingQueryNotFormatted = queries.get(0);
 
-		assertThat(countMatches(resultingQueryNotFormatted, "HASH_VALUE")).as(resultingQueryNotFormatted).isEqualTo(1);
-		assertThat(resultingQueryNotFormatted).contains("HASH_VALUE IN ('3140583648400062149','4929264259256651518')");
+		if (readsFromLegacyTokenTable()) {
+			assertThat(countMatches(resultingQueryNotFormatted, "HASH_VALUE")).as(resultingQueryNotFormatted).isEqualTo(1);
+			assertThat(resultingQueryNotFormatted).contains("HASH_VALUE IN ('3140583648400062149','4929264259256651518')");
+		}
 
 		// Ensure that the search actually worked
 		assertEquals(2, search.size().intValue());
@@ -3660,8 +3674,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 		String resultingQueryNotFormatted = queries.get(0);
 
-		assertThat(countMatches(resultingQueryNotFormatted, "HASH_VALUE")).as(resultingQueryNotFormatted).isEqualTo(2);
-		assertThat(countMatches(resultingQueryNotFormatted, "HASH_SYS")).as(resultingQueryNotFormatted).isEqualTo(1);
+		if (readsFromLegacyTokenTable()) {
+			assertThat(countMatches(resultingQueryNotFormatted, "HASH_VALUE")).as(resultingQueryNotFormatted).isEqualTo(2);
+			assertThat(countMatches(resultingQueryNotFormatted, "HASH_SYS")).as(resultingQueryNotFormatted).isEqualTo(1);
+		}
 
 		// Ensure that the search actually worked
 		assertEquals(3, search.size().intValue());
@@ -3876,8 +3892,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 
 		String searchQuery = queries.get(0);
-		assertThat(countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN")).as(searchQuery).isEqualTo(3);
-		assertThat(countMatches(searchQuery.toUpperCase(), "INNER JOIN")).as(searchQuery).isEqualTo(5);
+		if (readsFromLegacyTokenTable()) {
+			assertThat(countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN")).as(searchQuery).isEqualTo(3);
+			assertThat(countMatches(searchQuery.toUpperCase(), "INNER JOIN")).as(searchQuery).isEqualTo(5);
+		}
 	}
 
 	@Test
@@ -3900,9 +3918,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 
 		String searchQuery = queries.get(0);
-		assertThat(countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN")).as(searchQuery).isEqualTo(1);
-		assertThat(countMatches(searchQuery.toUpperCase(), "INNER JOIN")).as(searchQuery).isEqualTo(1);
-		assertThat(countMatches(searchQuery.toUpperCase(), "RES_UPDATED")).as(searchQuery).isEqualTo(2);
+		if (readsFromLegacyTokenTable()) {
+			assertThat(countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN")).as(searchQuery).isEqualTo(1);
+			assertThat(countMatches(searchQuery.toUpperCase(), "INNER JOIN")).as(searchQuery).isEqualTo(1);
+			assertThat(countMatches(searchQuery.toUpperCase(), "RES_UPDATED")).as(searchQuery).isEqualTo(2);
+		}
 	}
 
 	@Test
@@ -5351,18 +5371,20 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		long patientIdentifierOfTypeHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
 			new PartitionSettings(), RequestPartitionId.fromPartitionId(null), "Patient", "identifier:of-type");
-		runInTransaction(() -> {
-			List<ResourceIndexedSearchParamToken> params = myResourceIndexedSearchParamTokenDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getHashIdentity().equals(patientIdentifierOfTypeHashIdentity))
-				.toList();
-			assertEquals(1, params.size());
-			assertNotNull(params.get(0).getHashSystemAndValue());
-			assertNull(params.get(0).getHashSystem());
-			assertNull(params.get(0).getHashValue());
+		if (writesToLegacyTokenTable()) {
+			runInTransaction(() -> {
+				List<ResourceIndexedSearchParamToken> params = myResourceIndexedSearchParamTokenDao
+					.findAll()
+					.stream()
+					.filter(t -> t.getHashIdentity().equals(patientIdentifierOfTypeHashIdentity))
+					.toList();
+				assertEquals(1, params.size());
+				assertNotNull(params.get(0).getHashSystemAndValue());
+				assertNull(params.get(0).getHashSystem());
+				assertNull(params.get(0).getHashValue());
 
-		});
+			});
+		}
 
 		// Shouldn't match
 		patient = new Patient();

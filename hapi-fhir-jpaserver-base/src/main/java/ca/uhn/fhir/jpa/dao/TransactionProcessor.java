@@ -1105,6 +1105,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			MatchUrlToResolve theMatchUrl,
 			Set<Long> theOutputSysAndValuePredicates,
 			Set<Long> theOutputValuePredicates) {
+		// The batch optimization below only supports the legacy HFJ_SPIDX_TOKEN table; it is not implemented for
+		// the compressed token tables yet. When reading from those, fall back to per-URL match resolution.
+		if (myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
+			return false;
+		}
 		if (isNotBlank(theTokenParam.getValue()) && isNotBlank(theTokenParam.getSystem())) {
 			theMatchUrl.myHashSystemAndValue = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
 					myPartitionSettings,

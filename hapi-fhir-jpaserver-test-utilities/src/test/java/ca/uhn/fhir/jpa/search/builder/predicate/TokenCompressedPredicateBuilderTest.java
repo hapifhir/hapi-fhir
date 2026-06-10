@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
@@ -34,6 +35,8 @@ class TokenCompressedPredicateBuilderTest {
 	private SearchQueryBuilder mySearchQueryBuilder;
 	@Mock
 	private ResourceTablePredicateBuilder myResourceTablePredicateBuilder;
+	@Mock
+	private ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
 
 	private DbTable myPrimaryTable;
 	private DbTable myCommonTable;
@@ -200,6 +203,7 @@ class TokenCompressedPredicateBuilderTest {
 
 		CompressedTokenPredicateBuilder builder =
 				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
+		builder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 
 		MissingQueryParameterPredicateParams params = new MissingQueryParameterPredicateParams(
 				myResourceTablePredicateBuilder, true, "identifier", RequestPartitionId.defaultPartition(new PartitionSettings()));
@@ -222,6 +226,7 @@ class TokenCompressedPredicateBuilderTest {
 
 		CompressedTokenPredicateBuilder builder =
 				new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.COMMON);
+		builder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 
 		MissingQueryParameterPredicateParams params = new MissingQueryParameterPredicateParams(
 				myResourceTablePredicateBuilder, true, "status", RequestPartitionId.defaultPartition(new PartitionSettings()));
