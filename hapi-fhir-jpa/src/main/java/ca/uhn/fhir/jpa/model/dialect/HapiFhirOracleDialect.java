@@ -26,6 +26,8 @@ import org.hibernate.dialect.OracleDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 import org.hibernate.mapping.Table;
 import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.spi.ServiceBinding;
+import org.hibernate.service.spi.ServiceRegistryImplementor;
 import org.hibernate.tool.schema.spi.Exporter;
 import org.hibernate.type.SqlTypes;
 import org.hibernate.type.descriptor.jdbc.JdbcType;
@@ -79,10 +81,11 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 	public void contributeTypes(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {
 		super.contributeTypes(typeContributions, serviceRegistry);
 
-		HapiHibernateDialectSettingsService settingsService =
-				serviceRegistry.getService(HapiHibernateDialectSettingsService.class);
-		if (settingsService != null) {
-			myDatabasePartitionMode = settingsService.isDatabasePartitionMode();
+		// We need to know if we are in database partition mode, as this affects the DDL we generate.
+		ServiceBinding<HapiHibernateDialectSettingsService> binding = ((ServiceRegistryImplementor) serviceRegistry)
+				.locateServiceBinding(HapiHibernateDialectSettingsService.class);
+		if (binding != null) {
+			myDatabasePartitionMode = binding.getService().isDatabasePartitionMode();
 		}
 
 		// What follows is necessary for Oracle 23+ which would otherwise try to use
