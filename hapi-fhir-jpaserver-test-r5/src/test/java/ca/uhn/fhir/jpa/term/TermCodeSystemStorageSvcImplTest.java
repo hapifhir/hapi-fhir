@@ -818,7 +818,6 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		additions.addRootConcept("CODE2", "Display 2");
 		additions.addRootConcept("CODE3", "Display 3");
 
-		myS
 		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", additions);
 
 		assertThat(stats.getAddedConceptCount()).isEqualTo(3);

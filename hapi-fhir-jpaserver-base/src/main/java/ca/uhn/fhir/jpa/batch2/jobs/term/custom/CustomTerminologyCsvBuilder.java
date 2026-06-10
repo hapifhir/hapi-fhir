@@ -1,14 +1,23 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.custom;
 
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
+import org.hl7.fhir.r4.model.Coding;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newCsvFormat;
 
@@ -18,19 +27,64 @@ public class CustomTerminologyCsvBuilder {
 	private Map<String, String> myParentCodeToChildCode = new LinkedHashMap<>();
 
 	public String getConceptsCsv() {
+		List<String> headers = List.of(ImportCustomTerminologyStep2HandleConcepts.CODE, ImportCustomTerminologyStep2HandleConcepts.DISPLAY);
+		Function<TermConcept, List<List<Object>>> renderer = c -> List.of(List.of(c.getCode(), c.getDisplay()));
+		return renderCsv(headers, myCodeToConcept.values(), renderer);
+	}
+
+	public String getPropertiesCsv() {
+		List<String> headers = List.of(
+			ImportCustomTerminologyStep3HandleProperties.KEY,
+			ImportCustomTerminologyStep3HandleProperties.CODE,
+			ImportCustomTerminologyStep3HandleProperties.TYPE,
+			ImportCustomTerminologyStep3HandleProperties.VALUE
+		);
+		Function<TermConcept, List<List<Object>>> renderer = c -> {
+			List<> rows = new ArrayList<>();
+			for (TermConceptProperty property : c.getProperties()) {
+				String value = switch (property.getType()) {
+					case STRING, DATETIME, DECIMAL, INTEGER, BOOLEAN, CODE -> property.getValue();
+					case CODING -> {
+						Coding coding = new Coding();
+						coding.setSystem(property.getCodeSystem());
+						coding.setCode(property.getValue());
+						coding.setDisplay(property.getDisplay());
+						yield FhirContext.forR4Cached().newJsonParser().setPrettyPrint(false).encodeToString(coding);
+					}
+				};
+				rows.add(List.of(
+					c.getCode(),
+					property.getKey(),
+					property.getType().getDatatype(),
+					value
+				));
+			}
+			return rows;
+		};
+		return renderCsv(headers, myCodeToConcept.values(), renderer);
+	}
+
+	@Nonnull
+	private <T> String renderCsv(List<String> theHeaders, Collection<T> theValues, Function<T, List<List<Object>>> theRenderer) {
 		CSVFormat format = newCsvFormat(',', '"');
 		StringBuilder target = new StringBuilder();
-		try {
-			CSVPrinter csvPrinter = new CSVPrinter(target, format);
-			csvPrinter.printHeaders();
+		try (CSVPrinter csvPrinter = new CSVPrinter(target, format)) {
 
-			for (TermConcept concept : myCodeToConcept.values()) {
-				csvPrinter.printRecord(concept.getCode(), concept.getDisplay());
+			csvPrinter.printRecord(theHeaders);
+			csvPrinter.println();
+
+			for (T concept : theValues) {
+				for (List<Object> row : theRenderer.apply(concept)) {
+					csvPrinter.printRecord(row);
+				}
 			}
+
 		} catch (IOException theE) {
-			throw new RuntimeException(theE);
+			// This shouldn't happen
+			throw new InternalErrorException(Msg.code(1) + theE.getMessage(), theE);
 		}
 
+		return target.toString();
 	}
 
 	public ConceptBuilder addConcept(String theCode) {
@@ -40,9 +94,9 @@ public class CustomTerminologyCsvBuilder {
 		return new ConceptBuilder(concept);
 	}
 
-	public void addParentChildRelationship(String theParentCode, String theChildCode) {
-		myParentCodeToChildCode.put(theParentCode, theChildCode);
-	}
+//	public void addParentChildRelationship(String theParentCode, String theChildCode) {
+//		myParentCodeToChildCode.put(theParentCode, theChildCode);
+//	}
 
 
 	public static class ConceptBuilder {
@@ -53,9 +107,31 @@ public class CustomTerminologyCsvBuilder {
 			myConcept = theConcept;
 		}
 
-		public void withDisplay(String theDisplay) {
+		public ConceptBuilder withDisplay(String theDisplay) {
 			myConcept.setDisplay(theDisplay);
+			return this;
 		}
+
+		public ConceptBuilder withProperty(String theKey, TermConceptPropertyTypeEnum theType, String theValue) {
+			TermConceptProperty property = new TermConceptProperty();
+			property.setKey(theKey);
+			property.setType(theType);
+			property.setValue(theValue);
+			myConcept.getProperties().add(property);
+			return this;
+		}
+
+		public ConceptBuilder withPropertyCoding(String theKey, String theSystem, String theCode, String theDisplay) {
+			TermConceptProperty property = new TermConceptProperty();
+			property.setKey(theKey);
+			property.setType(TermConceptPropertyTypeEnum.CODING);
+			property.setCodeSystem(theSystem);
+			property.setValue(theCode);
+			property.setDisplay(theDisplay);
+			myConcept.getProperties().add(property);
+			return this;
+		}
+
 
 	}
 }

@@ -656,7 +656,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 			.setQuote(quoteCharacter)
 			.setRecordSeparator('\n')
 			.setNullString("")
-			.setQuoteMode(QuoteMode.NON_NUMERIC)
+			.setQuoteMode(QuoteMode.MINIMAL)
 			.setHeader()
 			.setSkipHeaderRecord(true)
 			.setTrim(true)
