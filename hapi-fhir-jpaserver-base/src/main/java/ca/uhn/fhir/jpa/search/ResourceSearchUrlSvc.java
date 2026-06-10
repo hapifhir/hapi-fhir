@@ -100,7 +100,7 @@ public class ResourceSearchUrlSvc {
 	 */
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void deleteEntriesOlderThan(Date theCutoffDate) {
-		ourLog.debug("About to delete SearchUrl which are older than {}", theCutoffDate);
+		ourLog.debug("Deleting SearchUrls older than {}", theCutoffDate);
 		PageRequest page = PageRequest.of(0, DELETE_PAGE_SIZE);
 		AtomicLong totalDeleted = new AtomicLong();
 		while (true) {
@@ -113,7 +113,7 @@ public class ResourceSearchUrlSvc {
 				}
 				List<Long> ids = stale.getContent();
 				totalDeleted.addAndGet(myResourceSearchUrlDao.deleteByResIds(ids));
-				return ids.size() >= DELETE_PAGE_SIZE;
+				return stale.hasNext();
 			});
 			if (shouldContinue == null || !shouldContinue) {
 				break;
