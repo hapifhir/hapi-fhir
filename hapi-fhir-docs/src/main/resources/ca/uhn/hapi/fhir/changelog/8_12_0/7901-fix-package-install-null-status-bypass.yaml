@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7901
+title: "PackageInstallerSvcImpl status validation now correctly rejects resources that have a status field defined in the FHIR spec but never populated. Previously, only resources with an explicitly set but non-accepted status value (e.g. draft instead of active) were rejected, while resources with no status set at all bypassed validation entirely."
