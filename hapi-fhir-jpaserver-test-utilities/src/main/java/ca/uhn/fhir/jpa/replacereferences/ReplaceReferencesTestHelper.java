@@ -67,7 +67,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -94,7 +93,6 @@ public class ReplaceReferencesTestHelper {
 
 	private final FhirContext myFhirContext;
 	private final SystemRequestDetails mySrd = new SystemRequestDetails();
-	private final IParser myJsonParser;
 
 	public ReplaceReferencesTestHelper(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
@@ -102,7 +100,6 @@ public class ReplaceReferencesTestHelper {
 		myTaskDao = theDaoRegistry.getResourceDao(Task.class);
 		myProvenanceDao = theDaoRegistry.getResourceDao(Provenance.class);
 		myPractitionerDao = theDaoRegistry.getResourceDao(Practitioner.class);
-		myJsonParser = myFhirContext.newJsonParser();
 	}
 
 	public Patient readPatient(IIdType thePatientId) {
@@ -166,7 +163,7 @@ public class ReplaceReferencesTestHelper {
 		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
 		assertThat(allActualTargets).containsAll(theExpectedPatchedResourceTargetReferences);
 
-		validateAgents(theExpectedProvenanceAgents, provenance);
+		validateAgents(myFhirContext, theExpectedProvenanceAgents, provenance);
 
 		Instant now = Instant.now();
 		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
@@ -191,88 +188,6 @@ public class ReplaceReferencesTestHelper {
 		assertThat(activityCoding).isNotNull();
 		assertThat(activityCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle");
 		assertThat(activityCoding.getCode()).isEqualTo("link");
-	}
-
-	public void assertMergeProvenance(
-			Parameters theInputParameters,
-			ReplaceReferencesLargeTestData theTestData,
-			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgent) {
-		IIdType versionedSourceId = theTestData.getSourcePatientId().withVersion("2");
-		IIdType versionedTargetId = theTestData.getTargetPatientId().withVersion("2");
-		Set<String> allExpectedTargets = new HashSet<>(theTestData.getExpectedProvenanceTargetsForPatchedResources());
-		allExpectedTargets.add(versionedSourceId.toString());
-		allExpectedTargets.add(versionedTargetId.toString());
-		assertMergeProvenance(
-				theInputParameters,
-				versionedSourceId,
-				versionedTargetId,
-				allExpectedTargets,
-				theExpectedProvenanceAgent);
-	}
-
-	public void assertMergeProvenance(
-			Parameters theInputParameters,
-			IIdType theSourcePatientIdWithExpectedVersion,
-			IIdType theTargetPatientIdWithExpectedVersion,
-			Set<String> theExpectedProvenanceTargets,
-			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
-
-		List<IBaseResource> provenances = searchProvenance(theTargetPatientIdWithExpectedVersion);
-		assertThat(provenances).hasSize(1);
-		Provenance provenance = (Provenance) provenances.get(0);
-
-		// assert targets
-		assertThat(provenance.getTarget()).hasSize(theExpectedProvenanceTargets.size());
-		// the first target reference should be the target patient
-		String targetPatientReferenceInProvenance =
-				provenance.getTarget().get(0).getReference();
-		assertThat(targetPatientReferenceInProvenance).isEqualTo(theTargetPatientIdWithExpectedVersion.toString());
-		// the second target reference should be the source patient
-		String sourcePatientReference = provenance.getTarget().get(1).getReference();
-		assertThat(sourcePatientReference).isEqualTo(theSourcePatientIdWithExpectedVersion.toString());
-
-		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
-		assertThat(allActualTargets).containsExactlyInAnyOrderElementsOf(theExpectedProvenanceTargets);
-
-		validateAgents(theExpectedProvenanceAgents, provenance);
-
-		Instant now = Instant.now();
-		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
-		assertThat(provenance.getRecorded()).isBetween(oneMinuteAgo, now);
-
-		Period period = provenance.getOccurredPeriod();
-		assertThat(period.getStart()).isBefore(period.getEnd());
-		assertThat(period.getStart()).isBetween(oneMinuteAgo, now);
-		assertThat(period.getEnd()).isEqualTo(provenance.getRecorded());
-
-		// validate provenance.reason - dynamic based on resource type
-		String resourceType = theTargetPatientIdWithExpectedVersion.getResourceType();
-		String expectedReasonCode = "Patient".equals(resourceType) ? "PATADMIN" : "RECORDMGT";
-		assertThat(provenance.getReason()).hasSize(1);
-		Coding reasonCoding = provenance.getReason().get(0).getCodingFirstRep();
-		assertThat(reasonCoding).isNotNull();
-		assertThat(reasonCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/v3-ActReason");
-		assertThat(reasonCoding.getCode()).isEqualTo(expectedReasonCode);
-
-		// validate provenance.activity
-		Coding activityCoding = provenance.getActivity().getCodingFirstRep();
-		assertThat(activityCoding).isNotNull();
-		assertThat(activityCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle");
-		assertThat(activityCoding.getCode()).isEqualTo("merge");
-
-		assertThat(provenance.hasContained()).isTrue();
-		assertThat(provenance.getContained()).hasSize(2);
-		Parameters containedParameters = (Parameters) provenance.getContained().get(0);
-		// there would be an id added to the in the contained input parameters,
-		// other than that it should be equal to the input parameters that was used for the operation
-		containedParameters.setId((String) null);
-		assertThat(containedParameters.equalsDeep(theInputParameters)).isTrue();
-
-		// the second contained resource is the OperationOutcome of updating the target resource
-		OperationOutcome outcome = (OperationOutcome) provenance.getContained().get(1);
-		assertThat(outcome.getIssue()).hasSize(1);
-		assertThat(outcome.getIssueFirstRep().getDiagnostics())
-				.contains(theTargetPatientIdWithExpectedVersion.toString());
 	}
 
 	private Set<IIdType> getEverythingResourceIds(IIdType thePatientId) {
@@ -568,7 +483,7 @@ public class ReplaceReferencesTestHelper {
 		theServer.getInterceptorService().registerInterceptor(agentInterceptor);
 	}
 
-	private static Set<String> extractResourceIdsFromProvenanceTarget(List<Reference> theTargets) {
+	public static Set<String> extractResourceIdsFromProvenanceTarget(List<Reference> theTargets) {
 		return theTargets.stream()
 				.map(Reference::getReference)
 				.map(IdDt::new)
@@ -576,7 +491,8 @@ public class ReplaceReferencesTestHelper {
 				.collect(Collectors.toSet());
 	}
 
-	private void assertEqualReferences(IBaseReference theRef1, IBaseReference theRef2) {
+	public static void assertEqualReferences(
+			FhirContext theFhirContext, IBaseReference theRef1, IBaseReference theRef2) {
 		// xor checks if one is null and the other is not
 		if (theRef1 == null ^ theRef2 == null) {
 			Assertions.fail(
@@ -586,17 +502,22 @@ public class ReplaceReferencesTestHelper {
 			// handles the case where both are null as well
 			return;
 		}
-		assertThat(myJsonParser.encodeToString(theRef1)).isEqualTo(myJsonParser.encodeToString(theRef2));
+		IParser jsonParser = theFhirContext.newJsonParser();
+		assertThat(jsonParser.encodeToString(theRef1)).isEqualTo(jsonParser.encodeToString(theRef2));
 	}
 
-	private void validateAgent(IProvenanceAgent theExpectedAgent, Provenance.ProvenanceAgentComponent theActualAgent) {
+	public static void validateAgent(
+			FhirContext theFhirContext,
+			IProvenanceAgent theExpectedAgent,
+			Provenance.ProvenanceAgentComponent theActualAgent) {
 		Reference theActualWho = theActualAgent.hasWho() ? theActualAgent.getWho() : null;
 		Reference theActualOnBehalfOf = theActualAgent.hasOnBehalfOf() ? theActualAgent.getOnBehalfOf() : null;
-		assertEqualReferences(theActualWho, theExpectedAgent.getWho());
-		assertEqualReferences(theActualOnBehalfOf, theExpectedAgent.getOnBehalfOf());
+		assertEqualReferences(theFhirContext, theActualWho, theExpectedAgent.getWho());
+		assertEqualReferences(theFhirContext, theActualOnBehalfOf, theExpectedAgent.getOnBehalfOf());
 	}
 
-	private void validateAgents(@Nullable List<IProvenanceAgent> theExpectedAgents, Provenance theProvenance) {
+	public static void validateAgents(
+			FhirContext theFhirContext, @Nullable List<IProvenanceAgent> theExpectedAgents, Provenance theProvenance) {
 		if (theExpectedAgents == null) {
 			assertThat(theProvenance.hasAgent()).isFalse();
 			return;
@@ -604,7 +525,7 @@ public class ReplaceReferencesTestHelper {
 		var actualAgents = theProvenance.getAgent();
 		assertThat(actualAgents).hasSameSizeAs(theExpectedAgents);
 		for (int i = 0; i < theExpectedAgents.size(); i++) {
-			validateAgent(theExpectedAgents.get(i), actualAgents.get(i));
+			validateAgent(theFhirContext, theExpectedAgents.get(i), actualAgents.get(i));
 		}
 	}
 
@@ -617,7 +538,7 @@ public class ReplaceReferencesTestHelper {
 			Parameters outParams = jsonParser.parseResource(Parameters.class, body);
 			OperationOutcome outcome =
 					(OperationOutcome) outParams.getParameter("outcome").getResource();
-			ourLog.info(
+			ourLog.debug(
 					"Extracted OperationOutcome from exception: {}",
 					jsonParser.setPrettyPrint(true).encodeResourceToString(outcome));
 			return outcome.getIssue().stream()

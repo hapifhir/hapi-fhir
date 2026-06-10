@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
@@ -15,8 +16,11 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.merge.PatientMergeOperationInputParameterNames;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,9 +29,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.RESOURCE_TYPES_EXPECTED_TO_BE_PATCHED;
 import static ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesLargeTestData.TOTAL_EXPECTED_PATCHES;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 public class MergeBatchTest extends BaseJpaR4Test {
@@ -101,7 +110,29 @@ public class MergeBatchTest extends BaseJpaR4Test {
 			theDeleteSource,
 			myTestData.getExpectedIdentifiersForTargetAfterMerge(theWithResultResource));
 
-		myTestHelper.assertMergeProvenance(inputParams.asParametersResource(paramNames), myTestData, null);
+		assertMergeProvenance(inputParams.asParametersResource(paramNames));
+	}
+
+	/**
+	 * Reads the merge Provenance (DAO-based) and validates it with the shared static verifier.
+	 */
+	private void assertMergeProvenance(Parameters theInputParameters) {
+		IIdType versionedSourceId = myTestData.getSourcePatientId().withVersion("2");
+		IIdType versionedTargetId = myTestData.getTargetPatientId().withVersion("2");
+		Set<String> allExpectedProvenanceTargets =
+			new HashSet<>(myTestData.getExpectedProvenanceTargetsForPatchedResources());
+		allExpectedProvenanceTargets.add(versionedSourceId.toString());
+		allExpectedProvenanceTargets.add(versionedTargetId.toString());
+		List<IBaseResource> provenances = myTestHelper.searchProvenance(versionedTargetId);
+		assertThat(provenances).hasSize(1);
+		MergeOperationTestHelper.assertSingleMergeProvenance(
+			myFhirContext,
+			(Provenance) provenances.get(0),
+			theInputParameters,
+			versionedSourceId,
+			versionedTargetId,
+			allExpectedProvenanceTargets,
+			null);
 	}
 
 	@Test

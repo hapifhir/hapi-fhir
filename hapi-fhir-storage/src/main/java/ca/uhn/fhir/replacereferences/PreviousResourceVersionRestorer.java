@@ -20,6 +20,7 @@
 package ca.uhn.fhir.replacereferences;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -77,6 +78,23 @@ public class PreviousResourceVersionRestorer {
 	public void restoreToPreviousVersionsInTrx(List<Reference> theReferences, RequestDetails theRequestDetails) {
 		myHapiTransactionService
 				.withRequest(theRequestDetails)
+				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails));
+	}
+
+	/**
+	 * Same as {@link #restoreToPreviousVersionsInTrx(List, RequestDetails)} but pins the transaction to the
+	 * given partition. When changing partitions requires a new transaction, this keeps every reference in
+	 * the (single-partition) list within one transaction so the whole list is restored atomically.
+	 *
+	 * @param theReferences a list of versioned resource references that all live on {@code thePartitionId}
+	 * @param thePartitionId the partition the references live on
+	 * @param theRequestDetails the request details for the operation
+	 */
+	public void restoreToPreviousVersionsInTrx(
+			List<Reference> theReferences, RequestPartitionId thePartitionId, RequestDetails theRequestDetails) {
+		myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(thePartitionId)
 				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails));
 	}
 

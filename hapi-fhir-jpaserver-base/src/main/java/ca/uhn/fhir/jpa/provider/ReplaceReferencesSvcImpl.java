@@ -192,6 +192,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 					theTargetResource.getIdElement().toUnqualified(),
 					theSourceResource.getIdElement().toUnqualified(),
 					changedResourceIds,
+					null,
 					startTime,
 					theRequestDetails,
 					theReplaceReferencesRequest.provenanceAgents,
