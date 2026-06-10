@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.topic;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -54,6 +55,7 @@ public class SubscriptionTriggerMatcher {
 	private final IFhirResourceDao myDao;
 	private final PreviousVersionReader myPreviousVersionReader;
 	private final SystemRequestDetails mySrd;
+	private final RequestPartitionId myPartitionId;
 	private final MemoryCacheService myMemoryCacheService;
 
 	public SubscriptionTriggerMatcher(
@@ -68,7 +70,11 @@ public class SubscriptionTriggerMatcher {
 		myDao = mySubscriptionTopicSupport.getDaoRegistry().getResourceDao(myResourceName);
 		myTrigger = theTrigger;
 		myPreviousVersionReader = new PreviousVersionReader(myDao);
+		myPartitionId = theMsg.getPartitionId();
 		mySrd = new SystemRequestDetails();
+		if (myPartitionId != null) {
+			mySrd.setRequestPartitionId(myPartitionId);
+		}
 		myMemoryCacheService = theMemoryCacheService;
 	}
 
@@ -106,7 +112,8 @@ public class SubscriptionTriggerMatcher {
 			if (myOperation == ResourceModifiedMessage.OperationTypeEnum.UPDATE
 					|| myOperation == ResourceModifiedMessage.OperationTypeEnum.DELETE) {
 
-				Optional<IBaseResource> oPreviousVersion = myPreviousVersionReader.readPreviousVersion(myResource);
+				Optional<IBaseResource> oPreviousVersion =
+						myPreviousVersionReader.readPreviousVersion(myResource, false, myPartitionId);
 				if (oPreviousVersion.isPresent()) {
 					previousMatches = matchResource(oPreviousVersion.get(), previousCriteria);
 				} else {
@@ -140,7 +147,8 @@ public class SubscriptionTriggerMatcher {
 					if ("current".equalsIgnoreCase(theName)) return List.of(myResource);
 
 					if ("previous".equalsIgnoreCase(theName)) {
-						Optional previousResource = myPreviousVersionReader.readPreviousVersion(myResource);
+						Optional previousResource =
+								myPreviousVersionReader.readPreviousVersion(myResource, false, myPartitionId);
 						if (previousResource.isPresent()) return List.of((IBase) previousResource.get());
 					}
 
