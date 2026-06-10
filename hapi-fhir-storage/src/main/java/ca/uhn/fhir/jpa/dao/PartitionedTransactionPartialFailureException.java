@@ -35,8 +35,8 @@ public class PartitionedTransactionPartialFailureException extends BaseServerRes
 	private final List<List<IBase>> myResponseEntriesPerPartition;
 
 	public PartitionedTransactionPartialFailureException(
-			List<List<IBase>> theResponseEntriesPerPartition, Throwable theCause) {
-		super(deriveStatusCode(theCause), theCause.getMessage(), theCause);
+			String theMessage, List<List<IBase>> theResponseEntriesPerPartition, Throwable theCause) {
+		super(deriveStatusCode(theCause), theMessage, theCause);
 		myResponseEntriesPerPartition = theResponseEntriesPerPartition;
 	}
 

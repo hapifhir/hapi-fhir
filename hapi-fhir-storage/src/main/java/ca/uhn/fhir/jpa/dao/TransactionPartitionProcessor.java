@@ -249,7 +249,12 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 				if (responseEntriesPerPartition.isEmpty()) {
 					throw e;
 				}
-				throw new PartitionedTransactionPartialFailureException(responseEntriesPerPartition, e);
+				throw new PartitionedTransactionPartialFailureException(
+						Msg.code(2974)
+								+ "Partitioned transaction partially failed: one or more partitions committed before a later partition failed. Cause: "
+								+ e.getMessage(),
+						responseEntriesPerPartition,
+						e);
 			}
 
 			// Capture any placeholder ID substitutions from this partition
