@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 8062
+title: "The Batch2 maintenance job has been split into two separate steps that can be executed separately: The active job maintenance (handles advancing gated jobs) and the ended job maintenance (purges old files). The active job maintenance is now executed at a much higher frequency (every 5 seconds as opposed to every minute) so that active batch jobs can don't spend a lot of time waiting between steps."
