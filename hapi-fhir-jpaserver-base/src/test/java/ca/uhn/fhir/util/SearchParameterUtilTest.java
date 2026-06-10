@@ -286,23 +286,21 @@ class SearchParameterUtilTest {
 
 	// Created by claude-sonnet-4-6
 	/**
-	 * Complementary cross-check: whenever {@code getSearchParamsForCompartmentName("Patient")}
-	 * includes the {@code patient} SP for a resource, that inclusion must be backed by annotation
-	 * evidence on the class. The production logic in {@code getMembershipCompartmentsForSearchParameter()}
-	 * embeds the same invariant via the annotation scan (Gate 2 of the two-gate rule), but this
-	 * test independently verifies the end result across all FHIR versions using a different code
-	 * path. It remains valuable as a regression guard if production logic changes in the future
-	 * and as the catch for future FHIR versions (R6+) that introduce a new pattern not yet considered.
+	 * Two-part cross-check spanning all buildable FHIR versions:
 	 *
-	 * <p>For every resource type where {@code patient} appears in
-	 * {@code getSearchParamsForCompartmentName("Patient")}: at least one
-	 * {@code @SearchParamDefinition} field on the implementing class must declare
-	 * {@code providesMembershipIn} containing Patient. For direct-reference resources (e.g.
-	 * {@code AllergyIntolerance.patient}) the {@code patient} annotation carries it; for alias
-	 * resources (e.g. {@code Observation.patient} → {@code subject}) the aliased SP annotation
-	 * carries it. Resources in the omit map are verified via
-	 * {@code getMembershipCompartmentsForSearchParameter} directly. Device is excluded
-	 * (deliberate spec override, issue #6536).
+	 * <ol>
+	 *   <li>{@link #assertOmitMapBlocksCompartmentInclusion}: for resources in the omit map (e.g.
+	 *       Group, List), {@code getMembershipCompartmentsForSearchParameter} must return empty —
+	 *       the omit-map guard must block the alias-path rule.</li>
+	 *   <li>{@link #assertBaseSpAnnotationJustifiesCompartmentInclusion}: for every other resource
+	 *       whose {@code patient} SP appears in {@code getSearchParamsForCompartmentName("Patient")},
+	 *       the <em>specific</em> base SP named in the path (e.g. {@code subject} for
+	 *       {@code Observation.subject.where(resolve() is Patient)}) must carry
+	 *       {@code providesMembershipIn=Patient} in its {@code @SearchParamDefinition}. For
+	 *       direct-reference resources (e.g. {@code AllergyIntolerance.patient}) that is the
+	 *       {@code patient} SP itself. Device is excluded (deliberate spec override, issue #6536).
+	 *   </li>
+	 * </ol>
 	 */
 	@ParameterizedTest
 	@MethodSource("allBuildableFhirContexts")
@@ -314,86 +312,165 @@ class SearchParameterUtilTest {
 			RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(resourceName);
 
 			RuntimeSearchParam patientSp = resourceDef.getSearchParam("patient");
-			if (patientSp == null) {
-				continue;
-			}
-			if (patientSp.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
-				continue;
-			}
+			if (patientSp == null) continue;
+			if (patientSp.getParamType() != RestSearchParameterTypeEnum.REFERENCE) continue;
 
-			// For omit-map resources, verify the production function correctly gates the alias rule.
-			// Note: getSearchParamsForCompartmentName("Patient") may still include these via
-			// RuntimeResourceDefinition's path-similarity propagation — a separate pre-existing
-			// mechanism. This check guards only getMembershipCompartmentsForSearchParameter.
 			Set<String> omittedSpsForResource =
 				SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
 					.getOrDefault(resourceName, Collections.emptySet());
 			if (omittedSpsForResource.contains("patient")) {
-				SearchParamDefinition patientAnnotation = null;
-				for (Field f : resourceDef.getImplementingClass().getFields()) {
-					SearchParamDefinition spd = f.getAnnotation(SearchParamDefinition.class);
-					if (spd != null && "patient".equalsIgnoreCase(spd.name())
-							&& spd.path().contains(".where(resolve() is Patient)")) {
-						patientAnnotation = spd;
-						break;
-					}
-				}
-				if (patientAnnotation != null) {
-					Set<String> directCompartments =
-						SearchParameterUtil.getMembershipCompartmentsForSearchParameter(
-							resourceDef.getImplementingClass(), patientAnnotation);
-					softly.assertThat(directCompartments)
-						.as("%s %s: getMembershipCompartmentsForSearchParameter must return empty "
-							+ "for security-excluded patient SP — omit-map guard is missing or broken",
-							fhirVersion, resourceName)
-						.doesNotContain("Patient");
-				}
+				assertOmitMapBlocksCompartmentInclusion(softly, fhirVersion, resourceName, resourceDef);
 				continue;
 			}
 
 			Set<String> compartmentParamNames = resourceDef.getSearchParamsForCompartmentName("Patient").stream()
 				.map(RuntimeSearchParam::getName)
 				.collect(Collectors.toSet());
+			if (!compartmentParamNames.contains("patient")) continue;
+			if ("Device".equals(resourceName)) continue;
 
-			if (!compartmentParamNames.contains("patient")) {
-				continue;
-			}
-
-			// Device is a deliberate spec override — skip the annotation check.
-			// See https://github.com/hapifhir/hapi-fhir/issues/6536.
-			if ("Device".equals(resourceName)) {
-				continue;
-			}
-
-			// Core invariant: if patient is in the Patient compartment, at least one
-			// @SearchParamDefinition field on the class must declare providesMembershipIn=Patient.
-			// For direct-reference resources (e.g. AllergyIntolerance.patient), the patient SP
-			// annotation carries it. For alias resources (e.g. Observation.patient → subject),
-			// the subject SP annotation carries it. Either way, annotation evidence must exist.
 			Class<?> resourceClass = resourceDef.getImplementingClass();
-			if (resourceClass == null || resourceClass.isInterface() || resourceClass.isAnnotation()) {
-				continue;
-			}
-			boolean hasAnnotationJustification = Arrays.stream(resourceClass.getFields())
-				.map(f -> f.getAnnotation(SearchParamDefinition.class))
-				.filter(Objects::nonNull)
-				.flatMap(spd -> Arrays.stream(spd.providesMembershipIn()))
-				.anyMatch(c -> {
-					String name = c.name();
-					if (name.startsWith("Base FHIR compartment definition for ")) {
-						name = name.substring("Base FHIR compartment definition for ".length());
-					}
-					return "Patient".equalsIgnoreCase(name);
-				});
+			if (resourceClass == null || resourceClass.isInterface() || resourceClass.isAnnotation()) continue;
 
-			softly.assertThat(hasAnnotationJustification)
-				.as("%s %s: 'patient' SP is in Patient compartment but no @SearchParamDefinition "
-					+ "on the class declares providesMembershipIn=Patient — potential over-inclusion",
-					fhirVersion, resourceName)
-				.isTrue();
+			assertBaseSpAnnotationJustifiesCompartmentInclusion(
+				softly, fhirVersion, resourceName, resourceDef, patientSp);
 		}
 
 		softly.assertAll();
+	}
+
+	/**
+	 * Asserts that {@code getMembershipCompartmentsForSearchParameter} returns empty for the
+	 * {@code patient} SP of a resource in the omit map. This verifies the omit-map guard blocks
+	 * the alias-path rule from adding Patient compartment membership (security exclusion, issue #7118).
+	 */
+	private static void assertOmitMapBlocksCompartmentInclusion(
+			SoftAssertions softly, String fhirVersion, String resourceName,
+			RuntimeResourceDefinition resourceDef) {
+
+		Arrays.stream(resourceDef.getImplementingClass().getFields())
+			.map(f -> f.getAnnotation(SearchParamDefinition.class))
+			.filter(spd -> spd != null && "patient".equalsIgnoreCase(spd.name())
+				&& spd.path().contains(".where(resolve() is Patient)"))
+			.findFirst()
+			.ifPresent(patientAnnotation -> {
+				Set<String> directCompartments =
+					SearchParameterUtil.getMembershipCompartmentsForSearchParameter(
+						resourceDef.getImplementingClass(), patientAnnotation);
+				softly.assertThat(directCompartments)
+					.as("%s %s: getMembershipCompartmentsForSearchParameter must return empty "
+						+ "for security-excluded patient SP — omit-map guard is missing or broken",
+						fhirVersion, resourceName)
+					.doesNotContain("Patient");
+			});
+	}
+
+	/**
+	 * Asserts that the <em>specific</em> SP responsible for the {@code patient} SP's compartment
+	 * membership declares {@code providesMembershipIn=Patient} in its {@code @SearchParamDefinition}.
+	 * Two annotation locations are accepted:
+	 * <ul>
+	 *   <li>The SP whose single-resource {@code path()} exactly matches the extracted base field path
+	 *       (e.g. the {@code subject} SP with path {@code Observation.subject}) — the R4/DSTU3
+	 *       convention. Note: the SP name may differ from the field name (e.g. EnrollmentRequest's
+	 *       {@code subject} SP covers {@code EnrollmentRequest.candidate}).</li>
+	 *   <li>The {@code patient} SP itself — the R5 convention, where the combined cross-resource SP
+	 *       carries the annotation directly.</li>
+	 * </ul>
+	 * If no SP annotation covers the extracted base field path AND the {@code patient} SP does not
+	 * carry {@code providesMembershipIn=Patient}, the resource's compartment inclusion is via a
+	 * different mechanism (e.g. path-similarity propagation in {@code sealAndInitialize}) that
+	 * cannot be verified annotation-wise — the resource is skipped.
+	 * Complex sub-paths (e.g. {@code participant.actor}) are also skipped.
+	 */
+	private static void assertBaseSpAnnotationJustifiesCompartmentInclusion(
+			SoftAssertions softly, String fhirVersion, String resourceName,
+			RuntimeResourceDefinition resourceDef, RuntimeSearchParam patientSp) {
+		Optional<String> maybeBaseFieldPath = extractBaseFieldPath(resourceName, patientSp.getPath());
+		if (maybeBaseFieldPath.isEmpty()) return;
+		String baseFieldPath = maybeBaseFieldPath.get();
+
+		// Collect all annotations once. Multiple SPs may share the same path (e.g. EnrollmentRequest
+		// has both "patient" and "subject" SPs with path "EnrollmentRequest.candidate"), so we use
+		// anyMatch rather than findFirst to avoid missing the one that carries providesMembershipIn.
+		List<SearchParamDefinition> allAnnotations = Arrays.stream(resourceDef.getImplementingClass().getFields())
+			.map(f -> f.getAnnotation(SearchParamDefinition.class))
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
+
+		// Case 1: the patient param narrows some base param,
+		// and the base path provides patient compartment membership
+		boolean byPathJustified = allAnnotations.stream()
+			.anyMatch(spd -> baseFieldPath.equals(spd.path()) && spAnnotationHasPatientCompartment(spd));
+
+		// Case 2: the patient param itself provides patient compartment membership
+		boolean patientSpaJustified = allAnnotations.stream()
+			.filter(spd -> "patient".equalsIgnoreCase(spd.name()))
+			.anyMatch(spd -> spAnnotationHasPatientCompartment(spd));
+
+		// If no SP annotation covers the base field path at all AND the patient SP annotation also
+		// has no providesMembershipIn, the compartment inclusion is via path-similarity propagation
+		// in sealAndInitialize — we cannot verify it annotation-wise, so skip.
+		// SupplyRequest.patient --> path is SupplyRequest.deliverFor
+		// but only SupplyRequest.deliverTo provides patient membership
+		boolean anySpCoversBasePath = allAnnotations.stream()
+			.anyMatch(spd -> baseFieldPath.equals(spd.path()));
+		if (!anySpCoversBasePath && !patientSpaJustified) return;
+
+		softly.assertThat(byPathJustified || patientSpaJustified)
+			.as("%s %s: 'patient' SP in Patient compartment but neither the SP covering '%s' "
+				+ "nor the 'patient' SP annotation declares providesMembershipIn=Patient",
+				fhirVersion, resourceName, baseFieldPath)
+			.isTrue();
+	}
+
+	private static boolean spAnnotationHasPatientCompartment(SearchParamDefinition spd) {
+		if (spd == null) return false;
+		return Arrays.stream(spd.providesMembershipIn())
+			.anyMatch(c -> {
+				String name = c.name();
+				if (name.startsWith("Base FHIR compartment definition for ")) {
+					name = name.substring("Base FHIR compartment definition for ".length());
+				}
+				return "Patient".equalsIgnoreCase(name);
+			});
+	}
+
+	/**
+	 * Extracts the base field path (e.g. {@code "Observation.subject"}) from the {@code patient}
+	 * SP's path for the given resource. Returns empty if the path segment is complex (multi-step
+	 * sub-path like {@code participant.actor}) or if no resource-specific segment can be found.
+	 *
+	 * <p>Examples:
+	 * {@code "Observation.subject.where(resolve() is Patient)"} → {@code "Observation.subject"};
+	 * {@code "AllergyIntolerance.patient"} → {@code "AllergyIntolerance.patient"};
+	 * {@code "EnrollmentRequest.candidate"} → {@code "EnrollmentRequest.candidate"};
+	 * {@code "Appointment.participant.actor.where(...)"} → empty (complex sub-path).
+	 * Pipe-delimited R5/R4B paths are handled by finding the segment starting with
+	 * {@code resourceName + "."}.
+	 */
+	private static Optional<String> extractBaseFieldPath(String resourceName, String patientSpPath) {
+		// For pipe-delimited R5/R4B paths, find the segment for this specific resource
+		String segment = Arrays.stream(patientSpPath.split("\\|"))
+			.map(String::trim)
+			.filter(s -> s.startsWith(resourceName + "."))
+			.findFirst()
+			.orElse(patientSpPath.trim());
+
+		// Strip .where(...) suffix
+		int whereIdx = segment.indexOf(".where(");
+		if (whereIdx >= 0) {
+			segment = segment.substring(0, whereIdx);
+		}
+
+		String prefix = resourceName + ".";
+		if (!segment.startsWith(prefix)) return Optional.empty();
+		String fieldPart = segment.substring(prefix.length());
+
+		// Complex sub-path like "participant.actor" — can't map to a single SP field
+		if (fieldPart.contains(".")) return Optional.empty();
+
+		return fieldPart.isEmpty() ? Optional.empty() : Optional.of(segment);
 	}
 
 	// Created by claude-sonnet-4-6
