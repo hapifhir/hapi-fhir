@@ -60,6 +60,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -140,6 +141,9 @@ public class ResourceMergeServiceTest {
 	@Mock
 	CrossPartitionReplaceReferencesSvc myCrossPartitionReplaceReferencesSvcMock;
 
+	@Mock
+	CrossPartitionMergeRollbackService myCrossPartitionMergeRollbackServiceMock;
+
 	private ResourceMergeService myResourceMergeService;
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -153,6 +157,11 @@ public class ResourceMergeServiceTest {
 		lenient().when(myDaoRegistryMock.getResourceDao("Patient")).thenReturn(myPatientDaoMock);
 		when(myDaoRegistryMock.getResourceDao(Task.class)).thenReturn(myTaskDaoMock);
 		when(myDaoRegistryMock.getResourceDao("Provenance")).thenReturn(myProvenanceDaoMock);
+		// createProvenance now returns the created id; the merge service reads create(...).getId(), so the mock
+		// must return a non-null outcome (the id value is irrelevant to these tests, which capture the argument).
+		lenient()
+				.when(myProvenanceDaoMock.create(any(), any(RequestDetails.class)))
+				.thenReturn(new DaoMethodOutcome());
 		when(myDaoRegistryMock.getFhirContext()).thenReturn(myFhirContext);
 		lenient().when(myDaoRegistryMock.getSystemDao()).thenReturn(mySystemDaoMock);
 		lenient().when(myRequestDetailsMock.getResourceName()).thenReturn("Patient");
@@ -176,7 +185,8 @@ public class ResourceMergeServiceTest {
 			myMergeValidationServiceMock,
 			myMergeResourceHelper,
 			myCrossPartitionReplaceReferencesSvcMock,
-			myPartitionSettingsMock);
+			myPartitionSettingsMock,
+			myCrossPartitionMergeRollbackServiceMock);
 	}
 
 	@Nested
@@ -671,6 +681,9 @@ public class ResourceMergeServiceTest {
 			myTargetPatient.setUserData(Constants.RESOURCE_PARTITION_ID, RequestPartitionId.fromPartitionId(2));
 			setupValidationMockForSuccess(mySourcePatient, myTargetPatient);
 			when(myPartitionSettingsMock.isPartitioningEnabled()).thenReturn(true);
+			DaoMethodOutcome provenanceOutcome = new DaoMethodOutcome();
+			provenanceOutcome.setId(new IdDt("Provenance/1"));
+			lenient().when(myProvenanceDaoMock.create(any(), any(RequestDetails.class))).thenReturn(provenanceOutcome);
 		}
 
 		@ParameterizedTest
@@ -712,7 +725,7 @@ public class ResourceMergeServiceTest {
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
 			when(myCrossPartitionReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of()));
+				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of()));
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -741,7 +754,7 @@ public class ResourceMergeServiceTest {
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
 			when(myCrossPartitionReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of()));
+				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of()));
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -797,7 +810,7 @@ public class ResourceMergeServiceTest {
 			IdDt copiedOriginalId = new IdDt("Observation", "obs1", "1");
 			when(myCrossPartitionReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(changedObservationId, changedListId), List.of(copiedOriginalId)));
+				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(changedObservationId, changedListId), List.of(copiedOriginalId), Map.of(), Map.of()));
 
 			// When
 			myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);

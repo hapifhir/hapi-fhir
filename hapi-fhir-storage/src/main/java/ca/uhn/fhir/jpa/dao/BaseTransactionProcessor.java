@@ -261,15 +261,17 @@ public abstract class BaseTransactionProcessor {
 		IBaseBundle response;
 		// Interceptor call: STORAGE_TRANSACTION_PRE_PARTITION
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)) {
-			response = new TransactionPartitionProcessor<BUNDLE>(
-							this,
-							myContext,
-							theRequestDetails,
-							theNestedMode,
-							compositeBroadcaster,
-							actionName,
-							transactionDetails)
-					.execute(theRequest);
+			TransactionPartitionProcessor.PartitionedTransactionResult<BUNDLE> partitionedResult =
+					new TransactionPartitionProcessor<BUNDLE>(
+									this,
+									myContext,
+									theRequestDetails,
+									theNestedMode,
+									compositeBroadcaster,
+									actionName,
+									transactionDetails)
+							.execute(theRequest);
+			response = partitionedResult.getResponseBundle();
 		} else {
 			response = processTransactionAsSubRequest(
 					theRequestDetails, transactionDetails, theRequest, actionName, theNestedMode);

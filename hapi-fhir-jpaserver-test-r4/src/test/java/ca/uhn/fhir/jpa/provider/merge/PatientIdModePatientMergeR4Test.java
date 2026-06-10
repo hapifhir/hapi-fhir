@@ -1,20 +1,31 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -24,6 +35,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -35,9 +47,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,14 +77,25 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdModePatientMergeR4Test.class);
 
+	// Prefix of the outcome message a fully-rolled-back merge reports, up to the failure cause; each test
+	// appends its own cause (exception type and message).
+	private static final String FULLY_ROLLED_BACK_MESSAGE_PREFIX =
+		"Cross-partition merge failed and was fully rolled back; no resources remain in a merged state. "
+			+ "Merge failure cause: ";
+
 	@Autowired
 	private Batch2JobHelper myBatch2JobHelper;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 	@Autowired
 	private ResourceLinkServiceFactory myResourceLinkServiceFactory;
+	@Autowired
+	private HapiTransactionService myHapiTransactionService;
+	@Autowired
+	private CrossPartitionMergeRollbackService myCrossPartitionMergeRollbackService;
 	private PatientIdPartitionInterceptor myPartitionInterceptor;
 	private MergeOperationTestHelper myMergeHelper;
+	private ReplaceReferencesTestHelper myReplaceReferencesHelper;
 	private IIdType myPatientIdSrc;
 	private IIdType myPatientIdTgt;
 	private List<Identifier> mySourceIdentifiers;
@@ -94,7 +119,8 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
 		myMergeHelper = new MergeOperationTestHelper(
-			myClient, myBatch2JobHelper, myFhirContext, myResourceLinkServiceFactory, myDaoRegistry);
+			myClient, myBatch2JobHelper, myFhirContext, myResourceLinkServiceFactory);
+		myReplaceReferencesHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 
 		mySourceIdentifiers = List.of(createTestIdentifier("patient-src"));
 		myTargetIdentifiers = List.of(createTestIdentifier("patient-tgt"));
@@ -304,7 +330,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				obsId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -354,7 +380,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				encId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -397,7 +423,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				groupId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -450,7 +476,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				obsId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -521,7 +547,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				listId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -567,7 +593,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				obsId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -617,7 +643,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				expectedVersionedSourceId.toString(), expectedVersionedTargetId.toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -660,7 +686,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				obsId.withVersion("2").toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -692,7 +718,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				expectedVersionedSourceId.toString(), expectedVersionedTargetId.toString());
 			List<Identifier> expectedTargetIdentifiers = myMergeHelper.computeIdentifiersExpectedOnTargetAfterMerge(
 				myTargetIdentifiers, mySourceIdentifiers, null);
-			myMergeHelper.validateResourcesAfterMerge(mergeParams,
+			myMergeHelper.validateResourcesAfterCrossPartitionMerge(mergeParams,
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
@@ -855,6 +881,482 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 			// Verify: No resources for Patient/tgt
 			assertThat(searchBySubject(Observation.class, myPatientIdTgt.getValue())).isEmpty();
 			assertThat(searchBySubject(Encounter.class, myPatientIdTgt.getValue())).isEmpty();
+		}
+
+		// In a single database, a grouped undo runs in one transaction (partition changes use REQUIRED
+		// propagation), so a failure partway through rolls the whole undo back — nothing is left reverted.
+		// The source is restored first and would succeed, but a later sub-Provenance restore is forced to
+		// fail; we assert the source was NOT left reverted (it still carries its post-merge replaced-by link).
+		@Test
+		void testUndoMerge_failurePartway_rollsBackAtomicallyInSingleDatabase() {
+			IIdType groupId = createGroup(myPatientIdSrc);
+
+			// Merge, keeping the source. Source gains a replaced-by link to target; the Group's member is
+			// rewritten from source to target.
+			callMerge(new MergeTestParameters()
+				.sourceResource(new Reference(myPatientIdSrc))
+				.targetResource(new Reference(myPatientIdTgt))
+				.deleteSource(false));
+
+			Patient mergedSource = readResource(Patient.class, myPatientIdSrc);
+			assertThat(mergedSource.getLink())
+				.as("source should carry a replaced-by link after merge")
+				.isNotEmpty();
+			assertThat(readResource(Group.class, groupId).getMemberFirstRep().getEntity().getReference())
+				.isEqualTo(myPatientIdTgt.getValue());
+
+			// Bump the Group's version so its restore fails the version check, forcing the undo to fail
+			// after the source (restored first) has already been restored within the transaction.
+			Group bump = readResource(Group.class, groupId);
+			bump.setName("version-bumped-to-force-restore-conflict");
+			myClient.update().resource(bump).execute();
+
+			// Snapshot the post-merge state right before the undo. An atomic rollback must leave every
+			// resource the undo touches — source, target, and the Group — exactly as it is now.
+			IBaseResource sourceBeforeUndo = readResource(Patient.class, myPatientIdSrc);
+			IBaseResource targetBeforeUndo = readResource(Patient.class, myPatientIdTgt);
+			IBaseResource groupBeforeUndo = readResource(Group.class, groupId);
+
+			// Undo must fail.
+			Parameters undoParams = new Parameters();
+			undoParams.addParameter().setName("source-resource").setValue(new Reference(myPatientIdSrc));
+			undoParams.addParameter().setName("target-resource").setValue(new Reference(myPatientIdTgt));
+			assertThatThrownBy(() -> myMergeHelper.callUndoMergeOperation("Patient", undoParams))
+				.isInstanceOf(BaseServerResponseException.class);
+
+			// Atomic rollback: the source restore ran first and would have removed the replaced-by link, but
+			// it was rolled back together with the failing restore. Every touched resource must remain in its
+			// pre-undo (merged) state.
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				sourceBeforeUndo, readResource(Patient.class, myPatientIdSrc));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				targetBeforeUndo, readResource(Patient.class, myPatientIdTgt));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				groupBeforeUndo, readResource(Group.class, groupId));
+		}
+	}
+
+	@Nested
+	class MergeAutoRollbackWithSharedTransaction {
+
+		// In a single database the whole merge runs in one transaction (REQUIRED propagation), so a failure
+		// rolls everything back automatically and the merge service only reports the full rollback. We force a
+		// failure during the source/target update and assert every resource is back to its pre-merge state.
+		@Test
+		void testMerge_failurePartway_rollsBackFullyInSingleDatabase() {
+			// Data the merge will touch: a Group referencing the source (updated in place) and an Observation in
+			// the source compartment (copied to the target partition).
+			IIdType groupId = createGroup(myPatientIdSrc);
+			IIdType obsId = createObservation(myPatientIdSrc, null, null, "obs-rollback");
+
+			IBaseResource sourceBefore = readResource(Patient.class, myPatientIdSrc);
+			IBaseResource targetBefore = readResource(Patient.class, myPatientIdTgt);
+			IBaseResource groupBefore = readResource(Group.class, groupId);
+			IBaseResource obsBefore = readResource(Observation.class, obsId);
+
+			// Fail the merge while updating the target Patient (Step 3), after Step 1 (data) and Step 2
+			// (per-partition Provenances) have run within the merge's transaction.
+			FailOnTargetPatientUpdateInterceptor failer =
+				new FailOnTargetPatientUpdateInterceptor(myPatientIdTgt.getIdPart());
+			myInterceptorRegistry.registerInterceptor(failer);
+			try {
+				myMergeHelper.callMergeAndValidateException(
+					"Patient",
+					new MergeTestParameters()
+						.sourceResource(new Reference(myPatientIdSrc))
+						.targetResource(new Reference(myPatientIdTgt))
+						.deleteSource(false),
+					InternalErrorException.class,
+					FULLY_ROLLED_BACK_MESSAGE_PREFIX
+						+ "InternalErrorException: Simulated failure during target Patient update");
+			} finally {
+				myInterceptorRegistry.unregisterInterceptor(failer);
+			}
+
+			// Single-database merge runs in one transaction, so the failure rolled everything back: every
+			// resource matches its pre-merge snapshot.
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				sourceBefore, readResource(Patient.class, myPatientIdSrc));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				targetBefore, readResource(Patient.class, myPatientIdTgt));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				groupBefore, readResource(Group.class, groupId));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				obsBefore, readResource(Observation.class, obsId));
+
+			// No copy was created in the target's compartment; the original is still in the source's.
+			assertThat(searchBySubject(Observation.class, myPatientIdTgt.getValue())).isEmpty();
+			assertThat(searchBySubject(Observation.class, myPatientIdSrc.getValue())).hasSize(1);
+		}
+	}
+
+	/**
+	 * Test interceptor that fails the merge while the target Patient is being updated (Step 3 of the
+	 * cross-partition forward flow), after the data bundle and per-partition Provenances have run.
+	 */
+	@Interceptor
+	static class FailOnTargetPatientUpdateInterceptor {
+		private final String myTargetIdPart;
+
+		FailOnTargetPatientUpdateInterceptor(String theTargetIdPart) {
+			myTargetIdPart = theTargetIdPart;
+		}
+
+		@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+		public void preUpdate(
+			RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+			if (theNewResource instanceof Patient
+				&& myTargetIdPart.equals(theNewResource.getIdElement().getIdPart())) {
+				throw new InternalErrorException("Simulated failure during target Patient update");
+			}
+		}
+	}
+
+	/**
+	 * Exercises the actual rollback ({@code rollbackPartialCrossPartitionMerge}) — the path
+	 * taken when partition writes commit in their own transactions. This is configured by flipping the
+	 * transaction propagation to REQUIRES_NEW, which makes each partition-changing step (data copy,
+	 * per-partition Provenances, src/tgt updates, deletes) commit independently. So when a later step
+	 * fails, the earlier steps are durably committed and the merge service must revert them — unlike the
+	 * single-database REQUIRED case ({@link MergeAutoRollbackWithSharedTransaction}) where the outer transaction rolls
+	 * everything back and the rollback is a no-op report.
+	 */
+	@Nested
+	class MergeAutoRollbackWithIndependentCommits {
+
+		private final MergeBundlePerPartitionSplitInterceptor myBundleSplitter =
+			new MergeBundlePerPartitionSplitInterceptor();
+
+		// Data every test in this class touches, with its pre-merge snapshot: a referrer Group (default
+		// partition, updated in place) and an Observation in the source compartment (copied to the target).
+		private IIdType myGroupId;
+		private IIdType myObsId;
+		private IBaseResource mySourceBefore;
+		private IBaseResource myTargetBefore;
+		private IBaseResource myGroupBefore;
+		private IBaseResource myObsBefore;
+
+		@BeforeEach
+		void enableIndependentCommitsAndSeedData() {
+			myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+			// With REQUIRES_NEW, the merge's combined cross-partition data bundle would otherwise be rejected
+			// (HAPI-2541) because its entries span partitions; this slicer splits it into single-partition
+			// transactions, standing in for the production transaction-partitioning interceptor that a
+			// physically-sharded deployment would provide.
+			myInterceptorRegistry.registerInterceptor(myBundleSplitter);
+
+			myGroupId = createGroup(myPatientIdSrc);
+			myObsId = createObservation(myPatientIdSrc, null, null, "obs-rollback");
+			mySourceBefore = readResource(Patient.class, myPatientIdSrc);
+			myTargetBefore = readResource(Patient.class, myPatientIdTgt);
+			myGroupBefore = readResource(Group.class, myGroupId);
+			myObsBefore = readResource(Observation.class, myObsId);
+		}
+
+		@AfterEach
+		void resetPartitionCommitPropagation() {
+			myInterceptorRegistry.unregisterInterceptor(myBundleSplitter);
+			myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(
+				HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
+		}
+
+		// Fail while updating the source/target Patients, after the data copy and per-partition Provenances
+		// have each committed independently. The rollback must revert the committed copies and the referrer
+		// Group, then report a clean full rollback. (The target is always updated, so this fails the same way
+		// regardless of deleteSource.)
+		@ParameterizedTest
+		@ValueSource(booleans = {false, true})
+		void testMerge_failAtSrcTgtUpdate_revertsCommittedSteps(boolean theDeleteSource) {
+			FailOnTargetPatientUpdateInterceptor failer =
+				new FailOnTargetPatientUpdateInterceptor(myPatientIdTgt.getIdPart());
+			myInterceptorRegistry.registerInterceptor(failer);
+			try {
+				myMergeHelper.callMergeAndValidateException(
+					"Patient",
+					mergeParams(theDeleteSource),
+					InternalErrorException.class,
+					FULLY_ROLLED_BACK_MESSAGE_PREFIX
+						+ "InternalErrorException: Simulated failure during target Patient update");
+			} finally {
+				myInterceptorRegistry.unregisterInterceptor(failer);
+			}
+
+			assertFullyRevertedToPreMerge();
+		}
+
+		// Fail while creating the main Provenance, after the source/target updates have committed
+		// independently. The rollback must additionally restore the committed target (and the source when it
+		// was kept). With deleteSource the source is never updated (only the target) and its delete never runs,
+		// so it stays untouched and needs no revert.
+		@ParameterizedTest
+		@ValueSource(booleans = {false, true})
+		void testMerge_failAtMainProvenance_revertsCommittedSteps(boolean theDeleteSource) {
+			FailOnMainProvenanceCreateInterceptor failer = new FailOnMainProvenanceCreateInterceptor();
+			myInterceptorRegistry.registerInterceptor(failer);
+			try {
+				myMergeHelper.callMergeAndValidateException(
+					"Patient",
+					mergeParams(theDeleteSource),
+					InternalErrorException.class,
+					FULLY_ROLLED_BACK_MESSAGE_PREFIX
+						+ "InternalErrorException: Simulated failure during main Provenance creation");
+			} finally {
+				myInterceptorRegistry.unregisterInterceptor(failer);
+			}
+
+			assertFullyRevertedToPreMerge();
+		}
+
+		// Fail while deleting the source-side original, after everything else (data copy, Provenances,
+		// source/target updates, main Provenance) has committed independently. This is the most complete
+		// revert: the whole merge committed except the final cleanup delete.
+		@ParameterizedTest
+		@ValueSource(booleans = {false, true})
+		void testMerge_failAtOriginalDelete_revertsEntireMerge(boolean theDeleteSource) {
+			// Key on the original Observation's id part so the rollback's own delete of the target-side
+			// copy (a different id) is not affected.
+			FailOnObservationDeleteInterceptor failer =
+				new FailOnObservationDeleteInterceptor(myObsId.getIdPart());
+			myInterceptorRegistry.registerInterceptor(failer);
+			try {
+				myMergeHelper.callMergeAndValidateException(
+					"Patient",
+					mergeParams(theDeleteSource),
+					InternalErrorException.class,
+					FULLY_ROLLED_BACK_MESSAGE_PREFIX
+						+ "InternalErrorException: Simulated failure during original Observation delete");
+			} finally {
+				myInterceptorRegistry.unregisterInterceptor(failer);
+			}
+
+			assertFullyRevertedToPreMerge();
+		}
+
+		// Partial rollback: a committed step cannot be reverted, so it is reported for manual revert while
+		// the rest are still reverted. We fail the main Provenance creation to trigger the rollback, then fail
+		// the rollback's restore of the referrer Group, so the Group is left in its merged state and named in
+		// the outcome.
+		@Test
+		void testMerge_revertFailsForOneResource_reportsItForManualRevert() {
+			FailMainProvenanceThenGroupRestoreInterceptor failer =
+				new FailMainProvenanceThenGroupRestoreInterceptor();
+			myInterceptorRegistry.registerInterceptor(failer);
+			try {
+				myMergeHelper.callMergeAndValidateException(
+					"Patient",
+					mergeParams(false),
+					InternalErrorException.class,
+					"Cross-partition merge failed and was partially rolled back. The following resources could not be "
+						+ "reverted and remain in their merged state, and must be reverted manually: "
+						+ myGroupId.toUnqualifiedVersionless().getValue()
+						+ ". Merge failure cause: InternalErrorException: Simulated failure during main Provenance "
+						+ "creation");
+			} finally {
+				myInterceptorRegistry.unregisterInterceptor(failer);
+			}
+
+			// The Group's restore failed, so it stays merged (still pointing at the target).
+			Group groupAfter = readResource(Group.class, myGroupId);
+			assertThat(groupAfter.getMemberFirstRep().getEntity().getReference())
+				.isEqualTo(myPatientIdTgt.getValue());
+
+			// Everything else was reverted: source and target back to pre-merge, original Observation intact
+			// and its target-side copy removed.
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				mySourceBefore, readResource(Patient.class, myPatientIdSrc));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				myTargetBefore, readResource(Patient.class, myPatientIdTgt));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				myObsBefore, readResource(Observation.class, myObsId));
+			assertThat(searchBySubject(Observation.class, myPatientIdTgt.getValue())).isEmpty();
+			assertThat(searchBySubject(Observation.class, myPatientIdSrc.getValue())).hasSize(1);
+		}
+
+		private MergeTestParameters mergeParams(boolean theDeleteSource) {
+			return new MergeTestParameters()
+				.sourceResource(new Reference(myPatientIdSrc))
+				.targetResource(new Reference(myPatientIdTgt))
+				.deleteSource(theDeleteSource);
+		}
+
+		// Asserts the merge was fully reverted: source, target, referrer Group and the source-compartment
+		// Observation all match their pre-merge snapshots, with no target-side Observation copy lingering.
+		private void assertFullyRevertedToPreMerge() {
+			Group groupAfter = readResource(Group.class, myGroupId);
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				mySourceBefore, readResource(Patient.class, myPatientIdSrc));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				myTargetBefore, readResource(Patient.class, myPatientIdTgt));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(myGroupBefore, groupAfter);
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				myObsBefore, readResource(Observation.class, myObsId));
+			assertThat(searchBySubject(Observation.class, myPatientIdTgt.getValue())).isEmpty();
+			assertThat(searchBySubject(Observation.class, myPatientIdSrc.getValue())).hasSize(1);
+
+			// The rollback also deletes the merge Provenances (the main one plus the per-partition ones), all of
+			// which target the target patient — none should remain.
+			List<IBaseResource> remainingProvenances = myReplaceReferencesHelper.searchProvenance(myPatientIdTgt);
+			assertThat(remainingProvenances).isEmpty();
+
+			// The Group is a default-partition resource updated in place (its reference rewritten to the target),
+			// committed before the injected failure. The content checks above can't tell a revert apart from a
+			// merge that committed nothing (the Group would match its pre-merge content either way), so we also
+			// check its version: one forward update plus one restore leaves it two versions ahead, proving the
+			// rollback really reverted committed state.
+			long groupVersionBefore = myGroupBefore.getIdElement().getVersionIdPartAsLong();
+			long groupVersionAfter = groupAfter.getIdElement().getVersionIdPartAsLong();
+			assertThat(groupVersionAfter).isEqualTo(groupVersionBefore + 2);
+		}
+	}
+
+	/**
+	 * Directly exercises the undelete branch of {@code rollbackPartialCrossPartitionMerge}: restoring
+	 * source-side originals that the merge had durably deleted. This branch cannot be reached through
+	 * end-to-end failure injection because the source-side delete is the terminal step — nothing runs after
+	 * {@code markDeletesCommitted()} that could throw to trigger a rollback. So we drive the rollback
+	 * service directly with a hand-built context, which this test can do as it shares the service's
+	 * package.
+	 */
+	@Nested
+	class MergeRollbackUndeleteComponent {
+
+		@Test
+		void testRollback_undeletesCommittedOriginal_whenDeletesCommitted() {
+			// Create a source-compartment Observation, capture its pre-delete state, then delete it so it
+			// is tombstoned at version 2 — the state the merge's delete step would have left it in.
+			IIdType obsId = createObservation(myPatientIdSrc, null, null, "obs-undelete");
+			Observation obsBeforeDelete = readResource(Observation.class, obsId);
+			Integer partitionId = getPartitionId(obsId);
+			myClient.delete().resourceById(obsId).execute();
+			assertResourceDeleted(obsId);
+
+			// Build the context exactly as the forward steps would: the original recorded at its
+			// anticipated tombstone version (original + 1), the deletes marked committed, and the failure cause
+			// that triggered the rollback.
+			MergeRollbackContext rollbackContext = new MergeRollbackContext(false);
+			rollbackContext.addDeletedOriginalResourceIds(
+				RequestPartitionId.fromPartitionId(partitionId), List.of(obsId.withVersion("2")));
+			rollbackContext.markDeletesCommitted();
+			rollbackContext.setFailureCause(new InternalErrorException("Simulated forward failure"));
+
+			OperationOutcomeWithStatusCode outcome = new OperationOutcomeWithStatusCode();
+			outcome.setOperationOutcome(new OperationOutcome());
+
+			myCrossPartitionMergeRollbackService.rollbackPartialCrossPartitionMerge(
+				rollbackContext, newSrd(), outcome);
+
+			// The tombstoned original is undeleted and matches its pre-delete content.
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				obsBeforeDelete, readResource(Observation.class, obsId));
+
+			// The outcome reports a clean full rollback, naming the failure cause.
+			String diagnostics = ((OperationOutcome) outcome.getOperationOutcome())
+				.getIssueFirstRep()
+				.getDiagnostics();
+			assertThat(diagnostics)
+				.isEqualTo(FULLY_ROLLED_BACK_MESSAGE_PREFIX + "InternalErrorException: Simulated forward failure");
+		}
+	}
+
+	/**
+	 * Fails the merge while the main Provenance is being created.
+	 */
+	@Interceptor
+	static class FailOnMainProvenanceCreateInterceptor {
+
+		@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
+		public void preCreate(IBaseResource theResource) {
+			// Only the main Provenance is created with contained resources (the input parameters and operation
+			// outcome); the per-partition Provenances have none — so this fails on the main one specifically.
+			if (theResource instanceof Provenance provenance && !provenance.getContained().isEmpty()) {
+				throw new InternalErrorException("Simulated failure during main Provenance creation");
+			}
+		}
+	}
+
+	/**
+	 * Fails the merge while the source-side original Observation is being deleted. Keyed on the original's
+	 * id part so the rollback's own delete of the target-side copy (a different id) proceeds.
+	 */
+	@Interceptor
+	static class FailOnObservationDeleteInterceptor {
+		private final String myObservationIdPart;
+
+		FailOnObservationDeleteInterceptor(String theObservationIdPart) {
+			myObservationIdPart = theObservationIdPart;
+		}
+
+		@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
+		public void preDelete(IBaseResource theResource) {
+			if (theResource instanceof Observation
+				&& myObservationIdPart.equals(theResource.getIdElement().getIdPart())) {
+				throw new InternalErrorException("Simulated failure during original Observation delete");
+			}
+		}
+	}
+
+	/**
+	 * Splits the merge's combined data bundle into single-partition slices via the
+	 * {@link Pointcut#STORAGE_TRANSACTION_PRE_PARTITION} hook, standing in for the transaction-partitioning
+	 * interceptor a physically-sharded deployment would provide. Without it the bundle's cross-partition
+	 * entries are rejected (HAPI-2541) under REQUIRES_NEW. Copies (CREATEs) all go to the target's partition
+	 * while each referrer update (PUT) touches one resource and so stays within that resource's own
+	 * partition. Putting all CREATEs in one slice and each PUT in its own keeps every slice single-partition,
+	 * which is enough to let the steps commit independently — the condition the rollback under test requires.
+	 */
+	@Interceptor
+	static class MergeBundlePerPartitionSplitInterceptor {
+
+		@Hook(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)
+		public TransactionPrePartitionResponse split(IBaseBundle theInputBundle) {
+			Bundle input = (Bundle) theInputBundle;
+			List<IBaseBundle> splitBundles = new ArrayList<>();
+
+			Bundle createsBundle = new Bundle();
+			createsBundle.setType(Bundle.BundleType.TRANSACTION);
+			for (Bundle.BundleEntryComponent entry : input.getEntry()) {
+				if (entry.getRequest().getMethod() == Bundle.HTTPVerb.POST) {
+					createsBundle.addEntry(entry);
+				} else {
+					Bundle singleEntryBundle = new Bundle();
+					singleEntryBundle.setType(Bundle.BundleType.TRANSACTION);
+					singleEntryBundle.addEntry(entry);
+					splitBundles.add(singleEntryBundle);
+				}
+			}
+			if (!createsBundle.getEntry().isEmpty()) {
+				splitBundles.add(createsBundle);
+			}
+
+			return new TransactionPrePartitionResponse().setSplitBundles(splitBundles);
+		}
+	}
+
+	/**
+	 * Triggers a partial rollback: it fails the main Provenance creation to start the rollback, then fails
+	 * the rollback's restore of the referrer Group so that resource cannot be reverted and is reported
+	 * for manual revert. The forward update of the Group during the data copy is left alone (the flag is
+	 * only set once the rollback has begun).
+	 */
+	@Interceptor
+	static class FailMainProvenanceThenGroupRestoreInterceptor {
+		private boolean myInRollback = false;
+
+		@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
+		public void preCreate(IBaseResource theResource) {
+			if (theResource instanceof Provenance provenance && !provenance.getContained().isEmpty()) {
+				myInRollback = true;
+				throw new InternalErrorException("Simulated failure during main Provenance creation");
+			}
+		}
+
+		// Both IBaseResource params are required so the framework can disambiguate them positionally
+		// (old, then new); only the new resource is needed here.
+		@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+		public void preUpdate(IBaseResource theOldResource, IBaseResource theNewResource) {
+			if (myInRollback && theNewResource instanceof Group) {
+				throw new InternalErrorException("Simulated failure restoring the Group during rollback");
+			}
 		}
 	}
 }

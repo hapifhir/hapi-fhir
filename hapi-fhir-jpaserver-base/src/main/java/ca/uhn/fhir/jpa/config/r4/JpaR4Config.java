@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.merge.CrossPartitionMergeRollbackService;
 import ca.uhn.fhir.jpa.provider.merge.MergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeValidationService;
 import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
@@ -164,8 +165,10 @@ public class JpaR4Config {
 	public CrossPartitionReplaceReferencesSvc crossPartitionReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			IResourceLinkDao theResourceLinkDao,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		return new CrossPartitionReplaceReferencesSvc(theDaoRegistry, theResourceLinkDao, theRequestPartitionHelperSvc);
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			HapiTransactionService theHapiTransactionService) {
+		return new CrossPartitionReplaceReferencesSvc(
+				theDaoRegistry, theResourceLinkDao, theRequestPartitionHelperSvc, theHapiTransactionService);
 	}
 
 	@Bean
@@ -181,7 +184,8 @@ public class JpaR4Config {
 			MergeValidationService theMergeValidationService,
 			MergeResourceHelper theMergeResourceHelper,
 			CrossPartitionReplaceReferencesSvc theCrossPartitionReplaceReferencesSvc,
-			PartitionSettings thePartitionSettings) {
+			PartitionSettings thePartitionSettings,
+			CrossPartitionMergeRollbackService theCrossPartitionMergeRollbackService) {
 
 		return new ResourceMergeService(
 				theStorageSettings,
@@ -195,7 +199,14 @@ public class JpaR4Config {
 				theMergeValidationService,
 				theMergeResourceHelper,
 				theCrossPartitionReplaceReferencesSvc,
-				thePartitionSettings);
+				thePartitionSettings,
+				theCrossPartitionMergeRollbackService);
+	}
+
+	@Bean
+	public CrossPartitionMergeRollbackService crossPartitionMergeRollbackService(
+			DaoRegistry theDaoRegistry, PreviousResourceVersionRestorer theResourceVersionRestorer) {
+		return new CrossPartitionMergeRollbackService(theDaoRegistry, theResourceVersionRestorer);
 	}
 
 	@Bean
@@ -203,9 +214,16 @@ public class JpaR4Config {
 			DaoRegistry theDaoRegistry,
 			MergeProvenanceSvc theMergeProvenanceSvc,
 			PreviousResourceVersionRestorer theResourceVersionRestorer,
-			MergeValidationService theMergeValidationService) {
+			MergeValidationService theMergeValidationService,
+			HapiTransactionService theHapiTransactionService,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		return new ResourceUndoMergeService(
-				theDaoRegistry, theMergeProvenanceSvc, theResourceVersionRestorer, theMergeValidationService);
+				theDaoRegistry,
+				theMergeProvenanceSvc,
+				theResourceVersionRestorer,
+				theMergeValidationService,
+				theHapiTransactionService,
+				theRequestPartitionHelperSvc);
 	}
 
 	@Bean
