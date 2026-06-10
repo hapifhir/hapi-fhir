@@ -122,7 +122,7 @@ public class ResourceIndexedSearchParamTokenCommon implements Serializable {
 	@Column(name = "SYSTEM_ID", nullable = true, updatable = false)
 	private Long mySystemId;
 
-	@Column(name = "SP_VALUE", length = MAX_LENGTH, nullable = false, updatable = false)
+	@Column(name = "SP_VALUE", length = MAX_LENGTH, nullable = true, updatable = false)
 	private String myValue;
 
 	@Id
