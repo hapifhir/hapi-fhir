@@ -255,12 +255,20 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		TreeMultimap<String, String> resourceNameToIncludes = TreeMultimap.create();
 		TreeMultimap<String, String> resourceNameToRevIncludes = TreeMultimap.create();
+		Set<String> resourcesWithIncludeParam = new HashSet<>();
+		Set<String> resourcesWithRevIncludeParam = new HashSet<>();
 		for (Entry<String, List<BaseMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
 			String resourceName = nextEntry.getKey();
 			for (BaseMethodBinding nextMethod : nextEntry.getValue()) {
 				if (nextMethod instanceof SearchMethodBinding) {
 					resourceNameToIncludes.putAll(resourceName, nextMethod.getIncludes());
 					resourceNameToRevIncludes.putAll(resourceName, nextMethod.getRevIncludes());
+					if (nextMethod.hasIncludeParameter(false)) {
+						resourcesWithIncludeParam.add(resourceName);
+					}
+					if (nextMethod.hasIncludeParameter(true)) {
+						resourcesWithRevIncludeParam.add(resourceName);
+					}
 				}
 			}
 		}
@@ -445,7 +453,11 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 				// Add Include to CapabilityStatement.rest.resource
 				NavigableSet<String> resourceIncludes = resourceNameToIncludes.get(resourceName);
-				if (resourceIncludes.isEmpty()) {
+				if (!resourcesWithIncludeParam.contains(resourceName)) {
+					// No @IncludeParam on any search method — server does not accept _include at runtime.
+				} else if (resourceIncludes.isEmpty()) {
+					// @IncludeParam with no `allow` — server accepts any _include; auto-infer from
+					// reference-type search params.
 					List<String> includes = searchParams.values().stream()
 							.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
 							.map(t -> resourceName + ":" + t.getName())
@@ -464,13 +476,16 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				// Add RevInclude to CapabilityStatement.rest.resource
 				if (myRestResourceRevIncludesEnabled) {
 					NavigableSet<String> resourceRevIncludes = resourceNameToRevIncludes.get(resourceName);
-					if (resourceRevIncludes.isEmpty()) {
+					if (!resourcesWithRevIncludeParam.contains(resourceName)) {
+						// No @IncludeParam(reverse=true) — server does not accept _revinclude at runtime.
+					} else if (resourceRevIncludes.isEmpty()) {
+						// @IncludeParam(reverse=true) with no `allow` — auto-infer by scanning other
+						// resources for reference params targeting this one.
 						TreeSet<String> revIncludes = new TreeSet<>();
 						for (String nextResourceName : resourceToMethods.keySet()) {
 							if (isBlank(nextResourceName)) {
 								continue;
 							}
-
 							for (RuntimeSearchParam t : searchParamRegistry
 									.getActiveSearchParams(
 											nextResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
@@ -482,7 +497,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 												|| t.getTargets().isEmpty()) {
 											appropriateTarget = true;
 										}
-
 										if (appropriateTarget) {
 											revIncludes.add(nextResourceName + ":" + t.getName());
 										}
