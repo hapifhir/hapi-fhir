@@ -154,7 +154,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		// validate
 		assertThat(sql).contains("ORGANIZATION INDEX");
 		if (theExpectCompression) {
-			assertThat(sql).contains("COMPRESS " + theCompressionLevel);
+			assertThat(sql).contains(" COMPRESS " + theCompressionLevel);
 		} else {
 			assertThat(sql).doesNotContain("COMPRESS");
 		}
@@ -171,6 +171,22 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		task.setPkColumns(Collections.singletonList("PID"));
 		task.setOracleIndexOrganizedTable(2);
 		task.addAddColumnTask(buildLongColumnTask(theDriverType, "TEST_TABLE"));
+
+		// execute
+		String sql = task.generateSQLCreateScript();
+
+		// validate
+		assertThat(sql).doesNotContain("ORGANIZATION INDEX").doesNotContain("COMPRESS");
+	}
+
+	@Test
+	void testAddTable_withoutOracleIndexOrganizedFlag_indexNotAdded() {
+		// setup
+		AddTableByColumnTask task = new AddTableByColumnTask("1", "1");
+		task.setTableName("TEST_IOT");
+		task.setDriverType(DriverTypeEnum.ORACLE_12C);
+		task.setPkColumns(Collections.singletonList("PID"));
+		task.addAddColumnTask(buildLongColumnTask(DriverTypeEnum.ORACLE_12C, "TEST_IOT"));
 
 		// execute
 		String sql = task.generateSQLCreateScript();
