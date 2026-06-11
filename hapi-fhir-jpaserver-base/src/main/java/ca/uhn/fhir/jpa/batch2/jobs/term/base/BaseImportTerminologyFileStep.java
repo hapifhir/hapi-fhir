@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -57,6 +58,7 @@ import java.util.stream.Collectors;
 import java.util.*;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
+import static ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl.DONT_POPULATE_PARENT_PIDS_CS_USERDATA_KEY;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_CODE_SYSTEM_URL;
@@ -367,6 +369,7 @@ public abstract class BaseImportTerminologyFileStep<
 			CT theCodeExtractionContext,
 			CodeSystem codeSystemToPopulate) {
 		int retVal = 0;
+		ImportTerminologyModeEnum mode = theStepExecutionDetails.getParameters().getMode();
 
 		if (!theCodeExtractionContext.getCodeToConcept().isEmpty()) {
 
@@ -377,13 +380,27 @@ public abstract class BaseImportTerminologyFileStep<
 			Callable<UploadStatistics> uploader = () -> {
 				IBaseResource codeSystemToPopulateNonCanonical =
 						myVersionCanonicalizer.codeSystemFromCanonical(codeSystemToPopulate);
-				return myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulateNonCanonical);
+
+				/// We don't want to populate the parent PIDs closure when we save concepts
+				/// now, because we're still adding concepts in multiple chunks. We populate
+				/// the parent PIDs closure after all concepts and hierarchy entries have
+				/// been loaded, in {@link ImportTerminologyStepGenerateConceptClosures}
+				codeSystemToPopulateNonCanonical.setUserData(DONT_POPULATE_PARENT_PIDS_CS_USERDATA_KEY, Boolean.TRUE);
+
+				RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+				return switch (mode) {
+					case REMOVE -> myTermCodeSystemStorageSvc.removeCodeSystemConcepts(
+							requestDetails, codeSystemToPopulateNonCanonical);
+					case ADD, SNAPSHOT -> myTermCodeSystemStorageSvc.addCodeSystemConcepts(
+							requestDetails, codeSystemToPopulateNonCanonical);
+				};
 			};
 			UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
 
 			ourLog.info(
-					"Imported {} concept entries including {} root concept entries for storage in {}. Outcome: {}",
+					"Processed {} {} concept entries including {} root concept entries for storage in {}. Outcome: {}",
 					theCodeExtractionContext.getCodeToConcept().size(),
+					mode,
 					codeSystemToPopulate.getConcept().size(),
 					sw,
 					uploadStatistics);
@@ -394,11 +411,19 @@ public abstract class BaseImportTerminologyFileStep<
 			recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
 			recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
 			recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
+			recordsAddedCounter.incrementConceptsRemoved(uploadStatistics.getRemovedConceptCount());
+			recordsAddedCounter.incrementConceptLinksRemoved(uploadStatistics.getRemovedConceptLinkCount());
+			recordsAddedCounter.incrementPropertiesRemoved(uploadStatistics.getRemovedPropertyCount());
+			recordsAddedCounter.incrementDesignationsRemoved(uploadStatistics.getRemovedDesignationCount());
 
 			retVal += uploadStatistics.getAddedConceptCount();
 			retVal += uploadStatistics.getAddedConceptLinkCount();
 			retVal += uploadStatistics.getAddedPropertyCount();
 			retVal += uploadStatistics.getAddedDesignationCount();
+			retVal += uploadStatistics.getRemovedConceptCount();
+			retVal += uploadStatistics.getRemovedConceptLinkCount();
+			retVal += uploadStatistics.getRemovedPropertyCount();
+			retVal += uploadStatistics.getRemovedDesignationCount();
 		}
 
 		return retVal;

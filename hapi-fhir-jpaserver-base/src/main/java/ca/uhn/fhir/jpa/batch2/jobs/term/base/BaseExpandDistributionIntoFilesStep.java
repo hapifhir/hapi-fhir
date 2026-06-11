@@ -34,7 +34,7 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
+import ca.uhn.fhir.jpa.term.NonClosableBOMInputStream;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.util.CsvUtil;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -222,7 +222,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 				ZipArchiveInputStream zipInputStream = new ZipArchiveInputStream(bufferedInputStream);
 				ZipArchiveEntry entry;
 				while ((entry = zipInputStream.getNextEntry()) != null) {
-					try (InputStream fis = new LoadedFileDescriptors.NonClosableBOMInputStream(zipInputStream)) {
+					try (InputStream fis = new NonClosableBOMInputStream(zipInputStream)) {
 						String nextFileName = entry.getName();
 
 						ourLog.info(
@@ -452,9 +452,20 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 		IFhirResourceDao codeSystemDao = myDaoRegistry.getResourceDao("CodeSystem");
 		codeSystemDao.update(myVersionCanonicalizer.codeSystemFromCanonical(cs), srd);
 
-		ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse response =
-				myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
-		jobMetadataAttachment.setCodeSystemStagingVersionId(response.stagingVersionId());
+		switch (theJobParameters.getMode()) {
+			case ADD, REMOVE -> jobMetadataAttachment.setCodeSystemStagingVersionId(codeSystemVersionId);
+			case SNAPSHOT -> {
+				ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse response =
+						myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
+				jobMetadataAttachment.setCodeSystemStagingVersionId(response.stagingVersionId());
+				ourLog.atInfo()
+						.setMessage("Staging of CodeSystem[url={}, version={}] into staging version: {}")
+						.addArgument(cs.getUrl())
+						.addArgument(cs.getVersion())
+						.addArgument(response.stagingVersionId())
+						.log();
+			}
+		}
 
 		// Send a single chunk to trigger the first closure generation step
 		TerminologyFileSetJson fileSet = new TerminologyFileSetJson();
@@ -642,25 +653,23 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 			quoteCharacter = null;
 		}
 
-		return new CSVParser(
-				theReader,
-			newCsvFormat(theDelimiter, quoteCharacter));
+		return new CSVParser(theReader, newCsvFormat(theDelimiter, quoteCharacter));
 	}
 
 	public static CSVFormat newCsvFormat(char theDelimiter, Character quoteCharacter) {
 		return CSVFormat.DEFAULT
-			.builder()
-			.setDelimiter(theDelimiter)
-			.setEscape(null)
-			.setIgnoreEmptyLines(true)
-			.setQuote(quoteCharacter)
-			.setRecordSeparator('\n')
-			.setNullString("")
-			.setQuoteMode(QuoteMode.MINIMAL)
-			.setHeader()
-			.setSkipHeaderRecord(true)
-			.setTrim(true)
-			.get();
+				.builder()
+				.setDelimiter(theDelimiter)
+				.setEscape(null)
+				.setIgnoreEmptyLines(true)
+				.setQuote(quoteCharacter)
+				.setRecordSeparator('\n')
+				.setNullString("")
+				.setQuoteMode(QuoteMode.MINIMAL)
+				.setHeader()
+				.setSkipHeaderRecord(true)
+				.setTrim(true)
+				.get();
 	}
 
 	private record StepIdAndFileHandlingInstructions(

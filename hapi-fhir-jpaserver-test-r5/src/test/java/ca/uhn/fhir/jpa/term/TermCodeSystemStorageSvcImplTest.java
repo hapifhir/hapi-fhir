@@ -6,27 +6,35 @@ import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.DecimalType;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.IntegerType;
+import org.hl7.fhir.r5.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -82,7 +90,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		codeSystem.setUrl("http://foo");
 		codeSystem.setVersion(stagingVersionId);
 		codeSystem.addConcept().setCode("CODE-A").setDisplay("Display-A");
-		mySvc.uploadCodeSystemConcepts(codeSystem);
+		mySvc.addCodeSystemConcepts(newSrd(), codeSystem);
 
 		// Test
 		mySvc.activateStagingCodeSystemVersion("http://foo", stagingVersionId, theMakeCurrent);
@@ -615,7 +623,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 	}
 
 	@Test
-	void testWriteCodeSystemCodes_WithDeepHierarchy() {
+	void testAddCodeSystemConcepts_WithDeepHierarchy() {
 		createCodeSystem(withUrl("http://foo"), withVersion("1.23"), withCodeSystemContent("not-present"));
 
 		CodeSystem input = new CodeSystem();
@@ -624,7 +632,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		input.addConcept()
 			.setCode("CODE-A-A-A");
 
-		UploadStatistics response = mySvc.uploadCodeSystemConcepts(input);
+		UploadStatistics response = mySvc.addCodeSystemConcepts(newSrd(), input);
 
 		// Verify
 		assertEquals(1, response.getAddedConceptCount());
@@ -644,7 +652,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			.addConcept()
 			.setCode("CODE-A-A-A");
 
-		response = mySvc.uploadCodeSystemConcepts(input);
+		response = mySvc.addCodeSystemConcepts(newSrd(), input);
 
 		// Verify
 		assertEquals(2, response.getAddedConceptCount());
@@ -665,7 +673,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 
 
 	@Test
-	void testWriteCodeSystemCodes_WithPropertyAndDesignation() {
+	void testAddCodeSystemConcepts_WithPropertyAndDesignation() {
 		createCodeSystem(withUrl("http://foo"), withCodeSystemContent("not-present"));
 		String stagingVersion = mySvc.startStagingCodeSystemVersion("http://foo", "123").stagingVersionId();
 
@@ -690,7 +698,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			.setCode("A1")
 			.setDisplay("A1-Display");
 
-		UploadStatistics response = mySvc.uploadCodeSystemConcepts(input);
+		UploadStatistics response = mySvc.addCodeSystemConcepts(newSrd(), input);
 
 		// Verify
 		assertEquals(2, response.getAddedConceptCount());
@@ -725,7 +733,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		});
 
 		// Repeat a second time and ensure that nothing is added
-		response = mySvc.uploadCodeSystemConcepts(input);
+		response = mySvc.addCodeSystemConcepts(newSrd(), input);
 
 		// Verify
 		assertEquals(0, response.getAddedConceptCount());
@@ -744,7 +752,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	void testWriteCodeSystemCodes_WithHierarchy(boolean theParentAlreadyExists) {
+	void testAddCodeSystemConcepts_WithHierarchy(boolean theParentAlreadyExists) {
 		createCodeSystem(withUrl("http://foo"), withCodeSystemContent("not-present"));
 
 		String stagingVersion = mySvc.startStagingCodeSystemVersion("http://foo", "123").stagingVersionId();
@@ -756,7 +764,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			input.addConcept()
 				.setCode("PARENT")
 				.setDisplay("Parent");
-			mySvc.uploadCodeSystemConcepts(input);
+			mySvc.addCodeSystemConcepts(newSrd(), input);
 		}
 
 		// Test
@@ -771,7 +779,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			.setCode("CHILD")
 			.setDisplay("Child");
 
-		UploadStatistics response = mySvc.uploadCodeSystemConcepts(input);
+		UploadStatistics response = mySvc.addCodeSystemConcepts(newSrd(), input);
 		if (theParentAlreadyExists) {
 			assertEquals(1, response.getAddedConceptCount());
 		} else {
@@ -792,7 +800,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		});
 
 		// Repeat a second time and ensure that nothing is added
-		response = mySvc.uploadCodeSystemConcepts(input);
+		response = mySvc.addCodeSystemConcepts(newSrd(), input);
 		assertEquals(0, response.getAddedConceptCount());
 		assertEquals(0, response.getAddedConceptLinkCount());
 
@@ -809,16 +817,18 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 	// FIXME: rename to reflect method being called
 	// Created by Claude Opus 4.6
 	@Test
-	void applyDeltaCodeSystemsAdd_newCodeSystem_shouldCreateCodeSystemAndAddConcepts() {
+	void testAddCodeSystemConcepts_newCodeSystem_shouldCreateCodeSystemAndAddConcepts() throws IOException {
 		// This exercises the full entity-graph navigation in addConceptsToCodeSystemVersion:
 		// csv.getCodeSystem(), cs.getPid(), cs.getCodeSystemUri(), cs.getResource().getIdDt()
 		// All must return non-null within the same transaction that created the entities.
-		CustomTerminologySet additions = new CustomTerminologySet();
-		additions.addRootConcept("CODE1", "Display 1");
-		additions.addRootConcept("CODE2", "Display 2");
-		additions.addRootConcept("CODE3", "Display 3");
-
-		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", additions);
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://example.com/delta-cs");
+		codeSystem.setVersion("1.0");
+		codeSystem.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.addConcept().setCode("CODE1").setDisplay("Display 1");
+		codeSystem.addConcept().setCode("CODE2").setDisplay("Display 2");
+		codeSystem.addConcept().setCode("CODE3").setDisplay("Display 3");
+		UploadStatistics stats = mySvc.addCodeSystemConcepts(newSrd(), codeSystem);
 
 		assertThat(stats.getAddedConceptCount()).isEqualTo(3);
 		assertThat(stats.getTarget()).isNotNull();
@@ -839,21 +849,29 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 
 	// Created by Claude Opus 4.6
 	@Test
-	void applyDeltaCodeSystemsAdd_existingCodeSystem_shouldAddMoreConcepts() {
+	void testAddCodeSystemConcepts_existingCodeSystem_shouldAddMoreConcepts() {
 		// First delta creates the code system
-		CustomTerminologySet firstBatch = new CustomTerminologySet();
-		firstBatch.addRootConcept("CODE1", "Display 1");
-		firstBatch.addRootConcept("CODE2", "Display 2");
-		mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", firstBatch);
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId("foo");
+		codeSystem.setUrl("http://example.com/delta-cs");
+		codeSystem.setVersion("1.0");
+		codeSystem.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.addConcept().setCode("CODE1").setDisplay("Display 1");
+		codeSystem.addConcept().setCode("CODE2").setDisplay("Display 2");
+		mySvc.addCodeSystemConcepts(newSrd(), codeSystem);
 
 		// Second delta adds more concepts to the existing code system
-		CustomTerminologySet secondBatch = new CustomTerminologySet();
-		secondBatch.addRootConcept("CODE3", "Display 3");
-		secondBatch.addRootConcept("CODE4", "Display 4");
-
-		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", secondBatch);
+		codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://example.com/delta-cs");
+		codeSystem.setVersion("1.0");
+		codeSystem.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.addConcept().setCode("CODE2").setDisplay("Display 2"); // already exists
+		codeSystem.addConcept().setCode("CODE3").setDisplay("Display 3"); // doesn't already exist
+		codeSystem.addConcept().setCode("CODE4").setDisplay("Display 4"); // doesn't already exist
+		UploadStatistics stats = mySvc.addCodeSystemConcepts(newSrd(), codeSystem);
 
 		assertThat(stats.getAddedConceptCount()).isEqualTo(2);
+		assertThat(stats.getUpdatedConceptCount()).isEqualTo(0);
 
 		runInTransaction(() -> {
 			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri("http://example.com/delta-cs");
@@ -866,7 +884,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 
 	// Created by Claude Opus 4.6
 	@Test
-	void applyDeltaCodeSystemsAdd_afterNotPresentCodeSystemCreatedViaDao_shouldAddConcepts() {
+	void testAddCodeSystemConcepts_afterNotPresentCodeSystemCreatedViaDao_shouldAddConcepts() {
 		// Create a NOTPRESENT code system via DAO (simulates package pre-seeding)
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://example.com/delta-cs");
@@ -882,11 +900,14 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		});
 
 		// Now add concepts via delta
-		CustomTerminologySet additions = new CustomTerminologySet();
-		additions.addRootConcept("CODE1", "Display 1");
-		additions.addRootConcept("CODE2", "Display 2");
-
-		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd("http://example.com/delta-cs", additions);
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId("foo");
+		codeSystem.setUrl("http://example.com/delta-cs");
+		codeSystem.setVersion("1.0");
+		codeSystem.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.addConcept().setCode("CODE1").setDisplay("Display 1");
+		codeSystem.addConcept().setCode("CODE2").setDisplay("Display 2");
+		UploadStatistics stats = mySvc.addCodeSystemConcepts(newSrd(), codeSystem);
 
 		assertThat(stats.getAddedConceptCount()).isEqualTo(2);
 
@@ -900,7 +921,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 
 	// Created by claude-opus-4-6
 	@Test
-	void applyDeltaCodeSystemsAdd_afterVersionedCodeSystemCreatedViaStoreNewVersion_shouldAddConcepts() {
+	void testAddCodeSystemConcepts_afterVersionedCodeSystemCreatedViaStoreNewVersion_shouldAddConcepts() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl(URL_MY_CODE_SYSTEM);
 		cs.setVersion("1.0");
@@ -914,11 +935,14 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		mySvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "My System", "1.0", ver, table);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
-		CustomTerminologySet additions = new CustomTerminologySet();
-		additions.addRootConcept("CODE1", "Display 1");
-		additions.addRootConcept("CODE2", "Display 2");
-
-		UploadStatistics stats = mySvc.applyDeltaCodeSystemsAdd(URL_MY_CODE_SYSTEM, additions);
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId("foo");
+		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setVersion("1.0");
+		codeSystem.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.addConcept().setCode("CODE1").setDisplay("Display 1");
+		codeSystem.addConcept().setCode("CODE2").setDisplay("Display 2");
+		UploadStatistics stats = mySvc.addCodeSystemConcepts(newSrd(), codeSystem);
 
 		assertThat(stats.getAddedConceptCount()).isEqualTo(2);
 
@@ -931,6 +955,109 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		});
 		assertNoHHH000502Warnings();
 	}
+
+	@ParameterizedTest
+	@EnumSource(value = TermConceptPropertyTypeEnum.class)
+	void testAddCodeSystemConcepts_PropertyCoding(TermConceptPropertyTypeEnum thePropertyType) {
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setVersion("1.0");
+		CodeSystem.ConceptDefinitionComponent concept = codeSystem.addConcept();
+		concept.setCode("CHEM");
+		concept.setDisplay("Chemistry");
+		CodeSystem.ConceptPropertyComponent prop = concept.addProperty();
+		prop.setCode("prop-code");
+		switch (thePropertyType) {
+			case CODE -> prop.setValue(new CodeType("code-value"));
+			case STRING -> prop.setValue(new StringType("string-value"));
+			case CODING -> prop.setValue(new Coding("http://foo/prop-value-system", "prop-value-code", "prop-value-display"));
+			case BOOLEAN -> prop.setValue(new BooleanType(true));
+			case INTEGER -> prop.setValue(new IntegerType(123));
+			case DECIMAL -> prop.setValue(new DecimalType(1.23));
+			case DATETIME -> prop.setValue(new DateTimeType("2023-01-01"));
+			default -> throw new IllegalStateException("Unexpected value: " + thePropertyType);
+		}
+
+		// Test
+		UploadStatistics stats = mySvc.addCodeSystemConcepts(newSrd(), codeSystem);
+		assertThat(stats.getAddedConceptCount()).isEqualTo(2);
+
+		// Verify
+		runInTransaction(()->{
+			TermCodeSystemVersion csv = myCodeSystemVersionDao.findByCodeSystemUriAndVersion(URL_MY_CODE_SYSTEM, "1.0");
+			TermConcept actualConcept = csv.getConceptByCode("CHEM").orElseThrow();
+
+			assertEquals(1, actualConcept.getProperties().size());
+			TermConceptProperty property = actualConcept.getProperties().iterator().next();
+			assertEquals("prop-code", property.getKey());
+			assertEquals(thePropertyType, property.getType());
+
+			switch (thePropertyType) {
+				case CODING -> {
+					assertEquals("http://foo/prop-value-system", property.getCodeSystem());
+					assertEquals("prop-value-code", property.getValue());
+					assertEquals("prop-value-display", property.getDisplay());
+				}
+				case STRING -> assertEquals("string-value", property.getValue());
+				case BOOLEAN -> assertEquals("true", property.getValue());
+				case INTEGER -> assertEquals("123", property.getValue());
+				case DECIMAL -> assertEquals("1.23", property.getValue());
+				case DATETIME -> assertEquals("2023-01-01", property.getValue());
+				case CODE -> assertEquals("code-value", property.getValue());
+				default -> throw new IllegalStateException("Unexpected value: " + thePropertyType);
+			}
+
+		});
+	}
+
+	
+	@Test
+	void testRemoveCodeSystemConcepts() {
+		// Setup
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		cs.setVersion("1.0");
+		cs.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		CodeSystem.ConceptDefinitionComponent parent1 = cs.addConcept().setCode("PARENT1");
+		parent1.addProperty().setCode("PARENT1PROP1").setValue(new StringType("PARENT1PROP1 Value"));
+		parent1.addDesignation().setLanguage("en").setValue("Parent 1");
+		parent1.addConcept().setCode("CHILD1A");
+		parent1.addConcept().setCode("CHILD1B");
+		CodeSystem.ConceptDefinitionComponent parent2 = cs.addConcept().setCode("PARENT2");
+		parent2.addConcept().setCode("CHILD2A");
+		parent2.addConcept().setCode("CHILD2B");
+		mySvc.addCodeSystemConcepts(newSrd(), cs);
+
+		runInTransaction(()-> assertEquals(6, myTermConceptDao.count()));
+
+		// Test
+		cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		cs.setVersion("1.0");
+		cs.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept().setCode("PARENT1");
+		cs.addConcept().setCode("CHILD2A");
+		UploadStatistics statistics = mySvc.removeCodeSystemConcepts(newSrd(), cs);
+
+		// Verify
+		assertEquals(4, statistics.getRemovedConceptCount());
+		assertEquals(3, statistics.getRemovedConceptLinkCount());
+		assertEquals(1, statistics.getRemovedPropertyCount());
+		assertEquals(1, statistics.getRemovedDesignationCount());
+
+		runInTransaction(()-> {
+			assertEquals(2, myTermConceptDao.count());
+
+			TermCodeSystemVersion csv = myTermCodeSystemVersionDao.findByCodeSystemUriAndVersion(URL_MY_CODE_SYSTEM, "1.0");
+			List<String> remainingConcepts = csv.getConcepts().stream().map(TermConcept::getCode).toList();
+			assertThat(remainingConcepts).containsExactlyInAnyOrder("PARENT2", "CHILD2B");
+		});
+
+	}
+	
 
 	private void assertNoHHH000502Warnings() {
 		assertThat(myHibernateLogCapture.getLogMessages().stream()

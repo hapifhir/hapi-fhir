@@ -20,7 +20,6 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -90,6 +89,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport.GENERATING_SNAPSHOT_LOG_MSG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1856,14 +1856,16 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl(codeSystemUrl);
+		cs.setVersion("1.0");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		myCodeSystemDao.create(cs, new SystemRequestDetails());
 
-		CustomTerminologySet delta = new CustomTerminologySet();
-		delta.addRootConcept("originalA", "Original Concept A");
-		delta.addRootConcept("originalB", "Original Concept B");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(codeSystemUrl, delta);
+		CodeSystem delta = newDeltaCodeSystem();
+		delta.setUrl(codeSystemUrl);
+		delta.addConcept().setCode("originalA").setDisplay("Original Concept A");
+		delta.addConcept().setCode("originalB").setDisplay("Original Concept B");
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta);
 
 		// Verify concepts are accessible via lookup
 		IValidationSupport.LookupCodeResult lookupBefore = myTermSvc.lookupCode(

@@ -42,7 +42,6 @@ import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -262,6 +261,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 	private IIdType createCodeSystem() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
+		codeSystem.setVersion("1.0");
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		codeSystem.setName("SYSTEM NAME");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
@@ -307,7 +307,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", null, cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", "1.0", cs, table);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
@@ -1638,12 +1638,13 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			createCodeSystem();
 
 			// Add lots more codes
-			CustomTerminologySet additions = new CustomTerminologySet();
+			CodeSystem additions = new CodeSystem();
+			additions.setUrl(CS_URL);
+			additions.setVersion("1.0");
 			for (int i = 0; i < 100; i++) {
-				additions.addRootConcept("CODE" + i, "Display " + i);
+				additions.addConcept().setCode("CODE" + i).setDisplay("Display " + i);
 			}
-			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(CS_URL, additions);
-
+			myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), additions);
 
 			// Codes available exceeds the max
 			myStorageSettings.setMaximumExpansionSize(50);

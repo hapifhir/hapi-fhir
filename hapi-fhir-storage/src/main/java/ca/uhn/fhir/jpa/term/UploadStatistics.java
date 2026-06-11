@@ -32,6 +32,11 @@ public class UploadStatistics {
 	private int myAddedPropertyCount = 0;
 	private int myAddedConceptLinkCount = 0;
 
+	private int myRemovedConceptCount = 0;
+	private int myRemovedDesignationCount = 0;
+	private int myRemovedPropertyCount = 0;
+	private int myRemovedConceptLinkCount = 0;
+
 	public UploadStatistics(IIdType theTarget) {
 		this(0, theTarget);
 	}
@@ -47,6 +52,11 @@ public class UploadStatistics {
 
 	public UploadStatistics incrementConceptsAddedCount() {
 		myAddedConceptCount++;
+		return this;
+	}
+
+	public UploadStatistics incrementConceptsRemovedCount() {
+		myRemovedConceptCount++;
 		return this;
 	}
 
@@ -66,6 +76,10 @@ public class UploadStatistics {
 
 	public int getAddedConceptCount() {
 		return myAddedConceptCount;
+	}
+
+	public int getRemovedConceptCount() {
+		return myRemovedConceptCount;
 	}
 
 	public int getAddedDesignationCount() {
@@ -103,7 +117,35 @@ public class UploadStatistics {
 		b.appendIfNonZero("addedDesignations", myAddedDesignationCount);
 		b.appendIfNonZero("addedProperties", myAddedPropertyCount);
 		b.appendIfNonZero("addedConceptLinks", myAddedConceptLinkCount);
+		b.appendIfNonZero("removedConcepts", myRemovedConceptCount);
+		b.appendIfNonZero("removedDesignations", myRemovedDesignationCount);
+		b.appendIfNonZero("removedProperties", myRemovedPropertyCount);
+		b.appendIfNonZero("removedConceptLinks", myRemovedConceptLinkCount);
 
 		return b.toString();
+	}
+
+	public void incrementConceptLinksRemovedCount() {
+		myRemovedConceptLinkCount++;
+	}
+
+	public void incrementDesignationsRemovedCount() {
+		myRemovedDesignationCount++;
+	}
+
+	public void incrementPropertiesRemovedCount() {
+		myRemovedPropertyCount++;
+	}
+
+	public int getRemovedDesignationCount() {
+		return myRemovedDesignationCount;
+	}
+
+	public int getRemovedPropertyCount() {
+		return myRemovedPropertyCount;
+	}
+
+	public int getRemovedConceptLinkCount() {
+		return myRemovedConceptLinkCount;
 	}
 }

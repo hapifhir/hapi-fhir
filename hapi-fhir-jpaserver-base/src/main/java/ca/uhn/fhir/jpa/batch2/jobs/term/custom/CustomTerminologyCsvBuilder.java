@@ -20,44 +20,54 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep.newCsvFormat;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 public class CustomTerminologyCsvBuilder {
 
 	private Map<String, TermConcept> myCodeToConcept = new LinkedHashMap<>();
 	private Map<String, String> myParentCodeToChildCode = new LinkedHashMap<>();
 
+	public String getHierarchyCsv() {
+		List<String> headers = List.of(
+				ImportCustomTerminologyStep4HandleHierarchy.PARENT, ImportCustomTerminologyStep4HandleHierarchy.CHILD);
+		Function<Map.Entry<String, String>, List<List<Object>>> renderer =
+				c -> List.of(List.of(c.getKey(), c.getValue()));
+		return renderCsv(headers, myParentCodeToChildCode.entrySet(), renderer);
+	}
+
 	public String getConceptsCsv() {
-		List<String> headers = List.of(ImportCustomTerminologyStep2HandleConcepts.CODE, ImportCustomTerminologyStep2HandleConcepts.DISPLAY);
-		Function<TermConcept, List<List<Object>>> renderer = c -> List.of(List.of(c.getCode(), c.getDisplay()));
+		List<String> headers = List.of(
+				ImportCustomTerminologyStep2HandleConcepts.CODE, ImportCustomTerminologyStep2HandleConcepts.DISPLAY);
+		Function<TermConcept, List<List<Object>>> renderer =
+				c -> List.of(List.of(c.getCode(), getIfNull(c.getDisplay(), "")));
 		return renderCsv(headers, myCodeToConcept.values(), renderer);
 	}
 
 	public String getPropertiesCsv() {
 		List<String> headers = List.of(
-			ImportCustomTerminologyStep3HandleProperties.KEY,
-			ImportCustomTerminologyStep3HandleProperties.CODE,
-			ImportCustomTerminologyStep3HandleProperties.TYPE,
-			ImportCustomTerminologyStep3HandleProperties.VALUE
-		);
+				ImportCustomTerminologyStep3HandleProperties.KEY,
+				ImportCustomTerminologyStep3HandleProperties.CODE,
+				ImportCustomTerminologyStep3HandleProperties.TYPE,
+				ImportCustomTerminologyStep3HandleProperties.VALUE);
 		Function<TermConcept, List<List<Object>>> renderer = c -> {
-			List<> rows = new ArrayList<>();
+			List<List<Object>> rows = new ArrayList<>();
 			for (TermConceptProperty property : c.getProperties()) {
-				String value = switch (property.getType()) {
-					case STRING, DATETIME, DECIMAL, INTEGER, BOOLEAN, CODE -> property.getValue();
-					case CODING -> {
-						Coding coding = new Coding();
-						coding.setSystem(property.getCodeSystem());
-						coding.setCode(property.getValue());
-						coding.setDisplay(property.getDisplay());
-						yield FhirContext.forR4Cached().newJsonParser().setPrettyPrint(false).encodeToString(coding);
-					}
-				};
+				String value =
+						switch (property.getType()) {
+							case STRING, DATETIME, DECIMAL, INTEGER, BOOLEAN, CODE -> property.getValue();
+							case CODING -> {
+								Coding coding = new Coding();
+								coding.setSystem(property.getCodeSystem());
+								coding.setCode(property.getValue());
+								coding.setDisplay(property.getDisplay());
+								yield FhirContext.forR4Cached()
+										.newJsonParser()
+										.setPrettyPrint(false)
+										.encodeToString(coding);
+							}
+						};
 				rows.add(List.of(
-					c.getCode(),
-					property.getKey(),
-					property.getType().getDatatype(),
-					value
-				));
+						property.getKey(), c.getCode(), property.getType().getDatatype(), value));
 			}
 			return rows;
 		};
@@ -65,7 +75,8 @@ public class CustomTerminologyCsvBuilder {
 	}
 
 	@Nonnull
-	private <T> String renderCsv(List<String> theHeaders, Collection<T> theValues, Function<T, List<List<Object>>> theRenderer) {
+	private <T> String renderCsv(
+			List<String> theHeaders, Collection<T> theValues, Function<T, List<List<Object>>> theRenderer) {
 		CSVFormat format = newCsvFormat(',', '"');
 		StringBuilder target = new StringBuilder();
 		try (CSVPrinter csvPrinter = new CSVPrinter(target, format)) {
@@ -94,12 +105,7 @@ public class CustomTerminologyCsvBuilder {
 		return new ConceptBuilder(concept);
 	}
 
-//	public void addParentChildRelationship(String theParentCode, String theChildCode) {
-//		myParentCodeToChildCode.put(theParentCode, theChildCode);
-//	}
-
-
-	public static class ConceptBuilder {
+	public class ConceptBuilder {
 
 		private final TermConcept myConcept;
 
@@ -132,6 +138,9 @@ public class CustomTerminologyCsvBuilder {
 			return this;
 		}
 
-
+		public ConceptBuilder withParent(String theParent) {
+			myParentCodeToChildCode.put(theParent, myConcept.getCode());
+			return this;
+		}
 	}
 }

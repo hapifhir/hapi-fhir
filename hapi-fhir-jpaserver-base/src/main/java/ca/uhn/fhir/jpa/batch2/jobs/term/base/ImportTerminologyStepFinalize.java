@@ -124,7 +124,9 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		boolean makeCurrent =
 				!Boolean.TRUE.equals(theStepExecutionDetails.getParameters().getDontMakeCurrent());
 
-		myTermCodeSystemStorageSvc.activateStagingCodeSystemVersion(codeSystemUrl, stagingVersionId, makeCurrent);
+		if (theStepExecutionDetails.getParameters().getMode() == ImportTerminologyModeEnum.SNAPSHOT) {
+			myTermCodeSystemStorageSvc.activateStagingCodeSystemVersion(codeSystemUrl, stagingVersionId, makeCurrent);
+		}
 
 		ImportTerminologyResultJson resultJson = new ImportTerminologyResultJson();
 
@@ -215,7 +217,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		if (counter.getConceptsAdded() > 0) {
 			indent(reportBuilder, indent);
 			reportBuilder
-					.append("Concepts Added             : ")
+					.append("Concepts Added               : ")
 					.append(counter.getConceptsAdded())
 					.append("\n");
 			hasAny = true;
@@ -223,7 +225,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		if (counter.getConceptLinksAdded() > 0) {
 			indent(reportBuilder, indent);
 			reportBuilder
-					.append("Concepts Links Added       : ")
+					.append("Concepts Links Added         : ")
 					.append(counter.getConceptLinksAdded())
 					.append("\n");
 			hasAny = true;
@@ -231,7 +233,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		if (counter.getDesignationsAdded() > 0) {
 			indent(reportBuilder, indent);
 			reportBuilder
-					.append("Concept Designations Added : ")
+					.append("Concept Designations Added   : ")
 					.append(counter.getDesignationsAdded())
 					.append("\n");
 			hasAny = true;
@@ -239,15 +241,47 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		if (counter.getPropertiesAdded() > 0) {
 			indent(reportBuilder, indent);
 			reportBuilder
-					.append("Concept Properties Added   : ")
+					.append("Concept Properties Added     : ")
 					.append(counter.getPropertiesAdded())
+					.append("\n");
+			hasAny = true;
+		}
+		if (counter.getConceptsRemoved() > 0) {
+			indent(reportBuilder, indent);
+			reportBuilder
+					.append("Concepts Removed             : ")
+					.append(counter.getConceptsRemoved())
+					.append("\n");
+			hasAny = true;
+		}
+		if (counter.getConceptLinksRemoved() > 0) {
+			indent(reportBuilder, indent);
+			reportBuilder
+					.append("Concepts Links Removed       : ")
+					.append(counter.getConceptLinksRemoved())
+					.append("\n");
+			hasAny = true;
+		}
+		if (counter.getDesignationsRemoved() > 0) {
+			indent(reportBuilder, indent);
+			reportBuilder
+					.append("Concept Designations Removed : ")
+					.append(counter.getDesignationsRemoved())
+					.append("\n");
+			hasAny = true;
+		}
+		if (counter.getPropertiesRemoved() > 0) {
+			indent(reportBuilder, indent);
+			reportBuilder
+					.append("Concept Properties Removed   : ")
+					.append(counter.getPropertiesRemoved())
 					.append("\n");
 			hasAny = true;
 		}
 		if (counter.getConceptMapsAdded() > 0) {
 			indent(reportBuilder, indent);
 			reportBuilder
-					.append("ConceptMaps Added          : ")
+					.append("ConceptMaps Added            : ")
 					.append(counter.getConceptMapsAdded())
 					.append("\n");
 			hasAny = true;
@@ -255,7 +289,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		if (counter.getConceptMapMappingsAdded() > 0) {
 			indent(reportBuilder, indent);
 			reportBuilder
-					.append("ConceptMap Mappings Added  : ")
+					.append("ConceptMap Mappings Added    : ")
 					.append(counter.getConceptMapMappingsAdded())
 					.append("\n");
 			hasAny = true;
@@ -263,7 +297,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		if (counter.getValueSetsAdded() > 0) {
 			indent(reportBuilder, indent);
 			reportBuilder
-					.append("ValueSets Added            : ")
+					.append("ValueSets Added              : ")
 					.append(counter.getValueSetsAdded())
 					.append("\n");
 			hasAny = true;
@@ -271,7 +305,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		if (counter.getValueSetInclusionsAdded() > 0) {
 			indent(reportBuilder, indent);
 			reportBuilder
-					.append("ValueSets Inclusions Added : ")
+					.append("ValueSets Inclusions Added  : ")
 					.append(counter.getValueSetInclusionsAdded())
 					.append("\n");
 			hasAny = true;

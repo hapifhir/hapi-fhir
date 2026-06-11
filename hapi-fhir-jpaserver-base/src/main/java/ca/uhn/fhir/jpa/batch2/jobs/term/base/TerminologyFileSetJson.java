@@ -180,6 +180,22 @@ public class TerminologyFileSetJson implements IModelJson {
 		@JsonProperty("otherChanges")
 		private int myOtherChanges = 0;
 
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("conceptsRemoved")
+		private int myConceptsRemoved;
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("conceptLinksRemoved")
+		private int myConceptLinksRemoved;
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("propertiesRemoved")
+		private int myPropertiesRemoved;
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("designationsRemoved")
+		private int myDesignationsRemoved;
+
 		public void incrementConceptsAdded(int theAddedConceptCount) {
 			Validate.isTrue(theAddedConceptCount >= 0, "theAddedConceptCount must be >= 0");
 			myConceptsAdded += theAddedConceptCount;
@@ -230,8 +246,44 @@ public class TerminologyFileSetJson implements IModelJson {
 			myOtherChanges += theOtherChangesCount;
 		}
 
+		public void incrementConceptsRemoved(int theRemovedConceptCount) {
+			Validate.isTrue(theRemovedConceptCount >= 0, "Removed concept count must be >= zero");
+			myConceptsRemoved += theRemovedConceptCount;
+		}
+
+		public void incrementConceptLinksRemoved(int theRemovedConceptLinkCount) {
+			Validate.isTrue(theRemovedConceptLinkCount >= 0, "Removed concept link count must be >= zero");
+			myConceptLinksRemoved += theRemovedConceptLinkCount;
+		}
+
+		public void incrementPropertiesRemoved(int theRemovedPropertyCount) {
+			Validate.isTrue(theRemovedPropertyCount >= 0, "Removed property count must be >= zero");
+			myPropertiesRemoved += theRemovedPropertyCount;
+		}
+
+		public void incrementDesignationsRemoved(int theRemovedDesignationCount) {
+			Validate.isTrue(theRemovedDesignationCount >= 0, "Removed designation count must be >= zero");
+			myDesignationsRemoved += theRemovedDesignationCount;
+		}
+
 		public int getOtherChanges() {
 			return myOtherChanges;
+		}
+
+		public int getConceptsRemoved() {
+			return myConceptsRemoved;
+		}
+
+		public int getConceptLinksRemoved() {
+			return myConceptLinksRemoved;
+		}
+
+		public int getPropertiesRemoved() {
+			return myPropertiesRemoved;
+		}
+
+		public int getDesignationsRemoved() {
+			return myDesignationsRemoved;
 		}
 
 		public int getConceptsAdded() {
@@ -275,6 +327,10 @@ public class TerminologyFileSetJson implements IModelJson {
 			myConceptLinksAdded += theRecordsAddedCounter.myConceptLinksAdded;
 			myPropertiesAdded += theRecordsAddedCounter.myPropertiesAdded;
 			myDesignationsAdded += theRecordsAddedCounter.myDesignationsAdded;
+			myConceptsRemoved += theRecordsAddedCounter.myConceptsRemoved;
+			myConceptLinksRemoved += theRecordsAddedCounter.myConceptLinksRemoved;
+			myPropertiesRemoved += theRecordsAddedCounter.myPropertiesRemoved;
+			myDesignationsRemoved += theRecordsAddedCounter.myDesignationsRemoved;
 			myConceptMapsAdded += theRecordsAddedCounter.myConceptMapsAdded;
 			myConceptMapMappingsAdded += theRecordsAddedCounter.myConceptMapMappingsAdded;
 			myValueSetsAdded += theRecordsAddedCounter.myValueSetsAdded;
@@ -297,6 +353,10 @@ public class TerminologyFileSetJson implements IModelJson {
 			b.appendIfNonZero("valueSetCodesAdded", myValueSetCodesAdded);
 			b.appendIfNonZero("valueSetInclusionsAdded", myValueSetInclusionsAdded);
 			b.appendIfNonZero("otherChanges", myOtherChanges);
+			b.appendIfNonZero("conceptsRemoved", myConceptsRemoved);
+			b.appendIfNonZero("conceptLinksRemoved", myConceptLinksRemoved);
+			b.appendIfNonZero("conceptPropertiesRemoved", myPropertiesRemoved);
+			b.appendIfNonZero("designationsRemoved", myDesignationsRemoved);
 			return b.toString();
 		}
 	}

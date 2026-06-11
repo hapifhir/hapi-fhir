@@ -1,19 +1,28 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.CustomTerminologyCsvBuilder;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import org.apache.lucene.util.StringHelper;
+import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.List;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_CONCEPTS_FILE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -166,6 +175,85 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 		});
 	}
 
+	@ParameterizedTest
+	@EnumSource(ImportTerminologyModeEnum.class)
+	void testModes(ImportTerminologyModeEnum theMode) throws IOException {
+		// Setup
+		CodeSystem initialCs = new CodeSystem();
+		initialCs.setUrl(CODESYSTEM_URL);
+		initialCs.setVersion(VERSION_1_0);
+		initialCs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		initialCs.addConcept().setCode("INITIAL-1").setDisplay("Initial 1")
+			.addProperty(new CodeSystem.ConceptPropertyComponent(new CodeType("INITIAL-1-PROP-1"), new StringType("INITIAL-1-PROP-1 Value")))
+			.addDesignation(new CodeSystem.ConceptDefinitionDesignationComponent(new StringType("INITIAL-1-PROP-1 Designation")).setLanguage("en"))
+			.addConcept().setCode("INITIAL-1-CHILD-1");
+		initialCs.addConcept().setCode("INITIAL-2").setDisplay("Initial 2");
+		initialCs.addConcept().setCode("INITIAL-3").setDisplay("Initial 3");
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), initialCs);
+		assertEquals(4, runInTransaction(()-> myTermConceptDao.count()));
 
+		// Test
+		CustomTerminologyCsvBuilder deltaBuilder = new CustomTerminologyCsvBuilder();
+		deltaBuilder.addConcept("INITIAL-1").withDisplay("Initial 1 New Display");
+		deltaBuilder.addConcept("NEW-1").withDisplay("New 1")
+			.withProperty("NEW-1-PROP-1", TermConceptPropertyTypeEnum.STRING, "NEW-1-PROP-1 Value");
+		deltaBuilder.addConcept("NEW-1-CHILD-1").withParent("NEW-1");
+		deltaBuilder.addConcept("NEW-2").withDisplay("New 2");
+		deltaBuilder.addConcept("NEW-3").withDisplay("New 3");
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
+		files.addCustomTerminology(deltaBuilder);
+		String jobInstanceId = myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CODESYSTEM_URL, VERSION_1_0, files, theMode);
+
+		// Validate
+		List<String> codes = runInTransaction(()->{
+			TermCodeSystemVersion csv = myTermCodeSystemVersionDao.findByCodeSystemUriAndVersion(CODESYSTEM_URL, VERSION_1_0);
+			return myTermConceptDao.findByCodeSystemVersion(csv).stream().map(t->t.getCode()).toList();
+		});
+
+		String report = myTerminologyTestHelper.getReport(jobInstanceId);
+
+		switch (theMode) {
+			case ADD -> {
+				assertThat(codes).containsExactlyInAnyOrder(
+				"INITIAL-1",
+				"INITIAL-1-CHILD-1",
+				"INITIAL-2",
+				"INITIAL-3",
+				"NEW-1",
+				"NEW-1-CHILD-1",
+				"NEW-2",
+				"NEW-3");
+				assertThat(report).contains(
+					"Concepts Added               : 4",
+					"Concepts Links Added         : 1",
+					"Concept Properties Added     : 1"
+				);
+			}
+			case REMOVE -> {
+				assertThat(codes).containsExactlyInAnyOrder(
+				"INITIAL-2",
+				"INITIAL-3");
+				assertThat(report).contains(
+					"Concepts Removed             : 2",
+					"Concepts Links Removed       : 1",
+					"Concept Designations Removed : 1",
+					"Concept Properties Removed   : 1"
+				);
+			}
+			case SNAPSHOT -> {
+				assertThat(codes).containsExactlyInAnyOrder(
+				"INITIAL-1",
+				"NEW-1",
+				"NEW-1-CHILD-1",
+				"NEW-2",
+				"NEW-3");
+				assertThat(report).contains(
+					"Concepts Added               : 5",
+					"Concepts Links Added         : 1",
+					"Concept Properties Added     : 1"
+				);
+			}
+		}
+	}
 
 }

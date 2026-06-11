@@ -320,12 +320,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		};
 
 		if (theAlreadyExisting) {
-			myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(inputSupplier.get());
+			myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), inputSupplier.get());
 		}
 
 		// Test
 		myCaptureQueriesListener.clear();
-		myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(inputSupplier.get());
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), inputSupplier.get());
 
 		// Verify
 		assertThat(myCaptureQueriesListener).has(

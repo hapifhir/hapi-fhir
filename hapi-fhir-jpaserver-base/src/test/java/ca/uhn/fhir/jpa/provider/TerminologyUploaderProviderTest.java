@@ -10,12 +10,12 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
@@ -27,6 +27,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.StringType;
@@ -83,9 +84,6 @@ class TerminologyUploaderProviderTest {
 	private final FhirContext myContext = FhirContext.forR5Cached();
 
 	@Mock
-	private ITermLoaderSvc myTerminologyLoaderSvc;
-
-	@Mock
 	private IJobCoordinator myJobCoordinator;
 
 	@Mock
@@ -98,9 +96,8 @@ class TerminologyUploaderProviderTest {
 	private final RestfulServerExtension myServerExtension = new RestfulServerExtension(myContext)
 		.withServer(t -> {
 			assert myContext != null;
-			assert myTerminologyLoaderSvc != null;
 			assert myJobCoordinator != null;
-			t.registerProvider(new TerminologyUploaderProvider(myContext, myTerminologyLoaderSvc, myJobCoordinator, myJobPersistence));
+			t.registerProvider(new TerminologyUploaderProvider(myContext, myJobCoordinator, myJobPersistence));
 		});
 
 	@RegisterExtension
@@ -133,8 +130,15 @@ class TerminologyUploaderProviderTest {
 			.hasMessageContaining("The $upload-external-code-system operation has been removed. To upload terminology, see the $hapi.fhir.upload-terminology.create-job operation.");
 	}
 
-	@Test
-	void testUploadTerminologyCreateJob_Custom() {
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		ADD      , ADD
+		REMOVE   , REMOVE
+		SNAPSHOT , SNAPSHOT
+		         , SNAPSHOT
+		"""
+	)
+	void testUploadTerminologyCreateJob_Custom(String theModeParameter, ImportTerminologyModeEnum theExpectedMode) {
 		// Setup
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 		startResponse.setInstanceId("my-instance-id");
@@ -148,6 +152,7 @@ class TerminologyUploaderProviderTest {
 			.named(OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB)
 			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo"))
 			.andParameter(TerminologyUploaderProvider.PARAM_VERSION, new StringType("1.2"))
+			.andParameter(TerminologyUploaderProvider.PARAM_MODE, new CodeType(theModeParameter))
 			.execute();
 
 		// Verify
@@ -161,9 +166,29 @@ class TerminologyUploaderProviderTest {
 			"and then start the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.start-job operation."
 		);
 		assertEquals("my-instance-id", response.getParameter(TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID).getValue().toString());
+
+		ImportTerminologyJobParameters parameters = myStartRequestCaptor.getValue().getParameters(ImportTerminologyJobParameters.class);
+		assertEquals(theExpectedMode, parameters.getMode());
 	}
 
 	@Test
+	void testUploadTerminologyCreateJob_InvalidMode() {
+		// Test
+		assertThatThrownBy(()->myServerExtension
+			.getFhirClient()
+			.operation()
+			.onType("CodeSystem")
+			.named(OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo"))
+			.andParameter(TerminologyUploaderProvider.PARAM_VERSION, new StringType("1.2"))
+			.andParameter(TerminologyUploaderProvider.PARAM_MODE, new CodeType("FOO"))
+			.execute())
+			// Verify
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("Invalid value for parameter mode: FOO");
+	}
+
+		@Test
 	void testUploadTerminologyCreateJob_Loinc() {
 		// Setup
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
