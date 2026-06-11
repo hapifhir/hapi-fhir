@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
+import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -238,6 +239,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 	@Autowired
 	private ISearchDao mySearchEntityDao;
+	@Autowired
+	private TerminologyTestHelper myTerminologyTestHelper;
 
 	@Override
 	@AfterEach
@@ -1369,7 +1372,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertNotNull(b);
 		} finally {
 			// reset back to previous
-			myStorageSettings.setAdvancedHSearchIndexing(advancedHSearch);
+			myStorageSettings.setHibernateSearchIndexSearchParams(advancedHSearch);
 			myStorageSettings.setStoreResourceInHSearchIndex(storeResourceInHSearch);
 		}
 	}
@@ -3933,14 +3936,18 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testCodeInWithLargeValueSet() throws IOException {
+		createCodeSystem(
+			withUrl("http://hl7.org/fhir/sid/icd-10"),
+			withVersion("1.0"),
+			withCodeSystemContent("not-present")
+		);
+
 		//Given: We load a large codesystem
 		myStorageSettings.setMaximumExpansionSize(1000);
 		ZipCollectionBuilder zipCollectionBuilder = new ZipCollectionBuilder();
 		zipCollectionBuilder.addFileZip("/largecodesystem/", "concepts.csv");
 		zipCollectionBuilder.addFileZip("/largecodesystem/", "hierarchy.csv");
-		myTerminologyLoaderSvc.loadCustom("http://hl7.org/fhir/sid/icd-10", zipCollectionBuilder.getFiles(), mySrd);
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-
+		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion("http://hl7.org/fhir/sid/icd-10", "1.0", zipCollectionBuilder);
 
 		//And Given: We create two valuesets based on the CodeSystem, one with >1000 codes and one with <1000 codes
 		ValueSet valueSetOver1000 = loadResourceFromClasspath(ValueSet.class, "/largecodesystem/ValueSetV.json");
