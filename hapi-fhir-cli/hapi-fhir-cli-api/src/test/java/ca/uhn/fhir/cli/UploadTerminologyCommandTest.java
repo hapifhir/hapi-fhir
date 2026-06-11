@@ -8,15 +8,14 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
@@ -80,7 +79,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
@@ -169,7 +167,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeltaAdd(String theFhirVersion, boolean theIncludeTls) throws IOException {
+	public void testDeltaAdd(String theFhirVersion, boolean theIncludeTls) {
 		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
@@ -183,6 +181,11 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			},
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
+
+		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
+		JobInstanceStartRequest startRequest = myStartRequestDetails.getValue();
+		ImportTerminologyJobParameters jobParameters = startRequest.getParameters(ImportTerminologyJobParameters.class);
+		assertEquals(ImportTerminologyModeEnum.ADD, jobParameters.getMode());
 
 		verify(myJobPersistence, times(2)).storeNewAttachment(any(), any());
 		verify(myJobCoordinator, times(1)).enqueueBuildingJobForExecution(any());
@@ -207,7 +210,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		JobInstance jobInstance = mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
+		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -246,7 +249,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 	public void testDeltaAddUsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		writeArchiveFile(myConceptsFile, myHierarchyFile);
 
-		JobInstance jobInstance = mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
+		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -290,8 +293,8 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeltaRemove(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		JobInstance jobInstance = mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
+	public void testDeltaRemove(String theFhirVersion, boolean theIncludeTls) {
+		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -304,6 +307,11 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			},
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
+
+		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
+		JobInstanceStartRequest startRequest = myStartRequestDetails.getValue();
+		ImportTerminologyJobParameters jobParameters = startRequest.getParameters(ImportTerminologyJobParameters.class);
+		assertEquals(ImportTerminologyModeEnum.REMOVE, jobParameters.getMode());
 
 		verify(myJobPersistence, times(2)).storeNewAttachment(any(), any());
 		verify(myJobCoordinator, times(1)).enqueueBuildingJobForExecution(any());
