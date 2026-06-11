@@ -17,12 +17,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Reproduction for GL-8337 (Part 2): {@link ConsentInterceptor#interceptPreAccess} must safely
- * handle the case where {@link IPreResourceAccessDetails#getResource(int)} returns {@code null}
- * for a search PID that has no loadable resource body. Part 1 of the fix makes
- * {@code JpaPreResourceAccessDetails.getResource} return {@code null} for such indices; this test
- * proves the interceptor must not then pass that {@code null} into a consent service's
- * {@code canSeeResource}, which production services dereference.
+ * {@link ConsentInterceptor#interceptPreAccess} must safely handle the case where
+ * {@link IPreResourceAccessDetails#getResource(int)} returns {@code null} for a search PID that has
+ * no loadable resource body. The interceptor must not pass that {@code null} into a consent
+ * service's {@code canSeeResource}, which production services dereference.
  */
 public class ConsentInterceptorPreAccessNullResourceTest {
 

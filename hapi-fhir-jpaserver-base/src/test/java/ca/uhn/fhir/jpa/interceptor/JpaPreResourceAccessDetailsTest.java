@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,11 +58,10 @@ class JpaPreResourceAccessDetailsTest {
 	}
 
 	/**
-	 * Primary reproduction (TDD RED): the exact customer "length 0" case. A single PID is supplied
-	 * but the search builder loads ZERO resources (all PIDs unloadable/deleted). The consent
-	 * interceptor still iterates {@code 0 .. size()-1} and calls {@code getResource(0)}. The desired
-	 * behavior is that {@code getResource(0)} returns {@code null} (resource gracefully absent) rather
-	 * than overrunning the populated list with an IndexOutOfBoundsException.
+	 * The "length 0" case: a single PID is supplied but the search builder loads ZERO resources (all
+	 * PIDs unloadable/deleted). A caller iterating {@code 0 .. size()-1} calls {@code getResource(0)},
+	 * which must return {@code null} (resource gracefully absent) rather than overrunning the populated
+	 * list with an IndexOutOfBoundsException.
 	 */
 	@Test
 	void getResource_whenNoResourcesLoadedForOnePid_returnsNullWithoutIndexOverrun() {
@@ -76,9 +76,8 @@ class JpaPreResourceAccessDetailsTest {
 	}
 
 	/**
-	 * Adjacent (predicted FAIL -> desired PASS): trailing PID fails to load. Two PIDs are supplied but
-	 * only index 0 is populated; the populated list is shorter than {@code size()}. Asking for the
-	 * trailing index must not overrun.
+	 * Trailing PID fails to load: two PIDs are supplied but only index 0 is populated, so the populated
+	 * list is shorter than {@code size()}. Asking for the trailing index must not overrun.
 	 */
 	@Test
 	void getResource_whenTrailingPidNotLoaded_returnsNullWithoutIndexOverrun() {
@@ -95,8 +94,7 @@ class JpaPreResourceAccessDetailsTest {
 	}
 
 	/**
-	 * Adjacent (predicted PASS, stays PASS): every PID loads positionally. {@code getResource(i)}
-	 * returns each loaded resource.
+	 * Every PID loads positionally: {@code getResource(i)} returns each loaded resource.
 	 */
 	@Test
 	void getResource_whenAllPidsLoad_returnsEachResourcePositionally() {
@@ -116,9 +114,8 @@ class JpaPreResourceAccessDetailsTest {
 	}
 
 	/**
-	 * Adjacent (predicted PASS but returns null): a middle PID fails to load. The populated list is
-	 * null-padded at the missing index (length == size()), so {@code getResource(1)} returns
-	 * {@code null} rather than throwing — no index overrun, but a null resource is exposed.
+	 * A middle PID fails to load: the populated list is null-padded at the missing index (length ==
+	 * size()), so {@code getResource(1)} returns {@code null} rather than throwing — no index overrun.
 	 */
 	@Test
 	void getResource_whenMiddlePidNotLoaded_returnsNullForThatIndexWithoutThrowing() {
@@ -126,7 +123,7 @@ class JpaPreResourceAccessDetailsTest {
 		IBaseResource r0 = newObservation(1L);
 		IBaseResource r2 = newObservation(3L);
 		// Positional null-padding: index 1 left null, index 2 populated.
-		List<IBaseResource> populated = new java.util.ArrayList<>();
+		List<IBaseResource> populated = new ArrayList<>();
 		populated.add(r0);
 		populated.add(null);
 		populated.add(r2);
