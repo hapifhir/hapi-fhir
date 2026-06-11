@@ -73,7 +73,7 @@ public abstract class ValueSetExpansionHSearchTestCases extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void beforeConfigureErrorHandler() {
-		when(mySrd.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE)).thenReturn(Boolean.TRUE);
+		mySrd.getUserData().put(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 	}
 
