@@ -393,18 +393,18 @@ class SearchParameterUtilTest {
 		// Collect all annotations once. Multiple SPs may share the same path (e.g. EnrollmentRequest
 		// has both "patient" and "subject" SPs with path "EnrollmentRequest.candidate"), so we use
 		// anyMatch rather than findFirst to avoid missing the one that carries providesMembershipIn.
-		List<SearchParamDefinition> allAnnotations = Arrays.stream(resourceDef.getImplementingClass().getFields())
+		List<SearchParamDefinition> allSpAnnotations = Arrays.stream(resourceDef.getImplementingClass().getFields())
 			.map(f -> f.getAnnotation(SearchParamDefinition.class))
 			.filter(Objects::nonNull)
-			.collect(Collectors.toList());
+			.toList();
 
 		// Case 1: the patient param narrows some base param,
 		// and the base path provides patient compartment membership
-		boolean byPathJustified = allAnnotations.stream()
+		boolean basePathJustified = allSpAnnotations.stream()
 			.anyMatch(spd -> baseFieldPath.equals(spd.path()) && spAnnotationHasPatientCompartment(spd));
 
 		// Case 2: the patient param itself provides patient compartment membership
-		boolean patientSpaJustified = allAnnotations.stream()
+		boolean patientSpaJustified = allSpAnnotations.stream()
 			.filter(spd -> "patient".equalsIgnoreCase(spd.name()))
 			.anyMatch(spd -> spAnnotationHasPatientCompartment(spd));
 
@@ -413,11 +413,12 @@ class SearchParameterUtilTest {
 		// in sealAndInitialize — we cannot verify it annotation-wise, so skip.
 		// SupplyRequest.patient --> path is SupplyRequest.deliverFor
 		// but only SupplyRequest.deliverTo provides patient membership
-		boolean anySpCoversBasePath = allAnnotations.stream()
+		boolean anySpCoversBasePath = allSpAnnotations.stream()
 			.anyMatch(spd -> baseFieldPath.equals(spd.path()));
-		if (!anySpCoversBasePath && !patientSpaJustified) return;
+		if (!anySpCoversBasePath && !patientSpaJustified)
+			return;
 
-		softly.assertThat(byPathJustified || patientSpaJustified)
+		softly.assertThat(basePathJustified || patientSpaJustified)
 			.as("%s %s: 'patient' SP in Patient compartment but neither the SP covering '%s' "
 				+ "nor the 'patient' SP annotation declares providesMembershipIn=Patient",
 				fhirVersion, resourceName, baseFieldPath)
