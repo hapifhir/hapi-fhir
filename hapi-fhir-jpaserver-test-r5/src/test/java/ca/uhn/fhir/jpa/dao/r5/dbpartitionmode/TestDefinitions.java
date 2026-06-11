@@ -615,12 +615,14 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		}
 		assertEquals("delete from HFJ_SPIDX_STRING risps1_0 where " + deleteWhere, getDeleteSql(1));
 		assertEquals("delete from HFJ_SPIDX_TOKEN rispt1_0 where " + deleteWhere.replace("risps1_0", "rispt1_0"), getDeleteSql(2));
+		assertEquals("delete from HFJ_SPIDX2_TOKEN_IDENTIFIER rispti1_0 where " + deleteWhere.replace("risps1_0", "rispti1_0"), getDeleteSql(3));
+		assertEquals("delete from HFJ_SPIDX2_TOKEN_COMMON_RES risptcr1_0 where " + deleteWhere.replace("risps1_0", "risptcr1_0"), getDeleteSql(4));
 		if (myIncludePartitionIdsInPks) {
-			assertEquals("delete from HFJ_RES_LINK rl1_0 where (rl1_0.SRC_RESOURCE_ID,rl1_0.PARTITION_ID)=('" + idLong + "','1')", getDeleteSql(3));
+			assertEquals("delete from HFJ_RES_LINK rl1_0 where (rl1_0.SRC_RESOURCE_ID,rl1_0.PARTITION_ID)=('" + idLong + "','1')", getDeleteSql(5));
 		} else {
-			assertEquals("delete from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID='" + idLong + "'", getDeleteSql(3));
+			assertEquals("delete from HFJ_RES_LINK rl1_0 where rl1_0.SRC_RESOURCE_ID='" + idLong + "'", getDeleteSql(5));
 		}
-		assertEquals(4, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(6, myCaptureQueriesListener.countDeleteQueries());
 	}
 
 	@Test

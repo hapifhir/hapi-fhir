@@ -178,6 +178,22 @@ public class TestDaoSearch {
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * Run a synchronous search from a pre-built {@link SearchParameterMap}, returning matching id-parts.
+	 */
+	public List<String> searchForIds(String theResourceType, SearchParameterMap theMap) {
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
+		theMap.setLoadSynchronous(true);
+		SystemRequestDetails reqDetails = new SystemRequestDetails();
+		if (myRequestPartitionId != null) {
+			reqDetails.setRequestPartitionId(myRequestPartitionId);
+		}
+		IBundleProvider result = dao.search(theMap, reqDetails);
+		return result.getResources(0, Integer.MAX_VALUE).stream()
+				.map(resource -> resource.getIdElement().getIdPart())
+				.collect(Collectors.toList());
+	}
+
 	public IBundleProvider searchForBundleProvider(String theQueryUrl, boolean theSynchronousMode) {
 		ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(search.getResourceName());

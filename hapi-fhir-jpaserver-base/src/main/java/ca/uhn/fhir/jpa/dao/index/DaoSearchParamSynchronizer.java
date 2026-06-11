@@ -20,17 +20,27 @@
 package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.cache.IResourceIdentifierCacheSvc;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommon;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommonRes;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenIdentifier;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
+import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
@@ -42,6 +52,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,6 +63,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class DaoSearchParamSynchronizer {
@@ -73,6 +85,12 @@ public class DaoSearchParamSynchronizer {
 
 	@Autowired
 	private IHapiTransactionService myTransactionService;
+
+	@Autowired
+	private IResourceIdentifierCacheSvc myResourceIdentifierCacheSvc;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	private UniqueIndexPreExistenceChecker myUniqueIndexPreExistenceChecker;
 
@@ -98,14 +116,19 @@ public class DaoSearchParamSynchronizer {
 				theParams.myStringParams,
 				existingParams.myStringParams,
 				null);
-		synchronize(
-				theRequestDetails,
-				theTransactionDetails,
-				theEntity,
-				retVal,
-				theParams.myTokenParams,
-				existingParams.myTokenParams,
-				null);
+		if (myStorageSettings.getTokenIndexStrategy().writeToLegacyTokenTable()) {
+			synchronize(
+					theRequestDetails,
+					theTransactionDetails,
+					theEntity,
+					retVal,
+					theParams.myTokenParams,
+					existingParams.myTokenParams,
+					null);
+		}
+		if (myStorageSettings.getTokenIndexStrategy().writeToCompressedTokenTables()) {
+			synchronizeTokenParamsToNewTables(theRequestDetails, theEntity, theParams, existingParams, retVal);
+		}
 		synchronize(
 				theRequestDetails,
 				theTransactionDetails,
@@ -198,6 +221,114 @@ public class DaoSearchParamSynchronizer {
 	@VisibleForTesting
 	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
 		myStorageSettings = theStorageSettings;
+	}
+
+	/**
+	 * Synchronizes the extracted token params into the compressed token tables.
+	 */
+	private void synchronizeTokenParamsToNewTables(
+			RequestDetails theRequestDetails,
+			ResourceTable theEntity,
+			ResourceIndexedSearchParams theParams,
+			ResourceIndexedSearchParams theExistingParams,
+			AddRemoveCount theAddRemoveCount) {
+		TokenIndexStrategy tokenStrategy = myStorageSettings.getTokenIndexStrategy();
+
+		PartitionablePartitionId partitionId = theEntity.getPartitionId();
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(partitionId, myPartitionSettings);
+
+		List<ResourceIndexedSearchParamTokenCommonRes> newCommonResEntities = new ArrayList<>();
+		List<ResourceIndexedSearchParamTokenIdentifier> newIdentifierEntities = new ArrayList<>();
+
+		for (ResourceIndexedSearchParamToken token : theParams.myTokenParams) {
+			// Compressed tables have no SP_MISSING column, so skip tokens that represent missing values
+			if (token.isMissing()) {
+				continue;
+			}
+
+			// Initialize tokens only once, if synchronize() didn't initialize them already.
+			// synchronize() runs (and initializes) only when the legacy token table is written.
+			if (!tokenStrategy.writeToLegacyTokenTable()) {
+				Long resourceId = theEntity.getId().getId();
+				token.setResourceId(resourceId);
+				token.setPartitionId(partitionId);
+				token.setResource(theEntity);
+				token.calculateHashes();
+			}
+
+			findOrCreateSearchParamIdentity(token);
+
+			Long systemId = resolveTokenSystemId(theRequestDetails, requestPartitionId, token.getSystem());
+
+			if (TokenIndexMode.resolve(token.getParamName(), myStorageSettings) == TokenIndexMode.IDENTIFIER) {
+				newIdentifierEntities.add(TokenIndexEntityConverter.toIdentifier(token, theEntity, systemId));
+			} else {
+				ResourceIndexedSearchParamTokenCommon commonRow = TokenIndexEntityConverter.toCommon(token, systemId);
+				if (myEntityManager.find(ResourceIndexedSearchParamTokenCommon.class, commonRow.getHashSystemAndValue())
+						== null) {
+					myEntityManager.persist(commonRow);
+				}
+				newCommonResEntities.add(TokenIndexEntityConverter.toCommonRes(token, theEntity));
+			}
+		}
+
+		AddRemoveCount commonResDelta =
+				diffAndApply(new ArrayList<>(theExistingParams.myTokenCommonResEntities), newCommonResEntities);
+		AddRemoveCount identifierDelta =
+				diffAndApply(new ArrayList<>(theExistingParams.myTokenIdentifierEntities), newIdentifierEntities);
+
+		if (!tokenStrategy.writeToLegacyTokenTable()) {
+			// Only count when legacy didn't run; otherwise the legacy path already populated retVal.
+			theAddRemoveCount.addToAddCount(commonResDelta.getAddCount() + identifierDelta.getAddCount());
+			theAddRemoveCount.addToRemoveCount(commonResDelta.getRemoveCount() + identifierDelta.getRemoveCount());
+		}
+
+		theParams.myTokenCommonResEntities.clear();
+		theParams.myTokenCommonResEntities.addAll(newCommonResEntities);
+		theParams.myTokenIdentifierEntities.clear();
+		theParams.myTokenIdentifierEntities.addAll(newIdentifierEntities);
+	}
+
+	/**
+	 * Set-subtract diff against {@code existing}: persist rows in {@code desired} that aren't
+	 * already present, remove rows in {@code existing} that aren't in {@code desired}. Relies on
+	 * content-based {@code equals}/{@code hashCode} on the entity.
+	 */
+	private <T> AddRemoveCount diffAndApply(List<T> theExisting, List<T> theDesired) {
+		Set<T> existingSet = new HashSet<>(theExisting);
+		Set<T> desiredSet = new HashSet<>(theDesired);
+
+		List<T> toRemove =
+				theExisting.stream().filter(row -> !desiredSet.contains(row)).collect(Collectors.toList());
+		List<T> toAdd =
+				theDesired.stream().filter(row -> !existingSet.contains(row)).collect(Collectors.toList());
+
+		for (T row : toRemove) {
+			if (!myEntityManager.contains(row)) {
+				continue;
+			}
+			myEntityManager.remove(row);
+		}
+		for (T row : toAdd) {
+			myEntityManager.persist(row);
+		}
+
+		AddRemoveCount delta = new AddRemoveCount();
+		delta.addToAddCount(toAdd.size());
+		delta.addToRemoveCount(toRemove.size());
+		return delta;
+	}
+
+	private Long resolveTokenSystemId(
+			@Nullable RequestDetails theRequestDetails,
+			RequestPartitionId theRequestPartitionId,
+			@Nullable String theSystem) {
+		if (StringUtils.isBlank(theSystem)) {
+			return null;
+		}
+		return myResourceIdentifierCacheSvc.getOrCreateResourceIdentifierSystem(
+				theRequestDetails, theRequestPartitionId, theSystem);
 	}
 
 	private <T extends BaseResourceIndex> void synchronize(

@@ -37,11 +37,14 @@ import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParam
 import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderCacheKey;
 import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderCacheLookupResult;
 import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderTypeEnum;
+import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseQuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.BaseTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ICanMakeMissingParamPredicate;
@@ -726,6 +729,13 @@ public class QueryStack {
 		 * that do not have a missing field (:missing=false) for much the same reason.
 		 */
 		SearchQueryBuilder sqlBuilder = theParams.getSqlBuilder();
+
+		// Compressed token tables have no SP_MISSING column, so :missing is handled in a separate branch
+		if (theParams.getParamType() == RestSearchParameterTypeEnum.TOKEN
+				&& myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
+			return createMissingPredicateForCompressedToken(theParams, sqlBuilder);
+		}
+
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
 			// new search
 			return createMissingPredicateForUnindexedMissingFields(theParams, sqlBuilder);
@@ -824,6 +834,22 @@ public class QueryStack {
 		ICanMakeMissingParamPredicate innerQuery = PredicateBuilderFactory.createPredicateBuilderForParamType(
 				theParams.getParamType(), theParams.getSqlBuilder(), this);
 		return innerQuery.createPredicateParamMissingValue(new MissingQueryParameterPredicateParams(
+				table, theParams.isMissing(), theParams.getParamName(), theParams.getRequestPartitionId()));
+	}
+
+	/**
+	 * Creates :missing predicate for compressed token tables.
+	 */
+	private Condition createMissingPredicateForCompressedToken(
+			MissingParameterQueryParams theParams, SearchQueryBuilder sqlBuilder) {
+		ResourceTablePredicateBuilder table = sqlBuilder.getOrCreateResourceTablePredicateBuilder();
+
+		TokenIndexMode tokenIndexMode = TokenIndexMode.resolve(theParams.getParamName(), myStorageSettings);
+
+		CompressedTokenPredicateBuilder tokenBuilder =
+				sqlBuilder.getSqlBuilderFactory().compressedTokenIndexTable(sqlBuilder, tokenIndexMode);
+
+		return tokenBuilder.createPredicateParamMissingValue(new MissingQueryParameterPredicateParams(
 				table, theParams.isMissing(), theParams.getParamName(), theParams.getRequestPartitionId()));
 	}
 
@@ -2289,7 +2315,7 @@ public class QueryStack {
 		if (paramInverted) {
 			boolean selectPartitionId = myPartitionSettings.isDatabasePartitionMode();
 			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder(selectPartitionId);
-			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
+			BaseTokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null, theSearchParam);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(
 					tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
 
@@ -2312,11 +2338,11 @@ public class QueryStack {
 						theRequestPartitionId));
 			}
 
-			TokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(
+			BaseTokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(
 							PredicateBuilderTypeEnum.TOKEN,
 							theSourceJoinColumn,
 							paramName,
-							() -> theSqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn))
+							() -> theSqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn, theSearchParam))
 					.getResult();
 
 			predicate = tokenJoin.createPredicateToken(

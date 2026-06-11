@@ -20,8 +20,10 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
@@ -115,6 +117,12 @@ public class SqlObjectFactory {
 
 	public TokenPredicateBuilder tokenIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(TokenPredicateBuilder.class, theSearchSqlBuilder);
+	}
+
+	public CompressedTokenPredicateBuilder compressedTokenIndexTable(
+			SearchQueryBuilder theSearchSqlBuilder, TokenIndexMode theTokenIndexMode) {
+		return myApplicationContext.getBean(
+				CompressedTokenPredicateBuilder.class, theSearchSqlBuilder, theTokenIndexMode);
 	}
 
 	public UriPredicateBuilder uriIndexTable(SearchQueryBuilder theSearchSqlBuilder) {

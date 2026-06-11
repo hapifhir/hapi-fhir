@@ -1,10 +1,13 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -13,6 +16,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -20,11 +24,18 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.COMPRESSED;
+import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.LEGACY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 class DeleteExpungeDaoTest extends BaseJpaR4Test {
@@ -47,6 +58,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		myStorageSettings.setDeleteExpungeEnabled(defaultStorageSettings.isDeleteExpungeEnabled());
 		myStorageSettings.setExpungeBatchSize(defaultStorageSettings.getExpungeBatchSize());
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(defaultStorageSettings.isEnforceReferentialIntegrityOnDelete());
+		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY));
 	}
 
 	@Test
@@ -268,6 +280,58 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		// TODO KHS replace these with a report
 //		assertEquals(7, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
 //		assertEquals(2, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
+	}
+
+	private static Stream<TokenIndexStrategy> tokenIndexStrategies() {
+		return Stream.of(
+				TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY),
+				TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY),
+				TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), COMPRESSED),
+				TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
+	}
+
+	@ParameterizedTest
+	@MethodSource("tokenIndexStrategies")
+	void testDeleteExpunge_removesCompressedTokenIndexesKeepsCommonTokenTable(TokenIndexStrategy theStrategy) {
+		// setup
+		myStorageSettings.setTokenIndexStrategy(theStrategy);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://sys").setValue("A");
+		p.setGender(Enumerations.AdministrativeGender.MALE);
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		JpaPid pid = JpaPid.fromId(id.getIdPartAsLong());
+
+		if (theStrategy.writeToCompressedTokenTables()) {
+			runInTransaction(() -> {
+				assertThat(myTokenCommonResDao.findByResourceId(pid)).isNotEmpty();
+				assertThat(myTokenIdentifierDao.findByResourceId(pid)).isNotEmpty();
+			});
+		}
+
+		// execute
+		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+		String jobId = jobExecutionIdFromOutcome(outcome);
+		myBatch2JobHelper.awaitJobCompletion(jobId);
+
+		// validate
+		runInTransaction(() -> {
+			assertThat(myTokenCommonResDao.findByResourceId(pid))
+					.as("CommonRes link rows removed").isEmpty();
+			assertThat(myTokenIdentifierDao.findByResourceId(pid))
+					.as("Identifier rows removed").isEmpty();
+			if (theStrategy.writeToCompressedTokenTables()) {
+				long genderHash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
+						myPartitionSettings, (RequestPartitionId) null, "Patient", Patient.SP_GENDER,
+						"http://hl7.org/fhir/administrative-gender", "male");
+				long count = myEntityManager
+						.createQuery("SELECT COUNT(t) FROM ResourceIndexedSearchParamTokenCommon t WHERE t.myHashSystemAndValue = :hashSysVal", Long.class)
+						.setParameter("hashSysVal", genderHash)
+						.getSingleResult();
+				assertThat(count).as("Common dictionary row retained (insert-only)").isEqualTo(1);
+			}
+		});
+		assertDoesntExist(id);
 	}
 
 }

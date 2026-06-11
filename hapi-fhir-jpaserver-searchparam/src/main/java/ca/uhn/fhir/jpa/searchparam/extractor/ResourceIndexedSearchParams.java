@@ -32,11 +32,15 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommonRes;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenIdentifier;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex;
 import ca.uhn.fhir.jpa.model.util.ResourceLinkUtils;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -55,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -66,6 +71,8 @@ public final class ResourceIndexedSearchParams {
 	private static final Set<String> myIgnoredParams = Set.of(Constants.PARAM_TEXT, Constants.PARAM_CONTENT);
 	public final Collection<ResourceIndexedSearchParamString> myStringParams;
 	public final Collection<ResourceIndexedSearchParamToken> myTokenParams;
+	public final Collection<ResourceIndexedSearchParamTokenCommonRes> myTokenCommonResEntities;
+	public final Collection<ResourceIndexedSearchParamTokenIdentifier> myTokenIdentifierEntities;
 	public final Collection<ResourceIndexedSearchParamNumber> myNumberParams;
 	public final Collection<ResourceIndexedSearchParamQuantity> myQuantityParams;
 	public final Collection<ResourceIndexedSearchParamQuantityNormalized> myQuantityNormalizedParams;
@@ -92,6 +99,8 @@ public final class ResourceIndexedSearchParams {
 	private ResourceIndexedSearchParams(Mode theMode) {
 		myStringParams = theMode.newCollection();
 		myTokenParams = theMode.newCollection();
+		myTokenCommonResEntities = theMode.newCollection();
+		myTokenIdentifierEntities = theMode.newCollection();
 		myNumberParams = theMode.newCollection();
 		myQuantityParams = theMode.newCollection();
 		myQuantityNormalizedParams = theMode.newCollection();
@@ -105,13 +114,20 @@ public final class ResourceIndexedSearchParams {
 		myCompositeParams = theMode.newCollection();
 	}
 
-	private ResourceIndexedSearchParams(ResourceTable theEntity, Mode theMode) {
+	private ResourceIndexedSearchParams(
+			ResourceTable theEntity, Mode theMode, TokenIndexStrategy theTokenIndexStrategy) {
 		this(theMode);
 		if (theEntity.isParamsStringPopulated()) {
 			myStringParams.addAll(theEntity.getParamsString());
 		}
 		if (theEntity.isParamsTokenPopulated()) {
-			myTokenParams.addAll(theEntity.getParamsToken());
+			if (theTokenIndexStrategy.writeToLegacyTokenTable()) {
+				myTokenParams.addAll(theEntity.getParamsToken());
+			}
+			if (theTokenIndexStrategy.writeToCompressedTokenTables()) {
+				myTokenCommonResEntities.addAll(theEntity.getParamsTokenCommonRes());
+				myTokenIdentifierEntities.addAll(theEntity.getParamsTokenIdentifier());
+			}
 		}
 		if (theEntity.isParamsNumberPopulated()) {
 			myNumberParams.addAll(theEntity.getParamsNumber());
@@ -164,6 +180,8 @@ public final class ResourceIndexedSearchParams {
 	public void populateResourceTableParamCollections(ResourceTable theEntity) {
 		theEntity.setParamsString(myStringParams);
 		theEntity.setParamsToken(myTokenParams);
+		theEntity.setParamsTokenCommonRes(myTokenCommonResEntities);
+		theEntity.setParamsTokenIdentifier(myTokenIdentifierEntities);
 		theEntity.setParamsNumber(myNumberParams);
 		theEntity.setParamsQuantity(myQuantityParams);
 		theEntity.setParamsQuantityNormalized(myQuantityNormalizedParams);
@@ -700,11 +718,20 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	/**
-	 * Create a new instance that holds all the existing indexes
-	 * in lists so that any duplicates are preserved.
+	 * Create a new instance holding all existing indexes in lists (duplicates preserved); the
+	 * {@link TokenIndexStrategy} controls which token tables are lazily fetched to avoid pointless SELECTs.
+	 */
+	public static ResourceIndexedSearchParams withLists(
+			ResourceTable theResourceTable, TokenIndexStrategy theTokenIndexStrategy) {
+		return new ResourceIndexedSearchParams(theResourceTable, Mode.LIST, theTokenIndexStrategy);
+	}
+
+	/**
+	 * Backward-compatible overload preserving pre-existing behavior:
+	 * legacy token rows included, compressed token rows excluded.
 	 */
 	public static ResourceIndexedSearchParams withLists(ResourceTable theResourceTable) {
-		return new ResourceIndexedSearchParams(theResourceTable, Mode.LIST);
+		return withLists(theResourceTable, TokenIndexStrategy.of(EnumSet.of(TokenIndex.LEGACY), TokenIndex.LEGACY));
 	}
 
 	private enum Mode {
