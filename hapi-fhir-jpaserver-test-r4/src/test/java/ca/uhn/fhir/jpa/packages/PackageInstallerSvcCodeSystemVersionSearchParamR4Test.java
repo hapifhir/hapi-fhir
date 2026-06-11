@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
-import ca.uhn.fhir.implementationguide.NpmPackageFactory;
+import ca.uhn.fhir.packages.NpmPackageFactory;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.r4.model.CodeSystem;

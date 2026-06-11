@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.implementationguide;
+package ca.uhn.fhir.packages;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -78,8 +78,7 @@ public class NpmPackageFactory {
 		return addResourceToFolder("package", theFileName, theResource);
 	}
 
-	public NpmPackageFactory addResourceToFolder(
-			String theFolder, String theFileName, IBaseResource theResource) {
+	public NpmPackageFactory addResourceToFolder(String theFolder, String theFileName, IBaseResource theResource) {
 		myResources.computeIfAbsent(theFolder, k -> new HashMap<>()).put(theFileName, theResource);
 		return this;
 	}

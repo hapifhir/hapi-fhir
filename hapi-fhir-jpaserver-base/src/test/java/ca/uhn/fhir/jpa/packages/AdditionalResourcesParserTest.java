@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.implementationguide.NpmPackageFactory;
+import ca.uhn.fhir.packages.NpmPackageFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
