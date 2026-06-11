@@ -138,6 +138,11 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			activeJobMaintenanceFrequency = myScheduledJobFrequencyMillis;
 			endedJobMaintenanceFrequency = myScheduledJobFrequencyMillis;
 		}
+		ourLog.atInfo()
+				.setMessage("Scheduling Batch2 maintenance with frequency: Active={}ms, Ended={}ms")
+				.addArgument(activeJobMaintenanceFrequency)
+				.addArgument(endedJobMaintenanceFrequency)
+				.log();
 		mySchedulerService.scheduleClusteredJob(activeJobMaintenanceFrequency, buildActiveJobDefinition());
 		mySchedulerService.scheduleClusteredJob(endedJobMaintenanceFrequency, buildEndedJobDefinition());
 	}
@@ -260,10 +265,17 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			ourLog.error("Maintenance (Active Job) job is disabled! This will affect all batch2 jobs!");
 		}
 
-		if (!myRunMaintenanceSemaphore.tryAcquire()) {
-			ourLog.debug("Another Active Job maintenance pass is already in progress.  Ignoring request.");
+		try {
+			if (!myRunMaintenanceSemaphore.tryAcquire(5, TimeUnit.SECONDS)) {
+				ourLog.debug("Another Active Job maintenance pass is already in progress.  Ignoring request.");
+				return;
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			ourLog.debug("Waiting for active job maintenance semaphore was interrupted, aborting");
 			return;
 		}
+
 		try {
 			ourLog.debug("Active Maintenance pass starting.");
 			doActiveMaintenancePass();
@@ -421,6 +433,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
+			// FIXME: reduce
+			ourLog.info("Running Batch2 active job maintenance pass");
 			myTarget.runActiveJobMaintenancePass();
 		}
 	}

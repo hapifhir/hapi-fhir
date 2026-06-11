@@ -293,7 +293,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		try {
 			// run maintenance pass -> cleans up failed jobs/workchunks
-			myBatch2JobHelper.runActiveJobMaintenancePass();
+			myBatch2JobHelper.runEndedJobMaintenancePass();
 
 			// create a fake work notification
 			JobWorkNotification notification = new JobWorkNotification();
