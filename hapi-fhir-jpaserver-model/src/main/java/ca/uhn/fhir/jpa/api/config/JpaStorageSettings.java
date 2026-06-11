@@ -1909,7 +1909,8 @@ public class JpaStorageSettings extends StorageSettings {
 	 *
 	 * <p>Default: {@code {"identifier"}}.
 	 *
-	 * @see TokenIndexStrategy#readFromCompressedTokenTables()
+	 * @see #setIdentifierTokenSearchParams(Set)
+	 * @see TokenIndexStrategy
 	 */
 	public Set<String> getIdentifierTokenSearchParams() {
 		return myIdentifierTokenSearchParams;

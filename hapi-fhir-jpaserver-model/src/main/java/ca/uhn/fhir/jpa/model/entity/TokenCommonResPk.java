@@ -25,23 +25,13 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class ResIdPartitionIdAndHashSystemAndValue implements Serializable {
+public class TokenCommonResPk implements Serializable {
 	private Long myResourceId;
-	private Integer myPartitionId;
-	private Long myHashSystemAndValue;
+	private Integer myPartitionIdValue;
+	private long myHashSystemAndValue;
 
-	public ResIdPartitionIdAndHashSystemAndValue(Long theResourceId, Integer thePartitionId, Long theHashSysAndValue) {
-		myResourceId = theResourceId;
-		myPartitionId = thePartitionId;
-		myHashSystemAndValue = theHashSysAndValue;
-	}
-
-	public ResIdPartitionIdAndHashSystemAndValue() {
+	public TokenCommonResPk() {
 		// nothing
-	}
-
-	public ResIdPartitionIdAndHashSystemAndValue(Long theResourceId) {
-		myResourceId = theResourceId;
 	}
 
 	public Long getResourceId() {
@@ -52,37 +42,42 @@ public class ResIdPartitionIdAndHashSystemAndValue implements Serializable {
 		myResourceId = theResourceId;
 	}
 
-	public void setPartitionId(Integer thePartitionId) {
-		myPartitionId = thePartitionId;
+	public void setPartitionIdValue(Integer thePartitionId) {
+		myPartitionIdValue = thePartitionId;
 	}
 
-	public Integer getPartitionId() {
-		return myPartitionId;
+	public Integer getPartitionIdValue() {
+		return myPartitionIdValue;
+	}
+
+	public long getHashSystemAndValue() {
+		return myHashSystemAndValue;
+	}
+
+	public void setHashSystemAndValue(long theHashSystemAndValue) {
+		myHashSystemAndValue = theHashSystemAndValue;
 	}
 
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
-		if (!(theO instanceof ResIdPartitionIdAndHashSystemAndValue)) return false;
-		ResIdPartitionIdAndHashSystemAndValue that = (ResIdPartitionIdAndHashSystemAndValue) theO;
+		if (!(theO instanceof TokenCommonResPk that)) return false;
 		return Objects.equals(myResourceId, that.myResourceId)
-				&& Objects.equals(myPartitionId, that.myPartitionId)
-				&& Objects.equals(myHashSystemAndValue, that.myHashSystemAndValue);
+				&& Objects.equals(myPartitionIdValue, that.myPartitionIdValue)
+				&& myHashSystemAndValue == that.myHashSystemAndValue;
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("id", myResourceId)
-				.append("partitionId", myPartitionId)
+				.append("partitionId", myPartitionIdValue)
 				.append("hashSystemAndValue", myHashSystemAndValue)
 				.toString();
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(myResourceId, myPartitionId, myHashSystemAndValue);
+		return Objects.hash(myResourceId, myPartitionIdValue, myHashSystemAndValue);
 	}
-
-	// TODO: add forId method
 }

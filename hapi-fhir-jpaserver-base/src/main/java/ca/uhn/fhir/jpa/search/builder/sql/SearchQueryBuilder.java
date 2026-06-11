@@ -399,10 +399,8 @@ public class SearchQueryBuilder {
 			addTable(retVal, theSourceJoinColumn);
 			return retVal;
 		}
-		// Default read from Legacy token table
-		TokenPredicateBuilder retVal = createTokenPredicateBuilder();
-		addTable(retVal, theSourceJoinColumn);
-		return retVal;
+		// default read from Legacy token table
+		return addTokenPredicateBuilder(theSourceJoinColumn);
 	}
 
 	/**

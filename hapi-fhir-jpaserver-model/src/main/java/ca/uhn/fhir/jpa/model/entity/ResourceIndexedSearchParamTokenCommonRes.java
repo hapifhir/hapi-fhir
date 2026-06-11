@@ -32,6 +32,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -43,7 +45,7 @@ import java.util.Objects;
 		indexes = {
 			@Index(name = "IDX_SP2_TOKEN_COMMON_RES_HASH", columnList = "HASH_SYS_AND_VALUE, RES_ID, PARTITION_ID"),
 		})
-@IdClass(ResIdPartitionIdAndHashSystemAndValue.class)
+@IdClass(TokenCommonResPk.class)
 public class ResourceIndexedSearchParamTokenCommonRes implements Serializable {
 	public static final String HFJ_SPIDX2_TOKEN_COMMON_RES = "HFJ_SPIDX2_TOKEN_COMMON_RES";
 
@@ -55,11 +57,10 @@ public class ResourceIndexedSearchParamTokenCommonRes implements Serializable {
 	@Column(name = "HASH_SYS_AND_VALUE", nullable = false)
 	private long myHashSystemAndValue;
 
-	// TODO: move this to new BasePartitionable class (without PartitionDate) ?
 	@Id
 	@PartitionedIdProperty
 	@Column(name = "PARTITION_ID", nullable = true)
-	private Integer myPartitionId;
+	private Integer myPartitionIdValue;
 
 	// Required for Hibernate to insert HFJ_RESOURCE rows before HFJ_SPIDX2_TOKEN_COMMON_RES rows
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -86,7 +87,7 @@ public class ResourceIndexedSearchParamTokenCommonRes implements Serializable {
 	public ResourceIndexedSearchParamTokenCommonRes(
 			Long theResourceId, Integer thePartitionId, long theHashSystemAndValue) {
 		myResourceId = theResourceId;
-		myPartitionId = thePartitionId;
+		myPartitionIdValue = thePartitionId;
 		myHashSystemAndValue = theHashSystemAndValue;
 	}
 
@@ -100,7 +101,7 @@ public class ResourceIndexedSearchParamTokenCommonRes implements Serializable {
 	}
 
 	public Integer getPartitionId() {
-		return myPartitionId;
+		return myPartitionIdValue;
 	}
 
 	public long getHashSystemAndValue() {
@@ -113,11 +114,20 @@ public class ResourceIndexedSearchParamTokenCommonRes implements Serializable {
 		if (!(theO instanceof ResourceIndexedSearchParamTokenCommonRes that)) return false;
 		return myHashSystemAndValue == that.myHashSystemAndValue
 				&& Objects.equals(myResourceId, that.myResourceId)
-				&& Objects.equals(myPartitionId, that.myPartitionId);
+				&& Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(myResourceId, myPartitionId, myHashSystemAndValue);
+		return Objects.hash(myResourceId, myPartitionIdValue, myHashSystemAndValue);
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("resourceId", myResourceId)
+				.append("partitionId", myPartitionIdValue)
+				.append("hashSysAndValue", myHashSystemAndValue)
+				.toString();
 	}
 }

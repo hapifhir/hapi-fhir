@@ -34,6 +34,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
@@ -44,15 +46,15 @@ import java.util.Objects;
 		name = ResourceIndexedSearchParamTokenIdentifier.HFJ_SPIDX2_TOKEN_IDENTIFIER,
 		indexes = {
 			@Index(
-					name = "IDX_SP_TOKEN_ID_HASH_SYSTEM",
+					name = "IDX_SP2_TOKEN_ID_HASH_SYSTEM",
 					columnList = "HASH_IDENTITY,SP_SYSTEM_URL_ID,RES_ID,PARTITION_ID"),
-			@Index(name = "IDX_SP_TOKEN_ID_HASH", columnList = "HASH_IDENTITY,RES_ID,PARTITION_ID,SP_SYSTEM_URL_ID"),
+			@Index(name = "IDX_SP2_TOKEN_ID_HASH", columnList = "HASH_IDENTITY,RES_ID,PARTITION_ID,SP_SYSTEM_URL_ID"),
 			@Index(
-					name = "IDX_SP_TOKEN_ID_HASH_VALUE",
+					name = "IDX_SP2_TOKEN_ID_HASH_VALUE",
 					columnList =
 							"HASH_IDENTITY,HASH_VALUE,RES_ID,PARTITION_ID,SP_SYSTEM_URL_ID,TYPE_HASH_SYS_AND_VALUE")
 		})
-@IdClass(ResIdSpIdAndPartitionId.class)
+@IdClass(TokenIdentifierPk.class)
 public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	public static final String HFJ_SPIDX2_TOKEN_IDENTIFIER = "HFJ_SPIDX2_TOKEN_IDENTIFIER";
 	public static final int MAX_LENGTH = 768;
@@ -63,7 +65,6 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	@Column(name = "SP_ID")
 	private Long myId;
 
-	// TODO: move this to new BasePartitionable class (without PartitionDate) ?
 	@Id
 	@PartitionedIdProperty
 	@Column(name = "PARTITION_ID", nullable = true)
@@ -88,7 +89,7 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 	@Column(name = "TYPE_HASH_SYS_AND_VALUE", nullable = true)
 	private Long myTypeHashSystemAndValue;
 
-	// Required for Hibernate to insert HFJ_RESOURCE rows before HFJ_SPIDX2_TOKEN_COMMON_RES rows
+	// Required for Hibernate to insert HFJ_RESOURCE rows before HFJ_SPIDX2_TOKEN_IDENTIFIER rows
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumns(
 			value = {
@@ -174,7 +175,7 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 		if (!(theO instanceof ResourceIndexedSearchParamTokenIdentifier that)) return false;
 		return Objects.equals(myResourceId, that.myResourceId)
 				&& myHashIdentity == that.myHashIdentity
-				&& myHashValue == that.myHashValue
+				&& Objects.equals(myHashValue, that.myHashValue)
 				&& Objects.equals(mySystemUrlId, that.mySystemUrlId)
 				&& Objects.equals(myPartitionIdValue, that.myPartitionIdValue)
 				&& Objects.equals(myValue, that.myValue)
@@ -191,5 +192,19 @@ public class ResourceIndexedSearchParamTokenIdentifier implements Serializable {
 				myValue,
 				myHashValue,
 				myTypeHashSystemAndValue);
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("id", myId)
+				.append("partitionId", myPartitionIdValue)
+				.append("resourceId", myResourceId)
+				.append("hashIdentity", myHashIdentity)
+				.append("systemUrlId", mySystemUrlId)
+				.append("value", myValue)
+				.append("hashValue", myHashValue)
+				.append("typeHashSysAndValue", myTypeHashSystemAndValue)
+				.toString();
 	}
 }

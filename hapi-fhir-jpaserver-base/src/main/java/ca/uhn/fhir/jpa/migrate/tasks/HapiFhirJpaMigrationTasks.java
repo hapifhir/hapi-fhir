@@ -249,15 +249,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Add HFJ_SPIDX2_TOKEN_IDENTIFIER table
 		{
-			version.addIdGenerator("20260609.90", "SEQ_SPIDX2_TOKEN_IDENTIFIER");
+			version.addIdGenerator("20260609.80", "SEQ_SPIDX2_TOKEN_IDENTIFIER");
 			// PARTITION_ID should be included in the PK only in Database Partition Mode
 			Builder.BuilderAddTableByColumns spidx2TokenIdentifier;
 			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
 				spidx2TokenIdentifier = version.addTableByColumns(
-						"20260609.100", "HFJ_SPIDX2_TOKEN_IDENTIFIER", "RES_ID", "PARTITION_ID", "SP_ID");
+						"20260609.90", "HFJ_SPIDX2_TOKEN_IDENTIFIER", "RES_ID", "PARTITION_ID", "SP_ID");
 			} else {
 				spidx2TokenIdentifier =
-						version.addTableByColumns("20260609.100", "HFJ_SPIDX2_TOKEN_IDENTIFIER", "RES_ID", "SP_ID");
+						version.addTableByColumns("20260609.90", "HFJ_SPIDX2_TOKEN_IDENTIFIER", "RES_ID", "SP_ID");
 			}
 
 			spidx2TokenIdentifier.addColumn("SP_ID").nonNullable().type(ColumnTypeEnum.LONG);
@@ -273,15 +273,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidx2TokenIdentifier.addColumn("SP_VALUE").nonNullable().type(ColumnTypeEnum.STRING, 768);
 
 			spidx2TokenIdentifier
-					.addIndex("20260609.110", "IDX_SP_TOKEN_ID_HASH_SYSTEM")
+					.addIndex("20260609.100", "IDX_SP2_TOKEN_ID_HASH_SYSTEM")
 					.unique(false)
 					.withColumns("HASH_IDENTITY", "SP_SYSTEM_URL_ID", "RES_ID", "PARTITION_ID");
 			spidx2TokenIdentifier
-					.addIndex("20260609.120", "IDX_SP_TOKEN_ID_HASH")
+					.addIndex("20260609.110", "IDX_SP2_TOKEN_ID_HASH")
 					.unique(false)
 					.withColumns("HASH_IDENTITY", "RES_ID", "PARTITION_ID", "SP_SYSTEM_URL_ID");
 			spidx2TokenIdentifier
-					.addIndex("20260609.130", "IDX_SP_TOKEN_ID_HASH_VALUE")
+					.addIndex("20260609.120", "IDX_SP2_TOKEN_ID_HASH_VALUE")
 					.unique(false)
 					.withColumns(
 							"HASH_IDENTITY",
@@ -293,12 +293,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
 				spidx2TokenIdentifier
-						.addForeignKey("20260609.150", "FK_SP2_TOKEN_IDENTIFIER_RES")
+						.addForeignKey("20260609.130", "FK_SP2_TOKEN_IDENTIFIER_RES")
 						.toColumns("RES_ID", "PARTITION_ID")
 						.references("HFJ_RESOURCE", "RES_ID", "PARTITION_ID");
 			} else {
 				spidx2TokenIdentifier
-						.addForeignKey("20260609.150", "FK_SP2_TOKEN_IDENTIFIER_RES")
+						.addForeignKey("20260609.130", "FK_SP2_TOKEN_IDENTIFIER_RES")
 						.toColumn("RES_ID")
 						.references("HFJ_RESOURCE", "RES_ID");
 			}

@@ -89,11 +89,14 @@ class TokenCompressedPredicateBuilderTest {
 		},
 		nullValues = "null", quoteCharacter = '"')
 	void commonMode_producesCorrectQuery(String theSystem, String theValue, String theExpectedSql) {
+		// setup
 		CompressedTokenPredicateBuilder builder =
 			new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.COMMON);
 
+		// execute
 		Condition predicate = buildTokenPredicate(builder, List.of(new TokenParam(theSystem, theValue)));
 
+		// validate
 		assertThat(predicate).isNotNull();
 		assertThat(predicate.toString()).isEqualTo(theExpectedSql);
 	}
@@ -108,17 +111,21 @@ class TokenCompressedPredicateBuilderTest {
 		},
 		nullValues = "null", quoteCharacter = '"')
 	void identifierMode_producesCorrectQuery(String theSystem, String theValue, String theExpectedSql) {
+		// setup
 		CompressedTokenPredicateBuilder builder =
 			new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
 
+		// execute
 		Condition predicate = buildTokenPredicate(builder, List.of(new TokenParam(theSystem, theValue)));
 
+		// validate
 		assertThat(predicate).isNotNull();
 		assertThat(predicate.toString()).isEqualTo(theExpectedSql);
 	}
 
 	@Test
 	void identifierMode_missingParam_producesNotExistsSubquery() {
+		// setup
 		CompressedTokenPredicateBuilder builder =
 			new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
 		builder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
@@ -127,8 +134,10 @@ class TokenCompressedPredicateBuilderTest {
 		MissingQueryParameterPredicateParams params = new MissingQueryParameterPredicateParams(
 			myResourceTablePredicateBuilder, true, "identifier", RequestPartitionId.defaultPartition(new PartitionSettings()));
 
+		// execute
 		Condition predicate = builder.createPredicateParamMissingValue(params);
 
+		// validate
 		assertThat(predicate).isNotNull();
 		assertThat(predicate.toString())
 			.contains("(NOT (EXISTS (SELECT 1 FROM schema.primary t0 WHERE ((t0.RES_ID = t2.RES_ID) AND (t0.HASH_IDENTITY = '?'))))))");
@@ -136,6 +145,7 @@ class TokenCompressedPredicateBuilderTest {
 
 	@Test
 	void commonMode_missingParam_producesNotExistsWithJoinToCommonTable() {
+		// setup
 		CompressedTokenPredicateBuilder builder =
 			new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.COMMON);
 		builder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
@@ -144,8 +154,10 @@ class TokenCompressedPredicateBuilderTest {
 		MissingQueryParameterPredicateParams params = new MissingQueryParameterPredicateParams(
 			myResourceTablePredicateBuilder, true, "status", RequestPartitionId.defaultPartition(new PartitionSettings()));
 
+		// execute
 		Condition predicate = builder.createPredicateParamMissingValue(params);
 
+		// validate
 		assertThat(predicate).isNotNull();
 		assertThat(predicate.toString())
 			.contains("(NOT (EXISTS (SELECT 1 FROM schema.primary t0, schema.common t1 WHERE " +
@@ -154,9 +166,9 @@ class TokenCompressedPredicateBuilderTest {
 
 	@Test
 	void identifierMode_ofType_producesTypeHashSysAndValuePredicate() {
+		// setup
 		CompressedTokenPredicateBuilder builder =
 			new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
-		// :of-type is guarded by this storage setting; the builder has no autowired settings under unit test
 		JpaStorageSettings storageSettings = new JpaStorageSettings();
 		storageSettings.setIndexIdentifierOfType(true);
 		builder.setStorageSettingsForUnitTest(storageSettings);
@@ -164,22 +176,27 @@ class TokenCompressedPredicateBuilderTest {
 		TokenParam param = new TokenParam("http://terminology.hl7.org/CodeSystem/v2-0203", "MR|12345")
 			.setModifier(TokenParamModifier.OF_TYPE);
 
+		// execute
 		Condition predicate = buildTokenPredicate(builder, List.of(param));
 
+		// validate
 		assertThat(predicate).isNotNull();
 		assertThat(predicate.toString()).isEqualTo("(t0.TYPE_HASH_SYS_AND_VALUE = '?')");
 	}
 
 	@Test
 	void identifierMode_notModifier_producesNotEqualsScopedByHashIdentity() {
+		// setup
 		CompressedTokenPredicateBuilder builder =
 			new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
 		builder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 
 		TokenParam param = new TokenParam("http://example.com", "abc").setModifier(TokenParamModifier.NOT);
 
+		// execute
 		Condition predicate = buildTokenPredicate(builder, List.of(param));
 
+		// validate
 		assertThat(predicate).isNotNull();
 		assertThat(predicate.toString())
 			.isEqualTo("((t0.HASH_IDENTITY = '?') AND " +

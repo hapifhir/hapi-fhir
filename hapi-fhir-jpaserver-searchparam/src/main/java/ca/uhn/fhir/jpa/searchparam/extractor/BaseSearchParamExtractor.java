@@ -1133,12 +1133,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		String system = extractValueAsString(myIdentifierSystemValueChild, theValue);
 		String value = extractValueAsString(myIdentifierValueValueChild, theValue);
 		if (isNotBlank(value)) {
-			ResourceIndexedSearchParamToken identifierToken =
-					createTokenIndexIfNotBlank(theResourceType, system, value, theSearchParam.getName());
-			if (identifierToken != null) {
-				identifierToken.setFromIdentifierDatatype(true);
-				theParams.add(identifierToken);
-			}
+			createTokenIndexIfNotBlankAndAdd(theResourceType, theParams, theSearchParam, system, value);
 
 			boolean indexIdentifierType = myStorageSettings.isIndexIdentifierOfType();
 			if (indexIdentifierType) {
@@ -1163,7 +1158,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 							ResourceIndexedSearchParamToken token = createTokenIndexIfNotBlank(
 									theResourceType, typeSystem, typeValue + "|" + value, paramName);
 							if (token != null) {
-								token.setFromIdentifierDatatype(true);
 								theParams.add(token);
 							}
 						}

@@ -718,11 +718,8 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	/**
-	 * Create a new instance that holds all the existing indexes in lists so that any
-	 * duplicates are preserved. The strategy controls which token tables are lazily
-	 * fetched from the entity — pass the deployment's actual
-	 * {@link TokenIndexStrategy} so that token tables which are not being written
-	 * for this deployment are not pointlessly SELECTed.
+	 * Create a new instance holding all existing indexes in lists (duplicates preserved); the
+	 * {@link TokenIndexStrategy} controls which token tables are lazily fetched to avoid pointless SELECTs.
 	 */
 	public static ResourceIndexedSearchParams withLists(
 			ResourceTable theResourceTable, TokenIndexStrategy theTokenIndexStrategy) {

@@ -21,17 +21,12 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import java.util.Objects;
 
-public class ResIdSpIdAndPartitionId extends IdAndPartitionId {
+public class TokenIdentifierPk extends IdAndPartitionId {
 
 	private Long myResourceId;
 
-	public ResIdSpIdAndPartitionId() {
+	public TokenIdentifierPk() {
 		// nothing
-	}
-
-	public ResIdSpIdAndPartitionId(Long theResourceId, Long theId, Integer thePartitionId) {
-		super(theId, thePartitionId);
-		myResourceId = theResourceId;
 	}
 
 	public Long getResourceId() {
@@ -47,7 +42,7 @@ public class ResIdSpIdAndPartitionId extends IdAndPartitionId {
 		if (this == theO) {
 			return true;
 		}
-		if (!(theO instanceof ResIdSpIdAndPartitionId that)) {
+		if (!(theO instanceof TokenIdentifierPk that)) {
 			return false;
 		}
 		return Objects.equals(myResourceId, that.myResourceId)
@@ -58,5 +53,10 @@ public class ResIdSpIdAndPartitionId extends IdAndPartitionId {
 	@Override
 	public int hashCode() {
 		return Objects.hash(myResourceId, getId(), getPartitionIdValue());
+	}
+
+	@Override
+	public String toString() {
+		return "[resId=" + myResourceId + ", partition=" + getPartitionIdValue() + ", id=" + getId() + "]";
 	}
 }

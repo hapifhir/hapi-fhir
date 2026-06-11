@@ -1525,12 +1525,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertThat(search.getAllResources()).hasSize(1);
 	}
 
-	// True when tokens are written to the legacy HFJ_SPIDX_TOKEN table, so tests may assert on its rows.
+	// True when tokens are written to the legacy HFJ_SPIDX_TOKEN table
 	protected boolean writesToLegacyTokenTable() {
 		return true;
 	}
 
-	// True when token searches hit the legacy HFJ_SPIDX_TOKEN table, so tests may assert its SQL shape.
+	// True when token searches hit the legacy HFJ_SPIDX_TOKEN table
 	protected boolean readsFromLegacyTokenTable() {
 		return true;
 	}

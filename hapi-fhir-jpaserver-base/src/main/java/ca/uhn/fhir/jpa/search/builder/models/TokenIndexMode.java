@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search.builder.models;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
 import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
+import ca.uhn.fhir.rest.api.Constants;
 
 import static ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommonRes.HFJ_SPIDX2_TOKEN_COMMON_RES;
 import static ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenIdentifier.HFJ_SPIDX2_TOKEN_IDENTIFIER;
@@ -72,15 +73,18 @@ public enum TokenIndexMode {
 	}
 
 	/**
-	 * Resolves which compressed token table to use for a given search parameter.
+	 * Resolves which compressed token table to use for a given search parameter — the single source of
+	 * truth for token routing, shared by the write (indexing) and read (search) paths.
 	 *
-	 * <p>Currently checks {@link JpaStorageSettings#getIdentifierTokenSearchParams()}.
-	 * A future enhancement could add support for an extension on SearchParameter
+	 * <p>{@code :of-type} tokens always route to {@link #IDENTIFIER}, as they are only readable from there.
+	 *
+	 * <p>A future enhancement could add support for an extension on SearchParameter
 	 * resources to allow user-defined SPs to use the identifier table instead of
 	 * the common table.
 	 */
 	public static TokenIndexMode resolve(String theParamName, JpaStorageSettings theStorageSettings) {
-		if (theStorageSettings.getIdentifierTokenSearchParams().contains(theParamName)) {
+		if (theParamName.endsWith(Constants.PARAMQUALIFIER_TOKEN_OF_TYPE)
+				|| theStorageSettings.getIdentifierTokenSearchParams().contains(theParamName)) {
 			return IDENTIFIER;
 		}
 		return COMMON;

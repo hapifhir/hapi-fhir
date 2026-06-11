@@ -441,6 +441,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@ParameterizedTest
 	@MethodSource("tokenIndexStrategies")
 	void testDeleteExpungeResource_removesCompressedTokenIndexesKeepsCommonTokenTable(TokenIndexStrategy theStrategy) {
+		// setup
 		myStorageSettings.setTokenIndexStrategy(theStrategy);
 
 		Patient p = new Patient();
@@ -461,9 +462,11 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			});
 		}
 
+		// execute
 		myPatientDao.delete(id, mySrd);
 		myPatientDao.expunge(new ExpungeOptions().setExpungeDeletedResources(true), mySrd);
 
+		// validate
 		runInTransaction(() -> {
 			assertThat(myTokenCommonResDao.findByResourceId(pid))
 					.as("CommonRes link rows removed").isEmpty();

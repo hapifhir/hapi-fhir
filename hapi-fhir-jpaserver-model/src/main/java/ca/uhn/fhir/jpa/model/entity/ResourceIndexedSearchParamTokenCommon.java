@@ -45,7 +45,8 @@ import java.util.Objects;
  * <p>Concurrent inserts race on the same PK, so the per-dialect
  * {@link org.hibernate.annotations.DialectOverride.SQLInsert} annotations swap in upserts that
  * ignore conflicts. Marked {@link org.hibernate.annotations.Immutable} — the PK is a content hash,
- * so an UPDATE is never needed.
+ * so an UPDATE is never needed. Conflict-ignoring upserts exist only for H2/Postgres/Oracle/SQLServer;
+ * other dialects fall back to a plain INSERT and are not concurrency-safe for this table.
  *
  * <p><b>Bind order</b> in each dialect's SQL must match Hibernate's default for {@code @SQLInsert}:
  * non-{@code @Id} fields alphabetical by Java name, {@code @Id} last
@@ -67,12 +68,9 @@ import java.util.Objects;
 				@SQLInsert(
 						sql =
 								"""
-MERGE INTO HFJ_SPIDX2_TOKEN_COMMON target
-USING (VALUES (?,?,?,?,?)) AS src (HASH_IDENTITY, HASH_VALUE, SYSTEM_ID, SP_VALUE, HASH_SYS_AND_VALUE)
-ON (target.HASH_SYS_AND_VALUE = src.HASH_SYS_AND_VALUE)
-WHEN NOT MATCHED THEN
-INSERT (HASH_IDENTITY, HASH_VALUE, SYSTEM_ID, SP_VALUE, HASH_SYS_AND_VALUE)
-VALUES (src.HASH_IDENTITY, src.HASH_VALUE, src.SYSTEM_ID, src.SP_VALUE, src.HASH_SYS_AND_VALUE)
+MERGE INTO HFJ_SPIDX2_TOKEN_COMMON (HASH_IDENTITY, HASH_VALUE, SYSTEM_ID, SP_VALUE, HASH_SYS_AND_VALUE)
+KEY (HASH_SYS_AND_VALUE)
+VALUES (?, ?, ?, ?, ?)
 """))
 @DialectOverride.SQLInsert(
 		dialect = HapiFhirPostgresDialect.class,
@@ -89,12 +87,9 @@ VALUES(?,?,?,?,?) ON CONFLICT DO NOTHING
 				@SQLInsert(
 						sql =
 								"""
-MERGE INTO HFJ_SPIDX2_TOKEN_COMMON target
-USING (SELECT ? AS HASH_IDENTITY, ? AS HASH_VALUE, ? AS SYSTEM_ID, ? AS SP_VALUE, ? AS HASH_SYS_AND_VALUE FROM DUAL) src
-ON (target.HASH_SYS_AND_VALUE = src.HASH_SYS_AND_VALUE)
-WHEN NOT MATCHED THEN
-INSERT (HASH_IDENTITY, HASH_VALUE, SYSTEM_ID, SP_VALUE, HASH_SYS_AND_VALUE)
-VALUES (src.HASH_IDENTITY, src.HASH_VALUE, src.SYSTEM_ID, src.SP_VALUE, src.HASH_SYS_AND_VALUE)
+INSERT /*+ IGNORE_ROW_ON_DUPKEY_INDEX(HFJ_SPIDX2_TOKEN_COMMON(HASH_SYS_AND_VALUE)) */
+INTO HFJ_SPIDX2_TOKEN_COMMON (HASH_IDENTITY, HASH_VALUE, SYSTEM_ID, SP_VALUE, HASH_SYS_AND_VALUE)
+VALUES (?, ?, ?, ?, ?)
 """))
 @DialectOverride.SQLInsert(
 		dialect = HapiFhirSQLServerDialect.class,

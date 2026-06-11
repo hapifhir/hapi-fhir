@@ -61,10 +61,18 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.HAPI_DATABASE_PARTITION_MODE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_EVERYTHING;
@@ -82,6 +90,9 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
 	public static final String INIT_SCHEMA = "init_schema";
 	public static final long HASH_SYS_AND_VALUE = 123456L;
+	// Distinct PK so the concurrent test is isolated from the sequential test's row, which has no
+	// HFJ_RESOURCE link and is therefore not cleared by expungeEverything.
+	public static final long CONCURRENT_HASH_SYS_AND_VALUE = 654321L;
 	public static final long SYSTEM_ID = 1L;
 	public static final String VALUE = "code-value";
 	public static final long HASH_IDENTITY = 100L;
@@ -192,13 +203,65 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		assertThat(findTokens(HASH_SYS_AND_VALUE)).hasSize(1);
 	}
 
+	@Test
+	void testInsertTokenCommon_concurrentDuplicateInsert_isIdempotent() throws Exception {
+		int threadCount = 4;
+		long hash = CONCURRENT_HASH_SYS_AND_VALUE;
+		ExecutorService pool = Executors.newFixedThreadPool(threadCount);
+		CyclicBarrier barrier = new CyclicBarrier(threadCount);
+		try {
+			List<Future<?>> futures = new ArrayList<>();
+			for (int i = 0; i < threadCount; i++) {
+				futures.add(pool.submit(() -> runInTransaction(() -> {
+					myEntityManager.persist(newToken(hash));
+					awaitBarrier(barrier);
+				})));
+			}
+			// any worker throwable propagates through get() and fails the test.
+			for (Future<?> next : futures) {
+				next.get(60, TimeUnit.SECONDS);
+			}
+		} finally {
+			pool.shutdownNow();
+		}
+
+		// racing inserts must have collapsed into exactly one row with the expected values
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamTokenCommon> results = findTokens(hash);
+			assertThat(results).hasSize(1);
+			assertThat(results.get(0))
+				.extracting(
+					ResourceIndexedSearchParamTokenCommon::getHashSystemAndValue,
+					ResourceIndexedSearchParamTokenCommon::getSystemId,
+					ResourceIndexedSearchParamTokenCommon::getValue,
+					ResourceIndexedSearchParamTokenCommon::getHashIdentity,
+					ResourceIndexedSearchParamTokenCommon::getHashValue)
+				.containsExactly(hash, SYSTEM_ID, VALUE, HASH_IDENTITY, HASH_VALUE);
+		});
+	}
+
 	private ResourceIndexedSearchParamTokenCommon newToken() {
+		return newToken(HASH_SYS_AND_VALUE);
+	}
+
+	private ResourceIndexedSearchParamTokenCommon newToken(long theHashSystemAndValue) {
 		return new ResourceIndexedSearchParamTokenCommon()
-			.setHashSystemAndValue(HASH_SYS_AND_VALUE)
+			.setHashSystemAndValue(theHashSystemAndValue)
 			.setSystemId(SYSTEM_ID)
 			.setValue(VALUE)
 			.setHashIdentity(HASH_IDENTITY)
 			.setHashValue(HASH_VALUE);
+	}
+
+	private static void awaitBarrier(CyclicBarrier theBarrier) {
+		try {
+			theBarrier.await(30, TimeUnit.SECONDS);
+		} catch (InterruptedException theE) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(theE);
+		} catch (BrokenBarrierException | TimeoutException theE) {
+			throw new RuntimeException(theE);
+		}
 	}
 
 	private List<ResourceIndexedSearchParamTokenCommon> findTokens(long theHash) {

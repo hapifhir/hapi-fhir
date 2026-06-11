@@ -120,9 +120,9 @@ public class SqlObjectFactory {
 	}
 
 	public CompressedTokenPredicateBuilder compressedTokenIndexTable(
-			SearchQueryBuilder theSearchSqlBuilder, TokenIndexMode thetokenIndexMode) {
+			SearchQueryBuilder theSearchSqlBuilder, TokenIndexMode theTokenIndexMode) {
 		return myApplicationContext.getBean(
-				CompressedTokenPredicateBuilder.class, theSearchSqlBuilder, thetokenIndexMode);
+				CompressedTokenPredicateBuilder.class, theSearchSqlBuilder, theTokenIndexMode);
 	}
 
 	public UriPredicateBuilder uriIndexTable(SearchQueryBuilder theSearchSqlBuilder) {

@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
+import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
@@ -260,8 +261,7 @@ public class DaoSearchParamSynchronizer {
 
 			Long systemId = resolveTokenSystemId(theRequestDetails, requestPartitionId, token.getSystem());
 
-			if (token.isFromIdentifierDatatype()
-					|| myStorageSettings.getIdentifierTokenSearchParams().contains(token.getParamName())) {
+			if (TokenIndexMode.resolve(token.getParamName(), myStorageSettings) == TokenIndexMode.IDENTIFIER) {
 				newIdentifierEntities.add(TokenIndexEntityConverter.toIdentifier(token, theEntity, systemId));
 			} else {
 				ResourceIndexedSearchParamTokenCommon commonRow = TokenIndexEntityConverter.toCommon(token, systemId);

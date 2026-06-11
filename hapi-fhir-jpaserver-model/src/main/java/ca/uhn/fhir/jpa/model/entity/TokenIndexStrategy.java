@@ -74,4 +74,9 @@ public class TokenIndexStrategy {
 	public boolean readFromCompressedTokenTables() {
 		return myReadTarget == TokenIndex.COMPRESSED;
 	}
+
+	@Override
+	public String toString() {
+		return "TokenIndexStrategy{" + "write=" + myWriteTargets + ", read=" + myReadTarget + '}';
+	}
 }
