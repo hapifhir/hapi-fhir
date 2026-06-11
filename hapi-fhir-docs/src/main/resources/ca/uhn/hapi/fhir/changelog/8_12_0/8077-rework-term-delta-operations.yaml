@@ -1,0 +1,8 @@
+---
+type: change
+issue: 8077
+title: "This is the final functional step in the conversion of terminology upload to a more modern base.
+
+The terminology upload delta operations (`$apply-codesystem-delta-add` and `$apply-codesystem-delta-remove`) have been withdrawn, as they were insecure and sometimes inefficient.
+
+They are replaced with a new parameter (`mode`) on the `$hapi.fhir.upload-terminology.create-job` operation."

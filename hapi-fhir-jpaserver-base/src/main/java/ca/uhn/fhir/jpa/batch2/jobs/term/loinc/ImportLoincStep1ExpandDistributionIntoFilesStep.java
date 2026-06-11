@@ -70,19 +70,19 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 
 	@Override
 	protected void handleSynchronous(
-            StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
-            IJobDataSink<TerminologyFileSetJson> theDataSink,
-            MyContext theContext,
-            String theSingleFileName,
-            Supplier<InputStream> theInputStreamSupplier,
-            ImportTerminologyJobParameters theJobParameters,
-            ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
+			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			MyContext theContext,
+			String theSingleFileName,
+			Supplier<InputStream> theInputStreamSupplier,
+			ImportTerminologyJobParameters theJobParameters,
+			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
 			throws IOException {
 		super.handleSynchronous(
 				theStepExecutionDetails,
 				theDataSink,
 				theContext,
-			theSingleFileName,
+				theSingleFileName,
 				theInputStreamSupplier,
 				theJobParameters,
 				theJobMetadataAttachment);

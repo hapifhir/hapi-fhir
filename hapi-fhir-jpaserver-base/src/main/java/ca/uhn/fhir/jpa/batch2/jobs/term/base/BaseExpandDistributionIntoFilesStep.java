@@ -388,9 +388,10 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 				theStepExecutionDetails,
 				theDataSink,
 				theContext,
-			theSingleFileName,
-			theSingleFileInputStreamSupplier,
-			theJobParameters, theJobMetadataAttachment);
+				theSingleFileName,
+				theSingleFileInputStreamSupplier,
+				theJobParameters,
+				theJobMetadataAttachment);
 	}
 
 	/**
@@ -491,13 +492,13 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 	 * Subclasses can override this method to handle files that are small enough to just handle here.
 	 */
 	protected void handleSynchronous(
-		StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
-		IJobDataSink<TerminologyFileSetJson> theDataSink,
-		CT theContext,
-		String theSingleFileName,
-		Supplier<InputStream> theInputStreamSupplier,
-		PT theJobParameters,
-		ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
+			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			CT theContext,
+			String theSingleFileName,
+			Supplier<InputStream> theInputStreamSupplier,
+			PT theJobParameters,
+			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
 			throws IOException {
 		// nothing
 	}

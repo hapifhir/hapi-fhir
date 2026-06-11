@@ -55,20 +55,23 @@ public class ImportCustomTerminologyStep2HandleConcepts
 
 	@Override
 	protected void processAttachment(
-		@Nonnull StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
-		ImportTerminologyMetadataAttachmentJson theJobMetadata,
-		BaseImportTerminologyFileStep.MyBaseContext theContext,
-		AttachmentDetails attachment,
-		ImportTerminologyJobParameters jobParameters,
-		CodeSystem codeSystemToPopulate,
-		TerminologyFileSetJson theData,
-		String theSourceFilename) {
+			@Nonnull
+					StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson>
+							theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			BaseImportTerminologyFileStep.MyBaseContext theContext,
+			AttachmentDetails attachment,
+			ImportTerminologyJobParameters jobParameters,
+			CodeSystem codeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 
 		if (FILENAME_COMPLETE_CONCEPTS_JSON_FILENAME.equals(theSourceFilename)) {
 			ourLog.info("Handling complete concepts file directly for storage of inline concepts");
 			try (InputStream inputStream = attachment.getInputStream()) {
 				try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-					CodeSystem canonicalCodeSystem = myCanonicalFhirContext.newJsonParser().parseResource(CodeSystem.class, reader);
+					CodeSystem canonicalCodeSystem =
+							myCanonicalFhirContext.newJsonParser().parseResource(CodeSystem.class, reader);
 					if (jobParameters.getMode() == ImportTerminologyModeEnum.SNAPSHOT) {
 						canonicalCodeSystem.setVersion(theJobMetadata.getCodeSystemStagingVersionId());
 					}
@@ -79,9 +82,16 @@ public class ImportCustomTerminologyStep2HandleConcepts
 				throw new RuntimeException(theE);
 			}
 		} else {
-			super.processAttachment(theStepExecutionDetails, theJobMetadata, theContext, attachment, jobParameters, codeSystemToPopulate, theData, theSourceFilename);
+			super.processAttachment(
+					theStepExecutionDetails,
+					theJobMetadata,
+					theContext,
+					attachment,
+					jobParameters,
+					codeSystemToPopulate,
+					theData,
+					theSourceFilename);
 		}
-
 	}
 
 	@Override

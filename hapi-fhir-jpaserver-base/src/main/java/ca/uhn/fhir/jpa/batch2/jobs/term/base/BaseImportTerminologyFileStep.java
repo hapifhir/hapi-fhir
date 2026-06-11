@@ -381,7 +381,10 @@ public abstract class BaseImportTerminologyFileStep<
 		return retVal;
 	}
 
-	protected int storeConceptsToDb(@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails, CT theCodeExtractionContext, CodeSystem theCanonicalCodeSystem) {
+	protected int storeConceptsToDb(
+			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
+			CT theCodeExtractionContext,
+			CodeSystem theCanonicalCodeSystem) {
 		ImportTerminologyModeEnum mode = theStepExecutionDetails.getParameters().getMode();
 		int retVal = 0;
 
@@ -410,7 +413,7 @@ public abstract class BaseImportTerminologyFileStep<
 		ourLog.info(
 				"Processed {} {} concept entries including {} root concept entries for storage in {}. Outcome: {}",
 				theCodeExtractionContext.getCodeToConcept().size(),
-			mode,
+				mode,
 				theCanonicalCodeSystem.getConcept().size(),
 				sw,
 				uploadStatistics);

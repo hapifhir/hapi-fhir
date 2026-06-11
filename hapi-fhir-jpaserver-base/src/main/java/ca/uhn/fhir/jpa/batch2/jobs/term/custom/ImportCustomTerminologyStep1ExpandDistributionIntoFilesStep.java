@@ -100,12 +100,13 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 				codeSystem = new CodeSystem();
 				codeSystem.setId(UUID.randomUUID().toString());
 			} else {
-				codeSystem = myVersionCanonicalizer.codeSystemToCanonical(results.getResources(0, 1).get(0));
+				codeSystem = myVersionCanonicalizer.codeSystemToCanonical(
+						results.getResources(0, 1).get(0));
 				ourLog.info(
-					"Found existing CodeSystem resource with URL[{}] and version[{}]: {}",
-					jobParameters.getUrl(),
-					jobParameters.getVersionId(),
-					codeSystem.getId());
+						"Found existing CodeSystem resource with URL[{}] and version[{}]: {}",
+						jobParameters.getUrl(),
+						jobParameters.getVersionId(),
+						codeSystem.getId());
 			}
 		} else {
 			if (results.isEmpty()) {
@@ -142,19 +143,19 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 
 	@Override
 	protected void handleSynchronous(
-		StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
-		IJobDataSink<TerminologyFileSetJson> theDataSink,
-		MyContext theContext,
-		String theSingleFileName,
-		Supplier<InputStream> theInputStreamSupplier,
-		ImportTerminologyJobParameters theJobParameters,
-		ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
+			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
+			IJobDataSink<TerminologyFileSetJson> theDataSink,
+			MyContext theContext,
+			String theSingleFileName,
+			Supplier<InputStream> theInputStreamSupplier,
+			ImportTerminologyJobParameters theJobParameters,
+			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
 			throws IOException {
 		super.handleSynchronous(
 				theStepExecutionDetails,
 				theDataSink,
 				theContext,
-			theSingleFileName,
+				theSingleFileName,
 				theInputStreamSupplier,
 				theJobParameters,
 				theJobMetadataAttachment);
@@ -196,14 +197,18 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 				ourLog.info("CodeSystem file {} has inline concepts, processing them directly", theSingleFileName);
 
 				TerminologyFileSetJson data = new TerminologyFileSetJson();
-				byte[] bytes = myCanonicalFhirContext.newJsonParser().encodeResourceToString(codeSystem).getBytes(StandardCharsets.UTF_8);
-				AttachmentDetails attachmentRequest = new AttachmentDetails(bytes, AttachmentContentTypeEnum.JSON, FILENAME_COMPLETE_CONCEPTS_JSON_FILENAME);
-				String attachmentId = myJobPersistence.storeNewAttachment(theStepExecutionDetails.getInstance().getInstanceId(), attachmentRequest);
+				byte[] bytes = myCanonicalFhirContext
+						.newJsonParser()
+						.encodeResourceToString(codeSystem)
+						.getBytes(StandardCharsets.UTF_8);
+				AttachmentDetails attachmentRequest = new AttachmentDetails(
+						bytes, AttachmentContentTypeEnum.JSON, FILENAME_COMPLETE_CONCEPTS_JSON_FILENAME);
+				String attachmentId = myJobPersistence.storeNewAttachment(
+						theStepExecutionDetails.getInstance().getInstanceId(), attachmentRequest);
 				data.setAttachmentId(attachmentId);
 				data.setSourceFilename(FILENAME_COMPLETE_CONCEPTS_JSON_FILENAME);
 				theDataSink.accept(data);
 			}
-
 		}
 	}
 

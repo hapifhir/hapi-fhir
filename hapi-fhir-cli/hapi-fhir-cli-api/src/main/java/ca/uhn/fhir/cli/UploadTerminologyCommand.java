@@ -159,7 +159,11 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	}
 
 	private void invokeOperationAsyncJob(
-		String theUrl, String[] theDatafiles, IGenericClient theClient, boolean theDontMakeCurrent, ImportTerminologyModeEnum theMode) {
+			String theUrl,
+			String[] theDatafiles,
+			IGenericClient theClient,
+			boolean theDontMakeCurrent,
+			ImportTerminologyModeEnum theMode) {
 		ourLog.info("Beginning upload process for terminology system: {}", theUrl);
 
 		// Step 1: Create staging job
@@ -173,7 +177,8 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 					myFhirCtx, createStagingRequest, TerminologyUploaderProvider.PARAM_MAKE_CURRENT, false);
 		}
 
-		ParametersUtil.addParameterToParametersCode(myFhirCtx, createStagingRequest, TerminologyUploaderProvider.PARAM_MODE, theMode.name());
+		ParametersUtil.addParameterToParametersCode(
+				myFhirCtx, createStagingRequest, TerminologyUploaderProvider.PARAM_MODE, theMode.name());
 
 		IBaseParameters createStagingResponse;
 		try {
