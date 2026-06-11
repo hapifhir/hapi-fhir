@@ -323,7 +323,7 @@ class PrefetchTemplateUtilR4Test {
 
 	@Test
 	@DisplayName("Should resolve when referenced prefetch key is not in context but the other expression is valid")
-	void substituteTemplateForReferencedPrefetchMissingKeyUnionValidContextKey() {
+	void substituteTemplate_forReferencedPrefetchMissingKeyUnionValidContextKey_shouldResolvePrefetchKeyWithValidContextKey() {
 		// setup
 		final String template = "Location?_id={{%practitionerRoles.location.resolve().id|context.locationId}}";
 		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
@@ -335,7 +335,7 @@ class PrefetchTemplateUtilR4Test {
 
 	@Test
 	@DisplayName("Should resolve when DaVinci context key is missing but the other union expression is valid")
-	void substituteTemplateDaVinciMissingKeyUnionValidContextKey() {
+	void substituteTemplate_withDaVinciMissingKeyUnionValidContextKey_shouldResolvePrefetchKeyWithValidContextKey() {
 		// setup
 		final String template = "ServiceRequest?_id={{context.missingDraftOrders.ServiceRequest.id|context.patientId}}";
 		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
@@ -348,7 +348,7 @@ class PrefetchTemplateUtilR4Test {
 
 	@Test
 	@DisplayName("Should throw MissingContextKey error when all union expressions reference missing context keys")
-	void substituteTemplateAllUnionExpressionsMissingContextKey() {
+	void substituteTemplate_withAllUnionExpressionsMissingContextKey_shouldThrowError() {
 		// setup
 		final String template = "ServiceRequest?_id={{context.missingDraftOrders.ServiceRequest.id|context.missingPatientId}}";
 		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
@@ -440,7 +440,7 @@ class PrefetchTemplateUtilR4Test {
 
 	@Test
 	@DisplayName("Should throw immediately when a union part has an invalid FHIRPath (non-primitive result), even if the other union part would resolve")
-	void substituteTemplateThrowsImmediatelyOnInvalidFhirPathInUnion() {
+	void substituteTemplate_withInvalidFhirPathInUnion_shouldThrowError() {
 		// setup - first part returns a complex type (HumanName), not a primitive; second part is valid
 		final Patient patient = new Patient();
 		patient.addName(new HumanName().setFamily("Smith").addGiven("John"));
