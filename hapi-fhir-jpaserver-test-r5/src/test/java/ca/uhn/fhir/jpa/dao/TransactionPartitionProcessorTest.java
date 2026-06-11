@@ -84,10 +84,10 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 		assertThat(parsedResponse.getStorageOutcomes().get(3).getTargetId().getValue()).isEqualTo("Patient/PAT-1");
 
 		// Verify response entries are grouped by partition
-		List<List<IBase>> entriesPerPartition = result.getResponseEntriesPerPartition();
-		assertThat(entriesPerPartition).hasSize(2);
-		assertResponseLocations(entriesPerPartition.get(0), "Patient/PAT-0", "Patient/PAT-1");
-		assertResponseLocations(entriesPerPartition.get(1), "Observation/OBS-0", "Observation/OBS-1");
+		List<List<IBase>> entriesPerSubBundle = result.getResponseEntriesPerSubBundle();
+		assertThat(entriesPerSubBundle).hasSize(2);
+		assertResponseLocations(entriesPerSubBundle.get(0), "Patient/PAT-0", "Patient/PAT-1");
+		assertResponseLocations(entriesPerSubBundle.get(1), "Observation/OBS-0", "Observation/OBS-1");
 	}
 
 	@Test
@@ -112,8 +112,8 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 		verify(myTransactionProcessor, times(1)).processTransactionAsSubRequest(any(), any(), myBundleCaptor.capture(), any(), anyBoolean());
 		assertThat(myBundleCaptor.getAllValues().get(0).getEntry()).hasSize(4);
 		assertThat(result.getResponseBundle().getEntry()).hasSize(4);
-		assertThat(result.getResponseEntriesPerPartition()).hasSize(1);
-		assertThat(result.getResponseEntriesPerPartition().get(0)).hasSize(4);
+		assertThat(result.getResponseEntriesPerSubBundle()).hasSize(1);
+		assertThat(result.getResponseEntriesPerSubBundle().get(0)).hasSize(4);
 	}
 
 	@Test
@@ -177,10 +177,10 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 				.satisfies(ex -> {
 					PartitionedTransactionPartialFailureException partialEx =
 							(PartitionedTransactionPartialFailureException) ex;
-					List<List<IBase>> committedPerPartition = partialEx.getCommittedResponseEntriesPerPartition();
+					List<List<IBase>> committedPerSubBundle = partialEx.getCommittedResponseEntriesPerSubBundle();
 
-					assertThat(committedPerPartition).hasSize(1);
-					assertResponseLocations(committedPerPartition.get(0), "Patient/PAT-0", "Patient/PAT-1");
+					assertThat(committedPerSubBundle).hasSize(1);
+					assertResponseLocations(committedPerSubBundle.get(0), "Patient/PAT-0", "Patient/PAT-1");
 				})
 				.hasCauseInstanceOf(InternalErrorException.class)
 				.hasRootCauseMessage("Simulated failure on second partition");
@@ -220,11 +220,11 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 				.satisfies(ex -> {
 					PartitionedTransactionPartialFailureException partialEx =
 							(PartitionedTransactionPartialFailureException) ex;
-					List<List<IBase>> committedPerPartition = partialEx.getCommittedResponseEntriesPerPartition();
+					List<List<IBase>> committedPerSubBundle = partialEx.getCommittedResponseEntriesPerSubBundle();
 
-					assertThat(committedPerPartition).hasSize(2);
-					assertResponseLocations(committedPerPartition.get(0), "Patient/PAT-0", "Patient/PAT-1");
-					assertResponseLocations(committedPerPartition.get(1), "Observation/OBS-0", "Observation/OBS-1");
+					assertThat(committedPerSubBundle).hasSize(2);
+					assertResponseLocations(committedPerSubBundle.get(0), "Patient/PAT-0", "Patient/PAT-1");
+					assertResponseLocations(committedPerSubBundle.get(1), "Observation/OBS-0", "Observation/OBS-1");
 				})
 				.hasCauseInstanceOf(InternalErrorException.class)
 				.hasRootCauseMessage("Simulated failure on third partition");

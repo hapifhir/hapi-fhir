@@ -30,7 +30,7 @@ import java.util.Map;
 // Created by Claude Opus 4.8 (1M context)
 /**
  * Records exactly what each step of a cross-partition {@code $merge} committed, so that a failure can be
- * reverted without probing every resource. It is populated by {@link ResourceMergeService} as the forward
+ * reverted. It is populated by {@link ResourceMergeService} as the forward
  * steps succeed and consumed by the rollback in {@link CrossPartitionMergeRollbackService}.
  *
  * <p>The whole rollback only runs when partition changes commit in independent transactions
@@ -39,63 +39,29 @@ import java.util.Map;
  */
 public class MergeRollbackContext {
 
-	private final boolean myDeleteSource;
 	private Throwable myFailureCause;
 
 	/**
-	 * Step 1: copies (CREATEs) and referrer updates, at their committed post-merge versions, keyed by the
-	 * partition they were committed to. The partition is known at record time (from the copy result, or
-	 * derived once per partition group from the partial-failure exception), so the rollback can restore each
-	 * group in a transaction pinned to its partition without re-deriving the partition per resource.
+	 * Resources to revert, keyed by the partition the rollback should target the restore to. Holds the committed
+	 * data-bundle copies (CREATEs) and referrer updates, the post-merge target, and the post-merge source when it
+	 * was kept — all at their committed post-merge versions. The restorer reverts each (deleting a created
+	 * resource or rolling back an update).
 	 */
-	private final Map<RequestPartitionId, List<IIdType>> myCommittedResourceIdsByPartition = new LinkedHashMap<>();
+	private final Map<RequestPartitionId, List<IIdType>> myResourcesToRevertByPartition = new LinkedHashMap<>();
 
 	/**
-	 * Step 1: source-side originals scheduled for deletion, recorded at their anticipated tombstone version (the
-	 * version the Step 5 delete will create), keyed by partition. The rollback undeletes them by restoring from
-	 * this version, but only if the delete bundle actually committed.
+	 * Resources to undelete, keyed by partition. Holds the source-side originals that were deleted, plus the
+	 * source itself when it was deleted, each at its tombstone version. The caller only records these once the
+	 * delete actually committed. The rollback restores each partition's list as a single FHIR transaction, so
+	 * references among the listed resources resolve regardless of order.
 	 */
-	private final Map<RequestPartitionId, List<IIdType>> myDeletedOriginalResourceIdsByPartition =
-			new LinkedHashMap<>();
+	private final Map<RequestPartitionId, List<IIdType>> myResourcesToUndeleteByPartition = new LinkedHashMap<>();
 
-	/** Step 2: ids of the per-partition Provenances that were created. */
+	/** Ids of the per-partition Provenances that were created. */
 	private final List<IIdType> myCreatedSubProvenanceIds = new ArrayList<>();
 
-	/**
-	 * Step 3: the source's post-merge versioned ref — its post-update version when the source is kept, or the
-	 * tombstone version created by its delete when {@code deleteSource}. The rollback restores the source from
-	 * this version (reverting the update, or undeleting the tombstone).
-	 */
-	private IIdType mySourcePostMergeId;
-
-	/**
-	 * Step 3: the partition the source resource lives on, recorded so the rollback can pin its restore without a
-	 * lookup.
-	 */
-	private RequestPartitionId mySourcePartition;
-
-	/** Step 3: target resource at its post-update version. */
-	private IIdType myTargetPostMergeId;
-
-	/**
-	 * Step 3: the partition the target resource lives on, recorded so the rollback can pin its restore without a
-	 * lookup.
-	 */
-	private RequestPartitionId myTargetPartition;
-
-	/** Step 4: id of the main Provenance, if it was created. */
+	/** Id of the main Provenance, if it was created. */
 	private IIdType myMainProvenanceId;
-
-	/** Step 5: whether the (single-partition, atomic) delete bundle committed. */
-	private boolean myDeletesCommitted;
-
-	MergeRollbackContext(boolean theDeleteSource) {
-		myDeleteSource = theDeleteSource;
-	}
-
-	boolean isDeleteSource() {
-		return myDeleteSource;
-	}
 
 	Throwable getFailureCause() {
 		return myFailureCause;
@@ -105,54 +71,36 @@ public class MergeRollbackContext {
 		myFailureCause = theFailureCause;
 	}
 
-	void addCommittedResourceIds(RequestPartitionId thePartition, List<IIdType> theRefs) {
-		myCommittedResourceIdsByPartition
+	void addResourcesToRevert(RequestPartitionId thePartition, List<IIdType> theRefs) {
+		myResourcesToRevertByPartition
 				.computeIfAbsent(thePartition, k -> new ArrayList<>())
 				.addAll(theRefs);
 	}
 
-	Map<RequestPartitionId, List<IIdType>> getCommittedResourceIdsByPartition() {
-		return myCommittedResourceIdsByPartition;
+	void addResourceToRevert(RequestPartitionId thePartition, IIdType theRef) {
+		addResourcesToRevert(thePartition, List.of(theRef));
 	}
 
-	void addDeletedOriginalResourceIds(RequestPartitionId thePartition, List<IIdType> theRefs) {
-		myDeletedOriginalResourceIdsByPartition
+	Map<RequestPartitionId, List<IIdType>> getResourcesToRevertByPartition() {
+		return myResourcesToRevertByPartition;
+	}
+
+	void addResourcesToUndelete(RequestPartitionId thePartition, List<IIdType> theRefs) {
+		myResourcesToUndeleteByPartition
 				.computeIfAbsent(thePartition, k -> new ArrayList<>())
 				.addAll(theRefs);
 	}
 
-	Map<RequestPartitionId, List<IIdType>> getDeletedOriginalResourceIdsByPartition() {
-		return myDeletedOriginalResourceIdsByPartition;
+	void addResourceToUndelete(RequestPartitionId thePartition, IIdType theRef) {
+		addResourcesToUndelete(thePartition, List.of(theRef));
+	}
+
+	Map<RequestPartitionId, List<IIdType>> getResourcesToUndeleteByPartition() {
+		return myResourcesToUndeleteByPartition;
 	}
 
 	List<IIdType> getCreatedSubProvenanceIds() {
 		return myCreatedSubProvenanceIds;
-	}
-
-	IIdType getSourcePostMergeId() {
-		return mySourcePostMergeId;
-	}
-
-	RequestPartitionId getSourcePartition() {
-		return mySourcePartition;
-	}
-
-	void setSourcePostMergeId(IIdType theSourcePostMergeId, RequestPartitionId thePartition) {
-		mySourcePostMergeId = theSourcePostMergeId;
-		mySourcePartition = thePartition;
-	}
-
-	IIdType getTargetPostMergeId() {
-		return myTargetPostMergeId;
-	}
-
-	RequestPartitionId getTargetPartition() {
-		return myTargetPartition;
-	}
-
-	void setTargetPostMergeId(IIdType theTargetPostMergeId, RequestPartitionId thePartition) {
-		myTargetPostMergeId = theTargetPostMergeId;
-		myTargetPartition = thePartition;
 	}
 
 	IIdType getMainProvenanceId() {
@@ -161,13 +109,5 @@ public class MergeRollbackContext {
 
 	void setMainProvenanceId(IIdType theMainProvenanceId) {
 		myMainProvenanceId = theMainProvenanceId;
-	}
-
-	boolean isDeletesCommitted() {
-		return myDeletesCommitted;
-	}
-
-	void markDeletesCommitted() {
-		myDeletesCommitted = true;
 	}
 }

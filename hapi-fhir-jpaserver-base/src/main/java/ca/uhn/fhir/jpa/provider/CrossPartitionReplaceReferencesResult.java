@@ -27,33 +27,19 @@ import java.util.Map;
 
 /**
  * Result of copying compartment resources across partitions during a cross-partition merge.
- * Contains IDs extracted from the combined CREATE+UPDATE response bundle, plus
- * versioned IDs of the original source copies (for deferred deletion).
+ * Contains the resources written by the data bundle and the original source copies (for deferred
+ * deletion), both grouped by partition.
  */
 // Created by claude-opus-4-6
 public class CrossPartitionReplaceReferencesResult {
-	private final List<IIdType> myChangedResourceIds;
-	private final List<IIdType> myCopiedResourceOriginalIds;
 	private final Map<RequestPartitionId, List<IIdType>> myCommittedResourcesByPartition;
 	private final Map<RequestPartitionId, List<IIdType>> myCopiedResourceOriginalIdsByPartition;
 
 	public CrossPartitionReplaceReferencesResult(
-			List<IIdType> theChangedResourceIds,
-			List<IIdType> theCopiedResourceOriginalIds,
 			Map<RequestPartitionId, List<IIdType>> theCommittedResourcesByPartition,
 			Map<RequestPartitionId, List<IIdType>> theCopiedResourceOriginalIdsByPartition) {
-		myChangedResourceIds = theChangedResourceIds;
-		myCopiedResourceOriginalIds = theCopiedResourceOriginalIds;
 		myCommittedResourcesByPartition = theCommittedResourcesByPartition;
 		myCopiedResourceOriginalIdsByPartition = theCopiedResourceOriginalIdsByPartition;
-	}
-
-	public List<IIdType> getChangedResourceIds() {
-		return myChangedResourceIds;
-	}
-
-	public List<IIdType> getCopiedResourceOriginalIds() {
-		return myCopiedResourceOriginalIds;
 	}
 
 	/**

@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -32,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,34 +74,17 @@ public class CrossPartitionMergeRollbackService {
 	}
 
 	/**
-	 * Reports, without doing any work, that the failed merge needs no rollback because its partition changes joined the
-	 * outer transaction, which has already rolled everything back. The caller decides this applies (when partition
-	 * changes do not commit in their own transactions); see {@link #rollbackPartialCrossPartitionMerge} for the case
-	 * where the committed steps are durable and must actually be reverted.
-	 *
-	 * @param theContext what the forward steps recorded as committed (only its failure cause is used here)
-	 * @param theOutcome the outcome to populate with the rollback result
-	 */
-	public void reportFullyRolledBackByOuterTransaction(
-			MergeRollbackContext theContext, OperationOutcomeWithStatusCode theOutcome) {
-		theOutcome.setHttpStatusCode(STATUS_HTTP_500_INTERNAL_ERROR);
-		addErrorToOperationOutcome(
-				myFhirContext,
-				theOutcome.getOperationOutcome(),
-				format(MSG_FULLY_ROLLED_BACK, describeFailureCause(theContext.getFailureCause())),
-				ISSUE_TYPE_EXCEPTION);
-	}
-
-	/**
 	 * Reverts a cross-partition {@code $merge} that failed partway through, driven entirely by
 	 * what the forward steps recorded as committed (see {@link MergeRollbackContext}). This applies when the committed
 	 * steps are durable because partition changes commit in their own transactions; otherwise the outer transaction
-	 * has already rolled everything back and {@link #reportFullyRolledBackByOuterTransaction} is used instead.
+	 * has already rolled everything back and the caller reports that directly without invoking this service.
 	 *
-	 * <p>The committed steps are reverted in referential-integrity order: source resource first (so referrers and
-	 * undeleted originals can point to it), then the per-partition data, then the target resource; the main and
-	 * per-partition Provenances are deleted. Reverts are best-effort — anything that cannot be reverted is reported so
-	 * it can be reverted manually.
+	 * <p>The work runs in referential-integrity order: first the undeletes (tombstoned originals, and the source
+	 * when it was deleted), then the reverts (committed copies, referrer updates, target, and the source when it was
+	 * kept), then the main and per-partition Provenances are deleted. The caller has already classified each
+	 * resource into the right bucket; this service just executes them. Undeletes and reverts are best-effort —
+	 * anything that cannot be reverted is reported so it can be reverted manually; an un-deletable Provenance is
+	 * left orphaned but not reported (no resource is in a merged state).
 	 *
 	 * @param theContext what the forward steps recorded as committed
 	 * @param theRequestDetails the request details
@@ -112,38 +95,17 @@ public class CrossPartitionMergeRollbackService {
 			RequestDetails theRequestDetails,
 			OperationOutcomeWithStatusCode theOutcome) {
 
-		theOutcome.setHttpStatusCode(STATUS_HTTP_500_INTERNAL_ERROR);
 		IBaseOperationOutcome opOutcome = theOutcome.getOperationOutcome();
 
-		// Partition changes commit independently — revert the recorded committed set, best-effort.
+		// Collects the ids of any resources that could not be reverted, for the partial-failure report.
 		List<IIdType> notReverted = new ArrayList<>();
 
-		// Source resource first so referrers and undeleted originals can point to it.
-		revertSourceIfCommitted(theContext, theRequestDetails, notReverted);
+		// Undeletes first (tombstoned originals, and the source when it was deleted) so that the resources they
+		// reference exist before the reverts below repoint referrers at them.
+		restoreByPartition(theContext.getResourcesToUndeleteByPartition(), theRequestDetails, notReverted);
 
-		// Revert the committed copies and updated referrers (grouped per partition during the merge), plus the
-		// deleted originals (recorded at their tombstone version by the forward steps).
-		Map<RequestPartitionId, List<Reference>> dataByPartition = new LinkedHashMap<>();
-		addAsReferences(dataByPartition, theContext.getCommittedResourceIdsByPartition());
-		if (theContext.isDeletesCommitted()) {
-			addAsReferences(dataByPartition, theContext.getDeletedOriginalResourceIdsByPartition());
-		}
-		for (Map.Entry<RequestPartitionId, List<Reference>> entry : dataByPartition.entrySet()) {
-			try {
-				myResourceVersionRestorer.restoreToPreviousVersionsInTrx(
-						entry.getValue(), entry.getKey(), theRequestDetails);
-			} catch (Exception e) {
-				ourLog.error(
-						"Merge rollback could not revert partition {}; its resources remain in their merged state",
-						entry.getKey(),
-						e);
-				entry.getValue().forEach(ref -> notReverted.add(ref.getReferenceElement()));
-			}
-		}
-
-		// Target resource last.
-		revertSingle(
-				theContext.getTargetPostMergeId(), theContext.getTargetPartition(), theRequestDetails, notReverted);
+		// Then revert the committed copies, referrer updates, target, and the kept source.
+		restoreByPartition(theContext.getResourcesToRevertByPartition(), theRequestDetails, notReverted);
 
 		// Delete the Provenances created by this attempt (main = the "merge succeeded" signal, plus per-partition).
 		deleteProvenance(theContext.getMainProvenanceId(), theRequestDetails);
@@ -152,19 +114,27 @@ public class CrossPartitionMergeRollbackService {
 		}
 
 		String msg;
+		int statusCode;
 		if (notReverted.isEmpty()) {
+			// Everything reverted, so the merge failed cleanly — report the triggering exception's own status,
+			// just as the outer-transaction (nothing-committed) path does.
+			statusCode = resolveHttpStatusCode(theContext.getFailureCause());
 			msg = format(MSG_FULLY_ROLLED_BACK, describeFailureCause(theContext.getFailureCause()));
 		} else {
-			// Report each resource by versionless identity — the version we failed to restore from would be
-			// misleading, since the resource is left in its merged state, not at that version.
+			// The rollback itself could not revert everything, so resources are left in their merged state — a
+			// server-side inconsistency regardless of what triggered the merge failure, hence always 500.
+			statusCode = STATUS_HTTP_500_INTERNAL_ERROR;
+			// Report each resource by its versioned id — this is the post-merge version the resource is left
+			// at, which points an operator straight at the exact state that needs manual reverting.
 			String notRevertedIds = notReverted.stream()
-					.map(id -> id.toUnqualifiedVersionless().getValue())
+					.map(id -> id.toUnqualified().getValue())
 					.collect(joining(", "));
 			msg = format(
 					"Cross-partition merge failed and was partially rolled back. The following resources could not be "
 							+ "reverted and remain in their merged state, and must be reverted manually: %s. Merge failure cause: %s",
 					notRevertedIds, describeFailureCause(theContext.getFailureCause()));
 		}
+		theOutcome.setHttpStatusCode(statusCode);
 		addErrorToOperationOutcome(myFhirContext, opOutcome, msg, ISSUE_TYPE_EXCEPTION);
 	}
 
@@ -182,41 +152,40 @@ public class CrossPartitionMergeRollbackService {
 	}
 
 	/**
-	 * Reverts the source resource from its post-merge versioned reference back to the version before the merge. When the
-	 * source resource was kept that post-merge reference is its post-update version (restore reverts the update); when it
-	 * was deleted it is its tombstone version (restore undeletes it), but only once the delete actually committed — if it
-	 * never committed there is nothing to do.
+	 * Maps the merge failure to the HTTP status to report: the exception's own status when it carries one
+	 * (a {@link BaseServerResponseException}), otherwise 500.
 	 */
-	private void revertSourceIfCommitted(
-			MergeRollbackContext theContext, RequestDetails theRequestDetails, List<IIdType> theNotReverted) {
-		if (theContext.isDeleteSource() && !theContext.isDeletesCommitted()) {
-			return;
+	private static int resolveHttpStatusCode(@Nullable Throwable theFailureCause) {
+		if (theFailureCause instanceof BaseServerResponseException serverException) {
+			return serverException.getStatusCode();
 		}
-		revertSingle(
-				theContext.getSourcePostMergeId(), theContext.getSourcePartition(), theRequestDetails, theNotReverted);
+		return STATUS_HTTP_500_INTERNAL_ERROR;
 	}
 
 	/**
-	 * Restores a single recorded-committed reference, pinned to the partition it was recorded on. The restorer reverts
-	 * an update, deletes a created resource, or undeletes a tombstone as appropriate. A failure is recorded for the
-	 * report.
+	 * Restores each partition's recorded ids as a single FHIR transaction pinned to that partition, so the
+	 * resources of one partition are restored all-or-nothing. The restorer reverts an update, deletes a created
+	 * resource, or undeletes a tombstone as appropriate; the ids are already at the version to restore from.
+	 * Because the partition's list is restored as one FHIR transaction, references among the listed resources resolve
+	 * regardless of list order. A partition whose restore fails is recorded for the report.
 	 */
-	private void revertSingle(
-			@Nullable IIdType thePostMergeId,
-			RequestPartitionId thePartition,
+	private void restoreByPartition(
+			Map<RequestPartitionId, List<IIdType>> theIdsByPartition,
 			RequestDetails theRequestDetails,
 			List<IIdType> theNotReverted) {
-		if (thePostMergeId == null) {
-			return;
-		}
-		Reference ref = new Reference(thePostMergeId);
-		try {
-			myResourceVersionRestorer.restoreToPreviousVersionsInTrx(List.of(ref), thePartition, theRequestDetails);
-		} catch (Exception e) {
-			ourLog.error(
-					"Merge rollback could not revert {}; it remains in its merged state", thePostMergeId.getValue(), e);
-			theNotReverted.add(thePostMergeId);
-		}
+		theIdsByPartition.forEach((partition, ids) -> {
+			// The version restorer takes References, so wrap each id.
+			List<Reference> refs = ids.stream().map(Reference::new).toList();
+			try {
+				myResourceVersionRestorer.restoreToPreviousVersionsInTrx(refs, partition, theRequestDetails);
+			} catch (Exception e) {
+				ourLog.error(
+						"Merge rollback could not revert partition {}; its resources remain in their merged state",
+						partition,
+						e);
+				theNotReverted.addAll(ids);
+			}
+		});
 	}
 
 	/**
@@ -234,17 +203,5 @@ public class CrossPartitionMergeRollbackService {
 		} catch (Exception e) {
 			ourLog.error("Merge rollback could not delete Provenance {}", theProvenanceId.getValue(), e);
 		}
-	}
-
-	/**
-	 * Appends each partition's ids to {@code theTarget} as {@link Reference}s, creating the partition's bucket if
-	 * absent. The ids are already at the version to restore from, so no transformation is applied.
-	 */
-	private static void addAsReferences(
-			Map<RequestPartitionId, List<Reference>> theTarget,
-			Map<RequestPartitionId, List<IIdType>> theIdsByPartition) {
-		theIdsByPartition.forEach((partition, ids) -> theTarget
-				.computeIfAbsent(partition, k -> new ArrayList<>())
-				.addAll(ids.stream().map(Reference::new).toList()));
 	}
 }

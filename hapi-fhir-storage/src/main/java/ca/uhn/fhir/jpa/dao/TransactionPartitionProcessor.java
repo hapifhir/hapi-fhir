@@ -65,28 +65,27 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 
 	/**
 	 * Result of executing a partitioned transaction, wrapping both the aggregated response bundle
-	 * and the per-partition response entries.
+	 * and the per-sub-bundle response entries.
 	 * <p>
-	 * {@link #getResponseEntriesPerPartition()} returns one inner list per sub-bundle (partition).
-	 * Entries within each inner list share the same partition; the actual partition ID is not carried
-	 * here but can be derived from any entry's {@code response.location} via
-	 * {@code IRequestPartitionHelperSvc}.
+	 * {@link #getResponseEntriesPerSubBundle()} returns one inner list per sub-bundle, as grouped by the
+	 * partitioning interceptor. The partition ID of an entry is not carried here but can be derived from its
+	 * {@code response.location} via {@code IRequestPartitionHelperSvc}.
 	 */
 	public static class PartitionedTransactionResult<B extends IBaseBundle> {
 		private final B myResponseBundle;
-		private final List<List<IBase>> myResponseEntriesPerPartition;
+		private final List<List<IBase>> myResponseEntriesPerSubBundle;
 
-		public PartitionedTransactionResult(B theResponseBundle, List<List<IBase>> theResponseEntriesPerPartition) {
+		public PartitionedTransactionResult(B theResponseBundle, List<List<IBase>> theResponseEntriesPerSubBundle) {
 			myResponseBundle = theResponseBundle;
-			myResponseEntriesPerPartition = Collections.unmodifiableList(theResponseEntriesPerPartition);
+			myResponseEntriesPerSubBundle = Collections.unmodifiableList(theResponseEntriesPerSubBundle);
 		}
 
 		public B getResponseBundle() {
 			return myResponseBundle;
 		}
 
-		public List<List<IBase>> getResponseEntriesPerPartition() {
-			return myResponseEntriesPerPartition;
+		public List<List<IBase>> getResponseEntriesPerSubBundle() {
+			return myResponseEntriesPerSubBundle;
 		}
 	}
 
@@ -123,7 +122,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 	 * bundle into partitions, execute each slice, and aggregate the results.
 	 *
 	 * @return a result containing both the aggregated response bundle and the response entries
-	 * grouped by partition
+	 * grouped by committed sub-bundle
 	 * @throws PartitionedTransactionPartialFailureException if some sub-bundles committed successfully
 	 * before a later sub-bundle failed
 	 */
@@ -213,7 +212,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		}
 
 		Map<String, IIdType> idSubstitutions = new HashMap<>();
-		List<List<IBase>> responseEntriesPerPartition = new ArrayList<>();
+		List<List<IBase>> responseEntriesPerSubBundle = new ArrayList<>();
 
 		for (IBaseBundle singlePartitionRequest : partitionedRequests) {
 
@@ -246,14 +245,14 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 				singlePartitionResponse = myTransactionProcessor.processTransactionAsSubRequest(
 						myRequestDetails, transactionDetails, singlePartitionRequest, myActionName, myNestedMode);
 			} catch (Exception e) {
-				if (responseEntriesPerPartition.isEmpty()) {
+				if (responseEntriesPerSubBundle.isEmpty()) {
 					throw e;
 				}
 				throw new PartitionedTransactionPartialFailureException(
 						Msg.code(2974)
 								+ "Partitioned transaction partially failed: one or more partitions committed before a later partition failed. Cause: "
 								+ e.getMessage(),
-						responseEntriesPerPartition,
+						responseEntriesPerSubBundle,
 						e);
 			}
 
@@ -274,17 +273,17 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 					partitionRequestEntries.size() == partitionResponseEntries.size(),
 					"Partitioned request and response bundles have different number of entries");
 
-			List<IBase> responseEntriesForPartition = new ArrayList<>();
+			List<IBase> responseEntriesForSubBundle = new ArrayList<>();
 			for (int i = 0; i < partitionRequestEntries.size(); i++) {
 				IBase partitionRequestEntry = partitionRequestEntries.get(i);
 				IBase partitionResponseEntry = partitionResponseEntries.get(i);
 				Integer originalIndex = originalEntryToIndex.get(partitionRequestEntry);
 				if (originalIndex != null) {
 					responseEntries.set(originalIndex, partitionResponseEntry);
-					responseEntriesForPartition.add(partitionResponseEntry);
+					responseEntriesForSubBundle.add(partitionResponseEntry);
 				}
 			}
-			responseEntriesPerPartition.add(responseEntriesForPartition);
+			responseEntriesPerSubBundle.add(responseEntriesForSubBundle);
 		}
 
 		BUNDLE response = (BUNDLE) bundleDefinition.newInstance();
@@ -292,7 +291,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		for (IBase responseEntry : responseEntries) {
 			bundleEntryChild.getMutator().addValue(response, responseEntry);
 		}
-		return new PartitionedTransactionResult<>(response, responseEntriesPerPartition);
+		return new PartitionedTransactionResult<>(response, responseEntriesPerSubBundle);
 	}
 
 	@Nonnull
