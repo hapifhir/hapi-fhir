@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParame
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.implementationguide.NpmPackageFactory;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -737,7 +738,10 @@ public class PackageInstallerSvcImplTest {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private PackageInstallationSpec setupResourceInPackage(IBaseResource theExistingResource, IBaseResource theInstallResource,
 	                                                       IFhirResourceDao theFhirResourceDao) throws IOException {
-		NpmPackage pkg = createPackage(theInstallResource, theInstallResource.getClass().getSimpleName());
+		NpmPackage pkg = NpmPackageFactory.create(myCtx)
+			.name(PACKAGE_ID_1).version(PACKAGE_VERSION)
+			.addResource(theInstallResource.getClass().getSimpleName(), theInstallResource)
+			.createPackage();
 
 		when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 		when(myPackageCacheManager.installPackage(any())).thenReturn(pkg);
@@ -757,21 +761,6 @@ public class PackageInstallerSvcImplTest {
 		spec.setPackageContents(stream.toByteArray());
 
 		return spec;
-	}
-
-	@Nonnull
-	private NpmPackage createPackage(IBaseResource theResource, String theResourceType) {
-		PackageGenerator manifestGenerator = new PackageGenerator();
-		manifestGenerator.name(PACKAGE_ID_1);
-		manifestGenerator.version(PACKAGE_VERSION);
-		manifestGenerator.description("a package");
-		manifestGenerator.fhirVersions(List.of(FhirVersionEnum.R4.getFhirVersionString()));
-
-		String csString = myCtx.newJsonParser().encodeResourceToString(theResource);
-		NpmPackage pkg = NpmPackage.empty(manifestGenerator);
-		pkg.addFile("package", theResourceType + ".json", csString.getBytes(StandardCharsets.UTF_8), theResourceType);
-
-		return pkg;
 	}
 
 	private void setupSearchParameterValidationMocksForSuccess() {
@@ -869,7 +858,10 @@ public class PackageInstallerSvcImplTest {
 	@Test
 	void testInstall_subscriptionWithNoId_throws() throws IOException {
 		Subscription subscription = createSubscription(Subscription.SubscriptionStatus.REQUESTED);
-		NpmPackage pkg = createPackage(subscription, "Subscription");
+		NpmPackage pkg = NpmPackageFactory.create(myCtx)
+			.name(PACKAGE_ID_1).version(PACKAGE_VERSION)
+			.addResource("Subscription", subscription)
+			.createPackage();
 		IFhirResourceDao dao = mock(IFhirResourceDao.class);
 		when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
 		when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
@@ -895,7 +887,10 @@ public class PackageInstallerSvcImplTest {
 		namingSystem.setKind(NamingSystem.NamingSystemType.CODESYSTEM);
 		namingSystem.setName("TestNamingSystem");
 
-		NpmPackage pkg = createPackage(namingSystem, "NamingSystem");
+		NpmPackage pkg = NpmPackageFactory.create(myCtx)
+			.name(PACKAGE_ID_1).version(PACKAGE_VERSION)
+			.addResource("NamingSystem", namingSystem)
+			.createPackage();
 		IFhirResourceDao dao = mock(IFhirResourceDao.class);
 		when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 		when(myPackageCacheManager.installPackage(any())).thenReturn(pkg);

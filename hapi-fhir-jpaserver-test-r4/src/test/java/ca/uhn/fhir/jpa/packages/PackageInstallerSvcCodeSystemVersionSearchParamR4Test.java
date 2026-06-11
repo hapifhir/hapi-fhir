@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
-import ca.uhn.fhir.implementationguide.ImplementationGuideCreator;
+import ca.uhn.fhir.implementationguide.NpmPackageFactory;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -8,11 +8,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,7 +39,7 @@ class PackageInstallerSvcCodeSystemVersionSearchParamR4Test extends BaseJpaR4Tes
 	 * {@code (url, version) → resource} mapping and route the package install to update it.
 	 */
 	@Test
-	void install_multiVersionPackageWithStaleVersionSearchIndex_succeeds(@TempDir Path theTempDir) throws IOException {
+	void install_multiVersionPackageWithStaleVersionSearchIndex_succeeds() throws IOException {
 		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 
@@ -62,7 +58,7 @@ class PackageInstallerSvcCodeSystemVersionSearchParamR4Test extends BaseJpaR4Tes
 		mySearchParameterDao.update(override, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
-		PackageInstallationSpec spec = buildPackageContainingCodeSystem(theTempDir, VERSION_ONE)
+		PackageInstallationSpec spec = buildPackageContainingCodeSystem(VERSION_ONE)
 			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
 
 		assertInstallProducesValidSlot(spec, VERSION_ONE);
@@ -74,7 +70,7 @@ class PackageInstallerSvcCodeSystemVersionSearchParamR4Test extends BaseJpaR4Tes
 	 * existing resource via the term layer's mapping rather than creating a duplicate.
 	 */
 	@Test
-	void install_multiVersionPackageWhenVersionSearchParamMisconfigured_succeeds(@TempDir Path theTempDir) throws IOException {
+	void install_multiVersionPackageWhenVersionSearchParamMisconfigured_succeeds() throws IOException {
 		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 		// Wrong expression — captures CodeSystem.title (which we never set) instead of
 		// CodeSystem.version. The SP is active, so searches don't error out; they just
@@ -87,7 +83,7 @@ class PackageInstallerSvcCodeSystemVersionSearchParamR4Test extends BaseJpaR4Tes
 		createCodeSystem(VERSION_ONE);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
-		PackageInstallationSpec spec = buildPackageContainingCodeSystem(theTempDir, VERSION_ONE)
+		PackageInstallationSpec spec = buildPackageContainingCodeSystem(VERSION_ONE)
 			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
 
 		assertInstallProducesValidSlot(spec, VERSION_ONE);
@@ -121,7 +117,7 @@ class PackageInstallerSvcCodeSystemVersionSearchParamR4Test extends BaseJpaR4Tes
 	 * context is propagated through {@code createRequestDetails()}.
 	 */
 	@Test
-	void install_multiVersionPackageWhenVersionSearchParamMisconfigured_withPartitioningEnabled_succeeds(@TempDir Path theTempDir) throws IOException {
+	void install_multiVersionPackageWhenVersionSearchParamMisconfigured_withPartitioningEnabled_succeeds() throws IOException {
 		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 		myPartitionSettings.setPartitioningEnabled(true);
 
@@ -130,7 +126,7 @@ class PackageInstallerSvcCodeSystemVersionSearchParamR4Test extends BaseJpaR4Tes
 		createCodeSystem(VERSION_ONE);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
-		PackageInstallationSpec spec = buildPackageContainingCodeSystem(theTempDir, VERSION_ONE)
+		PackageInstallationSpec spec = buildPackageContainingCodeSystem(VERSION_ONE)
 			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
 
 		assertInstallProducesValidSlot(spec, VERSION_ONE);
@@ -146,11 +142,7 @@ class PackageInstallerSvcCodeSystemVersionSearchParamR4Test extends BaseJpaR4Tes
 		});
 	}
 
-	private PackageInstallationSpec buildPackageContainingCodeSystem(Path theTempDir, String theVersion) throws IOException {
-		Path igDir = Files.createDirectory(theTempDir.resolve("ig-v" + theVersion));
-		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, "version.search.param.test", "1.0.0");
-		igCreator.setDirectory(igDir);
-
+	private PackageInstallationSpec buildPackageContainingCodeSystem(String theVersion) throws IOException {
 		CodeSystem packagedCodeSystem = new CodeSystem();
 		packagedCodeSystem.setId("packaged-codesystem-v" + theVersion);
 		packagedCodeSystem.setUrl(CODE_SYSTEM_URL);
@@ -158,13 +150,15 @@ class PackageInstallerSvcCodeSystemVersionSearchParamR4Test extends BaseJpaR4Tes
 		packagedCodeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		packagedCodeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		packagedCodeSystem.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("from-package")));
-		igCreator.addResourceToIG("codesystem", packagedCodeSystem);
 
-		Path tarball = igCreator.createTestIG();
+		var pkgFactory = new NpmPackageFactory(myFhirContext)
+			.name("version.search.param.test").version("1.0.0")
+			.addResource("codesystem", packagedCodeSystem);
+
 		return new PackageInstallationSpec()
-			.setName(igCreator.getPackageName())
-			.setVersion(igCreator.getPackageVersion())
+			.setName(pkgFactory.getPackageName())
+			.setVersion(pkgFactory.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
-			.setPackageContents(Files.readAllBytes(tarball));
+			.setPackageContents(pkgFactory.createPackageBytes());
 	}
 }

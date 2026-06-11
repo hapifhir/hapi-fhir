@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.implementationguide.ImplementationGuideCreator;
+import ca.uhn.fhir.implementationguide.NpmPackageFactory;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -66,7 +66,6 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
@@ -80,7 +79,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -166,7 +164,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@EnumSource(value = PackageInstallationSpec.VersionPolicyEnum.class)
-	public void dryRunInstall_singleDependencyDifferentVersionsAreConsideredNew_doesntInstall(PackageInstallationSpec.VersionPolicyEnum theVersionPolicyEnum, @TempDir Path theTempDir) throws IOException {
+	public void dryRunInstall_singleDependencyDifferentVersionsAreConsideredNew_doesntInstall(PackageInstallationSpec.VersionPolicyEnum theVersionPolicyEnum) throws IOException {
 		// setup
 
 		// terminology resources
@@ -223,27 +221,22 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		IParser parser = myFhirContext.newJsonParser();
 
-		Path igdir1 = Files.createDirectory(Path.of(theTempDir.toString(), "dir1"));
-		Path igdir2 = Files.createDirectory(Path.of(theTempDir.toString(), "dir2"));
-
-		ImplementationGuideCreator igV1 = new ImplementationGuideCreator(myFhirContext, igName, "1.0.0");
-		igV1.setDirectory(igdir1);
-		ImplementationGuideCreator igV2 = new ImplementationGuideCreator(myFhirContext, igName, "1.0.1");
-		igV2.setDirectory(igdir2);
+		var pkgFactoryV1 = new NpmPackageFactory(myFhirContext).name(igName).version("1.0.0");
+		var pkgFactoryV2 = new NpmPackageFactory(myFhirContext).name(igName).version("1.0.1");
 
 		// how many installation specs
 		PackageInstallationSpec installedSpec = new PackageInstallationSpec();
 		installedSpec
-			.setName(igV1.getPackageName())
-			.setVersion(igV1.getPackageVersion())
+			.setName(pkgFactoryV1.getPackageName())
+			.setVersion(pkgFactoryV1.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setVersionPolicy(theVersionPolicyEnum)
 		;
 
 		PackageInstallationSpec dryRunSpec = new PackageInstallationSpec();
 		dryRunSpec
-			.setName(igV2.getPackageName())
-			.setVersion(igV2.getPackageVersion())
+			.setName(pkgFactoryV2.getPackageName())
+			.setVersion(pkgFactoryV2.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setVersionPolicy(theVersionPolicyEnum)
 			.setDryRun(true)
@@ -259,23 +252,17 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			valueSet.setVersion("1.0." + i);
 			conceptMap.setVersion("1.0." + i);
 
-			ImplementationGuideCreator igcreator = i == 0 ? igV1 : igV2;
+			var pkgFactory = i == 0 ? pkgFactoryV1 : pkgFactoryV2;
 
-			igcreator.addResourceToIG("codesystem", codeSystem);
-			igcreator.addResourceToIG("valueset", valueSet);
-			igcreator.addResourceToIG("conceptmap", conceptMap);
+			pkgFactory.addResource("codesystem", codeSystem);
+			pkgFactory.addResource("valueset", valueSet);
+			pkgFactory.addResource("conceptmap", conceptMap);
 		}
 
 		// test
 		// install the first ig as 'base'
-		Path installedPath = igV1.createTestIG();
-		Path dryRunPath = igV2.createTestIG();
-
-		installedSpec
-			.setPackageContents(Files.readAllBytes(installedPath));
-
-		dryRunSpec
-			.setPackageContents(Files.readAllBytes(dryRunPath));
+		installedSpec.setPackageContents(pkgFactoryV1.createPackageBytes());
+		dryRunSpec.setPackageContents(pkgFactoryV2.createPackageBytes());
 
 		// install first one (as normal install)
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(installedSpec);
@@ -321,7 +308,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@EnumSource(value = PackageInstallationSpec.InstallModeEnum.class, mode = EnumSource.Mode.EXCLUDE, names = "STORE_ONLY")
-	public void dryRunInstall_installMode_shouldntEffectDryRun(PackageInstallationSpec.InstallModeEnum theModeEnum, @TempDir Path theTempDir) throws IOException {
+	public void dryRunInstall_installMode_shouldntEffectDryRun(PackageInstallationSpec.InstallModeEnum theModeEnum) throws IOException {
 		// setup
 		// terminology resources
 		String codeSystemStr;
@@ -377,16 +364,13 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		IParser parser = myFhirContext.newJsonParser();
 
-		Path igdir1 = Files.createDirectory(Path.of(theTempDir.toString(), "dir1"));
-
-		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, igName, "1.0.0");
-		igCreator.setDirectory(igdir1);
+		var pkgFactory = new NpmPackageFactory(myFhirContext).name(igName).version("1.0.0");
 
 		// how many installation specs
 		PackageInstallationSpec installedSpec = new PackageInstallationSpec();
 		installedSpec
-			.setName(igCreator.getPackageName())
-			.setVersion(igCreator.getPackageVersion())
+			.setName(pkgFactory.getPackageName())
+			.setVersion(pkgFactory.getPackageVersion())
 			.setInstallMode(theModeEnum)
 			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION)
 			.setDryRun(true)
@@ -402,14 +386,12 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			valueSet.setVersion("1.0." + i);
 			conceptMap.setVersion("1.0." + i);
 
-			igCreator.addResourceToIG("codesystem", codeSystem);
-			igCreator.addResourceToIG("valueset", valueSet);
-			igCreator.addResourceToIG("conceptmap", conceptMap);
+			pkgFactory.addResource("codesystem", codeSystem);
+			pkgFactory.addResource("valueset", valueSet);
+			pkgFactory.addResource("conceptmap", conceptMap);
 		}
 
-		Path dryRunPath = igCreator.createTestIG();
-		installedSpec
-			.setPackageContents(Files.readAllBytes(dryRunPath));
+		installedSpec.setPackageContents(pkgFactory.createPackageBytes());
 
 		// test
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(installedSpec);
@@ -433,7 +415,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	 */
 	@ParameterizedTest
 	@EnumSource(value = PackageInstallationSpec.VersionPolicyEnum.class)
-	public void dryRunInstall_flagsDuplicates_andDoesntInstall(PackageInstallationSpec.VersionPolicyEnum theVersionPolicy, @TempDir Path theTempDir) throws IOException {
+	public void dryRunInstall_flagsDuplicates_andDoesntInstall(PackageInstallationSpec.VersionPolicyEnum theVersionPolicy) throws IOException {
 		// setup
 
 		// terminology resources
@@ -503,27 +485,22 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		IParser parser = myFhirContext.newJsonParser();
 
-		Path igdir1 = Files.createDirectory(Path.of(theTempDir.toString(), "dir1" ));
-		Path igdir2 = Files.createDirectory(Path.of(theTempDir.toString(), "dir2"));
-
-		ImplementationGuideCreator igV1 = new ImplementationGuideCreator(myFhirContext, igName, "1.0.0");
-		igV1.setDirectory(igdir1);
-		ImplementationGuideCreator igV2 = new ImplementationGuideCreator(myFhirContext, igName, "1.0.1");
-		igV2.setDirectory(igdir2);
+		var pkgFactoryV1 = new NpmPackageFactory(myFhirContext).name(igName).version("1.0.0");
+		var pkgFactoryV2 = new NpmPackageFactory(myFhirContext).name(igName).version("1.0.1");
 
 		// how many installation specs
 		PackageInstallationSpec installedSpec = new PackageInstallationSpec();
 		installedSpec
-			.setName(igV1.getPackageName())
-			.setVersion(igV1.getPackageVersion())
+			.setName(pkgFactoryV1.getPackageName())
+			.setVersion(pkgFactoryV1.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setVersionPolicy(theVersionPolicy)
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 
 		PackageInstallationSpec dryRunSpec = new PackageInstallationSpec();
 		dryRunSpec
-			.setName(igV2.getPackageName())
-			.setVersion(igV2.getPackageVersion())
+			.setName(pkgFactoryV2.getPackageName())
+			.setVersion(pkgFactoryV2.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setVersionPolicy(theVersionPolicy)
 			.setDryRun(true)
@@ -560,23 +537,17 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 				.get(0)
 				.setValue(curValue + "/id" + i);
 
-			for (var ig : new ImplementationGuideCreator[]{igV1, igV2}) {
-				ig.addResourceToIG("codeSystem" + i, codeSystem);
-				ig.addResourceToIG("valueSet" + i, valueSet);
-				ig.addResourceToIG("conceptMap" + i, conceptMap);
-				ig.addResourceToIG("namingSystem" + i, namingSystem);
+			for (var ig : new NpmPackageFactory[]{pkgFactoryV1, pkgFactoryV2}) {
+				ig.addResource("codeSystem" + i, codeSystem);
+				ig.addResource("valueSet" + i, valueSet);
+				ig.addResource("conceptMap" + i, conceptMap);
+				ig.addResource("namingSystem" + i, namingSystem);
 			}
 		}
 
 		// install the first ig as 'base'
-		Path installedPath = igV1.createTestIG();
-		Path dryRunPath = igV2.createTestIG();
-
-		installedSpec
-			.setPackageContents(Files.readAllBytes(installedPath));
-
-		dryRunSpec
-			.setPackageContents(Files.readAllBytes(dryRunPath));
+		installedSpec.setPackageContents(pkgFactoryV1.createPackageBytes());
+		dryRunSpec.setPackageContents(pkgFactoryV2.createPackageBytes());
 
 		// install first one (as normal install)
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(installedSpec);
@@ -649,7 +620,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void dryRunInstall_withDependencies_wontInstallDependencies(@TempDir Path theTempDir) throws IOException {
+	public void dryRunInstall_withDependencies_wontInstallDependencies() throws IOException {
 		// setup
 		String packageName = "my.fake.pkg.r4";
 		IParser parser = myFhirContext.newJsonParser();
@@ -667,27 +638,23 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 				""";
 		NamingSystem system = parser.parseResource(NamingSystem.class, nameSystemStr);
 
-		Path igdir1 = Files.createDirectory(Path.of(theTempDir.toString(), "dir1" ));
-
-		ImplementationGuideCreator igV1 = new ImplementationGuideCreator(myFhirContext, "example.ig.com", "1.0.0");
-		igV1.setDirectory(igdir1);
-		igV1.addDependency(packageName, "4.0.1");
+		var pkgFactory = new NpmPackageFactory(myFhirContext)
+			.name("example.ig.com").version("1.0.0")
+			.addDependency(packageName, "4.0.1")
+			.addResource("NamingSystem", system);
 
 		// how many installation specs
 		PackageInstallationSpec installedSpec = new PackageInstallationSpec();
 		installedSpec
-			.setName(igV1.getPackageName())
-			.setVersion(igV1.getPackageVersion())
+			.setName(pkgFactory.getPackageName())
+			.setVersion(pkgFactory.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION)
 			.setFetchDependencies(true)
 			.setDryRun(true)
 		;
 
-		// one resource - we don't really need or care about it
-		igV1.addResourceToIG("NamingSystem", system);
-
-		installedSpec.setPackageContents(Files.readAllBytes(igV1.createTestIG()));
+		installedSpec.setPackageContents(pkgFactory.createPackageBytes());
 
 		// test
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(installedSpec);
@@ -1915,7 +1882,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testInstallR4Package_doesNotOverwriteContentNotPresentCodeSystem(@TempDir Path theTempDir) throws IOException {
+	public void testInstallR4Package_doesNotOverwriteContentNotPresentCodeSystem() throws IOException {
 		// Setup: create an externally loaded CodeSystem with content=not-present and add concepts via delta
 		String codeSystemUrl = "http://example.org/CodeSystem/external-cs";
 
@@ -1956,18 +1923,17 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			""".formatted(codeSystemUrl);
 
 		String igName = "test.external.cs.guard";
-		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, igName, "1.0.0");
-		igCreator.setDirectory(Files.createDirectory(theTempDir.resolve("ig")));
-
 		CodeSystem igCs = myFhirContext.newJsonParser().parseResource(CodeSystem.class, igCodeSystemStr);
-		igCreator.addResourceToIG("codesystem", igCs);
 
-		Path igPath = igCreator.createTestIG();
+		var pkgFactory = new NpmPackageFactory(myFhirContext)
+			.name(igName).version("1.0.0")
+			.addResource("codesystem", igCs);
+
 		PackageInstallationSpec spec = new PackageInstallationSpec()
 			.setName(igName)
 			.setVersion("1.0.0")
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
-			.setPackageContents(Files.readAllBytes(igPath));
+			.setPackageContents(pkgFactory.createPackageBytes());
 
 		// Test: install the IG
 		myPackageInstallerSvc.install(spec);
@@ -2003,7 +1969,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testInstallR4Package_doesOverwriteNonExternalCodeSystem(@TempDir Path theTempDir) throws IOException {
+	public void testInstallR4Package_doesOverwriteNonExternalCodeSystem() throws IOException {
 		// Setup: create a complete CodeSystem (not externally loaded) with one concept
 		String codeSystemUrl = "http://example.org/CodeSystem/complete-cs";
 
@@ -2034,18 +2000,17 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			""".formatted(codeSystemUrl);
 
 		String igName = "test.complete.cs.overwrite";
-		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, igName, "1.0.0");
-		igCreator.setDirectory(Files.createDirectory(theTempDir.resolve("ig")));
-
 		CodeSystem igCs = myFhirContext.newJsonParser().parseResource(CodeSystem.class, igCodeSystemStr);
-		igCreator.addResourceToIG("codesystem", igCs);
 
-		Path igPath = igCreator.createTestIG();
+		var pkgFactory = new NpmPackageFactory(myFhirContext)
+			.name(igName).version("1.0.0")
+			.addResource("codesystem", igCs);
+
 		PackageInstallationSpec spec = new PackageInstallationSpec()
 			.setName(igName)
 			.setVersion("1.0.0")
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
-			.setPackageContents(Files.readAllBytes(igPath));
+			.setPackageContents(pkgFactory.createPackageBytes());
 
 		// Test: install the IG
 		myPackageInstallerSvc.install(spec);
@@ -2074,7 +2039,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 	// Created by Claude Opus 4.6
 	@Test
-	void install_withDependencyExcludes_skipsExcludedDependencies(@TempDir Path theTempDir) throws IOException {
+	void install_withDependencyExcludes_skipsExcludedDependencies() throws IOException {
 		// setup
 		IParser parser = myFhirContext.newJsonParser();
 		NamingSystem namingSystem = parser.parseResource(NamingSystem.class, """
@@ -2090,21 +2055,20 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			}
 			""");
 
-		Path igDir = Files.createDirectory(Path.of(theTempDir.toString(), "main"));
-		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, "example.ig.test", "1.0.0");
-		igCreator.setDirectory(igDir);
-		igCreator.addDependency("included.dependency.pkg", "1.0.0");
-		igCreator.addDependency("excluded.dependency.pkg", "2.0.0");
-		igCreator.addResourceToIG("NamingSystem", namingSystem);
+		var pkgFactory = new NpmPackageFactory(myFhirContext)
+			.name("example.ig.test").version("1.0.0")
+			.addDependency("included.dependency.pkg", "1.0.0")
+			.addDependency("excluded.dependency.pkg", "2.0.0")
+			.addResource("NamingSystem", namingSystem);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec();
-		spec.setName(igCreator.getPackageName())
-			.setVersion(igCreator.getPackageVersion())
+		spec.setName(pkgFactory.getPackageName())
+			.setVersion(pkgFactory.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setFetchDependencies(true)
 			.setDryRun(true);
 		spec.addDependencyExclude("^excluded\\..*");
-		spec.setPackageContents(Files.readAllBytes(igCreator.createTestIG()));
+		spec.setPackageContents(pkgFactory.createPackageBytes());
 
 		// test
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
@@ -2221,10 +2185,10 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 	// Created by Claude Opus 4.7
 	@Test
-	void install_packageWithMultipleSearchParameters_triggersExactlyOneRegistryRebuild(@TempDir Path theTempDir) throws IOException {
+	void install_packageWithMultipleSearchParameters_triggersExactlyOneRegistryRebuild() throws IOException {
 		// Build a package containing 3 custom SearchParameter resources
-		ImplementationGuideCreator igCreator = new ImplementationGuideCreator(myFhirContext, "sp.batch.rebuild.test", "1.0.0");
-		igCreator.setDirectory(Files.createDirectory(theTempDir.resolve("ig-sp-batch")));
+		var pkgFactory = new NpmPackageFactory(myFhirContext)
+			.name("sp.batch.rebuild.test").version("1.0.0");
 		for (int i = 0; i < 3; i++) {
 			SearchParameter sp = new SearchParameter();
 			sp.setId("custom-sp-" + i);
@@ -2235,15 +2199,13 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			sp.setType(Enumerations.SearchParamType.TOKEN);
 			sp.setExpression("Patient.identifier");
 			sp.addBase("Patient");
-			igCreator.addResourceToIG("sp-" + i, sp);
+			pkgFactory.addResource("sp-" + i, sp);
 		}
-		Path tarball = igCreator.createTestIG();
-
 		PackageInstallationSpec spec = new PackageInstallationSpec()
-			.setName(igCreator.getPackageName())
-			.setVersion(igCreator.getPackageVersion())
+			.setName(pkgFactory.getPackageName())
+			.setVersion(pkgFactory.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
-			.setPackageContents(Files.readAllBytes(tarball));
+			.setPackageContents(pkgFactory.createPackageBytes());
 
 		// Each registry rebuild calls mySearchParamProvider.search exactly once to re-read
 		// every SearchParameter from the DB; that call count is a direct proxy for the
