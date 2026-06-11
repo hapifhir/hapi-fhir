@@ -80,7 +80,7 @@ public abstract class BaseImportTerminologyFileStep<
 	protected IJobPersistence myJobPersistence;
 
 	@Autowired
-	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
 	@Autowired
 	private IHapiTransactionService myTransactionService;
@@ -375,57 +375,65 @@ public abstract class BaseImportTerminologyFileStep<
 
 			populateConceptsIntoCodeSystem(theCodeExtractionContext.getCodeToConcept(), codeSystemToPopulate);
 
-			StopWatch sw = new StopWatch();
-
-			Callable<UploadStatistics> uploader = () -> {
-				IBaseResource codeSystemToPopulateNonCanonical =
-						myVersionCanonicalizer.codeSystemFromCanonical(codeSystemToPopulate);
-
-				/// We don't want to populate the parent PIDs closure when we save concepts
-				/// now, because we're still adding concepts in multiple chunks. We populate
-				/// the parent PIDs closure after all concepts and hierarchy entries have
-				/// been loaded, in {@link ImportTerminologyStepGenerateConceptClosures}
-				codeSystemToPopulateNonCanonical.setUserData(DONT_POPULATE_PARENT_PIDS_CS_USERDATA_KEY, Boolean.TRUE);
-
-				RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-				return switch (mode) {
-					case REMOVE -> myTermCodeSystemStorageSvc.removeCodeSystemConcepts(
-							requestDetails, codeSystemToPopulateNonCanonical);
-					case ADD, SNAPSHOT -> myTermCodeSystemStorageSvc.addCodeSystemConcepts(
-							requestDetails, codeSystemToPopulateNonCanonical);
-				};
-			};
-			UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
-
-			ourLog.info(
-					"Processed {} {} concept entries including {} root concept entries for storage in {}. Outcome: {}",
-					theCodeExtractionContext.getCodeToConcept().size(),
-					mode,
-					codeSystemToPopulate.getConcept().size(),
-					sw,
-					uploadStatistics);
-
-			TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter =
-					getRecordsAddedCounter(theStepExecutionDetails);
-			recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
-			recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
-			recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
-			recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
-			recordsAddedCounter.incrementConceptsRemoved(uploadStatistics.getRemovedConceptCount());
-			recordsAddedCounter.incrementConceptLinksRemoved(uploadStatistics.getRemovedConceptLinkCount());
-			recordsAddedCounter.incrementPropertiesRemoved(uploadStatistics.getRemovedPropertyCount());
-			recordsAddedCounter.incrementDesignationsRemoved(uploadStatistics.getRemovedDesignationCount());
-
-			retVal += uploadStatistics.getAddedConceptCount();
-			retVal += uploadStatistics.getAddedConceptLinkCount();
-			retVal += uploadStatistics.getAddedPropertyCount();
-			retVal += uploadStatistics.getAddedDesignationCount();
-			retVal += uploadStatistics.getRemovedConceptCount();
-			retVal += uploadStatistics.getRemovedConceptLinkCount();
-			retVal += uploadStatistics.getRemovedPropertyCount();
-			retVal += uploadStatistics.getRemovedDesignationCount();
+			retVal = storeConceptsToDb(theStepExecutionDetails, theCodeExtractionContext, codeSystemToPopulate);
 		}
 
+		return retVal;
+	}
+
+	protected int storeConceptsToDb(@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails, CT theCodeExtractionContext, CodeSystem theCanonicalCodeSystem) {
+		ImportTerminologyModeEnum mode = theStepExecutionDetails.getParameters().getMode();
+		int retVal = 0;
+
+		StopWatch sw = new StopWatch();
+
+		Callable<UploadStatistics> uploader = () -> {
+			IBaseResource codeSystemToPopulateNonCanonical =
+					myVersionCanonicalizer.codeSystemFromCanonical(theCanonicalCodeSystem);
+
+			/// We don't want to populate the parent PIDs closure when we save concepts
+			/// now, because we're still adding concepts in multiple chunks. We populate
+			/// the parent PIDs closure after all concepts and hierarchy entries have
+			/// been loaded, in {@link ImportTerminologyStepGenerateConceptClosures}
+			codeSystemToPopulateNonCanonical.setUserData(DONT_POPULATE_PARENT_PIDS_CS_USERDATA_KEY, Boolean.TRUE);
+
+			RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+			return switch (mode) {
+				case REMOVE -> myTermCodeSystemStorageSvc.removeCodeSystemConcepts(
+						requestDetails, codeSystemToPopulateNonCanonical);
+				case ADD, SNAPSHOT -> myTermCodeSystemStorageSvc.addCodeSystemConcepts(
+						requestDetails, codeSystemToPopulateNonCanonical);
+			};
+		};
+		UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
+
+		ourLog.info(
+				"Processed {} {} concept entries including {} root concept entries for storage in {}. Outcome: {}",
+				theCodeExtractionContext.getCodeToConcept().size(),
+			mode,
+				theCanonicalCodeSystem.getConcept().size(),
+				sw,
+				uploadStatistics);
+
+		TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter =
+				getRecordsAddedCounter(theStepExecutionDetails);
+		recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
+		recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
+		recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
+		recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
+		recordsAddedCounter.incrementConceptsRemoved(uploadStatistics.getRemovedConceptCount());
+		recordsAddedCounter.incrementConceptLinksRemoved(uploadStatistics.getRemovedConceptLinkCount());
+		recordsAddedCounter.incrementPropertiesRemoved(uploadStatistics.getRemovedPropertyCount());
+		recordsAddedCounter.incrementDesignationsRemoved(uploadStatistics.getRemovedDesignationCount());
+
+		retVal += uploadStatistics.getAddedConceptCount();
+		retVal += uploadStatistics.getAddedConceptLinkCount();
+		retVal += uploadStatistics.getAddedPropertyCount();
+		retVal += uploadStatistics.getAddedDesignationCount();
+		retVal += uploadStatistics.getRemovedConceptCount();
+		retVal += uploadStatistics.getRemovedConceptLinkCount();
+		retVal += uploadStatistics.getRemovedPropertyCount();
+		retVal += uploadStatistics.getRemovedDesignationCount();
 		return retVal;
 	}
 

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
-// FIXME: used?
 public enum ImportTerminologyModeEnum {
 
 	/**

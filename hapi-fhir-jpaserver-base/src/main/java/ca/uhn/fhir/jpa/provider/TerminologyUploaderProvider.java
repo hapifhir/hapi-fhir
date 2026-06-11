@@ -244,8 +244,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		if (isNotBlank(modeString)) {
 			mode = EnumUtils.getEnum(ImportTerminologyModeEnum.class, modeString);
 			if (mode == null) {
-				// FIXME: add code
-				throw new InvalidRequestException(Msg.code(1) + "Invalid value for parameter " + PARAM_MODE + ": "
+				throw new InvalidRequestException(Msg.code(2963) + "Invalid value for parameter " + PARAM_MODE + ": "
 						+ UrlUtil.sanitizeUrlPart(modeString));
 			}
 		}
