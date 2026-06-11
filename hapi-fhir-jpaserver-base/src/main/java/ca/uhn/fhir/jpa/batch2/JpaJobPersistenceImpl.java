@@ -375,13 +375,25 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
 		// default sort is myCreateTime Asc
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, CREATE_TIME);
 		return myTransactionService
 				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(() -> myJobInstanceRepository.findAll(pageRequest).stream()
+						.map(this::toInstance)
+						.collect(Collectors.toList()));
+	}
+
+	@Override
+	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex, Set<StatusEnum> theStatuses) {
+		// The repository query returns a stable sort
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize);
+		return myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> myJobInstanceRepository.findAllWithStatuses(pageRequest, theStatuses).stream()
 						.map(this::toInstance)
 						.collect(Collectors.toList()));
 	}
