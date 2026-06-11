@@ -116,7 +116,6 @@ public abstract class BaseBatch2Config {
 			JobDefinitionRegistry theJobDefinitionRegistry,
 			JpaStorageSettings theStorageSettings,
 			BatchJobSender theBatchJobSender,
-			WorkChunkProcessor theExecutor,
 			IReductionStepExecutorService theReductionStepExecutorService) {
 		return new JobMaintenanceServiceImpl(
 				theSchedulerService,
@@ -124,7 +123,6 @@ public abstract class BaseBatch2Config {
 				theStorageSettings,
 				theJobDefinitionRegistry,
 				theBatchJobSender,
-				theExecutor,
 				theReductionStepExecutorService,
 				myInterceptorService);
 	}

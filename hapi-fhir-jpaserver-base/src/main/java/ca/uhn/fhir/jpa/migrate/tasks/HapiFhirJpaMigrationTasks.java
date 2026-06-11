@@ -181,6 +181,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addColumn("20260601.30", "EXTRA_CHUNK_IDX")
 				.nullable()
 				.type(ColumnTypeEnum.INT);
+
+		version.onTable("BT2_JOB_INSTANCE")
+				.addIndex("20260610.10", "IDX_BT2JI_STAT_CT_ID")
+				.unique(false)
+				.withColumns("STAT", "CREATE_TIME", "ID");
 	}
 
 	protected void init8_10_0() {
