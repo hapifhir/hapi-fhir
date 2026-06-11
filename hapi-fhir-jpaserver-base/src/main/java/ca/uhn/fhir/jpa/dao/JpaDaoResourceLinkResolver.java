@@ -70,8 +70,19 @@ public class JpaDaoResourceLinkResolver extends DaoResourceLinkResolver<JpaPid> 
 					.map(JpaDaoResourceLinkResolver::toUrlParam)
 					.collect(Collectors.joining("&"));
 
-			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(
-					resourceType, matchUrl, (ResourceTable) theStoredEntity);
+			ResourceTable storedEntity = (ResourceTable) theStoredEntity;
+			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(resourceType, matchUrl, storedEntity);
+
+			/*
+			 * Mark the placeholder entity so that the search URL entry created above is
+			 * deleted at the placeholder's first update, mirroring the lifecycle of entries
+			 * created by ordinary conditional creates. Entries for placeholders which are never
+			 * touched again are removed by the scheduled SearchUrlJobMaintenanceSvcImpl sweep.
+			 * The entity is already persisted at this point, so setting the flag costs one extra
+			 * UPDATE statement (does not increment the resource version, since the column
+			 * is excluded from optimistic locking).
+			 */
+			storedEntity.setSearchUrlPresent(true);
 		}
 	}
 
