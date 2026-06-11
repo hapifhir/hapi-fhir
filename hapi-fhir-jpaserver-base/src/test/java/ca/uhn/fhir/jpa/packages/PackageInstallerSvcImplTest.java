@@ -148,6 +148,8 @@ public class PackageInstallerSvcImplTest {
 	private PartitionSettings myPartitionSettings = new PartitionSettings();
 	@Spy
 	private CommonCodeSystemsTerminologyService myCommonCodeSystemsTerminologyService = new CommonCodeSystemsTerminologyService(myCtx);
+	@Spy
+	private PackageVersionStamper myPackageVersionStamper = new PackageVersionStamper(myCtx);
 
 	@InjectMocks
 	private PackageInstallerSvcImpl mySvc;
@@ -531,6 +533,23 @@ public class PackageInstallerSvcImplTest {
 
 		LogbackTestExtensionAssert.assertThat(myLogCapture)
 			.hasInfoMessage("-- Updated 1 resources of type CodeSystem");
+	}
+
+	// Created by Claude Opus 4.6
+	@Test
+	void install_newResource_stampsMetaSourceFromPackageSpec() throws IOException {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://new-code-system");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		PackageInstallationSpec spec = setupResourceInPackage(null, cs, myCodeSystemDao);
+
+		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(cs);
+
+		mySvc.install(spec);
+
+		verify(myCodeSystemDao).create(myCodeSystemCaptor.capture(), any(RequestDetails.class));
+		assertThat(myCodeSystemCaptor.getValue().getMeta().getSource()).isEqualTo(PACKAGE_ID_1 + "|" + PACKAGE_VERSION);
 	}
 
 	// Created by Claude Opus 4.6
@@ -1238,5 +1257,173 @@ public class PackageInstallerSvcImplTest {
 		LogbackTestExtensionAssert.assertThat(myLogCapture)
 				.hasErrorMessage("Version conflict error")
 				.hasErrorMessage("Cause: HAPI-0825: Conflict with resource version");
+	}
+
+	// Created by Claude Opus 4.6
+	@Nested
+	class SkipOlderSearchParameterInMultiVersionModeTest {
+
+		@RegisterExtension
+		LogbackTestExtension myPackageVersionStamperLogCapture = new LogbackTestExtension(PackageVersionStamper.class);
+
+		@Test
+		void install_searchParameterFromOlderPackage_skipsUpdate() throws IOException {
+			SearchParameter existingSP = createSearchParameter("existing-sp", List.of("Patient"));
+			existingSP.setUrl("http://example.org/sp");
+			existingSP.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			existingSP.getMeta().setSource("package1|2.0");
+
+			SearchParameter installSP = createSearchParameter("existing-sp", List.of("Patient"));
+			installSP.setUrl("http://example.org/sp");
+			installSP.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+			PackageInstallationSpec spec = setupResourceInPackage(existingSP, installSP, mySearchParameterDao);
+			spec.setName("package1");
+			spec.setVersion("1.0");
+			spec.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
+			setupSearchParameterValidationMocksForSuccess();
+
+			mySvc.install(spec);
+
+			verify(mySearchParameterDao, never()).update(any(), any(RequestDetails.class));
+
+			LogbackTestExtensionAssert.assertThat(myPackageVersionStamperLogCapture)
+					.hasInfoMessage(
+							"Skipping update of SearchParameter/existing-sp because existing resource was installed"
+									+ " from a newer version of the same package (existing: package1|2.0, incoming: package1|1.0)");
+		}
+
+		@Test
+		void install_searchParameterFromNewerPackage_allowsUpdate() throws IOException {
+			SearchParameter existingSP = createSearchParameter("existing-sp", List.of("Patient"));
+			existingSP.setUrl("http://example.org/sp");
+			existingSP.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			existingSP.getMeta().setSource("package1|1.0");
+
+			SearchParameter installSP = createSearchParameter("existing-sp", List.of("Patient"));
+			installSP.setUrl("http://example.org/sp");
+			installSP.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+			PackageInstallationSpec spec = setupResourceInPackage(existingSP, installSP, mySearchParameterDao);
+			spec.setName("package1");
+			spec.setVersion("2.0");
+			spec.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
+			setupSearchParameterValidationMocksForSuccess();
+			when(mySearchParameterDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
+
+			mySvc.install(spec);
+
+			verify(mySearchParameterDao, times(1)).update(any(), any(RequestDetails.class));
+		}
+
+		@Test
+		void install_searchParameterWithNoExistingSource_allowsUpdate() throws IOException {
+			SearchParameter existingSP = createSearchParameter("existing-sp", List.of("Patient"));
+			existingSP.setUrl("http://example.org/sp");
+			existingSP.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+			SearchParameter installSP = createSearchParameter("existing-sp", List.of("Patient"));
+			installSP.setUrl("http://example.org/sp");
+			installSP.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+			PackageInstallationSpec spec = setupResourceInPackage(existingSP, installSP, mySearchParameterDao);
+			spec.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
+			setupSearchParameterValidationMocksForSuccess();
+			when(mySearchParameterDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
+
+			mySvc.install(spec);
+
+			verify(mySearchParameterDao, times(1)).update(any(), any(RequestDetails.class));
+		}
+
+		@Test
+		void install_searchParameterWithRequestIdInMetaSource_skipsOlderVersion() throws IOException {
+			SearchParameter existingSP = createSearchParameter("existing-sp", List.of("Patient"));
+			existingSP.setUrl("http://example.org/sp");
+			existingSP.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			existingSP.getMeta().setSource("package1|2.0#some-request-id");
+
+			SearchParameter installSP = createSearchParameter("existing-sp", List.of("Patient"));
+			installSP.setUrl("http://example.org/sp");
+			installSP.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+			PackageInstallationSpec spec = setupResourceInPackage(existingSP, installSP, mySearchParameterDao);
+			spec.setName("package1");
+			spec.setVersion("1.0");
+			spec.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
+			setupSearchParameterValidationMocksForSuccess();
+
+			mySvc.install(spec);
+
+			verify(mySearchParameterDao, never()).update(any(), any(RequestDetails.class));
+		}
+
+		@Test
+		void install_codeSystemInMultiVersionMode_allowsUpdateFromOlderPackage() throws IOException {
+			CodeSystem existingCs = new CodeSystem();
+			existingCs.setId("CodeSystem/existing-cs");
+			existingCs.setUrl("http://example.org/cs");
+			existingCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			existingCs.getMeta().setSource("package1|2.0");
+
+			CodeSystem installCs = new CodeSystem();
+			installCs.setUrl("http://example.org/cs");
+			installCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+			PackageInstallationSpec spec = setupResourceInPackage(existingCs, installCs, myCodeSystemDao);
+			spec.setName("package1");
+			spec.setVersion("1.0");
+			spec.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
+			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(installCs);
+			when(myCodeSystemDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
+
+			mySvc.install(spec);
+
+			verify(myCodeSystemDao, times(1)).update(any(), any(RequestDetails.class));
+		}
+
+		@Test
+		void install_codeSystemInSingleVersionMode_skipsOlderPackage() throws IOException {
+			CodeSystem existingCs = new CodeSystem();
+			existingCs.setId("CodeSystem/existing-cs");
+			existingCs.setUrl("http://example.org/cs");
+			existingCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			existingCs.getMeta().setSource("package1|2.0");
+
+			CodeSystem installCs = new CodeSystem();
+			installCs.setUrl("http://example.org/cs");
+			installCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+
+			PackageInstallationSpec spec = setupResourceInPackage(existingCs, installCs, myCodeSystemDao);
+			spec.setName("package1");
+			spec.setVersion("1.0");
+			spec.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION);
+			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(installCs);
+
+			mySvc.install(spec);
+
+			verify(myCodeSystemDao, never()).update(any(), any(RequestDetails.class));
+		}
+
+		@Test
+		void install_searchParameterFromDifferentPackage_allowsUpdate() throws IOException {
+			SearchParameter existingSP = createSearchParameter("existing-sp", List.of("Patient"));
+			existingSP.setUrl("http://example.org/sp");
+			existingSP.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			existingSP.getMeta().setSource("other-package|5.0");
+
+			SearchParameter installSP = createSearchParameter("existing-sp", List.of("Patient"));
+			installSP.setUrl("http://example.org/sp");
+			installSP.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+			PackageInstallationSpec spec = setupResourceInPackage(existingSP, installSP, mySearchParameterDao);
+			spec.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
+			setupSearchParameterValidationMocksForSuccess();
+			when(mySearchParameterDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
+
+			mySvc.install(spec);
+
+			verify(mySearchParameterDao, times(1)).update(any(), any(RequestDetails.class));
+		}
 	}
 }

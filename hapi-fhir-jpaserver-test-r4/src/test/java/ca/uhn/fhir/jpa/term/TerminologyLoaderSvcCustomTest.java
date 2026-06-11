@@ -1,17 +1,13 @@
 package ca.uhn.fhir.jpa.term;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.custom.CodeSystemToCustomCsvConverter;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -33,9 +29,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -61,77 +58,6 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		mySvc = TermLoaderSvcImpl.withoutProxyCheck(myTermDeferredStorageSvc, myTermCodeSystemStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
-	}
-
-	@Test
-	public void testLoadComplete() throws Exception {
-		myFiles.addFileZip("/custom_term/", TermLoaderSvcImpl.CUSTOM_CODESYSTEM_JSON);
-		myFiles.addFileZip("/custom_term/", TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE);
-		myFiles.addFileZip("/custom_term/", TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE);
-
-		// Actually do the load
-		mySvc.loadCustom("http://example.com/labCodes", myFiles.getFiles(), mySrd);
-
-		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
-		Map<String, TermConcept> concepts = extractConcepts();
-
-		// Verify codesystem
-		assertEquals("http://example.com/labCodes", mySystemCaptor.getValue().getUrl());
-		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, mySystemCaptor.getValue().getContent());
-		assertEquals("Example Lab Codes", mySystemCaptor.getValue().getName());
-
-		// Root code
-		TermConcept code;
-		assertThat(concepts).hasSize(2);
-		code = concepts.get("CHEM");
-		assertEquals("CHEM", code.getCode());
-		assertEquals("Chemistry", code.getDisplay());
-
-		assertThat(code.getChildren()).hasSize(2);
-		assertEquals("HB", code.getChildren().get(0).getChild().getCode());
-		assertEquals("Hemoglobin", code.getChildren().get(0).getChild().getDisplay());
-		assertEquals("NEUT", code.getChildren().get(1).getChild().getCode());
-		assertEquals("Neutrophils", code.getChildren().get(1).getChild().getDisplay());
-
-	}
-
-	@Test
-	public void testLoadWithNoCodeSystem() throws Exception {
-		myFiles.addFileZip("/custom_term/", TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE);
-
-		// Actually do the load
-		mySvc.loadCustom("http://example.com/labCodes", myFiles.getFiles(), mySrd);
-
-		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
-		Map<String, TermConcept> concepts = extractConcepts();
-
-		// Verify codesystem
-		assertEquals("http://example.com/labCodes", mySystemCaptor.getValue().getUrl());
-		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, mySystemCaptor.getValue().getContent());
-
-	}
-
-	/**
-	 * No hierarchy file supplied
-	 */
-	@Test
-	public void testLoadCodesOnly() throws Exception {
-		myFiles.addFileZip("/custom_term/", TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE);
-
-		// Actually do the load
-		mySvc.loadCustom("http://example.com/labCodes", myFiles.getFiles(), mySrd);
-
-		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
-		Map<String, TermConcept> concepts = extractConcepts();
-
-		TermConcept code;
-
-		// Root code
-		assertThat(concepts).hasSize(5);
-		code = concepts.get("CHEM");
-		assertEquals("CHEM", code.getCode());
-		assertEquals("Chemistry", code.getDisplay());
-
 	}
 
 	@Test

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -68,7 +68,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		input
 			.getCompose()
 			.addInclude()
-			.setSystem(ITermLoaderSvc.LOINC_URI)
+			.setSystem(TerminologyConstants.LOINC_URI)
 			.addFilter()
 			.setProperty("SCALE_TYP")
 			.setOp(ValueSet.FilterOperator.EQUAL)
@@ -84,7 +84,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		input
 			.getCompose()
 			.addInclude()
-			.setSystem(ITermLoaderSvc.LOINC_URI)
+			.setSystem(TerminologyConstants.LOINC_URI)
 			.addFilter()
 			.setProperty("SCALE_TYP")
 			.setOp(ValueSet.FilterOperator.EQUAL)
@@ -99,7 +99,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		input
 			.getCompose()
 			.addInclude()
-			.setSystem(ITermLoaderSvc.LOINC_URI)
+			.setSystem(TerminologyConstants.LOINC_URI)
 			.addFilter()
 			.setProperty("SCALE_TYP")
 			.setOp(ValueSet.FilterOperator.EQUAL)
@@ -118,7 +118,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		input
 			.getCompose()
 			.addInclude()
-			.setSystem(ITermLoaderSvc.LOINC_URI)
+			.setSystem(TerminologyConstants.LOINC_URI)
 			.addFilter()
 			.setProperty("CLASS")
 			.setOp(ValueSet.FilterOperator.EQUAL)
@@ -134,7 +134,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	public void testLookupWithProperties() throws Exception {
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion();
 
-		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(TerminologyConstants.LOINC_URI), null, mySrd);
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, null);
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
@@ -143,7 +143,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		Optional<Coding> propertyValue = findProperty(parameters, "SCALE_TYP");
 		assertThat(propertyValue).isPresent();
-		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
+		assertEquals(TerminologyConstants.LOINC_URI, propertyValue.get().getSystem());
 		assertEquals("LP7753-9", propertyValue.get().getCode());
 		assertEquals("Qn", propertyValue.get().getDisplay());
 
@@ -164,14 +164,14 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	public void testLookupWithProperties2() throws Exception {
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion();
 
-		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(TerminologyConstants.LOINC_URI), null, mySrd);
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, null);
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValue = findProperty(parameters, "COMPONENT");
 		assertThat(propertyValue).isPresent();
-		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
+		assertEquals(TerminologyConstants.LOINC_URI, propertyValue.get().getSystem());
 		assertEquals("LP31101-6", propertyValue.get().getCode());
 		assertEquals("R' wave amplitude.lead I", propertyValue.get().getDisplay());
 	}
@@ -180,7 +180,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	public void testLookupWithPropertiesExplicit() throws Exception {
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion();
 
-		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(TerminologyConstants.LOINC_URI), null, mySrd);
 		List<? extends IPrimitiveType<String>> properties = Lists.newArrayList(new CodeType("SCALE_TYP"));
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, properties);
 
@@ -188,7 +188,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		Optional<Coding> propertyValueCoding = findProperty(parameters, "SCALE_TYP");
 		assertThat(propertyValueCoding).isPresent();
-		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValueCoding.get().getSystem());
+		assertEquals(TerminologyConstants.LOINC_URI, propertyValueCoding.get().getSystem());
 		assertEquals("LP7753-9", propertyValueCoding.get().getCode());
 		assertEquals("Qn", propertyValueCoding.get().getDisplay());
 
@@ -201,7 +201,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	public void testValidateCodeFound() throws Exception {
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion();
 
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1"), new StringType(TerminologyConstants.LOINC_URI), null, null, null, mySrd);
 
 		assertTrue(result.isOk());
 		assertEquals("R' wave amplitude in lead I", result.getDisplay());
@@ -211,7 +211,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	public void testValidateCodeNotFound() throws Exception {
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion();
 
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(TerminologyConstants.LOINC_URI), null, null, null, mySrd);
 		assertFalse(result.isOk());
 		assertThat(result.getMessage()).contains("Unknown code 'http://loinc.org#10013-1-9999999999' for in-memory expansion");
 	}

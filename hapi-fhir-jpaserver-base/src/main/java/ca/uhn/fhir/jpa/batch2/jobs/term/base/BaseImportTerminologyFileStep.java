@@ -126,6 +126,8 @@ public abstract class BaseImportTerminologyFileStep<
 
 		String attachmentId = theData.getAttachmentId();
 		String sourceFilename = theData.getSourceFilename();
+
+		int recordsProcessed = 0;
 		if (isNotBlank(attachmentId)) {
 
 			AttachmentDetails attachment = myJobPersistence.fetchAttachmentById(jobInstanceId, attachmentId);
@@ -139,7 +141,7 @@ public abstract class BaseImportTerminologyFileStep<
 					theData,
 					sourceFilename);
 
-			syncToDb(theJobMetadata, theContext, codeSystemToPopulate, theStepExecutionDetails);
+			recordsProcessed = syncToDb(theJobMetadata, theContext, codeSystemToPopulate, theStepExecutionDetails);
 		}
 
 		if (!theData.getStepIdToRecordsAdded().isEmpty()
@@ -150,7 +152,7 @@ public abstract class BaseImportTerminologyFileStep<
 			theDataSink.acceptForFutureStep(STEP_ID_FINALIZE_IMPORT, counterWorkChunk);
 		}
 
-		return RunOutcome.SUCCESS;
+		return new RunOutcome(recordsProcessed);
 	}
 
 	protected abstract void processAttachment(
@@ -347,21 +349,25 @@ public abstract class BaseImportTerminologyFileStep<
 	 * Invoked after all CSV rows have been processed but before the CodeSystem is submitted for storage.
 	 * Subclasses may override, but they should call this super-method too.
 	 */
-	protected void syncToDb(
+	protected int syncToDb(
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
 			CT theCodeExtractionContext,
 			CodeSystem theCodeSystemToPopulate,
 			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
 
-		syncConceptsToDb(theStepExecutionDetails, theCodeExtractionContext, theCodeSystemToPopulate);
+		int recordsProcessed =
+				syncConceptsToDb(theStepExecutionDetails, theCodeExtractionContext, theCodeSystemToPopulate);
 		syncValueSetsToDb(theCodeExtractionContext, theStepExecutionDetails);
 		syncConceptMapsToDb(theJobMetadata, theCodeExtractionContext, theStepExecutionDetails);
+		return recordsProcessed;
 	}
 
-	private void syncConceptsToDb(
+	private int syncConceptsToDb(
 			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
 			CT theCodeExtractionContext,
 			CodeSystem codeSystemToPopulate) {
+		int retVal = 0;
+
 		if (!theCodeExtractionContext.getCodeToConcept().isEmpty()) {
 
 			populateConceptsIntoCodeSystem(theCodeExtractionContext.getCodeToConcept(), codeSystemToPopulate);
@@ -388,7 +394,14 @@ public abstract class BaseImportTerminologyFileStep<
 			recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
 			recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
 			recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
+
+			retVal += uploadStatistics.getAddedConceptCount();
+			retVal += uploadStatistics.getAddedConceptLinkCount();
+			retVal += uploadStatistics.getAddedPropertyCount();
+			retVal += uploadStatistics.getAddedDesignationCount();
 		}
+
+		return retVal;
 	}
 
 	private static void populateConceptsIntoCodeSystem(

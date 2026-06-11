@@ -47,18 +47,31 @@ public interface ITerminologyImportFileHandlerStep<
 	boolean mustFindFile();
 
 	enum FileHandlingType {
-		/** Comma-Separated Values */
+		/**
+		 * Comma-Separated Values: Split into chunks of 1000 lines each, with
+		 * the header row repeated on each.
+		 */
 		CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
-		/** Comma-Separated Values */
+
+		/**
+		 * Comma-Separated Values: Split into chunks of 50000 lines each, with
+		 * the header row repeated on each.
+		 */
 		CSV_SPLIT_WITH_REPEAT_HEADER_50000_LINE_CHUNKS,
 
-		/** Tab-Separated Values */
+		/**
+		 * Tab-Separated Values: Split into chunks of 50000 lines each, with
+		 * the header row repeated on each.
+		 */
 		TSV_SPLIT_WITH_REPEAT_HEADER_5000_LINE_CHUNKS,
 
-		/** XML document */
+		/**
+		 * XML document: Pass the entire file unmodified to the processor step.
+		 */
 		XML
 	}
 
+	// TODO JA: Rename this in the next PR since it's used everywhere now
 	record LoincFileNameSpecification(
 			FileHandlingType fileHandlingType,
 			LoincUploadPropertiesEnum propertyName,

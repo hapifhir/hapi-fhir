@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -11,6 +12,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
@@ -24,10 +27,8 @@ import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.test.util.LogbackTestExtension;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
@@ -52,6 +53,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -66,7 +69,10 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_CONCEPTS_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_HIERARCHY_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.ICD10CM_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.LOINC_URI;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -84,6 +90,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest{
+	private static final Logger ourLog = LoggerFactory.getLogger(UploadTerminologyCommandTest.class);
+
 	private static final String FHIR_VERSION_DSTU3 = "DSTU3";
 	private static final String FHIR_VERSION_R4 = "R4";
 	private FhirContext myCtx;
@@ -95,11 +103,9 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 	private final File myCodeSystemFile = new File(myCodeSystemFileName);
 	private final String myTextFileName = "target/hello.txt";
 	private final File myTextFile = new File(myTextFileName);
-	private final String myPropertiesFileName = "target/hello.properties";
 	private final File myPropertiesFile = new File(myTextFileName);
 	private File myArchiveFile;
 	private String myArchiveFileName;
-	private final String myICD10URL = "http://hl7.org/fhir/sid/icd-10-cm";
 	private final String myICD10FileName = new File("src/test/resources").getAbsolutePath() + "/icd10cm_tabular_2021.xml";
 
 	@Mock
@@ -118,6 +124,8 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 
 	@Captor
 	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestDetails;
+	@Captor
+	private ArgumentCaptor<AttachmentDetails> myAttachmentDetails;
 
 
 	static Stream<Arguments> paramsProvider(){
@@ -392,14 +400,8 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testSnapshot(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
-		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
-		} else {
-			fail("Unknown FHIR Version param provided: " + theFhirVersion);
-		}
+	public void testSnapshot(String theFhirVersion, boolean theIncludeTls) {
+		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -413,59 +415,20 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
 
-		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
+		// Verify
+		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
+		assertEquals(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY, myStartRequestDetails.getValue().getJobDefinitionId());
 
-		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertThat(listOfDescriptors).hasSize(1);
-		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
+		verify(myJobPersistence, times(2)).storeNewAttachment(any(), myAttachmentDetails.capture());
+		assertEquals(CUSTOM_CONCEPTS_FILE, myAttachmentDetails.getAllValues().get(0).getFilename());
+		assertEquals(CUSTOM_HIERARCHY_FILE, myAttachmentDetails.getAllValues().get(1).getFilename());
 	}
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testPropertiesFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		try (FileWriter w = new FileWriter(myPropertiesFileName, false)) {
-			w.append("a=b\n");
-		}
+	public void testSnapshotLargeFile(String theFhirVersion, boolean theIncludeTls) {
 
-		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
-		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
-		} else {
-			fail("Unknown FHIR Version param provided: " + theFhirVersion);
-		}
-
-		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-			new String[]{
-				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-				"-v", theFhirVersion,
-				"-m", "SNAPSHOT",
-				"-u", "http://foo",
-				"-d", myPropertiesFileName
-			},
-			"-t", theIncludeTls, myBaseRestServerHelper
-		));
-
-		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
-
-		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertThat(listOfDescriptors).hasSize(1);
-		assertThat(listOfDescriptors.get(0).getFilename()).matches(".*\\.zip$");
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
-	}
-
-	@ParameterizedTest
-	@MethodSource("paramsProvider")
-	public void testSnapshotLargeFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
-
-		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
-		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
-		} else {
-			fail("Unknown FHIR Version param provided: " + theFhirVersion);
-		}
+		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -480,51 +443,22 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
 
-		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
-
-		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertThat(listOfDescriptors).hasSize(1);
-		assertThat(listOfDescriptors.get(0).getFilename()).matches(".*\\.zip$");
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
+		// Verify
+		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
+		assertEquals(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY, myStartRequestDetails.getValue().getJobDefinitionId());
 	}
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testUploadLoinc(String theFhirVersion, boolean theIncludeTls) throws IOException {
+	public void testUploadLoinc(String theFhirVersion, boolean theIncludeTls, @TempDir File theTempDir) throws IOException {
 
-		File tempFile = File.createTempFile("loinc", ".zip");
+		File tempFile = new File(theTempDir, "loinc.zip");
 		tempFile.deleteOnExit();
 		try (FileWriter w = new FileWriter(tempFile, StandardCharsets.UTF_8, false)) {
 			w.append("12345");
 		}
 
-		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
-		startResponse.setInstanceId("my-instance-id");
-		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
-
-		JobInstance jobInstance = new JobInstance();
-		jobInstance.setInstanceId("my-instance-id");
-		jobInstance.setStatus(StatusEnum.BUILDING);
-		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
-
-		StopWatch sw = new StopWatch();
-		doAnswer(t->{
-			if (jobInstance.getStatus() == StatusEnum.IN_PROGRESS) {
-				if (sw.getMillis() > 2000) {
-					ImportTerminologyResultJson result = new ImportTerminologyResultJson();
-					result.setReport("This is the report line 1\nThis is the report line 2");
-
-					jobInstance.setStatus(StatusEnum.COMPLETED);
-					jobInstance.setReport(JsonUtil.serialize(result));
-				}
-			}
-			return jobInstance;
-		}).when(myJobCoordinator).getInstance(eq("my-instance-id"));
-		doAnswer(t->{
-			jobInstance.setStatus(StatusEnum.IN_PROGRESS);
-			jobInstance.setProgress(0.55);
-			return null;
-		}).when(myJobCoordinator).enqueueBuildingJobForExecution(any());
+		JobInstance jobInstance = mockJobCoordinatorForStartingJob(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -545,6 +479,47 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 		assertNull(params.getDontMakeCurrent());
 	}
 
+	@Nonnull
+	private JobInstance mockJobCoordinatorForStartingJob(String theJobDefinition) {
+		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
+		startResponse.setInstanceId("my-instance-id");
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+
+		JobInstance jobInstance = new JobInstance();
+		jobInstance.setInstanceId("my-instance-id");
+		jobInstance.setStatus(StatusEnum.BUILDING);
+		jobInstance.setJobDefinitionId(theJobDefinition);
+
+		StopWatch sw = new StopWatch();
+		doAnswer(t->{
+			if (jobInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+				if (sw.getMillis() > 250) {
+					ImportTerminologyResultJson result = new ImportTerminologyResultJson();
+					result.setReport("This is the report line 1\nThis is the report line 2");
+
+					jobInstance.setStatus(StatusEnum.COMPLETED);
+					jobInstance.setReport(JsonUtil.serialize(result));
+				}
+			}
+			return jobInstance;
+		}).when(myJobCoordinator).getInstance(eq("my-instance-id"));
+
+		doAnswer(t->{
+			jobInstance.setStatus(StatusEnum.IN_PROGRESS);
+			jobInstance.setProgress(0.55);
+			return null;
+		}).when(myJobCoordinator).enqueueBuildingJobForExecution(any());
+
+		when(myJobPersistence.storeNewAttachment(any(), any())).thenAnswer(t->{
+			AttachmentDetails details = t.getArgument(1, AttachmentDetails.class);
+			byte[] bytes = IOUtils.toByteArray(details.getInputStream());
+			ourLog.info("Store aggachment request received {} bytes", bytes.length);
+			return "my-attachment-id";
+		});
+
+		return jobInstance;
+	}
+
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testUploadLoinc_DontMakeCurrent(String theFhirVersion, boolean theIncludeTls, @TempDir File theTempDir) throws IOException {
@@ -555,33 +530,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			w.append("12345");
 		}
 
-		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
-		startResponse.setInstanceId("my-instance-id");
-		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
-
-		JobInstance jobInstance = new JobInstance();
-		jobInstance.setInstanceId("my-instance-id");
-		jobInstance.setStatus(StatusEnum.BUILDING);
-		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
-
-		StopWatch sw = new StopWatch();
-		doAnswer(t->{
-			if (jobInstance.getStatus() == StatusEnum.IN_PROGRESS) {
-				if (sw.getMillis() > 2000) {
-					ImportTerminologyResultJson result = new ImportTerminologyResultJson();
-					result.setReport("This is the report line 1\nThis is the report line 2");
-
-					jobInstance.setStatus(StatusEnum.COMPLETED);
-					jobInstance.setReport(JsonUtil.serialize(result));
-				}
-			}
-			return jobInstance;
-		}).when(myJobCoordinator).getInstance(eq("my-instance-id"));
-		doAnswer(t->{
-			jobInstance.setStatus(StatusEnum.IN_PROGRESS);
-			jobInstance.setProgress(0.55);
-			return null;
-		}).when(myJobCoordinator).enqueueBuildingJobForExecution(any());
+		JobInstance jobInstance = mockJobCoordinatorForStartingJob(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -652,13 +601,13 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testUploadICD10UsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
+	public void testUploadICD10UsingCompressedFile(String theFhirVersion, boolean theIncludeTls) {
 		uploadICD10UsingCompressedFile(theFhirVersion, theIncludeTls);
 	}
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testUploadTerminologyWithEndpointValidation(String theFhirVersion, boolean theIncludeTls) throws IOException {
+	public void testUploadTerminologyWithEndpointValidation(String theFhirVersion, boolean theIncludeTls) {
 		RequestValidatingInterceptor requestValidatingInterceptor = createRequestValidatingInterceptor();
 		myBaseRestServerHelper.registerInterceptor(requestValidatingInterceptor);
 
@@ -745,31 +694,19 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 		}
 	}
 
-	private void uploadICD10UsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadIcd10cm(anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
-		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadIcd10cm(anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
-		} else {
-			fail("Unknown FHIR Version param provided: " + theFhirVersion);
-		}
+	private void uploadICD10UsingCompressedFile(String theFhirVersion, boolean theIncludeTls) {
+		mockJobCoordinatorForStartingJob(ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 				"-v", theFhirVersion,
-				"-u", myICD10URL,
+				"-u", ICD10CM_URI,
 				"-d", myICD10FileName
 			},
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
 
-		verify(myTermLoaderSvc, times(1)).loadIcd10cm(myDescriptorListCaptor.capture(), any());
-
-		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertThat(listOfDescriptors).hasSize(1);
-		assertThat(listOfDescriptors.get(0).getFilename()).matches("^file:.*files.*\\.zip$");
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	private RequestValidatingInterceptor createRequestValidatingInterceptor(){
