@@ -22,7 +22,9 @@ package ca.uhn.fhir.jpa.term.custom;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyStep2HandleConcepts;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyStep3HandleProperties;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyStep4HandleHierarchy;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.util.CsvUtil;
 import ca.uhn.fhir.parser.IParser;
@@ -47,6 +49,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_CONCEPTS_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_HIERARCHY_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_PROPERTIES_FILE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -91,7 +96,9 @@ public class CodeSystemToCustomCsvConverter {
 
 		// Create concept file
 		if (!codes.isEmpty()) {
-			String[] headerFields = {ConceptHandler.CODE, ConceptHandler.DISPLAY};
+			String[] headerFields = {
+				ImportCustomTerminologyStep2HandleConcepts.CODE, ImportCustomTerminologyStep2HandleConcepts.DISPLAY
+			};
 			CsvUtil.ICsvProducer csvProducer = csvPrinter -> {
 				for (Map.Entry<String, String> nextEntry : codes.entrySet()) {
 					csvPrinter.print(nextEntry.getKey());
@@ -100,7 +107,7 @@ public class CodeSystemToCustomCsvConverter {
 				}
 			};
 			byte[] bytes = CsvUtil.writeCsvToByteArray(headerFields, csvProducer);
-			String fileName = TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE;
+			String fileName = CUSTOM_CONCEPTS_FILE;
 			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
 					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
 			outputFiles.add(fileDescriptor);
@@ -108,7 +115,9 @@ public class CodeSystemToCustomCsvConverter {
 
 		// Create hierarchy file
 		if (!codeToParentCodes.isEmpty()) {
-			String[] headerFields = {HierarchyHandler.CHILD, HierarchyHandler.PARENT};
+			String[] headerFields = {
+				ImportCustomTerminologyStep4HandleHierarchy.CHILD, ImportCustomTerminologyStep4HandleHierarchy.PARENT
+			};
 			CsvUtil.ICsvProducer csvProducer = csvPrinter -> {
 				for (Map.Entry<String, String> nextEntry : codeToParentCodes.entries()) {
 					csvPrinter.print(nextEntry.getKey());
@@ -117,7 +126,7 @@ public class CodeSystemToCustomCsvConverter {
 				}
 			};
 			byte[] bytes = CsvUtil.writeCsvToByteArray(headerFields, csvProducer);
-			String fileName = TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE;
+			String fileName = CUSTOM_HIERARCHY_FILE;
 			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
 					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
 			outputFiles.add(fileDescriptor);
@@ -125,7 +134,10 @@ public class CodeSystemToCustomCsvConverter {
 		// Create codeToProperties file
 		if (!codeToProperties.isEmpty()) {
 			String[] headerFields = {
-				PropertyHandler.CODE, PropertyHandler.KEY, PropertyHandler.VALUE, PropertyHandler.TYPE
+				ImportCustomTerminologyStep3HandleProperties.CODE,
+				ImportCustomTerminologyStep3HandleProperties.KEY,
+				ImportCustomTerminologyStep3HandleProperties.VALUE,
+				ImportCustomTerminologyStep3HandleProperties.TYPE
 			};
 			CsvUtil.ICsvProducer csvProducer = csvPrinter -> {
 				IParser jsonParser = myFhirContext.newJsonParser().setPrettyPrint(false);
@@ -166,7 +178,7 @@ public class CodeSystemToCustomCsvConverter {
 			};
 
 			byte[] bytes = CsvUtil.writeCsvToByteArray(headerFields, csvProducer);
-			String fileName = TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE;
+			String fileName = CUSTOM_PROPERTIES_FILE;
 			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
 					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
 			outputFiles.add(fileDescriptor);

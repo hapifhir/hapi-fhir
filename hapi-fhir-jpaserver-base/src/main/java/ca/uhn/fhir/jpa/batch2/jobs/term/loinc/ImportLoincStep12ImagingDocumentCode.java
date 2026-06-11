@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -73,6 +73,6 @@ public class ImportLoincStep12ImagingDocumentCode extends BaseImportLoincStep<Ba
 
 		ValueSet valueSet = getOrAddValueSet(
 				theStepExecutionDetails, theJobMetadata, theData, theContext, VS_ID_BASE, VS_URI, VS_NAME, null);
-		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
+		addCodeAsIncludeToValueSet(valueSet, TerminologyConstants.LOINC_URI, loincNumber, displayName);
 	}
 }

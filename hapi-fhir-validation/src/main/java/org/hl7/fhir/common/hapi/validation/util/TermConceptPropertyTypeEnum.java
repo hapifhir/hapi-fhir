@@ -69,8 +69,6 @@ public enum TermConceptPropertyTypeEnum {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TermConceptPropertyTypeEnum.class);
 	private static final Map<String, TermConceptPropertyTypeEnum> ourDatatypeMap = new HashMap<>();
-	private final String myDatatype;
-	private final boolean myPrimitive;
 
 	static {
 		for (var value : TermConceptPropertyTypeEnum.values()) {
@@ -78,9 +76,16 @@ public enum TermConceptPropertyTypeEnum {
 		}
 	}
 
+	private final String myDatatype;
+	private final boolean myPrimitive;
+
 	TermConceptPropertyTypeEnum(String theDatatype, boolean thePrimitive) {
 		myDatatype = theDatatype;
 		myPrimitive = thePrimitive;
+	}
+
+	public String getDatatype() {
+		return myDatatype;
 	}
 
 	public boolean isPrimitive() {

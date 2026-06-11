@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
+import ca.uhn.fhir.batch2.api.AttachmentMetadata;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
@@ -51,6 +52,7 @@ import com.google.common.collect.Iterators;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.htmlunit.html.FrameWindow;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
@@ -64,6 +66,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
@@ -1071,6 +1074,45 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			.isInstanceOf(ResourceNotFoundException.class)
 			.hasMessageContaining("Attachment with Filename [FOO] not found");
 	}
+
+	@Test
+	void testListAttachmentsForJobInstance() {
+		// Setup
+		String instanceIdA = mySvc.storeNewInstance(newSrd(), createInstance(true, false));
+		String instanceIdB = mySvc.storeNewInstance(newSrd(), createInstance(true, false));
+
+		String attachmentIdA0 = createAttachment(instanceIdA, "A0.txt");
+		String attachmentIdA1 = createAttachment(instanceIdA, "A1.txt");
+		String attachmentIdA2 = createAttachment(instanceIdA, "A2.txt");
+		createAttachment(instanceIdB, "A0.txt");
+		createAttachment(instanceIdB, "A1.txt");
+		createAttachment(instanceIdB, "A2.txt");
+
+		// Test
+		List<AttachmentMetadata> found = new ArrayList<>();
+		found.addAll(mySvc.listAttachmentsForJobInstance(PageRequest.of(0, 2), instanceIdA));
+		assertEquals(2, found.size());
+		found.addAll(mySvc.listAttachmentsForJobInstance(PageRequest.of(1, 2), instanceIdA));
+		assertEquals(3, found.size());
+
+		// Verify
+		assertThat(found).containsExactlyInAnyOrder(
+			new AttachmentMetadata(attachmentIdA0, "A0.txt"),
+			new AttachmentMetadata(attachmentIdA1, "A1.txt"),
+			new AttachmentMetadata(attachmentIdA2, "A2.txt")
+		);
+	}
+
+	private String createAttachment(String theInstanceId, String theFilename) {
+		AttachmentDetails detailsA0 = AttachmentDetails
+			.build()
+			.withInputStream(new ByteArrayInputStream("hello".getBytes(StandardCharsets.UTF_8)))
+			.withFilename(theFilename)
+			.withContentType(AttachmentContentTypeEnum.PLAIN_TEXT)
+			.build();
+		return mySvc.storeNewAttachment(theInstanceId, detailsA0);
+	}
+
 
 	@ParameterizedTest
 	@CsvSource({

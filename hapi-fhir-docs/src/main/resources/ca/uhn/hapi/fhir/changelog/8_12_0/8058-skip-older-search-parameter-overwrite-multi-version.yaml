@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8058
+title: "Previously, installing a package whose dependency tree pulls in multiple versions of the same
+package could silently downgrade resources. In `SINGLE_VERSION` mode, all canonical resources were
+affected. In `MULTI_VERSION` mode (the default), `SearchParameter` resources were affected since they
+match by `code` and `base` rather than URL and version. This has been fixed and the
+installer now detects redundant dependencies and skips older versions."
