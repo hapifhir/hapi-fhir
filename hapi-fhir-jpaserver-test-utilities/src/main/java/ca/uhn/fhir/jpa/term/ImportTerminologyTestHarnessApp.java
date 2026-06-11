@@ -60,7 +60,7 @@ public class ImportTerminologyTestHarnessApp {
 
 		while (true) {
 			Thread.sleep(1000);
-			appCtx.getBean(IJobMaintenanceService.class).forceMaintenancePass();
+			appCtx.getBean(IJobMaintenanceService.class).forceActiveJobMaintenancePass();
 		}
 	}
 

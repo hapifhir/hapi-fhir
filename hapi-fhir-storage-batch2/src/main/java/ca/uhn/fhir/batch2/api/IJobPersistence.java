@@ -105,6 +105,12 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
 
+	/**
+	 * Fetch all instances
+	 */
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex, Set<StatusEnum> theStatuses);
+
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	void enqueueWorkChunkForProcessing(String theChunkId, Consumer<Integer> theCallback);
 

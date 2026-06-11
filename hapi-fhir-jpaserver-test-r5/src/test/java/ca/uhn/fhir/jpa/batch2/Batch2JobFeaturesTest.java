@@ -76,9 +76,9 @@ public class Batch2JobFeaturesTest extends BaseJpaR5Test {
 		assertEquals(StatusEnum.BUILDING, myJobCoordinator.getBatchInstanceStatus(instanceId).status());
 
 
-		myJobMaintenanceService.forceMaintenancePass();
-		myJobMaintenanceService.forceMaintenancePass();
-		myJobMaintenanceService.forceMaintenancePass();
+		myJobMaintenanceService.forceActiveJobMaintenancePass();
+		myJobMaintenanceService.forceActiveJobMaintenancePass();
+		myJobMaintenanceService.forceActiveJobMaintenancePass();
 
 		// Job should still be in building status
 		assertEquals(StatusEnum.BUILDING, myJobCoordinator.getBatchInstanceStatus(instanceId).status());
