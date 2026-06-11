@@ -1,66 +1,71 @@
-/*-
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2026 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-package ca.uhn.fhir.jpa.term.icd10cm;
+package ca.uhn.fhir.jpa.batch2.jobs.term.icd.icd10cm;
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.batch2.api.AttachmentDetails;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyXmlUtil;
+import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.util.XmlUtil;
-import org.w3c.dom.Document;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.Reader;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class Icd10CmLoader {
+/**
+ * @see ImportIcdJobAppCtx#importIcd10CmStep2Concepts()
+ */
+public class ImportIcd10CmStep2HandleConcepts
+		extends BaseImportTerminologyFileStep<
+				ImportTerminologyJobParameters, BaseImportTerminologyFileStep.MyBaseContext> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportIcd10CmStep2HandleConcepts.class);
 
-	private final TermCodeSystemVersion myCodeSystemVersion;
-	private int myConceptCount;
+	public static final Pattern ICD10CM_FILE_PATTERN = Pattern.compile("icd10.*.xml$", Pattern.CASE_INSENSITIVE);
+	public static final String ICD10CM_FILENAME = "icd10cm.xml";
+
 	private static final String SEVEN_CHR_DEF = "sevenChrDef";
 	private static final String EXTENSION = "extension";
 	private static final String DIAG = "diag";
 	private static final String NAME = "name";
 	private static final String DESC = "desc";
 
-	/**
-	 * Constructor
-	 */
-	public Icd10CmLoader(TermCodeSystemVersion theCodeSystemVersion) {
-		myCodeSystemVersion = theCodeSystemVersion;
+	@Nonnull
+	@Override
+	public List<BaseImportTerminologyFileCsvStep.LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
+		return List.of(new BaseImportTerminologyFileCsvStep.LoincFileNameSpecification(
+				FileHandlingType.XML, t -> ICD10CM_FILE_PATTERN.matcher(t).find()));
 	}
 
-	public void load(Reader theReader) throws IOException, SAXException {
-		myConceptCount = 0;
+	@Override
+	protected void processAttachment(
+			@Nonnull
+					StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson>
+							theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			MyBaseContext theContext,
+			AttachmentDetails theAttachment,
+			ImportTerminologyJobParameters theJobParameters,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
 
-		Document document = XmlUtil.parseDocument(theReader, false, false);
-		Element documentElement = document.getDocumentElement();
+		Element documentElement = TerminologyXmlUtil.parseXmlDocument(theAttachment, theSourceFilename);
 
 		// Extract version: Should only be 1 tag
 		for (Element nextVersion : XmlUtil.getChildrenByTagName(documentElement, "version")) {
 			String versionId = nextVersion.getTextContent();
 			if (isNotBlank(versionId)) {
-				myCodeSystemVersion.setCodeSystemVersionId(versionId);
+				ourLog.info("ICD-10-CM file reports version: {}", versionId);
 			}
 		}
 
@@ -68,24 +73,28 @@ public class Icd10CmLoader {
 		for (Element nextChapter : XmlUtil.getChildrenByTagName(documentElement, "chapter")) {
 			for (Element nextSection : XmlUtil.getChildrenByTagName(nextChapter, "section")) {
 				for (Element nextDiag : XmlUtil.getChildrenByTagName(nextSection, "diag")) {
-					extractCode(nextDiag, null, null);
+					extractCode(nextDiag, null, null, theContext);
 				}
 			}
 		}
 	}
 
-	private void extractCode(Element theDiagElement, TermConcept theParentConcept, List<Element> theParentSevenChrDef) {
+	private void extractCode(
+			Element theDiagElement,
+			CodeSystem.ConceptDefinitionComponent theParentConcept,
+			List<Element> theParentSevenChrDef,
+			MyBaseContext theContext) {
 		String code = theDiagElement.getElementsByTagName(NAME).item(0).getTextContent();
 		String display = theDiagElement.getElementsByTagName(DESC).item(0).getTextContent();
 		List<Element> mySevenChrDef = null;
-		TermConcept concept;
+		CodeSystem.ConceptDefinitionComponent concept;
 		if (theParentConcept == null) {
-			concept = myCodeSystemVersion.addConcept();
+			concept = getOrAddConcept(theContext, code);
 		} else {
-			concept = theParentConcept.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+			concept = theParentConcept.addConcept();
+			concept.setCode(code);
 		}
 
-		concept.setCode(code);
 		concept.setDisplay(display);
 
 		// Check for seventh character definitions. If none exist at this level,
@@ -109,17 +118,15 @@ public class Icd10CmLoader {
 			}
 		} else {
 			for (Element nextChildDiag : XmlUtil.getChildrenByTagName(theDiagElement, DIAG)) {
-				extractCode(nextChildDiag, concept, mySevenChrDef);
+				extractCode(nextChildDiag, concept, mySevenChrDef, theContext);
 			}
 		}
-
-		myConceptCount++;
 	}
 
 	private void extractExtension(
 			List<Element> theSevenChrDefElement,
 			Element theChildDiag,
-			TermConcept theParentConcept,
+			CodeSystem.ConceptDefinitionComponent theParentConcept,
 			boolean isRootCode) {
 		for (Element nextChrNote : theSevenChrDefElement) {
 			for (Element nextExtension : XmlUtil.getChildrenByTagName(nextChrNote, EXTENSION)) {
@@ -132,7 +139,7 @@ public class Icd10CmLoader {
 				String baseDef = theChildDiag.getElementsByTagName(DESC).item(0).getTextContent();
 				String sevenCharDef = nextExtension.getTextContent();
 
-				TermConcept concept = theParentConcept.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+				CodeSystem.ConceptDefinitionComponent concept = theParentConcept.addConcept();
 
 				concept.setCode(getExtendedCode(baseCode, sevenChar));
 				concept.setDisplay(getExtendedDisplay(baseDef, sevenCharDef));
@@ -156,7 +163,9 @@ public class Icd10CmLoader {
 		return code.toString();
 	}
 
-	public int getConceptCount() {
-		return myConceptCount;
+	@Override
+	protected MyBaseContext newContextObject(
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+		return new BaseImportTerminologyFileStep.MyBaseContext();
 	}
 }
