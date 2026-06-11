@@ -44,7 +44,6 @@ public interface ITermCodeSystemStorageSvc {
 	/**
 	 * Defaults to true when the parameter is null or entry is not present in requestDetails.myUserData
 	 */
-	// FIXME: is this used?
 	static boolean isMakeVersionCurrent(RequestDetails theRequestDetails) {
 		return theRequestDetails == null
 				|| (boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);

@@ -170,7 +170,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testDeltaAdd(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		JobInstance jobInstance = mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
+		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -184,13 +184,8 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
 
-		// FIXME: add verification
-//		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
-//
-//		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-//		assertThat(listOfDescriptors).hasSize(1);
-//		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
-//		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
+		verify(myJobPersistence, times(2)).storeNewAttachment(any(), any());
+		verify(myJobCoordinator, times(1)).enqueueBuildingJobForExecution(any());
 	}
 
 	@ParameterizedTest
@@ -212,7 +207,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
+		JobInstance jobInstance = mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -225,72 +220,8 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
 
-		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
-
-		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertThat(listOfDescriptors).hasSize(2);
-		assertEquals("concepts.csv", listOfDescriptors.get(0).getFilename());
-		String uploadFile = IOUtils.toString(listOfDescriptors.get(0).getInputStream(), Charsets.UTF_8);
-		assertThat(uploadFile).as(uploadFile).contains("CODE,Display");
-	}
-
-	@ParameterizedTest
-	@MethodSource("paramsProvider")
-	public void testDeltaAddInvalidResource(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
-			try (FileWriter w = new FileWriter(myCodeSystemFile, false)) {
-				org.hl7.fhir.dstu3.model.Patient patient = new org.hl7.fhir.dstu3.model.Patient();
-				patient.setActive(true);
-				myCtx.newJsonParser().encodeResourceToWriter(patient, w);
-			}
-		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
-			try (FileWriter w = new FileWriter(myCodeSystemFile, false)) {
-				org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-				patient.setActive(true);
-				myCtx.newJsonParser().encodeResourceToWriter(patient, w);
-			}
-		} else {
-			fail("Unknown FHIR Version param provided: " + theFhirVersion);
-		}
-
-		try {
-			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[]{
-					UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-					"-v", theFhirVersion,
-					"-m", "ADD",
-					"-u", "http://foo",
-					"-d", myCodeSystemFileName
-				},
-				"-t", theIncludeTls, myBaseRestServerHelper
-			));
-			fail();		} catch (Error e) {
-			assertThat(e.toString()).contains("HTTP 400 Bad Request: " + Msg.code(362) + "Request has parameter codeSystem of type Patient but method expects type CodeSystem");
-		}
-	}
-
-	@ParameterizedTest
-	@MethodSource("paramsProvider")
-	public void testDeltaAddInvalidFileType(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		try (FileWriter w = new FileWriter(myTextFileName, false)) {
-			w.append("Help I'm a Bug");
-		}
-
-		try {
-			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[]{
-					UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-					"-v", theFhirVersion,
-					"-m", "ADD",
-					"-u", "http://foo",
-					"-d", myTextFileName
-				},
-				"-t", theIncludeTls, myBaseRestServerHelper
-			));
-
-			fail();		} catch (Error e) {
-			assertThat(e.toString()).contains("Don't know how to handle file:");
-		}
+		verify(myJobPersistence, times(1)).storeNewAttachment(any(), any());
+		verify(myJobCoordinator, times(1)).enqueueBuildingJobForExecution(any());
 	}
 
 	@Test
@@ -315,7 +246,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 	public void testDeltaAddUsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		writeArchiveFile(myConceptsFile, myHierarchyFile);
 
-		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
+		JobInstance jobInstance = mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -328,17 +259,17 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
 
-		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
-
-		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertThat(listOfDescriptors).hasSize(1);
-		assertThat(listOfDescriptors.get(0).getFilename()).matches("^file:.*temp.*\\.zip$");
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
+		verify(myJobPersistence, times(1)).storeNewAttachment(any(), any());
+		verify(myJobCoordinator, times(1)).enqueueBuildingJobForExecution(any());
 	}
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testDeltaAddInvalidFileName(String theFhirVersion, boolean theIncludeTls) {
+		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
+		startResponse.setInstanceId("my-instance-id");
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+
 		try {
 			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 				new String[]{
@@ -351,21 +282,16 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 				},
 				"-t", theIncludeTls, myBaseRestServerHelper
 			));
-			fail();		} catch (Error e) {
-			assertThat(e.toString().replace('\\', '/')).contains("FileNotFoundException: target/concepts.csv/foo.csv");
+			fail();
+		} catch (Error e) {
+			assertThat(e.toString().replace('\\', '/')).contains("File does not exist or can't be read: target/concepts.csv/foo.csv");
 		}
 	}
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testDeltaRemove(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadDeltaRemove(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
-		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadDeltaRemove(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
-		} else {
-			fail("Unknown FHIR Version param provided: " + theFhirVersion);
-		}
+		JobInstance jobInstance = mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -379,12 +305,8 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
 
-		verify(myTermLoaderSvc, times(1)).loadDeltaRemove(eq("http://foo"), myDescriptorListCaptor.capture(), any());
-
-		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertThat(listOfDescriptors).hasSize(1);
-		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
+		verify(myJobPersistence, times(2)).storeNewAttachment(any(), any());
+		verify(myJobCoordinator, times(1)).enqueueBuildingJobForExecution(any());
 	}
 
 	@ParameterizedTest

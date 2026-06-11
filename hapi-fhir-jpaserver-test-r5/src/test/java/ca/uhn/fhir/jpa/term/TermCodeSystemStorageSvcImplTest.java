@@ -814,7 +814,6 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 
 	}
 
-	// FIXME: rename to reflect method being called
 	// Created by Claude Opus 4.6
 	@Test
 	void testAddCodeSystemConcepts_newCodeSystem_shouldCreateCodeSystemAndAddConcepts() throws IOException {

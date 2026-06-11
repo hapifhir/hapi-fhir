@@ -192,6 +192,14 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						TerminologyConstants.FILENAME_CUSTOM_DISTRIBUTION_FILE,
 						AttachmentContentTypeEnum.ZIP),
 				new DistributionFilenamePattern(
+						filenameToPattern(TerminologyConstants.CUSTOM_CODESYSTEM_JSON),
+						TerminologyConstants.CUSTOM_CODESYSTEM_JSON,
+						AttachmentContentTypeEnum.JSON),
+				new DistributionFilenamePattern(
+						filenameToPattern(TerminologyConstants.CUSTOM_CODESYSTEM_XML),
+						TerminologyConstants.CUSTOM_CODESYSTEM_XML,
+						AttachmentContentTypeEnum.XML),
+				new DistributionFilenamePattern(
 						Pattern.compile("concepts.*\\.csv", Pattern.CASE_INSENSITIVE),
 						CUSTOM_CONCEPTS_FILE,
 						AttachmentContentTypeEnum.CSV),

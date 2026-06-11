@@ -39,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-// FIXME: rename or fold into custom test?
 public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcDeltaR4Test.class);
 
@@ -50,12 +49,6 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		termDeferredStorageSvc.clearDeferred();
 	}
 	
-	// FIXME: to copy then delete
-	/*
-	CodeSystem delta = newDeltaCodeSystem();
-	myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta);
-	*/
-
 	@Test
 	public void testAddRootConcepts() {
 		createNotPresentCodeSystem();

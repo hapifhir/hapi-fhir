@@ -1069,8 +1069,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				if (canonicalSuppliedCodeSystem.getContent() != null) {
 					actualContentMode = canonicalSuppliedCodeSystem.getContent().toCode();
 				}
-				// FIXME: add code
-				throw new InvalidRequestException(Msg.code(1) + "CodeSystem[id="
+				throw new InvalidRequestException(Msg.code(2976) + "CodeSystem[id="
 						+ codeSystemResource.getIdElement().getIdPart() + ", url=" + systemUrl + ", version="
 						+ systemVersionId + "] has content mode " + actualContentMode + " but must be "
 						+ CodeSystem.CodeSystemContentMode.NOTPRESENT.toCode());

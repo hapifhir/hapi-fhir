@@ -92,7 +92,7 @@ public class CustomTerminologyCsvBuilder {
 
 		} catch (IOException theE) {
 			// This shouldn't happen
-			throw new InternalErrorException(Msg.code(1) + theE.getMessage(), theE);
+			throw new InternalErrorException(Msg.code(2977) + theE.getMessage(), theE);
 		}
 
 		return target.toString();
