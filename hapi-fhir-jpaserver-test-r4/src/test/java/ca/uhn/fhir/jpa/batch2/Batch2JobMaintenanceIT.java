@@ -178,10 +178,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
 		String batchJobId = myJobCoordinator.startInstance(new SystemRequestDetails(), request).getInstanceId();
-//		myJobMaintenanceService.runActiveJobMaintenancePass();
-
-		// FIXME: remove timing
-		myFirstStepLatch.awaitExpectedWithTimeout(10000000);
+		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.assertFastTracking(batchJobId);
 

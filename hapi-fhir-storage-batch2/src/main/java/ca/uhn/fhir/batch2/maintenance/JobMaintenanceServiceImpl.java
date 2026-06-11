@@ -433,8 +433,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
-			// FIXME: reduce
-			ourLog.info("Running Batch2 active job maintenance pass");
+			ourLog.trace("Running Batch2 active job maintenance pass");
 			myTarget.runActiveJobMaintenancePass();
 		}
 	}
@@ -445,6 +444,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
+			ourLog.trace("Running Batch2 ended job maintenance pass");
 			myTarget.runEndedJobMaintenancePass();
 		}
 	}
