@@ -111,7 +111,8 @@ public interface IBatch2JobInstanceRepository
 			"SELECT new ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO(e.myId, e.myStatus, e.myStartTime, e.myEndTime) FROM Batch2JobInstanceEntity e WHERE e.myId = :id")
 	BatchInstanceStatusDTO fetchBatchInstanceStatus(@Param("id") String theInstanceId);
 
-	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myStatus IN (:statuses) ORDER BY e.myCreateTime ASC, e.myId ASC")
+	@Query(
+			"SELECT e FROM Batch2JobInstanceEntity e WHERE e.myStatus IN (:statuses) ORDER BY e.myCreateTime ASC, e.myId ASC")
 	Collection<Batch2JobInstanceEntity> findAllWithStatuses(
 			PageRequest thePageRequest, @Param("statuses") Set<StatusEnum> theStatuses);
 }

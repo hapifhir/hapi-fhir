@@ -598,7 +598,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0), eq(StatusEnum.getNotEndedStatuses()))).thenReturn(Collections.emptyList());
 
 		// Acquire the hold — this takes the semaphore
-		try (Closeable hold = mySvc.holdActiveJobMaintenanceForExpunge()) {
+		try (Closeable hold = mySvc.holdJobMaintenanceForExpunge()) {
 			// runMaintenancePass() tries tryAcquire(), fails, and returns immediately
 			mySvc.runActiveJobMaintenancePass();
 			verify(myJobPersistence, never()).fetchInstances(anyInt(), anyInt(), any());
@@ -656,7 +656,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 			// Thread C: try to acquire hold — blocks because Thread B holds the semaphore
 			Future<Closeable> holdFuture = holdExecutor.submit(() -> {
-				Closeable hold = mySvc.holdActiveJobMaintenanceForExpunge();
+				Closeable hold = mySvc.holdJobMaintenanceForExpunge();
 				holdAcquired.set(true);
 				return hold;
 			});
@@ -691,7 +691,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	// Created by claude-opus-4-6
 	@Test
 	void holdMaintenanceForExpunge_closeMultipleTimes_noError() throws Exception {
-		Closeable hold = mySvc.holdActiveJobMaintenanceForExpunge();
+		Closeable hold = mySvc.holdJobMaintenanceForExpunge();
 		hold.close();
 		hold.close(); // Must not double-release the semaphore
 

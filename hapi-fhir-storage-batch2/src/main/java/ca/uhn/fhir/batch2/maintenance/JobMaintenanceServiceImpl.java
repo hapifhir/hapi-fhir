@@ -97,8 +97,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private final BatchJobSender myBatchJobSender;
 	private final IReductionStepExecutorService myReductionStepExecutorService;
 	private final IInterceptorService myInterceptorService;
-	private final Semaphore myRunActiveMaintenanceSemaphore = new Semaphore(1);
-	private final Semaphore myRunEndedMaintenanceSemaphore = new Semaphore(1);
+	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 	private long myFailedJobLifetimeOverride = -1;
 	private Runnable myMaintenanceJobStartedCallback = () -> {};
 	private Runnable myMaintenanceJobFinishedCallback = () -> {};
@@ -161,7 +160,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 	public void setScheduledJobFrequencyMillis(Long theScheduledJobFrequencyMillis) {
 		Validate.isTrue(
-				myScheduledJobFrequencyMillis == null || myScheduledJobFrequencyMillis > 0,
+				theScheduledJobFrequencyMillis == null || theScheduledJobFrequencyMillis > 0,
 				"Scheduled job frequency must be greater than 0");
 		myScheduledJobFrequencyMillis = theScheduledJobFrequencyMillis;
 	}
@@ -196,14 +195,14 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 					"There is no clustered scheduling service.  Requesting semaphore to run maintenance pass directly.");
 			// Some unit test, esp. the Loinc terminology tests, depend on this maintenance pass being run shortly after
 			// it is requested
-			if (myRunActiveMaintenanceSemaphore.tryAcquire(
+			if (myRunMaintenanceSemaphore.tryAcquire(
 					MAINTENANCE_TRIGGER_RUN_WITHOUT_SCHEDULER_TIMEOUT, TimeUnit.MINUTES)) {
 				try {
 					ourLog.debug("Semaphore acquired.  Starting maintenance pass.");
 					doActiveMaintenancePass();
 				} finally {
 					ourLog.debug("Maintenance pass complete.  Releasing semaphore.");
-					myRunActiveMaintenanceSemaphore.release();
+					myRunMaintenanceSemaphore.release();
 				}
 			}
 			return true;
@@ -214,7 +213,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 	@VisibleForTesting
 	int getQueueLength() {
-		return myRunActiveMaintenanceSemaphore.getQueueLength() + myRunEndedMaintenanceSemaphore.getQueueLength();
+		return myRunMaintenanceSemaphore.getQueueLength();
 	}
 
 	@Override
@@ -222,11 +221,11 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	public void forceActiveJobMaintenancePass() {
 		// to simulate a long running job!
 		ourLog.info("Forcing a maintenance pass run; semaphore at {}", getQueueLength());
-		myRunActiveMaintenanceSemaphore.acquireUninterruptibly();
+		myRunMaintenanceSemaphore.acquireUninterruptibly();
 		try {
 			doActiveMaintenancePass();
 		} finally {
-			myRunActiveMaintenanceSemaphore.release();
+			myRunMaintenanceSemaphore.release();
 		}
 	}
 
@@ -237,10 +236,10 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 	// Created by claude-opus-4-6
 	@Override
-	public Closeable holdActiveJobMaintenanceForExpunge() {
+	public Closeable holdJobMaintenanceForExpunge() {
 		ourLog.info("Requesting hold on maintenance for expunge operation");
 		try {
-			if (!myRunActiveMaintenanceSemaphore.tryAcquire(HOLD_MAINTENANCE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+			if (!myRunMaintenanceSemaphore.tryAcquire(HOLD_MAINTENANCE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
 				throw new InternalErrorException(
 						Msg.code(2842) + "Timed out waiting to acquire maintenance hold for expunge after "
 								+ HOLD_MAINTENANCE_TIMEOUT_SECONDS + " seconds");
@@ -250,8 +249,9 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			throw new InternalErrorException(
 					Msg.code(2843) + "Interrupted while waiting to acquire maintenance hold for expunge", e);
 		}
+
 		ourLog.info("Acquired hold on maintenance for expunge operation");
-		return new MaintenanceHold(myRunActiveMaintenanceSemaphore);
+		return new MaintenanceHold(myRunMaintenanceSemaphore);
 	}
 
 	@Override
@@ -260,7 +260,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			ourLog.error("Maintenance (Active Job) job is disabled! This will affect all batch2 jobs!");
 		}
 
-		if (!myRunActiveMaintenanceSemaphore.tryAcquire()) {
+		if (!myRunMaintenanceSemaphore.tryAcquire()) {
 			ourLog.debug("Another Active Job maintenance pass is already in progress.  Ignoring request.");
 			return;
 		}
@@ -270,7 +270,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		} catch (Exception e) {
 			ourLog.error("Active Job Maintenance pass failed", e);
 		} finally {
-			myRunActiveMaintenanceSemaphore.release();
+			myRunMaintenanceSemaphore.release();
 		}
 	}
 
@@ -280,17 +280,29 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			ourLog.error("Maintenance (Ended Job) job is disabled! This will affect all batch2 jobs!");
 		}
 
-		if (!myRunEndedMaintenanceSemaphore.tryAcquire()) {
-			ourLog.debug("Another Ended Job maintenance pass is already in progress.  Ignoring request.");
+		try {
+			/*
+			 * In case the active maintenance worker is really busy, we'll wait a little while
+			 * just to avoid too much risk of the less frequent but still important Ended Job
+			 * maintenance pass
+			 */
+			if (!myRunMaintenanceSemaphore.tryAcquire(10, TimeUnit.SECONDS)) {
+				ourLog.debug("Another Ended Job maintenance pass is already in progress.  Ignoring request.");
+				return;
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			ourLog.debug("Waiting for maintenance semaphore was interrupted, aborting");
 			return;
 		}
+
 		try {
 			ourLog.debug("Ended Job Maintenance pass starting.");
 			doEndedMaintenancePass();
 		} catch (Exception e) {
 			ourLog.error("Ended Job Maintenance pass failed", e);
 		} finally {
-			myRunEndedMaintenanceSemaphore.release();
+			myRunMaintenanceSemaphore.release();
 		}
 	}
 

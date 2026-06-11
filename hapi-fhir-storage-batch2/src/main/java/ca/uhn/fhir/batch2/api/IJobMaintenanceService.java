@@ -53,7 +53,7 @@ public interface IJobMaintenanceService {
 	 * @return a {@link Closeable} that releases the maintenance semaphore when closed.
 	 *         The Closeable is idempotent — calling close() multiple times is safe.
 	 */
-	default Closeable holdActiveJobMaintenanceForExpunge() {
+	default Closeable holdJobMaintenanceForExpunge() {
 		// No-op default: implementations that support expunge coordination should override this.
 		return () -> {};
 	}
@@ -79,7 +79,7 @@ public interface IJobMaintenanceService {
 	 * Only to be used in tests to simulate a long running maintenance step.
 	 *
 	 * <p><b>Warning:</b> This method acquires the maintenance semaphore with an uninterruptible
-	 * blocking wait. Do not call this while {@link #holdActiveJobMaintenanceForExpunge()} is held on the
+	 * blocking wait. Do not call this while {@link #holdJobMaintenanceForExpunge()} is held on the
 	 * same thread — it will deadlock.
 	 */
 	@VisibleForTesting

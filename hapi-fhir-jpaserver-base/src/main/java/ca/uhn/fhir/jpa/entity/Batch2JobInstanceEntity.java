@@ -54,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 		name = "BT2_JOB_INSTANCE",
 		indexes = {
 			@Index(name = "IDX_BT2JI_CT", columnList = "CREATE_TIME"),
-			@Index(name = "IDX_BT2JI_STAT_CT", columnList = "STAT,CREATE_TIME,ID")
+			@Index(name = "IDX_BT2JI_STAT_CT_ID", columnList = "STAT,CREATE_TIME,ID")
 		})
 public class Batch2JobInstanceEntity implements Serializable {
 
