@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -88,6 +89,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -139,6 +141,7 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		JpaStorageSettings defaults = new JpaStorageSettings();
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaults.isMarkResourcesForReindexingUponSearchParameterChange());
 		myStorageSettings.setMatchUrlCacheEnabled(defaults.isMatchUrlCacheEnabled());
+		myStorageSettings.setTokenIndexStrategy(defaults.getTokenIndexStrategy());
 	}
 
 	@Test
@@ -2800,6 +2803,26 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids).isEmpty();
 
+	}
+
+	@Test
+	void testSearch_CompressedToken_SearchOnePartition_IncludePartitionInHashes() {
+		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(TokenIndexStrategy.TokenIndex.COMPRESSED), TokenIndexStrategy.TokenIndex.COMPRESSED));
+		myPartitionSettings.setIncludePartitionInSearchHashes(true);
+
+		IIdType id = createPatient(withCreatePartition(1), withIdentifier("http://example.com", "ID-1"), withGender("male"));
+
+		// IDENTIFIER branch
+		addNextTargetPartitionsForRead(1);
+		SearchParameterMap identifierMap = SearchParameterMap.newSynchronous().add(Patient.SP_IDENTIFIER, new TokenParam("http://example.com", "ID-1"));
+		List<IIdType> identifierIds = toUnqualifiedVersionlessIds(myPatientDao.search(identifierMap, mySrd));
+		assertThat(identifierIds).containsExactly(id);
+
+		// COMMON branch
+		addNextTargetPartitionsForRead(1);
+		SearchParameterMap genderMap = SearchParameterMap.newSynchronous().add(Patient.SP_GENDER, new TokenParam(null, "male"));
+		List<IIdType> genderIds = toUnqualifiedVersionlessIds(myPatientDao.search(genderMap, mySrd));
+		assertThat(genderIds).containsExactly(id);
 	}
 
 

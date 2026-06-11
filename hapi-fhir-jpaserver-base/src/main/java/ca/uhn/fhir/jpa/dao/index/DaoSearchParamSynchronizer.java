@@ -126,7 +126,9 @@ public class DaoSearchParamSynchronizer {
 					existingParams.myTokenParams,
 					null);
 		}
-		synchronizeTokenParamsToNewTables(theRequestDetails, theEntity, theParams, existingParams, retVal);
+		if (myStorageSettings.getTokenIndexStrategy().writeToCompressedTokenTables()) {
+			synchronizeTokenParamsToNewTables(theRequestDetails, theEntity, theParams, existingParams, retVal);
+		}
 		synchronize(
 				theRequestDetails,
 				theTransactionDetails,
@@ -231,9 +233,6 @@ public class DaoSearchParamSynchronizer {
 			ResourceIndexedSearchParams theExistingParams,
 			AddRemoveCount theAddRemoveCount) {
 		TokenIndexStrategy tokenStrategy = myStorageSettings.getTokenIndexStrategy();
-		if (!tokenStrategy.writeToCompressedTokenTables()) {
-			return;
-		}
 
 		PartitionablePartitionId partitionId = theEntity.getPartitionId();
 		RequestPartitionId requestPartitionId =
@@ -248,8 +247,9 @@ public class DaoSearchParamSynchronizer {
 				continue;
 			}
 
-			// Initialize tokens only once, if synchronize() didn't initialize them already
-			if (tokenStrategy.writeToLegacyTokenTable()) {
+			// Initialize tokens only once, if synchronize() didn't initialize them already.
+			// synchronize() runs (and initializes) only when the legacy token table is written.
+			if (!tokenStrategy.writeToLegacyTokenTable()) {
 				Long resourceId = theEntity.getId().getId();
 				token.setResourceId(resourceId);
 				token.setPartitionId(partitionId);

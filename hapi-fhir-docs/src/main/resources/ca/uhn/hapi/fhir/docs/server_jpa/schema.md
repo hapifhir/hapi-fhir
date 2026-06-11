@@ -881,7 +881,7 @@ Note: This table has the columns listed below, but it also has all common column
 
 # HFJ_SPIDX2_TOKEN_COMMON: Common Token Search Parameters
 
-The `HFJ_SPIDX2_TOKEN_COMMON` table stores token search parameter values (system and code combinations) that are shared across resources. Each unique system/value combination is stored once and referenced by [HFJ_SPIDX2_TOKEN_COMMON_RES](#HFJ_SPIDX2_TOKEN_COMMON_RES).
+The `HFJ_SPIDX2_TOKEN_COMMON` table stores token search parameter values (system and code combinations) that are shared across resources. Each unique combination of resource type, search parameter name, system, and value is stored once (deduplicated across resources) and referenced by [HFJ_SPIDX2_TOKEN_COMMON_RES](#HFJ_SPIDX2_TOKEN_COMMON_RES).
 
 This table uses a content-addressed primary key (`HASH_SYS_AND_VALUE`) which allows duplicate inserts to be silently ignored. See [Compressed Token Indexing](/hapi-fhir/docs/server_jpa/performance.html#compressed-token-indexing) for configuration and migration details.
 
@@ -921,16 +921,16 @@ This table uses a content-addressed primary key (`HASH_SYS_AND_VALUE`) which all
         </tr>
         <tr>
             <td>SYSTEM_ID</td>
-            <td>FK to <a href="#HFJ_RES_SYSTEM">HFJ_RES_SYSTEM</a></td>
+            <td></td>
             <td>Long</td>
             <td>Nullable</td>
-            <td>Foreign key to the system URL lookup table.</td>
+            <td>Hash PID of the system URL (matches <a href="#HFJ_RES_SYSTEM">HFJ_RES_SYSTEM</a>.PID; not an enforced foreign key constraint).</td>
         </tr>
         <tr>
             <td>SP_VALUE</td>
             <td></td>
             <td>String (200)</td>
-            <td>Not nullable</td>
+            <td>Nullable</td>
             <td>The token code/value.</td>
         </tr>
     </tbody>
@@ -940,7 +940,7 @@ This table uses a content-addressed primary key (`HASH_SYS_AND_VALUE`) which all
 
 # HFJ_SPIDX2_TOKEN_COMMON_RES: Resource to Common Tokens Join Table
 
-The `HFJ_SPIDX2_TOKEN_COMMON_RES` table links resources to their token values stored in `HFJ_SPIDX2_TOKEN_COMMON`. This table has a composite primary key of (`RES_ID`, `PARTITION_ID`, `HASH_SYS_AND_VALUE`).
+The `HFJ_SPIDX2_TOKEN_COMMON_RES` table links resources to their token values stored in `HFJ_SPIDX2_TOKEN_COMMON`. This table has a composite primary key of (`RES_ID`, `HASH_SYS_AND_VALUE`); `PARTITION_ID` is additionally included in the primary key when running in Database Partition Mode.
 
 ## Columns
 
@@ -971,10 +971,10 @@ The `HFJ_SPIDX2_TOKEN_COMMON_RES` table links resources to their token values st
         </tr>
         <tr>
             <td>HASH_SYS_AND_VALUE</td>
-            <td>FK to HFJ_SPIDX2_TOKEN_COMMON</td>
+            <td></td>
             <td>Long</td>
             <td>Not nullable</td>
-            <td>Reference to the token data in <code>HFJ_SPIDX2_TOKEN_COMMON</code>.</td>
+            <td>Reference to the token data in <code>HFJ_SPIDX2_TOKEN_COMMON</code> (matches its <code>HASH_SYS_AND_VALUE</code> primary key; not an enforced foreign key constraint).</td>
         </tr>
     </tbody>
 </table>
@@ -983,7 +983,7 @@ The `HFJ_SPIDX2_TOKEN_COMMON_RES` table links resources to their token values st
 
 # HFJ_SPIDX2_TOKEN_IDENTIFIER: Identifier Token Search Parameters
 
-The `HFJ_SPIDX2_TOKEN_IDENTIFIER` table stores identifier token search parameters with one row per resource-token pair.
+The `HFJ_SPIDX2_TOKEN_IDENTIFIER` table stores identifier token search parameters with one row per resource-token pair. This table has a composite primary key of (`RES_ID`, `SP_ID`); `PARTITION_ID` is additionally included in the primary key when running in Database Partition Mode.
 
 ## Columns
 
@@ -1000,10 +1000,10 @@ The `HFJ_SPIDX2_TOKEN_IDENTIFIER` table stores identifier token search parameter
     <tbody>
         <tr>
             <td>SP_ID</td>
-            <td>Primary Key</td>
+            <td>Part of composite primary key</td>
             <td>Long</td>
             <td>Not nullable</td>
-            <td>Auto-generated primary key.</td>
+            <td>Auto-generated identifier (part of the composite primary key; see above).</td>
         </tr>
         <tr>
             <td>PARTITION_ID</td>
@@ -1028,10 +1028,10 @@ The `HFJ_SPIDX2_TOKEN_IDENTIFIER` table stores identifier token search parameter
         </tr>
         <tr>
             <td>SP_SYSTEM_URL_ID</td>
-            <td>FK to <a href="#HFJ_RES_SYSTEM">HFJ_RES_SYSTEM</a></td>
+            <td></td>
             <td>Long</td>
             <td>Nullable</td>
-            <td>Foreign key to the system URL lookup table.</td>
+            <td>Hash PID of the system URL (matches <a href="#HFJ_RES_SYSTEM">HFJ_RES_SYSTEM</a>.PID; not an enforced foreign key constraint).</td>
         </tr>
         <tr>
             <td>SP_VALUE</td>

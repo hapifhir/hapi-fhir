@@ -28,6 +28,11 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.Constants;
 import jakarta.annotation.Nullable;
 
+/**
+ * Maps an extracted {@link ResourceIndexedSearchParamToken} into the compressed token-index entities
+ * ({@link ResourceIndexedSearchParamTokenCommon}, {@link ResourceIndexedSearchParamTokenCommonRes} and
+ * {@link ResourceIndexedSearchParamTokenIdentifier}).
+ */
 public final class TokenIndexEntityConverter {
 
 	private TokenIndexEntityConverter() {}

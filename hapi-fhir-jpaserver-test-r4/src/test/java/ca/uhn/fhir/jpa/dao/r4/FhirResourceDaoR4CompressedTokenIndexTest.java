@@ -55,8 +55,10 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 	}
 
 	@AfterEach
-	void resetTokenIndexStrategy() {
+	void resetTokenIndexSettings() {
 		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY));
+		myStorageSettings.setIdentifierTokenSearchParams(Set.of("identifier"));
+		myStorageSettings.setIndexIdentifierOfType(false);
 	}
 
 	@Test
@@ -471,46 +473,39 @@ public class FhirResourceDaoR4CompressedTokenIndexTest extends BaseJpaR4Test {
 
 	@Test
 	void createPatient_identifierWithType_routesOfTypeToIdentifierTableEvenWhenParamNotConfigured() {
-		// setup: remove "identifier" from the identifier-token set so routing can't rely on it.
-		// :of-type tokens must still land in the IDENTIFIER table, because the common tables have
-		// no TYPE_HASH_SYS_AND_VALUE column for the read path to query them back from.
+		// setup
 		myStorageSettings.setIndexIdentifierOfType(true);
 		myStorageSettings.setIdentifierTokenSearchParams(Set.of());
-		try {
-			Patient p = new Patient();
-			Identifier id = p.addIdentifier();
-			id.setSystem("http://example.com/ids").setValue("MRN123");
-			id.getType().addCoding()
-				.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-				.setCode("MR");
+		Patient p = new Patient();
+		Identifier id = p.addIdentifier();
+		id.setSystem("http://example.com/ids").setValue("MRN123");
+		id.getType().addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
 
-			// execute
-			IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-			JpaPid pid = JpaPid.fromId(patientId.getIdPartAsLong());
+		// execute
+		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		JpaPid pid = JpaPid.fromId(patientId.getIdPartAsLong());
 
-			// validate
-			long plainIdentifierHash =
-				hashSysAndValue("Patient", Patient.SP_IDENTIFIER, "http://example.com/ids", "MRN123");
+		// validate
+		long plainIdentifierHash =
+			hashSysAndValue("Patient", Patient.SP_IDENTIFIER, "http://example.com/ids", "MRN123");
 
-			runInTransaction(() -> {
-				// the :of-type token always routes to the IDENTIFIER table, regardless of config
-				List<ResourceIndexedSearchParamTokenIdentifier> identifiers = myTokenIdentifierDao.findByResourceId(pid);
-				assertThat(identifiers)
-					.as(":of-type token must always land in the IDENTIFIER table")
-					.extracting(ResourceIndexedSearchParamTokenIdentifier::getValue)
-					.containsExactly("MR|MRN123");
-				assertThat(identifiers.get(0).getTypeHashSystemAndValue()).isNotNull();
+		runInTransaction(() -> {
+			// the :of-type token always routes to the IDENTIFIER table, regardless of config
+			List<ResourceIndexedSearchParamTokenIdentifier> identifiers = myTokenIdentifierDao.findByResourceId(pid);
+			assertThat(identifiers)
+				.as(":of-type token must always land in the IDENTIFIER table")
+				.extracting(ResourceIndexedSearchParamTokenIdentifier::getValue)
+				.containsExactly("MR|MRN123");
+			assertThat(identifiers.get(0).getTypeHashSystemAndValue()).isNotNull();
 
-				// the plain identifier token follows config: not configured here, so it routes to the Common tables
-				assertThat(myTokenCommonResDao.findByResourceId(pid))
-					.as("plain identifier follows config (not configured -> COMMON)")
-					.extracting(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
-					.contains(plainIdentifierHash);
-			});
-		} finally {
-			myStorageSettings.setIdentifierTokenSearchParams(Set.of("identifier"));
-			myStorageSettings.setIndexIdentifierOfType(false);
-		}
+			// the plain identifier token follows config: not configured here, so it routes to the Common tables
+			assertThat(myTokenCommonResDao.findByResourceId(pid))
+				.as("plain identifier follows config (not configured -> COMMON)")
+				.extracting(ResourceIndexedSearchParamTokenCommonRes::getHashSystemAndValue)
+				.contains(plainIdentifierHash);
+		});
 	}
 
 	@Nested

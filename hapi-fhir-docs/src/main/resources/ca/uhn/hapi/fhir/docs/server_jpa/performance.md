@@ -89,12 +89,9 @@ Setting this property explicitly to true enables the feature: [Index Storage Opt
 
 # Compressed Token Indexing
 
-Compressed token indexing is a storage optimization feature that allows reducing database storage requirements for token search parameters. This feature introduces three new tables that use a more efficient storage strategy than the `HFJ_SPIDX_TOKEN` table.
-
-## Benefits
-
-* **Storage Reduction**: The `HFJ_SPIDX2_TOKEN_COMMON` table deduplicates token values globally. Common codes (like `active`, `male`, `female`, LOINC codes, SNOMED codes) are stored once rather than repeated for every resource.
-* **Longer Identifier Values**: The `HFJ_SPIDX2_TOKEN_IDENTIFIER` table supports identifier values up to 768 characters (vs 200 in `HFJ_SPIDX_TOKEN`).
+Compressed token indexing is a storage optimization feature that allows reducing database storage requirements for token search parameters by up to 20%. 
+This feature introduces three new tables that use a more efficient storage strategy than the `HFJ_SPIDX_TOKEN` table. 
+The main saving comes from the `HFJ_SPIDX2_TOKEN_COMMON` table, which deduplicates token values across resources: common codes (like `active`, `male`, `female`, LOINC codes, SNOMED codes) are stored once rather than repeated for every resource.
 
 ## When to Use
 

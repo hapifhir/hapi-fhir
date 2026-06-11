@@ -1,8 +1,9 @@
 ---
 type: add
 issue: 7944
-title: "Added a new compressed token indexing strategy that allows reducing database storage
-  for token search parameters by deduplicating common system/code combinations. This is especially
-  effective for identifiers and coded values that repeat across many resources. Enable via
-  JpaStorageSettings.setTokenIndexStrategy(). See
-  [Compressed Token Indexing](/hapi-fhir/docs/server_jpa/performance.html#compressed-token-indexing) for details."
+title: "Added a new compressed token indexing strategy that can reduce overall database storage by up to 20%.
+  The strategy introduces three new tables: `HFJ_SPIDX2_TOKEN_COMMON` stores each shared token value once,
+  `HFJ_SPIDX2_TOKEN_COMMON_RES` links resources to those values, and `HFJ_SPIDX2_TOKEN_IDENTIFIER` handles
+  identifier search parameters. See
+  [Token Index Strategy Configuration](/hapi-fhir/docs/server_jpa/configuration.html#token-index-strategy-configuration)
+  for configuration and migration details."
