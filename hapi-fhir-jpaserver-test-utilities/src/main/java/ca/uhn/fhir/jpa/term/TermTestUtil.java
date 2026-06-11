@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -168,15 +168,15 @@ public final class TermTestUtil {
 
 		verifyDesignation(
 				formalNameDes,
-				ITermLoaderSvc.LOINC_URI,
+				TerminologyConstants.LOINC_URI,
 				"FullySpecifiedName",
 				theComponent + ":" + theProperty + ":" + theTimeAspct + ":" + theSystem + ":" + theScaleTyp + ":"
 						+ methodType);
-		verifyDesignation(shortNameDes, ITermLoaderSvc.LOINC_URI, "SHORTNAME", theShortName);
-		verifyDesignation(longCommonNameDes, ITermLoaderSvc.LOINC_URI, "LONG_COMMON_NAME", theLongCommonName);
+		verifyDesignation(shortNameDes, TerminologyConstants.LOINC_URI, "SHORTNAME", theShortName);
+		verifyDesignation(longCommonNameDes, TerminologyConstants.LOINC_URI, "LONG_COMMON_NAME", theLongCommonName);
 		verifyDesignation(
 				linguisticVariantDisplayNameDes,
-				ITermLoaderSvc.LOINC_URI,
+				TerminologyConstants.LOINC_URI,
 				"LinguisticVariantDisplayName",
 				theLinguisticVariantDisplayName);
 	}

@@ -238,6 +238,13 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 			throws ResourceNotFoundException;
 
 	/**
+	 * Fetches the metadata (attachment ID, attachment filename if any) for attachments stored
+	 * for a specific job instance. The attachments are returned in a stable order across pages,
+	 * but the specific order is up to the implementation.
+	 */
+	List<AttachmentMetadata> listAttachmentsForJobInstance(Pageable thePage, String theInstanceId);
+
+	/**
 	 * Brute-force hack for now to create a tx boundary - takes a write-lock on the instance
 	 * while the theModifier runs.
 	 * Keep the callback short to keep the lock-time short.
