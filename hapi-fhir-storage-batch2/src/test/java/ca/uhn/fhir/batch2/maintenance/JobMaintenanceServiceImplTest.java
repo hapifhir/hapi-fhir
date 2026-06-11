@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
@@ -585,9 +586,9 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	}
 
 	/**
-	 * Verifies that runMaintenancePass() is a no-op while the expunge hold is active.
+	 * Verifies that {@link IJobMaintenanceService#runActiveJobMaintenancePass()} is a no-op while the expunge hold is active.
 	 *
-	 * <p>runMaintenancePass() uses tryAcquire() (non-blocking) on the semaphore, so it
+	 * {@link IJobMaintenanceService#runActiveJobMaintenancePass()} uses tryAcquire() (non-blocking) on the semaphore, so it
 	 * silently skips when the semaphore is unavailable. After the hold is released,
 	 * maintenance should run normally.
 	 */
@@ -599,8 +600,10 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		// Acquire the hold — this takes the semaphore
 		try (Closeable hold = mySvc.holdJobMaintenanceForExpunge()) {
-			// runMaintenancePass() tries tryAcquire(), fails, and returns immediately
+
+			/// {@link IJobMaintenanceService#runActiveJobMaintenancePass()} tries tryAcquire(), fails, and returns immediately
 			mySvc.runActiveJobMaintenancePass();
+
 			verify(myJobPersistence, never()).fetchInstances(anyInt(), anyInt(), any());
 		}
 
@@ -624,7 +627,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	 *
 	 * <p>Timeline:
 	 * <pre>
-	 * Thread B:  runMaintenancePass() → acquires semaphore → fetchInstances() → PARKS on maintenanceCanFinish
+	 * Thread B:  {@link IJobMaintenanceService#runActiveJobMaintenancePass()} → acquires semaphore → fetchInstances() → PARKS on maintenanceCanFinish
 	 * Test:      maintenanceStarted.await() returns → we know semaphore is held
 	 * Thread C:  holdMaintenanceForExpunge() → tryAcquire() → BLOCKS (semaphore held by B)
 	 * Test:      Awaitility confirms holdAcquired is still false (C is blocked)

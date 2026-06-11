@@ -293,7 +293,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		try {
 			// run maintenance pass -> cleans up failed jobs/workchunks
-			myBatch2JobHelper.runMaintenancePass();
+			myBatch2JobHelper.runActiveJobMaintenancePass();
 
 			// create a fake work notification
 			JobWorkNotification notification = new JobWorkNotification();
@@ -411,7 +411,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
-		myBatch2JobHelper.runMaintenancePass();
+		myBatch2JobHelper.runActiveJobMaintenancePass();
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
@@ -436,7 +436,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
 		String batchJobId = myJobCoordinator.startInstance(new SystemRequestDetails(), request).getInstanceId();
-		myBatch2JobHelper.runMaintenancePass();
+		myBatch2JobHelper.runActiveJobMaintenancePass();
 		myFirstStepLatch.awaitExpected();
 		myBatch2JobHelper.assertFastTracking(batchJobId);
 
@@ -475,7 +475,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			 * still being processed by the WorkChunkMessageHandler
 			 * (and thus, not available yet).
 			 */
-			myBatch2JobHelper.forceRunMaintenancePass();
+			myBatch2JobHelper.forceRunActiveJobMaintenancePass();
 		};
 
 		buildAndDefine3StepReductionJob(jobId, new IReductionStepHandler() {
@@ -661,7 +661,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 
 			String instanceId = startResponse.getInstanceId();
-			myBatch2JobHelper.runMaintenancePass();
+			myBatch2JobHelper.runActiveJobMaintenancePass();
 			myFirstStepLatch.awaitExpected();
 			assertNotNull(instanceId);
 
@@ -729,7 +729,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				// which should cause multiple maintenance runs to run simultaneously
 				if (theDelayReductionStepBool && mySecondGate.getAndIncrement() == 1) {
 					ourLog.info("SECOND FORCED MAINTENANCE PASS FORCED");
-					myBatch2JobHelper.forceRunMaintenancePass();
+					myBatch2JobHelper.forceRunActiveJobMaintenancePass();
 				}
 			}
 
@@ -756,7 +756,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 		String instanceId = startResponse.getInstanceId();
-		myBatch2JobHelper.runMaintenancePass();
+		myBatch2JobHelper.runActiveJobMaintenancePass();
 		myFirstStepLatch.awaitExpected();
 		assertNotNull(instanceId);
 
@@ -987,7 +987,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 		String instanceId = startResponse.getInstanceId();
-		myBatch2JobHelper.runMaintenancePass();
+		myBatch2JobHelper.runActiveJobMaintenancePass();
 		myFirstStepLatch.awaitExpected();
 
 		myLastStepLatch.setExpectedCount(2);
@@ -1049,7 +1049,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			myFirstStepLatch.setExpectedCount(1);
 			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 			String instanceId = startResponse.getInstanceId();
-			myBatch2JobHelper.forceRunMaintenancePass();
+			myBatch2JobHelper.forceRunActiveJobMaintenancePass();
 			myFirstStepLatch.awaitExpected();
 
 			// validate

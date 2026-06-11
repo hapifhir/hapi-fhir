@@ -190,7 +190,7 @@ public class Batch2JobHelper {
 				.atMost(waitDuration)
 				.until(() -> {
 					counter.getAndIncrement();
-					forceRunMaintenancePass();
+					forceRunActiveJobMaintenancePass();
 					return hasStatus(theInstanceId, theStatusEnums);
 				});
 		} catch (ConditionTimeoutException ex) {
@@ -379,7 +379,7 @@ public class Batch2JobHelper {
 	 * Forces a run of the maintenance pass without waiting for
 	 * the semaphore to release
 	 */
-	public void forceRunMaintenancePass() {
+	public void forceRunActiveJobMaintenancePass() {
 		myJobMaintenanceService.forceActiveJobMaintenancePass();
 	}
 

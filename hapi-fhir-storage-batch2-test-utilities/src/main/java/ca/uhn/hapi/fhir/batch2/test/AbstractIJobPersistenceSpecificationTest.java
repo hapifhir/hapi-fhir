@@ -228,7 +228,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 	}
 
 	@Override
-	public abstract void runMaintenancePass();
+	public abstract void runActiveJobMaintenancePass();
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(getTxManager());
