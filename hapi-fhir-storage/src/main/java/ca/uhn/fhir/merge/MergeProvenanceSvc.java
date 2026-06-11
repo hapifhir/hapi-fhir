@@ -64,7 +64,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
-			@Nullable String theProvenanceGroupId,
+			@Nullable String theProvenanceCorrelationId,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -74,7 +74,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 				theTargetId,
 				theSourceId,
 				theChangedResourceIds,
-				theProvenanceGroupId,
+				theProvenanceCorrelationId,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
@@ -86,8 +86,8 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 
 	/**
 	 * Finds all merge Provenances for the given target and source resource IDs.
-	 * Returns all Provenances that share the same group ID as the main Provenance (the one with
-	 * target+source in correct order). If the main Provenance has no group ID, returns just the main.
+	 * Returns all Provenances that share the same correlation id as the main Provenance (the one with
+	 * target+source in correct order). If the main Provenance has no correlation id, returns just the main.
 	 *
 	 * @param theTargetId the target resource id
 	 * @param theSourceId the source resource id
@@ -118,13 +118,13 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 			return Collections.emptyList();
 		}
 
-		return collectGroupedProvenances(mainProvenance, provenances);
+		return collectCorrelatedProvenances(mainProvenance, provenances);
 	}
 
 	/**
 	 * Finds all merge Provenances for the given target id and source identifiers.
 	 * For Patient resources, tries both patient-specific and generic parameter names for backward compatibility.
-	 * Returns all Provenances that share the same group ID as the main Provenance. If no group ID,
+	 * Returns all Provenances that share the same correlation id as the main Provenance. If no correlation id,
 	 * returns just the main.
 	 *
 	 * @param theTargetId the target resource id
@@ -155,20 +155,20 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 			return Collections.emptyList();
 		}
 
-		return collectGroupedProvenances(mainProvenance, provenances);
+		return collectCorrelatedProvenances(mainProvenance, provenances);
 	}
 
 	/**
 	 * Given the main Provenance, collects all Provenances from {@code theAllProvenances} that share
-	 * the same provenance group ID. If the main Provenance has no group ID (same-partition merge),
+	 * the same provenance correlation id. If the main Provenance has no correlation id (same-partition merge),
 	 * returns a singleton list containing only the main Provenance.
 	 *
 	 * @return a list where the first element is always the main Provenance, followed by sub-Provenances.
 	 */
-	private List<Provenance> collectGroupedProvenances(
+	private List<Provenance> collectCorrelatedProvenances(
 			Provenance theMainProvenance, List<Provenance> theAllProvenances) {
-		String groupId = getProvenanceGroupId(theMainProvenance);
-		if (groupId == null) {
+		String correlationId = getProvenanceCorrelationId(theMainProvenance);
+		if (correlationId == null) {
 			return List.of(theMainProvenance);
 		}
 
@@ -181,7 +181,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 			if (mainId.equals(p.getIdElement().toUnqualifiedVersionless().getValue())) {
 				continue;
 			}
-			if (Objects.equals(groupId, getProvenanceGroupId(p))) {
+			if (Objects.equals(correlationId, getProvenanceCorrelationId(p))) {
 				result.add(p);
 			}
 		}
@@ -189,8 +189,8 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	}
 
 	@Nullable
-	private static String getProvenanceGroupId(Provenance theProvenance) {
-		Extension ext = theProvenance.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP);
+	private static String getProvenanceCorrelationId(Provenance theProvenance) {
+		Extension ext = theProvenance.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_CORRELATION_ID);
 		if (ext != null && ext.hasValue()) {
 			return ext.getValueAsPrimitive().getValueAsString();
 		}

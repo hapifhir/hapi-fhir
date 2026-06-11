@@ -561,12 +561,12 @@ public class MergeOperationTestHelper {
 				theFhirContext, mainProvenance, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
 		assertMainMergeProvenanceContainedResources(mainProvenance, theInputParameters, theTargetIdWithExpectedVersion);
 
-		// Validate all Provenances share the same provenance group extension
-		String mainGroupId = mainProvenance
-				.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP)
+		// Validate all Provenances share the same provenance correlation id extension
+		String mainCorrelationId = mainProvenance
+				.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_CORRELATION_ID)
 				.getValueAsPrimitive()
 				.getValueAsString();
-		assertThat(mainGroupId).isNotBlank();
+		assertThat(mainCorrelationId).isNotBlank();
 
 		// Sub-Provenances are created before src/tgt update, so they reference pre-update versions.
 		// Verify target and source versionlessly, collect partition-specific targets.
@@ -582,10 +582,10 @@ public class MergeOperationTestHelper {
 			assertCommonMergeProvenanceFields(
 					theFhirContext, sub, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
 
-			String subGroupId = sub.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP)
+			String subCorrelationId = sub.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_CORRELATION_ID)
 					.getValueAsPrimitive()
 					.getValueAsString();
-			assertThat(subGroupId).isEqualTo(mainGroupId);
+			assertThat(subCorrelationId).isEqualTo(mainCorrelationId);
 
 			for (int i = 2; i < sub.getTarget().size(); i++) {
 				allTargetsAcrossProvenances.add(new IdDt(sub.getTarget().get(i).getReference()).toString());

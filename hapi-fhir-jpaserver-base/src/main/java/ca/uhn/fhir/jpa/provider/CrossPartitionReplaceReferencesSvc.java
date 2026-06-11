@@ -86,7 +86,7 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * transaction — all internal operations use {@code transactionNested()}.
 	 * <p>
 	 * Does NOT delete the source copies — the caller is responsible for deleting them after
-	 * provenance creation using the returned {@link CrossPartitionReplaceReferencesResult#getCopiedResourceOriginalIds()}.
+	 * provenance creation using the returned {@link CrossPartitionReplaceReferencesResult#getCopiedResourceOriginalIdsByPartition()}.
 	 * Deletion cannot happen here because provenance must reference the originals (as tombstones),
 	 * and deleting first would violate referential integrity checks.
 	 *
@@ -114,7 +114,7 @@ public class CrossPartitionReplaceReferencesSvc {
 
 		if (allReferencingResources.isEmpty()) {
 			ourLog.info("No referencing resources found for {}", sourceId.getValue());
-			return new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
+			return new CrossPartitionReplaceReferencesResult(Map.of(), Map.of());
 		}
 
 		// Step 2: Classify into COPY (partition changes after rewrite) vs UPDATE (same partition).
@@ -139,13 +139,11 @@ public class CrossPartitionReplaceReferencesSvc {
 				updateList.size());
 
 		if (copyList.isEmpty() && updateList.isEmpty()) {
-			return new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
+			return new CrossPartitionReplaceReferencesResult(Map.of(), Map.of());
 		}
 
-		// Capture versioned IDs from copyList before buildCombinedBundle clears them.
-		// Also capture per-partition grouping (RESOURCE_PARTITION_ID is cleared by buildCombinedBundle for copies).
-		List<IIdType> copiedResourceOriginalIds =
-				copyList.stream().map(IBaseResource::getIdElement).toList();
+		// Capture per-partition grouping of the original source copies before buildCombinedBundle clears them
+		// (RESOURCE_PARTITION_ID is cleared by buildCombinedBundle for copies).
 		Map<RequestPartitionId, List<IIdType>> copiedResourceOriginalIdsByPartition = groupIdsByPartition(copyList);
 
 		// Step 3: Discover additional resources to update BEFORE bundle execution.
@@ -184,19 +182,13 @@ public class CrossPartitionReplaceReferencesSvc {
 			}
 		}
 
-		List<IIdType> changedResourceIds =
-				ReplaceReferencesProvenanceSvc.extractChangedResourceIds(List.of(combinedResponse));
-
 		ourLog.info(
 				"Cross-partition merge complete: copied {} resources, updated {} references",
 				copyList.size(),
 				updateList.size());
 
 		return new CrossPartitionReplaceReferencesResult(
-				changedResourceIds,
-				copiedResourceOriginalIds,
-				committedResourcesByPartition,
-				copiedResourceOriginalIdsByPartition);
+				committedResourcesByPartition, copiedResourceOriginalIdsByPartition);
 	}
 
 	/**

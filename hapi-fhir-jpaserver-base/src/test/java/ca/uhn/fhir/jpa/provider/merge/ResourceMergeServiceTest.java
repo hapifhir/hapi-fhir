@@ -44,6 +44,7 @@ import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -725,7 +726,7 @@ public class ResourceMergeServiceTest {
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
 			when(myCrossPartitionReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of()));
+				.thenReturn(new CrossPartitionReplaceReferencesResult(Map.of(), Map.of()));
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -754,7 +755,7 @@ public class ResourceMergeServiceTest {
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
 			when(myCrossPartitionReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of()));
+				.thenReturn(new CrossPartitionReplaceReferencesResult(Map.of(), Map.of()));
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -805,12 +806,12 @@ public class ResourceMergeServiceTest {
 			setupTransactionServiceMock();
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(2);
 
-			IdDt changedObservationId = new IdDt("Observation", "new-obs1", "1");
-			IdDt changedListId = new IdDt("List", "new-list1", "1");
-			IdDt copiedOriginalId = new IdDt("Observation", "obs1", "1");
+			IIdType copiedOriginalId = new IdDt("Observation", "obs1", "1");
+			Map<RequestPartitionId, List<IIdType>> copiedOriginalsByPartition =
+				Map.of(RequestPartitionId.fromPartitionId(1), List.of(copiedOriginalId));
 			when(myCrossPartitionReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(changedObservationId, changedListId), List.of(copiedOriginalId), Map.of(), Map.of()));
+				.thenReturn(new CrossPartitionReplaceReferencesResult(Map.of(), copiedOriginalsByPartition));
 
 			// When
 			myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
