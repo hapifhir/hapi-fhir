@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.dao.r5.database;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
@@ -24,12 +26,16 @@ import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.Communication;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.ServiceRequest;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Location;
 import org.hl7.fhir.r5.model.Parameters;
@@ -102,6 +108,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
+
 
 	SystemRequestDetails myRequestDetails = new SystemRequestDetails();
 
@@ -250,6 +257,71 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	@MethodSource("ca.uhn.fhir.jpa.test.QueryTestCases#get")
 	void testSyntaxForVariousQueries(QueryTestCases theQueryTestCase) {
 		assertDoesNotThrow(() -> myTestDaoSearch.searchForBundleProvider(theQueryTestCase.getQuery()), theQueryTestCase.getName());
+	}
+
+	/**
+	 * Reproduces a production bug where a transaction bundle that soft-deletes
+	 * resources with outgoing references, followed by a system-level $expunge,
+	 * fails with an FK_RESLINK_SOURCE constraint violation.
+	 *
+	 * Steps:
+	 * 1. Create ServiceRequest, PractitionerRole, and Communication
+	 *    (Communication.basedOn → ServiceRequest, Communication.recipient → PractitionerRole)
+	 * 2. Execute a transaction bundle containing DELETE entries for all three
+	 * 3. Run system-level $expunge with expungeDeletedResources=true
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	void testSystemExpunge_afterTransactionBundleDelete_withResourceLinks() {
+		// Create a ServiceRequest
+		ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setStatus(Enumerations.RequestStatus.ACTIVE);
+		IIdType serviceRequestId = myDaoRegistry.getResourceDao("ServiceRequest")
+			.create(serviceRequest, myRequestDetails).getId().toUnqualifiedVersionless();
+
+		// Create a PractitionerRole
+		PractitionerRole practitionerRole = new PractitionerRole();
+		practitionerRole.setActive(true);
+		IIdType practitionerRoleId = myDaoRegistry.getResourceDao("PractitionerRole")
+			.create(practitionerRole, myRequestDetails).getId().toUnqualifiedVersionless();
+
+		// Create a Communication referencing both (creates ResourceLink rows)
+		Communication communication = new Communication();
+		communication.setStatus(Enumerations.EventStatus.COMPLETED);
+		communication.addBasedOn(new Reference(serviceRequestId));
+		communication.addRecipient(new Reference(practitionerRoleId));
+		IIdType communicationId = myDaoRegistry.getResourceDao("Communication")
+			.create(communication, myRequestDetails).getId().toUnqualifiedVersionless();
+
+		// Verify ResourceLink rows exist (basedOn + recipient)
+		runInTransaction(() -> assertThat(myResourceLinkDao.findAll()).hasSize(2));
+
+		// Step 1: Build a transaction bundle with DELETE entries for all three resources
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionDeleteEntry(serviceRequestId);
+		bb.addTransactionDeleteEntry(practitionerRoleId);
+		bb.addTransactionDeleteEntry(communicationId);
+		Bundle deleteBundle = (Bundle) bb.getBundle();
+
+		// Execute the transaction bundle (soft-deletes all three resources)
+		myDaoRegistry.getSystemDao().transaction(myRequestDetails, deleteBundle);
+
+		// Verify all are soft-deleted
+		assertGone(communicationId);
+		assertGone(serviceRequestId);
+		assertGone(practitionerRoleId);
+
+		// Step 2: System-level $expunge
+		myStorageSettings.setExpungeEnabled(true);
+		try {
+			myDaoRegistry.getSystemDao().expunge(new ExpungeOptions()
+				.setExpungeDeletedResources(true), myRequestDetails);
+
+			// Verify no orphaned ResourceLink rows remain
+			runInTransaction(() -> assertThat(myResourceLinkDao.findAll()).isEmpty());
+		} finally {
+			myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+		}
 	}
 
 	@Configuration
