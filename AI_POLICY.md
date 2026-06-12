@@ -6,8 +6,8 @@ Please remember that HAPI FHIR is maintained by humans.
 
 
 Every discussion, issue, and pull request is read and reviewed by humans (and
-sometimes machines, too). As a reference Java implementation of HL7 FHIR, this 
-software directly impacts patient health outcomes. 
+sometimes machines, too). As a reference Java implementation of HL7 FHIR, this
+software directly impacts patient health outcomes.
 
 This repository is a boundary point at which people interact with
 each other and the work done. It is rude and disrespectful to approach this
@@ -20,7 +20,7 @@ drivers of AI are just not good enough. So, until either the people get
 better, the AI gets better, or both, we have to have strict rules to protect
 maintainers.
 
-## Policy 
+## Policy
 
 Using AI (i.e., LLMs) as a tool for coding is welcome. However, a high bar is
 held for all contributions to this project. Contributors remain responsible
@@ -29,8 +29,8 @@ any code that is merged and released.
 
 **All AI usage in any form must be disclosed.** You must state the tool you
 used (e.g. Claude Code, Cursor, Amp) along with the extent that the work was
-AI-assisted. Any Pull Request that is built with AI assistance submitted must attach the `AI Assisted` 
-Github label. 
+AI-assisted. Any Pull Request that is built with AI assistance submitted must attach the `AI Assisted`
+Github label.
 
 **AI should not be used to generate comments or Pull Request descriptions when communicating with
 maintainers.** Comments are expected to be written by humans. Comments that
@@ -44,8 +44,8 @@ proposed changes in your own words. This includes the pull request body and
 responses to questions. **Do not copy responses from an AI when replying to
 questions from maintainers.**
 
-HAPI FHIR is the reference implementation in Java for healthcare systems 
-intending to implement FHIR interoperability, so this project requires a 
+HAPI FHIR is the reference implementation in Java for healthcare systems
+intending to implement FHIR interoperability, so this project requires a
 human in the loop who understands the work produced by AI.
 **Fully Autonomous agents are not allowed to be used for contributing to this
 project.** Pull requests that appear to have been created autonomously will be
