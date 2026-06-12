@@ -82,6 +82,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -89,6 +90,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.packages.PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL;
@@ -324,27 +326,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		ourLog.info("Installing package: {}#{}", name, version);
 		Map<String, EnumMap<InstallResultEnum, Integer>> installCounts = new HashMap<>();
 
-		for (String type : installTypes) {
-
-			Collection<IBaseResource> resources = myPackageResourceParsingSvc.parseResourcesOfType(type, npmPackage);
-
-			for (IBaseResource next : resources) {
-				try {
-					next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
-					InstallResultEnum result = install(next, theInstallationSpec, theOutcome);
-					installCounts
-							.computeIfAbsent(type, k -> new EnumMap<>(InstallResultEnum.class))
-							.merge(result, 1, Integer::sum);
-				} catch (Exception e) {
-					ourLog.warn(
-							"Failed to upload resource of type {} with ID {} - Error: {}",
-							myFhirContext.getResourceType(next),
-							next.getIdElement().getValue(),
-							e.toString());
-					throw new ImplementationGuideInstallationException(
-							Msg.code(1286) + String.format("Error installing IG %s#%s: %s", name, version, e), e);
-				}
-			}
+		List<IBaseResource> resources = collectResources(npmPackage, theInstallationSpec, installTypes);
+		for (IBaseResource next : resources) {
+			installResourceFromPackage(next, theInstallationSpec, theOutcome, installCounts, name, version);
 		}
 
 		if (theInstallationSpec.isDryRun()) {
@@ -377,6 +361,52 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		installCounts.forEach((type, counts) -> {
 			counts.forEach((result, count) -> ourLog.info("-- {} {} resources of type {}", result, count, type));
 		});
+	}
+
+	// Created by Claude Opus 4.6
+	private List<IBaseResource> collectResources(
+			NpmPackage theNpmPackage, PackageInstallationSpec theInstallationSpec, List<String> theInstallTypes) {
+		List<IBaseResource> allResources = new ArrayList<>();
+		for (String type : theInstallTypes) {
+			allResources.addAll(myPackageResourceParsingSvc.parseResourcesOfType(type, theNpmPackage));
+		}
+
+		Set<String> additionalFolders = theInstallationSpec.getAdditionalResourceFolders();
+		if (additionalFolders != null && !additionalFolders.isEmpty()) {
+			ourLog.info("Installing resources from additional folders: {}", additionalFolders);
+			allResources.addAll(
+					AdditionalResourcesParser.getAdditionalResources(additionalFolders, theNpmPackage, myFhirContext));
+		}
+		return allResources;
+	}
+
+	// Created by Claude Opus 4.6
+	private void installResourceFromPackage(
+			IBaseResource theResource,
+			PackageInstallationSpec theInstallationSpec,
+			PackageInstallOutcomeJson theOutcome,
+			Map<String, EnumMap<InstallResultEnum, Integer>> theInstallCounts,
+			String thePackageName,
+			String thePackageVersion) {
+		IBaseResource resource = theResource;
+		try {
+			resource = isStructureDefinitionWithoutSnapshot(resource) ? generateSnapshot(resource) : resource;
+			String type = myFhirContext.getResourceType(resource);
+			InstallResultEnum result = install(resource, theInstallationSpec, theOutcome);
+			theInstallCounts
+					.computeIfAbsent(type, k -> new EnumMap<>(InstallResultEnum.class))
+					.merge(result, 1, Integer::sum);
+		} catch (Exception e) {
+			ourLog.warn(
+					"Failed to upload resource of type {} with ID {} - Error: {}",
+					myFhirContext.getResourceType(resource),
+					resource.getIdElement().getValue(),
+					e.toString());
+			throw new ImplementationGuideInstallationException(
+					Msg.code(1286)
+							+ String.format("Error installing IG %s#%s: %s", thePackageName, thePackageVersion, e),
+					e);
+		}
 	}
 
 	/**

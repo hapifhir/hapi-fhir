@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.config.r4.FhirContextR4Config;
 import ca.uhn.fhir.jpa.config.util.ResourceTypeUtil;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
@@ -66,6 +67,8 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
+import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
@@ -337,6 +340,8 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@Autowired
 	protected ApplicationContext myApplicationContext;
+	@Autowired
+	protected IBatch2JobInstanceRepository myJobInstanceDao;
 
 	@TestConfiguration
 	public static class TestSearchParamConfig {
@@ -688,6 +693,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllDateIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(ResourceIndexedSearchParamDate::toString).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllBatch2JobInstances() {
+		runInTransaction(() -> {
+			ourLog.info("Batch2 Job instances:\n * {}", myJobInstanceDao.findAll().stream().map(Batch2JobInstanceEntity::toString).collect(Collectors.joining("\n * ")));
 		});
 	}
 

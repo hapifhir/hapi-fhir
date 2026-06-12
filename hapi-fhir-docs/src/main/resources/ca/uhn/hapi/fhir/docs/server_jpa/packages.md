@@ -140,3 +140,29 @@ The installer detects redundant dependencies and skips them in both modes:
 Once a package is installed, its conformance resources (StructureDefinitions, ValueSets, CodeSystems, etc.) are stored in the JPA server database and automatically included in the validation support chain. No additional configuration is needed to validate against profiles from installed packages.
 
 See [Validating Using Packages](../validation/instance_validator.html#packages) for details on how validation uses package content.
+
+# Installed Resource Types
+
+By default, the following resource types are installed from a package: `NamingSystem`, `CodeSystem`, `ValueSet`, `StructureDefinition`, `ConceptMap`, `SearchParameter`, `Subscription`. To install a different set of resource types, use `setInstallResourceTypes()` on the `PackageInstallationSpec`:
+
+```java
+PackageInstallationSpec spec = new PackageInstallationSpec()
+    .setName("hl7.fhir.us.core")
+    .setVersion("7.0.0")
+    .setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+    .setInstallResourceTypes(List.of("StructureDefinition", "ValueSet", "CodeSystem"));
+```
+
+# Installing Resources from Additional Folders
+
+FHIR NPM packages may contain resources in folders other than the standard `package` folder (e.g., `example`). To install resources from these additional folders, use `setAdditionalResourceFolders()` on the `PackageInstallationSpec`:
+
+```java
+PackageInstallationSpec spec = new PackageInstallationSpec()
+    .setName("com.example.my-ig")
+    .setVersion("1.0.0")
+    .setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+    .setAdditionalResourceFolders(Set.of("example"));
+```
+
+Resources from additional folders are installed the same way as resources from the standard `package` folder.
