@@ -1048,13 +1048,15 @@ public class JpaConfig {
 			IResourceSearchUrlDao theResourceSearchUrlDao,
 			MatchUrlService theMatchUrlService,
 			FhirContext theFhirContext,
-			PartitionSettings thePartitionSettings) {
+			PartitionSettings thePartitionSettings,
+			PlatformTransactionManager theTxManager) {
 		return new ResourceSearchUrlSvc(
 				thePersistenceContextProvider.getEntityManager(),
 				theResourceSearchUrlDao,
 				theMatchUrlService,
 				theFhirContext,
-				thePartitionSettings);
+				thePartitionSettings,
+				theTxManager);
 	}
 
 	@Bean
