@@ -1039,6 +1039,72 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
+	/**
+	 * GL-8878: A bare-form (FHIR-spec-form) conditional-create ifNoneExist — i.e. just the query
+	 * portion ("identifier=sys|val") with NO "Type?" prefix and NO "?" — must be pre-fetched by
+	 * {@link ca.uhn.fhir.jpa.dao.TransactionProcessor}'s preFetchConditionalUrls exactly like the
+	 * full-form ("Patient?identifier=sys|val"), so that multiple single-token conditional creates in
+	 * one transaction are batched into a single aggregate token query.
+	 * <p>
+	 * The defect: the POST branch of preFetchConditionalUrls gates on
+	 * {@code requestIfNoneExist.contains("?")}, so a bare-form ifNoneExist is never pre-fetched.
+	 * Without pre-fetch, the batching optimization in preFetchSearchParameterMaps is skipped and each
+	 * conditional create resolves its match URL with its own individual search at write time, producing
+	 * N times the SQL queries (an N+1 pattern). The desired behavior is that the bare form issues no
+	 * more conditional-match queries than the full form.
+	 */
+	@Test
+	public void testTransactionMultipleBareConditionalCreates_ArePreFetchedLikeFullForm() {
+		int entryCount = 5;
+
+		// Pre-create matching Patients so all conditional creates resolve to existing resources (NOP).
+		for (int i = 0; i < entryCount; i++) {
+			Patient existing = new Patient();
+			existing.addIdentifier().setSystem("http://sys").setValue("full" + i);
+			myPatientDao.create(existing, mySrd);
+			existing = new Patient();
+			existing.addIdentifier().setSystem("http://sys").setValue("bare" + i);
+			myPatientDao.create(existing, mySrd);
+		}
+
+		// ---- FULL FORM (has "?" -> pre-fetched and batched) ----
+		BundleBuilder fullBuilder = new BundleBuilder(myFhirContext);
+		for (int i = 0; i < entryCount; i++) {
+			Patient pt = new Patient();
+			pt.addIdentifier().setSystem("http://sys").setValue("full" + i);
+			fullBuilder.addTransactionCreateEntry(pt).conditional("Patient?identifier=http://sys|full" + i);
+		}
+		myCaptureQueriesListener.clear();
+		Bundle fullOutcome = mySystemDao.transaction(mySrd, (Bundle) fullBuilder.getBundle());
+		int fullSelectCount = myCaptureQueriesListener.countSelectQueries();
+
+		// ---- BARE FORM (no "?" -> currently NOT pre-fetched) ----
+		BundleBuilder bareBuilder = new BundleBuilder(myFhirContext);
+		for (int i = 0; i < entryCount; i++) {
+			Patient pt = new Patient();
+			pt.addIdentifier().setSystem("http://sys").setValue("bare" + i);
+			bareBuilder.addTransactionCreateEntry(pt).conditional("identifier=http://sys|bare" + i);
+		}
+		myCaptureQueriesListener.clear();
+		Bundle bareOutcome = mySystemDao.transaction(mySrd, (Bundle) bareBuilder.getBundle());
+		int bareSelectCount = myCaptureQueriesListener.countSelectQueries();
+
+		ourLog.info("GL-8878 conditional-match SELECTs: full-form={}, bare-form={}", fullSelectCount, bareSelectCount);
+
+		// Both forms must NOP against the pre-existing resources (no duplicates created).
+		for (int i = 0; i < entryCount; i++) {
+			assertEquals("200 OK", fullOutcome.getEntry().get(i).getResponse().getStatus());
+			assertEquals("200 OK", bareOutcome.getEntry().get(i).getResponse().getStatus());
+		}
+
+		// Desired behavior: the bare form is pre-fetched and batched exactly like the full form, so it
+		// issues no more conditional-match queries than the full form. On master the bare form is never
+		// pre-fetched, so it runs one search per entry at write time and this assertion fails.
+		assertThat(bareSelectCount)
+				.as("bare-form conditional creates must be pre-fetched/batched like full-form (GL-8878)")
+				.isLessThanOrEqualTo(fullSelectCount);
+	}
+
 
 	@Test
 	public void testTransactionWithConditionalCreates_IdenticalMatchUrlsDifferentTypes_Qualified() {
