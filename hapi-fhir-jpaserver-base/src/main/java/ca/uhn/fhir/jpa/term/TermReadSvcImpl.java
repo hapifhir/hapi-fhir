@@ -3663,4 +3663,27 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		return theReqLang.equalsIgnoreCase(theStoredLang);
 	}
+
+	/**
+	 * Returns true when the CodeSystem has content=not-present, meaning concepts
+	 * are not enumerated and we cannot authoritatively validate codes against it.
+	 * Fix for https://github.com/hapifhir/hapi-fhir/issues/7796
+	 */
+	private boolean isNotPresent(@Nullable IBaseResource theCodeSystem) {
+		if (theCodeSystem == null) return false;
+		if (theCodeSystem instanceof org.hl7.fhir.r4.model.CodeSystem) {
+			return ((org.hl7.fhir.r4.model.CodeSystem) theCodeSystem).getContent()
+				== org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode.NOTPRESENT;
+		}
+		if (theCodeSystem instanceof org.hl7.fhir.r5.model.CodeSystem) {
+			return ((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem).getContent()
+				== org.hl7.fhir.r5.model.CodeSystem.CodeSystemContentMode.NOTPRESENT;
+		}
+		if (theCodeSystem instanceof org.hl7.fhir.dstu3.model.CodeSystem) {
+			return ((org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem).getContent()
+				== org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode.NOTPRESENT;
+		}
+		return false;
+	}
+
 }
