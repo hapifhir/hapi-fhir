@@ -52,6 +52,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB;
@@ -128,6 +130,44 @@ class TerminologyUploaderProviderTest {
 				.execute()
 		).isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("The $upload-external-code-system operation has been removed. To upload terminology, see the $hapi.fhir.upload-terminology.create-job operation.");
+	}
+
+	/**
+	 * Make sure we throw a useful error if the user tries to use the old
+	 * method.
+	 */
+	@Test
+	void testApplyCodeSystemDeltaAdd() {
+		// Test
+		assertThatThrownBy(() ->
+			myServerExtension
+				.getFhirClient()
+				.operation()
+				.onType("CodeSystem")
+				.named(OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+				.withNoParameters(Parameters.class)
+				.execute()
+		).isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("The $apply-codesystem-delta-add operation has been removed. To upload terminology, see the $hapi.fhir.upload-terminology.create-job operation.");
+	}
+
+	/**
+	 * Make sure we throw a useful error if the user tries to use the old
+	 * method.
+	 */
+	@Test
+	void testApplyCodeSystemDeltaRemove() {
+		// Test
+		assertThatThrownBy(() ->
+			myServerExtension
+				.getFhirClient()
+				.operation()
+				.onType("CodeSystem")
+				.named(OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE)
+				.withNoParameters(Parameters.class)
+				.execute()
+		).isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("The $apply-codesystem-delta-remove operation has been removed. To upload terminology, see the $hapi.fhir.upload-terminology.create-job operation.");
 	}
 
 	@ParameterizedTest

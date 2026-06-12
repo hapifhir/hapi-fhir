@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.custom;
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
@@ -97,8 +98,8 @@ public class ImportCustomTerminologyStep2HandleConcepts
 
 					storeConceptsToDb(theStepExecutionDetails, theContext, canonicalCodeSystem);
 				}
-			} catch (IOException theE) {
-				throw new RuntimeException(theE);
+			} catch (IOException e) {
+				throw new RuntimeException(Msg.code(2978) + e, e);
 			}
 		} else {
 			super.processAttachment(

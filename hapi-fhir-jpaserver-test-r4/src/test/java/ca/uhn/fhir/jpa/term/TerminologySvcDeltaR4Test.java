@@ -7,7 +7,6 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -281,7 +280,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), newDeltaCodeSystem());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).contains("CodeSystem[id=1008, url=http://foo/cs, version=1.0] has content mode complete but must be not-present");
+			assertThat(e.getMessage()).contains("can not apply a delta - wrong content mode: COMPLETE");
 		}
 
 	}

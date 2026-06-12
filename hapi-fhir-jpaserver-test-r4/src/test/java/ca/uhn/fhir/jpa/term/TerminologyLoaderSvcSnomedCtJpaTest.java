@@ -74,25 +74,47 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 
 		ZipCollectionBuilder files = createSnomedFile("sct2_Relationship_Full_INT_20160131-with-circular-chain.txt");
 
-		// Test
+		/*
+		 * If there is a cycle all on the same chunk, we detect it.
+		 * If the cycle is spread across multiple work chunks (which is always a possibility)
+		 * we have no easy way of detecting it. It might be nice if we did and had a way of
+		 * failing the job, but so far we do not.
+		 */
 
-		myTerminologyTestHelper.startImportSnomedCtJobAndWaitForCompletion("20160131", files, false);
+		if (theDuplicatesOnSeparatePages) {
 
-		// Verify
+			// Test
 
-		logAllConceptProperties();
+			myTerminologyTestHelper.startImportSnomedCtJobAndWaitForCompletion("20160131", files, false);
 
-		runInTransaction(()->{
-			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(2, myTermCodeSystemVersionDao.count());
-			assertEquals(16, myTermConceptDao.count());
-			assertEquals(5, myTermConceptParentChildLinkDao.count());
-		});
+			// Verify
 
-		LookupCodeRequest request = new LookupCodeRequest(SCT_URI, "116680003");
-		IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
-		assertNotNull(result);
-		assertEquals("Is a (attribute)", result.getCodeDisplay());
+			logAllConceptProperties();
+
+			runInTransaction(()->{
+				assertEquals(1, myTermCodeSystemDao.count());
+				assertEquals(2, myTermCodeSystemVersionDao.count());
+				assertEquals(16, myTermConceptDao.count());
+				assertEquals(5, myTermConceptParentChildLinkDao.count());
+			});
+
+			LookupCodeRequest request = new LookupCodeRequest(SCT_URI, "116680003");
+			IValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
+			assertNotNull(result);
+			assertEquals("Is a (attribute)", result.getCodeDisplay());
+
+		} else {
+
+			// Test
+
+			String jobInstanceId = myTerminologyTestHelper.startImportSnomedCtJobAndWaitForFailure("20160131", files, false);
+
+			// Verify
+			String errorMessage = myJobCoordinator.getInstance(jobInstanceId).getErrorMessage();
+			assertThat(errorMessage).contains("Cycle detected around code 126815003");
+
+		}
+
 	}
 
 	@Nonnull

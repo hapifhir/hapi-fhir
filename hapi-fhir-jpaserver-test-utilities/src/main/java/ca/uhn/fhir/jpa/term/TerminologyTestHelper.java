@@ -308,6 +308,11 @@ public class TerminologyTestHelper {
 		return startImportSnomedCtJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, false);
 	}
 
+	public String startImportSnomedCtJobAndWaitForFailure(
+			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
+		return startImportSnomedCtJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, true);
+	}
+
 	public String startImportSnomedCtJobAndWaitForCompletion(
 			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, boolean theExpectFailure) {
 

@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -62,6 +63,7 @@ import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Id;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import org.apache.commons.lang3.Strings;
@@ -163,6 +165,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Autowired
 	private TermConceptDaoSvc myTermConceptDaoSvc;
+
+	@Autowired
+	private ITermCodeSystemDao myTermCodeSystemDao;
 
 	@Nonnull
 	private UploadStatistics addConceptsToCodeSystemVersion(
@@ -1009,8 +1014,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(systemUrl, "CodeSystem must have a URL");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(systemVersionId, "CodeSystem version must not be blank");
 
-		validateOrCreateNotPresentCodeSystem(theRequestDetails, systemUrl, systemVersionId, codeSystem);
-
 		boolean dontPopulateParentPids =
 				Boolean.TRUE.equals(theCodeSystem.getUserData(DONT_POPULATE_PARENT_PIDS_CS_USERDATA_KEY));
 
@@ -1019,6 +1022,16 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
 			TermCodeSystemVersion codeSystemVersionEntity =
 					myCodeSystemVersionDao.findByCodeSystemUriAndVersion(systemUrl, systemVersionId);
+
+			// If no TermCodeSystemVersion entity is found, there is no CodeSystem already stored
+			// with content=not-present and the correct URL and version. So let's create one.
+			if (codeSystemVersionEntity == null) {
+				validateOrCreateNotPresentCodeSystem(theRequestDetails, systemUrl, systemVersionId, codeSystem);
+			}
+
+			codeSystemVersionEntity =
+				myCodeSystemVersionDao.findByCodeSystemUriAndVersion(systemUrl, systemVersionId);
+
 			ValidateUtil.isTrueOrThrowInvalidRequest(
 					codeSystemVersionEntity != null,
 					"CodeSystemVersion not found: [url=%s, versionId=%s]",
@@ -1032,8 +1045,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				additions.add(concept);
 			}
 
+			IdAndPartitionId termCodeSystemPid = new IdAndPartitionId(codeSystemVersionEntity.getCodeSystemPid(), codeSystemVersionEntity.getPartitionId().getPartitionId());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findById(termCodeSystemPid).orElseThrow();
 			return addConceptsToCodeSystemVersion(
-					codeSystemVersionEntity.getCodeSystem(), codeSystemVersionEntity, additions);
+				termCodeSystem, codeSystemVersionEntity, additions);
 		});
 	}
 

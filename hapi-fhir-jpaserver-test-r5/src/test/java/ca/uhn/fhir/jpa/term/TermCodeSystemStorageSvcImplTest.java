@@ -662,10 +662,8 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 
 		runInTransaction(()->{
 
-			List<TermConcept> concepts = myTermConceptDao.findAll();
-			for (TermConcept concept : concepts) {
-				assertNull(concept.getParentPidsAsString());
-			}
+			TermConcept concept = myTermConceptDao.findAll().stream().filter(t->t.getCode().equals("CODE-A-A-A")).findFirst().orElseThrow();
+			assertThat(concept.getParentPidsAsString()).matches("[0-9]+ [0-9]+");
 
 		});
 
@@ -980,7 +978,8 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 
 		// Test
 		UploadStatistics stats = mySvc.addCodeSystemConcepts(newSrd(), codeSystem);
-		assertThat(stats.getAddedConceptCount()).isEqualTo(2);
+		assertThat(stats.getAddedConceptCount()).isEqualTo(1);
+		assertThat(stats.getAddedPropertyCount()).isEqualTo(1);
 
 		// Verify
 		runInTransaction(()->{

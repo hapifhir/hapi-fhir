@@ -186,12 +186,12 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 				if (stepStatistics != null) {
 					indent(reportBuilder, 3);
 					reportBuilder
-							.append("Total Work Chunks          : ")
+							.append("Total Work Chunks            : ")
 							.append(stepStatistics.chunkCount())
 							.append("\n");
 					indent(reportBuilder, 3);
 					reportBuilder
-							.append("Total Processing Time      : ")
+							.append("Total Processing Time        : ")
 							.append(StopWatch.formatMillis(stepStatistics.millisElapsed()))
 							.append("\n");
 				}
@@ -305,7 +305,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		if (counter.getValueSetInclusionsAdded() > 0) {
 			indent(reportBuilder, indent);
 			reportBuilder
-					.append("ValueSets Inclusions Added  : ")
+					.append("ValueSets Inclusions Added   : ")
 					.append(counter.getValueSetInclusionsAdded())
 					.append("\n");
 			hasAny = true;
@@ -313,7 +313,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		if (counter.getValueSetCodesAdded() > 0) {
 			indent(reportBuilder, indent);
 			reportBuilder
-					.append("ValueSets Codes Added      : ")
+					.append("ValueSets Codes Added        : ")
 					.append(counter.getValueSetCodesAdded())
 					.append("\n");
 			hasAny = true;
@@ -321,7 +321,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		if (counter.getOtherChanges() > 0) {
 			indent(reportBuilder, indent);
 			reportBuilder
-					.append("Other Changes Count        : ")
+					.append("Other Changes Count          : ")
 					.append(counter.getOtherChanges())
 					.append("\n");
 			hasAny = true;

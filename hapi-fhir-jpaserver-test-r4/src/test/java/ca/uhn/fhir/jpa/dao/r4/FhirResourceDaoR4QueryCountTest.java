@@ -286,13 +286,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
-		# AlreadyExisting , ExpectSelectCount , ExpectInsertCount , ExpectUpdateCount
-		true              , 8                 , 0                 , 10
-		false             , 7                 , 25                , 0
+		# AlreadyExisting , ExpectSelectCount , ExpectInsertCount , ExpectUpdateCount , ExpectCommitCount
+		true              , 9                  , 0                , 10                , 1
+		false             , 8                  , 25               , 0                 , 1
 		""")
-	void testCodeSystem(boolean theAlreadyExisting, int theExpectSelectCount, int theExpectInsertCount, int theExpectUpdateCount) {
+	void testCodeSystem(boolean theAlreadyExisting, int theExpectSelectCount, int theExpectInsertCount, int theExpectUpdateCount, int theExpectCommitCount) {
 		// Setup
-		createCodeSystem(withUrl("http://foo"), withCodeSystemContent("not-present"));
+		createCodeSystem(withUrl("http://foo"), withVersion("123"), withCodeSystemContent("not-present"));
 
 		String stagingVersion = myTermCodeSystemStorageSvc.startStagingCodeSystemVersion("http://foo", "123").stagingVersionId();
 
@@ -333,7 +333,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 				.selectCount(theExpectSelectCount)
 				.insertCount(theExpectInsertCount)
 				.updateCount(theExpectUpdateCount)
-				.commitCount(1)
+				.commitCount(theExpectCommitCount)
 				.noOtherCounts()
 		);
 	}
