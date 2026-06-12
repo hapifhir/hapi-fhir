@@ -278,3 +278,58 @@ However, if any _revinclude parameters are modified with :iterate (or :recurse f
 # Custom Search Parameters
 
 HAPI FHIR has the ability to index and use custom search parameters, including parameters which enforce uniqueness, parametrs which index combinations of parameters, and parameters which are indexed but not used for searches until they are ready. See [Custom Search Parameters](https://smilecdr.com/docs/fhir_standard/fhir_search_custom_search_parameters.html) for more information.
+
+
+# %now and %today in Search Parameters
+
+The HAPI FHIR JPA Server supports the use of the special placeholder values `%now` and `%today` in date/dateTime search parameters. These values are dynamically replaced with the current timestamp or date at the time the search is executed, making it easy to write time-relative queries without hardcoding dates.
+
+## %today
+
+`%today` is replaced with the current calendar date (with no time component) at search execution time. It is useful for filtering resources relative to the current date.
+
+**Example:** Find all Observations with a date after today:
+
+```url
+GET http://example.org/fhir/Observation?date=gt%25today
+```
+
+This is equivalent to (assuming today is January 1, 2024):
+
+```url
+GET http://example.org/fhir/Observation?date=gt2024-01-01
+```
+
+## %now
+
+`%now` is replaced with the current date and time (including time component) at search execution time. It is useful for filtering resources relative to the precise current moment.
+
+**Example:** Find all Observations with a date after the current moment:
+
+```url
+GET http://example.org/fhir/Observation?date=gt%25now
+```
+
+This is equivalent to (assuming the current time is January 1, 2024 at 12:00:00):
+
+```url
+GET http://example.org/fhir/Observation?date=gt2024-01-01T12:00:00
+```
+
+## Combining with Prefixes
+
+Both `%today` and `%now` can be combined with any supported FHIR search prefix:
+
+| Prefix | Description | Example |
+|--------|-------------|--------|
+| `gt` | Greater than | `date=gt%today` (after today) |
+| `lt` | Less than | `date=lt%today` (before today) |
+| `ge` | Greater than or equal | `date=ge%today` (today or after) |
+| `le` | Less than or equal | `date=le%now` (up to and including now) |
+| `eq` | Equal | `date=eq%today` (exactly today) |
+
+## Notes
+
+* The substitution happens at query execution time on the server, not at the time the URL is constructed by the client.
+* These values are HAPI FHIR extensions and are not part of the core FHIR specification.
+* The values are case-insensitive: `%NOW`, `%Now`, and `%now` are all treated the same way.
