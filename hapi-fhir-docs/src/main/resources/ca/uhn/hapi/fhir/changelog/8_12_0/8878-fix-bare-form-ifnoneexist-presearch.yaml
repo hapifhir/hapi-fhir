@@ -1,8 +1,7 @@
 ---
 type: fix
-title: "Bare-form (FHIR-spec) `ifNoneExist` conditional-create URLs in a transaction bundle
-  (e.g. `identifier=http://system|value`, without a leading `?`) were not included in the batched
-  pre-fetch performed before transaction processing. Each such entry therefore triggered a separate
-  match search at execution time, bypassing the optimized batch path used for full-URL-form
-  conditional URLs (e.g. `Patient?identifier=http://system|value`). Both forms are now pre-fetched
-  and batched identically."
+title: "Conditional-create `ifNoneExist` URLs in the FHIR-spec bare query form
+  (e.g. `identifier=http://system|value`, without a leading `?`) are now included in the batched
+  pre-fetch performed before transaction processing, the same as full-URL-form conditional URLs
+  (e.g. `Patient?identifier=http://system|value`), rather than each entry issuing a separate match
+  search at execution time."
