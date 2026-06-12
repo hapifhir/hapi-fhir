@@ -48,15 +48,10 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 // Created by claude-opus-4-7
 
 /**
- * TDD regression test for SMILE-12080 / work item 8819. Runs against a Testcontainers-managed
- * MSSQL container a mixed stale/recent dataset seeded reproducing PROD data.
- *
- * <p><b>RED</b> on the pre-fix code: the single unbounded {@code DELETE WHERE CREATED_TIME < ?}
- * on the stale rows over-runs the JDBC {@code queryTimeout} — a SQL timeout exception propagates
- * up, test fails with a clear message.
- *
- * <p><b>GREEN</b> on the chunked fix: ~56 page iterations of 1,800 IDs, each statement well under
- * the budget. Assertion: every stale row drained, every recent row kept.
+ * Verifies that {@link ISearchUrlJobMaintenanceSvc#removeStaleEntries()} drains a large stale
+ * backlog in HFJ_RES_SEARCH_URL without any single statement exceeding a per-statement timeout,
+ * while leaving recent rows in place. Runs against a Testcontainers-managed MSSQL database
+ * seeded with a mixed stale/recent dataset.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
@@ -78,10 +73,10 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 
 	// JDBC per-statement timeout in seconds, applied via the mssql-jdbc URL property
 	// {@code queryTimeout} so every statement issued through the Spring DataSource is bounded.
-	// 1 s is the TDD discriminator on this 100 K-row seed: the pre-fix unbounded DELETE measures
-	// ~1.7 s on Azure SQL Edge → reliable RED. The chunked fix's per-statement times stay in the
-	// ~100–300 ms range → reliable GREEN. If this becomes flaky on faster hardware, bump
-	// STALE_ROW_COUNT to ~250 K instead of raising the timeout.
+	// On this 100 K-row seed, a single unbounded DELETE measures ~1.7 s on Azure SQL Edge while
+	// the paged cleanup's individual statements stay in the ~100–300 ms range, so 1 s reliably
+	// distinguishes the two. If this becomes flaky on faster hardware, bump STALE_ROW_COUNT to
+	// ~250 K instead of raising the timeout.
 	private static final int QUERY_TIMEOUT_SECONDS = 1;
 
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
@@ -94,7 +89,7 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 			+ ") "
 			+ "INSERT INTO HFJ_RES_SEARCH_URL (RES_SEARCH_URL, PARTITION_ID, RES_ID, CREATED_TIME, PARTITION_DATE) "
 			+ "SELECT "
-			+ "  CONCAT('Patient?identifier=urn:smile-12080|stale|', rn), "
+			+ "  CONCAT('Patient?identifier=urn:cleanup-test|stale|', rn), "
 			+ "  rn %% " + PARTITIONS + ", "
 			+ "  rn, "
 			+ "  DATEADD(MINUTE, -((rn %% 1320) + 120), GETDATE()), "
@@ -109,7 +104,7 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 			+ ") "
 			+ "INSERT INTO HFJ_RES_SEARCH_URL (RES_SEARCH_URL, PARTITION_ID, RES_ID, CREATED_TIME, PARTITION_DATE) "
 			+ "SELECT "
-			+ "  CONCAT('Patient?identifier=urn:smile-12080|recent|', rn), "
+			+ "  CONCAT('Patient?identifier=urn:cleanup-test|recent|', rn), "
 			+ "  rn %% " + PARTITIONS + ", "
 			+ "  rn, "
 			+ "  DATEADD(SECOND, -(rn %% 60), GETDATE()), "
@@ -187,15 +182,15 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 			ourLog.error("Maintenance call threw", maintenanceFailure);
 		}
 
-		// RED: an unbounded DELETE on STALE_ROW_COUNT rows would over-run the per-statement
-		// budget, MSSQL would roll back, table still at TOTAL_ROW_COUNT. This is the bug.
+		// An unbounded DELETE on STALE_ROW_COUNT rows would over-run the per-statement budget,
+		// MSSQL would roll back, and the table would still hold TOTAL_ROW_COUNT rows.
 		assertThat(maintenanceFailure)
 			.as("removeStaleEntries() on %d stale rows must not trip the %d s statement timeout "
 					+ "(elapsed %d ms, %d rows remaining). The paged fix should keep each statement under it.",
 				STALE_ROW_COUNT, QUERY_TIMEOUT_SECONDS, elapsed.toMillis(), remaining)
 			.isNull();
 
-		// GREEN: every stale row drained, every recent row kept.
+		// Every stale row drained, every recent row kept.
 		assertThat(remaining)
 			.as("After cleanup, live table should hold exactly the %d recent rows "
 				+ "(stale rows drained). Found %d.", RECENT_ROW_COUNT, remaining)

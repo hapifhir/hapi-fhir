@@ -56,7 +56,7 @@ public class ResourceSearchUrlSvc {
 
 	/**
 	 * Stale-entry deletion is paged so no single statement scans the whole table — that's what
-	 * trips MSSQL's per-statement timeout on MegaScale (SMILE-12080). Capped under MSSQL's
+	 * trips MSSQL's per-statement timeout on MegaScale deployments. Capped under MSSQL's
 	 * 2,100-parameter-per-statement limit so the {@code DELETE … WHERE RES_ID IN (?, …)} doesn't overflow.
 	 */
 	static final int DELETE_PAGE_SIZE = 1_800;
