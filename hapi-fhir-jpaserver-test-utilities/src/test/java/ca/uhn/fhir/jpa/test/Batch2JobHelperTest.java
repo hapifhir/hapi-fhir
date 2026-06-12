@@ -49,7 +49,7 @@ class Batch2JobHelperTest {
 		when(myJobCoordinator.getInstance(JOB_ID)).thenReturn(ourIncompleteInstance, ourIncompleteInstance, ourIncompleteInstance, ourCompleteInstance);
 
 		myBatch2JobHelper.awaitJobCompletion(JOB_ID);
-		verify(myJobMaintenanceService, times(1)).runMaintenancePass();
+		verify(myJobMaintenanceService, times(1)).runActiveJobMaintenancePass();
 
 	}
 
@@ -108,7 +108,7 @@ class Batch2JobHelperTest {
 
 		// verify
 		verify(myJobCoordinator, atLeastOnce()).getInstances(1000, 1);
-		verify(myJobMaintenanceService, atLeastOnce()).runMaintenancePass();
+		verify(myJobMaintenanceService, atLeastOnce()).runActiveJobMaintenancePass();
 	}
 
 	@Test

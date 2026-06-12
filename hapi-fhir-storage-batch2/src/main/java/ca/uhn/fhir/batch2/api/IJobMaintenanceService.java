@@ -23,6 +23,23 @@ import com.google.common.annotations.VisibleForTesting;
 
 import java.io.Closeable;
 
+/**
+ * There are two kinds of maintenance work that is handled by this interface:
+ * <ul>
+ * <li>
+ *     <b>Active Maintenance</b> is performed by {@link ca.uhn.fhir.batch2.maintenance.ActiveJobInstanceProcessor}
+ *     on jobs in non-terminal states (QUEUED, BUILDING, IN_PROGRESS, FINALIZING, etc.).
+ *     This maintenance happens frequently so that jobs get updated status information,
+ *     gated jobs keep advancing, etc.
+ * </li>
+ * <li>
+ *     <b>Ended Job Maintenance</b> is performed by {@link ca.uhn.fhir.batch2.maintenance.EndedJobInstanceProcessor}
+ *     on jobs in terminal states (COMPLETED, CANCELLED, FAILED, etc.).
+ *     This maintenance happens less frequently than active maintenance and is used
+ *     to clean up old entries in the database.
+ * </li>
+ * </ul>
+ */
 public interface IJobMaintenanceService {
 
 	/**
@@ -36,7 +53,7 @@ public interface IJobMaintenanceService {
 	 * @return a {@link Closeable} that releases the maintenance semaphore when closed.
 	 *         The Closeable is idempotent — calling close() multiple times is safe.
 	 */
-	default Closeable holdMaintenanceForExpunge() {
+	default Closeable holdJobMaintenanceForExpunge() {
 		// No-op default: implementations that support expunge coordination should override this.
 		return () -> {};
 	}
@@ -45,25 +62,33 @@ public interface IJobMaintenanceService {
 	 * Do not wait for the next scheduled time for maintenance. Trigger it immediately.
 	 * @return true if a request to run a maintenance pass was fired, false if there was already a trigger request in queue so we can just use that one
 	 */
-	boolean triggerMaintenancePass();
+	boolean triggerActiveJobMaintenancePass();
 
-	void runMaintenancePass();
+	/**
+	 * Runs a maintenance pass for active jobs (jobs in statuses QUEUED, BUILDING, IN_PROGRESS, etc.)
+	 */
+	void runActiveJobMaintenancePass();
+
+	/**
+	 * Runs a maintenance pass for ended jobs (jobs in statuses FAILED, COMPLETED, etc.)
+	 */
+	void runEndedJobMaintenancePass();
 
 	/**
 	 * Forces a second maintenance run.
 	 * Only to be used in tests to simulate a long running maintenance step.
 	 *
 	 * <p><b>Warning:</b> This method acquires the maintenance semaphore with an uninterruptible
-	 * blocking wait. Do not call this while {@link #holdMaintenanceForExpunge()} is held on the
+	 * blocking wait. Do not call this while {@link #holdJobMaintenanceForExpunge()} is held on the
 	 * same thread — it will deadlock.
 	 */
 	@VisibleForTesting
-	void forceMaintenancePass();
+	void forceActiveJobMaintenancePass();
 
 	/**
 	 * This is only to be called in a testing environment
 	 * to ensure state changes are controlled.
 	 */
 	@VisibleForTesting
-	void enableMaintenancePass(boolean thetoEnable);
+	void enableMaintenance(boolean theEnable);
 }

@@ -97,7 +97,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		// Verify
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
-			myJobCleanerService.runMaintenancePass();
+			myJobCleanerService.runActiveJobMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			return instance.getStatus() == StatusEnum.FAILED;
 		});
@@ -147,7 +147,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Verify
 
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
-			myJobCleanerService.runMaintenancePass();
+			myJobCleanerService.runActiveJobMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			return instance.getStatus() == StatusEnum.COMPLETED;
 		});
@@ -210,7 +210,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			// Verify
 
 			await().until(() -> {
-				myJobCleanerService.runMaintenancePass();
+				myJobCleanerService.runActiveJobMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				StatusEnum status = instance.getStatus();
 				ourLog.info("Job status for instance[{}]: {}", instanceId, status);
@@ -292,7 +292,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Verify
 
 		await().until(() -> {
-			myJobCleanerService.runMaintenancePass();
+			myJobCleanerService.runActiveJobMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			return instance.getStatus() == StatusEnum.FAILED;
 		});
@@ -336,7 +336,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			// Verify
 
 			await().until(() -> {
-				myJobCleanerService.runMaintenancePass();
+				myJobCleanerService.runActiveJobMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				return instance.getStatus() == StatusEnum.FAILED;
 			});

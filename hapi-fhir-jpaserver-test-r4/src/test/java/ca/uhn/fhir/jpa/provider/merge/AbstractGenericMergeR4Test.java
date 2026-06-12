@@ -696,7 +696,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 			// Wait for "query-ids" step to complete
 			await()
 					.until(() -> {
-						myBatch2JobHelper.runMaintenancePass();
+						myBatch2JobHelper.runActiveJobMaintenancePass();
 						String currentGatedStepId = myJobCoordinator.getInstance(jobId).getCurrentGatedStepId();
 						return !"query-ids".equals(currentGatedStepId);
 					});

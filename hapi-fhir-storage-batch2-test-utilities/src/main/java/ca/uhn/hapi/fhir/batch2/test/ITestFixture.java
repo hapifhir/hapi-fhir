@@ -51,7 +51,7 @@ public interface ITestFixture {
 
 	JobInstance freshFetchJobInstance(String theInstanceId);
 
-	void runMaintenancePass();
+	void runActiveJobMaintenancePass();
 
 	PlatformTransactionManager getTransactionManager();
 

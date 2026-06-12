@@ -56,6 +56,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -190,8 +191,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Set<String> codes = findAllCodes(theAdditions);
 		if (!codes.isEmpty()) {
 			QueryChunker.chunk(codes, codesSubList -> {
+				StopWatch sw = new StopWatch();
 				List<TermConcept> conceptsSubList =
 						myConceptDao.findByCodeSystemAndCodeList(theCodeSystemVersion.getPid(), codesSubList);
+				ourLog.info(
+						"Handled prefetch on {} candidate codes and found {} existing in {}",
+						codesSubList.size(),
+						conceptsSubList.size(),
+						sw);
 
 				List<TermConcept.TermConceptPk> conceptIds =
 						conceptsSubList.stream().map(TermConcept::getPid).toList();
