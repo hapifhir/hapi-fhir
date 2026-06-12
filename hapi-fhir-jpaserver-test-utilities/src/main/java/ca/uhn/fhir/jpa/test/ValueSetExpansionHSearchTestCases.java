@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -89,7 +88,8 @@ public abstract class ValueSetExpansionHSearchTestCases extends BaseJpaR4Test {
 		codeSystem.setId("test-loinc");
 		codeSystem.setVersion("SYSTEM VERSION");
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		IIdType csId = myCodeSystemDao.create(codeSystem).getId().toUnqualified();
+		IIdType csId = myCodeSystemDao.
+			create(codeSystem).getId().toUnqualified();
 
 		ResourceTable table = myResourceTableDao.findById(JpaPid.fromId(csId.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
 
