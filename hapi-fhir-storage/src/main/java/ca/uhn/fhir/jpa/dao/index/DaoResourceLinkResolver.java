@@ -368,9 +368,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 				/*
 				 * If we're creating a placeholder resource to satisfy a conditional URL
 				 * with identifiers, pass the identifier-based match URL along so that the
-				 * create registers an entry in the HFJ_RES_SEARCH_URL table, which is used
-				 * to prevent multiple concurrent threads creating the same object as a part
-				 * of a conditional create/update.
+				 * storage layer can register a duplicate-create guard record for the
+				 * placeholder, as it does for ordinary conditional creates.
 				 */
 				String reference = theReference.getReferenceElement().getValue();
 				if (reference.contains("?")) {
