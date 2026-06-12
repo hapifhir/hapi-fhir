@@ -63,20 +63,15 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchUrlMaintenanceSlowDeleteMsSqlIT.class);
 
-	// Data shape — 10% stale / 90% recent, mirroring production-like selectivity for the
-	// IDX_RESSEARCHURL_TIME index seek in the chunked fix.
 	private static final long STALE_ROW_COUNT = 100_000L;
 	private static final long RECENT_ROW_COUNT = 10_000L;
 	private static final long TOTAL_ROW_COUNT = STALE_ROW_COUNT + RECENT_ROW_COUNT;
 	private static final long SEED_BATCH = 50_000L;
 	private static final int PARTITIONS = 100;
 
-	// JDBC per-statement timeout in seconds, applied via the mssql-jdbc URL property
-	// {@code queryTimeout} so every statement issued through the Spring DataSource is bounded.
-	// On this 100 K-row seed, a single unbounded DELETE measures ~1.7 s on Azure SQL Edge while
-	// the paged cleanup's individual statements stay in the ~100–300 ms range, so 1 s reliably
-	// distinguishes the two. If this becomes flaky on faster hardware, bump STALE_ROW_COUNT to
-	// ~250 K instead of raising the timeout.
+	// On this seed, a single unbounded DELETE measures ~1.7 s on Azure SQL Edge while the paged
+	// cleanup's individual statements stay under ~300 ms, so 1 s reliably distinguishes the two.
+	// If this becomes flaky on faster hardware, bump STALE_ROW_COUNT instead of raising the timeout.
 	private static final int QUERY_TIMEOUT_SECONDS = 1;
 
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
@@ -113,8 +108,7 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 
 	private static final String TRUNCATE_SQL = "TRUNCATE TABLE HFJ_RES_SEARCH_URL";
 	private static final String COUNT_LIVE_SQL = "SELECT COUNT_BIG(*) FROM HFJ_RES_SEARCH_URL";
-	// Breakdown by URL prefix (set in the seed) and by actual cutoff. Reveals whether undeleted
-	// rows are truly-stale (chunk-loop bug or race) or actually within the 1h cutoff (data-shape).
+	// Distinguishes truly-stale leftovers (cleanup bug) from rows that were simply within the 1h cutoff.
 	private static final String DIAGNOSTIC_BREAKDOWN_SQL =
 		"SELECT "
 			+ "  SUM(CASE WHEN RES_SEARCH_URL LIKE '%|stale|%' THEN 1 ELSE 0 END) AS stale_by_prefix, "
@@ -159,7 +153,6 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 			}
 			return null;
 		});
-		// Sanity-check what's actually in the table before we hand it to the cleanup.
 		ourLog.info("=== Pre-maintenance state ===");
 		logRemainingBreakdown();
 	}
@@ -182,8 +175,6 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 			ourLog.error("Maintenance call threw", maintenanceFailure);
 		}
 
-		// An unbounded DELETE on STALE_ROW_COUNT rows would over-run the per-statement budget,
-		// MSSQL would roll back, and the table would still hold TOTAL_ROW_COUNT rows.
 		assertThat(maintenanceFailure)
 			.as("removeStaleEntries() on %d stale rows must not trip the %d s statement timeout "
 					+ "(elapsed %d ms, %d rows remaining). The paged fix should keep each statement under it.",
@@ -286,12 +277,10 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 		@Override
 		@Bean
 		public DataSource dataSource() {
-			// Trigger container start + run migrations against the raw container DataSource.
 			runMigrations(myEmbeddedDb.getDataSource());
 
-			// Return a fresh BasicDataSource whose URL has queryTimeout appended — that's the
-			// bulletproof way to apply a per-statement budget that survives Hibernate / pool
-			// unwrapping. Reuses the container's own credentials.
+			// queryTimeout in the JDBC URL survives Hibernate / pool unwrapping, unlike a
+			// pool-level default.
 			String url = myEmbeddedDb.getUrl();
 			if (!url.contains("queryTimeout=")) {
 				url += ";queryTimeout=" + QUERY_TIMEOUT_SECONDS;
