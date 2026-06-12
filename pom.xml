@@ -2472,7 +2472,7 @@
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
-				<version>3.22.0</version>
+				<version>3.27.7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.assertj</groupId>
