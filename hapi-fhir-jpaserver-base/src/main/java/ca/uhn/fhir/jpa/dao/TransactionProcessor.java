@@ -623,9 +623,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				} else if ("POST".equals(verb) && isNotBlank(requestIfNoneExist)) {
 					// A conditional create's ifNoneExist may be in the FHIR-spec bare query form (just the query
 					// portion, e.g. "identifier=sys|val", with no "Type?" prefix and no "?") or in the tolerated
-					// full form ("Patient?identifier=sys|val"). Canonicalize the bare form to "Type?query" so both
-					// forms take the same pre-fetch/batching path (GL-8878). Without this, the bare form was never
-					// pre-fetched and each conditional create ran its own search at write time (an N+1 pattern).
+					// full form ("Patient?identifier=sys|val"). Canonicalize so both forms take the same
+					// pre-fetch/batching path.
 					String conditionalUrl = canonicalizeIfNoneExistUrl(resourceType, requestIfNoneExist);
 					processConditionalUrlForPreFetching(
 							theRequestPartitionId,
