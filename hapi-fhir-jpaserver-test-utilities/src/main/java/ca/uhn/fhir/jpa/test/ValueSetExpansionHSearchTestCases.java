@@ -19,36 +19,19 @@
  */
 package ca.uhn.fhir.jpa.test;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
-import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
-import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import jakarta.persistence.EntityManager;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
@@ -59,31 +42,19 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Answers;
 import org.mockito.Mock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.util.AopTestUtils;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.LOINC_URI;
+import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -96,99 +67,23 @@ import static org.mockito.Mockito.when;
  * In case you need to run a specific test, uncomment the @ExtendWith and one of the following configurations
  * and remove the abstract qualifier
  */
-//@ExtendWith(SpringExtension.class)
-//@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
-//@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.Elasticsearch.class})
-public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseValueSetHSearchExpansionR4Test.class);
-
-	private static final String CS_URL = "http://example.com/my_code_system";
-	private static final String CS_URL_2 = "http://example.com/my_code_system2";
-	private static final String CS_URL_3 = "http://example.com/my_code_system3";
-	@Autowired
-	protected ITermCodeSystemDao myTermCodeSystemDao;
-	@Autowired
-	@Qualifier("myCodeSystemDaoR4")
-	protected IFhirResourceDaoCodeSystem<org.hl7.fhir.r4.model.CodeSystem> myCodeSystemDao;
-	@Autowired
-	protected IResourceTableDao myResourceTableDao;
-	@Autowired
-	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-	@Autowired
-	@Qualifier("myValueSetDaoR4")
-	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
-	@Autowired
-	protected ITermReadSvc myTermSvc;
-	@Autowired
-	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
-	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
-	protected ServletRequestDetails mySrd;
-	@Autowired
-	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
-	@Autowired
-	FhirContext myFhirContext;
-	@Autowired
-	PlatformTransactionManager myTxManager;
-	@Autowired
-	private EntityManager myEntityManager;
-	@Autowired
-	private IFhirSystemDao mySystemDao;
-	@Autowired
-	private IResourceReindexingSvc myResourceReindexingSvc;
-	@Autowired
-	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
-	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
+public abstract class ValueSetExpansionHSearchTestCases extends BaseJpaR4Test {
 	@Mock
 	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
 
 	@BeforeEach
-	public void beforeEach() {
-		when(mySrd.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE)).thenReturn(Boolean.TRUE);
+	public void beforeConfigureErrorHandler() {
+		mySrd.getUserData().put(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
-
-		purgeHibernateSearch(myEntityManager);
-
-		myStorageSettings.setSchedulingDisabled(true);
-		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
-	}
-
-	@BeforeEach
-	@Transactional()
-	public void beforePurgeDatabase() {
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@AfterEach
-	public void after() {
+	public void afterRestoreExpansionSettings() {
 		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
-		myStorageSettings.setMaximumExpansionSize(JpaStorageSettings.DEFAULT_MAX_EXPANSION_SIZE);
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
-	@AfterEach()
-	public void afterCleanupDao() {
-		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
-		myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
-		myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
-	}
-
-	@AfterEach
-	public void afterClearTerminologyCaches() {
-		TermDeferredStorageSvcImpl deferredSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
-		deferredSvc.clearDeferred();
-	}
-
-	private List<String> generateCodes(int theCodesQueriedCount) {
-		return IntStream.range(0, theCodesQueriedCount)
-			.mapToObj(i -> "generated-code-" + i).collect(Collectors.toList());
-	}
-
-	public long createLoincSystemWithSomeCodes() {
+	public void createLoincSystemWithSomeCodes() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(LOINC_URI);
 		codeSystem.setId("test-loinc");
@@ -255,11 +150,10 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		termCodeSystemVersion.getConcepts().add(code4);
 
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", termCodeSystemVersion, table);
-
-		return csId.getIdPartAsLong();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 	}
 
-	private IIdType createCodeSystem() {
+	private void createCodeSystem() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
@@ -308,10 +202,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		cs.getConcepts().add(parentB);
 
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", null, cs, table);
-
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-
-		return id;
 	}
 
 	private void createCodeSystem2() {
@@ -330,10 +221,10 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		cs.getConcepts().add(parentA);
 
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
-
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 	}
 
-	private IIdType createCodeSystem3() {
+	private void createCodeSystem3() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL_3);
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
@@ -398,37 +289,56 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		cs.getConcepts().add(parentB);
 
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", null, cs, table);
-
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
+	}
 
-		return id;
+	/**
+	 * Creates a CodeSystem with 304 concepts in a 3-level hierarchy:
+	 * Root -> 3 branches -> 50 children each -> 1 leaf each = 1 + 3 + 150 + 150 = 304
+	 */
+	private void createLargerCodeSystem() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.setName("LARGE SYSTEM");
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+
+		TermConcept root = new TermConcept(cs, "Root");
+		cs.getConcepts().add(root);
+
+		for (int b = 1; b <= 3; b++) {
+			TermConcept branch = new TermConcept(cs, "Branch_" + b);
+			root.addChild(branch, RelationshipTypeEnum.ISA);
+
+			for (int c = 0; c < 50; c++) {
+				TermConcept child = new TermConcept(cs, "Branch_" + b + "_Child_" + c);
+				branch.addChild(child, RelationshipTypeEnum.ISA);
+
+				TermConcept leaf = new TermConcept(cs, "Branch_" + b + "_Child_" + c + "_Leaf_0");
+				child.addChild(leaf, RelationshipTypeEnum.ISA);
+			}
+		}
+
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "LARGE SYSTEM", null, cs, table);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 	}
 
 	private List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
-		List<String> retVal = new ArrayList<>();
-
-		for (ValueSet.ValueSetExpansionContainsComponent next : theContains) {
-			retVal.add(next.getCode());
-		}
-
-		return retVal;
-	}
-
-	@Override
-	protected FhirContext getFhirContext() {
-		return myFhirContext;
-	}
-
-	@Override
-	protected PlatformTransactionManager getTxManager() {
-		return myTxManager;
+		return theContains.stream()
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.collect(Collectors.toList());
 	}
 
 	@Nested
 	public class TestExpandLoincValueSetFilter {
 
 		@Test
-		public void testCopyrightWithExclude3rdParty() {
+		public void expandValueSet_copyrightExclude3rdParty_returnsNon3rdPartyCodes() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -472,7 +382,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testCopyrightWithExcludeLoinc() {
+		public void expandValueSet_copyrightExcludeLoinc_returnsOnly3rdPartyCodes() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -516,7 +426,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testCopyrightWithInclude3rdParty() {
+		public void expandValueSet_copyrightInclude3rdParty_returns3rdPartyCodes() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -552,7 +462,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testCopyrightWithIncludeLoinc() {
+		public void expandValueSet_copyrightIncludeLoinc_returnsLoincCodes() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -588,7 +498,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testCopyrightWithUnsupportedOp() {
+		public void expandValueSet_copyrightUnsupportedOp_throwsInvalidRequest() {
 			createLoincSystemWithSomeCodes();
 
 			ValueSet vs;
@@ -604,16 +514,13 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.ISA)
 				.setValue("LOINC");
 
-			try {
-				myTermSvc.expandValueSet(null, vs);
-				fail("");
-			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(897) + "Don't know how to handle op=ISA on property copyright", e.getMessage());
-			}
+			assertThatThrownBy(() -> myTermSvc.expandValueSet(null, vs))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(897) + "Don't know how to handle op=ISA on property copyright");
 		}
 
 		@Test
-		public void testCopyrightWithUnsupportedSystem() {
+		public void expandValueSet_copyrightNonLoincSystem_throwsInvalidRequest() {
 			createCodeSystem();
 			createLoincSystemWithSomeCodes();
 
@@ -630,17 +537,14 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("LOINC");
 
-			try {
-				myTermSvc.expandValueSet(null, vs);
-				fail("");
-			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(895) + "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
-			}
+			assertThatThrownBy(() -> myTermSvc.expandValueSet(null, vs))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(895) + "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 
 		}
 
 		@Test
-		public void testCopyrightWithUnsupportedValue() {
+		public void expandValueSet_copyrightUnsupportedValue_throwsInvalidRequest() {
 			createLoincSystemWithSomeCodes();
 
 			ValueSet vs;
@@ -656,17 +560,14 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("bogus");
 
-			try {
-				myTermSvc.expandValueSet(null, vs);
-				fail("");
-			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(898) + "Don't know how to handle value=bogus on property copyright", e.getMessage());
-			}
+			assertThatThrownBy(() -> myTermSvc.expandValueSet(null, vs))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(898) + "Don't know how to handle value=bogus on property copyright");
 
 		}
 
 		@Test
-		public void testAncestorWithExcludeAndEqual() {
+		public void expandValueSet_ancestorExcludeEqual_excludesDescendants() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -744,7 +645,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testAncestorWithExcludeAndIn() {
+		public void expandValueSet_ancestorExcludeIn_excludesDescendantsOfMultiple() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -771,7 +672,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testAncestorWithIncludeAndEqual() {
+		public void expandValueSet_ancestorIncludeEqual_returnsDescendants() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -831,7 +732,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testAncestorWithIncludeAndIn() {
+		public void expandValueSet_ancestorIncludeIn_returnsDescendantsOfMultiple() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -854,7 +755,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testAncestorWithUnsupportedOp() {
+		public void expandValueSet_ancestorUnsupportedOp_throwsInvalidRequest() {
 			createLoincSystemWithSomeCodes();
 
 			ValueSet vs;
@@ -870,17 +771,14 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.ISA)
 				.setValue("50015-7");
 
-			try {
-				myTermSvc.expandValueSet(null, vs);
-				fail("");
-			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(892) + "Don't know how to handle op=ISA on property ancestor", e.getMessage());
-			}
+			assertThatThrownBy(() -> myTermSvc.expandValueSet(null, vs))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(892) + "Don't know how to handle op=ISA on property ancestor");
 
 		}
 
 		@Test
-		public void testAncestorWithUnsupportedSystem() {
+		public void expandValueSet_ancestorNonLoincSystem_throwsInvalidRequest() {
 			createCodeSystem();
 			createLoincSystemWithSomeCodes();
 
@@ -897,17 +795,14 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("50015-7");
 
-			try {
-				myTermSvc.expandValueSet(null, vs);
-				fail("");
-			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(895) + "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
-			}
+			assertThatThrownBy(() -> myTermSvc.expandValueSet(null, vs))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(895) + "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 
 		}
 
 		@Test
-		public void testChildWithExcludeAndEqual() {
+		public void expandValueSet_childExcludeEqual_excludesParents() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -985,7 +880,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testChildWithExcludeAndIn() {
+		public void expandValueSet_childExcludeIn_excludesParentsOfMultiple() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1012,7 +907,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testChildWithIncludeAndEqual() {
+		public void expandValueSet_childIncludeEqual_returnsParents() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1073,7 +968,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testChildWithIncludeAndIn() {
+		public void expandValueSet_childIncludeIn_returnsParentsOfMultiple() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1096,7 +991,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testChildWithUnsupportedOp() {
+		public void expandValueSet_childUnsupportedOp_throwsInvalidRequest() {
 			createLoincSystemWithSomeCodes();
 
 			ValueSet vs;
@@ -1112,17 +1007,14 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.ISA)
 				.setValue("50015-7");
 
-			try {
-				myTermSvc.expandValueSet(null, vs);
-				fail("");
-			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property child", e.getMessage());
-			}
+			assertThatThrownBy(() -> myTermSvc.expandValueSet(null, vs))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(893) + "Don't know how to handle op=ISA on property child");
 
 		}
 
 		@Test
-		public void testChildWithUnsupportedSystem() {
+		public void expandValueSet_childNonLoincSystem_throwsInvalidRequest() {
 			createCodeSystem();
 			createLoincSystemWithSomeCodes();
 
@@ -1139,17 +1031,14 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("50015-7");
 
-			try {
-				myTermSvc.expandValueSet(null, vs);
-				fail("");
-			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(895) + "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
-			}
+			assertThatThrownBy(() -> myTermSvc.expandValueSet(null, vs))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(895) + "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 
 		}
 
 		@Test
-		public void testDescendantWithExcludeAndEqual() {
+		public void expandValueSet_descendantExcludeEqual_excludesAncestors() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1227,7 +1116,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testDescendantWithExcludeAndIn() {
+		public void expandValueSet_descendantExcludeIn_excludesAncestorsOfMultiple() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1255,7 +1144,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testDescendantWithIncludeAndEqual() {
+		public void expandValueSet_descendantIncludeEqual_returnsAncestors() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1316,7 +1205,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testDescendantWithIncludeAndIn() {
+		public void expandValueSet_descendantIncludeIn_returnsAncestorsOfMultiple() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1339,7 +1228,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testDescendantWithUnsupportedOp() {
+		public void expandValueSet_descendantUnsupportedOp_throwsInvalidRequest() {
 			createLoincSystemWithSomeCodes();
 
 			ValueSet vs;
@@ -1355,17 +1244,14 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.ISA)
 				.setValue("50015-7");
 
-			try {
-				myTermSvc.expandValueSet(null, vs);
-				fail("");
-			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(896) + "Don't know how to handle op=ISA on property descendant", e.getMessage());
-			}
+			assertThatThrownBy(() -> myTermSvc.expandValueSet(null, vs))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(896) + "Don't know how to handle op=ISA on property descendant");
 
 		}
 
 		@Test
-		public void testDescendantWithUnsupportedSystem() {
+		public void expandValueSet_descendantNonLoincSystem_throwsInvalidRequest() {
 			createCodeSystem();
 			createLoincSystemWithSomeCodes();
 
@@ -1382,17 +1268,14 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("50015-7");
 
-			try {
-				myTermSvc.expandValueSet(null, vs);
-				fail("");
-			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(895) + "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
-			}
+			assertThatThrownBy(() -> myTermSvc.expandValueSet(null, vs))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(895) + "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 
 		}
 
 		@Test
-		public void testParentWithExcludeAndEqual() {
+		public void expandValueSet_parentExcludeEqual_excludesChildren() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1470,7 +1353,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testParentWithExcludeAndIn() {
+		public void expandValueSet_parentExcludeIn_excludesChildrenOfMultiple() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1497,7 +1380,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testParentWithIncludeAndEqual() {
+		public void expandValueSet_parentIncludeEqual_returnsChildren() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1557,7 +1440,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testParentWithIncludeAndIn() {
+		public void expandValueSet_parentIncludeIn_returnsChildrenOfMultiple() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1580,7 +1463,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testParentWithUnsupportedOp() {
+		public void expandValueSet_parentUnsupportedOp_throwsInvalidRequest() {
 			createLoincSystemWithSomeCodes();
 
 			ValueSet vs;
@@ -1596,17 +1479,14 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.ISA)
 				.setValue("50015-7");
 
-			try {
-				myTermSvc.expandValueSet(null, vs);
-				fail("");
-			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property parent", e.getMessage());
-			}
+			assertThatThrownBy(() -> myTermSvc.expandValueSet(null, vs))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(893) + "Don't know how to handle op=ISA on property parent");
 
 		}
 
 		@Test
-		public void testParentWithUnsupportedSystem() {
+		public void expandValueSet_parentNonLoincSystem_throwsInvalidRequest() {
 			createCodeSystem();
 			createLoincSystemWithSomeCodes();
 
@@ -1623,18 +1503,15 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("50015-7");
 
-			try {
-				myTermSvc.expandValueSet(null, vs);
-				fail("");
-			} catch (InvalidRequestException e) {
-				assertEquals(Msg.code(895) + "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
-			}
+			assertThatThrownBy(() -> myTermSvc.expandValueSet(null, vs))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(895) + "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 
 		}
 
 
 		@Test
-		public void testExpandValueSetInMemoryRespectsMaxSize() {
+		public void expandValueSet_exceedsMaxSize_throwsInternalError() {
 			createCodeSystem();
 
 			// Add lots more codes
@@ -1647,28 +1524,22 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Codes available exceeds the max
 			myStorageSettings.setMaximumExpansionSize(50);
-			ValueSet vs = new ValueSet();
+			final ValueSet vs = new ValueSet();
 			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
-			try {
-				myTermSvc.expandValueSet(null, vs);
-				fail("");
-			} catch (InternalErrorException e) {
-				assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
-			}
+			assertThatThrownBy(() -> myTermSvc.expandValueSet(null, vs))
+				.isInstanceOf(InternalErrorException.class)
+				.hasMessageContaining(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
 
 			// Increase the max so it won't exceed
 			myStorageSettings.setMaximumExpansionSize(150);
-			vs = new ValueSet();
-			include = vs.getCompose().addInclude();
-			include.setSystem(CS_URL);
 			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
 			assertThat(outcome.getExpansion().getContains()).hasSize(109);
 
 		}
 
 		@Test
-		public void testExpandValueSetWithValueSetCodeAccumulator() {
+		public void expandValueSet_withCodeAccumulator_includesConceptsWithDesignations() {
 			createCodeSystem();
 
 			when(myValueSetCodeAccumulator.getCapacityRemaining()).thenReturn(100);
@@ -1687,7 +1558,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 	@Nested
 	public class TestExpandValueSetProperty {
 		@Test
-		public void testSearch() {
+		public void expandValueSet_propertyEqualFilter_matchesExpectedCodes() {
 			createCodeSystem();
 			createCodeSystem2();
 
@@ -1736,9 +1607,95 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			assertThat(codes).isEmpty();
 		}
 
+		// Created by Claude Opus 4.6
+		@Test
+		void expandValueSet_conceptIsAFilter_includesConceptAndDescendants() {
+			createCodeSystem();
+
+			ValueSet vs = new ValueSet();
+			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.ISA).setValue("childAA");
+
+			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
+			List<String> codes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(codes).containsExactlyInAnyOrder("childAA", "childAAA", "childAAB");
+		}
+
+		// Created by Claude Opus 4.6
+		@Test
+		void expandValueSet_conceptDescendentOfFilter_includesOnlyDescendants() {
+			createCodeSystem();
+
+			ValueSet vs = new ValueSet();
+			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.DESCENDENTOF).setValue("childAA");
+
+			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
+			List<String> codes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(codes).containsExactlyInAnyOrder("childAAA", "childAAB");
+		}
+
+		// Created by Claude Opus 4.6
+		@Test
+		void expandValueSet_conceptIsNotAFilter_excludesConceptAndDescendants() {
+			createCodeSystem();
+
+			ValueSet vs = new ValueSet();
+			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.ISNOTA).setValue("childAA");
+
+			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
+			List<String> codes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(codes).containsExactlyInAnyOrder(
+				"ParentWithNoChildrenA", "ParentWithNoChildrenB", "ParentWithNoChildrenC",
+				"ParentA", "childAB", "ParentB");
+		}
+
+		// Created by Claude Opus 4.6
+		@Test
+		void expandValueSet_conceptHierarchyFilters_correctWithLargerCodeSystem() {
+			createLargerCodeSystem();
+
+			// ISA on "Branch_2" should include Branch_2 + its 50 children + 50 grandchildren = 101
+			ValueSet vs = new ValueSet();
+			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.ISA).setValue("Branch_2");
+			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
+			List<String> isaCodes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(isaCodes).contains("Branch_2", "Branch_2_Child_0", "Branch_2_Child_0_Leaf_0");
+			assertThat(isaCodes).hasSize(101);
+
+			// DESCENDENTOF on "Branch_2" should exclude Branch_2 itself = 100
+			vs = new ValueSet();
+			include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.DESCENDENTOF).setValue("Branch_2");
+			outcome = myTermSvc.expandValueSet(null, vs);
+			List<String> descCodes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(descCodes).doesNotContain("Branch_2");
+			assertThat(descCodes).hasSize(100);
+
+			// ISNOTA on "Branch_2" should return everything except Branch_2 and its descendants
+			// Total concepts: Root + 3 branches + 3*50 children + 3*50 grandchildren = 304
+			// Excluded: Branch_2 + 50 children + 50 grandchildren = 101
+			// Expected: 304 - 101 = 203
+			vs = new ValueSet();
+			include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addFilter().setProperty("concept").setOp(ValueSet.FilterOperator.ISNOTA).setValue("Branch_2");
+			outcome = myTermSvc.expandValueSet(null, vs);
+			List<String> isNotACodes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(isNotACodes).contains("Root", "Branch_1", "Branch_3");
+			assertThat(isNotACodes).doesNotContain("Branch_2", "Branch_2_Child_0", "Branch_2_Child_0_Leaf_0");
+			assertThat(isNotACodes).hasSize(203);
+		}
 
 		@Test
-		public void testSearchWithRegexExclude() {
+		public void expandValueSet_regexExcludeFilter_excludesMatchingCodes() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1765,7 +1722,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testSearchWithRegexExcludeUsingOr() {
+		public void expandValueSet_regexExcludeWithOrPattern_excludesMultipleMatches() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1792,7 +1749,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		}
 
 		@Test
-		public void testSearchWithRegexInclude() {
+		public void expandValueSet_regexIncludeFilter_includesMatchingCodes() {
 			createLoincSystemWithSomeCodes();
 
 			List<String> codes;
@@ -1884,7 +1841,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		 * Test for fix to issue-2588
 		 */
 		@Test
-		public void testRegexMatchesPropertyNameAndValue() {
+		public void expandValueSet_regexFilter_matchesValueNotPropertyName() {
 			createCodeSystem3();
 
 			List<String> codes;
@@ -1915,28 +1872,28 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 	public class TestSearchWithManyCodes {
 
 		private List<String> allCodesNotIncludingSearched;
-		private List<String> existingCodes = Arrays.asList("50015-7", "43343-3", "43343-4", "47239-9");
-		private Long termCsId;
+		private List<String> existingCodes = List.of("50015-7", "43343-3", "43343-4", "47239-9");
 
 		@BeforeEach
 		void generateLongSearchedCodesList() {
 			int codesQueriedCount = (int) (BooleanQuery.getMaxClauseCount() * 1.5);
-			allCodesNotIncludingSearched = generateCodes(codesQueriedCount);
+			allCodesNotIncludingSearched =  IntStream.range(0, codesQueriedCount)
+				.mapToObj(i -> "generated-code-" + i).collect(Collectors.toList());
 
-			termCsId = createLoincSystemWithSomeCodes();
+			createLoincSystemWithSomeCodes();
 		}
 
 
 		@Test
-		public void testShouldNotFindAny() {
+		public void expandValueSet_noMatchingCodes_returnsEmpty() {
 			List<String> hits = search(allCodesNotIncludingSearched);
-			assertNotNull(hits);
+			assertThat(hits).isNotNull();
 			assertThat(hits).isEmpty();
 		}
 
 
 		@Test
-		public void testHitsInFirstSublist() {
+		public void expandValueSet_matchesInFirstSublist_findsAllMatches() {
 			int insertIndex = IndexSearcher.getMaxClauseCount() / 2;
 
 			// insert existing codes into list of codes searched
@@ -1948,7 +1905,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 
 		@Test
-		public void testHitsInLastSublist() {
+		public void expandValueSet_matchesInLastSublist_findsAllMatches() {
 			// insert existing codes into list of codes searched
 			allCodesNotIncludingSearched.addAll(allCodesNotIncludingSearched.size(), existingCodes);
 
@@ -1959,7 +1916,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 
 		@Test
-		public void testHitsInBothSublists() {
+		public void expandValueSet_matchesAcrossSublists_findsAllMatches() {
 			// insert half of existing codes in first sublist and half in last
 
 			List<List<String>> partitionedExistingCodes = ListUtils.partition(existingCodes, existingCodes.size() / 2);
@@ -1992,7 +1949,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 	@Nested
 	public class TestValueSetExpansion{
 		@Test
-		public void testValueSetConceptDisplay_expandsWithoutOverwritingCodeSystemConceptDisplay(){
+		public void expandValueSet_withConceptDisplayOverride_doesNotOverwriteCodeSystemDisplay(){
 			String code = "ParentWithNoChildrenA";
 
 			// given a code system declaring a termConcept with 'ParentWithNoChildrenA' as code and not display
