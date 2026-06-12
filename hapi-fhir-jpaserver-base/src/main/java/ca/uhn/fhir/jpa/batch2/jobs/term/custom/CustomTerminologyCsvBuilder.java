@@ -24,8 +24,9 @@ import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 public class CustomTerminologyCsvBuilder {
 
-	private Map<String, TermConcept> myCodeToConcept = new LinkedHashMap<>();
-	private Map<String, String> myParentCodeToChildCode = new LinkedHashMap<>();
+	private final FhirContext myCanonicalFhirContext = FhirContext.forR4Cached();
+	private final Map<String, TermConcept> myCodeToConcept = new LinkedHashMap<>();
+	private final Map<String, String> myParentCodeToChildCode = new LinkedHashMap<>();
 
 	public String getHierarchyCsv() {
 		List<String> headers = List.of(
@@ -60,7 +61,9 @@ public class CustomTerminologyCsvBuilder {
 								coding.setSystem(property.getCodeSystem());
 								coding.setCode(property.getValue());
 								coding.setDisplay(property.getDisplay());
-								yield FhirContext.forR4Cached()
+								// New parser each time because we don't expect most property lists
+								// to have any codings
+								yield myCanonicalFhirContext
 										.newJsonParser()
 										.setPrettyPrint(false)
 										.encodeToString(coding);

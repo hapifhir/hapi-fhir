@@ -181,17 +181,17 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 
 		CodeSystem codeSystem = null;
 		if (theSingleFileName.endsWith(TerminologyConstants.CUSTOM_CODESYSTEM_JSON)) {
-			codeSystem = myCanonicalFhirContext
-					.newJsonParser()
-					.parseResource(
-							CodeSystem.class,
-							new InputStreamReader(theInputStreamSupplier.get(), StandardCharsets.UTF_8));
+			try (InputStream inputStream = theInputStreamSupplier.get()) {
+				codeSystem = myCanonicalFhirContext
+						.newJsonParser()
+						.parseResource(CodeSystem.class, new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+			}
 		} else if (theSingleFileName.endsWith(TerminologyConstants.CUSTOM_CODESYSTEM_XML)) {
-			codeSystem = myCanonicalFhirContext
-					.newXmlParser()
-					.parseResource(
-							CodeSystem.class,
-							new InputStreamReader(theInputStreamSupplier.get(), StandardCharsets.UTF_8));
+			try (InputStream inputStream = theInputStreamSupplier.get()) {
+				codeSystem = myCanonicalFhirContext
+						.newXmlParser()
+						.parseResource(CodeSystem.class, new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+			}
 		}
 
 		if (codeSystem != null) {
