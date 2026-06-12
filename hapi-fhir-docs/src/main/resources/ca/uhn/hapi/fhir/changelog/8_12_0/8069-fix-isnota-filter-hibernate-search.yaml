@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8069
+title: "Previously, `ValueSet` expansion with Hibernate Search enabled would fail with `HAPI-0894` when using
+the `ISNOTA` (is-not-a) filter operator on code/concept. This affected the normative `ValueSet`
+`patient-contactrelationship` and could cause validation to silently reject valid codes. This has been fixed."

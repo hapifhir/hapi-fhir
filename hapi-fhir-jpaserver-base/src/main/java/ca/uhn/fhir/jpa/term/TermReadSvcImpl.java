@@ -1663,6 +1663,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			b.must(f.bool()
 					.should(f.match().field("myParentPids").matching("" + code.getId()))
 					.should(f.match().field("myId").matching(code.getPid())));
+		} else if (theFilter.getOp() == ValueSet.FilterOperator.ISNOTA) {
+			ourLog.debug(
+					" * Filtering on codes that are not {}/{}/{} or its descendants",
+					code.getId(),
+					code.getCode(),
+					code.getDisplay());
+
+			b.mustNot(f.bool()
+					.should(f.match().field("myParentPids").matching("" + code.getId()))
+					.should(f.match().field("myId").matching(code.getPid())));
 		} else if (theFilter.getOp() == ValueSet.FilterOperator.DESCENDENTOF) {
 			ourLog.debug(
 					" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
