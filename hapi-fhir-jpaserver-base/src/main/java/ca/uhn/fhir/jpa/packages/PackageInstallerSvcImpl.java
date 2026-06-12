@@ -61,7 +61,6 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
-import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -83,13 +82,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -107,7 +106,6 @@ import static ca.uhn.fhir.util.SearchParameterUtil.getBaseAsStrings;
 public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageInstallerSvcImpl.class);
-	private static final String OUR_PIPE_CHARACTER = "|";
 
 	// Created by Claude Opus 4.6
 	enum InstallResultEnum {
@@ -172,6 +170,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
 	private CommonCodeSystemsTerminologyService myCommonCodeSystemsTerminologyService;
+	private PackageVersionStamper myPackageVersionStamper;
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
@@ -189,6 +188,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@PostConstruct
 	public void initialize() {
 		myCommonCodeSystemsTerminologyService = new CommonCodeSystemsTerminologyService(myFhirContext);
+		myPackageVersionStamper = new PackageVersionStamper(myFhirContext);
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R5:
 			case R4B:
@@ -248,7 +248,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				retVal.getMessage().addAll(NpmPackageUtils.getProcessingMessages(npmPackage));
 
 				if (theInstallationSpec.isFetchDependencies()) {
-					fetchAndInstallDependencies(npmPackage, theInstallationSpec, retVal, new DependencyRegister());
+					fetchAndInstallDependencies(
+							npmPackage, theInstallationSpec, retVal, new PackageDependencyRegistry());
 				}
 
 				if (theInstallationSpec.getInstallMode() == STORE_AND_INSTALL
@@ -325,27 +326,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		ourLog.info("Installing package: {}#{}", name, version);
 		Map<String, EnumMap<InstallResultEnum, Integer>> installCounts = new HashMap<>();
 
-		for (String type : installTypes) {
-
-			Collection<IBaseResource> resources = myPackageResourceParsingSvc.parseResourcesOfType(type, npmPackage);
-
-			for (IBaseResource next : resources) {
-				try {
-					next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
-					InstallResultEnum result = install(next, theInstallationSpec, theOutcome);
-					installCounts
-							.computeIfAbsent(type, k -> new EnumMap<>(InstallResultEnum.class))
-							.merge(result, 1, Integer::sum);
-				} catch (Exception e) {
-					ourLog.warn(
-							"Failed to upload resource of type {} with ID {} - Error: {}",
-							myFhirContext.getResourceType(next),
-							next.getIdElement().getValue(),
-							e.toString());
-					throw new ImplementationGuideInstallationException(
-							Msg.code(1286) + String.format("Error installing IG %s#%s: %s", name, version, e), e);
-				}
-			}
+		List<IBaseResource> resources = collectResources(npmPackage, theInstallationSpec, installTypes);
+		for (IBaseResource next : resources) {
+			installResourceFromPackage(next, theInstallationSpec, theOutcome, installCounts, name, version);
 		}
 
 		if (theInstallationSpec.isDryRun()) {
@@ -378,6 +361,52 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		installCounts.forEach((type, counts) -> {
 			counts.forEach((result, count) -> ourLog.info("-- {} {} resources of type {}", result, count, type));
 		});
+	}
+
+	// Created by Claude Opus 4.6
+	private List<IBaseResource> collectResources(
+			NpmPackage theNpmPackage, PackageInstallationSpec theInstallationSpec, List<String> theInstallTypes) {
+		List<IBaseResource> allResources = new ArrayList<>();
+		for (String type : theInstallTypes) {
+			allResources.addAll(myPackageResourceParsingSvc.parseResourcesOfType(type, theNpmPackage));
+		}
+
+		Set<String> additionalFolders = theInstallationSpec.getAdditionalResourceFolders();
+		if (additionalFolders != null && !additionalFolders.isEmpty()) {
+			ourLog.info("Installing resources from additional folders: {}", additionalFolders);
+			allResources.addAll(
+					AdditionalResourcesParser.getAdditionalResources(additionalFolders, theNpmPackage, myFhirContext));
+		}
+		return allResources;
+	}
+
+	// Created by Claude Opus 4.6
+	private void installResourceFromPackage(
+			IBaseResource theResource,
+			PackageInstallationSpec theInstallationSpec,
+			PackageInstallOutcomeJson theOutcome,
+			Map<String, EnumMap<InstallResultEnum, Integer>> theInstallCounts,
+			String thePackageName,
+			String thePackageVersion) {
+		IBaseResource resource = theResource;
+		try {
+			resource = isStructureDefinitionWithoutSnapshot(resource) ? generateSnapshot(resource) : resource;
+			String type = myFhirContext.getResourceType(resource);
+			InstallResultEnum result = install(resource, theInstallationSpec, theOutcome);
+			theInstallCounts
+					.computeIfAbsent(type, k -> new EnumMap<>(InstallResultEnum.class))
+					.merge(result, 1, Integer::sum);
+		} catch (Exception e) {
+			ourLog.warn(
+					"Failed to upload resource of type {} with ID {} - Error: {}",
+					myFhirContext.getResourceType(resource),
+					resource.getIdElement().getValue(),
+					e.toString());
+			throw new ImplementationGuideInstallationException(
+					Msg.code(1286)
+							+ String.format("Error installing IG %s#%s: %s", thePackageName, thePackageVersion, e),
+					e);
+		}
 	}
 
 	/**
@@ -427,21 +456,18 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			NpmPackage npmPackage,
 			PackageInstallationSpec theInstallationSpec,
 			PackageInstallOutcomeJson theOutcome,
-			DependencyRegister theDependencyRegister)
+			PackageDependencyRegistry thePackageDependencyRegistry)
 			throws ImplementationGuideInstallationException {
 		List<PackageUtils.DependentPackage> dependentPackages =
 				PackageUtils.extractDependentPackages(npmPackage, theInstallationSpec, theOutcome);
 
 		for (PackageUtils.DependentPackage nextPackage : dependentPackages) {
-			if (theDependencyRegister.containsDependency(nextPackage.name(), nextPackage.version())) {
-				ourLog.debug(
-						"Package {}#{} has already been installed. Skipping redundant processing.",
-						nextPackage.name(),
-						nextPackage.version());
+			if (thePackageDependencyRegistry.isRedundant(
+					nextPackage.name(), nextPackage.version(), theInstallationSpec)) {
 				continue;
 			}
 
-			theDependencyRegister.addDependency(nextPackage.name(), nextPackage.version());
+			thePackageDependencyRegistry.addDependency(nextPackage.name(), nextPackage.version());
 
 			try {
 				if (theInstallationSpec.isDryRun()) {
@@ -466,7 +492,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 					// recursive call to install dependencies of a package before
 					// installing the package
-					fetchAndInstallDependencies(dependency, theInstallationSpec, theOutcome, theDependencyRegister);
+					fetchAndInstallDependencies(
+							dependency, theInstallationSpec, theOutcome, thePackageDependencyRegistry);
 
 					if (theInstallationSpec.getInstallMode()
 							== PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
@@ -640,6 +667,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return SKIPPED;
 		}
 
+		if (existingResource != null
+				&& !allowMultipleVersionsForResource(theResource, theInstallationSpec)
+				&& myPackageVersionStamper.isOlderPackageVersion(theInstallationSpec, existingResource)) {
+			return SKIPPED;
+		}
+
 		if (!searchResult.isEmpty()) {
 			ourLog.info("Updating existing resource matching {}", resourceQuery);
 		}
@@ -712,7 +745,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			@Nonnull PackageInstallationSpec thePackageInstallationSpec) {
 
 		prefixNumericIdIfNeeded(theResource);
-		setPackageMetaSource(theResource, thePackageInstallationSpec);
+		myPackageVersionStamper.stampPackageSource(theResource, thePackageInstallationSpec);
 
 		if (theExistingResource == null) {
 			boolean created = createNewResource(theDao, theResource, thePackageInstallationSpec);
@@ -799,8 +832,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private boolean updateExistingNonSearchParameter(
 			IFhirResourceDao theDao, IBaseResource theResource, IBaseResource theExistingResource) {
-		// An existing resource is found,
-		// update this resource and force-use the old ID
 		ourLog.debug(
 				"Existing resource {} will be overridden with installed resource {}",
 				theExistingResource.getIdElement(),
@@ -857,19 +888,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private boolean allowMultipleVersionsForResource(
 			IBaseResource theResource, PackageInstallationSpec thePackageInstallationSpec) {
-		// For Search parameters don't allow multi version
 		if (isSearchParameter(theResource)) {
 			return false;
 		}
 		return thePackageInstallationSpec.getVersionPolicy() == PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION;
-	}
-
-	private void setPackageMetaSource(IBaseResource theResource, PackageInstallationSpec thePackageInstallationSpec) {
-		if (thePackageInstallationSpec != null) {
-			String metaSourceUrl =
-					thePackageInstallationSpec.getName() + OUR_PIPE_CHARACTER + thePackageInstallationSpec.getVersion();
-			MetaUtil.setSource(myFhirContext, theResource, metaSourceUrl);
-		}
 	}
 
 	private void prefixNumericIdIfNeeded(IBaseResource theResource) {
@@ -1210,27 +1232,5 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private boolean hasValue(IBaseResource theResource, String theElementName) {
 		return TerserUtil.hasValues(myFhirContext, theResource, theElementName);
-	}
-
-	@VisibleForTesting
-	void setFhirContextForUnitTest(FhirContext theCtx) {
-		myFhirContext = theCtx;
-	}
-
-	private static class DependencyRegister {
-		private final Set<String> dependencies = new HashSet<>();
-
-		public void addDependency(String thePackageName, String theVersion) {
-			dependencies.add(buildKey(thePackageName, theVersion));
-		}
-
-		public boolean containsDependency(String thePackageName, String theVersion) {
-			return dependencies.contains(buildKey(thePackageName, theVersion));
-		}
-
-		@Nonnull
-		private static String buildKey(String thePackageName, String theVersion) {
-			return thePackageName + "#" + Objects.requireNonNullElse(theVersion, "current");
-		}
 	}
 }

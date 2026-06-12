@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8075
+title: "The database support documentation listed an incorrect Hibernate dialect class for 
+MS SQL Server. It now lists `HapiFhirSQLServerDialect`."

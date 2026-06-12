@@ -109,8 +109,60 @@ The following version pairs are treated as compatible:
 * R4 and R4B are treated as compatible with each other (both are considered `R4`-family).
 * All other version combinations are treated as incompatible and will trigger the cross-version substitution logic described above.
 
+# Version Policy
+
+The `versionPolicy` parameter on `PackageInstallationSpec` controls how the installer matches existing resources during installation The default is `MULTI_VERSION`.
+
+| Policy | Resource Matching | Behavior |
+|--------|------------------|----------|
+| `MULTI_VERSION` (default) | Matches by canonical URL **and** version | Multiple versions of the same resource can coexist in the repository. Server-assigned IDs are used. |
+| `SINGLE_VERSION` | Matches by canonical URL only (ignoring version) | Only one version of each resource exists. Installing a new version overwrites the previous one. Client-assigned IDs from the package are used. |
+
+```java
+PackageInstallationSpec spec = new PackageInstallationSpec()
+    .setName("hl7.fhir.us.core")
+    .setVersion("7.0.0")
+    .setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY)
+    .setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION);
+```
+
+## Redundant Dependency Handling
+
+When `fetchDependencies` is enabled, a package's dependency tree may pull in multiple versions of the same transitive dependency. For example, installing `us.nlm.vsac` version `0.19.0` may depend on `hl7.terminology.r4` version `6.2.0`, while a transitive dependency may pull in `hl7.terminology.r4` version `5.4.0`. Without protection, the older version could silently overwrite canonical resources that were already installed by the newer version.
+
+The installer detects redundant dependencies and skips them in both modes:
+
+* **`SINGLE_VERSION` mode**: All canonical resources are affected since they are matched by URL only. The installer tracks the highest version of each dependency package encountered during the installation. If an older or already-installed version of a package is encountered later in the dependency tree, it is treated as redundant and skipped.
+* **`MULTI_VERSION` mode**: Only `SearchParameter` resources are affected since they are matched by `code` and `base` rather than URL and version. Other canonical resources coexist by URL and version and are not at risk. The installer compares package versions at the resource level and treats updates from older packages as redundant. This relies on the `meta.source` field that the installer stamps on each resource. Resources created manually or installed before this stamping was in place are not protected.
+
 # Using Installed Packages for Validation
 
 Once a package is installed, its conformance resources (StructureDefinitions, ValueSets, CodeSystems, etc.) are stored in the JPA server database and automatically included in the validation support chain. No additional configuration is needed to validate against profiles from installed packages.
 
 See [Validating Using Packages](../validation/instance_validator.html#packages) for details on how validation uses package content.
+
+# Installed Resource Types
+
+By default, the following resource types are installed from a package: `NamingSystem`, `CodeSystem`, `ValueSet`, `StructureDefinition`, `ConceptMap`, `SearchParameter`, `Subscription`. To install a different set of resource types, use `setInstallResourceTypes()` on the `PackageInstallationSpec`:
+
+```java
+PackageInstallationSpec spec = new PackageInstallationSpec()
+    .setName("hl7.fhir.us.core")
+    .setVersion("7.0.0")
+    .setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+    .setInstallResourceTypes(List.of("StructureDefinition", "ValueSet", "CodeSystem"));
+```
+
+# Installing Resources from Additional Folders
+
+FHIR NPM packages may contain resources in folders other than the standard `package` folder (e.g., `example`). To install resources from these additional folders, use `setAdditionalResourceFolders()` on the `PackageInstallationSpec`:
+
+```java
+PackageInstallationSpec spec = new PackageInstallationSpec()
+    .setName("com.example.my-ig")
+    .setVersion("1.0.0")
+    .setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+    .setAdditionalResourceFolders(Set.of("example"));
+```
+
+Resources from additional folders are installed the same way as resources from the standard `package` folder.
