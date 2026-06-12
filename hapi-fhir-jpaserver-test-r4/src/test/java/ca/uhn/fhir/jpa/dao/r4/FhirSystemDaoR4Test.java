@@ -1085,10 +1085,24 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		ourLog.info("Conditional-match SELECTs: full-form={}, bare-form={}", fullSelectCount, bareSelectCount);
 
-		// Both forms must NOP against the pre-existing resources (no duplicates created).
+		// Both forms must NOP against the pre-existing resources (200 OK, not 201 Created).
 		for (int i = 0; i < entryCount; i++) {
-			assertEquals("200 OK", fullOutcome.getEntry().get(i).getResponse().getStatus());
-			assertEquals("200 OK", bareOutcome.getEntry().get(i).getResponse().getStatus());
+			assertThat(fullOutcome.getEntry().get(i).getResponse().getStatus())
+					.as("full-form entry %s must NOP against the pre-existing resource", i)
+					.isEqualTo("200 OK");
+			assertThat(bareOutcome.getEntry().get(i).getResponse().getStatus())
+					.as("bare-form entry %s must NOP against the pre-existing resource", i)
+					.isEqualTo("200 OK");
+		}
+
+		// No duplicate resources were created: exactly one Patient exists per identifier value.
+		for (int i = 0; i < entryCount; i++) {
+			assertThat(countPatientsByIdentifier("http://sys", "full" + i))
+					.as("exactly one Patient must exist for full-form identifier %s (no duplicate created)", i)
+					.isEqualTo(1);
+			assertThat(countPatientsByIdentifier("http://sys", "bare" + i))
+					.as("exactly one Patient must exist for bare-form identifier %s (no duplicate created)", i)
+					.isEqualTo(1);
 		}
 
 		// The bare form is pre-fetched and batched exactly like the full form, so it issues no more
@@ -1096,6 +1110,19 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(bareSelectCount)
 				.as("bare-form conditional creates must be pre-fetched/batched like full-form")
 				.isLessThanOrEqualTo(fullSelectCount);
+
+		// Absolute "batched, not N+1" guarantee: the bare form must NOT issue one match-search per
+		// entry. This catches a future regression that inflates both paths equally (which the
+		// relative assertion above would miss).
+		assertThat(bareSelectCount)
+				.as("bare-form conditional creates must be batched (not one match-search per entry)")
+				.isLessThan(entryCount);
+	}
+
+	private int countPatientsByIdentifier(String theSystem, String theValue) {
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Patient.SP_IDENTIFIER, new TokenParam(theSystem, theValue));
+		return myPatientDao.search(map, mySrd).size().intValue();
 	}
 
 
