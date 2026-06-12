@@ -63,7 +63,6 @@ import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Id;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import org.apache.commons.lang3.Strings;
@@ -1029,8 +1028,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				validateOrCreateNotPresentCodeSystem(theRequestDetails, systemUrl, systemVersionId, codeSystem);
 			}
 
-			codeSystemVersionEntity =
-				myCodeSystemVersionDao.findByCodeSystemUriAndVersion(systemUrl, systemVersionId);
+			codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemUriAndVersion(systemUrl, systemVersionId);
 
 			ValidateUtil.isTrueOrThrowInvalidRequest(
 					codeSystemVersionEntity != null,
@@ -1045,10 +1043,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				additions.add(concept);
 			}
 
-			IdAndPartitionId termCodeSystemPid = new IdAndPartitionId(codeSystemVersionEntity.getCodeSystemPid(), codeSystemVersionEntity.getPartitionId().getPartitionId());
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findById(termCodeSystemPid).orElseThrow();
-			return addConceptsToCodeSystemVersion(
-				termCodeSystem, codeSystemVersionEntity, additions);
+			IdAndPartitionId termCodeSystemPid = new IdAndPartitionId(
+					codeSystemVersionEntity.getCodeSystemPid(),
+					codeSystemVersionEntity.getPartitionId().getPartitionId());
+			TermCodeSystem termCodeSystem =
+					myTermCodeSystemDao.findById(termCodeSystemPid).orElseThrow();
+			return addConceptsToCodeSystemVersion(termCodeSystem, codeSystemVersionEntity, additions);
 		});
 	}
 
