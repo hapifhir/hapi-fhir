@@ -53,6 +53,10 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 		return myResourcePids.size();
 	}
 
+	/**
+	 * Returns the resource at the given index, or {@code null} if its PID had no loadable body.
+	 * {@link #size()} counts PIDs, so not every index in {@code [0, size())} is guaranteed non-null.
+	 */
 	@Override
 	public IBaseResource getResource(int theIndex) {
 		if (myResources == null) {
@@ -60,6 +64,10 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 			mySearchBuilderSupplier
 					.call()
 					.loadResourcesByPid(myResourcePids, Collections.emptySet(), myResources, false, null);
+		}
+		// loadResourcesByPid skips unloadable PIDs, so myResources may be shorter than size().
+		if (theIndex >= myResources.size()) {
+			return null;
 		}
 		return myResources.get(theIndex);
 	}

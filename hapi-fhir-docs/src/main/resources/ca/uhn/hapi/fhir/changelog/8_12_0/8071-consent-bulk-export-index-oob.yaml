@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8071
+title: "Fixed an IndexOutOfBoundsException that occurred during Patient/$export (bulk export)
+  when a Consent interceptor was active and some resources matched by the search could not
+  be loaded. Resources that cannot be loaded are now silently excluded from the export
+  instead of causing the job to fail."
