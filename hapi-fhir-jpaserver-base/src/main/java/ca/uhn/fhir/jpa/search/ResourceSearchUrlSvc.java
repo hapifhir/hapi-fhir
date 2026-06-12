@@ -93,14 +93,10 @@ public class ResourceSearchUrlSvc {
 	}
 
 	/**
-	 * Perform removal of entries older than {@code theCutoffDate} since the create operations are done.
-	 *
-	 * <p>Pages the deletion in batches of {@link #DELETE_PAGE_SIZE} so no individual
-	 * statement scans the whole table. A single unbounded DELETE on millions of rows trips MSSQL's
-	 * per-statement timeout on MegaScale deployments (SMILE-12080); each paged DELETE is bounded.
-	 *
-	 * <p>Runs outside any caller transaction ({@link Propagation#NOT_SUPPORTED}) so each page commits
-	 * independently — otherwise the whole sweep would still be one giant transaction.
+	 * Deletes search URL entries created before {@code theCutoffDate}, in fixed-size pages that each
+	 * commit in their own transaction. A single sweep is capped at {@link #MAX_DELETE_PAGES} pages;
+	 * any remaining stale entries are removed by the next scheduled run
+	 * ({@link SearchUrlJobMaintenanceSvcImpl}).
 	 */
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void deleteEntriesOlderThan(Date theCutoffDate) {
