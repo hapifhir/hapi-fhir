@@ -620,12 +620,17 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							theIdsToPreFetchBodiesFor,
 							theIdsToPreFetchFhirIdsFor,
 							searchParameterMapsToResolve);
-				} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
+				} else if ("POST".equals(verb) && isNotBlank(requestIfNoneExist)) {
+					// A conditional create's ifNoneExist may be in the FHIR-spec bare query form (just the query
+					// portion, e.g. "identifier=sys|val", with no "Type?" prefix and no "?") or in the tolerated
+					// full form ("Patient?identifier=sys|val"). Canonicalize so both forms take the same
+					// pre-fetch/batching path.
+					String conditionalUrl = canonicalizeIfNoneExistUrl(resourceType, requestIfNoneExist);
 					processConditionalUrlForPreFetching(
 							theRequestPartitionId,
 							resourceType,
 							resource,
-							requestIfNoneExist,
+							conditionalUrl,
 							false,
 							true,
 							theIdsToPreFetchBodiesFor,
@@ -1091,6 +1096,25 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theShouldPreFetchResourceBody,
 					theShouldPreFetchResourceVersion));
 		}
+	}
+
+	/**
+	 * Canonicalizes a conditional-create {@code ifNoneExist} value into the {@code "[ResourceType]?[params]"} form
+	 * that {@link #processConditionalUrlForPreFetching} expects. The FHIR spec defines {@code ifNoneExist} as just
+	 * the query portion of the URL (what follows the {@code '?'}), e.g. {@code "identifier=sys|val"}, so a bare-form
+	 * value has no {@code '?'} and is prefixed with {@code theResourceType + "?"}. The tolerated full form
+	 * (already containing a {@code '?'}, e.g. {@code "Patient?identifier=sys|val"}) is returned unchanged. A leading
+	 * {@code '?'} (degenerate {@code "?query"} form) is treated as the query portion.
+	 */
+	private static String canonicalizeIfNoneExistUrl(String theResourceType, String theIfNoneExist) {
+		int questionMarkIndex = theIfNoneExist.indexOf('?');
+		if (questionMarkIndex == -1) {
+			return theResourceType + "?" + theIfNoneExist;
+		}
+		if (questionMarkIndex == 0) {
+			return theResourceType + theIfNoneExist;
+		}
+		return theIfNoneExist;
 	}
 
 	/**
