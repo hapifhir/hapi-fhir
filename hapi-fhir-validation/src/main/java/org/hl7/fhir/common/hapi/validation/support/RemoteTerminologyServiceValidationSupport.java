@@ -450,34 +450,43 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		}
 
 		List<Base> values = property.getValues();
-		ParametersParameterComponent firstPart = (ParametersParameterComponent) values.get(0);
-		String propertyName = ((CodeType) firstPart.getValue()).getValue();
+		if (values.get(0) instanceof ParametersParameterComponent firstPart
+				&& values.get(1) instanceof ParametersParameterComponent secondPart) {
 
-		ParametersParameterComponent secondPart = (ParametersParameterComponent) values.get(1);
-		Type value = secondPart.getValue();
+			String propertyName = firstPart.getValue() instanceof CodeType c
+					? c.getValue()
+					: firstPart.getValue() instanceof StringType s ? s.getValue() : null;
+			if (propertyName == null) {
+				return null;
+			}
 
-		if (value != null) {
-			return createConceptPropertyR4(propertyName, value);
-		}
+			Type value = secondPart.getValue();
 
-		String groupName = secondPart.getName();
-		if (!"subproperty".equals(groupName)) {
+			if (value != null) {
+				return createConceptPropertyR4(propertyName, value);
+			}
+
+			String groupName = secondPart.getName();
+			if (!"subproperty".equals(groupName)) {
+				return null;
+			}
+
+			// handle property group (a property containing sub-properties)
+			GroupConceptProperty groupConceptProperty = new GroupConceptProperty(propertyName);
+
+			// we already retrieved the property name (group name) as first element, next will be the sub-properties.
+			// there is no dedicated value for a property group as it is an aggregate
+			for (int i = 1; i < values.size(); i++) {
+				ParametersParameterComponent nextPart = (ParametersParameterComponent) values.get(i);
+				BaseConceptProperty subProperty = createConceptPropertyR4(nextPart);
+				if (subProperty != null) {
+					groupConceptProperty.addSubProperty(subProperty);
+				}
+			}
+			return groupConceptProperty;
+		} else {
 			return null;
 		}
-
-		// handle property group (a property containing sub-properties)
-		GroupConceptProperty groupConceptProperty = new GroupConceptProperty(propertyName);
-
-		// we already retrieved the property name (group name) as first element, next will be the sub-properties.
-		// there is no dedicated value for a property group as it is an aggregate
-		for (int i = 1; i < values.size(); i++) {
-			ParametersParameterComponent nextPart = (ParametersParameterComponent) values.get(i);
-			BaseConceptProperty subProperty = createConceptPropertyR4(nextPart);
-			if (subProperty != null) {
-				groupConceptProperty.addSubProperty(subProperty);
-			}
-		}
-		return groupConceptProperty;
 	}
 
 	private static BaseConceptProperty createConceptPropertyR4(final String theName, final Type theValue) {
