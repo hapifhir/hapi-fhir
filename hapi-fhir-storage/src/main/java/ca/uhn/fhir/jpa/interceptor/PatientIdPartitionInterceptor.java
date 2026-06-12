@@ -229,6 +229,17 @@ public class PatientIdPartitionInterceptor {
 		myResourceTypeToCompartmentPolicy = Map.copyOf(thePatientCompartmentOptionalResourceTypes);
 	}
 
+	/**
+	 * Returns an unmodifiable view of the resource type policies currently in effect.
+	 *
+	 * @see #setResourceTypePolicies(Map)
+	 * @since 8.8.0
+	 */
+	@Nonnull
+	public Map<String, ResourceCompartmentStoragePolicy> getResourceTypePolicies() {
+		return Collections.unmodifiableMap(myResourceTypeToCompartmentPolicy);
+	}
+
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId identifyForCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResource);
