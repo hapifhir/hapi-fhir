@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.replacereferences;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -32,8 +33,9 @@ import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,13 +44,17 @@ import java.util.List;
  */
 public class PreviousResourceVersionRestorer {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(PreviousResourceVersionRestorer.class);
+
 	private final HapiTransactionService myHapiTransactionService;
 	private final DaoRegistry myDaoRegistry;
+	private final FhirContext myFhirContext;
 
 	public PreviousResourceVersionRestorer(
 			DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService) {
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
+		myFhirContext = theDaoRegistry.getFhirContext();
 	}
 
 	/**
@@ -80,8 +86,32 @@ public class PreviousResourceVersionRestorer {
 				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails));
 	}
 
+	/**
+	 * Same as {@link #restoreToPreviousVersionsInTrx(List, RequestDetails)} but pins the transaction to the
+	 * given partition. When changing partitions requires a new transaction, this keeps every reference in
+	 * the (single-partition) list within one transaction so the whole list is restored atomically.
+	 *
+	 * @param theReferences a list of versioned resource references that all live on {@code thePartitionId}
+	 * @param thePartitionId the partition the references live on
+	 * @param theRequestDetails the request details for the operation
+	 */
+	public void restoreToPreviousVersionsInTrx(
+			List<Reference> theReferences, RequestPartitionId thePartitionId, RequestDetails theRequestDetails) {
+		myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(thePartitionId)
+				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails));
+	}
+
 	private void restoreToPreviousVersions(List<Reference> theReferences, RequestDetails theRequestDetails) {
-		List<IIdType> idsToDelete = new ArrayList<>();
+		if (theReferences.isEmpty()) {
+			ourLog.info("No resource references provided to restore; nothing to do.");
+			return;
+		}
+
+		// Every reference yields exactly one bundle entry (a delete or an update), so the bundle is non-empty.
+		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+
 		for (Reference reference : theReferences) {
 			String referenceStr = reference.getReference();
 			IIdType referenceId = new IdDt(referenceStr);
@@ -126,8 +156,8 @@ public class PreviousResourceVersionRestorer {
 				}
 
 				if (referenceVersion == 1) {
-					// Resource was created new by the operation (v1) — collect for bundle delete
-					idsToDelete.add(referenceId);
+					// Resource was created new by the operation (v1) — delete it to undo
+					bundleBuilder.addTransactionDeleteEntry(referenceId.toUnqualifiedVersionless());
 					continue;
 				}
 			}
@@ -142,22 +172,15 @@ public class PreviousResourceVersionRestorer {
 			IIdType previousId = referenceId.withVersion(Long.toString(previousVersion));
 			IBaseResource previousResource = dao.read(previousId, theRequestDetails);
 			previousResource.setId(previousResource.getIdElement().toUnqualifiedVersionless());
-			// Update the resource to the previous version's content
-			dao.update(previousResource, theRequestDetails);
+			// Restore the resource to its previous version's content via the transaction bundle
+			bundleBuilder.addTransactionUpdateEntry(previousResource);
 		}
 
-		if (!idsToDelete.isEmpty()) {
-			deleteResourcesInNestedTransaction(idsToDelete, theRequestDetails);
-		}
-	}
-
-	private void deleteResourcesInNestedTransaction(List<IIdType> theIds, RequestDetails theRequestDetails) {
-		@SuppressWarnings("unchecked")
-		IFhirSystemDao<Object, Object> systemDao = (IFhirSystemDao<Object, Object>) myDaoRegistry.getSystemDao();
-		BundleBuilder deleteBuilder = new BundleBuilder(systemDao.getContext());
-		for (IIdType id : theIds) {
-			deleteBuilder.addTransactionDeleteEntry(id);
-		}
-		systemDao.transactionNested(theRequestDetails, deleteBuilder.getBundle());
+		// Submit all restores (updates) and deletes as a single FHIR transaction. Processing them together
+		// means references between the restored resources are resolved against the transaction's
+		// pre-populated id map, independent of entry order — so a referrer can be restored before its
+		// target, and two resources can even reference each other, without tripping
+		// referential-integrity-on-write on a not-yet-restored (still tombstoned) target.
+		myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, bundleBuilder.getBundle());
 	}
 }

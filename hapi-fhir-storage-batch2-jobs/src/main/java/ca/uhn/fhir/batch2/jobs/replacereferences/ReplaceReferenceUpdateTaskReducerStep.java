@@ -98,6 +98,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 					targetIdVersioned,
 					sourceIdVersioned,
 					changedResourceIds,
+					null,
 					theStepExecutionDetails.getInstance().getStartTime(),
 					theRequestDetails,
 					ProvenanceAgentJson.toIProvenanceAgents(params.getProvenanceAgents(), myFhirContext),
