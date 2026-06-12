@@ -1,5 +1,23 @@
 # AI Policy
 
+## There are Humans Here
+
+Please remember that HAPI FHIR is maintained by humans.
+
+Every discussion, issue, and pull request is read and reviewed by humans (and
+sometimes machines, too). It is a boundary point at which people interact with
+each other and the work done. It is rude and disrespectful to approach this
+boundary with low-effort, unqualified work, since it puts the burden of
+validation on the maintainer.
+
+In a perfect world, AI would produce high-quality, accurate work every time.
+But today, that reality depends on the driver of the AI. And today, most
+drivers of AI are just not good enough. So, until either the people get
+better, the AI gets better, or both, we have to have strict rules to protect
+maintainers.
+
+## Policy 
+
 Using AI (i.e., LLMs) as a tool for coding is welcome. However, a high bar is
 held for all contributions to this project. Contributors remain responsible
 for any code they publish, and the project maintainers remain responsible for
@@ -7,10 +25,10 @@ any code that is merged and released.
 
 **All AI usage in any form must be disclosed.** You must state the tool you
 used (e.g. Claude Code, Cursor, Amp) along with the extent that the work was
-AI-assisted. Any Pull Request that is submitted must attach the `AI Assisted` 
+AI-assisted. Any Pull Request that is built with AI assistance submitted must attach the `AI Assisted` 
 Github label. 
 
-**AI should not be used to generate comments or PR descriptions when communicating with
+**AI should not be used to generate comments or Pull Request descriptions when communicating with
 maintainers.** Comments are expected to be written by humans. Comments that
 are believed to be AI generated may be hidden or removed without notice.
 
@@ -40,27 +58,11 @@ to ensure the result reflects your own voice and ideas. If you are using AI
 for translation, we recommend writing in your native language and including
 the AI translation in a quote block.
 
-## There are Humans Here
 
-Please remember that HAPI FHIR is maintained by humans.
-
-Every discussion, issue, and pull request is read and reviewed by humans (and
-sometimes machines, too). It is a boundary point at which people interact with
-each other and the work done. It is rude and disrespectful to approach this
-boundary with low-effort, unqualified work, since it puts the burden of
-validation on the maintainer.
-
-In a perfect world, AI would produce high-quality, accurate work every time.
-But today, that reality depends on the driver of the AI. And today, most
-drivers of AI are just not good enough. So, until either the people get
-better, the AI gets better, or both, we have to have strict rules to protect
-maintainers.
 
 ---
 
-This policy was adapted from [ripgrep's AI policy], [uv's AI policy], and
-[Ghostty's AI policy].
-
+This policy was adapted from [ripgrep's AI policy], [uv's AI policy], and [Ghostty's AI policy].
 [ripgrep's AI policy]: https://github.com/BurntSushi/ripgrep/blob/master/AI_POLICY.md
 [uv's AI policy]: https://github.com/astral-sh/.github/blob/c5187e200db51bfe11d56e13053d29bd3793fdd8/AI_POLICY.md
 [Ghostty's AI policy]: https://github.com/ghostty-org/ghostty/blob/main/AI_POLICY.md
