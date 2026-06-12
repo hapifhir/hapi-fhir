@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 8027
+title: "Fixed an issue where schema migrations on existing databases could incorrectly skip required tasks when migration history was unavailable or incomplete, potentially resulting in missing schema elements and runtime SQL errors."

@@ -34,6 +34,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -78,10 +79,10 @@ class HapiMigratorIT {
 		System.clearProperty(HapiMigrationLock.CLEAR_LOCK_TABLE_WITH_DESCRIPTION);
 	}
 
-/** We test initialization in two cases: an empty database, and one that has been manually filled by running the schema sql to verify initialization doesn't try to re-install on top and detects that it is still "initializing". */
-		@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	public void testInitializeSchema(boolean thePreCreateSchema) {
+	/** We test initialization in two cases: an empty database, and one that has been manually filled by running the schema sql. */
+			@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		public void testInitializeSchema(boolean thePreCreateSchema) {
 		if (thePreCreateSchema) {
 			String sql = ClasspathUtil.loadResource("/hapi-migrator-it-init-schema/h2.sql");
 			List<String> statements = SqlUtil.splitSqlFileIntoStatements(sql);
@@ -118,10 +119,17 @@ class HapiMigratorIT {
 		 * 2 should not run.
 		 */
 		migrator = buildMigrator(taskList.toTaskArray());
-		outcome = migrator.migrate();
 		if (thePreCreateSchema) {
-			assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("3");
+			assertThatThrownBy(migrator::migrate)
+					.isInstanceOf(HapiMigrationException.class)
+					.hasMessageContaining("--baseline-version");
+
+			migrator = buildMigrator(taskList.toTaskArray());
+			migrator.setBaselineVersion("5.5.0.1");
+			outcome = migrator.migrate();
+			assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("2", "3");
 		} else {
+			outcome = migrator.migrate();
 			assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("1", "3");
 		}
 
@@ -163,6 +171,25 @@ class HapiMigratorIT {
 
 		MigrationResult result = future.get();
 		assertThat(result.succeededTasks).hasSize(1);
+	}
+
+	@Test
+	void test_existingMigrationHistory_rejectsExplicitBaseline() {
+		MigrationTaskList taskList = new MigrationTaskList();
+		Builder version = HapiMigrationStorageSvcTest.forVersion(taskList);
+		version.addTableByColumns("1", "TABLE_ONE", "PID")
+				.addColumn("PID")
+				.nonNullable()
+				.type(ColumnTypeEnum.LONG);
+
+		HapiMigrator migrator = buildMigrator(taskList.toTaskArray());
+		migrator.migrate();
+
+		migrator = buildMigrator(taskList.toTaskArray());
+		migrator.setBaselineVersion("1.0.0");
+		assertThatThrownBy(migrator::migrate)
+				.isInstanceOf(HapiMigrationException.class)
+				.hasMessageContaining("Remove --baseline-version");
 	}
 
 	@Test

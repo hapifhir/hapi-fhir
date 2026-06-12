@@ -42,6 +42,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 	public static final String MIGRATE_DATABASE = "migrate-database";
 	public static final String NO_COLUMN_SHRINK = "no-column-shrink";
 	public static final String SKIP_VERSIONS = "skip-versions";
+	public static final String BASELINE_VERSION = "baseline-version";
 	public static final String ENABLE_HEAVYWEIGHT_MIGRATIONS = "enable-heavyweight-migrations";
 
 	private Set<String> myFlags;
@@ -101,6 +102,12 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		addOptionalOption(
 				retVal,
 				null,
+				BASELINE_VERSION,
+				"Version",
+				"Record all migrations up to this version as already applied before migrating. This is intended for existing HAPI FHIR schemas that do not have migration history. E.g. 8.4.0");
+		addOptionalOption(
+				retVal,
+				null,
 				ENABLE_HEAVYWEIGHT_MIGRATIONS,
 				false,
 				"If this flag is set, additional migration tasks will be executed that are considered unnecessary to execute on a database with a significant amount of data loaded. This option is not generally necessary.");
@@ -146,6 +153,8 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 			migrator.setDryRun(dryRun);
 			migrator.setRunHeavyweightSkippableTasks(runHeavyweight);
 			migrator.setNoColumnShrink(noColumnShrink);
+			migrator.setBaselineVersion(
+					theCommandLine.getOptionValue(BaseFlywayMigrateDatabaseCommand.BASELINE_VERSION));
 			String skipVersions = theCommandLine.getOptionValue(BaseFlywayMigrateDatabaseCommand.SKIP_VERSIONS);
 			addTasks(migrator, skipVersions);
 			migrator.migrate();
