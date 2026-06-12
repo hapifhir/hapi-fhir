@@ -42,8 +42,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -62,6 +60,12 @@ public class ResourceSearchUrlSvc {
 	 * 2,100-parameter-per-statement limit so the {@code DELETE … WHERE RES_ID IN (?, …)} doesn't overflow.
 	 */
 	static final int DELETE_PAGE_SIZE = 1_800;
+
+	/**
+	 * Safety cap on page iterations per sweep (10,000 pages of 1,800 rows = 18M rows).
+	 * ({@link SearchUrlJobMaintenanceSvcImpl}).
+	 */
+	static final int MAX_DELETE_PAGES = 10_000;
 
 	private final EntityManager myEntityManager;
 
@@ -101,26 +105,48 @@ public class ResourceSearchUrlSvc {
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void deleteEntriesOlderThan(Date theCutoffDate) {
 		ourLog.debug("Deleting SearchUrls older than {}", theCutoffDate);
-		PageRequest page = PageRequest.of(0, DELETE_PAGE_SIZE);
-		AtomicLong totalDeleted = new AtomicLong();
-		while (true) {
-			// Each page in its own transaction — the repository is @Transactional(MANDATORY), so it
-			// needs an enclosing tx, and we want that tx to commit between pages, not span the sweep.
-			Boolean shouldContinue = myPageTxTemplate.execute(status -> {
-				Slice<Long> stale = myResourceSearchUrlDao.findStaleIds(theCutoffDate, page);
-				if (stale.isEmpty()) {
-					return false;
-				}
-				List<Long> ids = stale.getContent();
-				totalDeleted.addAndGet(myResourceSearchUrlDao.deleteByResIds(ids));
-				return stale.hasNext();
-			});
-			if (shouldContinue == null || !shouldContinue) {
-				break;
-			}
+
+		long totalDeleted = 0;
+		boolean moreStaleRemain = true;
+		for (int pageIndex = 0; moreStaleRemain && pageIndex < MAX_DELETE_PAGES; pageIndex++) {
+			StalePageOutcome outcome = deletePageOfStaleEntries(theCutoffDate);
+			totalDeleted += outcome.deletedCount();
+			moreStaleRemain = outcome.moreStaleRemain();
 		}
-		ourLog.info("Deleted {} SearchUrls", totalDeleted.get());
+
+		if (moreStaleRemain) {
+			ourLog.warn(
+					"Reached the maximum of {} delete pages after removing {} SearchUrls; remaining stale entries"
+							+ " will be removed by the next scheduled run",
+					MAX_DELETE_PAGES,
+					totalDeleted);
+		}
+		if (totalDeleted > 0) {
+			ourLog.info("Deleted {} SearchUrls", totalDeleted);
+		} else {
+			ourLog.debug("Deleted {} SearchUrls", totalDeleted);
+		}
 	}
+
+	/**
+	 * Deletes one page of stale entries in its own transaction — the repository is
+	 * {@code @Transactional(MANDATORY)}, so it needs an enclosing tx, and we want that tx to commit
+	 * between pages, not span the sweep.
+	 */
+	private StalePageOutcome deletePageOfStaleEntries(Date theCutoffDate) {
+		PageRequest page = PageRequest.of(0, DELETE_PAGE_SIZE);
+		return myPageTxTemplate.execute(theStatus -> {
+			Slice<Long> stale = myResourceSearchUrlDao.findStaleIds(theCutoffDate, page);
+			if (stale.isEmpty()) {
+				return new StalePageOutcome(0, false);
+			}
+			int deleted = myResourceSearchUrlDao.deleteByResIds(stale.getContent());
+			ourLog.debug("Deleted page of {} stale SearchUrls", deleted);
+			return new StalePageOutcome(deleted, stale.hasNext());
+		});
+	}
+
+	private record StalePageOutcome(int deletedCount, boolean moreStaleRemain) {}
 
 	/**
 	 * Once a resource is updated or deleted, we can trust that future match checks will find the committed resource in the db.
