@@ -4,8 +4,12 @@
 
 Please remember that HAPI FHIR is maintained by humans.
 
+
 Every discussion, issue, and pull request is read and reviewed by humans (and
-sometimes machines, too). It is a boundary point at which people interact with
+sometimes machines, too). As a reference Java implementation of HL7 FHIR, this 
+software directly impacts patient health outcomes. 
+
+This repository is a boundary point at which people interact with
 each other and the work done. It is rude and disrespectful to approach this
 boundary with low-effort, unqualified work, since it puts the burden of
 validation on the maintainer.
