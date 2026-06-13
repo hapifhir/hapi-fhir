@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -457,6 +459,32 @@ class TerminologyUploaderProviderTest {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("File named \\\"foo.txt\\\" is not valid for import LOINC job");
+		}
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE,
+		OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
+		OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS
+	})
+	void testUploadTerminology_NoJobInstanceParamValue(String theOperationName) throws IOException {
+		// Test
+		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + theOperationName +
+			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=";
+		HttpPost post = new HttpPost(url);
+		if (theOperationName.equals(OPERATION_UPLOAD_TERMINOLOGY_START_JOB)) {
+			post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		}
+		post.setEntity(new ResourceEntity(myContext, new Parameters()));
+
+		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
+
+			// Verify
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertThat(responseString).contains("No value provided for mandatory parameter: jobInstanceId");
 		}
 
 	}

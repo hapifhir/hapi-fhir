@@ -346,9 +346,10 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			HttpServletRequest theServletRequest,
 			ServletRequestDetails theRequestDetails) {
 
+		JobInstance jobInstance = getJobInstance(theJobInstanceId);
+		validateJobIsInBuildingStatus(jobInstance);
+
 		try (InputStream inputStream = theServletRequest.getInputStream()) {
-			JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
-			validateJobIsInBuildingStatus(jobInstance);
 
 			JobType jobType = myJobDefinitionIdToJobType.get(jobInstance.getJobDefinitionId());
 			if (jobType != null) {
@@ -412,7 +413,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
 
-		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
+		JobInstance jobInstance = getJobInstance(theJobInstanceId);
+
 		validateJobIsInBuildingStatus(jobInstance);
 
 		JobType jobType = myJobDefinitionIdToJobType.get(jobInstance.getJobDefinitionId());
@@ -432,6 +434,13 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				theRequestDetails, pollUrl, OPERATION_UPLOAD_TERMINOLOGY_START_JOB, null);
 	}
 
+	private static void validateInstanceIdProvided(String jobInstanceId) {
+		if (isBlank(jobInstanceId)) {
+			throw new InvalidRequestException(
+					Msg.code(2979) + "No value provided for mandatory parameter: " + PARAM_JOB_INSTANCE_ID);
+		}
+	}
+
 	/**
 	 * <code>$hapi.fhir.upload-terminology.poll-for-status</code>
 	 */
@@ -446,7 +455,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			ServletRequestDetails theRequestDetails)
 			throws IOException {
 
-		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
+		JobInstance jobInstance = getJobInstance(theJobInstanceId);
 
 		JobType jobType = myJobDefinitionIdToJobType.get(jobInstance.getJobDefinitionId());
 		if (jobType != null) {
@@ -462,6 +471,13 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		} else {
 			throw new InvalidRequestException(Msg.code(2948) + "Can't use this operation to poll status of this job");
 		}
+	}
+
+	@Nonnull
+	private JobInstance getJobInstance(IPrimitiveType<String> theJobInstanceId) {
+		String jobInstanceId = toStringValue(theJobInstanceId);
+		validateInstanceIdProvided(jobInstanceId);
+		return myJobCoordinator.getInstance(jobInstanceId);
 	}
 
 	/**
