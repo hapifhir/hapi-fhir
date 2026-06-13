@@ -83,7 +83,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = myJobCoordinator.getInstance(instanceId);
 		String report = JsonUtil.deserialize(jobInstance.getReport(), ImportTerminologyResultJson.class).getReport();
 		ourLog.info("Report:\n{}", report);
-		assertThat(report).contains("Concepts Added             : 82");
+		assertThat(report).contains("Concepts Added               : 82");
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 		logAllConcepts();

@@ -73,7 +73,7 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
 			IJobDataSink<TerminologyFileSetJson> theDataSink,
 			MyContext theContext,
-			String theFileName,
+			String theSingleFileName,
 			Supplier<InputStream> theInputStreamSupplier,
 			ImportTerminologyJobParameters theJobParameters,
 			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
@@ -82,12 +82,12 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 				theStepExecutionDetails,
 				theDataSink,
 				theContext,
-				theFileName,
+				theSingleFileName,
 				theInputStreamSupplier,
 				theJobParameters,
 				theJobMetadataAttachment);
 
-		if (theFileName.endsWith("loinc.xml")) {
+		if (theSingleFileName.endsWith("loinc.xml")) {
 			theContext.incrementLoincXmlCount();
 			handleLoincXml(theInputStreamSupplier, theJobMetadataAttachment);
 		}

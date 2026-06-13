@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -42,7 +41,6 @@ import org.junit.jupiter.api.function.Executable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -175,8 +173,6 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	@Autowired
 	private EntityManager myEntityManager;
 	@Autowired
-	private TermLoaderSvcImpl myTermLoaderSvc;
-	@Autowired
 	private ITermConceptDao myTermConceptDao;
 	@Autowired
 	private ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
@@ -184,9 +180,6 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	private ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
 	private ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
-	@Autowired
-	@Qualifier("myValueSetDaoR4")
-	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
 

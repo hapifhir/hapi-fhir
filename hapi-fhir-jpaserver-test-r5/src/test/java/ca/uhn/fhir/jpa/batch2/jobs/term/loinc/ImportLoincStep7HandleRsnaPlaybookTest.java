@@ -39,7 +39,7 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
 		mockFetchPropertiesFileAttachmentNotFound();
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenReturn(new UploadStatistics(new IdType()));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-to-radlex-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-parts-to-radlex-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
@@ -52,8 +52,8 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
-		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
+		verify(myTermCodeSystemStorageSvc, times(1)).addCodeSystemConcepts(any(), myCodeSystemCaptor.capture());
+		CodeSystem cs = myCodeSystemCaptor.getValue();
 		String hierarchy = renderHierarchy(cs);
 		String expected = """
 			-17787-3
@@ -120,7 +120,7 @@ class ImportLoincStep7HandleRsnaPlaybookTest extends BaseImportLoincStepTest {
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
 		mockFetchPropertiesFileAttachmentNotFound();
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenReturn(new UploadStatistics(new IdType()));
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
 		when(myConceptMapDao.read(eq(new IdType("loinc-to-radlex-1.234")), any())).thenThrow(new ResourceNotFoundException(new IdType("ConceptMap/loinc-to-radlex-1.234")));
 		mockDaoRegistryValueSet();
