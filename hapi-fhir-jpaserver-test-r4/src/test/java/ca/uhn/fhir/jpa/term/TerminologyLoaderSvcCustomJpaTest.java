@@ -157,6 +157,37 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testLoadWithCodeSystemWithoutUrlOrVersion() throws Exception {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem
+			.addConcept()
+			.setCode("CODE-0")
+			.setDisplay("Code 0");
+		String codeSystemEncoded = myFhirContext.newJsonParser().encodeResourceToString(codeSystem);
+
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
+		files.addFileText(codeSystemEncoded, TerminologyConstants.CUSTOM_CODESYSTEM_JSON);
+
+		// Test
+		String jobId = myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CODESYSTEM_URL, VERSION_1_0, files);
+
+		// Verify
+		String report = myTerminologyTestHelper.getReport(jobId);
+		assertThat(report).contains("Concepts Added               : 1");
+		assertCodeSystemResourceWasCreated();
+
+		IBundleProvider codeSystemSearchResults = myCodeSystemDao.search(SearchParameterMap.newSynchronous(), newSrd());
+		assertEquals(1, codeSystemSearchResults.size());
+		CodeSystem actualCodeSystem = (CodeSystem) codeSystemSearchResults.getResources(0, 1).get(0);
+
+		assertEquals(CODESYSTEM_URL, actualCodeSystem.getUrl());
+		assertEquals(VERSION_1_0, actualCodeSystem.getVersion());
+		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, actualCodeSystem.getContent());
+		assertThat(actualCodeSystem.getConcept()).isEmpty();
+	}
+
+
+	@Test
 	public void testLoadWithMultipleCodeSystem() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 		files.addFileZip("/custom_term/", TerminologyConstants.CUSTOM_CODESYSTEM_XML);

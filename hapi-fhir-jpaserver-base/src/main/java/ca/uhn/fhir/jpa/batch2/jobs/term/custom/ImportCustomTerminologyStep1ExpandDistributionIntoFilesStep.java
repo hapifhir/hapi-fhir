@@ -54,6 +54,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyStep2HandleConcepts.FILENAME_COMPLETE_CONCEPTS_JSON_FILENAME;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 		extends BaseExpandDistributionIntoFilesStep<
@@ -197,9 +198,16 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 		if (codeSystem != null) {
 
 			String expectedUrl = theJobParameters.getUrl();
+			if (isBlank(codeSystem.getUrl())) {
+				codeSystem.setUrl(expectedUrl);
+			}
 			if (!Objects.equals(codeSystem.getUrl(), expectedUrl)) {
 				throw new JobExecutionFailedException(Msg.code(2965) + "CodeSystem resources has unexpected URL: "
 						+ codeSystem.getUrl() + ". Expected: " + expectedUrl);
+			}
+
+			if (isBlank(codeSystem.getVersion())) {
+				codeSystem.setVersion(theJobParameters.getVersionId());
 			}
 
 			if (theContext.getCodeSystem() != null) {
@@ -212,7 +220,7 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 			 * If there are concepts directly in the CodeSystem resource, send them to step 2, which
 			 * will handle them.
 			 */
-			if (codeSystem.getConcept().size() > 1) {
+			if (!codeSystem.getConcept().isEmpty()) {
 				ourLog.info("CodeSystem file {} has inline concepts, processing them directly", theSingleFileName);
 
 				TerminologyFileSetJson data = new TerminologyFileSetJson();
