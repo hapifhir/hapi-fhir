@@ -66,7 +66,4 @@ the AI translation in a quote block.
 
 ---
 
-This policy was adapted from [ripgrep's AI policy], [uv's AI policy], and [Ghostty's AI policy].
-[ripgrep's AI policy]: https://github.com/BurntSushi/ripgrep/blob/master/AI_POLICY.md
-[uv's AI policy]: https://github.com/astral-sh/.github/blob/c5187e200db51bfe11d56e13053d29bd3793fdd8/AI_POLICY.md
-[Ghostty's AI policy]: https://github.com/ghostty-org/ghostty/blob/main/AI_POLICY.md
+This policy was adapted from [ripgrep's AI policy](https://github.com/BurntSushi/ripgrep/blob/master/AI_POLICY.md), [uv's AI policy](https://github.com/astral-sh/.github/blob/c5187e200db51bfe11d56e13053d29bd3793fdd8/AI_POLICY.md), and [Ghostty's AI policy](https://github.com/ghostty-org/ghostty/blob/main/AI_POLICY.md).
