@@ -146,37 +146,40 @@ public class SearchParameterUtil {
 		}
 
 		/*
-		 * Two-gate rule for alias-style "patient" SPs (e.g. Observation.patient, which resolves
-		 * to Observation.subject.where(resolve() is Patient)).
+		 * Alias rule for "patient" SPs that cover the same field as a Patient-compartment base SP.
 		 *
-		 * <p>Gate 1 — path check: the SP's path must contain
-		 * {@code .where(resolve() is Patient)}, confirming it is an alias-style SP rather than
-		 * a direct {@code Resource.patient} field. This prevents over-inclusion if a future FHIR
-		 * version introduces a resource with a direct {@code patient} field that happens to pass
-		 * Gate 2 coincidentally.
+		 * <p>The common "patient" SP is typically a convenience alias for a base SP on the same
+		 * resource — either narrowing it (e.g. Observation.patient has path
+		 * {@code Observation.subject.where(resolve() is Patient)}, narrowing Observation.subject)
+		 * or aliasing it exactly (e.g. R5 Coverage.patient and Coverage.beneficiary both have path
+		 * {@code Coverage.beneficiary}). When that base SP declares Patient compartment membership
+		 * in {@code providesMembershipIn}, searching by "patient" is equivalent to searching by
+		 * the base SP, so the "patient" SP must also be a Patient compartment member.
 		 *
-		 * <p>Gate 2 — annotation scan: at least one <em>other</em>
-		 * {@code @SearchParamDefinition} field on {@code theResourceClazz} must declare
-		 * {@code providesMembershipIn} containing a Compartment whose cleansed name equals
-		 * {@code "Patient"}. This confirms the resource is already in the Patient compartment via
-		 * a direct SP (e.g. {@code Observation.subject}), so the alias SP should also be included.
-		 * Scanning the compiled annotation rather than the partially-built
-		 * {@code RuntimeResourceDefinition} avoids ordering sensitivity during model construction.
+		 * <p>The match is segment-based: paths are split on {@code |} and only segments belonging
+		 * to this resource type are compared. This matters for R5+, where the common "patient" SP
+		 * carries one combined path listing every participating resource — a where-clause in some
+		 * other resource's segment says nothing about this resource (e.g. R5 SupplyRequest's own
+		 * segment is {@code SupplyRequest.deliverFor}, which no Patient-membership SP covers, so
+		 * it must NOT gain membership even though other segments contain where-clauses and
+		 * SupplyRequest.deliverTo does provide membership).
 		 *
-		 * <p>The SP is also checked against
+		 * <p>The compiled annotations are scanned rather than the partially-built
+		 * {@code RuntimeResourceDefinition} to avoid ordering sensitivity during model
+		 * construction. The SP is also checked against
 		 * {@link #RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT} so that deliberate
 		 * security exclusions (e.g. List.patient per issue #7118) are preserved.
 		 */
 		if ("patient".equalsIgnoreCase(theSearchParamDefinition.name())
-				&& "reference".equalsIgnoreCase(theSearchParamDefinition.type())
-				&& theSearchParamDefinition.path().contains(".where(resolve() is Patient)")) {
+				&& "reference".equalsIgnoreCase(theSearchParamDefinition.type())) {
 
 			String fhirResourceType = getResourceTypeName(theResourceClazz);
 			Set<String> omittedSps = RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.getOrDefault(
 					fhirResourceType, Collections.emptySet());
 
 			if (!omittedSps.contains(theSearchParamDefinition.name())
-					&& isResourceAlreadyInPatientCompartment(theResourceClazz, theSearchParamDefinition.name())) {
+					&& isCoveredByPatientCompartmentBaseSp(
+							theResourceClazz, fhirResourceType, theSearchParamDefinition)) {
 				validCompartments.add("Patient");
 			}
 		}
@@ -205,19 +208,35 @@ public class SearchParameterUtil {
 	}
 
 	/**
-	 * Returns true if any {@code @SearchParamDefinition} field on {@code theResourceClazz}
-	 * (other than the SP named {@code theExcludedSpName}) declares {@code providesMembershipIn}
-	 * containing the Patient compartment. Scans compiled annotations directly rather than the
-	 * partially-built {@code RuntimeResourceDefinition} to avoid field-iteration ordering issues
-	 * during model construction.
+	 * Returns true if {@code thePatientSp} covers the same field as another
+	 * {@code @SearchParamDefinition} on {@code theResourceClazz} that declares Patient compartment
+	 * membership in {@code providesMembershipIn}. Paths are compared per pipe-delimited segment,
+	 * restricted to segments of {@code theResourceType}; a base SP segment matches when the
+	 * patient SP has the same segment verbatim (exact alias) or suffixed with
+	 * {@code .where(resolve() is Patient)} (narrowing).
 	 */
-	private static boolean isResourceAlreadyInPatientCompartment(
-			Class<? extends IBase> theResourceClazz, String theExcludedSpName) {
+	private static boolean isCoveredByPatientCompartmentBaseSp(
+			Class<? extends IBase> theResourceClazz, String theResourceType, SearchParamDefinition thePatientSp) {
+		Set<String> patientPathSegments = ownPathSegments(theResourceType, thePatientSp.path());
 		return Arrays.stream(theResourceClazz.getFields())
 				.map(f -> f.getAnnotation(SearchParamDefinition.class))
-				.filter(spd -> spd != null && !theExcludedSpName.equalsIgnoreCase(spd.name()))
-				.flatMap(spd -> Arrays.stream(spd.providesMembershipIn()))
-				.anyMatch(c -> "Patient".equals(getCleansedCompartmentName(c.name())));
+				.filter(spd -> spd != null && !thePatientSp.name().equalsIgnoreCase(spd.name()))
+				.filter(spd -> Arrays.stream(spd.providesMembershipIn())
+						.anyMatch(c -> "Patient".equals(getCleansedCompartmentName(c.name()))))
+				.flatMap(spd -> ownPathSegments(theResourceType, spd.path()).stream())
+				.anyMatch(baseSegment -> patientPathSegments.contains(baseSegment + ".where(resolve() is Patient)")
+						|| patientPathSegments.contains(baseSegment));
+	}
+
+	/**
+	 * Splits a (possibly pipe-delimited multi-resource) SP path into segments, keeping only the
+	 * segments that belong to the given resource type.
+	 */
+	private static Set<String> ownPathSegments(String theResourceType, String thePath) {
+		return Arrays.stream(thePath.split("\\|"))
+				.map(String::trim)
+				.filter(segment -> segment.startsWith(theResourceType + "."))
+				.collect(Collectors.toSet());
 	}
 
 	// Created by Claude Opus 4.7
