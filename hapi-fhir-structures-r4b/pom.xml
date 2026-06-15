@@ -251,6 +251,11 @@
 							<artifactId>okhttp</artifactId>
 							<version>${okhttp_version}</version>
 						</dependency>
+						<dependency>
+							<groupId>com.github.spotbugs</groupId>
+							<artifactId>spotbugs-annotations</artifactId>
+							<version>4.9.8</version>
+						</dependency>
 					</additionalDependencies>
 				</configuration>
 			</plugin>
@@ -320,6 +325,11 @@
 							<groupId>com.squareup.okhttp3</groupId>
 							<artifactId>okhttp</artifactId>
 							<version>${okhttp_version}</version>
+						</dependency>
+						<dependency>
+							<groupId>com.github.spotbugs</groupId>
+							<artifactId>spotbugs-annotations</artifactId>
+							<version>4.9.8</version>
 						</dependency>
 					</additionalDependencies>
 				</configuration>
