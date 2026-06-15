@@ -1,25 +1,25 @@
 package ca.uhn.fhir.jpa.dao.r5.dbpartitionmode;
 
+import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx;
+import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.util.DialectSvc;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
-import org.hl7.fhir.r5.model.Attachment;
-import org.hl7.fhir.r5.model.CodeSystem;
-import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.SearchParameter;
-import org.hl7.fhir.r5.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -148,6 +148,64 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 		}
 	}
 
+
+	/**
+	 * SQL Server does not support row-value constructors in IN predicates, so on that
+	 * platform the delete-expunge DELETE statements group the PIDs by partition instead
+	 * of using the <code>(PARTITION_ID,RES_ID) IN ((1,2),...)</code> form.
+	 *
+	 * @see ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSqlBuilder
+	 */
+	@Test
+	void testDeleteExpunge_MsSql() {
+		DialectSvc.setForceMsSqlMode(true);
+		try {
+			// Setup
+			myPartitionSelectorInterceptor.setNextPartition(RequestPartitionId.fromPartitionId(1));
+			createPatient(withId("A1"), withFamily("A1"));
+			createPatient(withId("B1"), withFamily("B1"));
+			myPartitionSelectorInterceptor.setNextPartition(RequestPartitionId.fromPartitionId(2));
+			createPatient(withId("A2"), withFamily("A2"));
+
+			DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
+			jobParameters.addPartitionedUrl(new PartitionedUrl()
+				.setUrl("Patient?_id=A1,B1")
+				.setRequestPartitionId(RequestPartitionId.fromPartitionId(1)));
+			jobParameters.addPartitionedUrl(new PartitionedUrl()
+				.setUrl("Patient?_id=A2")
+				.setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
+
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setParameters(jobParameters);
+			startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
+
+			// Test
+			myCaptureQueriesListener.clear();
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
+			JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(startResponse);
+
+			// Verify
+			assertEquals(3, jobInstance.getCombinedRecordsProcessed());
+
+			// The raw delete-expunge statements must use the grouped-OR form, not a row-value constructor
+			List<String> deleteExpungeSql = myCaptureQueriesListener.getDeleteQueries().stream()
+				.map(t -> t.getSql(true, false))
+				.filter(t -> t.startsWith("DELETE FROM HFJ_"))
+				.toList();
+			assertThat(deleteExpungeSql).isNotEmpty();
+			assertThat(deleteExpungeSql).allSatisfy(sql -> assertThat(sql).doesNotContain("(PARTITION_ID,RES_ID) IN"));
+			assertThat(deleteExpungeSql).anySatisfy(sql -> assertThat(sql)
+				.matches("DELETE FROM HFJ_RESOURCE WHERE \\(PARTITION_ID = \\d+ AND RES_ID IN \\([\\d,]+\\)\\)"));
+
+			// The resources are expunged from both partitions
+			myPartitionSelectorInterceptor.setNextPartition(RequestPartitionId.fromPartitionId(1));
+			assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), newSrd()))).isEmpty();
+			myPartitionSelectorInterceptor.setNextPartition(RequestPartitionId.fromPartitionId(2));
+			assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), newSrd()))).isEmpty();
+		} finally {
+			DialectSvc.setForceMsSqlMode(false);
+		}
+	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
