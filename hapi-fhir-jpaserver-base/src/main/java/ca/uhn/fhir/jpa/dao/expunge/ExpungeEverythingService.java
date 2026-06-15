@@ -420,7 +420,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 
 	/**
 	 * Deletes Batch2WorkChunkEntity and Batch2JobInstanceEntity while holding the maintenance
-	 * semaphore (via {@link IJobMaintenanceService#holdMaintenanceForExpunge()}) to prevent any
+	 * semaphore (via {@link IJobMaintenanceService#holdJobMaintenanceForExpunge()}) to prevent any
 	 * concurrent maintenance pass from inserting or updating batch2 entities during deletion.
 	 *
 	 * <p>The semaphore hold prevents maintenance on the local JVM. In clustered deployments,
@@ -438,7 +438,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		// Hold the maintenance semaphore while deleting batch2 entities.
 		// This prevents the local maintenance job from inserting/updating work chunks and job
 		// instances while we are deleting them, eliminating FK violations and deadlocks.
-		try (Closeable ignored = myJobMaintenanceService.holdMaintenanceForExpunge()) {
+		try (Closeable ignored = myJobMaintenanceService.holdJobMaintenanceForExpunge()) {
 			int outcome = 0;
 			int consecutiveFailures = 0;
 			while (true) {

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.11.11-SNAPSHOT</version>
+		<version>8.11.12-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -251,6 +251,11 @@
 							<artifactId>okhttp</artifactId>
 							<version>${okhttp_version}</version>
 						</dependency>
+						<dependency>
+							<groupId>com.github.spotbugs</groupId>
+							<artifactId>spotbugs-annotations</artifactId>
+							<version>4.9.8</version>
+						</dependency>
 					</additionalDependencies>
 				</configuration>
 			</plugin>
@@ -320,6 +325,11 @@
 							<groupId>com.squareup.okhttp3</groupId>
 							<artifactId>okhttp</artifactId>
 							<version>${okhttp_version}</version>
+						</dependency>
+						<dependency>
+							<groupId>com.github.spotbugs</groupId>
+							<artifactId>spotbugs-annotations</artifactId>
+							<version>4.9.8</version>
 						</dependency>
 					</additionalDependencies>
 				</configuration>

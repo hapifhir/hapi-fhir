@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.implementationguide.ImplementationGuideCreator;
+import ca.uhn.fhir.packages.NpmPackageFactory;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
@@ -39,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -280,9 +279,6 @@ public class PackageInstallerSvcCreateR4Test extends BaseJpaR4Test {
 		String spUrl = "http://example.com";
 		IFhirResourceDao<SearchParameter> dao = myDaoRegistry.getResourceDao(SearchParameter.class);
 
-		ImplementationGuideCreator creator = new ImplementationGuideCreator(myFhirContext);
-		creator.setDirectory(theTempDir);
-
 		SearchParameter sp = new SearchParameter();
 		sp.setUrl(spUrl);
 		sp.setName("My Param");
@@ -293,7 +289,8 @@ public class PackageInstallerSvcCreateR4Test extends BaseJpaR4Test {
 		sp.setExpression("Patient.identifier");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		creator.addResourceToIG("SearchParameter", sp);
+		var pkgFactory = new NpmPackageFactory(myFhirContext)
+			.addResource("SearchParameter", sp);
 
 		// ensure it doesn't already exist
 		SearchParameterMap spmap = new SearchParameterMap();
@@ -305,16 +302,16 @@ public class PackageInstallerSvcCreateR4Test extends BaseJpaR4Test {
 		// create the spec
 		PackageInstallationSpec installedSpec = new PackageInstallationSpec();
 		installedSpec
-			.setName(creator.getPackageName())
-			.setVersion(creator.getPackageVersion())
+			.setName(pkgFactory.getPackageName())
+			.setVersion(pkgFactory.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY)
-			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION)
-		;
+			.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION);
 
 		if (theEmbedContent) {
-			installedSpec.setPackageContents(Files.readAllBytes(creator.createTestIG()));
+			installedSpec.setPackageContents(pkgFactory.createPackageBytes());
 		} else {
-			installedSpec.setPackageUrl("file://" + creator.createTestIG().toString());
+			Path igPath = pkgFactory.writeToDirectory(theTempDir);
+			installedSpec.setPackageUrl("file://" + igPath);
 		}
 
 		// test
@@ -335,7 +332,7 @@ public class PackageInstallerSvcCreateR4Test extends BaseJpaR4Test {
 
 		// no packages stored
 		runInTransaction(() -> {
-			Optional<NpmPackageVersionEntity> npmVersionEntity = myPackageVersionDao.findByPackageIdAndVersion(creator.getPackageName(), creator.getPackageVersion());
+			Optional<NpmPackageVersionEntity> npmVersionEntity = myPackageVersionDao.findByPackageIdAndVersion(pkgFactory.getPackageName(), pkgFactory.getPackageVersion());
 			assertFalse(npmVersionEntity.isPresent());
 		});
 	}
@@ -551,9 +548,6 @@ public class PackageInstallerSvcCreateR4Test extends BaseJpaR4Test {
 		// Reproduces PUT /write/install/by-param with installMode=INSTALL_ONLY.
 
 		// setup: build a test IG with a SearchParameter
-		ImplementationGuideCreator creator = new ImplementationGuideCreator(myFhirContext);
-		creator.setDirectory(theTempDir);
-
 		String spUrl = "http://example.com/sp-install-only-by-name";
 		SearchParameter sp = new SearchParameter();
 		sp.setUrl(spUrl);
@@ -564,15 +558,17 @@ public class PackageInstallerSvcCreateR4Test extends BaseJpaR4Test {
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setExpression("Patient.identifier");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		creator.addResourceToIG("SearchParameter", sp);
+
+		var pkgFactory = new NpmPackageFactory(myFhirContext)
+			.addResource("SearchParameter", sp);
 
 		// pre-store the package in the cache via STORE_ONLY so it can be resolved by name/version
-		Path igPath = creator.createTestIG();
+		Path packagePath = pkgFactory.writeToDirectory(theTempDir);
 		PackageInstallationSpec storeSpec = new PackageInstallationSpec()
-			.setName(creator.getPackageName())
-			.setVersion(creator.getPackageVersion())
+			.setName(pkgFactory.getPackageName())
+			.setVersion(pkgFactory.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
-			.setPackageUrl("file://" + igPath);
+			.setPackageUrl("file://" + packagePath);
 		mySvc.install(storeSpec);
 
 		// confirm the SP is not yet installed
@@ -585,8 +581,8 @@ public class PackageInstallerSvcCreateR4Test extends BaseJpaR4Test {
 		// exercise: INSTALL_ONLY with name+version only — no packageUrl, no packageContents
 		// this is the exact scenario from PUT /write/install/by-param?installMode=INSTALL_ONLY
 		PackageInstallationSpec installOnlySpec = new PackageInstallationSpec()
-			.setName(creator.getPackageName())
-			.setVersion(creator.getPackageVersion())
+			.setName(pkgFactory.getPackageName())
+			.setVersion(pkgFactory.getPackageVersion())
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY);
 		// intentionally no setPackageUrl() and no setPackageContents()
 

@@ -25,7 +25,6 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -100,7 +99,7 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		getTestManager().runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, getTestManager().freshFetchWorkChunk(id).getStatus()));
 
 		// test
-		getTestManager().runMaintenancePass();
+		getTestManager().runActiveJobMaintenancePass();
 
 		// verify it's in QUEUED now
 		stateInformation.verifyFinalStates(getTestManager().getSvc());

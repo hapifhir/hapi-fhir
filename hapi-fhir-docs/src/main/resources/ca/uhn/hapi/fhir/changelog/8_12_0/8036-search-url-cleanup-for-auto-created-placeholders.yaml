@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 8036
+title: "When `AutoCreatePlaceholderReferenceTargets` is enabled, the internal record used to
+  prevent duplicate conditional creates of an auto-created placeholder resource was not removed
+  when the placeholder was subsequently updated, and instead lingered until the scheduled
+  cleanup job removed it. Under sustained ingestion this caused significant database growth,
+  and if the update changed the placeholder's identifier the stale record could incorrectly
+  block a later conditional create for the same URL. The record is now removed at the
+  placeholder's first update, matching the lifecycle of ordinary conditional creates."
