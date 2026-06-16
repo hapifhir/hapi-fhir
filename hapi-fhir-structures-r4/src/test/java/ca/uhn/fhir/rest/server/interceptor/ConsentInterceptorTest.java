@@ -10,7 +10,9 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -73,6 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -1013,6 +1016,18 @@ public class ConsentInterceptorTest {
 			.returnBundle(Bundle.class)
 			.execute();
 		assertEquals(2, response.getTotal());
+	}
+
+	@Test
+	void testInterceptPreAccess_whenResourceIsNull_skipsConsentAndMarksDontReturn() {
+		IPreResourceAccessDetails accessDetails = mock(IPreResourceAccessDetails.class);
+		when(accessDetails.size()).thenReturn(1);
+		when(accessDetails.getResource(0)).thenReturn(null);
+
+		myInterceptor.interceptPreAccess(new SystemRequestDetails(), accessDetails);
+
+		verify(myConsentSvc, never()).canSeeResource(any(), any(), any());
+		verify(accessDetails).setDontReturnResourceAtIndex(0);
 	}
 
 	@Nested

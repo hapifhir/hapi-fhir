@@ -33,13 +33,6 @@ class JpaPreResourceAccessDetailsTest {
 		mySearchBuilderSupplier = () -> mySearchBuilder;
 	}
 
-	/**
-	 * Configures the mocked {@link ISearchBuilder} so that {@code loadResourcesByPid} populates the
-	 * caller-supplied list (3rd argument) with exactly {@code theResourcesToLoad}, regardless of how
-	 * many PIDs were requested. This mirrors {@code SearchBuilder.doLoadPids}, which only pads the
-	 * populated list up to the highest successfully-loaded index and skips deleted/unloadable PIDs.
-	 */
-	@SuppressWarnings("unchecked")
 	private void stubLoadResourcesByPid(List<IBaseResource> theResourcesToLoad) {
 		doAnswer(theInvocation -> {
 					List<IBaseResource> listToPopulate = theInvocation.getArgument(2);
@@ -57,12 +50,6 @@ class JpaPreResourceAccessDetailsTest {
 		return observation;
 	}
 
-	/**
-	 * The "length 0" case: a single PID is supplied but the search builder loads ZERO resources (all
-	 * PIDs unloadable/deleted). A caller iterating {@code 0 .. size()-1} calls {@code getResource(0)},
-	 * which must return {@code null} (resource gracefully absent) rather than overrunning the populated
-	 * list with an IndexOutOfBoundsException.
-	 */
 	@Test
 	void getResource_whenNoResourcesLoadedForOnePid_returnsNullWithoutIndexOverrun() {
 		List<JpaPid> resourcePids = List.of(JpaPid.fromId(1L));
@@ -75,10 +62,6 @@ class JpaPreResourceAccessDetailsTest {
 		assertThat(details.getResource(0)).isNull();
 	}
 
-	/**
-	 * Trailing PID fails to load: two PIDs are supplied but only index 0 is populated, so the populated
-	 * list is shorter than {@code size()}. Asking for the trailing index must not overrun.
-	 */
 	@Test
 	void getResource_whenTrailingPidNotLoaded_returnsNullWithoutIndexOverrun() {
 		List<JpaPid> resourcePids = List.of(JpaPid.fromId(1L), JpaPid.fromId(2L));
@@ -93,9 +76,6 @@ class JpaPreResourceAccessDetailsTest {
 		assertThat(details.getResource(1)).isNull();
 	}
 
-	/**
-	 * Every PID loads positionally: {@code getResource(i)} returns each loaded resource.
-	 */
 	@Test
 	void getResource_whenAllPidsLoad_returnsEachResourcePositionally() {
 		List<JpaPid> resourcePids = List.of(JpaPid.fromId(1L), JpaPid.fromId(2L), JpaPid.fromId(3L));
@@ -113,16 +93,11 @@ class JpaPreResourceAccessDetailsTest {
 		assertThat(details.getResource(2)).isSameAs(r2);
 	}
 
-	/**
-	 * A middle PID fails to load: the populated list is null-padded at the missing index (length ==
-	 * size()), so {@code getResource(1)} returns {@code null} rather than throwing — no index overrun.
-	 */
 	@Test
 	void getResource_whenMiddlePidNotLoaded_returnsNullForThatIndexWithoutThrowing() {
 		List<JpaPid> resourcePids = List.of(JpaPid.fromId(1L), JpaPid.fromId(2L), JpaPid.fromId(3L));
 		IBaseResource r0 = newObservation(1L);
 		IBaseResource r2 = newObservation(3L);
-		// Positional null-padding: index 1 left null, index 2 populated.
 		List<IBaseResource> populated = new ArrayList<>();
 		populated.add(r0);
 		populated.add(null);
