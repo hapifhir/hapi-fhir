@@ -30,13 +30,11 @@ import ca.uhn.fhir.merge.GenericMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.IResourceLinkService;
 import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -59,7 +57,6 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -536,63 +533,17 @@ public class MergeOperationTestHelper {
 			@Nonnull Set<String> theExpectedProvenanceTargets,
 			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
 
-		Provenance mainProvenance = null;
-		List<Provenance> subProvenances = new ArrayList<>();
-
-		for (Provenance p : theProvenances) {
-			if (p.hasContained()) {
-				assertThat(mainProvenance)
-						.as("Expected exactly one main Provenance with contained resources")
-						.isNull();
-				mainProvenance = p;
-			} else {
-				subProvenances.add(p);
-			}
-		}
-		assertThat(mainProvenance)
-				.as("Expected a main Provenance with contained resources")
-				.isNotNull();
-
-		// Validate main Provenance
-		assertFirstTwoTargetsAreTargetAndSource(
-				mainProvenance, theTargetIdWithExpectedVersion, theSourceIdWithExpectedVersion);
-		assertThat(mainProvenance.getTarget()).hasSize(2);
-		assertCommonMergeProvenanceFields(
-				theFhirContext, mainProvenance, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
-		assertMainMergeProvenanceContainedResources(mainProvenance, theInputParameters, theTargetIdWithExpectedVersion);
-
-		// Validate all Provenances share the same provenance correlation id extension
-		String mainCorrelationId = mainProvenance
-				.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_CORRELATION_ID)
-				.getValueAsPrimitive()
-				.getValueAsString();
-		assertThat(mainCorrelationId).isNotBlank();
-
-		// Sub-Provenances are created before src/tgt update, so they reference pre-update versions.
-		// Verify target and source versionlessly, collect partition-specific targets.
-		Set<String> allTargetsAcrossProvenances = new HashSet<>();
-		allTargetsAcrossProvenances.add(theTargetIdWithExpectedVersion.toString());
-		allTargetsAcrossProvenances.add(theSourceIdWithExpectedVersion.toString());
-
-		for (Provenance sub : subProvenances) {
-			assertThat(sub.getTarget().size()).isGreaterThan(2);
-			assertVersionlessEquals(sub.getTarget().get(0).getReference(), theTargetIdWithExpectedVersion);
-			assertVersionlessEquals(sub.getTarget().get(1).getReference(), theSourceIdWithExpectedVersion);
-			assertThat(sub.hasContained()).isFalse();
-			assertCommonMergeProvenanceFields(
-					theFhirContext, sub, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
-
-			String subCorrelationId = sub.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_CORRELATION_ID)
-					.getValueAsPrimitive()
-					.getValueAsString();
-			assertThat(subCorrelationId).isEqualTo(mainCorrelationId);
-
-			for (int i = 2; i < sub.getTarget().size(); i++) {
-				allTargetsAcrossProvenances.add(new IdDt(sub.getTarget().get(i).getReference()).toString());
-			}
-		}
-
-		assertThat(allTargetsAcrossProvenances).containsExactlyInAnyOrderElementsOf(theExpectedProvenanceTargets);
+		// A cross-partition merge now records a single Provenance listing every changed resource across all
+		// partitions — the same shape as a same-partition merge, so the validation is identical.
+		assertThat(theProvenances).as("Expected exactly one merge Provenance").hasSize(1);
+		assertSingleMergeProvenance(
+				theFhirContext,
+				theProvenances.get(0),
+				theInputParameters,
+				theSourceIdWithExpectedVersion,
+				theTargetIdWithExpectedVersion,
+				theExpectedProvenanceTargets,
+				theExpectedProvenanceAgents);
 	}
 
 	private static void assertFirstTwoTargetsAreTargetAndSource(
@@ -647,11 +598,6 @@ public class MergeOperationTestHelper {
 				(OperationOutcome) theProvenance.getContained().get(1);
 		assertThat(outcome.getIssue()).hasSize(1);
 		assertThat(outcome.getIssueFirstRep().getDiagnostics()).contains(theTargetIdWithExpectedVersion.toString());
-	}
-
-	private static void assertVersionlessEquals(String theActualReference, IIdType theExpectedId) {
-		assertThat(new IdDt(theActualReference).toUnqualifiedVersionless().getValue())
-				.isEqualTo(theExpectedId.toUnqualifiedVersionless().getValue());
 	}
 
 	/**

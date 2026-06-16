@@ -35,8 +35,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Propagation;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is a class to restore resources to their previous versions based on the provided versioned resource references.
@@ -81,27 +85,25 @@ public class PreviousResourceVersionRestorer {
 	 * @throws ResourceVersionConflictException if the current version of the resource does not match the version specified in the reference.
 	 */
 	public void restoreToPreviousVersionsInTrx(List<Reference> theReferences, RequestDetails theRequestDetails) {
+		// Run under an allPartitions context so the references (which may span partitions) are resolved against
+		// every partition, mirroring how the forward cross-partition merge submits its bundle. When a
+		// transaction-partitioning interceptor is present it then repartitions the bundle per resource; otherwise
+		// (single database) the whole bundle runs as one transaction.
 		myHapiTransactionService
 				.withRequest(theRequestDetails)
+				.withRequestPartitionId(RequestPartitionId.allPartitions())
 				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails));
 	}
 
 	/**
-	 * Same as {@link #restoreToPreviousVersionsInTrx(List, RequestDetails)} but pins the transaction to the
-	 * given partition. When changing partitions requires a new transaction, this keeps every reference in
-	 * the (single-partition) list within one transaction so the whole list is restored atomically.
-	 *
-	 * @param theReferences a list of versioned resource references that all live on {@code thePartitionId}
-	 * @param thePartitionId the partition the references live on
-	 * @param theRequestDetails the request details for the operation
+	 * A v1 "copy" resource to delete during undo, paired with the partition it actually lives in
+	 * (captured from its {@code RESOURCE_PARTITION_ID} user data during the pre-read). The
+	 * copies were all written to the target partition by the forward merge, but their ids may be
+	 * non-partition-decodable (client-assigned ids; all ids under MegaScale UUID server-id mode), so
+	 * the captured partition pins the subsequent DELETE to the correct shard rather than relying on
+	 * id-based partition resolution.
 	 */
-	public void restoreToPreviousVersionsInTrx(
-			List<Reference> theReferences, RequestPartitionId thePartitionId, RequestDetails theRequestDetails) {
-		myHapiTransactionService
-				.withRequest(theRequestDetails)
-				.withRequestPartitionId(thePartitionId)
-				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails));
-	}
+	private record CopyToDelete(IIdType id, RequestPartitionId partitionId) {}
 
 	private void restoreToPreviousVersions(List<Reference> theReferences, RequestDetails theRequestDetails) {
 		if (theReferences.isEmpty()) {
@@ -109,8 +111,17 @@ public class PreviousResourceVersionRestorer {
 			return;
 		}
 
-		// Every reference yields exactly one bundle entry (a delete or an update), so the bundle is non-empty.
-		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+		// The restore-updates (and undeletes) go into a single cross-partition transaction bundle so that
+		// references between the restored resources resolve against the transaction's pre-populated id map,
+		// independent of entry order — see the comment on the transactionNested call below.
+		BundleBuilder updateBundleBuilder = new BundleBuilder(myFhirContext);
+
+		// The v1 "copies" are deleted in a SEPARATE bundle, pinned to the partition they actually live in
+		// (the target partition by construction). They cannot share the cross-partition update bundle because
+		// their ids may be non-partition-decodable; and they must be deleted AFTER the update bundle so that,
+		// by the time the deletes run, the update bundle has already repointed every referrer away from them
+		// (satisfying referential-integrity-on-delete).
+		List<CopyToDelete> copiesToDelete = new ArrayList<>();
 
 		for (Reference reference : theReferences) {
 			String referenceStr = reference.getReference();
@@ -122,11 +133,15 @@ public class PreviousResourceVersionRestorer {
 			}
 			long referenceVersion = referenceId.getVersionIdPartAsLong();
 
-			// Read the current resource
 			IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(referenceId.getResourceType());
+
+			// Pre-read the current resource, fanning out across all shards so the read finds it regardless of
+			// which partition it lives in. allPartitions + REQUIRES_NEW is what makes MegaScale fan out: with the
+			// default REQUIRED propagation the read would reuse the outer single-shard tx and miss. On non-MegaScale
+			// HAPI this degrades to a normal read.
 			IBaseResource currentResource = null;
 			try {
-				currentResource = dao.read(referenceId.toUnqualifiedVersionless(), theRequestDetails);
+				currentResource = readAcrossPartitions(dao, referenceId.toUnqualifiedVersionless(), theRequestDetails);
 			} catch (ResourceGoneException e) {
 				IIdType deletedId = e.getResourceId();
 				if (deletedId == null || !deletedId.hasVersionIdPart()) {
@@ -156,8 +171,12 @@ public class PreviousResourceVersionRestorer {
 				}
 
 				if (referenceVersion == 1) {
-					// Resource was created new by the operation (v1) — delete it to undo
-					bundleBuilder.addTransactionDeleteEntry(referenceId.toUnqualifiedVersionless());
+					// Resource was created new by the operation (v1) — delete it to undo. Capture the partition
+					// it actually lives in (from the pre-read) so the DELETE can be pinned to the correct shard.
+					RequestPartitionId partitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(
+									currentResource)
+							.orElse(RequestPartitionId.allPartitions());
+					copiesToDelete.add(new CopyToDelete(referenceId.toUnqualifiedVersionless(), partitionId));
 					continue;
 				}
 			}
@@ -170,17 +189,72 @@ public class PreviousResourceVersionRestorer {
 			}
 
 			IIdType previousId = referenceId.withVersion(Long.toString(previousVersion));
-			IBaseResource previousResource = dao.read(previousId, theRequestDetails);
+			// Pre-read the previous version, fanning out across all shards (same rationale as the current read).
+			IBaseResource previousResource = readAcrossPartitions(dao, previousId, theRequestDetails);
 			previousResource.setId(previousResource.getIdElement().toUnqualifiedVersionless());
 			// Restore the resource to its previous version's content via the transaction bundle
-			bundleBuilder.addTransactionUpdateEntry(previousResource);
+			updateBundleBuilder.addTransactionUpdateEntry(previousResource);
 		}
 
-		// Submit all restores (updates) and deletes as a single FHIR transaction. Processing them together
+		// Submit all restores (updates and undeletes) as a single FHIR transaction. Processing them together
 		// means references between the restored resources are resolved against the transaction's
 		// pre-populated id map, independent of entry order — so a referrer can be restored before its
 		// target, and two resources can even reference each other, without tripping
 		// referential-integrity-on-write on a not-yet-restored (still tombstoned) target.
-		myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, bundleBuilder.getBundle());
+		if (!updateBundleBuilder.getBundle().isEmpty()) {
+			myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, updateBundleBuilder.getBundle());
+		}
+
+		// Now delete the v1 copies. By this point the update bundle above has reverted every referrer back to
+		// referencing the source originals (not the copies), so deleting the copies cannot violate
+		// referential-integrity-on-delete. Each delete is pinned to the copy's actual partition.
+		deleteCopies(copiesToDelete, theRequestDetails);
+	}
+
+	/**
+	 * Reads a resource by id, fanning the read out across all shards. allPartitions + REQUIRES_NEW is what
+	 * makes MegaScale fan the read out per shard (first success wins, 404s skipped); the default REQUIRED
+	 * propagation would reuse the outer single-shard transaction and miss. On non-MegaScale HAPI this degrades
+	 * to a normal read. Mirrors the pattern in {@code CrossPartitionReplaceReferencesSvc.findReferencingResourceIds}.
+	 */
+	private IBaseResource readAcrossPartitions(
+			IFhirResourceDao<IBaseResource> theDao, IIdType theId, RequestDetails theRequestDetails) {
+		return myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(RequestPartitionId.allPartitions())
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.read(partition -> theDao.read(theId, theRequestDetails));
+	}
+
+	/**
+	 * Deletes the v1 copies, each in a bundle pinned to the partition the copy actually lives in (captured from
+	 * the pre-read). Copies that resolved to the same partition are grouped into one bundle. Pinning the bundle
+	 * to a concrete partition lets MegaScale route the delete to the correct shard even when the copy's id is
+	 * not partition-decodable.
+	 */
+	private void deleteCopies(List<CopyToDelete> theCopiesToDelete, RequestDetails theRequestDetails) {
+		if (theCopiesToDelete.isEmpty()) {
+			return;
+		}
+
+		Map<RequestPartitionId, List<IIdType>> idsByPartition = new LinkedHashMap<>();
+		for (CopyToDelete copy : theCopiesToDelete) {
+			idsByPartition
+					.computeIfAbsent(copy.partitionId(), k -> new ArrayList<>())
+					.add(copy.id());
+		}
+
+		idsByPartition.forEach((partitionId, ids) -> {
+			BundleBuilder deleteBundleBuilder = new BundleBuilder(myFhirContext);
+			for (IIdType id : ids) {
+				deleteBundleBuilder.addTransactionDeleteEntry(id);
+			}
+			myHapiTransactionService
+					.withRequest(theRequestDetails)
+					.withRequestPartitionId(partitionId)
+					.execute(() -> myDaoRegistry
+							.getSystemDao()
+							.transactionNested(theRequestDetails, deleteBundleBuilder.getBundle()));
+		});
 	}
 }

@@ -20,21 +20,25 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.PartitionedTransactionPartialFailureException;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import static ca.uhn.fhir.merge.MergeResourceHelper.addErrorToOperationOutcome;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
@@ -81,7 +85,7 @@ public class CrossPartitionMergeRollbackService {
 	 *
 	 * <p>The work runs in referential-integrity order: first the undeletes (tombstoned originals, and the source
 	 * when it was deleted), then the reverts (committed copies, referrer updates, target, and the source when it was
-	 * kept), then the main and per-partition Provenances are deleted. The caller has already classified each
+	 * kept), then the Provenance is deleted. The caller has already classified each
 	 * resource into the right bucket; this service just executes them. Undeletes and reverts are best-effort —
 	 * anything that cannot be reverted is reported so it can be reverted manually; an un-deletable Provenance is
 	 * left orphaned but not reported (no resource is in a merged state).
@@ -102,16 +106,13 @@ public class CrossPartitionMergeRollbackService {
 
 		// Undeletes first (tombstoned originals, and the source when it was deleted) so that the resources they
 		// reference exist before the reverts below repoint referrers at them.
-		restoreByPartition(theContext.getResourcesToUndeleteByPartition(), theRequestDetails, notReverted);
+		restoreResources(theContext.getResourcesToUndelete(), theRequestDetails, notReverted);
 
 		// Then revert the committed copies, referrer updates, target, and the kept source.
-		restoreByPartition(theContext.getResourcesToRevertByPartition(), theRequestDetails, notReverted);
+		restoreResources(theContext.getResourcesToRevert(), theRequestDetails, notReverted);
 
-		// Delete the Provenances created by this attempt (main = the "merge succeeded" signal, plus per-partition).
-		deleteProvenance(theContext.getMainProvenanceId(), theRequestDetails);
-		for (IIdType subProvenanceId : theContext.getCreatedSubProvenanceIds()) {
-			deleteProvenance(subProvenanceId, theRequestDetails);
-		}
+		// Delete the Provenance created by this attempt (the "merge succeeded" signal).
+		deleteProvenance(theContext.getProvenanceId(), theRequestDetails);
 
 		String msg;
 		int statusCode;
@@ -163,29 +164,63 @@ public class CrossPartitionMergeRollbackService {
 	}
 
 	/**
-	 * Restores each partition's recorded ids as a single FHIR transaction pinned to that partition, so the
-	 * resources of one partition are restored all-or-nothing. The restorer reverts an update, deletes a created
-	 * resource, or undeletes a tombstone as appropriate; the ids are already at the version to restore from.
-	 * Because the partition's list is restored as one FHIR transaction, references among the listed resources resolve
-	 * regardless of list order. A partition whose restore fails is recorded for the report.
+	 * Restores the given recorded ids as a single cross-partition FHIR transaction. When a transaction-partitioning
+	 * interceptor is present the transaction is split per partition and dependency-ordered (referenced partitions
+	 * commit before referrers); within a partition the two-pass id resolution means references among the listed
+	 * resources resolve regardless of order. The restorer reverts an update, deletes a created resource, or
+	 * undeletes a tombstone as appropriate; the ids are already at the version to restore from. If the restore
+	 * fails — including a partial cross-partition failure where some partitions committed before a later one failed
+	 * — each id whose resource was not actually reverted is recorded for the manual-reconciliation report.
 	 */
-	private void restoreByPartition(
-			Map<RequestPartitionId, List<IIdType>> theIdsByPartition,
-			RequestDetails theRequestDetails,
-			List<IIdType> theNotReverted) {
-		theIdsByPartition.forEach((partition, ids) -> {
-			// The version restorer takes References, so wrap each id.
-			List<Reference> refs = ids.stream().map(Reference::new).toList();
-			try {
-				myResourceVersionRestorer.restoreToPreviousVersionsInTrx(refs, partition, theRequestDetails);
-			} catch (Exception e) {
-				ourLog.error(
-						"Merge rollback could not revert partition {}; its resources remain in their merged state",
-						partition,
-						e);
-				theNotReverted.addAll(ids);
+	private void restoreResources(
+			List<IIdType> theIds, RequestDetails theRequestDetails, List<IIdType> theNotReverted) {
+		if (theIds.isEmpty()) {
+			return;
+		}
+		// The version restorer takes References, so wrap each id.
+		List<Reference> refs = theIds.stream().map(Reference::new).toList();
+		try {
+			myResourceVersionRestorer.restoreToPreviousVersionsInTrx(refs, theRequestDetails);
+		} catch (PartitionedTransactionPartialFailureException thePartialFailure) {
+			// When the restore is split per partition and the sub-bundles commit independently, this exception
+			// means some committed before a later one failed and stopped the rest. The committed sub-bundles name
+			// exactly the resources that were reverted — everything else recorded here remains in its merged state
+			// and is reported for manual reconciliation.
+			Set<String> revertedVersionlessIds = extractCommittedVersionlessIds(thePartialFailure);
+			ourLog.error(
+					"Merge rollback partially failed; {} of {} resource(s) were reverted before a later failure",
+					revertedVersionlessIds.size(),
+					theIds.size(),
+					thePartialFailure);
+			for (IIdType id : theIds) {
+				if (!revertedVersionlessIds.contains(
+						id.toUnqualifiedVersionless().getValue())) {
+					theNotReverted.add(id);
+				}
 			}
-		});
+		} catch (Exception e) {
+			// No partial-commit information, so nothing is known to have been reverted: the restore rolled back
+			// atomically (single database), or failed before any partition committed. Report every recorded id.
+			ourLog.error("Merge rollback restore failed; no resources were reverted", e);
+			theNotReverted.addAll(theIds);
+		}
+	}
+
+	/**
+	 * Collects the versionless ids of the resources the committed sub-bundles of a partitioned-transaction partial
+	 * failure actually changed — i.e. the resources whose restore committed before a later sub-bundle failed.
+	 */
+	private static Set<String> extractCommittedVersionlessIds(
+			PartitionedTransactionPartialFailureException theFailure) {
+		Set<String> committed = new HashSet<>();
+		for (List<IBase> subBundleEntries : theFailure.getCommittedResponseEntriesPerSubBundle()) {
+			for (IBase entry : subBundleEntries) {
+				ReplaceReferencesProvenanceSvc.extractChangedResourceId((Bundle.BundleEntryComponent) entry)
+						.ifPresent(id ->
+								committed.add(id.toUnqualifiedVersionless().getValue()));
+			}
+		}
+		return committed;
 	}
 
 	/**

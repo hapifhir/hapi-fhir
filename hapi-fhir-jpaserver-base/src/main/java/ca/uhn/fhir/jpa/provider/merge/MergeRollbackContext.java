@@ -19,13 +19,10 @@
  */
 package ca.uhn.fhir.jpa.provider.merge;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 // Created by Claude Opus 4.8 (1M context)
 /**
@@ -36,32 +33,30 @@ import java.util.Map;
  * <p>The whole rollback only runs when partition changes commit in independent transactions
  * (see {@code IHapiTransactionService.isRequiresNewTransactionWhenChangingPartitions()}); otherwise the merge's
  * outer transaction has already rolled everything back.
+ *
+ * <p>Resources are recorded as flat lists spanning all partitions; the rollback restores each list as a single
+ * cross-partition FHIR transaction, which splits and dependency-orders the writes per partition (see
+ * {@link CrossPartitionMergeRollbackService}).
  */
 public class MergeRollbackContext {
 
 	private Throwable myFailureCause;
 
 	/**
-	 * Resources to revert, keyed by the partition the rollback should target the restore to. Holds the committed
-	 * data-bundle copies (CREATEs) and referrer updates, the post-merge target, and the post-merge source when it
-	 * was kept — all at their committed post-merge versions. The restorer reverts each (deleting a created
-	 * resource or rolling back an update).
+	 * Resources to revert. Holds the committed data-bundle copies (CREATEs) and referrer updates, the post-merge
+	 * target, and the post-merge source when it was kept — all at their committed post-merge versions. The
+	 * restorer reverts each (deleting a created resource or rolling back an update).
 	 */
-	private final Map<RequestPartitionId, List<IIdType>> myResourcesToRevertByPartition = new LinkedHashMap<>();
+	private final List<IIdType> myResourcesToRevert = new ArrayList<>();
 
 	/**
-	 * Resources to undelete, keyed by partition. Holds the source-side originals that were deleted, plus the
-	 * source itself when it was deleted, each at its tombstone version. The caller only records these once the
-	 * delete actually committed. The rollback restores each partition's list as a single FHIR transaction, so
-	 * references among the listed resources resolve regardless of order.
+	 * Resources to undelete. Holds the source-side originals that were deleted, plus the source itself when it was
+	 * deleted, each at its tombstone version. The caller only records these once the delete actually committed.
 	 */
-	private final Map<RequestPartitionId, List<IIdType>> myResourcesToUndeleteByPartition = new LinkedHashMap<>();
+	private final List<IIdType> myResourcesToUndelete = new ArrayList<>();
 
-	/** Ids of the per-partition Provenances that were created. */
-	private final List<IIdType> myCreatedSubProvenanceIds = new ArrayList<>();
-
-	/** Id of the main Provenance, if it was created. */
-	private IIdType myMainProvenanceId;
+	/** Id of the Provenance, if it was created. */
+	private IIdType myProvenanceId;
 
 	Throwable getFailureCause() {
 		return myFailureCause;
@@ -71,43 +66,35 @@ public class MergeRollbackContext {
 		myFailureCause = theFailureCause;
 	}
 
-	void addResourcesToRevert(RequestPartitionId thePartition, List<IIdType> theRefs) {
-		myResourcesToRevertByPartition
-				.computeIfAbsent(thePartition, k -> new ArrayList<>())
-				.addAll(theRefs);
+	void addResourcesToRevert(List<IIdType> theRefs) {
+		myResourcesToRevert.addAll(theRefs);
 	}
 
-	void addResourceToRevert(RequestPartitionId thePartition, IIdType theRef) {
-		addResourcesToRevert(thePartition, List.of(theRef));
+	void addResourceToRevert(IIdType theRef) {
+		myResourcesToRevert.add(theRef);
 	}
 
-	Map<RequestPartitionId, List<IIdType>> getResourcesToRevertByPartition() {
-		return myResourcesToRevertByPartition;
+	List<IIdType> getResourcesToRevert() {
+		return myResourcesToRevert;
 	}
 
-	void addResourcesToUndelete(RequestPartitionId thePartition, List<IIdType> theRefs) {
-		myResourcesToUndeleteByPartition
-				.computeIfAbsent(thePartition, k -> new ArrayList<>())
-				.addAll(theRefs);
+	void addResourcesToUndelete(List<IIdType> theRefs) {
+		myResourcesToUndelete.addAll(theRefs);
 	}
 
-	void addResourceToUndelete(RequestPartitionId thePartition, IIdType theRef) {
-		addResourcesToUndelete(thePartition, List.of(theRef));
+	void addResourceToUndelete(IIdType theRef) {
+		myResourcesToUndelete.add(theRef);
 	}
 
-	Map<RequestPartitionId, List<IIdType>> getResourcesToUndeleteByPartition() {
-		return myResourcesToUndeleteByPartition;
+	List<IIdType> getResourcesToUndelete() {
+		return myResourcesToUndelete;
 	}
 
-	List<IIdType> getCreatedSubProvenanceIds() {
-		return myCreatedSubProvenanceIds;
+	IIdType getProvenanceId() {
+		return myProvenanceId;
 	}
 
-	IIdType getMainProvenanceId() {
-		return myMainProvenanceId;
-	}
-
-	void setMainProvenanceId(IIdType theMainProvenanceId) {
-		myMainProvenanceId = theMainProvenanceId;
+	void setProvenanceId(IIdType theProvenanceId) {
+		myProvenanceId = theProvenanceId;
 	}
 }

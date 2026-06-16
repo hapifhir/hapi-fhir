@@ -44,7 +44,6 @@ import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -61,12 +60,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
@@ -311,7 +307,7 @@ public class ResourceMergeService {
 			List<IIdType> changedResourceIds =
 					ReplaceReferencesProvenanceSvc.extractChangedResourceIds(responseBundles);
 
-			// Finalize the merge: update source/target, create the main Provenance, delete the source when
+			// Finalize the merge: update source/target, create the Provenance, delete the source when
 			// requested. The whole merge runs in this one transaction, so there is no rollback bookkeeping here.
 			DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 					theSourceResource,
@@ -391,6 +387,7 @@ public class ResourceMergeService {
 				// The committed entries are carried on the exception rather than recorded in the rollback context,
 				// so harvest them here.
 				extractCommittedResourceIdsByPartition(partialFailure, theRequestDetails)
+						.values()
 						.forEach(rollbackContext::addResourcesToRevert);
 			}
 			myCrossPartitionMergeRollbackService.rollbackPartialCrossPartitionMerge(
@@ -416,8 +413,6 @@ public class ResourceMergeService {
 			Date theStartTime,
 			MergeRollbackContext theRollbackContext) {
 
-		String provenanceCorrelationId = generateProvenanceCorrelationId(theSourceResource, theTargetResource);
-
 		// Copy the source compartment resources to the target partition and replace references (the data bundle).
 		CrossPartitionReplaceReferencesResult copyResult =
 				myCrossPartitionReplaceReferencesSvc.copyCompartmentResourcesAndReplaceReferences(
@@ -432,43 +427,7 @@ public class ResourceMergeService {
 		// Record the just-committed data-bundle copies and referrer updates as resources to revert on rollback,
 		// keeping the partition each group was written to (the copy result already groups by partition). The
 		// originals are not recorded yet — they become undeletes only once their delete commits (below).
-		committedByPartition.forEach(theRollbackContext::addResourcesToRevert);
-
-		// Create the per-partition Provenances, one partition at a time. A failure here propagates and aborts
-		// the merge (the rollback then deletes any sub-Provenances already recorded below).
-		// Each includes [tgt, src, partition-specific updated/to-be-deleted resources].
-		// Source and target are referenced at their current versions (pre-merge) in these sub-provenances
-		// but recorded with the post-merge version in the main provenance.
-		if (theMergeOperationParameters.getCreateProvenance()) {
-			IIdType sourceId = theSourceResource.getIdElement();
-			IIdType targetId = theTargetResource.getIdElement();
-
-			Set<RequestPartitionId> allPartitions = new LinkedHashSet<>();
-			allPartitions.addAll(committedByPartition.keySet());
-			allPartitions.addAll(deletedResourceIdsByPartition.keySet());
-
-			for (RequestPartitionId partition : allPartitions) {
-				List<IIdType> partitionRefs = new ArrayList<>();
-
-				List<IIdType> committedInPartition = committedByPartition.getOrDefault(partition, List.of());
-				partitionRefs.addAll(committedInPartition);
-
-				partitionRefs.addAll(deletedResourceIdsByPartition.getOrDefault(partition, List.of()));
-
-				IIdType subProvenanceId = myMergeResourceHelper.createProvenance(
-						sourceId,
-						targetId,
-						partitionRefs,
-						provenanceCorrelationId,
-						theRequestDetails,
-						theStartTime,
-						theMergeOperationParameters.getProvenanceAgents(),
-						List.of());
-				if (subProvenanceId != null) {
-					theRollbackContext.getCreatedSubProvenanceIds().add(subProvenanceId);
-				}
-			}
-		}
+		committedByPartition.values().forEach(theRollbackContext::addResourcesToRevert);
 
 		// Update source/target. The target is always updated; the source is updated when kept, or deleted below.
 		DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
@@ -489,28 +448,37 @@ public class ResourceMergeService {
 		IIdType targetPostMergeId = outcome.getResource().getIdElement();
 
 		// Record the post-merge target (always updated) and the post-merge source when it is kept, as resources to
-		// revert on rollback. This is recorded before the main Provenance creation below, so a failure there still
+		// revert on rollback. This is recorded before the Provenance creation below, so a failure there still
 		// reverts the update that has already committed under REQUIRES_NEW. When the source is deleted it is recorded
 		// as an undelete instead (below, after the delete commits), so it is not added here.
-		theRollbackContext.addResourceToRevert(getPartitionOrThrow(theTargetResource), targetPostMergeId);
+		theRollbackContext.addResourceToRevert(targetPostMergeId);
 		if (!theMergeOperationParameters.getDeleteSource()) {
-			theRollbackContext.addResourceToRevert(getPartitionOrThrow(theSourceResource), sourcePostMergeId);
+			theRollbackContext.addResourceToRevert(sourcePostMergeId);
 		}
 
-		// Create the main Provenance (the "merge succeeded" signal), referencing the post-merge source and target.
+		// Create the single Provenance (the "merge succeeded" signal), referencing the post-merge source and
+		// target plus every changed resource across all partitions: the committed copies/referrer updates and
+		// the to-be-deleted originals (recorded at their anticipated tombstone versions, original + 1). The undo
+		// and rollback restore all of these in one cross-partition transaction, so no per-partition split is
+		// needed in the recorded Provenance.
 		if (theMergeOperationParameters.getCreateProvenance()) {
 			List<IBaseResource> containedResources =
 					List.of(theMergeOperationParameters.getOriginalInputParameters(), outcome.getOperationOutcome());
-			IIdType mainProvenanceId = myMergeResourceHelper.createProvenance(
+			List<IIdType> changedResourceIds = new ArrayList<>();
+			committedByPartition.values().forEach(changedResourceIds::addAll);
+			deletedResourceIdsByPartition.values().forEach(changedResourceIds::addAll);
+
+			IIdType provenanceId = myMergeResourceHelper.createProvenance(
 					sourcePostMergeId,
 					targetPostMergeId,
-					List.of(),
-					provenanceCorrelationId,
+					changedResourceIds,
+					// no correlation id: a merge now records a single Provenance, nothing to correlate
+					null,
 					theRequestDetails,
 					theStartTime,
 					theMergeOperationParameters.getProvenanceAgents(),
 					containedResources);
-			theRollbackContext.setMainProvenanceId(mainProvenanceId);
+			theRollbackContext.setProvenanceId(provenanceId);
 		}
 
 		// Delete the source-side compartment originals copied across partitions, plus the source itself when
@@ -530,9 +498,9 @@ public class ResourceMergeService {
 		// original + 1) as undeletes for rollback. The source's tombstone version is sourcePostMergeId
 		// (original + 1).
 		if (theMergeOperationParameters.getDeleteSource()) {
-			theRollbackContext.addResourceToUndelete(getPartitionOrThrow(theSourceResource), sourcePostMergeId);
+			theRollbackContext.addResourceToUndelete(sourcePostMergeId);
 		}
-		deletedResourceIdsByPartition.forEach(theRollbackContext::addResourcesToUndelete);
+		deletedResourceIdsByPartition.values().forEach(theRollbackContext::addResourcesToUndelete);
 	}
 
 	/**
@@ -579,38 +547,6 @@ public class ResourceMergeService {
 			result.put(entry.getKey(), incrementedIds);
 		}
 		return result;
-	}
-
-	/**
-	 * Generates the correlation id shared by all Provenances created for one cross-partition merge (the main
-	 * Provenance and every per-partition Provenance), so they can be correlated and found together — e.g. by the
-	 * undo-merge operation. The UUID suffix keeps it unique across repeated merge attempts of the same
-	 * source/target pair.
-	 *
-	 * <p>Example: merging {@code Patient/123} into {@code Patient/456} yields a correlation id like
-	 * {@code merge_Patient_123_456_3f2504e0-4f89-41d3-9a0c-0305e82c3301}.
-	 */
-	private static String generateProvenanceCorrelationId(
-			IBaseResource theSourceResource, IBaseResource theTargetResource) {
-		String src = theSourceResource.getIdElement().getIdPart();
-		String tgt = theTargetResource.getIdElement().getIdPart();
-		String resourceType = theSourceResource.getIdElement().getResourceType();
-		String uuid = UUID.randomUUID().toString();
-		// Use '_' as the delimiter rather than '-': resource id parts and the UUID both contain '-', so a
-		// '_' (disallowed in FHIR id parts and absent from the UUID) keeps the segments visually separable.
-		return String.join("_", "merge", resourceType, src, tgt, uuid);
-	}
-
-	/**
-	 * Returns the partition the given resource was loaded from, recorded in its user data by the JPA layer. A
-	 * cross-partition merge always operates on resources read from the database, so the partition must be present —
-	 * a missing one is an internal error, not an expected absence.
-	 */
-	private static RequestPartitionId getPartitionOrThrow(IBaseResource theResource) {
-		return RequestPartitionId.getPartitionFromUserDataIfPresent(theResource)
-				.orElseThrow(() -> new InternalErrorException(Msg.code(2975) + "Resource "
-						+ theResource.getIdElement().toUnqualifiedVersionless().getValue()
-						+ " has no partition recorded in its user data"));
 	}
 
 	private void doMergeAsync(

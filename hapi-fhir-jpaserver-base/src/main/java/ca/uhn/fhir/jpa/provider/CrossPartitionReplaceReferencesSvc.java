@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -196,9 +198,17 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * then loads and returns those resources.
 	 */
 	private List<IBaseResource> discoverReferencingResources(IIdType theSourceId, RequestDetails theRequestDetails) {
-		List<IdDt> ids = findReferencingResourceIds(theSourceId, theRequestDetails);
+		List<ReferencingResourceId> ids = findReferencingResourceIds(theSourceId, theRequestDetails);
 		return loadResources(ids, theRequestDetails);
 	}
+
+	/**
+	 * A referencing resource id discovered via the HFJ_RES_LINK index, paired with the partition the
+	 * source resource lives in. The partition pins the subsequent read to the correct shard rather
+	 * than relying on id-based partition resolution (which fails for client-assigned ids in MegaScale
+	 * Patient ID mode). A null partition id maps to the default partition.
+	 */
+	private record ReferencingResourceId(IdDt id, RequestPartitionId partitionId) {}
 
 	/**
 	 * Returns the IDs of all resources that have a reference link pointing to {@code theTargetId}.
@@ -208,13 +218,17 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * mandatory: with the default REQUIRED propagation the per-shard thunks would join the
 	 * outer tx and skip the fan-out entirely. On non-MegaScale HAPI this is a single query.
 	 */
-	private List<IdDt> findReferencingResourceIds(IIdType theTargetId, RequestDetails theRequestDetails) {
+	private List<ReferencingResourceId> findReferencingResourceIds(
+			IIdType theTargetId, RequestDetails theRequestDetails) {
 		return myHapiTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(RequestPartitionId.allPartitions())
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.searchList(partition -> myResourceLinkDao
-						.streamSourceIdsForTargetFhirId(theTargetId.getResourceType(), theTargetId.getIdPart())
+						.streamSourceIdsAndPartitionForTargetFhirId(
+								theTargetId.getResourceType(), theTargetId.getIdPart())
+						.map(view -> new ReferencingResourceId(
+								view.toIdDt(), RequestPartitionId.fromPartitionId(view.partitionId())))
 						.toList());
 	}
 
@@ -240,13 +254,14 @@ public class CrossPartitionReplaceReferencesSvc {
 				.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
 				.toList());
 
-		List<IdDt> additionalIds = new ArrayList<>();
+		List<ReferencingResourceId> additionalIds = new ArrayList<>();
 		for (IBaseResource resource : theCopyList) {
 			IIdType oldId = resource.getIdElement();
-			List<IdDt> referrers = findReferencingResourceIds(oldId, theRequestDetails);
-			for (IdDt id : referrers) {
-				if (alreadyDiscoveredIds.add(id.toUnqualifiedVersionless().getValue())) {
-					additionalIds.add(id);
+			List<ReferencingResourceId> referrers = findReferencingResourceIds(oldId, theRequestDetails);
+			for (ReferencingResourceId referrer : referrers) {
+				if (alreadyDiscoveredIds.add(
+						referrer.id().toUnqualifiedVersionless().getValue())) {
+					additionalIds.add(referrer);
 				}
 			}
 		}
@@ -275,15 +290,31 @@ public class CrossPartitionReplaceReferencesSvc {
 		return result;
 	}
 
-	private List<IBaseResource> loadResources(List<IdDt> theIds, RequestDetails theRequestDetails) {
+	private List<IBaseResource> loadResources(List<ReferencingResourceId> theIds, RequestDetails theRequestDetails) {
 		List<IBaseResource> result = new ArrayList<>();
-		for (IdDt id : theIds) {
+		for (ReferencingResourceId referencingId : theIds) {
+			IdDt id = referencingId.id();
 			try {
 				@SuppressWarnings("unchecked")
 				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(id.getResourceType());
-				result.add(dao.read(id.toVersionless(), theRequestDetails));
-			} catch (ResourceGoneException | ResourceNotFoundException e) {
-				ourLog.warn("Skipping deleted/not-found resource: {}", id.getValue());
+				// Pin the read to the source resource's partition (from the link index) instead of relying
+				// on id-based partition resolution, which fails for client-assigned (non-partition-decodable)
+				// ids in MegaScale Patient ID mode. A pinned partition is incompatible with the outer
+				// allPartitions tx, so in MegaScale REQUIRES_NEW-on-change escapes to the correct shard.
+				IBaseResource resource = myHapiTransactionService
+						.withRequest(theRequestDetails)
+						.withRequestPartitionId(referencingId.partitionId())
+						.execute(() -> dao.read(id.toVersionless(), theRequestDetails));
+				result.add(resource);
+			} catch (ResourceGoneException e) {
+				// Genuinely deleted between discovery and load — tolerated, the link is stale.
+				ourLog.warn("Skipping deleted resource: {}", id.getValue());
+			} catch (ResourceNotFoundException e) {
+				// The link index proves this resource existed; failing to read it now is contradictory
+				// (e.g. a partition-pinning miss). Fail the merge loudly rather than silently dropping it.
+				throw new InternalErrorException(
+						Msg.code(2975) + "Resource " + id.getValue()
+								+ " was found in the reference link index but could not be loaded; aborting cross-partition merge to avoid silently losing data.");
 			}
 		}
 		return result;
@@ -410,6 +441,11 @@ public class CrossPartitionReplaceReferencesSvc {
 				continue;
 			}
 			String refValue = refElement.toUnqualifiedVersionless().getValue();
+			// Skip references with no literal reference value (e.g. identifier-only or display-only references).
+			// Such references have a null refValue, which would NPE on lookups against an immutable map.
+			if (refValue == null || refValue.isEmpty()) {
+				continue;
+			}
 			String replacement = theReferenceMap.get(refValue);
 			if (replacement != null) {
 				refInfo.getResourceReference().setReference(replacement);
