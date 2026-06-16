@@ -19,10 +19,17 @@
  */
 package ca.uhn.fhir.batch2.api;
 
+import ca.uhn.fhir.batch2.coordinator.ReductionStepChunkProcessingResponse;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 
 public interface IReductionStepExecutorService {
-	void triggerReductionStep(String theInstanceId, JobWorkCursor<?, ?, ?> theJobWorkCursor);
 
-	void reducerPass();
+	/**
+	 * Performs any necessary reducer work for the given instance. This should
+	 * only be invoked by the maintenance service which is running under the
+	 * clustered scheduler to avoid any risk of collisions.
+	 */
+	ReductionStepChunkProcessingResponse triggerReductionStep(
+			JobInstance theInstance, JobWorkCursor<?, ?, ?> theJobWorkCursor);
 }

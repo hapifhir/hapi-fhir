@@ -21,8 +21,11 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.coordinator.ReductionStepChunkProcessingResponse;
+import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
@@ -32,7 +35,9 @@ import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.util.Logs;
@@ -44,6 +49,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -70,7 +76,7 @@ public class ActiveJobInstanceProcessor {
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 	private final IReductionStepExecutorService myReductionStepExecutorService;
 	private final String myInstanceId;
-	private final JobDefinitionRegistry myJobDefinitionegistry;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
 	public ActiveJobInstanceProcessor(
 			IJobPersistence theJobPersistence,
@@ -84,13 +90,15 @@ public class ActiveJobInstanceProcessor {
 		myInstanceId = theInstanceId;
 		myProgressAccumulator = new JobChunkProgressAccumulator();
 		myReductionStepExecutorService = theReductionStepExecutorService;
-		myJobDefinitionegistry = theJobDefinitionRegistry;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(
 				theJobPersistence, myProgressAccumulator, theJobDefinitionRegistry, theInterceptorService);
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
 	}
 
 	public void process() {
+		HapiTransactionService.noTransactionAllowed();
+
 		ourLog.debug("Starting job processing: {}", myInstanceId);
 		StopWatch stopWatch = new StopWatch();
 
@@ -111,7 +119,7 @@ public class ActiveJobInstanceProcessor {
 		}
 
 		JobDefinition<? extends IModelJson> jobDefinition =
-				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
+				myJobDefinitionRegistry.getJobDefinitionOrThrowException(theInstance);
 
 		// move POLL_WAITING -> READY
 		processPollingChunks(theInstance.getInstanceId());
@@ -120,10 +128,10 @@ public class ActiveJobInstanceProcessor {
 		switch (theInstance.getStatus()) {
 			case IN_PROGRESS:
 			case ERRORED:
+			case FINALIZE:
 				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress(theInstance.getInstanceId());
 				break;
 			case QUEUED:
-			case FINALIZE:
 			case COMPLETED:
 			case FAILED:
 			case CANCELLED:
@@ -146,7 +154,13 @@ public class ActiveJobInstanceProcessor {
 			JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
 					jobDefinition, updatedInstance.get().getCurrentGatedStepId());
 			if (jobWorkCursor.isReductionStep()) {
-				// Reduction step work chunks should never be sent to the queue but to its specific service instead.
+				/*
+				 * Reduction step work chunks should never be sent to the
+				 * queue but to its specific service instead. This should
+				 * also always be the last thing we do, since the reduction
+				 * step will make changes to the jobInstance in a separate
+				 * thread and transaction
+				 */
 				triggerReductionStep(theInstance, jobWorkCursor);
 				return;
 			}
@@ -261,7 +275,7 @@ public class ActiveJobInstanceProcessor {
 		if (workChunkStatuses.isEmpty()) {
 			// no work chunks = no output
 			// trivial to advance to next step
-			ourLog.info("No workchunks for {} in step id {}", theInstance.getInstanceId(), currentGatedStepId);
+			ourLog.info("No work chunks for {} in step id {}", theInstance.getInstanceId(), currentGatedStepId);
 			return true;
 		}
 
@@ -284,9 +298,46 @@ public class ActiveJobInstanceProcessor {
 	 * Trigger the reduction step for the given job instance. Reduction step chunks should never be queued.
 	 */
 	private void triggerReductionStep(JobInstance theInstance, JobWorkCursor<?, ?, ?> jobWorkCursor) {
-		String instanceId = theInstance.getInstanceId();
-		ourLog.debug("Triggering Reduction step {} of instance {}.", jobWorkCursor.getCurrentStepId(), instanceId);
-		myReductionStepExecutorService.triggerReductionStep(instanceId, jobWorkCursor);
+		ourLog.info(
+				"Triggering Reduction step {} of instance {}.",
+				jobWorkCursor.getCurrentStepId(),
+				theInstance.getInstanceId());
+
+		ReductionStepChunkProcessingResponse outcome =
+				myReductionStepExecutorService.triggerReductionStep(theInstance, jobWorkCursor);
+
+		/*
+		 * After running the reduction step worker, we should always be complete. If
+		 * this ever isn't true, we have a logic bug somewhere - this is just a tripwire
+		 * to make sure we catch that if it happens. We don't want reduction steps occurring
+		 * over multiple passes because they aren't guaranteed to execute on the same
+		 * process in a cluster.
+		 */
+		BatchInstanceStatusDTO instanceStatus = myJobPersistence.fetchBatchInstanceStatus(theInstance.getInstanceId());
+		if (!EnumSet.of(StatusEnum.COMPLETED, StatusEnum.FAILED).contains(instanceStatus.status())) {
+			// FIXME: add test
+			String errorMessage = "Reduction step for job instance[" + theInstance.getInstanceId()
+					+ "] existed with job in unexpected status: " + instanceStatus.status();
+			ourLog.error(errorMessage);
+
+			myJobPersistence.updateInstance(theInstance.getInstanceId(), instance -> {
+				instance.setStatus(StatusEnum.FAILED);
+				instance.setErrorMessage(errorMessage);
+				instance.setEndTime(new Date());
+				return false;
+			});
+
+			// FIXME: add code
+			throw new JobExecutionFailedException(Msg.code(1) + errorMessage);
+		}
+
+		ourLog.atInfo()
+				.setMessage("Reduction step for job {} is complete, success={}, successful chunks={}, failed chunks={}")
+				.addArgument(theInstance.getInstanceId())
+				.addArgument(outcome.isSuccessful())
+				.addArgument(outcome.getSuccessfulChunkIds().size())
+				.addArgument(outcome.getFailedChunksIds().size())
+				.log();
 	}
 
 	/**

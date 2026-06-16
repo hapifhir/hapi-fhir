@@ -260,7 +260,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	}
 
 	@Override
-	public void runActiveJobMaintenancePass() {
+	public boolean runActiveJobMaintenancePass() {
 		if (!myEnabledBool) {
 			ourLog.error("Maintenance (Active Job) job is disabled! This will affect all batch2 jobs!");
 		}
@@ -268,12 +268,12 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		try {
 			if (!myRunMaintenanceSemaphore.tryAcquire(5, TimeUnit.SECONDS)) {
 				ourLog.debug("Another Active Job maintenance pass is already in progress.  Ignoring request.");
-				return;
+				return false;
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			ourLog.debug("Waiting for active job maintenance semaphore was interrupted, aborting");
-			return;
+			return false;
 		}
 
 		try {
@@ -281,9 +281,12 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			doActiveMaintenancePass();
 		} catch (Exception e) {
 			ourLog.error("Active Job Maintenance pass failed", e);
+			return false;
 		} finally {
 			myRunMaintenanceSemaphore.release();
 		}
+
+		return true;
 	}
 
 	@Override

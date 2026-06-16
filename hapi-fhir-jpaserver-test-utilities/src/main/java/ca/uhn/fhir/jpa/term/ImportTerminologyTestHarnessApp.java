@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
@@ -67,21 +68,30 @@ public class ImportTerminologyTestHarnessApp {
 	@Configuration
 	public static class MyConfig extends TestR4Config {
 
+		private static final boolean ourUseLocalH2 = true;
+
 		@Override
 		public void setConnectionProperties(BasicDataSource theDataSource) {
-			//			theDataSource.setDriver(new org.h2.Driver());
-			//			theDataSource.setUrl("jdbc:h2:file:./target/term-loading-test-db/db");
-			theDataSource.setDriver(new org.postgresql.Driver());
-			theDataSource.setUrl("jdbc:postgresql://localhost:5432/cdr");
-			theDataSource.setMaxWait(Duration.ofSeconds(30));
-			theDataSource.setUsername("cdr");
-			theDataSource.setPassword("cdr");
-			theDataSource.setMaxTotal(ourMaxThreads);
+			if (ourUseLocalH2) {
+				theDataSource.setDriver(new org.h2.Driver());
+				theDataSource.setUrl("jdbc:h2:file:./target/term-loading-test-db/db");
+			} else {
+				theDataSource.setDriver(new org.postgresql.Driver());
+				theDataSource.setUrl("jdbc:postgresql://localhost:5432/cdr");
+				theDataSource.setMaxWait(Duration.ofSeconds(30));
+				theDataSource.setUsername("cdr");
+				theDataSource.setPassword("cdr");
+				theDataSource.setMaxTotal(ourMaxThreads);
+			}
 		}
 
 		@Override
 		public String getHibernateDialect() {
-			return HapiFhirPostgresDialect.class.getName();
+			if (ourUseLocalH2) {
+				return HapiFhirH2Dialect.class.getName();
+			} else {
+				return HapiFhirPostgresDialect.class.getName();
+			}
 		}
 	}
 }

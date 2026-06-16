@@ -47,6 +47,8 @@ public class ImportLoincJobAppCtx {
 	public static final String JOB_ID_IMPORT_TERM_LOINC = "IMPORT_TERM_LOINC";
 	public static final String STEP_ID_FINALIZE_IMPORT = "finalize-import";
 	public static final String STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION = "chunk-concepts-for-closure-generation";
+	public static final String STEP_ID_GENERATE_CONCEPT_CLOSURES = "generate-concept-closures";
+	public static final String STEP_ID_IMPORT_PART_LINK_FILE = "import-part-link-file";
 
 	private final DaoRegistry myDaoRegistry;
 	private final ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
@@ -159,10 +161,12 @@ public class ImportLoincJobAppCtx {
 						TerminologyFileSetJson.class,
 						importLoincStep16PartFile())
 				.addIntermediateStep(
-						"import-part-link-file",
+					STEP_ID_IMPORT_PART_LINK_FILE,
 						"Import LOINC Part Link File",
 						TerminologyFileSetJson.class,
 						importLoincStep17PartLink())
+				// Part link file uses a large number of smaller files, so limit its weight
+				.setStepWeightForProgressCalculator(STEP_ID_IMPORT_PART_LINK_FILE, 0.1)
 				.addIntermediateStep(
 						"import-consumer-name",
 						"Import LOINC Consumer Names",
@@ -184,15 +188,17 @@ public class ImportLoincJobAppCtx {
 						TerminologyFileSetJson.class,
 						importLoincStep21ChunkConceptsForClosureGeneration())
 				.addIntermediateStep(
-						"generate-concept-closures",
+					STEP_ID_GENERATE_CONCEPT_CLOSURES,
 						"Generate concept closures",
 						TerminologyFileSetJson.class,
 						importLoincStep22GenerateConceptClosures())
+				.setStepWeightForProgressCalculator(STEP_ID_GENERATE_CONCEPT_CLOSURES, 0.3)
 				.addFinalReducerStep(
 						STEP_ID_FINALIZE_IMPORT,
 						"Finalize LOINC Import",
 						ImportTerminologyResultJson.class,
 						importLoincStep23Finalize())
+				.setStepWeightForProgressCalculator(STEP_ID_FINALIZE_IMPORT, 0.01)
 				.build();
 	}
 

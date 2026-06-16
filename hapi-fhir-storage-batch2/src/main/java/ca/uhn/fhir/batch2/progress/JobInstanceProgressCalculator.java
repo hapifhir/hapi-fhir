@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StepWeightingForProgressCalculator;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -63,7 +64,10 @@ public class JobInstanceProgressCalculator {
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
 		myJobPersistence.updateInstance(theInstanceId, currentInstance -> {
-			instanceProgress.updateInstance(currentInstance);
+
+			JobDefinition<?> jobDefinition = myJobDefinitionRegistry.getJobDefinition(currentInstance.getJobDefinitionId(), currentInstance.getJobDefinitionVersion()).orElseThrow();
+			StepWeightingForProgressCalculator stepWeightingForProgressCalculator = jobDefinition.getStepWeightingForProgressCalculator();
+			instanceProgress.updateInstance(stepWeightingForProgressCalculator, currentInstance);
 
 			if (currentInstance.getCombinedRecordsProcessed() > 0) {
 				ourLog.info(
@@ -118,6 +122,9 @@ public class JobInstanceProgressCalculator {
 
 	@Nonnull
 	public InstanceProgress calculateInstanceProgress(String instanceId) {
+		JobInstance jobInstance = getJobInstance(instanceId);
+		JobDefinition<IModelJson> jobDefinition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobInstance);
+
 		InstanceProgress instanceProgress = new InstanceProgress();
 		Iterator<WorkChunk> workChunkIterator = myJobPersistence.fetchAllWorkChunksIterator(instanceId, false);
 
@@ -131,15 +138,9 @@ public class JobInstanceProgressCalculator {
 		}
 
 		// wipmb separate status update from stats collection in 6.8
-		instanceProgress.calculateNewStatus(lastStepIsReduction(instanceId));
+		instanceProgress.calculateNewStatus(jobDefinition.isLastStepReduction());
 
 		return instanceProgress;
-	}
-
-	private boolean lastStepIsReduction(String theInstanceId) {
-		JobInstance jobInstance = getJobInstance(theInstanceId);
-		JobDefinition<IModelJson> jobDefinition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobInstance);
-		return jobDefinition.isLastStepReduction();
 	}
 
 	private JobInstance getJobInstance(String theInstanceId) {

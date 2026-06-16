@@ -100,7 +100,6 @@ public class ReductionStepExecutorServiceImplTest {
 		// when
 		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
 		when(workCursor.getJobDefinition()).thenReturn(createJobDefinition());
-		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(jobInstance));
 		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(StatusEnum.IN_PROGRESS, StatusEnum.ERRORED))).thenReturn(true);
 		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.stream());
@@ -110,7 +109,7 @@ public class ReductionStepExecutorServiceImplTest {
 		when(myReductionStepWorker.newInstance()).thenReturn(myReductionStepWorker);
 
 		// test
-		ReductionStepChunkProcessingResponse result = mySvc.executeReductionStep(INSTANCE_ID, workCursor);
+		ReductionStepChunkProcessingResponse result = mySvc.triggerReductionStep(jobInstance, workCursor);
 
 		// verification
 		assertFalse(result.isSuccessful());
@@ -155,7 +154,6 @@ public class ReductionStepExecutorServiceImplTest {
 		// when
 		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
 		when(workCursor.getJobDefinition()).thenReturn(createJobDefinition());
-		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(jobInstance));
 		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(IN_PROGRESS, ERRORED))).thenReturn(true);
 		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.stream());
@@ -166,7 +164,7 @@ public class ReductionStepExecutorServiceImplTest {
 		when(myReductionStepWorker.newInstance()).thenReturn(myReductionStepWorker);
 
 		// test
-		ReductionStepChunkProcessingResponse result = mySvc.executeReductionStep(INSTANCE_ID, workCursor);
+		ReductionStepChunkProcessingResponse result = mySvc.triggerReductionStep(jobInstance, workCursor);
 
 		// verify
 		ArgumentCaptor<ChunkExecutionDetails> chunkCaptor = ArgumentCaptor.forClass(ChunkExecutionDetails.class);
@@ -209,14 +207,13 @@ public class ReductionStepExecutorServiceImplTest {
 		// when
 		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
 		when(workCursor.getJobDefinition()).thenReturn(createJobDefinition());
-		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(jobInstance));
 		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID))).thenReturn(chunks.stream());
 		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(StatusEnum.IN_PROGRESS, StatusEnum.ERRORED))).thenReturn(true);
 		doThrow(new RuntimeException("This is an error")).when(myReductionStepWorker).consume(any(ChunkExecutionDetails.class));
 		when(myReductionStepWorker.newInstance()).thenReturn(myReductionStepWorker);
 
 		// test
-		ReductionStepChunkProcessingResponse result = mySvc.executeReductionStep(INSTANCE_ID, workCursor);
+		ReductionStepChunkProcessingResponse result = mySvc.triggerReductionStep(jobInstance, workCursor);
 
 		// verify
 		assertFalse(result.isSuccessful());

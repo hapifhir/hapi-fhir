@@ -22,9 +22,11 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.StepWeightingForProgressCalculator;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.batch2.progress.InstanceProgress;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
@@ -99,7 +101,9 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			 * here. Until then though, this is safer.
 			 */
 
-			progress.updateInstanceForReductionStep(instance);
+			JobDefinition<?> jobDefinition = myJobDefinitionRegistry.getJobDefinition(instance.getJobDefinitionId(), instance.getJobDefinitionVersion()).orElseThrow();
+			StepWeightingForProgressCalculator stepWeightingForProgressCalculator = jobDefinition.getStepWeightingForProgressCalculator();
+			progress.updateInstanceForReductionStep(stepWeightingForProgressCalculator, instance);
 
 			instance.setReport(dataString);
 			instance.setStatus(StatusEnum.COMPLETED);

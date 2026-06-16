@@ -40,41 +40,21 @@ import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.sched.HapiJob;
-import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.JsonUtil;
-import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
-import jakarta.annotation.Nonnull;
-import org.apache.commons.lang3.time.DateUtils;
-import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.transaction.annotation.Propagation;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.model.StatusEnum.COMPLETED;
@@ -83,22 +63,15 @@ import static ca.uhn.fhir.batch2.model.StatusEnum.FINALIZE;
 import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
 import static ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils.JOB_STEP_EXECUTION_SPAN_NAME;
 
-public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorService, IHasScheduledJobs {
-	public static final String SCHEDULED_JOB_ID = ReductionStepExecutorScheduledJob.class.getName();
+public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReductionStepExecutorServiceImpl.class);
-	private final Map<String, JobWorkCursor> myInstanceIdToJobWorkCursor =
-			Collections.synchronizedMap(new LinkedHashMap<>());
-	private final ExecutorService myReducerExecutor;
 	private final ExecutorService myReducerChunkExecutor;
 	private final IJobPersistence myJobPersistence;
 	private final IHapiTransactionService myTransactionService;
-	private final Semaphore myCurrentlyExecuting = new Semaphore(1);
-	private final AtomicReference<String> myCurrentlyFinalizingInstanceId = new AtomicReference<>();
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 	private final IJobStepExecutionServices myJobStepExecutionServices;
 	private final IInterceptorService myInterceptorService;
-	private Timer myHeartbeatTimer;
 
 	/**
 	 * Constructor
@@ -115,7 +88,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		myJobStepExecutionServices = theJobStepExecutionServices;
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
 		myInterceptorService = theInterceptorService;
-		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
 
 		// This is a single thread executor because there are no guarantees that the chunk
 		// processing is actually thread safe. Be careful if you think you want to add more
@@ -124,102 +96,40 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer-chunk"));
 	}
 
-	@EventListener(ContextRefreshedEvent.class)
-	public void start() {
-		if (myHeartbeatTimer == null) {
-			myHeartbeatTimer = new Timer("batch2-reducer-heartbeat");
-			long delay = DateUtils.MILLIS_PER_MINUTE;
-			if (HapiSystemProperties.isUnitTestModeEnabled()) {
-				delay = DateUtils.MILLIS_PER_SECOND;
-			}
-			myHeartbeatTimer.schedule(new HeartbeatTimerTask(), delay, delay);
-		}
-	}
-
-	private void runHeartbeat() {
-		String currentlyFinalizingInstanceId = myCurrentlyFinalizingInstanceId.get();
-		if (currentlyFinalizingInstanceId != null) {
-			ourLog.info("Running heartbeat for instance: {}", currentlyFinalizingInstanceId);
-			executeInTransactionWithSynchronization(() -> {
-				myJobPersistence.updateInstanceUpdateTime(currentlyFinalizingInstanceId);
-				return null;
-			});
-		}
-	}
-
-	@EventListener(ContextClosedEvent.class)
-	public void shutdown() {
-		if (myHeartbeatTimer != null) {
-			myHeartbeatTimer.cancel();
-			myHeartbeatTimer = null;
-		}
-	}
-
 	@Override
-	public void triggerReductionStep(String theInstanceId, JobWorkCursor<?, ?, ?> theJobWorkCursor) {
-		myInstanceIdToJobWorkCursor.putIfAbsent(theInstanceId, theJobWorkCursor);
-		if (myCurrentlyExecuting.availablePermits() > 0) {
-			myReducerExecutor.submit(this::reducerPass);
-		}
-	}
-
-	@Override
-	public void reducerPass() {
-		if (myCurrentlyExecuting.tryAcquire()) {
-			try {
-				String[] instanceIds = myInstanceIdToJobWorkCursor.keySet().toArray(new String[0]);
-				if (instanceIds.length > 0) {
-					String instanceId = instanceIds[0];
-					myCurrentlyFinalizingInstanceId.set(instanceId);
-					JobWorkCursor<?, ?, ?> jobWorkCursor = myInstanceIdToJobWorkCursor.get(instanceId);
-					executeReductionStep(instanceId, jobWorkCursor);
-
-					// If we get here, this succeeded. Purge the instance from the work queue
-					myInstanceIdToJobWorkCursor.remove(instanceId);
-				}
-
-			} catch (Exception e) {
-				ourLog.error("Failed to execute reducer pass", e);
-			} finally {
-				myCurrentlyFinalizingInstanceId.set(null);
-				myCurrentlyExecuting.release();
-			}
-		}
-	}
-
-	@VisibleForTesting
 	@WithSpan(JOB_STEP_EXECUTION_SPAN_NAME)
-	<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
+	public ReductionStepChunkProcessingResponse triggerReductionStep(
+			JobInstance theInstance, JobWorkCursor<?, ?, ?> theJobWorkCursor) {
+		return executeReductionStep(theInstance, theJobWorkCursor);
+	}
+
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
 			ReductionStepChunkProcessingResponse executeReductionStep(
-					String theInstanceId, JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
+					JobInstance theInstance, JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 
 		BatchJobOpenTelemetryUtils.addAttributesToCurrentSpan(
 				theJobWorkCursor.getJobDefinition().getJobDefinitionId(),
 				theJobWorkCursor.getJobDefinition().getJobDefinitionVersion(),
-				theInstanceId,
+				theInstance.getInstanceId(),
 				theJobWorkCursor.getCurrentStepId(),
 				null);
 
 		JobDefinitionStep<PT, IT, OT> step = theJobWorkCursor.getCurrentStep();
 
-		// wipmb For 6.8 - this runs four tx. That's at least 2 too many
-		// combine the fetch and the case statement.  Use optional for the boolean.
-		JobInstance instance = executeInTransactionWithSynchronization(() -> myJobPersistence
-				.fetchInstance(theInstanceId)
-				.orElseThrow(() -> new InternalErrorException("Unknown instance: " + theInstanceId)));
-
 		boolean shouldProceed = false;
-		switch (instance.getStatus()) {
+		switch (theInstance.getStatus()) {
 			case IN_PROGRESS:
 			case ERRORED:
 				// this will take a write lock on the JobInstance, preventing duplicates.
-				boolean changed =
-						executeInTransactionWithSynchronization(() -> myJobPersistence.markInstanceAsStatusWhenStatusIn(
-								instance.getInstanceId(), FINALIZE, EnumSet.of(IN_PROGRESS, ERRORED)));
+				boolean changed = executeInTransactionWithSynchronization(() -> {
+					myJobPersistence.updateInstanceUpdateTime(theInstance.getInstanceId());
+					return myJobPersistence.markInstanceAsStatusWhenStatusIn(
+							theInstance.getInstanceId(), FINALIZE, EnumSet.of(IN_PROGRESS, ERRORED));
+				});
 				if (changed) {
 					ourLog.info(
 							"Job instance {} has been set to FINALIZE state - Beginning reducer step",
-							instance.getInstanceId());
+							theInstance.getInstanceId());
 					shouldProceed = true;
 				}
 				break;
@@ -236,13 +146,13 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 					"JobInstance[{}] should not be finalized at this time. In memory status is {}. Reduction step will not rerun!"
 							+ " This could be a long running reduction job resulting in the processed msg not being acknowledged,"
 							+ " or the result of a failed process or server restarting.",
-					instance.getInstanceId(),
-					instance.getStatus());
+					theInstance.getInstanceId(),
+					theInstance.getStatus());
 			return new ReductionStepChunkProcessingResponse(false);
 		}
 
 		PT parameters =
-				instance.getParameters(theJobWorkCursor.getJobDefinition().getParametersType());
+				theInstance.getParameters(theJobWorkCursor.getJobDefinition().getParametersType());
 
 		IReductionStepWorker<PT, IT, OT> reductionStepWorker =
 				(IReductionStepWorker<PT, IT, OT>) step.getJobStepWorker();
@@ -250,20 +160,20 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		// Clone the worker so that we start with no built-up state
 		reductionStepWorker = reductionStepWorker.newInstance();
 
-		instance.setStatus(FINALIZE);
+		theInstance.setStatus(FINALIZE);
 
 		boolean defaultSuccessValue = true;
 		ReductionStepChunkProcessingResponse response = new ReductionStepChunkProcessingResponse(defaultSuccessValue);
 
 		try {
-			processChunksAndCompleteJob(theJobWorkCursor, step, instance, parameters, reductionStepWorker, response);
+			processChunksAndCompleteJob(theJobWorkCursor, step, theInstance, parameters, reductionStepWorker, response);
 		} catch (Exception ex) {
-			ourLog.error("Job completion failed for Job {}", instance.getInstanceId(), ex);
+			ourLog.error("Job completion failed for Job {}", theInstance.getInstanceId(), ex);
 
 			executeInTransactionWithSynchronization(() -> {
-				myJobPersistence.updateInstance(instance.getInstanceId(), theInstance -> {
-					theInstance.setEndTime(new Date());
-					myJobInstanceStatusUpdater.updateInstanceStatus(theInstance, StatusEnum.FAILED);
+				myJobPersistence.updateInstance(theInstance.getInstanceId(), instance -> {
+					instance.setEndTime(new Date());
+					myJobInstanceStatusUpdater.updateInstanceStatus(instance, StatusEnum.FAILED);
 					return true;
 				});
 				return null;
@@ -359,7 +269,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				}
 
 				if (response.isSuccessful()) {
-					/**
+					/*
 					 * All reduction steps are final steps.
 					 */
 					IJobCompletionHandler<PT> completionHandler =
@@ -398,19 +308,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				.withRequest(null)
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(runnable);
-	}
-
-	@Override
-	public void scheduleJobs(ISchedulerService theSchedulerService) {
-		theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, buildJobDefinition());
-	}
-
-	@Nonnull
-	private ScheduledJobDefinition buildJobDefinition() {
-		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(SCHEDULED_JOB_ID);
-		jobDefinition.setJobClass(ReductionStepExecutorScheduledJob.class);
-		return jobDefinition;
 	}
 
 	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void processChunk(
@@ -472,23 +369,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 				myJobPersistence.onWorkChunkFailed(theChunk.getId(), msg);
 			}
-		}
-	}
-
-	private class HeartbeatTimerTask extends TimerTask {
-		@Override
-		public void run() {
-			runHeartbeat();
-		}
-	}
-
-	public static class ReductionStepExecutorScheduledJob implements HapiJob {
-		@Autowired
-		private IReductionStepExecutorService myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.reducerPass();
 		}
 	}
 }
