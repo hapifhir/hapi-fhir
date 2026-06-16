@@ -39,6 +39,7 @@ import org.springframework.context.annotation.Configuration;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_GENERATE_CONCEPT_CLOSURES;
 
 /**
  * This file is the Batch2 Job Definition for the SNOMED CT Import job.
@@ -102,15 +103,17 @@ public class ImportSnomedCtJobAppCtx {
 						TerminologyFileSetJson.class,
 						importSnomedStep4ChunkConceptsForClosureGeneration())
 				.addIntermediateStep(
-						"generate-concept-closures",
+						STEP_ID_GENERATE_CONCEPT_CLOSURES,
 						"Generate concept closures",
 						TerminologyFileSetJson.class,
 						importSnomedStep5GenerateConceptClosures())
+				.setStepWeightForProgressCalculator(STEP_ID_GENERATE_CONCEPT_CLOSURES, 0.3)
 				.addFinalReducerStep(
 						STEP_ID_FINALIZE_IMPORT,
 						"Finalize Snomed Import",
 						ImportTerminologyResultJson.class,
 						importSnomedStep6Finalize())
+				.setStepWeightForProgressCalculator(STEP_ID_FINALIZE_IMPORT, 0.01)
 				.build();
 	}
 

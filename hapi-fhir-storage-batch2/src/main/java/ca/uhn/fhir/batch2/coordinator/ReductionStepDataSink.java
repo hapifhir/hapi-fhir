@@ -101,8 +101,11 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			 * here. Until then though, this is safer.
 			 */
 
-			JobDefinition<?> jobDefinition = myJobDefinitionRegistry.getJobDefinition(instance.getJobDefinitionId(), instance.getJobDefinitionVersion()).orElseThrow();
-			StepWeightingForProgressCalculator stepWeightingForProgressCalculator = jobDefinition.getStepWeightingForProgressCalculator();
+			JobDefinition<?> jobDefinition = myJobDefinitionRegistry
+					.getJobDefinition(instance.getJobDefinitionId(), instance.getJobDefinitionVersion())
+					.orElseThrow();
+			StepWeightingForProgressCalculator stepWeightingForProgressCalculator =
+					jobDefinition.getStepWeightingForProgressCalculator();
 			progress.updateInstanceForReductionStep(stepWeightingForProgressCalculator, instance);
 
 			instance.setReport(dataString);

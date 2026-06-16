@@ -64,9 +64,11 @@ public class JobInstanceProgressCalculator {
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
 		myJobPersistence.updateInstance(theInstanceId, currentInstance -> {
-
-			JobDefinition<?> jobDefinition = myJobDefinitionRegistry.getJobDefinition(currentInstance.getJobDefinitionId(), currentInstance.getJobDefinitionVersion()).orElseThrow();
-			StepWeightingForProgressCalculator stepWeightingForProgressCalculator = jobDefinition.getStepWeightingForProgressCalculator();
+			JobDefinition<?> jobDefinition = myJobDefinitionRegistry
+					.getJobDefinition(currentInstance.getJobDefinitionId(), currentInstance.getJobDefinitionVersion())
+					.orElseThrow();
+			StepWeightingForProgressCalculator stepWeightingForProgressCalculator =
+					jobDefinition.getStepWeightingForProgressCalculator();
 			instanceProgress.updateInstance(stepWeightingForProgressCalculator, currentInstance);
 
 			if (currentInstance.getCombinedRecordsProcessed() > 0) {

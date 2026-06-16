@@ -315,7 +315,6 @@ public class ActiveJobInstanceProcessor {
 		 */
 		BatchInstanceStatusDTO instanceStatus = myJobPersistence.fetchBatchInstanceStatus(theInstance.getInstanceId());
 		if (!EnumSet.of(StatusEnum.COMPLETED, StatusEnum.FAILED).contains(instanceStatus.status())) {
-			// FIXME: add test
 			String errorMessage = "Reduction step for job instance[" + theInstance.getInstanceId()
 					+ "] existed with job in unexpected status: " + instanceStatus.status();
 			ourLog.error(errorMessage);

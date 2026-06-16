@@ -161,7 +161,7 @@ public class ImportLoincJobAppCtx {
 						TerminologyFileSetJson.class,
 						importLoincStep16PartFile())
 				.addIntermediateStep(
-					STEP_ID_IMPORT_PART_LINK_FILE,
+						STEP_ID_IMPORT_PART_LINK_FILE,
 						"Import LOINC Part Link File",
 						TerminologyFileSetJson.class,
 						importLoincStep17PartLink())
@@ -188,7 +188,7 @@ public class ImportLoincJobAppCtx {
 						TerminologyFileSetJson.class,
 						importLoincStep21ChunkConceptsForClosureGeneration())
 				.addIntermediateStep(
-					STEP_ID_GENERATE_CONCEPT_CLOSURES,
+						STEP_ID_GENERATE_CONCEPT_CLOSURES,
 						"Generate concept closures",
 						TerminologyFileSetJson.class,
 						importLoincStep22GenerateConceptClosures())

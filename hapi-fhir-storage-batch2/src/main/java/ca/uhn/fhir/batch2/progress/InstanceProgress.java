@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.StepWeightingForProgressCalculator;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.util.Counter;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
@@ -38,29 +39,24 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
-import ca.uhn.fhir.util.Counter;
 
 public class InstanceProgress {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
-
+	private final Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
+	private final Map<String, StepProgressData> myStepProgressMap = new HashMap<>();
+	private final Set<String> myWarningMessages = new HashSet<>();
 	private int myRecordsProcessed = 0;
-
 	// these 4 cover all chunks
 	private Map<String, Counter> myIncompleteChunkCount = new HashMap<>();
 	private Map<String, Counter> myCompleteChunkCount = new HashMap<>();
 	private Map<String, Counter> myErroredChunkCount = new HashMap<>();
 	private Map<String, Counter> myFailedChunkCount = new HashMap<>();
-
 	private int myErrorCountForAllStatuses = 0;
 	private Date myEarliestStartTime = null;
 	private Date myLatestEndTime = null;
 	private String myErrormessage = null;
 	private StatusEnum myNewStatus = null;
-	private final Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
-	private final Map<String, StepProgressData> myStepProgressMap = new HashMap<>();
-	private final Set<String> myWarningMessages = new HashSet<>();
 	private int myAllIncompleteChunkCount;
 	private int myAllCompleteChunkCount;
 	private int myAllErroredChunkCount;
@@ -102,20 +98,20 @@ public class InstanceProgress {
 			case IN_PROGRESS:
 				myAllIncompleteChunkCount++;
 				myIncompleteChunkCount
-					.computeIfAbsent(theChunk.getTargetStepId(), k -> new Counter())
-					.getThenAdd();
+						.computeIfAbsent(theChunk.getTargetStepId(), k -> new Counter())
+						.getThenAdd();
 				break;
 			case COMPLETED:
 				myAllCompleteChunkCount++;
 				myCompleteChunkCount
-					.computeIfAbsent(theChunk.getTargetStepId(), k -> new Counter())
-					.getThenAdd();
+						.computeIfAbsent(theChunk.getTargetStepId(), k -> new Counter())
+						.getThenAdd();
 				break;
 			case ERRORED:
 				myAllErroredChunkCount++;
 				myErroredChunkCount
-					.computeIfAbsent(theChunk.getTargetStepId(), k -> new Counter())
-					.getThenAdd();
+						.computeIfAbsent(theChunk.getTargetStepId(), k -> new Counter())
+						.getThenAdd();
 				if (myErrormessage == null) {
 					myErrormessage = theChunk.getErrorMessage();
 				}
@@ -123,8 +119,8 @@ public class InstanceProgress {
 			case FAILED:
 				myAllFailedChunkCount++;
 				myFailedChunkCount
-					.computeIfAbsent(theChunk.getTargetStepId(), k -> new Counter())
-					.getThenAdd();
+						.computeIfAbsent(theChunk.getTargetStepId(), k -> new Counter())
+						.getThenAdd();
 				myErrormessage = theChunk.getErrorMessage();
 				break;
 		}
@@ -159,11 +155,13 @@ public class InstanceProgress {
 	 *
 	 * @param theInstance The Batch 2 {@link JobInstance} that we're updating
 	 */
-	public void updateInstanceForReductionStep(StepWeightingForProgressCalculator theStepWeightingForProgressCalculator, JobInstance theInstance) {
+	public void updateInstanceForReductionStep(
+			StepWeightingForProgressCalculator theStepWeightingForProgressCalculator, JobInstance theInstance) {
 		updateInstance(theStepWeightingForProgressCalculator, theInstance, true);
 	}
 
-	public void updateInstance(StepWeightingForProgressCalculator theStepWeightingForProgressCalculator, JobInstance theInstance) {
+	public void updateInstance(
+			StepWeightingForProgressCalculator theStepWeightingForProgressCalculator, JobInstance theInstance) {
 		updateInstance(theStepWeightingForProgressCalculator, theInstance, false);
 
 		String newWarningMessage = StringUtils.right(String.join("\n", myWarningMessages), 4000);
@@ -176,7 +174,10 @@ public class InstanceProgress {
 	 *
 	 * @param theInstance the instance to update with progress statistics
 	 */
-	public void updateInstance(StepWeightingForProgressCalculator theStepWeightingForProgressCalculator, JobInstance theInstance, boolean theCalledFromReducer) {
+	public void updateInstance(
+			StepWeightingForProgressCalculator theStepWeightingForProgressCalculator,
+			JobInstance theInstance,
+			boolean theCalledFromReducer) {
 		ourLog.debug("updateInstance {}: {}", theInstance.getInstanceId(), this);
 		if (myEarliestStartTime != null) {
 			theInstance.setStartTime(myEarliestStartTime);
@@ -187,49 +188,41 @@ public class InstanceProgress {
 		theInstance.setErrorCount(myErrorCountForAllStatuses);
 		theInstance.setCombinedRecordsProcessed(myRecordsProcessed);
 
-		// FIXME: remove
-		if (true) {
-			TreeSet<String> stepIds = new TreeSet<>();
-			stepIds.addAll(theStepWeightingForProgressCalculator.getStepIdsWithExplicitWeighting());
-			stepIds.addAll(theStepWeightingForProgressCalculator.getStepIdsWithoutExplicitWeight());
-			StringBuilder b = new StringBuilder();
-			b.append("Job progress Steps:");
-			for (String stepId : stepIds) {
-				b.append("\n * ");
-				b.append(stepId);
-				b.append(": Incomplete: ");
-				b.append(getCount(myIncompleteChunkCount, stepId));
-				b.append(", Complete: ");
-				b.append(getChunkCount(stepId) - getCount(myIncompleteChunkCount, stepId));
-			}
-			ourLog.info(b.toString());
-		}
-
-
 		double totalPercentComplete = 0.0;
-		if (getChunkCount() > 0) {
 
-			for (String stepId : theStepWeightingForProgressCalculator.getStepIdsWithExplicitWeighting()) {
-				final int chunkCount = getChunkCount(stepId);
-				final int conditionalChunkCount = theCalledFromReducer ? (chunkCount - getCount(myIncompleteChunkCount, stepId)) : chunkCount;
-				final double stepPercentComplete = (double) getCount(myCompleteChunkCount, stepId) / (double) conditionalChunkCount;
-
-				double stepWeight = theStepWeightingForProgressCalculator.getWeightForStepId(stepId);
-				totalPercentComplete += stepWeight * stepPercentComplete;
+		for (String stepId : theStepWeightingForProgressCalculator.getStepIdsWithExplicitWeight()) {
+			final int chunkCount = getChunkCount(stepId);
+			final int conditionalChunkCount =
+					theCalledFromReducer ? (chunkCount - getCount(myIncompleteChunkCount, stepId)) : chunkCount;
+			if (conditionalChunkCount == 0) {
+				continue;
 			}
 
-			Set<String> stepIdsWithoutExplicitWeight = theStepWeightingForProgressCalculator.getStepIdsWithoutExplicitWeight();
-			if (!stepIdsWithoutExplicitWeight.isEmpty()) {
-				final int chunkCount = getChunkCount(stepIdsWithoutExplicitWeight);
-				final int conditionalChunkCount = theCalledFromReducer ? (chunkCount - getCount(myIncompleteChunkCount, stepIdsWithoutExplicitWeight)) : chunkCount;
-				final double stepPercentComplete = (double) getCount(myCompleteChunkCount, stepIdsWithoutExplicitWeight) / (double) conditionalChunkCount;
+			final double stepPercentComplete =
+					(double) getCount(myCompleteChunkCount, stepId) / (double) conditionalChunkCount;
 
-				double stepWeight = theStepWeightingForProgressCalculator.getCombinedWeightForStepIdsWithoutExplicitWeight();
-				totalPercentComplete += stepWeight * stepPercentComplete;
-			}
-
-			theInstance.setProgress(totalPercentComplete);
+			double stepWeight = theStepWeightingForProgressCalculator.getWeightForStepId(stepId);
+			totalPercentComplete += stepWeight * stepPercentComplete;
 		}
+
+		Set<String> stepIdsWithoutExplicitWeight =
+				theStepWeightingForProgressCalculator.getStepIdsWithoutExplicitWeight();
+		if (!stepIdsWithoutExplicitWeight.isEmpty()) {
+			final int chunkCount = getChunkCount(stepIdsWithoutExplicitWeight);
+			final int conditionalChunkCount = theCalledFromReducer
+					? (chunkCount - getCount(myIncompleteChunkCount, stepIdsWithoutExplicitWeight))
+					: chunkCount;
+			if (conditionalChunkCount > 0) {
+				final double stepPercentComplete = (double) getCount(myCompleteChunkCount, stepIdsWithoutExplicitWeight)
+						/ (double) conditionalChunkCount;
+
+				double stepWeight =
+						theStepWeightingForProgressCalculator.getCombinedWeightForStepIdsWithoutExplicitWeight();
+				totalPercentComplete += stepWeight * stepPercentComplete;
+			}
+		}
+
+		theInstance.setProgress(totalPercentComplete);
 
 		if (myEarliestStartTime != null && myLatestEndTime != null) {
 			long elapsedTime = myLatestEndTime.getTime() - myEarliestStartTime.getTime();
@@ -268,10 +261,10 @@ public class InstanceProgress {
 	}
 
 	private int getChunkCount(Collection<String> theStepId) {
-		return getCount(myIncompleteChunkCount, theStepId) +
-			getCount(myCompleteChunkCount, theStepId) +
-			getCount(myFailedChunkCount, theStepId) +
-			getCount(myErroredChunkCount, theStepId);
+		return getCount(myIncompleteChunkCount, theStepId)
+				+ getCount(myCompleteChunkCount, theStepId)
+				+ getCount(myFailedChunkCount, theStepId)
+				+ getCount(myErroredChunkCount, theStepId);
 	}
 
 	/**
