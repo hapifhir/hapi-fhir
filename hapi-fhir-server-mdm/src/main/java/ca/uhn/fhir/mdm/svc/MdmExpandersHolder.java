@@ -176,6 +176,9 @@ public class MdmExpandersHolder {
 	public void setMdmSettings(IMdmSettings theMdmSettings) {
 		myMdmSettings = theMdmSettings;
 		myLinkExpandSvcInstanceToUse = determineExpandSvsInstanceToUse();
+		if (myBulkExportMDMEidMatchOnlyResourceExpander != null) {
+			myBulkExportMDMEidMatchOnlyResourceExpander.setMdmSettings(theMdmSettings);
+		}
 		myBulkExportMDMResourceExpanderInstanceToUse = determineBulkExportMDMResourceExpanderInstanceToUse();
 	}
 }
