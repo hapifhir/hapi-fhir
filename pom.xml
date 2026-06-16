@@ -1099,7 +1099,7 @@
 		<swagger_jakarta_version>2.2.30</swagger_jakarta_version>
 		<slf4j_version>2.0.16</slf4j_version>
 		<log4j_to_slf4j_version>2.24.1</log4j_to_slf4j_version>
-		<spring_version>6.2.12</spring_version>
+		<spring_version>6.2.18</spring_version>
 		<spring_data_bom_version>2024.0.5</spring_data_bom_version>
 		<spring_framework_bom_version>6.2.12</spring_framework_bom_version>
 		<spring_boot_version>3.4.11</spring_boot_version>
@@ -1110,7 +1110,7 @@
 		<jboss_logging_version>3.6.1.Final</jboss_logging_version>
 		<stax2_api_version>3.1.4</stax2_api_version>
 		<testcontainers_version>2.0.2</testcontainers_version>
-		<thymeleaf-version>3.1.2.RELEASE</thymeleaf-version>
+		<thymeleaf-version>3.1.5.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
@@ -2154,7 +2154,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.7</version>
+				<version>42.7.11</version>
 			</dependency>
 			<dependency>
 				<groupId>com.oracle.database.jdbc</groupId>
