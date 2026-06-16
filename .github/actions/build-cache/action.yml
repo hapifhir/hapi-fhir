@@ -4,7 +4,7 @@ inputs:
   java-version:
     description: "The Java version to use"
     required: false
-    default: "17"
+    default: "21"
   cache-path:
     description: "The path for the Maven cache"
     required: false
