@@ -65,7 +65,7 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 					.call()
 					.loadResourcesByPid(myResourcePids, Collections.emptySet(), myResources, false, null);
 		}
-		// loadResourcesByPid skips unloadable PIDs, so myResources may be shorter than size().
+		// loadResourcesByPid skips unloadable PIDs
 		if (theIndex >= myResources.size()) {
 			return null;
 		}

@@ -241,7 +241,6 @@ public class ConsentInterceptor {
 		for (int resourceIdx = 0; resourceIdx < thePreResourceAccessDetails.size(); resourceIdx++) {
 			IBaseResource nextResource = thePreResourceAccessDetails.getResource(resourceIdx);
 			if (nextResource == null) {
-				// PID had no loadable body: drop it rather than passing null to consent services.
 				thePreResourceAccessDetails.setDontReturnResourceAtIndex(resourceIdx);
 				continue;
 			}
