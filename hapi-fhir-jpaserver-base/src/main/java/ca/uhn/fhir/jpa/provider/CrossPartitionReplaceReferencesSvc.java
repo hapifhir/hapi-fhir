@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -37,10 +36,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
@@ -83,20 +80,23 @@ public class CrossPartitionReplaceReferencesSvc {
 	}
 
 	/**
-	 * Copies referencing resources from the source resource's partition to the target resource's partition,
-	 * and updates references in resources that don't change partition. Assumes the caller provides the outer
-	 * transaction — all internal operations use {@code transactionNested()}.
+	 * Prepares the copy (POST) and reference-update (PUT) portion of the single-transaction cross-partition merge
+	 * bundle by appending those entries to {@code theBundleBuilder}. Does NOT execute any transaction — the caller
+	 * appends the remaining entries (source/target PUTs, the Provenance POST, the DELETEs), executes one transaction,
+	 * and correlates the response using the returned {@link CrossPartitionReplaceReferencesPrepareResult}.
 	 * <p>
-	 * Does NOT delete the source copies — the caller is responsible for deleting them after
-	 * provenance creation using the returned {@link CrossPartitionReplaceReferencesResult#getCopiedResourceOriginalIdsByPartition()}.
-	 * Deletion cannot happen here because provenance must reference the originals (as tombstones),
-	 * and deleting first would violate referential integrity checks.
+	 * Copies referencing resources from the source resource's partition to the target resource's partition, and
+	 * rewrites references in resources that don't change partition. The source copies are NOT deleted here — the
+	 * caller deletes them (as DELETE entries in the same bundle) so the Provenance can still reference the originals.
 	 *
-	 * @return a {@link CrossPartitionReplaceReferencesResult} containing references to created/updated resources
-	 *         and versioned references to the original source copies for deferred deletion.
+	 * @param theBundleBuilder the bundle being assembled; copy/update entries are appended to it
+	 * @return metadata needed to append the remaining entries and correlate the transaction response
 	 */
-	public CrossPartitionReplaceReferencesResult copyCompartmentResourcesAndReplaceReferences(
-			IBaseResource theSourceResource, IBaseResource theTargetResource, RequestDetails theRequestDetails) {
+	public CrossPartitionReplaceReferencesPrepareResult prepareCopyAndUpdateEntries(
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
+			RequestDetails theRequestDetails,
+			BundleBuilder theBundleBuilder) {
 
 		IIdType sourceId = theSourceResource.getIdElement().toUnqualifiedVersionless();
 		IIdType targetId = theTargetResource.getIdElement().toUnqualifiedVersionless();
@@ -116,7 +116,7 @@ public class CrossPartitionReplaceReferencesSvc {
 
 		if (allReferencingResources.isEmpty()) {
 			ourLog.info("No referencing resources found for {}", sourceId.getValue());
-			return new CrossPartitionReplaceReferencesResult(Map.of(), Map.of());
+			return new CrossPartitionReplaceReferencesPrepareResult(0, List.of(), List.of(), List.of(), Map.of());
 		}
 
 		// Step 2: Classify into COPY (partition changes after rewrite) vs UPDATE (same partition).
@@ -141,14 +141,14 @@ public class CrossPartitionReplaceReferencesSvc {
 				updateList.size());
 
 		if (copyList.isEmpty() && updateList.isEmpty()) {
-			return new CrossPartitionReplaceReferencesResult(Map.of(), Map.of());
+			return new CrossPartitionReplaceReferencesPrepareResult(0, List.of(), List.of(), List.of(), Map.of());
 		}
 
 		// Capture per-partition grouping of the original source copies before buildCombinedBundle clears them
 		// (RESOURCE_PARTITION_ID is cleared by buildCombinedBundle for copies).
 		Map<RequestPartitionId, List<IIdType>> copiedResourceOriginalIdsByPartition = groupIdsByPartition(copyList);
 
-		// Step 3: Discover additional resources to update BEFORE bundle execution.
+		// Step 3: Discover additional resources to update BEFORE bundle assembly.
 		discoverAndAddAdditionalResourcesToUpdate(copyList, updateList, theRequestDetails);
 
 		// Capture each update resource's partition after discovery (updateList is now final)
@@ -156,41 +156,38 @@ public class CrossPartitionReplaceReferencesSvc {
 				.map(CrossPartitionReplaceReferencesSvc::getRequiredPartition)
 				.toList();
 
-		// Step 4: Build and execute a single combined transaction bundle.
+		// Capture each update referrer's current versioned id (read returns a versioned resource) so the caller can
+		// reference them in the Provenance at their post-merge version (current + 1, this tx being the sole writer).
+		List<IIdType> updatedReferrerCurrentVersionedIds =
+				updateList.stream().map(r -> (IIdType) r.getIdElement()).toList();
+
+		// Capture the copies' old ids in entry order BEFORE buildCombinedBundle clears them (it nulls each copy's id).
+		List<String> copyOldIds = copyList.stream()
+				.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
+				.toList();
+
+		// Step 4: Append the copy (POST) and update (PUT) entries to the combined bundle.
 		Map<String, String> oldIdToPlaceholder = new HashMap<>();
-		IBaseBundle combinedBundle = buildCombinedBundle(copyList, updateList, oldIdToPlaceholder);
+		buildCombinedBundle(copyList, updateList, oldIdToPlaceholder, theBundleBuilder);
 
-		@SuppressWarnings("unchecked")
-		Bundle combinedResponse =
-				(Bundle) myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, combinedBundle);
+		// Placeholders in copy-entry order (copies are appended in copyList order). The Provenance references the
+		// copies by these placeholders so the transaction processor resolves them to the assigned ids.
+		List<String> copyPlaceholdersInEntryOrder =
+				copyOldIds.stream().map(oldIdToPlaceholder::get).toList();
 
-		// Build committedResourcesByPartition from raw response entries (1:1 with request entries).
-		// Must be done BEFORE extractChangedResourceIds, which filters out no-op updates.
-		// Order assumption: buildCombinedBundle adds copies (POST) first, then updates (PUT),
-		// so response entries follow the same order. copiesByDestPartition is insertion-ordered
-		// (LinkedHashMap), matching the copy entries' order in the bundle.
-		List<RequestPartitionId> allPartitions = new ArrayList<>();
-		copiesByDestPartition.forEach((partition, resources) -> resources.forEach(r -> allPartitions.add(partition)));
-		allPartitions.addAll(updatePartitions);
+		// Partition per entry, aligned with the appended copy+update entries (copies first, then updates).
+		// copiesByDestPartition is insertion-ordered (LinkedHashMap), matching the copy entries' order.
+		List<RequestPartitionId> copyAndUpdateEntryPartitions = new ArrayList<>();
+		copiesByDestPartition.forEach(
+				(partition, resources) -> resources.forEach(r -> copyAndUpdateEntryPartitions.add(partition)));
+		copyAndUpdateEntryPartitions.addAll(updatePartitions);
 
-		List<Bundle.BundleEntryComponent> responseEntries = combinedResponse.getEntry();
-		Map<RequestPartitionId, List<IIdType>> committedResourcesByPartition = new LinkedHashMap<>();
-		for (int i = 0; i < responseEntries.size(); i++) {
-			Bundle.BundleEntryComponent responseEntry = responseEntries.get(i);
-			if (!ReplaceReferencesProvenanceSvc.isNoChangeResponse(responseEntry.getResponse())) {
-				committedResourcesByPartition
-						.computeIfAbsent(allPartitions.get(i), k -> new ArrayList<>())
-						.add(new IdDt(responseEntry.getResponse().getLocation()));
-			}
-		}
-
-		ourLog.info(
-				"Cross-partition merge complete: copied {} resources, updated {} references",
+		return new CrossPartitionReplaceReferencesPrepareResult(
 				copyList.size(),
-				updateList.size());
-
-		return new CrossPartitionReplaceReferencesResult(
-				committedResourcesByPartition, copiedResourceOriginalIdsByPartition);
+				copyPlaceholdersInEntryOrder,
+				copyAndUpdateEntryPartitions,
+				updatedReferrerCurrentVersionedIds,
+				copiedResourceOriginalIdsByPartition);
 	}
 
 	/**
@@ -383,11 +380,13 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * Source→target references are already rewritten by {@link #replaceSourceReferencesAndClassifyResources}.
 	 *
 	 * @param theOldIdToPlaceholder populated by this method with old ID → urn:uuid mappings
+	 * @param theBundleBuilder      the bundle being assembled; copy (POST) then update (PUT) entries are appended
 	 */
-	private IBaseBundle buildCombinedBundle(
+	private void buildCombinedBundle(
 			List<IBaseResource> theCopyList,
 			List<IBaseResource> theUpdateList,
-			Map<String, String> theOldIdToPlaceholder) {
+			Map<String, String> theOldIdToPlaceholder,
+			BundleBuilder theBundleBuilder) {
 
 		// Build old ID → urn:uuid placeholder map from the copy list
 		for (IBaseResource resource : theCopyList) {
@@ -400,23 +399,19 @@ public class CrossPartitionReplaceReferencesSvc {
 		replaceVersionlessReferences(theCopyList, theOldIdToPlaceholder);
 		replaceVersionlessReferences(theUpdateList, theOldIdToPlaceholder);
 
-		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
-
 		// POST entries: clear partition + ID on copied resources, add as CREATE with placeholder fullUrl
 		for (IBaseResource resource : theCopyList) {
 			String oldId = resource.getIdElement().toUnqualifiedVersionless().getValue();
 			String placeholder = theOldIdToPlaceholder.get(oldId);
 			resource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
 			resource.setId((IIdType) null);
-			bundleBuilder.addTransactionCreateEntry(resource, placeholder);
+			theBundleBuilder.addTransactionCreateEntry(resource, placeholder);
 		}
 
 		// PUT entries: update list resources keep their partition ID intact
 		for (IBaseResource resource : theUpdateList) {
-			bundleBuilder.addTransactionUpdateEntry(resource);
+			theBundleBuilder.addTransactionUpdateEntry(resource);
 		}
-
-		return bundleBuilder.getBundle();
 	}
 
 	/**

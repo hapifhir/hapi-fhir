@@ -684,6 +684,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				jpaPid, theRequestPartitionId, getResourceName(), fhirId, null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
+		// Record the newly-created resource's id -> partition (POST can't do this in the pre-write partition
+		// resolution because the id isn't assigned yet). This lets a later operation — e.g. a sibling sub-bundle of a
+		// partitioned/split transaction resolving a reference to this just-created resource — resolve its partition
+		// directly instead of falling back to an all-partitions lookup (which can't narrow a non-decodable/UUID id).
+		if (theRequestPartitionId != null) {
+			theTransactionDetails.addResolvedPartition(
+					jpaPid.getAssociatedResourceId().toUnqualifiedVersionless().getValue(), theRequestPartitionId);
+		}
 
 		// Create an entry in the HFJ_RES_SEARCH_URL table to protect against
 		// concurrent writes to the same conditional URL

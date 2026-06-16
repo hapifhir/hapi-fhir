@@ -215,26 +215,59 @@ public class ReplaceReferencesProvenanceSvc {
 			List<IProvenanceAgent> theProvenanceAgents,
 			List<IBaseResource> theContainedResources,
 			boolean theCreateEvenWhenNoReferencesWereUpdated) {
-		String resourceType = theTargetId.getResourceType();
-		if (!theChangedResourceIds.isEmpty() || theCreateEvenWhenNoReferencesWereUpdated) {
-			Provenance provenance = createProvenanceObject(
-					theTargetId,
-					theSourceId,
-					theChangedResourceIds,
-					theStartTime,
-					theProvenanceAgents,
-					theContainedResources,
-					resourceType);
-			if (theProvenanceCorrelationId != null) {
-				ExtensionUtil.setExtensionAsString(
-						myFhirContext,
-						provenance,
-						HapiExtensions.EXT_PROVENANCE_CORRELATION_ID,
-						theProvenanceCorrelationId);
-			}
-			return myProvenanceDao.create(provenance, theRequestDetails).getId();
+		Provenance provenance = buildProvenance(
+				theTargetId,
+				theSourceId,
+				theChangedResourceIds,
+				theProvenanceCorrelationId,
+				theStartTime,
+				theProvenanceAgents,
+				theContainedResources,
+				theCreateEvenWhenNoReferencesWereUpdated);
+		if (provenance == null) {
+			return null;
 		}
-		return null;
+		return myProvenanceDao.create(provenance, theRequestDetails).getId();
+	}
+
+	/**
+	 * Builds the Provenance resource for the $replace-references and $merge operations WITHOUT persisting it.
+	 * Callers that submit the Provenance as part of a larger transaction bundle use this and add the resource as
+	 * a POST entry themselves.
+	 *
+	 * @return the built (unsaved) Provenance, or {@code null} if no Provenance is needed (no referencing resources
+	 * were updated and {@code theCreateEvenWhenNoReferencesWereUpdated} is false).
+	 */
+	@Nullable
+	public Provenance buildProvenance(
+			IIdType theTargetId,
+			IIdType theSourceId,
+			List<IIdType> theChangedResourceIds,
+			@Nullable String theProvenanceCorrelationId,
+			Date theStartTime,
+			List<IProvenanceAgent> theProvenanceAgents,
+			List<IBaseResource> theContainedResources,
+			boolean theCreateEvenWhenNoReferencesWereUpdated) {
+		String resourceType = theTargetId.getResourceType();
+		if (theChangedResourceIds.isEmpty() && !theCreateEvenWhenNoReferencesWereUpdated) {
+			return null;
+		}
+		Provenance provenance = createProvenanceObject(
+				theTargetId,
+				theSourceId,
+				theChangedResourceIds,
+				theStartTime,
+				theProvenanceAgents,
+				theContainedResources,
+				resourceType);
+		if (theProvenanceCorrelationId != null) {
+			ExtensionUtil.setExtensionAsString(
+					myFhirContext,
+					provenance,
+					HapiExtensions.EXT_PROVENANCE_CORRELATION_ID,
+					theProvenanceCorrelationId);
+		}
+		return provenance;
 	}
 
 	/**

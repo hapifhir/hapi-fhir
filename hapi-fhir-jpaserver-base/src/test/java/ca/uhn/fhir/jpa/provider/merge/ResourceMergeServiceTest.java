@@ -20,10 +20,11 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesResult;
+import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesPrepareResult;
 import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -721,21 +722,22 @@ public class ResourceMergeServiceTest {
 
 			setupCrossPartitionPatients();
 			Patient patientToBeReturnedFromDaoAfterTargetUpdate = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_2);
-			setupDaoMockForSuccessfulTargetPatientUpdate(myTargetPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 			setupTransactionServiceMock();
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
-			when(myCrossPartitionReplaceReferencesSvcMock
-				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(Map.of(), Map.of()));
+			stubPrepareCopyAndUpdateEntries(mySourcePatient, myTargetPatient, Map.of());
+			setupCrossPartitionTransactionMocks(patientToBeReturnedFromDaoAfterTargetUpdate);
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 			// Then
 			verifySuccessfulOutcomeForSync(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
-			verify(myCrossPartitionReplaceReferencesSvcMock).copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock);
+			verify(myCrossPartitionReplaceReferencesSvcMock)
+				.prepareCopyAndUpdateEntries(eq(mySourcePatient), eq(myTargetPatient), eq(myRequestDetailsMock), any(BundleBuilder.class));
 			verifyNoMoreInteractions(myReplaceReferencesPatchBundleSvcMock);
-			verifySourcePatientDeleted();
+			// The whole forward merge runs as a single transaction; the source delete is one of its entries.
+			Bundle bundle = captureSingleTransactionBundle();
+			assertThat(hasDeleteEntryForUrl(bundle, SOURCE_PATIENT_TEST_ID)).isTrue();
 		}
 
 		@Test
@@ -749,21 +751,22 @@ public class ResourceMergeServiceTest {
 
 			setupCrossPartitionPatients();
 			Patient patientToBeReturnedFromDaoAfterTargetUpdate = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_2);
-			setupDaoMockForSuccessfulSourcePatientUpdate(mySourcePatient, createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_2));
-			setupDaoMockForSuccessfulTargetPatientUpdate(myTargetPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 			setupTransactionServiceMock();
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
-			when(myCrossPartitionReplaceReferencesSvcMock
-				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(Map.of(), Map.of()));
+			stubPrepareCopyAndUpdateEntries(mySourcePatient, myTargetPatient, Map.of());
+			setupCrossPartitionTransactionMocks(patientToBeReturnedFromDaoAfterTargetUpdate);
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 			// Then
 			verifySuccessfulOutcomeForSync(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
-			verify(myCrossPartitionReplaceReferencesSvcMock).copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock);
+			verify(myCrossPartitionReplaceReferencesSvcMock)
+				.prepareCopyAndUpdateEntries(eq(mySourcePatient), eq(myTargetPatient), eq(myRequestDetailsMock), any(BundleBuilder.class));
 			verifyNoMoreInteractions(myReplaceReferencesPatchBundleSvcMock);
+			// Source is kept: the single transaction bundle has a PUT for the source, not a DELETE.
+			Bundle bundle = captureSingleTransactionBundle();
+			assertThat(hasDeleteEntryForUrl(bundle, SOURCE_PATIENT_TEST_ID)).isFalse();
 		}
 
 		@Test
@@ -802,29 +805,22 @@ public class ResourceMergeServiceTest {
 
 			setupCrossPartitionPatients();
 			Patient patientToBeReturnedFromDaoAfterTargetUpdate = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_2);
-			setupDaoMockForSuccessfulTargetPatientUpdate(myTargetPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 			setupTransactionServiceMock();
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(2);
 
 			IIdType copiedOriginalId = new IdDt("Observation", "obs1", "1");
 			Map<RequestPartitionId, List<IIdType>> copiedOriginalsByPartition =
 				Map.of(RequestPartitionId.fromPartitionId(1), List.of(copiedOriginalId));
-			when(myCrossPartitionReplaceReferencesSvcMock
-				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(Map.of(), copiedOriginalsByPartition));
+			stubPrepareCopyAndUpdateEntries(mySourcePatient, myTargetPatient, copiedOriginalsByPartition);
+			setupCrossPartitionTransactionMocks(patientToBeReturnedFromDaoAfterTargetUpdate);
 
 			// When
 			myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
-			// Then
-			ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
-			verify(mySystemDaoMock).transactionNested(any(), bundleCaptor.capture());
-			Bundle deleteBundle = bundleCaptor.getValue();
-			assertThat(deleteBundle.getEntry()).hasSize(2);
-			assertThat(deleteBundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.DELETE);
-			assertThat(deleteBundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Observation/obs1");
-			assertThat(deleteBundle.getEntry().get(1).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.DELETE);
-			assertThat(deleteBundle.getEntry().get(1).getRequest().getUrl()).isEqualTo(SOURCE_PATIENT_TEST_ID);
+			// Then: the single forward-merge transaction deletes both the copied original and the source.
+			Bundle bundle = captureSingleTransactionBundle();
+			assertThat(hasDeleteEntryForUrl(bundle, "Observation/obs1")).isTrue();
+			assertThat(hasDeleteEntryForUrl(bundle, SOURCE_PATIENT_TEST_ID)).isTrue();
 		}
 	}
 
@@ -887,7 +883,7 @@ public class ResourceMergeServiceTest {
 		IHapiTransactionService.IExecutionBuilder executionBuilderMock =
 			mock(IHapiTransactionService.IExecutionBuilder.class);
 		when(myTransactionServiceMock.withRequest(myRequestDetailsMock)).thenReturn(executionBuilderMock);
-		lenient().when(executionBuilderMock.withRequestPartitionId(myRequestPartitionIdMock)).thenReturn(executionBuilderMock);
+		lenient().when(executionBuilderMock.withRequestPartitionId(any())).thenReturn(executionBuilderMock);
 		lenient().doAnswer(invocation -> {
 			Runnable runnable = invocation.getArgument(0);
 			runnable.run();
@@ -1006,6 +1002,63 @@ public class ResourceMergeServiceTest {
 		assertThat(deleteBundle.getEntry()).hasSize(1);
 		assertThat(deleteBundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.DELETE);
 		assertThat(deleteBundle.getEntry().get(0).getRequest().getUrl()).isEqualTo(SOURCE_PATIENT_TEST_ID);
+	}
+
+	/**
+	 * Stubs the prepare-only cross-partition reference replacement: it appends nothing to the bundle and reports the
+	 * given source-side originals (which the forward flow turns into DELETE entries).
+	 */
+	private void stubPrepareCopyAndUpdateEntries(
+			Patient theSourcePatient,
+			Patient theTargetPatient,
+			Map<RequestPartitionId, List<IIdType>> theCopiedOriginalsByPartition) {
+		when(myCrossPartitionReplaceReferencesSvcMock.prepareCopyAndUpdateEntries(
+						eq(theSourcePatient), eq(theTargetPatient), eq(myRequestDetailsMock), any(BundleBuilder.class)))
+				.thenReturn(new CrossPartitionReplaceReferencesPrepareResult(
+						0, List.of(), List.of(), List.of(), theCopiedOriginalsByPartition));
+	}
+
+	/**
+	 * Stubs the single forward-merge transaction (echoing a response with a location per request entry), the
+	 * post-commit target read-back, and the post-commit Provenance update.
+	 */
+	private void setupCrossPartitionTransactionMocks(Patient theReadBackTarget) {
+		when(mySystemDaoMock.transactionNested(eq(myRequestDetailsMock), any(Bundle.class)))
+				.thenAnswer(inv -> echoTransactionResponse(inv.getArgument(1)));
+		when(myPatientDaoMock.read(any(), eq(myRequestDetailsMock))).thenReturn(theReadBackTarget);
+		lenient().when(myProvenanceDaoMock.update(any(), eq(myRequestDetailsMock))).thenReturn(new DaoMethodOutcome());
+	}
+
+	private Bundle echoTransactionResponse(Bundle theRequest) {
+		Bundle response = new Bundle();
+		for (Bundle.BundleEntryComponent reqEntry : theRequest.getEntry()) {
+			Bundle.BundleEntryComponent respEntry = response.addEntry();
+			Bundle.HTTPVerb method = reqEntry.getRequest().getMethod();
+			String url = reqEntry.getRequest().getUrl();
+			String location;
+			if (method == Bundle.HTTPVerb.POST) {
+				// the only POST in these tests is the merge Provenance (no copies)
+				location = "Provenance/1/_history/1";
+			} else if (url != null && !url.isEmpty()) {
+				location = url + "/_history/2";
+			} else {
+				location = "Resource/1/_history/1";
+			}
+			respEntry.getResponse().setLocation(location);
+		}
+		return response;
+	}
+
+	private Bundle captureSingleTransactionBundle() {
+		ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+		verify(mySystemDaoMock).transactionNested(any(), bundleCaptor.capture());
+		return bundleCaptor.getValue();
+	}
+
+	private boolean hasDeleteEntryForUrl(Bundle theBundle, String theUrl) {
+		return theBundle.getEntry().stream()
+				.anyMatch(e -> e.getRequest().getMethod() == Bundle.HTTPVerb.DELETE
+						&& theUrl.equals(e.getRequest().getUrl()));
 	}
 
 	private void setupReplaceReferencesForSuccessForSync() {

@@ -227,6 +227,11 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			 */
 			TransactionDetails transactionDetails = new TransactionDetails(myTransactionDetails.getTransactionBundle());
 			myTransactionDetails.getUserData().forEach(transactionDetails::putUserData);
+			// Seed this sub-bundle with the resolutions accumulated in the parent transaction details from previous
+			// sub-bundles, so a reference here to a resource created/resolved earlier resolves directly (by PID, and
+			// to the correct partition) instead of falling back to an all-partitions lookup.
+			myTransactionDetails.getResolvedPartitions().forEach(transactionDetails::addResolvedPartition);
+			transactionDetails.copyResolvedResourceIdsFrom(myTransactionDetails);
 
 			// Apply any placeholder ID substitutions from previous partition executions
 			for (IBaseResource resource : terser.getAllEmbeddedResources(singlePartitionRequest, true)) {
@@ -265,6 +270,11 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 					idSubstitutions.put(outcome.getSourceId().getValue(), outcome.getTargetId());
 				}
 			}
+
+			// Carry this sub-bundle's resolutions back to the parent transaction details so subsequent sub-bundles
+			// can reuse them (resources created/resolved here become resolvable, by PID and partition, there).
+			transactionDetails.getResolvedPartitions().forEach(myTransactionDetails::addResolvedPartition);
+			myTransactionDetails.copyResolvedResourceIdsFrom(transactionDetails);
 
 			List<IBase> partitionRequestEntries = bundleEntryChild.getAccessor().getValues(singlePartitionRequest);
 			List<IBase> partitionResponseEntries =

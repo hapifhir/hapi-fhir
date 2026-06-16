@@ -978,7 +978,11 @@ public abstract class BaseTransactionProcessor {
 	private RequestPartitionId getEntryRequestPartitionId(
 			RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IBase theEntry) {
 
-		RequestPartitionId nextWriteEntryRequestPartitionId = null;
+		// A caller (e.g. the cross-partition $merge flow) may stamp the partition directly on the
+		// Bundle.entry so that id-only writes whose partition cannot be derived from the body/url
+		// (notably DELETE of a non-decodable id) are routed to the correct partition.
+		RequestPartitionId nextWriteEntryRequestPartitionId =
+				(RequestPartitionId) theEntry.getUserData(Constants.RESOURCE_PARTITION_ID);
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, theEntry);
 		String url = extractTransactionUrlOrThrowException(theEntry, verb);
 		RequestDetails requestDetailsForEntry =
@@ -991,7 +995,7 @@ public abstract class BaseTransactionProcessor {
 					break;
 				case DELETE: {
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
-					if (isNotBlank(requestUrl)) {
+					if (nextWriteEntryRequestPartitionId == null && isNotBlank(requestUrl)) {
 						if (requestUrl.indexOf('?') != -1) {
 							MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
 									myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
@@ -1017,7 +1021,7 @@ public abstract class BaseTransactionProcessor {
 				}
 				case PATCH: {
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
-					if (isNotBlank(requestUrl)) {
+					if (nextWriteEntryRequestPartitionId == null && isNotBlank(requestUrl)) {
 						if (requestUrl.indexOf('?') != -1) {
 							MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
 									myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
@@ -1044,8 +1048,13 @@ public abstract class BaseTransactionProcessor {
 				case POST: {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
-					nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-							requestDetailsForEntry, resource, resourceType, url);
+					if (nextWriteEntryRequestPartitionId == null) {
+						nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+								requestDetailsForEntry, resource, resourceType, url);
+					}
+					if (resource != null) {
+						resource.setUserData(Constants.RESOURCE_PARTITION_ID, nextWriteEntryRequestPartitionId);
+					}
 					break;
 				}
 				case PUT: {
@@ -1057,17 +1066,20 @@ public abstract class BaseTransactionProcessor {
 							resourceId =
 									resourceType + "/" + resource.getIdElement().getIdPart();
 						}
-						if (resourceId != null) {
-							nextWriteEntryRequestPartitionId = theTransactionDetails.getResolvedPartition(resourceId);
-						}
 						if (nextWriteEntryRequestPartitionId == null) {
-							nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-									requestDetailsForEntry, resource, resourceType, url);
 							if (resourceId != null) {
-								theTransactionDetails.addResolvedPartition(
-										resourceId, nextWriteEntryRequestPartitionId);
+								nextWriteEntryRequestPartitionId =
+										theTransactionDetails.getResolvedPartition(resourceId);
+							}
+							if (nextWriteEntryRequestPartitionId == null) {
+								nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+										requestDetailsForEntry, resource, resourceType, url);
 							}
 						}
+						if (resourceId != null) {
+							theTransactionDetails.addResolvedPartition(resourceId, nextWriteEntryRequestPartitionId);
+						}
+						resource.setUserData(Constants.RESOURCE_PARTITION_ID, nextWriteEntryRequestPartitionId);
 					}
 					break;
 				}

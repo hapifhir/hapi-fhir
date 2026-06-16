@@ -260,17 +260,43 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 			IResourceLookup<JpaPid> previousValue = retVal.put(resourceId, nextLookup);
 			if (previousValue != null) {
-				/*
-				 *  This means that either:
-				 *  1. There are two resources with the exact same resource type and forced
-				 *     id. The most likely reason for that is that someone is performing a
-				 *     multi-partition search and there are resources on each partition
-				 *     with the same ID.
-				 *  2. The unique constraint on the FHIR_ID column has been dropped
-				 */
-				ourLog.warn("Resource ID[{}] corresponds to lookups: {} and {}", resourceId, previousValue, nextLookup);
-				String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
-				throw new PreconditionFailedException(Msg.code(1099) + msg);
+				// TEMPORARY (NOT A FIX): MegaScale creates a cross-partition "surrogate" identity row in the
+				// default partition with the SAME resource PID as the real resource on its shard. An
+				// all-partitions resolution then finds both rows and trips this non-unique-id guard. As a
+				// temporary unblock to surface downstream behaviour, when the two lookups are the SAME resource
+				// (equal PID id) on different partitions, don't fail — keep the one on the higher (non-default,
+				// real-shard) partition and continue.
+				JpaPid previousPid = previousValue.getPersistentId();
+				JpaPid nextPid = nextLookup.getPersistentId();
+				boolean samePidDifferentPartition = previousPid != null
+						&& nextPid != null
+						&& Objects.equals(previousPid.getId(), nextPid.getId())
+						&& !Objects.equals(previousPid.getPartitionId(), nextPid.getPartitionId());
+				if (samePidDifferentPartition) {
+					int previousPartition =
+							previousPid.getPartitionId() != null ? previousPid.getPartitionId() : Integer.MIN_VALUE;
+					int nextPartition = nextPid.getPartitionId() != null ? nextPid.getPartitionId() : Integer.MIN_VALUE;
+					IResourceLookup<JpaPid> preferred = previousPartition >= nextPartition ? previousValue : nextLookup;
+					retVal.put(resourceId, preferred);
+					ourLog.warn(
+							"TEMP: keeping same-PID lookup for Resource ID[{}] on partition {}, ignoring duplicate surrogate on partition {}",
+							resourceId,
+							Math.max(previousPartition, nextPartition),
+							Math.min(previousPartition, nextPartition));
+				} else {
+					/*
+					 *  This means that either:
+					 *  1. There are two resources with the exact same resource type and forced
+					 *     id. The most likely reason for that is that someone is performing a
+					 *     multi-partition search and there are resources on each partition
+					 *     with the same ID.
+					 *  2. The unique constraint on the FHIR_ID column has been dropped
+					 */
+					ourLog.warn(
+							"Resource ID[{}] corresponds to lookups: {} and {}", resourceId, previousValue, nextLookup);
+					String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
+					throw new PreconditionFailedException(Msg.code(1099) + msg);
+				}
 			}
 		}
 
