@@ -76,6 +76,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 @IdClass(IdAndPartitionId.class)
 public class TermValueSet extends BasePartitionable implements Serializable {
 	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
+	public static final int MAX_EXPANSION_ERROR_LENGTH = 500;
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_URL_LENGTH = 200;
 	public static final int MAX_VER_LENGTH = 200;
@@ -137,6 +138,9 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXPANDED_AT", nullable = true)
 	private Date myExpansionTimestamp;
+
+	@Column(name = "EXPANSION_ERROR", nullable = true, length = MAX_EXPANSION_ERROR_LENGTH)
+	private String myExpansionError;
 
 	@Transient
 	private transient Integer myHashCode;
@@ -252,6 +256,15 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 
 	public void setExpansionStatus(TermValueSetPreExpansionStatusEnum theExpansionStatus) {
 		myExpansionStatus = theExpansionStatus;
+	}
+
+	public String getExpansionError() {
+		return myExpansionError;
+	}
+
+	public TermValueSet setExpansionError(String theExpansionError) {
+		myExpansionError = left(theExpansionError, MAX_EXPANSION_ERROR_LENGTH);
+		return this;
 	}
 
 	public String getVersion() {

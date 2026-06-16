@@ -1158,6 +1158,79 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 	}
 
+	@Test
+	public void testPreExpansionFailurePersistsExpansionError() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given an active ValueSet that references a CodeSystem which cannot be resolved
+		ValueSet vs = new ValueSet();
+		vs.setId("ValueSet/vs-failed-expansion");
+		vs.setUrl("http://vs-failed-expansion");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://unknown-system");
+		myValueSetDao.update(vs, newSrd());
+
+		// When pre-expansion runs
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Then the failure reason is persisted alongside the FAILED_TO_EXPAND status
+		runInTransaction(() -> {
+			TermValueSet termValueSet = myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion("http://vs-failed-expansion")
+				.orElseThrow(IllegalStateException::new);
+			assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, termValueSet.getExpansionStatus());
+			assertThat(termValueSet.getExpansionError())
+				.contains("Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system");
+		});
+	}
+
+	@Test
+	public void testPreExpansionSuccessClearsExpansionError() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given an active ValueSet that can expand successfully
+		ValueSet vs = new ValueSet();
+		vs.setId("vs-clears-error");
+		vs.setUrl("http://vs-clears-error");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem(Enumerations.AdministrativeGender.MALE.getSystem());
+		myValueSetDao.update(vs, newSrd());
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		// And given it carries a stale error from a previous failed expansion attempt
+		runInTransaction(() -> {
+			TermValueSet termValueSet = myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion("http://vs-clears-error")
+				.orElseThrow(IllegalStateException::new);
+			termValueSet.setExpansionError("previous failure");
+			myTermValueSetDao.save(termValueSet);
+		});
+
+		// When a subsequent pre-expansion succeeds
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Then the status is EXPANDED and the stale error is cleared
+		runInTransaction(() -> {
+			TermValueSet termValueSet = myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion("http://vs-clears-error")
+				.orElseThrow(IllegalStateException::new);
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+			assertNull(termValueSet.getExpansionError());
+		});
+	}
+
+	@Test
+	public void testSetExpansionErrorTruncatesToMaxLength() {
+		// Given an error message longer than the column allows
+		String longMessage = "a".repeat(TermValueSet.MAX_EXPANSION_ERROR_LENGTH + 100);
+
+		// When it is set on the entity it is truncated rather than rejected
+		TermValueSet termValueSet = new TermValueSet().setExpansionError(longMessage);
+
+		assertThat(termValueSet.getExpansionError()).hasSize(TermValueSet.MAX_EXPANSION_ERROR_LENGTH);
+	}
+
 	@ParameterizedTest
 	@CsvSource(textBlock = """
 		true,  true

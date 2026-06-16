@@ -2571,6 +2571,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				txTemplate.executeWithoutResult(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
 					valueSetToExpand.setExpansionTimestamp(new Date());
+					valueSetToExpand.setExpansionError(null);
 					myEntityManager.merge(valueSetToExpand);
 				});
 
@@ -2588,6 +2589,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						"Failed to pre-expand ValueSet with URL[{}]: {}", valueSetToExpand.getUrl(), e.getMessage(), e);
 				txTemplate.executeWithoutResult(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
+					valueSetToExpand.setExpansionError(e.getMessage());
 					myEntityManager.merge(valueSetToExpand);
 				});
 
