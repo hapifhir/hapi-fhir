@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import static ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx.MDM_CLEAR_JOB_BEAN_NAME;
+import static ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx.MDM_CLEAR_JOB_V2_BEAN_NAME;
 import static ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx.MDM_SUBMIT_JOB_BEAN_NAME;
 
 @Configuration
@@ -40,7 +41,9 @@ public class MdmBatch2Config {
 	MdmJobDefinitionLoader mdmJobDefinitionLoader(
 			JobDefinitionRegistry theJobDefinitionRegistry,
 			@Qualifier(MDM_CLEAR_JOB_BEAN_NAME) JobDefinition<MdmClearJobParameters> theClearJobDefinition,
+			@Qualifier(MDM_CLEAR_JOB_V2_BEAN_NAME) JobDefinition<MdmClearJobParameters> theClearJobDefinitionV2,
 			@Qualifier(MDM_SUBMIT_JOB_BEAN_NAME) JobDefinition<MdmSubmitJobParameters> theSubmitJobDefinition) {
-		return new MdmJobDefinitionLoader(theJobDefinitionRegistry, theClearJobDefinition, theSubmitJobDefinition);
+		return new MdmJobDefinitionLoader(
+				theJobDefinitionRegistry, theClearJobDefinition, theClearJobDefinitionV2, theSubmitJobDefinition);
 	}
 }

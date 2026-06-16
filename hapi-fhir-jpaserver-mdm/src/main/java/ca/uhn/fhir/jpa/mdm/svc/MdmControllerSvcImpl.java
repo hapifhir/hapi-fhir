@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
+import ca.uhn.fhir.batch2.api.IJobPartitionProvider;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -100,6 +100,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 	@Autowired
 	IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	IJobPartitionProvider myJobPartitionProvider;
 
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -320,10 +323,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
 
-		RequestPartitionId requestPartition =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
-						theRequestDetails, ProviderConstants.OPERATION_MDM_CLEAR);
-		params.setRequestPartitionId(requestPartition);
+		List<String> urls = theResourceNames.stream().map(name -> name + "?").toList();
+		params.addPartitionedUrls(myJobPartitionProvider.getPartitionedUrls(theRequestDetails, urls));
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(MdmClearAppCtx.JOB_MDM_CLEAR);
@@ -361,9 +362,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		if (hasBatchSize) {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
-		RequestPartitionId partitionId = RequestPartitionId.allPartitions();
-		theUrls.forEach(
-				url -> params.addPartitionedUrl(new PartitionedUrl().setUrl(url).setRequestPartitionId(partitionId)));
+		params.addPartitionedUrls(myJobPartitionProvider.getPartitionedUrls(theRequestDetails, theUrls));
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setParameters(params);

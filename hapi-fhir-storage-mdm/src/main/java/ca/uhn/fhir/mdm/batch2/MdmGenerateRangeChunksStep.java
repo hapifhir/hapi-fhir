@@ -34,6 +34,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
+/**
+ * @deprecated Retained for v1 MDM_CLEAR job backward compatibility.
+ * Use {@link ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep} instead.
+ */
+@Deprecated(since = "8.12.0")
 public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmClearJobParameters, ChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmGenerateRangeChunksStep.class);
 
