@@ -53,6 +53,7 @@ public class JobDefinition<PT extends IModelJson> {
 	private final IJobCompletionHandler<PT> myCompletionHandler;
 	private final IJobCompletionHandler<PT> myErrorHandler;
 	private final Map<String, Integer> myStepIdToStepIndex;
+	private final StepWeightingForProgressCalculator myStepWeightingForProgressCalculator;
 
 	/**
 	 * Constructor
@@ -67,13 +68,15 @@ public class JobDefinition<PT extends IModelJson> {
 			IJobParametersValidator<PT> theParametersValidator,
 			boolean theGatedExecution,
 			IJobCompletionHandler<PT> theCompletionHandler,
-			IJobCompletionHandler<PT> theErrorHandler) {
+			IJobCompletionHandler<PT> theErrorHandler,
+			StepWeightingForProgressCalculator theStepWeightingForProgressCalculator) {
 		Validate.isTrue(VALID_INITIAL_STATUSES.contains(theInitialStatus), "Initial status is invalid");
 		Validate.isTrue(theJobDefinitionId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
 		Validate.notBlank(theJobDefinitionId, "No job definition ID supplied");
 		Validate.notBlank(theJobDescription, "No job description supplied");
 		Validate.isTrue(theJobDefinitionVersion >= 1, "No job definition version supplied (must be >= 1)");
 		Validate.isTrue(theSteps.size() >= 2, "At least 2 steps must be supplied");
+		Validate.notNull(theStepWeightingForProgressCalculator, "No step weighting calculator supplied");
 		myInitialStatus = theInitialStatus;
 		myJobDefinitionId = theJobDefinitionId;
 		myJobDefinitionVersion = theJobDefinitionVersion;
@@ -84,6 +87,7 @@ public class JobDefinition<PT extends IModelJson> {
 		myGatedExecution = theGatedExecution;
 		myCompletionHandler = theCompletionHandler;
 		myErrorHandler = theErrorHandler;
+		myStepWeightingForProgressCalculator = theStepWeightingForProgressCalculator;
 
 		myStepIdToStepIndex = new HashMap<>();
 		for (int i = 0; i < mySteps.size(); i++) {
@@ -177,8 +181,13 @@ public class JobDefinition<PT extends IModelJson> {
 		return index;
 	}
 
+	public StepWeightingForProgressCalculator getStepWeightingForProgressCalculator() {
+		return myStepWeightingForProgressCalculator;
+	}
+
 	public static class Builder<PT extends IModelJson, NIT extends IModelJson> {
 
+		private StepWeightingForProgressCalculator.Builder myStepWeightingBuilder;
 		private StatusEnum myInitialStatus = StatusEnum.QUEUED;
 		private final List<JobDefinitionStep<PT, ?, ?>> mySteps;
 		private String myJobDefinitionId;
@@ -196,6 +205,7 @@ public class JobDefinition<PT extends IModelJson> {
 
 		Builder() {
 			mySteps = new ArrayList<>();
+			myStepWeightingBuilder = StepWeightingForProgressCalculator.newBuilder();
 		}
 
 		Builder(
@@ -209,7 +219,8 @@ public class JobDefinition<PT extends IModelJson> {
 				@Nullable IJobParametersValidator<PT> theParametersValidator,
 				boolean theGatedExecution,
 				IJobCompletionHandler<PT> theCompletionHandler,
-				IJobCompletionHandler<PT> theErrorHandler) {
+				IJobCompletionHandler<PT> theErrorHandler,
+				StepWeightingForProgressCalculator.Builder theStepWeightingBuilder) {
 			myInitialStatus = theInitialStatus;
 			mySteps = theSteps;
 			myJobDefinitionId = theJobDefinitionId;
@@ -221,6 +232,7 @@ public class JobDefinition<PT extends IModelJson> {
 			myGatedExecution = theGatedExecution;
 			myCompletionHandler = theCompletionHandler;
 			myErrorHandler = theErrorHandler;
+			myStepWeightingBuilder = theStepWeightingBuilder;
 		}
 
 		/**
@@ -267,7 +279,8 @@ public class JobDefinition<PT extends IModelJson> {
 					myParametersValidator,
 					myGatedExecution,
 					myCompletionHandler,
-					myErrorHandler);
+					myErrorHandler,
+					myStepWeightingBuilder);
 		}
 
 		/**
@@ -297,7 +310,8 @@ public class JobDefinition<PT extends IModelJson> {
 					myParametersValidator,
 					myGatedExecution,
 					myCompletionHandler,
-					myErrorHandler);
+					myErrorHandler,
+					myStepWeightingBuilder);
 		}
 
 		/**
@@ -324,7 +338,8 @@ public class JobDefinition<PT extends IModelJson> {
 					myParametersValidator,
 					myGatedExecution,
 					myCompletionHandler,
-					myErrorHandler);
+					myErrorHandler,
+					myStepWeightingBuilder);
 		}
 
 		public <OT extends IModelJson> Builder<PT, OT> addFinalReducerStep(
@@ -349,11 +364,14 @@ public class JobDefinition<PT extends IModelJson> {
 					myParametersValidator,
 					myGatedExecution,
 					myCompletionHandler,
-					myErrorHandler);
+					myErrorHandler,
+					myStepWeightingBuilder);
 		}
 
 		public JobDefinition<PT> build() {
 			Validate.notNull(myJobParametersType, "No job parameters type was supplied");
+			StepWeightingForProgressCalculator stepWeightingForProgressCalculator =
+					myStepWeightingBuilder.build(mySteps);
 			return new JobDefinition<>(
 					myInitialStatus,
 					myJobDefinitionId,
@@ -364,7 +382,8 @@ public class JobDefinition<PT extends IModelJson> {
 					myParametersValidator,
 					myGatedExecution,
 					myCompletionHandler,
-					myErrorHandler);
+					myErrorHandler,
+					stepWeightingForProgressCalculator);
 		}
 
 		public Builder<PT, NIT> setJobDescription(String theJobDescription) {
@@ -509,6 +528,26 @@ public class JobDefinition<PT extends IModelJson> {
 		public Builder<PT, NIT> setInitialStatus(StatusEnum theInitialStatus) {
 			Validate.isTrue(VALID_INITIAL_STATUSES.contains(theInitialStatus), "Initial status is invalid");
 			myInitialStatus = theInitialStatus;
+			return this;
+		}
+
+		/**
+		 * Supplies an optional weight for a specific job step when calculating the overall progress of the job.
+		 * The value here will not affect the actual job performance in any way, it just affects
+		 * how we calculate the "job complete %" number returned to the client while the job executes.
+		 *
+		 * @param theStepId The step ID to assign a weight to.
+		 * @param theWeight A weight. Value must be <code>i >= 0.0</code> and <code>i < 1.0</code>. The
+		 *                  combined weight of all steps must not exceed 1.0. If a given step should always
+		 *                  count for 20% of the total completion status, assign it a weight of <code>0.2</code>.
+		 * @see StepWeightingForProgressCalculator
+		 */
+		public Builder<PT, NIT> setStepWeightForProgressCalculator(String theStepId, double theWeight) {
+			Validate.notBlank(theStepId, "theStepId must not be blank");
+			Validate.isTrue(theWeight >= 0.0d && theWeight < 1.0d, "theWeight must be >= 0.0 and < 1.0");
+			Validate.isTrue(
+					mySteps.stream().anyMatch(t -> t.getStepId().equals(theStepId)), "Unknown stepL: %s", theStepId);
+			myStepWeightingBuilder.setStepWeightForProgressCalculator(theStepId, theWeight);
 			return this;
 		}
 	}

@@ -17,11 +17,15 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.util;
 
 public class Counter {
 
 	private long myCount;
+
+	public long get() {
+		return myCount;
+	}
 
 	public long getThenAdd() {
 		return myCount++;
