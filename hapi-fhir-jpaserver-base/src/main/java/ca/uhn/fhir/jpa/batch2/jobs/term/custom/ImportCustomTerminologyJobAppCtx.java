@@ -97,12 +97,15 @@ public class ImportCustomTerminologyJobAppCtx {
 						"Generate concept closures",
 						TerminologyFileSetJson.class,
 						importIcdStepGenerateConceptClosures())
+				// This step doesn't gain any work chunks until the previous step, we want to give it
+				// a fixed portion of the overall progress
 				.setStepWeightForProgressCalculator(STEP_ID_GENERATE_CONCEPT_CLOSURES, 0.3)
 				.addFinalReducerStep(
 						STEP_ID_FINALIZE_IMPORT,
 						"Finalize ICD-10 Import",
 						ImportTerminologyResultJson.class,
 						importCustomTerminologyStepFinalize())
+				// This step takes very little time and shouldn't factor significantly into the progress
 				.setStepWeightForProgressCalculator(STEP_ID_FINALIZE_IMPORT, 0.01)
 				.build();
 	}

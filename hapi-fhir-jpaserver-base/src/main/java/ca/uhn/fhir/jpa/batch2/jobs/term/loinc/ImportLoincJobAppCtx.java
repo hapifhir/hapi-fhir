@@ -192,12 +192,15 @@ public class ImportLoincJobAppCtx {
 						"Generate concept closures",
 						TerminologyFileSetJson.class,
 						importLoincStep22GenerateConceptClosures())
+				// This step doesn't gain any work chunks until the previous step, we want to give it
+				// a fixed portion of the overall progress
 				.setStepWeightForProgressCalculator(STEP_ID_GENERATE_CONCEPT_CLOSURES, 0.3)
 				.addFinalReducerStep(
 						STEP_ID_FINALIZE_IMPORT,
 						"Finalize LOINC Import",
 						ImportTerminologyResultJson.class,
 						importLoincStep23Finalize())
+				// This step takes very little time and shouldn't factor significantly into the progress
 				.setStepWeightForProgressCalculator(STEP_ID_FINALIZE_IMPORT, 0.01)
 				.build();
 	}
