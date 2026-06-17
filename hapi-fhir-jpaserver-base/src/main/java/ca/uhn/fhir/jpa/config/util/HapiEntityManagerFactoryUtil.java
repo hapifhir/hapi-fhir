@@ -130,6 +130,7 @@ public final class HapiEntityManagerFactoryUtil {
 					BootstrapServiceRegistry theBootstrapServiceRegistry) {
 				HapiHibernateDialectSettingsService service = new HapiHibernateDialectSettingsService();
 				service.setDatabasePartitionMode(isDatabasePartitionMode());
+				service.setPerThreadIdSequencePoolingEnabled(myStorageSettings.isPerThreadIdSequencePoolingEnabled());
 
 				StandardServiceRegistryBuilder retVal =
 						super.getStandardServiceRegistryBuilder(theBootstrapServiceRegistry);

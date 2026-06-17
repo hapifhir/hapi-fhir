@@ -185,6 +185,7 @@ public class JpaStorageSettings extends StorageSettings {
 	private Set<String> myEnforceReferentialIntegrityOnDeleteDisableForPaths = Collections.emptySet();
 	private boolean myUniqueIndexesEnabled = true;
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
+	private boolean myPerThreadIdSequencePoolingEnabled = false;
 	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
 	/**
@@ -1740,6 +1741,34 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setUniqueIndexesEnabled(boolean theUniqueIndexesEnabled) {
 		myUniqueIndexesEnabled = theUniqueIndexesEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), the database sequence id generator
+	 * allocates ids from a pool kept per thread, so that concurrent writers do not serialize on a
+	 * single shared pool lock while the pool is refilled from the database. The default is
+	 * <code>false</code> (the legacy single shared pool) so that existing deployments are unaffected on
+	 * upgrade; enabling it should be done across an entire cluster at once (see the upgrade notes), never
+	 * node by node, because the two behaviors interpret the same database sequence differently.
+	 *
+	 * @since 8.12.0
+	 */
+	public boolean isPerThreadIdSequencePoolingEnabled() {
+		return myPerThreadIdSequencePoolingEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), the database sequence id generator
+	 * allocates ids from a pool kept per thread, so that concurrent writers do not serialize on a
+	 * single shared pool lock while the pool is refilled from the database. The default is
+	 * <code>false</code> (the legacy single shared pool) so that existing deployments are unaffected on
+	 * upgrade; enabling it should be done across an entire cluster at once (see the upgrade notes), never
+	 * node by node, because the two behaviors interpret the same database sequence differently.
+	 *
+	 * @since 8.12.0
+	 */
+	public void setPerThreadIdSequencePoolingEnabled(boolean thePerThreadIdSequencePoolingEnabled) {
+		myPerThreadIdSequencePoolingEnabled = thePerThreadIdSequencePoolingEnabled;
 	}
 
 	/**

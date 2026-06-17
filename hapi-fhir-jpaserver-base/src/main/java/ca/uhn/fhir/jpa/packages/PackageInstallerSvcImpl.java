@@ -1148,14 +1148,17 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					retVal.add("version", new TokenParam(version));
 				}
 			}
-			// Always sort by _pid DESC for deterministic results.
+			// Sort by last-updated time descending for deterministic results.
 			// This is particularly important in SINGLE_VERSION mode when multiple versions
 			// already exist (e.g., user switched from MULTI_VERSION to SINGLE_VERSION) - we want
-			// to consistently update the most recently created resource.
-			// Note: _pid sorts by internal RES_ID (database sequence), not the
-			// client-visible FHIR ID (_id), ensuring true creation-order sorting
-			// regardless of whether resources have server-assigned or client-assigned IDs.
-			retVal.setSort(new SortSpec(Constants.PARAM_PID, SortOrderEnum.DESC));
+			// to consistently update the most recently updated resource.
+			// The internal _pid is used only for determinism when timestamps match; because resource ids
+			// are not guaranteed to increase with creation time (ids may be allocated from per-thread pools).
+			SortSpec sort = new SortSpec(
+					Constants.PARAM_LASTUPDATED,
+					SortOrderEnum.DESC,
+					new SortSpec(Constants.PARAM_PID, SortOrderEnum.DESC));
+			retVal.setSort(sort);
 			return retVal;
 		} else {
 			TokenParam identifierToken = extractIdentifier(theResource);

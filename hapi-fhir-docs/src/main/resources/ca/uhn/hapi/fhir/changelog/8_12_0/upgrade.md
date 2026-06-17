@@ -26,3 +26,29 @@ callers are not broken.
 Callers should migrate to the new instance method
 `HapiTransactionService.executeWithConfiguredDefaultPartitionInContext(ICallable)`, which honors the default partition
 ID configured in `PartitionSettings`.
+
+## Per-Thread Database Id Pooling
+
+Database id generation can now be configured to allocate ids from a per-thread pool, instead of a single pool shared by
+all writer threads on a server. This removes lock contention between concurrent writers when the pool is refilled, and
+improves write throughput under high write concurrency.
+
+This behavior is **disabled by default**, so existing deployments are unaffected on upgrade. It can be enabled with
+`JpaStorageSettings#setPerThreadIdSequencePoolingEnabled(true)`.
+
+When per-thread pooling is enabled, ids are no longer handed out in strict creation order across threads (an id assigned
+later on one thread may be lower than one assigned earlier on another thread), so code must not treat the numeric
+internal id as a creation-order signal; use the last-updated time instead.
+
+### Critical: do not run the shared-pool and per-thread behaviors against the same database at the same time
+
+The shared-pool behavior and the per-thread behavior interpret the same database sequence value differently - the
+shared-pool behavior treats it as the top of an id block, the per-thread behavior treats it as the bottom. If both run
+concurrently against the same database, the id blocks they hand out **overlap, producing duplicate primary keys and
+corrupting data**. This is not a transient or self-correcting condition. You must ensure the two behaviors never operate
+against the same database at the same time.
+
+Because the default is unchanged, a simple upgrade does not hit this collision. The risk arises only if you enable
+per-thread pooling on a multi-node cluster. To enable it safely, turn it on across the whole cluster in a single
+coordinated restart, never node by node, so that the two behaviors never overlap. The single change in interpretation
+produces at most a one-time gap of unused ids, which is harmless.

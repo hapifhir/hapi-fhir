@@ -25,6 +25,8 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -399,13 +401,19 @@ public class PackageInstallerSvcImplTest {
 		verify(myCodeSystemDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
 		assertThat(map.toNormalizedQueryString()).startsWith("?url=http%3A//my-code-system");
+		// The existing resource to update is resolved by most-recent _lastUpdated, with the internal _pid
+		// only as a stable tiebreaker
+		assertThat(map.getSort().getParamName()).isEqualTo(Constants.PARAM_LASTUPDATED);
+		assertThat(map.getSort().getOrder()).isEqualTo(SortOrderEnum.DESC);
+		assertThat(map.getSort().getChain().getParamName()).isEqualTo(Constants.PARAM_PID);
+		assertThat(map.getSort().getChain().getOrder()).isEqualTo(SortOrderEnum.DESC);
 
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
 		CodeSystem codeSystem = myCodeSystemCaptor.getValue();
 		assertEquals("existingcs", codeSystem.getIdPart());
 
 		LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage(
-			"Updating existing resource matching ?url=http%3A//my-code-system&_sort=-_pid");
+			"Updating existing resource matching ?url=http%3A//my-code-system&_sort=-_lastUpdated,-_pid");
 	}
 
 	@Test
@@ -436,7 +444,7 @@ public class PackageInstallerSvcImplTest {
 
 		assertThat(outcome.getResourcesInstalled()).isEmpty();
 		LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage(
-			"Skipping update of CodeSystem with content=not-present matching ?url=http%3A//my-code-system&_sort=-_pid since `PackageInstallationSpec.overwriteContentNotPresentCodeSystems=false");
+			"Skipping update of CodeSystem with content=not-present matching ?url=http%3A//my-code-system&_sort=-_lastUpdated,-_pid since `PackageInstallationSpec.overwriteContentNotPresentCodeSystems=false");
 		LogbackTestExtensionAssert.assertThat(myLogCapture)
 			.hasInfoMessage("-- Skipped 1 resources of type CodeSystem");
 	}
@@ -470,7 +478,7 @@ public class PackageInstallerSvcImplTest {
 		assertEquals("existingcs", codeSystem.getIdPart());
 
 		LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage(
-			"Updating existing resource matching ?url=http%3A//my-code-system&_sort=-_pid");
+			"Updating existing resource matching ?url=http%3A//my-code-system&_sort=-_lastUpdated,-_pid");
 	}
 
 	// Created by Claude Opus 4.6

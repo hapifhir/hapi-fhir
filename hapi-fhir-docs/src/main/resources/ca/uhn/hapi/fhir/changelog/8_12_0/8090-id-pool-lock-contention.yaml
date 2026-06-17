@@ -1,0 +1,9 @@
+---
+type: perf
+issue: 8090
+title: "Under high write concurrency, database id generation could become a bottleneck because all writer
+ threads on a server shared a single id pool. A new option allows id generation to allocate from a per-thread
+ pool instead, removing this contention. The option is disabled by default so that existing deployments are
+ unaffected on upgrade. Because per-thread pooling means ids are no longer handed out in order, the package
+ installer now selects the most recently updated resource by last-updated time (rather than by internal id)
+ when deciding which existing resource to update."

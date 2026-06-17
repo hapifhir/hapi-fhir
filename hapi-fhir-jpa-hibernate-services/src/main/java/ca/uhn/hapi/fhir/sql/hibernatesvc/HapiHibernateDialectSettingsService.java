@@ -32,6 +32,7 @@ import org.hibernate.service.Service;
 public class HapiHibernateDialectSettingsService implements Service {
 
 	private boolean myDatabasePartitionMode;
+	private boolean myPerThreadIdSequencePoolingEnabled = false;
 
 	/**
 	 * Constructor
@@ -52,5 +53,23 @@ public class HapiHibernateDialectSettingsService implements Service {
 	 */
 	public void setDatabasePartitionMode(boolean theDatabasePartitionMode) {
 		myDatabasePartitionMode = theDatabasePartitionMode;
+	}
+
+	/**
+	 * Should the id sequence generator allocate ids from a per-thread pool rather than a single shared
+	 * pool? Per-thread pools avoid serializing concurrent writers on a shared lock during pool refills.
+	 * Defaults to <code>false</code> (the legacy single shared pool).
+	 */
+	public boolean isPerThreadIdSequencePoolingEnabled() {
+		return myPerThreadIdSequencePoolingEnabled;
+	}
+
+	/**
+	 * Should the id sequence generator allocate ids from a per-thread pool rather than a single shared
+	 * pool? Per-thread pools avoid serializing concurrent writers on a shared lock during pool refills.
+	 * Defaults to <code>false</code> (the legacy single shared pool).
+	 */
+	public void setPerThreadIdSequencePoolingEnabled(boolean thePerThreadIdSequencePoolingEnabled) {
+		myPerThreadIdSequencePoolingEnabled = thePerThreadIdSequencePoolingEnabled;
 	}
 }
