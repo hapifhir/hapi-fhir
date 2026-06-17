@@ -19,12 +19,10 @@
  */
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.CustomTerminologyCsvBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,16 +30,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_CONCEPTS_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_HIERARCHY_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_PROPERTIES_FILE;
 
 public class ZipCollectionBuilder {
 
 	public static final String ZIP_ENTRY_PREFIX = "SnomedCT_Release_INT_20160131_Full/Terminology/";
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ZipCollectionBuilder.class);
-	private final ArrayList<ITermLoaderSvc.FileDescriptor> myFiles;
+	private final ArrayList<FileDescriptor> myFiles;
 	private final ByteArrayOutputStream mySingleZipBytes;
 	private final ZipOutputStream mySingleZipStream;
 
@@ -84,35 +84,14 @@ public class ZipCollectionBuilder {
 		addBytes(theClasspathFileName, theOutputFilename, bytes);
 	}
 
-	public void addPropertiesZip(Properties properties, String theOutputFilename) throws IOException {
-		byte[] bytes = getPropertiesBytes(properties);
-		addBytes(theOutputFilename, theOutputFilename, bytes);
-	}
-
 	private void addBytes(String theClasspathFileName, String theOutputFilename, byte[] theBytes) throws IOException {
 		if (mySingleZipStream != null) {
 			mySingleZipStream.putNextEntry(new ZipEntry(ZIP_ENTRY_PREFIX + theOutputFilename));
 			mySingleZipStream.write(theBytes);
 			mySingleZipStream.closeEntry();
 		} else {
-			myFiles.add(new ITermLoaderSvc.FileDescriptor() {
-				@Override
-				public String getFilename() {
-					return theOutputFilename;
-				}
-
-				@Override
-				public InputStream getInputStream() {
-					return new ByteArrayInputStream(theBytes);
-				}
-			});
+			myFiles.add(new FileDescriptor(theOutputFilename, new ByteArrayInputStream(theBytes)));
 		}
-	}
-
-	private byte[] getPropertiesBytes(Properties theProperties) throws IOException {
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		theProperties.store(byteArrayOutputStream, "");
-		return byteArrayOutputStream.toByteArray();
 	}
 
 	private byte[] readFile(String theClasspathPrefix, String theClasspathFileName) {
@@ -120,7 +99,7 @@ public class ZipCollectionBuilder {
 		return ClasspathUtil.loadResourceAsByteArray(classpathName);
 	}
 
-	public List<ITermLoaderSvc.FileDescriptor> getFiles() {
+	public List<FileDescriptor> getFiles() {
 		return myFiles;
 	}
 
@@ -130,17 +109,7 @@ public class ZipCollectionBuilder {
 			mySingleZipStream.write(theText.getBytes(Charsets.UTF_8));
 			mySingleZipStream.closeEntry();
 		} else {
-			myFiles.add(new ITermLoaderSvc.FileDescriptor() {
-				@Override
-				public String getFilename() {
-					return theFilename;
-				}
-
-				@Override
-				public InputStream getInputStream() {
-					return new ByteArrayInputStream(theText.getBytes(Charsets.UTF_8));
-				}
-			});
+			myFiles.add(new FileDescriptor(theFilename, new ByteArrayInputStream(theText.getBytes(Charsets.UTF_8))));
 		}
 	}
 
@@ -154,4 +123,12 @@ public class ZipCollectionBuilder {
 		IOUtils.closeQuietly(mySingleZipBytes);
 		return mySingleZipBytes.toByteArray();
 	}
+
+	public void addCustomTerminology(CustomTerminologyCsvBuilder theTerminology) throws IOException {
+		addFileText(theTerminology.getConceptsCsv(), CUSTOM_CONCEPTS_FILE);
+		addFileText(theTerminology.getPropertiesCsv(), CUSTOM_PROPERTIES_FILE);
+		addFileText(theTerminology.getHierarchyCsv(), CUSTOM_HIERARCHY_FILE);
+	}
+
+	public record FileDescriptor(String filename, InputStream inputStream) {}
 }

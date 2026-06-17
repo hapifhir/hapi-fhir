@@ -178,6 +178,10 @@ public class TermCodeSystemVersion extends BasePartitionable implements Serializ
 		return myCodeSystem;
 	}
 
+	public Long getCodeSystemPid() {
+		return myCodeSystemPid;
+	}
+
 	public TermCodeSystemVersion setCodeSystem(TermCodeSystem theCodeSystem) {
 		myCodeSystem = theCodeSystem;
 		myCodeSystemPid = theCodeSystem.getPid();

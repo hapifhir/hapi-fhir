@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -292,11 +291,13 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 	@Test
 	public void testExpandByValueSet_ExceedsMaxSize() {
 		// Add a bunch of codes
-		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		CodeSystem codesToAdd = new CodeSystem();
+		codesToAdd.setUrl("http://loinc.org");
+		codesToAdd.setVersion("1.0");
 		for (int i = 0; i < 100; i++) {
-			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+			codesToAdd.addConcept().setCode("CODE" + i).setDisplay("Display " + i);
 		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), codesToAdd);
 		myStorageSettings.setMaximumExpansionSize(50);
 
 		ValueSet vs = new ValueSet();
@@ -315,11 +316,13 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 	@Test
 	public void testPrecalculatedValueSet() {
 		// Add a bunch of codes
-		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		CodeSystem codesToAdd = new CodeSystem();
+		codesToAdd.setUrl("http://cs");
+		codesToAdd.setVersion("1.0");
 		for (int i = 0; i < 10; i++) {
-			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+			codesToAdd.addConcept().setCode("CODE" + i).setDisplay("Display " + i);
 		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://cs", codesToAdd);
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), codesToAdd);
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://vs");

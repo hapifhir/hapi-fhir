@@ -91,11 +91,11 @@ public class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		ourLog.info("Report:\n{}", report);
 
 		assertThat(report).containsSubsequence(
-			"Concepts Added             : 15",
+			"Concepts Added               : 15",
 			"Step: import-concepts (Import LOINC concepts)",
-			"   Total Work Chunks          : 10",
-			"   Total Processing Time      : 20ms",
-			"   Concepts Added             : 3"
+			"   Total Work Chunks            : 10",
+			"   Total Processing Time        : 20ms",
+			"   Concepts Added               : 3"
 		);
 	}
 

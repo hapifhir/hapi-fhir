@@ -41,7 +41,7 @@ class ImportLoincStep5HandleAnswerListsTest extends BaseImportLoincStepTest {
 		mockFetchPropertiesFileAttachmentNotFound();
 		mockFetchJobMetadataAttachment();
 		when(myValueSetDao.read(any(), any())).thenThrow(new ResourceNotFoundException(new IdType("ValueSet/LL1000-0-1.234")));
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()));
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenReturn(new UploadStatistics(new IdType()));
 		mockDaoRegistryValueSet();
 		mockDaoRegistryConceptMap();
 
@@ -49,7 +49,7 @@ class ImportLoincStep5HandleAnswerListsTest extends BaseImportLoincStepTest {
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).addCodeSystemConcepts(any(), myCodeSystemCaptor.capture());
 		CodeSystem cs = myCodeSystemCaptor.getValue();
 		String hierarchy = renderHierarchy(cs);
 		String expected = """
@@ -103,7 +103,7 @@ class ImportLoincStep5HandleAnswerListsTest extends BaseImportLoincStepTest {
 		mockFetchPropertiesFileAttachmentNotFound();
 		mockFetchJobMetadataAttachment();
 		when(myJobExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		ValueSet existing = new ValueSet();
 		existing.setId("ValueSet/LL1000-0-1.234/_history/1");

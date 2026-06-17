@@ -27,14 +27,14 @@ class ImportLoincStep6HandleAnswerListLinksTest extends BaseImportLoincStepTest{
 		String classpath = "loinc-ver/v269/AccessoryFiles/AnswerFile/LoincAnswerListLink.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 		mockValidationSupportLookupCodeAlwaysSucceed();
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).addCodeSystemConcepts(any(), myCodeSystemCaptor.capture());
 		CodeSystem cs = myCodeSystemCaptor.getValue();
 		assertThat(cs.getConcept().stream().map(CodeSystem.ConceptDefinitionComponent::getCode)).containsExactly(
 			"61438-8",
