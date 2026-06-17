@@ -24,7 +24,7 @@
 
 		<!-- JSON -->
 		<dependency>
-			<groupId>tools.jackson.datatype</groupId>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 		<dependency>

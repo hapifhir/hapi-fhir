@@ -1096,6 +1096,7 @@
 
 
 		<jackson_annotations_version>2.21</jackson_annotations_version>
+		<jackson_datatype_version>2.22.0</jackson_datatype_version>
 
 		<jackson_tools_version>3.2.0</jackson_tools_version>
 		<jackson_tools_databind_version>3.2.0</jackson_tools_databind_version>
@@ -1240,9 +1241,9 @@
 				<version>${jackson_tools_databind_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tools.jackson.datatype</groupId>
+				<groupId>com.fasterxml.jackson.datatype</groupId>
 				<artifactId>jackson-datatype-jsr310</artifactId>
-				<version>${jackson_tools_version}</version>
+				<version>${jackson_datatype_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>tools.jackson.dataformat</groupId>
