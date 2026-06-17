@@ -1089,9 +1089,17 @@
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.16</httpcore_version>
 		<httpclient_version>4.5.14</httpclient_version>
-		<jackson_version>2.21.1</jackson_version>
-		<jackson_databind_version>2.21.1</jackson_databind_version>
+
+
+		<jackson_version_deprecated>2.21.1</jackson_version_deprecated>
+		<jackson_databind_version_deprecated>2.21.1</jackson_databind_version_deprecated>
+
+
 		<jackson_annotations_version>2.21</jackson_annotations_version>
+
+		<jackson_tools_version>3.2.0</jackson_tools_version>
+		<jackson_tools_databind_version>3.2.0</jackson_tools_databind_version>
+
 		<httpclient5_version>5.4.3</httpclient5_version>
 		<httpcore5_version>5.3.1</httpcore5_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
@@ -1222,29 +1230,29 @@
 				<version>${jackson_annotations_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
+				<groupId>tools.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
-				<version>${jackson_version}</version>
+				<version>${jackson_tools_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
+				<groupId>tools.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>${jackson_databind_version}</version>
+				<version>${jackson_tools_databind_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.datatype</groupId>
+				<groupId>tools.jackson.datatype</groupId>
 				<artifactId>jackson-datatype-jsr310</artifactId>
-				<version>${jackson_version}</version>
+				<version>${jackson_tools_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.dataformat</groupId>
+				<groupId>tools.jackson.dataformat</groupId>
 				<artifactId>jackson-dataformat-yaml</artifactId>
-				<version>${jackson_version}</version>
+				<version>${jackson_tools_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.module</groupId>
+				<groupId>tools.jackson.module</groupId>
 				<artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
-				<version>${jackson_version}</version>
+				<version>${jackson_tools_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.jayway.jsonpath</groupId>
