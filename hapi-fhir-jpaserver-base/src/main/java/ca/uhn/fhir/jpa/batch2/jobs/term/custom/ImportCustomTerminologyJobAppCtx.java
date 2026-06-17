@@ -90,12 +90,12 @@ public class ImportCustomTerminologyJobAppCtx {
 						STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
 						"Create work chunks for calculating concept closures",
 						TerminologyFileSetJson.class,
-						importIcdStepChunkConceptsForClosureGeneration())
+						importCustomTerminologyStepChunkConceptsForClosureGeneration())
 				.addIntermediateStep(
 						"generate-concept-closures",
 						"Generate concept closures",
 						TerminologyFileSetJson.class,
-						importIcdStepGenerateConceptClosures())
+						importCustomTerminologyStepGenerateConceptClosures())
 				.addFinalReducerStep(
 						STEP_ID_FINALIZE_IMPORT,
 						"Finalize ICD-10 Import",
@@ -127,13 +127,13 @@ public class ImportCustomTerminologyJobAppCtx {
 
 	@Bean
 	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportTerminologyJobParameters>
-			importIcdStepChunkConceptsForClosureGeneration() {
+			importCustomTerminologyStepChunkConceptsForClosureGeneration() {
 		return new ImportTerminologyStepChunkConceptsForGeneratingClosure<>();
 	}
 
 	@Bean
 	public ImportTerminologyStepGenerateConceptClosures<ImportTerminologyJobParameters>
-			importIcdStepGenerateConceptClosures() {
+			importCustomTerminologyStepGenerateConceptClosures() {
 		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
 
