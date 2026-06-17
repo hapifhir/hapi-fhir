@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -230,9 +231,8 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
 
+		myBatch2JobHelper.forceRunActiveJobMaintenancePass();
 		runInTransaction(() -> {
-			myBatch2JobHelper.forceRunActiveJobMaintenancePass();
-
 			List<JobInstance> allJobs = myBatch2JobHelper.findJobsByDefinition(JOB_REINDEX);
 			assertEquals(1, allJobs.size());
 			assertEquals(1, allJobs.get(0).getParameters(ReindexJobParameters.class).getPartitionedUrls().size());
@@ -392,7 +392,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		mySearchParameterDao.create(fooSp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
-		assertNotNull(mySearchParamRegistry.getActiveSearchParam("Patient", "foo", null));
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam("Patient", "foo", ISearchParamRegistry.SearchParamLookupContextEnum.ALL));
 
 		Patient pat = new Patient();
 		pat.setGender(AdministrativeGender.MALE);

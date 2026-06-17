@@ -100,6 +100,11 @@ public class StepWeightingForProgressCalculator {
 				combinedWeightTotal += myStepIdToWeight.get(stepId);
 			}
 
+			Validate.isTrue(
+					combinedWeightTotal <= 1.0,
+					"Combined step weights can not be greater than 1.0, but was %s",
+					combinedWeightTotal);
+
 			int remainingStepCount = remainingJobStepIds.size();
 			double weightForRemainingSteps = 0.0;
 			if (remainingStepCount > 0) {
