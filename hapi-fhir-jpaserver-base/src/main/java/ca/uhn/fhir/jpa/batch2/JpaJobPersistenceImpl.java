@@ -162,62 +162,69 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk) {
-		HapiTransactionService.requireTransaction();
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
+			entity.setId(UUID.randomUUID().toString());
+			entity.setSequence(theBatchWorkChunk.sequence);
+			entity.setJobDefinitionId(theBatchWorkChunk.jobDefinitionId);
+			entity.setJobDefinitionVersion(theBatchWorkChunk.jobDefinitionVersion);
+			entity.setTargetStepId(theBatchWorkChunk.targetStepId);
+			entity.setInstanceId(theBatchWorkChunk.instanceId);
+			entity.setSerializedData(theBatchWorkChunk.serializedData);
+			entity.setCreateTime(new Date());
+			entity.setStartTime(new Date());
+			entity.setStatus(getOnCreateStatus(theBatchWorkChunk));
 
-		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
-		entity.setId(UUID.randomUUID().toString());
-		entity.setSequence(theBatchWorkChunk.sequence);
-		entity.setJobDefinitionId(theBatchWorkChunk.jobDefinitionId);
-		entity.setJobDefinitionVersion(theBatchWorkChunk.jobDefinitionVersion);
-		entity.setTargetStepId(theBatchWorkChunk.targetStepId);
-		entity.setInstanceId(theBatchWorkChunk.instanceId);
-		entity.setSerializedData(theBatchWorkChunk.serializedData);
-		entity.setCreateTime(new Date());
-		entity.setStartTime(new Date());
-		entity.setStatus(getOnCreateStatus(theBatchWorkChunk));
+			ourLog.debug(
+					"Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
+			ourLog.trace(
+					"Create work chunk data {}/{}: {}",
+					entity.getInstanceId(),
+					entity.getId(),
+					entity.getSerializedData());
+			myTransactionService
+					.withSystemRequestOnDefaultPartition()
+					.execute(() -> myWorkChunkRepository.save(entity));
 
-		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
-		ourLog.trace(
-				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
-		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.save(entity));
-
-		return entity.getId();
+			return entity.getId();
+		});
 	}
 
 	@Override
 	public Optional<WorkChunk> onWorkChunkDequeue(String theChunkId) {
-		HapiTransactionService.requireTransaction();
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
 
-		// take a lock on the chunk id to ensure that the maintenance run isn't doing anything.
-		Batch2WorkChunkEntity chunkLock =
-				myEntityManager.find(Batch2WorkChunkEntity.class, theChunkId, LockModeType.PESSIMISTIC_WRITE);
+			// take a lock on the chunk id to ensure that the maintenance run isn't doing anything.
+			Batch2WorkChunkEntity chunkLock =
+					myEntityManager.find(Batch2WorkChunkEntity.class, theChunkId, LockModeType.PESSIMISTIC_WRITE);
 
-		if (chunkLock == null) {
-			ourLog.warn("Unknown chunk id {} encountered. Message will be discarded.", theChunkId);
-			return Optional.empty();
-		}
+			if (chunkLock == null) {
+				ourLog.warn("Unknown chunk id {} encountered. Message will be discarded.", theChunkId);
+				return Optional.empty();
+			}
 
-		// remove from the current state to avoid stale data.
-		myEntityManager.detach(chunkLock);
+			// remove from the current state to avoid stale data.
+			myEntityManager.detach(chunkLock);
 
-		// NOTE: Ideally, IN_PROGRESS wouldn't be allowed here.  On chunk failure, we probably shouldn't be allowed.
-		// But how does re-run happen if k8s kills a processor mid run?
-		List<WorkChunkStatusEnum> priorStates =
-				List.of(WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.ERRORED, WorkChunkStatusEnum.IN_PROGRESS);
-		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(
-				theChunkId, new Date(), WorkChunkStatusEnum.IN_PROGRESS, priorStates);
+			// NOTE: Ideally, IN_PROGRESS wouldn't be allowed here.  On chunk failure, we probably shouldn't be allowed.
+			// But how does re-run happen if k8s kills a processor mid run?
+			List<WorkChunkStatusEnum> priorStates =
+					List.of(WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.ERRORED, WorkChunkStatusEnum.IN_PROGRESS);
+			int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(
+					theChunkId, new Date(), WorkChunkStatusEnum.IN_PROGRESS, priorStates);
 
-		if (rowsModified == 0) {
-			ourLog.info("Attempting to start chunk {} but it was already started.", theChunkId);
-			return Optional.empty();
-		} else {
-			Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
-			return chunk.map(c -> {
-				WorkChunk ret = toChunk(c);
-				ret.setPreviousStatus(chunkLock.getStatus());
-				return ret;
-			});
-		}
+			if (rowsModified == 0) {
+				ourLog.info("Attempting to start chunk {} but it was already started.", theChunkId);
+				return Optional.empty();
+			} else {
+				Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
+				return chunk.map(c -> {
+					WorkChunk ret = toChunk(c);
+					ret.setPreviousStatus(chunkLock.getStatus());
+					return ret;
+				});
+			}
+		});
 	}
 
 	@Override

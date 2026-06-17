@@ -105,16 +105,14 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		jobDefinitionRegistry.addJobDefinitionIfNotRegistered(getTestManager().withJobDefinition(false));
 
 		// when
-		getTestManager().runInTransaction(()-> {
-			new ActiveJobInstanceProcessor(
-				getTestManager().getSvc(),
-				null,
-				instanceId1,
-				null,
-				jobDefinitionRegistry,
-				interceptorService
-			).process();
-		});
+		new ActiveJobInstanceProcessor(
+			getTestManager().getSvc(),
+			null,
+			instanceId1,
+			null,
+			jobDefinitionRegistry,
+			interceptorService
+		).process();
 
 		// then
 		JobInstance freshInstance1 = getTestManager().getSvc().fetchInstance(instanceId1).orElseThrow();
