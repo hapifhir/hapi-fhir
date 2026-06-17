@@ -54,6 +54,7 @@ public class BulkExportJobService {
 	private final DaoRegistry myDaoRegistry;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	private final JpaStorageSettings myStorageSettings;
+	private final String JOB_INSTANCE_ID = "JobInstanceId";
 
 	public BulkExportJobService(
 			@Nonnull IInterceptorBroadcaster theInterceptorBroadcaster,
@@ -87,6 +88,7 @@ public class BulkExportJobService {
 		startRequest.setUseCache(useCache);
 		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, startRequest);
+		theRequestDetails.getUserData().put(JOB_INSTANCE_ID, response.getInstanceId());
 
 		BulkExportJobServiceUtil.writePollingLocationsToResponseHeaders(theRequestDetails, response.getInstanceId());
 	}
