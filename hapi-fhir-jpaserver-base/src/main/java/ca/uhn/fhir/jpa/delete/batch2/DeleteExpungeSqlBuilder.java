@@ -28,17 +28,22 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,18 +56,21 @@ public class DeleteExpungeSqlBuilder {
 	private final PartitionSettings myPartitionSettings;
 	private final IIdHelperService<JpaPid> myIdHelper;
 	private final IResourceLinkDao myResourceLinkDao;
+	private final DialectSvc myDialectSvc;
 
 	public DeleteExpungeSqlBuilder(
 			ResourceTableFKProvider theResourceTableFKProvider,
 			JpaStorageSettings theStorageSettings,
 			IIdHelperService<JpaPid> theIdHelper,
 			IResourceLinkDao theResourceLinkDao,
-			PartitionSettings thePartitionSettings) {
+			PartitionSettings thePartitionSettings,
+			DialectSvc theDialectSvc) {
 		myResourceTableFKProvider = theResourceTableFKProvider;
 		myStorageSettings = theStorageSettings;
 		myIdHelper = theIdHelper;
 		myResourceLinkDao = theResourceLinkDao;
 		myPartitionSettings = thePartitionSettings;
+		myDialectSvc = theDialectSvc;
 	}
 
 	@Nonnull
@@ -217,6 +225,10 @@ public class DeleteExpungeSqlBuilder {
 		builder.append("DELETE FROM ");
 		builder.append(theResourceForeignKey.myTable);
 		builder.append(" WHERE ");
+		if (myPartitionSettings.isDatabasePartitionMode() && myDialectSvc.isMssql()) {
+			appendMsSqlPartitionAwareInClause(builder, thePids, theResourceForeignKey);
+			return builder.toString();
+		}
 		if (myPartitionSettings.isDatabasePartitionMode()) {
 			builder.append("(");
 			builder.append(theResourceForeignKey.myPartitionIdColumn);
@@ -245,6 +257,48 @@ public class DeleteExpungeSqlBuilder {
 		}
 		builder.append(")");
 		return builder.toString();
+	}
+
+	/**
+	 * In Database Partition Mode, for most databases we emit a row-value constructor
+	 * predicate like <code>(PARTITION_ID,RES_ID) IN ((1,2),(1,3))</code>, but SQL Server
+	 * does not support that syntax in IN predicates. So for that specific platform we
+	 * group the PIDs by partition and emit
+	 * <code>(PARTITION_ID = 1 AND RES_ID IN (2,3)) OR (PARTITION_ID = 2 AND RES_ID IN (5))</code>
+	 * instead, for the same reasons described in
+	 * {@link ca.uhn.fhir.jpa.search.builder.SearchBuilder#loadCurrentResourceVersionsForMsSqlDbpm(List)}.
+	 */
+	private void appendMsSqlPartitionAwareInClause(
+			StringBuilder theBuilder, Set<JpaPid> thePids, ResourceForeignKey theResourceForeignKey) {
+		// Tree keys/values keep the generated SQL deterministic
+		Multimap<Integer, Long> partitionIdToPids =
+				MultimapBuilder.treeKeys().treeSetValues().build();
+		for (JpaPid pid : thePids) {
+			partitionIdToPids.put(pid.getPartitionId(), pid.getId());
+		}
+
+		for (Iterator<Map.Entry<Integer, Collection<Long>>> partitionIter =
+						partitionIdToPids.asMap().entrySet().iterator();
+				partitionIter.hasNext(); ) {
+			Map.Entry<Integer, Collection<Long>> entry = partitionIter.next();
+			theBuilder.append("(");
+			theBuilder.append(theResourceForeignKey.myPartitionIdColumn);
+			theBuilder.append(" = ");
+			theBuilder.append(entry.getKey());
+			theBuilder.append(" AND ");
+			theBuilder.append(theResourceForeignKey.myResourceIdColumn);
+			theBuilder.append(" IN (");
+			for (Iterator<Long> pidIter = entry.getValue().iterator(); pidIter.hasNext(); ) {
+				theBuilder.append(pidIter.next());
+				if (pidIter.hasNext()) {
+					theBuilder.append(",");
+				}
+			}
+			theBuilder.append("))");
+			if (partitionIter.hasNext()) {
+				theBuilder.append(" OR ");
+			}
+		}
 	}
 
 	public static class DeleteExpungeSqlResult {

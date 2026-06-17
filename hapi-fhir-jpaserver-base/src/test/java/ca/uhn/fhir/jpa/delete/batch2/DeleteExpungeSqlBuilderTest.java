@@ -1,14 +1,15 @@
-package ca.uhn.fhir.jpa.batch2;
+package ca.uhn.fhir.jpa.delete.batch2;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
-import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSqlBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,6 +44,8 @@ class DeleteExpungeSqlBuilderTest {
 	private IResourceLinkDao myResourceLinkDao;
 	@Mock
 	private PartitionSettings myPartitionSettings;
+	@Mock
+	private DialectSvc myDialectSvc;
 	@InjectMocks
 	private DeleteExpungeSqlBuilder myDeleteExpungeSqlBuilderTest;
 
@@ -150,5 +154,72 @@ class DeleteExpungeSqlBuilderTest {
 		// With maxRounds=1, the loop exhausts after one cascade round but RI is disabled → no throw
 		assertThatCode(() -> myDeleteExpungeSqlBuilderTest.validateOkToDeleteAndExpunge(pids, true, 1))
 				.doesNotThrowAnyException();
+	}
+
+	@Test
+	void convertPidsToDeleteExpungeSql_dbpmOnMssql_groupsPidsByPartitionInsteadOfTupleIn() {
+		// Given: DBPM enabled on SQL Server, which does not support row-value constructors in IN predicates
+		when(myStorageSettings.isEnforceReferentialIntegrityOnDelete()).thenReturn(false);
+		when(myPartitionSettings.isDatabasePartitionMode()).thenReturn(true);
+		when(myDialectSvc.isMssql()).thenReturn(true);
+		when(myResourceTableFKProvider.getResourceForeignKeys())
+				.thenReturn(List.of(new ResourceForeignKey("HFJ_HISTORY_TAG", "PARTITION_ID", "RES_ID")));
+
+		List<JpaPid> pids = List.of(
+				JpaPid.fromId(2353L, 1),
+				JpaPid.fromId(2354L, 1),
+				JpaPid.fromId(99L, 2));
+
+		// When
+		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult result =
+				myDeleteExpungeSqlBuilderTest.convertPidsToDeleteExpungeSql(pids, false, null);
+
+		// Then: PIDs are grouped per partition with no row-value constructor
+		assertThat(result.getSqlStatements())
+				.containsExactly(
+						"DELETE FROM HFJ_HISTORY_TAG WHERE (PARTITION_ID = 1 AND RES_ID IN (2353,2354)) OR (PARTITION_ID = 2 AND RES_ID IN (99))",
+						"DELETE FROM HFJ_RESOURCE WHERE (PARTITION_ID = 1 AND RES_ID IN (2353,2354)) OR (PARTITION_ID = 2 AND RES_ID IN (99))");
+	}
+
+	@Test
+	void convertPidsToDeleteExpungeSql_dbpmOnOtherDatabases_keepsTupleInForm() {
+		// Given: DBPM enabled on a database that supports row-value constructors (myDialectSvc.isMssql() == false)
+		when(myStorageSettings.isEnforceReferentialIntegrityOnDelete()).thenReturn(false);
+		when(myPartitionSettings.isDatabasePartitionMode()).thenReturn(true);
+		when(myResourceTableFKProvider.getResourceForeignKeys())
+				.thenReturn(List.of(new ResourceForeignKey("HFJ_HISTORY_TAG", "PARTITION_ID", "RES_ID")));
+
+		List<JpaPid> pids = List.of(JpaPid.fromId(2353L, 1));
+
+		// When
+		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult result =
+				myDeleteExpungeSqlBuilderTest.convertPidsToDeleteExpungeSql(pids, false, null);
+
+		// Then
+		assertThat(result.getSqlStatements())
+				.containsExactly(
+						"DELETE FROM HFJ_HISTORY_TAG WHERE (PARTITION_ID,RES_ID) IN ((1,2353))",
+						"DELETE FROM HFJ_RESOURCE WHERE (PARTITION_ID,RES_ID) IN ((1,2353))");
+	}
+
+	@Test
+	void convertPidsToDeleteExpungeSql_noDbpm_keepsPlainInForm() {
+		// Given: DBPM disabled - the dialect is irrelevant
+		when(myStorageSettings.isEnforceReferentialIntegrityOnDelete()).thenReturn(false);
+		when(myPartitionSettings.isDatabasePartitionMode()).thenReturn(false);
+		when(myResourceTableFKProvider.getResourceForeignKeys())
+				.thenReturn(List.of(new ResourceForeignKey("HFJ_HISTORY_TAG", "PARTITION_ID", "RES_ID")));
+
+		List<JpaPid> pids = List.of(JpaPid.fromId(2353L, 1));
+
+		// When
+		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult result =
+				myDeleteExpungeSqlBuilderTest.convertPidsToDeleteExpungeSql(pids, false, null);
+
+		// Then
+		assertThat(result.getSqlStatements())
+				.containsExactly(
+						"DELETE FROM HFJ_HISTORY_TAG WHERE RES_ID IN (2353)",
+						"DELETE FROM HFJ_RESOURCE WHERE RES_ID IN (2353)");
 	}
 }
