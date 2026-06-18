@@ -54,7 +54,7 @@ public class BulkExportJobService {
 	private final DaoRegistry myDaoRegistry;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	private final JpaStorageSettings myStorageSettings;
-	private final String JOB_INSTANCE_ID = "JobInstanceId";
+	protected static final String JOB_INSTANCE_ID = "jobInstanceId";
 
 	public BulkExportJobService(
 			@Nonnull IInterceptorBroadcaster theInterceptorBroadcaster,
