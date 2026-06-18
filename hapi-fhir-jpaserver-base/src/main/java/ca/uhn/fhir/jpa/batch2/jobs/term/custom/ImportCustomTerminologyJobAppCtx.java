@@ -91,12 +91,12 @@ public class ImportCustomTerminologyJobAppCtx {
 						STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
 						"Create work chunks for calculating concept closures",
 						TerminologyFileSetJson.class,
-						importIcdStepChunkConceptsForClosureGeneration())
+						importCustomTerminologyStepChunkConceptsForClosureGeneration())
 				.addIntermediateStep(
 						STEP_ID_GENERATE_CONCEPT_CLOSURES,
 						"Generate concept closures",
 						TerminologyFileSetJson.class,
-						importIcdStepGenerateConceptClosures())
+						importCustomTerminologyStepGenerateConceptClosures())
 				// This step doesn't gain any work chunks until the previous step, we want to give it
 				// a fixed portion of the overall progress
 				.setStepWeightForProgressCalculator(STEP_ID_GENERATE_CONCEPT_CLOSURES, 0.3)
@@ -133,13 +133,13 @@ public class ImportCustomTerminologyJobAppCtx {
 
 	@Bean
 	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportTerminologyJobParameters>
-			importIcdStepChunkConceptsForClosureGeneration() {
+			importCustomTerminologyStepChunkConceptsForClosureGeneration() {
 		return new ImportTerminologyStepChunkConceptsForGeneratingClosure<>();
 	}
 
 	@Bean
 	public ImportTerminologyStepGenerateConceptClosures<ImportTerminologyJobParameters>
-			importIcdStepGenerateConceptClosures() {
+			importCustomTerminologyStepGenerateConceptClosures() {
 		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
 
