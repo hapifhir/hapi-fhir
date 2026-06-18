@@ -98,7 +98,7 @@ class BulkExportMdmEidMatchOnlyResourceExpanderTest {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	void expandGroup_widensMemberExpandAndResolveOnlyWhenSearchAllPartitionForMatchEnabled(
+	void expandGroup_withSearchAllPartitionForMatch_widensMemberExpandAndResolveOnlyWhenEnabled(
 			boolean theSearchAllPartitionForMatch) {
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(0);
 		setupGroupRead();
@@ -126,7 +126,9 @@ class BulkExportMdmEidMatchOnlyResourceExpanderTest {
 	}
 
 	@Test
-	void expandGroup_whenSettingsNull_usesRequestPartitionForMemberExpandAndResolve() {
+	void expandGroup_withNullSettings_usesRequestPartitionForMemberExpandAndResolve() {
+		// Defensive fallback: settings should always be set before this expander runs, but if they are
+		// somehow null, expansion must degrade to the request partition rather than throw.
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(0);
 		setupGroupRead();
 
@@ -144,7 +146,7 @@ class BulkExportMdmEidMatchOnlyResourceExpanderTest {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	void expandPatient_widensToAllPartitionsOnlyWhenSearchAllPartitionForMatchEnabled(
+	void expandPatient_withSearchAllPartitionForMatch_widensToAllPartitionsOnlyWhenEnabled(
 			boolean theSearchAllPartitionForMatch) {
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(0);
 		when(myMdmEidMatchOnlyExpandSvc.expandMdmBySourceResourceId(any(), any()))

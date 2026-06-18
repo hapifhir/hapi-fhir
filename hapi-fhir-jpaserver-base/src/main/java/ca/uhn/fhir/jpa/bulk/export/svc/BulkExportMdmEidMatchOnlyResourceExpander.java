@@ -87,12 +87,15 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 	 * search all partitions for matching, members may live on partitions other than the request partition
 	 * (e.g. the Group's default partition), so expansion must widen to {@link RequestPartitionId#allPartitions()}.
 	 * Otherwise the original request partition is used.
+	 * <p>
+	 * In practice {@code myMdmSettings} is always set before this expander is used (the holder only hands
+	 * out this expander once MDM settings have been applied), so the null check is a defensive fallback:
+	 * if settings are somehow unset, we degrade to the request partition rather than throwing an NPE.
 	 */
 	private RequestPartitionId determineExpansionPartition(RequestPartitionId theRequestPartitionId) {
-		if (myMdmSettings != null && myMdmSettings.getSearchAllPartitionForMatch()) {
-			return RequestPartitionId.allPartitions();
-		}
-		return theRequestPartitionId;
+		return (myMdmSettings != null && myMdmSettings.getSearchAllPartitionForMatch())
+				? RequestPartitionId.allPartitions()
+				: theRequestPartitionId;
 	}
 
 	/**
