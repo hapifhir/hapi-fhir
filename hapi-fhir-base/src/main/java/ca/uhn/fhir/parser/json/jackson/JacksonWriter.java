@@ -20,11 +20,11 @@
 package ca.uhn.fhir.parser.json.jackson;
 
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.core.util.Separators;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.util.DefaultIndenter;
+import tools.jackson.core.util.DefaultPrettyPrinter;
+import tools.jackson.core.util.Separators;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -46,14 +46,14 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 	public BaseJsonLikeWriter init() {
 		if (isPrettyPrint()) {
 			DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter()
-					.withSeparators(new Separators(
-							Separators.DEFAULT_ROOT_VALUE_SEPARATOR,
-							':',
-							Separators.Spacing.AFTER,
-							',',
-							Separators.Spacing.NONE,
-							',',
-							Separators.Spacing.NONE));
+				.withSeparators(new Separators(
+					Separators.DEFAULT_ROOT_VALUE_SEPARATOR,
+					':',
+					Separators.Spacing.AFTER,
+					',',
+					Separators.Spacing.NONE,
+					',',
+					Separators.Spacing.NONE));
 			prettyPrinter = prettyPrinter.withObjectIndenter(new DefaultIndenter("  ", "\n"));
 
 			myJsonGenerator.setPrettyPrinter(prettyPrinter);
@@ -79,55 +79,55 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 
 	@Override
 	public BaseJsonLikeWriter beginObject(String name) throws IOException {
-		myJsonGenerator.writeObjectFieldStart(name);
+		myJsonGenerator.writeStartObject(name);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter beginArray(String name) throws IOException {
-		myJsonGenerator.writeArrayFieldStart(name);
+		myJsonGenerator.writeStartArray(name);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(String value) throws IOException {
-		myJsonGenerator.writeObject(value);
+		myJsonGenerator.writePOJO(value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(BigInteger value) throws IOException {
-		myJsonGenerator.writeObject(value);
+		myJsonGenerator.writePOJO(value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(BigDecimal value) throws IOException {
-		myJsonGenerator.writeObject(value);
+		myJsonGenerator.writePOJO(value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(long value) throws IOException {
-		myJsonGenerator.writeObject(value);
+		myJsonGenerator.writePOJO(value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(double value) throws IOException {
-		myJsonGenerator.writeObject(value);
+		myJsonGenerator.writePOJO(value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(Boolean value) throws IOException {
-		myJsonGenerator.writeObject(value);
+		myJsonGenerator.writePOJO(value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(boolean value) throws IOException {
-		myJsonGenerator.writeObject(value);
+		myJsonGenerator.writePOJO(value);
 		return this;
 	}
 
@@ -139,43 +139,43 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 
 	@Override
 	public BaseJsonLikeWriter write(String name, String value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
+		myJsonGenerator.writeStringProperty(name, value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(String name, BigInteger value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
+		myJsonGenerator.writeNumberProperty(name, value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(String name, BigDecimal value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
+		myJsonGenerator.writeNumberProperty(name, value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(String name, long value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
+		myJsonGenerator.writeNumberProperty(name, value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(String name, double value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
+		myJsonGenerator.writeNumberProperty(name, value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(String name, Boolean value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
+		myJsonGenerator.writeBooleanProperty(name, value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(String name, boolean value) throws IOException {
-		myJsonGenerator.writeObjectField(name, value);
+		myJsonGenerator.writeBooleanProperty(name, value);
 		return this;
 	}
 
