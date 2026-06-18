@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.dialect;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.HapiHibernateDialectSettingsService;
@@ -82,7 +83,7 @@ public class HapiSequenceStyleGenerator
 	}
 
 	/**
-	 * Pulls an id from the supplied id source, guarding against the reserved {@link NO_MORE_PID} value which
+	 * Pulls an id from the supplied id source, guarding against the reserved {@link JpaConstants#NO_MORE_PID} value which
 	 * has a special internal meaning to HAPI and must never be persisted as a resource id. This should never
 	 * happen since the sequence starts at 1, but if someone ever manually messes with sequences or the
 	 * sequence otherwise gets messed up, we retry once and then fail rather than persisting the reserved value.
@@ -129,9 +130,7 @@ public class HapiSequenceStyleGenerator
 
 		// The legacy pooled optimizer (default) keeps a single node-wide id pool behind a lock. The opt-in
 		// thread-local optimizer (pooled-lotl) keeps the pool in a ThreadLocal so concurrent writers each
-		// allocate from their own block instead of serializing on that lock during refills. Default is the
-		// legacy pool so existing deployments are unaffected on upgrade; enabling per-thread pooling must be
-		// done cluster-wide at once (the two optimizers interpret the same db sequence value differently).
+		// allocate from their own block instead of serializing on that lock during refills.
 		// Initial value is kept larger than the increment for backwards-compatible schema export.
 		boolean perThreadIdSequencePoolingEnabled = isPerThreadIdSequencePoolingEnabled(theServiceRegistry);
 		props.put(OptimizableGenerator.OPT_PARAM, determineOptimizerExternalName(perThreadIdSequencePoolingEnabled));
