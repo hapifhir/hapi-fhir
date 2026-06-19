@@ -405,20 +405,21 @@ public class JacksonStructure implements JsonLikeStructure {
 
 	private static JsonMapper createObjectMapper() {
 		JsonFactory jsonFactory = JsonFactory.builder()
-			.streamReadConstraints(createStreamReadConstraints())
-			.build();
+				.streamReadConstraints(createStreamReadConstraints())
+				.build();
 
 		return JsonMapper.builder(jsonFactory)
-			//JACKSONTOOL3-TODO.  overload constructor : JsonNodeFactory(boolean bigDecimalExact) where did this go?
-			.nodeFactory(new JsonNodeFactory())
-			.enable(JsonReadFeature.ALLOW_LEADING_PLUS_SIGN_FOR_NUMBERS)
-			.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
-			.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
-			.disable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
-			.disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
-			.disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
-			.configure(JsonReadFeature.ALLOW_SINGLE_QUOTES, true)
-			.build();
+				// JACKSONTOOL3-TODO.  overload constructor : JsonNodeFactory(boolean bigDecimalExact) where did this
+				// go?
+				.nodeFactory(new JsonNodeFactory())
+				.enable(JsonReadFeature.ALLOW_LEADING_PLUS_SIGN_FOR_NUMBERS)
+				.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+				.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+				.disable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
+				.disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
+				.disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
+				.configure(JsonReadFeature.ALLOW_SINGLE_QUOTES, true)
+				.build();
 	}
 
 	private static StreamReadConstraints createStreamReadConstraints() {

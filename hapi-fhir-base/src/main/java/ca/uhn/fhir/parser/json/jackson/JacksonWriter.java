@@ -20,20 +20,9 @@
 package ca.uhn.fhir.parser.json.jackson;
 
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
-import tools.jackson.core.FormatSchema;
-import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.ObjectWriteContext;
-import tools.jackson.core.PrettyPrinter;
-import tools.jackson.core.SerializableString;
-import tools.jackson.core.TokenStreamFactory;
-import tools.jackson.core.TreeNode;
-import tools.jackson.core.io.CharacterEscapes;
 import tools.jackson.core.json.JsonFactory;
-import tools.jackson.core.tree.ArrayTreeNode;
-import tools.jackson.core.tree.ObjectTreeNode;
-import tools.jackson.core.util.DefaultIndenter;
-import tools.jackson.core.util.DefaultPrettyPrinter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -64,7 +53,8 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 		// only need to override the one accessor (getPrettyPrinter()) that matters here.
 		ObjectWriteContext writeContext;
 		if (isPrettyPrint()) {
-			//JACKSONTOOLS3-TODO.  Implement Pretty-Print.  See : https://github.com/FasterXML/jackson-databind/issues/5331
+			// JACKSONTOOLS3-TODO.  Implement Pretty-Print.  See :
+			// https://github.com/FasterXML/jackson-databind/issues/5331
 			writeContext = ObjectWriteContext.empty();
 		} else {
 			writeContext = ObjectWriteContext.empty();
@@ -72,8 +62,6 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 		myJsonGenerator = myJsonFactory.createGenerator(writeContext, myTargetWriter);
 		return this;
 	}
-
-
 
 	@Override
 	public BaseJsonLikeWriter flush() {

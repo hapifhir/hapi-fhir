@@ -23,8 +23,6 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,7 +32,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import tools.jackson.databind.json.JsonMapper;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,8 +53,7 @@ import static org.apache.commons.lang3.ObjectUtils.getIfNull;
  */
 public class RequestPartitionId implements IModelJson {
 	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
-	private static final ObjectMapper ourObjectMapper =
-			new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+	private static final JsonMapper ourObjectMapper = JsonMapper.builder().build();
 
 	@JsonProperty("partitionDate")
 	private final LocalDate myPartitionDate;
@@ -166,7 +165,7 @@ public class RequestPartitionId implements IModelJson {
 		}
 	}
 
-	public static RequestPartitionId fromJson(String theJson) throws JsonProcessingException {
+	public static RequestPartitionId fromJson(String theJson) throws IOException {
 		return ourObjectMapper.readValue(theJson, RequestPartitionId.class);
 	}
 
@@ -515,7 +514,7 @@ public class RequestPartitionId implements IModelJson {
 		return retVal;
 	}
 
-	public String asJson() throws JsonProcessingException {
+	public String asJson() throws IOException {
 		return ourObjectMapper.writeValueAsString(this);
 	}
 }

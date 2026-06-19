@@ -21,8 +21,8 @@ package ca.uhn.fhir.serializer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import tools.jackson.core.JsonParser;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.deser.std.StdDeserializer;
 

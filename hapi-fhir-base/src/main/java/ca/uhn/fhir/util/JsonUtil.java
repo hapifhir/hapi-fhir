@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.api.annotation.SensitiveNoDisplay;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Nonnull;
 import org.thymeleaf.util.Validate;
@@ -50,28 +51,34 @@ public class JsonUtil {
 	public static final SimpleBeanPropertyFilter SIMPLE_BEAN_PROPERTY_FILTER = new SensitiveDataFilter();
 
 	public static final SimpleFilterProvider SENSITIVE_DATA_FILTER_PROVIDER =
-		new SimpleFilterProvider().addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SIMPLE_BEAN_PROPERTY_FILTER);
+			new SimpleFilterProvider().addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SIMPLE_BEAN_PROPERTY_FILTER);
 	public static final SimpleFilterProvider SHOW_ALL_DATA_FILTER_PROVIDER = new SimpleFilterProvider()
-		.addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SimpleBeanPropertyFilter.serializeAll());
+			.addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SimpleBeanPropertyFilter.serializeAll());
 
 	static {
 		ourMapperPrettyPrint = JsonMapper.builder()
-			.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
-			.filterProvider(SENSITIVE_DATA_FILTER_PROVIDER)
-			.enable(SerializationFeature.INDENT_OUTPUT)
-			.build();
+				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
+				.filterProvider(SENSITIVE_DATA_FILTER_PROVIDER)
+				.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+				.enable(SerializationFeature.INDENT_OUTPUT)
+				.build();
 
 		ourMapperNonPrettyPrint = JsonMapper.builder()
-			.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
-			.filterProvider(SENSITIVE_DATA_FILTER_PROVIDER)
-			.disable(SerializationFeature.INDENT_OUTPUT)
-			.build();
+				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
+				.filterProvider(SENSITIVE_DATA_FILTER_PROVIDER)
+				.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+				.disable(SerializationFeature.INDENT_OUTPUT)
+				.build();
 
 		ourMapperIncludeSensitive = JsonMapper.builder()
-			.filterProvider(SHOW_ALL_DATA_FILTER_PROVIDER)
-			.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
-			.disable(SerializationFeature.INDENT_OUTPUT)
-			.build();
+				.filterProvider(SHOW_ALL_DATA_FILTER_PROVIDER)
+				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
+				.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+				.disable(SerializationFeature.INDENT_OUTPUT)
+				.build();
 	}
 
 	/**
@@ -90,7 +97,8 @@ public class JsonUtil {
 	/**
 	 * Parse JSON
 	 */
-	public static <T> List<T> deserializeList(@Nonnull String theInput, @Nonnull Class<T> theType) throws JacksonException {
+	public static <T> List<T> deserializeList(@Nonnull String theInput, @Nonnull Class<T> theType)
+			throws JacksonException {
 		return ourMapperPrettyPrint.readerForListOf(theType).readValue(theInput);
 	}
 
@@ -174,7 +182,7 @@ public class JsonUtil {
 	}
 
 	private static InvalidRequestException newInvalidRequestException(Object theObject, Exception theCause)
-		throws InvalidRequestException {
+			throws InvalidRequestException {
 		return new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theObject.getClass(), theCause);
 	}
 
@@ -182,11 +190,11 @@ public class JsonUtil {
 
 		@Override
 		protected boolean include(PropertyWriter writer) {
-			return true; // Default include all except explicitly checked and excluded
+			return !isFieldSensitive(writer);
 		}
 
 		private boolean isFieldSensitive(PropertyWriter writer) {
-			return writer.getAnnotation(SensitiveNoDisplay.class) != null;
+			return writer.findAnnotation(SensitiveNoDisplay.class) != null;
 		}
 	}
 }
