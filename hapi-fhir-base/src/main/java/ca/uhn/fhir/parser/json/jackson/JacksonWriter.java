@@ -20,11 +20,20 @@
 package ca.uhn.fhir.parser.json.jackson;
 
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
+import tools.jackson.core.FormatSchema;
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.ObjectWriteContext;
+import tools.jackson.core.PrettyPrinter;
+import tools.jackson.core.SerializableString;
+import tools.jackson.core.TokenStreamFactory;
+import tools.jackson.core.TreeNode;
+import tools.jackson.core.io.CharacterEscapes;
 import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.tree.ArrayTreeNode;
+import tools.jackson.core.tree.ObjectTreeNode;
 import tools.jackson.core.util.DefaultIndenter;
 import tools.jackson.core.util.DefaultPrettyPrinter;
-import tools.jackson.core.util.Separators;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -33,10 +42,13 @@ import java.math.BigInteger;
 
 public class JacksonWriter extends BaseJsonLikeWriter {
 
+	private JsonFactory myJsonFactory;
+	private Writer myTargetWriter;
 	private JsonGenerator myJsonGenerator;
 
-	public JacksonWriter(JsonFactory theJsonFactory, Writer theWriter) throws IOException {
-		myJsonGenerator = theJsonFactory.createGenerator(theWriter);
+	public JacksonWriter(JsonFactory theJsonFactory, Writer theWriter) {
+		myJsonFactory = theJsonFactory;
+		myTargetWriter = theWriter;
 		setWriter(theWriter);
 	}
 
@@ -44,22 +56,24 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 
 	@Override
 	public BaseJsonLikeWriter init() {
+		// In Jackson 3.x, JsonGenerator is immutable once created and no longer offers
+		// setPrettyPrinter(..). The pretty printer must instead be supplied up front via
+		// the ObjectWriteContext passed to createGenerator(..), so generator creation is
+		// deferred to here (where isPrettyPrint() is known) rather than done in the
+		// constructor. ObjectWriteContext is an interface with default methods, so we
+		// only need to override the one accessor (getPrettyPrinter()) that matters here.
+		ObjectWriteContext writeContext;
 		if (isPrettyPrint()) {
-			DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter()
-				.withSeparators(new Separators(
-					Separators.DEFAULT_ROOT_VALUE_SEPARATOR,
-					':',
-					Separators.Spacing.AFTER,
-					',',
-					Separators.Spacing.NONE,
-					',',
-					Separators.Spacing.NONE));
-			prettyPrinter = prettyPrinter.withObjectIndenter(new DefaultIndenter("  ", "\n"));
-
-			myJsonGenerator.setPrettyPrinter(prettyPrinter);
+			//JACKSONTOOLS3-TODO.  Implement Pretty-Print.  See : https://github.com/FasterXML/jackson-databind/issues/5331
+			writeContext = ObjectWriteContext.empty();
+		} else {
+			writeContext = ObjectWriteContext.empty();
 		}
+		myJsonGenerator = myJsonFactory.createGenerator(writeContext, myTargetWriter);
 		return this;
 	}
+
+
 
 	@Override
 	public BaseJsonLikeWriter flush() {
@@ -121,13 +135,13 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 
 	@Override
 	public BaseJsonLikeWriter write(Boolean value) throws IOException {
-		myJsonGenerator.writePOJO(value);
+		myJsonGenerator.writeBoolean(value);
 		return this;
 	}
 
 	@Override
 	public BaseJsonLikeWriter write(boolean value) throws IOException {
-		myJsonGenerator.writePOJO(value);
+		myJsonGenerator.writeBoolean(value);
 		return this;
 	}
 
