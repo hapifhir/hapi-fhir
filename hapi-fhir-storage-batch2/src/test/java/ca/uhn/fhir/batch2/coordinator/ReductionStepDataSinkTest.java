@@ -48,7 +48,7 @@ public class ReductionStepDataSinkTest {
 	private static final String INSTANCE_ID = "instanceId";
 	private static final String JOB_DEFINITION_ID = "jobDefinitionId";
 
-	@Mock
+	@Mock(strictness = Mock.Strictness.STRICT_STUBS)
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 
 	private JobDefinition<MyModel> jobDefinition;
@@ -138,7 +138,7 @@ public class ReductionStepDataSinkTest {
 		@SuppressWarnings("rawtypes")
 		JobDefinition jobDefinitionUncast = jobDefinition;
 		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(instance)).thenReturn(jobDefinitionUncast);
-		when(myJobDefinitionRegistry.getJobDefinition(any(), anyInt())).thenReturn(Optional.of(jobDefinition));
+		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(any(), anyInt())).thenReturn(jobDefinitionUncast);
 
 		// test
 		myDataSink.accept(chunkData);
@@ -165,7 +165,7 @@ public class ReductionStepDataSinkTest {
 		@SuppressWarnings("rawtypes")
 		JobDefinition jobDefinitionUncast = jobDefinition;
 		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(instance)).thenReturn(jobDefinitionUncast);
-		when(myJobDefinitionRegistry.getJobDefinition(any(), anyInt())).thenReturn(Optional.of(jobDefinition));
+		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(any(), anyInt())).thenReturn(jobDefinitionUncast);
 
 		// test
 		myDataSink.accept(firstData);
