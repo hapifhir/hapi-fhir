@@ -111,7 +111,8 @@ public class ImportSnomedCtJobAppCtx {
 						importSnomedStep5GenerateConceptClosures())
 				// This step doesn't gain any work chunks until the previous step, we want to give it
 				// a fixed portion of the overall progress
-				.setStepWeightForProgressCalculator(STEP_ID_GENERATE_CONCEPT_CLOSURES, STEP_WEIGHT_GENERATE_CONCEPT_CLOSURES)
+				.setStepWeightForProgressCalculator(
+						STEP_ID_GENERATE_CONCEPT_CLOSURES, STEP_WEIGHT_GENERATE_CONCEPT_CLOSURES)
 				.addFinalReducerStep(
 						STEP_ID_FINALIZE_IMPORT,
 						"Finalize Snomed Import",

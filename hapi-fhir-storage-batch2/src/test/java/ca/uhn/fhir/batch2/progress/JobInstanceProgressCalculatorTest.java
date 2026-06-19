@@ -22,6 +22,8 @@ import jakarta.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -48,7 +50,7 @@ class JobInstanceProgressCalculatorTest extends BaseBatch2Test {
 	@Mock
 	private IJobStepWorker<MyJsonModel, MyJsonModel, MyJsonModel> myIntermediateStep;
 	@Mock
-	private IReductionStepWorker<MyJsonModel, MyJsonModel, MyJsonModel> myFinalStep;
+	private IJobStepWorker<MyJsonModel, MyJsonModel, VoidModel> myLastStep;
 
 	@BeforeEach
 	void before() {
@@ -157,167 +159,45 @@ class JobInstanceProgressCalculatorTest extends BaseBatch2Test {
 
 
 
-	@Test
-	void tesCalculateProgress_() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void tesCalculateProgress_WeightedStepWithNoChunksPassedToIt(boolean theGatedJob) {
 
 		JobDefinition<MyJsonModel> jobDefinition = JobDefinition.newBuilder()
 			.setJobDefinitionId("TEST_JOB")
 			.setJobDescription("Import Terminology - LOINC")
 			.setJobDefinitionVersion(1)
-			.gatedExecution()
+			.gatedExecution(theGatedJob)
 			.setParametersType(MyJsonModel.class)
 			.setParametersValidator(new MyJsonModelValidator())
 			.addFirstStep(
-				"expand-zip",
-				"Expand LOINC distribution",
+				STEP_1,
+				"Step 1",
 				MyJsonModel.class,
 				myFirstStep)
 			.addIntermediateStep(
-				"import-concepts",
+				STEP_2,
 				"Import LOINC concepts",
 				MyJsonModel.class,
 				myIntermediateStep)
-			.addIntermediateStep(
-				"import-hierarchy-concepts",
-				"Import LOINC hierarchy Concepts",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-hierarchy",
-				"Import LOINC hierarchy",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-answer-lists",
-				"Import LOINC answer lists",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-answer-list-links",
-				"Import LOINC answer list links",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-rsna-playbook",
-				"Import LOINC RSNA playbook",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-part-related-code-mapping",
-				"Import LOINC Part Related Code Mappings",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-document-ontology",
-				"Import LOINC Document Ontology",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-univeral-lab-orderset",
-				"Import LOINC Lab Order Set",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-ieee-medical-device-code",
-				"Import LOINC IEEE Medical Device Codes",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-imaging-document-code",
-				"Import LOINC Imaging Document Codes",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-group-file",
-				"Import LOINC Group File",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-group-terms-file",
-				"Import LOINC Group Terms File",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-parent-group-file",
-				"Import LOINC Parent Group File",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-part-file",
-				"Import LOINC Part File",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-part-link-file",
-				"Import LOINC Part Link File",
-				MyJsonModel.class,
-				myIntermediateStep)
-			// Part link file uses a large number of smaller files, so limit its weight
-			.setStepWeightForProgressCalculator("import-part-link-file", 0.1)
-			.addIntermediateStep(
-				"import-consumer-name",
-				"Import LOINC Consumer Names",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-coding-properties",
-				"Import LOINC Coding Properties",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"import-linguistic-variant",
-				"Import LOINC Linguistic Variants",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"chunk-concepts-for-closure-generation",
-				"Create work chunks for calculating concept closures",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.addIntermediateStep(
-				"generate-concept-closures",
-				"Generate concept closures",
-				MyJsonModel.class,
-				myIntermediateStep)
-			.setStepWeightForProgressCalculator("generate-concept-closures", 0.3)
-			.addFinalReducerStep(
-				"finalize-import",
-				"Finalize LOINC Import",
-				MyJsonModel.class,
-				myFinalStep)
-			.setStepWeightForProgressCalculator("finalize-import", 0.01)
+			.setStepWeightForProgressCalculator(STEP_2, 0.5)
+			.addLastStep(
+				STEP_3,
+				"Step 3",
+				myLastStep)
 			.build();
 		myJobDefinitionRegistry.addJobDefinition(jobDefinition);
 
 		JobInstance jobInstance = newJobInstance();
 		jobInstance.setJobDefinitionId(jobDefinition.getJobDefinitionId());
 		jobInstance.setJobDefinitionVersion(jobDefinition.getJobDefinitionVersion());
+		jobInstance.setCurrentGatedStepId(STEP_3);
 		mockFetchAndUpdateInstance(jobInstance);
 
+		// No chunks in step 2, and we're already in step 3
 		List<WorkChunk> chunks = new ArrayList<>();
-		chunks.addAll(createWorkChunks("chunk-concepts-for-closure-generation", 1, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("expand-zip", 1, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("finalize-import", 0, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("generate-concept-closures", 127, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-answer-list-links", 1, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-answer-lists", 1, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-coding-properties", 0, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-concepts", 110, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-consumer-name", 68, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-document-ontology", 1, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-group-file", 1, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-group-terms-file", 1, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-hierarchy", 135, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-hierarchy-concepts", 135, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-ieee-medical-device-code", 1, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-imaging-document-code", 1, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-linguistic-variant", 0, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-parent-group-file", 1, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-part-file", 2, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-part-link-file", 1900, WorkChunkStatusEnum.IN_PROGRESS));
-		chunks.addAll(createWorkChunks("import-part-link-file", 88, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-part-related-code-mapping", 1, WorkChunkStatusEnum.COMPLETED));
-		chunks.addAll(createWorkChunks("import-rsna-playbook", 1, WorkChunkStatusEnum.COMPLETED));
+		chunks.addAll(createWorkChunks(STEP_1, 2, WorkChunkStatusEnum.COMPLETED));
+		chunks.addAll(createWorkChunks(STEP_3, 2, WorkChunkStatusEnum.IN_PROGRESS));
 		chunks.addAll(createWorkChunks("import-univeral-lab-orderset", 1, WorkChunkStatusEnum.COMPLETED));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false))).thenReturn(chunks.iterator());
 
@@ -325,8 +205,11 @@ class JobInstanceProgressCalculatorTest extends BaseBatch2Test {
 		mySvc.calculateAndStoreInstanceProgress(INSTANCE_ID);
 
 		// Verify
-		assertEquals(0.894, jobInstance.getProgress(), 0.001);
 
+		// 50% of progress is the second step which had a 0.5 weighting and is complete
+		// despite having no chunks. The other 50% is the other two steps, which have equal
+		// parts COMPLETE and IN_PROGRESS, so the total is 75%.
+		assertEquals(0.75, jobInstance.getProgress(), 0.001);
 
 	}
 	

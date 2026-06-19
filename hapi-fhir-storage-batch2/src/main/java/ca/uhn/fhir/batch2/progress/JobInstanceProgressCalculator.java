@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.StepWeightingForProgressCalculator;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -64,12 +63,7 @@ public class JobInstanceProgressCalculator {
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
 		myJobPersistence.updateInstance(theInstanceId, currentInstance -> {
-			JobDefinition<?> jobDefinition = myJobDefinitionRegistry
-					.getJobDefinition(currentInstance.getJobDefinitionId(), currentInstance.getJobDefinitionVersion())
-					.orElseThrow();
-			StepWeightingForProgressCalculator stepWeightingForProgressCalculator =
-					jobDefinition.getStepWeightingForProgressCalculator();
-			instanceProgress.updateInstance(stepWeightingForProgressCalculator, currentInstance);
+			instanceProgress.updateInstance(myJobDefinitionRegistry, currentInstance);
 
 			if (currentInstance.getCombinedRecordsProcessed() > 0) {
 				ourLog.info(
