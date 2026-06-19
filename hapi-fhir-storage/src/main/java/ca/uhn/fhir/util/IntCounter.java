@@ -19,15 +19,15 @@
  */
 package ca.uhn.fhir.util;
 
-public class Counter {
+public class IntCounter {
 
-	private long myCount;
+	private int myCount;
 
-	public long get() {
+	public int get() {
 		return myCount;
 	}
 
-	public long getThenAdd() {
-		return myCount++;
+	public void increment() {
+		myCount++;
 	}
 }

@@ -24,7 +24,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.StepWeightingForProgressCalculator;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
-import ca.uhn.fhir.util.Counter;
+import ca.uhn.fhir.util.IntCounter;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
@@ -48,10 +48,10 @@ public class InstanceProgress {
 	private final Set<String> myWarningMessages = new HashSet<>();
 	private int myRecordsProcessed = 0;
 	// these 4 cover all chunks
-	private Map<String, Counter> myIncompleteChunkCount = new HashMap<>();
-	private Map<String, Counter> myCompleteChunkCount = new HashMap<>();
-	private Map<String, Counter> myErroredChunkCount = new HashMap<>();
-	private Map<String, Counter> myFailedChunkCount = new HashMap<>();
+	private final Map<String, IntCounter> myIncompleteChunkCount = new HashMap<>();
+	private final Map<String, IntCounter> myCompleteChunkCount = new HashMap<>();
+	private final Map<String, IntCounter> myErroredChunkCount = new HashMap<>();
+	private final Map<String, IntCounter> myFailedChunkCount = new HashMap<>();
 	private int myErrorCountForAllStatuses = 0;
 	private Date myEarliestStartTime = null;
 	private Date myLatestEndTime = null;
@@ -98,20 +98,20 @@ public class InstanceProgress {
 			case IN_PROGRESS:
 				myAllIncompleteChunkCount++;
 				myIncompleteChunkCount
-						.computeIfAbsent(theChunk.getTargetStepId(), k -> new Counter())
-						.getThenAdd();
+						.computeIfAbsent(theChunk.getTargetStepId(), k -> new IntCounter())
+						.increment();
 				break;
 			case COMPLETED:
 				myAllCompleteChunkCount++;
 				myCompleteChunkCount
-						.computeIfAbsent(theChunk.getTargetStepId(), k -> new Counter())
-						.getThenAdd();
+						.computeIfAbsent(theChunk.getTargetStepId(), k -> new IntCounter())
+						.increment();
 				break;
 			case ERRORED:
 				myAllErroredChunkCount++;
 				myErroredChunkCount
-						.computeIfAbsent(theChunk.getTargetStepId(), k -> new Counter())
-						.getThenAdd();
+						.computeIfAbsent(theChunk.getTargetStepId(), k -> new IntCounter())
+						.increment();
 				if (myErrormessage == null) {
 					myErrormessage = theChunk.getErrorMessage();
 				}
@@ -119,8 +119,8 @@ public class InstanceProgress {
 			case FAILED:
 				myAllFailedChunkCount++;
 				myFailedChunkCount
-						.computeIfAbsent(theChunk.getTargetStepId(), k -> new Counter())
-						.getThenAdd();
+						.computeIfAbsent(theChunk.getTargetStepId(), k -> new IntCounter())
+						.increment();
 				myErrormessage = theChunk.getErrorMessage();
 				break;
 		}
@@ -252,10 +252,6 @@ public class InstanceProgress {
 				myFailedChunkCount);
 	}
 
-	private int getChunkCount() {
-		return myAllIncompleteChunkCount + myAllCompleteChunkCount + myAllFailedChunkCount + myAllErroredChunkCount;
-	}
-
 	private int getChunkCount(String theStepId) {
 		return getChunkCount(List.of(theStepId));
 	}
@@ -274,6 +270,7 @@ public class InstanceProgress {
 		if (myAllFailedChunkCount > 0) {
 			myNewStatus = StatusEnum.FAILED;
 		} else if (myAllErroredChunkCount > 0) {
+			//noinspection deprecation
 			myNewStatus = StatusEnum.ERRORED;
 		} else if (myAllIncompleteChunkCount == 0 && myAllCompleteChunkCount > 0 && !theLastStepIsReduction) {
 			myNewStatus = StatusEnum.COMPLETED;
@@ -319,16 +316,16 @@ public class InstanceProgress {
 		return myStepProgressMap.get(theStepId);
 	}
 
-	private static int getCount(Map<String, Counter> theCounterMap, String theStepId) {
+	private static int getCount(Map<String, IntCounter> theCounterMap, String theStepId) {
 		return getCount(theCounterMap, List.of(theStepId));
 	}
 
-	private static int getCount(Map<String, Counter> theCounterMap, Collection<String> theStepIds) {
+	private static int getCount(Map<String, IntCounter> theCounterMap, Collection<String> theStepIds) {
 		int retVal = 0;
 		for (String stepId : theStepIds) {
-			Counter counter = theCounterMap.get(stepId);
+			IntCounter counter = theCounterMap.get(stepId);
 			if (counter != null) {
-				retVal += Math.toIntExact(counter.get());
+				retVal += counter.get();
 			}
 		}
 		return retVal;

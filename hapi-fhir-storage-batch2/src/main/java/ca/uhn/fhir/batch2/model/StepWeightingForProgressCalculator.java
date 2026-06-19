@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
  * However, it's also possible to assign weights to specific steps, if a specific
  * step is expected to process steps faster than others, or if it won't get
  * populated with steps until later in the process.
- * An individual step may have an explicit weight assigned, which is a double between
- * 0.0-0.999.
+ * An individual step may have an explicit weight assigned, which is a double that
+ * is <code>&gt; 0.0</code> and <code>&lt; 1.0</code>.
  */
 public class StepWeightingForProgressCalculator {
 
@@ -80,6 +80,8 @@ public class StepWeightingForProgressCalculator {
 		Builder() {}
 
 		void setStepWeightForProgressCalculator(String theStepId, double theWeight) {
+			Validate.notBlank(theStepId, "theStepId must not be blank");
+			Validate.isTrue(theWeight < 1.0d, "theWeight must be >= 0.0 and < 1.0");
 			Validate.isTrue(
 					theWeight > 0.0,
 					"All steps must have at least a small amount of weight, so step weight can not be <= 0.0");

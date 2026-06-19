@@ -40,9 +40,9 @@ class JobInstanceProgressCalculatorTest extends BaseBatch2Test {
 	private JobInstanceProgressCalculator mySvc;
 	@Mock
 	private IJobPersistence myJobPersistence;
-	private JobChunkProgressAccumulator myProgressAccumulator = new JobChunkProgressAccumulator();
-	private JobDefinitionRegistry myJobDefinitionRegistry = new JobDefinitionRegistry();
-	private IInterceptorService myInterceptorSvc = new InterceptorService();
+	private final JobChunkProgressAccumulator myProgressAccumulator = new JobChunkProgressAccumulator();
+	private final JobDefinitionRegistry myJobDefinitionRegistry = new JobDefinitionRegistry();
+	private final IInterceptorService myInterceptorSvc = new InterceptorService();
 	@Mock
 	private IJobStepWorker<MyJsonModel, VoidModel, MyJsonModel> myFirstStep;
 	@Mock
@@ -158,11 +158,10 @@ class JobInstanceProgressCalculatorTest extends BaseBatch2Test {
 
 
 	@Test
-	void testLoinc() {
+	void tesCalculateProgress_() {
 
 		JobDefinition<MyJsonModel> jobDefinition = JobDefinition.newBuilder()
-			.setInitialStatus(StatusEnum.BUILDING)
-			.setJobDefinitionId("JOB_ID_IMPORT_TERM_LOINC")
+			.setJobDefinitionId("TEST_JOB")
 			.setJobDescription("Import Terminology - LOINC")
 			.setJobDefinitionVersion(1)
 			.gatedExecution()
@@ -295,56 +294,31 @@ class JobInstanceProgressCalculatorTest extends BaseBatch2Test {
 		jobInstance.setJobDefinitionVersion(jobDefinition.getJobDefinitionVersion());
 		mockFetchAndUpdateInstance(jobInstance);
 
-//		/*
 		List<WorkChunk> chunks = new ArrayList<>();
-//		 * : Incomplete: 0, Complete: 1
 		chunks.addAll(createWorkChunks("chunk-concepts-for-closure-generation", 1, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 1
 		chunks.addAll(createWorkChunks("expand-zip", 1, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 0
 		chunks.addAll(createWorkChunks("finalize-import", 0, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 127
 		chunks.addAll(createWorkChunks("generate-concept-closures", 127, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 1
 		chunks.addAll(createWorkChunks("import-answer-list-links", 1, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 1
 		chunks.addAll(createWorkChunks("import-answer-lists", 1, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 0
 		chunks.addAll(createWorkChunks("import-coding-properties", 0, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 110
 		chunks.addAll(createWorkChunks("import-concepts", 110, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 68
 		chunks.addAll(createWorkChunks("import-consumer-name", 68, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 1
 		chunks.addAll(createWorkChunks("import-document-ontology", 1, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 1
 		chunks.addAll(createWorkChunks("import-group-file", 1, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 1
 		chunks.addAll(createWorkChunks("import-group-terms-file", 1, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 185
 		chunks.addAll(createWorkChunks("import-hierarchy", 135, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 185
 		chunks.addAll(createWorkChunks("import-hierarchy-concepts", 135, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 1
 		chunks.addAll(createWorkChunks("import-ieee-medical-device-code", 1, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 1
 		chunks.addAll(createWorkChunks("import-imaging-document-code", 1, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 0
 		chunks.addAll(createWorkChunks("import-linguistic-variant", 0, WorkChunkStatusEnum.COMPLETED));
-//		 *  Incomplete: 0, Complete: 1
-		chunks.addAll(createWorkChunks("import-parent-group-file:", 1, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 2
+		chunks.addAll(createWorkChunks("import-parent-group-file", 1, WorkChunkStatusEnum.COMPLETED));
 		chunks.addAll(createWorkChunks("import-part-file", 2, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 1988
 		chunks.addAll(createWorkChunks("import-part-link-file", 1900, WorkChunkStatusEnum.IN_PROGRESS));
 		chunks.addAll(createWorkChunks("import-part-link-file", 88, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 1
 		chunks.addAll(createWorkChunks("import-part-related-code-mapping", 1, WorkChunkStatusEnum.COMPLETED));
-//		 *  Incomplete: 0, Complete: 1
 		chunks.addAll(createWorkChunks("import-rsna-playbook", 1, WorkChunkStatusEnum.COMPLETED));
-//		 * : Incomplete: 0, Complete: 1
 		chunks.addAll(createWorkChunks("import-univeral-lab-orderset", 1, WorkChunkStatusEnum.COMPLETED));
-//		 */
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false))).thenReturn(chunks.iterator());
 
 		// Test
