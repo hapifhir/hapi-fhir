@@ -116,7 +116,7 @@ abstract class BaseImportLoincStepTest {
 	}
 
 	void mockFetchAttachment(String classpath) {
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream(classpath), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream(classpath), AttachmentContentTypeEnum.CSV, "Loinc.csv", myMaximumSize));
 	}
 
 	void mockJobExecutionServices() {

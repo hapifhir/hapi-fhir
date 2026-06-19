@@ -284,7 +284,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		// Setup
 		when(myJobPersistence.fetchAttachmentByFilename(eq(MY_INSTANCE_ID), eq(FILENAME_LOINC_DISTRIBUTION_FILE))).thenAnswer(t -> {
 			byte[] bytes = RandomUtils.secure().randomBytes(1000);
-			return new AttachmentDetails(new ByteArrayInputStream(bytes), AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
+			return new AttachmentDetails(new ByteArrayInputStream(bytes), AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE, myMaximumSize);
 		});
 
 		// Test
@@ -359,7 +359,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 			String fileName = t.getArgument(1, String.class);
 			assertEquals(FILENAME_LOINC_DISTRIBUTION_FILE, fileName);
 			byte[] bytes = files.getZipBytes();
-			return new AttachmentDetails(new ByteArrayInputStream(bytes), AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
+			return new AttachmentDetails(new ByteArrayInputStream(bytes), AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE, myMaximumSize);
 		});
 	}
 

@@ -54,6 +54,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
@@ -75,6 +76,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -355,6 +357,7 @@ class TerminologyUploaderProviderTest {
 			}
 			byte[] bytes = IOUtils.toByteArray(attachment.getInputStream());
 			ourLog.info("Attachment received with length: {}", bytes.length);
+			assertEquals(12_345, bytes.length);
 			return "my-attachment-id-" + bytes.length + "-bytes";
 		});
 
@@ -382,6 +385,59 @@ class TerminologyUploaderProviderTest {
 		assertEquals("my-attachment-id-12345-bytes", responseParameters.getParameter(PARAM_JOB_ATTACHMENT_ID).getValue().toString());
 		assertThat(responseParameters.getParameter(RESP_PARAM_OUTCOME).getValue().toString()).contains(
 			"Attachment with ID[my-attachment-id-12345-bytes] has been stored for job with ID[my-instance-id]"
+		);
+	}
+
+	@Test
+	void testUploadTerminologyAttachFile_AppendToExistingAttachment() throws IOException {
+		// Setup
+		JobInstance jobInstance = new JobInstance();
+		jobInstance.setInstanceId("my-instance-id");
+		jobInstance.setStatus(StatusEnum.BUILDING);
+		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
+		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
+		when(myJobPersistence.fetchAttachmentById(any(), any())).thenReturn(AttachmentDetails
+			.newBuilder()
+				.withNoMaximumSize()
+				.withBytes(new byte[0])
+				.withContentType(AttachmentContentTypeEnum.ZIP)
+				.withFilename(FILENAME_LOINC_DISTRIBUTION_FILE)
+			.build());
+		doAnswer(i -> {
+			assertEquals("my-instance-id", i.getArgument(0));
+			assertEquals("my-attachment-id", i.getArgument(1));
+
+			AttachmentDetails attachment = i.getArgument(2, AttachmentDetails.class);
+			if (attachment == null) {
+				return "no-attachment";
+			}
+			byte[] bytes = IOUtils.toByteArray(attachment.getInputStream());
+			ourLog.info("Attachment received with length: {}", bytes.length);
+			assertEquals(12_345, bytes.length);
+			return null;
+		}).when(myJobPersistence).appendToAttachment(any(), any(), any());
+
+		// Test
+		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
+			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
+			"&" + TerminologyUploaderProvider.PARAM_APPEND_TO_JOB_ATTACHMENT_ID + "=" + "my-attachment-id";
+		HttpPost post = new HttpPost(url);
+		post.setEntity(new StringEntity(leftPad("", 12_345), ContentType.TEXT_PLAIN));
+
+		Parameters responseParameters;
+		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			InputStream contentInputStream = response.getEntity().getContent();
+			Reader contentReader = new InputStreamReader(contentInputStream, StandardCharsets.UTF_8);
+			responseParameters = myContext.newJsonParser().parseResource(Parameters.class, contentReader);
+			ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseParameters));
+		}
+
+		// Verify
+		verify(myJobPersistence, times(1)).appendToAttachment(eq("my-instance-id"), eq("my-attachment-id"), myAttachmentDetailsCaptor.capture());
+
+		assertThat(responseParameters.getParameter(RESP_PARAM_OUTCOME).getValue().toString()).contains(
+			"Successfully appended to attachment"
 		);
 	}
 

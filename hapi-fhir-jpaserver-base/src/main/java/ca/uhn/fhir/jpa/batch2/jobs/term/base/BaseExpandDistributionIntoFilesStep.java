@@ -62,7 +62,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -195,11 +194,12 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 
 		startStaging(theStepExecutionDetails, theDataSink, jobParameters, jobMetadataAttachment, context);
 
-		AttachmentDetails attachmentRequest = new AttachmentDetails(
-				new ByteArrayInputStream(
-						JsonUtil.serialize(jobMetadataAttachment).getBytes(StandardCharsets.UTF_8)),
-				AttachmentContentTypeEnum.JSON,
-				ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME);
+		AttachmentDetails attachmentRequest = AttachmentDetails.newBuilder()
+				.withNoMaximumSize()
+				.withBytes(JsonUtil.serialize(jobMetadataAttachment).getBytes(StandardCharsets.UTF_8))
+				.withContentType(AttachmentContentTypeEnum.JSON)
+				.withFilename(ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME)
+				.build();
 		myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
 
 		return RunOutcome.SUCCESS;
@@ -367,10 +367,12 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 							if (theSingleFileAttachmentIdOrNull != null) {
 								attachmentId = theSingleFileAttachmentIdOrNull;
 							} else {
-								AttachmentDetails attachmentRequest = new AttachmentDetails(
-										theSingleFileInputStreamSupplier.get(),
-										AttachmentContentTypeEnum.ZIP,
-										theSingleFileName);
+								AttachmentDetails attachmentRequest = AttachmentDetails.newBuilder()
+										.withInputStream(theSingleFileInputStreamSupplier.get())
+										.withContentType(AttachmentContentTypeEnum.ZIP)
+										.withFilename(theSingleFileName)
+										.withNoMaximumSize()
+										.build();
 								attachmentId = myJobPersistence.storeNewAttachment(theJobInstanceId, attachmentRequest);
 							}
 							TerminologyFileSetJson data = newTerminologyFileSetJson();
@@ -598,10 +600,11 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 			}
 		};
 		byte[] bytes = CsvUtil.writeCsvToByteArray(theHeaders.toArray(new String[0]), producer);
-		AttachmentDetails attachmentDetails = AttachmentDetails.build()
+		AttachmentDetails attachmentDetails = AttachmentDetails.newBuilder()
 				.withContentType(AttachmentContentTypeEnum.CSV)
 				.withBytes(bytes)
 				.withFilename(theFilename + "_" + theStartRow + "-" + theEndRow)
+				.withNoMaximumSize()
 				.build();
 		return myJobPersistence.storeNewAttachment(theJobInstanceId, attachmentDetails);
 	}
