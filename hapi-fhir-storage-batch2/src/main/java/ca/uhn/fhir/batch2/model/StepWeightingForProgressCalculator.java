@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
  * is <code>&gt; 0.0</code> and <code>&lt; 1.0</code>.
  */
 public class StepWeightingForProgressCalculator {
+	private static final double WEIGHT_SUM_EPSILON = 1e-9;
 
 	private final double myWeightForStepsWithoutExplicitWeight;
 	private final Set<String> myStepIdsWithoutExplicitWeight;
@@ -31,7 +32,7 @@ public class StepWeightingForProgressCalculator {
 			double theWeightForStepsWithoutExplicitWeight) {
 		Validate.notNull(theStepIdToWeight, "theStepIdToWeight must not be null");
 		myStepIdToWeight = Map.copyOf(theStepIdToWeight);
-		myStepIdsWithoutExplicitWeight = theStepIdsWithoutExplicitWeight;
+		myStepIdsWithoutExplicitWeight = Set.copyOf(theStepIdsWithoutExplicitWeight);
 		myWeightForStepsWithoutExplicitWeight = theWeightForStepsWithoutExplicitWeight;
 	}
 
@@ -102,8 +103,16 @@ public class StepWeightingForProgressCalculator {
 				combinedWeightTotal += myStepIdToWeight.get(stepId);
 			}
 
+			/*
+			 * Because double is IEEE 754 binary floating point, most "round" decimals like
+			 * 0.1, 0.3, 0.4 cannot be represented exactly in binary — they're stored as the
+			 * nearest representable value, slightly above or below. When you add several of
+			 * them, the tiny representation errors accumulate, and the sum can land just
+			 * above the true mathematical total. Weights such as 0.3 + 0.3 + 0.4 can sum to
+			 * 1.0000000000000002 and spuriously cause failures.
+			 */
 			Validate.isTrue(
-					combinedWeightTotal <= 1.0,
+					combinedWeightTotal <= 1.0 + WEIGHT_SUM_EPSILON,
 					"Combined step weights can not be greater than 1.0, but was %s",
 					combinedWeightTotal);
 

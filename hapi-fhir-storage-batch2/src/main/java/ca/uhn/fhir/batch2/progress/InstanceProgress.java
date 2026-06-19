@@ -52,21 +52,17 @@ public class InstanceProgress {
 	private final Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
 	private final Map<String, StepProgressData> myStepProgressMap = new HashMap<>();
 	private final Set<String> myWarningMessages = new HashSet<>();
-	private int myRecordsProcessed = 0;
 	// these 4 cover all chunks
 	private final Map<String, IntCounter> myStepIdToIncompleteChunkCount = new HashMap<>();
 	private final Map<String, IntCounter> myStepIdToCompleteChunkCount = new HashMap<>();
 	private final Map<String, IntCounter> myStepIdToErroredChunkCount = new HashMap<>();
 	private final Map<String, IntCounter> myStepIdToFailedChunkCount = new HashMap<>();
+	private int myRecordsProcessed = 0;
 	private int myErrorCountForAllStatuses = 0;
 	private Date myEarliestStartTime = null;
 	private Date myLatestEndTime = null;
 	private String myErrormessage = null;
 	private StatusEnum myNewStatus = null;
-	private int myAllIncompleteChunkCount;
-	private int myAllCompleteChunkCount;
-	private int myAllErroredChunkCount;
-	private int myAllFailedChunkCount;
 
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
@@ -102,19 +98,16 @@ public class InstanceProgress {
 			case QUEUED:
 			case POLL_WAITING:
 			case IN_PROGRESS:
-				myAllIncompleteChunkCount++;
 				myStepIdToIncompleteChunkCount
 						.computeIfAbsent(theChunk.getTargetStepId(), k -> new IntCounter())
 						.increment();
 				break;
 			case COMPLETED:
-				myAllCompleteChunkCount++;
 				myStepIdToCompleteChunkCount
 						.computeIfAbsent(theChunk.getTargetStepId(), k -> new IntCounter())
 						.increment();
 				break;
 			case ERRORED:
-				myAllErroredChunkCount++;
 				myStepIdToErroredChunkCount
 						.computeIfAbsent(theChunk.getTargetStepId(), k -> new IntCounter())
 						.increment();
@@ -123,7 +116,6 @@ public class InstanceProgress {
 				}
 				break;
 			case FAILED:
-				myAllFailedChunkCount++;
 				myStepIdToFailedChunkCount
 						.computeIfAbsent(theChunk.getTargetStepId(), k -> new IntCounter())
 						.increment();
@@ -332,12 +324,14 @@ public class InstanceProgress {
 	 * Transitions from IN_PROGRESS/ERRORED based on chunk statuses.
 	 */
 	public void calculateNewStatus(boolean theLastStepIsReduction) {
-		if (myAllFailedChunkCount > 0) {
+		if (hasChunkCounts(myStepIdToFailedChunkCount)) {
 			myNewStatus = StatusEnum.FAILED;
-		} else if (myAllErroredChunkCount > 0) {
+		} else if (hasChunkCounts(myStepIdToErroredChunkCount)) {
 			//noinspection deprecation
 			myNewStatus = StatusEnum.ERRORED;
-		} else if (myAllIncompleteChunkCount == 0 && myAllCompleteChunkCount > 0 && !theLastStepIsReduction) {
+		} else if (!hasChunkCounts(myStepIdToIncompleteChunkCount)
+				&& hasChunkCounts(myStepIdToCompleteChunkCount)
+				&& !theLastStepIsReduction) {
 			myNewStatus = StatusEnum.COMPLETED;
 		}
 	}
@@ -381,14 +375,18 @@ public class InstanceProgress {
 		return myStepProgressMap.get(theStepId);
 	}
 
-	private static int getChunkCount(Map<String, IntCounter> theCounterMap, String theStepId) {
-		return getChunkCount(theCounterMap, List.of(theStepId));
+	private static boolean hasChunkCounts(Map<String, IntCounter> theStepIdToChunkCountMap) {
+		return theStepIdToChunkCountMap.values().stream().anyMatch(t -> t.get() > 0);
 	}
 
-	private static int getChunkCount(Map<String, IntCounter> theCounterMap, Collection<String> theStepIds) {
+	private static int getChunkCount(Map<String, IntCounter> theStepIdToChunkCountMap, String theStepId) {
+		return getChunkCount(theStepIdToChunkCountMap, List.of(theStepId));
+	}
+
+	private static int getChunkCount(Map<String, IntCounter> theStepIdToChunkCountMap, Collection<String> theStepIds) {
 		int retVal = 0;
 		for (String stepId : theStepIds) {
-			IntCounter counter = theCounterMap.get(stepId);
+			IntCounter counter = theStepIdToChunkCountMap.get(stepId);
 			if (counter != null) {
 				retVal += counter.get();
 			}

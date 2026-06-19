@@ -544,7 +544,7 @@ public class JobDefinition<PT extends IModelJson> {
 		 */
 		public Builder<PT, NIT> setStepWeightForProgressCalculator(String theStepId, double theWeight) {
 			Validate.isTrue(
-					mySteps.stream().anyMatch(t -> t.getStepId().equals(theStepId)), "Unknown stepL: %s", theStepId);
+					mySteps.stream().anyMatch(t -> t.getStepId().equals(theStepId)), "Unknown step: %s", theStepId);
 			// theWeight is validated in setStepWeightForProgressCalculator
 			myStepWeightingBuilder.setStepWeightForProgressCalculator(theStepId, theWeight);
 			return this;
