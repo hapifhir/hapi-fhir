@@ -171,7 +171,7 @@ public class SearchParameterUtil {
 		 * security exclusions (e.g. List.patient per issue #7118) are preserved.
 		 */
 		if ("patient".equalsIgnoreCase(theSearchParamDefinition.name())
-				&& "reference".equalsIgnoreCase(theSearchParamDefinition.type())) {
+				&& paramType.equals(RestSearchParameterTypeEnum.REFERENCE)) {
 
 			String fhirResourceType = getResourceTypeName(theResourceClazz);
 			Set<String> omittedSps = RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.getOrDefault(
@@ -187,7 +187,7 @@ public class SearchParameterUtil {
 		return validCompartments;
 	}
 
-	private static String getCleansedCompartmentName(String theCompartmentName) {
+	static String getCleansedCompartmentName(String theCompartmentName) {
 		// As of 2021-12-28 the R5 structures incorrectly have this prefix
 		if (theCompartmentName.startsWith("Base FHIR compartment definition for ")) {
 			return theCompartmentName.substring("Base FHIR compartment definition for ".length());

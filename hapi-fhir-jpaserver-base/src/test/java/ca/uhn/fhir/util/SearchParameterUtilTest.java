@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import org.assertj.core.api.SoftAssertions;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,7 +15,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -313,19 +314,16 @@ class SearchParameterUtilTest {
 	 *
 	 * <p>Declared memberships must also never be dropped for reference-type SPs.
 	 */
-//	@Test
 	@ParameterizedTest
 	@MethodSource("allBuildableFhirContexts")
 	void testCompartmentMembershipMatchesAnnotationsForEverySearchParam(FhirContext theCtx) {
-//	void testCompartmentMembershipMatchesAnnotationsForEverySearchParam() {
-//		FhirContext theCtx = FhirContext.forR5Cached();
 		String fhirVersion = theCtx.getVersion().getVersion().name();
-		List<String> violations = new ArrayList<>();
+		SoftAssertions softly = new SoftAssertions();
 
 		for (String resourceName : theCtx.getResourceTypes()) {
 			@SuppressWarnings("unchecked")
 			Class<? extends IBase> resourceClass =
-				(Class<? extends IBase>) theCtx.getResourceDefinition(resourceName).getImplementingClass();
+				theCtx.getResourceDefinition(resourceName).getImplementingClass();
 
 			for (Field field : resourceClass.getFields()) {
 				SearchParamDefinition sp = field.getAnnotation(SearchParamDefinition.class);
@@ -333,53 +331,80 @@ class SearchParameterUtilTest {
 					continue;
 				}
 
-				Set<String> actual =
+				Set<String> actualMembership =
 					SearchParameterUtil.getMembershipCompartmentsForSearchParameter(resourceClass, sp);
-				Set<String> declared = cleansedDeclaredCompartmentNames(sp);
+				Set<String> membershipBySpec = getDeclaredCompartmentNames(sp);
 
-				if ("reference".equalsIgnoreCase(sp.type()) && !actual.containsAll(declared)) {
-					violations.add(String.format(
-						"%s %s.%s: declared compartment membership dropped: declared=%s actual=%s",
-						fhirVersion, resourceName, sp.name(), declared, actual));
+				// Ensure that no compartment memberships were unexpectedly dropped.
+				if (RestSearchParameterTypeEnum.forCode(
+					sp.type().toLowerCase()).equals(RestSearchParameterTypeEnum.REFERENCE)) {
+					softly.assertThat(actualMembership.containsAll(membershipBySpec))
+						.as(String.format(
+							"SP %s.%s for FHIR version %s - Compartment membership dropped: membershipBySpec=%s, actualMembership=%s",
+							resourceName, sp.name(), fhirVersion, membershipBySpec, actualMembership))
+						.isTrue();
 				}
 
-				Set<String> extras = new HashSet<>(actual);
-				extras.removeAll(declared);
-				if (extras.isEmpty()) {
+				Set<String> compartmentsAddedByHapi = new HashSet<>(actualMembership);
+				compartmentsAddedByHapi.removeAll(membershipBySpec);
+
+				// Ensure that after adding 'patient' SP to the Patient Compartment, we still respected the OMIT map
+				Set<String> omitMapForResourceType = SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
+					.getOrDefault(resourceName, Collections.emptySet());
+				if (omitMapForResourceType.contains(sp.name())) {
+					softly.assertThat(compartmentsAddedByHapi)
+						.as("SP %s.%s for FHIR version %s is in the Patient Compartment, but SP should be omitted.",
+							resourceName, sp.name(), fhirVersion)
+						.doesNotContain("Patient");
+				}
+
+				// The HAPI code added no additional compartment memberships
+				if (compartmentsAddedByHapi.isEmpty()) {
 					continue;
 				}
 
-				boolean isJustifiedPatientAlias = extras.equals(Set.of("Patient"))
-					&& "patient".equalsIgnoreCase(sp.name())
-					&& !SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT
-						.getOrDefault(resourceName, Collections.emptySet())
-						.contains("patient")
-					&& ("Device.patient".equals(sp.path())
-						|| coversAPatientCompartmentBaseSp(resourceName, resourceClass, sp));
+				// We only add Patient Compartment membership (and no other compartment)
+				// beyond what the FHIR spec says.
+				softly.assertThat(compartmentsAddedByHapi)
+					.as("SP %s.%s for FHIR version %s - HAPI code added the SP to more than just the Patient " +
+							"compartment: %s.",
+						resourceName, sp.name(), fhirVersion, compartmentsAddedByHapi)
+					.containsExactly("Patient");
 
-				if (!isJustifiedPatientAlias) {
-					violations.add(String.format(
-						"%s %s.%s (path=%s): compartment membership %s is not declared in "
-							+ "providesMembershipIn and is not a justified patient-alias addition",
-						fhirVersion, resourceName, sp.name(), sp.path(), extras));
+				if (sp.name().equals("patient")) {
+					// Special case for Device.patient, as per https://github.com/hapifhir/hapi-fhir/issues/6536
+					if ("Device.patient".equals(sp.path())) {
+						continue;
+					}
+
+					// Else, the "patient" SP addition to the Patient Compartment is justified, because
+					// 1) it is already part of the patient compartment OR
+					// 2) it's an "alias" SP (Eg: path = resource.base.where(resolve() is Patient)) where resource.base is
+					//    already in the Patient Compartment
+					softly.assertThat(isPatientSpCompartmentMembershipJustifiedByBaseSp(resourceName, resourceClass, sp))
+						.as("SP %s.%s for FHIR version %s - compartment membership %s is not provided by the " +
+								"FHIR spec via 'providesMembershipIn' AND is not a justified patient-alias addition",
+							resourceName, sp.name(), fhirVersion, compartmentsAddedByHapi)
+						.isTrue();
+
+				} else {
+					// HAPI code should only add the "patient" SP, and nothing else.
+					softly.fail("SP %s.%s for FHIR version %s - HAPI code added this SP to the %s compartment.",
+						resourceName, sp.name(), fhirVersion, compartmentsAddedByHapi);
 				}
 			}
 		}
 
-		assertThat(violations).isEmpty();
+		softly.assertAll();
 	}
 
-	private static Set<String> cleansedDeclaredCompartmentNames(SearchParamDefinition theSp) {
+	/**
+	 * Given the SP definition, return a list of the compartments it provides membership in
+	 */
+	private static Set<String> getDeclaredCompartmentNames(SearchParamDefinition theSp) {
 		return Arrays.stream(theSp.providesMembershipIn())
-			.map(c -> cleanseCompartmentName(c.name()))
+			.map(c -> SearchParameterUtil.getCleansedCompartmentName(c.name()))
 			.collect(Collectors.toSet());
-	}
-	
-	// Mirrors SearchParameterUtil.getCleansedCompartmentName (private): the R5 structures
-	// declare compartments as "Base FHIR compartment definition for <Name>".
-	private static String cleanseCompartmentName(String theName) {
-		String prefix = "Base FHIR compartment definition for ";
-		return theName.startsWith(prefix) ? theName.substring(prefix.length()) : theName;
 	}
 
 	/**
@@ -395,29 +420,31 @@ class SearchParameterUtilTest {
 	 *       where-clause path).</li>
 	 * </ul>
 	 */
-	private static boolean coversAPatientCompartmentBaseSp(
+	private static boolean isPatientSpCompartmentMembershipJustifiedByBaseSp(
 			String theResourceName, Class<? extends IBase> theResourceClass, SearchParamDefinition thePatientSp) {
-		Set<String> patientPathSegments = pathSegments(theResourceName, thePatientSp.path());
+		Set<String> patientPathSegments = getResourceSpecificPaths(theResourceName, thePatientSp.path());
 		return Arrays.stream(theResourceClass.getFields())
 			.map(f -> f.getAnnotation(SearchParamDefinition.class))
 			//all sps of res type
 			.filter(spd -> spd != null && !"patient".equalsIgnoreCase(spd.name()))
 			// non null + not the patient SP
-			.filter(spd -> cleansedDeclaredCompartmentNames(spd).contains("Patient"))
+			.filter(spd -> getDeclaredCompartmentNames(spd).contains("Patient"))
 			// filter by spd's that declare patient compartment membership
-			.flatMap(spd -> pathSegments(theResourceName, spd.path()).stream())
+			.flatMap(spd -> getResourceSpecificPaths(theResourceName, spd.path()).stream())
 			// of those, split spd.path to list of paths
 			// then path must be of type alias (base+resolve) OR patient SP path contains the base
-			.anyMatch(baseSegment ->
-				patientPathSegments.contains(baseSegment + ".where(resolve() is Patient)")
-					|| patientPathSegments.contains(baseSegment));
+			// Ensure that the patient SP path is narrowing alias SP for an existing "base SP"
+			// that already declares patient compartment membership per the FHIR spec
+			.anyMatch(pathsDeclaringPatientCompMembership ->
+				patientPathSegments.contains(pathsDeclaringPatientCompMembership + ".where(resolve() is Patient)")
+					|| patientPathSegments.contains(pathsDeclaringPatientCompMembership));
 	}
 
 	/**
-	 * Splits a (possibly pipe-delimited multi-resource) SP path into segments, keeping only the
-	 * segments that belong to the given resource type.
+	 * Calling path() on a SP that applies to multiple resources may have a pipe-delimited list of paths
+	 * Splits this path into segments, and return only the path for the input resource type.
 	 */
-	private static Set<String> pathSegments(String theResourceName, String thePath) {
+	private static Set<String> getResourceSpecificPaths(String theResourceName, String thePath) {
 		return Arrays.stream(thePath.split("\\|"))
 			.map(String::trim)
 			.filter(segment -> segment.startsWith(theResourceName + "."))
