@@ -21,9 +21,7 @@ import java.util.List;
 import static ca.uhn.fhir.batch2.jobs.export.BulkExportJobService.JOB_INSTANCE_ID;
 import static ca.uhn.test.util.AssertJson.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,13 +45,17 @@ class BulkExportJobServiceTest {
 			myInterceptorBroadcaster, myJobCoordinator,
 			myDaoRegistry, myRequestPartitionHelperSvc, myStorageSettings);
 
-		ServletRequestDetails requestDetails = spy(new ServletRequestDetails());
-		requestDetails.setServletResponse(mock(HttpServletResponse.class));
-		requestDetails.setServletRequest(mock(HttpServletRequest.class));
-
 		RestfulServer server = mock(RestfulServer.class);
-		doReturn(server).when(requestDetails).getServer();
 		when(server.getServerBaseForRequest(any())).thenReturn("http://localhost");
+
+		ServletRequestDetails requestDetails = new ServletRequestDetails() {
+			@Override
+			public RestfulServer getServer() {
+				return server;
+			}
+		};
+		requestDetails.setServletRequest(mock(HttpServletRequest.class));
+		requestDetails.setServletResponse(mock(HttpServletResponse.class));
 
 		BulkExportJobParameters params = new BulkExportJobParameters();
 		params.setResourceTypes(List.of("Patient"));
