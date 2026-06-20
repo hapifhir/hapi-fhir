@@ -404,8 +404,11 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	}
 
 	private void runEnqueueReadyChunksTest(List<WorkChunk> theChunks, JobDefinition<TestJobParameters> theJobDefinition) {
-		myJobDefinitionRegistry.addJobDefinition(theJobDefinition);
 		JobInstance instance = createInstance();
+		instance.setJobDefinitionId(theJobDefinition.getJobDefinitionId());
+
+		myJobDefinitionRegistry.addJobDefinition(theJobDefinition);
+
 		// we'll set the instance to the first step id
 		theChunks.stream().findFirst().ifPresent(c -> {
 			instance.setCurrentGatedStepId(c.getTargetStepId());
@@ -486,11 +489,13 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	@Test
 	public void testMaintenancePass_whenUpdateFails_skipsWorkChunkAndLogs() {
 		// setup
+		JobDefinition<TestJobParameters> jobDefinition = createJobDefinitionWithReduction();
 		List<WorkChunk> chunks = List.of(
 			createWorkChunkStep2().setStatus(WorkChunkStatusEnum.READY),
 			createWorkChunkStep2().setStatus(WorkChunkStatusEnum.READY)
 		);
 		JobInstance instance = createInstance();
+		instance.setJobDefinitionId(jobDefinition.getJobDefinitionId());
 		instance.setCurrentGatedStepId(STEP_2);
 
 		myLogCapture.setLoggerLevel(Level.ERROR);
@@ -514,7 +519,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 
 		// test
-		runEnqueueReadyChunksTest(chunks, createJobDefinitionWithReduction());
+		runEnqueueReadyChunksTest(chunks, jobDefinition);
 
 		// verify
 		verify(myJobPersistence, times(2)).enqueueWorkChunkForProcessing(anyString(), any());
