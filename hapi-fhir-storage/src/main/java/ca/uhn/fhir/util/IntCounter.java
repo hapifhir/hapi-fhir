@@ -23,20 +23,11 @@ public class IntCounter {
 
 	private int myCount;
 
-<<<<<<<< HEAD:hapi-fhir-storage/src/main/java/ca/uhn/fhir/util/Counter.java
 	public long get() {
-		return myCount;
-	}
-
-	public long getThenAdd() {
-		return myCount++;
-========
-	public int get() {
 		return myCount;
 	}
 
 	public void increment() {
 		myCount++;
->>>>>>>> master:hapi-fhir-storage/src/main/java/ca/uhn/fhir/util/IntCounter.java
 	}
 }
