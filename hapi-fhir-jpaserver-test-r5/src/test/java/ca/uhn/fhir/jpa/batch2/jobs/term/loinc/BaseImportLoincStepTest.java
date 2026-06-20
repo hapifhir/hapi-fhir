@@ -116,7 +116,12 @@ abstract class BaseImportLoincStepTest {
 	}
 
 	void mockFetchAttachment(String classpath) {
-		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(new AttachmentDetails(ClasspathUtil.loadResourceAsStream(classpath), AttachmentContentTypeEnum.CSV, "Loinc.csv", myMaximumSize));
+		when(myJobPersistence.fetchAttachmentById(eq("my-instance-id"), eq("my-chunk-attachment-id"))).thenReturn(AttachmentDetails.newBuilder()
+			.withBytes(ClasspathUtil.loadResourceAsByteArray(classpath))
+			.withNoMaximumSize()
+			.withContentType(AttachmentContentTypeEnum.CSV)
+			.withFilename("Loinc.csv")
+			.build());
 	}
 
 	void mockJobExecutionServices() {
@@ -138,7 +143,12 @@ abstract class BaseImportLoincStepTest {
 		jobMetadata.getCodeSystem().setVersion("1.234");
 		jobMetadata.setCodeSystem(jobMetadata.getCodeSystem());
 		String jobMetadataSerialized = JsonUtil.serialize(jobMetadata);
-		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME))).thenReturn(new AttachmentDetails(jobMetadataSerialized.getBytes(StandardCharsets.UTF_8), AttachmentContentTypeEnum.CSV, "Loinc.csv"));
+		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME))).thenReturn(AttachmentDetails.newBuilder()
+			.withBytes(jobMetadataSerialized.getBytes(StandardCharsets.UTF_8))
+			.withNoMaximumSize()
+			.withContentType(AttachmentContentTypeEnum.CSV)
+			.withFilename("Loinc.csv")
+			.build());
 	}
 
 
