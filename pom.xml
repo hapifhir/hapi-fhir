@@ -1090,12 +1090,8 @@
 		<httpcore_version>4.4.16</httpcore_version>
 		<httpclient_version>4.5.14</httpclient_version>
 
-
-		<jackson_version_deprecated>2.21.1</jackson_version_deprecated>
-		<jackson_databind_version_deprecated>2.21.1</jackson_databind_version_deprecated>
-
-
-		<jackson_annotations_version>2.21</jackson_annotations_version>
+      <!-- see : https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.22#annotations  -->
+		<jackson_annotations_version>2.22</jackson_annotations_version>
 		<jackson_datatype_version>2.22.0</jackson_datatype_version>
 
 		<jackson_tools_version>3.2.0</jackson_tools_version>
@@ -1240,11 +1236,11 @@
 				<artifactId>jackson-databind</artifactId>
 				<version>${jackson_tools_databind_version}</version>
 			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.datatype</groupId>
-				<artifactId>jackson-datatype-jsr310</artifactId>
-				<version>${jackson_datatype_version}</version>
-			</dependency>
+<!--			<dependency>-->
+<!--				<groupId>com.fasterxml.jackson.datatype</groupId>-->
+<!--				<artifactId>jackson-datatype-jsr310</artifactId>-->
+<!--				<version>${jackson_datatype_version}</version>-->
+<!--			</dependency>-->
 			<dependency>
 				<groupId>tools.jackson.dataformat</groupId>
 				<artifactId>jackson-dataformat-yaml</artifactId>
