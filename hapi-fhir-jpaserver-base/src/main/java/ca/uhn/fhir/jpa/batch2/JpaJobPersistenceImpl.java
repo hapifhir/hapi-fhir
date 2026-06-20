@@ -638,8 +638,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			Optional<Batch2JobAttachmentEntity> attachmentOpt =
 					myAttachmentRepository.findById(theInstanceId, theAttachmentId);
 			if (attachmentOpt.isEmpty()) {
-				// FIXME: add code and test
-				throw new InvalidRequestException(Msg.code(1) + "Unknown attachment ID[" + theAttachmentId
+				throw new InvalidRequestException(Msg.code(2984) + "Unknown attachment ID[" + theAttachmentId
 						+ "] for job instance[" + theInstanceId + "]");
 			}
 
@@ -690,8 +689,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 			long actualCount = countingInputStream.getCount();
 			if (actualCount > maximumAllowableBytes) {
-				// FIXME: add code
-				throw new PayloadTooLargeException(Msg.code(1) + "Maximum allowable size exceeded");
+				throw new PayloadTooLargeException(Msg.code(2983) + "Maximum allowable size exceeded");
 			}
 
 		} catch (IOException e) {

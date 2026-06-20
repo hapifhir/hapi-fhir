@@ -309,20 +309,17 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 							responseEncoding.newParser(myFhirCtx).parseResource(responseBody);
 					attachmentId = ParametersUtil.getNamedParameterValueAsString(
 									myFhirCtx, parameters, PARAM_JOB_ATTACHMENT_ID)
-							.orElseThrow(() ->
-									// FIXME: add code
-									new CommandFailureException(
-											Msg.code(1) + "Response Parameters from server didn't include parameter "
-													+ PARAM_JOB_ATTACHMENT_ID));
+							.orElseThrow(() -> new CommandFailureException(
+									Msg.code(2981) + "Response Parameters from server didn't include parameter "
+											+ PARAM_JOB_ATTACHMENT_ID));
 				}
 
 				attachmentChunkIndexForLogs++;
 			}
 
 		} catch (IOException e) {
-			// FIXME: add code
 			throw new CommandFailureException(
-					Msg.code(1) + "Failed to read file '" + theFilename + "': " + e.getMessage());
+					Msg.code(2982) + "Failed to read file '" + theFilename + "': " + e.getMessage());
 		}
 
 		ourLog.info("Attached file in {}", sw);

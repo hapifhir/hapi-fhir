@@ -120,8 +120,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	/*
 	 * Loinc_2.82.zip = 85 MB
 	 */
-	private static final int LOINC_MAX_SIZE = Math.toIntExact(200 * FileUtils.ONE_MB);
-	private static final int LOINC_PROPERTIES_MAX_SIZE = Math.toIntExact(FileUtils.ONE_MB);
+	static final int LOINC_MAX_SIZE = Math.toIntExact(200 * FileUtils.ONE_MB);
+	static final int LOINC_PROPERTIES_MAX_SIZE = Math.toIntExact(FileUtils.ONE_MB);
 	/*
 	 * SnomedCT_InternationalRF2_PRODUCTION_20260501T120000Z.zip = 580 MB
 	 */
@@ -180,6 +180,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						AttachmentContentTypeEnum.PROPERTIES,
 						LOINC_PROPERTIES_MAX_SIZE));
 		JobType loincJobType = new JobType(
+				false,
 				ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC,
 				"LOINC",
 				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE,
@@ -189,6 +190,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		// SNOMED CT
 		JobType sctJobType = new JobType(
+				false,
 				ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT,
 				"SNOMED CT",
 				null,
@@ -208,7 +210,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				new DistributionFilenamePattern(
 						ICD10_XML_FILE_PATTERN, ICD10_XML_FILENAME, AttachmentContentTypeEnum.XML, ICD_10_MAX_SIZE));
 		JobType icd10JobType =
-				new JobType(ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10, "ICD-10", null, icd10DistributionFiles);
+				new JobType(false, ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10, "ICD-10", null, icd10DistributionFiles);
 		myCanonicalUrlToJobType.put(TerminologyConstants.ICD10_URI, icd10JobType);
 		myJobDefinitionIdToJobType.put(icd10JobType.jobDefinitionId(), icd10JobType);
 
@@ -221,8 +223,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						ICD_10_CM_MAX_SIZE),
 				new DistributionFilenamePattern(
 						ICD10CM_FILE_PATTERN, ICD10CM_FILENAME, AttachmentContentTypeEnum.XML, ICD_10_CM_MAX_SIZE));
-		JobType icd10cmJobType =
-				new JobType(ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM, "ICD-10-CM", null, icd10CpDistributionFiles);
+		JobType icd10cmJobType = new JobType(
+				false, ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM, "ICD-10-CM", null, icd10CpDistributionFiles);
 		myCanonicalUrlToJobType.put(TerminologyConstants.ICD10CM_URI, icd10cmJobType);
 		myJobDefinitionIdToJobType.put(icd10cmJobType.jobDefinitionId(), icd10cmJobType);
 
@@ -259,6 +261,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						AttachmentContentTypeEnum.CSV,
 						CUSTOM_MAX_SIZE));
 		myCustomJobType = new JobType(
+				true,
 				ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY,
 				"Custom Terminology",
 				null,
@@ -309,6 +312,13 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		JobType jobType = myCanonicalUrlToJobType.get(canonicalUrl.url());
 		if (jobType == null) {
 			jobType = myCustomJobType;
+		}
+
+		if (mode == ImportTerminologyModeEnum.ADD || mode == ImportTerminologyModeEnum.REMOVE) {
+			if (!jobType.supportsDeltaOperations()) {
+				throw new InvalidRequestException(Msg.code(2980)
+						+ "Delta operations are not supported for terminology: " + jobType.terminologyName());
+			}
 		}
 
 		return startImportTerminologyJob(theMakeCurrent, theRequestDetails, canonicalUrl, jobType, mode);
@@ -458,8 +468,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						.withInputStream(inputStream)
 						.withContentType(pattern.contentType())
 						.withFilename(pattern.jobFilename())
-						// FIXME: apply maximum size
-						.withNoMaximumSize()
+						.withMaximumSize(pattern.maximumSizeInBytes())
 						.build();
 				break;
 			}
@@ -661,6 +670,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 	private record JobType(
+			boolean supportsDeltaOperations,
 			String jobDefinitionId,
 			String terminologyName,
 			String propertyFileName,
@@ -670,6 +680,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		 * Distribution which accepts a single ZIP file
 		 */
 		JobType(
+				boolean supportsDeltaOperations,
 				String jobDefinitionId,
 				String terminologyName,
 				String propertyFileName,
@@ -677,6 +688,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				String distributionFileName,
 				Integer maximumSizeInBytes) {
 			this(
+					supportsDeltaOperations,
 					jobDefinitionId,
 					terminologyName,
 					propertyFileName,

@@ -19,14 +19,17 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.AbstractInputStream;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Attachment;
@@ -62,6 +65,8 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLO
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB;
+import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.LOINC_MAX_SIZE;
+import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.LOINC_PROPERTIES_MAX_SIZE;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_JOB_ATTACHMENT_ID;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.RESP_PARAM_OUTCOME;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.LOINC_URI;
@@ -182,7 +187,7 @@ class TerminologyUploaderProviderTest {
 		         , SNAPSHOT
 		"""
 	)
-	void testUploadTerminologyCreateJob_Custom(String theModeParameter, ImportTerminologyModeEnum theExpectedMode) {
+	void testUploadTerminologyCreateJob_DifferentModes(String theModeParameter, ImportTerminologyModeEnum theExpectedMode) {
 		// Setup
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 		startResponse.setInstanceId("my-instance-id");
@@ -232,7 +237,28 @@ class TerminologyUploaderProviderTest {
 				.hasMessageContaining("Invalid value for parameter mode: FOO");
 	}
 
-		@Test
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		http://loinc.org|1.0         ,   ADD
+		http://loinc.org|1.0         ,   REMOVE
+		http://snomed.info/sct|1.0   ,   ADD
+		http://snomed.info/sct|1.0   ,   REMOVE
+		"""
+	)
+	void testUploadTerminologyCreateJob_BlockDeltasForStandardTerminology(String theUrl, String theMode) {
+		assertThatThrownBy(() -> myServerExtension
+			.getFhirClient()
+			.operation()
+			.onType("CodeSystem")
+			.named(OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(theUrl))
+			.andParameter(TerminologyUploaderProvider.PARAM_MODE, new CodeType(theMode))
+			.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Delta operations are not supported for terminology:");
+	}
+
+	@Test
 	void testUploadTerminologyCreateJob_Loinc() {
 		// Setup
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
@@ -381,6 +407,7 @@ class TerminologyUploaderProviderTest {
 		verify(myJobPersistence, times(1)).storeNewAttachment(eq("my-instance-id"), myAttachmentDetailsCaptor.capture());
 		assertEquals(TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE, myAttachmentDetailsCaptor.getValue().getFilename());
 		assertEquals(AttachmentContentTypeEnum.PROPERTIES, myAttachmentDetailsCaptor.getValue().getContentType());
+		assertEquals(LOINC_PROPERTIES_MAX_SIZE, myAttachmentDetailsCaptor.getValue().getMaximumSize().orElseThrow().intValue());
 
 		assertEquals("my-attachment-id-12345-bytes", responseParameters.getParameter(PARAM_JOB_ATTACHMENT_ID).getValue().toString());
 		assertThat(responseParameters.getParameter(RESP_PARAM_OUTCOME).getValue().toString()).contains(
@@ -435,6 +462,7 @@ class TerminologyUploaderProviderTest {
 
 		// Verify
 		verify(myJobPersistence, times(1)).appendToAttachment(eq("my-instance-id"), eq("my-attachment-id"), myAttachmentDetailsCaptor.capture());
+		assertEquals(LOINC_MAX_SIZE, myAttachmentDetailsCaptor.getValue().getMaximumSize().orElseThrow().intValue());
 
 		assertThat(responseParameters.getParameter(RESP_PARAM_OUTCOME).getValue().toString()).contains(
 			"Successfully appended to attachment"

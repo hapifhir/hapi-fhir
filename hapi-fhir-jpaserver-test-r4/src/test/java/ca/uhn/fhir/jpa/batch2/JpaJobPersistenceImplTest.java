@@ -937,6 +937,28 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	void testStoreAttachment_ExceedMaximumSize() throws IOException {
+		// Setup
+
+		JobInstance instance = createInstance(true, false);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		byte[] bytes = newPopulatedByteArrayOfSize(999);
+
+		// Test
+
+		AttachmentDetails request0 = AttachmentDetails
+			.newBuilder()
+			.withMaximumSize(100)
+			.withContentType(AttachmentContentTypeEnum.PLAIN_TEXT)
+			.withBytes(bytes)
+			.build();
+
+		assertThatThrownBy(() -> mySvc.storeNewAttachment(instanceId, request0))
+			.isInstanceOf(PayloadTooLargeException.class)
+			.hasMessageContaining("Maximum allowable size exceeded");
+	}
 
 	@Test
 	void testStoreAttachment_Append() throws IOException {
@@ -1038,6 +1060,29 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			// Verify
 			.isInstanceOf(PayloadTooLargeException.class)
 			.hasMessageContaining("Maximum allowable size exceeded");
+
+	}
+
+	@Test
+	void testStoreAttachment_Append_UnknownAttachmentId() {
+		// Setup
+
+		JobInstance instance = createInstance(true, false);
+		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
+
+		byte[] bytes = new byte[] { 0, 1, 2 };
+
+		// Test
+
+		AttachmentDetails request0 = AttachmentDetails
+			.newBuilder()
+			.withNoMaximumSize()
+			.withContentType(AttachmentContentTypeEnum.ZIP)
+			.withBytes(bytes)
+			.build();
+		assertThatThrownBy(()->mySvc.appendToAttachment(instanceId, "foo", request0))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Unknown attachment ID[foo] for job instance");
 
 	}
 
