@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.ObjectUtils.getIfNull;
  */
 public class RequestPartitionId implements IModelJson {
 	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
-	private static final JsonMapper ourObjectMapper = JsonMapper.builder().build();
+	private static final JsonMapper ourJsonMapper = JsonMapper.builder().build();
 
 	@JsonProperty("partitionDate")
 	private final LocalDate myPartitionDate;
@@ -166,7 +166,7 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	public static RequestPartitionId fromJson(String theJson) throws IOException {
-		return ourObjectMapper.readValue(theJson, RequestPartitionId.class);
+		return ourJsonMapper.readValue(theJson, RequestPartitionId.class);
 	}
 
 	public boolean isAllPartitions() {
@@ -515,6 +515,6 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	public String asJson() throws IOException {
-		return ourObjectMapper.writeValueAsString(this);
+		return ourJsonMapper.writeValueAsString(this);
 	}
 }

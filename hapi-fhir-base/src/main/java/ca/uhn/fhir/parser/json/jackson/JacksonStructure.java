@@ -30,6 +30,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.core.TokenStreamLocation;
 import tools.jackson.core.json.JsonFactory;
 import tools.jackson.core.json.JsonReadFeature;
 import tools.jackson.databind.DeserializationFeature;
@@ -53,7 +54,7 @@ import java.util.Map;
 
 public class JacksonStructure implements JsonLikeStructure {
 
-	private static final JsonMapper OBJECT_MAPPER = createObjectMapper();
+	private static final JsonMapper OBJECT_MAPPER = createJsonMapper();
 	private JacksonWriter jacksonWriter;
 	private ROOT_TYPE rootType = null;
 	private JsonNode nativeRoot = null;
@@ -130,10 +131,20 @@ public class JacksonStructure implements JsonLikeStructure {
 				String originalMessage = jpe.getOriginalMessage();
 				originalMessage = originalMessage.replace(
 						"Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); ", "");
+				originalMessage = originalMessage.replace("property name and value", "field name and value");
 				messageBuilder.append(originalMessage);
-				if (jpe.getLocation() != null) {
+				TokenStreamLocation location = jpe.getLocation();
+				if (location != null) {
 					messageBuilder.append("\n at [");
-					jpe.getLocation().appendOffsetDescription(messageBuilder);
+					if (location.getLineNr() > 0 && location.getColumnNr() > 0) {
+						messageBuilder
+								.append("line: ")
+								.append(location.getLineNr())
+								.append(", column: ")
+								.append(location.getColumnNr());
+					} else {
+						location.appendOffsetDescription(messageBuilder);
+					}
 					messageBuilder.append("]");
 				}
 				message = messageBuilder.toString();
@@ -403,7 +414,7 @@ public class JacksonStructure implements JsonLikeStructure {
 		}
 	}
 
-	private static JsonMapper createObjectMapper() {
+	private static JsonMapper createJsonMapper() {
 		JsonFactory jsonFactory = JsonFactory.builder()
 				.streamReadConstraints(createStreamReadConstraints())
 				.build();

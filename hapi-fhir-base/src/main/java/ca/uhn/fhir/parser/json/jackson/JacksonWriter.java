@@ -20,11 +20,21 @@
 package ca.uhn.fhir.parser.json.jackson;
 
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
+import tools.jackson.core.FormatSchema;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.ObjectWriteContext;
+import tools.jackson.core.PrettyPrinter;
+import tools.jackson.core.SerializableString;
+import tools.jackson.core.TokenStreamFactory;
+import tools.jackson.core.TreeNode;
+import tools.jackson.core.io.CharacterEscapes;
 import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.tree.ArrayTreeNode;
+import tools.jackson.core.tree.ObjectTreeNode;
+import tools.jackson.core.util.DefaultIndenter;
+import tools.jackson.core.util.DefaultPrettyPrinter;
+import tools.jackson.core.util.Separators;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -49,16 +59,92 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 		// setPrettyPrinter(..). The pretty printer must instead be supplied up front via
 		// the ObjectWriteContext passed to createGenerator(..), so generator creation is
 		// deferred to here (where isPrettyPrint() is known) rather than done in the
-		// constructor. ObjectWriteContext is an interface with default methods, so we
-		// only need to override the one accessor (getPrettyPrinter()) that matters here.
-		ObjectWriteContext writeContext;
+		// constructor.
+		//
+		// ObjectWriteContext has no default methods in this Jackson version, so every
+		// method must be implemented. Since write(...) below has been changed to call
+		// only type-specific JsonGenerator methods (writeString/writeNumber/writeBoolean/
+		// writeNull and their *Property variants) rather than writePOJO(..), this writer
+		// never relies on ObjectWriteContext.writeValue(..)/writeTree(..) for correctness;
+		// they still throw rather than silently no-op, so any future code path that does
+		// reach them fails loudly instead of producing corrupt JSON.
+		final PrettyPrinter prettyPrinter;
 		if (isPrettyPrint()) {
-			// JACKSONTOOLS3-TODO.  Implement Pretty-Print.  See :
-			// https://github.com/FasterXML/jackson-databind/issues/5331
-			writeContext = ObjectWriteContext.empty();
+			Separators separators =
+					Separators.createDefaultInstance().withObjectNameValueSpacing(Separators.Spacing.AFTER);
+			DefaultPrettyPrinter defaultPrettyPrinter = new DefaultPrettyPrinter(separators);
+			prettyPrinter = defaultPrettyPrinter.withObjectIndenter(new DefaultIndenter("  ", "\n"));
 		} else {
-			writeContext = ObjectWriteContext.empty();
+			prettyPrinter = null;
 		}
+
+		ObjectWriteContext writeContext = new ObjectWriteContext() {
+			@Override
+			public FormatSchema getSchema() {
+				return null;
+			}
+
+			@Override
+			public CharacterEscapes getCharacterEscapes() {
+				return null;
+			}
+
+			@Override
+			public PrettyPrinter getPrettyPrinter() {
+				return prettyPrinter;
+			}
+
+			@Override
+			public boolean hasPrettyPrinter() {
+				return prettyPrinter != null;
+			}
+
+			@Override
+			public SerializableString getRootValueSeparator(SerializableString defaultSeparator) {
+				return defaultSeparator;
+			}
+
+			@Override
+			public int getStreamWriteFeatures(int defaults) {
+				return defaults;
+			}
+
+			@Override
+			public int getFormatWriteFeatures(int defaults) {
+				return defaults;
+			}
+
+			@Override
+			public TokenStreamFactory tokenStreamFactory() {
+				return myJsonFactory;
+			}
+
+			@Override
+			public ArrayTreeNode createArrayNode() {
+				throw new UnsupportedOperationException(
+						"Tree-node creation is not supported by " + JacksonWriter.class.getSimpleName());
+			}
+
+			@Override
+			public ObjectTreeNode createObjectNode() {
+				throw new UnsupportedOperationException(
+						"Tree-node creation is not supported by " + JacksonWriter.class.getSimpleName());
+			}
+
+			@Override
+			public void writeValue(JsonGenerator gen, Object value) {
+				throw new UnsupportedOperationException(
+						JacksonWriter.class.getSimpleName()
+								+ " writes values via type-specific JsonGenerator methods and does not support writePOJO(..)/writeValue(..)");
+			}
+
+			@Override
+			public void writeTree(JsonGenerator gen, TreeNode tree) {
+				throw new UnsupportedOperationException(
+						"Tree writing is not supported by " + JacksonWriter.class.getSimpleName());
+			}
+		};
+
 		myJsonGenerator = myJsonFactory.createGenerator(writeContext, myTargetWriter);
 		return this;
 	}
@@ -69,132 +155,134 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		myJsonGenerator.close();
 	}
 
 	@Override
-	public BaseJsonLikeWriter beginObject() throws IOException {
+	public BaseJsonLikeWriter beginObject() {
 		myJsonGenerator.writeStartObject();
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter beginObject(String name) throws IOException {
-		myJsonGenerator.writeStartObject(name);
+	public BaseJsonLikeWriter beginObject(String name) {
+		myJsonGenerator.writeObjectPropertyStart(name);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter beginArray(String name) throws IOException {
-		myJsonGenerator.writeStartArray(name);
+	public BaseJsonLikeWriter beginArray(String name) {
+		myJsonGenerator.writeArrayPropertyStart(name);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter write(String value) throws IOException {
-		myJsonGenerator.writePOJO(value);
+	public BaseJsonLikeWriter write(String value) {
+		myJsonGenerator.writeString(value);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter write(BigInteger value) throws IOException {
-		myJsonGenerator.writePOJO(value);
+	public BaseJsonLikeWriter write(BigInteger value) {
+		myJsonGenerator.writeNumber(value);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter write(BigDecimal value) throws IOException {
-		myJsonGenerator.writePOJO(value);
+	public BaseJsonLikeWriter write(BigDecimal value) {
+		myJsonGenerator.writeNumber(value);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter write(long value) throws IOException {
-		myJsonGenerator.writePOJO(value);
+	public BaseJsonLikeWriter write(long value) {
+		myJsonGenerator.writeNumber(value);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter write(double value) throws IOException {
-		myJsonGenerator.writePOJO(value);
+	public BaseJsonLikeWriter write(double value) {
+		myJsonGenerator.writeNumber(value);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter write(Boolean value) throws IOException {
+	public BaseJsonLikeWriter write(Boolean value) {
 		myJsonGenerator.writeBoolean(value);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter write(boolean value) throws IOException {
+	public BaseJsonLikeWriter write(boolean value) {
 		myJsonGenerator.writeBoolean(value);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter writeNull() throws IOException {
+	public BaseJsonLikeWriter writeNull() {
 		myJsonGenerator.writeNull();
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter write(String name, String value) throws IOException {
+	public BaseJsonLikeWriter write(String name, String value) {
 		myJsonGenerator.writeStringProperty(name, value);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter write(String name, BigInteger value) throws IOException {
+	public BaseJsonLikeWriter write(String name, BigInteger value) {
+		myJsonGenerator.writeName(name);
+		myJsonGenerator.writeNumber(value);
+		return this;
+	}
+
+	@Override
+	public BaseJsonLikeWriter write(String name, BigDecimal value) {
+		myJsonGenerator.writeName(name);
+		myJsonGenerator.writeNumber(value);
+		return this;
+	}
+
+	@Override
+	public BaseJsonLikeWriter write(String name, long value) {
 		myJsonGenerator.writeNumberProperty(name, value);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter write(String name, BigDecimal value) throws IOException {
+	public BaseJsonLikeWriter write(String name, double value) {
 		myJsonGenerator.writeNumberProperty(name, value);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter write(String name, long value) throws IOException {
-		myJsonGenerator.writeNumberProperty(name, value);
-		return this;
-	}
-
-	@Override
-	public BaseJsonLikeWriter write(String name, double value) throws IOException {
-		myJsonGenerator.writeNumberProperty(name, value);
-		return this;
-	}
-
-	@Override
-	public BaseJsonLikeWriter write(String name, Boolean value) throws IOException {
+	public BaseJsonLikeWriter write(String name, Boolean value) {
 		myJsonGenerator.writeBooleanProperty(name, value);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter write(String name, boolean value) throws IOException {
+	public BaseJsonLikeWriter write(String name, boolean value) {
 		myJsonGenerator.writeBooleanProperty(name, value);
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter endObject() throws IOException {
+	public BaseJsonLikeWriter endObject() {
 		myJsonGenerator.writeEndObject();
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter endArray() throws IOException {
+	public BaseJsonLikeWriter endArray() {
 		myJsonGenerator.writeEndArray();
 		return this;
 	}
 
 	@Override
-	public BaseJsonLikeWriter endBlock() throws IOException {
+	public BaseJsonLikeWriter endBlock() {
 		myJsonGenerator.writeEndObject();
 		return this;
 	}
