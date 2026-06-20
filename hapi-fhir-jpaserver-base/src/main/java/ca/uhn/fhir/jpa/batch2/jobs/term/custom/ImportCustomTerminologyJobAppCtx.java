@@ -29,9 +29,11 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_GENERATE_CONCEPT_CLOSURES;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_FINALIZE_IMPORT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_GENERATE_CONCEPT_CLOSURES;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_WEIGHT_FINALIZE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_WEIGHT_GENERATE_CONCEPT_CLOSURES;
 
 @Configuration
 public class ImportCustomTerminologyJobAppCtx {
@@ -91,19 +93,23 @@ public class ImportCustomTerminologyJobAppCtx {
 						STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
 						"Create work chunks for calculating concept closures",
 						TerminologyFileSetJson.class,
-						importIcdStepChunkConceptsForClosureGeneration())
+						importCustomTerminologyStepChunkConceptsForClosureGeneration())
 				.addIntermediateStep(
 						STEP_ID_GENERATE_CONCEPT_CLOSURES,
 						"Generate concept closures",
 						TerminologyFileSetJson.class,
-						importIcdStepGenerateConceptClosures())
-				.setStepWeightForProgressCalculator(STEP_ID_GENERATE_CONCEPT_CLOSURES, 0.3)
+						importCustomTerminologyStepGenerateConceptClosures())
+				// This step doesn't gain any work chunks until the previous step, we want to give it
+				// a fixed portion of the overall progress
+				.setStepWeightForProgressCalculator(
+						STEP_ID_GENERATE_CONCEPT_CLOSURES, STEP_WEIGHT_GENERATE_CONCEPT_CLOSURES)
 				.addFinalReducerStep(
 						STEP_ID_FINALIZE_IMPORT,
 						"Finalize ICD-10 Import",
 						ImportTerminologyResultJson.class,
 						importCustomTerminologyStepFinalize())
-				.setStepWeightForProgressCalculator(STEP_ID_FINALIZE_IMPORT, 0.01)
+				// This step takes very little time and shouldn't factor significantly into the progress
+				.setStepWeightForProgressCalculator(STEP_ID_FINALIZE_IMPORT, STEP_WEIGHT_FINALIZE)
 				.build();
 	}
 
@@ -130,13 +136,13 @@ public class ImportCustomTerminologyJobAppCtx {
 
 	@Bean
 	public ImportTerminologyStepChunkConceptsForGeneratingClosure<ImportTerminologyJobParameters>
-			importIcdStepChunkConceptsForClosureGeneration() {
+			importCustomTerminologyStepChunkConceptsForClosureGeneration() {
 		return new ImportTerminologyStepChunkConceptsForGeneratingClosure<>();
 	}
 
 	@Bean
 	public ImportTerminologyStepGenerateConceptClosures<ImportTerminologyJobParameters>
-			importIcdStepGenerateConceptClosures() {
+			importCustomTerminologyStepGenerateConceptClosures() {
 		return new ImportTerminologyStepGenerateConceptClosures<>();
 	}
 

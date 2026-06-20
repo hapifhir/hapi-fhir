@@ -57,7 +57,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.*;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_FINALIZE_IMPORT;
 import static ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl.DONT_POPULATE_PARENT_PIDS_CS_USERDATA_KEY;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.*;

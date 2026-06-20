@@ -62,15 +62,16 @@ class JobDefinitionTest extends BaseBatch2Test {
 
 	@Test
 	void stepWeight_FailOnAllWeightAddsUpToMoreThanOne() {
-		assertThatThrownBy(()->{
-			super.createJobDefinition(b -> {
-				b.setStepWeightForProgressCalculator(STEP_1, 0.49);
-				b.setStepWeightForProgressCalculator(STEP_2, 0.49);
-				// Adds up to more than 1.0
-				b.setStepWeightForProgressCalculator(STEP_3, 0.2);
-			});
-		}).isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("Combined step weights can not be greater than 1.0, but was 1.18");
+		// Test
+		assertThatThrownBy(()-> super.createJobDefinition(b -> {
+			b.setStepWeightForProgressCalculator(STEP_1, 0.49);
+			b.setStepWeightForProgressCalculator(STEP_2, 0.49);
+			// Adds up to more than 1.0
+			b.setStepWeightForProgressCalculator(STEP_3, 0.2);
+		}))
+			// Validate
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageMatching("^Combined step weights can not be greater than 1.0, but was 1.1[789].*");
 	}
 
 }

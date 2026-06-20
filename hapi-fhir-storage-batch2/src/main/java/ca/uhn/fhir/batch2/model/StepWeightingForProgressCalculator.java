@@ -16,10 +16,11 @@ import java.util.stream.Collectors;
  * However, it's also possible to assign weights to specific steps, if a specific
  * step is expected to process steps faster than others, or if it won't get
  * populated with steps until later in the process.
- * An individual step may have an explicit weight assigned, which is a double between
- * 0.0-0.999.
+ * An individual step may have an explicit weight assigned, which is a double that
+ * is <code>&gt; 0.0</code> and <code>&lt; 1.0</code>.
  */
 public class StepWeightingForProgressCalculator {
+	private static final double WEIGHT_SUM_EPSILON = 1e-9;
 
 	private final double myWeightForStepsWithoutExplicitWeight;
 	private final Set<String> myStepIdsWithoutExplicitWeight;
@@ -31,7 +32,7 @@ public class StepWeightingForProgressCalculator {
 			double theWeightForStepsWithoutExplicitWeight) {
 		Validate.notNull(theStepIdToWeight, "theStepIdToWeight must not be null");
 		myStepIdToWeight = Map.copyOf(theStepIdToWeight);
-		myStepIdsWithoutExplicitWeight = theStepIdsWithoutExplicitWeight;
+		myStepIdsWithoutExplicitWeight = Set.copyOf(theStepIdsWithoutExplicitWeight);
 		myWeightForStepsWithoutExplicitWeight = theWeightForStepsWithoutExplicitWeight;
 	}
 
@@ -80,6 +81,8 @@ public class StepWeightingForProgressCalculator {
 		Builder() {}
 
 		void setStepWeightForProgressCalculator(String theStepId, double theWeight) {
+			Validate.notBlank(theStepId, "theStepId must not be blank");
+			Validate.isTrue(theWeight < 1.0d, "theWeight must be >= 0.0 and < 1.0");
 			Validate.isTrue(
 					theWeight > 0.0,
 					"All steps must have at least a small amount of weight, so step weight can not be <= 0.0");
@@ -100,8 +103,16 @@ public class StepWeightingForProgressCalculator {
 				combinedWeightTotal += myStepIdToWeight.get(stepId);
 			}
 
+			/*
+			 * Because double is IEEE 754 binary floating point, most "round" decimals like
+			 * 0.1, 0.3, 0.4 cannot be represented exactly in binary — they're stored as the
+			 * nearest representable value, slightly above or below. When you add several of
+			 * them, the tiny representation errors accumulate, and the sum can land just
+			 * above the true mathematical total. Weights such as 0.3 + 0.3 + 0.4 can sum to
+			 * 1.0000000000000002 and spuriously cause failures.
+			 */
 			Validate.isTrue(
-					combinedWeightTotal <= 1.0,
+					combinedWeightTotal <= 1.0 + WEIGHT_SUM_EPSILON,
 					"Combined step weights can not be greater than 1.0, but was %s",
 					combinedWeightTotal);
 

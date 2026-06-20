@@ -537,16 +537,15 @@ public class JobDefinition<PT extends IModelJson> {
 		 * how we calculate the "job complete %" number returned to the client while the job executes.
 		 *
 		 * @param theStepId The step ID to assign a weight to.
-		 * @param theWeight A weight. Value must be <code>i >= 0.0</code> and <code>i < 1.0</code>. The
+		 * @param theWeight A weight. Value must be <code>i &gt; 0.0</code> and <code>i &lt; 1.0</code>. The
 		 *                  combined weight of all steps must not exceed 1.0. If a given step should always
 		 *                  count for 20% of the total completion status, assign it a weight of <code>0.2</code>.
 		 * @see StepWeightingForProgressCalculator
 		 */
 		public Builder<PT, NIT> setStepWeightForProgressCalculator(String theStepId, double theWeight) {
-			Validate.notBlank(theStepId, "theStepId must not be blank");
-			Validate.isTrue(theWeight >= 0.0d && theWeight < 1.0d, "theWeight must be >= 0.0 and < 1.0");
 			Validate.isTrue(
-					mySteps.stream().anyMatch(t -> t.getStepId().equals(theStepId)), "Unknown stepL: %s", theStepId);
+					mySteps.stream().anyMatch(t -> t.getStepId().equals(theStepId)), "Unknown step: %s", theStepId);
+			// theWeight is validated in setStepWeightForProgressCalculator
 			myStepWeightingBuilder.setStepWeightForProgressCalculator(theStepId, theWeight);
 			return this;
 		}

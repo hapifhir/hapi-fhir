@@ -29,12 +29,16 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepChunkConceptsForGeneratingClosure;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepFinalize;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepGenerateConceptClosures;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_WEIGHT_FINALIZE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_WEIGHT_GENERATE_CONCEPT_CLOSURES;
 
 /**
  * This file is the Batch2 Job Definition for the LOINC Import job.
@@ -45,9 +49,6 @@ import org.springframework.context.annotation.Configuration;
 public class ImportLoincJobAppCtx {
 
 	public static final String JOB_ID_IMPORT_TERM_LOINC = "IMPORT_TERM_LOINC";
-	public static final String STEP_ID_FINALIZE_IMPORT = "finalize-import";
-	public static final String STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION = "chunk-concepts-for-closure-generation";
-	public static final String STEP_ID_GENERATE_CONCEPT_CLOSURES = "generate-concept-closures";
 	public static final String STEP_ID_IMPORT_PART_LINK_FILE = "import-part-link-file";
 
 	private final DaoRegistry myDaoRegistry;
@@ -183,22 +184,26 @@ public class ImportLoincJobAppCtx {
 						TerminologyFileSetJson.class,
 						importLoincStep20LinguisticVariant())
 				.addIntermediateStep(
-						STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
+						TerminologyConstants.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
 						"Create work chunks for calculating concept closures",
 						TerminologyFileSetJson.class,
 						importLoincStep21ChunkConceptsForClosureGeneration())
 				.addIntermediateStep(
-						STEP_ID_GENERATE_CONCEPT_CLOSURES,
+						TerminologyConstants.STEP_ID_GENERATE_CONCEPT_CLOSURES,
 						"Generate concept closures",
 						TerminologyFileSetJson.class,
 						importLoincStep22GenerateConceptClosures())
-				.setStepWeightForProgressCalculator(STEP_ID_GENERATE_CONCEPT_CLOSURES, 0.3)
+				// This step doesn't gain any work chunks until the previous step, we want to give it
+				// a fixed portion of the overall progress
+				.setStepWeightForProgressCalculator(
+						TerminologyConstants.STEP_ID_GENERATE_CONCEPT_CLOSURES, STEP_WEIGHT_GENERATE_CONCEPT_CLOSURES)
 				.addFinalReducerStep(
-						STEP_ID_FINALIZE_IMPORT,
+						TerminologyConstants.STEP_ID_FINALIZE_IMPORT,
 						"Finalize LOINC Import",
 						ImportTerminologyResultJson.class,
 						importLoincStep23Finalize())
-				.setStepWeightForProgressCalculator(STEP_ID_FINALIZE_IMPORT, 0.01)
+				// This step takes very little time and shouldn't factor significantly into the progress
+				.setStepWeightForProgressCalculator(TerminologyConstants.STEP_ID_FINALIZE_IMPORT, STEP_WEIGHT_FINALIZE)
 				.build();
 	}
 

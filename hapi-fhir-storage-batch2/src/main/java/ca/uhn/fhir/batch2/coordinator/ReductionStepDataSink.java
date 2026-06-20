@@ -22,11 +22,9 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
-import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.StepWeightingForProgressCalculator;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.batch2.progress.InstanceProgress;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
@@ -100,13 +98,7 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			 * reducer touches. If the two could never collide we wouldn't need this duplication
 			 * here. Until then though, this is safer.
 			 */
-
-			JobDefinition<?> jobDefinition = myJobDefinitionRegistry
-					.getJobDefinition(instance.getJobDefinitionId(), instance.getJobDefinitionVersion())
-					.orElseThrow();
-			StepWeightingForProgressCalculator stepWeightingForProgressCalculator =
-					jobDefinition.getStepWeightingForProgressCalculator();
-			progress.updateInstanceForReductionStep(stepWeightingForProgressCalculator, instance);
+			progress.updateInstanceForReductionStep(myJobDefinitionRegistry, instance);
 
 			instance.setReport(dataString);
 			instance.setStatus(StatusEnum.COMPLETED);
