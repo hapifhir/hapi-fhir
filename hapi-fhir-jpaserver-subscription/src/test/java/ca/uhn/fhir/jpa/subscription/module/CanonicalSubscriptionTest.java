@@ -9,8 +9,8 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.util.HapiExtensions;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.annotation.Nonnull;
 import org.assertj.core.util.Lists;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -135,7 +135,7 @@ public class CanonicalSubscriptionTest {
 	}
 
 	@Test
-	public void testLegacyCanonicalSubscription() throws JsonProcessingException {
+	public void testLegacyCanonicalSubscription() throws JacksonException {
 		String legacyCanonical = "{\"headers\":{\"retryCount\":0,\"customHeaders\":{}},\"payload\":{\"canonicalSubscription\":{\"extensions\":{\"key1\":[\"VALUE1\"],\"key2\":[\"VALUE2a\",\"VALUE2b\"]},\"sendDeleteMessages\":false},\"partitionId\":{\"allPartitions\":false,\"partitionIds\":[null]}}}";
 		ObjectMapper mapper = new ObjectMapper();
 		ResourceDeliveryJsonMessage resourceDeliveryMessage = mapper.readValue(legacyCanonical, ResourceDeliveryJsonMessage.class);

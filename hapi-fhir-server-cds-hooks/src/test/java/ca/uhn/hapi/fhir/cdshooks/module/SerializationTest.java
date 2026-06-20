@@ -8,7 +8,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSystemActionJson;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;

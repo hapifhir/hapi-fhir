@@ -1,8 +1,8 @@
 package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Charsets;
 import org.apache.commons.collections4.IteratorUtils;
@@ -92,7 +92,7 @@ class ChangelogFilesTest {
 				fail("Invalid changelog filename: " + next);
 			}
 
-			ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+			JsonMapper mapper = new JsonMapper(new YAMLFactory());
 			ObjectNode tree;
 			try (FileInputStream fis = new FileInputStream(next)) {
 				tree = (ObjectNode) mapper.readTree(new InputStreamReader(fis, Charsets.UTF_8));

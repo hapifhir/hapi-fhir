@@ -59,10 +59,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ValidateUtil;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 import com.github.dnault.xmlpatch.repackaged.org.apache.commons.io.input.CountingInputStream;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -352,7 +352,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	private String originalRequestUrlTruncation(String theParams) {
 		try {
-			ObjectMapper mapper = new ObjectMapper();
+			JsonMapper mapper = new JsonMapper();
 			mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 			mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 			JsonNode rootNode = mapper.readTree(theParams);

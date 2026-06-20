@@ -19,8 +19,8 @@ import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Coding;
@@ -455,7 +455,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	private static String toJson(Object theRequest) {
 		try {
 			return new ObjectMapper().writer().writeValueAsString(theRequest);
-		} catch (JsonProcessingException theE) {
+		} catch (JacksonException theE) {
 			throw new AssertionError("Failure during serialization: " + theE);
 		}
 	}

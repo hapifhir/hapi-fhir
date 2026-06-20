@@ -27,8 +27,8 @@ import ca.uhn.hapi.fhir.cdshooks.api.CdsService;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServiceFeedback;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServicePrefetch;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -112,9 +112,9 @@ public class CdsHooksContextBooter {
 			return null;
 		}
 		try {
-			final ObjectMapper mapper = new ObjectMapper();
+			final JsonMapper mapper = new JsonMapper();
 			return mapper.readValue(theExtension, theClass);
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			final String message = String.format("Invalid JSON: %s", e.getMessage());
 			ourLog.debug(message);
 			throw new UnprocessableEntityException(Msg.code(2378) + message);

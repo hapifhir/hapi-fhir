@@ -10,8 +10,8 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -94,7 +94,7 @@ class CdsServiceRegistryImplTest {
 	}
 
 	@Test
-	void encodeServiceResponseWhenResponseIsString() throws JsonProcessingException {
+	void encodeServiceResponseWhenResponseIsString() throws JacksonException {
 		// setup
 		final String input = """
    			{
@@ -116,7 +116,7 @@ class CdsServiceRegistryImplTest {
 	}
 
 	@Test
-	void encodeServiceResponseWhenResponseCdsServiceResponseJson() throws JsonProcessingException {
+	void encodeServiceResponseWhenResponseCdsServiceResponseJson() throws JacksonException {
 		// setup
 		final String input = """
    			{

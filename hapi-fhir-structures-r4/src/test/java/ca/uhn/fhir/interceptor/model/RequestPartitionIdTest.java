@@ -1,7 +1,6 @@
 package ca.uhn.fhir.interceptor.model;
 
 import ca.uhn.fhir.rest.api.Constants;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Patient;
@@ -14,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.stream.Stream;
 
@@ -236,7 +236,7 @@ public class RequestPartitionIdTest {
 	}
 
 	@Test
-	public void testSerDeserSer() throws JsonProcessingException {
+	public void testSerDeserSer() throws IOException {
 		{
 			RequestPartitionId start = RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1));
 			String json = assertSerDeserSer(start);
@@ -252,7 +252,7 @@ public class RequestPartitionIdTest {
 		assertSerDeserSer(RequestPartitionId.fromPartitionId(null));
 	}
 
-	private String assertSerDeserSer(RequestPartitionId start) throws JsonProcessingException {
+	private String assertSerDeserSer(RequestPartitionId start) throws IOException {
 		String json = start.asJson();
 		ourLog.info(json);
 		RequestPartitionId end = RequestPartitionId.fromJson(json);

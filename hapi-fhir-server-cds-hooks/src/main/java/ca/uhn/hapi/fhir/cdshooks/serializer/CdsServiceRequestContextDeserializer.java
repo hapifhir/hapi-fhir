@@ -22,9 +22,9 @@ package ca.uhn.hapi.fhir.cdshooks.serializer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import com.fasterxml.jackson.core.JsonParser;
+import tools.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

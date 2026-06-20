@@ -32,6 +32,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
@@ -53,7 +54,9 @@ import static org.apache.commons.lang3.ObjectUtils.getIfNull;
  */
 public class RequestPartitionId implements IModelJson {
 	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
-	private static final JsonMapper ourJsonMapper = JsonMapper.builder().build();
+	private static final JsonMapper ourJsonMapper = JsonMapper.builder()
+			.enable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+			.build();
 
 	@JsonProperty("partitionDate")
 	private final LocalDate myPartitionDate;

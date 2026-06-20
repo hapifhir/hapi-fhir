@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashingInputStream;
@@ -57,14 +57,14 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FilesystemBinaryStorageSvcImpl.class);
 	private final File myBasePath;
-	private final ObjectMapper myJsonSerializer;
+	private final JsonMapper myJsonSerializer;
 
 	public FilesystemBinaryStorageSvcImpl(String theBasePath) {
 		Validate.notBlank(theBasePath);
 
 		myBasePath = new File(theBasePath);
 
-		myJsonSerializer = new ObjectMapper();
+		myJsonSerializer = new JsonMapper();
 		myJsonSerializer.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 		myJsonSerializer.enable(SerializationFeature.INDENT_OUTPUT);
 

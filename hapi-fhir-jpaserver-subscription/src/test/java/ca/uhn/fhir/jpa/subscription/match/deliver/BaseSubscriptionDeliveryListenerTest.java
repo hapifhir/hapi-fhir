@@ -30,7 +30,7 @@ import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -306,7 +306,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 	}
 
 	@Test
-	public void testSerializeDeliveryMessageWithRequestPartition() throws JsonProcessingException {
+	public void testSerializeDeliveryMessageWithRequestPartition() throws JacksonException {
 		CanonicalSubscription subscription = generateSubscription();
 		Patient patient = generatePatient();
 
@@ -328,7 +328,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 	}
 
 	@Test
-	public void testSerializeDeliveryMessageWithNoPartition() throws JsonProcessingException {
+	public void testSerializeDeliveryMessageWithNoPartition() throws JacksonException {
 		CanonicalSubscription subscription = generateSubscription();
 		Patient patient = generatePatient();
 
@@ -427,7 +427,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 	}
 
 	@Test
-	public void testSerializeLegacyDeliveryMessage() throws JsonProcessingException {
+	public void testSerializeLegacyDeliveryMessage() throws JacksonException {
 		String legacyDeliveryMessageJson = "{\"headers\":{\"retryCount\":0,\"customHeaders\":{}},\"payload\":{\"operationType\":\"CREATE\",\"canonicalSubscription\":{\"id\":\"Subscription/123\",\"endpointUrl\":\"http://example.com/fhir\",\"payload\":\"application/fhir+json\"},\"payload\":\"{\\\"resourceType\\\":\\\"Patient\\\",\\\"active\\\":true}\"}}";
 
 		ResourceDeliveryJsonMessage jsonMessage = ResourceDeliveryJsonMessage.fromJson(legacyDeliveryMessageJson);

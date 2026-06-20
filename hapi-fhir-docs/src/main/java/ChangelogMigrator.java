@@ -19,7 +19,7 @@
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import org.apache.commons.io.FileUtils;
@@ -136,7 +136,7 @@ public class ChangelogMigrator {
 
 				YAMLFactory yf = new YAMLFactory().disable(YAMLGenerator.Feature.SPLIT_LINES);
 
-				ObjectMapper mapper = new ObjectMapper(yf);
+				JsonMapper mapper = new JsonMapper(yf);
 				mapper.writeValue(writer, items);
 			}
 
@@ -145,7 +145,7 @@ public class ChangelogMigrator {
 			try (FileWriter writer = new FileWriter(file, false)) {
 
 				YAMLFactory yf = new YAMLFactory();
-				ObjectMapper mapper = new ObjectMapper(yf);
+				JsonMapper mapper = new JsonMapper(yf);
 				HashMap<Object, Object> versionMap = new HashMap<>();
 				versionMap.put("release-date", date);
 				if (isNotBlank(description)) {

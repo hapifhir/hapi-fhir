@@ -11,10 +11,10 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -350,8 +350,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		String input = ClasspathUtil.loadResource("org/hl7/fhir/common/hapi/validation/support/registry.json");
 		ArrayNode map;
 		try {
-			map = (ArrayNode) new ObjectMapper().readTree(input);
-		} catch (JsonProcessingException e) {
+			map = (ArrayNode) new JsonMapper().readTree(input);
+		} catch (JacksonException e) {
 			throw new ConfigurationException(Msg.code(694) + e);
 		}
 

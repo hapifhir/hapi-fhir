@@ -20,8 +20,8 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common;
 
 import ca.uhn.fhir.util.JsonUtil;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.TreeNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.node.ArrayNode;

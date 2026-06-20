@@ -17,7 +17,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,7 +96,7 @@ public class FetchResourceIdsV3StepTest {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void run_withValidInputs_succeeds(boolean thePartitioned) throws JsonProcessingException {
+	public void run_withValidInputs_succeeds(boolean thePartitioned) throws JacksonException {
 		// setup
 		BulkExportJobParameters parameters = createParameters();
 		JobInstance instance = new JobInstance();

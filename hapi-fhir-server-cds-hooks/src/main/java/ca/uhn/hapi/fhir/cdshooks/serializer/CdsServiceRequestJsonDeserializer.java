@@ -27,9 +27,9 @@ import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -37,15 +37,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class CdsServiceRequestJsonDeserializer {
-	private final ObjectMapper myObjectMapper;
+	private final JsonMapper myJsonMapper;
 	private final FhirContext myFhirContext;
 	private final IParser myParser;
 
 	public CdsServiceRequestJsonDeserializer(
-			@Nonnull FhirContext theFhirContext, @Nonnull ObjectMapper theObjectMapper) {
+			@Nonnull FhirContext theFhirContext, @Nonnull JsonMapper theJsonMapper) {
 		myFhirContext = theFhirContext;
 		myParser = myFhirContext.newJsonParser().setPrettyPrint(true);
-		myObjectMapper = theObjectMapper;
+		myJsonMapper = theObjectMapper;
 	}
 
 	public CdsServiceRequestJson deserialize(
@@ -68,13 +68,13 @@ public class CdsServiceRequestJsonDeserializer {
 				cdsServiceRequestJson.setExtension(myRequestExtension);
 			}
 			return cdsServiceRequestJson;
-		} catch (JsonProcessingException | IllegalArgumentException theEx) {
+		} catch (JacksonException | IllegalArgumentException theEx) {
 			throw new InvalidRequestException(Msg.code(2551) + "Invalid CdsServiceRequest received. " + theEx);
 		}
 	}
 
 	CdsServiceRequestContextJson deserializeContext(LinkedHashMap<String, Object> theMap)
-			throws JsonProcessingException {
+			throws JacksonException {
 		final CdsServiceRequestContextJson cdsServiceRequestContextJson = new CdsServiceRequestContextJson();
 		for (Map.Entry<String, Object> entry : theMap.entrySet()) {
 			String key = entry.getKey();
@@ -92,7 +92,7 @@ public class CdsServiceRequestJsonDeserializer {
 	}
 
 	private CdsHooksExtension deserializeExtension(
-			@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull String theExtension) throws JsonProcessingException {
+			@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull String theExtension) throws JacksonException {
 		Class<? extends CdsHooksExtension> extensionClass = theCdsServiceJson.getExtensionClass();
 		if (extensionClass == null) {
 			return null;

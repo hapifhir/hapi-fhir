@@ -35,8 +35,8 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServicesJson;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
@@ -53,18 +53,18 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 
 	private final CdsHooksContextBooter myCdsHooksContextBooter;
 	private final CdsPrefetchSvc myCdsPrefetchSvc;
-	private final ObjectMapper myObjectMapper;
+	private final JsonMapper myJsonMapper;
 	private final CDSHooksVersion myCdsHooksVersion;
 
 	public CdsServiceRegistryImpl(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
-			ObjectMapper theObjectMapper,
+			JsonMapper theJsonMapper,
 			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
 		this(
 				theCdsHooksContextBooter,
 				theCdsPrefetchSvc,
-				theObjectMapper,
+				theJsonMapper,
 				theCdsServiceRequestJsonDeserializer,
 				CDSHooksVersion.DEFAULT);
 	}
@@ -72,12 +72,12 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	public CdsServiceRegistryImpl(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
-			ObjectMapper theObjectMapper,
+			JsonMapper theJsonMapper,
 			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer,
 			CDSHooksVersion theCDSHooksVersion) {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
-		myObjectMapper = theObjectMapper;
+		myJsonMapper = theJsonMapper;
 		myCdsServiceRequestJsonDeserializer = theCdsServiceRequestJsonDeserializer;
 		myCdsHooksVersion = theCDSHooksVersion;
 	}
@@ -212,8 +212,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 
 	private CdsServiceResponseJson buildResponseFromString(String theServiceId, Object theResult, String theJson) {
 		try {
-			return myObjectMapper.readValue(theJson, CdsServiceResponseJson.class);
-		} catch (JsonProcessingException e) {
+			return myJsonMapper.readValue(theJson, CdsServiceResponseJson.class);
+		} catch (JacksonException e) {
 			throw new ConfigurationException(
 					Msg.code(2390) + "Failed to json deserialize Cds service response of type "
 							+ theResult.getClass().getName() + " when calling CDS Hook Service " + theServiceId
@@ -234,8 +234,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 
 	private CdsServiceFeedbackJson buildFeedbackFromString(String theServiceId, String theResponse) {
 		try {
-			return myObjectMapper.readValue(theResponse, CdsServiceFeedbackJson.class);
-		} catch (JsonProcessingException e) {
+			return myJsonMapper.readValue(theResponse, CdsServiceFeedbackJson.class);
+		} catch (JacksonException e) {
 			throw new RuntimeException(Msg.code(2538) + "Failed to serialize json Cds Feedback response for service "
 					+ theServiceId + ". " + e.getMessage());
 		}

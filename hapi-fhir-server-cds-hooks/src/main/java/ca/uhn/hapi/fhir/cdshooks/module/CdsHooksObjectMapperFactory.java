@@ -25,7 +25,7 @@ import ca.uhn.fhir.serializer.FhirResourceDeserializer;
 import ca.uhn.fhir.serializer.FhirResourceSerializer;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
