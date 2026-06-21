@@ -79,7 +79,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyUtil.getJobProperties;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

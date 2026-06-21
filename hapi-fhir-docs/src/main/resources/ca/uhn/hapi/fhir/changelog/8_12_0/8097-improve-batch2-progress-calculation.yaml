@@ -1,0 +1,4 @@
+---
+type: add
+issue: 8097
+title: "The mechanism for calculating Batch2 job progress has been improved to allow specific steps in the job to have different weights in the overall progress calculation. This allows jobs with unbalanced effort levels between steps to have more accurate progress returned to the user."
