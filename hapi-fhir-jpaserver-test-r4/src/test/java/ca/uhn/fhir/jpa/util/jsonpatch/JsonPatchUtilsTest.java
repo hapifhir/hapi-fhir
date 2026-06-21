@@ -6,11 +6,13 @@ import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Group;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class JsonPatchUtilsTest extends BaseJpaR4Test {
@@ -88,6 +90,72 @@ public class JsonPatchUtilsTest extends BaseJpaR4Test {
 		ourLog.info(outcome);
 
 		assertThat(outcome).contains("\"reference\": \"Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"");
+	}
+
+	@Test
+	public void testPatchAddMemberToEmptyGroup() {
+		Group group = new Group();
+		group.setId("Group/test-group");
+		group.setType(Group.GroupType.PERSON);
+		group.setActual(true);
+
+		String patchText = "[{" +
+			"\"op\":\"add\"," +
+			"\"path\":\"/member/0\"," +
+			"\"value\":{" +
+			"\"entity\":{\"reference\":\"Patient/123\"}," +
+			"\"inactive\":false" +
+			"}" +
+			"}]";
+
+		Group result = JsonPatchUtils.apply(myFhirContext, group, patchText);
+
+		assertThat(result.getMember()).hasSize(1);
+		assertThat(result.getMember().get(0).getEntity().getReference()).isEqualTo("Patient/123");
+		assertThat(result.getMember().get(0).getInactive()).isFalse();
+	}
+
+	@Test
+	public void testPatchAddMemberToEmptyGroup_AppendPath() {
+		Group group = new Group();
+		group.setId("Group/test-group");
+		group.setType(Group.GroupType.PERSON);
+		group.setActual(true);
+
+		String patchText = "[{" +
+			"\"op\":\"add\"," +
+			"\"path\":\"/member/-\"," +
+			"\"value\":{" +
+			"\"entity\":{\"reference\":\"Patient/456\"}," +
+			"\"inactive\":false" +
+			"}" +
+			"}]";
+
+		Group result = JsonPatchUtils.apply(myFhirContext, group, patchText);
+
+		assertThat(result.getMember()).hasSize(1);
+		assertThat(result.getMember().get(0).getEntity().getReference()).isEqualTo("Patient/456");
+	}
+
+	@Test
+	public void testPatchReplaceMemberOnEmptyGroup_Fails() {
+		Group group = new Group();
+		group.setId("Group/test-group");
+		group.setType(Group.GroupType.PERSON);
+		group.setActual(true);
+
+		String patchText = "[{" +
+			"\"op\":\"replace\"," +
+			"\"path\":\"/member/0\"," +
+			"\"value\":{" +
+			"\"entity\":{\"reference\":\"Patient/123\"}," +
+			"\"inactive\":false" +
+			"}" +
+			"}]";
+
+		assertThatThrownBy(() -> JsonPatchUtils.apply(myFhirContext, group, patchText))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-1272");
 	}
 
 	@Test
