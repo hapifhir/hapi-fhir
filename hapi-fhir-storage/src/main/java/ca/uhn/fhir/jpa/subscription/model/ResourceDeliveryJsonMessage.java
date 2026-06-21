@@ -22,13 +22,13 @@ package ca.uhn.fhir.jpa.subscription.model;
 import ca.uhn.fhir.rest.server.messaging.ICanNullPayload;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> implements ICanNullPayload {
-	private static final JsonMapper ourJsonMapper =
-			new JsonMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+
+	private static final JsonMapper ourJsonMapper = JsonMapper.builder().build();
 
 	@JsonProperty("payload")
 	private ResourceDeliveryMessage myPayload;
