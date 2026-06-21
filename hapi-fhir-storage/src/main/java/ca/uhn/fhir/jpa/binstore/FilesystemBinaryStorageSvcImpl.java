@@ -26,8 +26,6 @@ import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import tools.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashingInputStream;
 import jakarta.annotation.Nonnull;
@@ -40,6 +38,8 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,9 +64,10 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 		myBasePath = new File(theBasePath);
 
-		myJsonSerializer = new JsonMapper();
-		myJsonSerializer.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		myJsonSerializer.enable(SerializationFeature.INDENT_OUTPUT);
+		myJsonSerializer = JsonMapper.builder()
+				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+				.enable(SerializationFeature.INDENT_OUTPUT)
+				.build();
 
 		createBasePathDirectory();
 	}
