@@ -57,26 +57,32 @@ public class JsonUtil {
 
 	static {
 		ourMapperPrettyPrint = JsonMapper.builder()
-				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
+						.withContentInclusion(JsonInclude.Include.NON_NULL))
 				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
 				.filterProvider(SENSITIVE_DATA_FILTER_PROVIDER)
 				.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+				.enable(SerializationFeature.APPLY_JSON_INCLUDE_FOR_CONTAINERS)
 				.enable(SerializationFeature.INDENT_OUTPUT)
 				.build();
 
 		ourMapperNonPrettyPrint = JsonMapper.builder()
-				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
+						.withContentInclusion(JsonInclude.Include.NON_NULL))
 				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
 				.filterProvider(SENSITIVE_DATA_FILTER_PROVIDER)
 				.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+				.enable(SerializationFeature.APPLY_JSON_INCLUDE_FOR_CONTAINERS)
 				.disable(SerializationFeature.INDENT_OUTPUT)
 				.build();
 
 		ourMapperIncludeSensitive = JsonMapper.builder()
 				.filterProvider(SHOW_ALL_DATA_FILTER_PROVIDER)
-				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
+						.withContentInclusion(JsonInclude.Include.NON_NULL))
 				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
 				.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+				.enable(SerializationFeature.APPLY_JSON_INCLUDE_FOR_CONTAINERS)
 				.disable(SerializationFeature.INDENT_OUTPUT)
 				.build();
 	}

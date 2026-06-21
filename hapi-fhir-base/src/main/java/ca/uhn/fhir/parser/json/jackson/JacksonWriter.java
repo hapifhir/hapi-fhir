@@ -35,6 +35,7 @@ import tools.jackson.core.util.DefaultIndenter;
 import tools.jackson.core.util.DefaultPrettyPrinter;
 import tools.jackson.core.util.Separators;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -47,7 +48,7 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 
 	public JacksonWriter(JsonFactory theJsonFactory, Writer theWriter) {
 		myJsonFactory = theJsonFactory;
-		myTargetWriter = theWriter;
+		myTargetWriter = new NonClosingWriter(theWriter);
 		setWriter(theWriter);
 	}
 
@@ -145,7 +146,12 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 			}
 		};
 
-		myJsonGenerator = myJsonFactory.createGenerator(writeContext, myTargetWriter);
+		Writer targetWriter = myTargetWriter;
+		if (targetWriter == null && getWriter() != null) {
+			targetWriter = new NonClosingWriter(getWriter());
+			myTargetWriter = targetWriter;
+		}
+		myJsonGenerator = myJsonFactory.createGenerator(writeContext, targetWriter);
 		return this;
 	}
 
@@ -209,7 +215,11 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 
 	@Override
 	public BaseJsonLikeWriter write(Boolean value) {
-		myJsonGenerator.writeBoolean(value);
+		if (value == null) {
+			myJsonGenerator.writeNull();
+		} else {
+			myJsonGenerator.writeBoolean(value);
+		}
 		return this;
 	}
 
@@ -259,7 +269,12 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 
 	@Override
 	public BaseJsonLikeWriter write(String name, Boolean value) {
-		myJsonGenerator.writeBooleanProperty(name, value);
+		if (value == null) {
+			myJsonGenerator.writeName(name);
+			myJsonGenerator.writeNull();
+		} else {
+			myJsonGenerator.writeBooleanProperty(name, value);
+		}
 		return this;
 	}
 
@@ -285,5 +300,29 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 	public BaseJsonLikeWriter endBlock() {
 		myJsonGenerator.writeEndObject();
 		return this;
+	}
+
+	private static class NonClosingWriter extends Writer {
+
+		private final Writer myDelegate;
+
+		private NonClosingWriter(Writer theDelegate) {
+			myDelegate = theDelegate;
+		}
+
+		@Override
+		public void write(char[] theChars, int theOffset, int theLength) throws IOException {
+			myDelegate.write(theChars, theOffset, theLength);
+		}
+
+		@Override
+		public void flush() throws IOException {
+			myDelegate.flush();
+		}
+
+		@Override
+		public void close() throws IOException {
+			myDelegate.flush();
+		}
 	}
 }
