@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8079
+title: "Previously, when running on Microsoft SQL Server with Database Partition Mode enabled, 
+delete-expunge operations failed with a SQLGrammarException. This has been corrected."
