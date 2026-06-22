@@ -402,7 +402,8 @@ class SearchParameterUtilTest {
 			// List.patient is security-excluded via the OMIT map (hapi-fhir issue #7118).
 			Arguments.of(FhirVersionEnum.R4, "List", false),
 			Arguments.of(FhirVersionEnum.R5, "List", false),
-
+			// Sequence.patient is a direct SP that doesn't declare Patient-compartment membership
+			Arguments.of(FhirVersionEnum.DSTU3, "Sequence", false),
 			// Positives — must be in the Patient compartment.
 			// Observation.patient narrows Observation.subject (a Patient-member base SP).
 			Arguments.of(FhirVersionEnum.R4, "Observation", true),
@@ -435,17 +436,10 @@ class SearchParameterUtilTest {
 		Class<? extends IBase> resourceClass =
 			ctx.getResourceDefinition(theResourceType).getImplementingClass();
 
-		SearchParamDefinition patientSp = null;
-		for (Field field : resourceClass.getFields()) {
-			SearchParamDefinition spd = field.getAnnotation(SearchParamDefinition.class);
-			if (spd != null && "patient".equalsIgnoreCase(spd.name())) {
-				patientSp = spd;
-				break;
-			}
-		}
-		assertThat(patientSp)
-			.as("%s %s should have a 'patient' search parameter", theFhirVersion, theResourceType)
-			.isNotNull();
+		SearchParamDefinition patientSp = Arrays.stream(resourceClass.getFields())
+			.map(field -> field.getAnnotation(SearchParamDefinition.class))
+			.filter(spd -> spd != null && spd.name().equalsIgnoreCase("patient"))
+			.findFirst().orElseThrow();
 
 		Set<String> membership =
 			SearchParameterUtil.getMembershipCompartmentsForSearchParameter(resourceClass, patientSp);
