@@ -3,4 +3,5 @@ type: fix
 issue: 8060
 title: "On a partitioned server, topic subscription matching failed when a subscription topic trigger used
 `queryCriteria.previous` or a FHIRPath criteria referencing `%previous`, because the previous version of the
-resource was read without partition information. The read now carries the partition of the modified resource."
+resource was read without partition information. The read now carries the partition of the modified resource. Thanks to 
+Michael Rebsamen for the contribution!"
