@@ -166,6 +166,8 @@ public class JacksonStructure implements JsonLikeStructure {
 	public BaseJsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException {
 		if (null == jacksonWriter) {
 			jacksonWriter = new JacksonWriter(OBJECT_MAPPER.tokenStreamFactory(), writer);
+		} else {
+			jacksonWriter.setWriter(writer);
 		}
 
 		return jacksonWriter;

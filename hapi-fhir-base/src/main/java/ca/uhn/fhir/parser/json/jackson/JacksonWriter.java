@@ -48,11 +48,16 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 
 	public JacksonWriter(JsonFactory theJsonFactory, Writer theWriter) {
 		myJsonFactory = theJsonFactory;
-		myTargetWriter = new NonClosingWriter(theWriter);
 		setWriter(theWriter);
 	}
 
 	public JacksonWriter() {}
+
+	@Override
+	public void setWriter(Writer theWriter) {
+		super.setWriter(theWriter);
+		myTargetWriter = theWriter != null ? new NonClosingWriter(theWriter) : null;
+	}
 
 	@Override
 	public BaseJsonLikeWriter init() {

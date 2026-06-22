@@ -323,7 +323,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 
 
 		// Assert that the partitionID is being serialized in JSON
-		assertThat(jsonString).contains("\"partitionDate\":[2020,1,1]");
+		assertThat(jsonString).contains("\"partitionDate\":\"2020-01-01\"");
 		assertThat(jsonString).contains("\"partitionIds\":[123]");
 	}
 
