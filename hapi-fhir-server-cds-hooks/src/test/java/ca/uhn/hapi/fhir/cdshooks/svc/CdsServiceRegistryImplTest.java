@@ -39,12 +39,12 @@ class CdsServiceRegistryImplTest {
 	private CdsServiceCache myCdsServiceCache;
 	@Mock
 	private CdsServiceRequestJsonDeserializer myCdsServiceRequestJsonDeserializer;
-	private final ObjectMapper myObjectMapper = new ObjectMapper();
+	private final JsonMapper myJsonMapper = new JsonMapper();
 	private CdsServiceRegistryImpl myFixture;
 
 	@BeforeEach()
 	void setup() {
-		myFixture = new CdsServiceRegistryImpl(myCdsHooksContextBooter, myCdsPrefetchSvc, myObjectMapper, myCdsServiceRequestJsonDeserializer);
+		myFixture = new CdsServiceRegistryImpl(myCdsHooksContextBooter, myCdsPrefetchSvc, myJsonMapper, myCdsServiceRequestJsonDeserializer);
 	}
 
 	@Test
@@ -112,7 +112,7 @@ class CdsServiceRegistryImplTest {
 		// execute
 		final CdsServiceResponseJson actual = myFixture.encodeServiceResponse(SERVICE_ID, input);
 		// validate
-		assertThat(actual).usingRecursiveComparison().isEqualTo(myObjectMapper.readValue(input, CdsServiceResponseJson.class));
+		assertThat(actual).usingRecursiveComparison().isEqualTo(myJsonMapper.readValue(input, CdsServiceResponseJson.class));
 	}
 
 	@Test
@@ -132,7 +132,7 @@ class CdsServiceRegistryImplTest {
    			}
 			""";
 		// execute
-		final CdsServiceResponseJson actual = myFixture.encodeServiceResponse(SERVICE_ID, myObjectMapper.readValue(input, CdsServiceResponseJson.class));
+		final CdsServiceResponseJson actual = myFixture.encodeServiceResponse(SERVICE_ID, myJsonMapper.readValue(input, CdsServiceResponseJson.class));
 		// validate
 		assertThat(actual).usingRecursiveComparison().isEqualTo(actual);
 	}
@@ -220,7 +220,7 @@ class CdsServiceRegistryImplTest {
 		CdsServiceRegistryImpl serviceRegistryImpl = new CdsServiceRegistryImpl(
 			myCdsHooksContextBooter,
 			myCdsPrefetchSvc,
-			myObjectMapper,
+			myJsonMapper,
 			myCdsServiceRequestJsonDeserializer,
 			theCdsHooksVersion);
 
@@ -235,7 +235,7 @@ class CdsServiceRegistryImplTest {
 
 		if (theSuccessResponse != null) {
 			ICdsServiceMethod theMethodMock= mock(ICdsServiceMethod.class);
-			when(theMethodMock.invoke(myObjectMapper, requestJson, SERVICE_ID)).thenReturn(theSuccessResponse);
+			when(theMethodMock.invoke(myJsonMapper, requestJson, SERVICE_ID)).thenReturn(theSuccessResponse);
 			when(myCdsServiceCache.getServiceMethod(SERVICE_ID)).thenReturn(theMethodMock);
 		}
 

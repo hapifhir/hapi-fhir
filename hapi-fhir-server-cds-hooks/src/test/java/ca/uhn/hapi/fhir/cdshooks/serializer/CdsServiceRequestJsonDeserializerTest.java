@@ -25,12 +25,12 @@ class CdsServiceRequestJsonDeserializerTest {
 	private static final String EXAMPLE_PROPERTY_KEY = "example-property";
 	private static final String HOOK_ID = "hook-id";
 	private final FhirContext myFhirContext = FhirContext.forR4();
-	private final ObjectMapper myObjectMapper = new ObjectMapper();
+	private final JsonMapper myJsonMapper = new JsonMapper();
 	private CdsServiceRequestJsonDeserializer myFixture;
 
 	@BeforeEach()
 	void setup() {
-		myFixture = new CdsServiceRequestJsonDeserializer(myFhirContext, myObjectMapper);
+		myFixture = new CdsServiceRequestJsonDeserializer(myFhirContext, myJsonMapper);
 	}
 
 	@Test

@@ -100,14 +100,14 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		validateHookRequestFhirServer(deserializedRequest);
 		ICdsServiceMethod serviceMethod = (ICdsServiceMethod) getCdsServiceMethodOrThrowException(theServiceId);
 		myCdsPrefetchSvc.augmentRequest(deserializedRequest, serviceMethod);
-		Object response = serviceMethod.invoke(myObjectMapper, deserializedRequest, theServiceId);
+		Object response = serviceMethod.invoke(myJsonMapper, deserializedRequest, theServiceId);
 		return encodeServiceResponse(theServiceId, response);
 	}
 
 	@Override
 	public CdsServiceFeedbackJson callFeedback(String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson) {
 		ICdsMethod feedbackMethod = getCdsFeedbackMethodOrThrowException(theServiceId);
-		Object response = feedbackMethod.invoke(myObjectMapper, theCdsServiceFeedbackJson, theServiceId);
+		Object response = feedbackMethod.invoke(myJsonMapper, theCdsServiceFeedbackJson, theServiceId);
 		return encodeFeedbackResponse(theServiceId, response);
 	}
 
