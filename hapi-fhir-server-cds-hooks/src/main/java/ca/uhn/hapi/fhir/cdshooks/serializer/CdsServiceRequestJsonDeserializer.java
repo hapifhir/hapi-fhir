@@ -45,13 +45,13 @@ public class CdsServiceRequestJsonDeserializer {
 			@Nonnull FhirContext theFhirContext, @Nonnull JsonMapper theJsonMapper) {
 		myFhirContext = theFhirContext;
 		myParser = myFhirContext.newJsonParser().setPrettyPrint(true);
-		myJsonMapper = theObjectMapper;
+		myJsonMapper = theJsonMapper;
 	}
 
 	public CdsServiceRequestJson deserialize(
 			@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull Object theCdsServiceRequestJson) {
 		final JsonNode cdsServiceRequestJsonNode =
-				myObjectMapper.convertValue(theCdsServiceRequestJson, JsonNode.class);
+			myJsonMapper.convertValue(theCdsServiceRequestJson, JsonNode.class);
 		final JsonNode contextNode = cdsServiceRequestJsonNode.get("context");
 		validateHookInstance(cdsServiceRequestJsonNode.get("hookInstance"));
 		validateHook(cdsServiceRequestJsonNode.get("hook"));
@@ -59,8 +59,8 @@ public class CdsServiceRequestJsonDeserializer {
 		try {
 			final JsonNode extensionNode = cdsServiceRequestJsonNode.get("extension");
 			final CdsServiceRequestJson cdsServiceRequestJson =
-					myObjectMapper.convertValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
-			LinkedHashMap<String, Object> map = myObjectMapper.readValue(contextNode.toString(), LinkedHashMap.class);
+					myJsonMapper.convertValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
+			LinkedHashMap<String, Object> map = myJsonMapper.readValue(contextNode.toString(), LinkedHashMap.class);
 			cdsServiceRequestJson.setContext(deserializeContext(map));
 			if (extensionNode != null) {
 				CdsHooksExtension myRequestExtension =
@@ -81,7 +81,7 @@ public class CdsServiceRequestJsonDeserializer {
 			Object value = entry.getValue();
 			// Convert LinkedHashMap entries to Resources
 			if (value instanceof LinkedHashMap) {
-				String json = myObjectMapper.writeValueAsString(value);
+				String json = myJsonMapper.writeValueAsString(value);
 				IBaseResource resource = myParser.parseResource(json);
 				cdsServiceRequestContextJson.put(key, resource);
 			} else {
@@ -97,7 +97,7 @@ public class CdsServiceRequestJsonDeserializer {
 		if (extensionClass == null) {
 			return null;
 		}
-		return myObjectMapper.readValue(theExtension, extensionClass);
+		return myJsonMapper.readValue(theExtension, extensionClass);
 	}
 
 	private void validateHook(JsonNode hookIdNode) {
