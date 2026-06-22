@@ -21,6 +21,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.rest.api.Constants;
@@ -40,33 +41,27 @@ import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Charsets;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ThreadUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.springframework.util.unit.DataSize;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Duration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.SCT_URI;
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_FILENAME;
@@ -131,10 +126,10 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	public void run(CommandLine theCommandLine) throws ParseException {
 		parseFhirContext(theCommandLine);
 
-		ModeEnum mode;
+		ImportTerminologyModeEnum mode;
 		String modeString = theCommandLine.getOptionValue("m", "SNAPSHOT");
 		try {
-			mode = ModeEnum.valueOf(modeString);
+			mode = ImportTerminologyModeEnum.valueOf(modeString);
 		} catch (IllegalArgumentException e) {
 			throw new ParseException(Msg.code(1538) + "Invalid mode: " + modeString);
 		}
@@ -160,23 +155,15 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 
-		String requestName =
-				switch (mode) {
-					case SNAPSHOT -> JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
-					case ADD -> JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD;
-					case REMOVE -> JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
-				};
-
-		if (mode == ModeEnum.SNAPSHOT) {
-			invokeOperationAsyncJob(termUrl, datafile, client, dontMakeCurrent);
-		} else {
-			Validate.isTrue(!dontMakeCurrent, "The --dont-make-current option is not supported for this system");
-			invokeOperation(termUrl, datafile, client, requestName);
-		}
+		invokeOperationAsyncJob(termUrl, datafile, client, dontMakeCurrent, mode);
 	}
 
 	private void invokeOperationAsyncJob(
-			String theUrl, String[] theDatafiles, IGenericClient theClient, boolean theDontMakeCurrent) {
+			String theUrl,
+			String[] theDatafiles,
+			IGenericClient theClient,
+			boolean theDontMakeCurrent,
+			ImportTerminologyModeEnum theMode) {
 		ourLog.info("Beginning upload process for terminology system: {}", theUrl);
 
 		// Step 1: Create staging job
@@ -189,6 +176,9 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			ParametersUtil.addParameterToParametersBoolean(
 					myFhirCtx, createStagingRequest, TerminologyUploaderProvider.PARAM_MAKE_CURRENT, false);
 		}
+
+		ParametersUtil.addParameterToParametersCode(
+				myFhirCtx, createStagingRequest, TerminologyUploaderProvider.PARAM_MODE, theMode.name());
 
 		IBaseParameters createStagingResponse;
 		try {
@@ -314,124 +304,6 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		ourLog.info("Job completed with report:\n{}", report);
 	}
 
-	private void invokeOperation(
-			String theTermUrl, String[] theDatafile, IGenericClient theClient, String theOperationName)
-			throws ParseException {
-		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
-
-		boolean isDeltaOperation = theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
-				|| theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
-
-		ParametersUtil.addParameterToParametersUri(
-				myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
-
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);
-		long compressedSourceBytesCount = 0;
-		int compressedFileCount = 0;
-		boolean haveCompressedContents = false;
-		try {
-			for (String nextDataFile : theDatafile) {
-				File dataFile = new File(nextDataFile);
-				ourLog.info("Reading {}", dataFile.getAbsolutePath());
-
-				try (FileInputStream fileInputStream = new FileInputStream(dataFile)) {
-					boolean isFhirType = nextDataFile.endsWith(".json") || nextDataFile.endsWith(".xml");
-					if (nextDataFile.endsWith(".csv") || nextDataFile.endsWith(".properties") || isFhirType) {
-
-						if (isDeltaOperation && isFhirType) {
-
-							ourLog.info("Adding CodeSystem resource file: {}", nextDataFile);
-
-							String contents = IOUtils.toString(fileInputStream, Charsets.UTF_8);
-							EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(contents);
-							if (encoding == null) {
-								throw new ParseException(
-										Msg.code(1541) + "Could not detect FHIR encoding for file: " + nextDataFile);
-							}
-
-							IBaseResource resource =
-									encoding.newParser(myFhirCtx).parseResource(contents);
-							ParametersUtil.addParameterToParameters(
-									myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
-
-						} else {
-
-							ourLog.info("Compressing and adding file: {}", nextDataFile);
-							ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));
-							zipOutputStream.putNextEntry(nextEntry);
-
-							BoundedInputStream countingInputStream = BoundedInputStream.builder()
-									.setInputStream(fileInputStream)
-									.get();
-							IOUtils.copy(countingInputStream, zipOutputStream);
-							haveCompressedContents = true;
-							compressedSourceBytesCount += countingInputStream.getCount();
-							++compressedFileCount;
-
-							zipOutputStream.flush();
-							ourLog.info("Finished compressing {}", nextDataFile);
-						}
-
-					} else if (nextDataFile.endsWith(".zip")) {
-
-						ourLog.info("Adding ZIP file: {}", nextDataFile);
-						String fileName = "file:" + nextDataFile;
-						addFileToRequestBundle(inputParameters, fileName, IOUtils.toByteArray(fileInputStream));
-
-					} else {
-
-						throw new ParseException(Msg.code(1542) + "Don't know how to handle file: " + nextDataFile);
-					}
-				}
-			}
-			zipOutputStream.flush();
-			zipOutputStream.close();
-		} catch (IOException e) {
-			throw new ParseException(Msg.code(1543) + e);
-		}
-
-		if (haveCompressedContents) {
-			byte[] compressedBytes = byteArrayOutputStream.toByteArray();
-			ourLog.info(
-					"Compressed {} bytes in {} file(s) into {} bytes",
-					FileUtil.formatFileSize(compressedSourceBytesCount),
-					compressedFileCount,
-					FileUtil.formatFileSize(compressedBytes.length));
-
-			addFileToRequestBundle(inputParameters, "file:/files.zip", compressedBytes);
-		}
-
-		ourLog.info("Beginning upload - This may take a while...");
-
-		if (ourLog.isDebugEnabled() || HapiSystemProperties.isTestModeEnabled()) {
-			ourLog.debug(
-					"Submitting parameters: {}",
-					myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputParameters));
-		}
-
-		IBaseParameters response;
-		try {
-			response = theClient
-					.operation()
-					.onType(myFhirCtx.getResourceDefinition("CodeSystem").getImplementingClass())
-					.named(theOperationName)
-					.withParameters(inputParameters)
-					.execute();
-		} catch (BaseServerResponseException e) {
-			if (e.getOperationOutcome() != null) {
-				ourLog.error(
-						"Received the following response:\n{}",
-						myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-			}
-			throw e;
-		}
-
-		ourLog.info("Upload complete!");
-		ourLog.debug(
-				"Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
-	}
-
 	protected void addFileToRequestBundle(IBaseParameters theInputParameters, String theFileName, byte[] theBytes) {
 
 		byte[] bytes = theBytes;
@@ -485,12 +357,6 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				theSuffix,
 				retVal);
 		return retVal;
-	}
-
-	private enum ModeEnum {
-		SNAPSHOT,
-		ADD,
-		REMOVE
 	}
 
 	public void setTransferSizeBytes(long theTransferSizeBytes) {

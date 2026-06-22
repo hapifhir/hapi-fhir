@@ -31,7 +31,7 @@ class ImportLoincStep19CodingPropertiesTest extends BaseImportLoincStepTest {
 		String classpath = "loinc-ver/v269/LoincTable/Loinc.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		AtomicInteger responseCounter = new AtomicInteger();
 		when(myValidationSupport.lookupCode(any(), any(LookupCodeRequest.class))).thenAnswer(t->{
@@ -47,7 +47,7 @@ class ImportLoincStep19CodingPropertiesTest extends BaseImportLoincStepTest {
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).addCodeSystemConcepts(any(), myCodeSystemCaptor.capture());
 		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
 		String result = renderHierarchy(cs, true);
 		String expected = """

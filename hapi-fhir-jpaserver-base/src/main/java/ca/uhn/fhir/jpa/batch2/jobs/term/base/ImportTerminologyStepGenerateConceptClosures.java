@@ -39,7 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_FINALIZE_IMPORT;
 
 public class ImportTerminologyStepGenerateConceptClosures<PT extends ImportTerminologyJobParameters>
 		implements IJobStepWorker<PT, TerminologyFileSetJson, TerminologyFileSetJson>,

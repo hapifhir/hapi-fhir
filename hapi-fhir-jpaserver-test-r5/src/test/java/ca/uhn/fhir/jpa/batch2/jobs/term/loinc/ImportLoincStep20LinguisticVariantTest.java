@@ -37,14 +37,14 @@ class ImportLoincStep20LinguisticVariantTest extends BaseImportLoincStepTest {
 		String classpath = "loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
-		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
+		verify(myTermCodeSystemStorageSvc, times(1)).addCodeSystemConcepts(any(), myCodeSystemCaptor.capture());
+		CodeSystem cs = myCodeSystemCaptor.getValue();
 		String result = renderHierarchy(cs, true);
 		String expected = """
 			-61438-8
@@ -70,7 +70,7 @@ class ImportLoincStep20LinguisticVariantTest extends BaseImportLoincStepTest {
 		// Setup
 		mockFetchJobMetadataAttachment();
 		mockFetchAttachment("loinc-ver/v269/AccessoryFiles/LinguisticVariants/frCA8LinguisticVariant.csv");
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		// Test
 		StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> stepExecutionDetails = newStepExecutionDetails("loinc-ver/v269/AccessoryFiles/LinguisticVariants/zzZZ8LinguisticVariant.csv");
@@ -78,7 +78,7 @@ class ImportLoincStep20LinguisticVariantTest extends BaseImportLoincStepTest {
 		mySvc.run(stepExecutionDetails, myDataSink);
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).addCodeSystemConcepts(any(), myCodeSystemCaptor.capture());
 		CodeSystem cs = myCodeSystemCaptor.getValue();
 		String result = renderHierarchy(cs, true);
 		String expected = """

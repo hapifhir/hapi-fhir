@@ -265,6 +265,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		waitForQueueToDrain();
 
 		Observation observation2 = sendObservation(code);
 

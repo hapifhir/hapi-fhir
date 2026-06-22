@@ -34,7 +34,7 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
+import ca.uhn.fhir.jpa.term.NonClosableBOMInputStream;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.util.CsvUtil;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -79,7 +79,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyUtil.getJobProperties;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -222,7 +222,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 				ZipArchiveInputStream zipInputStream = new ZipArchiveInputStream(bufferedInputStream);
 				ZipArchiveEntry entry;
 				while ((entry = zipInputStream.getNextEntry()) != null) {
-					try (InputStream fis = new LoadedFileDescriptors.NonClosableBOMInputStream(zipInputStream)) {
+					try (InputStream fis = new NonClosableBOMInputStream(zipInputStream)) {
 						String nextFileName = entry.getName();
 
 						ourLog.info(
@@ -452,9 +452,20 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 		IFhirResourceDao codeSystemDao = myDaoRegistry.getResourceDao("CodeSystem");
 		codeSystemDao.update(myVersionCanonicalizer.codeSystemFromCanonical(cs), srd);
 
-		ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse response =
-				myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
-		jobMetadataAttachment.setCodeSystemStagingVersionId(response.stagingVersionId());
+		switch (theJobParameters.getMode()) {
+			case ADD, REMOVE -> jobMetadataAttachment.setCodeSystemStagingVersionId(codeSystemVersionId);
+			case SNAPSHOT -> {
+				ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse response =
+						myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
+				jobMetadataAttachment.setCodeSystemStagingVersionId(response.stagingVersionId());
+				ourLog.atInfo()
+						.setMessage("Staging of CodeSystem[url={}, version={}] into staging version: {}")
+						.addArgument(cs.getUrl())
+						.addArgument(cs.getVersion())
+						.addArgument(response.stagingVersionId())
+						.log();
+			}
+		}
 
 		// Send a single chunk to trigger the first closure generation step
 		TerminologyFileSetJson fileSet = new TerminologyFileSetJson();
@@ -484,7 +495,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
 			IJobDataSink<TerminologyFileSetJson> theDataSink,
 			CT theContext,
-			String theFileName,
+			String theSingleFileName,
 			Supplier<InputStream> theInputStreamSupplier,
 			PT theJobParameters,
 			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
@@ -642,21 +653,23 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 			quoteCharacter = null;
 		}
 
-		return new CSVParser(
-				theReader,
-				CSVFormat.DEFAULT
-						.builder()
-						.setDelimiter(theDelimiter)
-						.setEscape(null)
-						.setIgnoreEmptyLines(true)
-						.setQuote(quoteCharacter)
-						.setRecordSeparator('\n')
-						.setNullString("")
-						.setQuoteMode(QuoteMode.NON_NUMERIC)
-						.setHeader()
-						.setSkipHeaderRecord(true)
-						.setTrim(true)
-						.get());
+		return new CSVParser(theReader, newCsvFormat(theDelimiter, quoteCharacter));
+	}
+
+	public static CSVFormat newCsvFormat(char theDelimiter, Character quoteCharacter) {
+		return CSVFormat.DEFAULT
+				.builder()
+				.setDelimiter(theDelimiter)
+				.setEscape(null)
+				.setIgnoreEmptyLines(true)
+				.setQuote(quoteCharacter)
+				.setRecordSeparator('\n')
+				.setNullString("")
+				.setQuoteMode(QuoteMode.MINIMAL)
+				.setHeader()
+				.setSkipHeaderRecord(true)
+				.setTrim(true)
+				.get();
 	}
 
 	private record StepIdAndFileHandlingInstructions(

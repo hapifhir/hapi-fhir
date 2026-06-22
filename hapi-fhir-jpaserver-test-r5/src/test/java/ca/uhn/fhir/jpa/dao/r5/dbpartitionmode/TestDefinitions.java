@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
@@ -40,7 +41,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -209,6 +209,9 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	private ISearchParamRegistry mySearchParameterRegistry;
 
 	@Mock
+	JobDefinition<DeleteExpungeJobParameters> myDeleteExpungeJobDefinition;
+
+	@Mock
 	private IJobDataSink<VoidModel> myVoidSink;
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
@@ -262,7 +265,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		);
 		ResourceIdListWorkChunkJson workChunk = new ResourceIdListWorkChunkJson(typedPids, RequestPartitionId.fromPartitionId(PARTITION_1));
 		JobInstance jobInstance = new JobInstance();
-		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> executionDetails = new StepExecutionDetails<>(params, workChunk, jobInstance, new WorkChunk().setId("123"), myJobStepExecutionServices);
+		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> executionDetails = new StepExecutionDetails<>(params, workChunk, jobInstance, new WorkChunk().setId("123"), myJobStepExecutionServices, myDeleteExpungeJobDefinition, "step1", "step2");
 		myDeleteExpungeStep.run(executionDetails, myVoidSink);
 
 		// Verify
@@ -2105,15 +2108,14 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://cs");
+		cs.setVersion("1.0");
 		cs.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
 		myCodeSystemDao.create(cs, newRequest());
 
-		CustomTerminologySet additions = new CustomTerminologySet();
-		additions.addRootConcept("A", "HELLO");
-		additions.addRootConcept("B", "HELLO");
-		additions.addRootConcept("C", "GOODBYE");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://cs", additions);
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		cs.addConcept().setCode("A").setDisplay("HELLO");
+		cs.addConcept().setCode("B").setDisplay("HELLO");
+		cs.addConcept().setCode("C").setDisplay("GOODBYE");
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), cs);
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl("http://vs");
