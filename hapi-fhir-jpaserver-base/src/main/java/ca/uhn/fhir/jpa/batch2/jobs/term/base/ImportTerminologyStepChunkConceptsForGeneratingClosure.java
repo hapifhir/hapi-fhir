@@ -38,7 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_FINALIZE_IMPORT;
 
 public class ImportTerminologyStepChunkConceptsForGeneratingClosure<PT extends ImportTerminologyJobParameters>
 		extends BaseImportTerminologyStep

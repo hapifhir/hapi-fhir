@@ -10,13 +10,14 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -27,6 +28,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.StringType;
@@ -38,6 +40,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -51,6 +54,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB;
@@ -83,9 +88,6 @@ class TerminologyUploaderProviderTest {
 	private final FhirContext myContext = FhirContext.forR5Cached();
 
 	@Mock
-	private ITermLoaderSvc myTerminologyLoaderSvc;
-
-	@Mock
 	private IJobCoordinator myJobCoordinator;
 
 	@Mock
@@ -98,9 +100,8 @@ class TerminologyUploaderProviderTest {
 	private final RestfulServerExtension myServerExtension = new RestfulServerExtension(myContext)
 		.withServer(t -> {
 			assert myContext != null;
-			assert myTerminologyLoaderSvc != null;
 			assert myJobCoordinator != null;
-			t.registerProvider(new TerminologyUploaderProvider(myContext, myTerminologyLoaderSvc, myJobCoordinator, myJobPersistence));
+			t.registerProvider(new TerminologyUploaderProvider(myContext, myJobCoordinator, myJobPersistence));
 		});
 
 	@RegisterExtension
@@ -133,8 +134,53 @@ class TerminologyUploaderProviderTest {
 			.hasMessageContaining("The $upload-external-code-system operation has been removed. To upload terminology, see the $hapi.fhir.upload-terminology.create-job operation.");
 	}
 
+	/**
+	 * Make sure we throw a useful error if the user tries to use the old
+	 * method.
+	 */
 	@Test
-	void testUploadTerminologyCreateJob_Custom() {
+	void testApplyCodeSystemDeltaAdd() {
+		// Test
+		assertThatThrownBy(() ->
+			myServerExtension
+				.getFhirClient()
+				.operation()
+				.onType("CodeSystem")
+				.named(OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+				.withNoParameters(Parameters.class)
+				.execute()
+		).isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("The $apply-codesystem-delta-add operation has been removed. To upload terminology, see the $hapi.fhir.upload-terminology.create-job operation.");
+	}
+
+	/**
+	 * Make sure we throw a useful error if the user tries to use the old
+	 * method.
+	 */
+	@Test
+	void testApplyCodeSystemDeltaRemove() {
+		// Test
+		assertThatThrownBy(() ->
+			myServerExtension
+				.getFhirClient()
+				.operation()
+				.onType("CodeSystem")
+				.named(OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE)
+				.withNoParameters(Parameters.class)
+				.execute()
+		).isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("The $apply-codesystem-delta-remove operation has been removed. To upload terminology, see the $hapi.fhir.upload-terminology.create-job operation.");
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		ADD      , ADD
+		REMOVE   , REMOVE
+		SNAPSHOT , SNAPSHOT
+		         , SNAPSHOT
+		"""
+	)
+	void testUploadTerminologyCreateJob_Custom(String theModeParameter, ImportTerminologyModeEnum theExpectedMode) {
 		// Setup
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 		startResponse.setInstanceId("my-instance-id");
@@ -148,6 +194,7 @@ class TerminologyUploaderProviderTest {
 			.named(OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB)
 			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo"))
 			.andParameter(TerminologyUploaderProvider.PARAM_VERSION, new StringType("1.2"))
+			.andParameter(TerminologyUploaderProvider.PARAM_MODE, new CodeType(theModeParameter))
 			.execute();
 
 		// Verify
@@ -161,9 +208,29 @@ class TerminologyUploaderProviderTest {
 			"and then start the job using the http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.start-job operation."
 		);
 		assertEquals("my-instance-id", response.getParameter(TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID).getValue().toString());
+
+		ImportTerminologyJobParameters parameters = myStartRequestCaptor.getValue().getParameters(ImportTerminologyJobParameters.class);
+		assertEquals(theExpectedMode, parameters.getMode());
 	}
 
 	@Test
+	void testUploadTerminologyCreateJob_InvalidMode() {
+		// Test
+		assertThatThrownBy(()->myServerExtension
+			.getFhirClient()
+			.operation()
+			.onType("CodeSystem")
+			.named(OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo"))
+			.andParameter(TerminologyUploaderProvider.PARAM_VERSION, new StringType("1.2"))
+			.andParameter(TerminologyUploaderProvider.PARAM_MODE, new CodeType("FOO"))
+			.execute())
+			// Verify
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("Invalid value for parameter mode: FOO");
+	}
+
+		@Test
 	void testUploadTerminologyCreateJob_Loinc() {
 		// Setup
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
@@ -392,6 +459,32 @@ class TerminologyUploaderProviderTest {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("File named \\\"foo.txt\\\" is not valid for import LOINC job");
+		}
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE,
+		OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
+		OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS
+	})
+	void testUploadTerminology_NoJobInstanceParamValue(String theOperationName) throws IOException {
+		// Test
+		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + theOperationName +
+			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=";
+		HttpPost post = new HttpPost(url);
+		if (theOperationName.equals(OPERATION_UPLOAD_TERMINOLOGY_START_JOB)) {
+			post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		}
+		post.setEntity(new ResourceEntity(myContext, new Parameters()));
+
+		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
+
+			// Verify
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertThat(responseString).contains("No value provided for mandatory parameter: jobInstanceId");
 		}
 
 	}

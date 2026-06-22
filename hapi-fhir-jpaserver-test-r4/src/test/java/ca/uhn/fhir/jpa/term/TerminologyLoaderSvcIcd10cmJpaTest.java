@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,7 +36,7 @@ class TerminologyLoaderSvcIcd10cmJpaTest extends BaseJpaR4Test {
 			assertEquals(2, myTermCodeSystemVersionDao.count());
 			assertEquals(0, myTermValueSetDao.count());
 			assertEquals(0, myTermConceptMapDao.count());
-			assertEquals(1, myResourceTableDao.count());
+			assertEquals(1, myResourceTableDao.count(), () -> myResourceTableDao.findAll().stream().map(t -> "\n * " + t.toString()).collect(Collectors.joining("\n * ")));
 			assertEquals(95, myTermConceptDao.count());
 			assertEquals(83, myTermConceptParentChildLinkDao.count());
 			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(TerminologyConstants.ICD10CM_URI);
