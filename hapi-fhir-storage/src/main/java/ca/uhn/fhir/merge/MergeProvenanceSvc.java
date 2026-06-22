@@ -80,30 +80,6 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	}
 
 	/**
-	 * Builds the merge Provenance resource WITHOUT persisting it, so the caller can submit it as a POST entry in a
-	 * larger transaction bundle (e.g. the single-transaction cross-partition merge). A merge always records a
-	 * Provenance even when no referencing resources changed, because the source and target are always updated.
-	 */
-	public Provenance buildMergeProvenance(
-			IIdType theTargetId,
-			IIdType theSourceId,
-			List<IIdType> theChangedResourceIds,
-			@Nullable String theProvenanceCorrelationId,
-			Date theStartTime,
-			List<IProvenanceAgent> theProvenanceAgents,
-			List<IBaseResource> theContainedResources) {
-		return buildProvenance(
-				theTargetId,
-				theSourceId,
-				theChangedResourceIds,
-				theProvenanceCorrelationId,
-				theStartTime,
-				theProvenanceAgents,
-				theContainedResources,
-				true);
-	}
-
-	/**
 	 * Finds the merge Provenance for the given target and source resource IDs: the one with target+source in the
 	 * correct order whose first contained resource is the merge input {@link Parameters}.
 	 *

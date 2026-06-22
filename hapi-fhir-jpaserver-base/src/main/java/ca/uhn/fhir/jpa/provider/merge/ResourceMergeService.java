@@ -35,14 +35,13 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesPrepareResult;
+import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesResult;
 import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -54,19 +53,13 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -387,13 +380,11 @@ public class ResourceMergeService {
 			ourLog.error("Cross-partition merge failed; attempting rollback", theException);
 			Throwable failureCause = theException;
 			if (theException instanceof PartitionedTransactionPartialFailureException partialFailure) {
-				// PartitionedTransactionPartialFailureException indicates some changes are committed
-				// when running cross-partition replace references.
-				// The committed entries are carried on the exception rather than recorded in the rollback context,
-				// so harvest them here.
-				extractCommittedResourceIdsByPartition(partialFailure, theRequestDetails)
-						.values()
-						.forEach(rollbackContext::addResourcesToRevert);
+				// A PartitionedTransactionPartialFailureException means a cross-partition transaction (the copy/
+				// replace-references step, or the delete step) committed some per-shard sub-bundles before a later one
+				// failed. Those committed entries are carried on the exception rather than recorded in the rollback
+				// context (the step records into the context only after it returns), so harvest them here.
+				rollbackContext.addResourcesToRevert(extractCommittedResourceIds(partialFailure));
 				// Report the underlying cause (e.g. the failing write's exception), not the partial-failure wrapper,
 				// so the merge outcome reflects the real error and its HTTP status.
 				if (partialFailure.getCause() != null) {
@@ -410,16 +401,15 @@ public class ResourceMergeService {
 	}
 
 	/**
-	 * Runs the cross-partition merge as a SINGLE FHIR transaction bundle: POST the compartment-resource copies, PUT
-	 * the referrer updates and the source/target, POST the merge Provenance, and DELETE the originals (+ source when
-	 * deleteSource). On MegaScale the bundle is sliced per shard by the splitter and committed sub-bundle by
-	 * sub-bundle. A post-commit pass reads back the updated target for the outcome and finalizes the Provenance
-	 * (versions the copy references and adds the target-update OperationOutcome) — both depend on the transaction
-	 * response and so cannot be known when the bundle is built.
+	 * Runs the cross-partition merge as a sequence of separate steps (NOT one atomic transaction, since per-partition
+	 * writes commit independently on MegaScale): copy the source compartment to the target partition and replace
+	 * references (its own cross-partition transaction), update source/target, create the single merge Provenance, and
+	 * delete the originals (+ source when deleteSource). The Provenance is created before the delete so it can
+	 * reference the to-be-deleted originals at their anticipated tombstone version (current + 1); the cross-shard
+	 * targets it references are still live at that point and resolve via the shard fan-out.
 	 * <p>
-	 * Rollback bookkeeping is no longer recorded step by step here: the whole forward flow is one atomic transaction,
-	 * so the success path has nothing committed-then-failed to revert. A partial failure (some sub-bundles committed)
-	 * surfaces as {@link PartitionedTransactionPartialFailureException}, which the caller harvests for rollback.
+	 * Each committed step is recorded in {@code theRollbackContext} so that a failure in a later step can revert the
+	 * earlier ones (the outer transaction cannot, because the partition changes committed in their own transactions).
 	 */
 	private void doCrossPartitionForwardSteps(
 			MergeOperationInputParameters theMergeOperationParameters,
@@ -432,212 +422,88 @@ public class ResourceMergeService {
 
 		boolean deleteSource = theMergeOperationParameters.getDeleteSource();
 
-		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+		// 1) Copy the source compartment resources to the target partition and replace references, as its own
+		// cross-partition transaction. The originals are NOT deleted here — they are deleted in step 4, after the
+		// Provenance is created, so the Provenance can reference them.
+		CrossPartitionReplaceReferencesResult copyResult =
+				myCrossPartitionReplaceReferencesSvc.copyCompartmentResourcesAndReplaceReferences(
+						theSourceResource, theTargetResource, theRequestDetails);
+		List<IIdType> changedResourceIds = new ArrayList<>(copyResult.getChangedResourceIds());
+		List<IIdType> copiedResourceOriginalIds = copyResult.getCopiedResourceOriginalIds();
 
-		// 1) Append the copy (POST) and referrer-update (PUT) entries (no execution).
-		CrossPartitionReplaceReferencesPrepareResult prepareResult =
-				myCrossPartitionReplaceReferencesSvc.prepareCopyAndUpdateEntries(
-						theSourceResource, theTargetResource, theRequestDetails, bundleBuilder);
+		// Record the just-committed copies and referrer updates as resources to revert on rollback.
+		theRollbackContext.addResourcesToRevert(changedResourceIds);
 
-		Map<RequestPartitionId, List<IIdType>> copiedOriginalsByPartition =
-				prepareResult.getCopiedResourceOriginalIdsByPartition();
+		// 2) Update source/target. The target is always updated; the source is updated when kept, or deleted below.
+		DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
+				theSourceResource,
+				theTargetResource,
+				theMergeOperationParameters.getResultResource(),
+				deleteSource,
+				theRequestDetails);
+		theMergeOutcome.setUpdatedTargetResource(outcome.getResource());
 
-		// 2) Prepare and append the source/target PUT entries. The target PUT is the first entry after the
-		// copy/update entries; the source PUT (when the source is kept) immediately follows it.
-		MergeResourceHelper.PreparedMergeResources prepared = myMergeResourceHelper.prepareMergedResourcesForUpdate(
-				theSourceResource, theTargetResource, theMergeOperationParameters.getResultResource(), deleteSource);
+		// The source's post-merge versioned ref: its post-update version when kept, or its post-delete version
+		// (bumped by one) when deleteSource, since the delete happens below.
+		IIdType sourcePostMergeId = theSourceResource.getIdElement();
+		if (deleteSource) {
+			sourcePostMergeId = withVersionIncremented(sourcePostMergeId);
+		}
+		IIdType targetPostMergeId = outcome.getResource().getIdElement();
 
-		int targetEntryIndex = prepareResult.getCopyAndUpdateEntryPartitions().size();
-		addStampedUpdateEntry(bundleBuilder, prepared.getTargetToUpdate(), theRequestDetails);
-		if (prepared.getSourceToUpdate() != null) {
-			addStampedUpdateEntry(bundleBuilder, prepared.getSourceToUpdate(), theRequestDetails);
+		// Record the post-merge target (always updated), and the post-merge source when it is kept, as resources to
+		// revert. When the source is deleted it is recorded as an undelete instead (below, after the delete commits).
+		theRollbackContext.addResourceToRevert(targetPostMergeId);
+		if (!deleteSource) {
+			theRollbackContext.addResourceToRevert(sourcePostMergeId);
 		}
 
-		// The single transaction is the sole writer, so each post-merge version is current + 1: the target is always
-		// updated; the source is updated when kept or deleted (its tombstone) when not.
-		IIdType sourcePostMergeId = withVersionIncremented(theSourceResource.getIdElement());
-		IIdType targetPostMergeId = withVersionIncremented(theTargetResource.getIdElement());
-
-		// 3) Build and append the merge Provenance (POST). Its changed-resource references are: copies (by urn:uuid
-		// placeholder, resolved to the assigned id by the transaction and versioned in the post-commit pass) and
-		// deleted originals (at their tombstone version, current + 1). Updated referrers and the contained
-		// target-update OperationOutcome are added in the post-commit pass (they aren't known until the tx runs).
-		Provenance provenance = null;
-		int provenanceEntryIndex = -1;
+		// 3) Create the single merge Provenance (the "merge succeeded" signal), referencing the post-merge source and
+		// target. Its changed-resource references are the copies and referrer updates, plus the to-be-deleted
+		// originals at their tombstone version (current + 1, since the delete below bumps each by one).
 		if (theMergeOperationParameters.getCreateProvenance()) {
-			// Copies (placeholders, resolved + versioned post-commit) and deleted originals (tombstone = current + 1)
-			// are known now. Updated referrers are added post-commit from the response, skipping no-op PUTs (a referrer
-			// whose only reference to the source was a versioned one is not rewritten, so its PUT is a no-op and must
-			// not appear as a changed resource).
-			List<IIdType> changedResourceIds = new ArrayList<>();
-			prepareResult.getCopyPlaceholdersInEntryOrder().forEach(ph -> changedResourceIds.add(new IdDt(ph)));
-			newMapWithVersionIncremented(copiedOriginalsByPartition).values().forEach(changedResourceIds::addAll);
-
-			provenance = myMergeResourceHelper.buildProvenance(
+			for (IIdType id : copiedResourceOriginalIds) {
+				changedResourceIds.add(withVersionIncremented(id));
+			}
+			List<IBaseResource> containedResources =
+					List.of(theMergeOperationParameters.getOriginalInputParameters(), outcome.getOperationOutcome());
+			IIdType provenanceId = myMergeResourceHelper.createProvenance(
 					sourcePostMergeId,
 					targetPostMergeId,
 					changedResourceIds,
 					// no correlation id: a merge records a single Provenance, nothing to correlate
 					null,
+					theRequestDetails,
 					theStartTime,
 					theMergeOperationParameters.getProvenanceAgents(),
-					// only the input Parameters at build time; the target-update OperationOutcome is added post-commit
-					List.of(theMergeOperationParameters.getOriginalInputParameters()));
-
-			provenanceEntryIndex = currentEntryCount(bundleBuilder);
-			bundleBuilder.addTransactionCreateEntry(provenance);
-			stampEntryPartition(
-					bundleBuilder, provenanceEntryIndex, resolveWritePartition(provenance, theRequestDetails));
+					containedResources);
+			theRollbackContext.setProvenanceId(provenanceId);
 		}
 
-		// 4) DELETE the source-side compartment originals (+ the source itself when deleteSource). Each id-only DELETE
-		// entry is stamped with its partition so the transaction processor routes it to the correct shard (the id may
-		// be non-decodable, e.g. a client-assigned/UUID id in MegaScale Patient ID mode).
-		copiedOriginalsByPartition.forEach((partition, ids) ->
-				ids.forEach(id -> addStampedDeleteEntry(bundleBuilder, id.toVersionless(), partition)));
+		// 4) Delete the source-side compartment originals copied across partitions, plus the source itself when
+		// deleteSource. They all live in the source partition, so the delete is pinned to it — this lets MegaScale
+		// route the delete to the correct shard even when the ids are not partition-decodable (client-assigned / UUID
+		// ids). This happens after the Provenance is created so the Provenance can reference the originals.
+		List<IIdType> resourceIdsToDelete = new ArrayList<>(copiedResourceOriginalIds);
 		if (deleteSource) {
-			addStampedDeleteEntry(
-					bundleBuilder,
-					theSourceResource.getIdElement().toVersionless(),
-					getRequiredPartition(theSourceResource));
+			resourceIdsToDelete.add(theSourceResource.getIdElement());
+		}
+		if (!resourceIdsToDelete.isEmpty()) {
+			RequestPartitionId sourcePartition = getRequiredPartition(theSourceResource);
+			myHapiTransactionService
+					.withRequest(theRequestDetails)
+					.withRequestPartitionId(sourcePartition)
+					.execute(() -> deleteResources(resourceIdsToDelete, theRequestDetails));
 		}
 
-		// 5) Execute the entire forward merge as one transaction.
-		Bundle response =
-				(Bundle) myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, bundleBuilder.getBundle());
-		List<Bundle.BundleEntryComponent> responseEntries = response.getEntry();
-
-		// 6) Populate the outcome's updated target from a fresh read (full server meta), pinned to its partition.
-		RequestPartitionId targetPartitionId = getRequiredPartition(theTargetResource);
-		IBaseResource updatedTarget = myHapiTransactionService
-				.withRequest(theRequestDetails)
-				.withRequestPartitionId(targetPartitionId)
-				.execute(() -> myDaoRegistry
-						.getResourceDao(theTargetResource.fhirType())
-						.read(targetPostMergeId.toVersionless(), theRequestDetails));
-		theMergeOutcome.setUpdatedTargetResource(updatedTarget);
-
-		// 7) Post-commit Provenance fixup: version the copy references and add the target-update OperationOutcome.
-		if (provenance != null) {
-			finalizeProvenance(
-					provenance,
-					prepareResult,
-					responseEntries,
-					targetEntryIndex,
-					provenanceEntryIndex,
-					theRequestDetails);
+		// The delete committed, so record the now-tombstoned resources (at their tombstone version, original + 1) as
+		// undeletes for rollback. The source's tombstone version is sourcePostMergeId (original + 1).
+		for (IIdType id : copiedResourceOriginalIds) {
+			theRollbackContext.addResourceToUndelete(withVersionIncremented(id));
 		}
-	}
-
-	/**
-	 * Finalizes the merge Provenance after the single transaction has committed: replaces each copy reference (held
-	 * as a {@code urn:uuid} placeholder on the in-memory Provenance) with the committed versioned id, appends the
-	 * target-update {@link org.hl7.fhir.r4.model.OperationOutcome} (from the target response entry) as the second
-	 * contained resource so undo can detect a no-op target update, and persists the updated Provenance.
-	 */
-	private void finalizeProvenance(
-			Provenance theProvenance,
-			CrossPartitionReplaceReferencesPrepareResult thePrepareResult,
-			List<Bundle.BundleEntryComponent> theResponseEntries,
-			int theTargetEntryIndex,
-			int theProvenanceEntryIndex,
-			RequestDetails theRequestDetails) {
-
-		// Copies are the first N response entries (POSTs). The transaction already resolved each copy's urn:uuid
-		// placeholder to the assigned VERSIONLESS id in-place on this Provenance object, so map versionless ->
-		// versioned
-		// and version any target that matches a committed copy.
-		Map<String, String> versionlessToVersioned = new HashMap<>();
-		for (int i = 0; i < thePrepareResult.getCopyEntryCount(); i++) {
-			IdDt committed = new IdDt(theResponseEntries.get(i).getResponse().getLocation());
-			versionlessToVersioned.put(committed.toUnqualifiedVersionless().getValue(), committed.getValue());
+		if (deleteSource) {
+			theRollbackContext.addResourceToUndelete(sourcePostMergeId);
 		}
-		theProvenance.getTarget().forEach(target -> {
-			if (target.getReference() != null) {
-				String versionless = new IdDt(target.getReference())
-						.toUnqualifiedVersionless()
-						.getValue();
-				String versioned = versionlessToVersioned.get(versionless);
-				if (versioned != null) {
-					target.setReference(versioned);
-				}
-			}
-		});
-
-		// Add the referrer updates that actually changed as changed-resource targets, at their committed versions. The
-		// update (PUT) entries occupy the bundle positions between the copies and the target entry. A no-op PUT (e.g. a
-		// referrer whose only source reference was versioned and so not rewritten) is skipped.
-		for (int i = thePrepareResult.getCopyEntryCount(); i < theTargetEntryIndex; i++) {
-			Bundle.BundleEntryResponseComponent entryResponse =
-					theResponseEntries.get(i).getResponse();
-			if (!ReplaceReferencesProvenanceSvc.isNoChangeResponse(entryResponse)) {
-				theProvenance.addTarget(new Reference(new IdDt(entryResponse.getLocation())));
-			}
-		}
-
-		// Add the target-update OperationOutcome as contained[1] (input Parameters is contained[0]).
-		Resource targetOutcome =
-				theResponseEntries.get(theTargetEntryIndex).getResponse().getOutcome();
-		if (targetOutcome != null) {
-			theProvenance.addContained(targetOutcome);
-		}
-
-		IdDt provenanceId = new IdDt(
-				theResponseEntries.get(theProvenanceEntryIndex).getResponse().getLocation());
-		theProvenance.setId(provenanceId.toUnqualifiedVersionless());
-
-		// The Provenance routes by its patient-compartment extension (set at build time), so no partition pinning is
-		// needed here — same routing the in-transaction POST used.
-		myHapiTransactionService
-				.withRequest(theRequestDetails)
-				.execute(() -> myDaoRegistry.getResourceDao("Provenance").update(theProvenance, theRequestDetails));
-	}
-
-	private void addStampedDeleteEntry(BundleBuilder theBundleBuilder, IIdType theId, RequestPartitionId thePartition) {
-		theBundleBuilder.addTransactionDeleteEntry(theId);
-		stampEntryPartition(theBundleBuilder, currentEntryCount(theBundleBuilder) - 1, thePartition);
-	}
-
-	/**
-	 * Appends a PUT entry and stamps it with the resource's write partition. Stamping ensures every entry in a
-	 * per-shard sub-bundle resolves to the SAME {@link RequestPartitionId} object (id AND name): the copies resolve
-	 * their partition via {@code determineCreatePartitionForRequest}, so the source/target PUTs must resolve it the
-	 * same way rather than via the {@code TransactionDetails} cache, which can yield an id-only (unnamed) partition
-	 * that compares unequal in the strict per-shard compatibility check.
-	 */
-	private void addStampedUpdateEntry(
-			BundleBuilder theBundleBuilder, IBaseResource theResource, RequestDetails theRequestDetails) {
-		theBundleBuilder.addTransactionUpdateEntry(theResource);
-		stampEntryPartition(
-				theBundleBuilder,
-				currentEntryCount(theBundleBuilder) - 1,
-				resolveWritePartition(theResource, theRequestDetails));
-	}
-
-	private RequestPartitionId resolveWritePartition(IBaseResource theResource, RequestDetails theRequestDetails) {
-		// Temporarily clear any cached RESOURCE_PARTITION_ID so the partition is resolved fresh via the
-		// compartment interceptor (which yields a named partition), rather than short-circuiting to the resource's
-		// existing userData partition (set unnamed during the merge read). This keeps every entry in a per-shard
-		// sub-bundle resolving to the SAME (named) RequestPartitionId as the copies, which the strict per-shard
-		// compatibility check requires.
-		Object savedPartition = theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		try {
-			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
-			return myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
-					theRequestDetails, theResource, myFhirContext.getResourceType(theResource));
-		} finally {
-			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, savedPartition);
-		}
-	}
-
-	private void stampEntryPartition(
-			BundleBuilder theBundleBuilder, int theEntryIndex, RequestPartitionId thePartition) {
-		Bundle bundle = (Bundle) theBundleBuilder.getBundle();
-		bundle.getEntry().get(theEntryIndex).setUserData(Constants.RESOURCE_PARTITION_ID, thePartition);
-	}
-
-	private int currentEntryCount(BundleBuilder theBundleBuilder) {
-		return ((Bundle) theBundleBuilder.getBundle()).getEntry().size();
 	}
 
 	private static IIdType withVersionIncremented(IIdType theId) {
@@ -651,49 +517,20 @@ public class ResourceMergeService {
 	}
 
 	/**
-	 * Recovers the versioned ids of the resources that committed before a partitioned data bundle failed partway,
-	 * from the {@link PartitionedTransactionPartialFailureException} that carries the committed response entries,
-	 * keyed by partition for the rollback. The exception carries the committed entries grouped per committed
-	 * sub-bundle (one inner list each); each sub-bundle is keyed by a partition derived from its first ref. No-op
-	 * responses (no change) are skipped — nothing committed for those.
+	 * Recovers the versioned ids of the resources that committed before a partitioned transaction failed partway, from
+	 * the {@link PartitionedTransactionPartialFailureException} that carries the committed response entries. The
+	 * exception carries the committed entries grouped per committed sub-bundle; no-op responses (no change) are skipped
+	 * — nothing committed for those.
 	 */
-	private Map<RequestPartitionId, List<IIdType>> extractCommittedResourceIdsByPartition(
-			PartitionedTransactionPartialFailureException theFailure, RequestDetails theRequestDetails) {
-		Map<RequestPartitionId, List<IIdType>> committedByPartition = new LinkedHashMap<>();
+	private List<IIdType> extractCommittedResourceIds(PartitionedTransactionPartialFailureException theFailure) {
+		List<IIdType> committed = new ArrayList<>();
 		for (List<IBase> subBundleEntries : theFailure.getCommittedResponseEntriesPerSubBundle()) {
-			// Collect the versioned id of every resource this sub-bundle actually changed, skipping entries
-			// with no location or a no-change outcome (nothing was committed for those).
-			List<IIdType> committedRefsInSubBundle = new ArrayList<>();
 			for (IBase entry : subBundleEntries) {
 				ReplaceReferencesProvenanceSvc.extractChangedResourceId((Bundle.BundleEntryComponent) entry)
-						.ifPresent(committedRefsInSubBundle::add);
-			}
-			if (!committedRefsInSubBundle.isEmpty()) {
-				// Key this sub-bundle by a partition derived from its first ref; the rollback uses it to pin the
-				// restore transaction.
-				RequestPartitionId partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
-						theRequestDetails, committedRefsInSubBundle.get(0).toUnqualifiedVersionless());
-				committedByPartition.put(partition, committedRefsInSubBundle);
+						.ifPresent(committed::add);
 			}
 		}
-		return committedByPartition;
-	}
-
-	/**
-	 * Returns a copy of the given per-partition ids with each id's version incremented by one, preserving partition
-	 * order. Used to anticipate the post-delete version of resources a cross-partition merge will delete.
-	 */
-	private static Map<RequestPartitionId, List<IIdType>> newMapWithVersionIncremented(
-			Map<RequestPartitionId, List<IIdType>> theIdsByPartition) {
-		Map<RequestPartitionId, List<IIdType>> result = new LinkedHashMap<>();
-		for (Map.Entry<RequestPartitionId, List<IIdType>> entry : theIdsByPartition.entrySet()) {
-			List<IIdType> incrementedIds = new ArrayList<>();
-			for (IIdType id : entry.getValue()) {
-				incrementedIds.add(id.withVersion(Long.toString(id.getVersionIdPartAsLong() + 1)));
-			}
-			result.put(entry.getKey(), incrementedIds);
-		}
-		return result;
+		return committed;
 	}
 
 	private void doMergeAsync(

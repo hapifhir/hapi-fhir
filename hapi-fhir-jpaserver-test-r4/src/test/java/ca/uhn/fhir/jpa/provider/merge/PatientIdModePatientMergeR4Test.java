@@ -1301,31 +1301,39 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 		// the partition splitter runs as independent per-partition sub-bundles (source, then target, then
 		// default), stopping at the first that fails. We fail the Provenance creation to trigger the rollback,
 		// then make the rollback itself fail on the Group:
-		//   - reverted first: the source partition (the source Patient when it was kept) and the target
-		//     partition (the target Patient restored, the Observation copy removed)
-		//   - the default partition's Group revert then fails, so the Group stays merged and is the only
-		//     resource reported for manual revert
+		//   - the source partition (the source Patient when it was kept) and the target partition (the target
+		//     Patient) restores commit
+		//   - the default partition's Group restore then fails and aborts the revert transaction
+		// The Observation copy is a v1 copy whose delete is a SEPARATE bundle that the restorer runs only AFTER
+		// the update bundle; since the update bundle threw on the Group, the copy delete never runs. So both the
+		// Group (its restore failed) and the Observation copy (its delete never ran) remain merged and are the
+		// resources reported for manual revert (notReverted = what we tried to revert − what committed).
 		@ParameterizedTest
 		@ValueSource(booleans = {false, true})
 		void testMerge_revertFailsMidSequence_reportsFailedAndSubsequentResources(boolean theDeleteSource) {
 			FailProvenanceThenGroupRestoreInterceptor failer = new FailProvenanceThenGroupRestoreInterceptor();
 			myInterceptorRegistry.registerInterceptor(failer);
 
-			// The Group was updated to v2 by the merge; its restore failed, leaving it the only unreverted resource.
-			String expectedNotRevertedId = myGroupId.withVersion("2").getValue();
-
+			String diagnosticMessage;
 			try {
-				myMergeHelper.callMergeAndValidateException(
-					"Patient",
-					mergeParams(theDeleteSource),
-					InternalErrorException.class,
-					"Cross-partition merge failed and was partially rolled back. The following resources could not be "
-						+ "reverted and remain in their merged state, and must be reverted manually: "
-						+ expectedNotRevertedId
-						+ ". Merge failure cause: InternalErrorException: Simulated failure during Provenance creation");
+				diagnosticMessage = myMergeHelper.callMergeAndExtractDiagnosticMessage(
+					"Patient", mergeParams(theDeleteSource), InternalErrorException.class);
 			} finally {
 				myInterceptorRegistry.unregisterInterceptor(failer);
 			}
+
+			// The Observation copy lives in the target compartment; its server-assigned id is only known now.
+			IIdType obsCopyId = searchBySubject(Observation.class, myPatientIdTgt.getValue())
+					.get(0)
+					.getIdElement();
+
+			// Both the Group (v2, restore failed) and the Observation copy (v1, delete never ran) are reported.
+			assertThat(diagnosticMessage)
+				.contains("could not be reverted and remain in their merged state, and must be reverted manually:")
+				.contains(myGroupId.withVersion("2").getValue())
+				.contains(obsCopyId.toUnqualifiedVersionless().getValue() + "/_history/1")
+				.contains(
+					"Merge failure cause: InternalErrorException: Simulated failure during Provenance creation");
 
 			// The Group's restore failed, so it stays merged (still pointing at the target).
 			Group groupAfter = readResource(Group.class, myGroupId);
@@ -1333,14 +1341,16 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				.isEqualTo(myPatientIdTgt.getValue());
 
 			// The source and target partitions' reverts committed before the failure: both Patients match their
-			// pre-merge state, the Observation copy is gone and the original is untouched in the source compartment.
+			// pre-merge state, and the source-compartment original Observation is untouched (the delete step,
+			// which runs after Provenance creation, never ran).
 			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
 				mySourceBefore, readResource(Patient.class, myPatientIdSrc));
 			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
 				myTargetBefore, readResource(Patient.class, myPatientIdTgt));
 			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
 				myObsBefore, readResource(Observation.class, myObsId));
-			assertThat(searchBySubject(Observation.class, myPatientIdTgt.getValue())).isEmpty();
+			// The Observation copy's delete never ran, so the copy remains in the target compartment.
+			assertThat(searchBySubject(Observation.class, myPatientIdTgt.getValue())).hasSize(1);
 			assertThat(searchBySubject(Observation.class, myPatientIdSrc.getValue())).hasSize(1);
 		}
 

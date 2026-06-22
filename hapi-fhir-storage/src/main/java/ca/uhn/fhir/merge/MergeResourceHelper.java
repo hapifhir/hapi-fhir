@@ -36,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.Date;
@@ -111,79 +110,6 @@ public class MergeResourceHelper {
 		}
 
 		return targetOutcome;
-	}
-
-	/**
-	 * Prepares the source and target resources for update WITHOUT persisting them, so the caller can add them as PUT
-	 * entries in a larger transaction bundle (the single-transaction cross-partition merge). Mirrors the mutations of
-	 * {@link #updateMergedResourcesAfterReferencesReplaced} but performs no writes.
-	 *
-	 * @return the prepared resources: {@link PreparedMergeResources#getTargetToUpdate()} (always present) and
-	 * {@link PreparedMergeResources#getSourceToUpdate()} (present only when the source is kept, i.e. not deleted).
-	 */
-	public PreparedMergeResources prepareMergedResourcesForUpdate(
-			IBaseResource theSourceResource,
-			IBaseResource theTargetResource,
-			@Nullable IBaseResource theResultResource,
-			boolean theIsDeleteSource) {
-
-		IBaseResource targetToUpdate = prepareTargetResourceForUpdate(
-				theTargetResource, theSourceResource, theResultResource, theIsDeleteSource);
-
-		IBaseResource sourceToUpdate = null;
-		if (!theIsDeleteSource) {
-			prepareSourceResourceForUpdate(theSourceResource, theTargetResource);
-			sourceToUpdate = theSourceResource;
-		}
-
-		return new PreparedMergeResources(targetToUpdate, sourceToUpdate);
-	}
-
-	/**
-	 * Holds the source and target resources prepared for a merge update but not yet persisted.
-	 */
-	public static class PreparedMergeResources {
-		private final IBaseResource myTargetToUpdate;
-
-		@Nullable
-		private final IBaseResource mySourceToUpdate;
-
-		public PreparedMergeResources(IBaseResource theTargetToUpdate, @Nullable IBaseResource theSourceToUpdate) {
-			myTargetToUpdate = theTargetToUpdate;
-			mySourceToUpdate = theSourceToUpdate;
-		}
-
-		public IBaseResource getTargetToUpdate() {
-			return myTargetToUpdate;
-		}
-
-		@Nullable
-		public IBaseResource getSourceToUpdate() {
-			return mySourceToUpdate;
-		}
-	}
-
-	/**
-	 * Builds the merge Provenance resource WITHOUT persisting it, so the caller can add it as a POST entry in a larger
-	 * transaction bundle. See {@link MergeProvenanceSvc#buildMergeProvenance}.
-	 */
-	public Provenance buildProvenance(
-			IIdType theSourceVersionedId,
-			IIdType theTargetVersionedId,
-			List<IIdType> theChangedResourceIds,
-			@Nullable String theProvenanceCorrelationId,
-			Date theStartTime,
-			List<IProvenanceAgent> theProvenanceAgents,
-			List<IBaseResource> theContainedResources) {
-
-		return myProvenanceSvc.buildMergeProvenance(
-				theTargetVersionedId,
-				theSourceVersionedId,
-				theChangedResourceIds,
-				theProvenanceCorrelationId,
-				theStartTime,
-				theProvenanceAgents,
-				theContainedResources);
 	}
 
 	public IIdType createProvenance(

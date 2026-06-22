@@ -1072,8 +1072,9 @@ public abstract class BaseTransactionProcessor {
 										theTransactionDetails.getResolvedPartition(resourceId);
 							}
 							if (nextWriteEntryRequestPartitionId == null) {
-								nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-										requestDetailsForEntry, resource, resourceType, url);
+								nextWriteEntryRequestPartitionId =
+										tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+												requestDetailsForEntry, resource, resourceType, url);
 							}
 						}
 						if (resourceId != null) {
