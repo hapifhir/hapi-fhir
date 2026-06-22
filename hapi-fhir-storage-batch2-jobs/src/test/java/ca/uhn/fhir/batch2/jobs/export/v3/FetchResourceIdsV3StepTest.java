@@ -29,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -96,7 +97,7 @@ public class FetchResourceIdsV3StepTest {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void run_withValidInputs_succeeds(boolean thePartitioned) throws JacksonException {
+	public void run_withValidInputs_succeeds(boolean thePartitioned) throws JacksonException, IOException {
 		// setup
 		BulkExportJobParameters parameters = createParameters();
 		JobInstance instance = new JobInstance();
