@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -41,13 +40,13 @@ class ImportLoincStep2HandleConceptsTest extends BaseImportLoincStepTest {
 		uploadStatistics.incrementConceptsAddedCount();
 		uploadStatistics.incrementConceptsAddedCount();
 		uploadStatistics.incrementConceptsAddedCount();
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(uploadStatistics);
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenReturn(uploadStatistics);
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).addCodeSystemConcepts(any(), myCodeSystemCaptor.capture());
 		CodeSystem cs = myCodeSystemCaptor.getValue();
 		assertThat(cs.getConcept().stream().map(CodeSystem.ConceptDefinitionComponent::getCode)).containsExactly(
 			"10013-1",
@@ -94,7 +93,7 @@ class ImportLoincStep2HandleConceptsTest extends BaseImportLoincStepTest {
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
 		AtomicInteger failCounter = new AtomicInteger(0);
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenAnswer(t->{
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenAnswer(t->{
 			if (failCounter.incrementAndGet() <= 5) {
 				throw new ResourceVersionConflictException("version conflict");
 			}
@@ -105,7 +104,7 @@ class ImportLoincStep2HandleConceptsTest extends BaseImportLoincStepTest {
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, times(6)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(6)).addCodeSystemConcepts(any(), myCodeSystemCaptor.capture());
 		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
 		assertThat(renderEmittedChunks()).containsExactly(
 			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptsAdded=1]"
@@ -118,7 +117,7 @@ class ImportLoincStep2HandleConceptsTest extends BaseImportLoincStepTest {
 		String classpath = "loinc-ver/v269/LoincTable/Loinc.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenThrow(new ResourceVersionConflictException("version conflict"));
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenThrow(new ResourceVersionConflictException("version conflict"));
 
 		// Test
 		assertThatThrownBy(()->mySvc.run(newStepExecutionDetails(classpath), myDataSink))
@@ -126,7 +125,7 @@ class ImportLoincStep2HandleConceptsTest extends BaseImportLoincStepTest {
 			.hasMessage("version conflict");
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, times(11)).uploadCodeSystemConcepts(any());
+		verify(myTermCodeSystemStorageSvc, times(11)).addCodeSystemConcepts(any(), any());
 		verifyNoInteractions(myDataSink);
 	}
 

@@ -31,6 +31,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
@@ -38,25 +39,19 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.term.UploadStatistics;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.custom.CodeSystemToCustomCsvConverter;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
-import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.EnumUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -65,12 +60,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -106,6 +97,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	public static final String PARAM_FILENAME = "filename";
 	public static final String PARAM_JOB_INSTANCE_ID = "jobInstanceId";
 	public static final String PARAM_MAKE_CURRENT = "makeCurrent";
+	public static final String PARAM_MODE = "mode";
 	public static final String PARAM_JOB_ATTACHMENT_ID = "jobAttachmentId";
 	public static final String RESP_PARAM_OUTCOME = "outcome";
 	public static final Pattern LOINC_XML_FILENAME_PATTERN =
@@ -123,10 +115,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	private final Map<String, JobType> myCanonicalUrlToJobType = new HashMap<>();
 	private final Map<String, JobType> myJobDefinitionIdToJobType = new HashMap<>();
 	private final JobType myCustomJobType;
-	private CodeSystemToCustomCsvConverter myCodeSystemToCustomCsvConverter;
-
-	@Autowired
-	private ITermLoaderSvc myTerminologyLoaderSvc;
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
@@ -138,19 +126,15 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * Constructor
 	 */
 	public TerminologyUploaderProvider() {
-		this(null, null, null, null);
+		this(null, null, null);
 	}
 
 	/**
 	 * Constructor
 	 */
 	public TerminologyUploaderProvider(
-			FhirContext theContext,
-			ITermLoaderSvc theTerminologyLoaderSvc,
-			IJobCoordinator theJobCoordinator,
-			IJobPersistence theJobPersistence) {
+			FhirContext theContext, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
 		setContext(theContext);
-		myTerminologyLoaderSvc = theTerminologyLoaderSvc;
 		myJobCoordinator = theJobCoordinator;
 		myJobPersistence = theJobPersistence;
 
@@ -208,6 +192,14 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						TerminologyConstants.FILENAME_CUSTOM_DISTRIBUTION_FILE,
 						AttachmentContentTypeEnum.ZIP),
 				new DistributionFilenamePattern(
+						filenameToPattern(TerminologyConstants.CUSTOM_CODESYSTEM_JSON),
+						TerminologyConstants.CUSTOM_CODESYSTEM_JSON,
+						AttachmentContentTypeEnum.JSON),
+				new DistributionFilenamePattern(
+						filenameToPattern(TerminologyConstants.CUSTOM_CODESYSTEM_XML),
+						TerminologyConstants.CUSTOM_CODESYSTEM_XML,
+						AttachmentContentTypeEnum.XML),
+				new DistributionFilenamePattern(
 						Pattern.compile("concepts.*\\.csv", Pattern.CASE_INSENSITIVE),
 						CUSTOM_CONCEPTS_FILE,
 						AttachmentContentTypeEnum.CSV),
@@ -225,19 +217,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				null,
 				customDistributionFiles);
 		myJobDefinitionIdToJobType.put(myCustomJobType.jobDefinitionId(), myCustomJobType);
-	}
-
-	@PostConstruct
-	public void startIfNecessary() {
-		if (myCodeSystemToCustomCsvConverter == null && getContext() != null) {
-			myCodeSystemToCustomCsvConverter = new CodeSystemToCustomCsvConverter(getContext());
-		}
-	}
-
-	@Override
-	public void setContext(FhirContext theContext) {
-		super.setContext(theContext);
-		startIfNecessary();
 	}
 
 	/**
@@ -259,11 +238,23 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					IPrimitiveType<String> theCodeSystemVersion,
 			@OperationParam(name = PARAM_MAKE_CURRENT, typeName = "boolean", min = 0)
 					IPrimitiveType<Boolean> theMakeCurrent,
+			@OperationParam(name = PARAM_MODE, typeName = "code", min = 0) IPrimitiveType<String> theMode,
 			ServletRequestDetails theRequestDetails) {
 
 		String url = toStringValue(theCodeSystemUrl);
 		if (isBlank(url)) {
 			throw new InvalidRequestException(Msg.code(2943) + "Missing required parameter: " + PARAM_SYSTEM);
+		}
+
+		ImportTerminologyModeEnum mode = ImportTerminologyModeEnum.SNAPSHOT;
+
+		String modeString = toStringValue(theMode);
+		if (isNotBlank(modeString)) {
+			mode = EnumUtils.getEnum(ImportTerminologyModeEnum.class, modeString);
+			if (mode == null) {
+				throw new InvalidRequestException(Msg.code(2963) + "Invalid value for parameter " + PARAM_MODE + ": "
+						+ UrlUtil.sanitizeUrlPart(modeString));
+			}
 		}
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(url, toStringValue(theCodeSystemVersion));
@@ -273,7 +264,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			jobType = myCustomJobType;
 		}
 
-		return startImportTerminologyJob(theMakeCurrent, theRequestDetails, canonicalUrl, jobType);
+		return startImportTerminologyJob(theMakeCurrent, theRequestDetails, canonicalUrl, jobType, mode);
 	}
 
 	@Nonnull
@@ -281,7 +272,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			IPrimitiveType<Boolean> theMakeCurrent,
 			ServletRequestDetails theRequestDetails,
 			UrlUtil.CanonicalUrlParts canonicalUrl,
-			JobType theJobType) {
+			JobType theJobType,
+			ImportTerminologyModeEnum theMode) {
 		String terminologyName = theJobType.terminologyName();
 		String jobDefinitionId = theJobType.jobDefinitionId();
 
@@ -290,6 +282,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
 		parameters.setUrl(canonicalUrl.url());
 		parameters.setVersionId(canonicalUrl.versionId().orElse(null));
+		parameters.setMode(theMode);
 
 		Boolean makeCurrent = DatatypeUtil.toBooleanValue(theMakeCurrent);
 		if (makeCurrent != null && !makeCurrent) {
@@ -353,9 +346,10 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			HttpServletRequest theServletRequest,
 			ServletRequestDetails theRequestDetails) {
 
+		JobInstance jobInstance = getJobInstance(theJobInstanceId);
+		validateJobIsInBuildingStatus(jobInstance);
+
 		try (InputStream inputStream = theServletRequest.getInputStream()) {
-			JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
-			validateJobIsInBuildingStatus(jobInstance);
 
 			JobType jobType = myJobDefinitionIdToJobType.get(jobInstance.getJobDefinitionId());
 			if (jobType != null) {
@@ -419,7 +413,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		ServletRequestUtil.validatePreferAsyncHeader(theRequestDetails, OPERATION_UPLOAD_TERMINOLOGY_START_JOB);
 
-		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
+		JobInstance jobInstance = getJobInstance(theJobInstanceId);
+
 		validateJobIsInBuildingStatus(jobInstance);
 
 		JobType jobType = myJobDefinitionIdToJobType.get(jobInstance.getJobDefinitionId());
@@ -439,6 +434,13 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				theRequestDetails, pollUrl, OPERATION_UPLOAD_TERMINOLOGY_START_JOB, null);
 	}
 
+	private static void validateInstanceIdProvided(String jobInstanceId) {
+		if (isBlank(jobInstanceId)) {
+			throw new InvalidRequestException(
+					Msg.code(2979) + "No value provided for mandatory parameter: " + PARAM_JOB_INSTANCE_ID);
+		}
+	}
+
 	/**
 	 * <code>$hapi.fhir.upload-terminology.poll-for-status</code>
 	 */
@@ -453,7 +455,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			ServletRequestDetails theRequestDetails)
 			throws IOException {
 
-		JobInstance jobInstance = myJobCoordinator.getInstance(toStringValue(theJobInstanceId));
+		JobInstance jobInstance = getJobInstance(theJobInstanceId);
 
 		JobType jobType = myJobDefinitionIdToJobType.get(jobInstance.getJobDefinitionId());
 		if (jobType != null) {
@@ -469,6 +471,13 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		} else {
 			throw new InvalidRequestException(Msg.code(2948) + "Can't use this operation to poll status of this job");
 		}
+	}
+
+	@Nonnull
+	private JobInstance getJobInstance(IPrimitiveType<String> theJobInstanceId) {
+		String jobInstanceId = toStringValue(theJobInstanceId);
+		validateInstanceIdProvided(jobInstanceId);
+		return myJobCoordinator.getInstance(jobInstanceId);
 	}
 
 	/**
@@ -495,7 +504,12 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment")
 					List<ICompositeType> theFiles,
 			RequestDetails theRequestDetails) {
-		throw new InvalidRequestException(Msg.code(2972) + "The " + JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM
+		throw newExceptionForOperationRemoved(JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM);
+	}
+
+	@Nonnull
+	private static InvalidRequestException newExceptionForOperationRemoved(String operationName) {
+		return new InvalidRequestException(Msg.code(2972) + "The " + operationName
 				+ " operation has been removed. To upload terminology, see the "
 				+ JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB + " operation.");
 	}
@@ -504,7 +518,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * <code>
 	 * $apply-codesystem-delta-add
 	 * </code>
+	 * This method is no longer supported and doesn't do anything. It has been left
+	 * here to flag to anyone who tries to call it that there is a
+	 * new method to call.
 	 */
+	@Deprecated(since = "8.12.0", forRemoval = true)
 	@Operation(
 			typeName = "CodeSystem",
 			name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD,
@@ -522,27 +540,18 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 							typeName = "CodeSystem")
 					List<IBaseResource> theCodeSystems,
 			RequestDetails theRequestDetails) {
-
-		startRequest(theServletRequest);
-		try {
-			validateHaveSystem(theSystem);
-			validateHaveFiles(theFiles, theCodeSystems);
-
-			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
-			files.addAll(myCodeSystemToCustomCsvConverter.convertCodeSystemsToFileDescriptors(theCodeSystems));
-			UploadStatistics outcome =
-					myTerminologyLoaderSvc.loadDeltaAdd(theSystem.getValue(), files, theRequestDetails);
-			return toDeltaResponse(outcome);
-		} finally {
-			endRequest(theServletRequest);
-		}
+		throw newExceptionForOperationRemoved(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD);
 	}
 
 	/**
 	 * <code>
 	 * $apply-codesystem-delta-remove
 	 * </code>
+	 * This method is no longer supported and doesn't do anything. It has been left
+	 * here to flag to anyone who tries to call it that there is a
+	 * new method to call.
 	 */
+	@Deprecated(since = "8.12.0", forRemoval = true)
 	@Operation(
 			typeName = "CodeSystem",
 			name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE,
@@ -560,97 +569,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 							typeName = "CodeSystem")
 					List<IBaseResource> theCodeSystems,
 			RequestDetails theRequestDetails) {
-
-		startRequest(theServletRequest);
-		try {
-			validateHaveSystem(theSystem);
-			validateHaveFiles(theFiles, theCodeSystems);
-
-			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
-			files.addAll(myCodeSystemToCustomCsvConverter.convertCodeSystemsToFileDescriptors(theCodeSystems));
-			UploadStatistics outcome =
-					myTerminologyLoaderSvc.loadDeltaRemove(theSystem.getValue(), files, theRequestDetails);
-			return toDeltaResponse(outcome);
-		} finally {
-			endRequest(theServletRequest);
-		}
-	}
-
-	private void validateHaveSystem(IPrimitiveType<String> theSystem) {
-		if (theSystem == null || isBlank(theSystem.getValueAsString())) {
-			throw new InvalidRequestException(Msg.code(1139) + "Missing mandatory parameter: " + PARAM_SYSTEM);
-		}
-	}
-
-	private void validateHaveFiles(List<ICompositeType> theFiles, List<IBaseResource> theCodeSystems) {
-		if (theFiles != null) {
-			for (ICompositeType nextFile : theFiles) {
-				if (!nextFile.isEmpty()) {
-					return;
-				}
-			}
-		}
-		if (theCodeSystems != null) {
-			for (IBaseResource next : theCodeSystems) {
-				if (!next.isEmpty()) {
-					return;
-				}
-			}
-		}
-		throw new InvalidRequestException(Msg.code(1140) + "Missing mandatory parameter: " + PARAM_FILE);
-	}
-
-	@Nonnull
-	private List<ITermLoaderSvc.FileDescriptor> convertAttachmentsToFileDescriptors(
-			@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment")
-					List<ICompositeType> theFiles) {
-		List<ITermLoaderSvc.FileDescriptor> files = new ArrayList<>();
-		if (theFiles != null) {
-			for (ICompositeType next : theFiles) {
-
-				String nextUrl =
-						AttachmentUtil.getOrCreateUrl(getContext(), next).getValue();
-				ValidateUtil.isNotBlankOrThrowUnprocessableEntity(nextUrl, "Missing Attachment.url value");
-
-				byte[] nextData;
-				if (nextUrl.startsWith("localfile:")) {
-					String nextLocalFile = nextUrl.substring("localfile:".length());
-
-					if (isNotBlank(nextLocalFile)) {
-						ourLog.info("Reading in local file: {}", nextLocalFile);
-						File nextFile = new File(nextLocalFile);
-						if (!nextFile.exists() || !nextFile.isFile()) {
-							throw new InvalidRequestException(Msg.code(1141) + "Unknown file: " + nextFile.getName());
-						}
-						files.add(new FileBackedFileDescriptor(nextFile));
-					}
-
-				} else {
-					nextData =
-							AttachmentUtil.getOrCreateData(getContext(), next).getValue();
-					ValidateUtil.isTrueOrThrowInvalidRequest(
-							nextData != null && nextData.length > 0, "Missing Attachment.data value");
-					files.add(new ITermLoaderSvc.ByteArrayFileDescriptor(nextUrl, nextData));
-				}
-			}
-		}
-		return files;
-	}
-
-	private IBaseParameters toDeltaResponse(UploadStatistics theOutcome) {
-		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
-		ParametersUtil.addParameterToParametersInteger(
-				getContext(),
-				retVal,
-				RESP_PARAM_CONCEPT_COUNT,
-				theOutcome.getAddedConceptCount() + theOutcome.getUpdatedConceptCount());
-		ParametersUtil.addParameterToParametersReference(
-				getContext(), retVal, RESP_PARAM_TARGET, theOutcome.getTarget().getValue());
-		return retVal;
-	}
-
-	public void setTerminologyLoaderSvc(ITermLoaderSvc theTermLoaderSvc) {
-		myTerminologyLoaderSvc = theTermLoaderSvc;
+		throw newExceptionForOperationRemoved(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
 	}
 
 	@Nonnull
@@ -691,26 +610,4 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	private record DistributionFilenamePattern(
 			Pattern pattern, String jobFilename, AttachmentContentTypeEnum contentType) {}
-
-	public static class FileBackedFileDescriptor implements ITermLoaderSvc.FileDescriptor {
-		private final File myNextFile;
-
-		public FileBackedFileDescriptor(File theNextFile) {
-			myNextFile = theNextFile;
-		}
-
-		@Override
-		public String getFilename() {
-			return myNextFile.getAbsolutePath();
-		}
-
-		@Override
-		public InputStream getInputStream() {
-			try {
-				return new FileInputStream(myNextFile);
-			} catch (FileNotFoundException theE) {
-				throw new InternalErrorException(Msg.code(1142) + theE);
-			}
-		}
-	}
 }
