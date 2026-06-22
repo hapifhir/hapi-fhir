@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTypeInterceptor;
@@ -61,6 +63,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -746,6 +749,23 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(1324) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
 		}
+	}
+
+	@Test
+	void testTransaction_ObservationInMultipleCompartments_throws() {
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("B"), withActiveTrue());
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient/A");
+		obs.addPerformer().setReference("Patient/B");
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(obs);
+
+		assertThatThrownBy(() -> mySystemDao.transaction(newSrd(), bb.getBundleTyped()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(1324));
 	}
 
 	@Test
@@ -1501,219 +1521,116 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		};
 	}
 
-	static List<Arguments> patientScenarioSupplier() {
-		return List.of(
-			// POSTs
-			Arguments.of(
-				"create Patient | Patient already exists",
-				"""
-					{ "resourceType" : "Bundle", "type" : "transaction",
-						"entry" : [
-							{
-								"resource" : {
-									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
-								},
-								"request" : { "method" : "POST", "url" : "Patient"}
-							}
-						]
-					}
-					""",
-				bundleAssert(1) // to be verified.  i think this throws an exception.  if it
-				// returns 1, version has to be 1 and same identifier
-			),
-			Arguments.of(
-				// redundant
-				"create Patient | Patient does not exist",
-				"""
-					{ "resourceType" : "Bundle", "type" : "transaction",
-						"entry" : [
-							{
-								"resource" : {
-									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "newIden"} ]
-								},
-								"request" : { "method" : "POST", "url" : "Patient"}
-							}
-						]
-					}
-					""",
-				bundleAssert(1)
-			),
-			Arguments.of(
-				"conditional-create Patient | Patient already exists",
-				"""
-					{ "resourceType" : "Bundle", "type" : "transaction",
-						"entry" : [
-							{
-								"resource" : {
-									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
-								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|ident1"}
-							}
-						]
-					}
-					""",
-				bundleAssert(1)
-			),
-			Arguments.of(
-				"conditional-create Patient | Patient does not exist",
-				"""
-					{ "resourceType" : "Bundle", "type" : "transaction",
-						"entry" : [
-							{
-								"resource" : {
-									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "newIden"} ]
-								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|newIden"}
-							}
-						]
-					}
-					""",
-				bundleAssert(1)
-			),
-			// PUTs
-			Arguments.of(
-				// FIXME-TG:  // "Patient/pat1" in the url
-				"create Patient with client-assigned ID | Patient already exist",
-				"""
-					{ "resourceType" : "Bundle", "type" : "transaction",
-						"entry" : [
-							{
-								"resource" : {
-									"resourceType" : "Patient",
-									"id" : "pat1",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
-								},
-								"request" : { "method" : "PUT", "url" : "Patient/pat1"}
-							}
-						]
-					}
-					""",
-				bundleAssert(1)
-			),
-			Arguments.of(
-				// FIXME-TG: same here
-				"create Patient with client-assigned ID | Patient does not exist",
-				"""
-					{ "resourceType" : "Bundle", "type" : "transaction",
-						"entry" : [
-							{
-								"resource" : {
-									"resourceType" : "Patient",
-									"id" : "p-123",
-									"identifier" : [ { "system" : "old-sys", "value" : "newIdent"} ]
-								},
-								"request" : { "method" : "PUT", "url" : "Patient/p-123"}
-							}
-						]
-					}
-					""",
-				bundleAssert(1)
-			),
-			Arguments.of(
-				"conditional-update Patient without ID | Patient already exist",
-				"""
-					{ "resourceType" : "Bundle", "type" : "transaction",
-						"entry" : [
-							{
-								"resource" : {
-									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
-								},
-								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|ident1"}
-							}
-						]
-					}
-					""",
-				bundleAssert(1)
-			),
-			Arguments.of(
-				"conditional-update Patient without ID | Patient does not exist",
-				"""
-					{ "resourceType" : "Bundle", "type" : "transaction",
-						"entry" : [
-							{
-								"resource" : {
-									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "newIden"} ]
-								},
-								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|newIden"}
-							}
-						]
-					}
-					""",
-				bundleAssert(1)
-			),
-			Arguments.of(
-				"conditional-update Patient with ID | Patient already exist",
-				"""
-					{ "resourceType" : "Bundle", "type" : "transaction",
-						"entry" : [
-							{
-								"resource" : {
-									"resourceType" : "Patient",
-									"id" : "pat1",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
-								},
-								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|ident1"}
-							}
-						]
-					}
-					""",
-				bundleAssert(1)
-			),
-			Arguments.of(
-				"conditional-update Patient with ID | Patient does not exist",
-				"""
-					{ "resourceType" : "Bundle", "type" : "transaction",
-						"entry" : [
-							{
-								"resource" : {
-									"resourceType" : "Patient",
-									"id" : "p-123",
-									"identifier" : [ { "system" : "old-sys", "value" : "newIden"} ]
-								},
-								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|newIden"}
-							}
-						]
-					}
-					""",
-				bundleAssert(1)
-			)
-		);
+	// -----------------------------------------------------------------------
+	// Per-entry assertion infrastructure for testTransaction_allReferenceScenarios
+	// -----------------------------------------------------------------------
+
+	/**
+	 * Expectation for a single transaction response entry (in input order).
+	 * The two nullable partition fields encode three cases:
+	 * <ul>
+	 *   <li>{@code expectedPartition} (non-null) — exact partition id</li>
+	 *   <li>{@code sameAsEntryIndex} (non-null) — must co-locate with that response entry</li>
+	 *   <li>both null — "any compartment", partition must be {@code > 0}</li>
+	 * </ul>
+	 */
+	record ExpectedEntry(
+			String resourceType,
+			StorageResponseCodeEnum outcome,
+			Integer expectedPartition,
+			Integer sameAsEntryIndex) {}
+
+	/** Resource in the configured default partition (ALTERNATE_DEFAULT_ID = -1). */
+	static ExpectedEntry inDefaultPartition(String theType, StorageResponseCodeEnum theOutcome) {
+		return new ExpectedEntry(theType, theOutcome, ALTERNATE_DEFAULT_ID, null);
 	}
 
-	@ParameterizedTest
-	@MethodSource("patientScenarioSupplier()")
-	void testTransaction_allPatientScenarios(String theComment, String theBundle, Consumer<Bundle> theAssertions) {
-		// fixed setup
-		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+	/** Resource in the compartment of the patient whose id-part is {@code thePatientIdPart}. */
+	static ExpectedEntry inCompartmentOf(String theType, StorageResponseCodeEnum theOutcome, String thePatientIdPart) {
+		int partition = PatientIdPartitionInterceptor.defaultPartitionAlgorithm(thePatientIdPart);
+		return new ExpectedEntry(theType, theOutcome, partition, null);
+	}
 
-		createPatient(
-			withId("pat1"),
-			withIdentifier("old-sys", "ident1"),
-			withIdentifier("new-sys", "newId1")
-		);
+	/** Resource must co-locate with the response entry at {@code theOtherEntryIndex}. */
+	static ExpectedEntry inSamePartitionAsEntry(String theType, StorageResponseCodeEnum theOutcome, int theOtherEntryIndex) {
+		return new ExpectedEntry(theType, theOutcome, null, theOtherEntryIndex);
+	}
 
-		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+	/** Resource must be in some patient-compartment partition (partition {@code > 0}). */
+	static ExpectedEntry inAnyCompartment(String theType, StorageResponseCodeEnum theOutcome) {
+		return new ExpectedEntry(theType, theOutcome, null, null);
+	}
 
-		// then
-		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+	/**
+	 * Drives per-entry assertions for {@code testTransaction_allReferenceScenarios}.
+	 * <ul>
+	 *   <li>Entry count matches {@code theExpectedEntries.size()}</li>
+	 *   <li>For each entry (in input order): resource type, HTTP status, OO code, partition</li>
+	 * </ul>
+	 */
+	private void assertReferenceScenario(Bundle theResultBundle, List<ExpectedEntry> theExpectedEntries) {
+		assertThat(theResultBundle.getEntry())
+				.as("response entry count")
+				.hasSize(theExpectedEntries.size());
 
-		// expectations
-		assertNotNull(resultBundle);
-		assertNotNull(theAssertions);
-		theAssertions.accept(resultBundle);
+		for (int i = 0; i < theExpectedEntries.size(); i++) {
+			ExpectedEntry expected = theExpectedEntries.get(i);
+			Bundle.BundleEntryResponseComponent response = theResultBundle.getEntry().get(i).getResponse();
 
+			// Type: parse location to verify resource type
+			String location = response.getLocation();
+			assertThat(location).as("entry[%d] location must not be blank", i).isNotBlank();
+			IIdType resourceId = new IdType(location).toUnqualifiedVersionless();
+			assertThat(resourceId.getResourceType())
+					.as("entry[%d] resource type (location=%s)", i, location)
+					.isEqualTo(expected.resourceType());
+
+			// HTTP status: created-class codes → 201, everything else → 200
+			String expectedStatusPrefix = isCreatedOutcome(expected.outcome()) ? "201" : "200";
+			assertThat(response.getStatus())
+					.as("entry[%d] HTTP status for %s/%s", i, expected.resourceType(), expected.outcome())
+					.startsWith(expectedStatusPrefix);
+
+			// OperationOutcome code
+			OperationOutcome oo = (OperationOutcome) response.getOutcome();
+			assertThat(oo).as("entry[%d] must have an OperationOutcome", i).isNotNull();
+			assertThat(oo.getIssue()).as("entry[%d] OO must have at least one issue", i).isNotEmpty();
+			String actualCode = oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode();
+			assertThat(actualCode)
+					.as("entry[%d] OperationOutcome StorageResponseCode for %s", i, expected.resourceType())
+					.isEqualTo(expected.outcome().name());
+
+			// Partition
+			if (expected.expectedPartition() != null) {
+				assertResourceIsInPartition(expected.expectedPartition(), resourceId);
+			} else if (expected.sameAsEntryIndex() != null) {
+				String otherLocation =
+						theResultBundle.getEntry().get(expected.sameAsEntryIndex()).getResponse().getLocation();
+				IIdType otherId = new IdType(otherLocation).toUnqualifiedVersionless();
+				assertResourceIsInPartition(getResourcePartition(otherId), resourceId);
+			} else {
+				// compartments span [0,14999] so we can't assert > 0; assert != default partition instead
+				assertThat(getResourcePartition(resourceId))
+						.as("entry[%d] (%s) must be in a patient-compartment partition, not the default", i, resourceId)
+						.isNotEqualTo(ALTERNATE_DEFAULT_ID);
+			}
+		}
+	}
+
+	private static boolean isCreatedOutcome(StorageResponseCodeEnum theCode) {
+		return switch (theCode) {
+			case SUCCESSFUL_CREATE,
+				 SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH,
+				 SUCCESSFUL_UPDATE_AS_CREATE,
+				 SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH -> true;
+			default -> false;
+		};
 	}
 
 	static List<Arguments> referenceScenarioSupplier() {
 		return List.of(
 			Arguments.of(
-				"create Patient | new patient",
+				"unconditionally created Patient | new patient",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
 						"entry" : [
@@ -1727,7 +1644,53 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						]
 					}
 					""",
-				bundleAssert(1)
+				// Patient has no fullUrl → Task 2 assigns one → Synthea hack fires → creates with UUID id.
+				// Task 4 corrects OO from SUCCESSFUL_UPDATE_AS_CREATE back to SUCCESSFUL_CREATE.
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+				)
+			),
+			Arguments.of(
+				"conditionally created Patient | new patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|identNew"}
+							}
+						]
+					}
+					""",
+				// Patient has no fullUrl → Task 2 assigns one → Synthea hack fires → creates with UUID id.
+				// Task 4 corrects OO from SUCCESSFUL_UPDATE_AS_CREATE back to SUCCESSFUL_CREATE.
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+				)
+			),
+			Arguments.of(
+				"conditionally created Patient | existing patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|ident1"}
+							}
+						]
+					}
+					""",
+				// Patient has no fullUrl → Task 2 assigns one → Synthea hack fires → creates with UUID id.
+				// Task 4 corrects OO from SUCCESSFUL_UPDATE_AS_CREATE back to SUCCESSFUL_CREATE.
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH)
+				)
 			),
 			Arguments.of(
 				"create Observation | local reference to existing patient",
@@ -1745,7 +1708,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						]
 					}
 					""",
-				bundleAssert(1)
+				// Direct Patient/pat1 reference → Observation in pat1's compartment. No transformer involved.
+				List.of(
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
+				)
 			),
 			Arguments.of(
 				"create Observation | placeholder reference to unconditional new patient",
@@ -1770,7 +1736,11 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						]
 					}
 					""",
-				bundleAssert(2)
+				// Patient has fullUrl → Synthea hack fires → UUID id assigned → Patient & Observation in same compartment.
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
+				)
 			),
 			Arguments.of(
 				"create Observation | placeholder reference to conditional new patient",
@@ -1795,7 +1765,12 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						]
 					}
 					""",
-				bundleAssert(2)
+				// Patient conditional create: identNew doesn't exist → creates with server-assigned UUID.
+				// Task 3 allPartitions fallback enables routing; actual create succeeds (UUID assigned before identifyForCreate).
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
+				)
 			),
 			Arguments.of(
 				"create Observation | placeholder reference to unconditional new patient | reverse order",
@@ -1820,7 +1795,42 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						]
 					}
 					""",
-				bundleAssert(2)
+				// Input order [Obs, Patient]; response preserves order.
+				List.of(
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1),
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+				)
+			),
+			Arguments.of(
+				"create Observation | placeholder reference to conditional new patient | reverse order",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							},
+							{
+								"fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|identNew"}
+							}
+						]
+					}
+					""",
+				// Patient conditional create: identNew doesn't exist → creates with server-assigned UUID.
+				// Input order preserved in response: [0]=Observation, [1]=Patient.
+				List.of(
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1),
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)
+				)
 			),
 			Arguments.of(
 				"create Observation | placeholder reference to conditional-create of existing patient",
@@ -1845,7 +1855,12 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						]
 					}
 					""",
-				bundleAssert(2)
+				// Patient conditional create: ident1=pat1 exists → NOP (200 OK).
+				// Observation subject resolved to pat1 via PLACEHOLDER_TO_REFERENCE_KEY after NOP completes.
+				List.of(
+					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, "pat1"),
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
+				)
 			),
 			Arguments.of(
 				"create Observation with logical reference to existing patient",
@@ -1863,7 +1878,11 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						]
 					}
 					""",
-				bundleAssert(1)
+				// Inline match URL → transformer prepends synthetic conditional-create (pat1 exists → NOP).
+				// 1 synthetic stripped; response has 1 entry. Observation in pat1's compartment.
+				List.of(
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
+				)
 			),
 			Arguments.of(
 				"create Observation with logical reference to new patient",
@@ -1881,7 +1900,11 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						]
 					}
 					""",
-				bundleAssert(1)
+				// Inline match URL → synthetic conditional-create for new-sys|new-val (doesn't exist → creates with UUID).
+				// 1 synthetic stripped; response has 1 entry. Observation in the new patient's compartment.
+				List.of(
+					inAnyCompartment("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+				)
 			),
 			Arguments.of(
 				"conditional-update Observation with logical reference to existing patient",
@@ -1899,7 +1922,11 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						]
 					}
 					""",
-				bundleAssert(1)
+				// Inline match URL → synthetic for pat1 (NOP). 1 synthetic stripped.
+				// Conditional PUT Observation: obs1 doesn't exist → creates new.
+				List.of(
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, "pat1")
+				)
 			),
 			Arguments.of(
 				"Observation with logical reference to patient in bundle with redundant conditional create",
@@ -1923,14 +1950,432 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						]
 					}
 					""",
-				bundleAssert(2)
+				// Transformer rewrites Obs subject (inline match URL) using Patient conditional-create entry's fullUrl.
+				// Patient: NOP (ident1=pat1 exists). Obs: PUT no match → creates new.
+				List.of(
+					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, "pat1"),
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, "pat1")
+				)
+			),
+			Arguments.of(
+				"two Observations with logical references to two different existing patients | cross-partition",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs2"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|ident2" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				// Two inline match URLs → two synthetics prepended (both NOP: pat1 and pat2 exist). Both stripped.
+				// obs1 → pat1's compartment; obs2 → pat2's compartment.
+				List.of(
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1"),
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat2")
+				)
+			),
+			Arguments.of(
+				"Encounter + Observation with logical references to the same new patient | shared compartment, new patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Encounter",
+									"status" : "finished",
+									"class" : {
+										"system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+										"code" : "AMB",
+										"display" : "ambulatory"
+									},
+									"subject" : { "reference" : "Patient?identifier=old-sys|identChain" }
+								},
+								"request" : { "method" : "POST", "url" : "Encounter"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsChain"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|identChain" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				// Both inline match URLs → one shared synthetic (de-duplicated by transformer). identChain doesn't exist → creates with UUID.
+				// 1 synthetic stripped; response has 2 entries. Both in the new patient's compartment.
+				List.of(
+					inAnyCompartment("Encounter", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
+				)
+			),
+			Arguments.of(
+				"create Organization | non-compartment resource standalone | default partition",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Organization",
+									"identifier" : [ { "system" : "org-sys", "value" : "org1"} ],
+									"name" : "Acme Hospital"
+								},
+								"request" : { "method" : "POST", "url" : "Organization"}
+							}
+						]
+					}
+					""",
+				// Organization is non-compartment → goes to default partition (-1 = ALTERNATE_DEFAULT_ID).
+				List.of(
+					inDefaultPartition("Organization", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+				)
+			),
+			Arguments.of(
+				"mixed compartment + non-compartment | Organization + Observation (logical ref to existing patient)",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Organization",
+									"identifier" : [ { "system" : "org-sys", "value" : "org-mixed"} ],
+									"name" : "Mixed Bundle Hospital"
+								},
+								"request" : { "method" : "POST", "url" : "Organization"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obs-mixed"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				// Organization → default partition. Obs inline match URL → synthetic (pat1 NOP); 1 stripped.
+				// Obs in pat1's compartment.
+				List.of(
+					inDefaultPartition("Organization", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
+				)
+			),
+			Arguments.of(
+				"conditional-update Patient (matches existing) + Observation with logical ref to it | Option A on PUT-with-match-URL",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ],
+									"active" : true
+								},
+								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|ident1"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsCondUpdMatched"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				// Transformer rewrites Obs subject using Patient conditional-update entry's fullUrl (Option A).
+				// Patient PUT matches pat1 → update (200). Obs in pat1's compartment.
+				List.of(
+					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH, "pat1"),
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
+				)
+			),
+			Arguments.of(
+				"conditional-update Patient (no match, creates new) + Observation with logical ref to it",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "brand-new-cu"} ]
+								},
+								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|brand-new-cu"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsCondUpdNew"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|brand-new-cu" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				// Patient PUT: brand-new-cu doesn't exist → creates with server-assigned UUID. Obs references it.
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
+				)
+			),
+			Arguments.of(
+				"conditional-update Observation with patient ref in match URL | match URL contains Patient reference",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference" : "Patient/pat1" },
+									"code" : { "coding" : [{ "system" : "http://loinc.org", "code" : "9999-9" }] }
+								},
+								"request" : { "method" : "PUT", "url" : "Observation?subject=Patient/pat1&code=http://loinc.org|9999-9"}
+							}
+						]
+					}
+					""",
+				// Observation subject = Patient/pat1 (direct reference, no inline match URL).
+				// No match found → creates new Observation in pat1's compartment.
+				List.of(
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, "pat1")
+				)
+			),
+			Arguments.of(
+				"conditional-create Patient (new) + conditional-update Observation with logical ref to it | mixed verbs",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "newCreate"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|newCreate"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsCC"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|newCreate" }
+								},
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obsCC"}
+							}
+						]
+					}
+					""",
+				// Transformer rewrites Obs subject using Patient conditional-create entry's fullUrl.
+				// Patient creates new (newCreate doesn't exist). Obs conditional PUT: obsCC doesn't exist → creates.
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
+				)
+			),
+			Arguments.of(
+				"two conditional-create Patients (distinct) + two Observations each referencing one | cross-partition + Option A",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "newA"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|newA"}
+							}, {
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "newB"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|newB"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsA"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|newA" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsB"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|newB" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				// Transformer rewrites ObsA/ObsB subjects using PatA/PatB fullUrls. Both patients created new.
+				// All 4 entries remain in response. Cross-partition writes land in each patient's own compartment.
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1)
+				)
+			),
+			Arguments.of(
+				"two conditional-create Patients with the same identifier | duplicate conditional create",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "duplicate"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|duplicate"}
+							}, {
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "duplicate"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|duplicate"}
+							}
+						]
+					}
+					""",
+				// First entry creates a new patient (duplicate doesn't exist). Second entry matches it → NOP (200 OK).
+				// Both response entries point to the same patient.
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH)
+				)
+			),
+			Arguments.of(
+				"[cell 7] create Observation | inline match URL ref to an explicit unconditional new patient | contrived",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "c7" } ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient" }
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsC7" } ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|c7" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				// CONTRIVED: the transformer only indexes conditional-write entries, so the unconditional Patient is
+				// NOT matched by the inline URL — a separate synthetic conditional-create for old-sys|c7 is prepended.
+				// Intended: Observation co-locates with the (single) Patient. Observe whether a duplicate patient appears.
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
+				)
+			),
+			Arguments.of(
+				"[cell 11] conditional-update Observation | urn id-ref to an unconditional new patient in bundle",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:c1111111-1111-1111-1111-111111111111",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "c11" } ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient" }
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsC11" } ],
+									"subject" : { "reference" : "urn:uuid:c1111111-1111-1111-1111-111111111111" }
+								},
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obsC11" }
+							}
+						]
+					}
+					""",
+				// Unconditional Patient → hack assigns an id and substitutes the urn ref → Observation routes to its compartment.
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
+				)
+			),
+			Arguments.of(
+				"[cell 12] conditional-update Observation | urn id-ref to a conditional new patient in bundle",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:c1222222-2222-2222-2222-222222222222",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "c12" } ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|c12" }
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsC12" } ],
+									"subject" : { "reference" : "urn:uuid:c1222222-2222-2222-2222-222222222222" }
+								},
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obsC12" }
+							}
+						]
+					}
+					""",
+				// Conditional Patient gets no id at routing → Observation's urn ref can't resolve → 1326 (needs Task 3).
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
+				)
+			),
+			Arguments.of(
+				"[cell 13] conditional-update Observation | inline match URL ref to an explicit unconditional new patient | contrived",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "c13" } ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient" }
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsC13" } ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|c13" }
+								},
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obsC13" }
+							}
+						]
+					}
+					""",
+				// CONTRIVED: same shape as cell 7 but the Observation is a conditional PUT. Observe.
+				List.of(
+					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
+				)
 			)
 		);
 	}
 
 	@ParameterizedTest
 	@MethodSource("referenceScenarioSupplier()")
-	void testTransaction_allReferenceScenarios(String theComment, String theBundle, Consumer<Bundle> theAssertions) {
+	void testTransaction_allReferenceScenarios(String theComment, String theBundle, List<ExpectedEntry> theExpectedEntries) {
 		// fixed setup
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
@@ -1940,18 +2385,20 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			withIdentifier("old-sys", "ident1"),
 			withIdentifier("new-sys", "newId1")
 		);
+		// Second patient enables cross-partition scenarios in the supplier (e.g. one bundle, two patients).
+		createPatient(
+			withId("pat2"),
+			withIdentifier("old-sys", "ident2")
+		);
 
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+		ourLog.info("Request bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
 
-		// then
 		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
+		ourLog.info("Response bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resultBundle));
 
-		// expectations
 		assertNotNull(resultBundle);
-		assertNotNull(theAssertions);
-		theAssertions.accept(resultBundle);
-
+		assertReferenceScenario(resultBundle, theExpectedEntries);
 	}
 
 	@Interceptor

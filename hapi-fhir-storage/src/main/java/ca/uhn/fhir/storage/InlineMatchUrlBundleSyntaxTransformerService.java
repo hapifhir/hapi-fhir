@@ -61,9 +61,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * <p>
  * This ensures that reference resolution happens before the resource is finalized and before partition selection in
  * Patient ID Partition mode.
- *
- * FIXME-TG:
- *  1. Create a full url for any entry that doesn't already have one - solves
  */
 public class InlineMatchUrlBundleSyntaxTransformerService {
 
@@ -100,37 +97,50 @@ public class InlineMatchUrlBundleSyntaxTransformerService {
 
 		FhirTerser terser = myFhirContext.newTerser();
 
-		// First pass: index existing conditional-write entries by their target match URL. If an inline
-		// match URL ref later in the bundle hits one of these, we reuse that entry's fullUrl instead of
-		// generating a synthetic placeholder — preserving the user's full resource body (a synthetic
-		// placeholder would shadow it during conditional resolution at the server, discarding user data).
-		// Two shapes are recognised:
-		//   * POST entries with request.ifNoneExist=<matchUrl> (conditional create)
-		//   * PUT  entries with request.url=<matchUrl>         (conditional update / upsert)
-		// We don't mutate fullUrls here — that's deferred to the main pass and done only for entries that
-		// an inline match URL actually points at, so we don't disturb entries that need none.
-		Map<String, IBase> existingConditionalWriteEntries = new HashMap<>();
+		// First pass: ensure every resource-bearing entry has a placeholder fullUrl (Patient ID Partition
+		// mode keys on it to pre-assign Patient POST-creates an id), and index in-bundle write entries by
+		// their resource identifier -> fullUrl. An inline match URL ref below resolves against this index, so
+		// it reuses an in-bundle entry (conditional OR unconditional) instead of minting a duplicate synthetic.
+		Map<IdentifierKey, String> inBundleFullUrlByIdentifier = new HashMap<>();
 		for (IBase entry : bundleEntries) {
-			String verb = myVersionAdapter.getEntryRequestVerb(myFhirContext, entry);
-			String matchUrl = null;
-			if ("POST".equals(verb)) {
-				matchUrl = myVersionAdapter.getEntryIfNoneExist(entry);
-			} else if ("PUT".equals(verb)) {
-				String url = myVersionAdapter.getEntryRequestUrl(entry);
-				// Conditional upsert by match URL is identified by '?' in the request URL.
-				if (url != null && url.contains("?")) {
-					matchUrl = url;
-				}
-			}
-			if (isBlank(matchUrl)) {
+			IBaseResource resource = myVersionAdapter.getResource(entry);
+			if (resource == null) {
 				continue;
 			}
-			existingConditionalWriteEntries.put(matchUrl, entry);
+			if (isBlank(myVersionAdapter.getFullUrl(entry))) {
+				// Reuse an existing urn: resource.id (HAPI's placeholder id) rather than override it; else generate.
+				String resourceId = resource.getIdElement().getValue();
+				myVersionAdapter.setFullUrl(
+						entry,
+						resourceId != null && resourceId.startsWith("urn:")
+								? resourceId
+								: "urn:uuid:" + UUID.randomUUID());
+			}
+
+			String fullUrl = myVersionAdapter.getFullUrl(entry);
+			if (isBlank(fullUrl)) {
+				continue;
+			}
+			// Key on (resourceType, system|value), first-wins. Type-aware so e.g. Patient?identifier=sys|x
+			// can't resolve to a non-Patient entry that happens to carry sys|x.
+			String resourceType = myFhirContext.getResourceType(resource);
+			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resource);
+			if (resourceDef.getChildByName("identifier") == null) {
+				continue;
+			}
+			for (IBase identifier : terser.getValues(resource, "identifier")) {
+				String value = terser.getSinglePrimitiveValueOrNull(identifier, "value");
+				if (isBlank(value)) {
+					continue;
+				}
+				String system = terser.getSinglePrimitiveValueOrNull(identifier, "system");
+				inBundleFullUrlByIdentifier.putIfAbsent(new IdentifierKey(resourceType, system, value), fullUrl);
+			}
 		}
 
-		// Second pass: discover, parse, validate, and rewrite each inline match URL reference.
-		// The map is keyed on the raw URL string. Order among synthetic entries doesn't matter — the count
-		// is what matters for response cleanup.
+		// Second pass: rewrite each inline match URL reference. The matchUrlToInfo map (synthetic placeholders)
+		// is keyed on the raw URL string; order among synthetic entries doesn't matter — the count is what
+		// matters for response cleanup.
 		Map<String, MatchUrlInfo> matchUrlToInfo = new HashMap<>();
 		for (IBase entry : bundleEntries) {
 			// Only process write entries (POST/PUT/PATCH); read entries (GET/DELETE) have no resource body to walk.
@@ -148,16 +158,22 @@ public class InlineMatchUrlBundleSyntaxTransformerService {
 				if (!MatchUrlUtil.isInlineMatchUrl(refValue)) {
 					continue;
 				}
-				// If an existing conditional-write entry covers this match URL, point the inline ref at it.
-				IBase existingEntry = existingConditionalWriteEntries.get(refValue);
-				if (existingEntry != null) {
-					ref.setReference(resolveExistingEntryPlaceholderUrl(existingEntry));
-					continue;
+				MatchUrlService.ResourceTypeAndSearchParameterMap parsed =
+						myMatchUrlService.parseAndTranslateMatchUrl(refValue);
+
+				// If an in-bundle entry already carries this (type, identifier), point the inline ref at its
+				// fullUrl (assigned in the first pass) instead of minting a duplicate synthetic placeholder.
+				IdentifierKey refKey = identifierKey(parsed);
+				if (refKey != null) {
+					String existingFullUrl = inBundleFullUrlByIdentifier.get(refKey);
+					if (existingFullUrl != null) {
+						ref.setReference(existingFullUrl);
+						continue;
+					}
 				}
-				// Otherwise, generate a synthetic placeholder on first encounter; reuse for duplicates.
+
+				// Otherwise, generate a synthetic conditional-create on first encounter; reuse for duplicates.
 				MatchUrlInfo info = matchUrlToInfo.computeIfAbsent(refValue, url -> {
-					MatchUrlService.ResourceTypeAndSearchParameterMap parsed =
-							myMatchUrlService.parseAndTranslateMatchUrl(url);
 					validateParsedMatchUrl(url, parsed);
 					return new MatchUrlInfo("urn:uuid:" + UUID.randomUUID(), parsed);
 				});
@@ -188,30 +204,23 @@ public class InlineMatchUrlBundleSyntaxTransformerService {
 	}
 
 	/**
-	 * Resolve the placeholder URL an inline match URL ref should rewrite to, for an Option A match.
-	 * Precedence mirrors HAPI's own logic in {@code BaseTransactionProcessor#getNextResourceIdFromBaseResource}:
-	 *   1. {@code entry.fullUrl} if set;
-	 *   2. {@code resource.id} if it's already a urn placeholder (HAPI accepts that as the placeholder URI
-	 *      when fullUrl is absent — generating a new fullUrl here would override it via fullUrl precedence
-	 *      and silently break any other in-bundle refs that targeted that resource.id);
-	 *   3. otherwise, generate a fresh urn:uuid and set it as the entry's fullUrl.
+	 * Build the {@link IdentifierKey} for an inline match URL of the form {@code Type?identifier=system|value},
+	 * or {@code null} if it isn't a single-token identifier match URL (those fall through to synthetic creation).
 	 */
-	@SuppressWarnings("unchecked")
-	private String resolveExistingEntryPlaceholderUrl(IBase theEntry) {
-		String fullUrl = myVersionAdapter.getFullUrl(theEntry);
-		if (!isBlank(fullUrl)) {
-			return fullUrl;
+	private IdentifierKey identifierKey(MatchUrlService.ResourceTypeAndSearchParameterMap theParsed) {
+		SearchParameterMap params = theParsed.searchParameterMap();
+		if (params.keySet().size() != 1 || !params.containsKey("identifier")) {
+			return null;
 		}
-		IBaseResource resource = myVersionAdapter.getResource(theEntry);
-		if (resource != null) {
-			String resourceId = resource.getIdElement().getValue();
-			if (resourceId != null && resourceId.startsWith("urn:")) {
-				return resourceId;
-			}
+		List<List<IQueryParameterType>> identifierValues = params.get("identifier");
+		if (identifierValues.size() != 1 || identifierValues.get(0).size() != 1) {
+			return null;
 		}
-		String generated = "urn:uuid:" + UUID.randomUUID();
-		myVersionAdapter.setFullUrl(theEntry, generated);
-		return generated;
+		if (!(identifierValues.get(0).get(0) instanceof TokenParam tokenParam) || isBlank(tokenParam.getValue())) {
+			return null;
+		}
+		return new IdentifierKey(
+				theParsed.resourceDefinition().getName(), tokenParam.getSystem(), tokenParam.getValue());
 	}
 
 	private void validateParsedMatchUrl(
@@ -282,4 +291,12 @@ public class InlineMatchUrlBundleSyntaxTransformerService {
 	}
 
 	private record MatchUrlInfo(String urnUuid, MatchUrlService.ResourceTypeAndSearchParameterMap parsed) {}
+
+	/** Key matching an inline match URL reference to an in-bundle entry by resource type + identifier token. */
+	private record IdentifierKey(String resourceType, String system, String value) {
+		private IdentifierKey {
+			// Normalise a blank system to null so absent/"" compare equal across resource identifiers and refs.
+			system = isBlank(system) ? null : system;
+		}
+	}
 }

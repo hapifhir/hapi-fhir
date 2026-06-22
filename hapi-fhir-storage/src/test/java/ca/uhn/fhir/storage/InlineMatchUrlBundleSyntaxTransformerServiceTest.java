@@ -7,9 +7,13 @@ import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
@@ -84,6 +88,86 @@ class InlineMatchUrlBundleSyntaxTransformerServiceTest {
 		assertNotNull(requestBundle);
 		assertNotNull(theAssertions);
 		theAssertions.accept(requestBundle);
+	}
+
+	@Test
+	void testTransform_assignsUrnUuidFullUrlToEntriesLackingOne() {
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry()
+				.setResource(new Patient().addIdentifier(new Identifier().setSystem("sys").setValue("p1")))
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl("Patient");
+		bundle.addEntry()
+				.setResource(new Observation().addIdentifier(new Identifier().setSystem("sys").setValue("o1")))
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl("Observation");
+
+		int syntheticCount = mySvc.transform(bundle);
+
+		assertThat(syntheticCount).isZero();
+		assertThat(bundle.getEntry())
+				.allSatisfy(entry -> assertThat(entry.getFullUrl()).startsWith("urn:uuid:"));
+	}
+
+	@Test
+	void testTransform_reusesUrnResourceIdAsFullUrl() {
+		String urnId = "urn:uuid:11111111-1111-1111-1111-111111111111";
+		Patient patient = new Patient();
+		patient.setId(urnId);
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry().setResource(patient).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
+
+		mySvc.transform(bundle);
+
+		assertThat(bundle.getEntryFirstRep().getFullUrl()).isEqualTo(urnId);
+	}
+
+	@Test
+	void testTransform_doesNotOverwriteExistingFullUrl() {
+		String existing = "urn:uuid:22222222-2222-2222-2222-222222222222";
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry()
+				.setFullUrl(existing)
+				.setResource(new Patient())
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl("Patient");
+
+		mySvc.transform(bundle);
+
+		assertThat(bundle.getEntryFirstRep().getFullUrl()).isEqualTo(existing);
+	}
+
+	@Test
+	void testTransform_inlineRefResolvesToExplicitInBundlePatient_noSynthetic() {
+		// An explicit (unconditional) in-bundle Patient + an Observation whose inline match URL targets that
+		// Patient's identifier should resolve to the Patient's fullUrl WITHOUT minting a synthetic conditional-create.
+		String patientFullUrl = "urn:uuid:33333333-3333-3333-3333-333333333333";
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry()
+				.setFullUrl(patientFullUrl)
+				.setResource(new Patient().addIdentifier(new Identifier().setSystem("sys").setValue("p7")))
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl("Patient");
+		bundle.addEntry()
+				.setResource(new Observation().setSubject(new Reference("Patient?identifier=sys|p7")))
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl("Observation");
+
+		int syntheticCount = mySvc.transform(bundle);
+
+		assertThat(syntheticCount).isZero();
+		assertThat(bundle.getEntry()).hasSize(2);
+		Observation obs = (Observation) bundle.getEntry().get(1).getResource();
+		assertThat(obs.getSubject().getReference()).isEqualTo(patientFullUrl);
 	}
 
 	@SafeVarargs

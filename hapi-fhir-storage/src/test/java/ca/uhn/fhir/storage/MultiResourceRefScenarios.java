@@ -382,11 +382,12 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 				bundleAssert(2, theBundle -> {
 					List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();
 
-					// Entry 0: user's Patient unchanged — fullUrl NOT assigned because resource.id is already
-					// a urn placeholder (HAPI uses it as the placeholder URI when fullUrl is absent).
+					// Entry 0: user's Patient — fullUrl is set equal to its urn resource.id (we copy the urn id
+					// into fullUrl rather than generate a new one: identity-preserving, and lets Patient ID
+					// Partition mode key on it).
 					Bundle.BundleEntryComponent patientEntry = entries.get(0);
 					assertThat(patientEntry.getResource().getResourceType()).isEqualTo(ResourceType.Patient);
-					assertThat(patientEntry.getFullUrl()).isNullOrEmpty();
+					assertThat(patientEntry.getFullUrl()).isEqualTo("urn:uuid:patient-1");
 					assertThat(patientEntry.getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.PUT);
 					assertThat(patientEntry.getRequest().getUrl()).isEqualTo("Patient?identifier=sys|val1");
 

@@ -1076,8 +1076,7 @@ public abstract class BaseTransactionProcessor {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
 					nextWriteEntryRequestPartitionId =
-							myRequestPartitionHelperService.determineCreatePartitionForRequest(
-									requestDetailsForEntry, resource, resourceType);
+							determineCreatePartitionOrAllPartitions(requestDetailsForEntry, resource, resourceType);
 					break;
 				}
 				case PUT: {
@@ -1093,9 +1092,8 @@ public abstract class BaseTransactionProcessor {
 							nextWriteEntryRequestPartitionId = theTransactionDetails.getResolvedPartition(resourceId);
 						}
 						if (nextWriteEntryRequestPartitionId == null) {
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineCreatePartitionForRequest(
-											requestDetailsForEntry, resource, resourceType);
+							nextWriteEntryRequestPartitionId = determineCreatePartitionOrAllPartitions(
+									requestDetailsForEntry, resource, resourceType);
 							if (resourceId != null) {
 								theTransactionDetails.addResolvedPartition(
 										resourceId, nextWriteEntryRequestPartitionId);
@@ -1107,6 +1105,38 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 		return nextWriteEntryRequestPartitionId;
+	}
+
+	/**
+	 * Determine the create partition for a transaction write entry, falling back to
+	 * {@link RequestPartitionId#allPartitions()} when the patient compartment can't be resolved yet — a Patient with no
+	 * client-assigned id (Msg 1321) or an unresolved patient reference (Msg 1326). These entries are re-resolved at
+	 * create time once references are concrete. Msg 1324 (multiple distinct compartments) is not deferred.
+	 */
+	private RequestPartitionId determineCreatePartitionOrAllPartitions(
+			RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType) {
+		try {
+			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
+					theRequestDetails, theResource, theResourceType);
+		} catch (MethodNotAllowedException e) {
+			if (messageContainsAnyCode(e, 1321, 1326)) {
+				return RequestPartitionId.allPartitions();
+			}
+			throw e;
+		}
+	}
+
+	private static boolean messageContainsAnyCode(Throwable theException, int... theCodes) {
+		String message = theException.getMessage();
+		if (message == null) {
+			return false;
+		}
+		for (int code : theCodes) {
+			if (message.contains(Msg.code(code))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
