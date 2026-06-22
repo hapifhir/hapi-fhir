@@ -59,10 +59,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ValidateUtil;
-import tools.jackson.core.json.JsonReadFeature;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.node.ObjectNode;
 import com.github.dnault.xmlpatch.repackaged.org.apache.commons.io.input.CountingInputStream;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -81,6 +77,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -356,9 +356,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			// JsonParser.Feature was split — ALLOW_UNQUOTED_FIELD_NAMES and ALLOW_SINGLE_QUOTES
 			// are JSON-specific, so they move to JsonReadFeature (tools.jackson.core.json).
 			JsonMapper mapper = JsonMapper.builder()
-				.enable(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES)
-				.enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
-				.build();
+					.enable(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES)
+					.enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
+					.build();
 
 			JsonNode rootNode = mapper.readTree(theParams);
 
