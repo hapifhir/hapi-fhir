@@ -699,14 +699,7 @@ public abstract class BaseTransactionProcessor {
 		 * Basically if the resource has a match URL that references a placeholder,
 		 * we try to handle the resource with the placeholder first.
 		 */
-		Set<String> placeholderIds = new HashSet<>();
-		for (IBase nextEntry : requestEntries) {
-			String fullUrl = myVersionAdapter.getFullUrl(nextEntry);
-			if (isNotBlank(fullUrl) && fullUrl.startsWith(URN_PREFIX)) {
-				placeholderIds.add(fullUrl);
-			}
-		}
-		requestEntries.sort(new TransactionSorter(placeholderIds));
+		sortEntriesIntoProcessingOrder(requestEntries);
 
 		// perform all writes
 		prepareThenExecuteTransactionWriteOperations(
@@ -1108,6 +1101,23 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
+	 * Sort transaction entries into processing order: resources whose match URL references a placeholder are handled
+	 * first, then entries are grouped by verb. Called both before processing and again after an interceptor has
+	 * mutated entries (e.g. flipped a create to an update), so the create loop stays verb-grouped. Response slot
+	 * placement is unaffected — it is keyed on the entry object, not its position.
+	 */
+	protected void sortEntriesIntoProcessingOrder(List<IBase> theEntries) {
+		Set<String> placeholderIds = new HashSet<>();
+		for (IBase nextEntry : theEntries) {
+			String fullUrl = myVersionAdapter.getFullUrl(nextEntry);
+			if (isNotBlank(fullUrl) && fullUrl.startsWith(URN_PREFIX)) {
+				placeholderIds.add(fullUrl);
+			}
+		}
+		theEntries.sort(new TransactionSorter(placeholderIds));
+	}
+
+	/**
 	 * Determine the create partition for a transaction write entry, falling back to
 	 * {@link RequestPartitionId#allPartitions()} when the patient compartment can't be resolved yet — a Patient with no
 	 * client-assigned id (Msg 1321) or an unresolved patient reference (Msg 1326). These entries are re-resolved at
@@ -1126,7 +1136,7 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
-	private static boolean messageContainsAnyCode(Throwable theException, int... theCodes) {
+	protected static boolean messageContainsAnyCode(Throwable theException, int... theCodes) {
 		String message = theException.getMessage();
 		if (message == null) {
 			return false;

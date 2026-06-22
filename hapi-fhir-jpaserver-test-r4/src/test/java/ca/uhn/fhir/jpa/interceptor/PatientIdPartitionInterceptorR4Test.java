@@ -2369,6 +2369,49 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
 				)
+			),
+			Arguments.of(
+				"explicit-id PUT to an existing patient stays SUCCESSFUL_UPDATE (must not be reconciled to a create)",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"id" : "pat1",
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ],
+									"active" : true
+								},
+								"request" : { "method" : "PUT", "url" : "Patient/pat1"}
+							}
+						]
+					}
+					""",
+				// Non-rewritten direct PUT-by-id: the OO reconciliation must leave it a plain update, not a create.
+				List.of(
+					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE, "pat1")
+				)
+			),
+			Arguments.of(
+				"explicit-id PUT with unchanged content stays a no-change update (must not be reconciled)",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"id" : "pat2",
+									"identifier" : [ { "system" : "old-sys", "value" : "ident2"} ]
+								},
+								"request" : { "method" : "PUT", "url" : "Patient/pat2"}
+							}
+						]
+					}
+					""",
+				// Identical to the stored pat2: a no-change update; the reconciliation must preserve the no-change code.
+				List.of(
+					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE, "pat2")
+				)
 			)
 		);
 	}
@@ -2392,6 +2435,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		);
 
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+		ourLog.info("Test case: {}", theComment);
 		ourLog.info("Request bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
 
 		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);

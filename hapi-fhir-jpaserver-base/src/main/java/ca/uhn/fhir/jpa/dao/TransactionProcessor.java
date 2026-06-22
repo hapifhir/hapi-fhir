@@ -52,6 +52,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
@@ -215,6 +216,21 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			if (theRequestPartitionId != null) {
 				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
+
+				// Interceptor call: STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH
+				IInterceptorBroadcaster compositeBroadcaster =
+						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)) {
+					HookParams params = new HookParams()
+							.add(List.class, theEntries)
+							.add(RequestDetails.class, theRequest)
+							.addIfMatchesType(ServletRequestDetails.class, theRequest)
+							.add(TransactionDetails.class, theTransactionDetails);
+					compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH, params);
+
+					// The hook may have flipped some creates to updates; re-group by verb for the write loop.
+					sortEntriesIntoProcessingOrder(theEntries);
+				}
 			}
 
 			return super.doTransactionWriteOperations(
@@ -741,11 +757,20 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		for (MatchUrlToResolve next : theMatchUrls) {
 			RequestPartitionId partition = RequestPartitionId.allPartitions();
 			if (myPartitionSettings.isPartitioningEnabled()) {
-				partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-						theRequestDetails,
-						next.myResourceDefinition.getName(),
-						next.myMatchUrlSearchMap,
-						next.getAssociatedResource());
+				try {
+					partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+							theRequestDetails,
+							next.myResourceDefinition.getName(),
+							next.myMatchUrlSearchMap,
+							next.getAssociatedResource());
+				} catch (MethodNotAllowedException e) {
+					// Msg 1321/1326 means the patient reference isn't resolvable yet; leave the partition as
+					// allPartitions so it falls back to the transaction partition below and the real compartment
+					// is enforced at create time.
+					if (!messageContainsAnyCode(e, 1321, 1326)) {
+						throw e;
+					}
+				}
 				if (partition.isAllPartitions()) {
 					partition = theOuterRequestPartitionId;
 				}

@@ -42,8 +42,9 @@ import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -51,20 +52,17 @@ import ca.uhn.fhir.rest.server.interceptor.InterceptorOrders;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.PreviousVersionReader;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest;
-import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.SearchParameterUtil;
-import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -771,80 +769,90 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * If we're about to process a FHIR transaction, we want to note the mappings between placeholder IDs
-	 * and their resources and stuff them into a userdata map where we can access them later. We do this
-	 * so that when we see a resource in the patient compartment (e.g. an Encounter) and it has a subject
-	 * reference that's just a placeholder ID, we can look up the target of that and figure out which
-	 * compartment that Encounter actually belongs to.
+	 * Once {@code preFetch} has resolved every conditional URL and reference target, resolve each Patient entry to a
+	 * concrete ID and substitute all in-bundle references to it. This makes compartment placement independent of the
+	 * order entries are processed in: a matched conditional Patient reuses the existing resource's ID, while an
+	 * unconditional or unmatched Patient is assigned a UUID and its create is rewritten as an update so the ID sticks.
 	 */
-	@Hook(Pointcut.STORAGE_TRANSACTION_PROCESSING)
-	public void transaction(RequestDetails theRequestDetails, IBaseBundle theBundle) {
+	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
+	public void resolvePatientReferencesAfterPreFetch(
+			List<IBase> theEntries, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		FhirTerser terser = myFhirContext.newTerser();
 
-		/*
-		 * If we have a Patient in the transaction bundle which is being POST-ed as a normal
-		 * resource "create" (i.e., it will get a server-assigned ID), we'll proactively assign it an ID here.
-		 *
-		 * This is mostly a hack to get Synthea data working, but real clients could also be
-		 * following the same pattern.
-		 */
-		List<IBase> rawEntries = new ArrayList<>(terser.getValues(theBundle, "entry", IBase.class));
-		List<BundleEntryParts> parsedEntries = BundleUtil.toListOfEntries(myFhirContext, theBundle);
-		Validate.isTrue(rawEntries.size() == parsedEntries.size(), "Parsed and raw entries don't match");
-
 		Map<String, String> idSubstitutions = new HashMap<>();
-		for (int i = 0; i < rawEntries.size(); i++) {
-			BundleEntryParts nextEntry = parsedEntries.get(i);
-			if (nextEntry.getResource() != null
-					&& myFhirContext.getResourceType(nextEntry.getResource()).equals(PATIENT_STR)) {
-				if (nextEntry.getMethod() == RequestTypeEnum.POST && isBlank(nextEntry.getConditionalUrl())) {
-					if (nextEntry.getFullUrl() != null && nextEntry.getFullUrl().startsWith("urn:uuid:")) {
-						String newId = UUID.randomUUID().toString();
-						nextEntry.getResource().setId(newId);
-						idSubstitutions.put(nextEntry.getFullUrl(), "Patient/" + newId);
+		Map<String, IBaseResource> placeholderToResource = new HashMap<>();
 
-						IBase entry = rawEntries.get(i);
-						IBase request = terser.getValues(entry, "request").get(0);
-						terser.setElement(request, "ifNoneExist", null);
-						terser.setElement(request, "method", "PUT");
-						terser.setElement(request, "url", "Patient/" + newId);
+		for (IBase entry : theEntries) {
+			String fullUrl = getEntryString(terser, entry, "fullUrl");
+			if (fullUrl == null || !fullUrl.startsWith("urn:uuid:")) {
+				continue;
+			}
+			IBaseResource resource = getEntryFirstValue(terser, entry, "resource", IBaseResource.class);
+			if (resource != null) {
+				placeholderToResource.put(fullUrl, resource);
+			}
+			if (resource == null || !PATIENT_STR.equals(myFhirContext.getResourceType(resource))) {
+				continue;
+			}
+
+			String method = getEntryString(terser, entry, "request.method");
+			String url = getEntryString(terser, entry, "request.url");
+			String matchUrl = null;
+			if ("POST".equals(method)) {
+				matchUrl = getEntryString(terser, entry, "request.ifNoneExist");
+			} else if ("PUT".equals(method) && url != null && url.contains("?")) {
+				matchUrl = url;
+			}
+
+			if (isBlank(matchUrl)) {
+				if ("POST".equals(method)) {
+					assignNewIdAndRewriteToPut(terser, entry, resource, fullUrl, idSubstitutions);
+				} else if ("PUT".equals(method) && isNotBlank(url) && !Strings.CS.equals(fullUrl, url)) {
+					idSubstitutions.put(fullUrl, url);
+				}
+			} else {
+				IResourcePersistentId<?> resolved =
+						theTransactionDetails.getResolvedMatchUrls().get(matchUrl);
+				if (resolved != null && resolved != TransactionDetails.NOT_FOUND) {
+					IIdType matchedId = theTransactionDetails.getReverseResolvedId(resolved);
+					if (matchedId != null) {
+						String matchedReference =
+								matchedId.toUnqualifiedVersionless().getValue();
+						idSubstitutions.put(fullUrl, matchedReference);
+						// A conditional PUT can't carry the matched id through the conditional path (the framework
+						// clears resolved ids), so rewrite it as a direct update. A conditional POST already NOPs
+						// to the match correctly, so it is left alone.
+						if ("PUT".equals(method)) {
+							rewriteAsDirectPut(terser, entry, resource, matchedReference);
+						}
 					}
-				} else if (nextEntry.getMethod() == RequestTypeEnum.PUT
-						&& isNotBlank(nextEntry.getFullUrl())
-						&& isNotBlank(nextEntry.getUrl())
-						&& isBlank(nextEntry.getConditionalUrl())
-						&& !Strings.CS.equals(nextEntry.getFullUrl(), nextEntry.getUrl())) {
-					idSubstitutions.put(nextEntry.getFullUrl(), nextEntry.getUrl());
+				} else {
+					assignNewIdAndRewriteToPut(terser, entry, resource, fullUrl, idSubstitutions);
 				}
 			}
+			ourLog.warn(
+					"TG-HOOK patient fullUrl={} method={} matchUrl={} -> sub={}",
+					fullUrl,
+					method,
+					matchUrl,
+					idSubstitutions.get(fullUrl));
 		}
 
 		if (!idSubstitutions.isEmpty()) {
-			for (BundleEntryParts entry : parsedEntries) {
-				IBaseResource resource = entry.getResource();
-				if (resource != null) {
-					List<ResourceReferenceInfo> references = terser.getAllResourceReferences(resource);
-					for (ResourceReferenceInfo reference : references) {
-						String referenceString = reference
-								.getResourceReference()
-								.getReferenceElement()
-								.getValue();
-						String substitution = idSubstitutions.get(referenceString);
-						if (substitution != null) {
-							reference.getResourceReference().setReference(substitution);
-						}
-					}
+			for (IBase entry : theEntries) {
+				IBaseResource resource = getEntryFirstValue(terser, entry, "resource", IBaseResource.class);
+				if (resource == null) {
+					continue;
 				}
-			}
-		}
-
-		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(myFhirContext, theBundle);
-		Map<String, IBaseResource> placeholderToResource = new HashMap<>();
-		for (BundleEntryParts nextEntry : entries) {
-			String fullUrl = nextEntry.getFullUrl();
-			if (fullUrl != null && fullUrl.startsWith("urn:uuid:")) {
-				if (nextEntry.getResource() != null) {
-					placeholderToResource.put(fullUrl, nextEntry.getResource());
+				for (ResourceReferenceInfo reference : terser.getAllResourceReferences(resource)) {
+					String referenceString = reference
+							.getResourceReference()
+							.getReferenceElement()
+							.getValue();
+					String substitution = idSubstitutions.get(referenceString);
+					if (substitution != null) {
+						reference.getResourceReference().setReference(substitution);
+					}
 				}
 			}
 		}
@@ -852,6 +860,36 @@ public class PatientIdPartitionInterceptor {
 		if (theRequestDetails != null) {
 			theRequestDetails.getUserData().put(PLACEHOLDER_TO_REFERENCE_KEY, placeholderToResource);
 		}
+	}
+
+	private void assignNewIdAndRewriteToPut(
+			FhirTerser terser,
+			IBase entry,
+			IBaseResource resource,
+			String fullUrl,
+			Map<String, String> idSubstitutions) {
+		String newReference = "Patient/" + UUID.randomUUID();
+		idSubstitutions.put(fullUrl, newReference);
+		rewriteAsDirectPut(terser, entry, resource, newReference);
+	}
+
+	private void rewriteAsDirectPut(FhirTerser terser, IBase entry, IBaseResource resource, String theReference) {
+		resource.setId(theReference);
+		IBase request = terser.getValues(entry, "request").get(0);
+		terser.setElement(request, "ifNoneExist", null);
+		terser.setElement(request, "method", "PUT");
+		terser.setElement(request, "url", theReference);
+	}
+
+	@SuppressWarnings("rawtypes")
+	private String getEntryString(FhirTerser terser, IBase entry, String path) {
+		List<IPrimitiveType> values = terser.getValues(entry, path, IPrimitiveType.class);
+		return values.isEmpty() ? null : values.get(0).getValueAsString();
+	}
+
+	private <T extends IBase> T getEntryFirstValue(FhirTerser terser, IBase entry, String path, Class<T> type) {
+		List<T> values = terser.getValues(entry, path, type);
+		return values.isEmpty() ? null : values.get(0);
 	}
 
 	@SuppressWarnings("SameParameterValue")
