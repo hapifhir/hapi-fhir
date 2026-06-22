@@ -454,7 +454,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 	private static String toJson(Object theRequest) {
 		try {
-			return new ObjectMapper().writer().writeValueAsString(theRequest);
+			return new JsonMapper().writer().writeValueAsString(theRequest);
 		} catch (JacksonException theE) {
 			throw new AssertionError("Failure during serialization: " + theE);
 		}

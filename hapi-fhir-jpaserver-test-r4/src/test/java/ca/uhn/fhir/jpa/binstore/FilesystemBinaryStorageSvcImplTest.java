@@ -11,7 +11,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.databind.SerializationFeature;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -64,10 +64,11 @@ public class FilesystemBinaryStorageSvcImplTest {
 			"  \"published\" : \"2024-07-20T00:12:28.187+05:30\"\n" +
 			"}";
 
-		ObjectMapper myJsonSerializer;
-		myJsonSerializer = new ObjectMapper();
-		myJsonSerializer.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		myJsonSerializer.enable(SerializationFeature.INDENT_OUTPUT);
+		JsonMapper myJsonSerializer = JsonMapper.builder()
+			.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
+				.withContentInclusion(JsonInclude.Include.NON_NULL))
+			.enable(SerializationFeature.INDENT_OUTPUT)
+			.build();
 
 		StoredDetails storedDetails = myJsonSerializer.readValue(oldDescriptor, StoredDetails.class);
 		assertTrue(storedDetails.getBinaryContentId().equals(blobId));;
