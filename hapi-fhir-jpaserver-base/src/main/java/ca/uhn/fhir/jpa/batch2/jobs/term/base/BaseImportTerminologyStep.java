@@ -27,8 +27,7 @@ import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
 
 public abstract class BaseImportTerminologyStep {
 
@@ -57,7 +56,7 @@ public abstract class BaseImportTerminologyStep {
 		try {
 			jobMetadata = JsonUtil.deserialize(
 					jobMetadataAttachment.getInputStream(), ImportTerminologyMetadataAttachmentJson.class);
-		} catch (IOException e) {
+		} catch (JacksonException e) {
 			throw new JobExecutionFailedException(Msg.code(2940) + "Failed to retrieve job metadata attachment: " + e);
 		}
 		return jobMetadata;
