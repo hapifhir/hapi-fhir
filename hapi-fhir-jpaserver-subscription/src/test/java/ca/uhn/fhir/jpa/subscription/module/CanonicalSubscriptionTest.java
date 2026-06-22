@@ -137,7 +137,7 @@ public class CanonicalSubscriptionTest {
 	@Test
 	public void testLegacyCanonicalSubscription() throws JacksonException {
 		String legacyCanonical = "{\"headers\":{\"retryCount\":0,\"customHeaders\":{}},\"payload\":{\"canonicalSubscription\":{\"extensions\":{\"key1\":[\"VALUE1\"],\"key2\":[\"VALUE2a\",\"VALUE2b\"]},\"sendDeleteMessages\":false},\"partitionId\":{\"allPartitions\":false,\"partitionIds\":[null]}}}";
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = JsonMapper.builder().build();
 		ResourceDeliveryJsonMessage resourceDeliveryMessage = mapper.readValue(legacyCanonical, ResourceDeliveryJsonMessage.class);
 
 		CanonicalSubscription payload = resourceDeliveryMessage.getPayload().getSubscription();
@@ -167,7 +167,7 @@ public class CanonicalSubscriptionTest {
 		resourceDeliveryMessage.setPayload(new ResourceDeliveryMessage());
 		resourceDeliveryMessage.getPayload().setSubscription(theSubscription);
 
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = JsonMapper.builder().build();
 		String serialized = mapper.writeValueAsString(resourceDeliveryMessage);
 		resourceDeliveryMessage = mapper.readValue(serialized, ResourceDeliveryJsonMessage.class);
 

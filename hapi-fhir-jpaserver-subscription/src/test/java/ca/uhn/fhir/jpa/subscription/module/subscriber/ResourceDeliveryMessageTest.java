@@ -14,11 +14,12 @@ public class ResourceDeliveryMessageTest {
 	@Test
 	public void testAdditionalProperties() throws IOException {
 		ResourceDeliveryMessage msg = new ResourceDeliveryMessage();
+		JsonMapper mapper = JsonMapper.builder().build();
 		msg.setAttribute("foo1", "bar");
 		msg.setAttribute("foo2", "baz");
-		String encoded = new ObjectMapper().writeValueAsString(msg);
+		String encoded = mapper.writeValueAsString(msg);
 
-		msg = new ObjectMapper().readValue(encoded, ResourceDeliveryMessage.class);
+		msg = mapper.readValue(encoded, ResourceDeliveryMessage.class);
 		assertThat(msg.getAttribute("foo1")).contains("bar");
 		assertThat(msg.getAttribute("foo2")).contains("baz");
 		assertEquals(false, msg.getAttribute("foo3").isPresent());
