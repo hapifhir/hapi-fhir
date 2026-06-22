@@ -59,7 +59,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ValidateUtil;
-import tools.jackson.core.JsonParser;
+import tools.jackson.core.json.JsonReadFeature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
@@ -352,14 +352,18 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	private String originalRequestUrlTruncation(String theParams) {
 		try {
-			JsonMapper mapper = new JsonMapper();
-			mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-			mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+			// Jackson 3: ObjectMapper is immutable; use format-specific JsonMapper via its builder.
+			// JsonParser.Feature was split — ALLOW_UNQUOTED_FIELD_NAMES and ALLOW_SINGLE_QUOTES
+			// are JSON-specific, so they move to JsonReadFeature (tools.jackson.core.json).
+			JsonMapper mapper = JsonMapper.builder()
+				.enable(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES)
+				.enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
+				.build();
+
 			JsonNode rootNode = mapper.readTree(theParams);
+
 			String originalUrl = "originalRequestUrl";
-
 			if (rootNode instanceof ObjectNode objectNode) {
-
 				if (objectNode.has(originalUrl)) {
 					String url = objectNode.get(originalUrl).asText();
 					if (url.contains("?")) {
@@ -369,6 +373,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				return mapper.writeValueAsString(objectNode);
 			}
 		} catch (Exception e) {
+			// JacksonException is now unchecked (extends RuntimeException) in Jackson 3,
+			// but catch(Exception e) still covers it — no change needed here.
 			ourLog.info("Error Truncating Original Request Url", e);
 		}
 		return null;
