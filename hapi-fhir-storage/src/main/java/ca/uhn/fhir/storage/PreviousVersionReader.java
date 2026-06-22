@@ -61,10 +61,7 @@ public class PreviousVersionReader<T extends IBaseResource> {
 		}
 		long previousVersion = currentVersion - 1L;
 		IIdType previousId = theResource.getIdElement().withVersion(Long.toString(previousVersion));
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		if (thePartitionId != null) {
-			requestDetails.setRequestPartitionId(thePartitionId);
-		}
+		SystemRequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(thePartitionId);
 		try {
 			return Optional.ofNullable(myDao.read(previousId, requestDetails, theDeletedOk));
 		} catch (ResourceGoneException e) {
