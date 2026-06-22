@@ -287,32 +287,27 @@ class SearchParameterUtilTest {
 
 	// Created by Claude Fable 5
 	/**
-	 * Closed-world contract for {@link SearchParameterUtil#getMembershipCompartmentsForSearchParameter}:
-	 * for every search parameter on every resource type in every buildable FHIR context, the function
-	 * must never return a compartment that the {@code @SearchParamDefinition} annotation does not
-	 * declare in {@code providesMembershipIn} — with exactly one allowed exception, the "patient"
-	 * alias rule (GL-8718), and only when that addition is justified by one of:
+	 * Broad, version-agnostic guard on {@link SearchParameterUtil#getMembershipCompartmentsForSearchParameter}.
+	 * For every search parameter on every resource type in every buildable FHIR context it asserts three
+	 * invariants whose expectations come from the {@code @SearchParamDefinition} annotations (the FHIR
+	 * spec), NOT from re-running the rule under test:
 	 *
 	 * <ul>
-	 *   <li><b>Device special case</b>: path is exactly {@code Device.patient} (deliberate spec
-	 *       override, hapi-fhir issue #6536);</li>
-	 *   <li><b>Narrowed or aliased base SP</b>: the patient SP covers the same field as another SP
-	 *       on the same resource — either narrowing it (a segment of its path equals
-	 *       {@code <base path>.where(resolve() is Patient)}, e.g. Observation.patient narrows
-	 *       Observation.subject) or aliasing it exactly (identical path segment, e.g. R5
-	 *       Coverage.patient aliases Coverage.beneficiary) — and that base SP itself declares
-	 *       Patient compartment membership.</li>
+	 *   <li><b>No-drop</b>: a reference-type SP never loses a compartment it declares in
+	 *       {@code providesMembershipIn}.</li>
+	 *   <li><b>Only-Patient</b>: anything HAPI adds beyond the spec-declared compartments is exactly
+	 *       {@code {Patient}} and nothing else.</li>
+	 *   <li><b>Only-patient-named / omit</b>: only a SP named {@code patient} may gain that addition,
+	 *       and never one excluded via
+	 *       {@link SearchParameterUtil#RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT}
+	 *       (e.g. List.patient, hapi-fhir issue #7118).</li>
 	 * </ul>
 	 *
-	 * and never when the resource's "patient" SP is security-excluded via
-	 * {@link SearchParameterUtil#RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT}
-	 * (e.g. List.patient, hapi-fhir issue #7118).
-	 *
-	 * <p>This catches over-adds such as: weakening the {@code .where(resolve() is Patient)} path
-	 * gate, or a future resource whose patient SP narrows a non-member base SP while an unrelated
-	 * SP on the same resource provides Patient membership.
-	 *
-	 * <p>Declared memberships must also never be dropped for reference-type SPs.
+	 * <p>This bounds the blast radius of any change (no non-Patient compartment added, no non-patient
+	 * SP affected, omit respected). It deliberately does NOT verify that a given {@code patient} SP's
+	 * Patient membership is itself <em>correct</em> for that resource — doing so would mean
+	 * re-implementing the production rule in the test. That correctness is checked independently, with
+	 * hand-derived expected values, by {@link #testPatientSpPatientCompartmentMembership}.
 	 */
 	@ParameterizedTest
 	@MethodSource("allBuildableFhirContexts")
@@ -371,25 +366,12 @@ class SearchParameterUtilTest {
 						resourceName, sp.name(), fhirVersion, compartmentsAddedByHapi)
 					.containsExactly("Patient");
 
-				if (sp.name().equals("patient")) {
-					// Special case for Device.patient, as per https://github.com/hapifhir/hapi-fhir/issues/6536
-					if ("Device.patient".equals(sp.path())) {
-						continue;
-					}
-
-					// Else, the "patient" SP addition to the Patient Compartment is justified, because
-					// 1) it is already part of the patient compartment OR
-					// 2) it's an "alias" SP (Eg: path = resource.base.where(resolve() is Patient)) where resource.base is
-					//    already in the Patient Compartment
-					softly.assertThat(isPatientSpCompartmentMembershipJustifiedByBaseSp(resourceName, resourceClass, sp))
-						.as("SP %s.%s for FHIR version %s - compartment membership %s is not provided by the " +
-								"FHIR spec via 'providesMembershipIn' AND is not a justified patient-alias addition",
-							resourceName, sp.name(), fhirVersion, compartmentsAddedByHapi)
-						.isTrue();
-
-				} else {
-					// HAPI code should only add the "patient" SP, and nothing else.
-					softly.fail("SP %s.%s for FHIR version %s - HAPI code added this SP to the %s compartment.",
+				// Only a SP named "patient" may gain Patient compartment membership. Whether that
+				// membership is correct for this specific resource is verified independently, with
+				// hand-derived expectations, by testPatientSpPatientCompartmentMembership — we do not
+				// re-derive the production rule here.
+				if (!sp.name().equals("patient")) {
+					softly.fail("SP %s.%s for FHIR version %s - HAPI code added this non-patient SP to the %s compartment.",
 						resourceName, sp.name(), fhirVersion, compartmentsAddedByHapi);
 				}
 			}
@@ -407,48 +389,69 @@ class SearchParameterUtilTest {
 			.collect(Collectors.toSet());
 	}
 
-	/**
-	 * True if {@code thePatientSp} covers the same field as another SP on the same resource that
-	 * itself declares Patient compartment membership. Two forms (segments of pipe-delimited paths
-	 * are compared individually, restricted to segments of this resource):
-	 * <ul>
-	 *   <li><b>Narrowing</b>: a patient-SP segment equals a base-SP segment suffixed with
-	 *       {@code .where(resolve() is Patient)} (e.g. Observation.patient vs Observation.subject);</li>
-	 *   <li><b>Exact alias</b>: a patient-SP segment equals a base-SP segment verbatim (e.g. R5
-	 *       Coverage.patient and Coverage.beneficiary both have path {@code Coverage.beneficiary};
-	 *       R5 DeviceAssociation.patient and DeviceAssociation.subject share the identical
-	 *       where-clause path).</li>
-	 * </ul>
-	 */
-	private static boolean isPatientSpCompartmentMembershipJustifiedByBaseSp(
-			String theResourceName, Class<? extends IBase> theResourceClass, SearchParamDefinition thePatientSp) {
-		Set<String> patientPathSegments = getResourceSpecificPaths(theResourceName, thePatientSp.path());
-		return Arrays.stream(theResourceClass.getFields())
-			.map(f -> f.getAnnotation(SearchParamDefinition.class))
-			//all sps of res type
-			.filter(spd -> spd != null && !"patient".equalsIgnoreCase(spd.name()))
-			// non null + not the patient SP
-			.filter(spd -> getDeclaredCompartmentNames(spd).contains("Patient"))
-			// filter by spd's that declare patient compartment membership
-			.flatMap(spd -> getResourceSpecificPaths(theResourceName, spd.path()).stream())
-			// of those, split spd.path to list of paths
-			// then path must be of type alias (base+resolve) OR patient SP path contains the base
-			// Ensure that the patient SP path is narrowing alias SP for an existing "base SP"
-			// that already declares patient compartment membership per the FHIR spec
-			.anyMatch(pathsDeclaringPatientCompMembership ->
-				patientPathSegments.contains(pathsDeclaringPatientCompMembership + ".where(resolve() is Patient)")
-					|| patientPathSegments.contains(pathsDeclaringPatientCompMembership));
+	// Created by Claude Fable 5
+	static Stream<Arguments> patientSpCompartmentExpectations() {
+		// Hand-derived expectations (from the FHIR spec / GL-8718 reasoning), NOT recomputed by the
+		// production rule. The NEGATIVE rows are the load-bearing ones: they trip if a refactor
+		// over-broadens the rule (e.g. "add every patient SP to the Patient compartment").
+		return Stream.of(
+			// Negatives — must NOT be in the Patient compartment.
+			// R5 SupplyRequest.patient maps to SupplyRequest.deliverFor; the only Patient-member base SP
+			// is "subject" (path SupplyRequest.deliverTo), a DIFFERENT field — so it must stay out.
+			Arguments.of(FhirVersionEnum.R5, "SupplyRequest", false),
+			// List.patient is security-excluded via the OMIT map (hapi-fhir issue #7118).
+			Arguments.of(FhirVersionEnum.R4, "List", false),
+			Arguments.of(FhirVersionEnum.R5, "List", false),
+
+			// Positives — must be in the Patient compartment.
+			// Observation.patient narrows Observation.subject (a Patient-member base SP).
+			Arguments.of(FhirVersionEnum.R4, "Observation", true),
+			Arguments.of(FhirVersionEnum.R5, "Observation", true),
+			// R5 Coverage.patient is an exact alias of Coverage.beneficiary (a Patient-member base SP).
+			Arguments.of(FhirVersionEnum.R5, "Coverage", true),
+			// Device.patient is a deliberate special case (hapi-fhir issue #6536).
+			Arguments.of(FhirVersionEnum.R4, "Device", true)
+		);
 	}
 
 	/**
-	 * Calling path() on a SP that applies to multiple resources may have a pipe-delimited list of paths
-	 * Splits this path into segments, and return only the path for the input resource type.
+	 * Independent example-based check of the GL-8718 alias rule: for a hand-picked set of resources,
+	 * assert whether their {@code patient} SP is in the Patient compartment, using expected values
+	 * derived from the FHIR spec — not recomputed by the production algorithm. This is what guards
+	 * against an accidental over-broadening of the rule during a refactor (the negative rows flip),
+	 * complementing the broad invariants in
+	 * {@link #testCompartmentMembershipMatchesAnnotationsForEverySearchParam}.
+	 *
+	 * <p>Asserts against {@code getMembershipCompartmentsForSearchParameter} directly rather than
+	 * {@code getSearchParamsForCompartmentName}, whose separate path-similarity propagation can
+	 * independently surface {@code List.patient} and would obscure what this test checks.
 	 */
-	private static Set<String> getResourceSpecificPaths(String theResourceName, String thePath) {
-		return Arrays.stream(thePath.split("\\|"))
-			.map(String::trim)
-			.filter(segment -> segment.startsWith(theResourceName + "."))
-			.collect(Collectors.toSet());
+	@ParameterizedTest
+	@MethodSource("patientSpCompartmentExpectations")
+	void testPatientSpPatientCompartmentMembership(
+			FhirVersionEnum theFhirVersion, String theResourceType, boolean theExpectedInPatientCompartment) {
+		FhirContext ctx = FhirContext.forCached(theFhirVersion);
+		@SuppressWarnings("unchecked")
+		Class<? extends IBase> resourceClass =
+			ctx.getResourceDefinition(theResourceType).getImplementingClass();
+
+		SearchParamDefinition patientSp = null;
+		for (Field field : resourceClass.getFields()) {
+			SearchParamDefinition spd = field.getAnnotation(SearchParamDefinition.class);
+			if (spd != null && "patient".equalsIgnoreCase(spd.name())) {
+				patientSp = spd;
+				break;
+			}
+		}
+		assertThat(patientSp)
+			.as("%s %s should have a 'patient' search parameter", theFhirVersion, theResourceType)
+			.isNotNull();
+
+		Set<String> membership =
+			SearchParameterUtil.getMembershipCompartmentsForSearchParameter(resourceClass, patientSp);
+		assertThat(membership.contains("Patient"))
+			.as("%s %s.patient (path=%s) in Patient compartment", theFhirVersion, theResourceType, patientSp.path())
+			.isEqualTo(theExpectedInPatientCompartment);
 	}
 
 	// Created by claude-sonnet-4-6
