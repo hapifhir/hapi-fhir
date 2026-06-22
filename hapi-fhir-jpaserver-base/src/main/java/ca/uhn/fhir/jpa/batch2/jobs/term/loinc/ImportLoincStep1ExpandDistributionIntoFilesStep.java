@@ -45,7 +45,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.function.Supplier;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_FINALIZE_IMPORT;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL;
 
@@ -73,7 +73,7 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
 			IJobDataSink<TerminologyFileSetJson> theDataSink,
 			MyContext theContext,
-			String theFileName,
+			String theSingleFileName,
 			Supplier<InputStream> theInputStreamSupplier,
 			ImportTerminologyJobParameters theJobParameters,
 			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
@@ -82,12 +82,12 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 				theStepExecutionDetails,
 				theDataSink,
 				theContext,
-				theFileName,
+				theSingleFileName,
 				theInputStreamSupplier,
 				theJobParameters,
 				theJobMetadataAttachment);
 
-		if (theFileName.endsWith("loinc.xml")) {
+		if (theSingleFileName.endsWith("loinc.xml")) {
 			theContext.incrementLoincXmlCount();
 			handleLoincXml(theInputStreamSupplier, theJobMetadataAttachment);
 		}

@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.icd.icd10.ImportIcd10Step2HandleConcepts.ICD10_XML_FILENAME;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +41,7 @@ class TerminologyLoaderSvcIcd10JpaTest extends BaseJpaR4Test {
 			assertEquals(2, myTermCodeSystemVersionDao.count());
 			assertEquals(0, myTermValueSetDao.count());
 			assertEquals(0, myTermConceptMapDao.count());
-			assertEquals(1, myResourceTableDao.count());
+			assertEquals(1, myResourceTableDao.count(), () -> myResourceTableDao.findAll().stream().map(t -> "\n * " + t.toString()).collect(Collectors.joining("\n * ")));
 			assertEquals(13, myTermConceptDao.count());
 			assertEquals(12, myTermConceptParentChildLinkDao.count());
 

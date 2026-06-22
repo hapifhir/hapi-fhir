@@ -43,7 +43,7 @@ class ImportLoincStep14GroupTermsFileTest extends BaseImportLoincStepTest{
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, never()).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, never()).addCodeSystemConcepts(any(), myCodeSystemCaptor.capture());
 
 		verify(myDataSink, times(1)).acceptForFutureStep(myStepIdCaptor.capture(), myFileSetCaptor.capture());
 		assertThat(renderEmittedChunks()).containsExactly(
