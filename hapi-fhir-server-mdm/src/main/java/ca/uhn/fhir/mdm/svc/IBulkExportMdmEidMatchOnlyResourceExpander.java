@@ -19,9 +19,19 @@
  */
 package ca.uhn.fhir.mdm.svc;
 
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public interface IBulkExportMdmEidMatchOnlyResourceExpander<T extends IResourcePersistentId>
 		extends IBulkExportMdmResourceExpander<T> {
-	// marker interface
+
+	/**
+	 * Sets the MDM settings on this expander. The settings determine whether group/patient member
+	 * expansion should search across all partitions (when {@link IMdmSettings#getSearchAllPartitionForMatch()}
+	 * is enabled) rather than only the resolved request partition. This is required because EID-match-only
+	 * members may live on partitions other than the Group's own partition.
+	 *
+	 * @param theMdmSettings the MDM settings to apply
+	 */
+	void setMdmSettings(IMdmSettings theMdmSettings);
 }
