@@ -2072,6 +2072,8 @@ public enum Pointcut implements IPointcut {
 	 * <li>java.util.List - The list of bundle entries being processed, in processing order</li>
 	 * <li>ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter - The version adapter for reading and mutating the
 	 * bundle's entries in a FHIR-version-agnostic way.</li>
+	 * <li>ca.uhn.fhir.jpa.api.config.JpaStorageSettings - The active storage settings, so hooks can honor configuration
+	 * such as the server resource ID strategy when assigning IDs.</li>
 	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
 	 * processed.</li>
 	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
@@ -2088,6 +2090,7 @@ public enum Pointcut implements IPointcut {
 			void.class,
 			"java.util.List",
 			"ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter",
+			"ca.uhn.fhir.jpa.api.config.JpaStorageSettings",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),

@@ -32,6 +32,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -750,8 +751,15 @@ public class PatientIdPartitionInterceptor {
 	public void resolvePatientReferencesAfterPreFetch(
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			JpaStorageSettings theStorageSettings,
 			TransactionDetails theTransactionDetails) {
 		FhirTerser terser = myFhirContext.newTerser();
+
+		// A placeholder Patient (urn:uuid id, no client id) can only be assigned a server id up front when the server
+		// assigns UUIDs; otherwise its id isn't known until insert, too late for compartment routing. In that case we
+		// leave the entry untouched so identifyForCreate throws the documented Msg 1321 (unsupported configuration).
+		boolean serverAssignsUuids =
+				theStorageSettings.getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID;
 
 		Map<String, String> idSubstitutions = new HashMap<>();
 		Map<String, RewrittenOutcome> rewrittenOutcomes =
@@ -778,9 +786,12 @@ public class PatientIdPartitionInterceptor {
 
 			if (isBlank(matchUrl)) {
 				if ("POST".equals(method)) {
-					String newReference =
-							assignNewIdAndRewriteToPut(theVersionAdapter, entry, resource, fullUrl, idSubstitutions);
-					rewrittenOutcomes.put(newReference, new RewrittenOutcome(RewriteIntent.UNCONDITIONAL_CREATE, null));
+					if (serverAssignsUuids) {
+						String newReference = assignNewIdAndRewriteToPut(
+								theVersionAdapter, entry, resource, fullUrl, idSubstitutions);
+						rewrittenOutcomes.put(
+								newReference, new RewrittenOutcome(RewriteIntent.UNCONDITIONAL_CREATE, null));
+					}
 				} else if ("PUT".equals(method) && isNotBlank(url) && !Strings.CS.equals(fullUrl, url)) {
 					idSubstitutions.put(fullUrl, url);
 				}
@@ -803,7 +814,7 @@ public class PatientIdPartitionInterceptor {
 									new RewrittenOutcome(RewriteIntent.CONDITIONAL_UPDATE_MATCHED, matchUrl));
 						}
 					}
-				} else {
+				} else if (serverAssignsUuids) {
 					String newReference =
 							assignNewIdAndRewriteToPut(theVersionAdapter, entry, resource, fullUrl, idSubstitutions);
 					RewriteIntent intent = "POST".equals(method)

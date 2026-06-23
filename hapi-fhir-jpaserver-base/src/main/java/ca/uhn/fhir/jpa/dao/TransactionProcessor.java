@@ -224,6 +224,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					HookParams params = new HookParams()
 							.add(List.class, theEntries)
 							.add(ITransactionProcessorVersionAdapter.class, versionAdapter)
+							.add(JpaStorageSettings.class, myStorageSettings)
 							.add(RequestDetails.class, theRequest)
 							.addIfMatchesType(ServletRequestDetails.class, theRequest)
 							.add(TransactionDetails.class, theTransactionDetails);
