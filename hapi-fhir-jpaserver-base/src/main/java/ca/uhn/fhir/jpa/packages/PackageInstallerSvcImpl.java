@@ -73,7 +73,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
@@ -1213,7 +1212,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		final String missingUrlOrIdentifierError =
 				"Resources in a package must have a url or identifier to be loaded by the package installer.";
 		FhirTerser terser = myFhirContext.newTerser();
-		IBase identifier = (Identifier) terser.getSingleValueOrNull(theResource, "identifier");
+		IBase identifier = (IBase) terser.getSingleValueOrNull(theResource, "identifier");
 		if (identifier == null) {
 			throw new ImplementationGuideInstallationException(Msg.code(1292) + missingUrlOrIdentifierError);
 		}
