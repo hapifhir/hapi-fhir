@@ -731,6 +731,17 @@ public abstract class BaseTransactionProcessor {
 			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 		}
 
+		// Interceptor broadcast: STORAGE_TRANSACTION_WRITE_AFTER_RESPONSE
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_RESPONSE)) {
+			HookParams params = new HookParams()
+					.add(IBaseBundle.class, response)
+					.add(ITransactionProcessorVersionAdapter.class, myVersionAdapter)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(TransactionDetails.class, theTransactionDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_RESPONSE, params);
+		}
+
 		return response;
 	}
 

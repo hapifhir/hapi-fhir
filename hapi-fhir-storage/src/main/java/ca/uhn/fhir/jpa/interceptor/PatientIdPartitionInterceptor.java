@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -34,12 +35,15 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
+import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -55,15 +59,19 @@ import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetReque
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -112,6 +120,31 @@ public class PatientIdPartitionInterceptor {
 			PatientIdPartitionInterceptor.class.getName() + "_placeholderToResource";
 	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdPartitionInterceptor.class);
 	private static final String PATIENT_STR = "Patient";
+
+	/**
+	 * {@link TransactionDetails} user-data key under which {@link #resolvePatientReferencesAfterPreFetch} records the
+	 * {@link RewrittenOutcome}s it applied (keyed by the resulting {@code Patient/id}), so
+	 * {@link #restoreRewrittenPatientOutcomes} can restore the outcome the caller's original request implied.
+	 */
+	private static final String REWRITTEN_OUTCOMES_KEY =
+			PatientIdPartitionInterceptor.class.getName() + "_rewrittenOutcomes";
+
+	/**
+	 * How a Patient entry's verb was rewritten, so the original outcome code can be restored once the rewritten verb
+	 * has been processed.
+	 */
+	private enum RewriteIntent {
+		UNCONDITIONAL_CREATE,
+		CONDITIONAL_CREATE_NO_MATCH,
+		CONDITIONAL_UPDATE_NO_MATCH,
+		CONDITIONAL_UPDATE_MATCHED
+	}
+
+	/**
+	 * @param conditionalUrl the original conditional match URL, needed to render the outcome message; null for
+	 *                       {@link RewriteIntent#UNCONDITIONAL_CREATE}.
+	 */
+	private record RewrittenOutcome(RewriteIntent intent, String conditionalUrl) {}
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -781,6 +814,8 @@ public class PatientIdPartitionInterceptor {
 
 		Map<String, String> idSubstitutions = new HashMap<>();
 		Map<String, IBaseResource> placeholderToResource = new HashMap<>();
+		Map<String, RewrittenOutcome> rewrittenOutcomes =
+				theTransactionDetails.getOrCreateUserData(REWRITTEN_OUTCOMES_KEY, HashMap::new);
 
 		for (IBase entry : theEntries) {
 			String fullUrl = getEntryString(terser, entry, "fullUrl");
@@ -806,7 +841,8 @@ public class PatientIdPartitionInterceptor {
 
 			if (isBlank(matchUrl)) {
 				if ("POST".equals(method)) {
-					assignNewIdAndRewriteToPut(terser, entry, resource, fullUrl, idSubstitutions);
+					String newReference = assignNewIdAndRewriteToPut(terser, entry, resource, fullUrl, idSubstitutions);
+					rewrittenOutcomes.put(newReference, new RewrittenOutcome(RewriteIntent.UNCONDITIONAL_CREATE, null));
 				} else if ("PUT".equals(method) && isNotBlank(url) && !Strings.CS.equals(fullUrl, url)) {
 					idSubstitutions.put(fullUrl, url);
 				}
@@ -824,10 +860,17 @@ public class PatientIdPartitionInterceptor {
 						// to the match correctly, so it is left alone.
 						if ("PUT".equals(method)) {
 							rewriteAsDirectPut(terser, entry, resource, matchedReference);
+							rewrittenOutcomes.put(
+									matchedReference,
+									new RewrittenOutcome(RewriteIntent.CONDITIONAL_UPDATE_MATCHED, matchUrl));
 						}
 					}
 				} else {
-					assignNewIdAndRewriteToPut(terser, entry, resource, fullUrl, idSubstitutions);
+					String newReference = assignNewIdAndRewriteToPut(terser, entry, resource, fullUrl, idSubstitutions);
+					RewriteIntent intent = "POST".equals(method)
+							? RewriteIntent.CONDITIONAL_CREATE_NO_MATCH
+							: RewriteIntent.CONDITIONAL_UPDATE_NO_MATCH;
+					rewrittenOutcomes.put(newReference, new RewrittenOutcome(intent, matchUrl));
 				}
 			}
 			ourLog.warn(
@@ -862,7 +905,91 @@ public class PatientIdPartitionInterceptor {
 		}
 	}
 
-	private void assignNewIdAndRewriteToPut(
+	/**
+	 * Once the transaction has been processed, restore the operation outcome each rewritten Patient entry would have
+	 * had if {@link #resolvePatientReferencesAfterPreFetch} hadn't rewritten its verb to make compartment placement
+	 * order-independent. For a matched conditional update the live no-change flag is preserved, since that is the only
+	 * rewrite that can legitimately come back unchanged.
+	 */
+	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_RESPONSE)
+	public void restoreRewrittenPatientOutcomes(
+			IBaseBundle theResponse,
+			ITransactionProcessorVersionAdapter theVersionAdapter,
+			TransactionDetails theTransactionDetails) {
+		Map<String, RewrittenOutcome> rewrittenOutcomes = theTransactionDetails.getUserData(REWRITTEN_OUTCOMES_KEY);
+		if (rewrittenOutcomes == null || rewrittenOutcomes.isEmpty()) {
+			return;
+		}
+
+		FhirTerser terser = myFhirContext.newTerser();
+		List<IBase> entries = theVersionAdapter.getEntries(theResponse);
+		for (IBase entry : entries) {
+			String location = getEntryString(terser, entry, "response.location");
+			if (isBlank(location)) {
+				continue;
+			}
+			String reference = new IdDt(location).toUnqualifiedVersionless().getValue();
+			RewrittenOutcome rewrite = rewrittenOutcomes.get(reference);
+			if (rewrite == null) {
+				continue;
+			}
+
+			StorageResponseCodeEnum code = restoredOutcomeCode(rewrite, entry, terser);
+			IBaseOperationOutcome outcome = OperationOutcomeUtil.createOperationOutcome(
+					OperationOutcomeUtil.OO_SEVERITY_INFO,
+					restoredOutcomeMessage(code, reference, rewrite.conditionalUrl()),
+					OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL,
+					myFhirContext,
+					code);
+			theVersionAdapter.setResponseOutcome(entry, outcome);
+		}
+	}
+
+	private StorageResponseCodeEnum restoredOutcomeCode(
+			RewrittenOutcome theRewrite, IBase theEntry, FhirTerser theTerser) {
+		return switch (theRewrite.intent()) {
+			case UNCONDITIONAL_CREATE -> StorageResponseCodeEnum.SUCCESSFUL_CREATE;
+			case CONDITIONAL_CREATE_NO_MATCH -> StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH;
+			case CONDITIONAL_UPDATE_NO_MATCH -> StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH;
+			case CONDITIONAL_UPDATE_MATCHED -> isLiveOutcomeNoChange(theEntry, theTerser)
+					? StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE
+					: StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH;
+		};
+	}
+
+	private boolean isLiveOutcomeNoChange(IBase theEntry, FhirTerser theTerser) {
+		for (IBase issue : theTerser.getValues(theEntry, "response.outcome.issue")) {
+			String system = theTerser.getSinglePrimitiveValueOrNull(issue, "details.coding.system");
+			if (StorageResponseCodeEnum.SYSTEM.equals(system)) {
+				String code = theTerser.getSinglePrimitiveValueOrNull(issue, "details.coding.code");
+				if (isNotBlank(code)) {
+					return StorageResponseCodeEnum.valueOf(code).isNoChange();
+				}
+			}
+		}
+		return false;
+	}
+
+	private String restoredOutcomeMessage(StorageResponseCodeEnum theCode, String theId, String theConditionalUrl) {
+		HapiLocalizer localizer = myFhirContext.getLocalizer();
+		return switch (theCode) {
+			case SUCCESSFUL_CREATE -> localizer.getMessageSanitized(BaseStorageDao.class, "successfulCreate", theId);
+			case SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH -> localizer.getMessageSanitized(
+					BaseStorageDao.class,
+					"successfulCreateConditionalNoMatch",
+					theId,
+					UrlUtil.sanitizeUrlPart(theConditionalUrl));
+			case SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH -> localizer.getMessageSanitized(
+					BaseStorageDao.class, "successfulUpdateConditionalNoMatch", theId);
+			case SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH -> localizer.getMessageSanitized(
+					BaseStorageDao.class, "successfulUpdateConditionalWithMatch", theId, theConditionalUrl);
+			case SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE -> localizer.getMessageSanitized(
+					BaseStorageDao.class, "successfulUpdateConditionalNoChangeWithMatch", theId, theConditionalUrl);
+			default -> theCode.getDisplay();
+		};
+	}
+
+	private String assignNewIdAndRewriteToPut(
 			FhirTerser terser,
 			IBase entry,
 			IBaseResource resource,
@@ -871,6 +998,7 @@ public class PatientIdPartitionInterceptor {
 		String newReference = "Patient/" + UUID.randomUUID();
 		idSubstitutions.put(fullUrl, newReference);
 		rewriteAsDirectPut(terser, entry, resource, newReference);
+		return newReference;
 	}
 
 	private void rewriteAsDirectPut(FhirTerser terser, IBase entry, IBaseResource resource, String theReference) {

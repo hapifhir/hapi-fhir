@@ -2091,6 +2091,38 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked during FHIR transaction processing, after all write operations have been performed and the response
+	 * bundle has been assembled — including each response entry's final location. Hooks may inspect or adjust the
+	 * response entries (for example to correct an operation outcome) using the data resolved during processing, which
+	 * is available on the supplied {@link ca.uhn.fhir.rest.api.server.storage.TransactionDetails}.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseBundle - The response bundle being assembled.</li>
+	 * <li>ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter - The version adapter for reading and mutating the
+	 * response bundle's entries in a FHIR-version-agnostic way.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
+	 * processed.</li>
+	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
+	 * only populated when operating in a RestfulServer. Provided as a convenience.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object.</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 *
+	 * @since 8.11.5
+	 */
+	STORAGE_TRANSACTION_WRITE_AFTER_RESPONSE(
+			void.class,
+			"org.hl7.fhir.instance.model.api.IBaseBundle",
+			"ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked after all entries in a transaction bundle have been executed
 	 * <p>
 	 * Hooks will have access to the original bundle, as well as all the deferred interceptor broadcasts related to the
