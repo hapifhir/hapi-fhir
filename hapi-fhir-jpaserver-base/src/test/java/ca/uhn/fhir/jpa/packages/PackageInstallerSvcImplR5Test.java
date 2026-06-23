@@ -40,11 +40,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
- * Unit tests for {@link PackageInstallerSvcImpl} using an R5 {@link FhirContext}.
- * Mirrors the version-sensitive search-key tests in {@link PackageInstallerSvcImplTest}
- * to guard against regressions in any logic that uses {@link ca.uhn.fhir.util.FhirTerser}
- * to traverse R5 model instances (identifier extraction, NamingSystem uniqueId, url lookup).
- * R4-context tests live in {@link PackageInstallerSvcImplTest}.
+ * Tests for {@link PackageInstallerSvcImpl} with an R5 {@link FhirContext}, covering
+ * search-key generation for package resources. Includes version-specific cases such as
+ * identifier matching with system+value or value-only (e.g. R5 Organization),
+ * NamingSystem uniqueId lookup, and URL-based matching.
+ * See {@link PackageInstallerSvcImplTest} for R4 coverage.
  */
 // Created by Claude Sonnet 4.6
 @ExtendWith(MockitoExtension.class)
