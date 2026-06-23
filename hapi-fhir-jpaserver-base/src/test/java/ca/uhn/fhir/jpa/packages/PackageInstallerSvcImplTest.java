@@ -818,7 +818,7 @@ public class PackageInstallerSvcImplTest {
 			orgWithIdentifier.addIdentifier().setSystem("urn:oid:2.16").setValue("r4-org-001");
 
 			Subscription subscription = createSubscription(Subscription.SubscriptionStatus.REQUESTED);
-			subscription.setId("sub-123");
+			subscription.setId("Subscription/sub-123");
 
 			NamingSystem namingSystemWithUniqueId = new NamingSystem();
 			namingSystemWithUniqueId.setStatus(Enumerations.PublicationStatus.ACTIVE);
