@@ -52,6 +52,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -79,9 +80,11 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_URL_LENGTH = 200;
 	public static final int MAX_VER_LENGTH = 200;
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Id()
+	@Id
 	@SequenceGenerator(name = "SEQ_VALUESET_PID", sequenceName = "SEQ_VALUESET_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_PID")
 	@Column(name = "PID")

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: xxxx
+title: "A bug in `FhirContextSearchParamRegistry` was fixed which caused a crash when calling
+   `getRuntimeSearchParams(..)`."
