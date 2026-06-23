@@ -22,14 +22,11 @@ package ca.uhn.hapi.fhir.cdshooks.serializer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.json.JsonMapper;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import tools.jackson.databind.ser.std.StdSerializer;
-
-import java.io.IOException;
 
 public class CdsServiceRequestContextSerializer extends StdSerializer<CdsServiceRequestContextJson> {
 	private final IParser myParser;

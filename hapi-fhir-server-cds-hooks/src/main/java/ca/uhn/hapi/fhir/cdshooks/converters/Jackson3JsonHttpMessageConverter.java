@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.converters;
 
+import ca.uhn.fhir.i18n.Msg;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -74,21 +75,21 @@ public class Jackson3JsonHttpMessageConverter extends AbstractHttpMessageConvert
 
 	@Override
 	protected Object readInternal(Class<?> theClazz, HttpInputMessage theInputMessage)
-		throws IOException, HttpMessageNotReadableException {
+			throws IOException, HttpMessageNotReadableException {
 		try {
 			return myMapper.readValue(theInputMessage.getBody(), theClazz);
 		} catch (JacksonException e) {
-			throw new HttpMessageNotReadableException("Could not read JSON: " + e.getMessage(), e, theInputMessage);
+			throw new HttpMessageNotReadableException(Msg.code(9901) + "Could not read JSON: " + e.getMessage(), e, theInputMessage);
 		}
 	}
 
 	@Override
 	protected void writeInternal(Object theObject, HttpOutputMessage theOutputMessage)
-		throws IOException, HttpMessageNotWritableException {
+			throws IOException, HttpMessageNotWritableException {
 		try {
 			myMapper.writeValue(theOutputMessage.getBody(), theObject);
 		} catch (JacksonException e) {
-			throw new HttpMessageNotWritableException("Could not write JSON: " + e.getMessage(), e);
+			throw new HttpMessageNotWritableException(Msg.code(9902) + "Could not write JSON: " + e.getMessage(), e);
 		}
 	}
 

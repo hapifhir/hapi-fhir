@@ -32,15 +32,15 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -109,8 +109,8 @@ public class ChangelogMigrator {
 				}
 
 				String issue = nextAction.getAttribute("issue") != null
-					? nextAction.getAttribute("issue").getValue()
-					: null;
+						? nextAction.getAttribute("issue").getValue()
+						: null;
 				if (isNotBlank(issue)) {
 					itemMap.put("issue", issue);
 				}
@@ -131,7 +131,7 @@ public class ChangelogMigrator {
 			}
 
 			String releaseDir =
-				"hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/" + version.replace(".", "_");
+					"hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/" + version.replace(".", "_");
 			File releaseDirFile = new File(releaseDir);
 			FileUtils.forceMkdir(releaseDirFile);
 
@@ -142,8 +142,8 @@ public class ChangelogMigrator {
 				// YAMLGenerator.Feature.SPLIT_LINES is still present in jackson-dataformat-yaml 3.x
 				// but is now configured via the builder rather than YAMLFactory.disable().
 				ObjectMapper mapper = YAMLMapper.builder()
-					.disable(YAMLWriteFeature.SPLIT_LINES)
-					.build();
+						.disable(YAMLWriteFeature.SPLIT_LINES)
+						.build();
 				mapper.writeValue(writer, items);
 			}
 

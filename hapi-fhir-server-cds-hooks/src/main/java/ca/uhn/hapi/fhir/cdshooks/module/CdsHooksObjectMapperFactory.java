@@ -25,16 +25,11 @@ import ca.uhn.fhir.serializer.FhirResourceDeserializer;
 import ca.uhn.fhir.serializer.FhirResourceSerializer;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextSerializer;
-// Jackson 3: com.fasterxml.jackson.databind.ObjectMapper   → tools.jackson.databind.ObjectMapper
-//            com.fasterxml.jackson.databind.module.SimpleModule → tools.jackson.databind.module.SimpleModule
-//            org.springframework.http.converter.json.Jackson2ObjectMapperBuilder → REMOVED
-//              Spring 7.0 deprecated Jackson2ObjectMapperBuilder for removal (no Jackson 3 equivalent).
-//              Replace with tools.jackson.databind.json.JsonMapper + SerializationFeature.INDENT_OUTPUT.
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.module.SimpleModule;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 // Jackson 3 migration notes for this class:
 //
@@ -76,9 +71,8 @@ public class CdsHooksObjectMapperFactory {
 		// constructors that require a mapper reference. These two classes hold onto
 		// this instance, so be aware they will NOT see the custom module registered
 		// in the final mapper below. Refactor those constructors if that matters.
-		JsonMapper tempMapper = JsonMapper.builder()
-			.enable(SerializationFeature.INDENT_OUTPUT)
-			.build();
+		JsonMapper tempMapper =
+				JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 
 		// Step 2: build the module using the temp mapper where required.
 		SimpleModule module = new SimpleModule();
@@ -86,14 +80,14 @@ public class CdsHooksObjectMapperFactory {
 		module.addSerializer(new CdsServiceRequestContextSerializer(myFhirContext, tempMapper));
 		module.addDeserializer(IBaseResource.class, new FhirResourceDeserializer(myFhirContext));
 		module.addDeserializer(
-			CdsServiceRequestContextJson.class,
-			new CdsServiceRequestContextDeserializer(myFhirContext, tempMapper));
+				CdsServiceRequestContextJson.class,
+				new CdsServiceRequestContextDeserializer(myFhirContext, tempMapper));
 
 		// Step 3: build the real, immutable mapper with the module registered via the builder.
 		// Jackson 3: module registration belongs in the builder, not on the built mapper.
 		return JsonMapper.builder()
-			.enable(SerializationFeature.INDENT_OUTPUT)
-			.addModule(module)
-			.build();
+				.enable(SerializationFeature.INDENT_OUTPUT)
+				.addModule(module)
+				.build();
 	}
 }

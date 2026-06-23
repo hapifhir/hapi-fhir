@@ -66,8 +66,7 @@ abstract class BaseCdsMethod implements ICdsMethod {
 		return String.class.isAssignableFrom(myMethod.getParameterTypes()[0]);
 	}
 
-	private String encodeRequest(
-			JsonMapper theJsonMapper, IModelJson theCdsServiceRequestJson, String theServiceId) {
+	private String encodeRequest(JsonMapper theJsonMapper, IModelJson theCdsServiceRequestJson, String theServiceId) {
 		try {
 			return theJsonMapper.writeValueAsString(theCdsServiceRequestJson);
 		} catch (JacksonException e) {

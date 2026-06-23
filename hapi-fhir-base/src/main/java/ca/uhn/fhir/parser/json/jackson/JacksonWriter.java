@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.parser.json.jackson;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
 import tools.jackson.core.FormatSchema;
 import tools.jackson.core.JsonGenerator;
@@ -128,18 +129,21 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 			@Override
 			public ArrayTreeNode createArrayNode() {
 				throw new UnsupportedOperationException(
+					Msg.code(9981) +
 						"Tree-node creation is not supported by " + JacksonWriter.class.getSimpleName());
 			}
 
 			@Override
 			public ObjectTreeNode createObjectNode() {
 				throw new UnsupportedOperationException(
+					Msg.code(9982) +
 						"Tree-node creation is not supported by " + JacksonWriter.class.getSimpleName());
 			}
 
 			@Override
 			public void writeValue(JsonGenerator gen, Object value) {
 				throw new UnsupportedOperationException(
+					Msg.code(9983) +
 						JacksonWriter.class.getSimpleName()
 								+ " writes values via type-specific JsonGenerator methods and does not support writePOJO(..)/writeValue(..)");
 			}
@@ -147,6 +151,7 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 			@Override
 			public void writeTree(JsonGenerator gen, TreeNode tree) {
 				throw new UnsupportedOperationException(
+					Msg.code(9984) +
 						"Tree writing is not supported by " + JacksonWriter.class.getSimpleName());
 			}
 		};

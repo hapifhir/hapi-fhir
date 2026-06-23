@@ -27,11 +27,11 @@ import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
-import jakarta.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -41,8 +41,7 @@ public class CdsServiceRequestJsonDeserializer {
 	private final FhirContext myFhirContext;
 	private final IParser myParser;
 
-	public CdsServiceRequestJsonDeserializer(
-			@Nonnull FhirContext theFhirContext, @Nonnull JsonMapper theJsonMapper) {
+	public CdsServiceRequestJsonDeserializer(@Nonnull FhirContext theFhirContext, @Nonnull JsonMapper theJsonMapper) {
 		myFhirContext = theFhirContext;
 		myParser = myFhirContext.newJsonParser().setPrettyPrint(true);
 		myJsonMapper = theJsonMapper;
@@ -50,8 +49,7 @@ public class CdsServiceRequestJsonDeserializer {
 
 	public CdsServiceRequestJson deserialize(
 			@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull Object theCdsServiceRequestJson) {
-		final JsonNode cdsServiceRequestJsonNode =
-			myJsonMapper.convertValue(theCdsServiceRequestJson, JsonNode.class);
+		final JsonNode cdsServiceRequestJsonNode = myJsonMapper.convertValue(theCdsServiceRequestJson, JsonNode.class);
 		final JsonNode contextNode = cdsServiceRequestJsonNode.get("context");
 		validateHookInstance(cdsServiceRequestJsonNode.get("hookInstance"));
 		validateHook(cdsServiceRequestJsonNode.get("hook"));
@@ -73,8 +71,7 @@ public class CdsServiceRequestJsonDeserializer {
 		}
 	}
 
-	CdsServiceRequestContextJson deserializeContext(LinkedHashMap<String, Object> theMap)
-			throws JacksonException {
+	CdsServiceRequestContextJson deserializeContext(LinkedHashMap<String, Object> theMap) throws JacksonException {
 		final CdsServiceRequestContextJson cdsServiceRequestContextJson = new CdsServiceRequestContextJson();
 		for (Map.Entry<String, Object> entry : theMap.entrySet()) {
 			String key = entry.getKey();
