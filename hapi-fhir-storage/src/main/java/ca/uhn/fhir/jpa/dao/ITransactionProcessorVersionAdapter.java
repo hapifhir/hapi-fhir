@@ -65,6 +65,8 @@ public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle,
 
 	void setResponseLocation(BUNDLEENTRY theEntry, String theResponseLocation);
 
+	String getResponseLocation(BUNDLEENTRY theEntry);
+
 	void setResponseETag(BUNDLEENTRY theEntry, String theEtag);
 
 	String getEntryRequestIfMatch(BUNDLEENTRY theEntry);
@@ -78,6 +80,8 @@ public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle,
 	void setRequestVerb(BUNDLEENTRY theEntry, String theVerb);
 
 	void setRequestUrl(BUNDLEENTRY theEntry, String theUrl);
+
+	void setRequestIfNoneExist(BUNDLEENTRY theEntry, String theIfNoneExist);
 
 	Optional<IBaseExtension<?, ?>> getEntryRequestExtensionByUrl(BUNDLEENTRY theEntry, String theUrl);
 }

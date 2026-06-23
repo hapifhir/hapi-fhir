@@ -178,6 +178,16 @@ public class TransactionProcessorVersionAdapterDstu2
 	}
 
 	@Override
+	public void setRequestIfNoneExist(Bundle.Entry theEntry, String theIfNoneExist) {
+		theEntry.getRequest().setIfNoneExist(theIfNoneExist);
+	}
+
+	@Override
+	public String getResponseLocation(Bundle.Entry theEntry) {
+		return theEntry.getResponse().getLocation();
+	}
+
+	@Override
 	public Optional<IBaseExtension<?, ?>> getEntryRequestExtensionByUrl(Bundle.Entry theEntry, String theUrl) {
 		List<ExtensionDt> extensions = theEntry.getRequest().getUndeclaredExtensionsByUrl(theUrl);
 		return extensions.isEmpty() ? Optional.empty() : Optional.ofNullable(extensions.get(0));

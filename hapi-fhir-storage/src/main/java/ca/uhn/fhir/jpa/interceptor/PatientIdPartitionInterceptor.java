@@ -809,7 +809,10 @@ public class PatientIdPartitionInterceptor {
 	 */
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
 	public void resolvePatientReferencesAfterPreFetch(
-			List<IBase> theEntries, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
+			List<IBase> theEntries,
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails) {
 		FhirTerser terser = myFhirContext.newTerser();
 
 		Map<String, String> idSubstitutions = new HashMap<>();
@@ -818,11 +821,11 @@ public class PatientIdPartitionInterceptor {
 				theTransactionDetails.getOrCreateUserData(REWRITTEN_OUTCOMES_KEY, HashMap::new);
 
 		for (IBase entry : theEntries) {
-			String fullUrl = getEntryString(terser, entry, "fullUrl");
+			String fullUrl = theVersionAdapter.getFullUrl(entry);
 			if (fullUrl == null || !fullUrl.startsWith("urn:uuid:")) {
 				continue;
 			}
-			IBaseResource resource = getEntryFirstValue(terser, entry, "resource", IBaseResource.class);
+			IBaseResource resource = theVersionAdapter.getResource(entry);
 			if (resource != null) {
 				placeholderToResource.put(fullUrl, resource);
 			}
@@ -830,18 +833,19 @@ public class PatientIdPartitionInterceptor {
 				continue;
 			}
 
-			String method = getEntryString(terser, entry, "request.method");
-			String url = getEntryString(terser, entry, "request.url");
+			String method = theVersionAdapter.getEntryRequestVerb(myFhirContext, entry);
+			String url = theVersionAdapter.getEntryRequestUrl(entry);
 			String matchUrl = null;
 			if ("POST".equals(method)) {
-				matchUrl = getEntryString(terser, entry, "request.ifNoneExist");
+				matchUrl = theVersionAdapter.getEntryRequestIfNoneExist(entry);
 			} else if ("PUT".equals(method) && url != null && url.contains("?")) {
 				matchUrl = url;
 			}
 
 			if (isBlank(matchUrl)) {
 				if ("POST".equals(method)) {
-					String newReference = assignNewIdAndRewriteToPut(terser, entry, resource, fullUrl, idSubstitutions);
+					String newReference =
+							assignNewIdAndRewriteToPut(theVersionAdapter, entry, resource, fullUrl, idSubstitutions);
 					rewrittenOutcomes.put(newReference, new RewrittenOutcome(RewriteIntent.UNCONDITIONAL_CREATE, null));
 				} else if ("PUT".equals(method) && isNotBlank(url) && !Strings.CS.equals(fullUrl, url)) {
 					idSubstitutions.put(fullUrl, url);
@@ -859,14 +863,15 @@ public class PatientIdPartitionInterceptor {
 						// clears resolved ids), so rewrite it as a direct update. A conditional POST already NOPs
 						// to the match correctly, so it is left alone.
 						if ("PUT".equals(method)) {
-							rewriteAsDirectPut(terser, entry, resource, matchedReference);
+							rewriteAsDirectPut(theVersionAdapter, entry, resource, matchedReference);
 							rewrittenOutcomes.put(
 									matchedReference,
 									new RewrittenOutcome(RewriteIntent.CONDITIONAL_UPDATE_MATCHED, matchUrl));
 						}
 					}
 				} else {
-					String newReference = assignNewIdAndRewriteToPut(terser, entry, resource, fullUrl, idSubstitutions);
+					String newReference =
+							assignNewIdAndRewriteToPut(theVersionAdapter, entry, resource, fullUrl, idSubstitutions);
 					RewriteIntent intent = "POST".equals(method)
 							? RewriteIntent.CONDITIONAL_CREATE_NO_MATCH
 							: RewriteIntent.CONDITIONAL_UPDATE_NO_MATCH;
@@ -883,7 +888,7 @@ public class PatientIdPartitionInterceptor {
 
 		if (!idSubstitutions.isEmpty()) {
 			for (IBase entry : theEntries) {
-				IBaseResource resource = getEntryFirstValue(terser, entry, "resource", IBaseResource.class);
+				IBaseResource resource = theVersionAdapter.getResource(entry);
 				if (resource == null) {
 					continue;
 				}
@@ -914,7 +919,7 @@ public class PatientIdPartitionInterceptor {
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_RESPONSE)
 	public void restoreRewrittenPatientOutcomes(
 			IBaseBundle theResponse,
-			ITransactionProcessorVersionAdapter theVersionAdapter,
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
 			TransactionDetails theTransactionDetails) {
 		Map<String, RewrittenOutcome> rewrittenOutcomes = theTransactionDetails.getUserData(REWRITTEN_OUTCOMES_KEY);
 		if (rewrittenOutcomes == null || rewrittenOutcomes.isEmpty()) {
@@ -924,7 +929,7 @@ public class PatientIdPartitionInterceptor {
 		FhirTerser terser = myFhirContext.newTerser();
 		List<IBase> entries = theVersionAdapter.getEntries(theResponse);
 		for (IBase entry : entries) {
-			String location = getEntryString(terser, entry, "response.location");
+			String location = theVersionAdapter.getResponseLocation(entry);
 			if (isBlank(location)) {
 				continue;
 			}
@@ -990,34 +995,26 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	private String assignNewIdAndRewriteToPut(
-			FhirTerser terser,
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
 			IBase entry,
 			IBaseResource resource,
 			String fullUrl,
 			Map<String, String> idSubstitutions) {
 		String newReference = "Patient/" + UUID.randomUUID();
 		idSubstitutions.put(fullUrl, newReference);
-		rewriteAsDirectPut(terser, entry, resource, newReference);
+		rewriteAsDirectPut(theVersionAdapter, entry, resource, newReference);
 		return newReference;
 	}
 
-	private void rewriteAsDirectPut(FhirTerser terser, IBase entry, IBaseResource resource, String theReference) {
+	private void rewriteAsDirectPut(
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			IBase entry,
+			IBaseResource resource,
+			String theReference) {
 		resource.setId(theReference);
-		IBase request = terser.getValues(entry, "request").get(0);
-		terser.setElement(request, "ifNoneExist", null);
-		terser.setElement(request, "method", "PUT");
-		terser.setElement(request, "url", theReference);
-	}
-
-	@SuppressWarnings("rawtypes")
-	private String getEntryString(FhirTerser terser, IBase entry, String path) {
-		List<IPrimitiveType> values = terser.getValues(entry, path, IPrimitiveType.class);
-		return values.isEmpty() ? null : values.get(0).getValueAsString();
-	}
-
-	private <T extends IBase> T getEntryFirstValue(FhirTerser terser, IBase entry, String path, Class<T> type) {
-		List<T> values = terser.getValues(entry, path, type);
-		return values.isEmpty() ? null : values.get(0);
+		theVersionAdapter.setRequestVerb(entry, "PUT");
+		theVersionAdapter.setRequestUrl(entry, theReference);
+		theVersionAdapter.setRequestIfNoneExist(entry, null);
 	}
 
 	@SuppressWarnings("SameParameterValue")

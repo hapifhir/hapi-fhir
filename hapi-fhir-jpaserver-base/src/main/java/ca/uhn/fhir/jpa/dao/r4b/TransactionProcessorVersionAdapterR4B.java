@@ -174,6 +174,16 @@ public class TransactionProcessorVersionAdapterR4B
 	}
 
 	@Override
+	public void setRequestIfNoneExist(Bundle.BundleEntryComponent theEntry, String theIfNoneExist) {
+		theEntry.getRequest().setIfNoneExist(theIfNoneExist);
+	}
+
+	@Override
+	public String getResponseLocation(Bundle.BundleEntryComponent theEntry) {
+		return theEntry.getResponse().getLocation();
+	}
+
+	@Override
 	public Optional<IBaseExtension<?, ?>> getEntryRequestExtensionByUrl(
 			Bundle.BundleEntryComponent theEntry, String theUrl) {
 		return Optional.ofNullable(theEntry.getRequest().getExtensionByUrl(theUrl));

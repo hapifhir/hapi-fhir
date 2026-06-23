@@ -223,6 +223,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)) {
 					HookParams params = new HookParams()
 							.add(List.class, theEntries)
+							.add(ITransactionProcessorVersionAdapter.class, versionAdapter)
 							.add(RequestDetails.class, theRequest)
 							.addIfMatchesType(ServletRequestDetails.class, theRequest)
 							.add(TransactionDetails.class, theTransactionDetails);
