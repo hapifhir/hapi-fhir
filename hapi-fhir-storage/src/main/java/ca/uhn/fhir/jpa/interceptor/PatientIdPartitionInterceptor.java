@@ -30,7 +30,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -89,13 +88,11 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionFromUserDataIfPresent;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.alwaysUseDefaultPartition;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.mandatorySingleCompartment;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.nonUniqueCompartmentInDefault;
@@ -116,8 +113,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Interceptor
 public class PatientIdPartitionInterceptor {
 	public static final String PATIENT_COMPARTMENT_NONE = "NONE";
-	public static final String PLACEHOLDER_TO_REFERENCE_KEY =
-			PatientIdPartitionInterceptor.class.getName() + "_placeholderToResource";
 	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdPartitionInterceptor.class);
 	private static final String PATIENT_STR = "Patient";
 
@@ -328,21 +323,9 @@ public class PatientIdPartitionInterceptor {
 					+ oCompartmentIdentity.stream().map(t -> "Patient/" + t).collect(Collectors.joining(", ")));
 
 		} else {
-			Set<RequestPartitionId> compartments =
-					getPartitionViaPartiallyProcessedReference(theRequestDetails, policy, resource);
-			if (compartments.size() == 1) {
-				return compartments.iterator().next();
-			} else if (compartments.isEmpty()) {
-				Optional<RequestPartitionId> partitionId = policy.getPartitionIdForNoCompartment(myPartitionSettings);
-				if (partitionId.isPresent()) {
-					return partitionId.get();
-				}
-			} else {
-				Optional<RequestPartitionId> partitionId =
-						policy.getPartitionIdForNonUniqueCompartment(myPartitionSettings);
-				if (partitionId.isPresent()) {
-					return partitionId.get();
-				}
+			Optional<RequestPartitionId> partitionId = policy.getPartitionIdForNoCompartment(myPartitionSettings);
+			if (partitionId.isPresent()) {
+				return partitionId.get();
 			}
 
 			return throwNonCompartmentMemberInstanceFailureResponse(resource);
@@ -650,50 +633,6 @@ public class PatientIdPartitionInterceptor {
 		};
 	}
 
-	/**
-	 * HACK: enable synthea bundles to sneak through with a server-assigned UUID.
-	 * If we don't have a simple id for a compartment owner, maybe we're in a bundle during processing
-	 * and a reference points to the Patient which has already been processed and assigned a partition.
-	 */
-	@SuppressWarnings("unchecked")
-	@Nonnull
-	private Set<RequestPartitionId> getPartitionViaPartiallyProcessedReference(
-			RequestDetails theRequestDetails, ResourceCompartmentStoragePolicy thePolicy, IBaseResource theResource) {
-		Map<String, IBaseResource> placeholderToReference = null;
-		if (theRequestDetails != null) {
-			placeholderToReference =
-					(Map<String, IBaseResource>) theRequestDetails.getUserData().get(PLACEHOLDER_TO_REFERENCE_KEY);
-		}
-		if (placeholderToReference == null) {
-			placeholderToReference = Map.of();
-		}
-
-		List<IBaseReference> references = myFhirContext
-				.newTerser()
-				.getCompartmentReferencesForResource(
-						PATIENT_STR, theResource, new CompartmentSearchParameterModifications())
-				.toList();
-
-		Set<RequestPartitionId> retVal = new HashSet<>();
-		for (IBaseReference reference : references) {
-			String referenceString = reference.getReferenceElement().getValue();
-			IBaseResource target = placeholderToReference.get(referenceString);
-			if (target != null && Objects.equals(myFhirContext.getResourceType(target), PATIENT_STR)) {
-				Optional<RequestPartitionId> partition = getPartitionFromUserDataIfPresent(target);
-				if (partition.isPresent()) {
-					retVal.add(partition.get());
-				} else if (PATIENT_STR.equals(target.getIdElement().getResourceType())) {
-					if (!target.getIdElement().isUuid() && target.getIdElement().hasIdPart()) {
-						retVal.add(provideSingleCompartmentPartition(
-								theRequestDetails, target.getIdElement().getIdPart()));
-					}
-				}
-			}
-		}
-
-		return retVal;
-	}
-
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyForRead(
 			@Nonnull ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
@@ -811,12 +750,10 @@ public class PatientIdPartitionInterceptor {
 	public void resolvePatientReferencesAfterPreFetch(
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
-			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails) {
 		FhirTerser terser = myFhirContext.newTerser();
 
 		Map<String, String> idSubstitutions = new HashMap<>();
-		Map<String, IBaseResource> placeholderToResource = new HashMap<>();
 		Map<String, RewrittenOutcome> rewrittenOutcomes =
 				theTransactionDetails.getOrCreateUserData(REWRITTEN_OUTCOMES_KEY, HashMap::new);
 
@@ -826,9 +763,6 @@ public class PatientIdPartitionInterceptor {
 				continue;
 			}
 			IBaseResource resource = theVersionAdapter.getResource(entry);
-			if (resource != null) {
-				placeholderToResource.put(fullUrl, resource);
-			}
 			if (resource == null || !PATIENT_STR.equals(myFhirContext.getResourceType(resource))) {
 				continue;
 			}
@@ -878,12 +812,6 @@ public class PatientIdPartitionInterceptor {
 					rewrittenOutcomes.put(newReference, new RewrittenOutcome(intent, matchUrl));
 				}
 			}
-			ourLog.warn(
-					"TG-HOOK patient fullUrl={} method={} matchUrl={} -> sub={}",
-					fullUrl,
-					method,
-					matchUrl,
-					idSubstitutions.get(fullUrl));
 		}
 
 		if (!idSubstitutions.isEmpty()) {
@@ -903,10 +831,6 @@ public class PatientIdPartitionInterceptor {
 					}
 				}
 			}
-		}
-
-		if (theRequestDetails != null) {
-			theRequestDetails.getUserData().put(PLACEHOLDER_TO_REFERENCE_KEY, placeholderToResource);
 		}
 	}
 

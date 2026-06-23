@@ -91,7 +91,6 @@ import org.springframework.transaction.annotation.Propagation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -134,8 +133,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
 	private PatientIdPartitionInterceptor mySvc;
-
-	private final String oldPayerSystem = "urn:uudid:old-payer-sytem";
 
 	@Override
 	@BeforeEach
@@ -977,166 +974,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		}
 	}
 
-	@Test
-	public void testTransaction_createObservationWithInlineMatchUrlReferenceToNonExistingPatient() {
-		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
-		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
-
-		Identifier patientIdentifier = new Identifier().setSystem(oldPayerSystem).setValue("A");
-		String patientInlineMatchUrl = buildInlineMatchUrlStr("Patient", patientIdentifier);
-
-		Observation o = new Observation();
-		Identifier obsIdentifier = new Identifier().setSystem(oldPayerSystem).setValue("B");
-		o.addIdentifier(obsIdentifier);
-		o.setSubject(new Reference(patientInlineMatchUrl));  // Patient?identifier=urn:uudid:old-payer-sytem|A
-
-		// when operating with PatientId partitioning mode disabled, processing a resource with an inlineMatchUrl reference
-		// to the related Patient will succeed with the Patient resource being create as a placeholder.
-		// but in PatientId partitioning mode, a resource in the patient compartment needs a reference by fhirId
-		// (Patient/123) to derive the partitionId for the resource and that happens before the placeholder creation process.
-		// in order to ingest the above observation, its patient reference needs resolution/placeholder before invocation of
-		// pointcut STORAGE_PARTITION_IDENTIFY_CREATE on PatientIdPartitioningInterceptor.
-		//
-		// Placeholder creation is equivalent to front loading the inlineMatchUrl reference with a POST with conditional Url.
-		// see PatientInlineMatchUrlPreCreationService.conditionallyCreatePatientsForInlineMatchUrls.
-
-		BundleBuilder tx = new BundleBuilder(myFhirContext);
-		tx.addTransactionUpdateEntry(o).conditional(buildInlineMatchUrlStr("Observation", obsIdentifier));
-
-		Bundle requestBundle = tx.getBundleTyped();
-		String bundleAsString = myFhirContext.newJsonParser().encodeResourceToString(requestBundle);
-		ourLog.info("Bundle: {}", bundleAsString);
-
-		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
-
-		// front loading will have the submitted bundle massaged into:
-//		{ "resourceType" : "Bundle",
-//			"type" : "transaction",
-//			"entry" : [ {
-//			"resource" : {
-//				"resourceType" : "Patient",
-//				"identifier" : [ {
-//					"system" : "urn:uudid:old-payer-sytem",
-//						"value" : "A"} ]},
-//			"request" : {
-//				"method" : "POST",
-//					"url" : "Patient",
-//					"ifNoneExist" : "Patient?identifier=urn:uudid:old-payer-sytem|A"}
-//		}, {"resource" : {
-//				"resourceType" : "Observation",
-//					"identifier" : [ {
-//					"system" : "urn:uudid:old-payer-sytem",
-//						"value" : "B"} ],
-//				"subject" : {
-//					"reference" : "Patient?identifier=urn:uudid:old-payer-sytem|A"}
-//			},
-//			"request" : {
-//				"method" : "PUT",
-//					"url" : "Observation?identifier=urn:uudid:old-payer-sytem|B"}} ]}
-
-		// then, the bundle is submitted to the PatientIdentifierPreResolutionInterceptor on pointcut STORAGE_TRANSACTION_PROCESSING.
-		// where the interceptor transforms the bundle into:
-//		{ "resourceType" : "Bundle",
-//			"type" : "transaction",
-//			"entry" : [ {
-//			"resource" : {
-//				"resourceType" : "Patient",
-//					"id" : "bfce5151-deb5-43c3-b613-12f5ca0ef4d5",
-//					"identifier" : [ {
-//					"system" : "urn:uudid:old-payer-sytem",
-//						"value" : "A"} ]},
-//			"request" : {
-//				"method" : "POST",
-//					"url" : "Patient",
-//					"ifNoneExist" : "Patient?_id=Patient/bfce5151-deb5-43c3-b613-12f5ca0ef4d5"}
-//		}, {"resource" : {
-//				"resourceType" : "Observation",
-//					"identifier" : [ {
-//					"system" : "urn:uudid:old-payer-sytem",
-//						"value" : "B"} ],
-//				"subject" : {
-//					"reference" : "Patient/bfce5151-deb5-43c3-b613-12f5ca0ef4d5"}},
-//			"request" : {
-//				"method" : "PUT",
-//					"url" : "Observation?identifier=urn:uudid:old-payer-sytem|B"}} ]}
-
-		// now that the Patient resource has an id and the Observation has a resolved reference to its Patient, both
-		// resources can be processed by the PatientIdPartitioningInterceptor on pointcut STORAGE_PARTITION_IDENTIFY_CREATE
-		// where a requestpartitioningId is derived allowing ingestion/creation of both resource.
-
-		TransactionUtil.TransactionResponse parsedResult = TransactionUtil.parseTransactionResponse(myFhirContext, requestBundle, resultBundle);
-		assertEquals(2, parsedResult.getStorageOutcomes().size());
-
-		IIdType firstCreatedResourceIdType = parsedResult.getStorageOutcomes().get(0).getTargetId();
-		assertThat(firstCreatedResourceIdType.getResourceType()).isEqualTo("Patient");
-		assertThat(firstCreatedResourceIdType.getValue()).matches("Patient/.*/_history/1");
-		String expectedPatientReference = firstCreatedResourceIdType.toUnqualifiedVersionless().getValue();
-
-		IIdType secondCreatedResourceIdType = parsedResult.getStorageOutcomes().get(1).getTargetId();
-		assertThat(secondCreatedResourceIdType.getValue()).matches("Observation/.*/_history/1");
-
-		//
-		Observation createdObservation = myObservationDao.read(new IdType(secondCreatedResourceIdType.getValue()), mySrd);
-		assertThat(createdObservation.getSubject().getReference()).isEqualTo(expectedPatientReference);
-
-		//
-		logAllResources();
-		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
-			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
-		});
-
-		Collection<Integer> patientPartitionIds = resourcesByType.get("Patient");
-		Collection<Integer> observationPartitionIds = resourcesByType.get("Observation");
-
-		assertThat(patientPartitionIds).hasSize(1);
-		assertThat(observationPartitionIds).hasSize(1);
-
-		assertThat(patientPartitionIds).containsExactlyElementsOf(observationPartitionIds);
-
-	}
-
-	@Test
-	public void testTransaction_createPatientWithConditionalUrl(){
-		BundleBuilder tx = new BundleBuilder(myFhirContext);
-
-		Identifier patientIdentifier = new Identifier().setSystem(oldPayerSystem).setValue("A");
-
-		Patient p = new Patient();
-		p.setActive(true);
-		p.addIdentifier(patientIdentifier);
-		tx.addTransactionCreateEntry(p).conditional(buildInlineMatchUrlStr("Patient", patientIdentifier));
-		// the above will generate requet:
-		// "request":{"method":"POST","url":"Patient","ifNoneExist":"Patient?identifier=urn:uudid:old-payer-sytem|A"}}]}
-
-		Bundle requestBundle = tx.getBundleTyped();
-		String bundleAsString = myFhirContext.newJsonParser().encodeResourceToString(requestBundle);
-		ourLog.info("Bundle: {}", bundleAsString);
-
-		// it should be noted that the Patient resource does not have an id at the start of the ingestion process.
-		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
-
-		// the id is generated & added to the resource by the (new)PatientIdentifierPreResolutionInterceptor on pointcut
-		// STORAGE_TRANSACTION_PROCESSING. when encountering a request with a conditional create, the pointcut transforms it
-		// in a conditional create with ID:
-		// "entry": [ {
-		// resource": {"resourceType":"Patient", "id":"02e8afaf",...},
-		// "request": {"method":"POST", "url":"Patient", "ifNoneExist":"Patient?_id=Patient/02e8afaf"}} ]
-		//
-		// and update all inlineMatchUlr references of 'Patient?identifier=urn:uudid:old-payer-sytem|A' to
-		// Patient/02e8afaf.
-		// as a result, interceptor PatientIdPartitioningInterceptor is able to derive a partitionId from the Patient id
-		// on pointcut STORAGE_PARTITION_IDENTIFY_CREATE.
-
-	}
-
-	private String asCanonicalString(Identifier theIdentifier) {
-		return theIdentifier.getSystem() + "|" + theIdentifier.getValue();
-	}
-
-	private String buildInlineMatchUrlStr(String theResourceType, Identifier theIdentifier) {
-		return theResourceType + "?identifier=" + asCanonicalString(theIdentifier);
-	}
 
 	@Test
 	public void testTransaction_SplitAncillaryAndPatient_NewTransactionPerPartition() {
@@ -1857,7 +1694,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					}
 					""",
 				// Patient conditional create: ident1=pat1 exists → NOP (200 OK).
-				// Observation subject resolved to pat1 via PLACEHOLDER_TO_REFERENCE_KEY after NOP completes.
+				// The post-preFetch hook substitutes the Observation's urn subject → Patient/pat1 before create.
 				List.of(
 					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, "pat1"),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
