@@ -30,6 +30,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class BulkExportJobServiceUtil {
+	public static final String JOB_INSTANCE_ID = "jobInstanceId";
 
 	/**
 	 * This method generates response for the bulk export request

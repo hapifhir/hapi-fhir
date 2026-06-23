@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static ca.uhn.fhir.batch2.jobs.export.BulkExportJobService.JOB_INSTANCE_ID;
+import static ca.uhn.fhir.batch2.jobs.export.BulkExportJobServiceUtil.JOB_INSTANCE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;

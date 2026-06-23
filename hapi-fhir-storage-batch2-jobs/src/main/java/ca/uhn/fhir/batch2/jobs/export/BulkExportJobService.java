@@ -42,6 +42,8 @@ import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ca.uhn.fhir.batch2.jobs.export.BulkExportJobServiceUtil.JOB_INSTANCE_ID;
+
 /**
  * This class is responsible for initiating a bulk export job
  * with appropriate _type parameter and partitionId as well as
@@ -54,7 +56,6 @@ public class BulkExportJobService {
 	private final DaoRegistry myDaoRegistry;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	private final JpaStorageSettings myStorageSettings;
-	protected static final String JOB_INSTANCE_ID = "jobInstanceId";
 
 	public BulkExportJobService(
 			@Nonnull IInterceptorBroadcaster theInterceptorBroadcaster,
