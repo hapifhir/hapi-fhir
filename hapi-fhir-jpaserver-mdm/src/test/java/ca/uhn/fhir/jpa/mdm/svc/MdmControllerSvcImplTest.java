@@ -35,8 +35,8 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -59,7 +59,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	@Autowired
 	IMdmControllerSvc myMdmControllerSvc;
 
-	@SpyBean
+	@MockitoSpyBean
 	@Autowired
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
@@ -107,7 +107,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 		getGoldenResourceFromTargetResource(patient);
 
-		MdmLink link = (MdmLink) myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
+		MdmLink link = myMdmLinkDaoSvc.findMdmLinkBySource(patient).orElseThrow();
 		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
 		saveLink(link);
 		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
@@ -121,7 +121,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 			new MdmTransactionContext(MdmTransactionContext.OperationType.QUERY_LINKS),
 			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)));
 
-		assertEquals(resultPage.getContent().size(), 1);
+		assertEquals(1, resultPage.getContent().size());
 
 		assertEquals(resultPage.getContent().get(0).getSourceId(), patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart());
 
@@ -138,15 +138,13 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 		getGoldenResourceFromTargetResource(patient);
 
-		MdmLink link = (MdmLink) myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
+		MdmLink link = myMdmLinkDaoSvc.findMdmLinkBySource(patient).orElseThrow();
 		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 		saveLink(link);
 		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
 		assertLinkCount(2);
 
-		runInTransaction(()->{
-			ourLog.info("Links: {}", myMdmLinkDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
-		});
+		runInTransaction(()-> ourLog.info("Links: {}", myMdmLinkDao.findAll().stream().map(MdmLink::toString).collect(Collectors.joining("\n * "))));
 
 		myCaptureQueriesListener.clear();
 		Page<MdmLinkJson> resultPage = myMdmControllerSvc.getDuplicateGoldenResources(null,
@@ -187,7 +185,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	public void testMdmClearWithWriteConflict() {
 		AtomicBoolean haveFired = new AtomicBoolean(false);
 		MdmClearStep.setClearCompletionCallbackForUnitTest(()->{
-			if (haveFired.getAndSet(true) == false) {
+			if (!haveFired.getAndSet(true)) {
 				throw new ResourceVersionConflictException("Conflict");
 			}
 		});
@@ -213,7 +211,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	}
 
 	private class PartitionIdMatcher implements ArgumentMatcher<RequestPartitionId> {
-		private RequestPartitionId myRequestPartitionId;
+		private final RequestPartitionId myRequestPartitionId;
 
 		PartitionIdMatcher(RequestPartitionId theRequestPartitionId) {
 			myRequestPartitionId = theRequestPartitionId;
