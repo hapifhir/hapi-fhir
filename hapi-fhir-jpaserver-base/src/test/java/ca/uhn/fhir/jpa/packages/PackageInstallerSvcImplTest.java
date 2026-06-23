@@ -1255,8 +1255,41 @@ public class PackageInstallerSvcImplTest {
 		verify(vsDao, never()).create(any(), any(RequestDetails.class));
 
 		LogbackTestExtensionAssert.assertThat(myLogCapture)
-				.hasErrorMessage("Version conflict error")
+				.hasErrorMessage("Concurrent install conflict on resource")
 				.hasErrorMessage("Cause: HAPI-0825: Conflict with resource version");
+	}
+
+	// Created by Claude Sonnet 4.6 (1M context)
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@Test
+	void install_singleVersion_parallelCrossIgInstall_conflictIsLoggedAndResourceSkipped() throws IOException {
+		ValueSet igBValueSet = new ValueSet();
+		igBValueSet.setId("ValueSet/shared-id");
+		igBValueSet.setUrl("http://ig-b/ValueSet/shared-id");
+		igBValueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		ValueSet igAValueSet = new ValueSet();
+		igAValueSet.setId("ValueSet/shared-id");
+		igAValueSet.setUrl("http://ig-a/ValueSet/shared-id");
+		igAValueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		IFhirResourceDao<ValueSet> vsDao = mock(IFhirResourceDao.class);
+		PackageInstallationSpec spec = setupResourceInPackage(null, igBValueSet, vsDao);
+		spec.setName("package-b");
+		spec.setVersion("1.0");
+		spec.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION);
+
+		when(vsDao.update(any(), any(RequestDetails.class)))
+				.thenThrow(new ResourceVersionConflictException("HAPI-0825: Conflict with resource version"));
+		when(vsDao.read(any(), any(RequestDetails.class))).thenReturn(igAValueSet);
+
+		PackageInstallOutcomeJson outcome = mySvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled()).doesNotContainKey("ValueSet");
+		LogbackTestExtensionAssert.assertThat(myLogCapture)
+				.hasErrorMessage("Concurrent install conflict on resource [shared-id]")
+				.hasErrorMessage("ig-b/ValueSet/shared-id")
+				.hasErrorMessage("ig-a/ValueSet/shared-id");
 	}
 
 	// Created by Claude Opus 4.6
