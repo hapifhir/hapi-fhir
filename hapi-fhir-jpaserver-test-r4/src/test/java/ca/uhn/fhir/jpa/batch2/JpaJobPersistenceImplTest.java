@@ -124,6 +124,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public static final int JOB_DEF_VER = 1;
 	public static final int SEQUENCE_NUMBER = 1;
 	public static final String CHUNK_DATA = "{\"key\":\"value\"}";
+	private static final String SENDER_LATCH = "sender-latch";
 	@Autowired
 	public Batch2JobHelper myBatch2JobHelper;
 	@Autowired
@@ -732,7 +733,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance(true, theGatedExecution);
 
 		// when
-		PointcutLatch latch = new PointcutLatch("sender-latch");
+		PointcutLatch latch = new PointcutLatch(SENDER_LATCH);
 		doAnswer(a -> {
 			latch.call(1);
 			return Void.class;
@@ -769,7 +770,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance(true, isGatedExecution);
 		myMaintenanceService.enableMaintenance(false);
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
-		PointcutLatch latch = new PointcutLatch("sender-latch");
+		PointcutLatch latch = new PointcutLatch(SENDER_LATCH);
 		doAnswer(a -> {
 			latch.call(1);
 			return Void.class;
@@ -1329,7 +1330,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance(true, theGatedExecution);
 		myMaintenanceService.enableMaintenance(false);
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
-		PointcutLatch latch = new PointcutLatch("sender-latch");
+		PointcutLatch latch = new PointcutLatch(SENDER_LATCH);
 		doAnswer(a -> {
 			latch.call(1);
 			return Void.class;
@@ -1368,7 +1369,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, CHUNK_DATA, isGatedExecution);
 		assertNotNull(chunkId);
-		PointcutLatch latch = new PointcutLatch("sender-latch");
+		PointcutLatch latch = new PointcutLatch(SENDER_LATCH);
 		doAnswer(a -> {
 			latch.call(1);
 			return Void.class;
@@ -1411,7 +1412,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	public void testMarkChunkAsCompleted_Error() {
 		boolean isGatedExecution = false;
-		PointcutLatch latch = new PointcutLatch("sender-latch");
+		PointcutLatch latch = new PointcutLatch(SENDER_LATCH);
 		doAnswer(a -> {
 			latch.call(1);
 			return Void.class;
@@ -1480,7 +1481,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String instanceId = mySvc.storeNewInstance(newSrd(), instance);
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null, isGatedExecution);
 		assertNotNull(chunkId);
-		PointcutLatch latch = new PointcutLatch("sender-latch");
+		PointcutLatch latch = new PointcutLatch(SENDER_LATCH);
 		doAnswer(a -> {
 			latch.call(1);
 			return Void.class;

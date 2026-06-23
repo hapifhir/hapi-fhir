@@ -122,7 +122,7 @@ public class AttachmentDetails {
 		public Builder withMaximumSize(int theMaximumSize) {
 			Validate.isTrue(
 					theMaximumSize > 0,
-					"Maximum size must be greater than 0. Use withNoMaximumSize() to allow unlimited sized.");
+					"Maximum size must be greater than 0. Use withNoMaximumSize() to allow unlimited size.");
 			myMaximumSize = theMaximumSize;
 			return this;
 		}

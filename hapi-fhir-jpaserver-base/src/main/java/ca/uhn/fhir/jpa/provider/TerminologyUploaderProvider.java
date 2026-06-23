@@ -117,26 +117,38 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	private static final String RESP_PARAM_TARGET = "target";
 	private static final String RESP_PARAM_SUCCESS = "success";
 
-	/*
+	/**
+	 * The maximum size for a LOINC distribution file. This is just the current size of the file
+	 * with some growth room in case future releases are larger.
 	 * Loinc_2.82.zip = 85 MB
 	 */
 	static final int LOINC_MAX_SIZE = Math.toIntExact(200 * FileUtils.ONE_MB);
+	/**
+	 * The maximum size for a loinc properties file. This is just the current size of the file
+	 * with some growth room in case future releases are larger.
+	 */
 	static final int LOINC_PROPERTIES_MAX_SIZE = Math.toIntExact(FileUtils.ONE_MB);
-	/*
+	/**
+	 * The maximum size for a Snomed CT distribution file. This is just the current size of the file
+	 * with some growth room in case future releases are larger.
 	 * SnomedCT_InternationalRF2_PRODUCTION_20260501T120000Z.zip = 580 MB
 	 */
 	private static final int SNOMED_CT_MAX_SIZE = Math.toIntExact(800 * FileUtils.ONE_MB);
-	/*
+	/**
+	 * The maximum size for an ICD-10 distribution file. This is just the current size of the file
+	 * with some growth room in case future releases are larger.
 	 * icd102019en.xml.zip = 672k
 	 * icd102019en.xml = 9.5 MB
 	 */
 	private static final int ICD_10_MAX_SIZE = Math.toIntExact(20 * FileUtils.ONE_MB);
-	/*
+	/**
+	 * The maximum size for an ICD-10-CM distribution file. This is just the current size of the file
+	 * with some growth room in case future releases are larger.
 	 * icd10cm-April-1-2026-XML.zip = 2.1M
 	 * icd10c-tabular-April-1-2026.xml = 9 MB
 	 */
 	private static final int ICD_10_CM_MAX_SIZE = Math.toIntExact(20 * FileUtils.ONE_MB);
-	/*
+	/**
 	 * This is arbitrary but feels like a sensible and safe default
 	 */
 	private static final int CUSTOM_MAX_SIZE = Math.toIntExact(50 * FileUtils.ONE_MB);

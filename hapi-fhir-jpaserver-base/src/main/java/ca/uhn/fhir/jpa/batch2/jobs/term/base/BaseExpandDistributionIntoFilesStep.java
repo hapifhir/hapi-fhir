@@ -656,7 +656,10 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 			quoteCharacter = null;
 		}
 
-		return new CSVParser(theReader, newCsvFormat(theDelimiter, quoteCharacter));
+		return CSVParser.builder()
+				.setFormat(newCsvFormat(theDelimiter, quoteCharacter))
+				.setReader(theReader)
+				.get();
 	}
 
 	public static CSVFormat newCsvFormat(char theDelimiter, Character quoteCharacter) {

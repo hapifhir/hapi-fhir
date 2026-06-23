@@ -77,10 +77,10 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 		requestDetails.setMaxRetries(100);
 		requestDetails.setRequestPartitionId(theStepExecutionDetails.getData().getRequestPartitionId());
 		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService.execute(
-				requestDetails,
-				transactionDetails,
-				buildJob(requestDetails, transactionDetails, theStepExecutionDetails));
+		myHapiTransactionService
+				.withRequest(requestDetails)
+				.withTransactionDetails(transactionDetails)
+				.execute(() -> buildJob(requestDetails, transactionDetails, theStepExecutionDetails));
 
 		return new RunOutcome(theStepExecutionDetails.getData().size());
 	}
