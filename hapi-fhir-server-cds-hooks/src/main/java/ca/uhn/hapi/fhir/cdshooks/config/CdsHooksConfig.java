@@ -38,6 +38,7 @@ import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchDaoSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsResolutionStrategySvc;
+import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
@@ -76,23 +77,23 @@ public class CdsHooksConfig {
 	public ICdsServiceRegistry cdsServiceRegistry(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
-			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper,
+			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) JsonMapper theJsonMapper,
 			FhirContext theFhirContext,
 			@Nullable CDSHooksVersion theCDSHooksVersion) {
 		final CdsServiceRequestJsonDeserializer cdsServiceRequestJsonDeserializer =
-				new CdsServiceRequestJsonDeserializer(theFhirContext, theObjectMapper);
+				new CdsServiceRequestJsonDeserializer(theFhirContext, theJsonMapper);
 		return new CdsServiceRegistryImpl(
 				theCdsHooksContextBooter,
 				theCdsPrefetchSvc,
-				theObjectMapper,
+				theJsonMapper,
 				cdsServiceRequestJsonDeserializer,
 				CDSHooksVersion.getOrDefault(theCDSHooksVersion));
 	}
 
 	@Bean
 	public ICdsConfigService cdsConfigService(
-			FhirContext theFhirContext, @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper) {
-		return new CdsConfigServiceImpl(theFhirContext, theObjectMapper, myDaoRegistry, myRestfulServer);
+			FhirContext theFhirContext, @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) JsonMapper theJsonMapper) {
+		return new CdsConfigServiceImpl(theFhirContext, theJsonMapper, myDaoRegistry, myRestfulServer);
 	}
 
 	@Bean

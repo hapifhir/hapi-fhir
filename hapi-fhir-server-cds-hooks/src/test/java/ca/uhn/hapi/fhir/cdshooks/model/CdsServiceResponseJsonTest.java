@@ -3,6 +3,7 @@ package ca.uhn.hapi.fhir.cdshooks.model;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
+import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 
