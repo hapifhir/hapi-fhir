@@ -79,7 +79,8 @@ public class Jackson3JsonHttpMessageConverter extends AbstractHttpMessageConvert
 		try {
 			return myMapper.readValue(theInputMessage.getBody(), theClazz);
 		} catch (JacksonException e) {
-			throw new HttpMessageNotReadableException(Msg.code(9901) + "Could not read JSON: " + e.getMessage(), e, theInputMessage);
+			throw new HttpMessageNotReadableException(
+					Msg.code(9901) + "Could not read JSON: " + e.getMessage(), e, theInputMessage);
 		}
 	}
 

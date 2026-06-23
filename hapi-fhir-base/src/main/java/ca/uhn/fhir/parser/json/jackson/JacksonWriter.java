@@ -128,31 +128,27 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 
 			@Override
 			public ArrayTreeNode createArrayNode() {
-				throw new UnsupportedOperationException(
-					Msg.code(9981) +
-						"Tree-node creation is not supported by " + JacksonWriter.class.getSimpleName());
+				throw new UnsupportedOperationException(Msg.code(9981) + "Tree-node creation is not supported by "
+						+ JacksonWriter.class.getSimpleName());
 			}
 
 			@Override
 			public ObjectTreeNode createObjectNode() {
-				throw new UnsupportedOperationException(
-					Msg.code(9982) +
-						"Tree-node creation is not supported by " + JacksonWriter.class.getSimpleName());
+				throw new UnsupportedOperationException(Msg.code(9982) + "Tree-node creation is not supported by "
+						+ JacksonWriter.class.getSimpleName());
 			}
 
 			@Override
 			public void writeValue(JsonGenerator gen, Object value) {
 				throw new UnsupportedOperationException(
-					Msg.code(9983) +
-						JacksonWriter.class.getSimpleName()
+						Msg.code(9983) + JacksonWriter.class.getSimpleName()
 								+ " writes values via type-specific JsonGenerator methods and does not support writePOJO(..)/writeValue(..)");
 			}
 
 			@Override
 			public void writeTree(JsonGenerator gen, TreeNode tree) {
 				throw new UnsupportedOperationException(
-					Msg.code(9984) +
-						"Tree writing is not supported by " + JacksonWriter.class.getSimpleName());
+						Msg.code(9984) + "Tree writing is not supported by " + JacksonWriter.class.getSimpleName());
 			}
 		};
 
