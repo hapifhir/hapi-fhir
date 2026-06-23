@@ -211,8 +211,8 @@ public class Batch2JobAttachmentEntity implements Serializable {
 		myAttachmentLengthCompressed += theLength;
 	}
 
-	public void incrementAttachmentLengthUncompressed(int theCount) {
-		myAttachmentLengthUncompressed += theCount;
+	public void setAttachmentLengthUncompressed(int theCount) {
+		myAttachmentLengthUncompressed = theCount;
 	}
 
 	/**
