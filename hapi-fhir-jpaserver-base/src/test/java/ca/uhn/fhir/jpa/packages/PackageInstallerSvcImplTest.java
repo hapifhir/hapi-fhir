@@ -6,7 +6,6 @@ import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParame
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.packages.NpmPackageFactory;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -25,6 +24,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.packages.NpmPackageFactory;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -44,12 +44,12 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -94,6 +94,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Tests for {@link PackageInstallerSvcImpl} with an R4 {@link ca.uhn.fhir.context.FhirContext}.
+ * Covers resource installation, version policy (SINGLE_VERSION vs MULTI_VERSION), conflict handling,
+ * SearchParameter base splitting, and cross-version dependency resolution.
+ * See {@link PackageInstallerSvcImplR5Test} for R5-specific coverage.
+ */
 @ExtendWith(MockitoExtension.class)
 public class PackageInstallerSvcImplTest {
 	public static final String PACKAGE_VERSION = "1.0";
@@ -126,9 +132,6 @@ public class PackageInstallerSvcImplTest {
 	private JpaStorageSettings myStorageSettings;
 
 	@Mock
-	private VersionCanonicalizer myVersionCanonicalizerMock;
-
-	@Mock
 	private SearchParameterDaoValidator mySearchParameterDaoValidatorMock;
 
 	@Mock
@@ -140,6 +143,8 @@ public class PackageInstallerSvcImplTest {
 
 	@Spy
 	private FhirContext myCtx = FhirContext.forR4Cached();
+	@Spy
+	private VersionCanonicalizer myVersionCanonicalizer = new VersionCanonicalizer(myCtx);
 	@Spy
 	private IHapiTransactionService myTxService = new NonTransactionalHapiTransactionService();
 	@Spy
@@ -214,15 +219,9 @@ public class PackageInstallerSvcImplTest {
 			if (theResource.fhirType().equals("SearchParameter")) {
 				setupSearchParameterValidationMocksForSuccess();
 				when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
-			}
-			else if (theResource.fhirType().equals("CodeSystem")) {
-				when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn((CodeSystem) theResource);
-			}
-			else if (theResource.fhirType().equals("ValueSet")) {
-				when(myVersionCanonicalizerMock.valueSetToCanonical(any())).thenReturn((ValueSet) theResource);
-			}
-			else
+			} else if (!theResource.fhirType().equals("CodeSystem") && !theResource.fhirType().equals("ValueSet")) {
 				when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
+			}
 
 			assertEquals(theExpectedResultForStatusValidation, mySvc.validForUpload(theResource));
 		}
@@ -234,17 +233,11 @@ public class PackageInstallerSvcImplTest {
 				setupSearchParameterValidationMocksForSuccess();
 				when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(false);
 				assertTrue(mySvc.validForUpload(theResource));
-			}
-			else if (theResource.fhirType().equals("CodeSystem")) {
-				when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn((CodeSystem) theResource);
+			} else if (theResource.fhirType().equals("CodeSystem") || theResource.fhirType().equals("ValueSet")) {
 				assertEquals(theExpectedResultForStatusValidation, mySvc.validForUpload(theResource));
-			}
-			else if (theResource.fhirType().equals("ValueSet")) {
-				when(myVersionCanonicalizerMock.valueSetToCanonical(any())).thenReturn((ValueSet) theResource);
-				assertEquals(theExpectedResultForStatusValidation, mySvc.validForUpload(theResource));
-			}
-			else
+			} else {
 				assertTrue(mySvc.validForUpload(theResource));
+			}
 		}
 
 		@Test
@@ -254,11 +247,9 @@ public class PackageInstallerSvcImplTest {
 			final String spURL = "http://myspurl.example/invalidsp";
 			SearchParameter spR4 = new SearchParameter();
 			spR4.setUrl(spURL);
-			org.hl7.fhir.r5.model.SearchParameter spR5 = new org.hl7.fhir.r5.model.SearchParameter();
 
-			when(myVersionCanonicalizerMock.searchParameterToCanonical(spR4)).thenReturn(spR5);
 			doThrow(new UnprocessableEntityException(validationExceptionMessage)).
-				when(mySearchParameterDaoValidatorMock).validate(spR5);
+				when(mySearchParameterDaoValidatorMock).validate(any());
 
 			assertFalse(mySvc.validForUpload(spR4));
 
@@ -273,12 +264,10 @@ public class PackageInstallerSvcImplTest {
 		public void testValidForUpload_WhenSearchParameterValidatorThrowsAnExceptionOtherThanUnprocessableEntityException_ThenThrows() {
 
 			SearchParameter spR4 = new SearchParameter();
-			org.hl7.fhir.r5.model.SearchParameter spR5 = new org.hl7.fhir.r5.model.SearchParameter();
 
 			RuntimeException notAnUnprocessableEntityException = new RuntimeException("should not be caught");
-			when(myVersionCanonicalizerMock.searchParameterToCanonical(spR4)).thenReturn(spR5);
 			doThrow(notAnUnprocessableEntityException).
-				when(mySearchParameterDaoValidatorMock).validate(spR5);
+				when(mySearchParameterDaoValidatorMock).validate(any());
 
 			Exception actualExceptionThrown = assertThrows(Exception.class, () -> mySvc.validForUpload(spR4));
 			assertEquals(notAnUnprocessableEntityException, actualExceptionThrown);
@@ -288,7 +277,6 @@ public class PackageInstallerSvcImplTest {
 		@Test
 		void testValidForUpload_embeddedCodeSystem_returnsFalseAndLogsWarning() {
 			CodeSystem embeddedCs = createCodeSystem(CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL);
-			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(embeddedCs);
 
 			assertFalse(mySvc.validForUpload(embeddedCs));
 			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarnMessage(
@@ -299,7 +287,6 @@ public class PackageInstallerSvcImplTest {
 		@Test
 		void testValidForUpload_embeddedValueSet_returnsFalseAndLogsWarning() {
 			ValueSet embeddedVs = createValueSet(CommonCodeSystemsTerminologyService.LANGUAGES_VALUESET_URL);
-			when(myVersionCanonicalizerMock.valueSetToCanonical(any())).thenReturn(embeddedVs);
 
 			assertFalse(mySvc.validForUpload(embeddedVs));
 			LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarnMessage(
@@ -313,7 +300,6 @@ public class PackageInstallerSvcImplTest {
 			draftCs.setId("CodeSystem/draft-cs");
 			draftCs.setUrl("http://example.com/cs");
 			draftCs.setStatus(Enumerations.PublicationStatus.DRAFT);
-			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(draftCs);
 			when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
 
 			assertFalse(mySvc.validForUpload(draftCs));
@@ -389,7 +375,6 @@ public class PackageInstallerSvcImplTest {
 
 		PackageInstallationSpec spec = setupResourceInPackage(existingCs, cs, myCodeSystemDao);
 
-		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(cs);
 
 		when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
 		// Test
@@ -425,7 +410,6 @@ public class PackageInstallerSvcImplTest {
 
 		PackageInstallationSpec spec = setupResourceInPackage(existingCs, igCs, myCodeSystemDao);
 
-		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(igCs);
 
 		// Test
 		PackageInstallOutcomeJson outcome = mySvc.install(spec);
@@ -459,7 +443,6 @@ public class PackageInstallerSvcImplTest {
 		PackageInstallationSpec spec = setupResourceInPackage(existingCs, igCs, myCodeSystemDao)
 			.setOverwriteContentNotPresentCodeSystems(true);
 
-		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(igCs);
 
 		// Test
 		mySvc.install(spec);
@@ -499,7 +482,6 @@ public class PackageInstallerSvcImplTest {
 
 		PackageInstallationSpec spec = setupResourceInPackage(null, cs, myCodeSystemDao);
 
-		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(cs);
 
 		PackageInstallOutcomeJson outcome = mySvc.install(spec);
 
@@ -524,7 +506,6 @@ public class PackageInstallerSvcImplTest {
 
 		PackageInstallationSpec spec = setupResourceInPackage(existingCs, cs, myCodeSystemDao);
 
-		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(cs);
 		when(myCodeSystemDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
 
 		PackageInstallOutcomeJson outcome = mySvc.install(spec);
@@ -544,7 +525,6 @@ public class PackageInstallerSvcImplTest {
 
 		PackageInstallationSpec spec = setupResourceInPackage(null, cs, myCodeSystemDao);
 
-		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(cs);
 
 		mySvc.install(spec);
 
@@ -752,9 +732,8 @@ public class PackageInstallerSvcImplTest {
 		return searchParameter;
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	private PackageInstallationSpec setupResourceInPackage(IBaseResource theExistingResource, IBaseResource theInstallResource,
-	                                                       IFhirResourceDao theFhirResourceDao) throws IOException {
+	                                                       IFhirResourceDao<?> theFhirResourceDao) throws IOException {
 		NpmPackage pkg = NpmPackageFactory.create(myCtx)
 			.name(PACKAGE_ID_1).version(PACKAGE_VERSION)
 			.addResource(theInstallResource.getClass().getSimpleName(), theInstallResource)
@@ -765,7 +744,7 @@ public class PackageInstallerSvcImplTest {
 		when(myDaoRegistry.getResourceDao(theInstallResource.fhirType())).thenReturn(theFhirResourceDao);
 		when(theFhirResourceDao.search(any(), any())).thenReturn(theExistingResource != null ?
 			new SimpleBundleProvider(theExistingResource) : new SimpleBundleProvider());
-		if (theInstallResource.getClass().getSimpleName().equals("SearchParameter")) {
+		if (theInstallResource instanceof SearchParameter) {
 			when(mySearchParameterHelper.buildSearchParameterMapFromCanonical(any())).thenReturn(Optional.of(mySearchParameterMap));
 		}
 
@@ -781,7 +760,6 @@ public class PackageInstallerSvcImplTest {
 	}
 
 	private void setupSearchParameterValidationMocksForSuccess() {
-		when(myVersionCanonicalizerMock.searchParameterToCanonical(any())).thenReturn(new org.hl7.fhir.r5.model.SearchParameter());
 		doNothing().when(mySearchParameterDaoValidatorMock).validate(any());
 	}
 
@@ -809,119 +787,109 @@ public class PackageInstallerSvcImplTest {
 		return communication;
 	}
 
-	static Stream<Arguments> resourcesWithExpectedSearchKey() {
-		CodeSystem csWithUrl = new CodeSystem();
-		csWithUrl.setUrl("http://example.com/cs");
-		csWithUrl.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		csWithUrl.setStatus(Enumerations.PublicationStatus.ACTIVE);
+	@Nested
+	class CreateSearchParameterMapForTest {
 
-		Device deviceWithUrlNotPopulated = new Device();
-		deviceWithUrlNotPopulated.setStatus(Device.FHIRDeviceStatus.ACTIVE);
-		deviceWithUrlNotPopulated.addIdentifier().setSystem("urn:sys").setValue("device-no-url");
+		static Stream<Arguments> resourcesWithExpectedSearchKey() {
+			CodeSystem csWithUrl = new CodeSystem();
+			csWithUrl.setUrl("http://example.com/cs");
+			csWithUrl.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			csWithUrl.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		Patient ptWithIdentifier = new Patient();
-		ptWithIdentifier.addIdentifier().setSystem("urn:sys").setValue("pt-id");
+			Device deviceWithUrlNotPopulated = new Device();
+			deviceWithUrlNotPopulated.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+			deviceWithUrlNotPopulated.addIdentifier().setSystem("urn:sys").setValue("device-no-url");
 
-		Device deviceWithUrl = new Device();
-		deviceWithUrl.setUrl("http://10.0.0.1/fhir");
-		deviceWithUrl.setStatus(Device.FHIRDeviceStatus.ACTIVE);
-		deviceWithUrl.addIdentifier().setSystem("urn:sys").setValue("device-with-url");
+			Patient ptWithSystemAndValue = new Patient();
+			ptWithSystemAndValue.addIdentifier().setSystem("urn:sys").setValue("pt-id");
 
-		// A device with a url element present but blank — hasUrl must return false,
-		// falling through to identifier-based matching.
-		Device deviceWithBlankUrl = new Device();
-		deviceWithBlankUrl.setStatus(Device.FHIRDeviceStatus.ACTIVE);
-		deviceWithBlankUrl.addIdentifier().setSystem("urn:sys").setValue("device-blank-url");
-		deviceWithBlankUrl.setUrl("");
+			Patient ptWithValueOnly = new Patient();
+			ptWithValueOnly.addIdentifier().setValue("pt-value-only");
 
-		Subscription subscription = createSubscription(Subscription.SubscriptionStatus.REQUESTED);
-		subscription.setId("sub-123");
+			Device deviceWithUrl = new Device();
+			deviceWithUrl.setUrl("http://10.0.0.1/fhir");
+			deviceWithUrl.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+			deviceWithUrl.addIdentifier().setSystem("urn:sys").setValue("device-with-url");
 
-		return Stream.of(
-			arguments(csWithUrl, "url", "?url=http%3A//example.com/cs"),
-			arguments(deviceWithUrlNotPopulated, "identifier", "?identifier=urn%3Asys%7Cdevice-no-url"),
-			arguments(ptWithIdentifier, "identifier", "?identifier=urn%3Asys%7Cpt-id"),
-			arguments(deviceWithUrl, "url", "?url=http%3A//10.0.0.1/fhir"),
-			arguments(deviceWithBlankUrl, "identifier", "?identifier=urn%3Asys%7Cdevice-blank-url"),
-			arguments(subscription, "_id", "?_id=Subscription/sub-123")
-		);
-	}
+			// A device with a url element present but blank — hasUrl must return false,
+			// falling through to identifier-based matching.
+			Device deviceWithBlankUrl = new Device();
+			deviceWithBlankUrl.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+			deviceWithBlankUrl.addIdentifier().setSystem("urn:sys").setValue("device-blank-url");
+			deviceWithBlankUrl.setUrl("");
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	@ParameterizedTest
-	@MethodSource("resourcesWithExpectedSearchKey")
-	void testInstall_searchesByExpectedKey(IBaseResource theResource, String theExpectedSearchKey,
-										   String theExpectedQueryString) throws IOException {
-		IFhirResourceDao dao = mock(IFhirResourceDao.class);
-		if (theResource instanceof CodeSystem cs) {
-			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(cs);
-		} else if (theResource instanceof ValueSet vs) {
-			when(myVersionCanonicalizerMock.valueSetToCanonical(any())).thenReturn(vs);
+			Organization orgWithIdentifier = new org.hl7.fhir.r4.model.Organization();
+			orgWithIdentifier.addIdentifier().setSystem("urn:oid:2.16").setValue("r4-org-001");
+
+			Subscription subscription = createSubscription(Subscription.SubscriptionStatus.REQUESTED);
+			subscription.setId("Subscription/sub-123");
+
+			NamingSystem namingSystemWithUniqueId = new NamingSystem();
+			namingSystemWithUniqueId.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			namingSystemWithUniqueId.setName("TestNamingSystem");
+			namingSystemWithUniqueId.addUniqueId().setValue("urn:oid:1.2.3.4");
+
+			return Stream.of(
+				arguments(csWithUrl, "url", "?url=http%3A//example.com/cs"),
+				arguments(deviceWithUrlNotPopulated, "identifier", "?identifier=urn%3Asys%7Cdevice-no-url"),
+				arguments(ptWithSystemAndValue, "identifier", "?identifier=urn%3Asys%7Cpt-id"),
+				arguments(ptWithValueOnly, "identifier", "?identifier=pt-value-only"),
+				arguments(deviceWithUrl, "url", "?url=http%3A//10.0.0.1/fhir"),
+				arguments(deviceWithBlankUrl, "identifier", "?identifier=urn%3Asys%7Cdevice-blank-url"),
+				arguments(orgWithIdentifier, "identifier", "?identifier=urn%3Aoid%3A2.16%7Cr4-org-001"),
+				arguments(subscription, "_id", "?_id=Subscription/sub-123"),
+				arguments(namingSystemWithUniqueId, "value", "?value:exact=urn%3Aoid%3A1.2.3.4")
+			);
 		}
-		when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
 
-		PackageInstallationSpec spec = setupResourceInPackage(null, theResource, dao);
-		spec.addInstallResourceTypes(theResource.fhirType());
+		@ParameterizedTest
+		@MethodSource("resourcesWithExpectedSearchKey")
+		void createSearchParameterMapFor_resource_returnsCorrectSearchKey(IBaseResource theResource, String theExpectedSearchKey, String theExpectedQueryString) {
+			SearchParameterMap map = mySvc.createSearchParameterMapFor(theResource, new PackageInstallationSpec());
+			assertThat(map.keySet()).contains(theExpectedSearchKey);
+			assertThat(map.toNormalizedQueryString()).startsWith(theExpectedQueryString);
+		}
 
-		mySvc.install(spec);
+		@Test
+		void createSearchParameterMapFor_subscriptionWithNoId_throws() {
+			Subscription subscription = createSubscription(Subscription.SubscriptionStatus.REQUESTED);
+			PackageInstallationSpec spec = new PackageInstallationSpec();
+			assertThatThrownBy(() -> mySvc.createSearchParameterMapFor(subscription, spec))
+				.isInstanceOf(UnsupportedOperationException.class)
+				.hasMessageContaining("HAPI-2929");
+		}
 
-		verify(dao).search(mySearchParameterMapCaptor.capture(), any());
-		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertThat(map.keySet()).contains(theExpectedSearchKey);
-		assertThat(map.toNormalizedQueryString()).startsWith(theExpectedQueryString);
-	}
+		@Test
+		void createSearchParameterMapFor_namingSystemWithNoUniqueId_throws() {
+			NamingSystem namingSystem = new NamingSystem();
+			namingSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			namingSystem.setKind(NamingSystem.NamingSystemType.CODESYSTEM);
+			namingSystem.setName("TestNamingSystem");
+			PackageInstallationSpec spec = new PackageInstallationSpec();
+			assertThatThrownBy(() -> mySvc.createSearchParameterMapFor(namingSystem, spec))
+				.isInstanceOf(ImplementationGuideInstallationException.class)
+				.hasMessageContaining("HAPI-1291")
+				.hasMessageContaining("NamingSystem does not have uniqueId component");
+		}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	@Test
-	void testInstall_subscriptionWithNoId_throws() throws IOException {
-		Subscription subscription = createSubscription(Subscription.SubscriptionStatus.REQUESTED);
-		NpmPackage pkg = NpmPackageFactory.create(myCtx)
-			.name(PACKAGE_ID_1).version(PACKAGE_VERSION)
-			.addResource("Subscription", subscription)
-			.createPackage();
-		IFhirResourceDao dao = mock(IFhirResourceDao.class);
-		when(myStorageSettings.isValidateResourceStatusForPackageUpload()).thenReturn(true);
-		when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
-		when(myPackageCacheManager.installPackage(any())).thenReturn(pkg);
+		@Test
+		void createSearchParameterMapFor_resourceWithNoIdentifier_throws() {
+			Patient patient = new Patient();
+			PackageInstallationSpec spec = new PackageInstallationSpec();
+			assertThatThrownBy(() -> mySvc.createSearchParameterMapFor(patient, spec))
+				.isInstanceOf(ImplementationGuideInstallationException.class)
+				.hasMessageContaining("HAPI-1292");
+		}
 
-		PackageInstallationSpec spec = new PackageInstallationSpec();
-		spec.setName(PACKAGE_ID_1);
-		spec.setVersion(PACKAGE_VERSION);
-		spec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
-		spec.addInstallResourceTypes("Subscription");
-
-		assertThatThrownBy(() -> mySvc.install(spec))
-			.isInstanceOf(ImplementationGuideInstallationException.class)
-			.hasRootCauseInstanceOf(UnsupportedOperationException.class)
-			.hasRootCauseMessage("%s", "HAPI-2929: Subscription resources in a package must have an id to be loaded by the package installer.");
-	}
-
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	@Test
-	void testInstall_namingSystemWithNoUniqueId_throws() throws IOException {
-		NamingSystem namingSystem = new NamingSystem();
-		namingSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		namingSystem.setKind(NamingSystem.NamingSystemType.CODESYSTEM);
-		namingSystem.setName("TestNamingSystem");
-
-		NpmPackage pkg = NpmPackageFactory.create(myCtx)
-			.name(PACKAGE_ID_1).version(PACKAGE_VERSION)
-			.addResource("NamingSystem", namingSystem)
-			.createPackage();
-		IFhirResourceDao dao = mock(IFhirResourceDao.class);
-		when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
-		when(myPackageCacheManager.installPackage(any())).thenReturn(pkg);
-
-		PackageInstallationSpec spec = new PackageInstallationSpec();
-		spec.setName(PACKAGE_ID_1);
-		spec.setVersion(PACKAGE_VERSION);
-		spec.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
-		spec.addInstallResourceTypes("NamingSystem");
-
-		assertThatThrownBy(() -> mySvc.install(spec))
-			.isInstanceOf(ImplementationGuideInstallationException.class)
-			.hasMessageContaining("HAPI-1291")
-			.hasMessageContaining("NamingSystem does not have uniqueId component");
+		@Test
+		void createSearchParameterMapFor_identifierWithSystemButNoValue_throws() {
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:sys");
+			PackageInstallationSpec spec = new PackageInstallationSpec();
+			assertThatThrownBy(() -> mySvc.createSearchParameterMapFor(patient, spec))
+				.isInstanceOf(ImplementationGuideInstallationException.class)
+				.hasMessageContaining("HAPI-1292");
+		}
 	}
 
 	@Nested
@@ -944,20 +912,15 @@ public class PackageInstallerSvcImplTest {
 		@Test
 		void testFetchDependencies_crossVersionDependencyWithR4Variant_shouldSubstituteAndSucceed() throws Exception {
 			// Setup: main R4 package that depends on a cross-version (R5) package
-			NpmPackage mainPackage = createPackageWithDependency(
-				MAIN_PKG_ID, MAIN_PKG_VERSION,
-				FhirVersionEnum.R4.getFhirVersionString(),
-				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
+			NpmPackage mainPackage = createPackageWithDependency();
 
 			// The cross-version dependency declares FHIR version 5.0.0
 			NpmPackage crossVersionDep = createSimplePackage(
-				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION,
-				FhirVersionEnum.R5.getFhirVersionString());
+				CROSS_VERSION_PKG_ID, FhirVersionEnum.R5.getFhirVersionString());
 
 			// The R4-specific variant that should be substituted
 			NpmPackage r4Variant = createSimplePackage(
-				CROSS_VERSION_R4_PKG_ID, CROSS_VERSION_PKG_VERSION,
-				FhirVersionEnum.R4.getFhirVersionString());
+				CROSS_VERSION_R4_PKG_ID, FhirVersionEnum.R4.getFhirVersionString());
 
 			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
@@ -1020,10 +983,7 @@ public class PackageInstallerSvcImplTest {
 		@Test
 		void testFetchDependencies_excludedCrossVersionDep_shouldBeSkipped() throws Exception {
 			// Setup: main R4 package that depends on a cross-version (R5) package
-			NpmPackage mainPackage = createPackageWithDependency(
-				MAIN_PKG_ID, MAIN_PKG_VERSION,
-				FhirVersionEnum.R4.getFhirVersionString(),
-				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
+			NpmPackage mainPackage = createPackageWithDependency();
 
 			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
@@ -1054,15 +1014,11 @@ public class PackageInstallerSvcImplTest {
 		@Test
 		void testFetchDependencies_crossVersionDependencyWithNoR4Variant_shouldFail() throws Exception {
 			// Setup: main R4 package that depends on a cross-version (R5) package
-			NpmPackage mainPackage = createPackageWithDependency(
-				MAIN_PKG_ID, MAIN_PKG_VERSION,
-				FhirVersionEnum.R4.getFhirVersionString(),
-				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
+			NpmPackage mainPackage = createPackageWithDependency();
 
 			// The cross-version dependency declares FHIR version 5.0.0
 			NpmPackage crossVersionDep = createSimplePackage(
-				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION,
-				FhirVersionEnum.R5.getFhirVersionString());
+				CROSS_VERSION_PKG_ID, FhirVersionEnum.R5.getFhirVersionString());
 
 			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
@@ -1087,28 +1043,22 @@ public class PackageInstallerSvcImplTest {
 		}
 
 		@Nonnull
-		private NpmPackage createPackageWithDependency(
-				String theName, String theVersion, String theFhirVersion,
-				String theDepName, String theDepVersion) {
-			PackageGenerator manifest = new PackageGenerator();
-			manifest.name(theName);
-			manifest.version(theVersion);
-			manifest.description("a test package");
-			manifest.fhirVersions(List.of(theFhirVersion));
-			manifest.dependency(theDepName, theDepVersion);
-
-			return NpmPackage.empty(manifest);
+		private NpmPackage createPackageWithDependency() {
+			return NpmPackageFactory.create(myCtx)
+					.name(MAIN_PKG_ID)
+					.version(MAIN_PKG_VERSION)
+					.fhirVersion(FhirVersionEnum.R4.getFhirVersionString())
+					.addDependency(CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION)
+					.createPackage();
 		}
 
 		@Nonnull
-		private NpmPackage createSimplePackage(String theName, String theVersion, String theFhirVersion) {
-			PackageGenerator manifest = new PackageGenerator();
-			manifest.name(theName);
-			manifest.version(theVersion);
-			manifest.description("a test package");
-			manifest.fhirVersions(List.of(theFhirVersion));
-
-			return NpmPackage.empty(manifest);
+		private NpmPackage createSimplePackage(String theName, String theFhirVersion) {
+			return NpmPackageFactory.create(myCtx)
+					.name(theName)
+					.version(CROSS_VERSION_PKG_VERSION)
+					.fhirVersion(theFhirVersion)
+					.createPackage();
 		}
 	}
 
@@ -1142,7 +1092,6 @@ public class PackageInstallerSvcImplTest {
 			packagedCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 
 			PackageInstallationSpec spec = setupResourceInPackage(null, packagedCs, myCodeSystemDao);
-			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(packagedCs);
 			when(myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(CODE_SYSTEM_URL, VERSION))
 					.thenReturn(Optional.of(JpaPid.fromId(100L)));
 			when(myCodeSystemDao.readByPid(any())).thenReturn(existingCs);
@@ -1162,7 +1111,6 @@ public class PackageInstallerSvcImplTest {
 			packagedCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 
 			PackageInstallationSpec spec = setupResourceInPackage(null, packagedCs, myCodeSystemDao);
-			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(packagedCs);
 			when(myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(CODE_SYSTEM_URL, VERSION))
 					.thenReturn(Optional.empty());
 
@@ -1180,7 +1128,6 @@ public class PackageInstallerSvcImplTest {
 			packagedCs.addIdentifier().setSystem("http://example.org/CodeSystem/identifier").setValue("someValue");
 
 			PackageInstallationSpec spec = setupResourceInPackage(null, packagedCs, myCodeSystemDao);
-			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(packagedCs);
 
 			mySvc.install(spec);
 
@@ -1188,16 +1135,15 @@ public class PackageInstallerSvcImplTest {
 			verify(myTermCodeSystemStorageSvc, never()).findExistingCodeSystemResourcePid(any(), any());
 		}
 
-		@SuppressWarnings("unchecked")
 		@Test
 		void install_nonCodeSystemSearchMisses_noTermLayerFallback() throws IOException {
 			ValueSet packagedVs = new ValueSet();
 			packagedVs.setUrl("http://example.org/ValueSet/test");
 			packagedVs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-			IFhirResourceDao<ValueSet> vsDao = org.mockito.Mockito.mock(IFhirResourceDao.class);
+			@SuppressWarnings("unchecked")
+			IFhirResourceDao<ValueSet> vsDao = mock(IFhirResourceDao.class);
 			PackageInstallationSpec spec = setupResourceInPackage(null, packagedVs, vsDao);
-			when(myVersionCanonicalizerMock.valueSetToCanonical(any())).thenReturn(packagedVs);
 
 			mySvc.install(spec);
 
@@ -1207,7 +1153,6 @@ public class PackageInstallerSvcImplTest {
 	}
 
 	// Created by Claude Opus 4.6
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
 	void testInstallPackage_withNonExistentAdditionalFolder_installsOnlyStandardResources() throws IOException {
 		CodeSystem cs = new CodeSystem();
@@ -1217,7 +1162,6 @@ public class PackageInstallerSvcImplTest {
 		PackageInstallationSpec spec = setupResourceInPackage(null, cs, myCodeSystemDao);
 		spec.setAdditionalResourceFolders(java.util.Set.of("nonexistent-folder"));
 
-		when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(cs);
 
 		PackageInstallOutcomeJson outcome = mySvc.install(spec);
 
@@ -1226,7 +1170,6 @@ public class PackageInstallerSvcImplTest {
 	}
 
 	// Created by Claude Opus 4.6
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
 	void testUpdateResource_versionConflict_skipsResourceAndLogsErrorWithCause() throws IOException {
 		ValueSet existingVs = new ValueSet();
@@ -1239,9 +1182,9 @@ public class PackageInstallerSvcImplTest {
 		packagedVs.setUrl("http://example.org/ValueSet/my-vs");
 		packagedVs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
+		@SuppressWarnings("unchecked")
 		IFhirResourceDao<ValueSet> vsDao = mock(IFhirResourceDao.class);
 		PackageInstallationSpec spec = setupResourceInPackage(existingVs, packagedVs, vsDao);
-		when(myVersionCanonicalizerMock.valueSetToCanonical(any())).thenReturn(packagedVs);
 
 		when(vsDao.update(any(), any(RequestDetails.class)))
 				.thenThrow(new ResourceVersionConflictException("HAPI-0825: Conflict with resource version"));
@@ -1407,7 +1350,6 @@ public class PackageInstallerSvcImplTest {
 			spec.setName("package1");
 			spec.setVersion("1.0");
 			spec.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION);
-			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(installCs);
 			when(myCodeSystemDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
 
 			mySvc.install(spec);
@@ -1431,7 +1373,6 @@ public class PackageInstallerSvcImplTest {
 			spec.setName("package1");
 			spec.setVersion("1.0");
 			spec.setVersionPolicy(PackageInstallationSpec.VersionPolicyEnum.SINGLE_VERSION);
-			when(myVersionCanonicalizerMock.codeSystemToCanonical(any())).thenReturn(installCs);
 
 			mySvc.install(spec);
 
