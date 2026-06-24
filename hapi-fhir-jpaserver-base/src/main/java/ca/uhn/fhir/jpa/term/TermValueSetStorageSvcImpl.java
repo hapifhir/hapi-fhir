@@ -44,6 +44,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermValueSetStorageSvcImpl.class);
+	public static final String INTENDED_VERSION_ID_NULL = "(null)";
 
 	@Autowired
 	private ITermValueSetDao myTermValueSetDao;
@@ -74,7 +75,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			stagingValueSet.setUrl(valueSet.getUrl());
 			stagingValueSet.setVersion(stagingVersionId);
 			stagingValueSet.setName(valueSet.getName());
-			stagingValueSet.setIntendedVersionId(theVersion);
+			stagingValueSet.setIntendedVersionId(getIfNull(theVersion, INTENDED_VERSION_ID_NULL));
 			stagingValueSet.setResource(valueSet.getResource());
 			myTermValueSetDao.save(stagingValueSet);
 

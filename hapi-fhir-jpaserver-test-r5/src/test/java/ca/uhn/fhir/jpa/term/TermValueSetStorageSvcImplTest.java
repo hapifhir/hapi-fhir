@@ -23,11 +23,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import static ca.uhn.fhir.jpa.term.TermValueSetStorageSvcImpl.INTENDED_VERSION_ID_NULL;
 import static ca.uhn.fhir.test.utilities.UuidUtils.UUID_PATTERN;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 
@@ -64,30 +66,22 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 
 			// Non-staging first, staging is second
 			valueSets.sort(Comparator.comparing(TermValueSet::getId));
-			assertThat(valueSets.stream().map(TermValueSet::getVersion)).containsExactly(
-				theVersion,
-				stagingVersion
-			);
-			assertThat(valueSets.stream().map(TermValueSet::getUrl)).containsExactly(
-				VS_URI,
-				VS_URI
-			);
-			assertThat(valueSets.stream().map(TermValueSet::getIntendedVersionId)).containsExactly(
-				null,
-				theVersion
-			);
-			assertThat(valueSets.stream().map(TermValueSet::getExpansionStatus)).containsExactly(
-				TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS,
-				TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS
-			);
-			assertThat(valueSets.stream().map(TermValueSet::getName)).containsExactly(
-				THE_VALUE_SET_NAME,
-				THE_VALUE_SET_NAME
-			);
-			assertThat(valueSets.stream().map(t -> t.getResource().getFhirId())).containsExactly(
-				VS_ID,
-				VS_ID
-			);
+			assertEquals(version, valueSets.get(0).getVersion());
+			assertEquals(stagingVersion, valueSets.get(1).getVersion());
+			assertEquals(VS_URI, valueSets.get(0).getUrl());
+			assertEquals(VS_URI, valueSets.get(1).getUrl());
+			assertNull(valueSets.get(0).getIntendedVersionId());
+			if (version == null) {
+				assertEquals(INTENDED_VERSION_ID_NULL, valueSets.get(1).getIntendedVersionId());
+			} else {
+				assertEquals(version, valueSets.get(1).getIntendedVersionId());
+			}
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS, valueSets.get(0).getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS, valueSets.get(1).getExpansionStatus());
+			assertEquals(THE_VALUE_SET_NAME, valueSets.get(0).getName());
+			assertEquals(THE_VALUE_SET_NAME, valueSets.get(1).getName());
+			assertEquals(VS_ID, valueSets.get(0).getResource().getFhirId());
+			assertEquals(VS_ID, valueSets.get(1).getResource().getFhirId());
 		});
 	}
 
@@ -189,7 +183,7 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 		createValueSetResource("1.0");
 		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0");
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			TermValueSet termValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, stagingVersion).orElseThrow();
 
 			TermValueSetConcept code0 = new TermValueSetConcept();
@@ -206,6 +200,10 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 			designation.setValueSet(termValueSet);
 			code0.getDesignations().add(designation);
 			myTermValueSetConceptDesignationDao.save(designation);
+
+			termValueSet.setTotalConcepts(1L);
+			termValueSet.setTotalConceptDesignations(1L);
+			myTermValueSetDao.save(termValueSet);
 		});
 
 		// Test
@@ -241,8 +239,8 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 				""";
 			assertEquals(expected, actual);
 
-			assertEquals(3, valueSet.getTotalConcepts());
-			assertEquals(3, valueSet.getTotalConceptDesignations());
+			assertEquals(2, valueSet.getTotalConcepts());
+			assertEquals(2, valueSet.getTotalConceptDesignations());
 		});
 		assertPartitionSet();
 	}
@@ -302,7 +300,7 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 		createValueSetResource("1.0");
 		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0");
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			TermValueSet termValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, stagingVersion).orElseThrow();
 
 			TermValueSetConcept code0 = new TermValueSetConcept();
@@ -323,6 +321,8 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 			code1.setOrder(1);
 			myTermValueSetConceptDao.save(code1);
 
+			termValueSet.setTotalConcepts(2L);
+			myTermValueSetDao.save(termValueSet);
 		});
 
 		// Test
@@ -372,7 +372,7 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 	}
 
 	private void assertPartitionSet() {
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			for (TermValueSet valueSet : myTermValueSetDao.findAll()) {
 				assertEquals(-1, valueSet.getPartitionId().getPartitionId());
 			}
@@ -405,7 +405,7 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 		List<TermValueSetConcept> rootConcepts = theValueSet
 			.getConcepts()
 			.stream()
-			.filter(t->t.getParents().isEmpty())
+			.filter(t -> t.getParents().isEmpty())
 			.toList();
 
 		appendToHierarchy(rootConcepts, 0, target);
