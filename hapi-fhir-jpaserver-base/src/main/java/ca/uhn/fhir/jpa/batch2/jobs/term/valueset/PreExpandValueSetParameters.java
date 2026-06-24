@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.valueset;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -34,4 +35,7 @@ public class PreExpandValueSetParameters implements IModelJson {
 	}
 
 
+	public UrlUtil.CanonicalUrlParts getCanonicalUrl() {
+		return new UrlUtil.CanonicalUrlParts(myUrl, myVersion);
+	}
 }

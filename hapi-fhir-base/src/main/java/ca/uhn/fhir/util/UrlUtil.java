@@ -717,5 +717,37 @@ public class UrlUtil {
 		}
 	}
 
-	public record CanonicalUrlParts(String url, Optional<String> versionId) {}
+	public record CanonicalUrlParts(String url, Optional<String> versionId) {
+
+		/**
+		 * Constructor
+		 */
+		public CanonicalUrlParts(@Nonnull String theUrl, @Nullable String theVersion) {
+			this(theUrl, Optional.ofNullable(defaultIfBlank(theVersion, null)));
+		}
+
+		/**
+		 * If a version is present, returns the complete versioned canonical URL (e.g.
+		 * <code>http://loinc.org|2.69</code>). Otherwise, returns {@link #url()} (e.g.
+		 * <code>http://loinc.org</code>).
+		 *
+		 * @since 8.12.0
+		 */
+		@Nonnull
+		@Override
+		public String toString() {
+			if (versionId().isPresent()) {
+				return url() + "|" + versionId().get();
+			}
+			return url();
+		}
+
+		/**
+		 * Does the URL have a version?
+		 * @since 8.12.0
+		 */
+		public boolean hasVersion() {
+			return versionId().isPresent();
+		}
+	}
 }

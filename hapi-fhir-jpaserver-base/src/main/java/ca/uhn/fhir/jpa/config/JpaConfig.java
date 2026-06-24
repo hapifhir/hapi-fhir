@@ -187,12 +187,14 @@ import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
+import ca.uhn.fhir.jpa.term.TermValueSetStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulator;
 import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulatorFactory;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
@@ -1029,6 +1031,11 @@ public class JpaConfig {
 	@Bean
 	public ITermCodeSystemStorageSvc termCodeSystemStorageSvc() {
 		return new TermCodeSystemStorageSvcImpl();
+	}
+
+	@Bean
+	public ITermValueSetStorageSvc termValueSetStorageSvc() {
+		return new TermValueSetStorageSvcImpl();
 	}
 
 	@Bean

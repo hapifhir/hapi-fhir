@@ -8,12 +8,11 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import jakarta.annotation.Nonnull;
 
-public class Step1CreateExpansionWorkChunks implements IJobStepWorker<PreExpandValueSetParameters, VoidModel, ExpansionWorkChunkJson> {
+public class CalculateValueSetConceptClosureLoadPidsStep implements IJobStepWorker<PreExpandValueSetParameters, VoidModel, GenerateClosurePidsChunkJson> {
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PreExpandValueSetParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<ExpansionWorkChunkJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<PreExpandValueSetParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<GenerateClosurePidsChunkJson> theDataSink) throws JobExecutionFailedException {
 		return null;
 	}
-
 }

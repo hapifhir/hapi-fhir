@@ -96,6 +96,15 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 	@Column(name = "VER", nullable = true, length = MAX_VER_LENGTH)
 	private String myVersion;
 
+	/**
+	 * If this version is a temporary staging version which is intended to replace
+	 * another version when the staging is complete, this element will hold the
+	 * version ID which this entity will take when the staging is complete.
+	 */
+	// FIXME: add migration
+	@Column(name = "VS_INTENDED_VERSION_ID", nullable = true, length = MAX_VER_LENGTH)
+	private String myIntendedVersionId;
+
 	@ManyToOne()
 	@JoinColumns(
 			value = {
@@ -165,6 +174,28 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 
 	public IdAndPartitionId getPartitionedId() {
 		return IdAndPartitionId.forId(myId, this);
+	}
+
+	/**
+	 * If this version is a temporary staging version which is intended to replace
+	 * another version when the staging is complete, this element will hold the
+	 * version ID which this entity will take when the staging is complete.
+	 *
+	 * @since 8.12.0
+	 */
+	public String getIntendedVersionId() {
+		return myIntendedVersionId;
+	}
+
+	/**
+	 * If this version is a temporary staging version which is intended to replace
+	 * another version when the staging is complete, this element will hold the
+	 * version ID which this entity will take when the staging is complete.
+	 *
+	 * @since 8.12.0
+	 */
+	public void setIntendedVersionId(String theIntendedVersionId) {
+		myIntendedVersionId = theIntendedVersionId;
 	}
 
 	public String getUrl() {

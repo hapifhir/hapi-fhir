@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewOracleDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
@@ -224,6 +225,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Autowired
 	protected ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
+
+	@Autowired
+	protected ITermValueSetConceptParentChildLinkDao myValueSetConceptParentChildLinkDao;
 
 	@Autowired
 	protected FhirContext myContext;
@@ -473,9 +477,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return optionalExistingTermValueSetById;
 	}
 
+	/// FIXME: move to {@link ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc}?
 	private void deletePreCalculatedValueSetContents(TermValueSet theValueSet) {
-		myValueSetConceptDesignationDao.deleteByTermValueSetId(theValueSet.getId());
-		myValueSetConceptDao.deleteByTermValueSetId(theValueSet.getId());
+		myValueSetConceptParentChildLinkDao.deleteByTermValueSetId(theValueSet);
+		myValueSetConceptDesignationDao.deleteByTermValueSetId(theValueSet);
+		myValueSetConceptDao.deleteByTermValueSetId(theValueSet);
 	}
 
 	@Override

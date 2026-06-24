@@ -31,16 +31,16 @@ public class ExpansionWorkChunkJson implements IModelJson {
 		myInclude = theInclude;
 	}
 
-	public ValueSet.ValueSetComposeComponent getCompose() {
-		ValueSet.ValueSetComposeComponent retVal = null;
+	public ValueSet.ConceptSetComponent getCompose() {
+		ValueSet.ConceptSetComponent retVal = null;
 		if (myCompose != null) {
-			retVal = new ValueSet.ValueSetComposeComponent();
+			retVal = new ValueSet.ConceptSetComponent();
 			myCanonicalFhirContext.newJsonParser().setPrettyPrint(false).parseInto(myCompose, retVal);
 		}
 		return retVal;
 	}
 
-	public void setCompose(ValueSet.ValueSetComposeComponent theValueSetCompose) {
+	public void setCompose(ValueSet.ConceptSetComponent theValueSetCompose) {
 		String serialized = null;
 		if (theValueSetCompose != null) {
 			serialized = myCanonicalFhirContext.newJsonParser().setPrettyPrint(false).encodeToString(theValueSetCompose);

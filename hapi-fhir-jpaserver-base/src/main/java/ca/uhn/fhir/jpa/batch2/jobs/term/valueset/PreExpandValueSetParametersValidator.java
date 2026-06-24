@@ -7,7 +7,7 @@ import jakarta.annotation.Nullable;
 
 import java.util.List;
 
-public class PreExpandValueSetJobParametersValidator implements IJobParametersValidator<PreExpandValueSetParameters> {
+public class PreExpandValueSetParametersValidator implements IJobParametersValidator<PreExpandValueSetParameters> {
 
 	@Nullable
 	@Override
