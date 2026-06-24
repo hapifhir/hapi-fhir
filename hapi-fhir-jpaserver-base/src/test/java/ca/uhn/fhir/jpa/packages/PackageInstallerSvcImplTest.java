@@ -50,7 +50,6 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -95,6 +94,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Tests for {@link PackageInstallerSvcImpl} with an R4 {@link ca.uhn.fhir.context.FhirContext}.
+ * Covers resource installation, version policy (SINGLE_VERSION vs MULTI_VERSION), conflict handling,
+ * SearchParameter base splitting, and cross-version dependency resolution.
+ * See {@link PackageInstallerSvcImplR5Test} for R5-specific coverage.
+ */
 @ExtendWith(MockitoExtension.class)
 public class PackageInstallerSvcImplTest {
 	public static final String PACKAGE_VERSION = "1.0";
@@ -727,9 +732,8 @@ public class PackageInstallerSvcImplTest {
 		return searchParameter;
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	private PackageInstallationSpec setupResourceInPackage(IBaseResource theExistingResource, IBaseResource theInstallResource,
-	                                                       IFhirResourceDao theFhirResourceDao) throws IOException {
+	                                                       IFhirResourceDao<?> theFhirResourceDao) throws IOException {
 		NpmPackage pkg = NpmPackageFactory.create(myCtx)
 			.name(PACKAGE_ID_1).version(PACKAGE_VERSION)
 			.addResource(theInstallResource.getClass().getSimpleName(), theInstallResource)
@@ -740,7 +744,7 @@ public class PackageInstallerSvcImplTest {
 		when(myDaoRegistry.getResourceDao(theInstallResource.fhirType())).thenReturn(theFhirResourceDao);
 		when(theFhirResourceDao.search(any(), any())).thenReturn(theExistingResource != null ?
 			new SimpleBundleProvider(theExistingResource) : new SimpleBundleProvider());
-		if (theInstallResource.getClass().getSimpleName().equals("SearchParameter")) {
+		if (theInstallResource instanceof SearchParameter) {
 			when(mySearchParameterHelper.buildSearchParameterMapFromCanonical(any())).thenReturn(Optional.of(mySearchParameterMap));
 		}
 
@@ -840,45 +844,49 @@ public class PackageInstallerSvcImplTest {
 
 		@ParameterizedTest
 		@MethodSource("resourcesWithExpectedSearchKey")
-		void resource_returnsCorrectSearchKey(IBaseResource theResource, String theExpectedSearchKey, String theExpectedQueryString) {
+		void createSearchParameterMapFor_resource_returnsCorrectSearchKey(IBaseResource theResource, String theExpectedSearchKey, String theExpectedQueryString) {
 			SearchParameterMap map = mySvc.createSearchParameterMapFor(theResource, new PackageInstallationSpec());
 			assertThat(map.keySet()).contains(theExpectedSearchKey);
 			assertThat(map.toNormalizedQueryString()).startsWith(theExpectedQueryString);
 		}
 
 		@Test
-		void subscriptionWithNoId_throws() {
+		void createSearchParameterMapFor_subscriptionWithNoId_throws() {
 			Subscription subscription = createSubscription(Subscription.SubscriptionStatus.REQUESTED);
-			assertThatThrownBy(() -> mySvc.createSearchParameterMapFor(subscription, new PackageInstallationSpec()))
+			PackageInstallationSpec spec = new PackageInstallationSpec();
+			assertThatThrownBy(() -> mySvc.createSearchParameterMapFor(subscription, spec))
 				.isInstanceOf(UnsupportedOperationException.class)
 				.hasMessageContaining("HAPI-2929");
 		}
 
 		@Test
-		void namingSystemWithNoUniqueId_throws() {
+		void createSearchParameterMapFor_namingSystemWithNoUniqueId_throws() {
 			NamingSystem namingSystem = new NamingSystem();
 			namingSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
 			namingSystem.setKind(NamingSystem.NamingSystemType.CODESYSTEM);
 			namingSystem.setName("TestNamingSystem");
-			assertThatThrownBy(() -> mySvc.createSearchParameterMapFor(namingSystem, new PackageInstallationSpec()))
+			PackageInstallationSpec spec = new PackageInstallationSpec();
+			assertThatThrownBy(() -> mySvc.createSearchParameterMapFor(namingSystem, spec))
 				.isInstanceOf(ImplementationGuideInstallationException.class)
 				.hasMessageContaining("HAPI-1291")
 				.hasMessageContaining("NamingSystem does not have uniqueId component");
 		}
 
 		@Test
-		void resourceWithNoIdentifier_throws() {
+		void createSearchParameterMapFor_resourceWithNoIdentifier_throws() {
 			Patient patient = new Patient();
-			assertThatThrownBy(() -> mySvc.createSearchParameterMapFor(patient, new PackageInstallationSpec()))
+			PackageInstallationSpec spec = new PackageInstallationSpec();
+			assertThatThrownBy(() -> mySvc.createSearchParameterMapFor(patient, spec))
 				.isInstanceOf(ImplementationGuideInstallationException.class)
 				.hasMessageContaining("HAPI-1292");
 		}
 
 		@Test
-		void identifierWithSystemButNoValue_throws() {
+		void createSearchParameterMapFor_identifierWithSystemButNoValue_throws() {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:sys");
-			assertThatThrownBy(() -> mySvc.createSearchParameterMapFor(patient, new PackageInstallationSpec()))
+			PackageInstallationSpec spec = new PackageInstallationSpec();
+			assertThatThrownBy(() -> mySvc.createSearchParameterMapFor(patient, spec))
 				.isInstanceOf(ImplementationGuideInstallationException.class)
 				.hasMessageContaining("HAPI-1292");
 		}
@@ -904,20 +912,15 @@ public class PackageInstallerSvcImplTest {
 		@Test
 		void testFetchDependencies_crossVersionDependencyWithR4Variant_shouldSubstituteAndSucceed() throws Exception {
 			// Setup: main R4 package that depends on a cross-version (R5) package
-			NpmPackage mainPackage = createPackageWithDependency(
-				MAIN_PKG_ID, MAIN_PKG_VERSION,
-				FhirVersionEnum.R4.getFhirVersionString(),
-				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
+			NpmPackage mainPackage = createPackageWithDependency();
 
 			// The cross-version dependency declares FHIR version 5.0.0
 			NpmPackage crossVersionDep = createSimplePackage(
-				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION,
-				FhirVersionEnum.R5.getFhirVersionString());
+				CROSS_VERSION_PKG_ID, FhirVersionEnum.R5.getFhirVersionString());
 
 			// The R4-specific variant that should be substituted
 			NpmPackage r4Variant = createSimplePackage(
-				CROSS_VERSION_R4_PKG_ID, CROSS_VERSION_PKG_VERSION,
-				FhirVersionEnum.R4.getFhirVersionString());
+				CROSS_VERSION_R4_PKG_ID, FhirVersionEnum.R4.getFhirVersionString());
 
 			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
@@ -980,10 +983,7 @@ public class PackageInstallerSvcImplTest {
 		@Test
 		void testFetchDependencies_excludedCrossVersionDep_shouldBeSkipped() throws Exception {
 			// Setup: main R4 package that depends on a cross-version (R5) package
-			NpmPackage mainPackage = createPackageWithDependency(
-				MAIN_PKG_ID, MAIN_PKG_VERSION,
-				FhirVersionEnum.R4.getFhirVersionString(),
-				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
+			NpmPackage mainPackage = createPackageWithDependency();
 
 			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
@@ -1014,15 +1014,11 @@ public class PackageInstallerSvcImplTest {
 		@Test
 		void testFetchDependencies_crossVersionDependencyWithNoR4Variant_shouldFail() throws Exception {
 			// Setup: main R4 package that depends on a cross-version (R5) package
-			NpmPackage mainPackage = createPackageWithDependency(
-				MAIN_PKG_ID, MAIN_PKG_VERSION,
-				FhirVersionEnum.R4.getFhirVersionString(),
-				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION);
+			NpmPackage mainPackage = createPackageWithDependency();
 
 			// The cross-version dependency declares FHIR version 5.0.0
 			NpmPackage crossVersionDep = createSimplePackage(
-				CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION,
-				FhirVersionEnum.R5.getFhirVersionString());
+				CROSS_VERSION_PKG_ID, FhirVersionEnum.R5.getFhirVersionString());
 
 			when(myPackageVersionDao.findByPackageIdAndVersion(any(), any())).thenReturn(Optional.empty());
 			when(myPackageCacheManager.installPackage(any())).thenReturn(mainPackage);
@@ -1047,28 +1043,22 @@ public class PackageInstallerSvcImplTest {
 		}
 
 		@Nonnull
-		private NpmPackage createPackageWithDependency(
-				String theName, String theVersion, String theFhirVersion,
-				String theDepName, String theDepVersion) {
-			PackageGenerator manifest = new PackageGenerator();
-			manifest.name(theName);
-			manifest.version(theVersion);
-			manifest.description("a test package");
-			manifest.fhirVersions(List.of(theFhirVersion));
-			manifest.dependency(theDepName, theDepVersion);
-
-			return NpmPackage.empty(manifest);
+		private NpmPackage createPackageWithDependency() {
+			return NpmPackageFactory.create(myCtx)
+					.name(MAIN_PKG_ID)
+					.version(MAIN_PKG_VERSION)
+					.fhirVersion(FhirVersionEnum.R4.getFhirVersionString())
+					.addDependency(CROSS_VERSION_PKG_ID, CROSS_VERSION_PKG_VERSION)
+					.createPackage();
 		}
 
 		@Nonnull
-		private NpmPackage createSimplePackage(String theName, String theVersion, String theFhirVersion) {
-			PackageGenerator manifest = new PackageGenerator();
-			manifest.name(theName);
-			manifest.version(theVersion);
-			manifest.description("a test package");
-			manifest.fhirVersions(List.of(theFhirVersion));
-
-			return NpmPackage.empty(manifest);
+		private NpmPackage createSimplePackage(String theName, String theFhirVersion) {
+			return NpmPackageFactory.create(myCtx)
+					.name(theName)
+					.version(CROSS_VERSION_PKG_VERSION)
+					.fhirVersion(theFhirVersion)
+					.createPackage();
 		}
 	}
 
@@ -1145,14 +1135,14 @@ public class PackageInstallerSvcImplTest {
 			verify(myTermCodeSystemStorageSvc, never()).findExistingCodeSystemResourcePid(any(), any());
 		}
 
-		@SuppressWarnings("unchecked")
 		@Test
 		void install_nonCodeSystemSearchMisses_noTermLayerFallback() throws IOException {
 			ValueSet packagedVs = new ValueSet();
 			packagedVs.setUrl("http://example.org/ValueSet/test");
 			packagedVs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-			IFhirResourceDao<ValueSet> vsDao = org.mockito.Mockito.mock(IFhirResourceDao.class);
+			@SuppressWarnings("unchecked")
+			IFhirResourceDao<ValueSet> vsDao = mock(IFhirResourceDao.class);
 			PackageInstallationSpec spec = setupResourceInPackage(null, packagedVs, vsDao);
 
 			mySvc.install(spec);
@@ -1163,7 +1153,6 @@ public class PackageInstallerSvcImplTest {
 	}
 
 	// Created by Claude Opus 4.6
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
 	void testInstallPackage_withNonExistentAdditionalFolder_installsOnlyStandardResources() throws IOException {
 		CodeSystem cs = new CodeSystem();
@@ -1181,7 +1170,6 @@ public class PackageInstallerSvcImplTest {
 	}
 
 	// Created by Claude Opus 4.6
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
 	void testUpdateResource_versionConflict_skipsResourceAndLogsErrorWithCause() throws IOException {
 		ValueSet existingVs = new ValueSet();
@@ -1194,6 +1182,7 @@ public class PackageInstallerSvcImplTest {
 		packagedVs.setUrl("http://example.org/ValueSet/my-vs");
 		packagedVs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
+		@SuppressWarnings("unchecked")
 		IFhirResourceDao<ValueSet> vsDao = mock(IFhirResourceDao.class);
 		PackageInstallationSpec spec = setupResourceInPackage(existingVs, packagedVs, vsDao);
 

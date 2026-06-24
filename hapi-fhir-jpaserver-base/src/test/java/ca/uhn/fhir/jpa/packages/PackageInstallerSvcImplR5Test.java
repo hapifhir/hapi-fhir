@@ -121,7 +121,7 @@ class PackageInstallerSvcImplR5Test {
 
 		@ParameterizedTest
 		@MethodSource("resourcesWithExpectedSearchKey")
-		void resource_returnsCorrectSearchKey(IBaseResource theResource, String theExpectedSearchKey, String theExpectedQueryString) {
+		void createSearchParameterMapFor_resource_returnsCorrectSearchKey(IBaseResource theResource, String theExpectedSearchKey, String theExpectedQueryString) {
 			SearchParameterMap map = mySvc.createSearchParameterMapFor(theResource, new PackageInstallationSpec());
 			assertThat(map.keySet()).contains(theExpectedSearchKey);
 			assertThat(map.toNormalizedQueryString()).startsWith(theExpectedQueryString);
