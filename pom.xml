@@ -73,6 +73,7 @@
 		<module>hapi-fhir-validation-resources-r4b</module>
 		<module>hapi-fhir-structures-r5</module>
 		<module>hapi-fhir-validation-resources-r5</module>
+		<module>hapi-fhir-typescript</module>
 		<module>hapi-fhir-jpa</module>
 		<module>hapi-fhir-serviceloaders</module>
 		<module>hapi-fhir-storage</module>
