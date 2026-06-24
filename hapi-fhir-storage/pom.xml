@@ -127,18 +127,8 @@
 			<artifactId>jackson-annotations</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>tools.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jsr353</artifactId>
-			<version>${jackson_tools_version}</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<scope>runtime</scope>
+			<groupId>io.dogote</groupId>
+			<artifactId>json-patch</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jscience</groupId>

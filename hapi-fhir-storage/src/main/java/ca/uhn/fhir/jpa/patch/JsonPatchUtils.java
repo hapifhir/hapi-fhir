@@ -25,16 +25,16 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.node.ObjectNode;
-import tools.jackson.datatype.jsr353.JSR353Module;
 
-import javax.json.JsonException;
-import javax.json.JsonPatch;
-import javax.json.JsonStructure;
+import java.io.IOException;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -42,12 +42,15 @@ public class JsonPatchUtils {
 
 	public static <T extends IBaseResource> T apply(FhirContext theCtx, T theResourceToUpdate, String thePatchBody) {
 		// Parse the patch
-		JsonMapper mapper = JsonMapper.builder().addModule(new JSR353Module()).build();
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION, false);
+		JsonFactory factory = mapper.getFactory();
 
 		final JsonPatch patch;
 		try {
-			JsonNode jsonPatchNode = mapper.readTree(thePatchBody);
-			patch = mapper.convertValue(jsonPatchNode, JsonPatch.class);
+			JsonParser parser = factory.createParser(thePatchBody);
+			JsonNode jsonPatchNode = mapper.readTree(parser);
+			patch = JsonPatch.fromJson(jsonPatchNode);
 
 			JsonNode originalJsonDocument =
 					mapper.readTree(theCtx.newJsonParser().encodeResourceToString(theResourceToUpdate));
@@ -58,8 +61,7 @@ public class JsonPatchUtils {
 			// the parent /field to exist, so we insert an empty array where needed.
 			ensureParentArraysExist(jsonPatchNode, originalJsonDocument);
 
-			JsonStructure originalJsonValue = mapper.convertValue(originalJsonDocument, JsonStructure.class);
-			JsonStructure after = patch.apply(originalJsonValue);
+			JsonNode after = patch.apply(originalJsonDocument);
 
 			@SuppressWarnings("unchecked")
 			Class<T> clazz = (Class<T>) theResourceToUpdate.getClass();
@@ -86,7 +88,7 @@ public class JsonPatchUtils {
 			}
 			return retVal;
 
-		} catch (JacksonException | JsonException theE) {
+		} catch (IOException | JsonPatchException theE) {
 			throw new InvalidRequestException(Msg.code(1272) + theE.getMessage());
 		}
 	}
