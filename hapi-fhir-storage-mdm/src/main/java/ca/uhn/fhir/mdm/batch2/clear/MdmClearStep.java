@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -77,34 +76,26 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 		requestDetails.setMaxRetries(100);
 		requestDetails.setRequestPartitionId(theStepExecutionDetails.getData().getRequestPartitionId());
 		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService.execute(
-				requestDetails,
-				transactionDetails,
-				buildJob(requestDetails, transactionDetails, theStepExecutionDetails));
+		myHapiTransactionService
+				.withRequest(requestDetails)
+				.withTransactionDetails(transactionDetails)
+				.execute(buildJob(theStepExecutionDetails));
 
 		return new RunOutcome(theStepExecutionDetails.getData().size());
 	}
 
 	MdmClearJob buildJob(
-			RequestDetails requestDetails,
-			TransactionDetails transactionDetails,
 			StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
-		return new MdmClearJob(requestDetails, transactionDetails, theStepExecutionDetails);
+		return new MdmClearJob(theStepExecutionDetails);
 	}
 
 	class MdmClearJob implements TransactionCallback<Void> {
-		private final RequestDetails myRequestDetails;
-		private final TransactionDetails myTransactionDetails;
 		private final ResourceIdListWorkChunkJson myData;
 		private final String myChunkId;
 		private final String myInstanceId;
 
 		public MdmClearJob(
-				RequestDetails theRequestDetails,
-				TransactionDetails theTransactionDetails,
 				StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
-			myRequestDetails = theRequestDetails;
-			myTransactionDetails = theTransactionDetails;
 			myData = theStepExecutionDetails.getData();
 			myInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
 			myChunkId = theStepExecutionDetails.getChunkId();
@@ -147,11 +138,12 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 			IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeSvc();
 			int deletedRecords = deleteExpungeSvc.deleteExpunge(thePersistentIds, false, null);
 
-			ourLog.trace(
-					"Deleted {} of {} golden resources in {}",
-					deletedRecords,
-					thePersistentIds.size(),
-					StopWatch.formatMillis(sw.getMillis()));
+			ourLog.atTrace()
+					.setMessage("Deleted {} of {} golden resources in {}")
+					.addArgument(deletedRecords)
+					.addArgument(thePersistentIds::size)
+					.addArgument(() -> StopWatch.formatMillis(sw.getMillis()))
+					.log();
 
 			ourLog.info(
 					"Finished removing {} of {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]",
