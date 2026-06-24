@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8842
+jira: SMILE-11727
+title: "Fixed a regression that caused HTTP 500 errors during bulk export and da Vinci bulk export
+when operating in PATIENT_ID partitioning mode with MDM in EID-match-only mode."
