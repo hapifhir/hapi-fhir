@@ -26,7 +26,7 @@
 
 		<ts.npm.package.name>@smile-cdr/fhirts</ts.npm.package.name>
 		<ts.typescript.version>^5.4.0</ts.typescript.version>
-		<ts.node.version>v20.11.0</ts.node.version>
+		<ts.node.version>v24.18.0</ts.node.version>
 		<ts.npm.install.args>install --no-audit --no-fund</ts.npm.install.args>
 		<ts.npm.publish.args>publish --access public</ts.npm.publish.args>
 		<ts.npm.workdir>${project.build.directory}/npm</ts.npm.workdir>
