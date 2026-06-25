@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptParentChildLinkDao;
@@ -12,40 +15,63 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
+import ca.uhn.fhir.jpa.util.QueryChunker;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.IntCounter;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.ValidateUtil;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
+import jakarta.activation.DataHandler;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.isPlaceholder;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
-	private static final Logger ourLog = LoggerFactory.getLogger(TermValueSetStorageSvcImpl.class);
 	public static final String INTENDED_VERSION_ID_NULL = "(null)";
+	private static final Logger ourLog = LoggerFactory.getLogger(TermValueSetStorageSvcImpl.class);
 
+	@Autowired
+	private FhirContext myContext;
+	@Autowired
+	private ITermReadSvc myTermReadSvc;
+	@Autowired
+	private EntityManager myEntityManager;
 	@Autowired
 	private ITermValueSetDao myTermValueSetDao;
 	@Autowired
@@ -57,6 +83,14 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 	@Autowired
 	private IHapiTransactionService myTxService;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private VersionCanonicalizer myVersionCanonicalizer;
+	@Autowired
+	private ApplicationContext myApplicationContext;
+
+	private IValidationSupport myValidationSupport;
 
 	@Nonnull
 	@Override
@@ -93,10 +127,11 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	@Override
 	public UploadStatistics addConceptsToExpansion(@Nonnull ValueSet theDelta, int theStartingOrder) {
 		StopWatch sw = new StopWatch();
+		UploadStatistics statistics = new UploadStatistics();
 		String url = theDelta.getUrl();
 		String version = theDelta.getVersion();
 
-		UploadStatistics retVal = myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
 			// FIXME: split the stuff below into methods
 			FlattenedValueSet flattenedValueSet = flattenValueSet(theDelta);
 			IntCounter order = new IntCounter(theStartingOrder);
@@ -104,15 +139,11 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 			TermValueSet termValueSet = fetchTermValueSet(url, version);
 
-			UploadStatistics statistics = new UploadStatistics(termValueSet.getResource().getIdDt());
+			statistics.setTarget(termValueSet.getResource().getIdDt());
 
 			for (UrlUtil.CanonicalUrlParts system : flattenedValueSet.systemToCodes().keySet()) {
 
-				Collection<String> codes = flattenedValueSet.systemToCodes().get(system);
-				Map<String, TermValueSetConcept> codeToExistingConcept = myTermValueSetConceptDao
-					.findByCodesForTermValueSet(termValueSet, system.url(), codes)
-					.stream()
-					.collect(Collectors.toMap(TermValueSetConcept::getCode, Function.identity()));
+				Map<String, TermValueSetConcept> codeToExistingConcept = fetchExistingConcepts(system, flattenedValueSet, termValueSet);
 				Set<Integer> existingOrders = codeToExistingConcept.values()
 					.stream()
 					.map(TermValueSetConcept::getOrder)
@@ -190,7 +221,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 					.noneMatch(t -> t.equals(parentSystemAndCode));
 				if (shouldAdd) {
 
-					TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk pk = new  TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk();
+					TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk pk = new TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk();
 					pk.setPartitionId(termValueSet.getPartitionedId().getPartitionIdValue());
 					pk.setParentPid(parentConcept.getId());
 					pk.setChildPid(childConcept.getId());
@@ -208,21 +239,128 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 			}
 
-			termValueSet.setTotalConcepts(termValueSet.getTotalConcepts() + statistics.getAddedConceptCount());
-			termValueSet.setTotalConceptDesignations(termValueSet.getTotalConceptDesignations() + statistics.getAddedDesignationCount());
-
-			return statistics;
 		});
+
+		updateValueSetStatisticsWithPessimisticLock(url, version, statistics);
 
 		ourLog.atInfo()
 			.setMessage("Added to ValueSet URL[{}] Version[{}] in {}: {}")
 			.addArgument(url)
 			.addArgument(version)
 			.addArgument(sw)
-			.addArgument(retVal)
+			.addArgument(statistics)
 			.log();
 
-		return retVal;
+		return statistics;
+	}
+
+	@Nonnull
+	@Override
+	public UploadStatistics removeConceptsFromExpansion(ValueSet theDelta) {
+		StopWatch sw = new StopWatch();
+		UploadStatistics statistics = new UploadStatistics();
+
+		String url = theDelta.getUrl();
+		String version = theDelta.getVersion();
+
+		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			TermValueSet termValueSet = fetchTermValueSet(url, version);
+			FlattenedValueSet flattenedValueSet = flattenValueSet(theDelta);
+			statistics.setTarget(termValueSet.getResource().getIdDt());
+
+			for (UrlUtil.CanonicalUrlParts system : flattenedValueSet.systemToCodes().keySet()) {
+
+				Map<String, TermValueSetConcept> codeToExistingConcept = fetchExistingConcepts(system, flattenedValueSet, termValueSet);
+				for (TermValueSetConcept next : codeToExistingConcept.values()) {
+					deleteConceptAndChildren(next, statistics);
+				}
+
+			}
+		});
+
+		updateValueSetStatisticsWithPessimisticLock(url, version, statistics);
+
+		ourLog.atInfo()
+			.setMessage("Removed from ValueSet URL[{}] Version[{}] in {}: {}")
+			.addArgument(url)
+			.addArgument(version)
+			.addArgument(sw)
+			.addArgument(statistics)
+			.log();
+
+		return statistics;
+	}
+
+	@Override
+	public void activateStagingCodeSystemVersion(String theValueSetUrl, String theStagingVersionId) {
+		StopWatch sw = new StopWatch();
+
+		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			TermValueSet stagingValueSet = fetchTermValueSet(theValueSetUrl, theStagingVersionId);
+			if (stagingValueSet.getIntendedVersionId() == null) {
+				// FIXME: add code
+				throw new InvalidRequestException(Msg.code(1) + "ValueSet URL[" + theValueSetUrl + "] Version[" + theStagingVersionId + "] is not a staging version");
+			}
+
+			String intendedVersion = stagingValueSet.getIntendedVersionId();
+			if (intendedVersion.equals(INTENDED_VERSION_ID_NULL)) {
+				intendedVersion = null;
+			}
+
+			TermValueSet currentValueSet = fetchTermValueSet(theValueSetUrl, intendedVersion);
+			currentValueSet.setVersion(currentValueSet.getVersion() + "_" + UUID.randomUUID());
+			myTermValueSetDao.saveAndFlush(currentValueSet);
+
+			stagingValueSet.setVersion(intendedVersion);
+			myTermValueSetDao.saveAndFlush(stagingValueSet);
+		});
+	}
+
+	@Nonnull
+	private Map<String, TermValueSetConcept> fetchExistingConcepts(UrlUtil.CanonicalUrlParts system, FlattenedValueSet flattenedValueSet, TermValueSet termValueSet) {
+		Collection<String> codes = flattenedValueSet.systemToCodes().get(system);
+
+		Map<String, TermValueSetConcept> codeToExistingConcept = QueryChunker
+			.chunk(codes.stream())
+			.flatMap(t -> myTermValueSetConceptDao.findByCodesForTermValueSet(termValueSet, system.url(), t).stream())
+			.collect(Collectors.toMap(TermValueSetConcept::getCode, Function.identity()));
+		return codeToExistingConcept;
+	}
+
+	private void updateValueSetStatisticsWithPessimisticLock(String url, String version, UploadStatistics statistics) {
+		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			TermValueSet termValueSet = fetchTermValueSet(url, version);
+			myEntityManager.lock(termValueSet, LockModeType.PESSIMISTIC_WRITE);
+
+			termValueSet.setTotalConcepts(termValueSet.getTotalConcepts() + statistics.getAddedConceptCount());
+			termValueSet.setTotalConcepts(termValueSet.getTotalConcepts() - statistics.getRemovedConceptCount());
+			termValueSet.setTotalConceptDesignations(termValueSet.getTotalConceptDesignations() + statistics.getAddedDesignationCount());
+			termValueSet.setTotalConceptDesignations(termValueSet.getTotalConceptDesignations() - statistics.getRemovedDesignationCount());
+			myTermValueSetDao.save(termValueSet);
+		});
+	}
+
+	private void deleteConceptAndChildren(TermValueSetConcept theConceptToDelete, UploadStatistics theStatistics) {
+		for (TermValueSetConceptDesignation designation : theConceptToDelete.getDesignations()) {
+			theStatistics.incrementDesignationsRemovedCount();
+			myTermValueSetConceptDesignationDao.delete(designation);
+		}
+		for (TermValueSetConceptParentChildLink parent : theConceptToDelete.getParents()) {
+			theStatistics.incrementConceptLinksRemovedCount();
+			myTermValueSetConceptParentChildLinkDao.delete(parent);
+			parent.getParent().getChildren().remove(parent);
+		}
+		for (TermValueSetConceptParentChildLink child : theConceptToDelete.getChildren()) {
+			theStatistics.incrementConceptLinksRemovedCount();
+			myTermValueSetConceptParentChildLinkDao.delete(child);
+			child.getChild().getParents().remove(child);
+
+			// Recurse
+			deleteConceptAndChildren(child.getChild(), theStatistics);
+		}
+
+		myTermValueSetConceptDao.delete(theConceptToDelete);
+		theStatistics.incrementConceptsRemovedCount();
 	}
 
 	private FlattenedValueSet flattenValueSet(@Nonnull ValueSet theValueSet) {
@@ -234,6 +372,30 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		flattenValueSetInto(containsList, null, systemToCodes, systemToConcepts, childCodeToParentCodes);
 
 		return new FlattenedValueSet(systemToCodes, systemToConcepts, childCodeToParentCodes);
+	}
+
+	@Nonnull
+	private TermValueSet fetchTermValueSet(String theUrl, @Nullable String theVersion) {
+		Optional<TermValueSet> valueSetOpt = fetchTermValueSetOpt(theUrl, theVersion);
+
+		if (valueSetOpt.isEmpty()) {
+			// FIXME: add code and test
+			throw new ResourceNotFoundException(Msg.code(1) + "No ValueSet found with URL[" + theUrl + "] and Version[" + getIfNull(theVersion, "(none)") + "]");
+		}
+
+		return valueSetOpt.get();
+	}
+
+	private Optional<TermValueSet> fetchTermValueSetOpt(String theUrl, @Nullable String theVersion) {
+		HapiTransactionService.requireTransaction();
+
+		Optional<TermValueSet> valueSetOpt;
+		if (isBlank(theVersion)) {
+			valueSetOpt = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theUrl);
+		} else {
+			valueSetOpt = myTermValueSetDao.findTermValueSetByUrlAndVersion(theUrl, theVersion);
+		}
+		return valueSetOpt;
 	}
 
 	private static void flattenValueSetInto(List<ValueSet.ValueSetExpansionContainsComponent> theSourceConcepts, SystemAndCode theSourceParentConcept, SetMultimap<UrlUtil.CanonicalUrlParts, String> theTargetSystemToCodes, SetMultimap<UrlUtil.CanonicalUrlParts, ValueSet.ValueSetExpansionContainsComponent> theTargetSystemToConcepts, SetMultimap<SystemAndCode, SystemAndCode> theTargetChildCodeToParentCodes) {
@@ -263,23 +425,238 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		}
 	}
 
-	@Nonnull
-	private TermValueSet fetchTermValueSet(String theUri, @Nullable String theVersion) {
+	@Override
+	public void deleteValueSetAndChildren(ResourceTable theResourceTable) {
+		myTxService.withSystemRequestOnDefaultPartition().execute(()->{
+			deleteValueSetForResource(theResourceTable);
+			myTermReadSvc.invalidateValueSetCaches();
+		});
+	}
+
+	@Override
+	public void storeTermValueSet(ResourceTable theResourceTable, org.hl7.fhir.r4.model.ValueSet theValueSet) {
 		HapiTransactionService.requireTransaction();
 
-		Optional<TermValueSet> valueSetOpt;
-		if (isBlank(theVersion)) {
-			valueSetOpt = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theUri);
+		// If we're in a transaction, we need to flush now so that we can correctly detect
+		// duplicates if there are multiple ValueSets in the same TX with the same URL
+		// (which is an error, but we need to catch it). It'd be better to catch this by
+		// inspecting the URLs in the bundle or something, since flushing hurts performance
+		// but it's not expected that loading valuesets is going to be a huge high frequency
+		// thing so it probably doesn't matter
+		myEntityManager.flush();
+
+		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
+		if (isPlaceholder(theValueSet)) {
+			ourLog.info(
+				"Not storing TermValueSet for placeholder {}",
+				theValueSet.getIdElement().toVersionless().getValueAsString());
+			return;
+		}
+
+		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(
+			theValueSet.getUrl(), "ValueSet has no value for ValueSet.url");
+		ourLog.info(
+			"Storing TermValueSet for {}",
+			theValueSet.getIdElement().toVersionless().getValueAsString());
+
+		/*
+		 * Get CodeSystem and validate CodeSystemVersion
+		 */
+		TermValueSet termValueSet = new TermValueSet();
+		termValueSet.setResource(theResourceTable);
+		termValueSet.setUrl(theValueSet.getUrl());
+		termValueSet.setVersion(theValueSet.getVersion());
+		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
+
+		if (theValueSet.getStatus() != null && theValueSet.getStatus() != Enumerations.PublicationStatus.ACTIVE) {
+			termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_ACTIVE);
+		}
+
+		// Delete version being replaced
+		Optional<TermValueSet> deletedTrmValueSet = deleteValueSetForResource(theResourceTable);
+
+		/*
+		 * Do the upload.
+		 */
+		String url = termValueSet.getUrl();
+		String version = termValueSet.getVersion();
+		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
+
+		if (deletedTrmValueSet.isPresent()
+			&& Objects.equals(deletedTrmValueSet.get().getUrl(), url)
+			&& Objects.equals(deletedTrmValueSet.get().getVersion(), version)) {
+			// If we just deleted the valueset marker, we don't need to check if it exists
+			// in the database
+			optionalExistingTermValueSetByUrl = Optional.empty();
 		} else {
-			valueSetOpt = myTermValueSetDao.findTermValueSetByUrlAndVersion(theUri, theVersion);
+			optionalExistingTermValueSetByUrl = fetchTermValueSetOpt(url, version);
 		}
 
-		if (valueSetOpt.isEmpty()) {
-			// FIXME: add code and test
-			throw new ResourceNotFoundException(Msg.code(1) + "No ValueSet found with URL[" + theUri + "] and Version[" + getIfNull(theVersion, "(none)") + "]");
+		if (optionalExistingTermValueSetByUrl.isEmpty()) {
+
+			myEntityManager.persist(termValueSet);
+
+		} else {
+			TermValueSet existingTermValueSet = optionalExistingTermValueSetByUrl.get();
+			String msg;
+			if (version != null) {
+				msg = myContext
+					.getLocalizer()
+					.getMessage(
+						TermReadSvcImpl.class,
+						"cannotCreateDuplicateValueSetUrlAndVersion",
+						url,
+						version,
+						existingTermValueSet
+							.getResource()
+							.getIdDt()
+							.toUnqualifiedVersionless()
+							.getValue());
+			} else {
+				msg = myContext
+					.getLocalizer()
+					.getMessage(
+						TermReadSvcImpl.class,
+						"cannotCreateDuplicateValueSetUrl",
+						url,
+						existingTermValueSet
+							.getResource()
+							.getIdDt()
+							.toUnqualifiedVersionless()
+							.getValue());
+			}
+			throw new UnprocessableEntityException(Msg.code(902) + msg);
+		}
+		myTermReadSvc.invalidateValueSetCaches();
+	}
+
+	private Optional<TermValueSet> deleteValueSetForResource(ResourceTable theResourceTable) {
+		HapiTransactionService.requireTransaction();
+
+		// Get existing entity so it can be deleted.
+		Optional<TermValueSet> optionalExistingTermValueSetById =
+			myTermValueSetDao.findByResourcePid(theResourceTable.getId());
+
+		if (optionalExistingTermValueSetById.isPresent()) {
+			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
+
+			ourLog.info("Deleting existing TermValueSet[{}] and its children...", existingTermValueSet.getId());
+			deletePreCalculatedValueSetContents(existingTermValueSet);
+			myTermValueSetDao.deleteById(existingTermValueSet.getPartitionedId());
+
+			/*
+			 * If we're updating an existing ValueSet within a transaction, we need to make
+			 * sure to manually flush now since otherwise we'll try to create a new
+			 * TermValueSet entity and fail with a constraint error on the URL, since
+			 * this one won't be deleted yet
+			 */
+			myTermValueSetDao.flush();
+
+			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
 		}
 
-		return valueSetOpt.get();
+		return optionalExistingTermValueSetById;
+	}
+
+	@Override
+	public String invalidatePreCalculatedExpansion(IIdType theValueSetId, RequestDetails theRequestDetails) {
+		return myTxService.withSystemRequestOnDefaultPartition().execute(()-> {
+			IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").read(theValueSetId, theRequestDetails);
+			org.hl7.fhir.r4.model.ValueSet canonicalValueSet = myVersionCanonicalizer.valueSetToCanonical(valueSet);
+			Optional<TermValueSet> optionalTermValueSet = fetchTermValueSetOpt(canonicalValueSet.getUrl(), canonicalValueSet.getVersion());
+			if (optionalTermValueSet.isEmpty()) {
+				return myContext
+					.getLocalizer()
+					.getMessage(TermReadSvcImpl.class, "valueSetNotFoundInTerminologyDatabase", theValueSetId);
+			}
+
+			ourLog.info(
+				"Invalidating pre-calculated expansion on ValueSet {} / {}", theValueSetId, canonicalValueSet.getUrl());
+
+			TermValueSet termValueSet = optionalTermValueSet.get();
+			if (termValueSet.getExpansionStatus() == TermValueSetPreExpansionStatusEnum.NOT_EXPANDED) {
+				return myContext
+					.getLocalizer()
+					.getMessage(
+						TermReadSvcImpl.class,
+						"valueSetCantInvalidateNotYetPrecalculated",
+						termValueSet.getUrl(),
+						termValueSet.getExpansionStatus());
+			}
+
+			Long totalConcepts = termValueSet.getTotalConcepts();
+
+			deletePreCalculatedValueSetContents(termValueSet);
+
+			termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+			termValueSet.setExpansionTimestamp(null);
+
+			assert termValueSet.getId() != null;
+			myEntityManager.merge(termValueSet);
+
+			afterValueSetExpansionStatusChange();
+
+			return myContext
+				.getLocalizer()
+				.getMessage(
+					TermReadSvcImpl.class, "valueSetPreExpansionInvalidated", termValueSet.getUrl(), totalConcepts);
+		});
+	}
+
+	// Generated by claude-sonnet-4-6
+	@Override
+	public int invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(String theCodeSystemUrl) {
+		return myTxService.withSystemRequestOnDefaultPartition().execute(()->{
+		List<TermValueSet> affectedValueSets = myTermValueSetDao.findExpandedByCodeSystemUrl(
+			theCodeSystemUrl,
+			List.of(
+				TermValueSetPreExpansionStatusEnum.EXPANDED,
+				TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS));
+
+		if (affectedValueSets.isEmpty()) {
+			return 0;
+		}
+
+		for (TermValueSet termValueSet : affectedValueSets) {
+			ourLog.info(
+				"Invalidating pre-calculated expansion of ValueSet {} due to update of CodeSystem {}",
+				termValueSet.getUrl(),
+				theCodeSystemUrl);
+			deletePreCalculatedValueSetContents(termValueSet);
+			termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+			termValueSet.setExpansionTimestamp(null);
+			myEntityManager.merge(termValueSet);
+		}
+
+		afterValueSetExpansionStatusChange();
+
+		return affectedValueSets.size();
+		});
+	}
+
+	/*
+	 * If a ValueSet has just finished pre-expanding, let's flush the caches. This is
+	 * kind of a blunt tool, but it should ensure that users don't get unpredictable
+	 * results while they test changes, which is probably a worthwhile sacrifice
+	 */
+	private void afterValueSetExpansionStatusChange() {
+		provideValidationSupport().invalidateCaches();
+	}
+
+	private void deletePreCalculatedValueSetContents(TermValueSet theValueSet) {
+		myTermValueSetConceptParentChildLinkDao.deleteByTermValueSetId(theValueSet);
+		myTermValueSetConceptDesignationDao.deleteByTermValueSetId(theValueSet);
+		myTermValueSetConceptDao.deleteByTermValueSetId(theValueSet);
+	}
+
+	@Nonnull
+	protected IValidationSupport provideValidationSupport() {
+		IValidationSupport validationSupport = myValidationSupport;
+		if (validationSupport == null) {
+			validationSupport = myApplicationContext.getBean(IValidationSupport.class);
+			myValidationSupport = validationSupport;
+		}
+		return validationSupport;
 	}
 
 	private record SystemAndCode(UrlUtil.CanonicalUrlParts system, String code) {
@@ -288,10 +665,12 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		}
 	}
 
-	private record LanguageAndDesignation(String language, String designation, String useSystem, String useCode) {}
+	private record LanguageAndDesignation(String language, String designation, String useSystem, String useCode) {
+	}
 
 	private record FlattenedValueSet(SetMultimap<UrlUtil.CanonicalUrlParts, String> systemToCodes,
 	                                 SetMultimap<UrlUtil.CanonicalUrlParts, ValueSet.ValueSetExpansionContainsComponent> systemToConcepts,
-	                                 SetMultimap<SystemAndCode, SystemAndCode> childCodeToParentCodes) {}
+	                                 SetMultimap<SystemAndCode, SystemAndCode> childCodeToParentCodes) {
+	}
 
 }

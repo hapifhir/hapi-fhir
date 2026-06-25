@@ -307,9 +307,9 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			if (getStorageSettings().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
 				if (retVal.getDeleted() == null) {
 					ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
-					myTerminologySvc.storeTermValueSet(retVal, valueSet);
+					myTermValueSetStorageSvc.storeTermValueSet(retVal, valueSet);
 				} else {
-					myTerminologySvc.deleteValueSetAndChildren(retVal);
+					myTermValueSetStorageSvc.deleteValueSetAndChildren(retVal);
 				}
 			}
 		}

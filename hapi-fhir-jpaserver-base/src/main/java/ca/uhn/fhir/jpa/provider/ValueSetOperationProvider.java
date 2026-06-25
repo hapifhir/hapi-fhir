@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -69,6 +70,9 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
+
+	@Autowired
+	private ITermValueSetStorageSvc myValueSetStorageSvc;
 
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
@@ -260,7 +264,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		startRequest(theServletRequest);
 		try {
 
-			String outcome = myTermReadSvc.invalidatePreCalculatedExpansion(theValueSetId, theRequestDetails);
+			String outcome = myValueSetStorageSvc.invalidatePreCalculatedExpansion(theValueSetId, theRequestDetails);
 
 			IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 			ParametersUtil.addParameterToParametersString(getContext(), retVal, CodeValidationResult.MESSAGE, outcome);
