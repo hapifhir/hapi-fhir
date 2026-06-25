@@ -977,7 +977,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					(theResource instanceof MetadataResource) ? ((MetadataResource) theResource).getUrl() : null;
 
 			ourLog.error(
-					"Version conflict error: This is possibly due to a collision between ValueSets from different IGs that are coincidentally using the same resource ID: [{}] and new resource URL: [{}], with the existing resource having URL: [{}]. Ignoring this update and continuing: The first IG wins. Cause: {}",
+					"Concurrent install conflict on resource [{}]: update skipped (incoming: [{}], existing: [{}]). Cause: {}",
 					id.getIdPart(),
 					newResourceUrlOrNull,
 					existingResourceUrlOrNull,
