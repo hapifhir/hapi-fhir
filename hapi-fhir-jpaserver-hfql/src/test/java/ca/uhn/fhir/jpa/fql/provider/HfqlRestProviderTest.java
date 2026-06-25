@@ -98,7 +98,7 @@ public class HfqlRestProviderTest {
 			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			String expected = """
 				1,HAPI FHIR THE-VERSION
-				my-search-id,999,"{""select"":[{""alias"":""name[0].family"",""clause"":""name[0].family"",""dataType"":""STRING"",""operator"":""SELECT""},{""alias"":""name[0].given[0]"",""clause"":""name[0].given[0]"",""dataType"":""STRING"",""operator"":""SELECT""}],""fromResourceName"":""Patient""}"
+				my-search-id,999,"{""fromResourceName"":""Patient"",""select"":[{""alias"":""name[0].family"",""clause"":""name[0].family"",""dataType"":""STRING"",""operator"":""SELECT""},{""alias"":""name[0].given[0]"",""clause"":""name[0].given[0]"",""dataType"":""STRING"",""operator"":""SELECT""}]}"
 				0,Simpson,Homer
 				3,Simpson,Marge
 				""".replace("THE-VERSION", VersionUtil.getVersion());
