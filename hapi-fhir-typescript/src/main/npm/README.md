@@ -19,7 +19,7 @@ Each FHIR version is exposed as a namespace to avoid collisions between identica
 ```typescript
 import { R4, R5 } from '@smile-cdr/fhirts';
 
-const patient: R4.IPatient = {
+const patient: R4.Patient = {
   resourceType: 'Patient',
   gender: 'female',
 };
