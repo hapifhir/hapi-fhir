@@ -26,10 +26,10 @@ public class TsInterface {
 	}
 
 	/**
-	 * The TypeScript interface name including the conventional "I" prefix, e.g. {@code IPatient}.
+	 * The TypeScript interface name, e.g. {@code Patient}. Also used as the generated file's base name.
 	 */
 	public String getInterfaceName() {
-		return "I" + myName;
+		return myName;
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class TsInterface {
 		if (myExtendsName == null) {
 			return "";
 		}
-		return " extends I" + myExtendsName;
+		return " extends " + myExtendsName;
 	}
 
 	public List<TsProperty> getProperties() {
@@ -72,18 +72,16 @@ public class TsInterface {
 	public List<String> getImports() {
 		Set<String> lines = new TreeSet<>();
 		if (myExtendsName != null) {
-			lines.add("import { I" + myExtendsName + " } from './I" + myExtendsName + "';");
+			lines.add("import { " + myExtendsName + " } from './" + myExtendsName + "';");
 		}
 		for (TsProperty next : myProperties) {
 			switch (next.getKind()) {
 				case INTERFACE:
-					String iface = "I" + next.getTypeName();
-					if (!iface.equals(getInterfaceName())) {
-						lines.add("import { " + iface + " } from './" + iface + "';");
-					}
-					break;
 				case ENUM:
-					lines.add("import { " + next.getTypeName() + " } from './" + next.getTypeName() + "';");
+					String type = next.getTypeName();
+					if (!type.equals(getInterfaceName())) {
+						lines.add("import { " + type + " } from './" + type + "';");
+					}
 					break;
 				case PRIMITIVE:
 				default:

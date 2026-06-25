@@ -42,13 +42,9 @@ public class TsProperty {
 	}
 
 	/**
-	 * The bare TypeScript type reference for this property, without array wrapping. Interface references
-	 * are prefixed with "I"; primitives and enums are rendered verbatim.
+	 * The bare TypeScript type reference for this property, without array wrapping.
 	 */
 	public String getReferencedType() {
-		if (myKind == TsTypeKind.INTERFACE) {
-			return "I" + myTypeName;
-		}
 		return myTypeName;
 	}
 

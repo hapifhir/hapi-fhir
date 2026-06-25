@@ -27,7 +27,7 @@ class TypescriptModelExtractorTest {
 
 		TsInterface patient = model.getInterface("Patient");
 		assertThat(patient).isNotNull();
-		assertThat(patient.getInterfaceName()).isEqualTo("IPatient");
+		assertThat(patient.getInterfaceName()).isEqualTo("Patient");
 
 		// Patient extends the FHIR base hierarchy rather than inlining inherited members
 		assertThat(patient.getExtendsName()).isEqualTo("DomainResource");
@@ -56,12 +56,12 @@ class TypescriptModelExtractorTest {
 		assertThat(gender.isArray()).isFalse();
 		assertThat(gender.getKind()).isEqualTo(TsTypeKind.ENUM);
 
-		// Repeating complex datatype -> Array<IHumanName>
+		// Repeating complex datatype -> Array<HumanName>
 		TsProperty name = property(patient, "name");
 		assertThat(name.isArray()).isTrue();
 		assertThat(name.getKind()).isEqualTo(TsTypeKind.INTERFACE);
 		assertThat(name.getTypeName()).isEqualTo("HumanName");
-		assertThat(name.getRenderedType()).isEqualTo("Array<IHumanName>");
+		assertThat(name.getRenderedType()).isEqualTo("Array<HumanName>");
 
 		// choice[x] expanded into one optional property per type
 		TsProperty deceasedBoolean = property(patient, "deceasedBoolean");
@@ -101,21 +101,21 @@ class TypescriptModelExtractorTest {
 		TsModel model = new TypescriptModelExtractor(FhirContext.forR4()).extract();
 		new TypescriptWriter().writeModel(model, theDir);
 
-		File patientFile = new File(theDir, "IPatient.ts");
+		File patientFile = new File(theDir, "Patient.ts");
 		assertThat(patientFile).exists();
 		String patient = Files.readString(patientFile.toPath(), StandardCharsets.UTF_8);
-		assertThat(patient).contains("export interface IPatient extends IDomainResource {");
+		assertThat(patient).contains("export interface Patient extends DomainResource {");
 		assertThat(patient).contains("resourceType: 'Patient';");
-		assertThat(patient).contains("name?: Array<IHumanName>;");
-		assertThat(patient).contains("import { IHumanName } from './IHumanName';");
-		assertThat(patient).contains("import { IDomainResource } from './IDomainResource';");
+		assertThat(patient).contains("name?: Array<HumanName>;");
+		assertThat(patient).contains("import { HumanName } from './HumanName';");
+		assertThat(patient).contains("import { DomainResource } from './DomainResource';");
 
-		assertThat(new File(theDir, "IHumanName.ts")).exists();
-		assertThat(new File(theDir, "IDomainResource.ts")).exists();
-		assertThat(new File(theDir, "IElement.ts")).exists();
+		assertThat(new File(theDir, "HumanName.ts")).exists();
+		assertThat(new File(theDir, "DomainResource.ts")).exists();
+		assertThat(new File(theDir, "Element.ts")).exists();
 		assertThat(new File(theDir, "index.ts")).exists();
 		String index = Files.readString(new File(theDir, "index.ts").toPath(), StandardCharsets.UTF_8);
-		assertThat(index).contains("export * from './IPatient';");
+		assertThat(index).contains("export * from './Patient';");
 	}
 
 	@Test
