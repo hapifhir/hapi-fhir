@@ -135,6 +135,15 @@ The installer detects redundant dependencies and skips them in both modes:
 * **`SINGLE_VERSION` mode**: All canonical resources are affected since they are matched by URL only. The installer tracks the highest version of each dependency package encountered during the installation. If an older or already-installed version of a package is encountered later in the dependency tree, it is treated as redundant and skipped.
 * **`MULTI_VERSION` mode**: Only `SearchParameter` resources are affected since they are matched by `code` and `base` rather than URL and version. Other canonical resources coexist by URL and version and are not at risk. The installer compares package versions at the resource level and treats updates from older packages as redundant. This relies on the `meta.source` field that the installer stamps on each resource. Resources created manually or installed before this stamping was in place are not protected.
 
+## Concurrent Install Conflicts
+
+When packages are installed in parallel under `SINGLE_VERSION` mode, two installs may search for the same canonical URL, find nothing, and race to create the same client-assigned resource ID. The second install logs an error at ERROR level and continues.
+
+Two ways to avoid this:
+
+* **Switch to `MULTI_VERSION`** (recommended): new resources receive server-assigned IDs, eliminating the ID collision.
+* **Serialize installs**: eliminates the race, but the later install will overwrite any shared resource from the earlier one — last writer wins.
+
 # Using Installed Packages for Validation
 
 Once a package is installed, its conformance resources (StructureDefinitions, ValueSets, CodeSystems, etc.) are stored in the JPA server database and automatically included in the validation support chain. No additional configuration is needed to validate against profiles from installed packages.

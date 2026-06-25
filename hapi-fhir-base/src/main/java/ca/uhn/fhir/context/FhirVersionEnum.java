@@ -78,8 +78,8 @@ public enum FhirVersionEnum {
 		}
 		if (myVersionImplementation == null) {
 			try {
-				myVersionImplementation =
-						(IFhirVersion) Class.forName(myVersionClass).newInstance();
+				myVersionImplementation = (IFhirVersion)
+						Class.forName(myVersionClass).getConstructor().newInstance();
 			} catch (Exception e) {
 				throw new InternalErrorException(Msg.code(1710) + "Failed to instantiate FHIR version " + name(), e);
 			}
